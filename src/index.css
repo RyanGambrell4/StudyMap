@@ -1,0 +1,50 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes slideInBack {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+.slide-in      { animation: slideIn     280ms cubic-bezier(.4,0,.2,1) both; }
+.slide-in-back { animation: slideInBack 280ms cubic-bezier(.4,0,.2,1) both; }
+
+/* Flashcard flip */
+.fc-inner {
+  transform-style: preserve-3d;
+  transition: transform 0.55s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative; width: 100%; height: 100%;
+}
+.fc-inner.fc-flipped { transform: rotateY(180deg); }
+.fc-face {
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  position: absolute; inset: 0;
+}
+.fc-back { transform: rotateY(180deg); }
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: white !important;
+  }
+  .print-page {
+    break-inside: avoid;
+  }
+}
