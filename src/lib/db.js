@@ -1,5 +1,5 @@
 /**
- * db.js — Cloud storage layer for StudyMap
+ * db.js — Cloud storage layer for StudyEdge
  *
  * Keeps an in-memory cache of the current user's data so components can
  * read synchronously (just like they did with localStorage), while writes

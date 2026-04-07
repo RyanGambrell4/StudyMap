@@ -149,7 +149,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
                 value={focus}
                 onChange={e => setFocus(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !loading && handleGenerate()}
-                placeholder="e.g. 'WACC formula and capital structure' or leave blank to let StudyMap decide"
+                placeholder="e.g. 'WACC formula and capital structure' or leave blank to let StudyEdge decide"
                 className="w-full rounded-xl px-4 py-3 text-slate-200 placeholder-slate-700 focus:outline-none text-sm mb-4"
                 style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}
               />
