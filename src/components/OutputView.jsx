@@ -71,20 +71,21 @@ function buildRecoverySessions(courses, recoveryIdxSet, sessionMinutes) {
 function SessionBlock({ session, completed, onToggle }) {
   return (
     <div
-      className={`rounded-lg px-2 pt-1.5 pb-1.5 mb-1 text-white text-xs leading-tight relative transition-all group cursor-pointer ${completed ? 'opacity-40' : 'opacity-90 hover:opacity-100'}`}
+      className={`rounded-xl px-2 pt-1.5 pb-1.5 mb-1 text-xs leading-tight relative transition-all cursor-pointer ${completed ? 'opacity-35' : 'hover:brightness-110'}`}
       style={{
-        backgroundColor: session.color.dot,
+        backgroundColor: `${session.color.dot}22`,
+        borderLeft: `3px solid ${session.color.dot}`,
         backgroundImage: session.isRecovery
-          ? 'repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(0,0,0,0.12) 4px,rgba(0,0,0,0.12) 8px)'
+          ? 'repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(0,0,0,0.06) 4px,rgba(0,0,0,0.06) 8px)'
           : undefined,
       }}
       onClick={() => onToggle(session.id)}
     >
       {session.startTime && (
-        <div className="text-white/60 text-[9px] font-medium mb-0.5">{session.startTime}</div>
+        <div className="text-slate-500 dark:text-slate-500 text-[9px] font-medium mb-0.5">{session.startTime}</div>
       )}
-      <div className={`font-semibold truncate ${completed ? 'line-through' : ''}`}>{session.courseName}</div>
-      <div className="text-white/70 text-[10px]">{session.isRecovery ? '↑ Recovery' : session.sessionType}</div>
+      <div className={`font-semibold truncate ${completed ? 'line-through' : ''}`} style={{ color: session.color.dot }}>{session.courseName}</div>
+      <div className="text-slate-500 dark:text-slate-500 text-[10px]">{session.isRecovery ? '↑ Recovery' : session.sessionType}</div>
     </div>
   )
 }
@@ -103,22 +104,25 @@ function SyllabusEventBlock({ event }) {
 }
 
 // ─── DayCell ──────────────────────────────────────────────────────────────────
-function DayCell({ day, completedIds, onToggle, syllabusEventsForDay, onAddSession }) {
+function DayCell({ day, completedIds, onToggle, syllabusEventsForDay, onAddSession, isLast }) {
   return (
-    <div className={`min-h-[100px] p-1.5 rounded-xl border transition-all group ${
-      day.isToday  ? 'bg-slate-700/50 border-indigo-500/50 ring-1 ring-indigo-500/30' :
-      day.isPast   ? 'bg-slate-800/20 border-slate-700/20' :
-                     'bg-slate-800/30 border-slate-700/30'
-    }`}>
-      <div className="flex items-center justify-between mb-1 px-1">
-        <div>
-          <span className={`text-[10px] font-bold uppercase tracking-wider block ${day.isToday ? 'text-indigo-400' : 'text-slate-500'}`}>{day.dayName}</span>
-          <span className={`text-sm font-bold leading-none ${day.isToday ? 'text-white' : day.isSunday ? 'text-slate-600' : 'text-slate-300'}`}>{day.dayNum}</span>
+    <div className={`min-h-[110px] px-1.5 pb-2 group ${!isLast ? 'border-r border-slate-700/30 dark:border-slate-700/30' : ''} ${day.isPast ? 'opacity-60' : ''}`}>
+      {/* Day header */}
+      <div className="flex flex-col items-center mb-2 pt-1">
+        <span className={`text-[10px] font-medium uppercase tracking-widest mb-1 ${day.isSunday ? 'text-slate-600' : 'text-slate-500'}`}>{day.dayName}</span>
+        <div className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-semibold ${
+          day.isToday
+            ? 'bg-indigo-500 text-white'
+            : day.isSunday
+              ? 'text-slate-600'
+              : 'text-slate-400'
+        }`}>
+          {day.dayNum}
         </div>
         {!day.isSunday && (
           <button
             onClick={() => onAddSession(day.dateStr)}
-            className="no-print opacity-0 group-hover:opacity-100 transition-opacity p-0.5 rounded text-slate-600 hover:text-indigo-400"
+            className="no-print opacity-0 group-hover:opacity-100 transition-opacity mt-1 p-0.5 rounded text-slate-600 hover:text-indigo-400"
             title="Add session"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -127,6 +131,7 @@ function DayCell({ day, completedIds, onToggle, syllabusEventsForDay, onAddSessi
           </button>
         )}
       </div>
+      {/* Sessions */}
       <div>
         {day.sessions.map(session => (
           <SessionBlock
@@ -461,10 +466,9 @@ export default function OutputView({
   }
 
   const handleJumpToMonth = monthKey => {
+    setCurrentMonthStr(monthKey)
     if (viewMode === 'week') {
       document.getElementById(`month-${monthKey}`)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
-    } else {
-      setCurrentMonthStr(monthKey)
     }
   }
 
@@ -599,29 +603,47 @@ export default function OutputView({
         {activeSection === 'calendar' && (
           <div className="px-4 py-6 max-w-7xl mx-auto">
             {/* View controls */}
-            <div className="flex flex-wrap items-center gap-3 mb-5">
-              <div className="flex items-center gap-0.5 bg-slate-800/50 rounded-xl p-1 border border-slate-700/50">
+            <div className="flex items-center justify-between mb-6">
+              {/* Month navigation */}
+              <div className="flex items-center gap-3">
+                <button
+                  onClick={() => {
+                    const idx = availableMonths.indexOf(currentMonthStr)
+                    if (idx > 0) handleJumpToMonth(availableMonths[idx - 1])
+                  }}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                  </svg>
+                </button>
+                <span className="text-base font-semibold text-slate-200 min-w-[140px] text-center">
+                  {(() => {
+                    const [y, m] = currentMonthStr.split('-').map(Number)
+                    return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                  })()}
+                </span>
+                <button
+                  onClick={() => {
+                    const idx = availableMonths.indexOf(currentMonthStr)
+                    if (idx < availableMonths.length - 1) handleJumpToMonth(availableMonths[idx + 1])
+                  }}
+                  className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all"
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* View toggle pill */}
+              <div className="flex items-center gap-0.5 bg-slate-800/60 rounded-full p-1 border border-slate-700/40">
                 {[['day', 'Day'], ['week', 'Week'], ['month', 'Month']].map(([mode, label]) => (
                   <button key={mode} onClick={() => setViewMode(mode)}
-                    className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-all ${viewMode === mode ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'}`}>
+                    className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${viewMode === mode ? 'bg-slate-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}>
                     {label}
                   </button>
                 ))}
-              </div>
-              <div className="flex items-center gap-1.5 flex-wrap">
-                {availableMonths.map(mk => {
-                  const [y, m] = mk.split('-').map(Number)
-                  const label = new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' })
-                  const isActive = viewMode === 'month' ? mk === currentMonthStr : mk === activeDayStr.slice(0, 7)
-                  return (
-                    <button key={mk} onClick={() => handleJumpToMonth(mk)}
-                      className={`px-2.5 py-1 rounded-full text-xs font-medium transition-all ${
-                        isActive ? 'bg-indigo-600 text-white' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 border border-slate-700'
-                      }`}>
-                      {label}
-                    </button>
-                  )
-                })}
               </div>
             </div>
 
@@ -655,7 +677,7 @@ export default function OutputView({
 
             {/* Week view */}
             {viewMode === 'week' && (
-              <div className="space-y-6">
+              <div className="space-y-8">
                 {weeksWithAll.map((week, weekIdx) => {
                   const hasAny = week.days.some(d => d.sessions.length > 0 || (syllabusEventsByDate[d.dateStr] ?? []).length > 0)
                   if (!hasAny && week.days.every(d => d.isPast)) return null
@@ -663,19 +685,18 @@ export default function OutputView({
                   const weekEnd = week.days[6]
                   const weekMonthKey = weekStart.dateStr.slice(0, 7)
                   const isFirstOfMonth = firstWeekOfMonth.has(weekStart.dateStr)
+                  const isCurrentWeek = week.days.some(d => d.isToday)
                   return (
                     <div key={weekIdx} className="print-page" id={isFirstOfMonth ? `month-${weekMonthKey}` : undefined}>
-                      <div className="flex items-center gap-3 mb-2">
-                        <h3 className="text-slate-400 font-semibold text-sm uppercase tracking-wider">
-                          {weekStart.monthName} {weekStart.dayNum}–{weekEnd.monthName} {weekEnd.dayNum}
-                        </h3>
-                        {week.days.some(d => d.isToday) && (
-                          <span className="text-xs bg-indigo-600/20 text-indigo-400 border border-indigo-500/30 px-2 py-0.5 rounded-full font-medium">Current Week</span>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xs text-slate-500 font-medium">
+                          {weekStart.monthName} {weekStart.dayNum} – {weekEnd.monthName} {weekEnd.dayNum}
+                        </span>
+                        {isCurrentWeek && (
+                          <span className="text-[11px] bg-indigo-500/15 text-indigo-400 px-2 py-0.5 rounded-full font-medium">This week</span>
                         )}
-                        <div className="flex-1 h-px bg-slate-700/50" />
-                        <span className="text-xs text-slate-600">{week.days.reduce((s, d) => s + d.sessions.length, 0)} sessions</span>
                       </div>
-                      <div className="grid grid-cols-7 gap-1.5">
+                      <div className="grid grid-cols-7 border-t border-slate-700/30">
                         {week.days.map((day, dayIdx) => (
                           <DayCell
                             key={dayIdx}
@@ -684,6 +705,7 @@ export default function OutputView({
                             onToggle={handleToggle}
                             syllabusEventsForDay={syllabusEventsByDate[day.dateStr]}
                             onAddSession={setAddSessionDayStr}
+                            isLast={dayIdx === 6}
                           />
                         ))}
                       </div>
