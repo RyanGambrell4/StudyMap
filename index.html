@@ -140,7 +140,12 @@
 
     /* ── Hero ── */
     .hero-wrap {
-      background: radial-gradient(ellipse 80% 55% at 65% -5%, rgba(79,126,247,0.1) 0%, transparent 60%);
+      position: relative;
+      background:
+        radial-gradient(ellipse 600px 500px at 32% 52%, rgba(79,126,247,0.13) 0%, transparent 65%),
+        radial-gradient(ellipse 400px 350px at 32% 52%, rgba(124,92,250,0.07) 0%, transparent 55%),
+        radial-gradient(circle at 1px 1px, rgba(255,255,255,0.055) 1px, transparent 0);
+      background-size: auto, auto, 28px 28px;
     }
     .hero {
       min-height: 100vh;
@@ -185,62 +190,30 @@
       color: var(--green); font-size: 0.95rem; font-weight: 600;
     }
 
-    /* ── App Mockup ── */
+    /* ── Screenshot group ── */
     .hero-visual { flex: 1; display: flex; align-items: center; justify-content: flex-end; }
-    .mockup-float { animation: float 5.5s ease-in-out infinite; filter: drop-shadow(0 40px 80px rgba(0,0,0,0.7)) drop-shadow(0 0 60px rgba(79,126,247,0.12)); }
-    .mockup-browser {
-      width: 560px; border-radius: 14px; overflow: hidden;
-      border: 1px solid rgba(255,255,255,0.12); background: #0A1020;
+    .ss-group {
+      position: relative; width: 580px; height: 400px;
+      animation: float 5.5s ease-in-out infinite;
     }
-    .mockup-chrome {
-      background: #141E33; padding: 10px 14px;
-      display: flex; align-items: center; gap: 10px;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+    .ss-back {
+      position: absolute; width: 500px;
+      border-radius: 12px; object-fit: cover;
+      transform: rotate(3.5deg) translate(55px, -10px);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+      border: 1px solid rgba(255,255,255,0.08);
+      opacity: 0.65;
     }
-    .dots { display: flex; gap: 6px; flex-shrink: 0; }
-    .dot { width: 11px; height: 11px; border-radius: 50%; }
-    .dot.r { background: #FF5F57; }
-    .dot.y { background: #FEBC2E; }
-    .dot.g { background: #28C840; }
-    .urlbar {
-      flex: 1; background: rgba(0,0,0,0.35); border-radius: 6px;
-      padding: 4px 10px; font-size: 11px; color: #475569; text-align: center;
-    }
-    .mockup-app { display: flex; height: 345px; overflow: hidden; }
-    .mockup-sidebar {
-      width: 176px; background: #080D1A; flex-shrink: 0;
-      border-right: 1px solid rgba(255,255,255,0.06);
-      padding: 12px 0; display: flex; flex-direction: column; gap: 2px;
-    }
-    .sidebar-head {
-      display: flex; align-items: center; gap: 8px;
-      padding: 0 14px 12px; font-size: 11px; font-weight: 800;
-      border-bottom: 1px solid rgba(255,255,255,0.06); margin-bottom: 6px;
-      color: var(--text);
-    }
-    .sidebar-logo-icon {
-      width: 22px; height: 22px; background: var(--accent);
-      border-radius: 5px; display: flex; align-items: center; justify-content: center;
-    }
-    .nav-item {
-      display: flex; align-items: center; gap: 8px;
-      padding: 6px 14px; font-size: 11px; color: #475569;
-      cursor: default;
-    }
-    .nav-item.active { color: var(--text); background: rgba(79,126,247,0.1); border-right: 2px solid var(--accent); }
-    .nav-item svg { width: 12px; height: 12px; flex-shrink: 0; }
-    .mockup-main { flex: 1; background: #080D1A; padding: 14px; overflow: hidden; }
-    .m-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 11px; }
-    .m-greeting { font-size: 12px; font-weight: 800; letter-spacing: -0.3px; }
-    .m-streak {
-      display: flex; align-items: center; gap: 4px;
-      background: rgba(251,146,60,0.14); border: 1px solid rgba(251,146,60,0.28);
-      border-radius: 100px; padding: 3px 8px; font-size: 10px; font-weight: 700; color: #FB923C;
-    }
-    .m-stats { display: grid; grid-template-columns: repeat(3,1fr); gap: 7px; margin-bottom: 11px; }
-    .m-stat {
-      background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 8px; padding: 8px 9px;
+    .ss-main {
+      position: absolute; width: 530px;
+      border-radius: 14px; object-fit: cover;
+      transform: rotate(-1.5deg);
+      box-shadow:
+        0 0 0 1px rgba(79,126,247,0.4),
+        0 0 0 4px rgba(79,126,247,0.08),
+        0 30px 80px rgba(0,0,0,0.65),
+        0 0 80px rgba(79,126,247,0.18);
+      z-index: 2;
     }
     .m-val { font-size: 15px; font-weight: 900; letter-spacing: -0.8px; line-height: 1; margin-bottom: 2px; }
     .m-lbl { font-size: 9px; color: #475569; }
@@ -276,7 +249,7 @@
 
     /* ── Sections ── */
     .section {
-      padding: 110px 48px;
+      padding: 77px 48px;
       max-width: 1200px; margin: 0 auto;
     }
     .eyebrow {
@@ -287,7 +260,7 @@
     /* ── How it works ── */
     .steps {
       display: grid; grid-template-columns: repeat(3,1fr);
-      gap: 52px; margin-top: 64px;
+      gap: 52px; margin-top: 44px;
     }
     .step { position: relative; }
     .step-num {
@@ -310,13 +283,13 @@
 
     /* ── Bento ── */
     .bento-section {
-      padding: 20px 48px 110px;
+      padding: 14px 48px 50px;
       max-width: 1200px; margin: 0 auto;
     }
     .bento-grid {
       display: grid;
       grid-template-columns: repeat(4,1fr);
-      gap: 16px; margin-top: 64px;
+      gap: 16px; margin-top: 44px;
     }
     .bcard {
       background: var(--surface); border: 1px solid var(--border);
@@ -360,7 +333,7 @@
     .bubble.ai { background: rgba(124,92,250,0.1); border: 1px solid rgba(124,92,250,0.2); align-self: flex-end; max-width: 90%; }
 
     /* ── Pricing ── */
-    .pricing-section { padding: 110px 48px; max-width: 1200px; margin: 0 auto; text-align: center; }
+    .pricing-section { padding: 60px 48px 77px; max-width: 1200px; margin: 0 auto; text-align: center; }
     .toggle-wrap {
       display: inline-flex; background: var(--surface);
       border: 1px solid var(--border); border-radius: 12px;
@@ -416,7 +389,7 @@
     /* ── CTA ── */
     .cta-section {
       position: relative; text-align: center;
-      padding: 130px 48px; overflow: hidden;
+      padding: 91px 48px; overflow: hidden;
     }
     .cta-glow {
       position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
@@ -445,21 +418,23 @@
 
     /* ── Responsive ── */
     @media (max-width: 1100px) {
-      .mockup-browser { width: 480px; }
+      .ss-group { width: 480px; }
+      .ss-main { width: 440px; }
+      .ss-back { width: 400px; }
     }
     @media (max-width: 900px) {
       .hero { flex-direction: column; min-height: auto; padding: 90px 28px 50px; gap: 40px; }
       .hero-visual { display: none; }
       .hero-content { max-width: 100%; }
       .email-form { flex-direction: column; }
-      .section, .bento-section, .pricing-section { padding: 72px 24px; }
+      .section, .bento-section, .pricing-section { padding: 50px 24px; }
       .steps { grid-template-columns: 1fr; gap: 44px; }
       .step-line { display: none; }
       .bento-grid { grid-template-columns: repeat(2,1fr); }
       .bcard.span2 { grid-column: span 2; }
       .pricing-cards { grid-template-columns: 1fr; }
       .toggle-wrap { flex-wrap: wrap; }
-      .cta-section { padding: 90px 24px; }
+      .cta-section { padding: 64px 24px; }
       .cta-form { flex-direction: column; max-width: 100%; }
       nav { padding: 16px 24px; }
       nav.scrolled { padding: 12px 24px; }
@@ -513,93 +488,9 @@
     </div>
 
     <div class="hero-visual fade-up d2">
-      <div class="mockup-float">
-        <div class="mockup-browser">
-          <!-- Chrome bar -->
-          <div class="mockup-chrome">
-            <div class="dots">
-              <div class="dot r"></div>
-              <div class="dot y"></div>
-              <div class="dot g"></div>
-            </div>
-            <div class="urlbar">getstudyedge.com/app</div>
-          </div>
-          <!-- App layout -->
-          <div class="mockup-app">
-            <!-- Sidebar -->
-            <div class="mockup-sidebar">
-              <div class="sidebar-head">
-                <div class="sidebar-logo-icon">
-                  <svg width="12" height="12" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-                  </svg>
-                </div>
-                StudyEdge
-              </div>
-              <div class="nav-item active">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
-                Dashboard
-              </div>
-              <div class="nav-item">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-                Calendar
-              </div>
-              <div class="nav-item">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/></svg>
-                Courses
-              </div>
-              <div class="nav-item">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Focus Mode
-              </div>
-              <div class="nav-item">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                Progress
-              </div>
-              <div class="nav-item">
-                <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
-                AI Coach
-              </div>
-            </div>
-            <!-- Main content -->
-            <div class="mockup-main">
-              <div class="m-header">
-                <div class="m-greeting">Good morning, Ryan</div>
-                <div class="m-streak">🔥 14</div>
-              </div>
-              <div class="m-stats">
-                <div class="m-stat">
-                  <div class="m-val" style="color:#34D399">85%</div>
-                  <div class="m-lbl">On Track</div>
-                </div>
-                <div class="m-stat">
-                  <div class="m-val">12h</div>
-                  <div class="m-lbl">Studied</div>
-                </div>
-                <div class="m-stat">
-                  <div class="m-val">4</div>
-                  <div class="m-lbl">Courses</div>
-                </div>
-              </div>
-              <div class="m-label">Today's sessions</div>
-              <div class="m-session">
-                <div class="m-bar" style="background:#4F7EF7"></div>
-                <div><div class="m-name">Calculus II</div><div class="m-type">Review Ch. 8</div></div>
-                <div class="m-time">2:00 PM</div>
-              </div>
-              <div class="m-session">
-                <div class="m-bar" style="background:#7C5CFA"></div>
-                <div><div class="m-name">Physics</div><div class="m-type">Practice problems</div></div>
-                <div class="m-time">4:30 PM</div>
-              </div>
-              <div class="m-session">
-                <div class="m-bar" style="background:#34D399"></div>
-                <div><div class="m-name">Organic Chem</div><div class="m-type">Flashcards</div></div>
-                <div class="m-time">7:00 PM</div>
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="ss-group">
+        <img class="ss-back" src="/ss-back.png" alt="StudyEdge dashboard" />
+        <img class="ss-main" src="/ss-main.png" alt="StudyEdge weekly calendar" />
       </div>
     </div>
   </div>
@@ -649,7 +540,7 @@
 <!-- ═══ FEATURE BENTO ═══ -->
 <div class="bento-section">
   <div class="eyebrow fade-up">Features</div>
-  <h2 class="text-h1 fade-up d1">Everything you need.<br>Nothing you don't.</h2>
+  <h2 class="text-h1 fade-up d1">Built for the week before finals.<br>And every week before that.</h2>
   <div class="bento-grid">
 
     <!-- Focus Mode — large -->
@@ -747,7 +638,7 @@
         <li><svg class="fi yes" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>10 AI queries / month</li>
         <li><svg class="fi yes" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Basic calendar</li>
         <li><svg class="fi yes" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Focus Mode timer</li>
-        <li class="off"><svg class="fi no" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>Syllabus upload</li>
+        <li><svg class="fi yes" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Syllabus upload (1 course)</li>
         <li class="off"><svg class="fi no" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>Push notifications</li>
         <li class="off"><svg class="fi no" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>Priority support</li>
       </ul>
