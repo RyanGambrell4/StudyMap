@@ -38,6 +38,7 @@ export default function DashboardView({
   allComplete,
   onImportSyllabus,
   onAddSession,
+  onNavigateToCourses,
 }) {
   const daysBetween = (a, b) =>
     Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000)
@@ -140,6 +141,77 @@ export default function DashboardView({
 
   // Primary color for hero card — from next upcoming session's course
   const heroColor = heroSession?.color?.dot ?? '#6366f1'
+
+  // ── Setup state: no courses yet ─────────────────────────────────────────────
+  if (courses.length === 0) {
+    return (
+      <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #0f172a 0%, #080e1c 100%)' }}>
+        <div className="px-6 py-10 max-w-2xl mx-auto">
+
+          {/* Header */}
+          <div className="mb-10">
+            <p className="text-slate-500 text-sm font-medium mb-1 tracking-wide">{formatDate(todayStr)}</p>
+            <h1 className="text-4xl font-bold text-white tracking-tight">{greeting()}</h1>
+          </div>
+
+          {/* Setup hero */}
+          <div className="rounded-3xl overflow-hidden mb-6" style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #312e81 100%)' }}>
+            <div className="px-8 py-8 relative">
+              <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full opacity-10 blur-3xl bg-white pointer-events-none" />
+              <div className="relative z-10">
+                <span className="inline-flex items-center gap-1.5 bg-white/15 text-white/80 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
+                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
+                  Setup required
+                </span>
+                <h2 className="text-2xl font-bold text-white mb-2 leading-tight">Your account is ready —<br />now set up your courses</h2>
+                <p className="text-white/60 text-sm mb-6 leading-relaxed">
+                  Everything in StudyEdge — your study plan, sessions, deadlines, coaching, and tools — runs on your courses. Add them to unlock the full app.
+                </p>
+                <button
+                  onClick={onNavigateToCourses}
+                  className="bg-white text-indigo-700 font-bold text-sm px-6 py-3 rounded-2xl shadow-lg shadow-black/20 hover:brightness-95 active:scale-95 transition-all inline-flex items-center gap-2"
+                >
+                  Add Your First Course
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Step checklist */}
+            <div className="border-t border-white/10 px-8 py-5 space-y-3">
+              {[
+                { done: false, label: 'Add your courses', note: 'Required — unlocks your study plan', required: true },
+                { done: false, label: 'Import your syllabus', note: 'Required — pulls in all exams and deadlines', required: true },
+                { done: false, label: 'Your sessions generate automatically', note: 'Sit back — we handle the scheduling', required: false },
+              ].map(({ done, label, note, required }, i) => (
+                <div key={i} className="flex items-start gap-3">
+                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${
+                    done ? 'bg-emerald-400 border-emerald-400' : 'border-white/30'
+                  }`}>
+                    {done && (
+                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                      </svg>
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white/80 text-sm font-semibold">{label}</span>
+                      {required && <span className="text-amber-400 text-xs font-bold">Required</span>}
+                    </div>
+                    <p className="text-white/40 text-xs mt-0.5">{note}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div

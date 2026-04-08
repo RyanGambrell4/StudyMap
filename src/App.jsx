@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { supabase } from './lib/supabase'
 import { initUserData, clearUserData, savePlan } from './lib/db'
 import AuthScreen from './components/AuthScreen'
@@ -16,6 +16,9 @@ export default function App() {
   const [yearLevel, setYearLevel]           = useState(null)
   const [assignments, setAssignments]       = useState([])
   const [initialCompletedIds, setInitialCompletedIds] = useState(null)
+
+  // Tracks the latest completedIds/assignments so handleAddCourse can save immediately
+  const latestPlanRef = useRef({ completedIds: [], assignments: [] })
 
   // ── Auth listener ──────────────────────────────────────────────────────────
   useEffect(() => {
@@ -61,23 +64,39 @@ export default function App() {
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleSignOut = () => supabase.auth.signOut()
 
-  const handleOnboardingComplete = ({ yearLevel: yl, courses: c, schedule: s, learningStyle: ls }) => {
-    setCourses(c)
-    setSchedule(s)
-    setLearningStyle(ls)
+  const handleOnboardingComplete = ({ yearLevel: yl, learningStyle: ls, preferredTime }) => {
     setYearLevel(yl)
+    setLearningStyle(ls)
+    setSchedule({ hoursPerWeek: 15, preferredTime })
+    setCourses([])
     setInitialCompletedIds(new Set())
     setShowOutput(true)
   }
 
   const handleSavePlan = (completedIds, updatedAssignments) => {
+    const resolvedAssignments = updatedAssignments ?? assignments
+    latestPlanRef.current = { completedIds: [...completedIds], assignments: resolvedAssignments }
     savePlan({
       courses,
       schedule,
       learningStyle,
       yearLevel,
       completedIds: [...completedIds],
-      assignments: updatedAssignments ?? assignments,
+      assignments: resolvedAssignments,
+      savedAt: Date.now(),
+    })
+  }
+
+  const handleAddCourse = (course) => {
+    const newCourses = [...courses, course]
+    setCourses(newCourses)
+    savePlan({
+      courses: newCourses,
+      schedule,
+      learningStyle,
+      yearLevel,
+      completedIds: latestPlanRef.current.completedIds,
+      assignments: latestPlanRef.current.assignments,
       savedAt: Date.now(),
     })
   }
@@ -115,6 +134,7 @@ export default function App() {
         onSavePlan={handleSavePlan}
         onEditPlan={handleEditPlan}
         onSignOut={handleSignOut}
+        onAddCourse={handleAddCourse}
         userEmail={session.user.email}
       />
     )

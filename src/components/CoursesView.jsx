@@ -2,6 +2,125 @@ import { useState, useMemo } from 'react'
 
 const TARGET_THRESHOLDS = { A: 90, B: 80, C: 70, 'Pass/Fail': 60 }
 
+const COURSE_COLORS = [
+  { name: 'blue',   dot: '#3B82F6' },
+  { name: 'purple', dot: '#A855F7' },
+  { name: 'green',  dot: '#22C55E' },
+  { name: 'orange', dot: '#F97316' },
+  { name: 'pink',   dot: '#EC4899' },
+  { name: 'teal',   dot: '#14B8A6' },
+  { name: 'red',    dot: '#EF4444' },
+  { name: 'yellow', dot: '#EAB308' },
+]
+
+const DIFFICULTY_LABELS = ['Easy', 'Medium', 'Hard']
+const GRADE_OPTIONS = ['A', 'B', 'C', 'Pass/Fail']
+
+function AddCourseForm({ courseCount, onAdd, onCancel }) {
+  const todayStr = new Date().toISOString().split('T')[0]
+  const [name, setName]         = useState('')
+  const [examDate, setExamDate] = useState('')
+  const [difficulty, setDifficulty] = useState('Medium')
+  const [targetGrade, setTargetGrade] = useState('B')
+  const [error, setError]       = useState('')
+
+  const handleAdd = () => {
+    if (!name.trim()) { setError('Enter a course name'); return }
+    if (!examDate) { setError('Select an exam/finals date'); return }
+    if (examDate <= todayStr) { setError('Exam date must be in the future'); return }
+    const color = COURSE_COLORS[courseCount % COURSE_COLORS.length]
+    const courseId = Date.now().toString(36) + Math.random().toString(36).slice(2, 5)
+    onAdd({ id: courseId, name: name.trim(), examDate, difficulty, targetGrade, color })
+  }
+
+  return (
+    <div className="bg-slate-800/70 border border-indigo-500/40 rounded-2xl p-5 space-y-4">
+      <h3 className="text-white font-bold text-sm">New Course</h3>
+
+      <div>
+        <label className="block text-xs font-medium text-slate-400 mb-1.5">Course name</label>
+        <input
+          value={name}
+          onChange={e => { setName(e.target.value); setError('') }}
+          placeholder="e.g. Calculus II, Macro Economics…"
+          className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+          autoFocus
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium text-slate-400 mb-1.5">Exam / finals date</label>
+        <input
+          type="date"
+          value={examDate}
+          min={todayStr}
+          onChange={e => { setExamDate(e.target.value); setError('') }}
+          className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+          style={{ colorScheme: 'dark' }}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-medium text-slate-400 mb-1.5">Difficulty</label>
+          <div className="flex gap-2">
+            {DIFFICULTY_LABELS.map(d => (
+              <button
+                key={d}
+                onClick={() => setDifficulty(d)}
+                className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                  difficulty === d
+                    ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300'
+                    : 'border-slate-700 text-slate-400 hover:border-slate-600'
+                }`}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-slate-400 mb-1.5">Target grade</label>
+          <div className="flex gap-2">
+            {GRADE_OPTIONS.map(g => (
+              <button
+                key={g}
+                onClick={() => setTargetGrade(g)}
+                className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                  targetGrade === g
+                    ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300'
+                    : 'border-slate-700 text-slate-400 hover:border-slate-600'
+                }`}
+              >
+                {g}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {error && <p className="text-red-400 text-xs">{error}</p>}
+
+      <div className="flex gap-3 pt-1">
+        {onCancel && (
+          <button onClick={onCancel} className="px-4 py-2.5 bg-slate-700/60 border border-slate-600 text-slate-300 text-sm font-medium rounded-xl hover:bg-slate-700 transition-colors">
+            Cancel
+          </button>
+        )}
+        <button
+          onClick={handleAdd}
+          className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm py-2.5 rounded-xl transition-colors flex items-center justify-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          </svg>
+          Add Course
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function gradeColor(score, threshold) {
   if (score >= threshold) return 'text-emerald-400'
   if (score >= threshold - 10) return 'text-amber-400'
@@ -16,8 +135,10 @@ export default function CoursesView({
   assignments,
   onLogGrade,
   onImportSyllabus,
+  onAddCourse,
 }) {
   const [expandedIdx, setExpandedIdx] = useState(null)
+  const [showAddForm, setShowAddForm] = useState(false)
 
   const todayStr = new Date().toISOString().split('T')[0]
 
@@ -49,9 +170,49 @@ export default function CoursesView({
     return map
   }, [assignments])
 
+  const handleAddCourse = (course) => {
+    onAddCourse?.(course)
+    setShowAddForm(false)
+  }
+
   return (
     <div className="px-6 py-8 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-white mb-6">Courses</h1>
+      <div className="flex items-center justify-between mb-6">
+        <h1 className="text-2xl font-bold text-white">Courses</h1>
+        {courses.length > 0 && !showAddForm && (
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+            Add Course
+          </button>
+        )}
+      </div>
+
+      {/* Add course form — always open when no courses, toggled otherwise */}
+      {(courses.length === 0 || showAddForm) && (
+        <div className="mb-6">
+          {courses.length === 0 && (
+            <div className="bg-amber-500/10 border border-amber-500/30 rounded-2xl px-5 py-4 mb-4 flex items-start gap-3">
+              <svg className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+              <div>
+                <p className="text-amber-300 font-bold text-sm">Courses are required to use StudyEdge</p>
+                <p className="text-amber-400/70 text-xs mt-0.5">Add each course you're taking this semester. Then import your syllabi to unlock your study schedule, deadlines, and AI tools.</p>
+              </div>
+            </div>
+          )}
+          <AddCourseForm
+            courseCount={courses.length}
+            onAdd={handleAddCourse}
+            onCancel={courses.length > 0 ? () => setShowAddForm(false) : undefined}
+          />
+        </div>
+      )}
 
       <div className="space-y-3">
         {courses.map((course, idx) => {
