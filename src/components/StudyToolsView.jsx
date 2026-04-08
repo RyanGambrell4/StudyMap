@@ -172,6 +172,7 @@ export default function StudyToolsView({ courses }) {
   // Upload + extraction state
   const [uploadedFile, setUploadedFile] = useState(null)
   const [extractedText, setExtractedText] = useState('')
+  const [pastedText, setPastedText] = useState('')
   const [isExtracting, setIsExtracting] = useState(false)
   const [extractError, setExtractError] = useState('')
   const [showTextPreview, setShowTextPreview] = useState(false)
@@ -220,6 +221,7 @@ export default function StudyToolsView({ courses }) {
     setExtractError('')
     setIsExtracting(true)
     setExtractedText('')
+    setPastedText('')
     setFlashcards([])
     setQuiz([])
     setMode('upload')
@@ -249,7 +251,7 @@ export default function StudyToolsView({ courses }) {
       const response = await fetch('/api/generate-study-tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text: extractedText }),
+        body: JSON.stringify({ text: activeText }),
       })
       if (!response.ok) throw new Error(`API returned ${response.status}`)
       const data = await response.json()
@@ -267,9 +269,9 @@ export default function StudyToolsView({ courses }) {
       saveStudyTools({
         flashcards: cards,
         quiz: q,
-        text: extractedText,
+        text: activeText,
         courseIdx: selectedCourse,
-        fileLabel: uploadedFile?.name ?? '',
+        fileLabel: uploadedFile?.name ?? (pastedText ? 'Pasted notes' : ''),
       })
     } catch (err) {
       console.error('Generation error:', err)
@@ -320,7 +322,8 @@ export default function StudyToolsView({ courses }) {
     setMode('upload')
   }
 
-  const hasText = extractedText.length > 0
+  const activeText = extractedText || pastedText
+  const hasText = activeText.length > 50
   const score = answers.filter(Boolean).length
 
   // ── Render ────────────────────────────────────────────────────────────────
@@ -388,6 +391,28 @@ export default function StudyToolsView({ courses }) {
                 <p className="text-slate-300 font-medium">Drop your file here or click to browse</p>
                 <p className="text-slate-500 text-xs mt-1">PDF, .docx, or .pptx</p>
               </div>
+            )}
+          </div>
+
+          {/* Paste box */}
+          <div>
+            <p className="text-xs text-slate-500 text-center mb-3">— or —</p>
+            <label className="block text-xs font-medium text-slate-400 mb-1.5">Paste your notes directly</label>
+            <textarea
+              value={pastedText}
+              onChange={e => {
+                setPastedText(e.target.value)
+                if (e.target.value) { setUploadedFile(null); setExtractedText('') }
+              }}
+              placeholder="Paste lecture notes, slides text, or any course material here…"
+              rows={5}
+              className="w-full bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 text-sm resize-none leading-relaxed"
+            />
+            {pastedText.length > 0 && pastedText.length <= 50 && (
+              <p className="text-amber-400 text-xs mt-1">Paste at least a few sentences to generate useful materials.</p>
+            )}
+            {pastedText.length > 50 && (
+              <p className="text-slate-600 text-xs mt-1">{pastedText.trim().split(/\s+/).length.toLocaleString()} words</p>
             )}
           </div>
 
