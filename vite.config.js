@@ -205,7 +205,7 @@ ${text.slice(0, 8000)}
 Generate exactly this JSON structure with no extra text:
 {
   "flashcards": [
-    {"front": "clear question about a key concept", "back": "complete educational answer in 2-3 sentences", "topic": "topic name"}
+    {"front": "clear question about a key concept", "back": "concise answer — a few words or 1 short sentence", "topic": "topic name"}
   ],
   "quiz": [
     {"question": "question text", "type": "multiple_choice", "options": ["A", "B", "C", "D"], "answer": "correct option text", "explanation": "why this is correct"}
@@ -216,7 +216,9 @@ Rules:
 - Generate 15 flashcards testing real concepts, definitions, and formulas
 - Generate 10 quiz questions
 - Flashcard fronts must be complete questions like "What is market capitalization?" not single words
-- Flashcard backs must be educational explanations, not fragments
+- Flashcard backs must be SHORT — a few words or 1 sentence maximum. If the answer can be expressed in 3-5 words, do that. Students should be able to instantly check if they were right.
+- Good back examples: "Increases shareholder equity", "Assets minus liabilities", "When price exceeds marginal cost"
+- Bad back examples: long explanations with multiple clauses, full paragraphs, anything over 20 words unless truly necessary
 - Quiz wrong answers must be plausible but clearly wrong if you know the material
 - Never use single words like "Investors" or "What" as a flashcard front
 - Focus on concepts students will actually be tested on`,
