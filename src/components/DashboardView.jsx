@@ -1,4 +1,5 @@
-import { useMemo } from 'react'
+import { useMemo, useEffect, useRef } from 'react'
+import { useCelebration } from '../utils/useCelebration'
 
 function greeting() {
   const h = new Date().getHours()
@@ -40,6 +41,24 @@ export default function DashboardView({
   onAddSession,
   onNavigateToCourses,
 }) {
+  const celebrate = useCelebration()
+
+  // Fire big confetti once when all sessions for the day are complete
+  const allCompleteKey = todayStr + (allComplete ? '-done' : '')
+  const allCompleteFiredRef = useRef(null)
+  useEffect(() => {
+    if (allComplete && allCompleteFiredRef.current !== allCompleteKey) {
+      allCompleteFiredRef.current = allCompleteKey
+      celebrate('big')
+    }
+  }, [allComplete, allCompleteKey])
+
+  // Wrap onToggle to fire light confetti on check-off
+  const handleToggle = (id) => {
+    if (!completedIds.has(id)) celebrate('light')
+    onToggle(id)
+  }
+
   const daysBetween = (a, b) =>
     Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000)
 
@@ -306,7 +325,7 @@ export default function DashboardView({
                     Start Session
                   </button>
                   <button
-                    onClick={() => heroSession && onToggle(heroSession.id)}
+                    onClick={() => heroSession && handleToggle(heroSession.id)}
                     className="bg-white/10 hover:bg-white/20 text-white/80 text-xs font-semibold px-4 py-2 rounded-xl transition-all text-center"
                   >
                     Mark done
@@ -328,7 +347,7 @@ export default function DashboardView({
                           </span>
                         </div>
                         <button
-                          onClick={() => onToggle(session.id)}
+                          onClick={() => handleToggle(session.id)}
                           className={`shrink-0 w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
                             done ? 'bg-white/40 border-transparent' : 'border-white/30 hover:border-white/60'
                           }`}

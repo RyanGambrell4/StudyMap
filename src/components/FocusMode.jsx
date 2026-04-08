@@ -5,6 +5,7 @@ import {
   saveNotes as dbSaveNotes,
   appendSessionRecall,
 } from '../lib/db'
+import { useCelebration } from '../utils/useCelebration'
 
 function fmt(seconds) {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
@@ -183,6 +184,14 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   // ── Completion ──
   const [showComplete, setShowComplete] = useState(false)
   const [encourageMsg] = useState(() => blueprint?.successNote ?? ENCOURAGE[Math.floor(Math.random() * ENCOURAGE.length)])
+  const celebrate = useCelebration()
+  const celebratedRef = useRef(false)
+  useEffect(() => {
+    if (showComplete && !celebratedRef.current) {
+      celebratedRef.current = true
+      celebrate('big')
+    }
+  }, [showComplete])
   const [pdfDownloading, setPdfDownloading] = useState(false)
 
   // ── Pomodoro ──
