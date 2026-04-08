@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect } from 'react'
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { generateSchedule } from '../utils/generateSchedule'
 import {
   getCachedSyllabusEvents,
@@ -266,6 +266,27 @@ export default function OutputView({
   const [blueprintSession, setBlueprintSession] = useState(null) // session waiting for blueprint
   const [activeBlueprint, setActiveBlueprint] = useState(null)  // chosen blueprint (or null = skip)
   const [activeSection, setActiveSection] = useState('dashboard')
+
+  // ── Browser back-button support ──────────────────────────────────────────────
+  const sectionMounted = useRef(false)
+  useEffect(() => {
+    if (!sectionMounted.current) {
+      window.history.replaceState({ section: 'dashboard' }, '', '#dashboard')
+      sectionMounted.current = true
+    } else {
+      window.history.pushState({ section: activeSection }, '', `#${activeSection}`)
+    }
+  }, [activeSection])
+  useEffect(() => {
+    const onPop = (e) => {
+      const section = e.state?.section ?? 'dashboard'
+      setActiveSection(section)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+  // ─────────────────────────────────────────────────────────────────────────────
+
   const [assignments, setAssignments] = useState(() => initialAssignments ?? [])
   const [logGradeId, setLogGradeId] = useState(null)
   const [gradeInput, setGradeInput] = useState('')
