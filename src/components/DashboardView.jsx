@@ -1,5 +1,6 @@
 import { useMemo, useEffect, useRef } from 'react'
 import { useCelebration } from '../utils/useCelebration'
+import { useStreak } from '../utils/useStreak'
 
 function greeting() {
   const h = new Date().getHours()
@@ -50,6 +51,7 @@ export default function DashboardView({
     if (allComplete && allCompleteFiredRef.current !== allCompleteKey) {
       allCompleteFiredRef.current = allCompleteKey
       celebrate('big')
+      recordCompletion(todayStr)
     }
   }, [allComplete, allCompleteKey])
 
@@ -105,19 +107,8 @@ export default function DashboardView({
     return map
   }, [courses, allSessions, todayStr, completedIds])
 
-  const streak = useMemo(() => {
-    let count = 0
-    const d = new Date(todayStr + 'T12:00:00')
-    const todayHasDone = allSessions.some(s => s.dateStr === todayStr && completedIds.has(s.id))
-    if (!todayHasDone) d.setDate(d.getDate() - 1)
-    while (true) {
-      const key = d.toISOString().split('T')[0]
-      if (!allSessions.some(s => s.dateStr === key && completedIds.has(s.id))) break
-      count++
-      d.setDate(d.getDate() - 1)
-    }
-    return count
-  }, [allSessions, completedIds, todayStr])
+  const { currentStreak, lastCompletedDate, recordCompletion } = useStreak()
+  const streak = currentStreak
 
   const { weekSessions, weekHours } = useMemo(() => {
     const d = new Date(todayStr + 'T12:00:00')
@@ -240,9 +231,26 @@ export default function DashboardView({
       <div className="px-6 py-10 max-w-3xl mx-auto space-y-10">
 
         {/* ── Header ── */}
-        <div>
-          <p className="text-slate-500 text-sm font-medium mb-1 tracking-wide">{formatDate(todayStr)}</p>
-          <h1 className="text-4xl font-bold text-white tracking-tight">{greeting()}</h1>
+        <div className="flex items-end justify-between gap-4">
+          <div>
+            <p className="text-slate-500 text-sm font-medium mb-1 tracking-wide">{formatDate(todayStr)}</p>
+            <h1 className="text-4xl font-bold text-white tracking-tight">{greeting()}</h1>
+          </div>
+          {/* Streak badge */}
+          {(streak > 1 || lastCompletedDate === todayStr) ? (
+            <div className="shrink-0 flex items-center gap-2 bg-orange-500/15 border border-orange-500/30 rounded-2xl px-4 py-2.5">
+              <span className="text-xl leading-none">🔥</span>
+              <div>
+                <p className="text-orange-300 font-black text-xl leading-none">{streak}</p>
+                <p className="text-orange-400/70 text-xs font-semibold mt-0.5">day streak</p>
+              </div>
+            </div>
+          ) : (
+            <div className="shrink-0 flex items-center gap-2 bg-slate-800/60 border border-slate-700/40 rounded-2xl px-4 py-2.5">
+              <span className="text-xl leading-none">🔥</span>
+              <p className="text-slate-400 font-bold text-sm">Start your streak</p>
+            </div>
+          )}
         </div>
 
         {/* ── Stats Strip ── */}
