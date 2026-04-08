@@ -14,6 +14,7 @@ import CalendarDayView from './CalendarDayView'
 import AddSessionModal from './AddSessionModal'
 import AppShell from './AppShell'
 import DashboardView from './DashboardView'
+import { useSessionReminders } from '../utils/useSessionReminders'
 import CoursesView from './CoursesView'
 import ProgressView from './ProgressView'
 import StudyToolsView from './StudyToolsView'
@@ -351,6 +352,8 @@ export default function OutputView({
     weeksWithAll.flatMap(w => w.days).flatMap(d => d.sessions.map(s => ({ ...s, dateStr: d.dateStr }))),
     [weeksWithAll]
   )
+
+  useSessionReminders(allSessions, completedIds, todayStr)
 
   const allDaysMap = useMemo(() => {
     const map = {}
