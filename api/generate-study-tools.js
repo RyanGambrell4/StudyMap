@@ -50,11 +50,24 @@ Rules:
     });
 
     const data = await response.json();
-  const content = data.content[0].text
-const firstBrace = content.indexOf('{')
-const lastBrace = content.lastIndexOf('}')
-const cleaned = content.slice(firstBrace, lastBrace + 1)
-const parsed = JSON.parse(cleaned)
+    const content = data.content[0].text
+    const firstBrace = content.indexOf('{')
+    const lastBrace = content.lastIndexOf('}')
+    const cleaned = content.slice(firstBrace, lastBrace + 1)
+    const parsed = JSON.parse(cleaned)
+
+    // Shuffle quiz options so correct answer is evenly distributed across positions
+    if (parsed.quiz) {
+      parsed.quiz = parsed.quiz.map(q => {
+        const opts = [...q.options]
+        for (let i = opts.length - 1; i > 0; i--) {
+          const j = Math.floor(Math.random() * (i + 1));
+          [opts[i], opts[j]] = [opts[j], opts[i]]
+        }
+        return { ...q, options: opts }
+      })
+    }
+
     res.status(200).json(parsed);
   } catch (error) {
     console.error('API error:', error);

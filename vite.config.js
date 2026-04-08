@@ -225,7 +225,19 @@ Rules:
         const content = data.content[0].text
         const firstBrace = content.indexOf('{')
         const lastBrace = content.lastIndexOf('}')
-        return JSON.parse(content.slice(firstBrace, lastBrace + 1))
+        const parsed = JSON.parse(content.slice(firstBrace, lastBrace + 1))
+        // Shuffle quiz options so correct answer is evenly distributed
+        if (parsed.quiz) {
+          parsed.quiz = parsed.quiz.map(q => {
+            const opts = [...q.options]
+            for (let i = opts.length - 1; i > 0; i--) {
+              const j = Math.floor(Math.random() * (i + 1));
+              [opts[i], opts[j]] = [opts[j], opts[i]]
+            }
+            return { ...q, options: opts }
+          })
+        }
+        return parsed
       }))
 
       // ── /api/generate-quick-quiz ─────────────────────────────────────────
@@ -264,7 +276,20 @@ Rules:
         const first = content.indexOf('[')
         const last = content.lastIndexOf(']')
         const questions = JSON.parse(content.slice(first, last + 1))
-        return { questions }
+        // Shuffle options so correct answer is evenly distributed across A/B/C/D
+        const LABELS = ['A', 'B', 'C', 'D']
+        const shuffled = questions.map(q => {
+          const plain = q.options.map(o => o.replace(/^[A-D]\.\s*/, ''))
+          for (let i = plain.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [plain[i], plain[j]] = [plain[j], plain[i]]
+          }
+          const newOptions = plain.map((text, i) => `${LABELS[i]}. ${text}`)
+          const correctPlain = q.answer.replace(/^[A-D]\.\s*/, '')
+          const newAnswer = newOptions.find(o => o.replace(/^[A-D]\.\s*/, '') === correctPlain) ?? newOptions[0]
+          return { ...q, options: newOptions, answer: newAnswer }
+        })
+        return { questions: shuffled }
       }))
 
       // ── /api/extract-syllabus-events ──────────────────────────────────────

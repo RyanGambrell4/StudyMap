@@ -46,7 +46,26 @@ Rules:
     const first = content.indexOf('[')
     const last = content.lastIndexOf(']')
     const questions = JSON.parse(content.slice(first, last + 1))
-    res.status(200).json({ questions })
+
+    // Shuffle options so correct answer is evenly distributed across A/B/C/D
+    const LABELS = ['A', 'B', 'C', 'D']
+    const shuffled = questions.map(q => {
+      // Strip letter prefix ("A. ", "B. " etc) to get plain text
+      const plain = q.options.map(o => o.replace(/^[A-D]\.\s*/, ''))
+      // Fisher-Yates shuffle
+      for (let i = plain.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [plain[i], plain[j]] = [plain[j], plain[i]]
+      }
+      // Re-apply letter prefixes
+      const newOptions = plain.map((text, i) => `${LABELS[i]}. ${text}`)
+      // Find which label the correct answer now sits at
+      const correctPlain = q.answer.replace(/^[A-D]\.\s*/, '')
+      const newAnswer = newOptions.find(o => o.replace(/^[A-D]\.\s*/, '') === correctPlain) ?? newOptions[0]
+      return { ...q, options: newOptions, answer: newAnswer }
+    })
+
+    res.status(200).json({ questions: shuffled })
   } catch (error) {
     console.error('Quick quiz error:', error)
     res.status(500).json({ error: error.message })
