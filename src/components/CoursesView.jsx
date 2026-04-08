@@ -178,7 +178,7 @@ export default function CoursesView({
   return (
     <div className="px-6 py-8 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-white">Courses</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Courses</h1>
         {courses.length > 0 && !showAddForm && (
           <button
             onClick={() => setShowAddForm(true)}
@@ -230,15 +230,15 @@ export default function CoursesView({
           const syllabusEvts = syllabusForCourse[idx] ?? []
 
           return (
-            <div key={idx} className="bg-slate-800/50 border border-slate-700/50 rounded-2xl overflow-hidden">
+            <div key={idx} className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl overflow-hidden">
               {/* Header */}
               <button
                 onClick={() => setExpandedIdx(expanded ? null : idx)}
-                className="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-700/20 transition-colors text-left"
+                className="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors text-left"
               >
                 <div className="w-3 h-10 rounded-full shrink-0" style={{ backgroundColor: course.color.dot }} />
                 <div className="flex-1 min-w-0">
-                  <p className="font-bold text-slate-100">{course.name}</p>
+                  <p className="font-bold text-slate-800 dark:text-slate-100">{course.name}</p>
                   <div className="flex items-center gap-3 mt-1 flex-wrap text-xs text-slate-500">
                     <span>{daysLeft > 0 ? `${daysLeft}d to exam` : 'Exam passed'}</span>
                     <span>·</span>
@@ -266,7 +266,7 @@ export default function CoursesView({
 
               {/* Expanded content */}
               {expanded && (
-                <div className="border-t border-slate-700/50 px-5 py-4 space-y-5">
+                <div className="border-t border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-transparent px-5 py-4 space-y-5">
 
                   {/* Sessions */}
                   <div>
@@ -281,7 +281,7 @@ export default function CoursesView({
                           return (
                             <div key={s.id} className={`flex items-center gap-3 text-sm ${done ? 'opacity-50' : isPast ? 'opacity-60' : ''}`}>
                               <span className={`shrink-0 w-1.5 h-1.5 rounded-full mt-0.5 ${done ? 'bg-emerald-500' : 'bg-slate-600'}`} />
-                              <span className={`flex-1 truncate ${done ? 'line-through text-slate-500' : 'text-slate-300'}`}>{s.sessionType}</span>
+                              <span className={`flex-1 truncate ${done ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-600 dark:text-slate-300'}`}>{s.sessionType}</span>
                               <span className="text-slate-500 text-xs shrink-0">
                                 {new Date(s.dateStr + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                               </span>
@@ -301,7 +301,7 @@ export default function CoursesView({
                         {syllabusEvts.sort((a, b) => a.date.localeCompare(b.date)).map(e => (
                           <div key={e.id} className="flex items-center gap-3 text-sm" style={{ borderLeft: `2px solid ${e.color.dot}`, paddingLeft: '10px' }}>
                             <div className="flex-1 min-w-0">
-                              <span className="text-slate-300 truncate block">{e.name}</span>
+                              <span className="text-slate-600 dark:text-slate-300 truncate block">{e.name}</span>
                               <span className="text-slate-500 text-xs">{e.type}</span>
                             </div>
                             <span className="text-slate-500 text-xs shrink-0">
@@ -328,7 +328,7 @@ export default function CoursesView({
                         {grades.map(g => (
                           <div key={g.id} className="flex items-center gap-3 text-sm">
                             <div className="flex-1 min-w-0">
-                              <span className="text-slate-300 truncate block">{g.name}</span>
+                              <span className="text-slate-600 dark:text-slate-300 truncate block">{g.name}</span>
                               <span className="text-slate-500 text-xs">{g.type} · {g.weight}% of grade · Due {new Date(g.dueDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
                             </div>
                             {g.loggedGrade !== null ? (

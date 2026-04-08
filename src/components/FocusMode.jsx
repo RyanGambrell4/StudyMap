@@ -456,7 +456,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
   // ─── RENDER ─────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#070D1A' }}>
+    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden bg-slate-50 dark:bg-[#070D1A]">
       {/* Top accent line */}
       <div className="h-0.5 w-full shrink-0" style={{ backgroundColor: dot }} />
 
@@ -477,7 +477,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
       {/* ── Break overlay ── */}
       {breakOverlay && (
-        <div className="absolute inset-0 z-[110] flex flex-col items-center justify-center" style={{ backgroundColor: '#070D1A' }}>
+        <div className="absolute inset-0 z-[110] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#070D1A]">
           <div className="text-center">
             <div className="relative flex items-center justify-center mb-10">
               <div className="w-36 h-36 rounded-full" style={{ backgroundColor: dot, opacity: 0.15, animation: 'breathe 4s ease-in-out infinite' }} />
@@ -494,7 +494,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
       {/* ── Session complete screen ── */}
       {showComplete && (
-        <div className="absolute inset-0 z-[105] flex flex-col items-center justify-center px-6 overflow-y-auto py-10" style={{ backgroundColor: '#070D1A' }}>
+        <div className="absolute inset-0 z-[105] flex flex-col items-center justify-center px-6 overflow-y-auto py-10 bg-slate-50 dark:bg-[#070D1A]">
           <div className="w-full max-w-md">
             <div className="flex items-center justify-center mb-6">
               <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ backgroundColor: `${dot}20`, border: `2px solid ${dot}50`, boxShadow: `0 0 40px ${dot}30` }}>
@@ -507,11 +507,11 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
             <p className="text-slate-400 text-center text-sm mb-8 leading-relaxed">{encourageMsg}</p>
 
             <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 text-center">
-                <p className="text-2xl font-bold text-white font-mono">{fmt(Math.max(elapsed, 1))}</p>
+              <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 text-center">
+                <p className="text-2xl font-bold text-slate-900 dark:text-white font-mono">{fmt(Math.max(elapsed, 1))}</p>
                 <p className="text-xs text-slate-500 mt-1">Time studied</p>
               </div>
-              <div className="bg-slate-800/60 border border-slate-700/60 rounded-2xl p-4 text-center">
+              <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 text-center">
                 <p className="text-2xl font-bold text-white">{tabsVisited.size}</p>
                 <p className="text-xs text-slate-500 mt-1">Activities used</p>
               </div>
@@ -551,7 +551,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                   Start Next — {nextSession.courseName}
                 </button>
               )}
-              <button onClick={handleBackToDashboard} className="w-full py-3.5 rounded-2xl font-semibold text-slate-300 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition-colors">
+              <button onClick={handleBackToDashboard} className="w-full py-3.5 rounded-2xl font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 transition-colors">
                 Back to Dashboard
               </button>
             </div>
@@ -636,7 +636,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
             {!finished && (
               <button
                 onClick={() => setRunning(r => !r)}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-slate-300 bg-slate-800/80 hover:bg-slate-700/80 border border-slate-700 transition-colors text-sm"
+                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 transition-colors text-sm"
               >
                 {running
                   ? <><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>Pause</>

@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef } from 'react'
 import { supabase } from './lib/supabase'
 import { initUserData, clearUserData, savePlan } from './lib/db'
+import { useTheme } from './utils/useTheme'
 import AuthScreen from './components/AuthScreen'
 import Onboarding from './components/Onboarding'
 import OutputView from './components/OutputView'
 import './index.css'
 
 export default function App() {
+  const { theme, toggleTheme } = useTheme()
   const [session, setSession]   = useState(undefined) // undefined = still checking
   const [dbReady, setDbReady]   = useState(false)
   const [showOutput, setShowOutput]   = useState(false)
@@ -135,6 +137,8 @@ export default function App() {
         onEditPlan={handleEditPlan}
         onSignOut={handleSignOut}
         onAddCourse={handleAddCourse}
+        onToggleTheme={toggleTheme}
+        theme={theme}
         userEmail={session.user.email}
       />
     )

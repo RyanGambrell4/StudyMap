@@ -224,31 +224,28 @@ export default function DashboardView({
   }
 
   return (
-    <div
-      className="min-h-screen"
-      style={{ background: 'linear-gradient(180deg, #0f172a 0%, #080e1c 100%)' }}
-    >
+    <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a]">
       <div className="px-6 py-10 max-w-3xl mx-auto space-y-10">
 
         {/* ── Header ── */}
         <div className="flex items-end justify-between gap-4">
           <div>
             <p className="text-slate-500 text-sm font-medium mb-1 tracking-wide">{formatDate(todayStr)}</p>
-            <h1 className="text-4xl font-bold text-white tracking-tight">{greeting()}</h1>
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight">{greeting()}</h1>
           </div>
           {/* Streak badge */}
           {(streak > 1 || lastCompletedDate === todayStr) ? (
             <div className="shrink-0 flex items-center gap-2 bg-orange-500/15 border border-orange-500/30 rounded-2xl px-4 py-2.5">
               <span className="text-xl leading-none">🔥</span>
               <div>
-                <p className="text-orange-300 font-black text-xl leading-none">{streak}</p>
-                <p className="text-orange-400/70 text-xs font-semibold mt-0.5">day streak</p>
+                <p className="text-orange-500 dark:text-orange-300 font-black text-xl leading-none">{streak}</p>
+                <p className="text-orange-500/70 dark:text-orange-400/70 text-xs font-semibold mt-0.5">day streak</p>
               </div>
             </div>
           ) : (
-            <div className="shrink-0 flex items-center gap-2 bg-slate-800/60 border border-slate-700/40 rounded-2xl px-4 py-2.5">
+            <div className="shrink-0 flex items-center gap-2 bg-slate-200/80 dark:bg-slate-800/60 border border-slate-300/60 dark:border-slate-700/40 rounded-2xl px-4 py-2.5">
               <span className="text-xl leading-none">🔥</span>
-              <p className="text-slate-400 font-bold text-sm">Start your streak</p>
+              <p className="text-slate-500 dark:text-slate-400 font-bold text-sm">Start your streak</p>
             </div>
           )}
         </div>
@@ -274,11 +271,11 @@ export default function DashboardView({
           ].map(({ value, label, icon, accent }) => (
             <div
               key={label}
-              className="bg-slate-800/60 border border-slate-700/40 rounded-2xl px-4 py-5"
+              className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/40 rounded-2xl px-4 py-5"
               style={{ borderTopWidth: 2, borderTopColor: `${accent}40` }}
             >
               <div className="flex items-center gap-1.5 mb-2" style={{ color: accent }}>{icon}</div>
-              <p className="text-3xl font-bold text-white leading-none mb-1.5">{value}</p>
+              <p className="text-3xl font-bold text-slate-900 dark:text-white leading-none mb-1.5">{value}</p>
               <p className="text-slate-500 text-xs font-medium leading-tight">{label}</p>
             </div>
           ))}
@@ -287,9 +284,9 @@ export default function DashboardView({
         {/* ── Hero Study Card ── */}
         <div>
           {noSessions ? (
-            <div className="rounded-3xl border border-slate-700/40 bg-slate-800/40 px-8 py-10 text-center">
-              <p className="text-slate-300 font-semibold text-lg mb-1">All clear</p>
-              <p className="text-slate-600 text-sm">No sessions scheduled for today or tomorrow</p>
+            <div className="rounded-3xl border border-slate-200 dark:border-slate-700/40 bg-white dark:bg-slate-800/40 px-8 py-10 text-center">
+              <p className="text-slate-700 dark:text-slate-300 font-semibold text-lg mb-1">All clear</p>
+              <p className="text-slate-400 dark:text-slate-600 text-sm">No sessions scheduled for today or tomorrow</p>
             </div>
           ) : (
             <div
@@ -377,13 +374,13 @@ export default function DashboardView({
 
         {/* ── Week Strip ── */}
         <div>
-          <h2 className="text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">This Week</h2>
-          <div className="bg-slate-800/50 border border-slate-700/40 rounded-2xl p-4">
+          <h2 className="text-slate-500 dark:text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">This Week</h2>
+          <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-4">
             <div className="grid grid-cols-7 gap-1">
               {weekDays.map(day => (
                 <div key={day.dateStr} className="flex flex-col items-center gap-2 py-2">
                   <span className={`text-[10px] font-bold uppercase tracking-widest ${
-                    day.isToday ? 'text-white' : 'text-slate-600'
+                    day.isToday ? 'text-white' : 'text-slate-400 dark:text-slate-600'
                   }`}>
                     {day.letter}
                   </span>
@@ -397,8 +394,8 @@ export default function DashboardView({
                   >
                     <span className={`text-sm font-bold leading-none ${
                       day.isToday ? 'text-white' :
-                      day.isPast   ? 'text-slate-600' :
-                                     'text-slate-300'
+                      day.isPast   ? 'text-slate-400 dark:text-slate-600' :
+                                     'text-slate-700 dark:text-slate-300'
                     }`}>
                       {day.dayNum}
                     </span>
@@ -424,7 +421,7 @@ export default function DashboardView({
 
         {/* ── Course Cards ── */}
         <div>
-          <h2 className="text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">Your Courses</h2>
+          <h2 className="text-slate-500 dark:text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">Your Courses</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             {courseStats.map(({ course, total, completed, dot }, idx) => {
               const pct = total === 0 ? 0 : Math.round((completed / total) * 100)
@@ -436,7 +433,7 @@ export default function DashboardView({
               return (
                 <div
                   key={idx}
-                  className="group bg-slate-800/50 border border-slate-700/40 rounded-2xl p-6 cursor-default transition-all hover:bg-slate-800/80 hover:border-slate-600/60 hover:scale-[1.01]"
+                  className="group bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-6 cursor-default transition-all hover:bg-slate-50 dark:hover:bg-slate-800/80 hover:border-slate-300 dark:hover:border-slate-600/60 hover:scale-[1.01]"
                   style={{ borderLeftWidth: 4, borderLeftColor: dot }}
                 >
                   <div className="flex items-start gap-4 mb-5">
@@ -447,7 +444,7 @@ export default function DashboardView({
                       {course.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="flex-1 min-w-0 pt-1">
-                      <p className="font-bold text-white text-base truncate mb-1">{course.name}</p>
+                      <p className="font-bold text-slate-900 dark:text-white text-base truncate mb-1">{course.name}</p>
                       <div className="flex items-center gap-1.5">
                         {isUrgent && (
                           <svg className="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -470,7 +467,7 @@ export default function DashboardView({
                       <span className="text-slate-500">{completed} of {total} sessions</span>
                       <span style={{ color: dot }}>{pct}%</span>
                     </div>
-                    <div className="h-2 bg-slate-700/80 rounded-full overflow-hidden">
+                    <div className="h-2 bg-slate-200 dark:bg-slate-700/80 rounded-full overflow-hidden">
                       <div
                         className="h-full rounded-full transition-all duration-700"
                         style={{ width: `${pct}%`, backgroundColor: dot }}
@@ -489,7 +486,7 @@ export default function DashboardView({
                             color: dot,
                             border: `1px solid ${dot}50`,
                           }
-                        : { backgroundColor: 'rgba(30,41,59,0.6)', color: '#475569', border: '1px solid rgba(51,65,85,0.5)', cursor: 'default' }
+                        : { backgroundColor: 'rgba(241,245,249,0.8)', color: '#94a3b8', border: '1px solid rgba(203,213,225,0.8)', cursor: 'default' }
                     }
                   >
                     {nextSess ? 'Study Now' : 'All sessions complete'}
@@ -502,16 +499,16 @@ export default function DashboardView({
 
         {/* ── Upcoming Deadlines ── */}
         <div className="pb-6">
-          <h2 className="text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">Upcoming Deadlines</h2>
+          <h2 className="text-slate-500 dark:text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">Upcoming Deadlines</h2>
 
           {upcomingDeadlines.length === 0 ? (
-            <div className="bg-slate-800/40 border border-slate-700/40 rounded-2xl px-8 py-10 flex flex-col items-center text-center">
-              <div className="w-14 h-14 bg-slate-700/50 rounded-2xl flex items-center justify-center mb-4">
-                <svg className="w-7 h-7 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 rounded-2xl px-8 py-10 flex flex-col items-center text-center">
+              <div className="w-14 h-14 bg-slate-100 dark:bg-slate-700/50 rounded-2xl flex items-center justify-center mb-4">
+                <svg className="w-7 h-7 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
               </div>
-              <p className="text-white font-bold text-base mb-2">Import your syllabus</p>
+              <p className="text-slate-900 dark:text-white font-bold text-base mb-2">Import your syllabus</p>
               <p className="text-slate-500 text-sm mb-6 max-w-xs">See all your exams, quizzes, and deadlines pulled straight from your course documents</p>
               <button
                 onClick={onImportSyllabus}
@@ -521,25 +518,25 @@ export default function DashboardView({
               </button>
             </div>
           ) : (
-            <div className="bg-slate-800/50 border border-slate-700/40 rounded-2xl overflow-hidden">
+            <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden">
               {upcomingDeadlines.map((event, i) => {
                 const days = daysBetween(todayStr, event.date)
                 return (
                   <div
                     key={event.id}
-                    className={`flex items-center gap-4 px-6 py-4 transition-colors hover:bg-slate-700/30 ${
-                      i < upcomingDeadlines.length - 1 ? 'border-b border-slate-700/40' : ''
+                    className={`flex items-center gap-4 px-6 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30 ${
+                      i < upcomingDeadlines.length - 1 ? 'border-b border-slate-100 dark:border-slate-700/40' : ''
                     }`}
                   >
                     <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: event.color.dot }} />
                     <div className="flex-1 min-w-0">
-                      <p className="text-white text-sm font-bold truncate">{event.name}</p>
+                      <p className="text-slate-900 dark:text-white text-sm font-bold truncate">{event.name}</p>
                       <p className="text-slate-500 text-xs mt-0.5 font-medium">{event.courseName} · {event.type}</p>
                     </div>
                     <span className={`text-xs font-bold shrink-0 px-3 py-1.5 rounded-full ${
-                      days <= 3 ? 'bg-red-900/60 text-red-300' :
-                      days <= 7 ? 'bg-amber-900/50 text-amber-300' :
-                      'bg-slate-700/80 text-slate-400'
+                      days <= 3 ? 'bg-red-100 dark:bg-red-900/60 text-red-600 dark:text-red-300' :
+                      days <= 7 ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300' :
+                      'bg-slate-100 dark:bg-slate-700/80 text-slate-500 dark:text-slate-400'
                     }`}>
                       {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d`}
                     </span>

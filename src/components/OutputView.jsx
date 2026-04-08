@@ -252,7 +252,8 @@ function LogGradeModal({ logGradeId, assignments, courses, gradeInput, setGradeI
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function OutputView({
   courses, schedule, learningStyle, yearLevel,
-  initialCompletedIds, initialAssignments, onSavePlan, onEditPlan, onSignOut, onAddCourse, userEmail,
+  initialCompletedIds, initialAssignments, onSavePlan, onEditPlan, onSignOut, onAddCourse,
+  onToggleTheme, theme, userEmail,
 }) {
   const result = useMemo(
     () => generateSchedule(courses, schedule, learningStyle, yearLevel),
@@ -548,6 +549,8 @@ export default function OutputView({
         onShare={() => setShowShareCard(true)}
         onEditPlan={onEditPlan}
         onSignOut={onSignOut}
+        onToggleTheme={onToggleTheme}
+        theme={theme}
         userEmail={userEmail}
       >
 

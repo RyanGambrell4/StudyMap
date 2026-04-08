@@ -61,7 +61,7 @@ export default function CalendarDayView({
       <div className="flex items-center justify-between mb-5">
         <button
           onClick={onPrev}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm transition-colors"
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -69,12 +69,12 @@ export default function CalendarDayView({
           Prev
         </button>
         <div className="text-center">
-          <p className={`font-bold text-lg ${dayStr === todayStr ? 'text-indigo-400' : 'text-white'}`}>{dateLabel}</p>
+          <p className={`font-bold text-lg ${dayStr === todayStr ? 'text-indigo-500 dark:text-indigo-400' : 'text-slate-900 dark:text-white'}`}>{dateLabel}</p>
           {dayStr === todayStr && <p className="text-indigo-400/50 text-xs">Today</p>}
         </div>
         <button
           onClick={onNext}
-          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 text-sm transition-colors"
+          className="flex items-center gap-2 px-4 py-2 rounded-lg bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 text-sm transition-colors"
         >
           Next
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -137,7 +137,7 @@ export default function CalendarDayView({
           {Array.from({ length: TOTAL_HOURS + 1 }, (_, i) => (
             <div
               key={i}
-              className="absolute right-3 text-[11px] text-slate-600 font-medium"
+              className="absolute right-3 text-[11px] text-slate-400 dark:text-slate-600 font-medium"
               style={{ top: i * HOUR_HEIGHT - 7 }}
             >
               {fmtHour(START_HOUR + i)}
@@ -146,14 +146,14 @@ export default function CalendarDayView({
         </div>
 
         {/* Grid */}
-        <div className="flex-1 relative border-l border-slate-700/50" style={{ height: totalHeight }}>
+        <div className="flex-1 relative border-l border-slate-300/50 dark:border-slate-700/50" style={{ height: totalHeight }}>
           {/* Hour lines */}
           {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-            <div key={i} className="absolute left-0 right-0 border-t border-slate-700/30" style={{ top: i * HOUR_HEIGHT }} />
+            <div key={i} className="absolute left-0 right-0 border-t border-slate-200/80 dark:border-slate-700/30" style={{ top: i * HOUR_HEIGHT }} />
           ))}
           {/* Half-hour lines */}
           {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-            <div key={`h${i}`} className="absolute left-0 right-0 border-t border-slate-700/15 border-dashed" style={{ top: i * HOUR_HEIGHT + HOUR_HEIGHT / 2 }} />
+            <div key={`h${i}`} className="absolute left-0 right-0 border-t border-slate-200/40 dark:border-slate-700/15 border-dashed" style={{ top: i * HOUR_HEIGHT + HOUR_HEIGHT / 2 }} />
           ))}
 
           {/* Session blocks */}
