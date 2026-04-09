@@ -25,7 +25,7 @@ export default async function handler(req, res) {
       return res.redirect('/app?gcal=error')
     }
 
-    const supabaseUrl = process.env.VITE_SUPABASE_URL
+    const supabaseUrl = process.env.SUPABASE_URL
     const serviceKey = process.env.SUPABASE_SERVICE_KEY
 
     // Fetch existing study_tools to merge rather than overwrite

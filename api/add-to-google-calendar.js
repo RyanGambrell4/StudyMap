@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   if (!userId || !title) return res.status(400).json({ error: 'userId and title required' })
 
   try {
-    const supabaseUrl = process.env.VITE_SUPABASE_URL
+    const supabaseUrl = process.env.SUPABASE_URL
     const serviceKey = process.env.SUPABASE_SERVICE_KEY
 
     const getRes = await fetch(
