@@ -801,6 +801,7 @@ export default function OutputView({
             courses={courses}
             userId={userId}
             onShowPaywall={onShowPaywall}
+            onNavigateToCoach={() => setActiveSection('coach')}
           />
         )}
 

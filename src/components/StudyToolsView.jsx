@@ -166,7 +166,7 @@ function QuizQuestion({ question, onAnswer }) {
 }
 
 // ── Main view ─────────────────────────────────────────────────────────────────
-export default function StudyToolsView({ courses, userId, onShowPaywall }) {
+export default function StudyToolsView({ courses, userId, onShowPaywall, onNavigateToCoach }) {
   const fileInputRef = useRef(null)
   const [dragging, setDragging] = useState(false)
 
@@ -180,7 +180,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall }) {
   const [selectedCourse, setSelectedCourse] = useState(null)
 
   // Mode + content
-  const [mode, setMode] = useState('upload') // 'upload' | 'flashcards' | 'quiz'
+  const [mode, setMode] = useState('hub') // 'hub' | 'upload' | 'flashcards' | 'quiz'
   const [flashcards, setFlashcards] = useState([])
   const [quiz, setQuiz] = useState([])
   const [isGenerating, setIsGenerating] = useState(false)
@@ -328,7 +328,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall }) {
   }
 
   function handleBack() {
-    setMode('upload')
+    setMode('hub')
   }
 
   const activeText = extractedText || pastedText
@@ -338,12 +338,110 @@ export default function StudyToolsView({ courses, userId, onShowPaywall }) {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <div className="px-6 py-8 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold text-white mb-2">Study Tools</h1>
-      <p className="text-slate-400 text-sm mb-8">Upload a file to generate flashcards and quizzes.</p>
 
-      {/* ── Upload section (always visible at top) ── */}
+      {/* ── Hub screen ── */}
+      {mode === 'hub' && (
+        <div>
+          <h1 className="text-2xl font-bold text-white mb-2">Study Tools</h1>
+          <p className="text-slate-400 text-sm mb-8">Choose how you want to study.</p>
+          <div className="space-y-3">
+
+            {/* Flashcards card */}
+            <button
+              onClick={() => setMode('upload')}
+              className="w-full text-left bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/60 hover:border-indigo-500/40 rounded-2xl p-5 transition-all group"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0 group-hover:bg-indigo-600/30 transition-colors">
+                  <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-base font-semibold text-white">Flashcards</h2>
+                    {flashcards.length > 0 && (
+                      <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-indigo-900/50 text-indigo-300 border border-indigo-700/50">
+                        {flashcards.length} ready
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-slate-400 text-sm">Upload your notes and get AI-generated flashcards to memorize key concepts.</p>
+                </div>
+                <svg className="w-4 h-4 text-slate-600 group-hover:text-slate-400 transition-colors shrink-0 mt-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
+
+            {/* Quizzes card */}
+            <button
+              onClick={() => { setMode('upload') }}
+              className="w-full text-left bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/60 hover:border-violet-500/40 rounded-2xl p-5 transition-all group"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center shrink-0 group-hover:bg-violet-600/30 transition-colors">
+                  <svg className="w-5 h-5 text-violet-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-base font-semibold text-white">Quizzes</h2>
+                    {quiz.length > 0 && (
+                      <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-violet-900/50 text-violet-300 border border-violet-700/50">
+                        {quiz.length} questions ready
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-slate-400 text-sm">Test your knowledge with multiple choice, true/false, and fill-in-the-blank questions.</p>
+                </div>
+                <svg className="w-4 h-4 text-slate-600 group-hover:text-slate-400 transition-colors shrink-0 mt-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
+
+            {/* Study Coach card */}
+            <button
+              onClick={() => onNavigateToCoach?.()}
+              className="w-full text-left bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/60 hover:border-emerald-500/40 rounded-2xl p-5 transition-all group"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center shrink-0 group-hover:bg-emerald-600/30 transition-colors">
+                  <svg className="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-base font-semibold text-white">Study Coach</h2>
+                  </div>
+                  <p className="text-slate-400 text-sm">Get a personalized AI study plan tailored to your schedule and upcoming exams.</p>
+                </div>
+                <svg className="w-4 h-4 text-slate-600 group-hover:text-slate-400 transition-colors shrink-0 mt-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
+
+          </div>
+        </div>
+      )}
+
+      {/* ── Upload section ── */}
       {mode === 'upload' && (
         <div className="space-y-5">
+          {/* Back to hub */}
+          <div className="flex items-center gap-3 mb-2">
+            <button onClick={() => setMode('hub')} className="flex items-center gap-2 text-slate-400 hover:text-slate-200 text-sm transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+            <h1 className="text-lg font-semibold text-white">Upload Material</h1>
+          </div>
           {/* Drop zone */}
           <div
             onDrop={handleDrop}
