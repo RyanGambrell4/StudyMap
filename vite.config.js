@@ -63,6 +63,16 @@ function apiDevPlugin() {
     name: 'api-dev-middleware',
     configureServer(server) {
 
+      // ── Clean URL routing ─────────────────────────────────────────────────
+      server.middlewares.use((req, res, next) => {
+        if (req.url === '/app' || req.url?.startsWith('/app?')) {
+          req.url = '/app.html' + (req.url.slice(4) || '')
+        } else if (req.url === '/signup' || req.url?.startsWith('/signup?')) {
+          req.url = '/signup.html' + (req.url.slice(7) || '')
+        }
+        next()
+      })
+
       // ── /api/generate-session-blueprint ──────────────────────────────────
       server.middlewares.use('/api/generate-session-blueprint', makeHandler(async ({ courseName, sessionType, durationMinutes, examDate, targetGrade, uploadedTopics, studentFocus }) => {
         if (!courseName || !durationMinutes) {
@@ -337,4 +347,13 @@ Return ONLY the JSON array with no other text. Example:
 
 export default defineConfig({
   plugins: [react(), apiDevPlugin()],
+  build: {
+    rollupOptions: {
+      input: {
+        main: path.resolve(process.cwd(), 'index.html'),
+        app: path.resolve(process.cwd(), 'app.html'),
+        signup: path.resolve(process.cwd(), 'signup.html'),
+      },
+    },
+  },
 })

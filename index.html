@@ -9,6 +9,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const { createClient } = window.supabase;
+    const sb = createClient(
+      'https://vpmgamaspefwqywttdtj.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZwbWdhbWFzcGVmd3F5d3R0ZHRqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU1NzA0MDMsImV4cCI6MjA5MTE0NjQwM30.ymnJxCa2crnymc9607WUOHVZVI600fhpWICtjRp-23E'
+    );
+  </script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -172,6 +180,7 @@
       font-size: 1.1rem; color: var(--text2);
       line-height: 1.65; max-width: 450px; margin-bottom: 36px;
     }
+    .hero-cta-btns { display: flex; gap: 12px; flex-wrap: wrap; }
     .email-form { display: flex; gap: 10px; max-width: 470px; }
     .email-form input, .cta-form input {
       flex: 1; background: rgba(255,255,255,0.05);
@@ -190,30 +199,49 @@
       color: var(--green); font-size: 0.95rem; font-weight: 600;
     }
 
-    /* ── Screenshot group ── */
+    /* ── Hero visual ── */
     .hero-visual { flex: 1; display: flex; align-items: center; justify-content: flex-end; }
-    .ss-group {
-      position: relative; width: 580px; height: 400px;
-      animation: float 5.5s ease-in-out infinite;
+    .browser-wrap {
+      max-width: 680px; width: 100%;
+      animation: floatBrowser 5.5s ease-in-out infinite;
+      transform: perspective(1000px) rotateX(2deg);
+      transform-origin: center top;
+      filter: drop-shadow(0 40px 80px rgba(0,0,0,0.55)) drop-shadow(0 0 60px rgba(79,126,247,0.22));
     }
-    .ss-back {
-      position: absolute; width: 500px;
-      border-radius: 12px; object-fit: cover;
-      transform: rotate(3.5deg) translate(55px, -10px);
-      box-shadow: 0 20px 60px rgba(0,0,0,0.55);
+    @keyframes floatBrowser {
+      0%,100% { transform: perspective(1000px) rotateX(2deg) translateY(0); }
+      50% { transform: perspective(1000px) rotateX(2deg) translateY(-14px); }
+    }
+    .browser-chrome {
+      background: #1a2235;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 14px 14px 0 0;
+      padding: 10px 14px;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .browser-dots { display: flex; gap: 6px; }
+    .browser-dots span {
+      width: 10px; height: 10px; border-radius: 50%;
+    }
+    .browser-dots span:nth-child(1) { background: #FF5F57; }
+    .browser-dots span:nth-child(2) { background: #FEBC2E; }
+    .browser-dots span:nth-child(3) { background: #28C840; }
+    .browser-url {
+      flex: 1; background: rgba(255,255,255,0.05);
       border: 1px solid rgba(255,255,255,0.08);
-      opacity: 0.65;
+      border-radius: 6px; padding: 4px 12px;
+      font-size: 0.7rem; color: var(--text3);
+      letter-spacing: 0.2px; font-family: inherit;
     }
-    .ss-main {
-      position: absolute; width: 530px;
-      border-radius: 14px; object-fit: cover;
-      transform: rotate(-1.5deg);
-      box-shadow:
-        0 0 0 1px rgba(79,126,247,0.4),
-        0 0 0 4px rgba(79,126,247,0.08),
-        0 30px 80px rgba(0,0,0,0.65),
-        0 0 80px rgba(79,126,247,0.18);
-      z-index: 2;
+    .browser-screen {
+      border: 1px solid rgba(255,255,255,0.08);
+      border-top: none;
+      border-radius: 0 0 14px 14px;
+      overflow: hidden; line-height: 0;
+    }
+    .browser-screen img {
+      width: 100%; display: block;
+      object-fit: cover; object-position: top;
     }
     .m-val { font-size: 15px; font-weight: 900; letter-spacing: -0.8px; line-height: 1; margin-bottom: 2px; }
     .m-lbl { font-size: 9px; color: #475569; }
@@ -259,13 +287,20 @@
 
     /* ── How it works ── */
     .steps {
-      display: grid; grid-template-columns: repeat(3,1fr);
-      gap: 52px; margin-top: 44px;
+      display: flex; flex-direction: column;
+      gap: 80px; margin-top: 64px;
     }
-    .step { position: relative; }
+    .step {
+      display: grid; grid-template-columns: 1fr 1.55fr;
+      gap: 64px; align-items: center;
+    }
+    .step.flip { grid-template-columns: 1.55fr 1fr; }
+    .step.flip .step-content { order: 2; }
+    .step.flip .step-img    { order: 1; }
+    .step-content { display: flex; flex-direction: column; }
     .step-num {
-      font-size: 5.5rem; font-weight: 900; letter-spacing: -5px;
-      color: rgba(79,126,247,0.07); line-height: 1; margin-bottom: 14px;
+      font-size: 4.5rem; font-weight: 900; letter-spacing: -4px;
+      color: rgba(79,126,247,0.08); line-height: 1; margin-bottom: 8px;
     }
     .step-icon {
       width: 46px; height: 46px; border-radius: 13px;
@@ -273,13 +308,19 @@
       display: flex; align-items: center; justify-content: center; margin-bottom: 18px;
     }
     .step-icon svg { width: 21px; height: 21px; color: var(--accent); }
-    .step h3 { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 10px; }
-    .step p { font-size: 0.9rem; color: var(--text2); line-height: 1.72; }
-    .step-line {
-      position: absolute; top: 58px; right: -26px;
-      width: 52px; height: 1px;
-      background: linear-gradient(90deg, var(--border), var(--border2), var(--border));
+    .step h3 { font-size: 1.3rem; font-weight: 800; letter-spacing: -0.6px; margin-bottom: 12px; line-height: 1.25; }
+    .step p { font-size: 0.92rem; color: var(--text2); line-height: 1.75; }
+    .step-img {
+      border-radius: 16px; overflow: hidden; line-height: 0;
+      border: 1px solid rgba(79,126,247,0.2);
+      box-shadow: 0 0 0 1px rgba(79,126,247,0.07), 0 20px 60px rgba(0,0,0,0.55), 0 0 40px rgba(79,126,247,0.1);
     }
+    .step-img img {
+      width: 100%; display: block;
+      object-fit: cover; object-position: top;
+      max-height: 420px;
+    }
+    .step-line { display: none; }
 
     /* ── Bento ── */
     .bento-section {
@@ -288,14 +329,15 @@
     }
     .bento-grid {
       display: grid;
-      grid-template-columns: repeat(4,1fr);
+      grid-template-columns: repeat(2,1fr);
       gap: 16px; margin-top: 44px;
     }
     .bcard {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: 22px; padding: 32px;
+      border-radius: 22px; padding: 24px;
       position: relative; overflow: hidden;
       transition: transform 0.3s cubic-bezier(0.22,1,0.36,1), box-shadow 0.3s;
+      display: flex; flex-direction: column;
     }
     .bcard::before {
       content: ''; position: absolute; inset: 0; border-radius: 22px;
@@ -307,7 +349,7 @@
     }
     .bcard:hover { transform: translateY(-4px); box-shadow: 0 24px 70px rgba(0,0,0,0.45), 0 0 40px rgba(79,126,247,0.07); }
     .bcard:hover::before { opacity: 1; }
-    .bcard.span2 { grid-column: span 2; }
+    .bcard.span2 { grid-column: span 1; }
     .bcard-glow {
       position: absolute; top: -60px; right: -60px;
       width: 220px; height: 220px; border-radius: 50%;
@@ -315,13 +357,15 @@
     }
     .bcard:hover .bcard-glow { opacity: 0.07; }
     .bcard-icon {
-      width: 50px; height: 50px; border-radius: 14px;
-      display: flex; align-items: center; justify-content: center; margin-bottom: 22px;
+      width: 44px; height: 44px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+      flex-shrink: 0;
     }
-    .bcard-icon svg { width: 22px; height: 22px; }
-    .bcard h3 { font-size: 1.25rem; font-weight: 800; letter-spacing: -0.6px; margin-bottom: 10px; }
-    .bcard p { font-size: 0.875rem; color: var(--text2); line-height: 1.7; }
-    .bcard-visual { margin-top: 24px; }
+    .bcard-icon svg { width: 20px; height: 20px; }
+    .bcard h3 { font-size: 1.1rem; font-weight: 800; letter-spacing: -0.5px; margin-bottom: 8px; }
+    .bcard p { font-size: 0.84rem; color: var(--text2); line-height: 1.65; }
+    .bcard-visual { margin-top: 18px; flex: 1; min-height: 0; }
+    .bcard-visual img { width: 100%; display: block; object-fit: cover; object-position: top; border-radius: 10px; max-height: 200px; }
 
     /* Streak bars */
     .streak-bars { display: flex; gap: 4px; }
@@ -331,6 +375,22 @@
     .bubble { border-radius: 10px; padding: 9px 12px; font-size: 0.8rem; line-height: 1.5; color: var(--text2); }
     .bubble.user { background: rgba(255,255,255,0.05); align-self: flex-start; max-width: 82%; }
     .bubble.ai { background: rgba(124,92,250,0.1); border: 1px solid rgba(124,92,250,0.2); align-self: flex-end; max-width: 90%; }
+
+    /* ── Capability pills ── */
+    .caps-section {
+      padding: 0 48px 70px;
+      max-width: 1200px; margin: 0 auto; text-align: center;
+    }
+    .caps-grid {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 10px;
+      margin-top: 32px;
+    }
+    .cap-pill {
+      background: var(--surface); border: 1px solid var(--border2);
+      color: var(--accent); border-radius: 100px;
+      padding: 7px 16px; font-size: 0.8rem; font-weight: 600;
+      letter-spacing: -0.1px; white-space: nowrap;
+    }
 
     /* ── Pricing ── */
     .pricing-section { padding: 60px 48px 77px; max-width: 1200px; margin: 0 auto; text-align: center; }
@@ -396,7 +456,7 @@
       width: 800px; height: 500px; pointer-events: none;
       background: radial-gradient(ellipse, rgba(79,126,247,0.15) 0%, transparent 65%);
     }
-    .cta-section > * { position: relative; }
+    .cta-section > *:not(.cta-glow) { position: relative; }
     .cta-sub { font-size: 1.25rem; color: var(--text2); margin: 14px auto 48px; max-width: 380px; }
     .cta-form { display: flex; gap: 10px; max-width: 450px; margin: 0 auto; }
     .cta-success {
@@ -418,9 +478,7 @@
 
     /* ── Responsive ── */
     @media (max-width: 1100px) {
-      .ss-group { width: 480px; }
-      .ss-main { width: 440px; }
-      .ss-back { width: 400px; }
+      .browser-wrap { max-width: 500px; }
     }
     @media (max-width: 900px) {
       .hero { flex-direction: column; min-height: auto; padding: 90px 28px 50px; gap: 40px; }
@@ -428,10 +486,13 @@
       .hero-content { max-width: 100%; }
       .email-form { flex-direction: column; }
       .section, .bento-section, .pricing-section { padding: 50px 24px; }
-      .steps { grid-template-columns: 1fr; gap: 44px; }
-      .step-line { display: none; }
-      .bento-grid { grid-template-columns: repeat(2,1fr); }
-      .bcard.span2 { grid-column: span 2; }
+      .steps { gap: 48px; }
+      .step { grid-template-columns: 1fr; gap: 28px; }
+      .step.flip { grid-template-columns: 1fr; }
+      .step.flip .step-content { order: 1; }
+      .step.flip .step-img { order: 2; }
+      .bento-grid { grid-template-columns: 1fr; }
+      .bcard.span2 { grid-column: span 1; }
       .pricing-cards { grid-template-columns: 1fr; }
       .toggle-wrap { flex-wrap: wrap; }
       .cta-section { padding: 64px 24px; }
@@ -459,38 +520,33 @@
     </div>
     StudyEdge
   </div>
-  <button class="btn" onclick="document.getElementById('hero-input').focus()">Get Started Free</button>
+  <button class="btn" onclick="location.href='/app?signup=1'">Get Started Free</button>
 </nav>
 
 <!-- ═══ HERO ═══ -->
 <div class="hero-wrap">
   <div class="hero">
     <div class="hero-content">
-      <div class="badge fade-up">
-        <span class="badge-dot"></span>
-        Now in Early Access
-      </div>
       <h1 class="text-h1 hero-headline fade-up d1">
         <span class="l1">You already have<br>the syllabus.</span>
         <span class="l2 gradient-text">Now you have a plan.</span>
       </h1>
-      <p class="hero-sub fade-up d2">Upload your course syllabus and StudyEdge builds your full semester schedule — every exam mapped, every session planned, every streak tracked.</p>
-      <div class="fade-up d3">
-        <form class="email-form" id="hero-form">
-          <input type="email" id="hero-input" placeholder="you@university.edu" autocomplete="email" />
-          <button type="submit" class="btn lg">Get early access</button>
-        </form>
-        <div class="form-success" id="hero-success">
-          <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-          You're on the list — we'll be in touch.
-        </div>
+      <p class="hero-sub fade-up d2">StudyEdge is your personal study coach. It plans every session before you start, keeps you locked in while you work, and gives you the tools to actually learn the material — not just cover it.</p>
+      <div class="fade-up d3 hero-cta-btns">
+        <button class="btn lg" onclick="location.href='/app?signup=1'">Get Started Free</button>
+        <button class="btn outline lg" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">See how it works</button>
       </div>
     </div>
 
     <div class="hero-visual fade-up d2">
-      <div class="ss-group">
-        <img class="ss-back" src="/ss-back.png" alt="StudyEdge dashboard" />
-        <img class="ss-main" src="/ss-main.png" alt="StudyEdge weekly calendar" />
+      <div class="browser-wrap">
+        <div class="browser-chrome">
+          <div class="browser-dots"><span></span><span></span><span></span></div>
+          <div class="browser-url">getstudyedge.com/app</div>
+        </div>
+        <div class="browser-screen">
+          <img src="/ss-hero.png" alt="StudyEdge dashboard" />
+        </div>
       </div>
     </div>
   </div>
@@ -504,35 +560,48 @@
 </div>
 
 <!-- ═══ HOW IT WORKS ═══ -->
-<div class="section">
+<div class="section" id="how-it-works">
   <div class="eyebrow fade-up">How it works</div>
-  <h2 class="text-h1 fade-up d1">From syllabus to schedule<br>in under a minute.</h2>
+  <h2 class="text-h1 fade-up d1">Your coach. Every session.<br>Not just on exam week.</h2>
   <div class="steps">
     <div class="step fade-up d1">
-      <div class="step-num">01</div>
-      <div class="step-icon">
-        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+      <div class="step-content">
+        <div class="step-num">01</div>
+        <div class="step-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
+        </div>
+        <h3>Your coach plans the session before you start</h3>
+        <p>The Session Blueprint builds a minute-by-minute study plan tailored to your course, your goals, and your deadlines before every session. No more sitting down and not knowing where to start.</p>
       </div>
-      <h3>Upload your syllabus</h3>
-      <p>Drag in your PDF or paste the text. StudyEdge reads every deadline, exam, and assignment — no manual entry required.</p>
-      <div class="step-line"></div>
+      <div class="step-img">
+        <img src="/ss-blueprint.png" alt="Session Blueprint plan" />
+      </div>
     </div>
-    <div class="step fade-up d2">
-      <div class="step-num">02</div>
-      <div class="step-icon">
-        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
+    <div class="step flip fade-up d2">
+      <div class="step-content">
+        <div class="step-num">02</div>
+        <div class="step-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        </div>
+        <h3>Lock in with Focus Mode</h3>
+        <p>Start the session and StudyEdge runs the clock. Each block of your plan is timed. Flashcards, active recall prompts, a quick quiz, and a notes area are built right in — everything you need without switching apps.</p>
       </div>
-      <h3>Your semester is mapped</h3>
-      <p>We build a study schedule around your exam dates, learning style, and available hours — automatically balanced across every course.</p>
-      <div class="step-line"></div>
+      <div class="step-img" style="height:380px;overflow:hidden">
+        <img src="/ss-focus-recall.png" alt="Focus Mode timer with Active Recall" style="width:100%;height:100%;object-fit:cover;object-position:top;transform:scale(1.1);transform-origin:top center" />
+      </div>
     </div>
     <div class="step fade-up d3">
-      <div class="step-num">03</div>
-      <div class="step-icon">
-        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+      <div class="step-content">
+        <div class="step-num">03</div>
+        <div class="step-icon">
+          <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/></svg>
+        </div>
+        <h3>Track everything. Build the habit.</h3>
+        <p>Every completed session updates your streak, your course progress, and your weekly stats. Your entire semester is mapped in the calendar so nothing sneaks up on you.</p>
       </div>
-      <h3>Show up and build your streak</h3>
-      <p>Follow your daily sessions, track your progress, and keep your streak alive. Show up consistently — the results take care of themselves.</p>
+      <div class="step-img" style="height:380px;overflow:hidden">
+        <img src="/ss-complete.png" alt="Session complete" style="width:100%;object-fit:cover;object-position:center;transform:translateY(-80px)" />
+      </div>
     </div>
   </div>
 </div>
@@ -540,7 +609,7 @@
 <!-- ═══ FEATURE BENTO ═══ -->
 <div class="bento-section">
   <div class="eyebrow fade-up">Features</div>
-  <h2 class="text-h1 fade-up d1">Built for the week before finals.<br>And every week before that.</h2>
+  <h2 class="text-h1 fade-up d1">Not just a timer.<br>An entire study system.</h2>
   <div class="bento-grid">
 
     <!-- Focus Mode — large -->
@@ -550,19 +619,10 @@
         <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
       </div>
       <h3>Focus Mode</h3>
-      <p>A distraction-free session timer with break intervals, progress tracking, and a completion screen that actually celebrates you.</p>
+      <p>Every session is broken into structured blocks — warm-up, deep work, active recall, and synthesis. StudyEdge keeps the clock and tells you exactly what to do in each block.</p>
       <div class="bcard-visual">
-        <div style="background:rgba(79,126,247,0.07);border:1px solid rgba(79,126,247,0.15);border-radius:14px;padding:18px 24px;display:flex;align-items:center;gap:20px;">
-          <div>
-            <div style="font-size:2.8rem;font-weight:900;letter-spacing:-3px;color:#4F7EF7;font-variant-numeric:tabular-nums;line-height:1">24:13</div>
-            <div style="font-size:0.75rem;color:var(--text3);margin-top:4px">Calculus II · Deep work</div>
-          </div>
-          <div style="margin-left:auto;display:flex;flex-direction:column;gap:6px;align-items:flex-end">
-            <div style="font-size:0.75rem;color:var(--text3)">Session 2 of 3</div>
-            <div style="width:120px;height:5px;background:rgba(255,255,255,0.08);border-radius:3px;overflow:hidden">
-              <div style="height:100%;width:62%;background:var(--accent);border-radius:3px"></div>
-            </div>
-          </div>
+        <div style="border-radius:12px;overflow:hidden;line-height:0;border:1px solid rgba(79,126,247,0.2);box-shadow:0 8px 30px rgba(0,0,0,0.4)">
+          <img src="/ss-focus.png" alt="Focus Mode timer" style="width:100%;display:block;object-fit:cover;object-position:top;max-height:220px" />
         </div>
       </div>
     </div>
@@ -571,14 +631,14 @@
     <div class="bcard span2 fade-up d2">
       <div class="bcard-glow" style="background:radial-gradient(circle,#7C5CFA,transparent)"></div>
       <div class="bcard-icon" style="background:rgba(124,92,250,0.1);color:#7C5CFA">
-        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
       </div>
-      <h3>AI Study Coach</h3>
-      <p>Ask anything about your courses, get study strategies tailored to your learning style, or generate a practice quiz on demand.</p>
+      <h3>Session Blueprint</h3>
+      <p>Before every session, the AI builds a personalized study plan based on your course, your goals, and how much time you have until your exam. It's like having a tutor map out exactly how to spend the next hour.</p>
       <div class="bcard-visual">
-        <div style="display:flex;flex-direction:column;gap:7px">
-          <div class="bubble user">How should I prepare for my Calculus midterm in 4 days?</div>
-          <div class="bubble ai">Start with timed practice sets on integration — that's your highest-yield area. Two 45-min sessions daily, review mistakes immediately, and leave the last day for light review only...</div>
+        <div style="border-radius:12px;overflow:hidden;line-height:0;border:1px solid rgba(124,92,250,0.2);box-shadow:0 8px 30px rgba(0,0,0,0.4);position:relative">
+          <img src="/ss-coach.png" alt="AI Study Coach week plan" style="width:100%;display:block;object-fit:cover;object-position:top;max-height:220px" />
+          <div style="position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(to bottom, transparent, var(--surface))"></div>
         </div>
       </div>
     </div>
@@ -590,10 +650,11 @@
         <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/></svg>
       </div>
       <h3>Streak Tracking</h3>
-      <p>Build the habit. Every completed session extends your streak — break it once and you'll understand why consistency is everything.</p>
+      <p>Consistency is the difference between cramming and actually learning. Your streak makes showing up feel like winning.</p>
       <div class="bcard-visual">
-        <div class="streak-bars" id="streak-bars"></div>
-        <div style="font-size:0.75rem;color:var(--text3);margin-top:8px">11 day streak</div>
+        <div style="border-radius:12px;overflow:hidden;line-height:0;border:1px solid rgba(251,146,60,0.2);box-shadow:0 8px 30px rgba(0,0,0,0.4);height:200px">
+          <img src="/ss-complete.png" alt="Session complete" style="width:100%;display:block;object-fit:cover;transform:translateY(-90px)" />
+        </div>
       </div>
     </div>
 
@@ -601,15 +662,36 @@
     <div class="bcard fade-up d4">
       <div class="bcard-glow" style="background:radial-gradient(circle,#34D399,transparent)"></div>
       <div class="bcard-icon" style="background:rgba(52,211,153,0.1);color:#34D399">
-        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
       </div>
-      <h3>Smart Calendar</h3>
-      <p>Day, week, and month views. Every study session, exam, and deadline in one place — Notion-clean, zero clutter.</p>
+      <h3>Study Tools Built In</h3>
+      <p>During any session, access AI-generated flashcards, multiple choice quizzes, active recall prompts, and a notes area. Everything you need to learn the material — not just read it.</p>
       <div class="bcard-visual">
-        <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-top:4px" id="mini-cal"></div>
+        <div style="border-radius:12px;overflow:hidden;line-height:0;border:1px solid rgba(52,211,153,0.2);box-shadow:0 8px 30px rgba(0,0,0,0.4)">
+          <img src="/ss-flashcard.png" alt="AI flashcards" style="width:100%;display:block;object-fit:cover;object-position:center;max-height:200px" />
+        </div>
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ═══ CAPABILITY PILLS ═══ -->
+<div class="caps-section">
+  <div class="eyebrow fade-up">Everything in one place</div>
+  <div class="caps-grid fade-up d1">
+    <span class="cap-pill">Session Blueprint</span>
+    <span class="cap-pill">Focus Mode Timer</span>
+    <span class="cap-pill">AI Flashcards</span>
+    <span class="cap-pill">Practice Quizzes</span>
+    <span class="cap-pill">Active Recall</span>
+    <span class="cap-pill">Smart Calendar</span>
+    <span class="cap-pill">Streak Tracking</span>
+    <span class="cap-pill">Course Progress</span>
+    <span class="cap-pill">Syllabus Import</span>
+    <span class="cap-pill">Session Notes</span>
+    <span class="cap-pill">Week-by-Week Study Plans</span>
+    <span class="cap-pill">Push Reminders</span>
   </div>
 </div>
 
@@ -619,7 +701,7 @@
   <h2 class="text-h1 fade-up d1">Start free.<br>Upgrade when you're ready.</h2>
   <div class="toggle-wrap fade-up d2">
     <button class="tog on" data-p="monthly">Monthly</button>
-    <button class="tog" data-p="semester">Semester <span class="save-chip">Save 30%</span></button>
+    <button class="tog" data-p="semester">Semester <span class="save-chip">Save 23%</span></button>
     <button class="tog" data-p="yearly">Yearly <span class="save-chip">Save 45%</span></button>
   </div>
   <div class="pricing-cards">
@@ -642,7 +724,7 @@
         <li class="off"><svg class="fi no" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>Push notifications</li>
         <li class="off"><svg class="fi no" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>Priority support</li>
       </ul>
-      <button class="btn outline full">Start for free</button>
+      <button class="btn outline full" onclick="location.href='/app?signup=1'">Start for free</button>
     </div>
 
     <!-- Pro -->
@@ -664,7 +746,7 @@
         <li><svg class="fi yes" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Push notifications</li>
         <li class="off"><svg class="fi no" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>Priority support</li>
       </ul>
-      <button class="btn full">Get Pro</button>
+      <button class="btn full" onclick="location.href='/app?signup=1&plan=pro'">Get Pro</button>
     </div>
 
     <!-- Unlimited -->
@@ -685,7 +767,7 @@
         <li><svg class="fi yes" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Push notifications</li>
         <li><svg class="fi yes" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>Priority support</li>
       </ul>
-      <button class="btn outline full">Get Unlimited</button>
+      <button class="btn outline full" onclick="location.href='/app?signup=1&plan=unlimited'">Get Unlimited</button>
     </div>
 
   </div>
@@ -697,14 +779,7 @@
   <h2 class="text-display fade-up">Stop winging it.</h2>
   <p class="cta-sub fade-up d1">Start actually keeping up.</p>
   <div class="fade-up d2">
-    <form class="cta-form" id="cta-form">
-      <input type="email" id="cta-input" placeholder="you@university.edu" autocomplete="email" />
-      <button type="submit" class="btn lg">Get started free</button>
-    </form>
-    <div class="cta-success" id="cta-success">
-      <svg width="20" height="20" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
-      You're on the list — we'll reach out soon.
-    </div>
+    <button class="btn lg" onclick="location.href='/app?signup=1'">Get Started Free</button>
   </div>
 </section>
 
@@ -727,6 +802,17 @@
 </div>
 
 <script>
+  async function insertWaitlist(email) {
+    try {
+      const { data, error } = await sb.from('waitlist').insert([{ email }]);
+      console.log('[StudyEdge] Supabase response:', data, error);
+      if (error && error.code !== '23505') {
+        console.error('[StudyEdge] Waitlist insert error:', error);
+      }
+    } catch (err) {
+      console.error('[StudyEdge] Waitlist error:', err);
+    }
+  }
   // ── Scroll nav ──
   const nav = document.getElementById('nav');
   window.addEventListener('scroll', () => {
@@ -760,23 +846,6 @@
   const marqueeEl = document.getElementById('marquee');
   marqueeEl.innerHTML = [...MARQUEE_ITEMS, ...MARQUEE_ITEMS]
     .map(i => `<span class="marquee-item">${i.svg}${i.label}</span>`).join('');
-
-  // ── Streak bars ──
-  const streakEl = document.getElementById('streak-bars');
-  const active = [1,1,1,1,1,1,1,1,1,1,1,0,0,0];
-  streakEl.innerHTML = active.map(a =>
-    `<div class="streak-bar" style="background:${a ? 'rgba(251,146,60,0.75)' : 'rgba(255,255,255,0.06)'}"></div>`
-  ).join('');
-
-  // ── Mini calendar ──
-  const calEl = document.getElementById('mini-cal');
-  const days = ['M','T','W','T','F','S','S'];
-  const calData = [0,1,1,1,0,1,0, 1,1,0,1,1,0,0, 1,1,1,0,1,0,0];
-  calEl.innerHTML = days.map(d =>
-    `<div style="text-align:center;font-size:8px;color:#475569;font-weight:700;padding-bottom:3px">${d}</div>`
-  ).join('') + calData.map((v,i) =>
-    `<div style="height:16px;border-radius:3px;background:${v ? 'rgba(52,211,153,0.35)' : 'rgba(255,255,255,0.04)'};${i===9?'background:rgba(79,126,247,0.5);outline:1px solid rgba(79,126,247,0.5)':''}" title="${v?'Session':'Rest'}"></div>`
-  ).join('');
 
   // ── Pricing toggle ──
   let activePeriod = 'monthly';
@@ -821,16 +890,12 @@
         setTimeout(() => input.classList.remove('error'), 2200);
         return;
       }
-      // TODO: POST to real waitlist endpoint (e.g. /api/waitlist)
-      console.log('[StudyEdge] Waitlist signup:', email);
+      insertWaitlist(email);
       burst();
       document.getElementById(formId).style.display = 'none';
-      const s = document.getElementById(successId);
-      s.style.display = 'flex';
+      document.getElementById(successId).style.display = 'flex';
     });
   }
-  wireForm('hero-form', 'hero-success', 'hero-input');
-  wireForm('cta-form', 'cta-success', 'cta-input');
 </script>
 </body>
 </html>

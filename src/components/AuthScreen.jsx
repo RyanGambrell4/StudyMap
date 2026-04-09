@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 export default function AuthScreen() {
-  const [mode, setMode] = useState('login') // 'login' | 'signup' | 'forgot'
+  const [mode, setMode] = useState(() =>
+    new URLSearchParams(window.location.search).get('signup') === '1' ? 'signup' : 'login'
+  )
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
