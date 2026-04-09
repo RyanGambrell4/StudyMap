@@ -320,6 +320,9 @@ export default function OutputView({
   const [gcalToast, setGcalToast] = useState(null) // 'connected' | 'error' | null
   const [fixConflictsLoading, setFixConflictsLoading] = useState(false)
   const [rescheduleResults, setRescheduleResults] = useState(null)
+  const [sessionTimeOverrides, setSessionTimeOverrides] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('studymap_session_time_overrides') ?? '{}') } catch { return {} }
+  })
 
   useEffect(() => {
     // Detect redirect back from OAuth
@@ -355,6 +358,21 @@ export default function OutputView({
     window.location.href = `/api/google-auth?userId=${encodeURIComponent(userId)}`
   }
 
+  const handleApplySuggestion = (suggestion) => {
+    setSessionTimeOverrides(prev => ({
+      ...prev,
+      [suggestion.sessionId]: { startTime: suggestion.suggestedStart, endTime: suggestion.suggestedEnd },
+    }))
+  }
+
+  const handleApplyAll = () => {
+    if (!rescheduleResults?.length) return
+    const updates = {}
+    rescheduleResults.forEach(r => { updates[r.sessionId] = { startTime: r.suggestedStart, endTime: r.suggestedEnd } })
+    setSessionTimeOverrides(prev => ({ ...prev, ...updates }))
+    setRescheduleResults(null)
+  }
+
   const handleFixConflicts = async () => {
     if (!conflictMap.size) return
     setFixConflictsLoading(true)
@@ -385,6 +403,7 @@ export default function OutputView({
   useEffect(() => { saveSyllabusEvents(syllabusEvents) }, [syllabusEvents])
   useEffect(() => { saveManualSessions(manualSessions) }, [manualSessions])
   useEffect(() => { localStorage.setItem('studymap_view_mode', viewMode) }, [viewMode])
+  useEffect(() => { localStorage.setItem('studymap_session_time_overrides', JSON.stringify(sessionTimeOverrides)) }, [sessionTimeOverrides])
 
   // ── recovery ──
   const recoveryCoursesIdx = useMemo(() => {
@@ -408,17 +427,34 @@ export default function OutputView({
   // ── merged weeks ──
   const weeksWithAll = useMemo(() => {
     const extras = [...recoverySessions, ...manualSessions]
-    if (!extras.length) return weeks
-    const byDate = {}
-    extras.forEach(s => { if (!byDate[s.dateStr]) byDate[s.dateStr] = []; byDate[s.dateStr].push(s) })
-    return weeks.map(week => ({
+    const hasOverrides = Object.keys(sessionTimeOverrides).length > 0
+
+    let base = weeks
+    if (extras.length) {
+      const byDate = {}
+      extras.forEach(s => { if (!byDate[s.dateStr]) byDate[s.dateStr] = []; byDate[s.dateStr].push(s) })
+      base = weeks.map(week => ({
+        ...week,
+        days: week.days.map(day => {
+          const extra = byDate[day.dateStr] ?? []
+          return extra.length ? { ...day, sessions: [...day.sessions, ...extra] } : day
+        }),
+      }))
+    }
+
+    if (!hasOverrides) return base
+
+    return base.map(week => ({
       ...week,
-      days: week.days.map(day => {
-        const extra = byDate[day.dateStr] ?? []
-        return extra.length ? { ...day, sessions: [...day.sessions, ...extra] } : day
-      }),
+      days: week.days.map(day => ({
+        ...day,
+        sessions: day.sessions.map(s => {
+          const ov = sessionTimeOverrides[s.id]
+          return ov ? { ...s, ...ov } : s
+        }),
+      })),
     }))
-  }, [weeks, recoverySessions, manualSessions])
+  }, [weeks, recoverySessions, manualSessions, sessionTimeOverrides])
 
   const allSessions = useMemo(() =>
     weeksWithAll.flatMap(w => w.days).flatMap(d => d.sessions.map(s => ({ ...s, dateStr: d.dateStr }))),
@@ -812,22 +848,44 @@ export default function OutputView({
                 {rescheduleResults.length === 0 ? (
                   <p className="text-xs text-slate-500">No suggestions available.</p>
                 ) : (
-                  <div className="space-y-2">
-                    {rescheduleResults.map((r, i) => {
-                      const session = allSessions.find(s => s.id === r.sessionId)
-                      return (
-                        <div key={i} className="flex items-start gap-3 text-xs">
-                          <div className="shrink-0 w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5" />
-                          <div>
-                            <span className="text-slate-300 font-medium">{session?.courseName ?? r.sessionId}</span>
-                            <span className="text-slate-500 mx-1">·</span>
-                            <span className="text-amber-300">{r.date} {r.suggestedStart}–{r.suggestedEnd}</span>
-                            <p className="text-slate-500 mt-0.5">{r.reason}</p>
+                  <>
+                    <div className="space-y-2 mb-4">
+                      {rescheduleResults.map((r, i) => {
+                        const session = allSessions.find(s => s.id === r.sessionId)
+                        const applied = sessionTimeOverrides[r.sessionId]?.startTime === r.suggestedStart
+                        return (
+                          <div key={i} className="flex items-start justify-between gap-3 text-xs">
+                            <div className="flex items-start gap-2 flex-1 min-w-0">
+                              <div className="shrink-0 w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5" />
+                              <div className="min-w-0">
+                                <span className="text-slate-300 font-medium">{session?.courseName ?? r.sessionId}</span>
+                                <span className="text-slate-500 mx-1">·</span>
+                                <span className="text-amber-300">{r.date} {r.suggestedStart}–{r.suggestedEnd}</span>
+                                <p className="text-slate-500 mt-0.5 truncate">{r.reason}</p>
+                              </div>
+                            </div>
+                            <button
+                              onClick={() => handleApplySuggestion(r)}
+                              disabled={applied}
+                              className={`shrink-0 text-[11px] font-medium px-2.5 py-1 rounded-lg transition-all ${
+                                applied
+                                  ? 'bg-emerald-900/40 text-emerald-400 border border-emerald-700/50 cursor-default'
+                                  : 'bg-amber-900/40 text-amber-300 border border-amber-600/50 hover:bg-amber-900/70'
+                              }`}
+                            >
+                              {applied ? '✓ Applied' : 'Apply'}
+                            </button>
                           </div>
-                        </div>
-                      )
-                    })}
-                  </div>
+                        )
+                      })}
+                    </div>
+                    <button
+                      onClick={handleApplyAll}
+                      className="w-full py-2 rounded-lg text-xs font-medium text-white bg-amber-600/80 hover:bg-amber-600 transition-colors"
+                    >
+                      Apply all suggestions
+                    </button>
+                  </>
                 )}
               </div>
             )}
