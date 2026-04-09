@@ -10,6 +10,7 @@ async function getAccessToken(refreshToken) {
     }),
   })
   const data = await tokenRes.json()
+  console.log('[google-calendar-events] getAccessToken response:', JSON.stringify({ access_token: data.access_token ? '***present***' : null, error: data.error, error_description: data.error_description }))
   return data.access_token ?? null
 }
 
@@ -22,6 +23,7 @@ export default async function handler(req, res) {
   try {
     const supabaseUrl = process.env.SUPABASE_URL
     const serviceKey = process.env.SUPABASE_SERVICE_KEY
+    console.log('[google-calendar-events] SUPABASE_URL set:', !!supabaseUrl, '| SERVICE_KEY set:', !!serviceKey)
 
     const getRes = await fetch(
       `${supabaseUrl}/rest/v1/user_data?user_id=eq.${encodeURIComponent(userId)}&select=study_tools`,
@@ -34,11 +36,18 @@ export default async function handler(req, res) {
     )
     const rows = await getRes.json()
     const gcal = rows[0]?.study_tools?.google_calendar
+    console.log('[google-calendar-events] Supabase row found:', !!rows[0], '| study_tools keys:', Object.keys(rows[0]?.study_tools ?? {}), '| refresh_token present:', !!gcal?.refresh_token)
 
-    if (!gcal?.refresh_token) return res.status(200).json({ events: [], connected: false })
+    if (!gcal?.refresh_token) {
+      console.log('[google-calendar-events] No refresh token — returning not connected')
+      return res.status(200).json({ events: [], connected: false })
+    }
 
     const accessToken = await getAccessToken(gcal.refresh_token)
-    if (!accessToken) return res.status(200).json({ events: [], connected: true })
+    if (!accessToken) {
+      console.log('[google-calendar-events] getAccessToken returned null — token exchange failed')
+      return res.status(200).json({ events: [], connected: true })
+    }
 
     const timeMin = new Date().toISOString()
     const timeMax = new Date(Date.now() + 14 * 24 * 60 * 60 * 1000).toISOString()
@@ -48,9 +57,10 @@ export default async function handler(req, res) {
       { headers: { Authorization: `Bearer ${accessToken}` } }
     )
     const calData = await calRes.json()
+    console.log('[google-calendar-events] Google Calendar API response — error:', calData.error ?? null, '| items count:', calData.items?.length ?? 0)
 
     if (calData.error) {
-      console.error('[google-calendar-events] API error:', calData.error)
+      console.error('[google-calendar-events] Google API error:', JSON.stringify(calData.error))
       return res.status(200).json({ events: [], connected: true })
     }
 
