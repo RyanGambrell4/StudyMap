@@ -1,9 +1,15 @@
 import { useMemo } from 'react'
 
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-const GRID_LINE  = 'rgba(255,255,255,0.06)'
-const GCAL_BG    = 'rgba(59,130,246,0.1)'
-const GCAL_TEXT  = '#93c5fd'
+function theme_vars(dark) {
+  return {
+    gridLine:     dark ? 'rgba(255,255,255,0.06)'  : 'rgba(0,0,0,0.08)',
+    gcalBg:       dark ? 'rgba(59,130,246,0.1)'    : 'rgba(59,130,246,0.12)',
+    gcalText:     dark ? '#93c5fd'                  : '#1d4ed8',
+    sessionAlpha: dark ? '15'                       : '2e',
+    gcalBorder:         'rgba(96,165,250,0.45)',
+  }
+}
 
 function firstDayOffset(year, month) {
   const dow = new Date(year, month - 1, 1).getDay()
@@ -34,7 +40,9 @@ export default function CalendarMonthView({
   setExpandedDayStr,
   onDayClick,
   googleEvents = [],
+  theme = 'dark',
 }) {
+  const tv = theme_vars(theme === 'dark')
   const [yearStr, monthStr] = activeMonth.split('-')
   const year  = parseInt(yearStr)
   const month = parseInt(monthStr)
@@ -90,13 +98,13 @@ export default function CalendarMonthView({
       </div>
 
       {/* ── Weekday headers ── */}
-      <div className="grid grid-cols-7" style={{ borderBottom: `1px solid ${GRID_LINE}` }}>
+      <div className="grid grid-cols-7" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
         {DAY_NAMES.map((n, i) => (
           <div key={n}
             className="py-2 text-center text-[10px] font-medium uppercase tracking-widest"
             style={{
               color: i === 6 ? '#374151' : '#4B5563',
-              borderRight: i < 6 ? `1px solid ${GRID_LINE}` : 'none',
+              borderRight: i < 6 ? `1px solid ${tv.gridLine}` : 'none',
             }}
           >
             {n}
@@ -106,7 +114,7 @@ export default function CalendarMonthView({
 
       {/* ── Day grid ── */}
       <div className="grid grid-cols-7"
-        style={{ borderBottom: `1px solid ${GRID_LINE}` }}
+        style={{ borderBottom: `1px solid ${tv.gridLine}` }}
       >
         {cells.map((dateStr, i) => {
           const colIdx = i % 7
@@ -117,8 +125,8 @@ export default function CalendarMonthView({
               <div key={`pad-${i}`}
                 className="min-h-[90px]"
                 style={{
-                  borderRight: colIdx < 6 ? `1px solid ${GRID_LINE}` : 'none',
-                  borderBottom: !isLastRow ? `1px solid ${GRID_LINE}` : 'none',
+                  borderRight: colIdx < 6 ? `1px solid ${tv.gridLine}` : 'none',
+                  borderBottom: !isLastRow ? `1px solid ${tv.gridLine}` : 'none',
                 }}
               />
             )
@@ -149,8 +157,8 @@ export default function CalendarMonthView({
               style={{
                 minHeight: 90,
                 padding: '6px 5px 6px 5px',
-                borderRight: colIdx < 6 ? `1px solid ${GRID_LINE}` : 'none',
-                borderBottom: !isLastRow ? `1px solid ${GRID_LINE}` : 'none',
+                borderRight: colIdx < 6 ? `1px solid ${tv.gridLine}` : 'none',
+                borderBottom: !isLastRow ? `1px solid ${tv.gridLine}` : 'none',
                 background: isExpanded
                   ? 'rgba(99,102,241,0.07)'
                   : isToday
@@ -180,7 +188,7 @@ export default function CalendarMonthView({
                     return (
                       <div key={`s-${j}`}
                         className="flex items-center gap-1 px-1.5 rounded text-[10px] leading-none"
-                        style={{ height: 18, background: `${ev.color.dot}18`, color: ev.color.dot }}
+                        style={{ height: 18, background: `${ev.color.dot}${tv.sessionAlpha}`, color: ev.color.dot }}
                       >
                         <span className="truncate">{ev.name}</span>
                       </div>
@@ -191,7 +199,7 @@ export default function CalendarMonthView({
                     return (
                       <div key={`g-${j}`}
                         className="flex items-center gap-1 px-1.5 rounded text-[10px] leading-none"
-                        style={{ height: 18, background: GCAL_BG, color: GCAL_TEXT }}
+                        style={{ height: 18, background: tv.gcalBg, color: tv.gcalText }}
                       >
                         {t && <span className="shrink-0 opacity-70">{t}</span>}
                         <span className="truncate">{ev.title}</span>
@@ -206,7 +214,7 @@ export default function CalendarMonthView({
                       className="flex items-center gap-1 px-1.5 rounded text-[10px] leading-none"
                       style={{
                         height: 18,
-                        background: `${ev.color.dot}15`,
+                        background: `${ev.color.dot}${tv.sessionAlpha}`,
                         color: ev.color.dot,
                         opacity: done ? 0.45 : 1,
                       }}
@@ -228,7 +236,7 @@ export default function CalendarMonthView({
       {/* ── Expanded day detail ── */}
       {expandedDayStr && (
         <div className="mt-3 rounded-xl p-4"
-          style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${GRID_LINE}` }}
+          style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${tv.gridLine}` }}
         >
           <div className="flex items-center justify-between mb-3">
             <h4 className="text-sm font-medium text-slate-300">
@@ -260,10 +268,10 @@ export default function CalendarMonthView({
               {(googleEventsByDate[expandedDayStr] ?? []).map(e => (
                 <div key={e.id}
                   className="flex items-center gap-3 px-3 py-2 rounded-lg"
-                  style={{ background: GCAL_BG, borderLeft: `2px solid ${GCAL_BORDER}` }}
+                  style={{ background: tv.gcalBg, borderLeft: `2px solid ${tv.gcalBorder}` }}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-medium truncate" style={{ color: GCAL_TEXT }}>{e.title}</p>
+                    <p className="text-[12px] font-medium truncate" style={{ color: tv.gcalText }}>{e.title}</p>
                     <p className="text-[10px] text-slate-600">Google Calendar{e.allDay ? ' · All day' : ''}</p>
                   </div>
                 </div>
@@ -271,7 +279,7 @@ export default function CalendarMonthView({
               {expandedDay?.sessions?.map(s => (
                 <div key={s.id}
                   className="flex items-center gap-3 px-3 py-2 rounded-lg"
-                  style={{ background: `${s.color.dot}14`, borderLeft: `2px solid ${s.color.dot}` }}
+                  style={{ background: `${s.color.dot}${tv.sessionAlpha}`, borderLeft: `2px solid ${s.color.dot}` }}
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] font-medium truncate" style={{ color: s.color.dot }}>{s.courseName}</p>

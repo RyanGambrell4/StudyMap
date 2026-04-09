@@ -668,43 +668,51 @@ export default function OutputView({
           <div className="px-4 py-6 max-w-7xl mx-auto">
             {/* View controls */}
             <div className="flex items-center justify-between mb-6">
-              {/* Month navigation */}
-              <div className="flex items-center gap-3">
-                <button
-                  onClick={() => {
-                    const idx = availableMonths.indexOf(currentMonthStr)
-                    if (idx > 0) handleJumpToMonth(availableMonths[idx - 1])
-                  }}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                  </svg>
-                </button>
-                <span className="text-base font-semibold text-slate-200 min-w-[140px] text-center">
-                  {(() => {
-                    const [y, m] = currentMonthStr.split('-').map(Number)
-                    return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
-                  })()}
-                </span>
-                <button
-                  onClick={() => {
-                    const idx = availableMonths.indexOf(currentMonthStr)
-                    if (idx < availableMonths.length - 1) handleJumpToMonth(availableMonths[idx + 1])
-                  }}
-                  className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all"
-                >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                  </svg>
-                </button>
-              </div>
+              {/* Month navigation — only shown in month view; day/week views have their own nav */}
+              {viewMode === 'month' ? (
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => {
+                      const idx = availableMonths.indexOf(currentMonthStr)
+                      if (idx > 0) handleJumpToMonth(availableMonths[idx - 1])
+                    }}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                    </svg>
+                  </button>
+                  <span className="text-base font-semibold text-slate-200 min-w-[140px] text-center">
+                    {(() => {
+                      const [y, m] = currentMonthStr.split('-').map(Number)
+                      return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
+                    })()}
+                  </span>
+                  <button
+                    onClick={() => {
+                      const idx = availableMonths.indexOf(currentMonthStr)
+                      if (idx < availableMonths.length - 1) handleJumpToMonth(availableMonths[idx + 1])
+                    }}
+                    className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all"
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <div /> /* spacer so toggle stays right-aligned */
+              )}
 
-              {/* View toggle pill */}
-              <div className="flex items-center gap-0.5 bg-slate-800/60 rounded-full p-1 border border-slate-700/40">
+              {/* View toggle */}
+              <div className="flex items-center rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700/60 bg-slate-100 dark:bg-slate-800/50">
                 {[['day', 'Day'], ['week', 'Week'], ['month', 'Month']].map(([mode, label]) => (
                   <button key={mode} onClick={() => setViewMode(mode)}
-                    className={`px-4 py-1.5 rounded-full text-sm font-medium transition-all ${viewMode === mode ? 'bg-slate-600 text-white shadow-sm' : 'text-slate-500 hover:text-slate-300'}`}>
+                    className={`px-4 py-1.5 text-sm font-medium transition-all ${
+                      viewMode === mode
+                        ? 'bg-indigo-600 text-white'
+                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700/40'
+                    }`}>
                     {label}
                   </button>
                 ))}
@@ -724,6 +732,7 @@ export default function OutputView({
                 googleEvents={googleEvents}
                 userId={userId}
                 gcalConnected={gcalConnected}
+                theme={theme}
               />
             )}
 
@@ -740,6 +749,7 @@ export default function OutputView({
                 setExpandedDayStr={setExpandedDayStr}
                 onDayClick={dateStr => { setActiveDayStr(dateStr); setViewMode('day'); setExpandedDayStr(null) }}
                 googleEvents={googleEvents}
+                theme={theme}
               />
             )}
 
@@ -755,6 +765,7 @@ export default function OutputView({
                 onPrevWeek={handlePrevWeek}
                 onNextWeek={handleNextWeek}
                 googleEvents={googleEvents}
+                theme={theme}
               />
             )}
           </div>

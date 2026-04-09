@@ -6,11 +6,18 @@ const END_HOUR    = 22
 const TOTAL_HOURS = END_HOUR - START_HOUR
 const DAY_LABELS  = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
-const GRID_LINE      = 'rgba(255,255,255,0.055)'
-const GRID_LINE_HALF = 'rgba(255,255,255,0.025)'
-const GCAL_BG        = 'rgba(59,130,246,0.1)'
-const GCAL_BORDER    = 'rgba(96,165,250,0.45)'
-const GCAL_TEXT      = '#93c5fd'
+const GCAL_BORDER = 'rgba(96,165,250,0.45)'
+
+function theme_vars(dark) {
+  return {
+    gridLine:     dark ? 'rgba(255,255,255,0.055)' : 'rgba(0,0,0,0.08)',
+    gridLineHalf: dark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.04)',
+    gcalBg:       dark ? 'rgba(59,130,246,0.1)'    : 'rgba(59,130,246,0.12)',
+    gcalText:     dark ? '#93c5fd'                  : '#1d4ed8',
+    sessionAlpha: dark ? '16'                       : '30',
+    subtitleText: dark ? '#4B5563'                  : '#6b7280',
+  }
+}
 
 function timeToMinutes(str) {
   if (!str) return null
@@ -59,7 +66,9 @@ export default function CalendarWeekView({
   onPrevWeek,
   onNextWeek,
   googleEvents = [],
+  theme = 'dark',
 }) {
+  const tv = theme_vars(theme === 'dark')
   const [nowPx, setNowPx] = useState(() =>
     ((nowMinutes() - START_HOUR * 60) / 60) * HOUR_HEIGHT
   )
@@ -135,7 +144,7 @@ export default function CalendarWeekView({
   return (
     <div className="flex flex-col">
       {/* ── Week nav ── */}
-      <div className="flex items-center justify-between mb-4 pb-3" style={{ borderBottom: `1px solid ${GRID_LINE}` }}>
+      <div className="flex items-center justify-between mb-4 pb-3" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
         <button onClick={onPrevWeek}
           className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors text-sm"
         >
@@ -156,7 +165,7 @@ export default function CalendarWeekView({
       </div>
 
       {/* ── Column headers ── */}
-      <div className="flex" style={{ borderBottom: `1px solid ${GRID_LINE}` }}>
+      <div className="flex" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
         {/* Gutter */}
         <div className="w-12 shrink-0" />
         {/* Day headers */}
@@ -166,7 +175,7 @@ export default function CalendarWeekView({
           return (
             <div key={i}
               className="flex-1 flex flex-col items-center py-2 group cursor-pointer"
-              style={{ borderLeft: `1px solid ${GRID_LINE}` }}
+              style={{ borderLeft: `1px solid ${tv.gridLine}` }}
               onClick={() => onAddSession && onAddSession(col.dateStr)}
             >
               <span className="text-[10px] font-medium uppercase tracking-widest mb-1"
@@ -187,19 +196,19 @@ export default function CalendarWeekView({
 
       {/* ── All-day row ── */}
       {hasAnyAllDay && (
-        <div className="flex" style={{ borderBottom: `1px solid ${GRID_LINE}` }}>
+        <div className="flex" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
           <div className="w-12 shrink-0 flex items-start justify-end pt-1.5 pr-2">
             <span className="text-[9px] font-medium uppercase tracking-wide" style={{ color: '#374151' }}>All day</span>
           </div>
           {columns.map((col, i) => (
             <div key={i}
               className="flex-1 py-0.5 px-0.5 min-h-[28px] space-y-0.5"
-              style={{ borderLeft: `1px solid ${GRID_LINE}` }}
+              style={{ borderLeft: `1px solid ${tv.gridLine}` }}
             >
               {col.allDay.map((ev, j) => {
                 if (ev._type === 'gcal') return (
                   <div key={j} className="px-1.5 rounded text-[10px] truncate leading-none"
-                    style={{ height: 16, lineHeight: '16px', background: GCAL_BG, color: GCAL_TEXT }}>
+                    style={{ height: 16, lineHeight: '16px', background: tv.gcalBg, color: tv.gcalText }}>
                     {ev.title}
                   </div>
                 )
@@ -239,17 +248,17 @@ export default function CalendarWeekView({
         {columns.map((col, colIdx) => (
           <div key={colIdx}
             className="flex-1 relative min-w-0"
-            style={{ borderLeft: `1px solid ${GRID_LINE}`, height: TOTAL_HOURS * HOUR_HEIGHT }}
+            style={{ borderLeft: `1px solid ${tv.gridLine}`, height: TOTAL_HOURS * HOUR_HEIGHT }}
           >
             {/* Hour lines */}
             {Array.from({ length: TOTAL_HOURS - 1 }, (_, i) => (
               <div key={i} className="absolute left-0 right-0 pointer-events-none"
-                style={{ top: (i + 1) * HOUR_HEIGHT, height: 1, background: GRID_LINE }} />
+                style={{ top: (i + 1) * HOUR_HEIGHT, height: 1, background: tv.gridLine }} />
             ))}
             {/* Half-hour lines */}
             {Array.from({ length: TOTAL_HOURS }, (_, i) => (
               <div key={`h${i}`} className="absolute left-0 right-0 pointer-events-none"
-                style={{ top: i * HOUR_HEIGHT + HOUR_HEIGHT / 2, height: 1, background: GRID_LINE_HALF }} />
+                style={{ top: i * HOUR_HEIGHT + HOUR_HEIGHT / 2, height: 1, background: tv.gridLineHalf }} />
             ))}
 
             {/* Red current-time line — only in today's column */}
@@ -274,10 +283,10 @@ export default function CalendarWeekView({
                 return (
                   <div key={`gcal-${j}`}
                     className="absolute inset-x-0.5 rounded overflow-hidden"
-                    style={{ top, height, background: GCAL_BG, borderLeft: `2px solid ${GCAL_BORDER}` }}
+                    style={{ top, height, background: tv.gcalBg, borderLeft: `2px solid ${GCAL_BORDER}` }}
                   >
                     <div className="px-1.5 py-0.5">
-                      <p className="text-[10px] font-medium leading-tight truncate" style={{ color: GCAL_TEXT }}>{ev.title}</p>
+                      <p className="text-[10px] font-medium leading-tight truncate" style={{ color: tv.gcalText }}>{ev.title}</p>
                     </div>
                   </div>
                 )
@@ -288,7 +297,7 @@ export default function CalendarWeekView({
               return (
                 <div key={ev.id ?? j}
                   className="absolute inset-x-0.5 rounded overflow-hidden cursor-pointer"
-                  style={{ top, height, background: `${ev.color.dot}16`, borderLeft: `2px solid ${ev.color.dot}`, opacity: done ? 0.38 : 1 }}
+                  style={{ top, height, background: `${ev.color.dot}${tv.sessionAlpha}`, borderLeft: `2px solid ${ev.color.dot}`, opacity: done ? 0.38 : 1 }}
                   onClick={() => onToggle(ev.id)}
                 >
                   <div className="px-1.5 py-0.5">
@@ -297,7 +306,7 @@ export default function CalendarWeekView({
                       {ev.courseName}
                     </p>
                     {height > 30 && (
-                      <p className="text-[9px] leading-tight truncate" style={{ color: '#4B5563' }}>{ev.sessionType}</p>
+                      <p className="text-[9px] leading-tight truncate" style={{ color: tv.subtitleText }}>{ev.sessionType}</p>
                     )}
                   </div>
                 </div>

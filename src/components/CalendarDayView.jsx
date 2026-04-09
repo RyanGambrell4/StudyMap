@@ -5,11 +5,20 @@ const START_HOUR = 6
 const END_HOUR = 22
 const TOTAL_HOURS = END_HOUR - START_HOUR
 
-const GRID_LINE       = 'rgba(255,255,255,0.055)'
-const GRID_LINE_HALF  = 'rgba(255,255,255,0.025)'
-const GCAL_BG         = 'rgba(59,130,246,0.1)'
-const GCAL_BORDER     = 'rgba(96,165,250,0.45)'
-const GCAL_TEXT       = '#93c5fd'
+const GCAL_BORDER = 'rgba(96,165,250,0.45)'
+
+function theme_vars(dark) {
+  return {
+    gridLine:     dark ? 'rgba(255,255,255,0.055)' : 'rgba(0,0,0,0.08)',
+    gridLineHalf: dark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.04)',
+    gcalBg:       dark ? 'rgba(59,130,246,0.1)'    : 'rgba(59,130,246,0.12)',
+    gcalText:     dark ? '#93c5fd'                  : '#1d4ed8',
+    sessionAlpha: dark ? '16'                       : '30',
+    emptyText:    dark ? '#374151'                  : '#9ca3af',
+    subtitleText: dark ? '#64748B'                  : '#6b7280',
+    timeText:     dark ? '#374151'                  : '#9ca3af',
+  }
+}
 
 function timeToMinutes(str) {
   if (!str) return null
@@ -44,7 +53,9 @@ export default function CalendarDayView({
   googleEvents = [],
   userId,
   gcalConnected = false,
+  theme = 'dark',
 }) {
+  const tv = theme_vars(theme === 'dark')
   const [addingToGcal, setAddingToGcal] = useState(null)
   const [gcalAdded, setGcalAdded]       = useState(new Set())
   const [nowPx, setNowPx]               = useState(() =>
@@ -140,7 +151,7 @@ export default function CalendarDayView({
   return (
     <div className="select-none">
       {/* ── Day nav ── */}
-      <div className="flex items-center justify-between mb-3 pb-3" style={{ borderBottom: `1px solid ${GRID_LINE}` }}>
+      <div className="flex items-center justify-between mb-3 pb-3" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
         <button
           onClick={onPrev}
           className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors text-sm"
@@ -171,15 +182,15 @@ export default function CalendarDayView({
 
       {/* ── All-day strip ── */}
       {hasAllDay && (
-        <div className="flex mb-px" style={{ borderBottom: `1px solid ${GRID_LINE}` }}>
+        <div className="flex mb-px" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
           <div className="w-12 shrink-0 flex items-start justify-end pt-1.5 pr-3">
             <span className="text-[9px] font-medium text-slate-600 uppercase tracking-wide">All day</span>
           </div>
-          <div className="flex-1 py-1 px-1 space-y-0.5 min-h-[28px]" style={{ borderLeft: `1px solid ${GRID_LINE}` }}>
+          <div className="flex-1 py-1 px-1 space-y-0.5 min-h-[28px]" style={{ borderLeft: `1px solid ${tv.gridLine}` }}>
             {allDayGoogleBlocks.map((ev, i) => (
               <div key={`gcal-ad-${i}`}
                 className="px-2 py-0.5 rounded text-[11px] truncate"
-                style={{ background: GCAL_BG, color: GCAL_TEXT }}
+                style={{ background: tv.gcalBg, color: tv.gcalText }}
               >
                 {ev.title}
               </div>
@@ -227,16 +238,16 @@ export default function CalendarDayView({
         </div>
 
         {/* Grid column */}
-        <div className="flex-1 relative" style={{ borderLeft: `1px solid ${GRID_LINE}`, height: TOTAL_HOURS * HOUR_HEIGHT }}>
+        <div className="flex-1 relative" style={{ borderLeft: `1px solid ${tv.gridLine}`, height: TOTAL_HOURS * HOUR_HEIGHT }}>
           {/* Hour lines */}
           {Array.from({ length: TOTAL_HOURS - 1 }, (_, i) => (
             <div key={i} className="absolute left-0 right-0 pointer-events-none"
-              style={{ top: (i + 1) * HOUR_HEIGHT, height: 1, background: GRID_LINE }} />
+              style={{ top: (i + 1) * HOUR_HEIGHT, height: 1, background: tv.gridLine }} />
           ))}
           {/* Half-hour lines */}
           {Array.from({ length: TOTAL_HOURS }, (_, i) => (
             <div key={`h${i}`} className="absolute left-0 right-0 pointer-events-none"
-              style={{ top: i * HOUR_HEIGHT + HOUR_HEIGHT / 2, height: 1, background: GRID_LINE_HALF }} />
+              style={{ top: i * HOUR_HEIGHT + HOUR_HEIGHT / 2, height: 1, background: tv.gridLineHalf }} />
           ))}
 
           {/* Red current-time indicator */}
@@ -260,7 +271,7 @@ export default function CalendarDayView({
             return (
               <div key={s.id ?? i}
                 className="absolute left-1 right-1 rounded overflow-hidden"
-                style={{ top, height, background: `${s.color.dot}16`, borderLeft: `2px solid ${s.color.dot}`, opacity: done ? 0.38 : 1 }}
+                style={{ top, height, background: `${s.color.dot}${tv.sessionAlpha}`, borderLeft: `2px solid ${s.color.dot}`, opacity: done ? 0.38 : 1 }}
               >
                 <div className="flex items-start justify-between h-full px-2 py-1 gap-1">
                   <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onToggle(s.id)}>
@@ -269,12 +280,12 @@ export default function CalendarDayView({
                       {s.courseName}
                     </p>
                     {height > 32 && (
-                      <p className="text-[10px] leading-tight truncate mt-0.5" style={{ color: '#64748B' }}>
+                      <p className="text-[10px] leading-tight truncate mt-0.5" style={{ color: tv.subtitleText }}>
                         {s.sessionType}
                       </p>
                     )}
                     {height > 48 && s.startTime && (
-                      <p className="text-[10px] mt-0.5" style={{ color: '#374151' }}>
+                      <p className="text-[10px] mt-0.5" style={{ color: tv.timeText }}>
                         {s.startTime} – {s.endTime}
                       </p>
                     )}
@@ -312,11 +323,11 @@ export default function CalendarDayView({
             return (
               <div key={`gcal-${i}`}
                 className="absolute left-1 right-1 rounded overflow-hidden"
-                style={{ top, height, background: GCAL_BG, borderLeft: `2px solid ${GCAL_BORDER}` }}
+                style={{ top, height, background: tv.gcalBg, borderLeft: `2px solid ${GCAL_BORDER}` }}
               >
                 <div className="px-2 py-1">
-                  <p className="text-[11px] font-medium leading-tight truncate" style={{ color: GCAL_TEXT }}>{e.title}</p>
-                  {height > 32 && <p className="text-[10px] mt-0.5" style={{ color: '#374151' }}>Google Cal</p>}
+                  <p className="text-[11px] font-medium leading-tight truncate" style={{ color: tv.gcalText }}>{e.title}</p>
+                  {height > 32 && <p className="text-[10px] mt-0.5" style={{ color: tv.timeText }}>Google Cal</p>}
                 </div>
               </div>
             )
@@ -326,7 +337,7 @@ export default function CalendarDayView({
           {timedBlocks.length === 0 && allDayBlocks.length === 0 &&
             timedGoogleBlocks.length === 0 && allDayGoogleBlocks.length === 0 && (
             <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <p className="text-[12px]" style={{ color: '#374151' }}>No sessions scheduled</p>
+              <p className="text-[12px]" style={{ color: tv.timeText }}>No sessions scheduled</p>
             </div>
           )}
         </div>
