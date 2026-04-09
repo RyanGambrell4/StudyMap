@@ -68,6 +68,8 @@ export default function AppShell({
   onToggleTheme,
   theme,
   userEmail,
+  googleCalendarConnected,
+  onConnectGoogleCalendar,
   children,
 }) {
   return (
@@ -151,6 +153,22 @@ export default function AppShell({
             </svg>
             Edit Plan
           </button>
+          {onConnectGoogleCalendar && (
+            <button
+              onClick={googleCalendarConnected ? undefined : onConnectGoogleCalendar}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
+                googleCalendarConnected
+                  ? 'text-emerald-500 dark:text-emerald-400 cursor-default'
+                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60'
+              }`}
+              title={googleCalendarConnected ? 'Google Calendar connected' : 'Connect Google Calendar'}
+            >
+              <svg className="w-5 h-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              {googleCalendarConnected ? 'Calendar Connected' : 'Connect Google Cal'}
+            </button>
+          )}
           {onSignOut && (
             <button
               onClick={onSignOut}

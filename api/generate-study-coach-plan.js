@@ -1,12 +1,19 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
-  const { courseName, goal, emphasisTopics, importantDates, daysPerWeek, sessionMinutes } = req.body
+  const { courseName, goal, emphasisTopics, importantDates, daysPerWeek, sessionMinutes, calendarEvents } = req.body
   if (!courseName || !goal) return res.status(400).json({ error: 'Missing required fields' })
 
   const todayStr = new Date().toISOString().split('T')[0]
   const datesStr = importantDates?.length
     ? importantDates.map(d => `${d.label} — ${d.date}`).join('\n')
     : 'No specific dates provided'
+
+  const calendarStr = calendarEvents?.length
+    ? calendarEvents.slice(0, 30).map(e => {
+        const start = e.start?.split('T')[0] ?? e.start ?? ''
+        return `- ${start}: ${e.title}`
+      }).join('\n')
+    : null
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -32,7 +39,7 @@ Today's date: ${todayStr}
 
 Important upcoming dates:
 ${datesStr}
-
+${calendarStr ? `\nStudent's upcoming Google Calendar events (avoid scheduling conflicts):\n${calendarStr}\n` : ''}
 Build a focused, realistic study plan starting from today. Generate enough weeks to cover all important dates, with the right session count per week (${daysPerWeek || 3} sessions/week).
 
 Return ONLY this JSON:

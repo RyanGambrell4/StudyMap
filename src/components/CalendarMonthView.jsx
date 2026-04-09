@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 
+
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 
 function firstDayOffset(year, month) {
@@ -21,6 +22,7 @@ export default function CalendarMonthView({
   expandedDayStr,
   setExpandedDayStr,
   onDayClick,
+  googleEvents = [],
 }) {
   const [yearStr, monthStr] = activeMonth.split('-')
   const year = parseInt(yearStr)
@@ -43,6 +45,18 @@ export default function CalendarMonthView({
 
   const expandedDay = expandedDayStr ? allDaysMap[expandedDayStr] : null
   const expandedSyllabus = expandedDayStr ? (syllabusEventsByDate[expandedDayStr] ?? []) : []
+
+  // Build a map of dateStr → google events for quick lookup
+  const googleEventsByDate = useMemo(() => {
+    const map = {}
+    googleEvents.forEach(e => {
+      const dateStr = (e.start || '').split('T')[0]
+      if (!dateStr) return
+      if (!map[dateStr]) map[dateStr] = []
+      map[dateStr].push(e)
+    })
+    return map
+  }, [googleEvents])
 
   return (
     <div>
@@ -84,6 +98,7 @@ export default function CalendarMonthView({
           const day = allDaysMap[dateStr]
           const sessions = day?.sessions ?? []
           const syllabus = syllabusEventsByDate[dateStr] ?? []
+          const gcalForDay = googleEventsByDate[dateStr] ?? []
           const allEvents = [...sessions, ...syllabus]
           const isToday = dateStr === todayStr
           const isPast = dateStr < todayStr
@@ -106,7 +121,7 @@ export default function CalendarMonthView({
               </div>
               {/* Dot chips */}
               <div className="flex flex-wrap gap-0.5">
-                {allEvents.slice(0, 6).map((ev, j) => (
+                {allEvents.slice(0, 5).map((ev, j) => (
                   <div
                     key={j}
                     className="w-2 h-2 rounded-full border"
@@ -116,8 +131,16 @@ export default function CalendarMonthView({
                     }}
                   />
                 ))}
-                {allEvents.length > 6 && (
-                  <span className="text-[9px] text-slate-500 leading-none self-end">+{allEvents.length - 6}</span>
+                {gcalForDay.slice(0, 3).map((ev, j) => (
+                  <div
+                    key={`gcal-${j}`}
+                    className="w-2 h-2 rounded-full"
+                    style={{ backgroundColor: '#475569' }}
+                    title={ev.title}
+                  />
+                ))}
+                {(allEvents.length + gcalForDay.length) > 8 && (
+                  <span className="text-[9px] text-slate-500 leading-none self-end">+{allEvents.length + gcalForDay.length - 8}</span>
                 )}
               </div>
             </button>
@@ -151,10 +174,22 @@ export default function CalendarMonthView({
             </div>
           </div>
 
-          {(!expandedDay?.sessions.length && !expandedSyllabus.length) ? (
+          {(!expandedDay?.sessions.length && !expandedSyllabus.length && !(googleEventsByDate[expandedDayStr]?.length)) ? (
             <p className="text-slate-600 text-sm">No sessions or events scheduled.</p>
           ) : (
             <div className="space-y-2">
+              {(googleEventsByDate[expandedDayStr] ?? []).map(e => (
+                <div
+                  key={e.id}
+                  className="flex items-center gap-3 px-3 py-2 rounded-lg"
+                  style={{ backgroundColor: 'rgba(71,85,105,0.15)', borderLeft: '3px solid #475569' }}
+                >
+                  <div className="flex-1 min-w-0">
+                    <p className="text-slate-300 text-sm font-medium truncate">{e.title}</p>
+                    <p className="text-slate-500 text-xs">Google Calendar{e.allDay ? ' · All day' : ''}</p>
+                  </div>
+                </div>
+              ))}
               {expandedDay?.sessions.map(s => (
                 <div
                   key={s.id}

@@ -313,6 +313,45 @@ export default function OutputView({
   const [manualSessions, setManualSessions] = useState(() => getCachedManualSessions() ?? [])
   const [addSessionDayStr, setAddSessionDayStr] = useState(null)
 
+  // ── Google Calendar ──────────────────────────────────────────────────────────
+  const [googleEvents, setGoogleEvents] = useState([])
+  const [gcalConnected, setGcalConnected] = useState(false)
+  const [gcalToast, setGcalToast] = useState(null) // 'connected' | 'error' | null
+
+  useEffect(() => {
+    // Detect redirect back from OAuth
+    const params = new URLSearchParams(window.location.search)
+    const gcal = params.get('gcal')
+    if (gcal === 'connected') {
+      setGcalToast('connected')
+      window.history.replaceState({}, '', window.location.pathname + window.location.hash)
+      setTimeout(() => setGcalToast(null), 4000)
+    } else if (gcal === 'error') {
+      setGcalToast('error')
+      window.history.replaceState({}, '', window.location.pathname + window.location.hash)
+      setTimeout(() => setGcalToast(null), 4000)
+    }
+  }, [])
+
+  useEffect(() => {
+    if (!userId) return
+    fetch('/api/google-calendar-events', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ userId }),
+    })
+      .then(r => r.json())
+      .then(data => {
+        if (data.connected) setGcalConnected(true)
+        if (data.events?.length) setGoogleEvents(data.events)
+      })
+      .catch(() => {})
+  }, [userId])
+
+  const handleConnectGoogleCalendar = () => {
+    window.location.href = `/api/google-auth?userId=${encodeURIComponent(userId)}`
+  }
+
   // ── persist ──
   useEffect(() => { onSavePlan(completedIds, assignments) }, [completedIds, assignments])
   useEffect(() => { saveSyllabusEvents(syllabusEvents) }, [syllabusEvents])
@@ -549,6 +588,20 @@ export default function OutputView({
         <ShareCardModal courses={courses} stats={stats} onClose={() => setShowShareCard(false)} />
       )}
 
+      {gcalToast && (
+        <div style={{
+          position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 9999, pointerEvents: 'none',
+          padding: '10px 20px', borderRadius: 12, fontSize: '0.875rem', fontWeight: 600,
+          background: gcalToast === 'connected' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
+          border: `1px solid ${gcalToast === 'connected' ? 'rgba(16,185,129,0.4)' : 'rgba(239,68,68,0.4)'}`,
+          color: gcalToast === 'connected' ? '#34d399' : '#f87171',
+          backdropFilter: 'blur(8px)',
+        }}>
+          {gcalToast === 'connected' ? '✓ Google Calendar connected' : '✕ Google Calendar connection failed'}
+        </div>
+      )}
+
       <AppShell
         activeSection={activeSection}
         setActiveSection={setActiveSection}
@@ -559,6 +612,8 @@ export default function OutputView({
         onToggleTheme={onToggleTheme}
         theme={theme}
         userEmail={userEmail}
+        googleCalendarConnected={gcalConnected}
+        onConnectGoogleCalendar={handleConnectGoogleCalendar}
       >
 
         {/* Recovery alerts */}
@@ -657,6 +712,9 @@ export default function OutputView({
                 onToggle={handleToggle}
                 onPrev={handlePrevDay}
                 onNext={handleNextDay}
+                googleEvents={googleEvents}
+                userId={userId}
+                gcalConnected={gcalConnected}
               />
             )}
 
@@ -672,6 +730,7 @@ export default function OutputView({
                 expandedDayStr={expandedDayStr}
                 setExpandedDayStr={setExpandedDayStr}
                 onDayClick={dateStr => { setActiveDayStr(dateStr); setViewMode('day'); setExpandedDayStr(null) }}
+                googleEvents={googleEvents}
               />
             )}
 
@@ -759,6 +818,7 @@ export default function OutputView({
             courses={courses}
             userId={userId}
             onShowPaywall={onShowPaywall}
+            googleEvents={googleEvents}
           />
         )}
 
