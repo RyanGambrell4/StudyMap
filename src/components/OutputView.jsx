@@ -11,6 +11,7 @@ import BlueprintScreen from './BlueprintScreen'
 import SyllabusUploadModal from './SyllabusUploadModal'
 import CalendarMonthView from './CalendarMonthView'
 import CalendarDayView from './CalendarDayView'
+import CalendarWeekView from './CalendarWeekView'
 import AddSessionModal from './AddSessionModal'
 import AppShell from './AppShell'
 import DashboardView from './DashboardView'
@@ -529,6 +530,14 @@ export default function OutputView({
     const d = new Date(activeDayStr + 'T12:00:00'); d.setDate(d.getDate() + 1)
     setActiveDayStr(d.toISOString().split('T')[0])
   }
+  const handlePrevWeek = () => {
+    const d = new Date(activeDayStr + 'T12:00:00'); d.setDate(d.getDate() - 7)
+    setActiveDayStr(d.toISOString().split('T')[0])
+  }
+  const handleNextWeek = () => {
+    const d = new Date(activeDayStr + 'T12:00:00'); d.setDate(d.getDate() + 7)
+    setActiveDayStr(d.toISOString().split('T')[0])
+  }
 
   // ── render ────────────────────────────────────────────────────────────────
   return (
@@ -736,45 +745,17 @@ export default function OutputView({
 
             {/* Week view */}
             {viewMode === 'week' && (
-              <div className="space-y-8">
-                {weeksWithAll.map((week, weekIdx) => {
-                  const hasAny = week.days.some(d => d.sessions.length > 0 || (syllabusEventsByDate[d.dateStr] ?? []).length > 0)
-                  if (!hasAny && week.days.every(d => d.isPast)) return null
-                  const weekStart = week.days[0]
-                  const weekEnd = week.days[6]
-                  const weekMonthKey = weekStart.dateStr.slice(0, 7)
-                  const isFirstOfMonth = firstWeekOfMonth.has(weekStart.dateStr)
-                  const isCurrentWeek = week.days.some(d => d.isToday)
-                  return (
-                    <div key={weekIdx} className="print-page" id={isFirstOfMonth ? `month-${weekMonthKey}` : undefined}>
-                      <div className="flex items-center gap-2 mb-3">
-                        <span className="text-xs text-slate-500 font-medium">
-                          {weekStart.monthName} {weekStart.dayNum} – {weekEnd.monthName} {weekEnd.dayNum}
-                        </span>
-                        {isCurrentWeek && (
-                          <span className="text-[11px] bg-indigo-500/15 text-indigo-400 px-2 py-0.5 rounded-full font-medium">This week</span>
-                        )}
-                      </div>
-                      <div className="grid grid-cols-7 border-t border-slate-700/30">
-                        {week.days.map((day, dayIdx) => (
-                          <DayCell
-                            key={dayIdx}
-                            day={day}
-                            completedIds={completedIds}
-                            onToggle={handleToggle}
-                            syllabusEventsForDay={syllabusEventsByDate[day.dateStr]}
-                            onAddSession={setAddSessionDayStr}
-                            isLast={dayIdx === 6}
-                          />
-                        ))}
-                      </div>
-                    </div>
-                  )
-                })}
-                <div className="no-print mt-4 text-center text-slate-600 text-xs pb-8">
-                  <p>Sundays are rest days · {schedule.preferredTime} sessions · {schedule.hoursPerWeek}h/week</p>
-                </div>
-              </div>
+              <CalendarWeekView
+                activeDayStr={activeDayStr}
+                allDaysMap={allDaysMap}
+                syllabusEventsByDate={syllabusEventsByDate}
+                completedIds={completedIds}
+                onToggle={handleToggle}
+                onAddSession={setAddSessionDayStr}
+                onPrevWeek={handlePrevWeek}
+                onNextWeek={handleNextWeek}
+                googleEvents={googleEvents}
+              />
             )}
           </div>
         )}
