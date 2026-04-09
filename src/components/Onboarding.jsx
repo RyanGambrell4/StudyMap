@@ -1,17 +1,323 @@
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 // ── Options ───────────────────────────────────────────────────────────────────
 const STYLE_OPTIONS = [
-  { value: 'visual',   label: 'Visual',        desc: 'Diagrams, charts, and color-coded notes' },
-  { value: 'reading',  label: 'Reading',        desc: 'Textbooks, notes, and written summaries' },
-  { value: 'practice', label: 'Practice-based', desc: 'Problems, quizzes, and flashcards' },
+  {
+    value: 'visual',
+    label: '🎨  Visual',
+    desc: 'You think in diagrams. Color-coding, flowcharts, and mind maps make complex ideas click — if you can see it, you can learn it.',
+  },
+  {
+    value: 'reading',
+    label: '📖  Reading & Writing',
+    desc: 'You process through text. Rewriting notes, summarizing chapters, and annotating readings are how ideas stick for you.',
+  },
+  {
+    value: 'practice',
+    label: '🧩  Practice-Based',
+    desc: 'You learn by doing. Flashcards, past exams, and problem sets are your best tools — repetition and reps build your mastery.',
+  },
 ]
 
 const TIME_OPTIONS = [
-  { value: 'Morning',   label: 'Morning',   desc: 'Before noon' },
-  { value: 'Afternoon', label: 'Afternoon', desc: '12pm – 5pm' },
-  { value: 'Evening',   label: 'Evening',   desc: 'After 5pm' },
+  {
+    value: 'Morning',
+    label: 'Morning',
+    emoji: '☀️',
+    desc: "Sharpest before the day gets noisy. Early sessions, clear head.",
+  },
+  {
+    value: 'Afternoon',
+    label: 'Afternoon',
+    emoji: '⚡',
+    desc: "Post-lunch and fully awake. You hit your stride after noon.",
+  },
+  {
+    value: 'Evening',
+    label: 'Evening',
+    emoji: '🌙',
+    desc: "Night owl energy. When the world quiets down, you focus.",
+  },
 ]
+
+const SCHOOL_OPTIONS = [
+  {
+    key: 'hs',
+    label: '🎒  High School',
+    desc: 'AP classes, finals week, and juggling it all before graduation.',
+  },
+  {
+    key: 'uni',
+    label: '🎓  University',
+    desc: 'Lectures, labs, deadlines — and somehow a social life too.',
+  },
+]
+
+const HS_YEARS = [
+  { value: 'Freshman',  desc: 'Just getting started' },
+  { value: 'Sophomore', desc: 'Getting the hang of it' },
+  { value: 'Junior',    desc: 'Peak grind mode' },
+  { value: 'Senior',    desc: 'Finishing strong' },
+]
+
+const UNI_YEARS = [
+  { value: '1st Year',  desc: 'New campus, new everything' },
+  { value: '2nd Year',  desc: 'Figuring it all out' },
+  { value: '3rd Year',  desc: 'Deeper work, higher stakes' },
+  { value: '4th Year+', desc: 'Endgame mode' },
+]
+
+// ── Splash canvas particles ────────────────────────────────────────────────────
+function useParticles(canvasRef) {
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+    const ctx = canvas.getContext('2d')
+    let raf
+
+    const resize = () => {
+      canvas.width  = canvas.offsetWidth
+      canvas.height = canvas.offsetHeight
+    }
+    resize()
+    window.addEventListener('resize', resize)
+
+    const COUNT = 55
+    const particles = Array.from({ length: COUNT }, () => ({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      r: Math.random() * 1.4 + 0.4,
+      dx: (Math.random() - 0.5) * 0.28,
+      dy: (Math.random() - 0.5) * 0.22,
+      alpha: Math.random() * 0.45 + 0.08,
+    }))
+
+    const draw = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      for (const p of particles) {
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2)
+        ctx.fillStyle = `rgba(139,92,246,${p.alpha})`
+        ctx.fill()
+        p.x += p.dx
+        p.y += p.dy
+        if (p.x < 0) p.x = canvas.width
+        if (p.x > canvas.width) p.x = 0
+        if (p.y < 0) p.y = canvas.height
+        if (p.y > canvas.height) p.y = 0
+      }
+      raf = requestAnimationFrame(draw)
+    }
+    draw()
+    return () => {
+      cancelAnimationFrame(raf)
+      window.removeEventListener('resize', resize)
+    }
+  }, [canvasRef])
+}
+
+// ── Feature cards data ─────────────────────────────────────────────────────────
+const SPLASH_CARDS = [
+  {
+    icon: (
+      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+          d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
+      </svg>
+    ),
+    label: 'Session Blueprint',
+    desc: 'Your session planned before you start',
+  },
+  {
+    icon: (
+      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+          d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+      </svg>
+    ),
+    label: 'Focus Mode',
+    desc: 'Timed blocks that keep you locked in',
+  },
+  {
+    icon: (
+      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8}
+          d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+      </svg>
+    ),
+    label: 'Streak Tracking',
+    desc: 'Build the habit, ace the semester',
+  },
+]
+
+// ── Staggered headline words ───────────────────────────────────────────────────
+function AnimHeadline() {
+  const lines = ['Your semester,', 'mapped in 60 seconds']
+  let wordIdx = 0
+  return (
+    <h1 style={{
+      fontSize: 'clamp(2rem, 5vw, 2.5rem)',
+      fontWeight: 800,
+      color: '#f1f5f9',
+      lineHeight: 1.18,
+      letterSpacing: '-1.8px',
+      marginBottom: '16px',
+    }}>
+      {lines.map((line, li) => (
+        <span key={li} style={{ display: 'block' }}>
+          {line.split(' ').map(word => {
+            const delay = `${0.18 + wordIdx++ * 0.07}s`
+            return (
+              <span key={word + delay} style={{
+                display: 'inline-block',
+                marginRight: '0.28em',
+                opacity: 0,
+                animation: `ob-word 0.5s cubic-bezier(0.22,1,0.36,1) ${delay} forwards`,
+              }}>{word}</span>
+            )
+          })}
+        </span>
+      ))}
+    </h1>
+  )
+}
+
+// ── Splash screen ──────────────────────────────────────────────────────────────
+function SplashScreen({ onNext }) {
+  const canvasRef = useRef(null)
+  useParticles(canvasRef)
+
+  return (
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(160deg, #0a0d1a 0%, #0f1221 50%, #12162e 100%)',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: '48px 24px',
+      position: 'relative',
+      overflow: 'hidden',
+    }}>
+      {/* Particle canvas */}
+      <canvas ref={canvasRef} style={{
+        position: 'absolute', inset: 0,
+        width: '100%', height: '100%',
+        pointerEvents: 'none',
+      }} />
+
+      {/* Central radial glow */}
+      <div style={{
+        position: 'absolute',
+        top: '40%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '700px', height: '500px',
+        background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.11) 0%, transparent 68%)',
+        pointerEvents: 'none',
+      }} />
+
+      {/* Content */}
+      <div style={{ width: '100%', maxWidth: '520px', margin: '0 auto', textAlign: 'center', position: 'relative', zIndex: 1 }}>
+
+        {/* Logo */}
+        <div className="ob-logo" style={{ marginBottom: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
+          <div style={{
+            width: '34px', height: '34px',
+            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+            borderRadius: '9px',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            boxShadow: '0 0 20px rgba(99,102,241,0.4)',
+          }}>
+            <svg width="16" height="16" fill="none" stroke="white" strokeWidth="2" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+            </svg>
+          </div>
+          <span style={{ color: 'white', fontWeight: 700, fontSize: '1.1rem', letterSpacing: '-0.4px' }}>StudyEdge</span>
+        </div>
+
+        {/* Animated headline */}
+        <AnimHeadline />
+
+        {/* Subtext */}
+        <p className="ob-pill" style={{
+          color: '#475569',
+          fontSize: '1rem',
+          lineHeight: 1.6,
+          marginBottom: '40px',
+        }}>
+          Tell us your courses and goals. We'll build your entire study plan.
+        </p>
+
+        {/* Feature cards */}
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '36px' }}>
+          {SPLASH_CARDS.map((card, i) => (
+            <div
+              key={card.label}
+              className={`ob-card-${i}`}
+              style={{
+                background: 'rgba(15,18,40,0.7)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: '14px',
+                padding: '16px 12px',
+                backdropFilter: 'blur(12px)',
+                WebkitBackdropFilter: 'blur(12px)',
+                textAlign: 'left',
+              }}
+            >
+              <div style={{
+                color: '#818cf8',
+                marginBottom: '10px',
+                width: '32px', height: '32px',
+                background: 'rgba(99,102,241,0.12)',
+                borderRadius: '8px',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+              }}>
+                {card.icon}
+              </div>
+              <p style={{ color: '#e2e8f0', fontSize: '0.78rem', fontWeight: 700, marginBottom: '4px', letterSpacing: '-0.1px' }}>
+                {card.label}
+              </p>
+              <p style={{ color: '#475569', fontSize: '0.73rem', lineHeight: 1.45 }}>
+                {card.desc}
+              </p>
+            </div>
+          ))}
+        </div>
+
+        {/* CTA */}
+        <button
+          className="ob-btn ob-glow-btn"
+          onClick={onNext}
+          style={{
+            width: '100%',
+            padding: '15px',
+            background: '#4f46e5',
+            border: '1px solid rgba(99,102,241,0.5)',
+            borderRadius: '12px',
+            color: 'white',
+            fontFamily: 'inherit',
+            fontSize: '1rem',
+            fontWeight: 700,
+            cursor: 'pointer',
+            letterSpacing: '-0.2px',
+            transition: 'background 0.15s',
+            marginBottom: '14px',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = '#4338ca' }}
+          onMouseLeave={e => { e.currentTarget.style.background = '#4f46e5' }}
+        >
+          Let's go
+        </button>
+
+        {/* Fine print */}
+        <p className="ob-fine" style={{ color: '#1e293b', fontSize: '0.8rem', fontWeight: 500 }}>
+          Free to start · No credit card required
+        </p>
+
+      </div>
+    </div>
+  )
+}
 
 // ── Animation wrapper ──────────────────────────────────────────────────────────
 function StepWrap({ children, animKey, dir }) {
@@ -22,80 +328,206 @@ function StepWrap({ children, animKey, dir }) {
   )
 }
 
-// ── Progress dots ──────────────────────────────────────────────────────────────
-function StepDots({ current, total }) {
+// ── Segmented progress bar ─────────────────────────────────────────────────────
+function ProgressBar({ current, total }) {
   return (
-    <div className="flex items-center justify-center gap-2 mb-10">
-      {Array.from({ length: total }, (_, i) => (
-        <div key={i} className={`rounded-full transition-all duration-300 ${
-          i + 1 === current ? 'w-5 h-2 bg-indigo-500' : i + 1 < current ? 'w-2 h-2 bg-indigo-500/50' : 'w-2 h-2 bg-slate-700'
-        }`} />
-      ))}
+    <div style={{ display: 'flex', gap: '6px', marginBottom: '36px' }}>
+      {Array.from({ length: total }, (_, i) => {
+        const filled = i + 1 <= current
+        const active = i + 1 === current
+        return (
+          <div key={i} style={{
+            flex: 1, height: '4px', borderRadius: '999px', overflow: 'hidden',
+            background: 'rgba(255,255,255,0.07)',
+          }}>
+            <div style={{
+              height: '100%',
+              width: filled ? '100%' : '0%',
+              borderRadius: '999px',
+              background: active
+                ? 'linear-gradient(90deg, #6366f1, #818cf8)'
+                : 'rgba(99,102,241,0.55)',
+              boxShadow: active ? '0 0 8px rgba(99,102,241,0.7)' : 'none',
+              transition: 'width 0.4s cubic-bezier(0.22,1,0.36,1)',
+            }} />
+          </div>
+        )
+      })}
     </div>
   )
 }
 
-// ── Logo ───────────────────────────────────────────────────────────────────────
-function Logo() {
+// ── Shared option card styles ──────────────────────────────────────────────────
+const CARD_BASE = {
+  background: 'rgba(13,20,42,0.75)',
+  border: '1px solid rgba(255,255,255,0.08)',
+  borderRadius: '14px',
+  backdropFilter: 'blur(10px)',
+  WebkitBackdropFilter: 'blur(10px)',
+  cursor: 'pointer',
+  transition: 'border-color 0.15s, box-shadow 0.15s, transform 0.15s, background 0.2s',
+  fontFamily: 'inherit',
+  textAlign: 'left',
+}
+const CARD_HOVER = {
+  borderColor: 'rgba(99,102,241,0.35)',
+  boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
+  transform: 'translateY(-2px)',
+}
+const CARD_SELECTED = {
+  background: 'linear-gradient(135deg, rgba(55,48,163,0.6) 0%, rgba(79,70,229,0.5) 100%)',
+  borderColor: 'rgba(99,102,241,0.7)',
+  boxShadow: '0 0 0 1px rgba(99,102,241,0.3), 0 4px 24px rgba(79,70,229,0.25)',
+  transform: 'translateY(-2px)',
+}
+
+function useHover() {
+  const [hovered, setHovered] = useState(false)
+  return {
+    hovered,
+    handlers: {
+      onMouseEnter: () => setHovered(true),
+      onMouseLeave: () => setHovered(false),
+    },
+  }
+}
+
+// ── Checkmark badge ────────────────────────────────────────────────────────────
+function Check() {
   return (
-    <div className="flex flex-col items-center mb-8">
-      <div className="w-14 h-14 rounded-2xl bg-indigo-600 flex items-center justify-center shadow-xl shadow-indigo-500/30 mb-4">
-        <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-        </svg>
-      </div>
-      <span className="text-2xl font-bold text-white tracking-tight">StudyEdge</span>
+    <div className="ob-check-pop" style={{
+      position: 'absolute', top: '10px', right: '10px',
+      width: '20px', height: '20px', borderRadius: '50%',
+      background: '#6366f1',
+      display: 'flex', alignItems: 'center', justifyContent: 'center',
+      flexShrink: 0,
+    }}>
+      <svg width="11" height="11" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+      </svg>
     </div>
   )
 }
 
-// ── Page shell ─────────────────────────────────────────────────────────────────
+// ── Page shell with consistent background ─────────────────────────────────────
 function Page({ children }) {
+  const canvasRef = useRef(null)
+  useParticles(canvasRef)
   return (
-    <div className="min-h-screen bg-[#0F172A] flex flex-col items-center justify-center px-4 py-12">
-      <div className="w-full max-w-lg">{children}</div>
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(160deg, #0a0d1a 0%, #0f1221 50%, #12162e 100%)',
+      display: 'flex', flexDirection: 'column',
+      alignItems: 'center', justifyContent: 'center',
+      padding: '48px 24px', position: 'relative', overflow: 'hidden',
+    }}>
+      <canvas ref={canvasRef} style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', pointerEvents: 'none' }} />
+      {/* Dot grid texture */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: 'radial-gradient(circle, rgba(99,102,241,0.07) 1px, transparent 1px)',
+        backgroundSize: '28px 28px',
+      }} />
+      {/* Central glow */}
+      <div style={{
+        position: 'absolute', top: '35%', left: '50%',
+        transform: 'translate(-50%, -50%)',
+        width: '700px', height: '500px',
+        background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.11) 0%, transparent 68%)',
+        pointerEvents: 'none',
+      }} />
+      <div style={{ width: '100%', maxWidth: '480px', position: 'relative', zIndex: 1 }}>
+        {children}
+      </div>
     </div>
   )
 }
 
-// ── Continue button ────────────────────────────────────────────────────────────
+// ── Continue / Back buttons ────────────────────────────────────────────────────
 function ContinueBtn({ onClick, disabled, label = 'Continue' }) {
   return (
     <button
       onClick={onClick}
       disabled={disabled}
-      className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-2xl transition-colors flex items-center justify-center gap-2 text-base"
+      className={disabled ? '' : 'ob-btn-active'}
+      style={{
+        flex: 1,
+        padding: '15px',
+        background: disabled ? 'rgba(99,102,241,0.15)' : '#4f46e5',
+        border: `1px solid ${disabled ? 'rgba(99,102,241,0.15)' : 'rgba(99,102,241,0.5)'}`,
+        borderRadius: '12px',
+        color: disabled ? 'rgba(255,255,255,0.25)' : 'white',
+        fontFamily: 'inherit',
+        fontSize: '0.95rem',
+        fontWeight: 700,
+        cursor: disabled ? 'not-allowed' : 'pointer',
+        transition: 'background 0.3s, border-color 0.3s, color 0.3s',
+        letterSpacing: '-0.2px',
+      }}
+      onMouseEnter={e => { if (!disabled) e.currentTarget.style.background = '#4338ca' }}
+      onMouseLeave={e => { if (!disabled) e.currentTarget.style.background = '#4f46e5' }}
     >
       {label}
-      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-      </svg>
     </button>
   )
 }
 
 function BackBtn({ onClick }) {
   return (
-    <button onClick={onClick} className="px-5 bg-slate-800 border border-slate-700 text-slate-300 font-medium py-3.5 rounded-2xl hover:bg-slate-700 transition-colors">
+    <button
+      onClick={onClick}
+      style={{
+        padding: '15px 20px',
+        background: 'rgba(255,255,255,0.04)',
+        border: '1px solid rgba(255,255,255,0.08)',
+        borderRadius: '12px',
+        color: '#64748b',
+        fontFamily: 'inherit',
+        fontSize: '0.95rem',
+        fontWeight: 600,
+        cursor: 'pointer',
+        transition: 'background 0.15s, color 0.15s',
+      }}
+      onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.07)'; e.currentTarget.style.color = '#94a3b8' }}
+      onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,0.04)'; e.currentTarget.style.color = '#64748b' }}
+    >
       Back
+    </button>
+  )
+}
+
+// ── Selectable card ────────────────────────────────────────────────────────────
+function OptionCard({ selected, onClick, children, style = {} }) {
+  const [hovered, setHovered] = useState(false)
+  const merged = {
+    ...CARD_BASE,
+    ...(hovered && !selected ? CARD_HOVER : {}),
+    ...(selected ? CARD_SELECTED : {}),
+    position: 'relative',
+    ...style,
+  }
+  return (
+    <button
+      onClick={onClick}
+      style={merged}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+    >
+      {children}
+      {selected && <Check />}
     </button>
   )
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────────
 export default function Onboarding({ onComplete }) {
-  const [step, setStep]           = useState(1)
-  const [animKey, setAnimKey]     = useState(0)
-  const [animDir, setAnimDir]     = useState(1)
+  const [step, setStep]       = useState(1)
+  const [animKey, setAnimKey] = useState(0)
+  const [animDir, setAnimDir] = useState(1)
 
-  // Q1: school type + year
-  const [schoolType, setSchoolType] = useState(null) // 'hs' | 'uni'
-  const [yearLevel, setYearLevel]   = useState(null)
-
-  // Q2: learning style
+  const [schoolType, setSchoolType]     = useState(null)
+  const [yearLevel, setYearLevel]       = useState(null)
   const [learningStyle, setLearningStyle] = useState(null)
-
-  // Q3: study time preference
   const [preferredTime, setPreferredTime] = useState(null)
 
   const goTo = (next, dir = 1) => {
@@ -105,80 +537,54 @@ export default function Onboarding({ onComplete }) {
     window.scrollTo(0, 0)
   }
 
-  const hsYears  = ['Freshman', 'Sophomore', 'Junior', 'Senior']
-  const uniYears = ['1st Year', '2nd Year', '3rd Year', '4th Year+']
-
-  // ── Step 1: Welcome ──────────────────────────────────────────────────────────
-  if (step === 1) return (
-    <Page>
-      <StepWrap animKey={animKey} dir={animDir}>
-        <div className="text-center">
-          <Logo />
-          <h1 className="text-4xl font-bold text-white mb-4 tracking-tight leading-tight">
-            Your semester,<br />mapped in 60 seconds
-          </h1>
-          <p className="text-slate-400 text-lg mb-3 leading-relaxed">
-            3 quick questions — then you're in.
-          </p>
-          <p className="text-slate-600 text-sm mb-10">
-            Courses, syllabi, and schedule setup happen inside the app.
-          </p>
-          <button
-            onClick={() => goTo(2)}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-2xl text-lg transition-colors shadow-xl shadow-indigo-500/20 flex items-center justify-center gap-2.5"
-          >
-            Let's go
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-            </svg>
-          </button>
-        </div>
-      </StepWrap>
-    </Page>
-  )
+  // ── Step 1 ───────────────────────────────────────────────────────────────────
+  if (step === 1) return <SplashScreen onNext={() => goTo(2)} />
 
   // ── Step 2: School level + year ──────────────────────────────────────────────
   if (step === 2) return (
     <Page>
       <StepWrap animKey={animKey} dir={animDir}>
-        <StepDots current={1} total={3} />
-        <h2 className="text-3xl font-bold text-white text-center mb-2">Where are you studying?</h2>
-        <p className="text-slate-400 text-center mb-8">This shapes how we tailor your plan</p>
+        <ProgressBar current={1} total={3} />
+        <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f1f5f9', letterSpacing: '-1.2px', marginBottom: '6px' }}>
+          Where are you studying?
+        </h2>
+        <p style={{ color: '#475569', fontSize: '0.95rem', marginBottom: '24px' }}>
+          We'll personalize your study plan for your level and workload.
+        </p>
 
-        {/* School type */}
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {[{ key: 'hs', label: 'High School' }, { key: 'uni', label: 'University' }].map(({ key, label }) => (
-            <button
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+          {SCHOOL_OPTIONS.map(({ key, label, desc }) => (
+            <OptionCard
               key={key}
+              selected={schoolType === key}
               onClick={() => { setSchoolType(key); setYearLevel(null) }}
-              className={`py-5 rounded-2xl border-2 font-bold text-base transition-all ${
-                schoolType === key
-                  ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
-                  : 'border-slate-700 text-slate-300 hover:border-slate-600 hover:bg-slate-800/60'
-              }`}
+              style={{ padding: '20px 16px', width: '100%', textAlign: 'left' }}
             >
-              {label}
-            </button>
+              <p style={{
+                color: schoolType === key ? '#c7d2fe' : '#cbd5e1',
+                fontSize: '0.95rem', fontWeight: 700, letterSpacing: '-0.3px', marginBottom: '5px',
+              }}>{label}</p>
+              <p style={{ color: schoolType === key ? 'rgba(199,210,254,0.55)' : '#334155', fontSize: '0.78rem', lineHeight: 1.45 }}>{desc}</p>
+            </OptionCard>
           ))}
         </div>
 
-        {/* Year — appears after picking school type */}
         {schoolType && (
-          <div className="mb-8">
-            <p className="text-slate-500 text-xs font-bold uppercase tracking-widest mb-3 text-center">What year?</p>
-            <div className="grid grid-cols-2 gap-3">
-              {(schoolType === 'hs' ? hsYears : uniYears).map(yr => (
-                <button
-                  key={yr}
-                  onClick={() => setYearLevel(yr)}
-                  className={`py-4 rounded-2xl border-2 font-semibold text-sm transition-all ${
-                    yearLevel === yr
-                      ? 'border-indigo-500 bg-indigo-500/10 text-indigo-300'
-                      : 'border-slate-700 text-slate-300 hover:border-slate-600 hover:bg-slate-800/60'
-                  }`}
+          <div className="ob-year-in" style={{ marginBottom: '24px' }}>
+            <p style={{ color: '#334155', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '10px' }}>
+              What year are you in?
+            </p>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              {(schoolType === 'hs' ? HS_YEARS : UNI_YEARS).map(({ value, desc }) => (
+                <OptionCard
+                  key={value}
+                  selected={yearLevel === value}
+                  onClick={() => setYearLevel(value)}
+                  style={{ padding: '14px 16px', width: '100%', textAlign: 'left' }}
                 >
-                  {yr}
-                </button>
+                  <p style={{ color: yearLevel === value ? '#c7d2fe' : '#cbd5e1', fontSize: '0.88rem', fontWeight: 700, marginBottom: '3px' }}>{value}</p>
+                  <p style={{ color: yearLevel === value ? 'rgba(199,210,254,0.5)' : '#334155', fontSize: '0.75rem' }}>{desc}</p>
+                </OptionCard>
               ))}
             </div>
           </div>
@@ -190,40 +596,47 @@ export default function Onboarding({ onComplete }) {
   )
 
   // ── Step 3: Learning style ───────────────────────────────────────────────────
+  const STYLE_ACCENTS = { visual: '#6366f1', reading: '#8b5cf6', practice: '#10b981' }
+
   if (step === 3) return (
     <Page>
       <StepWrap animKey={animKey} dir={animDir}>
-        <StepDots current={2} total={3} />
-        <h2 className="text-3xl font-bold text-white text-center mb-2">How do you learn best?</h2>
-        <p className="text-slate-400 text-center mb-8">We'll tailor your study materials to match</p>
+        <ProgressBar current={2} total={3} />
+        <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f1f5f9', letterSpacing: '-1.2px', marginBottom: '6px' }}>
+          How do you learn best?
+        </h2>
+        <p style={{ color: '#475569', fontSize: '0.95rem', marginBottom: '24px' }}>
+          Pick the style that sounds most like you — we'll build sessions around it.
+        </p>
 
-        <div className="space-y-3 mb-8">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>
           {STYLE_OPTIONS.map(({ value, label, desc }) => (
-            <button
+            <OptionCard
               key={value}
+              selected={learningStyle === value}
               onClick={() => setLearningStyle(value)}
-              className={`w-full flex items-center justify-between gap-4 px-5 py-5 rounded-2xl border-2 transition-all text-left ${
-                learningStyle === value
-                  ? 'border-indigo-500 bg-indigo-500/10'
-                  : 'border-slate-700 hover:border-slate-600 hover:bg-slate-800/60'
-              }`}
+              style={{ padding: '0', width: '100%', display: 'flex', overflow: 'hidden' }}
             >
-              <div>
-                <p className={`font-bold text-base mb-0.5 ${learningStyle === value ? 'text-indigo-300' : 'text-slate-200'}`}>{label}</p>
-                <p className="text-slate-500 text-sm">{desc}</p>
+              <div style={{
+                width: '4px', flexShrink: 0,
+                background: learningStyle === value ? STYLE_ACCENTS[value] : 'rgba(255,255,255,0.06)',
+                transition: 'background 0.2s',
+              }} />
+              <div style={{ padding: '16px 18px 16px 16px', flex: 1 }}>
+                <p style={{
+                  color: learningStyle === value ? '#e0e7ff' : '#cbd5e1',
+                  fontSize: '0.95rem', fontWeight: 700, marginBottom: '5px', letterSpacing: '-0.2px',
+                }}>{label}</p>
+                <p style={{
+                  color: learningStyle === value ? 'rgba(224,231,255,0.55)' : '#475569',
+                  fontSize: '0.82rem', lineHeight: 1.55,
+                }}>{desc}</p>
               </div>
-              {learningStyle === value && (
-                <div className="w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center shrink-0">
-                  <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              )}
-            </button>
+            </OptionCard>
           ))}
         </div>
 
-        <div className="flex gap-3">
+        <div style={{ display: 'flex', gap: '10px' }}>
           <BackBtn onClick={() => goTo(2, -1)} />
           <ContinueBtn onClick={() => goTo(4)} disabled={!learningStyle} />
         </div>
@@ -235,35 +648,36 @@ export default function Onboarding({ onComplete }) {
   if (step === 4) return (
     <Page>
       <StepWrap animKey={animKey} dir={animDir}>
-        <StepDots current={3} total={3} />
-        <h2 className="text-3xl font-bold text-white text-center mb-2">When do you prefer to study?</h2>
-        <p className="text-slate-400 text-center mb-8">We'll schedule your sessions around your peak hours</p>
+        <ProgressBar current={3} total={3} />
+        <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f1f5f9', letterSpacing: '-1.2px', marginBottom: '6px' }}>
+          When do you do your best work?
+        </h2>
+        <p style={{ color: '#475569', fontSize: '0.95rem', marginBottom: '24px' }}>
+          We'll schedule your sessions when your focus is at its peak.
+        </p>
 
-        <div className="grid grid-cols-3 gap-3 mb-8">
-          {TIME_OPTIONS.map(({ value, label, desc }) => (
-            <button
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '24px' }}>
+          {TIME_OPTIONS.map(({ value, label, emoji, desc }) => (
+            <OptionCard
               key={value}
+              selected={preferredTime === value}
               onClick={() => setPreferredTime(value)}
-              className={`flex flex-col items-center gap-2 py-7 px-3 rounded-2xl border-2 transition-all ${
-                preferredTime === value
-                  ? 'border-indigo-500 bg-indigo-500/10'
-                  : 'border-slate-700 hover:border-slate-600 hover:bg-slate-800/60'
-              }`}
+              style={{ padding: '22px 12px 18px', width: '100%', textAlign: 'center' }}
             >
-              <p className={`font-bold text-base ${preferredTime === value ? 'text-indigo-300' : 'text-slate-200'}`}>{label}</p>
-              <p className="text-slate-500 text-xs text-center leading-tight">{desc}</p>
-              {preferredTime === value && (
-                <div className="w-4 h-4 rounded-full bg-indigo-500 flex items-center justify-center mt-1">
-                  <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 20 20">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                </div>
-              )}
-            </button>
+              <p style={{ fontSize: '1.5rem', marginBottom: '8px', lineHeight: 1 }}>{emoji}</p>
+              <p style={{
+                color: preferredTime === value ? '#c7d2fe' : '#cbd5e1',
+                fontSize: '0.92rem', fontWeight: 700, marginBottom: '6px', letterSpacing: '-0.2px',
+              }}>{label}</p>
+              <p style={{
+                color: preferredTime === value ? 'rgba(199,210,254,0.55)' : '#334155',
+                fontSize: '0.75rem', lineHeight: 1.45,
+              }}>{desc}</p>
+            </OptionCard>
           ))}
         </div>
 
-        <div className="flex gap-3">
+        <div style={{ display: 'flex', gap: '10px' }}>
           <BackBtn onClick={() => goTo(3, -1)} />
           <ContinueBtn
             onClick={() => onComplete({ yearLevel, learningStyle, preferredTime })}

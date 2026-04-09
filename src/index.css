@@ -3,15 +3,58 @@
 @tailwind utilities;
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateX(28px); }
+  from { opacity: 0; transform: translateX(36px); }
   to   { opacity: 1; transform: translateX(0); }
 }
 @keyframes slideInBack {
-  from { opacity: 0; transform: translateX(-28px); }
+  from { opacity: 0; transform: translateX(-36px); }
   to   { opacity: 1; transform: translateX(0); }
 }
-.slide-in      { animation: slideIn     280ms cubic-bezier(.4,0,.2,1) both; }
-.slide-in-back { animation: slideInBack 280ms cubic-bezier(.4,0,.2,1) both; }
+.slide-in      { animation: slideIn     200ms cubic-bezier(.25,.46,.45,.94) both; }
+.slide-in-back { animation: slideInBack 200ms cubic-bezier(.25,.46,.45,.94) both; }
+
+@keyframes ob-check-pop {
+  0%   { transform: scale(0) rotate(-10deg); opacity: 0; }
+  60%  { transform: scale(1.25) rotate(4deg); opacity: 1; }
+  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+}
+@keyframes ob-year-slide-in {
+  from { opacity: 0; transform: translateY(14px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ob-btn-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0), 0 4px 24px rgba(79,70,229,0.2); }
+  50%       { box-shadow: 0 0 0 4px rgba(99,102,241,0.22), 0 4px 32px rgba(79,70,229,0.38); }
+}
+.ob-check-pop  { animation: ob-check-pop   220ms cubic-bezier(0.34,1.56,0.64,1) both; }
+.ob-year-in    { animation: ob-year-slide-in 280ms cubic-bezier(0.22,1,0.36,1) both; }
+.ob-btn-active { animation: ob-btn-pulse 2.2s ease-in-out infinite; }
+
+/* ── Onboarding splash animations ── */
+@keyframes ob-fade-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes ob-scale-in {
+  from { opacity: 0; transform: scale(0.82); }
+  to   { opacity: 1; transform: scale(1); }
+}
+@keyframes ob-word {
+  from { opacity: 0; transform: translateY(10px); filter: blur(4px); }
+  to   { opacity: 1; transform: translateY(0);    filter: blur(0); }
+}
+@keyframes ob-glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(99,102,241,0), 0 0 16px 2px rgba(99,102,241,0.18); }
+  50%       { box-shadow: 0 0 0 4px rgba(99,102,241,0.18), 0 0 28px 6px rgba(99,102,241,0.32); }
+}
+.ob-logo    { animation: ob-scale-in 0.55s cubic-bezier(0.34,1.56,0.64,1) 0.05s both; }
+.ob-pill    { animation: ob-fade-up  0.45s ease                            0.4s  both; }
+.ob-card-0  { animation: ob-fade-up  0.5s  cubic-bezier(0.22,1,0.36,1)    0.72s both; }
+.ob-card-1  { animation: ob-fade-up  0.5s  cubic-bezier(0.22,1,0.36,1)    0.88s both; }
+.ob-card-2  { animation: ob-fade-up  0.5s  cubic-bezier(0.22,1,0.36,1)    1.04s both; }
+.ob-btn     { animation: ob-fade-up  0.45s ease                            1.2s  both; }
+.ob-fine    { animation: ob-fade-up  0.45s ease                            1.35s both; }
+.ob-glow-btn { animation: ob-glow-pulse 2.4s ease-in-out 1.8s infinite; }
 
 /* Flashcard flip */
 .fc-inner {
