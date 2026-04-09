@@ -54,25 +54,27 @@ export default async function handler(req, res) {
       },
     }
 
-    // Upsert into user_data
-    const upsertRes = await fetch(`${supabaseUrl}/rest/v1/user_data`, {
-      method: 'POST',
-      headers: {
-        apikey: serviceKey,
-        Authorization: `Bearer ${serviceKey}`,
-        'Content-Type': 'application/json',
-        Prefer: 'resolution=merge-duplicates',
-      },
-      body: JSON.stringify({
-        user_id: userId,
-        study_tools: updatedTools,
-        updated_at: new Date().toISOString(),
-      }),
-    })
-    console.log('[google-auth-callback] Supabase upsert status:', upsertRes.status, upsertRes.statusText)
-    if (!upsertRes.ok) {
-      const upsertBody = await upsertRes.text()
-      console.error('[google-auth-callback] Supabase upsert error body:', upsertBody)
+    // UPDATE the existing row (PATCH with eq filter — avoids duplicate key conflicts)
+    const updateRes = await fetch(
+      `${supabaseUrl}/rest/v1/user_data?user_id=eq.${encodeURIComponent(userId)}`,
+      {
+        method: 'PATCH',
+        headers: {
+          apikey: serviceKey,
+          Authorization: `Bearer ${serviceKey}`,
+          'Content-Type': 'application/json',
+          Prefer: 'return=minimal',
+        },
+        body: JSON.stringify({
+          study_tools: updatedTools,
+          updated_at: new Date().toISOString(),
+        }),
+      }
+    )
+    console.log('[google-auth-callback] Supabase update status:', updateRes.status, updateRes.statusText)
+    if (!updateRes.ok) {
+      const updateBody = await updateRes.text()
+      console.error('[google-auth-callback] Supabase update error body:', updateBody)
     }
 
     res.redirect('https://getstudyedge.com/app?gcal=connected')
