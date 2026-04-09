@@ -66,6 +66,7 @@ export default function CalendarWeekView({
   onPrevWeek,
   onNextWeek,
   googleEvents = [],
+  conflictMap = new Map(),
   theme = 'dark',
 }) {
   const tv = theme_vars(theme === 'dark')
@@ -293,18 +294,27 @@ export default function CalendarWeekView({
               }
 
               // session
-              const done = completedIds.has(ev.id)
+              const done        = completedIds.has(ev.id)
+              const conflictWith = conflictMap.get(ev.id)
               return (
                 <div key={ev.id ?? j}
                   className="absolute inset-x-0.5 rounded overflow-hidden cursor-pointer"
-                  style={{ top, height, background: `${ev.color.dot}${tv.sessionAlpha}`, borderLeft: `2px solid ${ev.color.dot}`, opacity: done ? 0.38 : 1 }}
+                  style={{ top, height, background: `${ev.color.dot}${tv.sessionAlpha}`, borderLeft: `2px solid ${conflictWith ? '#f59e0b' : ev.color.dot}`, opacity: done ? 0.38 : 1 }}
                   onClick={() => onToggle(ev.id)}
+                  title={conflictWith ? `Conflicts with ${conflictWith} — tap to reschedule` : undefined}
                 >
                   <div className="px-1.5 py-0.5">
-                    <p className={`text-[10px] font-medium leading-tight truncate ${done ? 'line-through' : ''}`}
-                      style={{ color: ev.color.dot }}>
-                      {ev.courseName}
-                    </p>
+                    <div className="flex items-center gap-0.5">
+                      {conflictWith && (
+                        <svg className="w-2 h-2 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                      )}
+                      <p className={`text-[10px] font-medium leading-tight truncate ${done ? 'line-through' : ''}`}
+                        style={{ color: conflictWith ? '#fbbf24' : ev.color.dot }}>
+                        {ev.courseName}
+                      </p>
+                    </div>
                     {height > 30 && (
                       <p className="text-[9px] leading-tight truncate" style={{ color: tv.subtitleText }}>{ev.sessionType}</p>
                     )}

@@ -40,6 +40,7 @@ export default function CalendarMonthView({
   setExpandedDayStr,
   onDayClick,
   googleEvents = [],
+  conflictMap = new Map(),
   theme = 'dark',
 }) {
   const tv = theme_vars(theme === 'dark')
@@ -207,19 +208,27 @@ export default function CalendarMonthView({
                     )
                   }
                   // session
-                  const done = completedIds.has(ev.id)
+                  const done        = completedIds.has(ev.id)
+                  const conflictWith = conflictMap.get(ev.id)
                   const t = ev.startTime ? ev.startTime.replace(':00', '').replace(' ', '') : null
                   return (
                     <div key={`ss-${j}`}
                       className="flex items-center gap-1 px-1.5 rounded text-[10px] leading-none"
+                      title={conflictWith ? `Conflicts with ${conflictWith} — tap to reschedule` : undefined}
                       style={{
                         height: 18,
-                        background: `${ev.color.dot}${tv.sessionAlpha}`,
-                        color: ev.color.dot,
+                        background: conflictWith ? 'rgba(245,158,11,0.12)' : `${ev.color.dot}${tv.sessionAlpha}`,
+                        color: conflictWith ? '#fbbf24' : ev.color.dot,
+                        border: conflictWith ? '1px solid rgba(245,158,11,0.35)' : 'none',
                         opacity: done ? 0.45 : 1,
                       }}
                     >
-                      {t && <span className="shrink-0 opacity-60">{t}</span>}
+                      {conflictWith && (
+                        <svg className="w-2 h-2 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                      )}
+                      {t && !conflictWith && <span className="shrink-0 opacity-60">{t}</span>}
                       <span className={`truncate ${done ? 'line-through' : ''}`}>{ev.courseName}</span>
                     </div>
                   )

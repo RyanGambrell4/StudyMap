@@ -318,6 +318,8 @@ export default function OutputView({
   const [googleEvents, setGoogleEvents] = useState([])
   const [gcalConnected, setGcalConnected] = useState(false)
   const [gcalToast, setGcalToast] = useState(null) // 'connected' | 'error' | null
+  const [fixConflictsLoading, setFixConflictsLoading] = useState(false)
+  const [rescheduleResults, setRescheduleResults] = useState(null)
 
   useEffect(() => {
     // Detect redirect back from OAuth
@@ -351,6 +353,31 @@ export default function OutputView({
 
   const handleConnectGoogleCalendar = () => {
     window.location.href = `/api/google-auth?userId=${encodeURIComponent(userId)}`
+  }
+
+  const handleFixConflicts = async () => {
+    if (!conflictMap.size) return
+    setFixConflictsLoading(true)
+    setRescheduleResults(null)
+    try {
+      const conflictingSessions = allSessions.filter(s => conflictMap.has(s.id))
+      const res = await fetch('/api/reschedule-conflicts', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          conflictingSessions,
+          googleEvents,
+          timePreference: schedule.preferredTime,
+        }),
+      })
+      const data = await res.json()
+      setRescheduleResults(data.suggestions ?? [])
+    } catch (e) {
+      console.error('[handleFixConflicts]', e)
+      setRescheduleResults([])
+    } finally {
+      setFixConflictsLoading(false)
+    }
   }
 
   // ── persist ──
@@ -399,6 +426,40 @@ export default function OutputView({
   )
 
   useSessionReminders(allSessions, completedIds, todayStr)
+
+  // ── Conflict detection ────────────────────────────────────────────────────────
+  const conflictMap = useMemo(() => {
+    const map = new Map() // sessionId → gcal event title
+    if (!googleEvents.length) return map
+    function parseSessionTime(str) {
+      if (!str) return null
+      const m = str.match(/(\d{1,2}):(\d{2})\s*(AM|PM)/i)
+      if (!m) return null
+      let h = parseInt(m[1])
+      const min = parseInt(m[2])
+      if (m[3].toUpperCase() === 'PM' && h !== 12) h += 12
+      if (m[3].toUpperCase() === 'AM' && h === 12) h = 0
+      return h * 60 + min
+    }
+    allSessions.forEach(session => {
+      const startMin = parseSessionTime(session.startTime)
+      if (startMin === null) return
+      const endMin = startMin + (session.duration ?? 60)
+      for (const gcal of googleEvents) {
+        if (!gcal.start?.includes('T')) continue
+        if (gcal.start.split('T')[0] !== session.dateStr) continue
+        const gStart = new Date(gcal.start)
+        const gEnd   = gcal.end ? new Date(gcal.end) : new Date(gStart.getTime() + 30 * 60000)
+        const gsMin  = gStart.getHours() * 60 + gStart.getMinutes()
+        const geMin  = gEnd.getHours()   * 60 + gEnd.getMinutes()
+        if (startMin < geMin && endMin > gsMin) {
+          map.set(session.id, gcal.title)
+          break
+        }
+      }
+    })
+    return map
+  }, [allSessions, googleEvents])
 
   const allDaysMap = useMemo(() => {
     const map = {}
@@ -704,7 +765,25 @@ export default function OutputView({
                 <div /> /* spacer so toggle stays right-aligned */
               )}
 
-              {/* View toggle */}
+              {/* Fix Conflicts button */}
+              {conflictMap.size > 0 && (
+                <button
+                  onClick={handleFixConflicts}
+                  disabled={fixConflictsLoading}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-amber-300 border border-amber-500/40 bg-amber-900/20 hover:bg-amber-900/40 transition-colors disabled:opacity-60"
+                >
+                  {fixConflictsLoading ? (
+                    <div className="w-3 h-3 rounded-full border border-amber-400 border-t-transparent animate-spin" />
+                  ) : (
+                    <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                    </svg>
+                  )}
+                  Fix {conflictMap.size} conflict{conflictMap.size !== 1 ? 's' : ''}
+                </button>
+              )}
+
+            {/* View toggle */}
               <div className="flex items-center rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700/60 bg-slate-100 dark:bg-slate-800/50">
                 {[['day', 'Day'], ['week', 'Week'], ['month', 'Month']].map(([mode, label]) => (
                   <button key={mode} onClick={() => setViewMode(mode)}
@@ -719,6 +798,40 @@ export default function OutputView({
               </div>
             </div>
 
+            {/* Reschedule results panel */}
+            {rescheduleResults !== null && (
+              <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-900/10 p-4">
+                <div className="flex items-center justify-between mb-3">
+                  <h4 className="text-sm font-medium text-amber-300">Suggested rescheduled times</h4>
+                  <button onClick={() => setRescheduleResults(null)} className="text-slate-500 hover:text-slate-300 transition-colors">
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+                {rescheduleResults.length === 0 ? (
+                  <p className="text-xs text-slate-500">No suggestions available.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {rescheduleResults.map((r, i) => {
+                      const session = allSessions.find(s => s.id === r.sessionId)
+                      return (
+                        <div key={i} className="flex items-start gap-3 text-xs">
+                          <div className="shrink-0 w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5" />
+                          <div>
+                            <span className="text-slate-300 font-medium">{session?.courseName ?? r.sessionId}</span>
+                            <span className="text-slate-500 mx-1">·</span>
+                            <span className="text-amber-300">{r.date} {r.suggestedStart}–{r.suggestedEnd}</span>
+                            <p className="text-slate-500 mt-0.5">{r.reason}</p>
+                          </div>
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            )}
+
             {/* Day view */}
             {viewMode === 'day' && (
               <CalendarDayView
@@ -732,6 +845,7 @@ export default function OutputView({
                 googleEvents={googleEvents}
                 userId={userId}
                 gcalConnected={gcalConnected}
+                conflictMap={conflictMap}
                 theme={theme}
               />
             )}
@@ -749,6 +863,7 @@ export default function OutputView({
                 setExpandedDayStr={setExpandedDayStr}
                 onDayClick={dateStr => { setActiveDayStr(dateStr); setViewMode('day'); setExpandedDayStr(null) }}
                 googleEvents={googleEvents}
+                conflictMap={conflictMap}
                 theme={theme}
               />
             )}
@@ -765,6 +880,7 @@ export default function OutputView({
                 onPrevWeek={handlePrevWeek}
                 onNextWeek={handleNextWeek}
                 googleEvents={googleEvents}
+                conflictMap={conflictMap}
                 theme={theme}
               />
             )}
@@ -812,6 +928,7 @@ export default function OutputView({
             userId={userId}
             onShowPaywall={onShowPaywall}
             googleEvents={googleEvents}
+            preferredTime={schedule.preferredTime}
           />
         )}
 

@@ -53,6 +53,7 @@ export default function CalendarDayView({
   googleEvents = [],
   userId,
   gcalConnected = false,
+  conflictMap = new Map(),
   theme = 'dark',
 }) {
   const tv = theme_vars(theme === 'dark')
@@ -265,20 +266,29 @@ export default function CalendarDayView({
             if (topMin < 0 || topMin > TOTAL_HOURS * 60) return null
             const top    = (topMin / 60) * HOUR_HEIGHT
             const height = Math.max(((s.endMin - s.startMin) / 60) * HOUR_HEIGHT, 22)
-            const done   = completedIds.has(s.id)
-            const added  = gcalAdded.has(s.id)
-            const adding = addingToGcal === s.id
+            const done        = completedIds.has(s.id)
+            const added       = gcalAdded.has(s.id)
+            const adding      = addingToGcal === s.id
+            const conflictWith = conflictMap.get(s.id)
             return (
               <div key={s.id ?? i}
                 className="absolute left-1 right-1 rounded overflow-hidden"
-                style={{ top, height, background: `${s.color.dot}${tv.sessionAlpha}`, borderLeft: `2px solid ${s.color.dot}`, opacity: done ? 0.38 : 1 }}
+                style={{ top, height, background: `${s.color.dot}${tv.sessionAlpha}`, borderLeft: `2px solid ${conflictWith ? '#f59e0b' : s.color.dot}`, opacity: done ? 0.38 : 1 }}
               >
                 <div className="flex items-start justify-between h-full px-2 py-1 gap-1">
                   <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onToggle(s.id)}>
-                    <p className={`text-[11px] font-medium leading-tight truncate ${done ? 'line-through' : ''}`}
-                      style={{ color: s.color.dot }}>
-                      {s.courseName}
-                    </p>
+                    <div className="flex items-center gap-1">
+                      {conflictWith && (
+                        <svg className="w-2.5 h-2.5 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                          title={`Conflicts with ${conflictWith} — tap to reschedule`}>
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                      )}
+                      <p className={`text-[11px] font-medium leading-tight truncate ${done ? 'line-through' : ''}`}
+                        style={{ color: conflictWith ? '#fbbf24' : s.color.dot }}>
+                        {s.courseName}
+                      </p>
+                    </div>
                     {height > 32 && (
                       <p className="text-[10px] leading-tight truncate mt-0.5" style={{ color: tv.subtitleText }}>
                         {s.sessionType}

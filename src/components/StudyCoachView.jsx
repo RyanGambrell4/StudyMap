@@ -10,7 +10,7 @@ function saveCoachPlan(courseId, plan, formData) {
   dbSaveCoachPlan(courseId, plan, formData)
 }
 
-export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [] }) {
+export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning' }) {
   // ── Form state ──
   const [courseIdx, setCourseIdx] = useState(courses.length > 0 ? 0 : -1)
   const [goal, setGoal] = useState('')
@@ -80,6 +80,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
           daysPerWeek,
           sessionMinutes,
           calendarEvents: googleEvents.length ? googleEvents : null,
+          timePreference,
         }),
       })
       const data = await res.json()

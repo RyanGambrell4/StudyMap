@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
-  const { courseName, goal, emphasisTopics, importantDates, daysPerWeek, sessionMinutes, calendarEvents } = req.body
+  const { courseName, goal, emphasisTopics, importantDates, daysPerWeek, sessionMinutes, calendarEvents, timePreference } = req.body
   if (!courseName || !goal) return res.status(400).json({ error: 'Missing required fields' })
 
   const todayStr = new Date().toISOString().split('T')[0]
@@ -8,10 +8,22 @@ export default async function handler(req, res) {
     ? importantDates.map(d => `${d.label} — ${d.date}`).join('\n')
     : 'No specific dates provided'
 
+  const TIME_WINDOWS = {
+    Morning:   { label: 'morning',   hours: '6am–12pm' },
+    Afternoon: { label: 'afternoon', hours: '12pm–6pm' },
+    Evening:   { label: 'evening',   hours: '6pm–10pm' },
+  }
+  const pref = TIME_WINDOWS[timePreference] ?? TIME_WINDOWS.Morning
+
   const calendarStr = calendarEvents?.length
-    ? calendarEvents.slice(0, 30).map(e => {
-        const start = e.start?.split('T')[0] ?? e.start ?? ''
-        return `- ${start}: ${e.title}`
+    ? calendarEvents.slice(0, 50).map(e => {
+        if (e.allDay || !e.start?.includes('T')) {
+          return `- ${e.start?.split('T')[0] ?? ''}: ${e.title} (all day)`
+        }
+        const sDate = new Date(e.start)
+        const eDate = e.end ? new Date(e.end) : null
+        const fmt = d => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+        return `- ${e.start.split('T')[0]}: ${e.title} (${fmt(sDate)}–${eDate ? fmt(eDate) : 'end unknown'})`
       }).join('\n')
     : null
 
@@ -39,7 +51,12 @@ Today's date: ${todayStr}
 
 Important upcoming dates:
 ${datesStr}
-${calendarStr ? `\nStudent's upcoming Google Calendar events (avoid scheduling conflicts):\n${calendarStr}\n` : ''}
+${calendarStr ? `
+CRITICAL: Never schedule study sessions during the following blocked time slots. These are the student's real calendar events and must not be overlapped under any circumstances. The student's preferred study time is ${timePreference ?? 'Morning'}. Always schedule sessions during ${pref.hours} first (morning = 6am-12pm, afternoon = 12pm-6pm, evening = 6pm-10pm). Only use other times if the preferred window is fully blocked.
+
+Blocked time slots:
+${calendarStr}
+` : `The student prefers studying in the ${pref.label} (${pref.hours}). Schedule sessions in that window whenever possible.`}
 Build a focused, realistic study plan starting from today. Generate enough weeks to cover all important dates, with the right session count per week (${daysPerWeek || 3} sessions/week).
 
 Return ONLY this JSON:
