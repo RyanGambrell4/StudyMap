@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan } from '../lib/db'
+import { canUseAI, incrementAIQuery, getAIQueriesUsed, getAIQueriesLimit } from '../lib/subscription'
 
 function loadCoachPlan(courseId) {
   return getCachedCoachPlan(courseId)
@@ -9,7 +10,7 @@ function saveCoachPlan(courseId, plan, formData) {
   dbSaveCoachPlan(courseId, plan, formData)
 }
 
-export default function StudyCoachView({ courses }) {
+export default function StudyCoachView({ courses, userId, onShowPaywall }) {
   // ── Form state ──
   const [courseIdx, setCourseIdx] = useState(courses.length > 0 ? 0 : -1)
   const [goal, setGoal] = useState('')
@@ -56,6 +57,13 @@ export default function StudyCoachView({ courses }) {
 
   const handleGenerate = async () => {
     if (!course || !goal.trim()) return
+
+    // Check AI query limit before calling
+    if (!canUseAI()) {
+      onShowPaywall?.('ai')
+      return
+    }
+
     setLoading(true)
     setError('')
     setPlan(null)
@@ -78,6 +86,8 @@ export default function StudyCoachView({ courses }) {
       setPlan(data)
       const courseId = course.id ?? courseIdx
       saveCoachPlan(courseId, data, { goal, emphasisTopics, daysPerWeek, sessionMinutes, importantDates })
+      // Track AI query usage
+      await incrementAIQuery()
     } catch (e) {
       setError(e.message)
     } finally {

@@ -259,7 +259,7 @@ function LogGradeModal({ logGradeId, assignments, courses, gradeInput, setGradeI
 export default function OutputView({
   courses, schedule, learningStyle, yearLevel,
   initialCompletedIds, initialAssignments, onSavePlan, onEditPlan, onSignOut, onAddCourse,
-  onToggleTheme, theme, userEmail,
+  onToggleTheme, theme, userEmail, userId, onShowPaywall,
 }) {
   const result = useMemo(
     () => generateSchedule(courses, schedule, learningStyle, yearLevel),
@@ -746,12 +746,20 @@ export default function OutputView({
 
         {/* ── Study Tools ── */}
         {activeSection === 'tools' && (
-          <StudyToolsView courses={courses} />
+          <StudyToolsView
+            courses={courses}
+            userId={userId}
+            onShowPaywall={onShowPaywall}
+          />
         )}
 
         {/* ── Study Coach ── */}
         {activeSection === 'coach' && (
-          <StudyCoachView courses={courses} />
+          <StudyCoachView
+            courses={courses}
+            userId={userId}
+            onShowPaywall={onShowPaywall}
+          />
         )}
 
         {/* Print header */}

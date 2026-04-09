@@ -7,6 +7,7 @@
  */
 
 import { supabase } from './supabase'
+import { initSubscription, clearSubscription } from './subscription'
 
 let _cache = null   // all user data
 let _userId = null  // current user's id
@@ -33,7 +34,11 @@ export async function initUserData(uid) {
     study_tools: null,
     session_notes: {},
     session_recalls: [],
+    subscription: null,
   }
+
+  // Initialise subscription cache from DB data
+  initSubscription(uid, _cache.subscription ?? null)
 
   return _cache
 }
@@ -42,6 +47,7 @@ export async function initUserData(uid) {
 export function clearUserData() {
   _cache = null
   _userId = null
+  clearSubscription()
 }
 
 // ── Reads (synchronous, from cache) ───────────────────────────────────────────

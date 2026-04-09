@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { extractText } from '../utils/extractText'
 import { getCachedStudyTools, saveStudyTools } from '../lib/db'
+import { canUseAI, incrementAIQuery } from '../lib/subscription'
 
 function loadSaved() {
   return getCachedStudyTools()
@@ -165,7 +166,7 @@ function QuizQuestion({ question, onAnswer }) {
 }
 
 // ── Main view ─────────────────────────────────────────────────────────────────
-export default function StudyToolsView({ courses }) {
+export default function StudyToolsView({ courses, userId, onShowPaywall }) {
   const fileInputRef = useRef(null)
   const [dragging, setDragging] = useState(false)
 
@@ -244,6 +245,12 @@ export default function StudyToolsView({ courses }) {
   }
 
   async function handleGenerateFlashcards() {
+    // Check AI query limit before calling
+    if (!canUseAI()) {
+      onShowPaywall?.('ai')
+      return
+    }
+
     setIsGenerating(true)
     setGenerateError('')
     setLoadingMessage('Our AI is reading your notes and generating study materials…')
@@ -273,6 +280,8 @@ export default function StudyToolsView({ courses }) {
         courseIdx: selectedCourse,
         fileLabel: uploadedFile?.name ?? (pastedText ? 'Pasted notes' : ''),
       })
+      // Track AI query usage
+      await incrementAIQuery()
     } catch (err) {
       console.error('Generation error:', err)
       setGenerateError('Failed to generate study materials. Please check your API key and try again.')

@@ -1,10 +1,12 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from './lib/supabase'
 import { initUserData, clearUserData, savePlan } from './lib/db'
+import { getActivePlan, canAddCourse } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
 import AuthScreen from './components/AuthScreen'
 import Onboarding from './components/Onboarding'
 import OutputView from './components/OutputView'
+import PaywallModal from './components/PaywallModal'
 import './index.css'
 
 export default function App() {
@@ -19,10 +21,19 @@ export default function App() {
   const [assignments, setAssignments]       = useState([])
   const [initialCompletedIds, setInitialCompletedIds] = useState(null)
 
+  // ── Paywall state ──────────────────────────────────────────────────────────
+  const [paywallOpen, setPaywallOpen]     = useState(false)
+  const [paywallTrigger, setPaywallTrigger] = useState('courses')
+
+  const openPaywall = useCallback((trigger = 'courses') => {
+    setPaywallTrigger(trigger)
+    setPaywallOpen(true)
+  }, [])
+
   // Tracks the latest completedIds/assignments so handleAddCourse can save immediately
   const latestPlanRef = useRef({ completedIds: [], assignments: [] })
 
-  // ── Auth listener ──────────────────────────────────────────────────────────
+  // ── Auth listener ──────────────────────────────────────────────────────────────
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session)
@@ -90,6 +101,11 @@ export default function App() {
   }
 
   const handleAddCourse = (course) => {
+    // Check course limit before adding
+    if (!canAddCourse(courses.length)) {
+      openPaywall('courses')
+      return
+    }
     const newCourses = [...courses, course]
     setCourses(newCourses)
     savePlan({
@@ -124,25 +140,39 @@ export default function App() {
 
   if (!session) return <AuthScreen />
 
-  if (showOutput) {
-    return (
-      <OutputView
-        courses={courses}
-        schedule={schedule}
-        learningStyle={learningStyle}
-        yearLevel={yearLevel ?? '1st Year'}
-        initialCompletedIds={initialCompletedIds ?? new Set()}
-        initialAssignments={assignments}
-        onSavePlan={handleSavePlan}
-        onEditPlan={handleEditPlan}
-        onSignOut={handleSignOut}
-        onAddCourse={handleAddCourse}
-        onToggleTheme={toggleTheme}
-        theme={theme}
-        userEmail={session.user.email}
-      />
-    )
-  }
+  return (
+    <>
+      {showOutput ? (
+        <OutputView
+          courses={courses}
+          schedule={schedule}
+          learningStyle={learningStyle}
+          yearLevel={yearLevel ?? '1st Year'}
+          initialCompletedIds={initialCompletedIds ?? new Set()}
+          initialAssignments={assignments}
+          onSavePlan={handleSavePlan}
+          onEditPlan={handleEditPlan}
+          onSignOut={handleSignOut}
+          onAddCourse={handleAddCourse}
+          onToggleTheme={toggleTheme}
+          theme={theme}
+          userEmail={session.user.email}
+          userId={session.user.id}
+          onShowPaywall={openPaywall}
+        />
+      ) : (
+        <Onboarding onComplete={handleOnboardingComplete} />
+      )}
 
-  return <Onboarding onComplete={handleOnboardingComplete} />
+      {/* Global paywall modal — rendered at App level so any component can trigger it */}
+      {paywallOpen && (
+        <PaywallModal
+          trigger={paywallTrigger}
+          onClose={() => setPaywallOpen(false)}
+          userEmail={session?.user?.email}
+          userId={session?.user?.id}
+        />
+      )}
+    </>
+  )
 }

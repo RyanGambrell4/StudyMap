@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { canAddCourse, getActivePlan, getPlanLimits } from '../lib/subscription'
 
 const TARGET_THRESHOLDS = { A: 90, B: 80, C: 70, 'Pass/Fail': 60 }
 
@@ -136,9 +137,15 @@ export default function CoursesView({
   onLogGrade,
   onImportSyllabus,
   onAddCourse,
+  onShowPaywall,
 }) {
   const [expandedIdx, setExpandedIdx] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
+
+  const plan = getActivePlan()
+  const { courses: courseLimit } = getPlanLimits()
+  const atLimit = !canAddCourse(courses.length)
+  const limitLabel = courseLimit === Infinity ? null : `${courses.length} / ${courseLimit} courses`
 
   const todayStr = new Date().toISOString().split('T')[0]
 
@@ -178,16 +185,30 @@ export default function CoursesView({
   return (
     <div className="px-6 py-8 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Courses</h1>
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white">Courses</h1>
+          {limitLabel && (
+            <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${
+              atLimit
+                ? 'bg-amber-500/15 text-amber-400 border border-amber-500/30'
+                : 'bg-slate-700/50 text-slate-400'
+            }`}>
+              {limitLabel}
+            </span>
+          )}
+        </div>
         {courses.length > 0 && !showAddForm && (
           <button
-            onClick={() => setShowAddForm(true)}
+            onClick={() => {
+              if (atLimit) { onShowPaywall?.('courses'); return }
+              setShowAddForm(true)
+            }}
             className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-500 text-white text-sm font-semibold px-4 py-2 rounded-xl transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Add Course
+            {atLimit ? '🔒 Add Course' : 'Add Course'}
           </button>
         )}
       </div>
