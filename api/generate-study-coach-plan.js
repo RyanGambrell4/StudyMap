@@ -53,7 +53,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 4000,
+        max_tokens: 8000,
         messages: [{
           role: 'user',
           content: `You are an expert academic strategist building a comprehensive, week-by-week study plan for a student.
@@ -102,10 +102,12 @@ Return ONLY this JSON:
 Rules:
 - Generate exactly ${daysPerWeek || 3} sessions per week
 - Make focusArea and keyTopics highly specific to the course content, not generic
-- Make studyMethod specific and actionable (mention exact techniques)
-- warningZones should be honest and specific — things that actually trip students up in this subject
+- Keep all string values SHORT — focusArea max 8 words, goal max 12 words, keyTopics max 4 words each, studyMethod max 8 words
+- warningZones: max 10 words each, 3 items only
+- priorityTopics: max 5 words each, 5 items only
 - If there are important dates, weight the weeks before them appropriately (ramp up intensity)
-- Generate enough weeks to cover all listed dates plus 1-2 weeks before the last one`,
+- Generate enough weeks to cover all listed dates plus 1 week before the last one
+- CRITICAL: Keep response compact — short strings only, no verbose explanations`,
         }],
       }),
     })
