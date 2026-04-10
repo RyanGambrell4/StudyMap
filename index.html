@@ -149,9 +149,7 @@
 
     /* ── Hero ── */
     .hero-wrap {
-      position: relative;
-      overflow: hidden;
-      padding-top: 80px;
+      position: relative; overflow: hidden; padding-top: 72px;
       background:
         radial-gradient(ellipse 600px 500px at 32% 52%, rgba(79,126,247,0.13) 0%, transparent 65%),
         radial-gradient(ellipse 400px 350px at 32% 52%, rgba(124,92,250,0.07) 0%, transparent 55%),
@@ -168,13 +166,7 @@
       background: radial-gradient(ellipse at 90% 0%, rgba(139,92,246,0.55) 0%, rgba(99,102,241,0.2) 35%, transparent 70%);
       filter: blur(8px); pointer-events: none; transform: rotate(-10deg);
     }
-    .hero {
-      max-width: 1500px; margin: 0 auto;
-      padding: 40px 48px 0;
-      height: 600px;
-      overflow: visible;
-      display: flex; align-items: center; gap: 48px;
-    }
+    .hero { max-width: 1500px; margin: 0 auto; padding: 48px 48px 48px; display: flex; align-items: center; gap: 48px; }
     .hero-content { flex: 0 0 500px; display: flex; flex-direction: column; justify-content: center; }
     .badge {
       display: inline-flex; align-items: center; gap: 8px;
@@ -214,10 +206,9 @@
     }
 
     /* ── Hero visual ── */
-    .hero-visual { flex: 1 1 auto; height: 620px; max-height: 620px; display: flex; align-items: stretch; justify-content: flex-end; }
+    .hero-visual { flex: 1 1 auto; display: flex; align-items: flex-start; justify-content: flex-end; }
     .browser-wrap {
-      flex: 1; width: 100%; min-width: 0; height: 620px; max-height: 620px;
-      display: flex; flex-direction: column;
+      width: 100%; max-width: 780px; display: flex; flex-direction: column;
       animation: floatBrowser 5.5s ease-in-out infinite;
       transform: perspective(1000px) rotateX(2deg);
       transform-origin: center top;
@@ -253,12 +244,8 @@
       border-top: none;
       border-radius: 0 0 14px 14px;
       overflow: hidden; line-height: 0;
-      flex: 1; display: flex;
     }
-    .browser-screen img {
-      width: 100%; height: 100%; display: block;
-      object-fit: cover; object-position: top;
-    }
+    .browser-screen img { width: 100%; height: auto; display: block; }
     .m-val { font-size: 15px; font-weight: 900; letter-spacing: -0.8px; line-height: 1; margin-bottom: 2px; }
     .m-lbl { font-size: 9px; color: #475569; }
     .m-label { font-size: 9px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 7px; }
@@ -276,7 +263,7 @@
     .proof-strip {
       border-top: 1px solid var(--border);
       border-bottom: 1px solid var(--border);
-      padding: 15px 0; overflow: hidden;
+      padding: 15px 0; overflow: hidden; margin-top: 48px;
     }
     .marquee-track { overflow: hidden; }
     .marquee-items {
