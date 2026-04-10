@@ -82,7 +82,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
           daysPerWeek,
           sessionMinutes,
           calendarEvents: googleEvents.length ? googleEvents : null,
-          timePreference,
+          timePreference: preferredTime,
         }),
       })
       const data = await res.json()
