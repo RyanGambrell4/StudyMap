@@ -124,6 +124,34 @@ export default function App() {
     })
   }
 
+  const handleEditCourse = (idx, updatedCourse) => {
+    const newCourses = courses.map((c, i) => i === idx ? updatedCourse : c)
+    setCourses(newCourses)
+    savePlan({
+      courses: newCourses,
+      schedule,
+      learningStyle,
+      yearLevel,
+      completedIds: latestPlanRef.current.completedIds,
+      assignments: latestPlanRef.current.assignments,
+      savedAt: Date.now(),
+    })
+  }
+
+  const handleDeleteCourse = (idx) => {
+    const newCourses = courses.filter((_, i) => i !== idx)
+    setCourses(newCourses)
+    savePlan({
+      courses: newCourses,
+      schedule,
+      learningStyle,
+      yearLevel,
+      completedIds: latestPlanRef.current.completedIds,
+      assignments: latestPlanRef.current.assignments,
+      savedAt: Date.now(),
+    })
+  }
+
   const handleEditPlan = () => {
     savePlan(null)
     setInitialCompletedIds(null)
@@ -166,6 +194,8 @@ export default function App() {
           onEditPlan={handleEditPlan}
           onSignOut={handleSignOut}
           onAddCourse={handleAddCourse}
+          onEditCourse={handleEditCourse}
+          onDeleteCourse={handleDeleteCourse}
           onToggleTheme={toggleTheme}
           theme={theme}
           userEmail={session.user.email}

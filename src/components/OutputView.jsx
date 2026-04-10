@@ -260,7 +260,7 @@ function LogGradeModal({ logGradeId, assignments, courses, gradeInput, setGradeI
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function OutputView({
   courses, schedule, learningStyle, yearLevel,
-  initialCompletedIds, initialAssignments, onSavePlan, onEditPlan, onSignOut, onAddCourse,
+  initialCompletedIds, initialAssignments, onSavePlan, onEditPlan, onSignOut, onAddCourse, onEditCourse, onDeleteCourse,
   onToggleTheme, theme, userEmail, userId, onShowPaywall,
 }) {
   const result = useMemo(
@@ -1016,6 +1016,8 @@ export default function OutputView({
             onLogGrade={id => { setLogGradeId(id); setGradeInput('') }}
             onImportSyllabus={idx => setSyllabusModalCourse(idx)}
             onAddCourse={onAddCourse}
+            onEditCourse={onEditCourse}
+            onDeleteCourse={onDeleteCourse}
           />
         )}
 

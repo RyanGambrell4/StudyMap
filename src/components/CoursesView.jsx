@@ -122,6 +122,120 @@ function AddCourseForm({ courseCount, onAdd, onCancel }) {
   )
 }
 
+function EditCourseForm({ course, onSave, onCancel }) {
+  const [name, setName]             = useState(course.name)
+  const [examDate, setExamDate]     = useState(course.examDate)
+  const [difficulty, setDifficulty] = useState(course.difficulty)
+  const [targetGrade, setTargetGrade] = useState(course.targetGrade)
+  const [color, setColor]           = useState(course.color)
+  const [error, setError]           = useState('')
+
+  const handleSave = () => {
+    if (!name.trim()) { setError('Enter a course name'); return }
+    if (!examDate) { setError('Select an exam/finals date'); return }
+    onSave({ ...course, name: name.trim(), examDate, difficulty, targetGrade, color })
+  }
+
+  return (
+    <div className="bg-slate-800/70 border border-indigo-500/40 rounded-2xl p-5 space-y-4">
+      <h3 className="text-white font-bold text-sm">Edit Course</h3>
+
+      <div>
+        <label className="block text-xs font-medium text-slate-400 mb-1.5">Course name</label>
+        <input
+          value={name}
+          onChange={e => { setName(e.target.value); setError('') }}
+          className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-600 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+          autoFocus
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium text-slate-400 mb-1.5">Exam / finals date</label>
+        <input
+          type="date"
+          value={examDate}
+          onChange={e => { setExamDate(e.target.value); setError('') }}
+          className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+          style={{ colorScheme: 'dark' }}
+        />
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="block text-xs font-medium text-slate-400 mb-1.5">Difficulty</label>
+          <div className="flex gap-2">
+            {DIFFICULTY_LABELS.map(d => (
+              <button
+                key={d}
+                onClick={() => setDifficulty(d)}
+                className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                  difficulty === d
+                    ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300'
+                    : 'border-slate-700 text-slate-400 hover:border-slate-600'
+                }`}
+              >
+                {d}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-slate-400 mb-1.5">Target grade</label>
+          <div className="flex gap-2">
+            {GRADE_OPTIONS.map(g => (
+              <button
+                key={g}
+                onClick={() => setTargetGrade(g)}
+                className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${
+                  targetGrade === g
+                    ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300'
+                    : 'border-slate-700 text-slate-400 hover:border-slate-600'
+                }`}
+              >
+                {g}
+              </button>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <label className="block text-xs font-medium text-slate-400 mb-2">Color</label>
+        <div className="flex gap-2.5 flex-wrap">
+          {COURSE_COLORS.map(c => (
+            <button
+              key={c.name}
+              onClick={() => setColor(c)}
+              className={`w-7 h-7 rounded-full border-2 transition-all ${
+                color.name === c.name ? 'border-white scale-110' : 'border-transparent opacity-60 hover:opacity-100'
+              }`}
+              style={{ backgroundColor: c.dot }}
+            />
+          ))}
+        </div>
+      </div>
+
+      {error && <p className="text-red-400 text-xs">{error}</p>}
+
+      <div className="flex gap-3 pt-1">
+        <button
+          onClick={onCancel}
+          className="px-4 py-2.5 bg-slate-700/60 border border-slate-600 text-slate-300 text-sm font-medium rounded-xl hover:bg-slate-700 transition-colors"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={handleSave}
+          className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm py-2.5 rounded-xl transition-colors"
+        >
+          Save Changes
+        </button>
+      </div>
+    </div>
+  )
+}
+
 function gradeColor(score, threshold) {
   if (score >= threshold) return 'text-emerald-400'
   if (score >= threshold - 10) return 'text-amber-400'
@@ -137,10 +251,14 @@ export default function CoursesView({
   onLogGrade,
   onImportSyllabus,
   onAddCourse,
+  onEditCourse,
+  onDeleteCourse,
   onShowPaywall,
 }) {
   const [expandedIdx, setExpandedIdx] = useState(null)
   const [showAddForm, setShowAddForm] = useState(false)
+  const [editingIdx, setEditingIdx] = useState(null)
+  const [confirmDeleteIdx, setConfirmDeleteIdx] = useState(null)
 
   const plan = getActivePlan()
   const { courses: courseLimit } = getPlanLimits()
@@ -180,6 +298,17 @@ export default function CoursesView({
   const handleAddCourse = (course) => {
     onAddCourse?.(course)
     setShowAddForm(false)
+  }
+
+  const handleSaveEdit = (idx, updatedCourse) => {
+    onEditCourse?.(idx, updatedCourse)
+    setEditingIdx(null)
+  }
+
+  const handleDelete = (idx) => {
+    onDeleteCourse?.(idx)
+    setConfirmDeleteIdx(null)
+    if (expandedIdx === idx) setExpandedIdx(null)
   }
 
   return (
@@ -238,6 +367,8 @@ export default function CoursesView({
       <div className="space-y-3">
         {courses.map((course, idx) => {
           const expanded = expandedIdx === idx
+          const isEditing = editingIdx === idx
+          const confirmingDelete = confirmDeleteIdx === idx
           const sessions = sessionsByCourse[idx] ?? []
           const completed = sessions.filter(s => completedIds.has(s.id)).length
           const pct = sessions.length ? Math.round((completed / sessions.length) * 100) : 0
@@ -253,40 +384,105 @@ export default function CoursesView({
           return (
             <div key={idx} className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl overflow-hidden">
               {/* Header */}
-              <button
-                onClick={() => setExpandedIdx(expanded ? null : idx)}
-                className="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors text-left"
-              >
-                <div className="w-3 h-10 rounded-full shrink-0" style={{ backgroundColor: course.color.dot }} />
-                <div className="flex-1 min-w-0">
-                  <p className="font-bold text-slate-800 dark:text-slate-100">{course.name}</p>
-                  <div className="flex items-center gap-3 mt-1 flex-wrap text-xs text-slate-500">
-                    <span>{daysLeft > 0 ? `${daysLeft}d to exam` : 'Exam passed'}</span>
-                    <span>·</span>
-                    <span>{completed}/{sessions.length} sessions</span>
-                    <span>·</span>
-                    <span>Target: {course.targetGrade}</span>
-                    {avgGrade !== null && (
-                      <>
-                        <span>·</span>
-                        <span className={gradeColor(avgGrade, threshold)}>Avg: {avgGrade}%</span>
-                      </>
-                    )}
+              <div className="flex items-center gap-4 px-5 py-4">
+                <button
+                  onClick={() => { if (!isEditing) setExpandedIdx(expanded ? null : idx) }}
+                  className="flex items-center gap-4 flex-1 min-w-0 text-left hover:opacity-80 transition-opacity"
+                >
+                  <div className="w-3 h-10 rounded-full shrink-0" style={{ backgroundColor: course.color.dot }} />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-slate-800 dark:text-slate-100">{course.name}</p>
+                    <div className="flex items-center gap-3 mt-1 flex-wrap text-xs text-slate-500">
+                      <span>{daysLeft > 0 ? `${daysLeft}d to exam` : 'Exam passed'}</span>
+                      <span>·</span>
+                      <span>{completed}/{sessions.length} sessions</span>
+                      <span>·</span>
+                      <span>Target: {course.targetGrade}</span>
+                      {avgGrade !== null && (
+                        <>
+                          <span>·</span>
+                          <span className={gradeColor(avgGrade, threshold)}>Avg: {avgGrade}%</span>
+                        </>
+                      )}
+                    </div>
+                  </div>
+                </button>
+
+                {/* Actions */}
+                <div className="flex items-center gap-1 shrink-0">
+                  <span className="text-xs font-semibold text-slate-400 mr-1">{pct}%</span>
+
+                  {/* Edit button */}
+                  <button
+                    onClick={e => { e.stopPropagation(); setEditingIdx(isEditing ? null : idx); setConfirmDeleteIdx(null); setExpandedIdx(idx) }}
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-indigo-400 hover:bg-indigo-500/10 transition-all"
+                    title="Edit course"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                    </svg>
+                  </button>
+
+                  {/* Delete button */}
+                  <button
+                    onClick={e => { e.stopPropagation(); setConfirmDeleteIdx(confirmingDelete ? null : idx); setEditingIdx(null) }}
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all"
+                    title="Delete course"
+                  >
+                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                  </button>
+
+                  {/* Expand chevron */}
+                  <button
+                    onClick={() => { if (!isEditing) setExpandedIdx(expanded ? null : idx) }}
+                    className="p-1.5 rounded-lg text-slate-500 hover:text-slate-300 transition-colors"
+                  >
+                    <svg
+                      className={`w-4 h-4 transition-transform ${expanded || isEditing ? 'rotate-180' : ''}`}
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+
+              {/* Delete confirmation */}
+              {confirmingDelete && (
+                <div className="border-t border-red-500/20 bg-red-500/5 px-5 py-3 flex items-center justify-between gap-4">
+                  <p className="text-sm text-red-300">Delete <span className="font-semibold">{course.name}</span>? This can't be undone.</p>
+                  <div className="flex gap-2 shrink-0">
+                    <button
+                      onClick={() => setConfirmDeleteIdx(null)}
+                      className="px-3 py-1.5 text-xs font-medium text-slate-400 hover:text-slate-200 border border-slate-600 rounded-lg transition-colors"
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => handleDelete(idx)}
+                      className="px-3 py-1.5 text-xs font-semibold text-white bg-red-600 hover:bg-red-500 rounded-lg transition-colors"
+                    >
+                      Delete
+                    </button>
                   </div>
                 </div>
-                <div className="flex items-center gap-3 shrink-0">
-                  <span className="text-xs font-semibold text-slate-400">{pct}%</span>
-                  <svg
-                    className={`w-4 h-4 text-slate-500 transition-transform ${expanded ? 'rotate-180' : ''}`}
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
+              )}
+
+              {/* Edit form */}
+              {isEditing && (
+                <div className="border-t border-slate-200 dark:border-slate-700/50 px-5 py-4">
+                  <EditCourseForm
+                    course={course}
+                    onSave={updated => handleSaveEdit(idx, updated)}
+                    onCancel={() => setEditingIdx(null)}
+                  />
                 </div>
-              </button>
+              )}
 
               {/* Expanded content */}
-              {expanded && (
+              {expanded && !isEditing && (
                 <div className="border-t border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-transparent px-5 py-4 space-y-5">
 
                   {/* Sessions */}
