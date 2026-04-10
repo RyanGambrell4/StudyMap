@@ -318,46 +318,49 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
   const [expandedWeek, setExpandedWeek] = useState(0)
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-3">
 
-      {/* Summary — deep indigo */}
-      <div style={{ backgroundColor: '#1e1b4b', borderLeft: '3px solid #6366f1', borderRadius: '0.75rem', padding: '1.25rem 1.25rem 1.25rem 1rem' }}>
-        <p className="text-xs font-bold uppercase tracking-widest mb-2.5" style={{ color: '#818cf8' }}>Your Study Strategy</p>
-        <p className="text-white text-sm leading-relaxed">{plan.summary}</p>
+      {/* Summary */}
+      <div style={{ backgroundColor: '#111827', border: '1px solid #1f2937', borderRadius: '0.75rem', padding: '1.25rem' }}>
+        <div className="flex items-center gap-2 mb-2.5">
+          <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: dot }} />
+          <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: '#4b5563' }}>Study Strategy</p>
+        </div>
+        <p className="text-slate-300 text-sm leading-relaxed">{plan.summary}</p>
       </div>
 
-      {/* Priority Topics — teal */}
-      {plan.priorityTopics?.length > 0 && (
-        <div>
-          <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-3">Priority Topics</p>
-          <div className="flex flex-wrap gap-2">
-            {plan.priorityTopics.map((topic, i) => (
-              <span
-                key={i}
-                className="text-xs px-3 py-1.5 rounded-full font-medium"
-                style={{ backgroundColor: '#0f172a', color: '#94a3b8', border: '1px solid #1e3a4a' }}
-              >
-                {topic}
-              </span>
-            ))}
-          </div>
-        </div>
-      )}
+      {/* Priority Topics + Watch Out For — side by side if both exist, else full width */}
+      {(plan.priorityTopics?.length > 0 || plan.warningZones?.length > 0) && (
+        <div className={`grid gap-3 ${plan.priorityTopics?.length > 0 && plan.warningZones?.length > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
 
-      {/* Warning Zones */}
-      {plan.warningZones?.length > 0 && (
-        <div>
-          <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-3">Watch Out For</p>
-          <ul className="space-y-2.5">
-            {plan.warningZones.map((w, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-sm" style={{ color: '#ef4444' }}>
-                <svg className="w-3.5 h-3.5 shrink-0 mt-0.5" fill="none" stroke="#ef4444" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                </svg>
-                {w}
-              </li>
-            ))}
-          </ul>
+          {plan.priorityTopics?.length > 0 && (
+            <div style={{ backgroundColor: '#111827', border: '1px solid #1f2937', borderRadius: '0.75rem', padding: '1.125rem' }}>
+              <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: '#4b5563' }}>Priority Topics</p>
+              <ol className="space-y-2">
+                {plan.priorityTopics.map((topic, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <span className="text-[10px] font-bold tabular-nums mt-0.5 shrink-0" style={{ color: '#374151' }}>{String(i + 1).padStart(2, '0')}</span>
+                    <p className="text-xs text-slate-300 leading-snug">{topic}</p>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          )}
+
+          {plan.warningZones?.length > 0 && (
+            <div style={{ backgroundColor: '#111827', border: '1px solid #1f2937', borderRadius: '0.75rem', padding: '1.125rem' }}>
+              <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: '#4b5563' }}>Watch Out For</p>
+              <ul className="space-y-2">
+                {plan.warningZones.map((w, i) => (
+                  <li key={i} className="flex items-start gap-2.5">
+                    <div className="w-1 h-1 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: '#ef4444' }} />
+                    <p className="text-xs text-slate-400 leading-snug">{w}</p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+
         </div>
       )}
 
@@ -454,7 +457,7 @@ function SessionCard({ session, dot }) {
       {session.keyTopics?.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-2.5">
           {session.keyTopics.map((topic, ti) => (
-            <span key={ti} className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: '#0f2231', color: '#7dd3fc', border: '1px solid #1e4d6b' }}>
+            <span key={ti} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ backgroundColor: '#1e293b', color: '#475569', border: '1px solid #334155' }}>
               {topic}
             </span>
           ))}
