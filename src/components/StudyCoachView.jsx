@@ -10,7 +10,7 @@ function saveCoachPlan(courseId, plan, formData) {
   dbSaveCoachPlan(courseId, plan, formData)
 }
 
-export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning' }) {
+export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', theme = 'dark' }) {
   // ── Form state ──
   const [courseIdx, setCourseIdx] = useState(courses.length > 0 ? 0 : -1)
   const [goal, setGoal] = useState('')
@@ -172,6 +172,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
           pushed={pushed}
           onPush={handlePushToSessions}
           onReset={handleReset}
+          theme={theme}
         />
       ) : (
         <div className="space-y-5">
@@ -314,16 +315,81 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
 }
 
 // ── Plan display ──────────────────────────────────────────────────────────────
-function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
+function tv(dark) {
+  return dark ? {
+    cardBg:        '#0a0f1a',
+    cardBorder:    '#1e293b',
+    strategyBg:    'linear-gradient(160deg, #0d1420 0%, #0a0f1a 100%)',
+    labelColor:    '#4b5563',
+    topicText:     '#e2e8f0',
+    divider:       '#111827',
+    summaryText:   '#cbd5e1',
+    weekBgClosed:  '#0a0f1a',
+    weekBgOpen:    '#0d1117',
+    weekBorderClosed: '#141c2e',
+    weekBorderOpen:   '#1e293b',
+    weekNumBg:     '#111827',
+    weekNumBorder: '#1e293b',
+    weekNumText:   '#475569',
+    weekTitle:     '#f1f5f9',
+    weekTheme:     '#475569',
+    sessCountBg:   '#0d1117',
+    sessCountBorder: '#1e293b',
+    sessCountText: '#2d3d55',
+    chevron:       '#2d4a6e',
+    sessionBg:     '#080d14',
+    sessionBorder: '#141c2e',
+    goalText:      '#64748b',
+    chipBg:        '#0d1117',
+    chipText:      '#3d526e',
+    chipBorder:    '#1a2744',
+    methodText:    '#475569',
+    warningText:   '#94a3b8',
+    sectionDivBorder: '1px solid #1e293b',
+  } : {
+    cardBg:        '#ffffff',
+    cardBorder:    '#e2e8f0',
+    strategyBg:    'linear-gradient(160deg, #f5f7ff 0%, #f8fafc 100%)',
+    labelColor:    '#9ca3af',
+    topicText:     '#111827',
+    divider:       '#f1f5f9',
+    summaryText:   '#374151',
+    weekBgClosed:  '#f9fafb',
+    weekBgOpen:    '#f0f4ff',
+    weekBorderClosed: '#e5e7eb',
+    weekBorderOpen:   '#c7d2fe',
+    weekNumBg:     '#f1f5f9',
+    weekNumBorder: '#e2e8f0',
+    weekNumText:   '#9ca3af',
+    weekTitle:     '#111827',
+    weekTheme:     '#6b7280',
+    sessCountBg:   '#f1f5f9',
+    sessCountBorder: '#e2e8f0',
+    sessCountText: '#9ca3af',
+    chevron:       '#9ca3af',
+    sessionBg:     '#f8fafc',
+    sessionBorder: '#e5e7eb',
+    goalText:      '#6b7280',
+    chipBg:        '#f1f5f9',
+    chipText:      '#6b7280',
+    chipBorder:    '#e2e8f0',
+    methodText:    '#6b7280',
+    warningText:   '#374151',
+    sectionDivBorder: '1px solid #e5e7eb',
+  }
+}
+
+function PlanView({ plan, course, dot, pushed, onPush, onReset, theme = 'dark' }) {
   const [expandedWeek, setExpandedWeek] = useState(0)
+  const t = tv(theme === 'dark')
 
   return (
     <div className="space-y-3">
 
-      {/* Strategy card — course-color top accent, dark gradient bg */}
+      {/* Strategy card */}
       <div style={{
-        background: 'linear-gradient(160deg, #0d1420 0%, #0a0f1a 100%)',
-        border: '1px solid #1e293b',
+        background: t.strategyBg,
+        border: `1px solid ${t.cardBorder}`,
         borderTop: `2px solid ${dot}`,
         borderRadius: '0.875rem',
         padding: '1.5rem',
@@ -334,56 +400,29 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
           </svg>
           <p style={{ color: dot, fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Study Strategy</p>
         </div>
-        <p style={{ color: '#cbd5e1', fontSize: '13.5px', lineHeight: '1.7' }}>{plan.summary}</p>
+        <p style={{ color: t.summaryText, fontSize: '13.5px', lineHeight: '1.7' }}>{plan.summary}</p>
       </div>
 
-      {/* Priority Topics — full width, editorial numbered layout */}
+      {/* Priority Topics */}
       {plan.priorityTopics?.length > 0 && (
-        <div style={{
-          backgroundColor: '#0a0f1a',
-          border: '1px solid #1e293b',
-          borderRadius: '0.875rem',
-          padding: '1.5rem',
-        }}>
-          <p style={{ color: '#374151', fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Priority Topics</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+        <div style={{ backgroundColor: t.cardBg, border: `1px solid ${t.cardBorder}`, borderRadius: '0.875rem', padding: '1.5rem' }}>
+          <p style={{ color: t.labelColor, fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Priority Topics</p>
+          <div>
             {plan.priorityTopics.map((topic, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-4"
-                style={{
-                  padding: '0.875rem 0',
-                  borderBottom: i < plan.priorityTopics.length - 1 ? '1px solid #111827' : 'none',
-                }}
-              >
-                <span style={{
-                  fontSize: '26px',
-                  fontWeight: 800,
-                  lineHeight: 1,
-                  color: `${dot}28`,
-                  minWidth: '2.25rem',
-                  textAlign: 'right',
-                  fontVariantNumeric: 'tabular-nums',
-                  flexShrink: 0,
-                  paddingTop: '2px',
-                }}>
+              <div key={i} className="flex items-start gap-4" style={{ padding: '0.875rem 0', borderBottom: i < plan.priorityTopics.length - 1 ? `1px solid ${t.divider}` : 'none' }}>
+                <span style={{ fontSize: '26px', fontWeight: 800, lineHeight: 1, color: `${dot}28`, minWidth: '2.25rem', textAlign: 'right', fontVariantNumeric: 'tabular-nums', flexShrink: 0, paddingTop: '2px' }}>
                   {i + 1}
                 </span>
-                <p style={{ color: '#e2e8f0', fontSize: '13.5px', lineHeight: '1.55', paddingTop: '3px' }}>{topic}</p>
+                <p style={{ color: t.topicText, fontSize: '13.5px', lineHeight: '1.55', paddingTop: '3px' }}>{topic}</p>
               </div>
             ))}
           </div>
         </div>
       )}
 
-      {/* Watch Out For — red-tinted card, full width */}
+      {/* Watch Out For */}
       {plan.warningZones?.length > 0 && (
-        <div style={{
-          backgroundColor: 'rgba(239, 68, 68, 0.03)',
-          border: '1px solid rgba(239, 68, 68, 0.14)',
-          borderRadius: '0.875rem',
-          padding: '1.5rem',
-        }}>
+        <div style={{ backgroundColor: 'rgba(239,68,68,0.03)', border: '1px solid rgba(239,68,68,0.14)', borderRadius: '0.875rem', padding: '1.5rem' }}>
           <div className="flex items-center gap-2 mb-4">
             <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
               <path d="M8 2L14.5 13.5H1.5L8 2Z" stroke="#ef4444" strokeWidth="1.5" strokeLinejoin="round" />
@@ -392,31 +431,13 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
             </svg>
             <p style={{ color: '#ef4444', fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Watch Out For</p>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+          <div>
             {plan.warningZones.map((w, i) => (
-              <div
-                key={i}
-                className="flex items-start gap-3"
-                style={{
-                  padding: '0.75rem 0',
-                  borderBottom: i < plan.warningZones.length - 1 ? '1px solid rgba(239, 68, 68, 0.07)' : 'none',
-                }}
-              >
-                <div style={{
-                  width: '20px',
-                  height: '20px',
-                  borderRadius: '50%',
-                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                  border: '1px solid rgba(239, 68, 68, 0.2)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0,
-                  marginTop: '1px',
-                }}>
+              <div key={i} className="flex items-start gap-3" style={{ padding: '0.75rem 0', borderBottom: i < plan.warningZones.length - 1 ? '1px solid rgba(239,68,68,0.07)' : 'none' }}>
+                <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: '1px' }}>
                   <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ef4444' }} />
                 </div>
-                <p style={{ color: '#94a3b8', fontSize: '13px', lineHeight: '1.65' }}>{w}</p>
+                <p style={{ color: t.warningText, fontSize: '13px', lineHeight: '1.65' }}>{w}</p>
               </div>
             ))}
           </div>
@@ -425,74 +446,33 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
 
       {/* Week-by-week */}
       <div>
-        <p style={{ color: '#374151', fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Your Week-by-Week Plan</p>
+        <p style={{ color: t.labelColor, fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Your Week-by-Week Plan</p>
         <div className="space-y-2">
           {plan.weeklyFocus?.map((week, wi) => {
             const isOpen = expandedWeek === wi
             return (
-              <div
-                key={wi}
-                className="rounded-xl overflow-hidden"
-                style={{
-                  backgroundColor: isOpen ? '#0d1117' : '#0a0f1a',
-                  border: '1px solid',
-                  borderColor: isOpen ? '#1e293b' : '#141c2e',
-                  transition: 'background-color 0.15s, border-color 0.15s',
-                }}
-              >
-                {/* Week header */}
-                <button
-                  className="w-full flex items-center gap-4 px-4 py-4 text-left"
-                  onClick={() => setExpandedWeek(isOpen ? -1 : wi)}
-                >
-                  {/* Week number pill */}
-                  <div style={{
-                    width: '32px',
-                    height: '32px',
-                    borderRadius: '8px',
-                    backgroundColor: isOpen ? `${dot}18` : '#111827',
-                    border: `1px solid ${isOpen ? `${dot}35` : '#1e293b'}`,
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    flexShrink: 0,
-                    transition: 'background-color 0.15s, border-color 0.15s',
-                  }}>
-                    <span style={{ fontSize: '11px', fontWeight: 700, color: isOpen ? dot : '#475569' }}>{wi + 1}</span>
+              <div key={wi} className="rounded-xl overflow-hidden" style={{ backgroundColor: isOpen ? t.weekBgOpen : t.weekBgClosed, border: '1px solid', borderColor: isOpen ? t.weekBorderOpen : t.weekBorderClosed, transition: 'background-color 0.15s, border-color 0.15s' }}>
+                <button className="w-full flex items-center gap-4 px-4 py-4 text-left" onClick={() => setExpandedWeek(isOpen ? -1 : wi)}>
+                  <div style={{ width: '32px', height: '32px', borderRadius: '8px', backgroundColor: isOpen ? `${dot}18` : t.weekNumBg, border: `1px solid ${isOpen ? `${dot}35` : t.weekNumBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, transition: 'background-color 0.15s, border-color 0.15s' }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: isOpen ? dot : t.weekNumText }}>{wi + 1}</span>
                   </div>
-
                   <div className="flex-1 min-w-0">
-                    <p style={{ color: '#f1f5f9', fontWeight: 600, fontSize: '13.5px' }}>{week.week}</p>
-                    <p style={{ color: '#475569', fontSize: '12px', marginTop: '1px' }} className="truncate">{week.theme}</p>
+                    <p style={{ color: t.weekTitle, fontWeight: 600, fontSize: '13.5px' }}>{week.week}</p>
+                    <p style={{ color: t.weekTheme, fontSize: '12px', marginTop: '1px' }} className="truncate">{week.theme}</p>
                   </div>
-
                   <div className="flex items-center gap-3 shrink-0">
-                    <span style={{
-                      fontSize: '11px',
-                      fontWeight: 600,
-                      color: '#2d3d55',
-                      backgroundColor: '#0d1117',
-                      border: '1px solid #1e293b',
-                      borderRadius: '6px',
-                      padding: '2px 8px',
-                    }}>
+                    <span style={{ fontSize: '11px', fontWeight: 600, color: t.sessCountText, backgroundColor: t.sessCountBg, border: `1px solid ${t.sessCountBorder}`, borderRadius: '6px', padding: '2px 8px' }}>
                       {week.sessions?.length}
                     </span>
-                    <svg
-                      className="w-4 h-4"
-                      style={{ color: '#2d4a6e', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
-                      fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                    >
+                    <svg className="w-4 h-4" style={{ color: t.chevron, transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                     </svg>
                   </div>
                 </button>
-
-                {/* Session cards */}
                 {isOpen && (
-                  <div className="px-3 pb-3 space-y-2" style={{ borderTop: '1px solid #111827' }}>
+                  <div className="px-3 pb-3 space-y-2" style={{ borderTop: `1px solid ${t.divider}` }}>
                     {week.sessions?.map((sess, si) => (
-                      <SessionCard key={si} session={sess} dot={dot} />
+                      <SessionCard key={si} session={sess} dot={dot} t={t} />
                     ))}
                   </div>
                 )}
@@ -504,23 +484,15 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
 
       {/* Actions */}
       <div className="space-y-3 pt-2">
-        <button
-          onClick={onPush}
-          disabled={pushed}
-          className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all disabled:opacity-60"
-          style={{ backgroundColor: pushed ? '#065f46' : dot, boxShadow: pushed ? '0 0 24px #065f4650' : `0 0 28px ${dot}35` }}
-        >
+        <button onClick={onPush} disabled={pushed} className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all disabled:opacity-60" style={{ backgroundColor: pushed ? '#065f46' : dot, boxShadow: pushed ? '0 0 24px #065f4650' : `0 0 28px ${dot}35` }}>
           {pushed ? '✓ Plan saved — sessions will use this as their starting point' : 'Push to Sessions'}
         </button>
         {pushed && (
-          <p className="text-center text-xs text-slate-600 leading-relaxed">
-            When you start a session for <span className="text-slate-400 font-medium">{course.name}</span>, the Blueprint screen will auto-fill the focus from this plan.
+          <p className="text-center text-xs leading-relaxed" style={{ color: t.weekTheme }}>
+            When you start a session for <span className="font-medium" style={{ color: t.weekTitle }}>{course.name}</span>, the Blueprint screen will auto-fill the focus from this plan.
           </p>
         )}
-        <button
-          onClick={onReset}
-          className="w-full py-2.5 rounded-xl text-sm text-slate-600 hover:text-slate-300 border border-slate-800 hover:border-slate-700 transition-colors"
-        >
+        <button onClick={onReset} className="w-full py-2.5 rounded-xl text-sm transition-colors" style={{ color: t.weekTheme, border: `1px solid ${t.cardBorder}` }}>
           Rebuild plan
         </button>
       </div>
@@ -529,74 +501,33 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
   )
 }
 
-function SessionCard({ session, dot }) {
+function SessionCard({ session, dot, t }) {
   return (
-    <div
-      style={{
-        backgroundColor: '#080d14',
-        border: '1px solid #141c2e',
-        borderLeft: `2px solid ${dot}`,
-        borderRadius: '0.625rem',
-        padding: '1rem 1rem 1rem 1.125rem',
-        marginTop: '0.5rem',
-      }}
-    >
-      {/* Top row: label + focus area + duration */}
+    <div style={{ backgroundColor: t.sessionBg, border: `1px solid ${t.sessionBorder}`, borderLeft: `2px solid ${dot}`, borderRadius: '0.625rem', padding: '1rem 1rem 1rem 1.125rem', marginTop: '0.5rem' }}>
       <div className="flex items-start justify-between gap-3 mb-2.5">
         <div className="flex items-center gap-2 min-w-0">
-          <span
-            style={{
-              fontSize: '9.5px',
-              fontWeight: 700,
-              padding: '2px 8px',
-              borderRadius: '4px',
-              textTransform: 'uppercase',
-              letterSpacing: '0.1em',
-              backgroundColor: `${dot}15`,
-              color: dot,
-              border: `1px solid ${dot}28`,
-              flexShrink: 0,
-              whiteSpace: 'nowrap',
-            }}
-          >
+          <span style={{ fontSize: '9.5px', fontWeight: 700, padding: '2px 8px', borderRadius: '4px', textTransform: 'uppercase', letterSpacing: '0.1em', backgroundColor: `${dot}15`, color: dot, border: `1px solid ${dot}28`, flexShrink: 0, whiteSpace: 'nowrap' }}>
             {session.sessionLabel}
           </span>
-          <p style={{ color: '#f1f5f9', fontWeight: 600, fontSize: '13.5px' }} className="truncate">{session.focusArea}</p>
+          <p style={{ color: t.weekTitle, fontWeight: 600, fontSize: '13.5px' }} className="truncate">{session.focusArea}</p>
         </div>
-        <span style={{ fontSize: '11px', color: '#2d4a6e', fontWeight: 600, flexShrink: 0 }}>{session.duration}m</span>
+        <span style={{ fontSize: '11px', color: t.chevron, fontWeight: 600, flexShrink: 0 }}>{session.duration}m</span>
       </div>
-
-      {/* Goal */}
-      <p style={{ color: '#64748b', fontSize: '12.5px', lineHeight: '1.6', marginBottom: '0.75rem' }}>{session.goal}</p>
-
-      {/* Key topics */}
+      <p style={{ color: t.goalText, fontSize: '12.5px', lineHeight: '1.6', marginBottom: '0.75rem' }}>{session.goal}</p>
       {session.keyTopics?.length > 0 && (
         <div className="flex flex-wrap gap-1.5" style={{ marginBottom: '0.75rem' }}>
           {session.keyTopics.map((topic, ti) => (
-            <span
-              key={ti}
-              style={{
-                fontSize: '10.5px',
-                padding: '2px 9px',
-                borderRadius: '5px',
-                fontWeight: 500,
-                backgroundColor: '#0d1117',
-                color: '#3d526e',
-                border: '1px solid #1a2744',
-              }}
-            >
+            <span key={ti} style={{ fontSize: '10.5px', padding: '2px 9px', borderRadius: '5px', fontWeight: 500, backgroundColor: t.chipBg, color: t.chipText, border: `1px solid ${t.chipBorder}` }}>
               {topic}
             </span>
           ))}
         </div>
       )}
-
-      {/* Study method */}
       <div className="flex items-center gap-2">
         <svg className="w-3 h-3 shrink-0" fill="none" stroke={dot} viewBox="0 0 24 24" strokeOpacity="0.7">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
-        <p style={{ fontSize: '11.5px', fontStyle: 'italic', color: '#475569' }}>{session.studyMethod}</p>
+        <p style={{ fontSize: '11.5px', fontStyle: 'italic', color: t.methodText }}>{session.studyMethod}</p>
       </div>
     </div>
   )
