@@ -326,7 +326,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
         <p className="text-white text-sm leading-relaxed">{plan.summary}</p>
       </div>
 
-      {/* Priority Topics — premium purple tags */}
+      {/* Priority Topics — teal */}
       {plan.priorityTopics?.length > 0 && (
         <div>
           <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-3">Priority Topics</p>
@@ -335,7 +335,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
               <span
                 key={i}
                 className="text-xs px-3 py-1.5 rounded-full font-medium"
-                style={{ backgroundColor: '#312e81', color: '#c7d2fe', border: '1px solid #4338ca' }}
+                style={{ backgroundColor: '#0d3d38', color: '#5eead4', border: '1px solid #0f766e' }}
               >
                 {topic}
               </span>
@@ -344,14 +344,14 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
         </div>
       )}
 
-      {/* Warning Zones — dark rose */}
+      {/* Warning Zones — amber */}
       {plan.warningZones?.length > 0 && (
-        <div style={{ backgroundColor: '#1f1215', borderLeft: '3px solid #f43f5e', borderRadius: '0.75rem', padding: '1rem 1rem 1rem 0.875rem' }}>
-          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#fb7185' }}>Watch Out For</p>
+        <div style={{ backgroundColor: '#1c1505', borderLeft: '3px solid #f59e0b', borderRadius: '0.75rem', padding: '1rem 1rem 1rem 0.875rem' }}>
+          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#fbbf24' }}>Watch Out For</p>
           <ul className="space-y-2.5">
             {plan.warningZones.map((w, i) => (
-              <li key={i} className="flex items-start gap-2.5 text-sm" style={{ color: '#fecdd3' }}>
-                <svg className="w-3.5 h-3.5 shrink-0 mt-0.5" fill="none" stroke="#f43f5e" viewBox="0 0 24 24">
+              <li key={i} className="flex items-start gap-2.5 text-sm" style={{ color: '#fde68a' }}>
+                <svg className="w-3.5 h-3.5 shrink-0 mt-0.5" fill="none" stroke="#f59e0b" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                 </svg>
                 {w}
@@ -365,8 +365,10 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
       <div>
         <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-3">Your Week-by-Week Plan</p>
         <div className="space-y-2">
-          {plan.weeklyFocus?.map((week, wi) => (
-            <div key={wi} className="rounded-xl overflow-hidden" style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b' }}>
+          {plan.weeklyFocus?.map((week, wi) => {
+            const weekAccent = ['#6366f1', '#14b8a6', '#8b5cf6', '#f59e0b'][wi % 4]
+            return (
+            <div key={wi} className="rounded-xl overflow-hidden" style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderLeft: `2px solid ${weekAccent}` }}>
               {/* Week header */}
               <button
                 className="w-full flex items-center justify-between px-4 py-3.5 text-left transition-colors"
@@ -398,7 +400,8 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
                 </div>
               )}
             </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 
@@ -451,17 +454,17 @@ function SessionCard({ session, dot }) {
       {session.keyTopics?.length > 0 && (
         <div className="flex flex-wrap gap-1.5 mb-2.5">
           {session.keyTopics.map((topic, ti) => (
-            <span key={ti} className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: '#1e293b', color: '#64748b', border: '1px solid #273344' }}>
+            <span key={ti} className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: '#0f2231', color: '#7dd3fc', border: '1px solid #1e4d6b' }}>
               {topic}
             </span>
           ))}
         </div>
       )}
       <div className="flex items-center gap-1.5">
-        <svg className="w-3 h-3 shrink-0" fill="none" stroke="#4f46e5" viewBox="0 0 24 24">
+        <svg className="w-3 h-3 shrink-0" fill="none" stroke={dot} viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
-        <p className="text-[11px] italic" style={{ color: '#4f5b7a' }}>{session.studyMethod}</p>
+        <p className="text-[11px] italic" style={{ color: '#94a3b8' }}>{session.studyMethod}</p>
       </div>
     </div>
   )
