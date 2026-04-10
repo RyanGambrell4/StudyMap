@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import imageCompression from 'browser-image-compression'
 import { extractText } from '../utils/extractText'
 import { getCachedStudyTools, saveStudyTools } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
@@ -169,7 +170,10 @@ function QuizQuestion({ question, onAnswer }) {
 // ── Main view ─────────────────────────────────────────────────────────────────
 export default function StudyToolsView({ courses, userId, onShowPaywall, onNavigateToCoach }) {
   const fileInputRef = useRef(null)
+  const scanInputRef = useRef(null)
   const [dragging, setDragging] = useState(false)
+  const [isScanning, setIsScanning] = useState(false)
+  const [scanError, setScanError] = useState('')
 
   // Upload + extraction state
   const [uploadedFile, setUploadedFile] = useState(null)
@@ -243,6 +247,39 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     setDragging(false)
     const file = e.dataTransfer.files?.[0]
     if (file) handleFile(file)
+  }
+
+  async function handleScanImage(file) {
+    if (!file) return
+    setScanError('')
+    setIsScanning(true)
+    try {
+      const compressed = await imageCompression(file, { maxSizeMB: 1, maxWidthOrHeight: 2048, useWebWorker: true })
+      const mediaType = compressed.type || 'image/jpeg'
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader()
+        reader.onload = () => resolve(reader.result.split(',')[1])
+        reader.onerror = reject
+        reader.readAsDataURL(compressed)
+      })
+      const token = await getAccessToken()
+      const res = await fetch('/api/scan-notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ imageBase64: base64, mediaType }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to scan notes')
+      setPastedText(data.text)
+      setUploadedFile(null)
+      setExtractedText('')
+      setMode('upload')
+    } catch (e) {
+      setScanError(e.message)
+    } finally {
+      setIsScanning(false)
+      if (scanInputRef.current) scanInputRef.current.value = ''
+    }
   }
 
   async function handleGenerateFlashcards() {
@@ -500,6 +537,45 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 <p className="text-slate-300 font-medium">Drop your file here or click to browse</p>
                 <p className="text-slate-500 text-xs mt-1">PDF, .docx, or .pptx</p>
               </div>
+            )}
+          </div>
+
+          {/* Scan handwritten notes */}
+          <div>
+            <p className="text-xs text-slate-500 text-center mb-3">— or —</p>
+            <input
+              ref={scanInputRef}
+              type="file"
+              accept="image/*"
+              capture="environment"
+              className="hidden"
+              onChange={e => handleScanImage(e.target.files?.[0])}
+            />
+            <button
+              onClick={() => scanInputRef.current?.click()}
+              disabled={isScanning}
+              className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl border border-dashed border-slate-600 text-slate-400 hover:border-indigo-500/50 hover:text-indigo-300 hover:bg-indigo-500/5 transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isScanning ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Scanning notes…
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                  </svg>
+                  Scan Handwritten Notes
+                </>
+              )}
+            </button>
+            {scanError && (
+              <p className="text-red-400 text-xs mt-2">{scanError}</p>
             )}
           </div>
 
