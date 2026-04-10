@@ -318,15 +318,15 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
   const [expandedWeek, setExpandedWeek] = useState(0)
 
   return (
-    <div className="space-y-5">
+    <div className="space-y-4">
 
-      {/* Summary */}
-      <div className="rounded-2xl p-5" style={{ backgroundColor: `${dot}12`, border: `1px solid ${dot}30` }}>
-        <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: dot }}>Your Study Strategy</p>
-        <p className="text-slate-200 text-sm leading-relaxed">{plan.summary}</p>
+      {/* Summary — deep indigo */}
+      <div style={{ backgroundColor: '#1e1b4b', borderLeft: '3px solid #6366f1', borderRadius: '0.75rem', padding: '1.25rem 1.25rem 1.25rem 1rem' }}>
+        <p className="text-xs font-bold uppercase tracking-widest mb-2.5" style={{ color: '#818cf8' }}>Your Study Strategy</p>
+        <p className="text-white text-sm leading-relaxed">{plan.summary}</p>
       </div>
 
-      {/* Priority Topics */}
+      {/* Priority Topics — premium purple tags */}
       {plan.priorityTopics?.length > 0 && (
         <div>
           <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-3">Priority Topics</p>
@@ -335,7 +335,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
               <span
                 key={i}
                 className="text-xs px-3 py-1.5 rounded-full font-medium"
-                style={{ backgroundColor: `${dot}15`, color: dot, border: `1px solid ${dot}30` }}
+                style={{ backgroundColor: '#312e81', color: '#c7d2fe', border: '1px solid #4338ca' }}
               >
                 {topic}
               </span>
@@ -344,14 +344,16 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
         </div>
       )}
 
-      {/* Warning Zones */}
+      {/* Warning Zones — dark rose */}
       {plan.warningZones?.length > 0 && (
-        <div className="rounded-2xl p-4" style={{ backgroundColor: '#451a03', border: '1px solid #78350f' }}>
-          <p className="text-xs font-bold uppercase tracking-widest mb-3 text-amber-400">Watch Out For</p>
-          <ul className="space-y-2">
+        <div style={{ backgroundColor: '#1f1215', borderLeft: '3px solid #f43f5e', borderRadius: '0.75rem', padding: '1rem 1rem 1rem 0.875rem' }}>
+          <p className="text-xs font-bold uppercase tracking-widest mb-3" style={{ color: '#fb7185' }}>Watch Out For</p>
+          <ul className="space-y-2.5">
             {plan.warningZones.map((w, i) => (
-              <li key={i} className="flex items-start gap-2 text-sm text-amber-200">
-                <span className="text-amber-500 shrink-0 mt-0.5">⚠</span>
+              <li key={i} className="flex items-start gap-2.5 text-sm" style={{ color: '#fecdd3' }}>
+                <svg className="w-3.5 h-3.5 shrink-0 mt-0.5" fill="none" stroke="#f43f5e" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
                 {w}
               </li>
             ))}
@@ -362,24 +364,24 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
       {/* Week-by-week */}
       <div>
         <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-3">Your Week-by-Week Plan</p>
-        <div className="space-y-3">
+        <div className="space-y-2">
           {plan.weeklyFocus?.map((week, wi) => (
-            <div key={wi} className="rounded-2xl overflow-hidden" style={{ border: '1px solid #1e293b' }}>
+            <div key={wi} className="rounded-xl overflow-hidden" style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b' }}>
               {/* Week header */}
               <button
-                className="w-full flex items-center justify-between px-4 py-3.5 text-left transition-colors hover:bg-slate-800/40"
-                style={{ backgroundColor: expandedWeek === wi ? '#0d1424' : 'transparent' }}
+                className="w-full flex items-center justify-between px-4 py-3.5 text-left transition-colors"
+                style={{ backgroundColor: expandedWeek === wi ? '#111827' : 'transparent' }}
                 onClick={() => setExpandedWeek(expandedWeek === wi ? -1 : wi)}
               >
                 <div className="min-w-0">
-                  <p className="text-white font-semibold text-sm">{week.week}</p>
+                  <p className="text-slate-100 font-semibold text-sm">{week.week}</p>
                   <p className="text-slate-500 text-xs mt-0.5 truncate">{week.theme}</p>
                 </div>
                 <div className="flex items-center gap-3 shrink-0 ml-4">
-                  <span className="text-xs text-slate-600">{week.sessions?.length} sessions</span>
+                  <span className="text-[11px] text-slate-600 font-medium">{week.sessions?.length} sessions</span>
                   <svg
-                    className="w-4 h-4 text-slate-600 transition-transform"
-                    style={{ transform: expandedWeek === wi ? 'rotate(180deg)' : 'rotate(0)' }}
+                    className="w-3.5 h-3.5 text-slate-600 transition-transform"
+                    style={{ transform: expandedWeek === wi ? 'rotate(180deg)' : 'rotate(0deg)' }}
                     fill="none" stroke="currentColor" viewBox="0 0 24 24"
                   >
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -389,9 +391,9 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
 
               {/* Session cards */}
               {expandedWeek === wi && (
-                <div className="px-4 pb-4 space-y-3 border-t border-slate-800">
+                <div className="px-3 pb-3 space-y-2" style={{ borderTop: '1px solid #1e293b' }}>
                   {week.sessions?.map((sess, si) => (
-                    <SessionCard key={si} session={sess} dot={dot} index={si} />
+                    <SessionCard key={si} session={sess} dot={dot} />
                   ))}
                 </div>
               )}
@@ -427,32 +429,39 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
   )
 }
 
-function SessionCard({ session, dot, index }) {
+function SessionCard({ session, dot }) {
   return (
-    <div className="rounded-xl p-4 mt-3" style={{ backgroundColor: '#0d1424', border: '1px solid #1e293b' }}>
+    <div
+      className="rounded-lg p-3.5 mt-2"
+      style={{ backgroundColor: '#141b2d', borderLeft: `2.5px solid ${dot}`, border: `1px solid #1e293b`, borderLeftColor: dot }}
+    >
       <div className="flex items-start justify-between gap-3 mb-2">
         <div className="flex items-center gap-2 min-w-0">
           <span
-            className="text-xs font-bold px-2 py-0.5 rounded-full shrink-0"
-            style={{ backgroundColor: `${dot}20`, color: dot, border: `1px solid ${dot}35` }}
+            className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 uppercase tracking-wide"
+            style={{ backgroundColor: `${dot}18`, color: dot, border: `1px solid ${dot}30` }}
           >
             {session.sessionLabel}
           </span>
-          <p className="text-white font-semibold text-sm truncate">{session.focusArea}</p>
+          <p className="text-slate-100 font-semibold text-sm truncate">{session.focusArea}</p>
         </div>
-        <span className="text-xs text-slate-700 shrink-0">{session.duration} min</span>
+        <span className="text-[11px] text-slate-600 shrink-0 font-medium">{session.duration}m</span>
       </div>
       <p className="text-slate-400 text-xs leading-relaxed mb-2.5">{session.goal}</p>
-      <div className="flex flex-wrap gap-1.5 mb-2.5">
-        {session.keyTopics?.map((topic, ti) => (
-          <span key={ti} className="text-xs px-2 py-0.5 rounded-full text-slate-500 border border-slate-800">{topic}</span>
-        ))}
-      </div>
+      {session.keyTopics?.length > 0 && (
+        <div className="flex flex-wrap gap-1.5 mb-2.5">
+          {session.keyTopics.map((topic, ti) => (
+            <span key={ti} className="text-[10px] px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: '#1e293b', color: '#64748b', border: '1px solid #273344' }}>
+              {topic}
+            </span>
+          ))}
+        </div>
+      )}
       <div className="flex items-center gap-1.5">
-        <svg className="w-3 h-3 text-slate-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <svg className="w-3 h-3 shrink-0" fill="none" stroke="#4f46e5" viewBox="0 0 24 24">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
-        <p className="text-xs text-slate-600 italic">{session.studyMethod}</p>
+        <p className="text-[11px] italic" style={{ color: '#4f5b7a' }}>{session.studyMethod}</p>
       </div>
     </div>
   )
