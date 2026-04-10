@@ -4,6 +4,7 @@ import { initUserData, clearUserData, savePlan } from './lib/db'
 import { getActivePlan, canAddCourse } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
 import AuthScreen from './components/AuthScreen'
+import LandingPage from './components/LandingPage'
 import Onboarding from './components/Onboarding'
 import OutputView from './components/OutputView'
 import PaywallModal from './components/PaywallModal'
@@ -20,6 +21,10 @@ export default function App() {
   const [yearLevel, setYearLevel]           = useState(null)
   const [assignments, setAssignments]       = useState([])
   const [initialCompletedIds, setInitialCompletedIds] = useState(null)
+
+  // ── Landing / Auth screen state ─────────────────────────────────────────────
+  const [showAuth, setShowAuth] = useState(false)
+  const [authMode, setAuthMode] = useState('signup')
 
   // ── Paywall state ──────────────────────────────────────────────────────────
   const [paywallOpen, setPaywallOpen]     = useState(false)
@@ -138,7 +143,14 @@ export default function App() {
     )
   }
 
-  if (!session) return <AuthScreen />
+  if (!session) {
+    // Check URL param for direct signup link
+    const urlSignup = new URLSearchParams(window.location.search).get('signup') === '1'
+    if (showAuth || urlSignup) {
+      return <AuthScreen initialMode={authMode} onBack={() => setShowAuth(false)} />
+    }
+    return <LandingPage onGetStarted={(mode) => { setAuthMode(mode); setShowAuth(true) }} />
+  }
 
   return (
     <>

@@ -1,9 +1,9 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-export default function AuthScreen() {
+export default function AuthScreen({ initialMode, onBack }) {
   const [mode, setMode] = useState(() =>
-    new URLSearchParams(window.location.search).get('signup') === '1' ? 'signup' : 'login'
+    initialMode || (new URLSearchParams(window.location.search).get('signup') === '1' ? 'signup' : 'login')
   )
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -150,6 +150,14 @@ export default function AuthScreen() {
           )}
         </div>
 
+        {onBack && (
+          <button
+            onClick={onBack}
+            className="block w-full text-slate-600 hover:text-slate-400 text-sm transition-colors mt-2"
+          >
+            ← Back to home
+          </button>
+        )}
       </div>
     </div>
   )
