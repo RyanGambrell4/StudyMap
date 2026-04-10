@@ -150,11 +150,22 @@
     /* ── Hero ── */
     .hero-wrap {
       position: relative;
+      overflow: visible;
       background:
         radial-gradient(ellipse 600px 500px at 32% 52%, rgba(79,126,247,0.13) 0%, transparent 65%),
         radial-gradient(ellipse 400px 350px at 32% 52%, rgba(124,92,250,0.07) 0%, transparent 55%),
         radial-gradient(circle at 1px 1px, rgba(255,255,255,0.055) 1px, transparent 0);
       background-size: auto, auto, 28px 28px;
+    }
+    .hero-spotlight-left {
+      position: absolute; top: -60px; left: -80px; width: 600px; height: 700px;
+      background: radial-gradient(ellipse at 10% 0%, rgba(139,92,246,0.55) 0%, rgba(99,102,241,0.2) 35%, transparent 70%);
+      filter: blur(8px); pointer-events: none; transform: rotate(10deg);
+    }
+    .hero-spotlight-right {
+      position: absolute; top: -60px; right: -80px; width: 600px; height: 700px;
+      background: radial-gradient(ellipse at 90% 0%, rgba(139,92,246,0.55) 0%, rgba(99,102,241,0.2) 35%, transparent 70%);
+      filter: blur(8px); pointer-events: none; transform: rotate(-10deg);
     }
     .hero {
       min-height: 100vh;
@@ -526,8 +537,14 @@
 
 <!-- ═══ HERO ═══ -->
 <div class="hero-wrap">
+  <div class="hero-spotlight-left"></div>
+  <div class="hero-spotlight-right"></div>
   <div class="hero">
     <div class="hero-content">
+      <div class="badge fade-up d1">
+        <span class="badge-dot"></span>
+        AI-powered study planner for students
+      </div>
       <h1 class="text-h1 hero-headline fade-up d1">
         <span class="l1">You already have<br>the syllabus.</span>
         <span class="l2 gradient-text">Now you have a plan.</span>
