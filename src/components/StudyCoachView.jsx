@@ -320,89 +320,183 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
   return (
     <div className="space-y-3">
 
-      {/* Summary */}
-      <div style={{ backgroundColor: '#111827', border: '1px solid #1f2937', borderRadius: '0.75rem', padding: '1.25rem' }}>
-        <div className="flex items-center gap-2 mb-2.5">
-          <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: dot }} />
-          <p className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: '#4b5563' }}>Study Strategy</p>
+      {/* Strategy card — course-color top accent, dark gradient bg */}
+      <div style={{
+        background: 'linear-gradient(160deg, #0d1420 0%, #0a0f1a 100%)',
+        border: '1px solid #1e293b',
+        borderTop: `2px solid ${dot}`,
+        borderRadius: '0.875rem',
+        padding: '1.5rem',
+      }}>
+        <div className="flex items-center gap-2 mb-3">
+          <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
+            <path d="M8 1.5L10.163 5.88L15 6.573L11.5 9.983L12.326 14.8L8 12.52L3.674 14.8L4.5 9.983L1 6.573L5.837 5.88L8 1.5Z" fill={dot} fillOpacity="0.85" />
+          </svg>
+          <p style={{ color: dot, fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Study Strategy</p>
         </div>
-        <p className="text-slate-300 text-sm leading-relaxed">{plan.summary}</p>
+        <p style={{ color: '#cbd5e1', fontSize: '13.5px', lineHeight: '1.7' }}>{plan.summary}</p>
       </div>
 
-      {/* Priority Topics + Watch Out For — side by side if both exist, else full width */}
-      {(plan.priorityTopics?.length > 0 || plan.warningZones?.length > 0) && (
-        <div className={`grid gap-3 ${plan.priorityTopics?.length > 0 && plan.warningZones?.length > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+      {/* Priority Topics — full width, editorial numbered layout */}
+      {plan.priorityTopics?.length > 0 && (
+        <div style={{
+          backgroundColor: '#0a0f1a',
+          border: '1px solid #1e293b',
+          borderRadius: '0.875rem',
+          padding: '1.5rem',
+        }}>
+          <p style={{ color: '#374151', fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '1.25rem' }}>Priority Topics</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+            {plan.priorityTopics.map((topic, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-4"
+                style={{
+                  padding: '0.875rem 0',
+                  borderBottom: i < plan.priorityTopics.length - 1 ? '1px solid #111827' : 'none',
+                }}
+              >
+                <span style={{
+                  fontSize: '26px',
+                  fontWeight: 800,
+                  lineHeight: 1,
+                  color: `${dot}28`,
+                  minWidth: '2.25rem',
+                  textAlign: 'right',
+                  fontVariantNumeric: 'tabular-nums',
+                  flexShrink: 0,
+                  paddingTop: '2px',
+                }}>
+                  {i + 1}
+                </span>
+                <p style={{ color: '#e2e8f0', fontSize: '13.5px', lineHeight: '1.55', paddingTop: '3px' }}>{topic}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-          {plan.priorityTopics?.length > 0 && (
-            <div style={{ backgroundColor: '#111827', border: '1px solid #1f2937', borderRadius: '0.75rem', padding: '1.125rem' }}>
-              <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: '#4b5563' }}>Priority Topics</p>
-              <ol className="space-y-2">
-                {plan.priorityTopics.map((topic, i) => (
-                  <li key={i} className="flex items-start gap-2.5">
-                    <span className="text-[10px] font-bold tabular-nums mt-0.5 shrink-0" style={{ color: '#374151' }}>{String(i + 1).padStart(2, '0')}</span>
-                    <p className="text-xs text-slate-300 leading-snug">{topic}</p>
-                  </li>
-                ))}
-              </ol>
-            </div>
-          )}
-
-          {plan.warningZones?.length > 0 && (
-            <div style={{ backgroundColor: '#111827', border: '1px solid #1f2937', borderRadius: '0.75rem', padding: '1.125rem' }}>
-              <p className="text-[11px] font-semibold uppercase tracking-widest mb-3" style={{ color: '#4b5563' }}>Watch Out For</p>
-              <ul className="space-y-2">
-                {plan.warningZones.map((w, i) => (
-                  <li key={i} className="flex items-start gap-2.5">
-                    <div className="w-1 h-1 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: '#ef4444' }} />
-                    <p className="text-xs text-slate-400 leading-snug">{w}</p>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-
+      {/* Watch Out For — red-tinted card, full width */}
+      {plan.warningZones?.length > 0 && (
+        <div style={{
+          backgroundColor: 'rgba(239, 68, 68, 0.03)',
+          border: '1px solid rgba(239, 68, 68, 0.14)',
+          borderRadius: '0.875rem',
+          padding: '1.5rem',
+        }}>
+          <div className="flex items-center gap-2 mb-4">
+            <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2L14.5 13.5H1.5L8 2Z" stroke="#ef4444" strokeWidth="1.5" strokeLinejoin="round" />
+              <path d="M8 6.5V9" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" />
+              <circle cx="8" cy="11.5" r="0.75" fill="#ef4444" />
+            </svg>
+            <p style={{ color: '#ef4444', fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase' }}>Watch Out For</p>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+            {plan.warningZones.map((w, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-3"
+                style={{
+                  padding: '0.75rem 0',
+                  borderBottom: i < plan.warningZones.length - 1 ? '1px solid rgba(239, 68, 68, 0.07)' : 'none',
+                }}
+              >
+                <div style={{
+                  width: '20px',
+                  height: '20px',
+                  borderRadius: '50%',
+                  backgroundColor: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.2)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0,
+                  marginTop: '1px',
+                }}>
+                  <div style={{ width: '6px', height: '6px', borderRadius: '50%', backgroundColor: '#ef4444' }} />
+                </div>
+                <p style={{ color: '#94a3b8', fontSize: '13px', lineHeight: '1.65' }}>{w}</p>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 
       {/* Week-by-week */}
       <div>
-        <p className="text-xs text-slate-500 uppercase tracking-widest font-bold mb-3">Your Week-by-Week Plan</p>
+        <p style={{ color: '#374151', fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '0.75rem' }}>Your Week-by-Week Plan</p>
         <div className="space-y-2">
           {plan.weeklyFocus?.map((week, wi) => {
-            const weekAccent = ['#6366f1', '#14b8a6', '#8b5cf6', '#f59e0b'][wi % 4]
+            const isOpen = expandedWeek === wi
             return (
-            <div key={wi} className="rounded-xl overflow-hidden" style={{ backgroundColor: '#0f172a', border: '1px solid #1e293b', borderLeft: `2px solid ${weekAccent}` }}>
-              {/* Week header */}
-              <button
-                className="w-full flex items-center justify-between px-4 py-3.5 text-left transition-colors"
-                style={{ backgroundColor: expandedWeek === wi ? '#111827' : 'transparent' }}
-                onClick={() => setExpandedWeek(expandedWeek === wi ? -1 : wi)}
+              <div
+                key={wi}
+                className="rounded-xl overflow-hidden"
+                style={{
+                  backgroundColor: isOpen ? '#0d1117' : '#0a0f1a',
+                  border: '1px solid',
+                  borderColor: isOpen ? '#1e293b' : '#141c2e',
+                  transition: 'background-color 0.15s, border-color 0.15s',
+                }}
               >
-                <div className="min-w-0">
-                  <p className="text-slate-100 font-semibold text-sm">{week.week}</p>
-                  <p className="text-slate-500 text-xs mt-0.5 truncate">{week.theme}</p>
-                </div>
-                <div className="flex items-center gap-3 shrink-0 ml-4">
-                  <span className="text-[11px] text-slate-600 font-medium">{week.sessions?.length} sessions</span>
-                  <svg
-                    className="w-3.5 h-3.5 text-slate-600 transition-transform"
-                    style={{ transform: expandedWeek === wi ? 'rotate(180deg)' : 'rotate(0deg)' }}
-                    fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                  >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </button>
+                {/* Week header */}
+                <button
+                  className="w-full flex items-center gap-4 px-4 py-4 text-left"
+                  onClick={() => setExpandedWeek(isOpen ? -1 : wi)}
+                >
+                  {/* Week number pill */}
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '8px',
+                    backgroundColor: isOpen ? `${dot}18` : '#111827',
+                    border: `1px solid ${isOpen ? `${dot}35` : '#1e293b'}`,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0,
+                    transition: 'background-color 0.15s, border-color 0.15s',
+                  }}>
+                    <span style={{ fontSize: '11px', fontWeight: 700, color: isOpen ? dot : '#475569' }}>{wi + 1}</span>
+                  </div>
 
-              {/* Session cards */}
-              {expandedWeek === wi && (
-                <div className="px-3 pb-3 space-y-2" style={{ borderTop: '1px solid #1e293b' }}>
-                  {week.sessions?.map((sess, si) => (
-                    <SessionCard key={si} session={sess} dot={dot} />
-                  ))}
-                </div>
-              )}
-            </div>
+                  <div className="flex-1 min-w-0">
+                    <p style={{ color: '#f1f5f9', fontWeight: 600, fontSize: '13.5px' }}>{week.week}</p>
+                    <p style={{ color: '#475569', fontSize: '12px', marginTop: '1px' }} className="truncate">{week.theme}</p>
+                  </div>
+
+                  <div className="flex items-center gap-3 shrink-0">
+                    <span style={{
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      color: '#2d3d55',
+                      backgroundColor: '#0d1117',
+                      border: '1px solid #1e293b',
+                      borderRadius: '6px',
+                      padding: '2px 8px',
+                    }}>
+                      {week.sessions?.length}
+                    </span>
+                    <svg
+                      className="w-4 h-4"
+                      style={{ color: '#2d4a6e', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
+                      fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                    </svg>
+                  </div>
+                </button>
+
+                {/* Session cards */}
+                {isOpen && (
+                  <div className="px-3 pb-3 space-y-2" style={{ borderTop: '1px solid #111827' }}>
+                    {week.sessions?.map((sess, si) => (
+                      <SessionCard key={si} session={sess} dot={dot} />
+                    ))}
+                  </div>
+                )}
+              </div>
             )
           })}
         </div>
@@ -438,36 +532,71 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
 function SessionCard({ session, dot }) {
   return (
     <div
-      className="rounded-lg p-3.5 mt-2"
-      style={{ backgroundColor: '#141b2d', borderLeft: `2.5px solid ${dot}`, border: `1px solid #1e293b`, borderLeftColor: dot }}
+      style={{
+        backgroundColor: '#080d14',
+        border: '1px solid #141c2e',
+        borderLeft: `2px solid ${dot}`,
+        borderRadius: '0.625rem',
+        padding: '1rem 1rem 1rem 1.125rem',
+        marginTop: '0.5rem',
+      }}
     >
-      <div className="flex items-start justify-between gap-3 mb-2">
+      {/* Top row: label + focus area + duration */}
+      <div className="flex items-start justify-between gap-3 mb-2.5">
         <div className="flex items-center gap-2 min-w-0">
           <span
-            className="text-[10px] font-bold px-2 py-0.5 rounded-full shrink-0 uppercase tracking-wide"
-            style={{ backgroundColor: `${dot}18`, color: dot, border: `1px solid ${dot}30` }}
+            style={{
+              fontSize: '9.5px',
+              fontWeight: 700,
+              padding: '2px 8px',
+              borderRadius: '4px',
+              textTransform: 'uppercase',
+              letterSpacing: '0.1em',
+              backgroundColor: `${dot}15`,
+              color: dot,
+              border: `1px solid ${dot}28`,
+              flexShrink: 0,
+              whiteSpace: 'nowrap',
+            }}
           >
             {session.sessionLabel}
           </span>
-          <p className="text-slate-100 font-semibold text-sm truncate">{session.focusArea}</p>
+          <p style={{ color: '#f1f5f9', fontWeight: 600, fontSize: '13.5px' }} className="truncate">{session.focusArea}</p>
         </div>
-        <span className="text-[11px] text-slate-600 shrink-0 font-medium">{session.duration}m</span>
+        <span style={{ fontSize: '11px', color: '#2d4a6e', fontWeight: 600, flexShrink: 0 }}>{session.duration}m</span>
       </div>
-      <p className="text-slate-400 text-xs leading-relaxed mb-2.5">{session.goal}</p>
+
+      {/* Goal */}
+      <p style={{ color: '#64748b', fontSize: '12.5px', lineHeight: '1.6', marginBottom: '0.75rem' }}>{session.goal}</p>
+
+      {/* Key topics */}
       {session.keyTopics?.length > 0 && (
-        <div className="flex flex-wrap gap-1.5 mb-2.5">
+        <div className="flex flex-wrap gap-1.5" style={{ marginBottom: '0.75rem' }}>
           {session.keyTopics.map((topic, ti) => (
-            <span key={ti} className="text-[10px] px-2 py-0.5 rounded font-medium" style={{ backgroundColor: '#1e293b', color: '#475569', border: '1px solid #334155' }}>
+            <span
+              key={ti}
+              style={{
+                fontSize: '10.5px',
+                padding: '2px 9px',
+                borderRadius: '5px',
+                fontWeight: 500,
+                backgroundColor: '#0d1117',
+                color: '#3d526e',
+                border: '1px solid #1a2744',
+              }}
+            >
               {topic}
             </span>
           ))}
         </div>
       )}
-      <div className="flex items-center gap-1.5">
-        <svg className="w-3 h-3 shrink-0" fill="none" stroke={dot} viewBox="0 0 24 24">
+
+      {/* Study method */}
+      <div className="flex items-center gap-2">
+        <svg className="w-3 h-3 shrink-0" fill="none" stroke={dot} viewBox="0 0 24 24" strokeOpacity="0.7">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
         </svg>
-        <p className="text-[11px] italic" style={{ color: '#94a3b8' }}>{session.studyMethod}</p>
+        <p style={{ fontSize: '11.5px', fontStyle: 'italic', color: '#475569' }}>{session.studyMethod}</p>
       </div>
     </div>
   )
