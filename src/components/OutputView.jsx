@@ -358,6 +358,13 @@ export default function OutputView({
     window.location.href = `/api/google-auth?userId=${encodeURIComponent(userId)}`
   }
 
+  const handleSessionMove = useCallback((sessionId, newDateStr, newStartTime, newEndTime) => {
+    setSessionTimeOverrides(prev => ({
+      ...prev,
+      [sessionId]: { startTime: newStartTime, endTime: newEndTime, dateStr: newDateStr },
+    }))
+  }, [])
+
   const handleApplySuggestion = (suggestion) => {
     setSessionTimeOverrides(prev => ({
       ...prev,
@@ -444,16 +451,63 @@ export default function OutputView({
 
     if (!hasOverrides) return base
 
-    return base.map(week => ({
+    // Collect sessions being moved to a different date
+    const dateMoved = {} // sessionId → newDateStr (only when date actually differs from original)
+    Object.entries(sessionTimeOverrides).forEach(([id, ov]) => {
+      if (ov.dateStr) dateMoved[id] = ov.dateStr
+    })
+    const hasDateMoves = Object.keys(dateMoved).length > 0
+
+    // Snapshot all sessions by id (so we can re-insert at new date)
+    const allSessionsById = {}
+    if (hasDateMoves) {
+      base.forEach(week => week.days.forEach(day => day.sessions.forEach(s => {
+        allSessionsById[s.id] = { ...s, _origDateStr: day.dateStr }
+      })))
+    }
+
+    // First pass: apply time overrides; remove sessions whose date was moved
+    let result = base.map(week => ({
       ...week,
       days: week.days.map(day => ({
         ...day,
-        sessions: day.sessions.map(s => {
-          const ov = sessionTimeOverrides[s.id]
-          return ov ? { ...s, ...ov } : s
-        }),
+        sessions: day.sessions
+          .filter(s => !dateMoved[s.id] || dateMoved[s.id] === day.dateStr)
+          .map(s => {
+            const ov = sessionTimeOverrides[s.id]
+            if (!ov) return s
+            const { dateStr: _d, ...timeOv } = ov  // strip dateStr from session fields
+            return { ...s, ...timeOv }
+          }),
       })),
     }))
+
+    // Second pass: inject moved sessions into their new dates
+    if (hasDateMoves) {
+      const movedByNewDate = {}
+      Object.entries(dateMoved).forEach(([id, newDate]) => {
+        const orig = allSessionsById[id]
+        if (!orig || orig._origDateStr === newDate) return
+        const ov = sessionTimeOverrides[id]
+        const { _origDateStr, ...clean } = orig
+        const session = {
+          ...clean,
+          ...(ov?.startTime ? { startTime: ov.startTime } : {}),
+          ...(ov?.endTime   ? { endTime:   ov.endTime   } : {}),
+        }
+        if (!movedByNewDate[newDate]) movedByNewDate[newDate] = []
+        movedByNewDate[newDate].push(session)
+      })
+      result = result.map(week => ({
+        ...week,
+        days: week.days.map(day => {
+          const incoming = movedByNewDate[day.dateStr] ?? []
+          return incoming.length ? { ...day, sessions: [...day.sessions, ...incoming] } : day
+        }),
+      }))
+    }
+
+    return result
   }, [weeks, recoverySessions, manualSessions, sessionTimeOverrides])
 
   const allSessions = useMemo(() =>
@@ -904,6 +958,7 @@ export default function OutputView({
                 userId={userId}
                 gcalConnected={gcalConnected}
                 conflictMap={conflictMap}
+                onSessionMove={handleSessionMove}
                 theme={theme}
               />
             )}
@@ -939,6 +994,7 @@ export default function OutputView({
                 onNextWeek={handleNextWeek}
                 googleEvents={googleEvents}
                 conflictMap={conflictMap}
+                onSessionMove={handleSessionMove}
                 theme={theme}
               />
             )}

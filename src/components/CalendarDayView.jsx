@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 
 const HOUR_HEIGHT = 56
 const START_HOUR = 6
@@ -31,6 +31,18 @@ function timeToMinutes(str) {
   return h * 60 + min
 }
 
+function minutesToTimeStr(min) {
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 || 12
+  return `${h12}:${String(m).padStart(2, '0')} ${ampm}`
+}
+
+function snap15(min) {
+  return Math.round(min / 15) * 15
+}
+
 function fmtHour(h) {
   if (h === 0) return '12 AM'
   if (h === 12) return '12 PM'
@@ -54,11 +66,18 @@ export default function CalendarDayView({
   userId,
   gcalConnected = false,
   conflictMap = new Map(),
+  onSessionMove,
   theme = 'dark',
 }) {
   const tv = theme_vars(theme === 'dark')
   const [addingToGcal, setAddingToGcal] = useState(null)
   const [gcalAdded, setGcalAdded]       = useState(new Set())
+
+  // ── Drag state ──
+  const dragRef    = useRef(null)
+  const colDivRef  = useRef(null)
+  const [ghost, setGhost] = useState(null)
+  // ghost: { startMin, endMin, color, courseName, sessionId }
   const [nowPx, setNowPx]               = useState(() =>
     ((nowMinutes() - START_HOUR * 60) / 60) * HOUR_HEIGHT
   )
@@ -142,6 +161,109 @@ export default function CalendarDayView({
     syllabusForDay.forEach(e => allDay.push({ ...e, isSyllabus: true }))
     return { timedBlocks: timed, allDayBlocks: allDay }
   }, [dayData, syllabusForDay])
+
+  // ── Drag handlers ──────────────────────────────────────────────────────────
+
+  function handleSessionPointerDown(e, s) {
+    e.preventDefault()
+    e.stopPropagation()
+
+    const rect = colDivRef.current?.getBoundingClientRect()
+    if (!rect) return
+
+    const mouseY       = e.clientY - rect.top
+    const blockTopPx   = ((s.startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT
+    const duration     = s.endMin - s.startMin
+    const mouseOffsetMin = Math.max(0, Math.min(
+      ((mouseY - blockTopPx) / HOUR_HEIGHT) * 60,
+      duration
+    ))
+
+    dragRef.current = {
+      type: 'move',
+      sessionId: s.id,
+      duration,
+      mouseOffsetMin,
+      didMove: false,
+      startClientY: e.clientY,
+      currentGhost: { startMin: s.startMin, endMin: s.endMin },
+    }
+
+    setGhost({ startMin: s.startMin, endMin: s.endMin, color: s.color, courseName: s.courseName, sessionId: s.id })
+    document.body.style.userSelect = 'none'
+  }
+
+  function handleResizePointerDown(e, s) {
+    e.preventDefault()
+    e.stopPropagation()
+
+    dragRef.current = {
+      type: 'resize',
+      sessionId: s.id,
+      origStartMin: s.startMin,
+      didMove: false,
+      startClientY: e.clientY,
+      currentGhost: { startMin: s.startMin, endMin: s.endMin },
+    }
+
+    setGhost({ startMin: s.startMin, endMin: s.endMin, color: s.color, courseName: s.courseName, sessionId: s.id })
+    document.body.style.cursor    = 'ns-resize'
+    document.body.style.userSelect = 'none'
+  }
+
+  useEffect(() => {
+    const onMove = (e) => {
+      if (!dragRef.current) return
+      const drag = dragRef.current
+      const dy = e.clientY - drag.startClientY
+      if (!drag.didMove && Math.abs(dy) > 4) {
+        drag.didMove = true
+        if (drag.type === 'move') document.body.style.cursor = 'grabbing'
+      }
+      if (!drag.didMove) return
+
+      const rect = colDivRef.current?.getBoundingClientRect()
+      if (!rect) return
+      const mouseY = e.clientY - rect.top
+
+      if (drag.type === 'move') {
+        const rawStart = (mouseY / HOUR_HEIGHT) * 60 + START_HOUR * 60 - drag.mouseOffsetMin
+        const newStart = Math.max(START_HOUR * 60, Math.min(END_HOUR * 60 - drag.duration, snap15(rawStart)))
+        const newEnd   = newStart + drag.duration
+        drag.currentGhost = { startMin: newStart, endMin: newEnd }
+        setGhost(prev => prev ? { ...prev, startMin: newStart, endMin: newEnd } : null)
+      } else {
+        const rawEnd = (mouseY / HOUR_HEIGHT) * 60 + START_HOUR * 60
+        const newEnd = Math.max(drag.origStartMin + 15, Math.min(END_HOUR * 60, snap15(rawEnd)))
+        drag.currentGhost = { startMin: drag.origStartMin, endMin: newEnd }
+        setGhost(prev => prev ? { ...prev, startMin: drag.origStartMin, endMin: newEnd } : null)
+      }
+    }
+
+    const onUp = () => {
+      if (!dragRef.current) return
+      const drag = dragRef.current
+      if (drag.didMove && onSessionMove) {
+        const g = drag.currentGhost
+        onSessionMove(drag.sessionId, dayStr, minutesToTimeStr(g.startMin), minutesToTimeStr(g.endMin))
+      } else if (!drag.didMove && onToggle) {
+        onToggle(drag.sessionId)
+      }
+      dragRef.current = null
+      setGhost(null)
+      document.body.style.cursor    = ''
+      document.body.style.userSelect = ''
+    }
+
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup',   onUp)
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup',   onUp)
+    }
+  }, [onSessionMove, onToggle, dayStr])
+
+  // ───────────────────────────────────────────────────────────────────────────
 
   const dateLabel = new Date(dayStr + 'T12:00:00').toLocaleDateString('en-US', {
     weekday: 'long', month: 'long', day: 'numeric',
@@ -239,7 +361,7 @@ export default function CalendarDayView({
         </div>
 
         {/* Grid column */}
-        <div className="flex-1 relative" style={{ borderLeft: `1px solid ${tv.gridLine}`, height: TOTAL_HOURS * HOUR_HEIGHT }}>
+        <div ref={colDivRef} className="flex-1 relative" style={{ borderLeft: `1px solid ${tv.gridLine}`, height: TOTAL_HOURS * HOUR_HEIGHT }}>
           {/* Hour lines */}
           {Array.from({ length: TOTAL_HOURS - 1 }, (_, i) => (
             <div key={i} className="absolute left-0 right-0 pointer-events-none"
@@ -260,27 +382,65 @@ export default function CalendarDayView({
             </div>
           )}
 
+          {/* Ghost drag preview */}
+          {ghost && (() => {
+            const topMin = ghost.startMin - START_HOUR * 60
+            if (topMin < 0 || topMin > TOTAL_HOURS * 60) return null
+            const top    = (topMin / 60) * HOUR_HEIGHT
+            const height = Math.max(((ghost.endMin - ghost.startMin) / 60) * HOUR_HEIGHT, 22)
+            return (
+              <div className="absolute left-1 right-1 rounded overflow-hidden pointer-events-none z-30"
+                style={{
+                  top, height,
+                  background: `${ghost.color.dot}28`,
+                  border: `1.5px dashed ${ghost.color.dot}`,
+                  boxShadow: `0 4px 16px ${ghost.color.dot}30`,
+                }}
+              >
+                <div className="px-2 py-1">
+                  <p className="text-[11px] font-medium leading-tight truncate" style={{ color: ghost.color.dot }}>
+                    {ghost.courseName}
+                  </p>
+                  {height > 32 && (
+                    <p className="text-[10px] opacity-70" style={{ color: ghost.color.dot }}>
+                      {minutesToTimeStr(ghost.startMin)} – {minutesToTimeStr(ghost.endMin)}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )
+          })()}
+
           {/* Study session blocks */}
           {timedBlocks.map((s, i) => {
             const topMin = s.startMin - START_HOUR * 60
             if (topMin < 0 || topMin > TOTAL_HOURS * 60) return null
             const top    = (topMin / 60) * HOUR_HEIGHT
             const height = Math.max(((s.endMin - s.startMin) / 60) * HOUR_HEIGHT, 22)
-            const done        = completedIds.has(s.id)
-            const added       = gcalAdded.has(s.id)
-            const adding      = addingToGcal === s.id
+            const done         = completedIds.has(s.id)
+            const added        = gcalAdded.has(s.id)
+            const adding       = addingToGcal === s.id
             const conflictWith = conflictMap.get(s.id)
+            const isDragging   = ghost?.sessionId === s.id
             return (
               <div key={s.id ?? i}
-                className="absolute left-1 right-1 rounded overflow-hidden"
-                style={{ top, height, background: `${s.color.dot}${tv.sessionAlpha}`, borderLeft: `2px solid ${conflictWith ? '#f59e0b' : s.color.dot}`, opacity: done ? 0.38 : 1 }}
+                className="absolute left-1 right-1 rounded overflow-hidden select-none"
+                style={{
+                  top, height,
+                  background: `${s.color.dot}${tv.sessionAlpha}`,
+                  borderLeft: `2px solid ${conflictWith ? '#f59e0b' : s.color.dot}`,
+                  opacity: isDragging ? 0.25 : done ? 0.38 : 1,
+                  cursor: isDragging ? 'grabbing' : 'grab',
+                  touchAction: 'none',
+                }}
+                onPointerDown={e => handleSessionPointerDown(e, s)}
               >
                 <div className="flex items-start justify-between h-full px-2 py-1 gap-1">
-                  <div className="flex-1 min-w-0 cursor-pointer" onClick={() => onToggle(s.id)}>
+                  <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1">
                       {conflictWith && (
                         <svg className="w-2.5 h-2.5 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"
-                          title={`Conflicts with ${conflictWith} — tap to reschedule`}>
+                          title={`Conflicts with ${conflictWith} — drag to reschedule`}>
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
                         </svg>
                       )}
@@ -302,6 +462,7 @@ export default function CalendarDayView({
                   </div>
                   {gcalConnected && height > 38 && (
                     <button
+                      onPointerDown={e => e.stopPropagation()}
                       onClick={e => { e.stopPropagation(); if (!added && !adding) handleAddToGcal(s) }}
                       className="shrink-0 mt-0.5 opacity-50 hover:opacity-100 transition-opacity"
                       title={added ? 'Added to Google Calendar' : 'Add to Google Calendar'}
@@ -320,6 +481,17 @@ export default function CalendarDayView({
                     </button>
                   )}
                 </div>
+
+                {/* Resize handle */}
+                {!isDragging && (
+                  <div
+                    className="absolute bottom-0 left-0 right-0 flex items-center justify-center"
+                    style={{ height: 10, cursor: 'ns-resize' }}
+                    onPointerDown={e => handleResizePointerDown(e, s)}
+                  >
+                    <div style={{ width: 20, height: 2, borderRadius: 1, background: s.color.dot, opacity: 0.35 }} />
+                  </div>
+                )}
               </div>
             )
           })}

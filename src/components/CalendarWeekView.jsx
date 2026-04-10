@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react'
+import { useMemo, useState, useEffect, useRef } from 'react'
 
 const HOUR_HEIGHT = 56
 const START_HOUR  = 6
@@ -30,6 +30,18 @@ function timeToMinutes(str) {
   return h * 60 + min
 }
 
+function minutesToTimeStr(min) {
+  const h = Math.floor(min / 60)
+  const m = min % 60
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  const h12 = h % 12 || 12
+  return `${h12}:${String(m).padStart(2, '0')} ${ampm}`
+}
+
+function snap15(min) {
+  return Math.round(min / 15) * 15
+}
+
 function fmtHour(h) {
   if (h === 0) return '12 AM'
   if (h === 12) return '12 PM'
@@ -41,10 +53,9 @@ function nowMinutes() {
   return n.getHours() * 60 + n.getMinutes()
 }
 
-// Returns ISO dateStr for the Monday of the week containing dayStr
 function getWeekMonday(dayStr) {
   const d = new Date(dayStr + 'T12:00:00')
-  const dow = d.getDay() // 0=Sun
+  const dow = d.getDay()
   const offset = dow === 0 ? 6 : dow - 1
   d.setDate(d.getDate() - offset)
   return d.toISOString().split('T')[0]
@@ -67,9 +78,11 @@ export default function CalendarWeekView({
   onNextWeek,
   googleEvents = [],
   conflictMap = new Map(),
+  onSessionMove,
   theme = 'dark',
 }) {
   const tv = theme_vars(theme === 'dark')
+
   const [nowPx, setNowPx] = useState(() =>
     ((nowMinutes() - START_HOUR * 60) / 60) * HOUR_HEIGHT
   )
@@ -79,9 +92,17 @@ export default function CalendarWeekView({
     return () => clearInterval(id)
   }, [])
 
-  const todayStr   = new Date().toISOString().split('T')[0]
-  const mondayStr  = getWeekMonday(activeDayStr)
-  const weekDays   = useMemo(() =>
+  // ── Drag state ──────────────────────────────────────────────────────────────
+  const dragRef     = useRef(null)   // mutable drag info — no re-renders
+  const colDivRefs  = useRef([])     // DOM refs for each day column
+  const columnsRef  = useRef([])     // mirrors `columns` for use in effect
+  const [ghost, setGhost] = useState(null)
+  // ghost: { colIdx, startMin, endMin, color, courseName, sessionId }
+
+  const todayStr  = new Date().toISOString().split('T')[0]
+  const mondayStr = getWeekMonday(activeDayStr)
+
+  const weekDays = useMemo(() =>
     Array.from({ length: 7 }, (_, i) => {
       const dateStr = addDays(mondayStr, i)
       return { dateStr, ...allDaysMap[dateStr] }
@@ -89,7 +110,6 @@ export default function CalendarWeekView({
     [mondayStr, allDaysMap]
   )
 
-  // Google events keyed by date
   const googleByDate = useMemo(() => {
     const map = {}
     googleEvents.forEach(e => {
@@ -101,7 +121,6 @@ export default function CalendarWeekView({
     return map
   }, [googleEvents])
 
-  // Week label
   const weekLabel = useMemo(() => {
     const start = new Date(mondayStr + 'T12:00:00')
     const end   = new Date(addDays(mondayStr, 6) + 'T12:00:00')
@@ -112,7 +131,6 @@ export default function CalendarWeekView({
     return `${start.toLocaleDateString('en-US', opts)} – ${end.toLocaleDateString('en-US', opts)}, ${end.getFullYear()}`
   }, [mondayStr])
 
-  // Per-column: split sessions into timed vs all-day
   const columns = useMemo(() =>
     weekDays.map(day => {
       const sessions  = day?.sessions ?? []
@@ -138,9 +156,161 @@ export default function CalendarWeekView({
     [weekDays, syllabusEventsByDate, googleByDate]
   )
 
+  // Keep columnsRef in sync
+  useEffect(() => { columnsRef.current = columns }, [columns])
+
   const hasAnyAllDay = columns.some(c => c.allDay.length > 0)
   const todayColIdx  = columns.findIndex(c => c.dateStr === todayStr)
   const showRedLine  = todayColIdx >= 0 && nowPx >= 0 && nowPx <= TOTAL_HOURS * HOUR_HEIGHT
+
+  // ── Drag handlers ───────────────────────────────────────────────────────────
+
+  function handleSessionPointerDown(e, ev, colIdx) {
+    if (ev._type !== 'session') return
+    e.preventDefault()
+    e.stopPropagation()
+
+    const colEl = colDivRefs.current[colIdx]
+    const rect  = colEl?.getBoundingClientRect()
+    if (!rect) return
+
+    const mouseY       = e.clientY - rect.top
+    const blockTopPx   = ((ev.startMin - START_HOUR * 60) / 60) * HOUR_HEIGHT
+    const duration     = ev.endMin - ev.startMin
+    const mouseOffsetMin = Math.max(0, Math.min(
+      ((mouseY - blockTopPx) / HOUR_HEIGHT) * 60,
+      duration
+    ))
+
+    dragRef.current = {
+      type: 'move',
+      sessionId: ev.id,
+      duration,
+      mouseOffsetMin,
+      didMove: false,
+      startClientX: e.clientX,
+      startClientY: e.clientY,
+      currentGhost: { colIdx, startMin: ev.startMin, endMin: ev.endMin },
+    }
+
+    setGhost({
+      colIdx,
+      startMin:  ev.startMin,
+      endMin:    ev.endMin,
+      color:     ev.color,
+      courseName: ev.courseName,
+      sessionId: ev.id,
+    })
+
+    document.body.style.userSelect = 'none'
+  }
+
+  function handleResizePointerDown(e, ev, colIdx) {
+    e.preventDefault()
+    e.stopPropagation()
+
+    dragRef.current = {
+      type: 'resize',
+      sessionId: ev.id,
+      origStartMin: ev.startMin,
+      colIdx,
+      didMove: false,
+      startClientY: e.clientY,
+      currentGhost: { colIdx, startMin: ev.startMin, endMin: ev.endMin },
+    }
+
+    setGhost({
+      colIdx,
+      startMin:  ev.startMin,
+      endMin:    ev.endMin,
+      color:     ev.color,
+      courseName: ev.courseName,
+      sessionId: ev.id,
+    })
+
+    document.body.style.cursor    = 'ns-resize'
+    document.body.style.userSelect = 'none'
+  }
+
+  useEffect(() => {
+    const onMove = (e) => {
+      if (!dragRef.current) return
+      const drag = dragRef.current
+
+      const dx = e.clientX - drag.startClientX
+      const dy = e.clientY - drag.startClientY
+      if (!drag.didMove && Math.sqrt(dx * dx + dy * dy) > 4) {
+        drag.didMove = true
+        if (drag.type === 'move') document.body.style.cursor = 'grabbing'
+      }
+      if (!drag.didMove) return
+
+      if (drag.type === 'move') {
+        // Determine hovered column from clientX
+        let targetCol = null
+        for (let i = 0; i < colDivRefs.current.length; i++) {
+          const el = colDivRefs.current[i]
+          if (!el) continue
+          const r = el.getBoundingClientRect()
+          if (e.clientX >= r.left && e.clientX <= r.right) { targetCol = i; break }
+        }
+        if (targetCol === null) {
+          const first = colDivRefs.current[0]?.getBoundingClientRect()
+          const last  = colDivRefs.current[colDivRefs.current.length - 1]?.getBoundingClientRect()
+          targetCol = (first && e.clientX < first.left) ? 0 : (last ? colDivRefs.current.length - 1 : 0)
+        }
+
+        const colEl = colDivRefs.current[targetCol]
+        if (!colEl) return
+        const rect     = colEl.getBoundingClientRect()
+        const mouseY   = e.clientY - rect.top
+        const rawStart = (mouseY / HOUR_HEIGHT) * 60 + START_HOUR * 60 - drag.mouseOffsetMin
+        const newStart = Math.max(START_HOUR * 60, Math.min(END_HOUR * 60 - drag.duration, snap15(rawStart)))
+        const newEnd   = newStart + drag.duration
+
+        drag.currentGhost = { colIdx: targetCol, startMin: newStart, endMin: newEnd }
+        setGhost(prev => prev ? { ...prev, colIdx: targetCol, startMin: newStart, endMin: newEnd } : null)
+
+      } else if (drag.type === 'resize') {
+        const colEl = colDivRefs.current[drag.colIdx]
+        if (!colEl) return
+        const rect   = colEl.getBoundingClientRect()
+        const mouseY = e.clientY - rect.top
+        const rawEnd = (mouseY / HOUR_HEIGHT) * 60 + START_HOUR * 60
+        const newEnd = Math.max(drag.origStartMin + 15, Math.min(END_HOUR * 60, snap15(rawEnd)))
+
+        drag.currentGhost = { colIdx: drag.colIdx, startMin: drag.origStartMin, endMin: newEnd }
+        setGhost(prev => prev ? { ...prev, startMin: drag.origStartMin, endMin: newEnd } : null)
+      }
+    }
+
+    const onUp = (e) => {
+      if (!dragRef.current) return
+      const drag = dragRef.current
+
+      if (drag.didMove && onSessionMove) {
+        const g       = drag.currentGhost
+        const newDate = columnsRef.current[g.colIdx]?.dateStr
+        if (newDate) {
+          onSessionMove(drag.sessionId, newDate, minutesToTimeStr(g.startMin), minutesToTimeStr(g.endMin))
+        }
+      } else if (!drag.didMove && onToggle) {
+        onToggle(drag.sessionId)
+      }
+
+      dragRef.current = null
+      setGhost(null)
+      document.body.style.cursor    = ''
+      document.body.style.userSelect = ''
+    }
+
+    window.addEventListener('pointermove', onMove)
+    window.addEventListener('pointerup',   onUp)
+    return () => {
+      window.removeEventListener('pointermove', onMove)
+      window.removeEventListener('pointerup',   onUp)
+    }
+  }, [onSessionMove, onToggle])
 
   return (
     <div className="flex flex-col">
@@ -167,9 +337,7 @@ export default function CalendarWeekView({
 
       {/* ── Column headers ── */}
       <div className="flex" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
-        {/* Gutter */}
         <div className="w-12 shrink-0" />
-        {/* Day headers */}
         {columns.map((col, i) => {
           const isToday = col.dateStr === todayStr
           const dayNum  = col.dateStr ? parseInt(col.dateStr.split('-')[2]) : null
@@ -247,7 +415,9 @@ export default function CalendarWeekView({
 
         {/* Day columns */}
         {columns.map((col, colIdx) => (
-          <div key={colIdx}
+          <div
+            key={colIdx}
+            ref={el => colDivRefs.current[colIdx] = el}
             className="flex-1 relative min-w-0"
             style={{ borderLeft: `1px solid ${tv.gridLine}`, height: TOTAL_HOURS * HOUR_HEIGHT }}
           >
@@ -262,7 +432,7 @@ export default function CalendarWeekView({
                 style={{ top: i * HOUR_HEIGHT + HOUR_HEIGHT / 2, height: 1, background: tv.gridLineHalf }} />
             ))}
 
-            {/* Red current-time line — only in today's column */}
+            {/* Red current-time line */}
             {showRedLine && colIdx === todayColIdx && (
               <div className="absolute left-0 right-0 z-20 pointer-events-none" style={{ top: nowPx }}>
                 {colIdx === 0 && (
@@ -272,6 +442,36 @@ export default function CalendarWeekView({
                 <div className="w-full" style={{ height: 1.5, background: 'rgba(239,68,68,0.75)' }} />
               </div>
             )}
+
+            {/* Ghost block (drag preview) */}
+            {ghost && ghost.colIdx === colIdx && (() => {
+              const topMin = ghost.startMin - START_HOUR * 60
+              if (topMin < 0 || topMin > TOTAL_HOURS * 60) return null
+              const top    = (topMin / 60) * HOUR_HEIGHT
+              const height = Math.max(((ghost.endMin - ghost.startMin) / 60) * HOUR_HEIGHT, 20)
+              return (
+                <div className="absolute inset-x-0.5 rounded overflow-hidden pointer-events-none z-30"
+                  style={{
+                    top,
+                    height,
+                    background: `${ghost.color.dot}28`,
+                    border: `1.5px dashed ${ghost.color.dot}`,
+                    boxShadow: `0 4px 16px ${ghost.color.dot}30`,
+                  }}
+                >
+                  <div className="px-1.5 py-0.5">
+                    <p className="text-[10px] font-medium leading-tight truncate" style={{ color: ghost.color.dot }}>
+                      {ghost.courseName}
+                    </p>
+                    {height > 28 && (
+                      <p className="text-[9px] leading-tight opacity-70" style={{ color: ghost.color.dot }}>
+                        {minutesToTimeStr(ghost.startMin)} – {minutesToTimeStr(ghost.endMin)}
+                      </p>
+                    )}
+                  </div>
+                </div>
+              )
+            })()}
 
             {/* Timed events */}
             {col.timed.map((ev, j) => {
@@ -294,14 +494,24 @@ export default function CalendarWeekView({
               }
 
               // session
-              const done        = completedIds.has(ev.id)
+              const done         = completedIds.has(ev.id)
               const conflictWith = conflictMap.get(ev.id)
+              const isDragging   = ghost?.sessionId === ev.id
+
               return (
                 <div key={ev.id ?? j}
-                  className="absolute inset-x-0.5 rounded overflow-hidden cursor-pointer"
-                  style={{ top, height, background: `${ev.color.dot}${tv.sessionAlpha}`, borderLeft: `2px solid ${conflictWith ? '#f59e0b' : ev.color.dot}`, opacity: done ? 0.38 : 1 }}
-                  onClick={() => onToggle(ev.id)}
-                  title={conflictWith ? `Conflicts with ${conflictWith} — tap to reschedule` : undefined}
+                  className="absolute inset-x-0.5 rounded overflow-hidden select-none"
+                  style={{
+                    top,
+                    height,
+                    background: `${ev.color.dot}${tv.sessionAlpha}`,
+                    borderLeft: `2px solid ${conflictWith ? '#f59e0b' : ev.color.dot}`,
+                    opacity: isDragging ? 0.25 : done ? 0.38 : 1,
+                    cursor: isDragging ? 'grabbing' : 'grab',
+                    touchAction: 'none',
+                  }}
+                  onPointerDown={e => handleSessionPointerDown(e, ev, colIdx)}
+                  title={conflictWith ? `Conflicts with ${conflictWith} — drag to reschedule` : undefined}
                 >
                   <div className="px-1.5 py-0.5">
                     <div className="flex items-center gap-0.5">
@@ -319,6 +529,17 @@ export default function CalendarWeekView({
                       <p className="text-[9px] leading-tight truncate" style={{ color: tv.subtitleText }}>{ev.sessionType}</p>
                     )}
                   </div>
+
+                  {/* Resize handle */}
+                  {!isDragging && (
+                    <div
+                      className="absolute bottom-0 left-0 right-0 flex items-center justify-center"
+                      style={{ height: 10, cursor: 'ns-resize' }}
+                      onPointerDown={e => handleResizePointerDown(e, ev, colIdx)}
+                    >
+                      <div style={{ width: 20, height: 2, borderRadius: 1, background: ev.color.dot, opacity: 0.35 }} />
+                    </div>
+                  )}
                 </div>
               )
             })}
