@@ -114,7 +114,7 @@ export default function LandingPage({ onGetStarted }) {
         </p>
 
         {/* CTA Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 60 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
           <button
             onClick={() => onGetStarted('signup')}
             style={{
@@ -134,23 +134,23 @@ export default function LandingPage({ onGetStarted }) {
 
         {/* Hero Image */}
         <div style={{
-          maxWidth: 1400, margin: '0 auto', position: 'relative', marginBottom: '-60px',
+          maxWidth: 1400, margin: '60px auto 0', padding: '0 24px', position: 'relative',
         }}>
           {/* Glow behind image */}
           <div style={{
             position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
             width: '110%', height: '110%',
-            background: 'radial-gradient(ellipse, rgba(91,110,245,0.15) 0%, transparent 60%)',
-            filter: 'blur(50px)', pointerEvents: 'none',
+            background: 'radial-gradient(ellipse, rgba(91,110,245,0.18) 0%, transparent 60%)',
+            filter: 'blur(60px)', pointerEvents: 'none',
           }} />
           <img
             src="/hero-landing.png"
             alt="StudyEdge app — dashboard, AI study planner, flashcards, focus mode, and study coach"
             style={{
-              width: '100%', borderRadius: 16, position: 'relative',
+              display: 'block', width: '100%', borderRadius: 16, position: 'relative',
               border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 0 80px rgba(91,110,245,0.25), 0 60px 120px rgba(0,0,0,0.6)',
-              transform: 'perspective(1200px) rotateX(4deg)',
+              boxShadow: '0 0 100px rgba(91,110,245,0.3), 0 60px 120px rgba(0,0,0,0.6)',
+              transform: 'perspective(1200px) rotateX(5deg)',
               transformOrigin: 'top center',
             }}
           />
