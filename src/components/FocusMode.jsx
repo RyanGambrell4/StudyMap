@@ -205,7 +205,10 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
   // ── Study tools ──
   const [studyTools] = useState(() => loadStudyTools(session.courseId))
-  const flashcards = studyTools?.flashcards ?? []
+  const [inSessionFlashcards, setInSessionFlashcards] = useState(null)
+  const [fcGenerating, setFcGenerating] = useState(false)
+  const [fcGenerateError, setFcGenerateError] = useState('')
+  const flashcards = inSessionFlashcards ?? studyTools?.flashcards ?? []
 
   // ── Active Recall ──
   const [recallText, setRecallText] = useState('')
@@ -412,7 +415,16 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       const res = await fetch('/api/generate-quick-quiz', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ courseName: session.courseName, sessionType: session.sessionType, text: studyTools?.text ?? '' }),
+        body: JSON.stringify({
+          courseName: session.courseName,
+          sessionType: session.sessionType,
+          text: [
+            notesConcepts && `Key concepts:\n${notesConcepts}`,
+            notesMain && `Notes:\n${notesMain}`,
+            notesSummary && `Summary:\n${notesSummary}`,
+            studyTools?.text?.slice(0, 3000),
+          ].filter(Boolean).join('\n\n') || '',
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Quiz generation failed')
@@ -437,6 +449,30 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   }
 
   const resetQuiz = () => { setQuizQuestions(null); setQuizDone(false); setQuizAnswers([]); setQuizIdx(0); setQuizSelected(null); setQuizConfirmed(false) }
+
+  const handleGenerateFlashcards = async () => {
+    const sessionNotes = [
+      notesConcepts && `Key concepts:\n${notesConcepts}`,
+      notesMain && `Notes:\n${notesMain}`,
+      notesSummary && `Summary:\n${notesSummary}`,
+    ].filter(Boolean).join('\n\n')
+    const text = [sessionNotes, studyTools?.text?.slice(0, 4000)].filter(Boolean).join('\n\n')
+    if (text.length < 50) { setFcGenerateError('Add some notes in the Notes tab first to generate flashcards.'); return }
+    setFcGenerating(true); setFcGenerateError('')
+    try {
+      const token = await getAccessToken()
+      const res = await fetch('/api/generate-study-tools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to generate flashcards')
+      setInSessionFlashcards(data.flashcards ?? [])
+      setFcIdx(0); setFcFlipped(false); setFcKnown(new Set())
+    } catch (e) { setFcGenerateError(e.message) }
+    finally { setFcGenerating(false) }
+  }
 
   const handleSaveNotes = () => {
     saveNotes(session.courseId, todayStr, { concepts: notesConcepts, main: notesMain, summary: notesSummary })
@@ -911,18 +947,30 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                   <div className="flex flex-col items-center justify-center py-12 text-center">
                     <div className="w-20 h-20 rounded-3xl flex items-center justify-center mb-5" style={{ backgroundColor: `${dot}12`, border: `1px dashed ${dot}30` }}>
                       <svg className="w-10 h-10" style={{ color: dot, opacity: 0.7 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                       </svg>
                     </div>
-                    <p className="text-white font-bold text-lg mb-2">No flashcards for {session.courseName} yet</p>
-                    <p className="text-slate-600 text-sm mb-6 max-w-xs">Upload your lecture notes in Study Tools to generate a personalized deck for this course.</p>
-                    {onGoToTools && (
+                    <p className="text-white font-bold text-lg mb-2">Generate flashcards for this session</p>
+                    <p className="text-slate-500 text-sm mb-6 max-w-xs">
+                      {notesConcepts || notesMain || notesSummary
+                        ? 'Flashcards will be generated from your session notes and course materials.'
+                        : 'Add notes in the Notes tab for more relevant flashcards, or generate from course materials.'}
+                    </p>
+                    {fcGenerateError && (
+                      <div className="bg-red-950/40 border border-red-800/40 rounded-xl px-4 py-3 text-red-300 text-sm mb-4 w-full max-w-xs">{fcGenerateError}</div>
+                    )}
+                    {fcGenerating ? (
+                      <div className="flex flex-col items-center gap-3">
+                        <div className="w-8 h-8 border-4 rounded-full animate-spin" style={{ borderColor: `${dot}30`, borderTopColor: dot }} />
+                        <p className="text-slate-400 text-sm">Generating flashcards…</p>
+                      </div>
+                    ) : (
                       <button
-                        onClick={() => { onExit(); setTimeout(onGoToTools, 50) }}
+                        onClick={handleGenerateFlashcards}
                         className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
                         style={{ backgroundColor: `${dot}20`, color: dot, border: `1px solid ${dot}40` }}
                       >
-                        Go to Study Tools →
+                        Generate Flashcards
                       </button>
                     )}
                   </div>
