@@ -170,7 +170,8 @@
     .hero {
       max-width: 1500px; margin: 0 auto;
       padding: 0 48px;
-      height: 700px;
+      height: 680px;
+      overflow: hidden;
       display: flex; align-items: center; gap: 48px;
     }
     .hero-content { flex: 0 0 500px; display: flex; flex-direction: column; justify-content: center; }
@@ -212,9 +213,9 @@
     }
 
     /* ── Hero visual ── */
-    .hero-visual { flex: 1 1 auto; height: 100%; display: flex; align-items: stretch; justify-content: flex-end; }
+    .hero-visual { flex: 1 1 auto; height: 620px; max-height: 620px; display: flex; align-items: stretch; justify-content: flex-end; }
     .browser-wrap {
-      flex: 1; width: 100%; min-width: 0; height: 100%;
+      flex: 1; width: 100%; min-width: 0; height: 620px; max-height: 620px;
       display: flex; flex-direction: column;
       animation: floatBrowser 5.5s ease-in-out infinite;
       transform: perspective(1000px) rotateX(2deg);
