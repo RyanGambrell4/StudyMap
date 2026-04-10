@@ -68,15 +68,20 @@ export default function LandingPage({ onGetStarted }) {
 
       {/* ── Hero Section ── */}
       <section style={{
-        paddingTop: '140px', paddingBottom: '80px',
-        textAlign: 'center', position: 'relative', overflow: 'hidden',
+        paddingTop: '140px', paddingBottom: '0px',
+        textAlign: 'center', position: 'relative', overflow: 'visible',
       }}>
-        {/* Background glow */}
+        {/* Left spotlight beam */}
         <div style={{
-          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: 900, height: 600, borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(91,110,245,0.12) 0%, transparent 65%)',
-          filter: 'blur(60px)', pointerEvents: 'none',
+          position: 'absolute', top: -60, left: -80, width: 600, height: 700,
+          background: 'radial-gradient(ellipse at 10% 0%, rgba(139,92,246,0.55) 0%, rgba(99,102,241,0.2) 35%, transparent 70%)',
+          filter: 'blur(8px)', pointerEvents: 'none', transform: 'rotate(10deg)',
+        }} />
+        {/* Right spotlight beam */}
+        <div style={{
+          position: 'absolute', top: -60, right: -80, width: 600, height: 700,
+          background: 'radial-gradient(ellipse at 90% 0%, rgba(139,92,246,0.55) 0%, rgba(99,102,241,0.2) 35%, transparent 70%)',
+          filter: 'blur(8px)', pointerEvents: 'none', transform: 'rotate(-10deg)',
         }} />
 
         {/* Badge */}
@@ -84,7 +89,7 @@ export default function LandingPage({ onGetStarted }) {
           display: 'inline-flex', alignItems: 'center', gap: 8,
           background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.22)',
           borderRadius: 999, padding: '6px 16px', marginBottom: 28, fontSize: 13, fontWeight: 600,
-          color: '#a5b4fc',
+          color: '#a5b4fc', position: 'relative',
         }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#6366f1' }} />
           AI-powered study planner for students
@@ -92,66 +97,77 @@ export default function LandingPage({ onGetStarted }) {
 
         {/* Headline */}
         <h1 style={{
-          fontSize: 'clamp(36px, 5vw, 64px)', fontWeight: 900, lineHeight: 1.08,
-          letterSpacing: '-1.5px', color: '#fff', maxWidth: 720,
+          fontSize: 'clamp(40px, 5.5vw, 72px)', fontWeight: 900, lineHeight: 1.06,
+          letterSpacing: '-2px', color: '#fff', maxWidth: 760,
           margin: '0 auto 20px', position: 'relative',
         }}>
-          Study smarter.{' '}
+          You already have<br />the syllabus.{' '}
           <span style={{
             background: 'linear-gradient(135deg, #6366f1, #818cf8, #a5b4fc)',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
           }}>
-            Score higher.
+            Now you have a plan.
           </span>
         </h1>
 
         {/* Subheadline */}
         <p style={{
-          fontSize: 'clamp(16px, 2vw, 19px)', color: 'rgba(226,232,240,0.55)',
-          maxWidth: 540, margin: '0 auto 40px', lineHeight: 1.6, fontWeight: 400,
+          fontSize: 'clamp(16px, 2vw, 19px)', color: 'rgba(226,232,240,0.5)',
+          maxWidth: 520, margin: '0 auto 40px', lineHeight: 1.65, fontWeight: 400, position: 'relative',
         }}>
-          AI builds your perfect study plan for every session. Flashcards, focus timer, study coach — everything you need in one app.
+          StudyEdge is your personal study coach. It plans every session before you start, keeps you locked in while you work, and gives you the tools to actually learn the material — not just cover it.
         </p>
 
         {/* CTA Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14, marginBottom: 72, position: 'relative' }}>
           <button
             onClick={() => onGetStarted('signup')}
             style={{
               background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-              border: 'none', color: '#fff', borderRadius: 12, padding: '14px 32px',
+              border: 'none', color: '#fff', borderRadius: 999, padding: '15px 36px',
               fontSize: 16, fontWeight: 700, cursor: 'pointer',
-              boxShadow: '0 0 30px rgba(99,102,241,0.35), 0 4px 20px rgba(0,0,0,0.3)',
+              boxShadow: '0 0 40px rgba(99,102,241,0.45), 0 4px 20px rgba(0,0,0,0.3)',
               transition: 'all 0.2s',
             }}
-            onMouseEnter={e => e.target.style.boxShadow = '0 0 45px rgba(99,102,241,0.55), 0 4px 20px rgba(0,0,0,0.3)'}
-            onMouseLeave={e => e.target.style.boxShadow = '0 0 30px rgba(99,102,241,0.35), 0 4px 20px rgba(0,0,0,0.3)'}
+            onMouseEnter={e => e.target.style.boxShadow = '0 0 60px rgba(99,102,241,0.65), 0 4px 20px rgba(0,0,0,0.3)'}
+            onMouseLeave={e => e.target.style.boxShadow = '0 0 40px rgba(99,102,241,0.45), 0 4px 20px rgba(0,0,0,0.3)'}
           >
-            Start Studying Free →
+            Get Started Free
           </button>
-          <span style={{ fontSize: 13, color: 'rgba(226,232,240,0.35)' }}>No credit card required</span>
+          <button
+            onClick={() => onGetStarted('login')}
+            style={{
+              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.12)',
+              color: '#e2e8f0', borderRadius: 999, padding: '15px 32px',
+              fontSize: 16, fontWeight: 600, cursor: 'pointer', transition: 'all 0.2s',
+            }}
+            onMouseEnter={e => e.target.style.background = 'rgba(255,255,255,0.1)'}
+            onMouseLeave={e => e.target.style.background = 'rgba(255,255,255,0.06)'}
+          >
+            Sign In →
+          </button>
         </div>
 
-        {/* Hero Image */}
+        {/* Hero Image — bleeds off bottom */}
         <div style={{
-          maxWidth: 1400, margin: '60px auto 0', padding: '0 24px', position: 'relative',
+          maxWidth: 1200, margin: '0 auto', padding: '0 32px',
+          position: 'relative',
         }}>
-          {/* Glow behind image */}
           <div style={{
-            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-            width: '110%', height: '110%',
-            background: 'radial-gradient(ellipse, rgba(91,110,245,0.18) 0%, transparent 60%)',
-            filter: 'blur(60px)', pointerEvents: 'none',
+            position: 'absolute', top: '20%', left: '50%', transform: 'translateX(-50%)',
+            width: '80%', height: '60%',
+            background: 'radial-gradient(ellipse, rgba(99,102,241,0.2) 0%, transparent 70%)',
+            filter: 'blur(40px)', pointerEvents: 'none',
           }} />
           <img
             src="/hero-landing.png"
             alt="StudyEdge app — dashboard, AI study planner, flashcards, focus mode, and study coach"
             style={{
-              display: 'block', width: '100%', borderRadius: 16, position: 'relative',
-              border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 0 100px rgba(91,110,245,0.3), 0 60px 120px rgba(0,0,0,0.6)',
-              transform: 'perspective(1200px) rotateX(5deg)',
-              transformOrigin: 'top center',
+              display: 'block', width: '100%', borderRadius: '16px 16px 0 0',
+              border: '1px solid rgba(255,255,255,0.1)',
+              borderBottom: 'none',
+              boxShadow: '0 -20px 80px rgba(99,102,241,0.2), 0 0 120px rgba(0,0,0,0.8)',
+              position: 'relative',
             }}
           />
         </div>
@@ -159,7 +175,7 @@ export default function LandingPage({ onGetStarted }) {
 
       {/* ── Features Grid ── */}
       <section style={{
-        maxWidth: 1000, margin: '0 auto', padding: '80px 24px 100px',
+        maxWidth: 1000, margin: '0 auto', padding: '140px 24px 100px',
       }}>
         <div style={{ textAlign: 'center', marginBottom: 56 }}>
           <h2 style={{
