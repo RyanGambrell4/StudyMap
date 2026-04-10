@@ -58,7 +58,8 @@ Rules:
     })
 
     const data = await response.json()
-    const content = data.content[0].text
+    const content = data.content?.[0]?.text
+    if (!content) throw new Error(data.error?.message ?? 'Empty AI response')
     const first = content.indexOf('[')
     const last = content.lastIndexOf(']')
     const questions = JSON.parse(content.slice(first, last + 1))
@@ -85,6 +86,6 @@ Rules:
   } catch (error) {
     console.error('Quick quiz error:', error)
     console.error(error)
-    res.status(500).json({ error: 'Internal server error' })
+    res.status(500).json({ error: error.message ?? 'Internal server error' })
   }
 }

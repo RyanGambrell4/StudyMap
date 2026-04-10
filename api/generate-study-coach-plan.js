@@ -111,14 +111,18 @@ Rules:
     })
 
     const data = await response.json()
-    const content = data.content[0].text
+    if (!response.ok) {
+      throw new Error(data.error?.message ?? `Anthropic API error ${response.status}`)
+    }
+    const content = data.content?.[0]?.text
+    if (!content) throw new Error('Empty response from AI')
     const first = content.indexOf('{')
     const last = content.lastIndexOf('}')
+    if (first === -1 || last === -1) throw new Error('AI response was not valid JSON')
     const plan = JSON.parse(content.slice(first, last + 1))
     res.status(200).json(plan)
   } catch (error) {
     console.error('Study coach plan error:', error)
-    console.error(error)
-    res.status(500).json({ error: 'Internal server error' })
+    res.status(500).json({ error: error.message ?? 'Internal server error' })
   }
 }

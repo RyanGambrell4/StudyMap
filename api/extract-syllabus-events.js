@@ -55,7 +55,8 @@ Return ONLY the JSON array with no other text. Example:
     })
 
     const data = await response.json()
-    const content = data.content[0].text
+    const content = data.content?.[0]?.text
+    if (!content) throw new Error(data.error?.message ?? 'Empty AI response')
     const firstBracket = content.indexOf('[')
     const lastBracket = content.lastIndexOf(']')
     const cleaned = content.slice(firstBracket, lastBracket + 1)
@@ -64,6 +65,6 @@ Return ONLY the JSON array with no other text. Example:
   } catch (error) {
     console.error('Syllabus extraction error:', error)
     console.error(error)
-    res.status(500).json({ error: 'Internal server error' })
+    res.status(500).json({ error: error.message ?? 'Internal server error' })
   }
 }

@@ -83,7 +83,8 @@ Return ONLY a JSON array, no other text:
     })
 
     const data = await response.json()
-    const content = data.content[0].text
+    const content = data.content?.[0]?.text
+    if (!content) throw new Error(data.error?.message ?? 'Empty AI response')
     const first = content.indexOf('[')
     const last  = content.lastIndexOf(']')
     const suggestions = JSON.parse(content.slice(first, last + 1))
