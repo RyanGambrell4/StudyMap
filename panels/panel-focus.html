@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Focus Mode Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:transparent;font-family:'Inter',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;padding:0;display:inline-block}
+:root{--blue:#4f7bff;--text:#e2e8f0;--muted:rgba(226,232,240,0.27)}
+.panel{background:rgba(9,10,28,0.98);border-radius:16px;border:1px solid rgba(255,255,255,0.085);overflow:hidden;box-shadow:0 0 0 1px rgba(79,123,255,0.16),0 24px 48px rgba(0,0,0,0.58),0 0 55px rgba(79,123,255,0.10);width:220px}
+.bb{display:flex;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,0.030);border-bottom:1px solid rgba(255,255,255,0.062)}
+.bd{width:9px;height:9px;border-radius:50%}
+.bu{margin-left:8px;background:rgba(255,255,255,0.052);border-radius:6px;padding:4px 12px;font-size:11px;color:rgba(255,255,255,0.28)}
+.body{padding:20px 18px 22px;text-align:center}
+.eye{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:0.11em;margin-bottom:18px}
+.ring{position:relative;width:100px;height:100px;margin:0 auto 16px}
+.svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.tr{fill:none;stroke:rgba(79,123,255,0.12);stroke-width:5}
+.pr{fill:none;stroke:var(--blue);stroke-width:5;stroke-linecap:round;stroke-dasharray:264;stroke-dashoffset:76}
+.inner{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.tm{font-size:26px;font-weight:900;color:#fff;line-height:1}
+.mn{font-size:10px;color:var(--muted);margin-top:2px}
+.nm{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
+.tp{font-size:11px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="panel">
+  <div class="bb"><div class="bd" style="background:#ff5f56"></div><div class="bd" style="background:#ffbd2e"></div><div class="bd" style="background:#27c93f"></div><div class="bu">Focus Mode</div></div>
+  <div class="body">
+    <div class="eye">FOCUS MODE · ACTIVE</div>
+    <div class="ring">
+      <svg class="svg" viewBox="0 0 100 100"><circle class="tr" cx="50" cy="50" r="42"/><circle class="pr" cx="50" cy="50" r="42"/></svg>
+      <div class="inner"><div class="tm">18:24</div><div class="mn">remaining</div></div>
+    </div>
+    <div class="nm">FIN 3100</div>
+    <div class="tp">Initial Reading · Deep Focus</div>
+  </div>
+</div>
+</body></html>

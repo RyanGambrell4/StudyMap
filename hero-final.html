@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>StudyEdge Hero — Final</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{width:1480px;height:740px;background:#060614;overflow:hidden;font-family:'Inter',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;position:relative}
+
+/* BG */
+.bg-noise{position:absolute;inset:0;z-index:0;opacity:0.45;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.7' numOctaves='5' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.05'/%3E%3C/svg%3E");background-size:180px 180px}
+.grid{position:absolute;inset:0;background-image:radial-gradient(circle,rgba(100,120,255,0.045) 1.2px,transparent 1.2px);background-size:20px 20px}
+.grid2{display:none}
+.gl{position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0}
+
+/* Panels */
+.p{position:absolute;background:rgba(8,9,24,0.98);border-radius:14px;border:1px solid rgba(255,255,255,0.08);overflow:hidden}
+.bb{display:flex;align-items:center;gap:5px;padding:8px 12px;background:rgba(255,255,255,0.028);border-bottom:1px solid rgba(255,255,255,0.058)}
+.bd{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.bu{margin-left:7px;background:rgba(255,255,255,0.050);border-radius:5px;padding:3px 11px;font-size:10px;color:rgba(255,255,255,0.26);white-space:nowrap;overflow:hidden}
+
+:root{--b:#4f7bff;--p:#7c5cfc;--g:#22c55e;--o:#f97316;--tl:#2dd4bf;--t:#e2e8f0;--d:rgba(226,232,240,0.50);--m:rgba(226,232,240,0.27);--c:rgba(255,255,255,0.038);--br:rgba(255,255,255,0.072)}
+
+/* ═══ BADGES ═══ */
+.badge{position:absolute;border-radius:999px;padding:7px 14px;font-size:11px;font-weight:700;display:flex;align-items:center;gap:6px;z-index:30;white-space:nowrap}
+.bdot{width:5px;height:5px;border-radius:50%;background:currentColor}
+
+/* ═══ SCHEDULE ═══ left:8 top:98 w:185 */
+.ps{left:8px;top:98px;width:185px;z-index:6;transform:rotate(-1.5deg);transform-origin:top left;box-shadow:0 20px 40px rgba(0,0,0,0.50),0 0 35px rgba(91,110,245,0.40),0 0 80px rgba(91,110,245,0.18),0 0 130px rgba(91,110,245,0.07)}
+.s-h{padding:10px 12px 8px;border-bottom:1px solid var(--br)}
+.s-ht{font-size:12px;font-weight:700;color:var(--t);margin-bottom:2px}
+.s-hs{font-size:9px;color:var(--m)}
+.s-b{padding:6px 10px}
+.s-r{display:flex;align-items:stretch;gap:7px;padding:6px 0;border-bottom:1px solid var(--br)}
+.s-r:last-child{border-bottom:none}
+.s-t{font-size:9px;color:var(--m);font-weight:500;width:38px;flex-shrink:0;padding-top:2px}
+.s-bar{width:2.5px;border-radius:2px;flex-shrink:0;min-height:28px}
+.s-i{flex:1;min-width:0}
+.s-c{font-size:11px;font-weight:600;color:var(--t);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.s-ty{font-size:9px;color:var(--m)}
+.s-d{font-size:8px;color:var(--m);background:var(--c);border:1px solid var(--br);border-radius:4px;padding:2px 6px;flex-shrink:0;align-self:center}
+
+/* ═══ FOCUS ═══ left:165 top:118 w:175 */
+.pf{left:165px;top:118px;width:175px;z-index:7;box-shadow:0 24px 48px rgba(0,0,0,0.55),0 0 35px rgba(91,110,245,0.40),0 0 80px rgba(91,110,245,0.18),0 0 130px rgba(91,110,245,0.07)}
+.f-b{padding:14px 14px 16px;text-align:center}
+.f-e{font-size:9px;font-weight:700;color:var(--m);letter-spacing:0.10em;margin-bottom:14px}
+.f-w{position:relative;width:80px;height:80px;margin:0 auto 12px}
+.f-svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.f-tr{fill:none;stroke:rgba(79,123,255,0.12);stroke-width:4.5}
+.f-pr{fill:none;stroke:var(--b);stroke-width:4.5;stroke-linecap:round;stroke-dasharray:214;stroke-dashoffset:62}
+.f-in{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.f-tm{font-size:20px;font-weight:900;color:#fff;line-height:1}
+.f-mn{font-size:8px;color:var(--m);margin-top:2px}
+.f-nm{font-size:11px;font-weight:700;color:var(--t);margin-bottom:2px}
+.f-tp{font-size:9px;color:var(--m)}
+
+/* ═══ MAIN DASHBOARD ═══ left:310 top:86 w:420 */
+.pm{left:310px;top:86px;width:420px;z-index:10;box-shadow:0 0 0 1px rgba(91,110,245,0.30),0 40px 80px rgba(0,0,0,0.68),0 0 55px rgba(91,110,245,0.50),0 0 120px rgba(91,110,245,0.25),0 0 200px rgba(91,110,245,0.10)}
+.m-inner{display:flex}
+.m-sb{width:40px;flex-shrink:0;background:rgba(0,0,0,0.20);border-right:1px solid var(--br);display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:4px}
+.m-sl{width:26px;height:26px;background:var(--b);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff;margin-bottom:10px}
+.m-si{width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--m)}
+.m-si.on{background:rgba(79,123,255,0.13);color:var(--b)}
+.m-c{flex:1;padding:16px 16px 0;display:flex;flex-direction:column;gap:12px;overflow:hidden}
+.m-h{display:flex;justify-content:space-between;align-items:flex-start}
+.m-dt{font-size:10px;color:var(--m);margin-bottom:2px}
+.m-gr{font-size:20px;font-weight:800;color:var(--t)}
+.m-sp{display:flex;align-items:center;gap:4px;background:rgba(249,115,22,0.11);border:1px solid rgba(249,115,22,0.22);border-radius:8px;padding:5px 10px;font-size:10px;font-weight:700;color:#f97316;white-space:nowrap;flex-shrink:0}
+.m-sg{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.m-sc{background:var(--c);border:1px solid var(--br);border-radius:10px;padding:11px 10px 9px}
+.m-sci{font-size:11px;display:block;margin-bottom:6px}
+.m-scv{font-size:20px;font-weight:800;color:var(--t);line-height:1;margin-bottom:2px}
+.m-scl{font-size:9px;color:var(--m);font-weight:500}
+.m-nc{background:linear-gradient(135deg,rgba(79,123,255,0.16),rgba(124,92,252,0.10));border:1px solid rgba(79,123,255,0.24);border-radius:11px;padding:13px 14px}
+.m-ne{font-size:9px;font-weight:700;color:var(--b);letter-spacing:0.08em;display:flex;align-items:center;gap:6px;margin-bottom:6px}
+.m-nc2{background:var(--b);color:#fff;padding:2px 6px;border-radius:3px;font-size:8px;font-weight:700}
+.m-nr{font-size:20px;font-weight:900;color:#fff;margin-bottom:3px;letter-spacing:-0.3px}
+.m-nm{font-size:10px;color:var(--d);margin-bottom:10px}
+.m-br{display:flex;gap:6px}
+.m-bw{background:#fff;color:#0f1030;border-radius:7px;padding:7px 14px;font-size:11px;font-weight:700}
+.m-bg{background:rgba(255,255,255,0.07);color:var(--t);border:1px solid var(--br);border-radius:7px;padding:7px 14px;font-size:11px;font-weight:600}
+.m-qi{display:flex;align-items:center;gap:9px;padding:8px 0;border-top:1px solid var(--br)}
+.m-qd{width:6px;height:6px;border-radius:50%;flex-shrink:0}
+.m-qn{font-size:11px;color:var(--d);flex:1}
+.m-qc{width:15px;height:15px;border:1.5px solid rgba(255,255,255,0.16);border-radius:50%;flex-shrink:0}
+.m-ww{padding:4px 16px 14px}
+.m-wl{font-size:8px;font-weight:700;color:var(--m);letter-spacing:0.09em;margin-bottom:8px}
+.m-wr{display:grid;grid-template-columns:repeat(7,1fr)}
+.m-wd{text-align:center}
+.m-wdl{font-size:8px;color:var(--m);margin-bottom:3px}
+.m-wdn{width:24px;height:24px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;color:var(--d);margin:0 auto 3px;font-weight:500}
+.m-wdn.t{background:var(--b);color:#fff;font-weight:700}
+.m-wds{display:flex;justify-content:center;gap:2px}
+.m-wdot{width:4px;height:4px;border-radius:50%}
+
+/* ═══ SESSION PLANNER ═══ left:690 top:72 w:310 */
+.psp{left:690px;top:72px;width:310px;z-index:14;box-shadow:0 0 0 1px rgba(91,110,245,0.30),0 50px 100px rgba(0,0,0,0.72),0 0 50px rgba(91,110,245,0.45),0 0 110px rgba(91,110,245,0.22),0 0 180px rgba(91,110,245,0.09),-16px 0 40px rgba(0,0,0,0.35)}
+.sp-top{padding:14px 14px 0}
+.sp-ready{display:inline-flex;align-items:center;gap:5px;background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.28);border-radius:999px;padding:4px 10px;margin-bottom:10px}
+.sp-rdot{width:6px;height:6px;border-radius:50%;background:#22c55e}
+.sp-rtxt{font-size:10px;font-weight:700;color:#22c55e;letter-spacing:0.06em}
+.sp-title{font-size:14px;font-weight:800;color:var(--t);line-height:1.25;margin-bottom:8px}
+.sp-bar{display:flex;height:7px;border-radius:4px;overflow:hidden;gap:2px;margin-bottom:5px}
+.sp-seg{border-radius:3px}
+.sp-times{display:flex;justify-content:space-between;font-size:9px;color:var(--m);margin-bottom:10px}
+.sp-pills{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:12px}
+.sp-pill{border-radius:999px;padding:4px 10px;font-size:9px;font-weight:700}
+.sp-steps{padding:0 11px}
+.sp-step{background:var(--c);border:1px solid var(--br);border-radius:10px;padding:10px 12px;margin-bottom:7px;border-left:3px solid transparent}
+.sp-shdr{display:flex;align-items:center;gap:7px;margin-bottom:6px}
+.sp-min{border-radius:999px;padding:3px 9px;font-size:9px;font-weight:800;flex-shrink:0}
+.sp-stitle{font-size:11px;font-weight:700;color:var(--t);flex:1;line-height:1.3}
+.sp-snum{font-size:9px;color:var(--m);flex-shrink:0}
+.sp-sbody{font-size:10px;color:var(--d);line-height:1.45;margin-bottom:4px}
+.sp-snote{font-size:9px;color:var(--m);font-style:italic;line-height:1.35}
+.sp-btns{padding:10px 11px 14px;display:flex;gap:6px}
+.sp-regen{flex:1;background:var(--c);border:1px solid var(--br);border-radius:8px;padding:8px;text-align:center;font-size:10px;font-weight:600;color:var(--d)}
+.sp-start{flex:2;background:linear-gradient(135deg,var(--b),var(--p));border-radius:8px;padding:8px;text-align:center;font-size:11px;font-weight:800;color:#fff}
+
+/* ═══ AI COACH ═══ left:985 top:82 w:215 */
+.pc{left:985px;top:82px;width:215px;z-index:16;transform:rotate(1deg);box-shadow:0 0 0 1px rgba(91,110,245,0.30),0 24px 48px rgba(0,0,0,0.58),0 0 35px rgba(91,110,245,0.40),0 0 80px rgba(91,110,245,0.18),0 0 130px rgba(91,110,245,0.07)}
+.c-h{display:flex;align-items:center;gap:8px;padding:10px 12px 8px;border-bottom:1px solid var(--br)}
+.c-a{width:26px;height:26px;background:linear-gradient(135deg,var(--b),var(--p));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;font-weight:700;flex-shrink:0}
+.c-nm{font-size:12px;font-weight:700;color:var(--t)}
+.c-sb{font-size:9px;color:var(--m)}
+.c-ms{padding:10px 10px 12px;display:flex;flex-direction:column;gap:7px}
+.c-mu{align-self:flex-end;background:var(--b);color:#fff;border-radius:10px 10px 3px 10px;padding:7px 10px;font-size:10px;font-weight:500;line-height:1.4;max-width:180px}
+.c-ma{align-self:flex-start;background:var(--c);border:1px solid var(--br);color:var(--t);border-radius:3px 10px 10px 10px;padding:8px 10px;font-size:10px;line-height:1.5;max-width:190px}
+.c-mat{font-size:8px;font-weight:700;color:var(--b);display:block;margin-bottom:4px;letter-spacing:0.05em}
+.c-ty{display:flex;gap:3px;align-items:center;padding:8px 10px;background:var(--c);border:1px solid var(--br);border-radius:3px 10px 10px 10px;width:fit-content}
+.c-td{width:4px;height:4px;border-radius:50%;background:var(--m)}
+
+/* ═══ FLASHCARD ═══ left:1190 top:100 w:210 */
+.pfl{left:1190px;top:100px;width:210px;z-index:16;transform:rotate(-1deg);box-shadow:0 0 0 1px rgba(91,110,245,0.30),0 20px 40px rgba(0,0,0,0.55),0 0 35px rgba(91,110,245,0.40),0 0 80px rgba(91,110,245,0.18),0 0 130px rgba(91,110,245,0.07)}
+.fl-h{display:flex;align-items:center;justify-content:space-between;padding:9px 12px;border-bottom:1px solid var(--br)}
+.fl-ht{font-size:11px;font-weight:700;color:var(--t)}
+.fl-hp{font-size:9px;color:var(--m)}
+.fl-b{padding:12px 12px 10px}
+.fl-face{background:linear-gradient(135deg,rgba(79,123,255,0.10),rgba(124,92,252,0.07));border:1px solid rgba(79,123,255,0.20);border-radius:10px;padding:14px 12px;text-align:center;margin-bottom:10px}
+.fl-side{font-size:8px;color:var(--b);font-weight:700;letter-spacing:0.10em;margin-bottom:7px}
+.fl-q{font-size:13px;font-weight:800;color:#fff;line-height:1.3;margin-bottom:6px}
+.fl-a{font-size:10px;color:var(--d);line-height:1.5}
+.fl-btns{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.fl-fb{border-radius:6px;padding:7px 3px;text-align:center;font-size:10px;font-weight:700}
+.hard{background:rgba(239,68,68,0.11);border:1px solid rgba(239,68,68,0.22);color:#ef4444}
+.med{background:rgba(234,179,8,0.11);border:1px solid rgba(234,179,8,0.22);color:#eab308}
+.easy{background:rgba(34,197,94,0.11);border:1px solid rgba(34,197,94,0.22);color:#22c55e}
+</style>
+</head>
+<body>
+
+<div class="bg-noise"></div>
+<div class="grid"></div>
+<div class="grid2"></div>
+
+<!-- Single-color background ambient -->
+<div class="gl" style="width:1100px;height:700px;background:radial-gradient(ellipse,rgba(91,110,245,0.14) 0%,rgba(91,110,245,0.05) 40%,transparent 65%);top:50%;left:50%;transform:translate(-50%,-50%)"></div>
+
+<!-- Badges -->
+<div class="badge" style="background:rgba(10,10,30,0.90);border:1px solid rgba(91,110,245,0.45);color:#f97316;top:16px;left:440px;box-shadow:0 0 16px rgba(91,110,245,0.30),0 0 40px rgba(91,110,245,0.10)"><div class="bdot"></div>🔥 7-day streak active</div>
+<div class="badge" style="background:rgba(10,10,30,0.90);border:1px solid rgba(91,110,245,0.45);color:#a78bfa;top:16px;left:680px;box-shadow:0 0 16px rgba(91,110,245,0.30),0 0 40px rgba(91,110,245,0.10)"><div class="bdot"></div>✦ AI session planner</div>
+<div class="badge" style="background:rgba(10,10,30,0.90);border:1px solid rgba(91,110,245,0.45);color:#22c55e;top:16px;left:900px;box-shadow:0 0 16px rgba(91,110,245,0.30),0 0 40px rgba(91,110,245,0.10)"><div class="bdot"></div>✓ Quiz scored 9/10</div>
+
+<!-- ═══ SCHEDULE ═══ -->
+<div class="p ps">
+  <div class="bb"><div class="bd" style="background:#ff5f56"></div><div class="bd" style="background:#ffbd2e"></div><div class="bd" style="background:#27c93f"></div><div class="bu">Schedule</div></div>
+  <div class="s-h"><div class="s-ht">Today's Schedule</div><div class="s-hs">Thu, Apr 9 · 4 sessions</div></div>
+  <div class="s-b">
+    <div class="s-r"><div class="s-t">8:00 AM</div><div class="s-bar" style="background:#4f7bff"></div><div class="s-i"><div class="s-c">FIN 3100</div><div class="s-ty">Initial Reading</div></div><div class="s-d">58 min</div></div>
+    <div class="s-r"><div class="s-t">10:30</div><div class="s-bar" style="background:#a78bfa"></div><div class="s-i"><div class="s-c">ECON 4880</div><div class="s-ty">Exam Cram</div></div><div class="s-d">45 min</div></div>
+    <div class="s-r"><div class="s-t">2:00 PM</div><div class="s-bar" style="background:#34d399"></div><div class="s-i"><div class="s-c">MATH 2310</div><div class="s-ty">Problem Set</div></div><div class="s-d">60 min</div></div>
+    <div class="s-r"><div class="s-t">4:30 PM</div><div class="s-bar" style="background:#f97316"></div><div class="s-i"><div class="s-c">BUS 2200</div><div class="s-ty">Case Review</div></div><div class="s-d">40 min</div></div>
+  </div>
+</div>
+
+<!-- ═══ FOCUS MODE ═══ -->
+<div class="p pf">
+  <div class="bb"><div class="bd" style="background:#ff5f56"></div><div class="bd" style="background:#ffbd2e"></div><div class="bd" style="background:#27c93f"></div><div class="bu">Focus Mode</div></div>
+  <div class="f-b">
+    <div class="f-e">FOCUS MODE · ACTIVE</div>
+    <div class="f-w">
+      <svg class="f-svg" viewBox="0 0 90 90"><circle class="f-tr" cx="45" cy="45" r="38"/><circle class="f-pr" cx="45" cy="45" r="38"/></svg>
+      <div class="f-in"><div class="f-tm">18:24</div><div class="f-mn">remaining</div></div>
+    </div>
+    <div class="f-nm">FIN 3100</div>
+    <div class="f-tp">Initial Reading · Deep Focus</div>
+  </div>
+</div>
+
+<!-- ═══ MAIN DASHBOARD ═══ -->
+<div class="p pm">
+  <div class="bb"><div class="bd" style="background:#ff5f56"></div><div class="bd" style="background:#ffbd2e"></div><div class="bd" style="background:#27c93f"></div><div class="bu">getstudyedge.com/app</div></div>
+  <div class="m-inner">
+    <div class="m-sb">
+      <div class="m-sl">S</div>
+      <div class="m-si on">⊞</div><div class="m-si">📅</div><div class="m-si">✦</div><div class="m-si">🃏</div><div class="m-si">🎯</div><div class="m-si">📝</div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column">
+      <div class="m-c">
+        <div class="m-h"><div><div class="m-dt">Thursday, April 9</div><div class="m-gr">Good morning 👋</div></div><div class="m-sp">🔥 Start your streak</div></div>
+        <div class="m-sg">
+          <div class="m-sc"><span class="m-sci" style="color:#f97316">🔥</span><div class="m-scv">7</div><div class="m-scl">Day streak</div></div>
+          <div class="m-sc"><span class="m-sci" style="color:#22c55e">✓</span><div class="m-scv">5</div><div class="m-scl">Sessions this week</div></div>
+          <div class="m-sc"><span class="m-sci" style="color:#4f7bff">⏱</span><div class="m-scv">12h</div><div class="m-scl">Studied this week</div></div>
+        </div>
+        <div class="m-nc">
+          <div class="m-ne">UP NEXT TODAY <span class="m-nc2">Today</span></div>
+          <div class="m-nr">FIN 3100</div>
+          <div class="m-nm">Initial Reading · 8:00 AM · 58 min</div>
+          <div class="m-br"><div class="m-bw">Start Session</div><div class="m-bg">Mark done</div></div>
+        </div>
+        <div class="m-qi"><div class="m-qd" style="background:#a78bfa"></div><div class="m-qn">ECON 4880 · Exam Cram</div><div class="m-qc"></div></div>
+        <div class="m-qi"><div class="m-qd" style="background:#34d399"></div><div class="m-qn">MATH 2310 · Problem Set Review</div><div class="m-qc"></div></div>
+      </div>
+      <div class="m-ww">
+        <div class="m-wl">THIS WEEK</div>
+        <div class="m-wr">
+          <div class="m-wd"><div class="m-wdl">M</div><div class="m-wdn">6</div><div class="m-wds"><div class="m-wdot" style="background:#4f7bff"></div><div class="m-wdot" style="background:#a78bfa"></div></div></div>
+          <div class="m-wd"><div class="m-wdl">T</div><div class="m-wdn">7</div><div class="m-wds"><div class="m-wdot" style="background:#4f7bff"></div></div></div>
+          <div class="m-wd"><div class="m-wdl">W</div><div class="m-wdn">8</div><div class="m-wds"><div class="m-wdot" style="background:#4f7bff"></div><div class="m-wdot" style="background:#a78bfa"></div><div class="m-wdot" style="background:#34d399"></div></div></div>
+          <div class="m-wd"><div class="m-wdl">T</div><div class="m-wdn t">9</div><div class="m-wds"><div class="m-wdot" style="background:#4f7bff"></div><div class="m-wdot" style="background:#a78bfa"></div></div></div>
+          <div class="m-wd"><div class="m-wdl">F</div><div class="m-wdn">10</div><div class="m-wds"><div class="m-wdot" style="background:#4f7bff"></div><div class="m-wdot" style="background:#34d399"></div><div class="m-wdot" style="background:#f97316"></div></div></div>
+          <div class="m-wd"><div class="m-wdl">S</div><div class="m-wdn">11</div><div class="m-wds"><div class="m-wdot" style="background:#a78bfa"></div><div class="m-wdot" style="background:#34d399"></div></div></div>
+          <div class="m-wd"><div class="m-wdl">S</div><div class="m-wdn">12</div><div class="m-wds"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ SESSION PLANNER ═══ -->
+<div class="p psp">
+  <div class="bb"><div class="bd" style="background:#ff5f56"></div><div class="bd" style="background:#ffbd2e"></div><div class="bd" style="background:#27c93f"></div><div class="bu">Session Blueprint</div></div>
+  <div class="sp-top">
+    <div class="sp-ready"><div class="sp-rdot"></div><span class="sp-rtxt">SESSION PLAN READY</span></div>
+    <div class="sp-title">Strategic Positioning —<br>Competitive Advantage Foundations</div>
+    <div class="sp-bar">
+      <div class="sp-seg" style="flex:5;background:#4f7bff"></div>
+      <div class="sp-seg" style="flex:12;background:#5b6ef5"></div>
+      <div class="sp-seg" style="flex:10;background:#7c5cfc"></div>
+      <div class="sp-seg" style="flex:12;background:#4f7bff"></div>
+      <div class="sp-seg" style="flex:5;background:#22c55e"></div>
+      <div class="sp-seg" style="flex:10;background:#a78bfa"></div>
+      <div class="sp-seg" style="flex:4;background:#2dd4bf"></div>
+    </div>
+    <div class="sp-times"><span>0 min</span><span>58 min</span></div>
+    <div class="sp-pills">
+      <div class="sp-pill" style="background:rgba(79,123,255,0.13);border:1px solid rgba(79,123,255,0.26);color:#4f7bff">Review</div>
+      <div class="sp-pill" style="background:rgba(124,92,252,0.13);border:1px solid rgba(124,92,252,0.26);color:#a78bfa">Active Recall</div>
+      <div class="sp-pill" style="background:rgba(34,197,94,0.11);border:1px solid rgba(34,197,94,0.24);color:#22c55e">Break</div>
+      <div class="sp-pill" style="background:rgba(45,212,191,0.11);border:1px solid rgba(45,212,191,0.24);color:#2dd4bf">Summary</div>
+    </div>
+  </div>
+  <div class="sp-steps">
+    <div class="sp-step" style="border-left-color:#4f7bff">
+      <div class="sp-shdr"><div class="sp-min" style="background:rgba(79,123,255,0.16);color:#4f7bff">5 min</div><div class="sp-stitle">Warm-Up: Competitive Strategy Recall</div><div class="sp-snum">#1</div></div>
+      <div class="sp-sbody">Skim your course notes to identify 2–3 core frameworks (Porter's Five Forces, positioning models). Write one question about each.</div>
+      <div class="sp-snote">Activating existing knowledge primes your brain to absorb new connections.</div>
+    </div>
+    <div class="sp-step" style="border-left-color:#4f7bff">
+      <div class="sp-shdr"><div class="sp-min" style="background:rgba(79,123,255,0.16);color:#4f7bff">12 min</div><div class="sp-stitle">Deep Concept Review: Where Companies Compete</div><div class="sp-snum">#2</div></div>
+      <div class="sp-sbody">Read the section on market positioning, industry choice, and competitive scope. Annotate 3–4 key examples of how real companies made these choices.</div>
+      <div class="sp-snote">Understanding the strategic decision framework is essential before execution.</div>
+    </div>
+    <div class="sp-step" style="border-left-color:#7c5cfc">
+      <div class="sp-shdr"><div class="sp-min" style="background:rgba(124,92,252,0.16);color:#a78bfa">10 min</div><div class="sp-stitle">Active Recall: Strategic Positioning Mapping</div><div class="sp-snum">#3</div></div>
+      <div class="sp-sbody">Close your notes. Create a 2×2 matrix (Broad vs. Narrow scope, Cost vs. Differentiation). Fill in 3 company examples from memory.</div>
+      <div class="sp-snote">Testing yourself on positioning reveals gaps and cements the frameworks.</div>
+    </div>
+  </div>
+  <div class="sp-btns"><div class="sp-regen">Regenerate plan</div><div class="sp-start">Start Session →</div></div>
+</div>
+
+<!-- ═══ AI COACH ═══ -->
+<div class="p pc">
+  <div class="bb"><div class="bd" style="background:#ff5f56"></div><div class="bd" style="background:#ffbd2e"></div><div class="bd" style="background:#27c93f"></div><div class="bu">AI Study Coach</div></div>
+  <div class="c-h">
+    <div class="c-a">✦</div>
+    <div><div class="c-nm">StudyEdge Coach</div><div class="c-sb">FIN 3100 · Chapter 4</div></div>
+  </div>
+  <div class="c-ms">
+    <div class="c-mu">What's the difference between monetary and fiscal policy?</div>
+    <div class="c-ma"><span class="c-mat">✦ STUDYEDGE AI</span>Monetary policy is controlled by the central bank — it manages interest rates and money supply. Fiscal policy is government-controlled through spending and taxation. Both aim to stabilize the economy but through different levers.</div>
+    <div class="c-mu">Quiz me on this chapter</div>
+    <div class="c-ty"><div class="c-td"></div><div class="c-td" style="opacity:.55"></div><div class="c-td" style="opacity:.25"></div></div>
+  </div>
+</div>
+
+<!-- ═══ FLASHCARD ═══ -->
+<div class="p pfl">
+  <div class="bb"><div class="bd" style="background:#ff5f56"></div><div class="bd" style="background:#ffbd2e"></div><div class="bd" style="background:#27c93f"></div><div class="bu">Flashcards · FIN 3100</div></div>
+  <div class="fl-h"><div class="fl-ht">🃏 Flashcards</div><div class="fl-hp">7 / 24</div></div>
+  <div class="fl-b">
+    <div class="fl-face">
+      <div class="fl-side">ANSWER</div>
+      <div class="fl-q">What is the Federal Funds Rate?</div>
+      <div class="fl-a">The overnight lending rate between banks, set by the Fed as a primary monetary policy tool to influence borrowing costs economy-wide.</div>
+    </div>
+    <div class="fl-btns">
+      <div class="fl-fb hard">Hard</div>
+      <div class="fl-fb med">Medium</div>
+      <div class="fl-fb easy">Easy ✓</div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

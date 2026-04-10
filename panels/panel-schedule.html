@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Schedule Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:transparent;font-family:'Inter',-apple-system,sans-serif;-webkit-font-smoothing:antialiased;padding:0;display:inline-block}
+:root{--text:#e2e8f0;--dim:rgba(226,232,240,0.50);--muted:rgba(226,232,240,0.27);--card:rgba(255,255,255,0.040);--bdr:rgba(255,255,255,0.076)}
+.panel{background:rgba(9,10,28,0.98);border-radius:16px;border:1px solid rgba(255,255,255,0.085);overflow:hidden;box-shadow:0 0 0 1px rgba(45,212,191,0.16),0 30px 60px rgba(0,0,0,0.60),0 0 70px rgba(45,212,191,0.08);width:230px}
+.bb{display:flex;align-items:center;gap:5px;padding:10px 14px;background:rgba(255,255,255,0.030);border-bottom:1px solid rgba(255,255,255,0.062)}
+.bd{width:9px;height:9px;border-radius:50%}
+.bu{margin-left:8px;background:rgba(255,255,255,0.052);border-radius:6px;padding:4px 12px;font-size:11px;color:rgba(255,255,255,0.28)}
+.hdr{padding:14px 16px 12px;border-bottom:1px solid var(--bdr)}
+.ht{font-size:14px;font-weight:700;color:var(--text);margin-bottom:3px}
+.hs{font-size:11px;color:var(--muted)}
+.body{padding:10px 14px}
+.row{display:flex;align-items:stretch;gap:10px;padding:9px 0;border-bottom:1px solid var(--bdr)}
+.row:last-child{border-bottom:none}
+.time{font-size:10.5px;color:var(--muted);font-weight:500;width:46px;flex-shrink:0;padding-top:2px}
+.bar{width:3px;border-radius:2px;flex-shrink:0;min-height:36px}
+.info{flex:1;min-width:0}
+.course{font-size:12.5px;font-weight:600;color:var(--text);margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.type{font-size:10.5px;color:var(--muted)}
+.dur{font-size:10px;color:var(--muted);background:var(--card);border:1px solid var(--bdr);border-radius:5px;padding:3px 8px;flex-shrink:0;align-self:center;white-space:nowrap}
+</style>
+</head>
+<body>
+<div class="panel">
+  <div class="bb"><div class="bd" style="background:#ff5f56"></div><div class="bd" style="background:#ffbd2e"></div><div class="bd" style="background:#27c93f"></div><div class="bu">Schedule</div></div>
+  <div class="hdr"><div class="ht">Today's Schedule</div><div class="hs">Thu, Apr 9 · 4 sessions</div></div>
+  <div class="body">
+    <div class="row"><div class="time">8:00 AM</div><div class="bar" style="background:#4f7bff"></div><div class="info"><div class="course">FIN 3100</div><div class="type">Initial Reading</div></div><div class="dur">58 min</div></div>
+    <div class="row"><div class="time">10:30</div><div class="bar" style="background:#a78bfa"></div><div class="info"><div class="course">ECON 4880</div><div class="type">Exam Cram</div></div><div class="dur">45 min</div></div>
+    <div class="row"><div class="time">2:00 PM</div><div class="bar" style="background:#34d399"></div><div class="info"><div class="course">MATH 2310</div><div class="type">Problem Set</div></div><div class="dur">60 min</div></div>
+    <div class="row"><div class="time">4:30 PM</div><div class="bar" style="background:#f97316"></div><div class="info"><div class="course">BUS 2200</div><div class="type">Case Review</div></div><div class="dur">40 min</div></div>
+  </div>
+</div>
+</body></html>

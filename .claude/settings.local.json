@@ -2,7 +2,13 @@
   "permissions": {
     "allow": [
       "Bash(npm run:*)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(vercel --prod)",
+      "Bash(npx vercel:*)",
+      "Bash(find /Users/ryangambrell/Desktop/StudyMap -name *.png -o -name *.jpg -o -name *.webp)",
+      "Bash(python3 -c \":*)",
+      "Bash(ls /Users/ryangambrell/Desktop/StudyMap/public/ss-*.png)",
+      "Read(//Users/ryangambrell/Desktop/**)"
     ]
   }
 }

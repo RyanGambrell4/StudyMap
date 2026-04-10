@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>StudyEdge Hero</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  width:1480px; height:1470px;
+  background:#06061a; overflow:hidden;
+  font-family:'Inter',-apple-system,sans-serif;
+  -webkit-font-smoothing:antialiased;
+  position:relative;
+}
+
+/* BG */
+.grid {
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(255,255,255,0.020) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,0.020) 1px,transparent 1px);
+  background-size:52px 52px;
+}
+.glow { position:absolute;border-radius:50%;filter:blur(100px);pointer-events:none; }
+
+/* Bottom fade */
+.fade {
+  position:absolute;bottom:0;left:0;right:0;height:620px;
+  background:linear-gradient(to bottom,transparent 0%,#06061a 65%);
+  z-index:40;pointer-events:none;
+}
+
+/* Panel base */
+.p {
+  position:absolute;
+  background:rgba(8,9,26,0.98);
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,0.08);
+  overflow:hidden;
+}
+
+/* Browser bar */
+.bb {
+  display:flex;align-items:center;gap:5px;
+  padding:9px 13px;
+  background:rgba(255,255,255,0.028);
+  border-bottom:1px solid rgba(255,255,255,0.058);
+  flex-shrink:0;
+}
+.bd { width:8px;height:8px;border-radius:50%;flex-shrink:0; }
+.bu {
+  margin-left:7px;background:rgba(255,255,255,0.050);
+  border-radius:5px;padding:3px 11px;font-size:10px;
+  color:rgba(255,255,255,0.26);white-space:nowrap;overflow:hidden;max-width:190px;
+}
+
+:root {
+  --blue:#4f7bff;--purple:#7c5cfc;--green:#22c55e;
+  --orange:#f97316;--teal:#2dd4bf;--pink:#ec4899;
+  --text:#e2e8f0;--dim:rgba(226,232,240,0.50);--muted:rgba(226,232,240,0.27);
+  --card:rgba(255,255,255,0.038);--bdr:rgba(255,255,255,0.072);
+}
+
+/* ════════════════════════════════════════
+   MAIN DASHBOARD
+   left:195  top:88  width:740  → right:935
+   z-index:10
+════════════════════════════════════════ */
+.pm {
+  left:195px;top:88px;width:740px;
+  z-index:10;
+  box-shadow:0 0 0 1px rgba(79,123,255,0.26),0 60px 120px rgba(0,0,0,0.72),0 0 160px rgba(79,123,255,0.18);
+}
+.pm-inner { display:flex; }
+.sb {
+  width:50px;flex-shrink:0;
+  background:rgba(0,0,0,0.20);border-right:1px solid var(--bdr);
+  display:flex;flex-direction:column;align-items:center;
+  padding:16px 0;gap:6px;
+}
+.sl {
+  width:30px;height:30px;background:var(--blue);border-radius:8px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:900;color:#fff;margin-bottom:12px;
+}
+.si {
+  width:34px;height:34px;border-radius:9px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:15px;color:var(--muted);
+}
+.si.on { background:rgba(79,123,255,0.13);color:var(--blue); }
+
+.mc { flex:1;padding:22px 20px 0 20px;display:flex;flex-direction:column;gap:15px;overflow:hidden; }
+.mh { display:flex;justify-content:space-between;align-items:flex-start; }
+.md { font-size:11px;color:var(--muted);margin-bottom:3px; }
+.mg { font-size:22px;font-weight:800;color:var(--text); }
+.sp {
+  display:flex;align-items:center;gap:5px;
+  background:rgba(249,115,22,0.11);border:1px solid rgba(249,115,22,0.23);
+  border-radius:10px;padding:7px 12px;font-size:11px;font-weight:700;color:#f97316;
+  white-space:nowrap;flex-shrink:0;
+}
+.sg { display:grid;grid-template-columns:repeat(3,1fr);gap:10px; }
+.sc {
+  background:var(--card);border:1px solid var(--bdr);
+  border-radius:12px;padding:14px 13px 12px;
+}
+.sci { font-size:13px;display:block;margin-bottom:8px; }
+.scv { font-size:24px;font-weight:800;color:var(--text);line-height:1;margin-bottom:3px; }
+.scl { font-size:11px;color:var(--muted);font-weight:500; }
+.nc {
+  background:linear-gradient(135deg,rgba(79,123,255,0.16) 0%,rgba(124,92,252,0.10) 100%);
+  border:1px solid rgba(79,123,255,0.25);border-radius:13px;padding:16px 17px;
+}
+.ne { font-size:10px;font-weight:700;color:var(--blue);letter-spacing:0.09em;display:flex;align-items:center;gap:8px;margin-bottom:7px; }
+.nc2 { background:var(--blue);color:#fff;padding:2px 7px;border-radius:4px;font-size:9px;font-weight:700; }
+.nr { font-size:24px;font-weight:900;color:#fff;margin-bottom:4px;letter-spacing:-0.3px; }
+.nm { font-size:11px;color:var(--dim);margin-bottom:13px; }
+.br { display:flex;gap:8px; }
+.bw { background:#fff;color:#0e1030;border-radius:9px;padding:9px 17px;font-size:12px;font-weight:700; }
+.bg2 { background:rgba(255,255,255,0.07);color:var(--text);border:1px solid var(--bdr);border-radius:9px;padding:9px 17px;font-size:12px;font-weight:600; }
+.qi { display:flex;align-items:center;gap:11px;padding:10px 0;border-top:1px solid var(--bdr); }
+.qd { width:7px;height:7px;border-radius:50%;flex-shrink:0; }
+.qn { font-size:12px;color:var(--dim);flex:1; }
+.qc { width:18px;height:18px;border:1.5px solid rgba(255,255,255,0.17);border-radius:50%;flex-shrink:0; }
+.ww { padding:4px 20px 20px; }
+.wl { font-size:10px;font-weight:700;color:var(--muted);letter-spacing:0.09em;margin-bottom:11px; }
+.wr { display:grid;grid-template-columns:repeat(7,1fr); }
+.wd { text-align:center; }
+.wdl { font-size:9px;color:var(--muted);margin-bottom:4px; }
+.wdn { width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;color:var(--dim);margin:0 auto 4px;font-weight:500; }
+.wdn.t { background:var(--blue);color:#fff;font-weight:700; }
+.wds { display:flex;justify-content:center;gap:2px; }
+.wdot { width:5px;height:5px;border-radius:50%; }
+
+/* ════════════════════════════════════════
+   SESSION PLANNER
+   left:885  top:52  width:355  → right:1240
+   z-index:14  (overlaps main by 50px)
+════════════════════════════════════════ */
+.psp {
+  left:885px;top:52px;width:355px;
+  z-index:14;
+  box-shadow:0 0 0 1px rgba(34,197,94,0.20),0 70px 140px rgba(0,0,0,0.78),0 0 100px rgba(34,197,94,0.12),-20px 0 60px rgba(0,0,0,0.40);
+}
+.sp-top { padding:20px 18px 0; }
+.sp-ready {
+  display:inline-flex;align-items:center;gap:6px;
+  background:rgba(34,197,94,0.12);border:1px solid rgba(34,197,94,0.28);
+  border-radius:999px;padding:5px 12px;margin-bottom:12px;
+}
+.sp-rtext { font-size:11px;font-weight:700;color:#22c55e;letter-spacing:0.06em; }
+.sp-rdot { width:6px;height:6px;border-radius:50%;background:#22c55e; }
+.sp-title { font-size:16px;font-weight:800;color:var(--text);line-height:1.25;margin-bottom:8px; }
+.sp-desc { font-size:11px;color:var(--dim);line-height:1.5;margin-bottom:16px; }
+/* Progress bar */
+.sp-bar { display:flex;height:8px;border-radius:4px;overflow:hidden;gap:2px;margin-bottom:6px; }
+.sp-seg { border-radius:3px; }
+.sp-times { display:flex;justify-content:space-between;font-size:10px;color:var(--muted);margin-bottom:14px; }
+/* Type pills */
+.sp-pills { display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px; }
+.sp-pill { border-radius:999px;padding:5px 11px;font-size:10px;font-weight:700; }
+/* Steps */
+.sp-steps { padding:0 14px 0; }
+.sp-step {
+  background:var(--card);border:1px solid var(--bdr);
+  border-radius:11px;padding:13px 14px;margin-bottom:8px;
+  border-left:3px solid transparent;
+}
+.sp-step-hdr { display:flex;align-items:center;gap:8px;margin-bottom:8px; }
+.sp-min {
+  border-radius:999px;padding:4px 10px;font-size:10px;font-weight:800;
+  flex-shrink:0;
+}
+.sp-step-title { font-size:12px;font-weight:700;color:var(--text);flex:1;line-height:1.3; }
+.sp-step-num { font-size:10px;color:var(--muted);flex-shrink:0; }
+.sp-step-body { font-size:11px;color:var(--dim);line-height:1.5;margin-bottom:6px; }
+.sp-step-note { font-size:10px;color:var(--muted);font-style:italic;line-height:1.4; }
+.sp-btns { padding:14px 14px 16px;display:flex;gap:8px; }
+.sp-regen {
+  flex:1;background:var(--card);border:1px solid var(--bdr);
+  border-radius:9px;padding:10px;text-align:center;font-size:11px;font-weight:600;color:var(--dim);
+}
+.sp-start {
+  flex:2;background:linear-gradient(135deg,var(--blue),var(--purple));
+  border-radius:9px;padding:10px;text-align:center;font-size:12px;font-weight:800;color:#fff;
+}
+
+/* ════════════════════════════════════════
+   SCHEDULE  left:5  top:100  w:230  z:6
+════════════════════════════════════════ */
+.psc {
+  left:5px;top:100px;width:230px;
+  transform:rotate(-2deg);transform-origin:top left;
+  z-index:6;
+  box-shadow:0 0 0 1px rgba(45,212,191,0.15),0 24px 48px rgba(0,0,0,0.55);
+}
+.sch { padding:13px 14px 11px;border-bottom:1px solid var(--bdr); }
+.scht { font-size:13px;font-weight:700;color:var(--text);margin-bottom:2px; }
+.schs { font-size:10px;color:var(--muted); }
+.scb { padding:9px 12px; }
+.sr { display:flex;align-items:stretch;gap:9px;padding:8px 0;border-bottom:1px solid var(--bdr); }
+.sr:last-child { border-bottom:none; }
+.srt { font-size:10px;color:var(--muted);font-weight:500;width:42px;flex-shrink:0;padding-top:2px; }
+.srb { width:3px;border-radius:2px;flex-shrink:0;min-height:32px; }
+.sri { flex:1;min-width:0; }
+.src2 { font-size:12px;font-weight:600;color:var(--text);margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis; }
+.sry { font-size:10px;color:var(--muted); }
+.srd { font-size:10px;color:var(--muted);background:var(--card);border:1px solid var(--bdr);border-radius:5px;padding:2px 7px;flex-shrink:0;align-self:center;white-space:nowrap; }
+
+/* ════════════════════════════════════════
+   FOCUS  left:5  top:578  w:230  z:6
+════════════════════════════════════════ */
+.pf {
+  left:5px;top:578px;width:230px;
+  transform:rotate(1.5deg);
+  z-index:6;
+  box-shadow:0 0 0 1px rgba(79,123,255,0.14),0 18px 36px rgba(0,0,0,0.52);
+}
+.fb { padding:18px 16px 20px;text-align:center; }
+.fe { font-size:9.5px;font-weight:700;color:var(--muted);letter-spacing:0.11em;margin-bottom:16px; }
+.fw { position:relative;width:92px;height:92px;margin:0 auto 14px; }
+.fsvg { position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg); }
+.ftr { fill:none;stroke:rgba(79,123,255,0.12);stroke-width:5; }
+.fpr { fill:none;stroke:var(--blue);stroke-width:5;stroke-linecap:round;stroke-dasharray:239;stroke-dashoffset:68; }
+.fin { position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center; }
+.ft { font-size:22px;font-weight:900;color:#fff;line-height:1; }
+.fm { font-size:9px;color:var(--muted);margin-top:2px; }
+.fn { font-size:12px;font-weight:700;color:var(--text);margin-bottom:2px; }
+.ftp { font-size:10px;color:var(--muted); }
+
+/* ════════════════════════════════════════
+   COACH  left:1215  top:58  w:248  z:16
+   overlaps session planner by ~25px
+════════════════════════════════════════ */
+.pco {
+  left:1215px;top:58px;width:248px;
+  transform:rotate(1.5deg);transform-origin:top right;
+  z-index:16;
+  box-shadow:0 0 0 1px rgba(124,92,252,0.20),0 28px 56px rgba(0,0,0,0.62),0 0 60px rgba(124,92,252,0.10);
+}
+.coh { display:flex;align-items:center;gap:9px;padding:13px 14px 11px;border-bottom:1px solid var(--bdr); }
+.coa { width:30px;height:30px;background:linear-gradient(135deg,var(--blue),var(--purple));border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;color:#fff;font-weight:700;flex-shrink:0; }
+.con { font-size:13px;font-weight:700;color:var(--text); }
+.cos { font-size:10px;color:var(--muted); }
+.com { padding:12px 13px 14px;display:flex;flex-direction:column;gap:9px; }
+.mu { align-self:flex-end;background:var(--blue);color:#fff;border-radius:11px 11px 3px 11px;padding:8px 11px;font-size:11px;font-weight:500;line-height:1.4;max-width:200px;word-break:break-word; }
+.ma { align-self:flex-start;background:var(--card);border:1px solid var(--bdr);color:var(--text);border-radius:3px 11px 11px 11px;padding:9px 11px;font-size:11px;line-height:1.5;max-width:218px;word-break:break-word; }
+.mat { font-size:9px;font-weight:700;color:var(--blue);display:block;margin-bottom:4px;letter-spacing:0.05em; }
+.ty { display:flex;gap:3px;align-items:center;padding:9px 12px;background:var(--card);border:1px solid var(--bdr);border-radius:3px 11px 11px 11px;width:fit-content; }
+.td { width:5px;height:5px;border-radius:50%;background:var(--muted); }
+
+/* ════════════════════════════════════════
+   FLASHCARD  left:1210  top:486  w:253  z:16
+════════════════════════════════════════ */
+.pfl {
+  left:1210px;top:486px;width:253px;
+  transform:rotate(-1.8deg);
+  z-index:16;
+  box-shadow:0 0 0 1px rgba(34,197,94,0.18),0 22px 44px rgba(0,0,0,0.60),0 0 50px rgba(34,197,94,0.08);
+}
+.flh { display:flex;align-items:center;justify-content:space-between;padding:11px 14px;border-bottom:1px solid var(--bdr); }
+.flt { font-size:12px;font-weight:700;color:var(--text); }
+.flp { font-size:10px;color:var(--muted); }
+.flb { padding:14px 14px 13px; }
+.flf {
+  background:linear-gradient(135deg,rgba(79,123,255,0.10),rgba(124,92,252,0.07));
+  border:1px solid rgba(79,123,255,0.21);border-radius:11px;
+  padding:16px 14px;text-align:center;margin-bottom:11px;
+}
+.fls { font-size:9px;color:var(--blue);font-weight:700;letter-spacing:0.10em;margin-bottom:9px; }
+.flq { font-size:14px;font-weight:800;color:#fff;line-height:1.3;margin-bottom:7px; }
+.fla { font-size:11px;color:var(--dim);line-height:1.5; }
+.flbts { display:grid;grid-template-columns:repeat(3,1fr);gap:5px; }
+.fb2 { border-radius:7px;padding:8px 4px;text-align:center;font-size:11px;font-weight:700; }
+.hard { background:rgba(239,68,68,0.11);border:1px solid rgba(239,68,68,0.23);color:#ef4444; }
+.med  { background:rgba(234,179,8,0.11);border:1px solid rgba(234,179,8,0.23);color:#eab308; }
+.easy { background:rgba(34,197,94,0.11);border:1px solid rgba(34,197,94,0.23);color:#22c55e; }
+
+/* Badges */
+.badge {
+  position:absolute;border-radius:999px;padding:8px 15px;font-size:11px;font-weight:700;
+  display:flex;align-items:center;gap:7px;z-index:25;
+  backdrop-filter:blur(16px);box-shadow:0 6px 22px rgba(0,0,0,0.42);white-space:nowrap;
+}
+.bdot { width:6px;height:6px;border-radius:50%;background:currentColor; }
+</style>
+</head>
+<body>
+
+<div class="grid"></div>
+
+<!-- Glows -->
+<div class="glow" style="width:1100px;height:900px;background:radial-gradient(ellipse,rgba(60,90,230,0.24) 0%,rgba(100,50,200,0.12) 38%,transparent 65%);top:40%;left:50%;transform:translate(-50%,-50%);z-index:1;"></div>
+<div class="glow" style="width:500px;height:500px;background:radial-gradient(ellipse,rgba(34,197,94,0.14) 0%,transparent 65%);top:5%;right:15%;z-index:1;"></div>
+<div class="glow" style="width:460px;height:460px;background:radial-gradient(ellipse,rgba(100,50,210,0.14) 0%,transparent 65%);top:5%;left:-2%;z-index:1;"></div>
+<div class="glow" style="width:380px;height:380px;background:radial-gradient(ellipse,rgba(79,123,255,0.12) 0%,transparent 65%);bottom:20%;left:3%;z-index:1;"></div>
+<div class="glow" style="width:380px;height:380px;background:radial-gradient(ellipse,rgba(34,197,94,0.10) 0%,transparent 65%);bottom:25%;right:10%;z-index:1;"></div>
+
+<!-- Badges -->
+<div class="badge" style="background:rgba(249,115,22,0.14);border:1px solid rgba(249,115,22,0.30);color:#f97316;top:20px;left:340px;z-index:25;">
+  <div class="bdot"></div>🔥 7-day streak
+</div>
+<div class="badge" style="background:rgba(34,197,94,0.13);border:1px solid rgba(34,197,94,0.28);color:#22c55e;top:20px;left:680px;z-index:25;">
+  <div class="bdot"></div>✦ AI session planner
+</div>
+<div class="badge" style="background:rgba(124,92,252,0.13);border:1px solid rgba(124,92,252,0.28);color:#a78bfa;top:20px;left:1010px;z-index:25;">
+  <div class="bdot"></div>Quiz scored 9/10
+</div>
+
+
+<!-- ══ SCHEDULE ══ -->
+<div class="p psc">
+  <div class="bb"><div class="bd" style="background:#ff5f56"></div><div class="bd" style="background:#ffbd2e"></div><div class="bd" style="background:#27c93f"></div><div class="bu">Today's Schedule</div></div>
+  <div class="sch"><div class="scht">Today's Schedule</div><div class="schs">Thu, Apr 9 · 4 sessions</div></div>
+  <div class="scb">
+    <div class="sr"><div class="srt">8:00 AM</div><div class="srb" style="background:#4f7bff"></div><div class="sri"><div class="src2">FIN 3100</div><div class="sry">Initial Reading</div></div><div class="srd">58 min</div></div>
+    <div class="sr"><div class="srt">10:30</div><div class="srb" style="background:#a78bfa"></div><div class="sri"><div class="src2">ECON 4880</div><div class="sry">Exam Cram</div></div><div class="srd">45 min</div></div>
+    <div class="sr"><div class="srt">2:00 PM</div><div class="srb" style="background:#34d399"></div><div class="sri"><div class="src2">MATH 2310</div><div class="sry">Problem Set</div></div><div class="srd">60 min</div></div>
+    <div class="sr"><div class="srt">4:30 PM</div><div class="srb" style="background:#f97316"></div><div class="sri"><div class="src2">BUS 2200</div><div class="sry">Case Review</div></div><div class="srd">40 min</div></div>
+  </div>
+</div>
+
+<!-- ══ MAIN DASHBOARD ══ -->
+<div class="p pm">
+  <div class="bb"><div class="bd" style="background:#ff5f56"></div><div class="bd" style="background:#ffbd2e"></div><div class="bd" style="background:#27c93f"></div><div class="bu">getstudyedge.com/app</div></div>
+  <div class="pm-inner">
+    <div class="sb">
+      <div class="sl">S</div>
+      <div class="si on">⊞</div><div class="si">📅</div><div class="si">✦</div>
+      <div class="si">🃏</div><div class="si">🎯</div><div class="si">📝</div>
+    </div>
+    <div style="flex:1;display:flex;flex-direction:column;">
+      <div class="mc">
+        <div class="mh">
+          <div><div class="md">Thursday, April 9</div><div class="mg">Good morning 👋</div></div>
+          <div class="sp">🔥 Start your streak</div>
+        </div>
+        <div class="sg">
+          <div class="sc"><span class="sci" style="color:#f97316">🔥</span><div class="scv">7</div><div class="scl">Day streak</div></div>
+          <div class="sc"><span class="sci" style="color:#22c55e">✓</span><div class="scv">5</div><div class="scl">Sessions this week</div></div>
+          <div class="sc"><span class="sci" style="color:#4f7bff">⏱</span><div class="scv">12h</div><div class="scl">Studied this week</div></div>
+        </div>
+        <div class="nc">
+          <div class="ne">UP NEXT TODAY <span class="nc2">Today</span></div>
+          <div class="nr">FIN 3100</div>
+          <div class="nm">Initial Reading · 8:00 AM · 58 min</div>
+          <div class="br"><div class="bw">Start Session</div><div class="bg2">Mark done</div></div>
+        </div>
+        <div class="qi"><div class="qd" style="background:#a78bfa"></div><div class="qn">ECON 4880 · Exam Cram</div><div class="qc"></div></div>
+        <div class="qi"><div class="qd" style="background:#34d399"></div><div class="qn">MATH 2310 · Problem Set Review</div><div class="qc"></div></div>
+      </div>
+      <div class="ww">
+        <div class="wl">THIS WEEK</div>
+        <div class="wr">
+          <div class="wd"><div class="wdl">M</div><div class="wdn">6</div><div class="wds"><div class="wdot" style="background:#4f7bff"></div><div class="wdot" style="background:#a78bfa"></div></div></div>
+          <div class="wd"><div class="wdl">T</div><div class="wdn">7</div><div class="wds"><div class="wdot" style="background:#4f7bff"></div></div></div>
+          <div class="wd"><div class="wdl">W</div><div class="wdn">8</div><div class="wds"><div class="wdot" style="background:#4f7bff"></div><div class="wdot" style="background:#a78bfa"></div><div class="wdot" style="background:#34d399"></div></div></div>
+          <div class="wd"><div class="wdl">T</div><div class="wdn t">9</div><div class="wds"><div class="wdot" style="background:#4f7bff"></div><div class="wdot" style="background:#a78bfa"></div></div></div>
+          <div class="wd"><div class="wdl">F</div><div class="wdn">10</div><div class="wds"><div class="wdot" style="background:#4f7bff"></div><div class="wdot" style="background:#34d399"></div><div class="wdot" style="background:#f97316"></div></div></div>
+          <div class="wd"><div class="wdl">S</div><div class="wdn">11</div><div class="wds"><div class="wdot" style="background:#a78bfa"></div><div class="wdot" style="background:#34d399"></div></div></div>
+          <div class="wd"><div class="wdl">S</div><div class="wdn">12</div><div class="wds"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══ SESSION PLANNER ══ -->
+<div class="p psp">
+  <div class="bb"><div class="bd" style="background:#ff5f56"></div><div class="bd" style="background:#ffbd2e"></div><div class="bd" style="background:#27c93f"></div><div class="bu">Session Blueprint</div></div>
+  <div class="sp-top">
+    <div class="sp-ready"><div class="sp-rdot"></div><span class="sp-rtext">SESSION PLAN READY</span></div>
+    <div class="sp-title">Strategic Positioning —<br>Competitive Advantage Foundations</div>
+    <div class="sp-desc">Master the frameworks companies use to decide where to compete and how they leverage competitive advantages to win.</div>
+    <!-- Progress bar -->
+    <div class="sp-bar">
+      <div class="sp-seg" style="flex:5;background:#4f7bff"></div>
+      <div class="sp-seg" style="flex:12;background:#5b6ef5"></div>
+      <div class="sp-seg" style="flex:10;background:#7c5cfc"></div>
+      <div class="sp-seg" style="flex:12;background:#4f7bff"></div>
+      <div class="sp-seg" style="flex:5;background:#22c55e"></div>
+      <div class="sp-seg" style="flex:10;background:#a78bfa"></div>
+      <div class="sp-seg" style="flex:4;background:#2dd4bf"></div>
+    </div>
+    <div class="sp-times"><span>0 min</span><span>58 min</span></div>
+    <div class="sp-pills">
+      <div class="sp-pill" style="background:rgba(79,123,255,0.13);border:1px solid rgba(79,123,255,0.26);color:#4f7bff">Review</div>
+      <div class="sp-pill" style="background:rgba(124,92,252,0.13);border:1px solid rgba(124,92,252,0.26);color:#a78bfa">Active Recall</div>
+      <div class="sp-pill" style="background:rgba(34,197,94,0.11);border:1px solid rgba(34,197,94,0.24);color:#22c55e">Break</div>
+      <div class="sp-pill" style="background:rgba(45,212,191,0.11);border:1px solid rgba(45,212,191,0.24);color:#2dd4bf">Summary</div>
+    </div>
+  </div>
+  <div class="sp-steps">
+    <!-- Step 1 -->
+    <div class="sp-step" style="border-left-color:#4f7bff">
+      <div class="sp-step-hdr">
+        <div class="sp-min" style="background:rgba(79,123,255,0.16);color:#4f7bff">5 min</div>
+        <div class="sp-step-title">Warm-Up: Competitive Strategy Recall</div>
+        <div class="sp-step-num">#1</div>
+      </div>
+      <div class="sp-step-body">Skim your notes to identify 2–3 core frameworks (Porter's Five Forces, positioning models, resource-based view). Write one question you have about each.</div>
+      <div class="sp-step-note">Activating existing knowledge primes your brain to absorb new connections.</div>
+    </div>
+    <!-- Step 2 -->
+    <div class="sp-step" style="border-left-color:#4f7bff">
+      <div class="sp-step-hdr">
+        <div class="sp-min" style="background:rgba(79,123,255,0.16);color:#4f7bff">12 min</div>
+        <div class="sp-step-title">Deep Concept Review: Where Companies Compete</div>
+        <div class="sp-step-num">#2</div>
+      </div>
+      <div class="sp-step-body">Read the section on market positioning, industry choice, and competitive scope (cost leadership vs. differentiation vs. focus). Annotate 3–4 key examples.</div>
+      <div class="sp-step-note">Understanding the strategic decision framework is essential before moving to execution.</div>
+    </div>
+    <!-- Step 3 -->
+    <div class="sp-step" style="border-left-color:#7c5cfc">
+      <div class="sp-step-hdr">
+        <div class="sp-min" style="background:rgba(124,92,252,0.16);color:#a78bfa">10 min</div>
+        <div class="sp-step-title">Active Recall: Strategic Positioning Mapping</div>
+        <div class="sp-step-num">#3</div>
+      </div>
+      <div class="sp-step-body">Close your notes. Create a 2×2 matrix (Broad vs. Narrow scope / Cost vs. Differentiation). Fill in 3 company examples from memory.</div>
+      <div class="sp-step-note">Testing yourself on positioning reveals gaps in understanding.</div>
+    </div>
+    <!-- Step 4 -->
+    <div class="sp-step" style="border-left-color:#4f7bff">
+      <div class="sp-step-hdr">
+        <div class="sp-min" style="background:rgba(79,123,255,0.16);color:#4f7bff">12 min</div>
+        <div class="sp-step-title">Deep Concept: Competitive Advantages & Resources</div>
+        <div class="sp-step-num">#4</div>
+      </div>
+      <div class="sp-step-body">Read the section on what makes companies different — strengths, weaknesses, capabilities, and resources (VRIO framework). Highlight key examples.</div>
+      <div class="sp-step-note">This directly addresses how firms turn advantages into industry wins.</div>
+    </div>
+    <!-- Step 5 -->
+    <div class="sp-step" style="border-left-color:#22c55e">
+      <div class="sp-step-hdr">
+        <div class="sp-min" style="background:rgba(34,197,94,0.14);color:#22c55e">5 min</div>
+        <div class="sp-step-title">Break</div>
+        <div class="sp-step-num">#5</div>
+      </div>
+      <div class="sp-step-body">Step away, grab water, and reset for the final stretch.</div>
+      <div class="sp-step-note">A brief mental reset maximizes focus and retention.</div>
+    </div>
+    <!-- Step 6 -->
+    <div class="sp-step" style="border-left-color:#7c5cfc">
+      <div class="sp-step-hdr">
+        <div class="sp-min" style="background:rgba(124,92,252,0.16);color:#a78bfa">10 min</div>
+        <div class="sp-step-title">Active Recall: Strengths-Weaknesses Case Analysis</div>
+        <div class="sp-step-num">#6</div>
+      </div>
+      <div class="sp-step-body">Pick one industry case study. Write a 1-page analysis: Where does the firm compete? What are its 2–3 advantages? What weakness does it have?</div>
+      <div class="sp-step-note">Applying frameworks to real cases mirrors exam questions and forces strategic thinking.</div>
+    </div>
+    <!-- Step 7 -->
+    <div class="sp-step" style="border-left-color:#2dd4bf">
+      <div class="sp-step-hdr">
+        <div class="sp-min" style="background:rgba(45,212,191,0.14);color:#2dd4bf">4 min</div>
+        <div class="sp-step-title">Summary & Concept Synthesis</div>
+        <div class="sp-step-num">#7</div>
+      </div>
+      <div class="sp-step-body">Write one paragraph connecting all three pieces: how firms choose where to compete, what creates advantage, and how they use strengths to win.</div>
+      <div class="sp-step-note">Synthesizing concepts into one narrative cements relationships between ideas.</div>
+    </div>
+  </div>
+  <div class="sp-btns">
+    <div class="sp-regen">Regenerate plan</div>
+    <div class="sp-start">Start Session →</div>
+  </div>
+</div>
+
+<!-- ══ FOCUS ══ -->
+<div class="p pf">
+  <div class="bb"><div class="bd" style="background:#ff5f56"></div><div class="bd" style="background:#ffbd2e"></div><div class="bd" style="background:#27c93f"></div><div class="bu">Focus Mode</div></div>
+  <div class="fb">
+    <div class="fe">FOCUS MODE · ACTIVE</div>
+    <div class="fw">
+      <svg class="fsvg" viewBox="0 0 92 92"><circle class="ftr" cx="46" cy="46" r="37"/><circle class="fpr" cx="46" cy="46" r="37"/></svg>
+      <div class="fin"><div class="ft">18:24</div><div class="fm">remaining</div></div>
+    </div>
+    <div class="fn">FIN 3100</div>
+    <div class="ftp">Initial Reading · Deep Focus</div>
+  </div>
+</div>
+
+<!-- ══ COACH ══ -->
+<div class="p pco">
+  <div class="bb"><div class="bd" style="background:#ff5f56"></div><div class="bd" style="background:#ffbd2e"></div><div class="bd" style="background:#27c93f"></div><div class="bu">AI Study Coach</div></div>
+  <div class="coh">
+    <div class="coa">✦</div>
+    <div><div class="con">StudyEdge Coach</div><div class="cos">FIN 3100 · Chapter 4</div></div>
+  </div>
+  <div class="com">
+    <div class="mu">What's the difference between monetary and fiscal policy?</div>
+    <div class="ma"><span class="mat">✦ STUDYEDGE AI</span>Monetary policy is run by the central bank — managing interest rates and money supply. Fiscal policy is the government's tool via spending and taxes.</div>
+    <div class="mu">Quiz me on this chapter</div>
+    <div class="ty"><div class="td"></div><div class="td" style="opacity:.55"></div><div class="td" style="opacity:.25"></div></div>
+  </div>
+</div>
+
+<!-- ══ FLASHCARD ══ -->
+<div class="p pfl">
+  <div class="bb"><div class="bd" style="background:#ff5f56"></div><div class="bd" style="background:#ffbd2e"></div><div class="bd" style="background:#27c93f"></div><div class="bu">Flashcards · FIN 3100</div></div>
+  <div class="flh"><div class="flt">🃏 Flashcards</div><div class="flp">7 / 24</div></div>
+  <div class="flb">
+    <div class="flf">
+      <div class="fls">ANSWER</div>
+      <div class="flq">What is the Federal Funds Rate?</div>
+      <div class="fla">The overnight lending rate between banks, set by the Fed as a primary monetary policy tool to influence borrowing costs economy-wide.</div>
+    </div>
+    <div class="flbts">
+      <div class="fb2 hard">Hard</div>
+      <div class="fb2 med">Medium</div>
+      <div class="fb2 easy">Easy ✓</div>
+    </div>
+  </div>
+</div>
+
+<div class="fade"></div>
+</body>
+</html>
