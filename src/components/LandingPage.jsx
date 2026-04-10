@@ -134,7 +134,7 @@ export default function LandingPage({ onGetStarted }) {
 
         {/* Hero Image */}
         <div style={{
-          maxWidth: 1100, margin: '0 auto', position: 'relative', padding: '0 24px',
+          maxWidth: 1400, margin: '0 auto', position: 'relative', marginBottom: '-60px',
         }}>
           {/* Glow behind image */}
           <div style={{
@@ -149,7 +149,9 @@ export default function LandingPage({ onGetStarted }) {
             style={{
               width: '100%', borderRadius: 16, position: 'relative',
               border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 0 60px rgba(91,110,245,0.18), 0 40px 80px rgba(0,0,0,0.5)',
+              boxShadow: '0 0 80px rgba(91,110,245,0.25), 0 60px 120px rgba(0,0,0,0.6)',
+              transform: 'perspective(1200px) rotateX(4deg)',
+              transformOrigin: 'top center',
             }}
           />
         </div>
