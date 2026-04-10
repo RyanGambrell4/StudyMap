@@ -1,7 +1,10 @@
+import { getAccessToken } from '../lib/supabase'
+
 export async function extractSyllabusEvents(text) {
+  const token = await getAccessToken()
   const res = await fetch('/api/extract-syllabus-events', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ text }),
   })
   const data = await res.json()

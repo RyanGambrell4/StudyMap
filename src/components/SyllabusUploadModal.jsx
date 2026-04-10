@@ -1,12 +1,14 @@
 import { useState, useRef } from 'react'
+import { getAccessToken } from '../lib/supabase'
 
 const EVENT_TYPES = ['Exam', 'Quiz', 'Midterm', 'Final Exam', 'Assignment', 'Project', 'Lab', 'Reading', 'Other']
 const NEUTRAL_COLOR = { dot: '#64748b' }
 
 async function extractEventsFromAPI(text) {
+  const token = await getAccessToken()
   const res = await fetch('/api/extract-syllabus-events', {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
     body: JSON.stringify({ text }),
   })
   if (!res.ok) {

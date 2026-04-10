@@ -16,6 +16,7 @@ import AddSessionModal from './AddSessionModal'
 import AppShell from './AppShell'
 import DashboardView from './DashboardView'
 import { useSessionReminders } from '../utils/useSessionReminders'
+import { getAccessToken } from '../lib/supabase'
 import CoursesView from './CoursesView'
 import ProgressView from './ProgressView'
 import StudyToolsView from './StudyToolsView'
@@ -341,17 +342,19 @@ export default function OutputView({
 
   useEffect(() => {
     if (!userId) return
-    fetch('/api/google-calendar-events', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ userId }),
-    })
-      .then(r => r.json())
-      .then(data => {
-        if (data.connected) setGcalConnected(true)
-        if (data.events?.length) setGoogleEvents(data.events)
+    getAccessToken().then(token =>
+      fetch('/api/google-calendar-events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ userId }),
       })
-      .catch(() => {})
+        .then(r => r.json())
+        .then(data => {
+          if (data.connected) setGcalConnected(true)
+          if (data.events?.length) setGoogleEvents(data.events)
+        })
+        .catch(() => {})
+    )
   }, [userId])
 
   const handleConnectGoogleCalendar = () => {
@@ -386,9 +389,10 @@ export default function OutputView({
     setRescheduleResults(null)
     try {
       const conflictingSessions = allSessions.filter(s => conflictMap.has(s.id))
+      const token = await getAccessToken()
       const res = await fetch('/api/reschedule-conflicts', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           conflictingSessions,
           googleEvents,

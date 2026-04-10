@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { extractText } from '../utils/extractText'
 import { getCachedStudyTools, saveStudyTools } from '../lib/db'
+import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
 
 function loadSaved() {
@@ -255,9 +256,10 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     setGenerateError('')
     setLoadingMessage('Our AI is reading your notes and generating study materials…')
     try {
+      const token = await getAccessToken()
       const response = await fetch('/api/generate-study-tools', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ text: activeText }),
       })
       if (!response.ok) throw new Error(`API returned ${response.status}`)

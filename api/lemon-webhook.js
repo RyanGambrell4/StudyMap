@@ -59,16 +59,20 @@ export default async function handler(req, res) {
   const secret = process.env.LEMONSQUEEZY_WEBHOOK_SECRET
   const signature = req.headers['x-signature']
 
-  if (secret && signature) {
-    const expected = crypto
-      .createHmac('sha256', secret)
-      .update(rawBody)
-      .digest('hex')
+  if (!secret) {
+    console.error('[webhook] LEMONSQUEEZY_WEBHOOK_SECRET not set — rejecting request')
+    return res.status(500).json({ error: 'Webhook not configured' })
+  }
+  if (!signature) return res.status(401).json({ error: 'Missing signature' })
 
-    if (expected !== signature) {
-      console.warn('[webhook] Invalid signature')
-      return res.status(401).json({ error: 'Invalid signature' })
-    }
+  const expected = crypto
+    .createHmac('sha256', secret)
+    .update(rawBody)
+    .digest('hex')
+
+  if (expected !== signature) {
+    console.warn('[webhook] Invalid signature')
+    return res.status(401).json({ error: 'Invalid signature' })
   }
 
   // ── Parse event ────────────────────────────────────────────────────────────

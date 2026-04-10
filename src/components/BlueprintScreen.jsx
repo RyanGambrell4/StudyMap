@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getCachedCoachPlan, saveCoachPlan, getCachedStudyTools } from '../lib/db'
+import { getAccessToken } from '../lib/supabase'
 
 const ACTIVITY_COLORS = {
   'review':           { border: '#3B82F6', bg: '#1e3a5f', label: 'Review' },
@@ -62,9 +63,10 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
     setError('')
     setBlueprint(null)
     try {
+      const token = await getAccessToken()
       const res = await fetch('/api/generate-session-blueprint', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           courseName: session.courseName,
           sessionType: session.sessionType,

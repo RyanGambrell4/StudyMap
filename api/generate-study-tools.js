@@ -3,6 +3,21 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
+  const contentLength = parseInt(req.headers['content-length'] || '0')
+  if (contentLength > 500000) return res.status(413).json({ error: 'Payload too large' })
+
+  const authHeader = req.headers['authorization']
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
+  if (!token) return res.status(401).json({ error: 'Unauthorized' })
+
+  const verifyRes = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      apikey: process.env.SUPABASE_SERVICE_KEY,
+    },
+  })
+  if (!verifyRes.ok) return res.status(401).json({ error: 'Unauthorized' })
+
   const { text } = req.body;
 
   if (!text || text.length < 50) {
@@ -73,6 +88,7 @@ Rules:
     res.status(200).json(parsed);
   } catch (error) {
     console.error('API error:', error);
-    res.status(500).json({ error: error.message });
+    console.error(error)
+    res.status(500).json({ error: 'Internal server error' });
   }
 }

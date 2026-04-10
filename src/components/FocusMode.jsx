@@ -5,6 +5,7 @@ import {
   saveNotes as dbSaveNotes,
   appendSessionRecall,
 } from '../lib/db'
+import { getAccessToken } from '../lib/supabase'
 import { useCelebration } from '../utils/useCelebration'
 
 function fmt(seconds) {
@@ -407,9 +408,10 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     setQuizLoading(true); setQuizError(''); setQuizQuestions(null)
     setQuizAnswers([]); setQuizIdx(0); setQuizSelected(null); setQuizConfirmed(false); setQuizDone(false)
     try {
+      const token = await getAccessToken()
       const res = await fetch('/api/generate-quick-quiz', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ courseName: session.courseName, sessionType: session.sessionType, text: studyTools?.text ?? '' }),
       })
       const data = await res.json()

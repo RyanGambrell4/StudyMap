@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan } from '../lib/db'
+import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getAIQueriesUsed, getAIQueriesLimit } from '../lib/subscription'
 
 function loadCoachPlan(courseId) {
@@ -69,9 +70,10 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     setPlan(null)
     setPushed(false)
     try {
+      const token = await getAccessToken()
       const res = await fetch('/api/generate-study-coach-plan', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           courseName: course.name,
           goal: goal.trim(),

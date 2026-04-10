@@ -16,8 +16,23 @@ async function getAccessToken(refreshToken) {
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
+  const authHeader = req.headers['authorization']
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
+  if (!token) return res.status(401).json({ error: 'Unauthorized' })
+
+  const verifyRes = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      apikey: process.env.SUPABASE_SERVICE_KEY,
+    },
+  })
+  if (!verifyRes.ok) return res.status(401).json({ error: 'Unauthorized' })
+
   const { userId, title, description, startDateTime, endDateTime, date } = req.body
   if (!userId || !title) return res.status(400).json({ error: 'userId and title required' })
+
+  const userData = await verifyRes.json()
+  if (userData.id !== userId) return res.status(403).json({ error: 'Forbidden' })
 
   try {
     const supabaseUrl = process.env.SUPABASE_URL
@@ -65,11 +80,12 @@ export default async function handler(req, res) {
     )
     const created = await createRes.json()
 
-    if (created.error) return res.status(500).json({ error: created.error.message })
+    if (created.error) { console.error('[add-to-google-calendar] Google API error:', created.error); return res.status(500).json({ error: 'Internal server error' }) }
 
     res.status(200).json({ success: true, eventId: created.id, htmlLink: created.htmlLink })
   } catch (err) {
     console.error('[add-to-google-calendar] Error:', err)
-    res.status(500).json({ error: err.message })
+    console.error(err)
+    res.status(500).json({ error: 'Internal server error' })
   }
 }

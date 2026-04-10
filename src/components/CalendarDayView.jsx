@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
+import { getAccessToken } from '../lib/supabase'
 
 const HOUR_HEIGHT = 56
 const START_HOUR = 6
@@ -127,9 +128,10 @@ export default function CalendarDayView({
       }
       const startISO = parseTime(session.startTime, session.dateStr || dayStr)
       const endISO   = parseTime(session.endTime,   session.dateStr || dayStr)
+      const token = await getAccessToken()
       await fetch('/api/add-to-google-calendar', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           userId,
           title: `Study: ${session.courseName}`,
