@@ -825,11 +825,11 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                           <span className="text-xs text-slate-500">Card {rcIdx + 1} of {flashcards.length}</span>
                         </div>
                         <div className="relative cursor-pointer select-none" style={{ perspective: '1200px', height: '150px' }} onClick={() => setRcFlipped(f => !f)}>
-                          <div className="absolute inset-0 rounded-2xl" style={{ transformStyle: 'preserve-3d', transition: 'transform 0.55s cubic-bezier(0.4,0,0.2,1)', transform: rcFlipped ? 'rotateY(180deg)' : 'rotateY(0)' }}>
-                            <div className="absolute inset-0 rounded-2xl flex items-center justify-center p-5 text-center" style={{ backfaceVisibility: 'hidden', backgroundColor: '#111827', border: '1px solid #1e293b' }}>
+                          <div className="absolute inset-0 rounded-2xl" style={{ transformStyle: 'preserve-3d', WebkitTransformStyle: 'preserve-3d', transition: 'transform 0.55s cubic-bezier(0.4,0,0.2,1)', transform: rcFlipped ? 'rotateY(180deg)' : 'rotateY(0)' }}>
+                            <div className="absolute inset-0 rounded-2xl flex items-center justify-center p-5 text-center" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', backgroundColor: '#111827', border: '1px solid #1e293b' }}>
                               <p className="text-slate-100 font-medium text-sm leading-relaxed">{flashcards[rcIdx]?.front}</p>
                             </div>
-                            <div className="absolute inset-0 rounded-2xl flex items-center justify-center p-5 text-center" style={{ backfaceVisibility: 'hidden', backgroundColor: `${dot}15`, border: `1px solid ${dot}35`, transform: 'rotateY(180deg)' }}>
+                            <div className="absolute inset-0 rounded-2xl flex items-center justify-center p-5 text-center" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', backgroundColor: `${dot}15`, border: `1px solid ${dot}35`, transform: 'rotateY(180deg)', WebkitTransform: 'rotateY(180deg)' }}>
                               <p className="text-slate-200 text-sm leading-relaxed">{flashcards[rcIdx]?.back}</p>
                             </div>
                           </div>
@@ -889,6 +889,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                           className="absolute inset-0 rounded-2xl"
                           style={{
                             transformStyle: 'preserve-3d',
+                            WebkitTransformStyle: 'preserve-3d',
                             transition: 'transform 0.6s cubic-bezier(0.4,0,0.2,1)',
                             transform: fcFlipped ? 'rotateY(180deg)' : 'rotateY(0)',
                             filter: fcFlipped ? `drop-shadow(0 0 20px ${dot}30)` : 'none',
@@ -896,7 +897,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                         >
                           <div
                             className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center p-6 text-center"
-                            style={{ backfaceVisibility: 'hidden', backgroundColor: '#111827', border: '1px solid #1e293b', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}
+                            style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', backgroundColor: '#111827', border: '1px solid #1e293b', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}
                           >
                             {flashcards[fcIdx]?.topic && (
                               <span className="text-xs mb-3 px-2 py-0.5 rounded-full border font-medium uppercase tracking-wide" style={{ color: dot, borderColor: `${dot}40`, backgroundColor: `${dot}10` }}>{flashcards[fcIdx].topic}</span>
@@ -906,7 +907,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                           </div>
                           <div
                             className="absolute inset-0 rounded-2xl flex items-center justify-center p-6 text-center"
-                            style={{ backfaceVisibility: 'hidden', backgroundColor: `${dot}10`, border: `1px solid ${dot}30`, transform: 'rotateY(180deg)' }}
+                            style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', backgroundColor: `${dot}10`, border: `1px solid ${dot}30`, transform: 'rotateY(180deg)', WebkitTransform: 'rotateY(180deg)' }}
                           >
                             <p className="text-slate-200 leading-relaxed text-base">{flashcards[fcIdx]?.back}</p>
                           </div>
