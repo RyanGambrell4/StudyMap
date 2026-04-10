@@ -144,7 +144,7 @@ export default function LandingPage({ onGetStarted }) {
             filter: 'blur(60px)', pointerEvents: 'none',
           }} />
           <img
-            src="/hero-landing.png"
+            src="/ss-main-screen.png"
             alt="StudyEdge app — dashboard, AI study planner, flashcards, focus mode, and study coach"
             style={{
               display: 'block', width: '100%', borderRadius: 16, position: 'relative',
@@ -180,50 +180,71 @@ export default function LandingPage({ onGetStarted }) {
           {[
             {
               icon: '✦', color: '#6366f1',
+              screenshot: '/ss-session-blueprint.png',
               title: 'AI Session Planner',
               desc: 'AI breaks every study session into timed steps — warm-up, deep review, active recall, and more. No guessing what to do next.',
             },
             {
               icon: '💬', color: '#7c5cfc',
+              screenshot: '/ss-study-plan.png',
               title: 'AI Study Coach',
               desc: 'Ask questions, get explanations, quiz yourself — like having a tutor available 24/7 for every course.',
             },
             {
               icon: '🃏', color: '#22c55e',
+              screenshot: '/ss-flashcard.png',
               title: 'Smart Flashcards',
               desc: 'AI generates flashcards from your course material. Rate difficulty and focus on what you actually need to review.',
             },
             {
               icon: '🎯', color: '#f97316',
+              screenshot: '/ss-timer-recall.png',
               title: 'Focus Mode',
               desc: 'Distraction-free study timer with session tracking. See your streak grow as you build consistent habits.',
             },
             {
               icon: '📅', color: '#2dd4bf',
+              screenshot: '/ss-calendar.png',
               title: 'Study Schedule',
               desc: 'See your entire day planned out — every session, every course, organized by time and priority.',
             },
             {
               icon: '📊', color: '#a78bfa',
+              screenshot: '/ss-progress.png',
               title: 'Progress Dashboard',
               desc: 'Track your streaks, sessions completed, hours studied. Stay motivated with real data on your progress.',
             },
           ].map((f, i) => (
             <div key={i} style={{
               background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)',
-              borderRadius: 14, padding: '28px 24px',
+              borderRadius: 14, padding: 0, overflow: 'hidden',
               transition: 'all 0.2s',
             }}>
-              <div style={{
-                width: 40, height: 40, borderRadius: 10,
-                background: `${f.color}18`, border: `1px solid ${f.color}30`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 18, marginBottom: 16,
-              }}>
-                {f.icon}
+              <img
+                src={f.screenshot}
+                alt={f.title}
+                style={{
+                  width: '100%',
+                  height: 180,
+                  objectFit: 'cover',
+                  objectPosition: 'top',
+                  borderRadius: '10px 10px 0 0',
+                  marginBottom: 20,
+                  display: 'block',
+                }}
+              />
+              <div style={{ padding: '0 24px 28px' }}>
+                <div style={{
+                  width: 40, height: 40, borderRadius: 10,
+                  background: `${f.color}18`, border: `1px solid ${f.color}30`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 18, marginBottom: 16,
+                }}>
+                  {f.icon}
+                </div>
+                <h3 style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 8 }}>{f.title}</h3>
+                <p style={{ fontSize: 14, color: 'rgba(226,232,240,0.45)', lineHeight: 1.6 }}>{f.desc}</p>
               </div>
-              <h3 style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 8 }}>{f.title}</h3>
-              <p style={{ fontSize: 14, color: 'rgba(226,232,240,0.45)', lineHeight: 1.6 }}>{f.desc}</p>
             </div>
           ))}
         </div>
