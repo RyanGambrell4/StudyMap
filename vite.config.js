@@ -131,7 +131,7 @@ Rules:
       }))
 
       // ── /api/generate-study-coach-plan ───────────────────────────────────────
-      server.middlewares.use('/api/generate-study-coach-plan', makeHandler(async ({ courseName, goal, emphasisTopics, importantDates, daysPerWeek, sessionMinutes }) => {
+      server.middlewares.use('/api/generate-study-coach-plan', makeHandler(async ({ courseName, goal, emphasisTopics, importantDates, daysPerWeek, sessionMinutes, calendarEvents, timePreference }) => {
         if (!courseName || !goal) {
           const err = new Error('Missing required fields'); err.statusCode = 400; throw err
         }
@@ -139,6 +139,21 @@ Rules:
         const datesStr = importantDates?.length
           ? importantDates.map(d => `${d.label} — ${d.date}`).join('\n')
           : 'No specific dates provided'
+        const TIME_WINDOWS = {
+          Morning:   { label: 'morning',   hours: '6am–12pm' },
+          Afternoon: { label: 'afternoon', hours: '12pm–6pm' },
+          Evening:   { label: 'evening',   hours: '6pm–10pm' },
+        }
+        const pref = TIME_WINDOWS[timePreference] ?? TIME_WINDOWS.Morning
+        const calendarStr = calendarEvents?.length
+          ? calendarEvents.slice(0, 50).map(e => {
+              if (e.allDay || !e.start?.includes('T')) return `- ${e.start?.split('T')[0] ?? ''}: ${e.title} (all day)`
+              const sDate = new Date(e.start)
+              const eDate = e.end ? new Date(e.end) : null
+              const fmt = d => d.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })
+              return `- ${e.start.split('T')[0]}: ${e.title} (${fmt(sDate)}–${eDate ? fmt(eDate) : 'end unknown'})`
+            }).join('\n')
+          : null
         const data = await anthropicPost({
           model: 'claude-haiku-4-5-20251001',
           max_tokens: 4000,
@@ -155,7 +170,12 @@ Today's date: ${todayStr}
 
 Important upcoming dates:
 ${datesStr}
+${calendarStr ? `
+CRITICAL: Never schedule study sessions during the following blocked time slots. The student's preferred study time is ${timePreference ?? 'Morning'}. Always schedule sessions during ${pref.hours} first. Only use other times if the preferred window is fully blocked.
 
+Blocked time slots:
+${calendarStr}
+` : `The student prefers studying in the ${pref.label} (${pref.hours}). Schedule sessions in that window whenever possible.`}
 Build a focused, realistic study plan starting from today. Generate enough weeks to cover all important dates, with the right session count per week (${daysPerWeek || 3} sessions/week).
 
 Return ONLY this JSON:
@@ -165,14 +185,14 @@ Return ONLY this JSON:
   "weeklyFocus": [
     {
       "week": "Week of [Month Day]",
-      "theme": "what this week is fundamentally about",
+      "theme": "what this week is fundamentally about — e.g. 'Building foundational understanding'",
       "sessions": [
         {
           "sessionLabel": "Session 1",
           "focusArea": "specific topic or concept to cover this session",
           "goal": "what the student should be able to do or understand by the end of this session",
           "keyTopics": ["specific topic 1", "specific topic 2", "specific topic 3"],
-          "studyMethod": "recommended approach — e.g. Active recall + practice problems",
+          "studyMethod": "recommended approach — e.g. Active recall + practice problems, or Concept mapping + flashcards",
           "duration": ${sessionMinutes || 60}
         }
       ]
@@ -185,9 +205,9 @@ Return ONLY this JSON:
 Rules:
 - Generate exactly ${daysPerWeek || 3} sessions per week
 - Make focusArea and keyTopics highly specific to the course content, not generic
-- Make studyMethod specific and actionable
-- warningZones should be honest and specific
-- If there are important dates, weight the weeks before them appropriately
+- Make studyMethod specific and actionable (mention exact techniques)
+- warningZones should be honest and specific — things that actually trip students up in this subject
+- If there are important dates, weight the weeks before them appropriately (ramp up intensity)
 - Generate enough weeks to cover all listed dates plus 1-2 weeks before the last one`,
           }],
         })
@@ -302,6 +322,25 @@ Rules:
           return { ...q, options: newOptions, answer: newAnswer }
         })
         return { questions: shuffled }
+      }))
+
+      // ── /api/scan-notes ──────────────────────────────────────────────────
+      server.middlewares.use('/api/scan-notes', makeHandler(async ({ imageBase64, mediaType }) => {
+        if (!imageBase64 || !mediaType) {
+          const err = new Error('Missing image data'); err.statusCode = 400; throw err
+        }
+        const data = await anthropicPost({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 4000,
+          messages: [{
+            role: 'user',
+            content: [
+              { type: 'image', source: { type: 'base64', media_type: mediaType, data: imageBase64 } },
+              { type: 'text', text: 'Extract and clean up all the text from these handwritten notes. Format it as clear, readable study notes with headers and bullet points. Preserve all the information but make it well-organized and easy to read.' },
+            ],
+          }],
+        })
+        return { text: data.content?.[0]?.text ?? '' }
       }))
 
       // ── /api/extract-syllabus-events ──────────────────────────────────────
