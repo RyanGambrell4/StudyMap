@@ -150,7 +150,8 @@
     /* ── Hero ── */
     .hero-wrap {
       position: relative;
-      overflow: visible;
+      overflow: hidden;
+      padding-top: 80px;
       background:
         radial-gradient(ellipse 600px 500px at 32% 52%, rgba(79,126,247,0.13) 0%, transparent 65%),
         radial-gradient(ellipse 400px 350px at 32% 52%, rgba(124,92,250,0.07) 0%, transparent 55%),
@@ -169,9 +170,9 @@
     }
     .hero {
       max-width: 1500px; margin: 0 auto;
-      padding: 0 48px;
-      height: 680px;
-      overflow: hidden;
+      padding: 40px 48px 0;
+      height: 600px;
+      overflow: visible;
       display: flex; align-items: center; gap: 48px;
     }
     .hero-content { flex: 0 0 500px; display: flex; flex-direction: column; justify-content: center; }
