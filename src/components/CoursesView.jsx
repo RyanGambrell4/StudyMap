@@ -16,6 +16,123 @@ const COURSE_COLORS = [
 
 const DIFFICULTY_LABELS = ['Easy', 'Medium', 'Hard']
 const GRADE_OPTIONS = ['A', 'B', 'C', 'Pass/Fail']
+const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+
+function fmt12(t) {
+  if (!t) return ''
+  const [h, m] = t.split(':').map(Number)
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`
+}
+
+function ClassScheduleSection({ value, onChange }) {
+  const [open, setOpen] = useState(!!value)
+  const blank = { isDE: false, days: [], startTime: '09:00', endTime: '10:15', semesterStart: '', semesterEnd: '' }
+  const cs = value ?? blank
+  const set = (key, val) => onChange({ ...cs, [key]: val })
+  const toggleDay = day => set('days', cs.days.includes(day) ? cs.days.filter(d => d !== day) : [...cs.days, day])
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => { setOpen(true); onChange(blank) }}
+        className="flex items-center gap-2 text-xs text-slate-500 hover:text-indigo-400 transition-colors py-1"
+      >
+        <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        + Add class schedule (optional)
+      </button>
+    )
+  }
+
+  return (
+    <div className="space-y-3 border-t border-slate-700/50 pt-4">
+      <div className="flex items-center justify-between">
+        <h4 className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
+          <svg className="w-3.5 h-3.5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          Class Schedule
+        </h4>
+        <button type="button" onClick={() => { setOpen(false); onChange(null) }} className="text-xs text-slate-500 hover:text-red-400 transition-colors">Remove</button>
+      </div>
+
+      {/* In-Person / DE toggle */}
+      <div>
+        <label className="block text-xs font-medium text-slate-400 mb-1.5">Attendance type</label>
+        <div className="flex gap-2">
+          <button type="button" onClick={() => set('isDE', false)}
+            className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${!cs.isDE ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300' : 'border-slate-700 text-slate-400 hover:border-slate-600'}`}>
+            In-Person
+          </button>
+          <button type="button" onClick={() => set('isDE', true)}
+            className={`flex-1 py-2 rounded-xl text-xs font-semibold border transition-all ${cs.isDE ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300' : 'border-slate-700 text-slate-400 hover:border-slate-600'}`}>
+            DE / Online
+          </button>
+        </div>
+        {cs.isDE && <p className="text-[11px] text-slate-500 mt-1.5">Classes won't appear on your calendar, but study sessions will be scheduled around them.</p>}
+      </div>
+
+      {/* Days of the week */}
+      <div>
+        <label className="block text-xs font-medium text-slate-400 mb-1.5">Class days</label>
+        <div className="flex gap-1.5 flex-wrap">
+          {WEEK_DAYS.map(d => (
+            <button
+              key={d} type="button" onClick={() => toggleDay(d)}
+              className={`px-2.5 py-1.5 rounded-lg text-xs font-semibold border transition-all ${
+                cs.days.includes(d)
+                  ? 'border-indigo-500 bg-indigo-500/20 text-indigo-300'
+                  : 'border-slate-700 text-slate-400 hover:border-slate-600'
+              }`}
+            >{d}</button>
+          ))}
+        </div>
+      </div>
+
+      {/* Class time */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium text-slate-400 mb-1.5">Start time</label>
+          <input type="time" value={cs.startTime} onChange={e => set('startTime', e.target.value)}
+            className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            style={{ colorScheme: 'dark' }} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-slate-400 mb-1.5">End time</label>
+          <input type="time" value={cs.endTime} onChange={e => set('endTime', e.target.value)}
+            className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            style={{ colorScheme: 'dark' }} />
+        </div>
+      </div>
+
+      {/* Semester dates */}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-medium text-slate-400 mb-1.5">First class date</label>
+          <input type="date" value={cs.semesterStart} onChange={e => set('semesterStart', e.target.value)}
+            className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            style={{ colorScheme: 'dark' }} />
+        </div>
+        <div>
+          <label className="block text-xs font-medium text-slate-400 mb-1.5">Last class date</label>
+          <input type="date" value={cs.semesterEnd} onChange={e => set('semesterEnd', e.target.value)}
+            className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            style={{ colorScheme: 'dark' }} />
+        </div>
+      </div>
+
+      {cs.days.length > 0 && cs.startTime && cs.endTime && (
+        <p className="text-[11px] text-slate-500 bg-slate-800/40 rounded-lg px-3 py-2">
+          {cs.days.join(', ')} · {fmt12(cs.startTime)} – {fmt12(cs.endTime)}
+          {cs.isDE ? ' · DE (not shown on calendar)' : ' · shown on calendar'}
+        </p>
+      )}
+    </div>
+  )
+}
 
 function AddCourseForm({ courseCount, onAdd, onCancel }) {
   const todayStr = new Date().toISOString().split('T')[0]
@@ -23,6 +140,7 @@ function AddCourseForm({ courseCount, onAdd, onCancel }) {
   const [examDate, setExamDate] = useState('')
   const [difficulty, setDifficulty] = useState('Medium')
   const [targetGrade, setTargetGrade] = useState('B')
+  const [classSchedule, setClassSchedule] = useState(null)
   const [error, setError]       = useState('')
 
   const handleAdd = () => {
@@ -31,7 +149,7 @@ function AddCourseForm({ courseCount, onAdd, onCancel }) {
     if (examDate <= todayStr) { setError('Exam date must be in the future'); return }
     const color = COURSE_COLORS[courseCount % COURSE_COLORS.length]
     const courseId = Date.now().toString(36) + Math.random().toString(36).slice(2, 5)
-    onAdd({ id: courseId, name: name.trim(), examDate, difficulty, targetGrade, color })
+    onAdd({ id: courseId, name: name.trim(), examDate, difficulty, targetGrade, color, classSchedule: classSchedule || undefined })
   }
 
   return (
@@ -100,6 +218,8 @@ function AddCourseForm({ courseCount, onAdd, onCancel }) {
         </div>
       </div>
 
+      <ClassScheduleSection value={classSchedule} onChange={setClassSchedule} />
+
       {error && <p className="text-red-400 text-xs">{error}</p>}
 
       <div className="flex gap-3 pt-1">
@@ -128,12 +248,13 @@ function EditCourseForm({ course, onSave, onCancel }) {
   const [difficulty, setDifficulty] = useState(course.difficulty)
   const [targetGrade, setTargetGrade] = useState(course.targetGrade)
   const [color, setColor]           = useState(course.color)
+  const [classSchedule, setClassSchedule] = useState(course.classSchedule ?? null)
   const [error, setError]           = useState('')
 
   const handleSave = () => {
     if (!name.trim()) { setError('Enter a course name'); return }
     if (!examDate) { setError('Select an exam/finals date'); return }
-    onSave({ ...course, name: name.trim(), examDate, difficulty, targetGrade, color })
+    onSave({ ...course, name: name.trim(), examDate, difficulty, targetGrade, color, classSchedule: classSchedule || undefined })
   }
 
   return (
@@ -215,6 +336,8 @@ function EditCourseForm({ course, onSave, onCancel }) {
           ))}
         </div>
       </div>
+
+      <ClassScheduleSection value={classSchedule} onChange={setClassSchedule} />
 
       {error && <p className="text-red-400 text-xs">{error}</p>}
 

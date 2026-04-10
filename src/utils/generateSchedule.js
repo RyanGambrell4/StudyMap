@@ -62,7 +62,26 @@ function minutesToTime(mins) {
   return `${h12}:${m.toString().padStart(2, '0')} ${ampm}`
 }
 
-function sessionTimes(preferredTime, slotIndex, durationMinutes) {
+function timeStrToMins(str) {
+  if (!str) return 0
+  const [h, m] = str.split(':').map(Number)
+  return h * 60 + (m || 0)
+}
+
+function getClassBlocksForDate(courses, targetDateStr) {
+  const dow = new Date(targetDateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' })
+  const blocks = []
+  courses.forEach(c => {
+    const cs = c.classSchedule
+    if (!cs?.days?.length || !cs.semesterStart || !cs.semesterEnd) return
+    if (targetDateStr < cs.semesterStart || targetDateStr > cs.semesterEnd) return
+    if (!cs.days.includes(dow)) return
+    blocks.push({ startMin: timeStrToMins(cs.startTime), endMin: timeStrToMins(cs.endTime) })
+  })
+  return blocks
+}
+
+function sessionTimes(preferredTime, slotIndex, durationMinutes, classBlocks = []) {
   const slots = TIME_SLOTS[preferredTime] ?? TIME_SLOTS.Morning
   let startMin
   if (slotIndex < slots.length) {
@@ -70,6 +89,13 @@ function sessionTimes(preferredTime, slotIndex, durationMinutes) {
   } else {
     const last = slots[slots.length - 1]
     startMin = last + (slotIndex - slots.length + 1) * (durationMinutes + 30)
+  }
+  // Shift start time past any overlapping class block
+  const sorted = [...classBlocks].sort((a, b) => a.startMin - b.startMin)
+  for (const block of sorted) {
+    if (startMin < block.endMin && startMin + durationMinutes > block.startMin) {
+      startMin = block.endMin + 15
+    }
   }
   return { startTime: minutesToTime(startMin), endTime: minutesToTime(startMin + durationMinutes) }
 }
@@ -115,7 +141,8 @@ export function generateSchedule(courses, schedule, learningStyle, yearLevel = '
       const daysLeft    = daysBetween(date, course.examDateObj)
       const sessionType = getSessionType(idx, sessionDates.length, daysLeft, learningStyle, yearLevel)
       const dur         = sessionMinutes
-      const times       = sessionTimes(preferredTime, scheduleMap[key].length, dur)
+      const classBlocks = getClassBlocksForDate(parsedCourses, key)
+      const times       = sessionTimes(preferredTime, scheduleMap[key].length, dur, classBlocks)
 
       scheduleMap[key].push({
         id: `${courseIdx}-${key}-${idx}`,
@@ -147,7 +174,7 @@ export function generateSchedule(courses, schedule, learningStyle, yearLevel = '
           sessionType: 'Final Review',
           duration: dur,
           daysUntilExam: 2,
-          ...sessionTimes(preferredTime, scheduleMap[key].length, dur),
+          ...sessionTimes(preferredTime, scheduleMap[key].length, dur, getClassBlocksForDate(parsedCourses, key)),
         })
       }
     }
@@ -165,7 +192,7 @@ export function generateSchedule(courses, schedule, learningStyle, yearLevel = '
           sessionType: 'Exam Cram',
           duration: dur,
           daysUntilExam: 1,
-          ...sessionTimes(preferredTime, scheduleMap[key].length, dur),
+          ...sessionTimes(preferredTime, scheduleMap[key].length, dur, getClassBlocksForDate(parsedCourses, key)),
         })
       }
     }

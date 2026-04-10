@@ -71,6 +71,7 @@ export default function CalendarWeekView({
   activeDayStr,
   allDaysMap,
   syllabusEventsByDate,
+  classBlocksByDate = {},
   completedIds,
   onToggle,
   onAddSession,
@@ -150,10 +151,16 @@ export default function CalendarWeekView({
         const parseISO = iso => { const d = new Date(iso); return d.getHours() * 60 + d.getMinutes() }
         timed.push({ ...e, _type: 'gcal', startMin: parseISO(e.start), endMin: parseISO(e.end || e.start) + 30 })
       })
+      ;(classBlocksByDate[day.dateStr] ?? []).forEach(e => {
+        const startMin = timeToMinutes(e.startTime)
+        if (startMin !== null) {
+          timed.push({ ...e, startMin, endMin: timeToMinutes(e.endTime) ?? startMin + 60 })
+        }
+      })
 
       return { ...day, timed, allDay }
     }),
-    [weekDays, syllabusEventsByDate, googleByDate]
+    [weekDays, syllabusEventsByDate, googleByDate, classBlocksByDate]
   )
 
   // Keep columnsRef in sync
@@ -419,7 +426,11 @@ export default function CalendarWeekView({
             key={colIdx}
             ref={el => colDivRefs.current[colIdx] = el}
             className="flex-1 relative min-w-0"
-            style={{ borderLeft: `1px solid ${tv.gridLine}`, height: TOTAL_HOURS * HOUR_HEIGHT }}
+            style={{ borderLeft: `1px solid ${tv.gridLine}`, height: TOTAL_HOURS * HOUR_HEIGHT, cursor: 'default' }}
+            onClick={e => {
+              if (e.target !== e.currentTarget) return
+              onAddSession?.(col.dateStr)
+            }}
           >
             {/* Hour lines */}
             {Array.from({ length: TOTAL_HOURS - 1 }, (_, i) => (
@@ -479,6 +490,25 @@ export default function CalendarWeekView({
               if (topMin < 0 || topMin > TOTAL_HOURS * 60) return null
               const top    = (topMin / 60) * HOUR_HEIGHT
               const height = Math.max(((ev.endMin - ev.startMin) / 60) * HOUR_HEIGHT, 20)
+
+              if (ev._type === 'class') {
+                return (
+                  <div key={ev.id}
+                    className="absolute inset-x-0.5 rounded overflow-hidden pointer-events-none z-10"
+                    style={{
+                      top, height,
+                      background: `${ev.color.dot}14`,
+                      borderLeft: `2px solid ${ev.color.dot}`,
+                      backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 4px, ${ev.color.dot}12 4px, ${ev.color.dot}12 8px)`,
+                    }}
+                  >
+                    <div className="px-1.5 py-0.5">
+                      <p className="text-[9px] font-bold leading-tight truncate uppercase tracking-wider" style={{ color: ev.color.dot, opacity: 0.85 }}>CLASS</p>
+                      {height > 28 && <p className="text-[9px] leading-tight truncate" style={{ color: ev.color.dot, opacity: 0.6 }}>{ev.courseName}</p>}
+                    </div>
+                  </div>
+                )
+              }
 
               if (ev._type === 'gcal') {
                 return (

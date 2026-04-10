@@ -519,6 +519,37 @@ export default function OutputView({
     [weeksWithAll]
   )
 
+  // ── Class schedule blocks (shown on calendar for in-person classes) ────────────
+  const classBlocksByDate = useMemo(() => {
+    const fmt12 = t => {
+      if (!t) return ''
+      const [h, m] = t.split(':').map(Number)
+      return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`
+    }
+    const map = {}
+    courses.forEach((course, courseIdx) => {
+      const cs = course.classSchedule
+      if (!cs?.days?.length || !cs.semesterStart || !cs.semesterEnd || cs.isDE) return
+      const end = new Date(cs.semesterEnd + 'T12:00:00')
+      for (let d = new Date(cs.semesterStart + 'T12:00:00'); d <= end; d.setDate(d.getDate() + 1)) {
+        const dayName = d.toLocaleDateString('en-US', { weekday: 'short' })
+        if (!cs.days.includes(dayName)) continue
+        const key = d.toISOString().split('T')[0]
+        if (!map[key]) map[key] = []
+        map[key].push({
+          id: `class-${courseIdx}-${key}`,
+          courseId: courseIdx,
+          courseName: course.name,
+          color: course.color,
+          startTime: fmt12(cs.startTime),
+          endTime: fmt12(cs.endTime),
+          _type: 'class',
+        })
+      }
+    })
+    return map
+  }, [courses])
+
   useSessionReminders(allSessions, completedIds, todayStr)
 
   // ── Conflict detection ────────────────────────────────────────────────────────
@@ -991,6 +1022,7 @@ export default function OutputView({
                 activeDayStr={activeDayStr}
                 allDaysMap={allDaysMap}
                 syllabusEventsByDate={syllabusEventsByDate}
+                classBlocksByDate={classBlocksByDate}
                 completedIds={completedIds}
                 onToggle={handleToggle}
                 onAddSession={setAddSessionDayStr}
