@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StudyEdge — Turn your syllabus into a plan</title>
-  <meta name="description" content="Upload your syllabus, get a personalized study schedule. StudyEdge maps your semester, tracks your streak, and keeps you on track." />
+  <title>StudyEdge — Know exactly when, what, and how to study</title>
+  <meta name="description" content="StudyEdge tells you exactly when to study, plans every session down to the minute, and coaches you through it with flashcards, active recall, and more. The only study tool students need." />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -379,6 +379,38 @@
     .bubble.user { background: rgba(255,255,255,0.05); align-self: flex-start; max-width: 82%; }
     .bubble.ai { background: rgba(124,92,250,0.1); border: 1px solid rgba(124,92,250,0.2); align-self: flex-end; max-width: 90%; }
 
+    /* ── Calendar deep-dive ── */
+    .cal-section {
+      padding: 60px 48px 80px;
+      max-width: 1200px; margin: 0 auto;
+    }
+    .cal-split {
+      display: grid; grid-template-columns: 1fr 1.15fr;
+      gap: 72px; align-items: center; margin-top: 52px;
+    }
+    .cal-sub {
+      font-size: 1rem; color: var(--text2); line-height: 1.72;
+      margin-bottom: 40px; max-width: 500px;
+    }
+    .cal-features { display: flex; flex-direction: column; gap: 22px; }
+    .cal-feat { display: flex; gap: 16px; align-items: flex-start; }
+    .cal-feat-icon {
+      width: 38px; height: 38px; border-radius: 10px; flex-shrink: 0;
+      background: rgba(79,126,247,0.08); border: 1px solid rgba(79,126,247,0.18);
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .cal-feat strong { display: block; font-size: 0.9rem; font-weight: 700; color: var(--text); margin-bottom: 3px; letter-spacing: -0.2px; }
+    .cal-feat span { font-size: 0.83rem; color: var(--text2); line-height: 1.65; }
+    .cal-visual {
+      border-radius: 16px; overflow: hidden; line-height: 0;
+      border: 1px solid rgba(79,126,247,0.2);
+      box-shadow: 0 0 0 1px rgba(79,126,247,0.07), 0 20px 60px rgba(0,0,0,0.55), 0 0 40px rgba(79,126,247,0.1);
+    }
+    .cal-visual img { width: 100%; display: block; }
+    @media (max-width: 900px) {
+      .cal-split { grid-template-columns: 1fr; gap: 40px; }
+    }
+
     /* ── Capability pills ── */
     .caps-section {
       padding: 0 48px 70px;
@@ -540,7 +572,7 @@
         <span class="l1">You already have<br>the syllabus.</span>
         <span class="l2 gradient-text">Now you have a plan.</span>
       </h1>
-      <p class="hero-sub fade-up d2">StudyEdge is your personal study coach. It plans every session before you start, keeps you locked in while you work, and gives you the tools to actually learn the material — not just cover it.</p>
+      <p class="hero-sub fade-up d2">StudyEdge does three things no other app does together: it schedules exactly when you should study around your real life, plans every session minute-by-minute before you start, and coaches you through it with built-in flashcards, quizzes, and active recall — so you actually learn the material, not just cover it.</p>
       <div class="fade-up d3 hero-cta-btns">
         <button class="btn lg" onclick="location.href='/app?signup=1'">Get Started Free</button>
         <button class="btn outline lg" onclick="document.getElementById('how-it-works').scrollIntoView({behavior:'smooth'})">See how it works</button>
@@ -571,7 +603,7 @@
 <!-- ═══ HOW IT WORKS ═══ -->
 <div class="section" id="how-it-works">
   <div class="eyebrow fade-up">How it works</div>
-  <h2 class="text-h1 fade-up d1">Your coach. Every session.<br>Not just on exam week.</h2>
+  <h2 class="text-h1 fade-up d1">Three things every student needs.<br>Finally, all in one place.</h2>
   <div class="steps">
     <div class="step fade-up d1">
       <div class="step-content">
@@ -579,8 +611,8 @@
         <div class="step-icon">
           <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/></svg>
         </div>
-        <h3>Your coach plans the session before you start</h3>
-        <p>The Session Blueprint builds a minute-by-minute study plan tailored to your course, your goals, and your deadlines before every session. No more sitting down and not knowing where to start.</p>
+        <h3>Know exactly what to study — before you sit down</h3>
+        <p>Before every session, the AI builds a minute-by-minute plan tailored to your course, your upcoming exams, and your goals. Warm-up, deep review, active recall, synthesis — it's all mapped out. You sit down and immediately know exactly what to work on and in what order.</p>
       </div>
       <div class="step-img">
         <img src="/ss-session-blueprint.png" alt="Session Blueprint plan" />
@@ -592,8 +624,8 @@
         <div class="step-icon">
           <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
         </div>
-        <h3>Lock in with Focus Mode</h3>
-        <p>Start the session and StudyEdge runs the clock. Each block of your plan is timed. Flashcards, active recall prompts, a quick quiz, and a notes area are built right in — everything you need without switching apps.</p>
+        <h3>Built-in tools that actually teach you the material</h3>
+        <p>Hit start and StudyEdge runs the clock. Every block is timed and purposeful. AI-generated flashcards, active recall prompts, a quick quiz, and a notes area are all built in — you don't just read the material, you learn it. No second-guessing, no switching apps, no wasted time.</p>
       </div>
       <div class="step-img" style="height:380px;overflow:hidden">
         <img src="/ss-timer-recall.png" alt="Focus Mode timer with Active Recall" style="width:100%;height:100%;object-fit:cover;object-position:top;transform:scale(1.1);transform-origin:top center" />
@@ -605,11 +637,11 @@
         <div class="step-icon">
           <svg fill="none" stroke="currentColor" stroke-width="1.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 16.121A3 3 0 1012.015 11L11 14H9c0 .768.293 1.536.879 2.121z"/></svg>
         </div>
-        <h3>Track everything. Build the habit.</h3>
-        <p>Every completed session updates your streak, your course progress, and your weekly stats. Your entire semester is mapped in the calendar so nothing sneaks up on you.</p>
+        <h3>Know exactly when to study — built around your schedule</h3>
+        <p>Connect your Google Calendar, add your class schedule and due dates, and StudyEdge automatically maps out your week. It sees your classes, commitments, and deadlines — then fills in your free time with the right courses at the right time. You get push reminders so you always know what's on for today.</p>
       </div>
-      <div class="step-img" style="height:380px;overflow:hidden">
-        <img src="/ss-session-ending.png" alt="Session complete" style="width:100%;object-fit:contain;object-position:center;transform:translateY(0px)" />
+      <div class="step-img">
+        <img src="/ss-calendar.png" alt="StudyEdge smart calendar — AI-scheduled study sessions" />
       </div>
     </div>
   </div>
@@ -618,7 +650,7 @@
 <!-- ═══ FEATURE BENTO ═══ -->
 <div class="bento-section">
   <div class="eyebrow fade-up">Features</div>
-  <h2 class="text-h1 fade-up d1">Not just a timer.<br>An entire study system.</h2>
+  <h2 class="text-h1 fade-up d1">Everything you need to succeed.<br>Nothing you don't.</h2>
   <div class="bento-grid">
 
     <!-- Focus Mode — large -->
@@ -682,6 +714,50 @@
       </div>
     </div>
 
+  </div>
+</div>
+
+<!-- ═══ SMART CALENDAR ═══ -->
+<div class="cal-section">
+  <div class="eyebrow fade-up">Smart Scheduling</div>
+  <h2 class="text-h1 fade-up d1">Your schedule. Your life.<br><span class="gradient-text">Your study plan builds around it.</span></h2>
+  <div class="cal-split">
+    <div class="cal-content fade-up d2">
+      <p class="cal-sub">Most students don't have a studying problem — they have a scheduling problem. StudyEdge fixes that by connecting to your real schedule and automatically mapping out exactly when you should study each week, for each course.</p>
+      <div class="cal-features">
+        <div class="cal-feat">
+          <div class="cal-feat-icon">📅</div>
+          <div>
+            <strong>Connect your Google Calendar</strong>
+            <span>Import your existing events so StudyEdge works around what you already have going on — classes, work, social life and all.</span>
+          </div>
+        </div>
+        <div class="cal-feat">
+          <div class="cal-feat-icon">📋</div>
+          <div>
+            <strong>Add your class schedule &amp; due dates</strong>
+            <span>Upload your syllabus or enter deadlines manually. The AI maps every assignment and exam to the right week automatically.</span>
+          </div>
+        </div>
+        <div class="cal-feat">
+          <div class="cal-feat-icon">🧠</div>
+          <div>
+            <strong>AI tells you exactly when to study</strong>
+            <span>It finds your free windows and fills them with the right courses — prioritized by exam dates, difficulty, and how much time you have left.</span>
+          </div>
+        </div>
+        <div class="cal-feat">
+          <div class="cal-feat-icon">🔔</div>
+          <div>
+            <strong>Push reminders so nothing slips</strong>
+            <span>Get notified before each session so you always know what's on for today — and never fall behind because you forgot.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="cal-visual fade-up d3">
+      <img src="/ss-calendar.png" alt="StudyEdge smart calendar — AI-scheduled study sessions around your real schedule" />
+    </div>
   </div>
 </div>
 
