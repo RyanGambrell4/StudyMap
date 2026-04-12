@@ -413,10 +413,11 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     setQuizAnswers([]); setQuizIdx(0); setQuizSelected(null); setQuizConfirmed(false); setQuizDone(false)
     try {
       const token = await getAccessToken()
-      const res = await fetch('/api/generate-quick-quiz', {
+      const res = await fetch('/api/generate-study-tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
+          mode: 'quick-quiz',
           courseName: session.courseName,
           sessionType: session.sessionType,
           text: [
