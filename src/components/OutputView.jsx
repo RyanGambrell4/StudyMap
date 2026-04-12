@@ -21,6 +21,67 @@ import CoursesView from './CoursesView'
 import ProgressView from './ProgressView'
 import StudyToolsView from './StudyToolsView'
 import StudyCoachView from './StudyCoachView'
+import AIChatView from './AIChatView'
+
+// ─── TutorView ────────────────────────────────────────────────────────────────
+function TutorView({ courses, userId, onShowPaywall }) {
+  const [selectedCourse, setSelectedCourse] = useState(courses.length > 0 ? 0 : -1)
+  const course = courses[selectedCourse] ?? null
+
+  return (
+    <div className="flex flex-col h-full min-h-0 max-w-3xl mx-auto w-full px-4 py-6">
+      {/* Header + course selector */}
+      <div className="mb-4 shrink-0">
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">AI Tutor</h1>
+        <p className="text-slate-500 text-sm mb-4">Ask questions, get explanations, and flag difficult topics that feed back into your study plan.</p>
+        {courses.length > 1 && (
+          <div className="flex flex-wrap gap-2">
+            {courses.map((c, i) => {
+              const dot = c.color?.dot ?? '#6366f1'
+              const active = selectedCourse === i
+              return (
+                <button
+                  key={i}
+                  onClick={() => setSelectedCourse(i)}
+                  className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all border"
+                  style={active
+                    ? { backgroundColor: `${dot}20`, color: dot, borderColor: `${dot}50` }
+                    : { backgroundColor: 'transparent', color: '#64748b', borderColor: 'rgba(148,163,184,0.3)' }
+                  }
+                >
+                  <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dot }} />
+                  {c.name}
+                </button>
+              )
+            })}
+          </div>
+        )}
+        {courses.length === 0 && (
+          <p className="text-slate-400 text-sm">Add courses to start using the AI Tutor.</p>
+        )}
+      </div>
+
+      {/* Chat */}
+      {course && (
+        <div className="flex-1 min-h-0 bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden flex flex-col">
+          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700/50 shrink-0">
+            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+              AI Tutor — <span style={{ color: course.color?.dot ?? '#6366f1' }}>{course.name}</span>
+            </p>
+          </div>
+          <AIChatView
+            courseId={course.id ?? selectedCourse}
+            courseName={course.name}
+            examDate={course.examDate ?? null}
+            targetGrade={course.targetGrade ?? null}
+            userId={userId}
+            onShowPaywall={onShowPaywall}
+          />
+        </div>
+      )}
+    </div>
+  )
+}
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const TARGET_THRESHOLDS = { A: 90, B: 80, C: 70, 'Pass/Fail': 60 }
@@ -745,6 +806,9 @@ export default function OutputView({
           onStartNext={handleFocusStartNext}
           nextSession={allSessions.find(s => s.dateStr >= todayStr && !completedIds.has(s.id) && s.id !== focusSession.id) ?? null}
           onGoToTools={() => setActiveSection('tools')}
+          course={courses[focusSession.courseId] ?? null}
+          onShowPaywall={onShowPaywall}
+          userId={userId}
         />
       )}
 
@@ -1082,6 +1146,15 @@ export default function OutputView({
             googleEvents={googleEvents}
             preferredTime={schedule.preferredTime}
             theme={theme}
+          />
+        )}
+
+        {/* ── AI Tutor ── */}
+        {activeSection === 'tutor' && (
+          <TutorView
+            courses={courses}
+            userId={userId}
+            onShowPaywall={onShowPaywall}
           />
         )}
 

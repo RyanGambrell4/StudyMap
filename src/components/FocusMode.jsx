@@ -7,6 +7,7 @@ import {
 } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
 import { useCelebration } from '../utils/useCelebration'
+import AIChatView from './AIChatView'
 
 function fmt(seconds) {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
@@ -154,7 +155,7 @@ const ACTIVITY_COLORS = {
   'break':             '#22C55E',
 }
 
-export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools }) {
+export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools, course, onShowPaywall, userId }) {
   const totalSec = session.duration * 60
   const isLongSession = session.duration > 45
   const todayStr = new Date().toISOString().split('T')[0]
@@ -750,6 +751,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
             { id: 'flashcards', label: 'Flashcards' },
             { id: 'quiz', label: 'Quick Quiz' },
             { id: 'notes', label: 'Notes' },
+            { id: 'ai', label: 'Ask AI' },
           ].map(({ id, label }) => (
             <button
               key={id}
@@ -769,8 +771,18 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
         </div>
 
         {/* Tab content */}
-        <div className="flex-1 overflow-y-auto">
-          <div className="px-5 py-4">
+        <div className={`flex-1 ${activeTab === 'ai' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'}`}>
+          {activeTab === 'ai' && (
+            <AIChatView
+              courseId={session.courseId}
+              courseName={session.courseName}
+              examDate={course?.examDate ?? null}
+              targetGrade={course?.targetGrade ?? null}
+              userId={userId}
+              onShowPaywall={onShowPaywall}
+            />
+          )}
+          <div className={activeTab === 'ai' ? 'hidden' : 'px-5 py-4'}>
 
             {/* ── Active Recall ── */}
             {activeTab === 'recall' && (

@@ -99,9 +99,20 @@ export async function saveStudyTools(data) {
 
 export async function saveCoachPlan(courseId, plan, formData) {
   const existing = _cache?.coach_plans ?? {}
+  const prev = existing[courseId] ?? {}
   const updated = {
     ...existing,
-    [courseId]: { plan, formData, savedAt: Date.now(), sessionIndex: 0 },
+    [courseId]: { ...prev, plan, formData, savedAt: Date.now(), sessionIndex: 0 },
+  }
+  if (_cache) _cache.coach_plans = updated
+  await _upsert({ coach_plans: updated })
+}
+
+export async function saveCoachPlanStruggles(courseId, struggles) {
+  const existing = _cache?.coach_plans ?? {}
+  const updated = {
+    ...existing,
+    [courseId]: { ...(existing[courseId] ?? {}), struggles },
   }
   if (_cache) _cache.coach_plans = updated
   await _upsert({ coach_plans: updated })

@@ -3,6 +3,8 @@ import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getAIQueriesUsed, getAIQueriesLimit } from '../lib/subscription'
 
+
+
 function loadCoachPlan(courseId) {
   return getCachedCoachPlan(courseId)
 }
@@ -47,6 +49,10 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       setSessionMinutes(60)
       setImportantDates([{ label: '', date: '' }])
     }
+    // Load struggles from cached coach plan
+    const courseId = courses[courseIdx]?.id ?? courseIdx
+    const entry = getCachedCoachPlan(courseId)
+    setStruggles(entry?.struggles ?? [])
     setPushed(false)
     setError('')
   }, [courseIdx])
@@ -54,6 +60,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   const course = courses[courseIdx]
   const dot = course?.color?.dot ?? '#6366F1'
   const isDark = theme === 'dark'
+  const [struggles, setStruggles] = useState([])
   const inputStyle = isDark
     ? { backgroundColor: '#111827', border: '1px solid #1e293b' }
     : { backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }
@@ -88,6 +95,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
           sessionMinutes,
           calendarEvents: googleEvents.length ? googleEvents : null,
           timePreference: preferredTime,
+          struggles: struggles.length ? struggles : null,
         }),
       })
       const data = await res.json()
@@ -169,6 +177,18 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
           })}
         </div>
       </div>
+
+      {/* Struggles banner */}
+      {struggles.length > 0 && (
+        <div className="mb-5 flex items-start gap-3 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/50 rounded-xl px-4 py-3">
+          <span className="text-base shrink-0 mt-0.5">📌</span>
+          <p className="text-indigo-700 dark:text-indigo-300 text-sm leading-relaxed">
+            <span className="font-semibold">Topics flagged from AI Tutor: </span>
+            {struggles.join(', ')}
+            <span className="text-indigo-500 dark:text-indigo-400"> — these will be emphasized in your new plan.</span>
+          </p>
+        </div>
+      )}
 
       {/* Show saved plan or form */}
       {plan ? (
