@@ -19,9 +19,9 @@ function Flashcard({ card, flipped, onFlip }) {
     >
       <div className={`fc-inner${flipped ? ' fc-flipped' : ''}`} style={{ minHeight: 220 }}>
         {/* Front */}
-        <div className="fc-face bg-slate-800 border border-slate-700 rounded-2xl flex flex-col items-center justify-center p-8 gap-3">
+        <div className="fc-face bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl flex flex-col items-center justify-center p-8 gap-3">
           <span className="text-xs font-semibold uppercase tracking-widest text-indigo-400">Concept</span>
-          <p className="text-white text-xl font-bold text-center leading-snug">{card.front}</p>
+          <p className="text-slate-900 dark:text-white text-xl font-bold text-center leading-snug">{card.front}</p>
           <span className="text-slate-500 text-xs mt-2">Tap to reveal answer</span>
         </div>
         {/* Back */}
@@ -54,17 +54,17 @@ function QuizQuestion({ question, onAnswer }) {
   return (
     <div className="space-y-5">
       {/* Question */}
-      <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-6">
+      <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-6">
         <div className="flex items-center gap-2 mb-3">
           <span className={`text-xs font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full ${
-            (question.type === 'mc' || question.type === 'multiple_choice') ? 'bg-indigo-900/50 text-indigo-400' :
-            question.type === 'tf' ? 'bg-violet-900/50 text-violet-400' :
-            'bg-emerald-900/50 text-emerald-400'
+            (question.type === 'mc' || question.type === 'multiple_choice') ? 'bg-indigo-100 dark:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400' :
+            question.type === 'tf' ? 'bg-violet-100 dark:bg-violet-900/50 text-violet-600 dark:text-violet-400' :
+            'bg-emerald-100 dark:bg-emerald-900/50 text-emerald-600 dark:text-emerald-400'
           }`}>
             {(question.type === 'mc' || question.type === 'multiple_choice') ? 'Multiple Choice' : question.type === 'tf' ? 'True / False' : 'Fill in the Blank'}
           </span>
         </div>
-        <p className="text-white font-semibold text-base leading-relaxed">{question.question}</p>
+        <p className="text-slate-900 dark:text-white font-semibold text-base leading-relaxed">{question.question}</p>
         {question.hint && <p className="text-slate-500 text-xs mt-1">{question.hint}</p>}
       </div>
 
@@ -82,10 +82,10 @@ function QuizQuestion({ question, onAnswer }) {
                 onClick={() => !revealed && submit(opt)}
                 disabled={revealed}
                 className={`w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
-                  showRight ? 'bg-emerald-900/40 border-emerald-500/60 text-emerald-300' :
-                  showWrong ? 'bg-red-900/40 border-red-500/60 text-red-300' :
-                  isSelected ? 'bg-slate-700/60 border-slate-500 text-white' :
-                  'bg-slate-800/40 border-slate-700/50 text-slate-300 hover:border-indigo-500/50 hover:text-white'
+                  showRight ? 'bg-emerald-50 dark:bg-emerald-900/40 border-emerald-400 dark:border-emerald-500/60 text-emerald-700 dark:text-emerald-300' :
+                  showWrong ? 'bg-red-50 dark:bg-red-900/40 border-red-400 dark:border-red-500/60 text-red-700 dark:text-red-300' :
+                  isSelected ? 'bg-slate-100 dark:bg-slate-700/60 border-slate-400 dark:border-slate-500 text-slate-900 dark:text-white' :
+                  'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 hover:border-indigo-400 dark:hover:border-indigo-500/50 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 <span className="text-slate-500 mr-2">{String.fromCharCode(65 + i)}.</span>
@@ -114,10 +114,10 @@ function QuizQuestion({ question, onAnswer }) {
                 onClick={() => !revealed && submit(val)}
                 disabled={revealed}
                 className={`flex-1 py-3 rounded-xl border font-semibold text-sm transition-all ${
-                  showRight ? 'bg-emerald-900/40 border-emerald-500/60 text-emerald-300' :
-                  showWrong ? 'bg-red-900/40 border-red-500/60 text-red-300' :
-                  isSelected ? 'bg-slate-700 border-slate-500 text-white' :
-                  'bg-slate-800/40 border-slate-700/50 text-slate-300 hover:border-indigo-500/50 hover:text-white'
+                  showRight ? 'bg-emerald-50 dark:bg-emerald-900/40 border-emerald-400 dark:border-emerald-500/60 text-emerald-700 dark:text-emerald-300' :
+                  showWrong ? 'bg-red-50 dark:bg-red-900/40 border-red-400 dark:border-red-500/60 text-red-700 dark:text-red-300' :
+                  isSelected ? 'bg-slate-100 dark:bg-slate-700 border-slate-400 dark:border-slate-500 text-slate-900 dark:text-white' :
+                  'bg-slate-50 dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/50 text-slate-700 dark:text-slate-300 hover:border-indigo-400 dark:hover:border-indigo-500/50 hover:text-slate-900 dark:hover:text-white'
                 }`}
               >
                 {val ? 'True' : 'False'}
@@ -139,7 +139,7 @@ function QuizQuestion({ question, onAnswer }) {
             disabled={revealed}
             placeholder="Type your answer…"
             autoFocus
-            className="w-full bg-slate-800/60 border border-slate-600 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
+            className="w-full bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-3 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm"
           />
           {!revealed && (
             <button
@@ -381,14 +381,14 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       {/* ── Hub screen ── */}
       {mode === 'hub' && (
         <div>
-          <h1 className="text-2xl font-bold text-white mb-2">Study Tools</h1>
-          <p className="text-slate-400 text-sm mb-8">Choose how you want to study.</p>
+          <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Study Tools</h1>
+          <p className="text-slate-500 dark:text-slate-400 text-sm mb-8">Choose how you want to study.</p>
           <div className="space-y-3">
 
             {/* Flashcards card */}
             <button
               onClick={() => setMode('upload')}
-              className="w-full text-left bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/60 hover:border-indigo-500/40 rounded-2xl p-5 transition-all group"
+              className="w-full text-left bg-white dark:bg-slate-800/40 hover:bg-slate-50 dark:hover:bg-slate-800/70 border border-slate-200 dark:border-slate-700/60 hover:border-indigo-300 dark:hover:border-indigo-500/40 rounded-2xl p-5 transition-all group"
             >
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center shrink-0 group-hover:bg-indigo-600/30 transition-colors">
@@ -398,7 +398,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-base font-semibold text-white">Flashcards</h2>
+                    <h2 className="text-base font-semibold text-slate-900 dark:text-white">Flashcards</h2>
                     {flashcards.length > 0 && (
                       <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-indigo-900/50 text-indigo-300 border border-indigo-700/50">
                         {flashcards.length} ready
@@ -416,7 +416,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             {/* Quizzes card */}
             <button
               onClick={() => { setMode('upload') }}
-              className="w-full text-left bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/60 hover:border-violet-500/40 rounded-2xl p-5 transition-all group"
+              className="w-full text-left bg-white dark:bg-slate-800/40 hover:bg-slate-50 dark:hover:bg-slate-800/70 border border-slate-200 dark:border-slate-700/60 hover:border-violet-300 dark:hover:border-violet-500/40 rounded-2xl p-5 transition-all group"
             >
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-xl bg-violet-600/20 border border-violet-500/30 flex items-center justify-center shrink-0 group-hover:bg-violet-600/30 transition-colors">
@@ -426,7 +426,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-base font-semibold text-white">Quizzes</h2>
+                    <h2 className="text-base font-semibold text-slate-900 dark:text-white">Quizzes</h2>
                     {quiz.length > 0 && (
                       <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-violet-900/50 text-violet-300 border border-violet-700/50">
                         {quiz.length} questions ready
@@ -444,7 +444,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             {/* Study Coach card */}
             <button
               onClick={() => onNavigateToCoach?.()}
-              className="w-full text-left bg-slate-800/40 hover:bg-slate-800/70 border border-slate-700/60 hover:border-emerald-500/40 rounded-2xl p-5 transition-all group"
+              className="w-full text-left bg-white dark:bg-slate-800/40 hover:bg-slate-50 dark:hover:bg-slate-800/70 border border-slate-200 dark:border-slate-700/60 hover:border-emerald-300 dark:hover:border-emerald-500/40 rounded-2xl p-5 transition-all group"
             >
               <div className="flex items-start gap-4">
                 <div className="w-10 h-10 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center shrink-0 group-hover:bg-emerald-600/30 transition-colors">
@@ -454,7 +454,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <h2 className="text-base font-semibold text-white">Study Coach</h2>
+                    <h2 className="text-base font-semibold text-slate-900 dark:text-white">Study Coach</h2>
                   </div>
                   <p className="text-slate-400 text-sm">Get a personalized AI study plan tailored to your schedule and upcoming exams.</p>
                 </div>
@@ -479,7 +479,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               </svg>
               Back
             </button>
-            <h1 className="text-lg font-semibold text-white">Upload Material</h1>
+            <h1 className="text-lg font-semibold text-slate-900 dark:text-white">Upload Material</h1>
           </div>
           {/* Drop zone */}
           <div
@@ -491,8 +491,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               dragging
                 ? 'border-indigo-400 bg-indigo-500/10'
                 : uploadedFile
-                  ? 'border-slate-600 bg-slate-800/30'
-                  : 'border-slate-700 bg-slate-800/20 hover:border-indigo-500/60 hover:bg-indigo-500/5'
+                  ? 'border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/30'
+                  : 'border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/20 hover:border-indigo-400 dark:hover:border-indigo-500/60 hover:bg-indigo-500/5'
             }`}
           >
             <input
@@ -503,7 +503,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               onChange={e => handleFile(e.target.files?.[0])}
             />
             <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${
-              uploadedFile ? 'bg-indigo-600/20 border border-indigo-500/30' : 'bg-slate-700/60 border border-slate-600'
+              uploadedFile ? 'bg-indigo-600/20 border border-indigo-500/30' : 'bg-slate-200 dark:bg-slate-700/60 border border-slate-300 dark:border-slate-600'
             }`}>
               {isExtracting ? (
                 <svg className="w-6 h-6 text-indigo-400 animate-spin" fill="none" viewBox="0 0 24 24">
@@ -527,14 +527,14 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               </div>
             ) : uploadedFile ? (
               <div className="text-center">
-                <p className="text-slate-200 font-semibold truncate max-w-xs">{uploadedFile.name}</p>
+                <p className="text-slate-800 dark:text-slate-200 font-semibold truncate max-w-xs">{uploadedFile.name}</p>
                 <p className="text-slate-500 text-xs mt-1">
                   {hasText ? `${extractedText.split(/\s+/).filter(Boolean).length.toLocaleString()} words extracted` : 'Click to replace'}
                 </p>
               </div>
             ) : (
               <div className="text-center">
-                <p className="text-slate-300 font-medium">Drop your file here or click to browse</p>
+                <p className="text-slate-700 dark:text-slate-300 font-medium">Drop your file here or click to browse</p>
                 <p className="text-slate-500 text-xs mt-1">PDF, .docx, or .pptx</p>
               </div>
             )}
@@ -591,7 +591,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               }}
               placeholder="Paste lecture notes, slides text, or any course material here…"
               rows={5}
-              className="w-full bg-slate-800/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-200 placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 text-sm resize-none leading-relaxed"
+              className="w-full bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-indigo-500/60 text-sm resize-none leading-relaxed"
             />
             {pastedText.length > 0 && pastedText.length <= 50 && (
               <p className="text-amber-400 text-xs mt-1">Paste at least a few sentences to generate useful materials.</p>
@@ -620,7 +620,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               <select
                 value={selectedCourse ?? ''}
                 onChange={e => setSelectedCourse(e.target.value === '' ? null : Number(e.target.value))}
-                className="w-full bg-slate-800/60 border border-slate-600 rounded-xl px-4 py-2.5 text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                className="w-full bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-slate-800 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
               >
                 <option value="">No course</option>
                 {courses.map((c, i) => (
@@ -643,7 +643,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 {showTextPreview ? 'Hide' : 'Show'} extracted text
               </button>
               {showTextPreview && (
-                <div className="mt-2 bg-slate-900/60 border border-slate-700 rounded-xl p-4 max-h-48 overflow-y-auto">
+                <div className="mt-2 bg-slate-100 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-700 rounded-xl p-4 max-h-48 overflow-y-auto">
                   <p className="text-slate-400 text-xs font-mono whitespace-pre-wrap leading-relaxed">{extractedText.slice(0, 2000)}{extractedText.length > 2000 ? '\n…' : ''}</p>
                 </div>
               )}
@@ -679,7 +679,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               {flashcards.length > 0 && (
                 <button
                   onClick={handleGenerateQuiz}
-                  className="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+                  className="flex-1 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 font-semibold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
                 >
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -692,7 +692,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
           {/* Previously generated cards */}
           {flashcards.length > 0 && (
-            <div className="bg-slate-800/30 border border-slate-700/40 rounded-2xl p-4">
+            <div className="bg-slate-100 dark:bg-slate-800/30 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-4">
               <p className="text-slate-400 text-xs font-medium mb-3">Previously generated</p>
               <div className="flex gap-3">
                 <button

@@ -53,6 +53,11 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
 
   const course = courses[courseIdx]
   const dot = course?.color?.dot ?? '#6366F1'
+  const isDark = theme === 'dark'
+  const inputStyle = isDark
+    ? { backgroundColor: '#111827', border: '1px solid #1e293b' }
+    : { backgroundColor: '#f8fafc', border: '1px solid #e2e8f0' }
+  const inactiveBtnBorder = isDark ? '#1e293b' : '#e2e8f0'
 
   const validDates = importantDates.filter(d => d.label.trim() && d.date)
 
@@ -120,12 +125,12 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   if (courses.length === 0) {
     return (
       <div className="px-6 py-12 max-w-2xl mx-auto text-center">
-        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={{ backgroundColor: '#1e293b', border: '1px dashed #334155' }}>
-          <svg className="w-8 h-8 text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div className="w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-5" style={isDark ? { backgroundColor: '#1e293b', border: '1px dashed #334155' } : { backgroundColor: '#f1f5f9', border: '1px dashed #cbd5e1' }}>
+          <svg className="w-8 h-8 text-slate-400 dark:text-slate-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
           </svg>
         </div>
-        <p className="text-white font-bold text-lg mb-2">No courses yet</p>
+        <p className="text-slate-900 dark:text-white font-bold text-lg mb-2">No courses yet</p>
         <p className="text-slate-500 text-sm">Add your courses in the setup flow to start building a Study Coach plan.</p>
       </div>
     )
@@ -136,7 +141,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
 
       {/* Header */}
       <div className="mb-6">
-        <h1 className="text-2xl font-bold text-white mb-1">Study Coach</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Study Coach</h1>
         <p className="text-slate-500 text-sm">Tell us about your course and goals — we'll map out a week-by-week study plan designed for how you work.</p>
       </div>
 
@@ -154,7 +159,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
                 className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all border"
                 style={active
                   ? { backgroundColor: `${cdot}20`, color: cdot, borderColor: `${cdot}50` }
-                  : { backgroundColor: 'transparent', color: '#64748b', borderColor: '#1e293b' }
+                  : { backgroundColor: 'transparent', color: '#64748b', borderColor: inactiveBtnBorder }
                 }
               >
                 <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: cdot }} />
@@ -186,8 +191,8 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
               onChange={e => setGoal(e.target.value)}
               placeholder="e.g. 'Ace the final', 'Understand derivatives deeply', 'Pass with a B+'"
               rows={2}
-              className="w-full rounded-xl px-4 py-3 text-slate-200 placeholder-slate-700 focus:outline-none text-sm resize-none leading-relaxed"
-              style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}
+              className="w-full rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-700 focus:outline-none text-sm resize-none leading-relaxed"
+              style={inputStyle}
             />
           </div>
 
@@ -199,8 +204,8 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
               onChange={e => setEmphasisTopics(e.target.value)}
               placeholder="e.g. 'Limit theorems, integration by parts, related rates' or 'Chapter 4-7 heavily tested'"
               rows={2}
-              className="w-full rounded-xl px-4 py-3 text-slate-200 placeholder-slate-700 focus:outline-none text-sm resize-none leading-relaxed"
-              style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}
+              className="w-full rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-700 focus:outline-none text-sm resize-none leading-relaxed"
+              style={inputStyle}
             />
           </div>
 
@@ -215,15 +220,15 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
                     value={d.label}
                     onChange={e => updateDateRow(i, 'label', e.target.value)}
                     placeholder="e.g. Midterm Exam"
-                    className="flex-1 rounded-xl px-3 py-2.5 text-slate-200 placeholder-slate-700 focus:outline-none text-sm"
-                    style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}
+                    className="flex-1 rounded-xl px-3 py-2.5 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-700 focus:outline-none text-sm"
+                    style={inputStyle}
                   />
                   <input
                     type="date"
                     value={d.date}
                     onChange={e => updateDateRow(i, 'date', e.target.value)}
-                    className="rounded-xl px-3 py-2.5 text-slate-300 focus:outline-none text-sm"
-                    style={{ backgroundColor: '#111827', border: '1px solid #1e293b', colorScheme: 'dark' }}
+                    className="rounded-xl px-3 py-2.5 text-slate-700 dark:text-slate-300 focus:outline-none text-sm"
+                    style={{ ...inputStyle, colorScheme: isDark ? 'dark' : 'light' }}
                   />
                   {importantDates.length > 1 && (
                     <button
@@ -261,7 +266,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
                     className="w-9 h-9 rounded-xl text-sm font-bold transition-all border"
                     style={daysPerWeek === n
                       ? { backgroundColor: `${dot}25`, color: dot, borderColor: `${dot}50` }
-                      : { backgroundColor: 'transparent', color: '#64748b', borderColor: '#1e293b' }
+                      : { backgroundColor: 'transparent', color: '#64748b', borderColor: inactiveBtnBorder }
                     }
                   >
                     {n}
@@ -274,8 +279,8 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
               <select
                 value={sessionMinutes}
                 onChange={e => setSessionMinutes(Number(e.target.value))}
-                className="w-full rounded-xl px-3 py-2.5 text-slate-200 focus:outline-none text-sm"
-                style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}
+                className="w-full rounded-xl px-3 py-2.5 text-slate-800 dark:text-slate-200 focus:outline-none text-sm"
+                style={{ ...inputStyle, colorScheme: isDark ? 'dark' : 'light' }}
               >
                 {[30, 45, 60, 90].map(m => (
                   <option key={m} value={m}>{m} min</option>

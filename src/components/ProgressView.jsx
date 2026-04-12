@@ -23,10 +23,10 @@ function HoursBar({ label, hours, maxHours, color }) {
   return (
     <div>
       <div className="flex items-center justify-between mb-1.5 text-sm">
-        <span className="text-slate-400">{label}</span>
-        <span className="font-semibold text-slate-200">{Math.round(hours * 10) / 10}h</span>
+        <span className="text-slate-500 dark:text-slate-400">{label}</span>
+        <span className="font-semibold text-slate-800 dark:text-slate-200">{Math.round(hours * 10) / 10}h</span>
       </div>
-      <div className="h-2.5 bg-slate-800 rounded-full overflow-hidden">
+      <div className="h-2.5 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-700"
           style={{ width: `${pct}%`, backgroundColor: color }}
@@ -98,38 +98,38 @@ export default function ProgressView({ courses, allSessions, completedIds, today
 
   return (
     <div className="px-6 py-8 max-w-4xl mx-auto">
-      <h1 className="text-2xl font-bold text-white mb-6">Progress</h1>
+      <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-6">Progress</h1>
 
       {/* ── Streak + motivational ── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5 flex items-center gap-4">
+        <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-orange-500/15 border border-orange-500/20 flex items-center justify-center text-2xl shrink-0">
             🔥
           </div>
           <div>
-            <p className="text-4xl font-bold text-white tabular-nums">{streak}</p>
-            <p className="text-slate-400 text-sm mt-0.5">day streak</p>
+            <p className="text-4xl font-bold text-slate-900 dark:text-white tabular-nums">{streak}</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">day streak</p>
           </div>
         </div>
-        <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5 flex items-center gap-4">
+        <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 flex items-center gap-4">
           <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 border border-emerald-500/20 flex items-center justify-center text-2xl shrink-0">
             ✅
           </div>
           <div>
-            <p className="text-4xl font-bold text-white tabular-nums">{totalCompleted}</p>
-            <p className="text-slate-400 text-sm mt-0.5">sessions completed</p>
+            <p className="text-4xl font-bold text-slate-900 dark:text-white tabular-nums">{totalCompleted}</p>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-0.5">sessions completed</p>
           </div>
         </div>
       </div>
 
       {/* Motivational message */}
       <div className="bg-indigo-600/10 border border-indigo-500/20 rounded-2xl px-5 py-4 mb-6">
-        <p className="text-indigo-300 text-sm font-medium">{getStreakMsg(streak)}</p>
+        <p className="text-indigo-600 dark:text-indigo-300 text-sm font-medium">{getStreakMsg(streak)}</p>
       </div>
 
       {/* ── Hours comparison ── */}
-      <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5 mb-6">
-        <h2 className="text-slate-300 font-semibold mb-4">Study Hours</h2>
+      <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5 mb-6">
+        <h2 className="text-slate-700 dark:text-slate-300 font-semibold mb-4">Study Hours</h2>
         <div className="space-y-4">
           <HoursBar label="This week" hours={thisWeekHours} maxHours={maxHours} color="#6366f1" />
           <HoursBar label="Last week" hours={lastWeekHours} maxHours={maxHours} color="#334155" />
@@ -143,19 +143,19 @@ export default function ProgressView({ courses, allSessions, completedIds, today
       </div>
 
       {/* ── Per-course progress ── */}
-      <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-5">
-        <h2 className="text-slate-300 font-semibold mb-4">Sessions by Course</h2>
+      <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/50 rounded-2xl p-5">
+        <h2 className="text-slate-700 dark:text-slate-300 font-semibold mb-4">Sessions by Course</h2>
         <div className="space-y-4">
           {courseStats.map(({ course, total, completed, pct }, i) => (
             <div key={i}>
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: course.color.dot }} />
-                  <span className="text-slate-300 text-sm truncate">{course.name}</span>
+                  <span className="text-slate-700 dark:text-slate-300 text-sm truncate">{course.name}</span>
                 </div>
-                <span className="text-slate-400 text-sm tabular-nums shrink-0">{completed}/{total}</span>
+                <span className="text-slate-500 dark:text-slate-400 text-sm tabular-nums shrink-0">{completed}/{total}</span>
               </div>
-              <div className="h-2 bg-slate-700 rounded-full overflow-hidden">
+              <div className="h-2 bg-slate-200 dark:bg-slate-700 rounded-full overflow-hidden">
                 <div
                   className="h-full rounded-full transition-all duration-700"
                   style={{ width: `${pct}%`, backgroundColor: pct === 100 ? '#10b981' : course.color.dot }}

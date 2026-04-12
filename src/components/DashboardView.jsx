@@ -155,13 +155,13 @@ export default function DashboardView({
   // ── Setup state: no courses yet ─────────────────────────────────────────────
   if (courses.length === 0) {
     return (
-      <div className="min-h-screen" style={{ background: 'linear-gradient(180deg, #0f172a 0%, #080e1c 100%)' }}>
+      <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a]">
         <div className="px-6 py-10 max-w-2xl mx-auto">
 
           {/* Header */}
           <div className="mb-10">
             <p className="text-slate-500 text-sm font-medium mb-1 tracking-wide">{formatDate(todayStr)}</p>
-            <h1 className="text-4xl font-bold text-white tracking-tight">{greeting()}</h1>
+            <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight">{greeting()}</h1>
           </div>
 
           {/* Setup hero */}
@@ -478,16 +478,12 @@ export default function DashboardView({
                   <button
                     onClick={() => nextSess && onStartFocus(nextSess)}
                     disabled={!nextSess}
-                    className="w-full py-2.5 rounded-xl text-sm font-bold transition-all"
-                    style={
-                      nextSess
-                        ? {
-                            background: `linear-gradient(135deg, ${dot}30, ${dot}18)`,
-                            color: dot,
-                            border: `1px solid ${dot}50`,
-                          }
-                        : { backgroundColor: 'rgba(241,245,249,0.8)', color: '#94a3b8', border: '1px solid rgba(203,213,225,0.8)', cursor: 'default' }
-                    }
+                    className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all ${!nextSess ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-600/50 cursor-default' : ''}`}
+                    style={nextSess ? {
+                      background: `linear-gradient(135deg, ${dot}30, ${dot}18)`,
+                      color: dot,
+                      border: `1px solid ${dot}50`,
+                    } : {}}
                   >
                     {nextSess ? 'Study Now' : 'All sessions complete'}
                   </button>
