@@ -2,6 +2,7 @@ import { useMemo, useEffect, useRef } from 'react'
 import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { getCurrentGrade, letterGrade, gradeStatus, STATUS_COLORS } from '../utils/gradeCalc'
+import { getActivePlan } from '../lib/subscription'
 
 function greeting() {
   const h = new Date().getHours()
@@ -43,7 +44,10 @@ export default function DashboardView({
   onAddSession,
   onNavigateToCourses,
   onNavigateToGrades,
+  onNavigateToTutor,
+  onShowPaywall,
 }) {
+  const plan = getActivePlan()
   const celebrate = useCelebration()
 
   // Fire big confetti once when all sessions for the day are complete
@@ -374,156 +378,179 @@ export default function DashboardView({
           )}
         </div>
 
-        {/* ── Week Strip ── */}
-        <div>
-          <h2 className="text-slate-500 dark:text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">This Week</h2>
-          <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-4">
-            <div className="grid grid-cols-7 gap-1">
-              {weekDays.map(day => (
-                <div key={day.dateStr} className="flex flex-col items-center gap-2 py-2">
-                  <span className={`text-[10px] font-bold uppercase tracking-widest ${
-                    day.isToday ? 'text-white' : 'text-slate-400 dark:text-slate-600'
-                  }`}>
-                    {day.letter}
-                  </span>
+        {/* ── Exam Countdown ── */}
+        {courses.length > 0 && (
+          <div>
+            <h2 className="text-slate-500 dark:text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">Exams</h2>
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
+              {courses.map((course, idx) => {
+                const daysLeft = daysBetween(todayStr, course.examDate)
+                const dot = course.color?.dot ?? '#6366f1'
+                const isUrgent = daysLeft >= 0 && daysLeft <= 7
+                const isWarning = daysLeft > 7 && daysLeft <= 14
+                return (
                   <div
-                    className="w-9 h-9 rounded-full flex items-center justify-center transition-all"
-                    style={
-                      day.isToday
-                        ? { backgroundColor: heroColor, boxShadow: `0 0 12px ${heroColor}66` }
-                        : {}
-                    }
+                    key={idx}
+                    className="shrink-0 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl px-4 py-4 min-w-[140px]"
+                    style={{ borderTopWidth: 3, borderTopColor: dot }}
                   >
-                    <span className={`text-sm font-bold leading-none ${
-                      day.isToday ? 'text-white' :
-                      day.isPast   ? 'text-slate-400 dark:text-slate-600' :
-                                     'text-slate-700 dark:text-slate-300'
-                    }`}>
-                      {day.dayNum}
-                    </span>
-                  </div>
-                  <div className="h-4 flex items-center justify-center">
-                    {day.allDone ? (
-                      <svg className="w-3.5 h-3.5 text-emerald-400" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    ) : day.hasSessions ? (
-                      <div className="flex gap-0.5">
-                        {day.dots.map((color, i) => (
-                          <div key={i} className="w-2 h-2 rounded-full" style={{ backgroundColor: color }} />
-                        ))}
-                      </div>
-                    ) : null}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-
-        {/* ── Course Cards ── */}
-        <div>
-          <h2 className="text-slate-500 dark:text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">Your Courses</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {courseStats.map(({ course, total, completed, dot }, idx) => {
-              const pct = total === 0 ? 0 : Math.round((completed / total) * 100)
-              const daysLeft = daysBetween(todayStr, course.examDate)
-              const isUrgent = daysLeft >= 0 && daysLeft <= 7
-              const isWarning = daysLeft > 7 && daysLeft <= 14
-              const nextSess = nextSessionPerCourse[idx]
-
-              return (
-                <div
-                  key={idx}
-                  className="group bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-6 cursor-default transition-all hover:bg-slate-50 dark:hover:bg-slate-800/80 hover:border-slate-300 dark:hover:border-slate-600/60 hover:scale-[1.01]"
-                  style={{ borderLeftWidth: 4, borderLeftColor: dot }}
-                >
-                  <div className="flex items-start gap-4 mb-5">
                     <div
-                      className="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 font-black text-white text-2xl shadow-lg"
-                      style={{ backgroundColor: dot, boxShadow: `0 4px 14px ${dot}55` }}
+                      className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-black text-sm mb-3 shadow-sm"
+                      style={{ backgroundColor: dot }}
                     >
                       {course.name.charAt(0).toUpperCase()}
                     </div>
-                    <div className="flex-1 min-w-0 pt-1">
-                      <p className="font-bold text-slate-900 dark:text-white text-base truncate mb-1">{course.name}</p>
-                      <div className="flex items-center gap-1.5">
-                        {isUrgent && (
-                          <svg className="w-3.5 h-3.5 text-red-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                          </svg>
-                        )}
-                        <span className={`text-sm font-bold ${
-                          isUrgent ? 'text-red-400' :
-                          isWarning ? 'text-amber-400' :
-                          'text-slate-500'
-                        }`}>
-                          {daysLeft > 0 ? `${daysLeft}d to exam` : daysLeft === 0 ? 'Exam today' : 'Exam passed'}
-                        </span>
-                      </div>
-                    </div>
+                    <p className="text-slate-700 dark:text-slate-200 font-bold text-sm truncate mb-1">{course.name}</p>
+                    <p className={`text-xs font-bold ${isUrgent ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-slate-500'}`}>
+                      {daysLeft > 0 ? `${daysLeft}d to exam` : daysLeft === 0 ? 'Exam today' : 'Exam passed'}
+                    </p>
                   </div>
-
-                  <div className="mb-5">
-                    <div className="flex justify-between text-xs font-semibold mb-2">
-                      <span className="text-slate-500">{completed} of {total} sessions</span>
-                      <span style={{ color: dot }}>{pct}%</span>
-                    </div>
-                    <div className="h-2 bg-slate-200 dark:bg-slate-700/80 rounded-full overflow-hidden">
-                      <div
-                        className="h-full rounded-full transition-all duration-700"
-                        style={{ width: `${pct}%`, backgroundColor: dot }}
-                      />
-                    </div>
-                  </div>
-
-                  {/* Grade badge */}
-                  {onNavigateToGrades && (() => {
-                    const comps = course.gradeData?.components ?? []
-                    const target = course.gradeData?.targetGrade ?? null
-                    const current = getCurrentGrade(comps)
-                    if (current !== null && target) {
-                      const status = gradeStatus(current, target)
-                      const sc = STATUS_COLORS[status]
-                      return (
-                        <button
-                          onClick={() => onNavigateToGrades(idx)}
-                          className="w-full flex items-center justify-between px-3 py-2 rounded-xl mb-3 transition-all hover:opacity-80"
-                          style={{ backgroundColor: sc.bg, border: `1px solid ${sc.border}` }}
-                        >
-                          <span className="text-xs font-semibold" style={{ color: sc.color }}>
-                            {status === 'on-track' ? '✓ On Track' : status === 'at-risk' ? '⚠ At Risk' : '↑ Needs Recovery'}
-                          </span>
-                          <span className="text-xs font-bold" style={{ color: sc.color }}>{letterGrade(current)} · {current.toFixed(0)}%</span>
-                        </button>
-                      )
-                    }
-                    return (
-                      <button
-                        onClick={() => onNavigateToGrades(idx)}
-                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl mb-3 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors border border-slate-200 dark:border-slate-700/50"
-                      >
-                        <span className="text-xs font-medium">Set up Grade Hub →</span>
-                      </button>
-                    )
-                  })()}
-
-                  <button
-                    onClick={() => nextSess && onStartFocus(nextSess)}
-                    disabled={!nextSess}
-                    className={`w-full py-2.5 rounded-xl text-sm font-bold transition-all ${!nextSess ? 'bg-slate-100 dark:bg-slate-700/50 text-slate-400 dark:text-slate-500 border border-slate-200 dark:border-slate-600/50 cursor-default' : ''}`}
-                    style={nextSess ? {
-                      background: `linear-gradient(135deg, ${dot}30, ${dot}18)`,
-                      color: dot,
-                      border: `1px solid ${dot}50`,
-                    } : {}}
-                  >
-                    {nextSess ? 'Study Now' : 'All sessions complete'}
-                  </button>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
+        )}
+
+        {/* ── Grade Snapshot ── */}
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-slate-500 dark:text-slate-300 text-sm font-bold uppercase tracking-widest">Grade Snapshot</h2>
+            {plan !== 'free' && onNavigateToGrades && (
+              <button onClick={() => onNavigateToGrades(0)} className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
+                Grade Hub →
+              </button>
+            )}
+          </div>
+          {plan === 'free' ? (
+            <div className="relative rounded-2xl overflow-hidden">
+              {/* Blurred fake preview */}
+              <div className="filter blur-sm pointer-events-none select-none bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden">
+                {[['Calculus II', '#6366f1', 'A', '91%'], ['Physics', '#f59e0b', 'B+', '88%'], ['English', '#10b981', 'A-', '90%']].map(([name, color, letter, pct]) => (
+                  <div key={name} className="flex items-center gap-4 px-5 py-4 border-b border-slate-100 dark:border-slate-700/40 last:border-0" style={{ borderLeft: `3px solid ${color}` }}>
+                    <p className="flex-1 text-slate-700 dark:text-slate-200 font-semibold text-sm">{name}</p>
+                    <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: `${color}20`, color }}>{letter} · {pct}</span>
+                  </div>
+                ))}
+              </div>
+              {/* Lock overlay */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-[2px] rounded-2xl gap-3 px-6 text-center">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-white font-bold text-sm">Grade Hub is Pro</p>
+                  <p className="text-slate-400 text-xs mt-1">Track grades, project your final, and plan your path to your target grade.</p>
+                </div>
+                <button
+                  onClick={onShowPaywall}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all"
+                >
+                  Upgrade to Pro →
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden">
+              {courses.map((course, idx) => {
+                const comps = course.gradeData?.components ?? []
+                const current = getCurrentGrade(comps)
+                const target = course.gradeData?.targetGrade ?? null
+                const status = current !== null && target ? gradeStatus(current, target) : 'unknown'
+                const sc = STATUS_COLORS[status]
+                const dot = course.color?.dot ?? '#6366f1'
+                return (
+                  <button
+                    key={idx}
+                    onClick={() => onNavigateToGrades && onNavigateToGrades(idx)}
+                    className="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors text-left border-b border-slate-100 dark:border-slate-700/40 last:border-0"
+                    style={{ borderLeft: `3px solid ${dot}` }}
+                  >
+                    <div className="flex-1 min-w-0">
+                      <p className="text-slate-800 dark:text-slate-100 font-semibold text-sm truncate">{course.name}</p>
+                    </div>
+                    {current !== null ? (
+                      <span className="text-xs font-bold px-2.5 py-1 rounded-full shrink-0" style={{ backgroundColor: sc.bg, color: sc.color }}>
+                        {letterGrade(current)} · {current.toFixed(0)}%
+                      </span>
+                    ) : (
+                      <span className="text-xs text-slate-400 shrink-0">Set up →</span>
+                    )}
+                  </button>
+                )
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* ── AI Tutor Quick Access ── */}
+        <div>
+          <h2 className="text-slate-500 dark:text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">AI Tutor</h2>
+          {plan === 'free' ? (
+            <div className="relative rounded-2xl overflow-hidden">
+              {/* Blurred fake chat preview */}
+              <div className="filter blur-sm pointer-events-none select-none bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-5 space-y-3">
+                <div className="flex gap-3">
+                  <div className="w-7 h-7 rounded-full bg-indigo-500/30 shrink-0" />
+                  <div className="bg-slate-100 dark:bg-slate-700/50 rounded-xl px-3 py-2 text-xs text-slate-500 max-w-[80%]">Can you explain L'Hôpital's rule with an example?</div>
+                </div>
+                <div className="flex gap-3 justify-end">
+                  <div className="bg-indigo-600/20 rounded-xl px-3 py-2 text-xs text-indigo-300 max-w-[80%]">Sure! L'Hôpital's rule states that for indeterminate forms...</div>
+                </div>
+                <div className="flex gap-3">
+                  <div className="w-7 h-7 rounded-full bg-indigo-500/30 shrink-0" />
+                  <div className="bg-slate-100 dark:bg-slate-700/50 rounded-xl px-3 py-2 text-xs text-slate-500 max-w-[80%]">What should I focus on for my exam next week?</div>
+                </div>
+              </div>
+              {/* Lock overlay */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-[2px] rounded-2xl gap-3 px-6 text-center">
+                <div className="w-10 h-10 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
+                  <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                  </svg>
+                </div>
+                <div>
+                  <p className="text-white font-bold text-sm">AI Tutor is Pro</p>
+                  <p className="text-slate-400 text-xs mt-1">Ask questions, get explanations, and flag topics that feed back into your study plan.</p>
+                </div>
+                <button
+                  onClick={onShowPaywall}
+                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all"
+                >
+                  Upgrade to Pro →
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-5">
+              <div className="flex flex-wrap gap-2 mb-4">
+                {courses.map((course, idx) => {
+                  const dot = course.color?.dot ?? '#6366f1'
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => onNavigateToTutor && onNavigateToTutor()}
+                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium border transition-all hover:opacity-80"
+                      style={{ backgroundColor: `${dot}18`, color: dot, borderColor: `${dot}40` }}
+                    >
+                      <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: dot }} />
+                      {course.name}
+                    </button>
+                  )
+                })}
+              </div>
+              <button
+                onClick={() => onNavigateToTutor && onNavigateToTutor()}
+                className="w-full flex items-center gap-3 bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-600/40 rounded-xl px-4 py-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors text-sm"
+              >
+                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                </svg>
+                <span>Ask a question...</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* ── Upcoming Deadlines ── */}

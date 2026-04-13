@@ -23,6 +23,7 @@ import StudyToolsView from './StudyToolsView'
 import StudyCoachView from './StudyCoachView'
 import AIChatView from './AIChatView'
 import GradeHubView from './GradeHubView'
+import AccountView from './AccountView'
 
 // ─── TutorView ────────────────────────────────────────────────────────────────
 function TutorView({ courses, userId, onShowPaywall }) {
@@ -365,6 +366,12 @@ export default function OutputView({
   const [recoveryAlerts, setRecoveryAlerts] = useState([])
   const [showShareCard, setShowShareCard] = useState(false)
   const [gradesCourseIdx, setGradesCourseIdx] = useState(0)
+  const [coachCourseIdx, setCoachCourseIdx] = useState(0)
+
+  const handleOpenStudyCoach = useCallback((idx) => {
+    setCoachCourseIdx(idx ?? 0)
+    setActiveSection('coach')
+  }, [])
 
   const [syllabusEvents, setSyllabusEvents] = useState(() => getCachedSyllabusEvents() ?? [])
   const [syllabusModalCourse, setSyllabusModalCourse] = useState(null)
@@ -873,6 +880,7 @@ export default function OutputView({
         onToggleTheme={onToggleTheme}
         theme={theme}
         userEmail={userEmail}
+        onNavigateToAccount={() => setActiveSection('account')}
         googleCalendarConnected={gcalConnected}
         onConnectGoogleCalendar={handleConnectGoogleCalendar}
       >
@@ -913,6 +921,8 @@ export default function OutputView({
             onAddSession={setAddSessionDayStr}
             onNavigateToCourses={() => setActiveSection('courses')}
             onNavigateToGrades={(idx) => { setGradesCourseIdx(idx); setActiveSection('grades') }}
+            onNavigateToTutor={() => setActiveSection('tutor')}
+            onShowPaywall={onShowPaywall}
           />
         )}
 
@@ -1117,6 +1127,8 @@ export default function OutputView({
             onAddCourse={onAddCourse}
             onEditCourse={onEditCourse}
             onDeleteCourse={onDeleteCourse}
+            onShowPaywall={onShowPaywall}
+            onOpenStudyCoach={handleOpenStudyCoach}
           />
         )}
 
@@ -1168,6 +1180,19 @@ export default function OutputView({
           <TutorView
             courses={courses}
             userId={userId}
+            onShowPaywall={onShowPaywall}
+          />
+        )}
+
+        {/* ── Account ── */}
+        {activeSection === 'account' && (
+          <AccountView
+            userEmail={userEmail}
+            onSignOut={onSignOut}
+            onImportSyllabus={() => setSyllabusModalCourse(-1)}
+            onEditPlan={onEditPlan}
+            googleCalendarConnected={gcalConnected}
+            onConnectGoogleCalendar={handleConnectGoogleCalendar}
             onShowPaywall={onShowPaywall}
           />
         )}
