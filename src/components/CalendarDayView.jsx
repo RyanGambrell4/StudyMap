@@ -68,6 +68,7 @@ export default function CalendarDayView({
   gcalConnected = false,
   conflictMap = new Map(),
   onSessionMove,
+  onAddSession,
   theme = 'dark',
 }) {
   const tv = theme_vars(theme === 'dark')
@@ -294,15 +295,28 @@ export default function CalendarDayView({
           {isToday && <p className="text-[10px] text-indigo-500/60 mt-0.5 tracking-wide">TODAY</p>}
         </div>
 
-        <button
-          onClick={onNext}
-          className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors text-sm"
-        >
-          Next
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-2">
+          {onAddSession && (
+            <button
+              onClick={() => onAddSession(dayStr)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-400 hover:text-indigo-300 border border-indigo-500/30 hover:border-indigo-400/50 hover:bg-indigo-500/10 transition-all"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+              </svg>
+              Add session
+            </button>
+          )}
+          <button
+            onClick={onNext}
+            className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors text-sm"
+          >
+            Next
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
       </div>
 
       {/* ── All-day strip ── */}
@@ -363,7 +377,15 @@ export default function CalendarDayView({
         </div>
 
         {/* Grid column */}
-        <div ref={colDivRef} className="flex-1 relative" style={{ borderLeft: `1px solid ${tv.gridLine}`, height: TOTAL_HOURS * HOUR_HEIGHT }}>
+        <div
+          ref={colDivRef}
+          className="flex-1 relative"
+          style={{ borderLeft: `1px solid ${tv.gridLine}`, height: TOTAL_HOURS * HOUR_HEIGHT }}
+          onClick={e => {
+            if (e.target !== colDivRef.current) return
+            if (onAddSession) onAddSession(dayStr)
+          }}
+        >
           {/* Hour lines */}
           {Array.from({ length: TOTAL_HOURS - 1 }, (_, i) => (
             <div key={i} className="absolute left-0 right-0 pointer-events-none"

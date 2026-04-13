@@ -1071,6 +1071,7 @@ export default function OutputView({
                 gcalConnected={gcalConnected}
                 conflictMap={conflictMap}
                 onSessionMove={handleSessionMove}
+                onAddSession={setAddSessionDayStr}
                 theme={theme}
               />
             )}
