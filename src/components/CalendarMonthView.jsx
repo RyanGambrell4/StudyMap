@@ -39,6 +39,7 @@ export default function CalendarMonthView({
   expandedDayStr,
   setExpandedDayStr,
   onDayClick,
+  onAddSession,
   googleEvents = [],
   conflictMap = new Map(),
   theme = 'dark',
@@ -254,6 +255,17 @@ export default function CalendarMonthView({
               })}
             </h4>
             <div className="flex items-center gap-3">
+              {onAddSession && (
+                <button
+                  onClick={() => onAddSession(expandedDayStr)}
+                  className="flex items-center gap-1 text-[11px] font-medium text-indigo-400 hover:text-indigo-300 border border-indigo-500/30 hover:border-indigo-400/50 hover:bg-indigo-500/10 px-2 py-1 rounded-lg transition-all"
+                >
+                  <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+                  </svg>
+                  Add session
+                </button>
+              )}
               <button
                 onClick={() => onDayClick(expandedDayStr)}
                 className="text-[11px] text-indigo-400 hover:text-indigo-300 transition-colors"

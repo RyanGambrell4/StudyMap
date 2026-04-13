@@ -331,7 +331,20 @@ export default function CalendarWeekView({
           </svg>
           Prev week
         </button>
-        <span className="text-sm font-medium text-slate-400 tracking-tight">{weekLabel}</span>
+        <div className="flex items-center gap-3">
+          <span className="text-sm font-medium text-slate-400 tracking-tight">{weekLabel}</span>
+          {onAddSession && (
+            <button
+              onClick={() => onAddSession(activeDayStr)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-400 hover:text-indigo-300 border border-indigo-500/30 hover:border-indigo-400/50 hover:bg-indigo-500/10 transition-all"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
+              </svg>
+              Add session
+            </button>
+          )}
+        </div>
         <button onClick={onNextWeek}
           className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors text-sm"
         >

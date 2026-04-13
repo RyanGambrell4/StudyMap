@@ -1088,6 +1088,7 @@ export default function OutputView({
                 expandedDayStr={expandedDayStr}
                 setExpandedDayStr={setExpandedDayStr}
                 onDayClick={dateStr => { setActiveDayStr(dateStr); setViewMode('day'); setExpandedDayStr(null) }}
+                onAddSession={setAddSessionDayStr}
                 googleEvents={googleEvents}
                 conflictMap={conflictMap}
                 theme={theme}
