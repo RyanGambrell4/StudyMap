@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getAIQueriesUsed, getAIQueriesLimit } from '../lib/subscription'
+import { getCurrentGrade, letterGrade, TARGET_OPTIONS } from '../utils/gradeCalc'
 
 
 
@@ -96,6 +97,17 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
           calendarEvents: googleEvents.length ? googleEvents : null,
           timePreference: preferredTime,
           struggles: struggles.length ? struggles : null,
+          gradeGap: (() => {
+            const comps = course?.gradeData?.components ?? []
+            const target = course?.gradeData?.targetGrade ?? null
+            const current = getCurrentGrade(comps)
+            return current !== null && target !== null ? current - target : null
+          })(),
+          weakAreas: (() => {
+            const comps = course?.gradeData?.components ?? []
+            const weak = comps.filter(c => c.graded && c.grade !== null && c.grade < 70).map(c => c.component)
+            return weak.length ? weak : null
+          })(),
         }),
       })
       const data = await res.json()
@@ -189,6 +201,35 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
           </p>
         </div>
       )}
+
+      {/* Grade gap banner */}
+      {(() => {
+        const comps = course?.gradeData?.components ?? []
+        const target = course?.gradeData?.targetGrade ?? null
+        if (!target || !comps.length) return null
+        const current = getCurrentGrade(comps)
+        if (current === null) return null
+        const gap = current - target
+        if (gap >= -2) return null  // on-track, no banner needed
+        const isRecovery = gap < -10
+        const weakAreas = comps.filter(c => c.graded && c.grade !== null && c.grade < 70).map(c => c.component)
+        const targetLabel = TARGET_OPTIONS.find(o => o.value === target)?.label ?? `${target}%`
+        const color = isRecovery
+          ? { bg: 'bg-red-50 dark:bg-red-950/30', border: 'border-red-200 dark:border-red-800/50', text: 'text-red-700 dark:text-red-300', sub: 'text-red-500 dark:text-red-400' }
+          : { bg: 'bg-amber-50 dark:bg-amber-950/30', border: 'border-amber-200 dark:border-amber-800/50', text: 'text-amber-700 dark:text-amber-300', sub: 'text-amber-500 dark:text-amber-400' }
+        return (
+          <div className={`mb-5 flex items-start gap-3 ${color.bg} border ${color.border} rounded-xl px-4 py-3`}>
+            <span className="text-base shrink-0 mt-0.5">{isRecovery ? '🚨' : '⚠️'}</span>
+            <p className={`${color.text} text-sm leading-relaxed`}>
+              <span className="font-semibold">{isRecovery ? 'Grade recovery needed: ' : 'Grade gap detected: '}</span>
+              Current {letterGrade(current)} ({current.toFixed(1)}%), target {targetLabel} — {Math.abs(gap).toFixed(1)} points below. This plan will prioritize closing the gap.
+              {weakAreas.length > 0 && (
+                <span className={color.sub}> Focus areas: {weakAreas.join(', ')}.</span>
+              )}
+            </p>
+          </div>
+        )
+      })()}
 
       {/* Show saved plan or form */}
       {plan ? (

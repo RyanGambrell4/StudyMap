@@ -22,6 +22,7 @@ import ProgressView from './ProgressView'
 import StudyToolsView from './StudyToolsView'
 import StudyCoachView from './StudyCoachView'
 import AIChatView from './AIChatView'
+import GradeHubView from './GradeHubView'
 
 // ─── TutorView ────────────────────────────────────────────────────────────────
 function TutorView({ courses, userId, onShowPaywall }) {
@@ -363,6 +364,7 @@ export default function OutputView({
   const [gradeError, setGradeError] = useState('')
   const [recoveryAlerts, setRecoveryAlerts] = useState([])
   const [showShareCard, setShowShareCard] = useState(false)
+  const [gradesCourseIdx, setGradesCourseIdx] = useState(0)
 
   const [syllabusEvents, setSyllabusEvents] = useState(() => getCachedSyllabusEvents() ?? [])
   const [syllabusModalCourse, setSyllabusModalCourse] = useState(null)
@@ -910,6 +912,7 @@ export default function OutputView({
             onImportSyllabus={() => setSyllabusModalCourse(-1)}
             onAddSession={setAddSessionDayStr}
             onNavigateToCourses={() => setActiveSection('courses')}
+            onNavigateToGrades={(idx) => { setGradesCourseIdx(idx); setActiveSection('grades') }}
           />
         )}
 
@@ -1146,6 +1149,17 @@ export default function OutputView({
             googleEvents={googleEvents}
             preferredTime={schedule.preferredTime}
             theme={theme}
+          />
+        )}
+
+        {/* ── Grade Hub ── */}
+        {activeSection === 'grades' && (
+          <GradeHubView
+            courses={courses}
+            onEditCourse={onEditCourse}
+            userId={userId}
+            onShowPaywall={onShowPaywall}
+            initialCourseIdx={gradesCourseIdx}
           />
         )}
 

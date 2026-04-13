@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   })
   if (!verifyRes.ok) return res.status(401).json({ error: 'Unauthorized' })
 
-  const { courseName, goal, emphasisTopics, importantDates, daysPerWeek, sessionMinutes, calendarEvents, timePreference, struggles } = req.body
+  const { courseName, goal, emphasisTopics, importantDates, daysPerWeek, sessionMinutes, calendarEvents, timePreference, struggles, gradeGap, weakAreas } = req.body
   if (!courseName || !goal) return res.status(400).json({ error: 'Missing required fields' })
 
   const todayStr = new Date().toISOString().split('T')[0]
@@ -73,7 +73,7 @@ CRITICAL: Never schedule study sessions during the following blocked time slots.
 Blocked time slots:
 ${calendarStr}
 ` : `The student prefers studying in the ${pref.label} (${pref.hours}). Schedule sessions in that window whenever possible.`}
-${struggles?.length ? `\nPreviously identified struggle areas — allocate MORE sessions and deeper coverage to these: ${struggles.join(', ')}\n` : ''}Build a focused, realistic study plan starting from today. Generate enough weeks to cover all important dates, with the right session count per week (${daysPerWeek || 3} sessions/week).
+${struggles?.length ? `\nPreviously identified struggle areas — allocate MORE sessions and deeper coverage to these: ${struggles.join(', ')}\n` : ''}${gradeGap != null && gradeGap < 0 ? `\nGRADE ALERT: Student is ${Math.abs(gradeGap).toFixed(1)} points below their target grade. ${weakAreas?.length ? `Weak areas: ${weakAreas.join(', ')}. ` : ''}Significantly increase session intensity and prioritize recovery for these topics.\n` : ''}Build a focused, realistic study plan starting from today. Generate enough weeks to cover all important dates, with the right session count per week (${daysPerWeek || 3} sessions/week).
 
 Return ONLY this JSON:
 

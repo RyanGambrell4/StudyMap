@@ -88,6 +88,85 @@ Rules:
     }
   }
 
+  // ── predict-grade mode ────────────────────────────────────────────────────────
+  if (mode === 'predict-grade') {
+    const { courseName, targetGrade, components } = req.body
+    if (!courseName || !components?.length) return res.status(400).json({ error: 'Missing required fields' })
+
+    const filled = components.filter(c => c.earnedGrade !== null && c.earnedGrade !== undefined)
+    const remaining = components.filter(c => c.earnedGrade === null || c.earnedGrade === undefined)
+    const earnedWeight = filled.reduce((s, c) => s + (c.weight || 0), 0)
+    const remainingWeight = remaining.reduce((s, c) => s + (c.weight || 0), 0)
+    const currentAvg = earnedWeight > 0
+      ? filled.reduce((s, c) => s + c.earnedGrade * (c.weight || 0), 0) / earnedWeight
+      : null
+
+    const componentLines = components.map(c =>
+      `- ${c.name} (${c.weight}%, ${c.type || 'Assignment'}): ${c.earnedGrade !== null && c.earnedGrade !== undefined ? c.earnedGrade + '%' : 'not yet graded'}`
+    ).join('\n')
+
+    const TARGET_THRESHOLDS = { A: 93, B: 83, C: 73, 'Pass/Fail': 60 }
+    const threshold = TARGET_THRESHOLDS[targetGrade] ?? 83
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 1000,
+          messages: [{
+            role: 'user',
+            content: `Analyze this student's grade data for ${courseName} and predict their final grade.
+
+Target grade: ${targetGrade} (threshold: ${threshold}%)
+Current weighted average on graded work: ${currentAvg !== null ? currentAvg.toFixed(1) + '%' : 'no grades yet'}
+Graded weight so far: ${earnedWeight}% of total
+Remaining ungraded weight: ${remainingWeight}%
+
+Components:
+${componentLines}
+
+Return ONLY this JSON:
+{
+  "predictedGrade": number,
+  "letterGrade": "A+|A|A-|B+|B|B-|C+|C|C-|D|F",
+  "status": "on-track|at-risk|needs-recovery",
+  "gapToTarget": number,
+  "gradeNeededOnRemaining": number,
+  "keyFactors": ["factor 1", "factor 2"],
+  "recommendations": ["action 1", "action 2", "action 3"],
+  "weakAreas": ["component 1", "component 2"]
+}
+
+Rules:
+- predictedGrade: realistic final grade assuming average performance on remaining work
+- gapToTarget: predictedGrade minus ${threshold} (negative = below target)
+- gradeNeededOnRemaining: score needed on all remaining work to hit ${threshold}% overall (cap at 100 if impossible)
+- status: on-track if predictedGrade >= ${threshold}, at-risk if within 10 points below, needs-recovery if more than 10 below
+- keyFactors: 2-3 items, max 10 words each, explain current trajectory
+- recommendations: 2-3 specific actionable steps, max 12 words each
+- weakAreas: component names where earned grade < 70%, or empty array`,
+          }],
+        }),
+      })
+      const data = await response.json()
+      const content = data.content?.[0]?.text
+      if (!content) throw new Error(data.error?.message ?? 'Empty AI response')
+      const first = content.indexOf('{')
+      const last = content.lastIndexOf('}')
+      const prediction = JSON.parse(content.slice(first, last + 1))
+      return res.status(200).json({ prediction })
+    } catch (error) {
+      console.error('Predict grade error:', error)
+      return res.status(500).json({ error: error.message ?? 'Internal server error' })
+    }
+  }
+
   // ── default mode: generate flashcards + quiz from notes ───────────────────────
   if (!text || text.length < 50) {
     return res.status(400).json({ error: 'Not enough text content' });

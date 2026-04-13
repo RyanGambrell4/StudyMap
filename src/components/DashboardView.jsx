@@ -1,6 +1,7 @@
 import { useMemo, useEffect, useRef } from 'react'
 import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
+import { getCurrentGrade, letterGrade, gradeStatus, STATUS_COLORS } from '../utils/gradeCalc'
 
 function greeting() {
   const h = new Date().getHours()
@@ -41,6 +42,7 @@ export default function DashboardView({
   onImportSyllabus,
   onAddSession,
   onNavigateToCourses,
+  onNavigateToGrades,
 }) {
   const celebrate = useCelebration()
 
@@ -474,6 +476,37 @@ export default function DashboardView({
                       />
                     </div>
                   </div>
+
+                  {/* Grade badge */}
+                  {onNavigateToGrades && (() => {
+                    const comps = course.gradeData?.components ?? []
+                    const target = course.gradeData?.targetGrade ?? null
+                    const current = getCurrentGrade(comps)
+                    if (current !== null && target) {
+                      const status = gradeStatus(current, target)
+                      const sc = STATUS_COLORS[status]
+                      return (
+                        <button
+                          onClick={() => onNavigateToGrades(idx)}
+                          className="w-full flex items-center justify-between px-3 py-2 rounded-xl mb-3 transition-all hover:opacity-80"
+                          style={{ backgroundColor: sc.bg, border: `1px solid ${sc.border}` }}
+                        >
+                          <span className="text-xs font-semibold" style={{ color: sc.color }}>
+                            {status === 'on-track' ? '✓ On Track' : status === 'at-risk' ? '⚠ At Risk' : '↑ Needs Recovery'}
+                          </span>
+                          <span className="text-xs font-bold" style={{ color: sc.color }}>{letterGrade(current)} · {current.toFixed(0)}%</span>
+                        </button>
+                      )
+                    }
+                    return (
+                      <button
+                        onClick={() => onNavigateToGrades(idx)}
+                        className="w-full flex items-center justify-between px-3 py-2 rounded-xl mb-3 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors border border-slate-200 dark:border-slate-700/50"
+                      >
+                        <span className="text-xs font-medium">Set up Grade Hub →</span>
+                      </button>
+                    )
+                  })()}
 
                   <button
                     onClick={() => nextSess && onStartFocus(nextSess)}
