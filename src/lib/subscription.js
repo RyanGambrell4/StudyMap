@@ -121,7 +121,7 @@ export async function incrementAIQuery() {
 
 export async function createCheckoutSession(plan, billingPeriod, userEmail, userId) {
   try {
-    const res = await fetch('/api/create-checkout-session', {
+    const res = await fetch('/api/stripe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ plan, billingPeriod, userEmail, userId }),
