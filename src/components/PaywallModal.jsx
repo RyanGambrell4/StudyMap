@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { buildCheckoutUrl } from '../lib/subscription'
+import { createCheckoutSession } from '../lib/subscription'
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -21,11 +21,12 @@ const PLANS = {
     },
     features: [
       '5 courses',
-      '50 AI queries / month',
-      'Smart calendar',
-      'Focus Mode timer',
-      'Syllabus upload',
-      'Push notifications',
+      '30 study boosts / month',
+      'AI study plans',
+      'Flashcards & quizzes',
+      'Focus sessions',
+      'Study Coach',
+      'Session Blueprints',
     ],
   },
   unlimited: {
@@ -39,11 +40,12 @@ const PLANS = {
     },
     features: [
       'Unlimited courses',
-      'Unlimited AI queries',
-      'Smart calendar',
-      'Focus Mode timer',
-      'Syllabus upload',
-      'Push notifications',
+      'Unlimited study boosts',
+      'AI study plans',
+      'Flashcards & quizzes',
+      'Focus sessions',
+      'Study Coach',
+      'Session Blueprints',
       'Priority support',
     ],
   },
@@ -55,8 +57,8 @@ const LIMIT_MESSAGES = {
     body: 'Free accounts are limited to 1 course. Upgrade to add more.',
   },
   ai: {
-    title: 'AI query limit reached',
-    body: "You've used all your free AI queries this month. Upgrade for more.",
+    title: 'Study boost limit reached',
+    body: "You've used all your study boosts this month. Upgrade for more.",
   },
 }
 
@@ -64,6 +66,7 @@ const LIMIT_MESSAGES = {
 
 export default function PaywallModal({ trigger, onClose, userEmail, userId }) {
   const [billingPeriod, setBillingPeriod] = useState('monthly')
+  const [loading, setLoading] = useState(null) // tracks which plan is loading
   const msg = LIMIT_MESSAGES[trigger] || LIMIT_MESSAGES.courses
 
   // Close on Escape
@@ -73,20 +76,19 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId }) {
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
 
-  const handleSelectPlan = (planId) => {
-    const url = buildCheckoutUrl(planId, billingPeriod, userEmail, userId)
+  const handleSelectPlan = async (planId) => {
+    setLoading(planId)
+
+    const url = await createCheckoutSession(planId, billingPeriod, userEmail, userId)
+
+    setLoading(null)
 
     if (!url) {
-      alert('Payments are being set up — check back soon!')
+      alert('Something went wrong — please try again.')
       return
     }
 
-    // Open Lemon Squeezy checkout overlay
-    if (window.LemonSqueezy?.Url?.Open) {
-      window.LemonSqueezy.Url.Open(url)
-    } else {
-      window.open(url, '_blank')
-    }
+    window.location.href = url
   }
 
   return (
@@ -215,6 +217,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId }) {
               {/* CTA button */}
               <button
                 onClick={() => handleSelectPlan(planId)}
+                disabled={loading === planId}
                 style={{
                   width: '100%', padding: '11px',
                   background: i === 0 ? plan.gradient : 'rgba(52,211,153,0.1)',
@@ -222,12 +225,14 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId }) {
                   borderRadius: '10px',
                   color: i === 0 ? 'white' : '#34D399',
                   fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 700,
-                  cursor: 'pointer', transition: 'opacity 0.15s',
+                  cursor: loading === planId ? 'not-allowed' : 'pointer',
+                  opacity: loading === planId ? 0.7 : 1,
+                  transition: 'opacity 0.15s',
                 }}
-                onMouseEnter={e => { e.currentTarget.style.opacity = '0.85' }}
-                onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
+                onMouseEnter={e => { if (loading !== planId) e.currentTarget.style.opacity = '0.85' }}
+                onMouseLeave={e => { e.currentTarget.style.opacity = loading === planId ? '0.7' : '1' }}
               >
-                Get {plan.name}
+                {loading === planId ? 'Loading...' : `Get ${plan.name}`}
               </button>
             </div>
           ))}
@@ -235,7 +240,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId }) {
 
         {/* ── Footer ── */}
         <p style={{ textAlign: 'center', color: '#475569', fontSize: '0.78rem', margin: 0 }}>
-          Secure checkout · Cancel anytime · Powered by Lemon Squeezy
+          Secure checkout · Cancel anytime · Powered by Stripe
         </p>
       </div>
     </div>

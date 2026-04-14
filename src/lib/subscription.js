@@ -1,11 +1,7 @@
 /**
- * subscription.js — Lemon Squeezy subscription layer for StudyEdge
+ * subscription.js — Stripe subscription layer for StudyEdge
  *
- * Tracks plan, limits, and AI query usage in memory (mirrored to Supabase).
- *
- * SETUP: After your Lemon Squeezy account is approved and products are created,
- * replace the REPLACE_* placeholder strings below with real variant IDs from
- * your LS dashboard (Product → Variants → copy the numeric ID).
+ * Tracks plan, limits, and study boost usage in memory (mirrored to Supabase).
  */
 
 import { supabase } from './supabase'
@@ -13,30 +9,9 @@ import { supabase } from './supabase'
 // ── Plan limits ───────────────────────────────────────────────────────────────
 
 export const PLAN_LIMITS = {
-  free:      { courses: 7,        aiQueries: 10 },
-  pro:       { courses: 5,        aiQueries: 50 },
+  free:      { courses: 1,        aiQueries: 10 },
+  pro:       { courses: 5,        aiQueries: 30 },
   unlimited: { courses: Infinity, aiQueries: Infinity },
-}
-
-// ── Lemon Squeezy config ──────────────────────────────────────────────────────
-
-// Your Lemon Squeezy store slug (the subdomain of your store URL)
-// e.g. if your store is at studyedge.lemonsqueezy.com, slug is 'studyedge'
-export const LS_STORE_SLUG = 'studyedge'
-
-// Replace these with real variant IDs from your LS dashboard once your account
-// is approved. Go to: Store → Products → click product → Variants → copy ID.
-export const LS_VARIANTS = {
-  pro: {
-    monthly:  'REPLACE_PRO_MONTHLY_VARIANT_ID',
-    semester: 'REPLACE_PRO_SEMESTER_VARIANT_ID',
-    yearly:   'REPLACE_PRO_YEARLY_VARIANT_ID',
-  },
-  unlimited: {
-    monthly:  'REPLACE_UNLIMITED_MONTHLY_VARIANT_ID',
-    semester: 'REPLACE_UNLIMITED_SEMESTER_VARIANT_ID',
-    yearly:   'REPLACE_UNLIMITED_YEARLY_VARIANT_ID',
-  },
 }
 
 // ── In-memory cache ───────────────────────────────────────────────────────────
@@ -49,8 +24,8 @@ const DEFAULT_SUB = {
   status: 'active',
   aiQueriesUsed: 0,
   aiQueriesResetAt: null,
-  lsSubscriptionId: null,
-  lsCustomerId: null,
+  stripeSubId: null,
+  stripeCustomerId: null,
   billingPeriod: null,
   currentPeriodEnd: null,
 }
@@ -142,21 +117,26 @@ export async function incrementAIQuery() {
   if (error) console.error('[subscription] increment AI query error', error)
 }
 
-// ── Checkout URL builder ──────────────────────────────────────────────────────
+// ── Stripe checkout session creator ──────────────────────────────────────────
 
-export function buildCheckoutUrl(plan, billingPeriod, userEmail, userId) {
-  const variantId = LS_VARIANTS[plan]?.[billingPeriod]
+export async function createCheckoutSession(plan, billingPeriod, userEmail, userId) {
+  try {
+    const res = await fetch('/api/create-checkout-session', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ plan, billingPeriod, userEmail, userId }),
+    })
 
-  if (!variantId || variantId.startsWith('REPLACE')) {
-    console.warn('[subscription] LS variant ID not configured for', plan, billingPeriod)
+    const data = await res.json()
+
+    if (!res.ok || !data.url) {
+      console.error('[subscription] Checkout session error:', data.error)
+      return null
+    }
+
+    return data.url
+  } catch (err) {
+    console.error('[subscription] Failed to create checkout session:', err)
     return null
   }
-
-  const base = `https://${LS_STORE_SLUG}.lemonsqueezy.com/checkout/buy/${variantId}`
-  const params = new URLSearchParams()
-  if (userEmail) params.set('checkout[email]', userEmail)
-  if (userId)    params.set('checkout[custom][user_id]', userId)
-  params.set('embed', '1')
-
-  return `${base}?${params.toString()}`
 }
