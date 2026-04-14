@@ -88,9 +88,9 @@ export default function AppShell({
       <aside className="hidden lg:flex flex-col w-56 shrink-0 bg-white dark:bg-[#0B1120] border-r border-slate-200 dark:border-slate-800 fixed inset-y-0 left-0 z-40">
         {/* Logo + theme toggle */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-200 dark:border-slate-800">
-          <div className="w-8 h-8 rounded-lg bg-indigo-600 flex items-center justify-center shadow-lg shadow-indigo-500/30 shrink-0">
-            <svg className="w-4.5 h-4.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-lg shadow-purple-500/30 shrink-0" style={{ background: 'linear-gradient(135deg, #a855f7, #7c3aed)' }}>
+            <svg className="w-5 h-5" fill="white" viewBox="0 0 48 46">
+              <path d="M25.946 44.938c-.664.845-2.021.375-2.021-.698V33.937a2.26 2.26 0 0 0-2.262-2.262H10.287c-.92 0-1.456-1.04-.92-1.788l7.48-10.471c1.07-1.497 0-3.578-1.842-3.578H1.237c-.92 0-1.456-1.04-.92-1.788L10.013.474c.214-.297.556-.474.92-.474h28.894c.92 0 1.456 1.04.92 1.788l-7.48 10.471c-1.07 1.498 0 3.579 1.842 3.579h11.377c.943 0 1.473 1.088.89 1.83L25.947 44.94z"/>
             </svg>
           </div>
           <span className="font-bold text-slate-900 dark:text-white text-lg tracking-tight flex-1">StudyEdge</span>
