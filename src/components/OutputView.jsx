@@ -5,6 +5,7 @@ import {
   getCachedManualSessions,
   saveSyllabusEvents,
   saveManualSessions,
+  getCachedCoachPlan,
 } from '../lib/db'
 import FocusMode from './FocusMode'
 import BlueprintScreen from './BlueprintScreen'
@@ -367,6 +368,19 @@ export default function OutputView({
   const [showShareCard, setShowShareCard] = useState(false)
   const [gradesCourseIdx, setGradesCourseIdx] = useState(0)
   const [coachCourseIdx, setCoachCourseIdx] = useState(0)
+  const [coachPlans, setCoachPlans] = useState({})
+
+  useEffect(() => {
+    if (activeSection === 'dashboard') {
+      const plans = {}
+      courses.forEach((course, idx) => {
+        const id = course.id ?? idx
+        const cached = getCachedCoachPlan(id)
+        if (cached) plans[id] = cached
+      })
+      setCoachPlans(plans)
+    }
+  }, [activeSection, courses])
 
   const handleOpenStudyCoach = useCallback((idx) => {
     setCoachCourseIdx(idx ?? 0)
@@ -923,11 +937,36 @@ export default function OutputView({
             onNavigateToGrades={(idx) => { setGradesCourseIdx(idx); setActiveSection('grades') }}
             onNavigateToTutor={() => setActiveSection('tutor')}
             onShowPaywall={onShowPaywall}
+            coachPlans={coachPlans}
+            onOpenStudyCoach={handleOpenStudyCoach}
           />
         )}
 
         {/* ── Calendar ── */}
-        {activeSection === 'calendar' && (
+        {activeSection === 'calendar' && !gcalConnected && (
+          <div className="px-4 py-6 max-w-3xl mx-auto flex flex-col items-center justify-center min-h-[60vh] text-center">
+            <div className="w-20 h-20 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center mb-6">
+              <svg className="w-10 h-10 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+            </div>
+            <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Connect your calendar</h2>
+            <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-sm mb-6">
+              Connect Google Calendar so StudyEdge can see your schedule and automatically build study sessions around your real life.
+            </p>
+            <button
+              onClick={handleConnectGoogleCalendar}
+              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-colors flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.172 13.828a4 4 0 015.656 0l4-4a4 4 0 00-5.656-5.656l-1.102 1.101" />
+              </svg>
+              Connect Google Calendar
+            </button>
+          </div>
+        )}
+        {activeSection === 'calendar' && gcalConnected && (
           <div className="px-4 py-6 max-w-7xl mx-auto">
             {/* View controls */}
             <div className="flex items-center justify-between mb-6">

@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from './lib/supabase'
 import { initUserData, clearUserData, savePlan } from './lib/db'
-import { getActivePlan, canAddCourse } from './lib/subscription'
+import { getActivePlan, canAddCourse, createCheckoutSession } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
 import AuthScreen from './components/AuthScreen'
 import LandingPage from './components/LandingPage'
@@ -178,6 +178,62 @@ export default function App() {
       return <AuthScreen initialMode={authMode} onBack={() => setShowAuth(false)} />
     }
     return <LandingPage onGetStarted={(mode) => { setAuthMode(mode); setShowAuth(true) }} />
+  }
+
+  // ── Email verification gate ──────────────────────────────────────────────
+  if (!session.user.email_confirmed_at) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#0a0f1e' }}>
+        <div className="max-w-md w-full text-center space-y-6">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center">
+            <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+          <h1 className="text-2xl font-bold text-white">Check your email</h1>
+          <p className="text-slate-400 text-sm leading-relaxed">
+            We sent a confirmation link to{' '}
+            <span className="text-white font-medium">{session.user.email}</span>.
+            <br />Click the link to verify your account and get started.
+          </p>
+          <button
+            onClick={() => {
+              supabase.auth.resend({ type: 'signup', email: session.user.email })
+              alert('Confirmation email resent!')
+            }}
+            className="text-sm text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+          >
+            Resend confirmation email
+          </button>
+          <div className="pt-2">
+            <button
+              onClick={handleSignOut}
+              className="text-xs text-slate-500 hover:text-slate-400 transition-colors"
+            >
+              Sign out
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Paid plan checkout redirect ──────────────────────────────────────────
+  const urlPlan = new URLSearchParams(window.location.search).get('plan')
+  if (urlPlan && (urlPlan === 'pro' || urlPlan === 'unlimited') && getActivePlan() === 'free') {
+    // Clear the URL param so we don't loop
+    window.history.replaceState({}, '', window.location.pathname)
+    createCheckoutSession(urlPlan, 'monthly', session.user.email, session.user.id).then(url => {
+      if (url) window.location.href = url
+    })
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0f1e' }}>
+        <div className="text-center space-y-4">
+          <div className="w-8 h-8 mx-auto rounded-full border-4 border-slate-800 border-t-indigo-500 animate-spin" />
+          <p className="text-slate-400 text-sm">Redirecting to checkout…</p>
+        </div>
+      </div>
+    )
   }
 
   return (
