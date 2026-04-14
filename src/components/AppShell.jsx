@@ -88,7 +88,7 @@ export default function AppShell({
       <aside className="hidden lg:flex flex-col w-56 shrink-0 bg-white dark:bg-[#0B1120] border-r border-slate-200 dark:border-slate-800 fixed inset-y-0 left-0 z-40">
         {/* Logo + theme toggle */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-200 dark:border-slate-800">
-          <img src="/logo.png" alt="StudyEdge" className="h-12 w-auto object-contain" />
+          <img src="/logo.png" alt="StudyEdge" style={{ height: '44px', width: '44px', objectFit: 'cover', objectPosition: 'top', mixBlendMode: 'screen' }} />
           <button
             onClick={onToggleTheme}
             className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
