@@ -219,11 +219,13 @@ export default function App() {
   }
 
   // ── Paid plan checkout redirect ──────────────────────────────────────────
-  const urlPlan = new URLSearchParams(window.location.search).get('plan')
+  const urlParams = new URLSearchParams(window.location.search)
+  const urlPlan = urlParams.get('plan')
+  const urlBilling = ['monthly', 'semester', 'yearly'].includes(urlParams.get('billing')) ? urlParams.get('billing') : 'monthly'
   if (urlPlan && (urlPlan === 'pro' || urlPlan === 'unlimited') && getActivePlan() === 'free') {
     // Clear the URL param so we don't loop
     window.history.replaceState({}, '', window.location.pathname)
-    createCheckoutSession(urlPlan, 'monthly', session.user.email, session.user.id).then(url => {
+    createCheckoutSession(urlPlan, urlBilling, session.user.email, session.user.id).then(url => {
       if (url) window.location.href = url
     })
     return (
