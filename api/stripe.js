@@ -30,22 +30,22 @@ const supabaseAdmin = createClient(
 const PRICE_IDS = {
   pro: {
     monthly:  'price_1TMEqQKCY4pCgrHv5F0n5XSz',
-    semester: 'price_1TMEqOKCY4pCgrHvxJvJVAYP',
+    semester: 'price_1TMaQxKCY4pCgrHvB2uE3ZhB',
     yearly:   'price_1TMEqPKCY4pCgrHvbhffsA2M',
   },
   unlimited: {
     monthly:  'price_1TMEqPKCY4pCgrHv65bsDflq',
-    semester: 'price_1TMEqPKCY4pCgrHvo2uSLhgo',
+    semester: 'price_1TMaOgKCY4pCgrHvPXqOb30f',
     yearly:   'price_1TMEqPKCY4pCgrHvymo8ytBO',
   },
 }
 
 const PRICE_TO_PLAN = {
   'price_1TMEqQKCY4pCgrHv5F0n5XSz': { plan: 'pro',       billingPeriod: 'monthly'  },
-  'price_1TMEqOKCY4pCgrHvxJvJVAYP': { plan: 'pro',       billingPeriod: 'semester' },
+  'price_1TMaQxKCY4pCgrHvB2uE3ZhB': { plan: 'pro',       billingPeriod: 'semester' },
   'price_1TMEqPKCY4pCgrHvbhffsA2M': { plan: 'pro',       billingPeriod: 'yearly'   },
   'price_1TMEqPKCY4pCgrHv65bsDflq': { plan: 'unlimited', billingPeriod: 'monthly'  },
-  'price_1TMEqPKCY4pCgrHvo2uSLhgo': { plan: 'unlimited', billingPeriod: 'semester' },
+  'price_1TMaOgKCY4pCgrHvPXqOb30f': { plan: 'unlimited', billingPeriod: 'semester' },
   'price_1TMEqPKCY4pCgrHvymo8ytBO': { plan: 'unlimited', billingPeriod: 'yearly'   },
 }
 
