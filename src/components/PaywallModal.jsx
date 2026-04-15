@@ -16,7 +16,7 @@ const PLANS = {
     gradient: 'linear-gradient(135deg, #4F7EF7, #7C5CFA)',
     prices: {
       monthly:  '$12.99/mo',
-      semester: '$49.99/semester',
+      semester: '$39.99/semester',
       yearly:   '$84.99/yr',
     },
     features: [
@@ -35,7 +35,7 @@ const PLANS = {
     gradient: null,
     prices: {
       monthly:  '$19.99/mo',
-      semester: '$69.99/semester',
+      semester: '$59.99/semester',
       yearly:   '$119.99/yr',
     },
     features: [
