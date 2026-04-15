@@ -29,24 +29,24 @@ const supabaseAdmin = createClient(
 
 const PRICE_IDS = {
   pro: {
-    monthly:  'price_1TMEqQKCY4pCgrHv5F0n5XSz',
-    semester: 'price_1TMEqOKCY4pCgrHvxJvJVAYP',
-    yearly:   'price_1TMEqPKCY4pCgrHvbhffsA2M',
+    monthly:  'price_1TMEKzGSTLwztvCdnzrGrQVI',
+    semester: 'price_1TMERpGSTLwztvCdga2icqKk',
+    yearly:   'price_1TMERpGSTLwztvCdcRPNJbgY',
   },
   unlimited: {
-    monthly:  'price_1TMEqPKCY4pCgrHv65bsDflq',
-    semester: 'price_1TMEqPKCY4pCgrHvo2uSLhgo',
-    yearly:   'price_1TMEqPKCY4pCgrHvymo8ytBO',
+    monthly:  'price_1TMEORGSTLwztvCdCYKocq1h',
+    semester: 'price_1TMEQfGSTLwztvCdVffhIKJt',
+    yearly:   'price_1TMEQfGSTLwztvCdXknR14sR',
   },
 }
 
 const PRICE_TO_PLAN = {
-  'price_1TMEqQKCY4pCgrHv5F0n5XSz': { plan: 'pro',       billingPeriod: 'monthly'  },
-  'price_1TMEqOKCY4pCgrHvxJvJVAYP': { plan: 'pro',       billingPeriod: 'semester' },
-  'price_1TMEqPKCY4pCgrHvbhffsA2M': { plan: 'pro',       billingPeriod: 'yearly'   },
-  'price_1TMEqPKCY4pCgrHv65bsDflq': { plan: 'unlimited', billingPeriod: 'monthly'  },
-  'price_1TMEqPKCY4pCgrHvo2uSLhgo': { plan: 'unlimited', billingPeriod: 'semester' },
-  'price_1TMEqPKCY4pCgrHvymo8ytBO': { plan: 'unlimited', billingPeriod: 'yearly'   },
+  'price_1TMEKzGSTLwztvCdnzrGrQVI': { plan: 'pro',       billingPeriod: 'monthly'  },
+  'price_1TMERpGSTLwztvCdga2icqKk': { plan: 'pro',       billingPeriod: 'semester' },
+  'price_1TMERpGSTLwztvCdcRPNJbgY': { plan: 'pro',       billingPeriod: 'yearly'   },
+  'price_1TMEORGSTLwztvCdCYKocq1h': { plan: 'unlimited', billingPeriod: 'monthly'  },
+  'price_1TMEQfGSTLwztvCdVffhIKJt': { plan: 'unlimited', billingPeriod: 'semester' },
+  'price_1TMEQfGSTLwztvCdXknR14sR': { plan: 'unlimited', billingPeriod: 'yearly'   },
 }
 
 function getRawBody(req) {
