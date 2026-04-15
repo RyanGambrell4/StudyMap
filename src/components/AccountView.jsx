@@ -31,6 +31,8 @@ export default function AccountView({
   onEditPlan,
   googleCalendarConnected,
   onConnectGoogleCalendar,
+  notionCalendarConnected,
+  onConnectNotionCalendar,
   onShowPaywall,
 }) {
   const plan = getActivePlan()
@@ -120,6 +122,31 @@ export default function AccountView({
                 </p>
               </div>
               {googleCalendarConnected ? (
+                <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full shrink-0">Connected</span>
+              ) : (
+                <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              )}
+            </button>
+          )}
+          {onConnectNotionCalendar && (
+            <button
+              onClick={notionCalendarConnected ? undefined : onConnectNotionCalendar}
+              className="w-full flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors text-left"
+            >
+              <div className="w-9 h-9 rounded-xl bg-slate-800/10 dark:bg-white/10 flex items-center justify-center shrink-0">
+                <svg className="w-5 h-5 text-slate-700 dark:text-slate-200" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L18.1 2.021c-.466-.374-.98-.7-2.054-.607l-12.77.933c-.466.047-.56.28-.374.466l1.557 1.395zm.793 3.172v13.856c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.166V6.354c0-.606-.234-.933-.748-.886l-15.177.887c-.56.046-.747.327-.747.98v.046zm14.337.42c.094.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952l1.448.327s0 .84-1.168.84l-3.222.187c-.094-.187 0-.654.327-.747l.84-.233V11.199L7.19 11.06c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.14c-.094-.514.28-.886.748-.933l3.456-.187v-.046l-.046.327-.093-.047z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Notion Calendar</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {notionCalendarConnected ? 'Connected — syncing your schedule' : 'Connect to sync your Notion databases'}
+                </p>
+              </div>
+              {notionCalendarConnected ? (
                 <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full shrink-0">Connected</span>
               ) : (
                 <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">

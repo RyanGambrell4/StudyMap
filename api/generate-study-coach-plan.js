@@ -82,6 +82,8 @@ Return ONLY this JSON:
   "weeklyFocus": [
     {
       "week": "Week of [Month Day]",
+      "startDate": "YYYY-MM-DD (Monday of this week)",
+      "endDate": "YYYY-MM-DD (Sunday of this week)",
       "theme": "what this week is fundamentally about — e.g. 'Building foundational understanding'",
       "sessions": [
         {
@@ -100,6 +102,7 @@ Return ONLY this JSON:
 }
 
 Rules:
+- Each week MUST include startDate (YYYY-MM-DD, the Monday) and endDate (YYYY-MM-DD, the Sunday)
 - Generate exactly ${daysPerWeek || 3} sessions per week
 - Make focusArea and keyTopics highly specific to the course content, not generic
 - Keep all string values SHORT — focusArea max 8 words, goal max 12 words, keyTopics max 4 words each, studyMethod max 8 words

@@ -1,4 +1,4 @@
-import { useMemo, useEffect, useRef } from 'react'
+import { useMemo, useEffect, useRef, useState } from 'react'
 import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { getCurrentGrade, letterGrade, gradeStatus, STATUS_COLORS } from '../utils/gradeCalc'
@@ -46,8 +46,49 @@ export default function DashboardView({
   onNavigateToGrades,
   onNavigateToTutor,
   onShowPaywall,
+  coachPlans,
+  onOpenStudyCoach,
 }) {
   const plan = getActivePlan()
+  const [gamePlanIdx, setGamePlanIdx] = useState(0)
+
+  // ── Determine current week from a coach plan's weeklyFocus ─────────────────
+  function getCurrentWeekInfo(weeklyFocus, sessionIndex) {
+    if (!weeklyFocus?.length) return null
+    // Try structured dates first
+    const today = new Date(todayStr + 'T12:00:00')
+    for (let i = 0; i < weeklyFocus.length; i++) {
+      const w = weeklyFocus[i]
+      if (w.startDate && w.endDate && todayStr >= w.startDate && todayStr <= w.endDate) {
+        const totalBefore = weeklyFocus.slice(0, i).reduce((s, wk) => s + (wk.sessions?.length ?? 0), 0)
+        const weekSessions = w.sessions?.length ?? 0
+        const completedInWeek = Math.min(Math.max((sessionIndex ?? 0) - totalBefore, 0), weekSessions)
+        return { weekIndex: i, total: weeklyFocus.length, theme: w.theme, weekSessions, completedInWeek }
+      }
+    }
+    // Fallback: parse "Week of Month Day"
+    for (let i = 0; i < weeklyFocus.length; i++) {
+      const w = weeklyFocus[i]
+      const match = w.week?.match(/Week of (\w+) (\d+)/)
+      if (match) {
+        const weekStart = new Date(`${match[1]} ${match[2]}, ${today.getFullYear()}`)
+        if (!isNaN(weekStart)) {
+          const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6)
+          if (today >= weekStart && today <= weekEnd) {
+            const totalBefore = weeklyFocus.slice(0, i).reduce((s, wk) => s + (wk.sessions?.length ?? 0), 0)
+            const weekSessions = w.sessions?.length ?? 0
+            const completedInWeek = Math.min(Math.max((sessionIndex ?? 0) - totalBefore, 0), weekSessions)
+            return { weekIndex: i, total: weeklyFocus.length, theme: w.theme, weekSessions, completedInWeek }
+          }
+        }
+      }
+    }
+    // Final fallback: first week
+    const w = weeklyFocus[0]
+    const weekSessions = w.sessions?.length ?? 0
+    const completedInWeek = Math.min(sessionIndex ?? 0, weekSessions)
+    return { weekIndex: 0, total: weeklyFocus.length, theme: w.theme, weekSessions, completedInWeek }
+  }
   const celebrate = useCelebration()
 
   // Fire big confetti once when all sessions for the day are complete
@@ -378,38 +419,183 @@ export default function DashboardView({
           )}
         </div>
 
-        {/* ── Exam Countdown ── */}
-        {courses.length > 0 && (
-          <div>
-            <h2 className="text-slate-500 dark:text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">Exams</h2>
-            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1 scrollbar-hide">
-              {courses.map((course, idx) => {
-                const daysLeft = daysBetween(todayStr, course.examDate)
-                const dot = course.color?.dot ?? '#6366f1'
-                const isUrgent = daysLeft >= 0 && daysLeft <= 7
-                const isWarning = daysLeft > 7 && daysLeft <= 14
-                return (
-                  <div
-                    key={idx}
-                    className="shrink-0 bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl px-4 py-4 min-w-[140px]"
-                    style={{ borderTopWidth: 3, borderTopColor: dot }}
-                  >
-                    <div
-                      className="w-8 h-8 rounded-xl flex items-center justify-center text-white font-black text-sm mb-3 shadow-sm"
-                      style={{ backgroundColor: dot }}
-                    >
-                      {course.name.charAt(0).toUpperCase()}
+        {/* ── Your Game Plan ── */}
+        {courses.length > 0 && (() => {
+          const courseId = courses[gamePlanIdx]?.id ?? gamePlanIdx
+          const cached = (coachPlans ?? {})[courseId]
+          const course = courses[gamePlanIdx]
+          const dot = course?.color?.dot ?? '#6366f1'
+          const daysLeft = daysBetween(todayStr, course?.examDate)
+          const isUrgent = daysLeft >= 0 && daysLeft <= 7
+          const isWarning = daysLeft > 7 && daysLeft <= 14
+          const nextSess = nextSessionPerCourse[gamePlanIdx]
+
+          return (
+            <div>
+              <h2 className="text-slate-500 dark:text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">Your Game Plan</h2>
+
+              {/* Course selector chips */}
+              {courses.length > 1 && (
+                <div className="flex flex-wrap gap-2 mb-4">
+                  {courses.map((c, i) => {
+                    const d = c.color?.dot ?? '#6366f1'
+                    const active = gamePlanIdx === i
+                    return (
+                      <button
+                        key={i}
+                        onClick={() => setGamePlanIdx(i)}
+                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border"
+                        style={active
+                          ? { backgroundColor: `${d}18`, color: d, borderColor: `${d}50` }
+                          : { backgroundColor: 'transparent', color: '#64748b', borderColor: 'rgba(148,163,184,0.25)' }
+                        }
+                      >
+                        <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: d }} />
+                        <span className="truncate max-w-[120px]">{c.name}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+
+              {/* Single course card */}
+              {cached?.plan ? (
+                <div
+                  className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden"
+                  style={{ borderLeftWidth: 4, borderLeftColor: dot }}
+                >
+                  <div className="px-5 py-5">
+                    {/* Header + exam badge */}
+                    <div className="flex items-start justify-between gap-3 mb-4">
+                      <p className="text-slate-900 dark:text-white font-bold text-base">{course.name}</p>
+                      {daysLeft > 0 && (
+                        <span className={`shrink-0 text-[10px] font-bold px-2 py-1 rounded-full ${
+                          isUrgent ? 'bg-red-500/12 text-red-400 dark:bg-red-500/15 dark:text-red-400'
+                          : isWarning ? 'bg-amber-500/12 text-amber-500 dark:bg-amber-500/15 dark:text-amber-400'
+                          : 'bg-slate-100 text-slate-500 dark:bg-slate-700/60 dark:text-slate-400'
+                        }`}>
+                          Final in {daysLeft}d
+                        </span>
+                      )}
                     </div>
-                    <p className="text-slate-700 dark:text-slate-200 font-bold text-sm truncate mb-1">{course.name}</p>
-                    <p className={`text-xs font-bold ${isUrgent ? 'text-red-400' : isWarning ? 'text-amber-400' : 'text-slate-500'}`}>
-                      {daysLeft > 0 ? `${daysLeft}d to exam` : daysLeft === 0 ? 'Exam today' : 'Exam passed'}
-                    </p>
+
+                    {/* Current week focus */}
+                    {(() => {
+                      const weekInfo = getCurrentWeekInfo(cached.plan.weeklyFocus, cached.sessionIndex)
+                      const emphasis = cached.formData?.emphasisTopics
+                      const struggles = cached.struggles?.length ? cached.struggles : null
+                      const pct = weekInfo ? (weekInfo.weekSessions > 0 ? Math.round((weekInfo.completedInWeek / weekInfo.weekSessions) * 100) : 0) : 0
+                      return (
+                        <>
+                          {weekInfo && (
+                            <div className="mb-4">
+                              <p className="text-slate-600 dark:text-slate-300 text-sm font-medium">
+                                <span className="text-slate-400 dark:text-slate-500">Week {weekInfo.weekIndex + 1} of {weekInfo.total}</span>
+                                {weekInfo.theme && <span className="text-slate-400 dark:text-slate-600 mx-1.5">—</span>}
+                                {weekInfo.theme && <span>Focus: {weekInfo.theme}</span>}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* Session progress */}
+                          {weekInfo && weekInfo.weekSessions > 0 && (
+                            <div className="mb-4">
+                              <div className="flex justify-between text-xs font-semibold mb-1.5">
+                                <span className="text-slate-500 dark:text-slate-400">{weekInfo.completedInWeek} of {weekInfo.weekSessions} sessions completed</span>
+                                <span style={{ color: dot }}>{pct}%</span>
+                              </div>
+                              <div className="h-1.5 bg-slate-200 dark:bg-slate-700/80 rounded-full overflow-hidden">
+                                <div
+                                  className="h-full rounded-full transition-all duration-500"
+                                  style={{ width: `${pct}%`, backgroundColor: dot }}
+                                />
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Professor emphasis */}
+                          {emphasis && (
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 leading-relaxed">
+                              <span className="font-semibold text-slate-600 dark:text-slate-300">Prof emphasizes:</span> {emphasis}
+                            </p>
+                          )}
+
+                          {/* Struggles */}
+                          {struggles && (
+                            <p className="text-xs text-amber-600 dark:text-amber-400/80 mb-3 leading-relaxed">
+                              <span className="mr-1">📌</span>
+                              <span className="font-semibold">Needs attention:</span> {struggles.join(', ')}
+                            </p>
+                          )}
+                        </>
+                      )
+                    })()}
+
+                    {/* Actions */}
+                    <div className="flex items-center gap-3 mt-1">
+                      <button
+                        onClick={() => onOpenStudyCoach && onOpenStudyCoach(gamePlanIdx)}
+                        className="text-xs font-semibold text-indigo-500 dark:text-indigo-400 hover:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
+                      >
+                        View Full Plan →
+                      </button>
+                      {nextSess && (
+                        <button
+                          onClick={() => onStartFocus(nextSess)}
+                          className="ml-auto text-xs font-bold px-4 py-2 rounded-xl transition-all"
+                          style={{
+                            background: `linear-gradient(135deg, ${dot}30, ${dot}18)`,
+                            color: dot,
+                            border: `1px solid ${dot}50`,
+                          }}
+                        >
+                          Start Studying →
+                        </button>
+                      )}
+                    </div>
                   </div>
-                )
-              })}
+
+                  {/* Connection reinforcement footer */}
+                  <div className="px-5 py-2.5 border-t border-slate-100 dark:border-slate-700/30">
+                    <p className="text-[10px] text-slate-400 dark:text-slate-600">Your sessions, flashcards, and AI tutor are all synced to this plan</p>
+                  </div>
+                </div>
+              ) : (
+                <div
+                  className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden"
+                  style={{ borderLeftWidth: 4, borderLeftColor: dot }}
+                >
+                  <div className="px-5 py-5">
+                    <p className="text-slate-900 dark:text-white font-bold text-base mb-4">{course.name}</p>
+                    <div className="flex items-start gap-4">
+                      <div className="w-10 h-10 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 flex items-center justify-center shrink-0 mt-0.5">
+                        <svg className="w-5 h-5 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                        </svg>
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-slate-800 dark:text-slate-100 font-semibold text-sm mb-1">Set up your study plan</p>
+                        <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed mb-1.5">
+                          Tell us your goals, what your professor emphasizes, and your schedule — we'll build a week-by-week plan that powers your entire experience.
+                        </p>
+                        <p className="text-slate-400 dark:text-slate-500 text-[11px] leading-relaxed">
+                          This unlocks personalized sessions, smarter flashcards, and AI tutoring tailored to your course.
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => onOpenStudyCoach && onOpenStudyCoach(gamePlanIdx)}
+                      className="mt-4 w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all"
+                      style={{ backgroundColor: dot, boxShadow: `0 4px 14px ${dot}40` }}
+                    >
+                      Create Study Plan →
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
-          </div>
-        )}
+          )
+        })()}
 
         {/* ── Grade Snapshot ── */}
         <div>
