@@ -402,7 +402,6 @@ export default function OutputView({
   // ── Google Calendar & Notion Calendar ────────────────────────────────────────
   const [googleEvents, setGoogleEvents] = useState([])
   const [gcalConnected, setGcalConnected] = useState(false)
-  const [notionConnected, setNotionConnected] = useState(false)
   const [gcalToast, setGcalToast] = useState(null) // 'connected' | 'error' | null
   const [fixConflictsLoading, setFixConflictsLoading] = useState(false)
   const [rescheduleResults, setRescheduleResults] = useState(null)
@@ -414,12 +413,11 @@ export default function OutputView({
     // Detect redirect back from OAuth
     const params = new URLSearchParams(window.location.search)
     const gcal = params.get('gcal')
-    const notion = params.get('notion')
-    if (gcal === 'connected' || notion === 'connected') {
+    if (gcal === 'connected') {
       setGcalToast('connected')
       window.history.replaceState({}, '', window.location.pathname + window.location.hash)
       setTimeout(() => setGcalToast(null), 4000)
-    } else if (gcal === 'error' || notion === 'error') {
+    } else if (gcal === 'error') {
       setGcalToast('error')
       window.history.replaceState({}, '', window.location.pathname + window.location.hash)
       setTimeout(() => setGcalToast(null), 4000)
@@ -437,7 +435,6 @@ export default function OutputView({
         .then(r => r.json())
         .then(data => {
           if (data.connected) setGcalConnected(true)
-          if (data.notionConnected) setNotionConnected(true)
           if (data.events?.length) setGoogleEvents(data.events)
         })
         .catch(() => {})
@@ -447,12 +444,6 @@ export default function OutputView({
   const handleConnectGoogleCalendar = () => {
     window.location.href = `/api/google-auth?userId=${encodeURIComponent(userId)}`
   }
-
-  const handleConnectNotionCalendar = () => {
-    window.location.href = `/api/google-auth?userId=${encodeURIComponent(userId)}&provider=notion`
-  }
-
-  const anyCalendarConnected = gcalConnected || notionConnected
 
   const handleSessionMove = useCallback((sessionId, newDateStr, newStartTime, newEndTime) => {
     setSessionTimeOverrides(prev => ({
@@ -889,7 +880,7 @@ export default function OutputView({
           color: gcalToast === 'connected' ? '#34d399' : '#f87171',
           backdropFilter: 'blur(8px)',
         }}>
-          {gcalToast === 'connected' ? '✓ Calendar connected' : '✕ Calendar connection failed'}
+          {gcalToast === 'connected' ? '✓ Google Calendar connected' : '✕ Google Calendar connection failed'}
         </div>
       )}
 
@@ -906,8 +897,6 @@ export default function OutputView({
         onNavigateToAccount={() => setActiveSection('account')}
         googleCalendarConnected={gcalConnected}
         onConnectGoogleCalendar={handleConnectGoogleCalendar}
-        notionCalendarConnected={notionConnected}
-        onConnectNotionCalendar={handleConnectNotionCalendar}
       >
 
         {/* Recovery alerts */}
@@ -954,7 +943,7 @@ export default function OutputView({
         )}
 
         {/* ── Calendar ── */}
-        {activeSection === 'calendar' && !anyCalendarConnected && (
+        {activeSection === 'calendar' && !gcalConnected && (
           <div className="px-4 py-6 max-w-3xl mx-auto flex flex-col items-center justify-center min-h-[60vh] text-center">
             <div className="w-20 h-20 rounded-2xl bg-indigo-500/10 dark:bg-indigo-500/15 border border-indigo-500/20 flex items-center justify-center mb-6">
               <svg className="w-10 h-10 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -963,31 +952,21 @@ export default function OutputView({
             </div>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">Connect your calendar</h2>
             <p className="text-slate-500 dark:text-slate-400 text-sm leading-relaxed max-w-sm mb-6">
-              Connect your calendar so StudyEdge can see your schedule and automatically build study sessions around your real life.
+              Connect Google Calendar so StudyEdge can see your schedule and automatically build study sessions around your real life.
             </p>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={handleConnectGoogleCalendar}
-                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-colors flex items-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-                Google Calendar
-              </button>
-              <button
-                onClick={handleConnectNotionCalendar}
-                className="px-6 py-3 bg-slate-800 hover:bg-slate-700 dark:bg-white dark:hover:bg-slate-100 text-white dark:text-slate-900 font-semibold text-sm rounded-xl transition-colors flex items-center gap-2"
-              >
-                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L18.1 2.021c-.466-.374-.98-.7-2.054-.607l-12.77.933c-.466.047-.56.28-.374.466l1.557 1.395zm.793 3.172v13.856c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.166V6.354c0-.606-.234-.933-.748-.886l-15.177.887c-.56.046-.747.327-.747.98v.046zm14.337.42c.094.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952l1.448.327s0 .84-1.168.84l-3.222.187c-.094-.187 0-.654.327-.747l.84-.233V11.199L7.19 11.06c-.094-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.14c-.094-.514.28-.886.748-.933l3.456-.187v-.046l-.046.327-.093-.047z" />
-                </svg>
-                Notion Calendar
-              </button>
-            </div>
+            <button
+              onClick={handleConnectGoogleCalendar}
+              className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold text-sm rounded-xl transition-colors flex items-center gap-2"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.172 13.828a4 4 0 015.656 0l4-4a4 4 0 00-5.656-5.656l-1.102 1.101" />
+              </svg>
+              Connect Google Calendar
+            </button>
           </div>
         )}
-        {activeSection === 'calendar' && anyCalendarConnected && (
+        {activeSection === 'calendar' && gcalConnected && (
           <div className="px-4 py-6 max-w-7xl mx-auto">
             {/* View controls */}
             <div className="flex items-center justify-between mb-6">
@@ -1255,8 +1234,6 @@ export default function OutputView({
             onEditPlan={onEditPlan}
             googleCalendarConnected={gcalConnected}
             onConnectGoogleCalendar={handleConnectGoogleCalendar}
-            notionCalendarConnected={notionConnected}
-            onConnectNotionCalendar={handleConnectNotionCalendar}
             onShowPaywall={onShowPaywall}
           />
         )}

@@ -67,8 +67,6 @@ export default function AppShell({
   onNavigateToAccount,
   googleCalendarConnected,
   onConnectGoogleCalendar,
-  notionCalendarConnected,
-  onConnectNotionCalendar,
   children,
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false)
@@ -187,22 +185,7 @@ export default function AppShell({
                   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  {googleCalendarConnected ? 'Google Cal Connected' : 'Connect Google Cal'}
-                </button>
-              )}
-              {onConnectNotionCalendar && (
-                <button
-                  onClick={notionCalendarConnected ? undefined : onConnectNotionCalendar}
-                  className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-sm transition-all ${
-                    notionCalendarConnected
-                      ? 'text-emerald-500 dark:text-emerald-400 cursor-default'
-                      : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800/60'
-                  }`}
-                >
-                  <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L18.1 2.021c-.466-.374-.98-.7-2.054-.607l-12.77.933c-.466.047-.56.28-.374.466l1.557 1.395zm.793 3.172v13.856c0 .747.373 1.027 1.214.98l14.523-.84c.841-.046.935-.56.935-1.166V6.354c0-.606-.234-.933-.748-.886l-15.177.887c-.56.046-.747.327-.747.98v.046z" />
-                  </svg>
-                  {notionCalendarConnected ? 'Notion Connected' : 'Connect Notion'}
+                  {googleCalendarConnected ? 'Calendar Connected' : 'Connect Google Cal'}
                 </button>
               )}
             </div>
