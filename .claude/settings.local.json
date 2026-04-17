@@ -8,7 +8,11 @@
       "Bash(find /Users/ryangambrell/Desktop/StudyMap -name *.png -o -name *.jpg -o -name *.webp)",
       "Bash(python3 -c \":*)",
       "Bash(ls /Users/ryangambrell/Desktop/StudyMap/public/ss-*.png)",
-      "Read(//Users/ryangambrell/Desktop/**)"
+      "Read(//Users/ryangambrell/Desktop/**)",
+      "Bash(git push:*)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "mcp__02cf278a-fb7d-46d0-88e3-73bdbab27fde__get_runtime_logs"
     ]
   }
 }
