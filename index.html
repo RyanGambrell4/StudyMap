@@ -730,8 +730,23 @@
       <h3>Focus Mode</h3>
       <p>Every study session runs on a structured block system: warm-up, deep work, active recall, and synthesis. StudyEdge keeps the clock and tells you what to do in each block. You just show up and work.</p>
       <div class="bcard-visual">
-        <div style="border-radius:12px;overflow:hidden;line-height:0;border:1px solid rgba(79,126,247,0.2);box-shadow:0 8px 30px rgba(0,0,0,0.4)">
-          <img src="/ss-only-timer.png" alt="Focus Mode timer" style="width:100%;display:block;object-fit:cover;object-position:top;max-height:220px" />
+        <div style="border-radius:12px;border:1px solid rgba(79,126,247,0.2);box-shadow:0 8px 30px rgba(0,0,0,0.4);background:#0d1424;padding:20px;text-align:center">
+          <div style="font-size:11px;color:rgba(226,232,240,0.35);margin-bottom:14px;letter-spacing:0.5px">BLOCK 3 OF 9 — ACTIVE RECALL</div>
+          <div style="position:relative;width:110px;height:110px;margin:0 auto 16px">
+            <svg width="110" height="110" viewBox="0 0 110 110">
+              <circle cx="55" cy="55" r="48" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="7"/>
+              <circle cx="55" cy="55" r="48" fill="none" stroke="#4F7EF7" stroke-width="7" stroke-dasharray="301" stroke-dashoffset="88" stroke-linecap="round" transform="rotate(-90 55 55)"/>
+            </svg>
+            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
+              <div style="font-size:26px;font-weight:800;color:#fff;letter-spacing:-1px;line-height:1">24:35</div>
+              <div style="font-size:10px;color:#4F7EF7;font-weight:600;margin-top:3px">this block</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <div style="flex:1;padding:9px;background:rgba(255,255,255,0.06);border-radius:9px;font-size:12px;color:rgba(226,232,240,0.6);border:1px solid rgba(255,255,255,0.08)">⏸ Pause</div>
+            <div style="flex:1;padding:9px;background:rgba(255,255,255,0.06);border-radius:9px;font-size:12px;color:rgba(226,232,240,0.6);border:1px solid rgba(255,255,255,0.08)">Skip Block →</div>
+          </div>
+          <div style="padding:10px;background:rgba(34,197,94,0.12);border-radius:9px;font-size:12px;font-weight:700;color:#22c55e;border:1px solid rgba(34,197,94,0.25)">✓ Finish Block (00:35)</div>
         </div>
       </div>
     </div>
@@ -745,9 +760,32 @@
       <h3>Session Blueprint</h3>
       <p>Before every session, the AI builds a study plan for your specific course, goals, and exam timeline. You know exactly how to spend the next hour before you've even sat down.</p>
       <div class="bcard-visual">
-        <div style="border-radius:12px;overflow:hidden;line-height:0;border:1px solid rgba(124,92,250,0.2);box-shadow:0 8px 30px rgba(0,0,0,0.4);position:relative">
-          <img src="/ss-study-plan.png" alt="AI Study Coach week plan" style="width:100%;display:block;object-fit:cover;object-position:top;max-height:220px" />
-          <div style="position:absolute;bottom:0;left:0;right:0;height:80px;background:linear-gradient(to bottom, transparent, var(--surface))"></div>
+        <div style="border-radius:12px;border:1px solid rgba(124,92,250,0.2);box-shadow:0 8px 30px rgba(0,0,0,0.4);background:#0d1424;padding:16px">
+          <div style="font-size:10px;font-weight:700;color:#7C5CFA;letter-spacing:1px;margin-bottom:12px">YOUR WEEK-BY-WEEK PLAN</div>
+          <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.07);margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span style="font-size:12px;font-weight:700;color:#fff">Week 1</span>
+              <span style="font-size:10px;color:rgba(226,232,240,0.35)">Foundation</span>
+            </div>
+            <div style="padding:6px 0;border-top:1px solid rgba(255,255,255,0.05)">
+              <div style="font-size:10px;color:#7C5CFA;font-weight:600;margin-bottom:2px">Session 1</div>
+              <div style="font-size:11px;color:rgba(226,232,240,0.65)">Memory: encoding, storage, retrieval</div>
+            </div>
+            <div style="padding:6px 0;border-top:1px solid rgba(255,255,255,0.05)">
+              <div style="font-size:10px;color:#7C5CFA;font-weight:600;margin-bottom:2px">Session 2</div>
+              <div style="font-size:11px;color:rgba(226,232,240,0.65)">Sensation & Perception basics</div>
+            </div>
+          </div>
+          <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:12px;border:1px solid rgba(255,255,255,0.07)">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+              <span style="font-size:12px;font-weight:700;color:#fff">Week 2</span>
+              <span style="font-size:10px;color:rgba(226,232,240,0.35)">Midterm Prep Sprint</span>
+            </div>
+            <div style="padding:6px 0;border-top:1px solid rgba(255,255,255,0.05)">
+              <div style="font-size:10px;color:#7C5CFA;font-weight:600;margin-bottom:2px">Session 1</div>
+              <div style="font-size:11px;color:rgba(226,232,240,0.65)">Active Recall — all three units</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -761,8 +799,28 @@
       <h3>Streak Tracking</h3>
       <p>Most students lose momentum not because they stop caring but because they lose their rhythm. Your streak tracks every session you complete and makes consistency visible. Miss a day and you feel it. Keep the streak and you build the habit that actually moves your grade.</p>
       <div class="bcard-visual">
-        <div style="border-radius:12px;overflow:hidden;line-height:0;border:1px solid rgba(251,146,60,0.2);box-shadow:0 8px 30px rgba(0,0,0,0.4);height:200px">
-          <img src="/ss-progress.png" alt="Progress and streak tracking" style="width:100%;height:100%;display:block;object-fit:cover;object-position:top" />
+        <div style="border-radius:12px;border:1px solid rgba(251,146,60,0.2);box-shadow:0 8px 30px rgba(0,0,0,0.4);background:#0d1424;padding:16px">
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;text-align:center;border:1px solid rgba(255,255,255,0.07)">
+              <div style="font-size:18px;margin-bottom:2px">🔥</div>
+              <div style="font-size:22px;font-weight:800;color:#fff;line-height:1">7</div>
+              <div style="font-size:9px;color:rgba(226,232,240,0.4);margin-top:2px">day streak</div>
+            </div>
+            <div style="flex:1;background:rgba(255,255,255,0.04);border-radius:10px;padding:10px;text-align:center;border:1px solid rgba(255,255,255,0.07)">
+              <div style="font-size:18px;margin-bottom:2px">✅</div>
+              <div style="font-size:22px;font-weight:800;color:#fff;line-height:1">32</div>
+              <div style="font-size:9px;color:rgba(226,232,240,0.4);margin-top:2px">sessions done</div>
+            </div>
+          </div>
+          <div style="background:rgba(251,146,60,0.08);border-radius:8px;padding:8px 10px;font-size:11px;color:#FB923C;margin-bottom:10px;border:1px solid rgba(251,146,60,0.2)">Great start — consistency is everything. Keep going!</div>
+          <div style="margin-bottom:8px">
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(226,232,240,0.45);margin-bottom:4px"><span>PSYC 101</span><span>78%</span></div>
+            <div style="height:5px;background:rgba(255,255,255,0.07);border-radius:99px"><div style="height:100%;width:78%;background:#6366f1;border-radius:99px"></div></div>
+          </div>
+          <div>
+            <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(226,232,240,0.45);margin-bottom:4px"><span>Study Hours</span><span>14h</span></div>
+            <div style="height:5px;background:rgba(255,255,255,0.07);border-radius:99px"><div style="height:100%;width:58%;background:#FB923C;border-radius:99px"></div></div>
+          </div>
         </div>
       </div>
     </div>
@@ -776,8 +834,19 @@
       <h3>Study Tools Built In</h3>
       <p>Flashcards, multiple choice quizzes, active recall prompts, and session notes are all built into the session. Everything you need to learn the material is already there.</p>
       <div class="bcard-visual">
-        <div style="border-radius:12px;overflow:hidden;line-height:0;border:1px solid rgba(52,211,153,0.2);box-shadow:0 8px 30px rgba(0,0,0,0.4)">
-          <img src="/ss-flashcard.png" alt="AI flashcards" style="width:100%;display:block;object-fit:cover;object-position:center;max-height:200px" />
+        <div style="border-radius:12px;border:1px solid rgba(52,211,153,0.2);box-shadow:0 8px 30px rgba(0,0,0,0.4);background:#0d1424;padding:16px">
+          <div style="display:flex;justify-content:space-between;font-size:10px;color:rgba(226,232,240,0.35);margin-bottom:10px"><span>Card 3 of 15</span><span>23% covered</span></div>
+          <div style="height:4px;background:rgba(255,255,255,0.07);border-radius:99px;margin-bottom:14px"><div style="height:100%;width:23%;background:#34D399;border-radius:99px"></div></div>
+          <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(52,211,153,0.2);border-radius:12px;padding:18px 14px;text-align:center;margin-bottom:12px">
+            <div style="font-size:10px;font-weight:700;color:#34D399;letter-spacing:1px;margin-bottom:10px">CONCEPT</div>
+            <div style="font-size:13px;font-weight:600;color:#fff;line-height:1.5;margin-bottom:12px">What is Miller's Law regarding short-term memory?</div>
+            <div style="font-size:11px;color:rgba(226,232,240,0.3);border-top:1px solid rgba(255,255,255,0.07);padding-top:10px">Tap to reveal answer</div>
+          </div>
+          <div style="display:flex;gap:6px">
+            <div style="flex:1;text-align:center;padding:8px 4px;background:rgba(239,68,68,0.12);border-radius:8px;font-size:10px;font-weight:600;color:#ef4444">✗ Reviewing</div>
+            <div style="flex:1;text-align:center;padding:8px 4px;background:rgba(234,179,8,0.12);border-radius:8px;font-size:10px;font-weight:600;color:#eab308">~ Almost</div>
+            <div style="flex:1;text-align:center;padding:8px 4px;background:rgba(34,197,94,0.12);border-radius:8px;font-size:10px;font-weight:600;color:#22c55e">✓ Know it</div>
+          </div>
         </div>
       </div>
     </div>
