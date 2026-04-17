@@ -949,47 +949,95 @@
 </div>
 
 <!-- ═══ GRADE INTELLIGENCE ═══ -->
-<div class="section" style="padding-top:80px;padding-bottom:80px">
-  <div class="eyebrow fade-up">Grade Intelligence</div>
-  <h2 class="text-h1 fade-up d1" style="margin-bottom:16px">Stop guessing.<br><span class="gradient-text">Know exactly where you stand.</span></h2>
-  <p class="fade-up d2" style="font-size:1.1rem;color:var(--text2);max-width:580px;margin:0 auto 64px;line-height:1.65;text-align:center">Most students find out their grade is in trouble too late to do anything about it. StudyEdge shows you your exact projected grade, what you need on every remaining assignment, and three different strategies to hit your target before the semester slips away.</p>
+<div class="section fade-up" style="padding-top:80px;padding-bottom:80px">
+  <div class="grade-split" style="max-width:1200px;margin:0 auto;display:flex;align-items:center;gap:56px;flex-wrap:wrap">
 
-  <div class="grade-grid fade-up d2" style="display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:1100px;margin:0 auto 32px">
-
-    <!-- Left: Grade Sandbox -->
-    <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:20px">
-      <div>
-        <div style="font-size:11px;font-weight:700;color:#4F7EF7;letter-spacing:1px;margin-bottom:10px">GRADE SANDBOX</div>
-        <h3 style="font-size:1.25rem;font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:-0.4px">Simulate your grade before you live it</h3>
-        <p style="font-size:0.9rem;color:var(--text2);line-height:1.6">Drag the sliders to see exactly how each assignment or exam affects your final grade. Plan your effort before the deadline, not after.</p>
-      </div>
-      <div style="border-radius:14px;overflow:hidden;border:1px solid rgba(79,126,247,0.2);box-shadow:0 16px 48px rgba(0,0,0,0.5);aspect-ratio:4/3;background:#0d1424">
-        <img src="/lp-grade-sandbox.png" alt="Grade sandbox with projected grade sliders" style="width:100%;height:100%;object-fit:cover;display:block" />
-      </div>
+    <!-- Left column: text + CTA -->
+    <div class="grade-split-text" style="flex:0 0 45%;min-width:320px">
+      <div class="eyebrow" style="margin-bottom:14px">Grade Intelligence</div>
+      <h2 class="text-h1" style="margin-bottom:18px">Stop guessing.<br><span class="gradient-text">Know exactly where you stand.</span></h2>
+      <p style="font-size:1.05rem;color:var(--text2);line-height:1.65;margin-bottom:28px">Most students find out their grade is in trouble too late to do anything about it. StudyEdge shows you your exact projected grade, what you need on every remaining assignment, and three different strategies to hit your target before the semester slips away.</p>
+      <button class="btn" onclick="location.href='/app?signup=1'">Try it free &rarr;</button>
     </div>
 
-    <!-- Right: Grade Predictor -->
-    <div style="background:rgba(255,255,255,0.025);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:28px;display:flex;flex-direction:column;gap:20px">
-      <div>
-        <div style="font-size:11px;font-weight:700;color:#a78bfa;letter-spacing:1px;margin-bottom:10px">GRADE PREDICTOR</div>
-        <h3 style="font-size:1.25rem;font-weight:800;color:#fff;margin-bottom:8px;letter-spacing:-0.4px">Three paths to your target grade</h3>
-        <p style="font-size:0.9rem;color:var(--text2);line-height:1.6">Tell StudyEdge your target. It calculates exactly what you need on every remaining assignment, then maps three realistic strategies to get there.</p>
+    <!-- Right column: image carousel -->
+    <div class="grade-split-media" style="flex:1;min-width:320px">
+      <div
+        id="gradeCarousel"
+        style="position:relative;border-radius:16px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);box-shadow:0 20px 60px rgba(0,0,0,0.55);aspect-ratio:1600/1220;background:#0d1424"
+      >
+        <div id="gradeSlides" style="display:flex;width:100%;height:100%;transition:transform 0.45s cubic-bezier(0.4,0,0.2,1);will-change:transform">
+          <img src="/grade-slide-1.png" alt="Grade sandbox" style="flex:0 0 100%;width:100%;height:100%;object-fit:cover;display:block" />
+          <img src="/grade-slide-2.png" alt="Grade predictor with three paths" style="flex:0 0 100%;width:100%;height:100%;object-fit:cover;display:block" />
+          <img src="/grade-slide-3.png" alt="Live grade dashboard" style="flex:0 0 100%;width:100%;height:100%;object-fit:cover;display:block" />
+        </div>
       </div>
-      <div style="border-radius:14px;overflow:hidden;border:1px solid rgba(167,139,250,0.2);box-shadow:0 16px 48px rgba(0,0,0,0.5);aspect-ratio:4/3;background:#0d1424">
-        <img src="/lp-grade-predictor.png" alt="Grade predictor showing three paths to hit an A" style="width:100%;height:100%;object-fit:cover;display:block" />
+
+      <!-- Dot navigation -->
+      <div id="gradeDots" style="display:flex;justify-content:center;gap:8px;margin-top:18px">
+        <button class="grade-dot" data-idx="0" aria-label="Slide 1" style="width:24px;height:8px;border-radius:4px;background:#4F7EF7;border:none;padding:0;cursor:pointer;transition:all 0.25s"></button>
+        <button class="grade-dot" data-idx="1" aria-label="Slide 2" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);border:none;padding:0;cursor:pointer;transition:all 0.25s"></button>
+        <button class="grade-dot" data-idx="2" aria-label="Slide 3" style="width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,0.25);border:none;padding:0;cursor:pointer;transition:all 0.25s"></button>
       </div>
     </div>
 
   </div>
 
-  <!-- Bottom CTA strip -->
-  <div class="fade-up d3" style="max-width:1100px;margin:0 auto;background:linear-gradient(135deg,rgba(79,126,247,0.1),rgba(167,139,250,0.1));border:1px solid rgba(99,102,241,0.2);border-radius:16px;padding:28px 36px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap">
-    <div>
-      <div style="font-size:1.15rem;font-weight:800;color:#fff;margin-bottom:6px;letter-spacing:-0.3px">Your grade is a math problem. StudyEdge solves it.</div>
-      <div style="font-size:0.9rem;color:var(--text2)">Add your grades once. Get your projected score, what you need, and exactly how to hit your target — for every course.</div>
-    </div>
-    <button class="btn" onclick="location.href='/app?signup=1'" style="white-space:nowrap;flex-shrink:0">Try it free →</button>
-  </div>
+  <script>
+    (function() {
+      var current = 0;
+      var total = 3;
+      var autoTimer = null;
+      var slides = document.getElementById('gradeSlides');
+      var carousel = document.getElementById('gradeCarousel');
+      var dots = document.querySelectorAll('#gradeDots .grade-dot');
+
+      function render() {
+        slides.style.transform = 'translateX(-' + (current * 100) + '%)';
+        dots.forEach(function(d, i) {
+          var active = i === current;
+          d.style.width = active ? '24px' : '8px';
+          d.style.height = '8px';
+          d.style.borderRadius = active ? '4px' : '50%';
+          d.style.background = active ? '#4F7EF7' : 'rgba(255,255,255,0.25)';
+        });
+      }
+
+      function go(idx) {
+        current = (idx + total) % total;
+        render();
+      }
+
+      function startAuto() {
+        stopAuto();
+        autoTimer = setInterval(function() { go(current + 1); }, 5000);
+      }
+
+      function stopAuto() {
+        if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+      }
+
+      dots.forEach(function(d) {
+        d.addEventListener('click', function() {
+          go(parseInt(d.getAttribute('data-idx'), 10));
+          startAuto();
+        });
+      });
+
+      carousel.addEventListener('mouseenter', stopAuto);
+      carousel.addEventListener('mouseleave', startAuto);
+
+      render();
+      startAuto();
+    })();
+  </script>
+
+  <style>
+    @media (max-width: 768px) {
+      .grade-split { flex-direction: column; gap: 36px; }
+      .grade-split-text, .grade-split-media { flex: 1 1 100%; min-width: 0; width: 100%; }
+    }
+  </style>
 </div>
 
 <!-- ═══ SMART CALENDAR ═══ -->
