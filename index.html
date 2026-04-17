@@ -67,6 +67,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@400,500,600,700,800&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   <script src="https://app.lemonsqueezy.com/js/lemon.js" defer></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -101,7 +102,7 @@
     body {
       background: var(--bg);
       color: var(--text);
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      font-family: "General Sans", sans-serif;
       font-size: 16px;
       line-height: 1.6;
       overflow-x: hidden;
@@ -194,7 +195,7 @@
       background: var(--accent); color: white;
       border: none; border-radius: 10px;
       padding: 10px 20px; font-size: 0.9rem; font-weight: 600;
-      cursor: pointer; font-family: inherit; letter-spacing: -0.2px;
+      cursor: pointer; font-family: "General Sans", sans-serif; letter-spacing: -0.2px;
       transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
     }
     .btn:hover { background: #3d6ef5; transform: translateY(-1px); box-shadow: 0 8px 28px rgba(79,126,247,0.35); }
@@ -251,7 +252,7 @@
       flex: 1; background: rgba(255,255,255,0.05);
       border: 1px solid var(--border2); border-radius: 12px;
       padding: 14px 18px; font-size: 1rem; color: var(--text);
-      font-family: inherit; outline: none;
+      font-family: "General Sans", sans-serif; outline: none;
       transition: border-color 0.2s, background 0.2s;
     }
     .email-form input::placeholder, .cta-form input::placeholder { color: var(--text3); }
@@ -296,7 +297,7 @@
       border: 1px solid rgba(255,255,255,0.08);
       border-radius: 6px; padding: 4px 12px;
       font-size: 0.7rem; color: var(--text3);
-      letter-spacing: 0.2px; font-family: inherit;
+      letter-spacing: 0.2px; font-family: "General Sans", sans-serif;
     }
     .browser-screen {
       border: 1px solid rgba(255,255,255,0.08);
@@ -498,7 +499,7 @@
     .tog {
       padding: 8px 22px; border: none; background: transparent;
       color: var(--text3); font-size: 0.875rem; font-weight: 600;
-      border-radius: 8px; cursor: pointer; font-family: inherit;
+      border-radius: 8px; cursor: pointer; font-family: "General Sans", sans-serif;
       transition: background 0.2s, color 0.2s; position: relative; letter-spacing: -0.2px;
     }
     .tog.on { background: var(--accent); color: white; }
