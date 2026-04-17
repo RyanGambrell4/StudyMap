@@ -988,6 +988,8 @@
       var current = 0;
       var total = 3;
       var autoTimer = null;
+      var inView = false;
+      var hovering = false;
       var slides = document.getElementById('gradeSlides');
       var carousel = document.getElementById('gradeCarousel');
       var dots = document.querySelectorAll('#gradeDots .grade-dot');
@@ -1008,27 +1010,42 @@
         render();
       }
 
-      function startAuto() {
-        stopAuto();
-        autoTimer = setInterval(function() { go(current + 1); }, 5000);
-      }
-
       function stopAuto() {
         if (autoTimer) { clearInterval(autoTimer); autoTimer = null; }
+      }
+
+      function syncAuto() {
+        stopAuto();
+        if (inView && !hovering) {
+          autoTimer = setInterval(function() { go(current + 1); }, 3000);
+        }
       }
 
       dots.forEach(function(d) {
         d.addEventListener('click', function() {
           go(parseInt(d.getAttribute('data-idx'), 10));
-          startAuto();
+          syncAuto();
         });
       });
 
-      carousel.addEventListener('mouseenter', stopAuto);
-      carousel.addEventListener('mouseleave', startAuto);
+      carousel.addEventListener('mouseenter', function() { hovering = true; syncAuto(); });
+      carousel.addEventListener('mouseleave', function() { hovering = false; syncAuto(); });
+
+      if ('IntersectionObserver' in window) {
+        var io = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            inView = entry.isIntersecting;
+            syncAuto();
+          });
+        }, { threshold: 0.25 });
+        io.observe(carousel);
+      } else {
+        // Fallback: assume in view
+        inView = true;
+        syncAuto();
+      }
 
       render();
-      startAuto();
     })();
   </script>
 
