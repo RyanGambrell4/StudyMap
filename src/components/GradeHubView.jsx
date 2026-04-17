@@ -25,7 +25,9 @@ const TARGET_COLORS = {
   'B-':   { color: '#14b8a6', gradient: 'linear-gradient(135deg, #2dd4bf, #0d9488)' }, // teal
   'C+':   { color: '#f59e0b', gradient: 'linear-gradient(135deg, #fbbf24, #d97706)' }, // amber
   'C':    { color: '#f97316', gradient: 'linear-gradient(135deg, #fb923c, #ea580c)' }, // orange
-  'Pass': { color: '#94a3b8', gradient: 'linear-gradient(135deg, #cbd5e1, #64748b)' }, // slate
+  'C-':   { color: '#ef4444', gradient: 'linear-gradient(135deg, #f87171, #dc2626)' }, // red
+  'D+':   { color: '#e11d48', gradient: 'linear-gradient(135deg, #fb7185, #be123c)' }, // rose
+  'D':    { color: '#94a3b8', gradient: 'linear-gradient(135deg, #cbd5e1, #64748b)' }, // slate
 }
 
 // ── Score badge color ─────────────────────────────────────────────────────────
@@ -143,7 +145,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
       ? saved.components.map(c => ({ ...c, weight: String(c.weight), grade: c.grade !== null ? String(c.grade) : '' }))
       : [{ id: uid(), component: '', weight: '', grade: '', graded: false }]
   )
-  const [targetGrade, setTargetGrade] = useState(saved.targetGrade ?? 83)
+  const [targetGrade, setTargetGrade] = useState(saved.targetGrade ?? 73)
   const [showPlan, setShowPlan] = useState(!!(saved.components?.length))
 
   const totalWeight = rows.reduce((s, r) => s + (parseFloat(r.weight) || 0), 0)
@@ -170,10 +172,10 @@ function PlanTab({ course, gradeData, dot, onSave }) {
 
   // Plan-of-attack calculations
   const savedComps = gradeData?.components ?? []
-  const neededInfo = showPlan && savedComps.length ? getNeededOnRemaining(savedComps, gradeData?.targetGrade ?? 83) : null
-  const scenarioPaths = showPlan && savedComps.length ? generateScenarioPaths(savedComps, gradeData?.targetGrade ?? 83) : []
+  const neededInfo = showPlan && savedComps.length ? getNeededOnRemaining(savedComps, gradeData?.targetGrade ?? 73) : null
+  const scenarioPaths = showPlan && savedComps.length ? generateScenarioPaths(savedComps, gradeData?.targetGrade ?? 73) : []
   const ungraded = savedComps.filter(c => !c.graded || c.grade === null)
-  const targetLabel = TARGET_OPTIONS.find(o => o.value === (gradeData?.targetGrade ?? 83))?.label ?? 'B'
+  const targetLabel = TARGET_OPTIONS.find(o => o.value === (gradeData?.targetGrade ?? 73))?.label ?? 'B'
 
   return (
     <div className="space-y-5">
@@ -368,7 +370,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
 // ── Track tab ─────────────────────────────────────────────────────────────────
 function TrackTab({ course, gradeData, dot, onSave }) {
   const components = gradeData?.components ?? []
-  const targetGrade = gradeData?.targetGrade ?? 83
+  const targetGrade = gradeData?.targetGrade ?? 73
   const [defenseMode, setDefenseMode] = useState(false)
 
   // Local editable grades (mirrors gradeData, auto-saves)
@@ -580,7 +582,7 @@ function TrackTab({ course, gradeData, dot, onSave }) {
 // ── Sandbox tab ───────────────────────────────────────────────────────────────
 function SandboxTab({ course, gradeData, dot, onSave }) {
   const components = gradeData?.components ?? []
-  const targetGrade = gradeData?.targetGrade ?? 83
+  const targetGrade = gradeData?.targetGrade ?? 73
   const scenarios = gradeData?.scenarios ?? []
   const [showCompare, setShowCompare] = useState(false)
   const [editingScenarioName, setEditingScenarioName] = useState(null)
@@ -850,7 +852,7 @@ function ConnectionSection({ course, gradeData, dot, onShowPaywall, userId }) {
   const [aiPrediction, setAiPrediction] = useState(null)
 
   const components = gradeData?.components ?? []
-  const targetGrade = gradeData?.targetGrade ?? 83
+  const targetGrade = gradeData?.targetGrade ?? 73
   const currentGrade = getCurrentGrade(components)
   const gap = currentGrade !== null ? currentGrade - targetGrade : null
   const below5 = gap !== null && gap < -2

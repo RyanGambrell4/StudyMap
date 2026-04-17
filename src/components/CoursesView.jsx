@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { canAddCourse, getActivePlan, getPlanLimits } from '../lib/subscription'
 
-const TARGET_THRESHOLDS = { A: 90, B: 80, C: 70, 'Pass/Fail': 60 }
+const TARGET_THRESHOLDS = { A: 80, B: 70, C: 60, 'Pass/Fail': 50 }
 
 const COURSE_COLORS = [
   { name: 'blue',   dot: '#3B82F6' },

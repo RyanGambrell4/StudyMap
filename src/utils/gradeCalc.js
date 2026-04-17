@@ -1,36 +1,39 @@
 // ── Grade letter mapping ──────────────────────────────────────────────────────
 
 export const TARGET_OPTIONS = [
-  { label: 'A+', value: 97 },
-  { label: 'A',  value: 93 },
-  { label: 'A-', value: 90 },
-  { label: 'B+', value: 87 },
-  { label: 'B',  value: 83 },
-  { label: 'B-', value: 80 },
-  { label: 'C+', value: 77 },
-  { label: 'C',  value: 73 },
-  { label: 'Pass', value: 60 },
+  { label: 'A+', value: 90 },
+  { label: 'A',  value: 85 },
+  { label: 'A-', value: 80 },
+  { label: 'B+', value: 77 },
+  { label: 'B',  value: 73 },
+  { label: 'B-', value: 70 },
+  { label: 'C+', value: 67 },
+  { label: 'C',  value: 63 },
+  { label: 'C-', value: 60 },
+  { label: 'D+', value: 55 },
+  { label: 'D',  value: 50 },
 ]
 
 export function letterGrade(pct) {
   if (pct === null || pct === undefined || isNaN(pct)) return '—'
-  if (pct >= 97) return 'A+'
-  if (pct >= 93) return 'A'
-  if (pct >= 90) return 'A-'
-  if (pct >= 87) return 'B+'
-  if (pct >= 83) return 'B'
-  if (pct >= 80) return 'B-'
-  if (pct >= 77) return 'C+'
-  if (pct >= 73) return 'C'
-  if (pct >= 70) return 'C-'
-  if (pct >= 60) return 'D'
+  if (pct >= 90) return 'A+'
+  if (pct >= 85) return 'A'
+  if (pct >= 80) return 'A-'
+  if (pct >= 77) return 'B+'
+  if (pct >= 73) return 'B'
+  if (pct >= 70) return 'B-'
+  if (pct >= 67) return 'C+'
+  if (pct >= 63) return 'C'
+  if (pct >= 60) return 'C-'
+  if (pct >= 55) return 'D+'
+  if (pct >= 50) return 'D'
   return 'F'
 }
 
 // Status vs target — returns 'on-track' | 'at-risk' | 'needs-recovery'
 export function gradeStatus(pct, target) {
   if (pct === null || pct === undefined) return 'unknown'
-  const t = target ?? 83
+  const t = target ?? 73
   if (pct >= t) return 'on-track'
   if (pct >= t - 5) return 'at-risk'
   return 'needs-recovery'

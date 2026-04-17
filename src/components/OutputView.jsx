@@ -87,7 +87,7 @@ function TutorView({ courses, userId, onShowPaywall }) {
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
-const TARGET_THRESHOLDS = { A: 90, B: 80, C: 70, 'Pass/Fail': 60 }
+const TARGET_THRESHOLDS = { A: 80, B: 70, C: 60, 'Pass/Fail': 50 }
 
 function gradeStatus(avg, threshold) {
   if (avg >= threshold) return 'on-track'

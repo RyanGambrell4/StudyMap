@@ -130,8 +130,8 @@ Rules:
       `- ${c.name} (${c.weight}%, ${c.type || 'Assignment'}): ${c.earnedGrade !== null && c.earnedGrade !== undefined ? c.earnedGrade + '%' : 'not yet graded'}`
     ).join('\n')
 
-    const TARGET_THRESHOLDS = { A: 93, B: 83, C: 73, 'Pass/Fail': 60 }
-    const threshold = TARGET_THRESHOLDS[targetGrade] ?? 83
+    const TARGET_THRESHOLDS = { A: 80, B: 70, C: 60, 'Pass/Fail': 50 }
+    const threshold = TARGET_THRESHOLDS[targetGrade] ?? 73
 
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
