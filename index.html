@@ -756,8 +756,54 @@
         <h3>Your AI coach runs the session while you're in it</h3>
         <p>Hit start and StudyEdge runs the clock. Each block is timed and structured with a purpose. Flashcards, recall prompts, practice quizzes, and notes are all built in. You're not reading over slides hoping it sticks. You're working the material.</p>
       </div>
-      <div class="step-img">
-        <img src="/lp-ai-tutor.png" alt="AI tutor answering questions inside a live study session" style="border-radius:14px;box-shadow:0 20px 60px rgba(0,0,0,0.5),0 0 0 1px rgba(255,255,255,0.06)" />
+      <div class="step-img" style="background:#080d1c;padding:0;border-radius:20px;border:1px solid rgba(99,102,241,0.25);box-shadow:0 0 80px rgba(99,102,241,0.12),0 20px 60px rgba(0,0,0,0.6);overflow:hidden;display:flex;flex-direction:column">
+        <!-- Top bar -->
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#0d1424;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 8px rgba(34,197,94,0.7)"></div>
+            <span style="font-size:13px;font-weight:700;color:#f1f5f9">Psych 101 — Week 4 Session</span>
+          </div>
+          <div style="font-size:11px;font-weight:600;color:rgba(226,232,240,0.4);background:rgba(255,255,255,0.06);padding:4px 10px;border-radius:99px;border:1px solid rgba(255,255,255,0.09)">54:58 remaining</div>
+        </div>
+        <!-- Tab bar -->
+        <div style="display:flex;gap:0;padding:0 18px;background:#0a0f1e;border-bottom:1px solid rgba(255,255,255,0.06)">
+          <div style="padding:10px 12px;font-size:11px;font-weight:600;color:rgba(226,232,240,0.35);cursor:pointer">Active Recall</div>
+          <div style="padding:10px 12px;font-size:11px;font-weight:600;color:rgba(226,232,240,0.35);cursor:pointer">Flashcards</div>
+          <div style="padding:10px 12px;font-size:11px;font-weight:600;color:rgba(226,232,240,0.35);cursor:pointer">Quick Quiz</div>
+          <div style="padding:10px 12px;font-size:11px;font-weight:600;color:rgba(226,232,240,0.35);cursor:pointer">Notes</div>
+          <div style="padding:10px 12px;font-size:11px;font-weight:700;color:#6366f1;border-bottom:2px solid #6366f1;cursor:pointer">Ask AI</div>
+        </div>
+        <!-- Chat area -->
+        <div style="flex:1;padding:16px 18px;display:flex;flex-direction:column;gap:12px;background:#080d1c">
+          <!-- User message -->
+          <div style="display:flex;justify-content:flex-end">
+            <div style="max-width:80%;padding:11px 14px;background:linear-gradient(135deg,#4f7ef7,#6366f1);border-radius:16px 16px 4px 16px;font-size:12px;font-weight:600;color:#fff;line-height:1.5">
+              What are the 4 most important things to know for this exam?
+            </div>
+          </div>
+          <!-- AI response -->
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <div style="width:26px;height:26px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#4f46e5);display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:2px">
+              <svg width="13" height="13" fill="none" stroke="#fff" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z"/></svg>
+            </div>
+            <div style="background:#0d1424;border:1px solid rgba(255,255,255,0.08);border-radius:4px 16px 16px 16px;padding:12px 14px;flex:1">
+              <div style="font-size:11px;font-weight:700;color:#6366f1;margin-bottom:8px">StudyEdge AI</div>
+              <div style="font-size:12px;color:rgba(226,232,240,0.75);line-height:1.7;display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;gap:8px"><span style="font-weight:700;color:#6366f1;flex-shrink:0">1.</span><span><strong style="color:#f1f5f9">Research Methods</strong> — know the difference between correlation and causation, and why experimental design matters.</span></div>
+                <div style="display:flex;gap:8px"><span style="font-weight:700;color:#6366f1;flex-shrink:0">2.</span><span><strong style="color:#f1f5f9">Biological Bases of Behavior</strong> — neurons, neurotransmitters, and what each brain region controls.</span></div>
+                <div style="display:flex;gap:8px"><span style="font-weight:700;color:#6366f1;flex-shrink:0">3.</span><span><strong style="color:#f1f5f9">Sensation &amp; Perception</strong> — how stimuli are processed, thresholds, and top-down vs bottom-up.</span></div>
+                <div style="display:flex;gap:8px"><span style="font-weight:700;color:#6366f1;flex-shrink:0">4.</span><span><strong style="color:#f1f5f9">Memory &amp; Cognition</strong> — encoding, storage, retrieval, and the key models (Atkinson-Shiffrin).</span></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Input bar -->
+        <div style="padding:12px 18px;background:#0d1424;border-top:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;gap:10px">
+          <div style="flex:1;padding:10px 14px;background:#080d1c;border:1px solid rgba(255,255,255,0.09);border-radius:10px;font-size:12px;color:rgba(226,232,240,0.25)">Ask anything about this material…</div>
+          <div style="width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,#6366f1,#4f46e5);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+            <svg width="14" height="14" fill="none" stroke="#fff" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.269 20.876L5.999 12zm0 0h7.5"/></svg>
+          </div>
+        </div>
       </div>
     </div>
   </div>
