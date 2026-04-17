@@ -15,6 +15,19 @@ const daysTo = (dateStr) => dateStr
   ? Math.round((new Date(dateStr + 'T12:00:00') - new Date(todayStr() + 'T12:00:00')) / 86400000)
   : null
 
+// ── Target grade colors (higher grade = cooler / more vibrant) ───────────────
+const TARGET_COLORS = {
+  'A+':   { color: '#d946ef', gradient: 'linear-gradient(135deg, #e879f9, #a855f7)' }, // fuchsia → purple
+  'A':    { color: '#8b5cf6', gradient: 'linear-gradient(135deg, #a78bfa, #7c3aed)' }, // violet
+  'A-':   { color: '#6366f1', gradient: 'linear-gradient(135deg, #818cf8, #4f46e5)' }, // indigo
+  'B+':   { color: '#0ea5e9', gradient: 'linear-gradient(135deg, #38bdf8, #0284c7)' }, // sky
+  'B':    { color: '#06b6d4', gradient: 'linear-gradient(135deg, #22d3ee, #0891b2)' }, // cyan
+  'B-':   { color: '#14b8a6', gradient: 'linear-gradient(135deg, #2dd4bf, #0d9488)' }, // teal
+  'C+':   { color: '#f59e0b', gradient: 'linear-gradient(135deg, #fbbf24, #d97706)' }, // amber
+  'C':    { color: '#f97316', gradient: 'linear-gradient(135deg, #fb923c, #ea580c)' }, // orange
+  'Pass': { color: '#94a3b8', gradient: 'linear-gradient(135deg, #cbd5e1, #64748b)' }, // slate
+}
+
 // ── Score badge color ─────────────────────────────────────────────────────────
 function scoreBadgeColor(score) {
   if (score === null || score === undefined) return '#64748b'
@@ -74,7 +87,7 @@ function LockedState({ onShowPaywall }) {
 // ── Course overview strip ─────────────────────────────────────────────────────
 function CourseStrip({ courses, activeCourseIdx, onSelect }) {
   return (
-    <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-hide mb-5 -mx-4 px-4">
+    <div className="flex gap-3 overflow-x-auto pt-2 pb-2 scrollbar-hide mb-5 -mx-4 px-4">
       {courses.map((course, idx) => {
         const dot = course.color?.dot ?? '#6366f1'
         const active = activeCourseIdx === idx
@@ -239,18 +252,22 @@ function PlanTab({ course, gradeData, dot, onSave }) {
         <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/50">
           <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Target Grade</label>
           <div className="flex flex-wrap gap-2">
-            {TARGET_OPTIONS.map(opt => (
-              <button
-                key={opt.label}
-                onClick={() => setTargetGrade(opt.value)}
-                className="min-h-[44px] px-4 rounded-xl text-sm font-bold border transition-all"
-                style={targetGrade === opt.value
-                  ? { backgroundColor: `${dot}20`, color: dot, borderColor: `${dot}50` }
-                  : { backgroundColor: 'transparent', color: '#64748b', borderColor: 'rgba(148,163,184,0.3)' }}
-              >
-                {opt.label}
-              </button>
-            ))}
+            {TARGET_OPTIONS.map(opt => {
+              const c = TARGET_COLORS[opt.label] ?? TARGET_COLORS.B
+              const active = targetGrade === opt.value
+              return (
+                <button
+                  key={opt.label}
+                  onClick={() => setTargetGrade(opt.value)}
+                  className="min-h-[44px] px-4 rounded-xl text-sm font-bold border transition-all"
+                  style={active
+                    ? { background: c.gradient, color: '#fff', borderColor: c.color, boxShadow: `0 4px 14px ${c.color}40` }
+                    : { backgroundColor: 'transparent', color: c.color, borderColor: `${c.color}55` }}
+                >
+                  {opt.label}
+                </button>
+              )
+            })}
           </div>
         </div>
 
