@@ -8,14 +8,38 @@ export default function AuthScreen({ initialMode, onBack }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError] = useState('')
+  const [error, setError] = useState(() => {
+    // Surface OAuth errors redirected back from Supabase (e.g. "Unable to exchange external code")
+    const sp = new URLSearchParams(window.location.search)
+    const raw = sp.get('error_description') || sp.get('error')
+    if (!raw) return ''
+    // Clean up the URL so the error doesn't persist on refresh
+    const clean = new URLSearchParams()
+    const plan = sp.get('plan'); const billing = sp.get('billing'); const signup = sp.get('signup')
+    if (plan) clean.set('plan', plan)
+    if (billing) clean.set('billing', billing)
+    if (signup) clean.set('signup', signup)
+    const qs = clean.toString()
+    window.history.replaceState({}, '', window.location.pathname + (qs ? '?' + qs : ''))
+    return `Sign in failed: ${decodeURIComponent(raw).replace(/\+/g, ' ')}`
+  })
   const [success, setSuccess] = useState('')
 
   const handleGoogleSignIn = async () => {
     setError('')
+    // Preserve checkout intent (plan + billing) across the OAuth round-trip
+    // so users who came from landing page pricing still land in Stripe checkout.
+    const src = new URLSearchParams(window.location.search)
+    const preserve = new URLSearchParams()
+    const plan = src.get('plan')
+    const billing = src.get('billing')
+    if (plan === 'pro' || plan === 'unlimited') preserve.set('plan', plan)
+    if (['monthly', 'semester', 'yearly'].includes(billing)) preserve.set('billing', billing)
+    const qs = preserve.toString()
+    const redirectTo = `${window.location.origin}/app${qs ? '?' + qs : ''}`
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
-      options: { redirectTo: window.location.origin + '/app' },
+      options: { redirectTo },
     })
     if (error) setError(error.message)
   }

@@ -172,9 +172,11 @@ export default function App() {
   }
 
   if (!session) {
-    // Check URL param for direct signup link
-    const urlSignup = new URLSearchParams(window.location.search).get('signup') === '1'
-    if (showAuth || urlSignup) {
+    // Check URL param for direct signup link or OAuth error bounceback
+    const sp = new URLSearchParams(window.location.search)
+    const urlSignup = sp.get('signup') === '1'
+    const hasOAuthError = !!(sp.get('error') || sp.get('error_description'))
+    if (showAuth || urlSignup || hasOAuthError) {
       return <AuthScreen initialMode={authMode} onBack={() => setShowAuth(false)} />
     }
     return <LandingPage onGetStarted={(mode) => { setAuthMode(mode); setShowAuth(true) }} />
