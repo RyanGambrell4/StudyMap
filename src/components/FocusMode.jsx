@@ -7,6 +7,7 @@ import {
 } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
 import { useCelebration } from '../utils/useCelebration'
+import { extractText } from '../utils/extractText'
 import AIChatView from './AIChatView'
 
 function fmt(seconds) {
@@ -240,6 +241,19 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const [quizDone, setQuizDone] = useState(false)
   const [quizAnswerFlash, setQuizAnswerFlash] = useState(null) // 'correct' | 'wrong'
 
+  // ── Quiz/Flashcard custom source (topic + uploaded files/images) ──
+  const [quizTopic, setQuizTopic] = useState('')
+  const [quizSourceText, setQuizSourceText] = useState('')
+  const [quizSourceImages, setQuizSourceImages] = useState([]) // { name, dataUrl, media_type, data }
+  const [quizSourceFiles, setQuizSourceFiles] = useState([])   // [{ name }]
+  const [quizSourceLoading, setQuizSourceLoading] = useState(false)
+
+  const [fcTopic, setFcTopic] = useState('')
+  const [fcSourceText, setFcSourceText] = useState('')
+  const [fcSourceImages, setFcSourceImages] = useState([])
+  const [fcSourceFiles, setFcSourceFiles] = useState([])
+  const [fcSourceLoading, setFcSourceLoading] = useState(false)
+
   // ── Notes ──
   const [notesConcepts, setNotesConcepts] = useState('')
   const [notesMain, setNotesMain] = useState('')
@@ -420,12 +434,15 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
           mode: 'quick-quiz',
           courseName: session.courseName,
           sessionType: session.sessionType,
+          topic: quizTopic.trim(),
           text: [
+            quizSourceText && `Uploaded materials:\n${quizSourceText.slice(0, 6000)}`,
             notesConcepts && `Key concepts:\n${notesConcepts}`,
             notesMain && `Notes:\n${notesMain}`,
             notesSummary && `Summary:\n${notesSummary}`,
             studyTools?.text?.slice(0, 3000),
           ].filter(Boolean).join('\n\n') || '',
+          images: quizSourceImages.map(img => ({ media_type: img.media_type, data: img.data })),
         }),
       })
       const data = await res.json()
@@ -458,15 +475,30 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       notesMain && `Notes:\n${notesMain}`,
       notesSummary && `Summary:\n${notesSummary}`,
     ].filter(Boolean).join('\n\n')
-    const text = [sessionNotes, studyTools?.text?.slice(0, 4000)].filter(Boolean).join('\n\n')
-    if (text.length < 50) { setFcGenerateError('Add some notes in the Notes tab first to generate flashcards.'); return }
+    const text = [
+      fcSourceText && `Uploaded materials:\n${fcSourceText.slice(0, 6000)}`,
+      sessionNotes,
+      studyTools?.text?.slice(0, 4000),
+    ].filter(Boolean).join('\n\n')
+    const topic = fcTopic.trim()
+    const hasImages = fcSourceImages.length > 0
+
+    if (!topic && !hasImages && text.length < 50) {
+      setFcGenerateError('Tell it what to study, upload a file, or add some notes first.')
+      return
+    }
     setFcGenerating(true); setFcGenerateError('')
     try {
       const token = await getAccessToken()
       const res = await fetch('/api/generate-study-tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({
+          text,
+          topic,
+          images: fcSourceImages.map(img => ({ media_type: img.media_type, data: img.data })),
+          creative: true,
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to generate flashcards')
@@ -474,6 +506,65 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       setFcIdx(0); setFcFlipped(false); setFcKnown(new Set())
     } catch (e) { setFcGenerateError(e.message) }
     finally { setFcGenerating(false) }
+  }
+
+  // ── File/image upload for quiz & flashcard generators ─────────────────────────
+  const resizeImageToBase64 = (file) => new Promise((resolve, reject) => {
+    const img = new Image()
+    const reader = new FileReader()
+    reader.onload = e => { img.src = e.target.result }
+    reader.onerror = reject
+    img.onload = () => {
+      const MAX_W = 1400
+      const scale = Math.min(1, MAX_W / img.width)
+      const canvas = document.createElement('canvas')
+      canvas.width = Math.round(img.width * scale)
+      canvas.height = Math.round(img.height * scale)
+      const ctx = canvas.getContext('2d')
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height)
+      const dataUrl = canvas.toDataURL('image/jpeg', 0.75)
+      const base64 = dataUrl.split(',')[1]
+      resolve({ data: base64, media_type: 'image/jpeg' })
+    }
+    img.onerror = reject
+    reader.readAsDataURL(file)
+  })
+
+  const handleUploadSource = async (mode, fileList) => {
+    const setLoading = mode === 'quiz' ? setQuizSourceLoading : setFcSourceLoading
+    const setText = mode === 'quiz' ? setQuizSourceText : setFcSourceText
+    const setImages = mode === 'quiz' ? setQuizSourceImages : setFcSourceImages
+    const setFiles = mode === 'quiz' ? setQuizSourceFiles : setFcSourceFiles
+    const setError = mode === 'quiz' ? setQuizError : setFcGenerateError
+
+    setLoading(true); setError('')
+    try {
+      for (const file of fileList) {
+        const ext = file.name.split('.').pop().toLowerCase()
+        if (['pdf', 'docx', 'pptx'].includes(ext)) {
+          const text = await extractText(file)
+          setText(prev => (prev ? prev + '\n\n' : '') + text)
+          setFiles(prev => [...prev, { name: file.name }])
+        } else if (['png', 'jpg', 'jpeg', 'gif', 'webp'].includes(ext)) {
+          const img = await resizeImageToBase64(file)
+          setImages(prev => [...prev, { name: file.name, ...img }])
+          setFiles(prev => [...prev, { name: file.name }])
+        } else {
+          throw new Error(`Unsupported file: ${file.name}. Upload PDF, DOCX, PPTX, or an image.`)
+        }
+      }
+    } catch (e) {
+      setError(e.message ?? 'Failed to read file')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const clearQuizSource = () => {
+    setQuizSourceText(''); setQuizSourceImages([]); setQuizSourceFiles([])
+  }
+  const clearFcSource = () => {
+    setFcSourceText(''); setFcSourceImages([]); setFcSourceFiles([])
   }
 
   const handleSaveNotes = () => {
@@ -773,7 +864,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
         {/* Tab content */}
         <div className={`flex-1 ${activeTab === 'ai' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'}`}>
-          {activeTab === 'ai' && (
+          {/* AIChatView stays mounted so the conversation persists across tab switches */}
+          <div className={activeTab === 'ai' ? 'flex-1 flex flex-col overflow-hidden' : 'hidden'}>
             <AIChatView
               courseId={session.courseId}
               courseName={session.courseName}
@@ -782,7 +874,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               userId={userId}
               onShowPaywall={onShowPaywall}
             />
-          )}
+          </div>
           <div className={activeTab === 'ai' ? 'hidden' : 'px-5 py-4'}>
 
             {/* ── Active Recall ── */}
@@ -964,29 +1056,79 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                       </svg>
                     </div>
-                    <p className="text-white font-bold text-lg mb-2">Generate flashcards for this session</p>
-                    <p className="text-slate-500 text-sm mb-6 max-w-xs">
-                      {notesConcepts || notesMain || notesSummary
-                        ? 'Flashcards will be generated from your session notes and course materials.'
-                        : 'Add notes in the Notes tab for more relevant flashcards, or generate from course materials.'}
+                    <p className="text-white font-bold text-lg mb-2">Build creative flashcards</p>
+                    <p className="text-slate-500 text-sm mb-5 max-w-md">
+                      Tell it exactly what to quiz you on, upload the source material, or both. It will only make cards on what you asked for.
                     </p>
-                    {fcGenerateError && (
-                      <div className="bg-red-950/40 border border-red-800/40 rounded-xl px-4 py-3 text-red-300 text-sm mb-4 w-full max-w-xs">{fcGenerateError}</div>
-                    )}
-                    {fcGenerating ? (
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-8 h-8 border-4 rounded-full animate-spin" style={{ borderColor: `${dot}30`, borderTopColor: dot }} />
-                        <p className="text-slate-400 text-sm">Generating flashcards…</p>
+
+                    <div className="w-full max-w-md space-y-3 text-left">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-1.5">What do you want flashcards on?</label>
+                        <textarea
+                          value={fcTopic}
+                          onChange={e => setFcTopic(e.target.value)}
+                          placeholder={`e.g. "Only the Krebs cycle — each enzyme, substrate, and product" or "Chapters 4–5 vocabulary"`}
+                          className="w-full min-h-20 rounded-xl px-3 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none resize-none"
+                          style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}
+                        />
                       </div>
-                    ) : (
-                      <button
-                        onClick={handleGenerateFlashcards}
-                        className="px-5 py-2.5 rounded-xl text-sm font-semibold transition-all"
-                        style={{ backgroundColor: `${dot}20`, color: dot, border: `1px solid ${dot}40` }}
-                      >
-                        Generate Flashcards
-                      </button>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-1.5">Upload source material (optional)</label>
+                        <div className="flex flex-wrap gap-2 items-center">
+                          <label
+                            className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors"
+                            style={{ backgroundColor: `${dot}15`, color: dot, border: `1px solid ${dot}35` }}
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0L8 12m4-4v12" />
+                            </svg>
+                            {fcSourceLoading ? 'Reading…' : 'Upload PDF / image / slides'}
+                            <input
+                              type="file"
+                              className="hidden"
+                              multiple
+                              accept=".pdf,.docx,.pptx,image/*"
+                              onChange={async e => {
+                                if (e.target.files?.length) await handleUploadSource('fc', Array.from(e.target.files))
+                                e.target.value = ''
+                              }}
+                            />
+                          </label>
+                          {fcSourceFiles.length > 0 && (
+                            <button onClick={clearFcSource} className="text-xs text-slate-500 hover:text-slate-300 transition-colors">Clear</button>
+                          )}
+                        </div>
+                        {fcSourceFiles.length > 0 && (
+                          <ul className="mt-2 space-y-1">
+                            {fcSourceFiles.map((f, i) => (
+                              <li key={i} className="text-xs text-slate-400 truncate">• {f.name}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
+                    </div>
+
+                    {fcGenerateError && (
+                      <div className="mt-4 bg-red-950/40 border border-red-800/40 rounded-xl px-4 py-3 text-red-300 text-sm w-full max-w-md">{fcGenerateError}</div>
                     )}
+
+                    <div className="mt-5">
+                      {fcGenerating ? (
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="w-8 h-8 border-4 rounded-full animate-spin" style={{ borderColor: `${dot}30`, borderTopColor: dot }} />
+                          <p className="text-slate-400 text-sm">Generating flashcards…</p>
+                        </div>
+                      ) : (
+                        <button
+                          onClick={handleGenerateFlashcards}
+                          className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all"
+                          style={{ backgroundColor: `${dot}20`, color: dot, border: `1px solid ${dot}40` }}
+                        >
+                          Generate Flashcards
+                        </button>
+                      )}
+                    </div>
                   </div>
                 )}
               </>
@@ -1012,19 +1154,65 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                       </svg>
                     </div>
-                    <p className="text-white font-bold text-xl mb-2">Test yourself right now</p>
-                    <p className="text-slate-500 text-sm mb-5 max-w-xs">5 AI-generated questions based on {session.courseName}{studyTools ? ' — pulled from your uploaded notes' : ''}.</p>
-                    <div className="flex gap-2 mb-7">
-                      {['Multiple Choice', '5 Questions', 'AI-Generated'].map(tag => (
-                        <span key={tag} className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ backgroundColor: `${dot}12`, color: dot, border: `1px solid ${dot}30` }}>{tag}</span>
-                      ))}
+                    <p className="text-white font-bold text-xl mb-2">Test yourself — your way</p>
+                    <p className="text-slate-500 text-sm mb-5 max-w-md">
+                      Describe exactly what to quiz you on, upload the source material, or both. The quiz will only cover what you asked for.
+                    </p>
+
+                    <div className="w-full max-w-md space-y-3 text-left">
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-1.5">What do you want to be quizzed on?</label>
+                        <textarea
+                          value={quizTopic}
+                          onChange={e => setQuizTopic(e.target.value)}
+                          placeholder={`e.g. "Only the three types of market structures from Chapter 6" or "Spanish preterite vs imperfect tenses"`}
+                          className="w-full min-h-20 rounded-xl px-3 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none resize-none"
+                          style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-xs font-semibold text-slate-400 mb-1.5">Upload source material (optional)</label>
+                        <div className="flex flex-wrap gap-2 items-center">
+                          <label
+                            className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors"
+                            style={{ backgroundColor: `${dot}15`, color: dot, border: `1px solid ${dot}35` }}
+                          >
+                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0L8 12m4-4v12" />
+                            </svg>
+                            {quizSourceLoading ? 'Reading…' : 'Upload PDF / image / slides'}
+                            <input
+                              type="file"
+                              className="hidden"
+                              multiple
+                              accept=".pdf,.docx,.pptx,image/*"
+                              onChange={async e => {
+                                if (e.target.files?.length) await handleUploadSource('quiz', Array.from(e.target.files))
+                                e.target.value = ''
+                              }}
+                            />
+                          </label>
+                          {quizSourceFiles.length > 0 && (
+                            <button onClick={clearQuizSource} className="text-xs text-slate-500 hover:text-slate-300 transition-colors">Clear</button>
+                          )}
+                        </div>
+                        {quizSourceFiles.length > 0 && (
+                          <ul className="mt-2 space-y-1">
+                            {quizSourceFiles.map((f, i) => (
+                              <li key={i} className="text-xs text-slate-400 truncate">• {f.name}</li>
+                            ))}
+                          </ul>
+                        )}
+                      </div>
                     </div>
+
                     <button
                       onClick={handleGenerateQuiz}
-                      className="w-full py-4 rounded-xl font-bold text-white text-base transition-all"
+                      className="mt-6 w-full max-w-md py-3.5 rounded-xl font-bold text-white text-sm transition-all"
                       style={{ backgroundColor: dot, boxShadow: `0 0 24px ${dot}40` }}
                     >
-                      Generate 5-Question Quiz
+                      Generate My Quiz
                     </button>
                   </div>
                 ) : quizDone ? (

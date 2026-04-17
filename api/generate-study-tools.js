@@ -4,7 +4,7 @@ export default async function handler(req, res) {
   }
 
   const contentLength = parseInt(req.headers['content-length'] || '0')
-  if (contentLength > 500000) return res.status(413).json({ error: 'Payload too large' })
+  if (contentLength > 4_500_000) return res.status(413).json({ error: 'Payload too large — try fewer or smaller images.' })
 
   const authHeader = req.headers['authorization']
   const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
@@ -18,30 +18,33 @@ export default async function handler(req, res) {
   })
   if (!verifyRes.ok) return res.status(401).json({ error: 'Unauthorized' })
 
-  const { text, mode, courseName, sessionType } = req.body;
+  const { text, mode, courseName, sessionType, topic, images } = req.body;
+  const safeImages = Array.isArray(images) ? images.slice(0, 6).filter(i => i?.data && i?.media_type) : []
 
   // ── quick-quiz mode (replaces the old generate-quick-quiz endpoint) ──────────
   if (mode === 'quick-quiz') {
     if (!courseName) return res.status(400).json({ error: 'Missing courseName' })
 
-    const context = text && text.length > 50
-      ? `Based on these notes for ${courseName}:\n${text.slice(0, 4000)}\n\n`
-      : `Course: ${courseName}\nSession type: ${sessionType}\n\n`
+    const hasTopic = typeof topic === 'string' && topic.trim().length > 0
+    const hasText = typeof text === 'string' && text.length > 50
+    const hasImages = safeImages.length > 0
 
-    try {
-      const response = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 1500,
-          messages: [{
-            role: 'user',
-            content: `${context}Generate exactly 5 multiple choice quiz questions for a mid-session check on ${courseName} (${sessionType} session).
+    const scopeLine = hasTopic
+      ? `The student wants to be quizzed ONLY on this topic. Do not quiz on anything outside it:\n"${topic.trim()}"\n\n`
+      : ''
+    const sourceLine = hasText
+      ? `The student's source material:\n${text.slice(0, 6000)}\n\n`
+      : ''
+    const imageLine = hasImages
+      ? `The student also uploaded ${safeImages.length} image(s) (attached) — treat them as authoritative source material.\n\n`
+      : ''
+
+    const prompt = `You are making a quiz for a student studying ${courseName}${sessionType ? ` (${sessionType} session)` : ''}.
+
+${scopeLine}${sourceLine}${imageLine}Generate exactly 5 multiple choice questions.
+
+${hasTopic ? 'EVERY question must directly test the topic above. Do not drift to other material. If a source was provided, the questions must come from content that is inside the source AND inside the topic.' : ''}
+${hasText || hasImages ? 'Only quiz on material that is actually present in the source. Do not invent facts.' : ''}
 
 Return ONLY this JSON array with no other text:
 [
@@ -54,11 +57,33 @@ Return ONLY this JSON array with no other text:
 ]
 
 Rules:
-- Test conceptual understanding, not just definitions
+- Test conceptual understanding, not just surface definitions
 - All 4 options must be plausible
 - Answer must exactly match one of the options strings
-- Explanations must be 1-2 sentences maximum`,
-          }],
+- Explanations must be 1-2 sentences maximum`
+
+    const userContent = hasImages
+      ? [
+          ...safeImages.map(img => ({
+            type: 'image',
+            source: { type: 'base64', media_type: img.media_type, data: img.data },
+          })),
+          { type: 'text', text: prompt },
+        ]
+      : prompt
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 1800,
+          messages: [{ role: 'user', content: userContent }],
         }),
       })
       const data = await response.json()
@@ -168,9 +193,62 @@ Rules:
   }
 
   // ── default mode: generate flashcards + quiz from notes ───────────────────────
-  if (!text || text.length < 50) {
-    return res.status(400).json({ error: 'Not enough text content' });
+  const hasTopicFc = typeof topic === 'string' && topic.trim().length > 0
+  const hasTextFc = typeof text === 'string' && text.length >= 50
+  const hasImagesFc = safeImages.length > 0
+
+  if (!hasTopicFc && !hasTextFc && !hasImagesFc) {
+    return res.status(400).json({ error: 'Provide a topic, source material, or notes.' });
   }
+
+  const scopeFc = hasTopicFc
+    ? `The student asked for flashcards ONLY on this topic — do not go outside it:\n"${topic.trim()}"\n\n`
+    : ''
+  const sourceFc = hasTextFc
+    ? `Source material the student uploaded or wrote:\n${text.slice(0, 8000)}\n\n`
+    : ''
+  const imagesFc = hasImagesFc
+    ? `The student also uploaded ${safeImages.length} image(s), attached — use them as source material.\n\n`
+    : ''
+
+  const fcPrompt = `You are an expert study coach building flashcards + a quiz.
+
+${scopeFc}${sourceFc}${imagesFc}Generate exactly this JSON structure with no extra text:
+{
+  "flashcards": [
+    {"front": "clear question about a key concept", "back": "concise answer — a few words or 1 short sentence", "topic": "topic name"}
+  ],
+  "quiz": [
+    {"question": "question text", "type": "multiple_choice", "options": ["A", "B", "C", "D"], "answer": "correct option text", "explanation": "why this is correct"}
+  ]
+}
+
+${hasTopicFc ? 'EVERY flashcard and quiz question MUST stay strictly inside the requested topic. Do not produce any card that goes outside it. If the topic is narrow, produce fewer but deeper cards — quality over quantity.' : ''}
+${hasTextFc || hasImagesFc ? 'Only build cards on material that actually appears in the source. Do not invent facts.' : ''}
+
+Creativity rules (make the cards actually interesting, not robotic):
+- Mix card styles: definition recall, "fill in the blank", "which of these is NOT…", scenario-based ("A student argues X — what concept are they missing?"), contrast pairs ("How does X differ from Y?"), causal chains ("If X happens, what follows?"), and compare/contrast.
+- Use real-world examples, mini-scenarios, or analogies on the FRONT when it helps memory stick.
+- Vary difficulty across the set — some quick recall, some applied reasoning.
+- Group related cards by topic so a student feels momentum.
+
+Hard rules:
+- Flashcard fronts must be complete questions or prompts — never a single word.
+- Flashcard backs must be SHORT — a few words or 1 sentence. Students should instantly self-check.
+- Good backs: "Increases shareholder equity", "Assets minus liabilities", "When price exceeds marginal cost".
+- Bad backs: long explanations, multiple clauses, anything over 25 words unless truly necessary.
+- Generate 15 flashcards and 10 quiz questions (fewer only if the topic is too narrow to support that many — never pad with irrelevant content).
+- Quiz wrong answers must be plausible but clearly wrong if you know the material.`
+
+  const userContentFc = hasImagesFc
+    ? [
+        ...safeImages.map(img => ({
+          type: 'image',
+          source: { type: 'base64', media_type: img.media_type, data: img.data },
+        })),
+        { type: 'text', text: fcPrompt },
+      ]
+    : fcPrompt
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -183,34 +261,7 @@ Rules:
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
         max_tokens: 4000,
-        messages: [{
-          role: 'user',
-          content: `You are an expert academic tutor. Based on these lecture notes/slides, generate study materials as JSON.
-
-Content:
-${text.slice(0, 8000)}
-
-Generate exactly this JSON structure with no extra text:
-{
-  "flashcards": [
-    {"front": "clear question about a key concept", "back": "concise answer — a few words or 1 short sentence", "topic": "topic name"}
-  ],
-  "quiz": [
-    {"question": "question text", "type": "multiple_choice", "options": ["A", "B", "C", "D"], "answer": "correct option text", "explanation": "why this is correct"}
-  ]
-}
-
-Rules:
-- Generate 15 flashcards testing real concepts, definitions, and formulas
-- Generate 10 quiz questions
-- Flashcard fronts must be complete questions like "What is market capitalization?" not single words
-- Flashcard backs must be SHORT — a few words or 1 sentence maximum. If the answer can be expressed in 3-5 words, do that. Students should be able to instantly check if they were right.
-- Good back examples: "Increases shareholder equity", "Assets minus liabilities", "When price exceeds marginal cost"
-- Bad back examples: long explanations with multiple clauses, full paragraphs, anything over 20 words unless truly necessary
-- Quiz wrong answers must be plausible but clearly wrong if you know the material
-- Never use single words like "Investors" or "What" as a flashcard front
-- Focus on concepts students will actually be tested on`
-        }]
+        messages: [{ role: 'user', content: userContentFc }]
       })
     });
 
