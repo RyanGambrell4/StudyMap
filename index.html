@@ -553,7 +553,18 @@
       background: radial-gradient(ellipse, rgba(79,126,247,0.15) 0%, transparent 65%);
     }
     .cta-section > *:not(.cta-glow) { position: relative; }
-    .cta-sub { font-size: 1.25rem; color: var(--text2); margin: 14px auto 48px; max-width: 380px; }
+    .cta-sub {
+      font-size: clamp(1.5rem, 2.6vw, 2rem);
+      font-weight: 800;
+      letter-spacing: -0.5px;
+      margin: 18px auto 40px;
+      max-width: 680px;
+      background: linear-gradient(135deg, #4F7EF7 0%, #7C5CFA 50%, #34D399 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+      color: transparent;
+    }
     .cta-form { display: flex; gap: 10px; max-width: 450px; margin: 0 auto; }
     .cta-success {
       display: none; align-items: center; justify-content: center;
@@ -918,8 +929,8 @@
 <!-- ═══ FINAL CTA ═══ -->
 <section class="cta-section">
   <div class="cta-glow"></div>
-  <h2 class="text-display fade-up">You already know you need a better system.</h2>
-  <p class="cta-sub fade-up d1">This is it.</p>
+  <h2 class="text-h1 fade-up">You already know you need a better system.</h2>
+  <p class="cta-sub fade-up d1">StudyEdge is your edge to success</p>
   <div class="fade-up d2">
     <button class="btn lg" onclick="location.href='/app?signup=1'">Get Started Free</button>
   </div>
