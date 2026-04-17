@@ -271,6 +271,7 @@ export default function App() {
           onClose={() => setPaywallOpen(false)}
           userEmail={session?.user?.email}
           userId={session?.user?.id}
+          currentPlan={getActivePlan()}
         />
       )}
     </>

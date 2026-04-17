@@ -64,10 +64,13 @@ const LIMIT_MESSAGES = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function PaywallModal({ trigger, onClose, userEmail, userId }) {
+export default function PaywallModal({ trigger, onClose, userEmail, userId, currentPlan = 'free' }) {
   const [billingPeriod, setBillingPeriod] = useState('monthly')
   const [loading, setLoading] = useState(null) // tracks which plan is loading
   const msg = LIMIT_MESSAGES[trigger] || LIMIT_MESSAGES.courses
+
+  // Show only the relevant next-tier upgrade
+  const visiblePlanIds = currentPlan === 'pro' ? ['unlimited'] : Object.keys(PLANS)
 
   // Close on Escape
   useEffect(() => {
@@ -176,8 +179,8 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId }) {
         </div>
 
         {/* ── Plan cards ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
-          {Object.entries(PLANS).map(([planId, plan], i) => (
+        <div style={{ display: 'grid', gridTemplateColumns: visiblePlanIds.length === 1 ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '20px' }}>
+          {Object.entries(PLANS).filter(([planId]) => visiblePlanIds.includes(planId)).map(([planId, plan], i) => (
             <div
               key={planId}
               style={{
