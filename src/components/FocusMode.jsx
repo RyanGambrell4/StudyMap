@@ -989,34 +989,33 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                         ‹
                       </button>
 
-                      <div className="flex-1 relative cursor-pointer select-none" style={{ perspective: '1200px', height: '210px' }} onClick={() => setFcFlipped(f => !f)}>
-                        <div
-                          className="absolute inset-0 rounded-2xl"
-                          style={{
-                            transformStyle: 'preserve-3d',
-                            WebkitTransformStyle: 'preserve-3d',
-                            transition: 'transform 0.6s cubic-bezier(0.4,0,0.2,1)',
-                            transform: fcFlipped ? 'rotateY(180deg)' : 'rotateY(0)',
-                            filter: fcFlipped ? `drop-shadow(0 0 20px ${dot}30)` : 'none',
-                          }}
-                        >
-                          <div
-                            className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center p-6 text-center"
-                            style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', backgroundColor: '#111827', border: '1px solid #1e293b', boxShadow: 'inset 0 1px 0 rgba(255,255,255,0.04)' }}
-                          >
+                      <div
+                        className="flex-1 relative cursor-pointer select-none rounded-2xl transition-all duration-200"
+                        style={{
+                          minHeight: '210px',
+                          backgroundColor: fcFlipped ? '#0f172a' : '#111827',
+                          border: fcFlipped ? `1px solid ${dot}55` : '1px solid #1e293b',
+                          boxShadow: fcFlipped
+                            ? `0 0 24px ${dot}25, inset 0 1px 0 rgba(255,255,255,0.04)`
+                            : 'inset 0 1px 0 rgba(255,255,255,0.04)',
+                        }}
+                        onClick={() => setFcFlipped(f => !f)}
+                      >
+                        {!fcFlipped ? (
+                          <div className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center p-6 text-center">
                             {flashcards[fcIdx]?.topic && (
-                              <span className="text-xs mb-3 px-2 py-0.5 rounded-full border font-medium uppercase tracking-wide" style={{ color: dot, borderColor: `${dot}40`, backgroundColor: `${dot}10` }}>{flashcards[fcIdx].topic}</span>
+                              <span className="text-xs mb-3 px-2 py-0.5 rounded-full border font-medium uppercase tracking-wide" style={{ color: dot, borderColor: `${dot}40`, backgroundColor: `${dot}15` }}>{flashcards[fcIdx].topic}</span>
                             )}
                             <p className="text-slate-100 font-semibold leading-relaxed text-base">{flashcards[fcIdx]?.front}</p>
                             <p className="text-slate-700 text-xs mt-4">Tap card to reveal answer</p>
                           </div>
-                          <div
-                            className="absolute inset-0 rounded-2xl flex items-center justify-center p-6 text-center"
-                            style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', backgroundColor: `${dot}10`, border: `1px solid ${dot}30`, transform: 'rotateY(180deg)', WebkitTransform: 'rotateY(180deg)' }}
-                          >
-                            <p className="text-slate-200 leading-relaxed text-base">{flashcards[fcIdx]?.back}</p>
+                        ) : (
+                          <div className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center p-6 text-center">
+                            <span className="text-[10px] mb-3 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest" style={{ color: dot, backgroundColor: `${dot}15`, border: `1px solid ${dot}40` }}>Answer</span>
+                            <p className="font-semibold leading-relaxed text-base" style={{ color: dot }}>{flashcards[fcIdx]?.back}</p>
+                            <p className="text-slate-600 text-xs mt-4">Tap card to flip back</p>
                           </div>
-                        </div>
+                        )}
                       </div>
 
                       <button
