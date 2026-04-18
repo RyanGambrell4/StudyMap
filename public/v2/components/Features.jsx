@@ -220,7 +220,7 @@ function GradeIntel(){
           <p className="section-sub" style={{margin:'22px 0 28px 0',textAlign:'left',maxWidth:'480px'}}>
             See your projected grade in real time. Scrub any score to test scenarios — StudyEdge tells you exactly what you need on every remaining assignment to hit your target.
           </p>
-          <button className="btn btn-primary btn-lg">Try it free →</button>
+          <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Try it free →</button>
         </div>
         <div className="grade-card">
           <div className="gc-top">

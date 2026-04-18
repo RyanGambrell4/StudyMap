@@ -62,7 +62,7 @@
 .schv-cell{flex:1;height:14px;border-radius:2px;opacity:0;animation:hmIn .4s ease-out forwards}
 
 /* Grade Intel */
-.grade-sec{padding:80px 0 80px}
+.grade-sec{padding:80px 0 40px}
 .grade-inner{display:grid;grid-template-columns:1fr 1.2fr;gap:60px;align-items:center}
 .grade-card{background:linear-gradient(180deg,#0c0c26,#07071a);border:1px solid var(--border-2);border-radius:18px;padding:28px;box-shadow:0 40px 80px -20px rgba(0,0,0,0.6);position:relative}
 .grade-card::before{content:'';position:absolute;inset:-1px;border-radius:18px;padding:1px;background:linear-gradient(135deg,rgba(99,102,241,0.4),transparent 50%,rgba(124,58,237,0.3));-webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none;opacity:.6}

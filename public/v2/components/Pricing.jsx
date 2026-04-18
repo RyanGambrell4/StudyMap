@@ -7,7 +7,7 @@ function Pricing(){
   const fmt = (p)=> (p*mult).toFixed(2);
   const goSignup = (plan)=>{
     const qs = new URLSearchParams({ signup: '1' });
-    if (plan) { qs.set('plan', plan); qs.set('billing', bill); }
+    if (plan) qs.set('plan', plan);
     window.location.href = '/app?' + qs.toString();
   };
   const tiers = [
@@ -144,7 +144,7 @@ function FinalCTA(){
             </div>
             <div className="cta-foot">
               <span>✓ No credit card</span>
-              <span>✓ 14-day free Pro trial</span>
+              <span>✓ 7-day free Pro trial</span>
               <span>✓ Cancel anytime</span>
             </div>
           </div>
@@ -164,15 +164,14 @@ function Footer(){
             <span>StudyEdge</span>
           </div>
           <p className="footer-tag">One system for students who are done winging it.</p>
-          <div className="footer-social">
-            {['X','IG','TT','YT'].map(s=>(<div key={s} className="fs">{s}</div>))}
-          </div>
         </div>
         <div className="footer-cols">
-          <div><div className="fc-h">Product</div><a>Features</a><a>Pricing</a><a>Roadmap</a><a>Changelog</a></div>
-          <div><div className="fc-h">Learn</div><a>Study guides</a><a>Blog</a><a>Student stories</a><a>Help center</a></div>
-          <div><div className="fc-h">Company</div><a>About</a><a>Careers</a><a>Contact</a><a>Press</a></div>
-          <div><div className="fc-h">Legal</div><a href="/privacy.html">Privacy</a><a href="/terms.html">Terms</a><a>Security</a></div>
+          <div>
+            <div className="fc-h">Legal</div>
+            <a href="/privacy.html">Privacy</a>
+            <a href="/terms.html">Terms</a>
+            <a href="mailto:support@getstudyedge.com">Contact</a>
+          </div>
         </div>
       </div>
       <div className="container footer-bot">
