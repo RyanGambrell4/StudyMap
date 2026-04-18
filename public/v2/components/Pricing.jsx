@@ -3,11 +3,16 @@ const { useState: p1, useEffect: p2 } = React;
 
 function Pricing(){
   const [bill, setBill] = p1('monthly');
-  const mult = bill==='monthly'?1:bill==='semester'?0.77:0.55;
-  const fmt = (p)=> (p*mult).toFixed(2);
+  // Exact per-plan × per-billing prices (match Stripe price IDs)
+  const PRICE_TABLE = {
+    pro:       { monthly: 12.99, semester: 39.99, yearly: 84.99 },
+    unlimited: { monthly: 19.99, semester: 59.99, yearly: 119.99 },
+  };
+  const PER_LABEL = { monthly: '/mo', semester: '/semester', yearly: '/yr' };
+  const SUB_LABEL = { monthly: 'Billed monthly', semester: 'Billed per semester', yearly: 'Billed yearly' };
   const goSignup = (plan)=>{
     const qs = new URLSearchParams({ signup: '1' });
-    if (plan) qs.set('plan', plan);
+    if (plan) { qs.set('plan', plan); qs.set('billing', bill); }
     window.location.href = '/app?' + qs.toString();
   };
   const tiers = [
@@ -25,7 +30,7 @@ function Pricing(){
       ]
     },
     {
-      name:'Pro', price:12.99, sub:bill==='monthly'?'Billed monthly':bill==='semester'?'Billed per semester':'Billed yearly',
+      name:'Pro', price:PRICE_TABLE.pro[bill], sub:SUB_LABEL[bill],
       cta:'Get Pro', primary:true, popular:true, plan:'pro',
       feats:[
         [true,'5 courses'],
@@ -38,7 +43,7 @@ function Pricing(){
       ]
     },
     {
-      name:'Unlimited', price:19.99, sub:bill==='monthly'?'Billed monthly':bill==='semester'?'Billed per semester':'Billed yearly',
+      name:'Unlimited', price:PRICE_TABLE.unlimited[bill], sub:SUB_LABEL[bill],
       cta:'Get Unlimited', primary:false, plan:'unlimited',
       feats:[
         [true,'Unlimited courses'],
@@ -77,8 +82,8 @@ function Pricing(){
               <div className="tier-name">{t.name}</div>
               <div className="tier-price">
                 <span className="dollar">$</span>
-                <span className="amt">{t.price===0?'0':fmt(t.price)}</span>
-                <span className="per">{t.price===0?'/forever':'/mo'}</span>
+                <span className="amt">{t.price===0?'0':t.price.toFixed(2)}</span>
+                <span className="per">{t.price===0?'/forever':PER_LABEL[bill]}</span>
               </div>
               <div className="tier-sub">{t.sub}</div>
               <div className="tier-feats">

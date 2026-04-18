@@ -50,7 +50,8 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
 .logo{display:flex;align-items:center;gap:10px;font-weight:700;font-size:17px;letter-spacing:-0.01em}
 .logo-mark{width:28px;height:28px;border-radius:8px;background:linear-gradient(135deg,#6366f1,#7c3aed);display:grid;place-items:center;box-shadow:0 8px 24px rgba(99,102,241,0.4),inset 0 1px 0 rgba(255,255,255,0.2);position:relative}
 .logo-mark svg{width:16px;height:16px}
-.nav-links{display:flex;gap:32px;font-size:14px;color:var(--text-muted)}
+.nav-right{display:flex;align-items:center;gap:32px}
+.nav-links{display:flex;gap:28px;font-size:14px;color:var(--text-muted)}
 .nav-links a{transition:color .2s}
 .nav-links a:hover{color:var(--text)}
 .nav-cta{display:flex;align-items:center;gap:12px}
@@ -84,5 +85,4 @@ section{position:relative;z-index:2}
 
 /* Utility */
 .mono{font-family:'JetBrains Mono',ui-monospace,SF Mono,Menlo,monospace}
-.hidden-sm{display:initial}
-@media(max-width:760px){.hidden-sm{display:none}}
+@media(max-width:760px){.hidden-sm{display:none !important}}
