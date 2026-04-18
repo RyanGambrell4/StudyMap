@@ -165,7 +165,9 @@ function Footer(){
       <div className="container footer-inner">
         <div className="footer-left">
           <div className="logo" style={{fontSize:17}}>
-            <div className="logo-mark"><svg viewBox="0 0 24 24" fill="none"><path d="M7 4l5 4 5-4v16l-5-4-5 4V4z" fill="#fff"/></svg></div>
+            <div className="logo-mark">
+              <img src="/favicon.png" alt="StudyEdge" style={{width:'100%',height:'100%',objectFit:'contain',mixBlendMode:'screen'}} />
+            </div>
             <span>StudyEdge</span>
           </div>
           <p className="footer-tag">One system for students who are done winging it.</p>
