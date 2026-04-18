@@ -236,10 +236,11 @@ export default function App() {
   const urlParams = new URLSearchParams(window.location.search)
   const urlPlan = urlParams.get('plan')
   const urlBilling = ['monthly', 'semester', 'yearly'].includes(urlParams.get('billing')) ? urlParams.get('billing') : 'monthly'
+  const urlTrial = urlParams.get('trial') === '1'
   if (urlPlan && (urlPlan === 'pro' || urlPlan === 'unlimited') && getActivePlan() === 'free') {
     // Clear the URL param so we don't loop
     window.history.replaceState({}, '', window.location.pathname)
-    createCheckoutSession(urlPlan, urlBilling, session.user.email, session.user.id).then(url => {
+    createCheckoutSession(urlPlan, urlBilling, session.user.email, session.user.id, { trial: urlTrial }).then(url => {
       if (url) window.location.href = url
     })
     return (

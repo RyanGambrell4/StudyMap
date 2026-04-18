@@ -145,7 +145,7 @@ function FinalCTA(){
             <h2 className="section-title" style={{maxWidth:820,margin:'0 auto'}}>You already know you need a<br/><span className="grad-text">better system.</span></h2>
             <p className="section-sub" style={{margin:'22px auto 32px',maxWidth:560}}>StudyEdge is your edge to success. Free to start, no credit card needed.</p>
             <div className="cta-btns">
-              <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Get Started Free →</button>
+              <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1&plan=pro&billing=monthly&trial=1'}>Get Started Free →</button>
             </div>
             <div className="cta-foot">
               <span>✓ No credit card</span>

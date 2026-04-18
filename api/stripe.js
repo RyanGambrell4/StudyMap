@@ -149,11 +149,22 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid JSON' })
   }
 
-  const { plan, billingPeriod, userEmail, userId } = body
+  const { plan, billingPeriod, userEmail, userId, trial } = body
   const priceId = PRICE_IDS[plan]?.[billingPeriod]
 
   if (!priceId) {
     return res.status(400).json({ error: 'Invalid plan or billing period' })
+  }
+
+  // Only allow trials on Pro monthly (the FinalCTA "Get Started Free" offer).
+  const wantsTrial = !!trial && plan === 'pro' && billingPeriod === 'monthly'
+
+  const subscriptionData = {
+    metadata: { user_id: userId },
+    ...(wantsTrial && {
+      trial_period_days: 7,
+      trial_settings: { end_behavior: { missing_payment_method: 'cancel' } },
+    }),
   }
 
   try {
@@ -162,10 +173,10 @@ export default async function handler(req, res) {
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       customer_email: userEmail || undefined,
-      subscription_data: {
-        metadata: { user_id: userId },
-      },
-      metadata: { user_id: userId },
+      // For trials we must collect the card up front so billing starts after day 7
+      payment_method_collection: wantsTrial ? 'always' : undefined,
+      subscription_data: subscriptionData,
+      metadata: { user_id: userId, trial: wantsTrial ? '1' : '0' },
       success_url: 'https://getstudyedge.com?checkout=success',
       cancel_url: 'https://getstudyedge.com?checkout=cancelled',
     })

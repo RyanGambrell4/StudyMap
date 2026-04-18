@@ -119,12 +119,12 @@ export async function incrementAIQuery() {
 
 // ── Stripe checkout session creator ──────────────────────────────────────────
 
-export async function createCheckoutSession(plan, billingPeriod, userEmail, userId) {
+export async function createCheckoutSession(plan, billingPeriod, userEmail, userId, opts = {}) {
   try {
     const res = await fetch('/api/stripe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan, billingPeriod, userEmail, userId }),
+      body: JSON.stringify({ plan, billingPeriod, userEmail, userId, trial: !!opts.trial }),
     })
 
     const data = await res.json()
