@@ -165,7 +165,7 @@ function Hero(){
             <span className="grad-text">Start studying with a system.</span>
           </h1>
           <p className="hero-sub">
-            StudyEdge builds your schedule, plans every session, and coaches you through it — with flashcards, quizzes, and active recall built in. One system, for students who are done winging it.
+            StudyEdge builds your schedule, plans every session, and coaches you through it, with flashcards, quizzes, and active recall built in. One system, for students who are done winging it.
           </p>
           <div className="hero-ctas">
             <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Get Started Free <span aria-hidden>→</span></button>
@@ -220,7 +220,7 @@ function Hero(){
                   <div className="dash-panel up-next">
                     <div>
                       <div className="un-k">UP NEXT · TODAY · 2:00 PM</div>
-                      <div className="un-t">PSYC 101 — Memory & Cognition</div>
+                      <div className="un-t">PSYC 101: Memory & Cognition</div>
                       <div className="un-s">Active Recall Lockdown · 60 min</div>
                     </div>
                     <div className="un-btns">

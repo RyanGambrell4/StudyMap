@@ -73,9 +73,9 @@ button{font-family:inherit;cursor:pointer;border:0;background:none;color:inherit
 /* Section */
 section{position:relative;z-index:2}
 .container{max-width:1280px;margin:0 auto;padding:0 32px}
-.section-head{text-align:center;max-width:780px;margin:0 auto 64px}
+.section-head{text-align:center;max-width:920px;margin:0 auto 64px}
 .section-kicker{font-size:12px;font-weight:600;letter-spacing:0.18em;color:var(--indigo-2);text-transform:uppercase;margin-bottom:16px}
-.section-title{font-size:clamp(36px,5vw,58px);font-weight:700;letter-spacing:-0.03em;line-height:1.05;text-wrap:balance}
+.section-title{font-size:clamp(32px,4.2vw,52px);font-weight:700;letter-spacing:-0.03em;line-height:1.1;text-wrap:pretty}
 .section-sub{margin-top:20px;color:var(--text-muted);font-size:17px;line-height:1.6;text-wrap:pretty}
 .grad-text{background:linear-gradient(90deg,#a5b4fc,#c4b5fd 60%,#818cf8);-webkit-background-clip:text;background-clip:text;color:transparent}
 

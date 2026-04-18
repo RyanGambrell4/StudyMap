@@ -130,7 +130,7 @@ function BlueprintVis(){
     <div className="bp">
       <div className="bp-hd">
         <div className="bp-k">SESSION PLAN READY</div>
-        <h4 className="bp-t">PSYC 101 — Active Recall Lockdown</h4>
+        <h4 className="bp-t">PSYC 101: Active Recall Lockdown</h4>
         <div className="bp-s">70 min · 9 blocks · Built for exam in 14 days</div>
       </div>
       <div className="bp-bar">
@@ -173,7 +173,7 @@ function FocusVis(){
     <div className="focus-v">
       <div className="fv-hd">
         <span className="fv-dot"/>
-        <div className="fv-t">PSYC 101 — Memory & Cognition</div>
+        <div className="fv-t">PSYC 101: Memory & Cognition</div>
         <span className="fv-x">✕</span>
       </div>
       <div className="fv-ring-row">
@@ -233,10 +233,10 @@ function FocusVis(){
         {tab===4 && <div>
           <div className="fv-q-ai">"What are the 4 most important things to know for this exam?"</div>
           <div className="fv-ai">
-            <div><strong>1. Research Methods & Stats</strong> — validity, controls, basic stats.</div>
-            <div><strong>2. Biological Bases of Behavior</strong> — brain, neurotransmitters.</div>
-            <div><strong>3. Sensation & Perception</strong> — bridges biology & cognition.</div>
-            <div><strong>4. Memory, Learning, Cognition</strong> — encoding, retrieval.</div>
+            <div><strong>1. Research Methods & Stats:</strong> validity, controls, basic stats.</div>
+            <div><strong>2. Biological Bases of Behavior:</strong> brain, neurotransmitters.</div>
+            <div><strong>3. Sensation & Perception:</strong> bridges biology & cognition.</div>
+            <div><strong>4. Memory, Learning, Cognition:</strong> encoding, retrieval.</div>
           </div>
         </div>}
       </div>
@@ -253,13 +253,13 @@ function HowItWorks(){
           <h2 className="section-title">Three problems every student has.<br/><span className="grad-text">One system that fixes all of them.</span></h2>
         </div>
         <div className="steps">
-          <Step num="01" title="Your schedule, built around your real life." body="Add your classes and due dates. StudyEdge maps out your entire week automatically, filling your free time with the right courses at the right time — prioritized by exam date and difficulty.">
+          <Step num="01" title="Your schedule, built around your real life." body="Add your classes and due dates. StudyEdge maps out your entire week automatically, filling your free time with the right courses at the right time, prioritized by exam date and difficulty.">
             <CalendarVis/>
           </Step>
           <Step num="02" title="Every session planned before you open a book." body="Before each session, the AI builds a minute-by-minute plan for your course, your upcoming exams, and your goals. All mapped out before you sit down." reverse>
             <BlueprintVis/>
           </Step>
-          <Step num="03" title="An AI coach that runs the session while you're in it." body="Hit start and StudyEdge runs the clock. Flashcards, recall prompts, practice quizzes, and notes — all built in. You're not reading over slides hoping it sticks.">
+          <Step num="03" title="An AI coach that runs the session while you're in it." body="Hit start and StudyEdge runs the clock. Flashcards, recall prompts, practice quizzes, and notes, all built in. You're not reading over slides hoping it sticks.">
             <FocusVis/>
           </Step>
         </div>

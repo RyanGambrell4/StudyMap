@@ -13,7 +13,7 @@ function Bento(){
         <div className="bento">
           <BentoCard
             title="Focus Mode"
-            body="A distraction-free timer that runs your session block by block — with active recall, flashcards, quizzes and notes built in."
+            body="A distraction-free timer that runs your session block by block, with active recall, flashcards, quizzes and notes built in."
             className="bc-a"
             accent="#a78bfa"
             icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2 2M10 1h4"/></svg>}>
@@ -22,7 +22,7 @@ function Bento(){
 
           <BentoCard
             title="Session Blueprint"
-            body="AI breaks every study session into the exact blocks, topics, and techniques you need — before you sit down."
+            body="AI breaks every study session into the exact blocks, topics, and techniques you need, before you sit down."
             className="bc-b"
             accent="#60a5fa"
             icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M7 14h10M7 17h6"/></svg>}>
@@ -40,7 +40,7 @@ function Bento(){
 
           <BentoCard
             title="Study Tools Built-In"
-            body="Flashcards, quizzes, active recall prompts and an AI tutor — all stitched into one session. No tab-switching."
+            body="Flashcards, quizzes, active recall prompts and an AI tutor, all stitched into one session. No tab-switching."
             className="bc-d"
             accent="#34d399"
             icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M4 19V5a2 2 0 0 1 2-2h11l3 3v13M4 19a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2M9 7h6M9 11h6M9 15h4"/></svg>}>
@@ -218,7 +218,7 @@ function GradeIntel(){
           <div className="section-kicker">Grade intelligence</div>
           <h2 className="section-title">Stop guessing.<br/><span className="grad-text">Know exactly where you stand.</span></h2>
           <p className="section-sub" style={{margin:'22px 0 28px 0',textAlign:'left',maxWidth:'480px'}}>
-            See your projected grade in real time. Scrub any score to test scenarios — StudyEdge tells you exactly what you need on every remaining assignment to hit your target.
+            See your projected grade in real time. Scrub any score to test scenarios. StudyEdge tells you exactly what you need on every remaining assignment to hit your target.
           </p>
           <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Try it free →</button>
         </div>
