@@ -243,13 +243,17 @@ export default function AppShell({
             </button>
           )
         })}
-        {/* Theme toggle */}
+        {/* Account tab — opens AccountView where users can upgrade + access settings */}
         <button
-          onClick={onToggleTheme}
-          className="flex-1 flex flex-col items-center gap-1 py-3 text-slate-400 dark:text-slate-500 transition-all"
+          onClick={onNavigateToAccount}
+          className={`flex-1 flex flex-col items-center gap-1 py-3 transition-all ${
+            activeSection === 'account' ? 'text-indigo-500 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'
+          }`}
         >
-          {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
-          <span className="text-[10px] font-medium">{theme === 'dark' ? 'Light' : 'Dark'}</span>
+          <svg className={`w-5 h-5 transition-colors ${activeSection === 'account' ? 'text-indigo-500 dark:text-indigo-400' : 'text-slate-400 dark:text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={activeSection === 'account' ? 2.5 : 2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          <span className="text-[10px] font-medium">Account</span>
         </button>
       </nav>
 

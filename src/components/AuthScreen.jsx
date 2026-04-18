@@ -52,7 +52,20 @@ export default function AuthScreen({ initialMode, onBack }) {
 
     try {
       if (mode === 'signup') {
-        const { error } = await supabase.auth.signUp({ email, password })
+        // Preserve checkout intent (plan + billing) through email verification redirect
+        const src = new URLSearchParams(window.location.search)
+        const preserve = new URLSearchParams()
+        const plan = src.get('plan')
+        const billing = src.get('billing')
+        if (plan === 'pro' || plan === 'unlimited') preserve.set('plan', plan)
+        if (['monthly', 'semester', 'yearly'].includes(billing)) preserve.set('billing', billing)
+        const qs = preserve.toString()
+        const emailRedirectTo = `${window.location.origin}/app${qs ? '?' + qs : ''}`
+        const { error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo },
+        })
         if (error) throw error
         setSuccess('Check your email to confirm your account, then come back and log in.')
       } else if (mode === 'login') {

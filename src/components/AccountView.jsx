@@ -32,6 +32,8 @@ export default function AccountView({
   googleCalendarConnected,
   onConnectGoogleCalendar,
   onShowPaywall,
+  onToggleTheme,
+  theme,
 }) {
   const plan = getActivePlan()
   const planInfo = PLAN_INFO[plan] ?? PLAN_INFO.free
@@ -103,6 +105,33 @@ export default function AccountView({
       <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden">
         <h2 className="text-base font-bold text-slate-900 dark:text-white px-6 pt-5 pb-3">Settings</h2>
         <div className="divide-y divide-slate-100 dark:divide-slate-700/40">
+          {onToggleTheme && (
+            <button
+              onClick={onToggleTheme}
+              className="w-full flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors text-left"
+            >
+              <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
+                {theme === 'dark' ? (
+                  <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+                  </svg>
+                ) : (
+                  <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                  </svg>
+                )}
+              </div>
+              <div className="flex-1">
+                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Appearance</p>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  {theme === 'dark' ? 'Dark mode — tap to switch to light' : 'Light mode — tap to switch to dark'}
+                </p>
+              </div>
+              <span className="text-xs font-bold text-indigo-500 dark:text-indigo-400 shrink-0">
+                Switch to {theme === 'dark' ? 'Light' : 'Dark'}
+              </span>
+            </button>
+          )}
           {onConnectGoogleCalendar && (
             <button
               onClick={googleCalendarConnected ? undefined : onConnectGoogleCalendar}
