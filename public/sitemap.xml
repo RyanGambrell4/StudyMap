@@ -4,7 +4,7 @@
   <!-- Landing page (highest priority) -->
   <url>
     <loc>https://getstudyedge.com/</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-18</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -12,9 +12,25 @@
   <!-- App entry point -->
   <url>
     <loc>https://getstudyedge.com/app</loc>
-    <lastmod>2026-04-14</lastmod>
+    <lastmod>2026-04-18</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- Privacy Policy -->
+  <url>
+    <loc>https://getstudyedge.com/privacy.html</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- Terms of Service -->
+  <url>
+    <loc>https://getstudyedge.com/terms.html</loc>
+    <lastmod>2026-04-18</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
   </url>
 
 </urlset>

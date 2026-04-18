@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>StudyEdge: The Complete AI Study System for Students</title>
-  <meta name="description" content="StudyEdge is the AI study system that schedules when you study, plans every session minute-by-minute, and coaches you through it with active recall, flashcards, and quizzes. Free to start." />
+  <title>StudyEdge — AI Study Planner for College Students | Free</title>
+  <meta name="description" content="StudyEdge is the AI study planner college students use to build a study schedule, plan every session, and run focus timers with flashcards, quizzes, and active recall built in. Free to start, no credit card." />
   <link rel="canonical" href="https://getstudyedge.com" />
   <link rel="icon" type="image/png" href="/favicon.png" />
 
@@ -65,6 +65,76 @@
   }
   </script>
 
+  <!-- Organization schema (brand entity) -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "StudyEdge",
+    "alternateName": ["Study Edge", "getstudyedge"],
+    "url": "https://getstudyedge.com",
+    "logo": "https://getstudyedge.com/favicon.png",
+    "sameAs": ["https://getstudyedge.com"],
+    "description": "StudyEdge is the complete AI study system for college and university students. Automatic study scheduling, minute-by-minute session plans, and built-in flashcards, quizzes, and active recall.",
+    "foundingDate": "2025",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "support@getstudyedge.com",
+      "contactType": "customer support"
+    }
+  }
+  </script>
+
+  <!-- FAQ schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is StudyEdge?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "StudyEdge is an AI-powered study planner for college and university students. It automatically builds your study schedule around your classes and deadlines, plans every study session minute-by-minute, and coaches you through it with flashcards, quizzes, and active recall built in."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is StudyEdge free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. StudyEdge has a free plan that includes one course, a basic calendar, the Focus Mode timer, and 10 AI study boosts per month, with no credit card required. Pro and Unlimited plans start at $12.99/month."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is StudyEdge different from a regular study planner?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Most study planners only track what you should do. StudyEdge builds the plan for you, runs the session with a structured timer, and has flashcards, quizzes, active recall prompts, and an AI tutor built directly into each session so there's no tab-switching."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does StudyEdge work for any major or course?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. StudyEdge works for any subject at the college or university level, including STEM, humanities, and social sciences. You upload your syllabus, add your courses, and the AI adapts its study blueprints to your material and exam timeline."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I cancel anytime?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. Paid plans can be cancelled at any time and all new Pro subscriptions come with a 7-day free trial."
+        }
+      }
+    ]
+  }
+  </script>
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -85,10 +155,115 @@
       position: fixed; inset: 0;
       background: #080914;
     }
+    /* SEO pre-render: visible to crawlers, hidden visually so users don't see
+       a flash before React mounts. React replaces these nodes on mount. */
+    .seo-prerender {
+      position: absolute;
+      width: 1px; height: 1px;
+      padding: 0; margin: -1px;
+      overflow: hidden; clip: rect(0,0,0,0);
+      white-space: nowrap; border: 0;
+    }
   </style>
 </head>
 <body>
-  <div id="root"></div>
+  <div id="root">
+    <div class="seo-prerender">
+      <header>
+        <a href="/">StudyEdge</a>
+        <nav>
+          <a href="#features">Features</a>
+          <a href="#how">How it works</a>
+          <a href="#pricing">Pricing</a>
+          <a href="/app?login=1">Sign in</a>
+          <a href="/app?signup=1">Get Started Free</a>
+        </nav>
+      </header>
+
+      <main>
+        <section>
+          <h1>StudyEdge: Stop studying harder. Start studying with a system.</h1>
+          <p>StudyEdge is the AI study planner for college and university students. It builds your study schedule, plans every session, and coaches you through it with flashcards, quizzes, and active recall built in. One system, for students who are done winging it.</p>
+          <p>AI-Powered Study System for Students. 3,200+ students studying smarter this week.</p>
+          <a href="/app?signup=1">Get Started Free</a>
+        </section>
+
+        <section id="how">
+          <h2>How StudyEdge works: Three problems every student has. One system that fixes all of them.</h2>
+
+          <h3>1. Your study schedule, built automatically around your real life</h3>
+          <p>Add your classes and due dates. StudyEdge maps out your entire week automatically, filling your free time with the right courses at the right time, prioritized by exam date and difficulty. Push reminders handle the rest.</p>
+
+          <h3>2. Every study session planned before you open a book</h3>
+          <p>Before every study session, StudyEdge AI builds a minute-by-minute Session Blueprint for your specific course, upcoming exams, and goals. Warm-up, deep review, active recall, synthesis — all mapped out before you sit down.</p>
+
+          <h3>3. An AI study coach that runs the session while you're in it</h3>
+          <p>Hit start and StudyEdge runs the clock. Each block is timed and structured. Flashcards, recall prompts, practice quizzes, and notes are built in. You're working the material, not reading over slides hoping it sticks.</p>
+        </section>
+
+        <section id="features">
+          <h2>Every study tool a serious student needs. All in one system.</h2>
+          <ul>
+            <li><strong>Focus Mode:</strong> structured study session timer with warm-up, deep work, active recall, and synthesis blocks.</li>
+            <li><strong>Session Blueprint:</strong> AI-built minute-by-minute study plan for every session.</li>
+            <li><strong>AI Study Coach:</strong> personalized study plans per course, adapted to your exam timeline.</li>
+            <li><strong>AI Tutor:</strong> ask questions and get explanations on topics from your courses.</li>
+            <li><strong>Flashcards:</strong> AI-generated flashcards from your notes, slides, or uploaded PDFs.</li>
+            <li><strong>Quizzes:</strong> AI-generated multiple-choice quizzes with explanations.</li>
+            <li><strong>Active Recall:</strong> evidence-based recall prompts inside every study session.</li>
+            <li><strong>Smart Calendar:</strong> study schedule integrated with Google Calendar.</li>
+            <li><strong>Syllabus Upload:</strong> drop in a PDF syllabus and StudyEdge extracts your exams, assignments, and deadlines.</li>
+            <li><strong>Streak Tracking:</strong> daily study streak that keeps momentum visible.</li>
+            <li><strong>Grade Hub:</strong> projected grade calculator and grade predictor that tells you exactly what you need on remaining assignments.</li>
+            <li><strong>Progress Tracking:</strong> time studied, sessions completed, and per-course analytics.</li>
+          </ul>
+        </section>
+
+        <section>
+          <h2>Grade Intelligence: Stop guessing. Know exactly where you stand.</h2>
+          <p>Most students find out their grade is in trouble too late to do anything about it. StudyEdge shows you your exact projected grade, what you need on every remaining assignment, and three different strategies to hit your target before the semester slips away.</p>
+        </section>
+
+        <section id="pricing">
+          <h2>StudyEdge pricing: The full system, free to start.</h2>
+          <dl>
+            <dt>Free</dt>
+            <dd>$0 forever. 1 course, 10 AI study boosts per month, basic calendar, Focus Mode timer, syllabus upload for 1 course. No credit card required.</dd>
+            <dt>Pro</dt>
+            <dd>$12.99/month ($39.99/semester, $84.99/year). 5 courses, 30 AI study boosts per month, smart calendar, Focus Mode timer, unlimited syllabus upload, push notifications. 7-day free trial.</dd>
+            <dt>Unlimited</dt>
+            <dd>$19.99/month ($59.99/semester, $119.99/year). Unlimited courses, unlimited AI study boosts, smart calendar, Focus Mode timer, unlimited syllabus upload, push notifications, priority support.</dd>
+          </dl>
+        </section>
+
+        <section>
+          <h2>Frequently Asked Questions about StudyEdge</h2>
+
+          <h3>What is StudyEdge?</h3>
+          <p>StudyEdge is an AI-powered study planner for college and university students. It automatically builds your study schedule around your classes and deadlines, plans every study session minute-by-minute, and coaches you through it with flashcards, quizzes, and active recall built in.</p>
+
+          <h3>Is StudyEdge free?</h3>
+          <p>Yes. StudyEdge has a free plan with one course, basic calendar, Focus Mode timer, and 10 AI study boosts per month. No credit card required. Pro plans start at $12.99/month.</p>
+
+          <h3>Does StudyEdge work for any major?</h3>
+          <p>Yes. StudyEdge works for any subject at the college or university level including STEM, humanities, and social sciences. You upload your syllabus, add your courses, and the AI adapts its Session Blueprints to your material and exam timeline.</p>
+
+          <h3>How is StudyEdge different from Notion, Anki, or Quizlet?</h3>
+          <p>Notion is a blank document; Anki is only flashcards; Quizlet is only quizzes. StudyEdge is the complete study system: it builds the schedule, plans every session, runs the timer, and has flashcards, quizzes, active recall prompts, an AI tutor, and grade tracking all stitched into a single focus session. No tab-switching, no app-hopping.</p>
+
+          <h3>Can I cancel anytime?</h3>
+          <p>Yes. Paid plans can be cancelled at any time and all new Pro subscriptions include a 7-day free trial.</p>
+        </section>
+
+        <footer>
+          <p>© 2026 StudyEdge, Inc. Built by students, for students.</p>
+          <a href="/privacy.html">Privacy</a>
+          <a href="/terms.html">Terms</a>
+          <a href="mailto:support@getstudyedge.com">Contact</a>
+        </footer>
+      </main>
+    </div>
+  </div>
 
   <!-- React + Babel (in-browser compile of JSX) -->
   <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
