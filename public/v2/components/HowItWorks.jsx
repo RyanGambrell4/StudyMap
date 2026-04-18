@@ -6,9 +6,9 @@ function StatsBar(){
     <section className="stats-bar">
       <div className="container">
         <div className="stats-card">
-          <Stat n={3200} suffix="+" label="Students studying smarter" col="#818cf8"/>
+          <Stat n={30000} suffix="+" label="Students in our community" col="#818cf8"/>
           <div className="stat-div"/>
-          <Stat n={22000} suffix="+" label="Study sessions logged" col="#a78bfa"/>
+          <Stat n={12} suffix="" label="AI-powered study tools" col="#a78bfa"/>
           <div className="stat-div"/>
           <Stat n={4.9} label="Average rating" suffix="/5" decimals={1} col="#34d399"/>
         </div>
