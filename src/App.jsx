@@ -80,7 +80,10 @@ export default function App() {
   }, [session?.user?.id])
 
   // ── Handlers ──────────────────────────────────────────────────────────────
-  const handleSignOut = () => supabase.auth.signOut()
+  const handleSignOut = async () => {
+    await supabase.auth.signOut()
+    window.location.href = '/'
+  }
 
   const handleOnboardingComplete = ({ yearLevel: yl, learningStyle: ls, preferredTime }) => {
     setYearLevel(yl)
@@ -172,14 +175,23 @@ export default function App() {
   }
 
   if (!session) {
-    // Check URL param for direct signup link or OAuth error bounceback
+    // The real landing page lives at / — the React app only hosts the
+    // auth screen (?signup=1 / ?login=1) and OAuth error bouncebacks.
     const sp = new URLSearchParams(window.location.search)
     const urlSignup = sp.get('signup') === '1'
+    const urlLogin = sp.get('login') === '1'
     const hasOAuthError = !!(sp.get('error') || sp.get('error_description'))
-    if (showAuth || urlSignup || hasOAuthError) {
-      return <AuthScreen initialMode={authMode} onBack={() => setShowAuth(false)} />
+    if (showAuth || urlSignup || urlLogin || hasOAuthError) {
+      const mode = urlSignup ? 'signup' : urlLogin ? 'login' : authMode
+      return <AuthScreen initialMode={mode} onBack={() => { window.location.href = '/' }} />
     }
-    return <LandingPage onGetStarted={(mode) => { setAuthMode(mode); setShowAuth(true) }} />
+    // No auth intent — send them to the real landing page
+    window.location.href = '/'
+    return (
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0f1e' }}>
+        <div className="w-8 h-8 rounded-full border-4 border-slate-800 border-t-indigo-500 animate-spin" />
+      </div>
+    )
   }
 
   // ── Email verification gate ──────────────────────────────────────────────
