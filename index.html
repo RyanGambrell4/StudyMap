@@ -3,6 +3,25 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- OAuth callback bounce: if Supabase redirected back to / with an auth
+       code or access token (happens when "/app" isn't in Supabase's Redirect
+       URLs list), forward to /app so the React app can finish the exchange. -->
+  <script>
+    (function(){
+      try {
+        var sp = new URLSearchParams(window.location.search);
+        var hash = window.location.hash || '';
+        var isOAuthCallback =
+          sp.has('code') ||
+          sp.has('error_description') ||
+          hash.indexOf('access_token') !== -1 ||
+          hash.indexOf('error=') !== -1;
+        if (isOAuthCallback && window.location.pathname === '/') {
+          window.location.replace('/app' + window.location.search + hash);
+        }
+      } catch (e) {}
+    })();
+  </script>
   <title>StudyEdge — AI Study Planner for College Students | Free</title>
   <meta name="description" content="StudyEdge is the AI study planner college students use to build a study schedule, plan every session, and run focus timers with flashcards, quizzes, and active recall built in. Free to start, no credit card." />
   <link rel="canonical" href="https://getstudyedge.com" />
