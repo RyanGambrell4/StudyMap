@@ -1,5 +1,8 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
+import { Turnstile } from '@marsidev/react-turnstile'
 import { supabase } from '../lib/supabase'
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY
 
 export default function AuthScreen({ initialMode, onBack }) {
   const [mode, setMode] = useState(() =>
@@ -24,6 +27,10 @@ export default function AuthScreen({ initialMode, onBack }) {
     return `Sign in failed: ${decodeURIComponent(raw).replace(/\+/g, ' ')}`
   })
   const [success, setSuccess] = useState('')
+
+  // Cloudflare Turnstile — signup only
+  const turnstileRef = useRef(null)
+  const [captchaToken, setCaptchaToken] = useState('')
 
   const handleGoogleSignIn = async () => {
     setError('')
@@ -52,6 +59,10 @@ export default function AuthScreen({ initialMode, onBack }) {
 
     try {
       if (mode === 'signup') {
+        // Require Turnstile token when CAPTCHA is configured
+        if (TURNSTILE_SITE_KEY && !captchaToken) {
+          throw new Error('Please complete the CAPTCHA before signing up.')
+        }
         // Preserve checkout intent (plan + billing) through email verification redirect
         const src = new URLSearchParams(window.location.search)
         const preserve = new URLSearchParams()
@@ -64,8 +75,15 @@ export default function AuthScreen({ initialMode, onBack }) {
         const { error } = await supabase.auth.signUp({
           email,
           password,
-          options: { emailRedirectTo },
+          options: {
+            emailRedirectTo,
+            ...(captchaToken && { captchaToken }),
+          },
         })
+        // Reset the Turnstile widget after any signup attempt (success or failure).
+        // Tokens are single-use — a stale token will reject the next signUp call.
+        try { turnstileRef.current?.reset() } catch {}
+        setCaptchaToken('')
         if (error) throw error
         setSuccess('Check your email to confirm your account, then come back and log in.')
       } else if (mode === 'login') {
@@ -170,6 +188,19 @@ export default function AuthScreen({ initialMode, onBack }) {
                   minLength={6}
                   className="w-full rounded-xl px-4 py-3 text-slate-200 placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 text-sm"
                   style={{ backgroundColor: '#0d1424', border: '1px solid #1e293b' }}
+                />
+              </div>
+            )}
+
+            {mode === 'signup' && TURNSTILE_SITE_KEY && (
+              <div className="flex justify-center">
+                <Turnstile
+                  ref={turnstileRef}
+                  siteKey={TURNSTILE_SITE_KEY}
+                  options={{ theme: 'dark', size: 'flexible' }}
+                  onSuccess={setCaptchaToken}
+                  onError={() => setCaptchaToken('')}
+                  onExpire={() => setCaptchaToken('')}
                 />
               </div>
             )}
