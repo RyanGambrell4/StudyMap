@@ -181,10 +181,31 @@ export default function App() {
     const urlSignup = sp.get('signup') === '1'
     const urlLogin = sp.get('login') === '1'
     const hasOAuthError = !!(sp.get('error') || sp.get('error_description'))
+
+    // Detect an in-progress OAuth callback so we don't redirect the user
+    // away before Supabase has a chance to exchange the code for a session.
+    // PKCE flow returns ?code=..., implicit flow returns #access_token=...
+    const hasOAuthCode = !!sp.get('code')
+    const hasOAuthHash = typeof window !== 'undefined' && window.location.hash.includes('access_token')
+    const inOAuthCallback = hasOAuthCode || hasOAuthHash
+
     if (showAuth || urlSignup || urlLogin || hasOAuthError) {
       const mode = urlSignup ? 'signup' : urlLogin ? 'login' : authMode
       return <AuthScreen initialMode={mode} onBack={() => { window.location.href = '/' }} />
     }
+
+    // Mid-OAuth — hold with a spinner until onAuthStateChange fires
+    if (inOAuthCallback) {
+      return (
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0f1e' }}>
+          <div className="text-center space-y-4">
+            <div className="w-8 h-8 mx-auto rounded-full border-4 border-slate-800 border-t-indigo-500 animate-spin" />
+            <p className="text-slate-400 text-sm">Signing you in…</p>
+          </div>
+        </div>
+      )
+    }
+
     // No auth intent — send them to the real landing page
     window.location.href = '/'
     return (
