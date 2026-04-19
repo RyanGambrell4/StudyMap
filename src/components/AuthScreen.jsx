@@ -87,13 +87,28 @@ export default function AuthScreen({ initialMode, onBack }) {
         if (error) throw error
         setSuccess('Check your email to confirm your account, then come back and log in.')
       } else if (mode === 'login') {
-        const { error } = await supabase.auth.signInWithPassword({ email, password })
+        if (TURNSTILE_SITE_KEY && !captchaToken) {
+          throw new Error('Please complete the CAPTCHA before signing in.')
+        }
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password,
+          options: { ...(captchaToken && { captchaToken }) },
+        })
+        try { turnstileRef.current?.reset() } catch {}
+        setCaptchaToken('')
         if (error) throw error
         // App.jsx listens for auth state change — no need to do anything here
       } else if (mode === 'forgot') {
+        if (TURNSTILE_SITE_KEY && !captchaToken) {
+          throw new Error('Please complete the CAPTCHA before requesting a reset link.')
+        }
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: window.location.origin,
+          ...(captchaToken && { captchaToken }),
         })
+        try { turnstileRef.current?.reset() } catch {}
+        setCaptchaToken('')
         if (error) throw error
         setSuccess('Password reset email sent. Check your inbox.')
       }
@@ -192,7 +207,7 @@ export default function AuthScreen({ initialMode, onBack }) {
               </div>
             )}
 
-            {mode === 'signup' && TURNSTILE_SITE_KEY && (
+            {TURNSTILE_SITE_KEY && (
               <div className="flex justify-center">
                 <Turnstile
                   ref={turnstileRef}

@@ -3,20 +3,38 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- OAuth callback bounce: if Supabase redirected back to / with an auth
-       code or access token (happens when "/app" isn't in Supabase's Redirect
-       URLs list), forward to /app so the React app can finish the exchange. -->
+  <!-- OAuth / session bounce: if Supabase redirected back to / after auth
+       (either with OAuth params in the URL OR with a session already written
+       to localStorage by supabase-js), forward the user to /app. This runs
+       synchronously before any other asset loads so signed-in users never
+       see the marketing page. -->
   <script>
     (function(){
       try {
+        if (window.location.pathname !== '/') return;
         var sp = new URLSearchParams(window.location.search);
         var hash = window.location.hash || '';
-        var isOAuthCallback =
+        var hasOAuthParams =
           sp.has('code') ||
           sp.has('error_description') ||
           hash.indexOf('access_token') !== -1 ||
           hash.indexOf('error=') !== -1;
-        if (isOAuthCallback && window.location.pathname === '/') {
+        var hasSession = false;
+        try {
+          for (var i = 0; i < localStorage.length; i++) {
+            var key = localStorage.key(i);
+            if (!key) continue;
+            // Supabase v2 stores the session under "sb-<projectref>-auth-token"
+            if (key.indexOf('sb-') === 0 && key.indexOf('-auth-token') !== -1) {
+              var val = localStorage.getItem(key);
+              if (val && val.indexOf('access_token') !== -1) {
+                hasSession = true;
+                break;
+              }
+            }
+          }
+        } catch (e) {}
+        if (hasOAuthParams || hasSession) {
           window.location.replace('/app' + window.location.search + hash);
         }
       } catch (e) {}
