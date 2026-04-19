@@ -86,3 +86,10 @@ section{position:relative;z-index:2}
 /* Utility */
 .mono{font-family:'JetBrains Mono',ui-monospace,SF Mono,Menlo,monospace}
 @media(max-width:760px){.hidden-sm{display:none !important}}
+
+@media(max-width:640px){
+  .container{padding:0 18px}
+  .section-head{margin:0 auto 36px;max-width:100%}
+  .section-title{font-size:clamp(28px,8vw,36px);line-height:1.15}
+  .section-kicker{font-size:11px}
+}

@@ -65,3 +65,30 @@
   .footer-inner{grid-template-columns:1fr}
   .footer-cols{grid-template-columns:repeat(2,1fr)}
 }
+
+/* ── Phone layout ───────────────────────────────────────────────────────── */
+@media(max-width:640px){
+  .pricing-sec{padding:32px 0 48px}
+  .tiers{gap:18px}
+  .tier{padding:22px 20px;gap:8px}
+  .amt{font-size:40px}
+  .tier-feats{margin:14px 0;padding:14px 0;gap:8px}
+  .tf{font-size:13.5px}
+  .tier-pop{top:-10px;font-size:9px;padding:4px 11px}
+
+  .bill-toggle{width:100%;margin:0 auto 32px}
+  .bt{flex:1;justify-content:center;padding:9px 10px;font-size:12px;gap:6px;white-space:nowrap}
+  .bt-save{font-size:9px;padding:2px 5px}
+
+  .testimonials{padding:40px 0 64px}
+  .tq{width:280px;padding:20px}
+
+  .cta-sec{padding:24px 0 64px}
+  .cta-card{padding:56px 22px;border-radius:20px}
+  .cta-btns .btn{width:100%;justify-content:center}
+  .cta-foot{gap:14px;font-size:12px}
+
+  .footer{padding:40px 0 calc(24px + env(safe-area-inset-bottom,0px))}
+  .footer-cols{grid-template-columns:1fr}
+  .footer-bot{flex-direction:column;gap:8px;text-align:center;margin-top:28px}
+}
