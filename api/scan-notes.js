@@ -1,19 +1,15 @@
+import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' })
   }
 
-  const authHeader = req.headers['authorization']
-  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
-  if (!token) return res.status(401).json({ error: 'Unauthorized' })
+  const contentLength = parseInt(req.headers['content-length'] || '0')
+  if (contentLength > 5_000_000) return res.status(413).json({ error: 'Payload too large' })
 
-  const verifyRes = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      apikey: process.env.SUPABASE_SERVICE_KEY,
-    },
-  })
-  if (!verifyRes.ok) return res.status(401).json({ error: 'Unauthorized' })
+  const gate = await verifyAndCheckAiUsage(req)
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
   const { imageBase64, mediaType } = req.body
   if (!imageBase64 || !mediaType) {

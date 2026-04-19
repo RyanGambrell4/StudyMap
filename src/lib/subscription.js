@@ -90,31 +90,20 @@ export function getAIQueriesLimit() {
 }
 
 // ── AI query increment ────────────────────────────────────────────────────────
+// Server-side enforcement (api/*.js + lib/server/usage.js) is the source of
+// truth. This helper just bumps the local cache so the UI updates immediately
+// after an AI call. The server has already written the real count.
 
-export async function incrementAIQuery() {
-  if (!_uid) return
-
+export function incrementAIQuery() {
+  if (!_sub) return
   const now = new Date()
-  const current = getCachedSubscription()
-  const newMonth = isNewMonth(current?.aiQueriesResetAt)
-  const newCount = newMonth ? 1 : (current?.aiQueriesUsed ?? 0) + 1
-
-  const updated = {
-    ...current,
+  const newMonth = isNewMonth(_sub?.aiQueriesResetAt)
+  const newCount = newMonth ? 1 : (_sub?.aiQueriesUsed ?? 0) + 1
+  _sub = {
+    ..._sub,
     aiQueriesUsed: newCount,
-    aiQueriesResetAt: newMonth ? now.toISOString() : current?.aiQueriesResetAt,
+    aiQueriesResetAt: newMonth ? now.toISOString() : (_sub?.aiQueriesResetAt ?? now.toISOString()),
   }
-
-  _sub = updated
-
-  const { error } = await supabase
-    .from('user_data')
-    .upsert(
-      { user_id: _uid, subscription: updated, updated_at: now.toISOString() },
-      { onConflict: 'user_id' }
-    )
-
-  if (error) console.error('[subscription] increment AI query error', error)
 }
 
 // ── Stripe checkout session creator ──────────────────────────────────────────

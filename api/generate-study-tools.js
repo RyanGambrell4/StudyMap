@@ -1,3 +1,5 @@
+import { verifyAndCheckAiUsage, verifyAuth } from '../lib/server/usage.js'
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -6,17 +8,11 @@ export default async function handler(req, res) {
   const contentLength = parseInt(req.headers['content-length'] || '0')
   if (contentLength > 4_500_000) return res.status(413).json({ error: 'Payload too large — try fewer or smaller images.' })
 
-  const authHeader = req.headers['authorization']
-  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
-  if (!token) return res.status(401).json({ error: 'Unauthorized' })
-
-  const verifyRes = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, {
-    headers: {
-      Authorization: `Bearer ${token}`,
-      apikey: process.env.SUPABASE_SERVICE_KEY,
-    },
-  })
-  if (!verifyRes.ok) return res.status(401).json({ error: 'Unauthorized' })
+  // predict-grade mode uses simple math on already-submitted data, so it's
+  // auth-only. Every other mode runs Claude and consumes a study boost.
+  const isPredict = req.body?.mode === 'predict-grade'
+  const gate = isPredict ? await verifyAuth(req) : await verifyAndCheckAiUsage(req)
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
   const { text, mode, courseName, sessionType, topic, images } = req.body;
   const safeImages = Array.isArray(images) ? images.slice(0, 6).filter(i => i?.data && i?.media_type) : []
