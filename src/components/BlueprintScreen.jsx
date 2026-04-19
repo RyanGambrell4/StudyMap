@@ -134,7 +134,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
           {!blueprint && (
             <div className="mb-6">
               <h1 className="text-2xl font-bold text-white mb-1">Session Blueprint</h1>
-              <p className="text-slate-500 text-sm mb-6">Your session, mapped out before you start. Tell us what you're working with — we'll build the plan.</p>
+              <p className="text-slate-500 text-sm mb-6">Your session, mapped out before you start. Tell us what you're working with and we'll build the plan.</p>
 
               {coachBanner && (
                 <div className="flex items-start gap-2.5 rounded-xl px-3.5 py-2.5 mb-4" style={{ backgroundColor: `${dot}12`, border: `1px solid ${dot}30` }}>
@@ -187,7 +187,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
                   onClick={() => onStartSession(null)}
                   className="w-full mt-3 py-3 rounded-2xl text-sm font-medium text-slate-500 hover:text-slate-300 transition-colors"
                 >
-                  Skip — just start the timer
+                  Skip and just start the timer
                 </button>
               )}
             </div>

@@ -15,7 +15,7 @@ export const TARGET_OPTIONS = [
 ]
 
 export function letterGrade(pct) {
-  if (pct === null || pct === undefined || isNaN(pct)) return '—'
+  if (pct === null || pct === undefined || isNaN(pct)) return '-'
   if (pct >= 90) return 'A+'
   if (pct >= 85) return 'A'
   if (pct >= 80) return 'A-'

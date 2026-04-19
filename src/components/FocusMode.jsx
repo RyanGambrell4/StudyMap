@@ -598,7 +598,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       {breakBanner && !breakOverlay && (
         <div className="relative z-10 flex items-center gap-3 px-4 py-2.5 shrink-0" style={{ backgroundColor: `${dot}18`, borderBottom: `1px solid ${dot}28` }}>
           <div className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ backgroundColor: dot }} />
-          <span className="text-slate-300 text-xs">5-minute break recommended — you've been studying for 25 minutes</span>
+          <span className="text-slate-300 text-xs">5-minute break recommended. You've been studying for 25 minutes</span>
           <div className="ml-auto flex items-center gap-2 shrink-0">
             <button onClick={() => setBreakOverlay(true)} className="text-xs px-3 py-1 rounded-lg font-medium text-white" style={{ backgroundColor: dot }}>Take Break</button>
             <button onClick={() => setBreakBanner(false)} className="text-xs text-slate-500 hover:text-slate-300 transition-colors">Dismiss</button>
@@ -679,7 +679,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
             <div className="flex flex-col gap-3">
               {nextSession && (
                 <button onClick={handleStartNext} className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all" style={{ backgroundColor: dot, boxShadow: `0 0 28px ${dot}40` }}>
-                  Start Next — {nextSession.courseName}
+                  Start Next: {nextSession.courseName}
                 </button>
               )}
               <button onClick={handleBackToDashboard} className="w-full py-3.5 rounded-2xl font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 transition-colors">
@@ -714,7 +714,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
           {/* Block label */}
           {blocks && currentBlock && !finished && (
             <p className="text-xs font-bold uppercase tracking-widest mb-2 transition-colors" style={{ color: blockColor }}>
-              Block {blockIdx + 1} of {blocks.length} — {currentBlock.title}
+              Block {blockIdx + 1} of {blocks.length}: {currentBlock.title}
             </p>
           )}
           <div className="flex items-center justify-center gap-10 w-full">
@@ -807,7 +807,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
           {/* Block transition banner */}
           {blockTransition && (
             <div className="mt-3 w-full max-w-sm rounded-xl px-4 py-3 text-center" style={{ backgroundColor: `${blockColor}15`, border: `1px solid ${blockColor}35` }}>
-              <p className="text-sm font-semibold" style={{ color: blockColor }}>Block complete ✓ — Next: {blockTransition.nextTitle}</p>
+              <p className="text-sm font-semibold" style={{ color: blockColor }}>Block complete ✓. Next: {blockTransition.nextTitle}</p>
               <p className="text-xs text-slate-500 mt-1 leading-relaxed">{blockTransition.nextInstruction}</p>
             </div>
           )}
@@ -884,7 +884,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                   <p className="text-slate-200 font-semibold text-sm mb-0.5">
                     Without looking at your notes, write down everything you know about{' '}
                     <span style={{ color: dot }}>{session.courseName}</span>{' '}
-                    — {session.sessionType}.
+                    · {session.sessionType}.
                   </p>
                   <p className="text-slate-600 text-xs leading-relaxed">Spend at least 5 minutes on this. The act of retrieving information is what builds memory.</p>
                 </div>
@@ -1066,7 +1066,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                         <textarea
                           value={fcTopic}
                           onChange={e => setFcTopic(e.target.value)}
-                          placeholder={`e.g. "Only the Krebs cycle — each enzyme, substrate, and product" or "Chapters 4–5 vocabulary"`}
+                          placeholder={`e.g. "Only the Krebs cycle: each enzyme, substrate, and product" or "Chapters 4–5 vocabulary"`}
                           className="w-full min-h-20 rounded-xl px-3 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none resize-none"
                           style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}
                         />
@@ -1153,7 +1153,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                       </svg>
                     </div>
-                    <p className="text-white font-bold text-xl mb-2">Test yourself — your way</p>
+                    <p className="text-white font-bold text-xl mb-2">Test yourself, your way</p>
                     <p className="text-slate-500 text-sm mb-5 max-w-md">
                       Describe exactly what to quiz you on, upload the source material, or both. The quiz will only cover what you asked for.
                     </p>

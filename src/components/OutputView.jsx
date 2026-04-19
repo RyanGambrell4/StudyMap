@@ -69,7 +69,7 @@ function TutorView({ courses, userId, onShowPaywall }) {
         <div className="flex-1 min-h-0 bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden flex flex-col">
           <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700/50 shrink-0">
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-              AI Tutor — <span style={{ color: course.color?.dot ?? '#6366f1' }}>{course.name}</span>
+              AI Tutor · <span style={{ color: course.color?.dot ?? '#6366f1' }}>{course.name}</span>
             </p>
           </div>
           <AIChatView
@@ -276,7 +276,7 @@ function ShareCardModal({ courses, stats, onClose }) {
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ color: '#94a3b8', fontSize: 10, fontWeight: 600 }}>NEXT EXAM</div>
                 <div style={{ color: '#fbbf24', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                  {stats.nearestExam.name} — in {stats.nearestExam.days} days
+                  {stats.nearestExam.name} · in {stats.nearestExam.days} days
                 </div>
               </div>
             </div>
@@ -1219,7 +1219,7 @@ export default function OutputView({
 
         {/* Print header */}
         <div className="hidden print:block p-8 border-b border-gray-200">
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">StudyEdge — Personalized Study Plan</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">StudyEdge · Personalized Study Plan</h1>
           <p className="text-gray-500">{stats.totalCourses} courses · {stats.totalHours}h planned</p>
         </div>
 

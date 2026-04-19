@@ -57,7 +57,7 @@ export default function StepAssignments({ courses, assignments, setAssignments, 
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-white mb-2">Your Assignments</h2>
         <p className="text-slate-400">Track grades and get smart recovery sessions when you fall behind</p>
-        <p className="text-slate-600 text-sm mt-1">Optional — you can skip and add these later</p>
+        <p className="text-slate-600 text-sm mt-1">Optional. You can skip and add these later.</p>
       </div>
 
       {/* Course tabs */}

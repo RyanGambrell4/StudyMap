@@ -215,7 +215,7 @@ export default function CalendarMonthView({
                   return (
                     <div key={`ss-${j}`}
                       className="flex items-center gap-1 px-1.5 rounded text-[10px] leading-none"
-                      title={conflictWith ? `Conflicts with ${conflictWith} — tap to reschedule` : undefined}
+                      title={conflictWith ? `Conflicts with ${conflictWith}. Tap to reschedule.` : undefined}
                       style={{
                         height: 18,
                         background: conflictWith ? 'rgba(245,158,11,0.12)' : `${ev.color.dot}${tv.sessionAlpha}`,

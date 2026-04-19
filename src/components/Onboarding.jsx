@@ -5,7 +5,7 @@ const STYLE_OPTIONS = [
   {
     value: 'visual',
     label: '🎨  Visual',
-    desc: 'You think in diagrams. Color-coding, flowcharts, and mind maps make complex ideas click — if you can see it, you can learn it.',
+    desc: 'You think in diagrams. Color-coding, flowcharts, and mind maps make complex ideas click. If you can see it, you can learn it.',
   },
   {
     value: 'reading',
@@ -15,7 +15,7 @@ const STYLE_OPTIONS = [
   {
     value: 'practice',
     label: '🧩  Practice-Based',
-    desc: 'You learn by doing. Flashcards, past exams, and problem sets are your best tools — repetition and reps build your mastery.',
+    desc: 'You learn by doing. Flashcards, past exams, and problem sets are your best tools. Repetition and reps build your mastery.',
   },
 ]
 
@@ -49,7 +49,7 @@ const SCHOOL_OPTIONS = [
   {
     key: 'uni',
     label: '🎓  University',
-    desc: 'Lectures, labs, deadlines — and somehow a social life too.',
+    desc: 'Lectures, labs, deadlines, and somehow a social life too.',
   },
 ]
 
@@ -606,7 +606,7 @@ export default function Onboarding({ onComplete }) {
           How do you learn best?
         </h2>
         <p style={{ color: '#475569', fontSize: '0.95rem', marginBottom: '24px' }}>
-          Pick the style that sounds most like you — we'll build sessions around it.
+          Pick the style that sounds most like you, and we'll build sessions around it.
         </p>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginBottom: '24px' }}>

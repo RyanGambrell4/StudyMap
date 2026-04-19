@@ -106,7 +106,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
               { role: 'user', content: 'Can you explain supply and demand curves?' },
               { role: 'assistant', content: 'Sure! Supply and demand curves show the relationship between price and quantity in a market. When price rises, demand typically falls while supply increases...' },
               { role: 'user', content: "I keep confusing elasticity with slope, can you help?" },
-              { role: 'assistant', content: "Great question — this trips up a lot of students. Slope is a geometric property of the curve, while elasticity measures responsiveness as a percentage change..." },
+              { role: 'assistant', content: "Great question. This trips up a lot of students. Slope is a geometric property of the curve, while elasticity measures responsiveness as a percentage change..." },
             ].map((m, i) => (
               <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
                 <div className={`max-w-xs px-4 py-2.5 rounded-2xl text-sm ${m.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100'}`}>
@@ -166,7 +166,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
               </svg>
             </div>
             <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xs leading-relaxed">
-              Ask me anything about <span className="font-semibold text-slate-700 dark:text-slate-300">{courseName}</span>. I can explain concepts, quiz you, or work through practice problems. If you're struggling with a topic, tell me — I'll update your study plan.
+              Ask me anything about <span className="font-semibold text-slate-700 dark:text-slate-300">{courseName}</span>. I can explain concepts, quiz you, or work through practice problems. If you're struggling with a topic, tell me and I'll update your study plan.
             </p>
           </div>
         )}

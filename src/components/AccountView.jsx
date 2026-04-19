@@ -124,7 +124,7 @@ export default function AccountView({
               <div className="flex-1">
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Appearance</p>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  {theme === 'dark' ? 'Dark mode — tap to switch to light' : 'Light mode — tap to switch to dark'}
+                  {theme === 'dark' ? 'Dark mode, tap to switch to light' : 'Light mode, tap to switch to dark'}
                 </p>
               </div>
               <span className="text-xs font-bold text-indigo-500 dark:text-indigo-400 shrink-0">
@@ -145,7 +145,7 @@ export default function AccountView({
               <div className="flex-1">
                 <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Google Calendar</p>
                 <p className="text-xs text-slate-500 mt-0.5">
-                  {googleCalendarConnected ? 'Connected — syncing your schedule' : 'Connect to sync your schedule'}
+                  {googleCalendarConnected ? 'Connected, syncing your schedule' : 'Connect to sync your schedule'}
                 </p>
               </div>
               {googleCalendarConnected ? (

@@ -34,7 +34,7 @@ export default function StepSchedule({ schedule, setSchedule, courses, onNext, o
         <label className="block font-semibold text-slate-100 mb-1">
           How many hours per week can you realistically study?
         </label>
-        <p className="text-sm text-slate-500 mb-6">Be honest — consistent shorter sessions beat burnout</p>
+        <p className="text-sm text-slate-500 mb-6">Be honest. Consistent shorter sessions beat burnout.</p>
 
         <div className="flex items-center gap-4 mb-5">
           <span className="text-sm text-slate-500 w-6 text-right shrink-0">5h</span>

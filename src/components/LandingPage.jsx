@@ -138,7 +138,7 @@ export default function LandingPage({ onGetStarted }) {
           fontSize: 'clamp(16px, 2vw, 19px)', color: 'rgba(226,232,240,0.55)',
           maxWidth: 540, margin: '0 auto 40px', lineHeight: 1.6, fontWeight: 400,
         }}>
-          AI builds your perfect study plan for every session. Flashcards, focus timer, study coach — everything you need in one app.
+          AI builds your perfect study plan for every session. Flashcards, focus timer, study coach, everything you need in one app.
         </p>
 
         {/* CTA Buttons */}
@@ -173,7 +173,7 @@ export default function LandingPage({ onGetStarted }) {
           }} />
           <img
             src="/ss-main-screen.png"
-            alt="StudyEdge app — dashboard, AI study planner, flashcards, focus mode, and study coach"
+            alt="StudyEdge app: dashboard, AI study planner, flashcards, focus mode, and study coach"
             style={{
               display: 'block', width: '100%', borderRadius: 16, position: 'relative',
               border: '1px solid rgba(255,255,255,0.08)',
@@ -207,10 +207,10 @@ export default function LandingPage({ onGetStarted }) {
         }}>
 
           {/* ── 1. AI Session Planner ── */}
-          <FeatureCard color="#6366f1" icon="✦" title="AI Session Planner" desc="AI breaks every study session into timed steps — warm-up, deep review, active recall, and more. No guessing what to do next.">
+          <FeatureCard color="#6366f1" icon="✦" title="AI Session Planner" desc="AI breaks every study session into timed steps: warm-up, deep review, active recall, and more. No guessing what to do next.">
             <div style={{ padding: '16px 16px 8px', fontFamily: 'inherit' }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: '#6366f1', letterSpacing: 1, marginBottom: 8 }}>SESSION PLAN READY</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 10, lineHeight: 1.3 }}>Memory & Encoding — Active Recall</div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 10, lineHeight: 1.3 }}>Memory & Encoding: Active Recall</div>
               <div style={{ display: 'flex', gap: 3, marginBottom: 10, borderRadius: 4, overflow: 'hidden', height: 8 }}>
                 <div style={{ flex: 1, background: '#a78bfa' }} />
                 <div style={{ flex: 2, background: '#6366f1' }} />
@@ -233,12 +233,12 @@ export default function LandingPage({ onGetStarted }) {
           </FeatureCard>
 
           {/* ── 2. AI Study Coach ── */}
-          <FeatureCard color="#7c5cfc" icon="💬" title="AI Study Coach" desc="Ask questions, get explanations, quiz yourself — like having a tutor available 24/7 for every course.">
+          <FeatureCard color="#7c5cfc" icon="💬" title="AI Study Coach" desc="Ask questions, get explanations, quiz yourself. Like having a tutor available 24/7 for every course.">
             <div style={{ padding: '16px 16px 8px' }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: '#7c5cfc', letterSpacing: 1, marginBottom: 10 }}>YOUR WEEK-BY-WEEK PLAN</div>
               {[
                 { week: 'Week 1', label: 'Foundation & Understanding', sessions: [['Session 1','Memory: encoding, storage, retrieval','60m'],['Session 2','Sensation & Perception basics','45m']] },
-                { week: 'Week 2', label: 'Midterm Prep Sprint', sessions: [['Session 1','Active Recall — all units','60m']] },
+                { week: 'Week 2', label: 'Midterm Prep Sprint', sessions: [['Session 1','Active Recall, all units','60m']] },
               ].map((w, wi) => (
                 <div key={wi} style={{ background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '10px 12px', marginBottom: 8, border: '1px solid rgba(255,255,255,0.07)' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
@@ -303,7 +303,7 @@ export default function LandingPage({ onGetStarted }) {
           </FeatureCard>
 
           {/* ── 5. Study Schedule ── */}
-          <FeatureCard color="#2dd4bf" icon="📅" title="Study Schedule" desc="See your entire week planned out — every session, every course, organized by time and priority.">
+          <FeatureCard color="#2dd4bf" icon="📅" title="Study Schedule" desc="See your entire week planned out, every session, every course, organized by time and priority.">
             <div style={{ padding: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
                 {['Mon','Tue','Wed','Thu','Fri'].map((d,i) => (
@@ -314,9 +314,9 @@ export default function LandingPage({ onGetStarted }) {
                 ))}
               </div>
               {[
-                ['9:00 AM','PSYC 101 — Memory','#6366f1'],
-                ['11:00 AM','Biology — Cell Division','#22c55e'],
-                ['2:30 PM','PSYC 101 — Perception','#6366f1'],
+                ['9:00 AM','PSYC 101: Memory','#6366f1'],
+                ['11:00 AM','Biology: Cell Division','#22c55e'],
+                ['2:30 PM','PSYC 101: Perception','#6366f1'],
               ].map(([time, label, color], i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px', background: 'rgba(255,255,255,0.03)', borderRadius: 8, marginBottom: 5, borderLeft: `2px solid ${color}` }}>
                   <span style={{ fontSize: 10, color: 'rgba(226,232,240,0.35)', minWidth: 52 }}>{time}</span>
@@ -342,7 +342,7 @@ export default function LandingPage({ onGetStarted }) {
                 </div>
               </div>
               <div style={{ background: 'rgba(167,139,250,0.08)', borderRadius: 8, padding: '8px 10px', fontSize: 11, color: '#a78bfa', marginBottom: 10, border: '1px solid rgba(167,139,250,0.2)' }}>
-                Great start — consistency is everything. Keep going!
+                Great start. Consistency is everything. Keep going!
               </div>
               {[['PSYC 101', 78, '#6366f1'],['Biology', 52, '#22c55e'],['Study Hours', 65, '#a78bfa']].map(([label, pct, color], i) => (
                 <div key={i} style={{ marginBottom: 8 }}>

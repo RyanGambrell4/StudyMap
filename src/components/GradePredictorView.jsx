@@ -218,7 +218,7 @@ export default function GradePredictorView({ courses, onEditCourse, userId, onSh
                   </select>
                   <input
                     type="number"
-                    placeholder="—"
+                    placeholder="-"
                     value={comp.earnedGrade}
                     min="0" max="100" step="0.1"
                     onChange={e => updateComponent(i, 'earnedGrade', e.target.value)}
@@ -322,7 +322,7 @@ function ResultsCard({ prediction, course, dot, targetGrade, onEdit }) {
             <p className={`text-lg font-bold ${(prediction.gradeNeededOnRemaining ?? 0) > 100 ? 'text-red-400' : 'text-slate-900 dark:text-white'}`}>
               {prediction.gradeNeededOnRemaining !== null && prediction.gradeNeededOnRemaining !== undefined
                 ? prediction.gradeNeededOnRemaining > 100 ? '100%+' : `${prediction.gradeNeededOnRemaining.toFixed(1)}%`
-                : '—'
+                : '-'
               }
             </p>
           </div>

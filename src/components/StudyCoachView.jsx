@@ -162,7 +162,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       {/* Header */}
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Study Coach</h1>
-        <p className="text-slate-500 text-sm">Tell us about your course and goals — we'll map out a week-by-week study plan designed for how you work.</p>
+        <p className="text-slate-500 text-sm">Tell us about your course and goals, and we'll map out a week-by-week study plan designed for how you work.</p>
       </div>
 
       {/* Course selector */}
@@ -197,7 +197,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
           <p className="text-indigo-700 dark:text-indigo-300 text-sm leading-relaxed">
             <span className="font-semibold">Topics flagged from AI Tutor: </span>
             {struggles.join(', ')}
-            <span className="text-indigo-500 dark:text-indigo-400"> — these will be emphasized in your new plan.</span>
+            <span className="text-indigo-500 dark:text-indigo-400">, these will be emphasized in your new plan.</span>
           </p>
         </div>
       )}
@@ -222,7 +222,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
             <span className="text-base shrink-0 mt-0.5">{isRecovery ? '🚨' : '⚠️'}</span>
             <p className={`${color.text} text-sm leading-relaxed`}>
               <span className="font-semibold">{isRecovery ? 'Grade recovery needed: ' : 'Grade gap detected: '}</span>
-              Current {letterGrade(current)} ({current.toFixed(1)}%), target {targetLabel} — {Math.abs(gap).toFixed(1)} points below. This plan will prioritize closing the gap.
+              Current {letterGrade(current)} ({current.toFixed(1)}%), target {targetLabel}, {Math.abs(gap).toFixed(1)} points below. This plan will prioritize closing the gap.
               {weakAreas.length > 0 && (
                 <span className={color.sub}> Focus areas: {weakAreas.join(', ')}.</span>
               )}
@@ -553,7 +553,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, theme = 'dark' }
       {/* Actions */}
       <div className="space-y-3 pt-2">
         <button onClick={onPush} disabled={pushed} className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all disabled:opacity-60" style={{ backgroundColor: pushed ? '#065f46' : dot, boxShadow: pushed ? '0 0 24px #065f4650' : `0 0 28px ${dot}35` }}>
-          {pushed ? '✓ Plan saved — sessions will use this as their starting point' : 'Push to Sessions'}
+          {pushed ? '✓ Plan saved. Sessions will use this as their starting point.' : 'Push to Sessions'}
         </button>
         {pushed && (
           <p className="text-center text-xs leading-relaxed" style={{ color: t.weekTheme }}>

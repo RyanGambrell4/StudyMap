@@ -220,9 +220,9 @@ export default function DashboardView({
                   <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
                   Setup required
                 </span>
-                <h2 className="text-2xl font-bold text-white mb-2 leading-tight">Your account is ready —<br />now set up your courses</h2>
+                <h2 className="text-2xl font-bold text-white mb-2 leading-tight">Your account is ready.<br />Now set up your courses.</h2>
                 <p className="text-white/60 text-sm mb-6 leading-relaxed">
-                  Everything in StudyEdge — your study plan, sessions, deadlines, coaching, and tools — runs on your courses. Add them to unlock the full app.
+                  Everything in StudyEdge, your study plan, sessions, deadlines, coaching, and tools, runs on your courses. Add them to unlock the full app.
                 </p>
                 <button
                   onClick={onNavigateToCourses}
@@ -239,9 +239,9 @@ export default function DashboardView({
             {/* Step checklist */}
             <div className="border-t border-white/10 px-8 py-5 space-y-3">
               {[
-                { done: false, label: 'Add your courses', note: 'Required — unlocks your study plan', required: true },
-                { done: false, label: 'Import your syllabus', note: 'Required — pulls in all exams and deadlines', required: true },
-                { done: false, label: 'Your sessions generate automatically', note: 'Sit back — we handle the scheduling', required: false },
+                { done: false, label: 'Add your courses', note: 'Required. Unlocks your study plan.', required: true },
+                { done: false, label: 'Import your syllabus', note: 'Required. Pulls in all exams and deadlines.', required: true },
+                { done: false, label: 'Your sessions generate automatically', note: 'Sit back, we handle the scheduling.', required: false },
               ].map(({ done, label, note, required }, i) => (
                 <div key={i} className="flex items-start gap-3">
                   <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${
@@ -491,7 +491,7 @@ export default function DashboardView({
                             <div className="mb-4">
                               <p className="text-slate-600 dark:text-slate-300 text-sm font-medium">
                                 <span className="text-slate-400 dark:text-slate-500">Week {weekInfo.weekIndex + 1} of {weekInfo.total}</span>
-                                {weekInfo.theme && <span className="text-slate-400 dark:text-slate-600 mx-1.5">—</span>}
+                                {weekInfo.theme && <span className="text-slate-400 dark:text-slate-600 mx-1.5">·</span>}
                                 {weekInfo.theme && <span>Focus: {weekInfo.theme}</span>}
                               </p>
                             </div>
@@ -576,7 +576,7 @@ export default function DashboardView({
                       <div className="flex-1 min-w-0">
                         <p className="text-slate-800 dark:text-slate-100 font-semibold text-sm mb-1">Set up your study plan</p>
                         <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed mb-1.5">
-                          Tell us your goals, what your professor emphasizes, and your schedule — we'll build a week-by-week plan that powers your entire experience.
+                          Tell us your goals, what your professor emphasizes, and your schedule, and we'll build a week-by-week plan that powers your entire experience.
                         </p>
                         <p className="text-slate-400 dark:text-slate-500 text-[11px] leading-relaxed">
                           This unlocks personalized sessions, smarter flashcards, and AI tutoring tailored to your course.

@@ -37,14 +37,14 @@ export function generateQuiz(flashcards) {
       if (isTrue || deck.length < 2) {
         questions.push({
           type: 'tf',
-          question: `"${card.front}" — ${card.back.slice(0, 120)}`,
+          question: `"${card.front}" · ${card.back.slice(0, 120)}`,
           answer: true,
         })
       } else {
         const other = deck.find((_, j) => j !== i)
         questions.push({
           type: 'tf',
-          question: `"${card.front}" — ${other.back.slice(0, 120)}`,
+          question: `"${card.front}" · ${other.back.slice(0, 120)}`,
           answer: false,
         })
       }

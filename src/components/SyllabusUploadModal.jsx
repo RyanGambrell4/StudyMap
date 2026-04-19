@@ -218,7 +218,7 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, onConfi
                     <p className={`font-semibold text-base transition-colors ${dragging ? 'text-indigo-300' : 'text-slate-200'}`}>
                       {dragging ? 'Drop to upload' : 'Drop your PDF here'}
                     </p>
-                    <p className="text-slate-500 text-sm mt-1">or click to browse — PDF files only</p>
+                    <p className="text-slate-500 text-sm mt-1">or click to browse. PDF files only.</p>
                   </div>
                   <input ref={fileRef} type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleFileInput} />
                 </div>

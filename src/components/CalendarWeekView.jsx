@@ -554,7 +554,7 @@ export default function CalendarWeekView({
                     touchAction: 'none',
                   }}
                   onPointerDown={e => handleSessionPointerDown(e, ev, colIdx)}
-                  title={conflictWith ? `Conflicts with ${conflictWith} — drag to reschedule` : undefined}
+                  title={conflictWith ? `Conflicts with ${conflictWith}. Drag to reschedule.` : undefined}
                 >
                   <div className="px-1.5 py-0.5">
                     <div className="flex items-center gap-0.5">

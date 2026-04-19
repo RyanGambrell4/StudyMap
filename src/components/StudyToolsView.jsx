@@ -542,7 +542,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
           {/* Scan handwritten notes */}
           <div>
-            <p className="text-xs text-slate-500 text-center mb-3">— or —</p>
+            <p className="text-xs text-slate-500 text-center mb-3">or</p>
             <input
               ref={scanInputRef}
               type="file"
@@ -581,7 +581,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
           {/* Paste box */}
           <div>
-            <p className="text-xs text-slate-500 text-center mb-3">— or —</p>
+            <p className="text-xs text-slate-500 text-center mb-3">or</p>
             <label className="block text-xs font-medium text-slate-400 mb-1.5">Paste your notes directly</label>
             <textarea
               value={pastedText}

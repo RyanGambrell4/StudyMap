@@ -2,10 +2,10 @@ import { useMemo } from 'react'
 
 const STREAK_MSGS = [
   { min: 0,  msg: 'Start your first session today to build your streak!' },
-  { min: 1,  msg: 'Great start — consistency is everything. Keep going!' },
-  { min: 3,  msg: 'Three days in — you\'re building a real habit. 🔥' },
+  { min: 1,  msg: 'Great start. Consistency is everything. Keep going!' },
+  { min: 3,  msg: 'Three days in, you\'re building a real habit. 🔥' },
   { min: 7,  msg: 'One week strong! Your future self thanks you. 🚀' },
-  { min: 14, msg: 'Two weeks of consistency — this is exceptional work. 💪' },
+  { min: 14, msg: 'Two weeks of consistency. This is exceptional work. 💪' },
   { min: 21, msg: 'Three weeks! You\'ve officially built a study habit. 🏆' },
   { min: 30, msg: 'A month of dedication. You\'re unstoppable. 🌟' },
 ]

@@ -70,7 +70,7 @@ function LockedState({ onShowPaywall }) {
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
             </svg>
           </div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Grade Hub — Pro Feature</h3>
+          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Grade Hub · Pro Feature</h3>
           <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xs mb-5">
             Advanced grade planning, live tracking, and what-if scenario modeling require a Pro or Unlimited plan.
           </p>
@@ -218,7 +218,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
                 {row.graded ? 'Graded' : 'Not yet'}
               </button>
               <input
-                type="number" placeholder="—" min="0" max="100" step="0.1"
+                type="number" placeholder="-" min="0" max="100" step="0.1"
                 value={row.grade}
                 disabled={!row.graded}
                 onChange={e => setRow(i, 'grade', e.target.value)}
@@ -247,7 +247,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
         {/* Weight total */}
         <div className={`mt-3 flex items-center gap-2 text-xs font-semibold ${weightOk ? 'text-emerald-500' : 'text-amber-400'}`}>
           <div className={`w-2 h-2 rounded-full ${weightOk ? 'bg-emerald-500' : 'bg-amber-400'}`} />
-          {totalWeight.toFixed(0)}% / 100% {!weightOk && '— weights must sum to 100%'}
+          {totalWeight.toFixed(0)}% / 100% {!weightOk && '· weights must sum to 100%'}
         </div>
 
         {/* Target grade */}
@@ -291,10 +291,10 @@ function PlanTab({ course, gradeData, dot, onSave }) {
           </h3>
           <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
             {neededInfo?.impossible
-              ? 'Target is no longer mathematically achievable — consider adjusting your target.'
+              ? 'Target is no longer mathematically achievable. Consider adjusting your target.'
               : neededInfo?.needed !== null
                 ? `You need an average of ${neededInfo.needed.toFixed(1)}% on remaining work.`
-                : 'All components graded — see your current grade in the Track tab.'}
+                : 'All components graded. See your current grade in the Track tab.'}
           </p>
 
           {/* Per-component target scores */}
@@ -351,7 +351,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
                         return (
                           <div key={c.id} className="flex justify-between text-xs">
                             <span className="text-slate-500 truncate mr-2">{c.component}</span>
-                            <span className="font-bold shrink-0" style={{ color: sc }}>{score?.toFixed(0) ?? '—'}%</span>
+                            <span className="font-bold shrink-0" style={{ color: sc }}>{score?.toFixed(0) ?? '-'}%</span>
                           </div>
                         )
                       })}
@@ -448,7 +448,7 @@ function TrackTab({ course, gradeData, dot, onSave }) {
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-0.5">Current Grade</p>
             <div className="flex items-baseline gap-2">
               <span className="text-5xl font-black" style={{ color: sc.color }}>
-                {currentGrade !== null ? currentGrade.toFixed(1) : '—'}
+                {currentGrade !== null ? currentGrade.toFixed(1) : '-'}
               </span>
               <span className="text-2xl font-bold text-slate-400">%</span>
               <span className="text-xl font-bold" style={{ color: sc.color }}>{letterGrade(currentGrade)}</span>
@@ -494,7 +494,7 @@ function TrackTab({ course, gradeData, dot, onSave }) {
               To keep your current {currentGrade?.toFixed(1)}%, score at least:
             </p>
             {defense.impossible
-              ? <p className="text-xs text-red-400">Score is already locked in — no remaining work can change it.</p>
+              ? <p className="text-xs text-red-400">Score is already locked in. No remaining work can change it.</p>
               : <p className="text-2xl font-black text-amber-500">{defense.floor?.toFixed(1)}% on all remaining work</p>
             }
           </div>
@@ -536,7 +536,7 @@ function TrackTab({ course, gradeData, dot, onSave }) {
                   <div className="relative w-20">
                     <input
                       type="number"
-                      placeholder={neededScore !== null ? `${neededScore.toFixed(0)}` : '—'}
+                      placeholder={neededScore !== null ? `${neededScore.toFixed(0)}` : '-'}
                       value={localGrades[c.id]}
                       min="0" max="100" step="0.1"
                       onChange={e => setGrade(c.id, e.target.value)}
@@ -650,7 +650,7 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
             <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-0.5">Projected Grade</p>
             <div className="flex items-baseline gap-2">
               <span className="text-5xl font-black transition-all duration-200" style={{ color: sc.color }}>
-                {projected !== null ? projected.toFixed(1) : '—'}
+                {projected !== null ? projected.toFixed(1) : '-'}
               </span>
               <span className="text-2xl font-bold text-slate-400">%</span>
               <span className="text-2xl font-bold" style={{ color: sc.color }}>{letterGrade(projected)}</span>
@@ -815,7 +815,7 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
                               <td key={s.name} className="px-4 py-2.5 text-center font-bold"
                                 style={{ color: isMax ? '#10b981' : isMin ? '#ef4444' : '#64748b' }}
                               >
-                                {score?.toFixed(0) ?? '—'}%
+                                {score?.toFixed(0) ?? '-'}%
                               </td>
                             )
                           })}

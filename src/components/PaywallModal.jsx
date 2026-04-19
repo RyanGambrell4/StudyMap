@@ -87,7 +87,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     setLoading(null)
 
     if (!url) {
-      alert('Something went wrong — please try again.')
+      alert('Something went wrong. Please try again.')
       return
     }
 
