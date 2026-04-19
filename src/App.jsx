@@ -184,18 +184,38 @@ export default function App() {
 
     // Detect an in-progress OAuth callback so we don't redirect the user
     // away before Supabase has a chance to exchange the code for a session.
-    // PKCE flow returns ?code=..., implicit flow returns #access_token=...
     const hasOAuthCode = !!sp.get('code')
     const hasOAuthHash = typeof window !== 'undefined' && window.location.hash.includes('access_token')
     const inOAuthCallback = hasOAuthCode || hasOAuthHash
+
+    // Detect an existing Supabase session in localStorage. When the Supabase
+    // client is still booting (before getSession resolves), `session` is
+    // null/undefined even though a valid token is sitting in storage. If we
+    // blindly redirect to '/', the landing-page bounce script sees the
+    // session and redirects us right back to '/app' — creating an infinite
+    // flip-flop that dumps the user on the marketing page.
+    let hasStoredSession = false
+    try {
+      if (typeof window !== 'undefined') {
+        for (let i = 0; i < window.localStorage.length; i++) {
+          const key = window.localStorage.key(i)
+          if (!key) continue
+          if (key.startsWith('sb-') && key.includes('-auth-token')) {
+            const val = window.localStorage.getItem(key)
+            if (val && val.includes('access_token')) { hasStoredSession = true; break }
+          }
+        }
+      }
+    } catch {}
 
     if (showAuth || urlSignup || urlLogin || hasOAuthError) {
       const mode = urlSignup ? 'signup' : urlLogin ? 'login' : authMode
       return <AuthScreen initialMode={mode} onBack={() => { window.location.href = '/' }} />
     }
 
-    // Mid-OAuth — hold with a spinner until onAuthStateChange fires
-    if (inOAuthCallback) {
+    // Mid-OAuth callback OR Supabase still hydrating a stored session —
+    // hold with a spinner. onAuthStateChange will fire and we'll render.
+    if (inOAuthCallback || hasStoredSession) {
       return (
         <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0f1e' }}>
           <div className="text-center space-y-4">
