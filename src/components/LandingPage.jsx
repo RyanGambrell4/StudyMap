@@ -202,7 +202,7 @@ export default function LandingPage({ onGetStarted }) {
         }}>
 
           {/* ── 1. AI Session Planner ── */}
-          <FeatureCard color="#6366f1" icon="✦" title="AI Session Planner" desc="AI breaks every study session into timed steps: warm-up, deep review, active recall, and more. No guessing what to do next.">
+          <FeatureCard color="#6366f1" icon={<svg width="16" height="16" viewBox="0 0 20 20" fill="#6366f1"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd"/></svg>} title="AI Session Planner" desc="AI breaks every study session into timed steps: warm-up, deep review, active recall, and more. No guessing what to do next.">
             <div style={{ padding: '16px 16px 8px', fontFamily: 'inherit' }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: '#6366f1', letterSpacing: 1, marginBottom: 8 }}>SESSION PLAN READY</div>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 10, lineHeight: 1.3 }}>Memory & Encoding: Active Recall</div>
@@ -228,7 +228,7 @@ export default function LandingPage({ onGetStarted }) {
           </FeatureCard>
 
           {/* ── 2. AI Study Coach ── */}
-          <FeatureCard color="#7c5cfc" icon="💬" title="AI Study Coach" desc="Ask questions, get explanations, quiz yourself. Like having a tutor available 24/7 for every course.">
+          <FeatureCard color="#7c5cfc" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>} title="AI Study Coach" desc="Ask questions, get explanations, quiz yourself. Like having a tutor available 24/7 for every course.">
             <div style={{ padding: '16px 16px 8px' }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: '#7c5cfc', letterSpacing: 1, marginBottom: 10 }}>YOUR WEEK-BY-WEEK PLAN</div>
               {[
@@ -255,7 +255,7 @@ export default function LandingPage({ onGetStarted }) {
           </FeatureCard>
 
           {/* ── 3. Smart Flashcards ── */}
-          <FeatureCard color="#22c55e" icon="🃏" title="Smart Flashcards" desc="AI generates flashcards from your course material. Rate difficulty and focus on what you actually need to review.">
+          <FeatureCard color="#22c55e" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>} title="Smart Flashcards" desc="AI generates flashcards from your course material. Rate difficulty and focus on what you actually need to review.">
             <div style={{ padding: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, fontSize: 10, color: 'rgba(226,232,240,0.4)' }}>
                 <span>Card 3 of 15</span><span>23% covered</span>
@@ -274,7 +274,7 @@ export default function LandingPage({ onGetStarted }) {
           </FeatureCard>
 
           {/* ── 4. Focus Mode ── */}
-          <FeatureCard color="#f97316" icon="🎯" title="Focus Mode" desc="Distraction-free study timer with session tracking. See your streak grow as you build consistent habits.">
+          <FeatureCard color="#f97316" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>} title="Focus Mode" desc="Distraction-free study timer with session tracking. See your streak grow as you build consistent habits.">
             <div style={{ padding: '16px', textAlign: 'center' }}>
               <div style={{ fontSize: 10, color: 'rgba(226,232,240,0.35)', marginBottom: 12 }}>60 min session</div>
               <div style={{ position: 'relative', width: 100, height: 100, margin: '0 auto 14px' }}>
@@ -298,7 +298,7 @@ export default function LandingPage({ onGetStarted }) {
           </FeatureCard>
 
           {/* ── 5. Study Schedule ── */}
-          <FeatureCard color="#2dd4bf" icon="📅" title="Study Schedule" desc="See your entire week planned out, every session, every course, organized by time and priority.">
+          <FeatureCard color="#2dd4bf" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>} title="Study Schedule" desc="See your entire week planned out, every session, every course, organized by time and priority.">
             <div style={{ padding: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
                 {['Mon','Tue','Wed','Thu','Fri'].map((d,i) => (
@@ -322,16 +322,16 @@ export default function LandingPage({ onGetStarted }) {
           </FeatureCard>
 
           {/* ── 6. Progress Dashboard ── */}
-          <FeatureCard color="#a78bfa" icon="📊" title="Progress Dashboard" desc="Track your streaks, sessions completed, hours studied. Stay motivated with real data on your progress.">
+          <FeatureCard color="#a78bfa" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>} title="Progress Dashboard" desc="Track your streaks, sessions completed, hours studied. Stay motivated with real data on your progress.">
             <div style={{ padding: '16px' }}>
               <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
                 <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '10px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.07)' }}>
-                  <div style={{ fontSize: 20 }}>🔥</div>
+                  <div style={{ display:'flex', justifyContent:'center', color:'#f97316' }}><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd"/></svg></div>
                   <div style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>7</div>
                   <div style={{ fontSize: 9, color: 'rgba(226,232,240,0.4)' }}>day streak</div>
                 </div>
                 <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '10px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.07)' }}>
-                  <div style={{ fontSize: 20 }}>✅</div>
+                  <div style={{ display:'flex', justifyContent:'center', color:'#22c55e' }}><svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd"/></svg></div>
                   <div style={{ fontSize: 18, fontWeight: 800, color: '#fff' }}>32</div>
                   <div style={{ fontSize: 9, color: 'rgba(226,232,240,0.4)' }}>sessions done</div>
                 </div>
