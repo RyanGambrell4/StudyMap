@@ -168,7 +168,7 @@ export default function OnboardingTour({ onReady }) {
           title: "That's it.",
           description: 'Start by adding your first course. Takes 30 seconds.',
           showButtons: ['previous', 'next'],
-          nextBtnText: "Let's go →",
+          nextBtnText: "Let's go",
         },
       },
     ]
@@ -179,6 +179,8 @@ export default function OnboardingTour({ onReady }) {
       progressText: '{{current}} of {{total}}',
       allowClose: true,
       overlayOpacity: 0.55,
+      nextBtnText: 'Next',
+      prevBtnText: 'Previous',
       steps,
       onDestroyStarted: () => {
         localStorage.setItem(TOUR_KEY, '1')

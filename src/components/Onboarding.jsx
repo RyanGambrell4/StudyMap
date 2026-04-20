@@ -4,38 +4,53 @@ import { useState, useEffect, useRef } from 'react'
 const STYLE_OPTIONS = [
   {
     value: 'visual',
-    label: '🎨  Visual',
+    label: 'Visual',
     desc: 'You think in diagrams. Color-coding, flowcharts, and mind maps make complex ideas click. If you can see it, you can learn it.',
   },
   {
     value: 'reading',
-    label: '📖  Reading & Writing',
+    label: 'Reading & Writing',
     desc: 'You process through text. Rewriting notes, summarizing chapters, and annotating readings are how ideas stick for you.',
   },
   {
     value: 'practice',
-    label: '🧩  Practice-Based',
+    label: 'Practice-Based',
     desc: 'You learn by doing. Flashcards, past exams, and problem sets are your best tools. Repetition and reps build your mastery.',
   },
 ]
+
+const TIME_ICONS = {
+  Morning: (
+    <svg style={{ width: '1.75rem', height: '1.75rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
+    </svg>
+  ),
+  Afternoon: (
+    <svg style={{ width: '1.75rem', height: '1.75rem' }} viewBox="0 0 20 20" fill="currentColor">
+      <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
+    </svg>
+  ),
+  Evening: (
+    <svg style={{ width: '1.75rem', height: '1.75rem' }} viewBox="0 0 20 20" fill="currentColor">
+      <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
+    </svg>
+  ),
+}
 
 const TIME_OPTIONS = [
   {
     value: 'Morning',
     label: 'Morning',
-    emoji: '☀️',
     desc: "Sharpest before the day gets noisy. Early sessions, clear head.",
   },
   {
     value: 'Afternoon',
     label: 'Afternoon',
-    emoji: '⚡',
     desc: "Post-lunch and fully awake. You hit your stride after noon.",
   },
   {
     value: 'Evening',
     label: 'Evening',
-    emoji: '🌙',
     desc: "Night owl energy. When the world quiets down, you focus.",
   },
 ]
@@ -43,12 +58,12 @@ const TIME_OPTIONS = [
 const SCHOOL_OPTIONS = [
   {
     key: 'hs',
-    label: '🎒  High School',
+    label: 'High School',
     desc: 'AP classes, finals week, and juggling it all before graduation.',
   },
   {
     key: 'uni',
-    label: '🎓  University',
+    label: 'University',
     desc: 'Lectures, labs, deadlines, and somehow a social life too.',
   },
 ]
@@ -656,14 +671,14 @@ export default function Onboarding({ onComplete }) {
         </p>
 
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px', marginBottom: '24px' }}>
-          {TIME_OPTIONS.map(({ value, label, emoji, desc }) => (
+          {TIME_OPTIONS.map(({ value, label, desc }) => (
             <OptionCard
               key={value}
               selected={preferredTime === value}
               onClick={() => setPreferredTime(value)}
               style={{ padding: '22px 12px 18px', width: '100%', textAlign: 'center' }}
             >
-              <p style={{ fontSize: '1.5rem', marginBottom: '8px', lineHeight: 1 }}>{emoji}</p>
+              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '8px', color: preferredTime === value ? '#a5b4fc' : '#64748b' }}>{TIME_ICONS[value]}</div>
               <p style={{
                 color: preferredTime === value ? '#c7d2fe' : '#cbd5e1',
                 fontSize: '0.92rem', fontWeight: 700, marginBottom: '6px', letterSpacing: '-0.2px',

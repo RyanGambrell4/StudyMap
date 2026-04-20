@@ -485,7 +485,8 @@ function TrackTab({ course, gradeData, dot, onSave }) {
               : 'text-slate-500 border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/60'
           }`}
         >
-          🛡️ Grade Defense Mode {defenseMode ? 'ON' : 'OFF'}
+          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+          Grade Defense Mode {defenseMode ? 'ON' : 'OFF'}
         </button>
 
         {defenseMode && defense && (
@@ -559,7 +560,7 @@ function TrackTab({ course, gradeData, dot, onSave }) {
         >
           {needed.impossible ? (
             <>
-              <p className="text-sm font-bold text-red-500 mb-1">⚠️ Target grade no longer achievable</p>
+              <p className="text-sm font-bold text-red-500 mb-1 flex items-center gap-1.5"><svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg> Target grade no longer achievable</p>
               <p className="text-xs text-red-400">You would need more than 100% on remaining work. Consider adjusting your target in the Plan tab.</p>
             </>
           ) : (
@@ -946,7 +947,7 @@ function ConnectionSection({ course, gradeData, dot, onShowPaywall, userId }) {
           {aiLoading ? (
             <><div className="w-4 h-4 rounded-full border-2 border-slate-400 border-t-indigo-500 animate-spin" /> Running AI analysis...</>
           ) : (
-            <><span>✨</span> Run AI Grade Prediction</>
+            <><svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg> Run AI Grade Prediction</>
           )}
         </button>
       </div>
@@ -954,7 +955,7 @@ function ConnectionSection({ course, gradeData, dot, onShowPaywall, userId }) {
       {aiPrediction && (
         <div className="rounded-xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50 dark:bg-indigo-950/30 p-4">
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-indigo-500">✨</span>
+            <svg className="w-4 h-4 text-indigo-500" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
             <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">AI Prediction</p>
           </div>
           <div className="flex items-baseline gap-2 mb-3">
@@ -1017,9 +1018,9 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
   }, [activeCourseIdx, course, onEditCourse])
 
   const TABS = [
-    { id: 'plan',    label: 'Plan',    icon: '🎯' },
-    { id: 'track',   label: 'Track',   icon: '📊' },
-    { id: 'sandbox', label: 'Sandbox', icon: '🔬' },
+    { id: 'plan',    label: 'Plan',    icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg> },
+    { id: 'track',   label: 'Track',   icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg> },
+    { id: 'sandbox', label: 'Sandbox', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg> },
   ]
 
   return (
@@ -1053,7 +1054,7 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
                   : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
               }`}
             >
-              <span className="text-base leading-none">{tab.icon}</span>
+              {tab.icon}
               {tab.label}
             </button>
           ))}

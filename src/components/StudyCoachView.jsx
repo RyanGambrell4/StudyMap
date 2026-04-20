@@ -193,7 +193,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       {/* Struggles banner */}
       {struggles.length > 0 && (
         <div className="mb-5 flex items-start gap-3 bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800/50 rounded-xl px-4 py-3">
-          <span className="text-base shrink-0 mt-0.5">📌</span>
+          <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
           <p className="text-indigo-700 dark:text-indigo-300 text-sm leading-relaxed">
             <span className="font-semibold">Topics flagged from AI Tutor: </span>
             {struggles.join(', ')}
@@ -219,7 +219,10 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
           : { bg: 'bg-amber-50 dark:bg-amber-950/30', border: 'border-amber-200 dark:border-amber-800/50', text: 'text-amber-700 dark:text-amber-300', sub: 'text-amber-500 dark:text-amber-400' }
         return (
           <div className={`mb-5 flex items-start gap-3 ${color.bg} border ${color.border} rounded-xl px-4 py-3`}>
-            <span className="text-base shrink-0 mt-0.5">{isRecovery ? '🚨' : '⚠️'}</span>
+            {isRecovery
+              ? <svg className="w-4 h-4 shrink-0 mt-0.5" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+              : <svg className="w-4 h-4 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+            }
             <p className={`${color.text} text-sm leading-relaxed`}>
               <span className="font-semibold">{isRecovery ? 'Grade recovery needed: ' : 'Grade gap detected: '}</span>
               Current {letterGrade(current)} ({current.toFixed(1)}%), target {targetLabel}, {Math.abs(gap).toFixed(1)} points below. This plan will prioritize closing the gap.

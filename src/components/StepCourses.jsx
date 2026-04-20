@@ -155,9 +155,9 @@ export default function StepCourses({ courses, setCourses, yearLevel, setYearLev
                   className={`${inputBase} border-slate-700`}
                   style={{ colorScheme: 'dark' }}
                 >
-                  <option value="Easy">🟢 Easy</option>
-                  <option value="Medium">🟡 Medium</option>
-                  <option value="Hard">🔴 Hard</option>
+                  <option value="Easy">Easy</option>
+                  <option value="Medium">Medium</option>
+                  <option value="Hard">Hard</option>
                 </select>
               </div>
               <div>
@@ -168,10 +168,10 @@ export default function StepCourses({ courses, setCourses, yearLevel, setYearLev
                   className={`${inputBase} border-slate-700`}
                   style={{ colorScheme: 'dark' }}
                 >
-                  <option value="A">🎯 A (90%+)</option>
-                  <option value="B">✅ B (80–89%)</option>
-                  <option value="C">📝 C (70–79%)</option>
-                  <option value="Pass/Fail">☑️ Pass/Fail</option>
+                  <option value="A">A (90%+)</option>
+                  <option value="B">B (80–89%)</option>
+                  <option value="C">C (70–79%)</option>
+                  <option value="Pass/Fail">Pass/Fail</option>
                 </select>
               </div>
             </div>

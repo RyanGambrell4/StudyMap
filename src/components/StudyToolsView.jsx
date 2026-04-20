@@ -884,7 +884,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                   {score}/{quiz.length}
                 </div>
                 <h2 className="text-white text-xl font-bold mb-1">
-                  {score >= quiz.length * 0.8 ? 'Excellent work! 🎉' : score >= quiz.length * 0.6 ? 'Good effort! 📚' : 'Keep studying! 💪'}
+                  {score >= quiz.length * 0.8 ? 'Excellent work!' : score >= quiz.length * 0.6 ? 'Good effort!' : 'Keep studying!'}
                 </h2>
                 <p className="text-slate-400 text-sm">
                   You got {score} out of {quiz.length} questions correct ({Math.round((score / quiz.length) * 100)}%)

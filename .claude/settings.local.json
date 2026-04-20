@@ -12,7 +12,22 @@
       "Bash(git push:*)",
       "Bash(git add:*)",
       "Bash(git commit:*)",
-      "mcp__02cf278a-fb7d-46d0-88e3-73bdbab27fde__get_runtime_logs"
+      "mcp__02cf278a-fb7d-46d0-88e3-73bdbab27fde__get_runtime_logs",
+      "Bash(unzip -l \"/Users/ryangambrell/Downloads/StudyEdge Landing Page V2-handoff.zip\")",
+      "Bash(mkdir -p /tmp/studyedge-v2)",
+      "Bash(unzip -oq \"/Users/ryangambrell/Downloads/StudyEdge Landing Page V2-handoff.zip\" -d /tmp/studyedge-v2/)",
+      "Read(//tmp/studyedge-v2/studyedge-landing-page-v2/**)",
+      "Read(//private/tmp/studyedge-v2/studyedge-landing-page-v2/project/**)",
+      "Bash(grep -l \"StatsBar\\\\|Bento\\\\|GradeIntel\\\\|Testimonials\\\\|FinalCTA\\\\|Footer\" components/*.jsx)",
+      "Bash(grep -E \"^function |window\\\\.\" components/*.jsx)",
+      "Bash(grep -rn \"section-title\" /Users/ryangambrell/Desktop/StudyMap/public/v2/*.css)",
+      "Bash(grep -rn \"section-head\" /Users/ryangambrell/Desktop/StudyMap/public/v2/*.css)",
+      "Bash(curl -s \"https://getstudyedge.com\")",
+      "mcp__a9bac2d5-ee3b-47e5-ae22-56d42b7d0a64__execute_sql",
+      "Bash(rm -f .git/index.lock .git/HEAD.lock)",
+      "Bash(you in…\" spinner until supabase.auth.onAuthStateChange fires. After:*)",
+      "Bash(failed\" because Supabase''s Bot and Abuse Protection setting enforces:*)",
+      "Bash(python3:*)"
     ]
   }
 }

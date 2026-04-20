@@ -144,7 +144,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       {/* Flag banner */}
       {flagBanner && (
         <div className="mx-4 mt-3 shrink-0 flex items-center gap-2.5 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/60 rounded-xl px-4 py-2.5 text-sm">
-          <span>📌</span>
+          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
           <span className="text-indigo-700 dark:text-indigo-300 font-medium flex-1">
             '<span className="font-bold">{flagBanner}</span>' added to your study plan focus areas
           </span>

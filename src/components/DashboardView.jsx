@@ -283,7 +283,7 @@ export default function DashboardView({
           {/* Streak badge */}
           {(streak > 1 || lastCompletedDate === todayStr) ? (
             <div className="shrink-0 flex items-center gap-2 bg-orange-500/15 border border-orange-500/30 rounded-2xl px-4 py-2.5">
-              <span className="text-xl leading-none">🔥</span>
+              <svg className="w-5 h-5 text-orange-500" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" /></svg>
               <div>
                 <p className="text-orange-500 dark:text-orange-300 font-black text-xl leading-none">{streak}</p>
                 <p className="text-orange-500/70 dark:text-orange-400/70 text-xs font-semibold mt-0.5">day streak</p>
@@ -291,7 +291,7 @@ export default function DashboardView({
             </div>
           ) : (
             <div className="shrink-0 flex items-center gap-2 bg-slate-200/80 dark:bg-slate-800/60 border border-slate-300/60 dark:border-slate-700/40 rounded-2xl px-4 py-2.5">
-              <span className="text-xl leading-none">🔥</span>
+              <svg className="w-5 h-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" /></svg>
               <p className="text-slate-500 dark:text-slate-400 font-bold text-sm">Start your streak</p>
             </div>
           )}
@@ -523,7 +523,7 @@ export default function DashboardView({
                           {/* Struggles */}
                           {struggles && (
                             <p className="text-xs text-amber-600 dark:text-amber-400/80 mb-3 leading-relaxed">
-                              <span className="mr-1">📌</span>
+                              <svg className="w-3.5 h-3.5 mr-1 shrink-0 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
                               <span className="font-semibold">Needs attention:</span> {struggles.join(', ')}
                             </p>
                           )}

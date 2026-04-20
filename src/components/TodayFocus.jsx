@@ -12,7 +12,7 @@ export default function TodayFocus({ nextSession, onStartFocus }) {
   if (!nextSession) {
     return (
       <div className="no-print flex items-center gap-4 bg-emerald-950/40 border border-emerald-800/40 rounded-2xl px-6 py-5 mb-6">
-        <div className="text-2xl">🎓</div>
+        <div className="text-emerald-400"><svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" /></svg></div>
         <div>
           <p className="font-bold text-emerald-400 text-base">All sessions complete!</p>
           <p className="text-slate-500 text-sm mt-0.5">You've finished every scheduled session. Incredible work.</p>
@@ -37,7 +37,7 @@ export default function TodayFocus({ nextSession, onStartFocus }) {
             <span className="text-slate-500 text-xs font-semibold uppercase tracking-widest">Up Next · {whenLabel}</span>
             {isFinal && (
               <span className="text-xs px-2 py-0.5 rounded-full font-medium bg-amber-500/15 text-amber-400 border border-amber-500/20">
-                {nextSession.sessionType === 'Exam Cram' ? '🔥 Exam Cram' : '⚡ Final Review'}
+                {nextSession.sessionType === 'Exam Cram' ? 'Exam Cram' : 'Final Review'}
               </span>
             )}
           </div>
