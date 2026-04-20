@@ -24,6 +24,9 @@ const D = {
 const COURSE_COLORS = ['#6366f1', '#f472b6', '#22d3ee', '#fbbf24', '#4ade80', '#f97316']
 const courseColor = (idx) => COURSE_COLORS[idx % COURSE_COLORS.length]
 
+// Replace em dashes with a regular hyphen in any displayed string
+const clean = (str) => (str ?? '').replace(/\s*—\s*/g, ' - ')
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function greeting() {
   const h = new Date().getHours()
@@ -251,7 +254,7 @@ export default function DashboardView({
         const e = upcoming[0]
         const days = daysBetween(todayStr, e.date)
         const dateLabel = days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : formatShortDate(e.date)
-        const shortName = (e.name ?? '').length > 18 ? (e.name ?? '').slice(0, 18) + '…' : (e.name ?? '')
+        const shortName = clean(e.name).length > 18 ? clean(e.name).slice(0, 18) + '…' : clean(e.name)
         map[idx] = `${shortName} · ${dateLabel}`
       } else if (c.examDate) {
         const days = daysBetween(todayStr, c.examDate)
@@ -284,12 +287,12 @@ export default function DashboardView({
   // AI coach message
   const aiMessage = useMemo(() => {
     if (upcomingExam && upcomingExam.days <= 7) {
-      return `${upcomingExam.course.name} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. Add focused review sessions this week to stay on track.`
+      return `${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. Add focused review sessions this week to stay on track.`
     }
     if (upcomingDeadlines.length > 0) {
       const d = upcomingDeadlines[0]
       const days = daysBetween(todayStr, d.date)
-      if (days <= 3) return `${d.name} is due ${days === 0 ? 'today' : days === 1 ? 'tomorrow' : `in ${days} days`}. Consider prioritizing this in your next session.`
+      if (days <= 3) return `${clean(d.name)} is due ${days === 0 ? 'today' : days === 1 ? 'tomorrow' : `in ${days} days`}. Consider prioritizing this in your next session.`
     }
     if (weekHours > 0 && deltaHours > 0) {
       return `You're up ${deltaHours}h from last week. Keep the momentum. Consistency beats intensity every time.`
@@ -301,7 +304,7 @@ export default function DashboardView({
   const subtitle = useMemo(() => {
     const parts = []
     if (todaySessions.length > 0) parts.push(`${todaySessions.length} session${todaySessions.length > 1 ? 's' : ''} on the schedule`)
-    if (upcomingExam && upcomingExam.days <= 14) parts.push(`${upcomingExam.course.name} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}`)
+    if (upcomingExam && upcomingExam.days <= 14) parts.push(`${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}`)
     if (!parts.length) return 'Keep up the momentum. Every session counts.'
     return parts.join('. ') + '.'
   }, [todaySessions, upcomingExam])
@@ -421,7 +424,7 @@ export default function DashboardView({
                 </div>
                 {/* Course name */}
                 <div style={{ fontSize: 12.5, color: D.textMuted, marginBottom: 4, fontWeight: 500 }}>
-                  {displaySession.courseName ?? ''}
+                  {clean(displaySession.courseName)}
                 </div>
                 {/* Topic */}
                 <div style={{ fontSize: 22, fontWeight: 600, letterSpacing: -0.3, color: D.text, marginBottom: 'auto' }}>
@@ -579,7 +582,7 @@ export default function DashboardView({
               }}>
                 <div style={{ width: 4, height: 28, background: color, borderRadius: 2 }} />
                 <div>
-                  <div style={{ fontSize: 13.5, fontWeight: 500, color: D.text }}>{course.name}</div>
+                  <div style={{ fontSize: 13.5, fontWeight: 500, color: D.text }}>{clean(course.name)}</div>
                   <div style={{ fontSize: 11.5, color: D.textDim, marginTop: 2 }}>
                     {lastLabel ? `Last session ${lastLabel}` : 'No sessions yet'}
                   </div>
@@ -734,8 +737,8 @@ export default function DashboardView({
                   }}>
                     <div style={{ width: 3, height: 22, background: evt.color?.dot ?? D.accent, borderRadius: 2 }} />
                     <div style={{ minWidth: 0 }}>
-                      <div style={{ fontSize: 13, fontWeight: 500, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{evt.name}</div>
-                      <div style={{ fontSize: 11, color: D.textDim, marginTop: 1 }}>{evt.courseName}</div>
+                      <div style={{ fontSize: 13, fontWeight: 500, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{clean(evt.name)}</div>
+                      <div style={{ fontSize: 11, color: D.textDim, marginTop: 1 }}>{clean(evt.courseName)}</div>
                     </div>
                     <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: D.textMuted, whiteSpace: 'nowrap' }}>{formatShortDate(evt.date)}</div>
                     <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, color: uc, fontWeight: 600, whiteSpace: 'nowrap' }}>{days}d</div>
