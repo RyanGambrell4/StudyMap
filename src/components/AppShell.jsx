@@ -1,5 +1,6 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { getActivePlan } from '../lib/subscription'
+import OnboardingTour from './OnboardingTour'
 
 // ── Nav items (5 primary) ──────────────────────────────────────────────────────
 const NAV_ITEMS = [
@@ -70,6 +71,8 @@ export default function AppShell({
   children,
 }) {
   const [settingsOpen, setSettingsOpen] = useState(false)
+  const [startTour, setStartTour] = useState(null)
+  const handleTourReady = useCallback((fn) => setStartTour(() => fn), [])
 
   const plan = getActivePlan()
   const planLabel = plan === 'unlimited' ? 'Unlimited' : plan === 'pro' ? 'Pro' : 'Free'
@@ -89,9 +92,20 @@ export default function AppShell({
         {/* Logo + theme toggle */}
         <div className="flex items-center gap-3 px-5 py-5 border-b border-slate-200 dark:border-slate-800">
           <img src="/favicon.png" alt="StudyEdge" style={{ height: '36px', width: '36px', objectFit: 'contain' }} />
+          {startTour && (
+            <button
+              onClick={startTour}
+              title="Take a tour"
+              className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-indigo-500 dark:hover:text-indigo-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </button>
+          )}
           <button
             onClick={onToggleTheme}
-            className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+            className="w-7 h-7 flex items-center justify-center rounded-lg text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors ml-auto"
             title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
           >
             {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
@@ -105,6 +119,7 @@ export default function AppShell({
             return (
               <button
                 key={item.id}
+                id={`tour-nav-${item.id}`}
                 onClick={() => setActiveSection(item.id)}
                 className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
                   active
@@ -225,6 +240,9 @@ export default function AppShell({
       <main className="flex-1 lg:ml-56 pb-20 lg:pb-0 min-h-screen">
         {children}
       </main>
+
+      {/* Onboarding tour */}
+      <OnboardingTour onReady={handleTourReady} />
 
       {/* ── Mobile bottom tab bar ── */}
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40 bg-white/95 dark:bg-[#0B1120]/95 backdrop-blur border-t border-slate-200 dark:border-slate-800 flex">
