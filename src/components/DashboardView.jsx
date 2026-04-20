@@ -4,6 +4,26 @@ import { useStreak } from '../utils/useStreak'
 import { getCurrentGrade, letterGrade, gradeStatus, STATUS_COLORS } from '../utils/gradeCalc'
 import { getActivePlan } from '../lib/subscription'
 
+// ── Color tokens ───────────────────────────────────────────────────────────────
+const C = {
+  pageBg:      '#080D18',
+  cardBg:      '#0D1525',
+  cardBorder:  '#1A2540',
+  accent:      '#6366F1',
+  textPrimary: '#F0F4FF',
+  textSec:     '#8896B3',
+  textMuted:   '#3D4F6B',
+  success:     '#10B981',
+  warning:     '#F59E0B',
+}
+
+const COURSE_COLORS = ['#6366F1', '#EC4899', '#06B6D4', '#F59E0B', '#10B981', '#F97316']
+
+function courseColor(idx) {
+  return COURSE_COLORS[idx % COURSE_COLORS.length]
+}
+
+// ── Helpers ────────────────────────────────────────────────────────────────────
 function greeting() {
   const h = new Date().getHours()
   if (h < 12) return 'Good morning'
@@ -11,22 +31,122 @@ function greeting() {
   return 'Good evening'
 }
 
-function formatDate(dateStr) {
-  return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
-    weekday: 'long', month: 'long', day: 'numeric',
-  })
+function formatDateHeader(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00')
+  const days = ['SUNDAY', 'MONDAY', 'TUESDAY', 'WEDNESDAY', 'THURSDAY', 'FRIDAY', 'SATURDAY']
+  const months = ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER']
+  return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`
 }
 
-// Derive a gradient from a hex color — darker version for gradient end
-function colorToGradient(hex) {
-  // Parse hex -> RGB -> darken for gradient
-  const r = parseInt(hex.slice(1, 3), 16)
-  const g = parseInt(hex.slice(3, 5), 16)
-  const b = parseInt(hex.slice(5, 7), 16)
-  const dark = `rgb(${Math.round(r * 0.55)}, ${Math.round(g * 0.55)}, ${Math.round(b * 0.55)})`
-  return `linear-gradient(135deg, ${hex} 0%, ${dark} 100%)`
+function daysBetween(a, b) {
+  return Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000)
 }
 
+function formatRelativeTime(dateStr, todayStr) {
+  const diff = daysBetween(dateStr, todayStr)
+  if (diff === 0) return 'today'
+  if (diff === 1) return 'yesterday'
+  if (diff < 7) return `${diff}d ago`
+  if (diff < 30) return `${Math.round(diff / 7)}w ago`
+  return `${Math.round(diff / 30)}mo ago`
+}
+
+function formatTime(timeStr) {
+  if (!timeStr) return null
+  const [h, m] = timeStr.split(':').map(Number)
+  const ampm = h >= 12 ? 'PM' : 'AM'
+  const hour = h % 12 || 12
+  return `${hour}:${String(m).padStart(2, '0')} ${ampm}`
+}
+
+// ── Sparkline ─────────────────────────────────────────────────────────────────
+function Sparkline({ color = '#6366F1', width = 80, height = 32 }) {
+  const points = '0,28 16,22 32,18 48,12 64,8 80,4'
+  return (
+    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
+      <polyline
+        points={points}
+        fill="none"
+        stroke={color}
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        opacity="0.7"
+      />
+    </svg>
+  )
+}
+
+// ── Card wrapper ──────────────────────────────────────────────────────────────
+function Card({ children, style, accentBorder }) {
+  return (
+    <div style={{
+      backgroundColor: C.cardBg,
+      border: `1px solid ${accentBorder ?? C.cardBorder}`,
+      borderRadius: 14,
+      ...style,
+    }}>
+      {children}
+    </div>
+  )
+}
+
+// ── Section label ─────────────────────────────────────────────────────────────
+function SectionLabel({ children }) {
+  return (
+    <p style={{
+      fontSize: 11,
+      fontWeight: 700,
+      letterSpacing: '0.08em',
+      textTransform: 'uppercase',
+      color: C.textSec,
+      margin: 0,
+    }}>
+      {children}
+    </p>
+  )
+}
+
+// ── Donut ring ────────────────────────────────────────────────────────────────
+function DonutRing({ pct = 0 }) {
+  const r = 52
+  const circ = 2 * Math.PI * r
+  const offset = circ - (pct / 100) * circ
+  return (
+    <svg width={120} height={120} viewBox="0 0 120 120">
+      <circle cx={60} cy={60} r={r} fill="none" stroke={C.cardBorder} strokeWidth={8} />
+      <circle
+        cx={60} cy={60} r={r}
+        fill="none"
+        stroke={C.accent}
+        strokeWidth={8}
+        strokeDasharray={circ}
+        strokeDashoffset={offset}
+        strokeLinecap="round"
+        style={{ transform: 'rotate(-90deg)', transformOrigin: '60px 60px', transition: 'stroke-dashoffset 0.6s ease' }}
+      />
+      <text x={60} y={56} textAnchor="middle" fill={C.textPrimary} style={{ fontSize: 18, fontWeight: 800, fontFamily: 'inherit' }}>
+        {pct}%
+      </text>
+      <text x={60} y={72} textAnchor="middle" fill={C.textMuted} style={{ fontSize: 9, fontFamily: 'inherit' }}>
+        of goal
+      </text>
+    </svg>
+  )
+}
+
+// ── Chevron right icon ─────────────────────────────────────────────────────────
+function ChevronRight() {
+  return (
+    <svg style={{ width: 14, height: 14, color: C.textMuted, flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+    </svg>
+  )
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// DashboardView
+// ═══════════════════════════════════════════════════════════════════════════════
 export default function DashboardView({
   courses,
   todayStr,
@@ -50,48 +170,11 @@ export default function DashboardView({
   onOpenStudyCoach,
 }) {
   const plan = getActivePlan()
-  const [gamePlanIdx, setGamePlanIdx] = useState(0)
-
-  // ── Determine current week from a coach plan's weeklyFocus ─────────────────
-  function getCurrentWeekInfo(weeklyFocus, sessionIndex) {
-    if (!weeklyFocus?.length) return null
-    // Try structured dates first
-    const today = new Date(todayStr + 'T12:00:00')
-    for (let i = 0; i < weeklyFocus.length; i++) {
-      const w = weeklyFocus[i]
-      if (w.startDate && w.endDate && todayStr >= w.startDate && todayStr <= w.endDate) {
-        const totalBefore = weeklyFocus.slice(0, i).reduce((s, wk) => s + (wk.sessions?.length ?? 0), 0)
-        const weekSessions = w.sessions?.length ?? 0
-        const completedInWeek = Math.min(Math.max((sessionIndex ?? 0) - totalBefore, 0), weekSessions)
-        return { weekIndex: i, total: weeklyFocus.length, theme: w.theme, weekSessions, completedInWeek }
-      }
-    }
-    // Fallback: parse "Week of Month Day"
-    for (let i = 0; i < weeklyFocus.length; i++) {
-      const w = weeklyFocus[i]
-      const match = w.week?.match(/Week of (\w+) (\d+)/)
-      if (match) {
-        const weekStart = new Date(`${match[1]} ${match[2]}, ${today.getFullYear()}`)
-        if (!isNaN(weekStart)) {
-          const weekEnd = new Date(weekStart); weekEnd.setDate(weekEnd.getDate() + 6)
-          if (today >= weekStart && today <= weekEnd) {
-            const totalBefore = weeklyFocus.slice(0, i).reduce((s, wk) => s + (wk.sessions?.length ?? 0), 0)
-            const weekSessions = w.sessions?.length ?? 0
-            const completedInWeek = Math.min(Math.max((sessionIndex ?? 0) - totalBefore, 0), weekSessions)
-            return { weekIndex: i, total: weeklyFocus.length, theme: w.theme, weekSessions, completedInWeek }
-          }
-        }
-      }
-    }
-    // Final fallback: first week
-    const w = weeklyFocus[0]
-    const weekSessions = w.sessions?.length ?? 0
-    const completedInWeek = Math.min(sessionIndex ?? 0, weekSessions)
-    return { weekIndex: 0, total: weeklyFocus.length, theme: w.theme, weekSessions, completedInWeek }
-  }
+  const { currentStreak, lastCompletedDate, recordCompletion } = useStreak()
   const celebrate = useCelebration()
+  const streak = currentStreak
 
-  // Fire big confetti once when all sessions for the day are complete
+  // ── Celebration on all-complete ─────────────────────────────────────────────
   const allCompleteKey = todayStr + (allComplete ? '-done' : '')
   const allCompleteFiredRef = useRef(null)
   useEffect(() => {
@@ -102,691 +185,667 @@ export default function DashboardView({
     }
   }, [allComplete, allCompleteKey])
 
-  // Wrap onToggle to fire light confetti on check-off
   const handleToggle = (id) => {
     if (!completedIds.has(id)) celebrate('light')
     onToggle(id)
   }
 
-  const daysBetween = (a, b) =>
-    Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000)
-
-  const tomorrowStr = useMemo(() => {
-    const d = new Date(todayStr + 'T12:00:00')
-    d.setDate(d.getDate() + 1)
-    return d.toISOString().split('T')[0]
-  }, [todayStr])
-
+  // ── Derived data ─────────────────────────────────────────────────────────────
   const todaySessions = useMemo(
     () => allSessions.filter(s => s.dateStr === todayStr),
     [allSessions, todayStr]
   )
-  const tomorrowSessions = useMemo(
-    () => allSessions.filter(s => s.dateStr === tomorrowStr),
-    [allSessions, tomorrowStr]
-  )
-  const showSessions = todaySessions.length > 0 ? todaySessions : tomorrowSessions
-  const isToday      = todaySessions.length > 0
-  const noSessions   = todaySessions.length === 0 && tomorrowSessions.length === 0
 
-  // Hero session = first incomplete session from showSessions
-  const heroSession = useMemo(
-    () => showSessions.find(s => !completedIds.has(s.id)) ?? showSessions[0] ?? null,
-    [showSessions, completedIds]
+  const nextUncompletedSession = useMemo(
+    () => allSessions.find(s => s.dateStr >= todayStr && !completedIds.has(s.id)) ?? null,
+    [allSessions, completedIds, todayStr]
   )
 
+  // Week bounds
+  const { weekStart, weekEnd, prevWeekStart, prevWeekEnd } = useMemo(() => {
+    const d = new Date(todayStr + 'T12:00:00')
+    const dow = d.getDay()
+    const mon = new Date(d); mon.setDate(d.getDate() - ((dow + 6) % 7))
+    const sun = new Date(mon); sun.setDate(mon.getDate() + 6)
+    const prevMon = new Date(mon); prevMon.setDate(mon.getDate() - 7)
+    const prevSun = new Date(sun); prevSun.setDate(sun.getDate() - 7)
+    return {
+      weekStart: mon.toISOString().split('T')[0],
+      weekEnd: sun.toISOString().split('T')[0],
+      prevWeekStart: prevMon.toISOString().split('T')[0],
+      prevWeekEnd: prevSun.toISOString().split('T')[0],
+    }
+  }, [todayStr])
+
+  const thisWeekDone = useMemo(
+    () => allSessions.filter(s => s.dateStr >= weekStart && s.dateStr <= weekEnd && completedIds.has(s.id)),
+    [allSessions, completedIds, weekStart, weekEnd]
+  )
+  const prevWeekDone = useMemo(
+    () => allSessions.filter(s => s.dateStr >= prevWeekStart && s.dateStr <= prevWeekEnd && completedIds.has(s.id)),
+    [allSessions, completedIds, prevWeekStart, prevWeekEnd]
+  )
+
+  const weekHours = Math.round(thisWeekDone.reduce((acc, s) => acc + (s.duration ?? 0), 0) / 60 * 10) / 10
+  const prevWeekHours = Math.round(prevWeekDone.reduce((acc, s) => acc + (s.duration ?? 0), 0) / 60 * 10) / 10
+  const weekSessionCount = thisWeekDone.length
+  const prevWeekSessionCount = prevWeekDone.length
+
+  const deltaHours = Math.round((weekHours - prevWeekHours) * 10) / 10
+  const deltaSessions = weekSessionCount - prevWeekSessionCount
+
+  // Upcoming exam
+  const upcomingExam = useMemo(() => {
+    if (!courses.length) return null
+    const exams = courses
+      .map((c, i) => ({ course: c, idx: i, days: c.examDate ? daysBetween(todayStr, c.examDate) : null }))
+      .filter(e => e.days !== null && e.days >= 0)
+      .sort((a, b) => a.days - b.days)
+    return exams[0] ?? null
+  }, [courses, todayStr])
+
+  // Last session per course (for "last session X ago")
+  const lastSessionPerCourse = useMemo(() => {
+    const map = {}
+    courses.forEach((_, idx) => {
+      const done = allSessions
+        .filter(s => s.courseId === idx && completedIds.has(s.id) && s.dateStr <= todayStr)
+        .sort((a, b) => b.dateStr.localeCompare(a.dateStr))
+      if (done.length) map[idx] = done[0]
+    })
+    return map
+  }, [courses, allSessions, completedIds, todayStr])
+
+  // Progress per course (total sessions vs completed)
+  const progressPerCourse = useMemo(() => {
+    const map = {}
+    courses.forEach((_, idx) => {
+      const total = allSessions.filter(s => s.courseId === idx).length
+      const done  = allSessions.filter(s => s.courseId === idx && completedIds.has(s.id)).length
+      map[idx] = { total, done }
+    })
+    return map
+  }, [courses, allSessions, completedIds])
+
+  // Weekly goal hours (from schedule or default 30)
+  const weeklyGoalHours = 20
+  const goalPct = Math.min(100, Math.round((weekHours / weeklyGoalHours) * 100))
+
+  // Subtitle
+  const subtitle = useMemo(() => {
+    const todayCount = todaySessions.length
+    const parts = []
+    if (todayCount > 0) {
+      parts.push(`${todayCount} session${todayCount > 1 ? 's' : ''} scheduled today`)
+    }
+    if (upcomingExam && upcomingExam.days <= 30) {
+      parts.push(`${upcomingExam.course.name} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}`)
+    }
+    if (!parts.length) return 'Keep up the momentum. Every session counts.'
+    return parts.join('. ') + '.'
+  }, [todaySessions, upcomingExam])
+
+  // ── Upcoming deadlines ───────────────────────────────────────────────────────
   const upcomingDeadlines = useMemo(() => {
-    const all = Object.values(syllabusEventsByDate).flat()
+    const all = Object.values(syllabusEventsByDate ?? {}).flat()
     return all
       .filter(e => e.date >= todayStr)
       .sort((a, b) => a.date.localeCompare(b.date))
       .slice(0, 5)
   }, [syllabusEventsByDate, todayStr])
 
-  const nextSessionPerCourse = useMemo(() => {
-    const map = {}
-    courses.forEach((_, idx) => {
-      const s = allSessions.find(
-        s => s.courseId === idx && s.dateStr >= todayStr && !completedIds.has(s.id)
-      )
-      if (s) map[idx] = s
-    })
-    return map
-  }, [courses, allSessions, todayStr, completedIds])
-
-  const { currentStreak, lastCompletedDate, recordCompletion } = useStreak()
-  const streak = currentStreak
-
-  const { weekSessions, weekHours } = useMemo(() => {
-    const d = new Date(todayStr + 'T12:00:00')
-    const dow = d.getDay()
-    const mon = new Date(d); mon.setDate(d.getDate() - ((dow + 6) % 7))
-    const sun = new Date(mon); sun.setDate(mon.getDate() + 6)
-    const monStr = mon.toISOString().split('T')[0]
-    const sunStr = sun.toISOString().split('T')[0]
-    const done = allSessions.filter(
-      s => s.dateStr >= monStr && s.dateStr <= sunStr && completedIds.has(s.id)
-    )
-    return {
-      weekSessions: done.length,
-      weekHours: Math.round(done.reduce((acc, s) => acc + (s.duration ?? 0), 0) / 60 * 10) / 10,
-    }
-  }, [allSessions, completedIds, todayStr])
-
-  const weekDays = useMemo(() => {
-    const d = new Date(todayStr + 'T12:00:00')
-    const dow = d.getDay()
-    const mon = new Date(d); mon.setDate(d.getDate() - ((dow + 6) % 7))
-    return Array.from({ length: 7 }, (_, i) => {
-      const day = new Date(mon); day.setDate(mon.getDate() + i)
-      const dateStr = day.toISOString().split('T')[0]
-      const daySessions = allSessions.filter(s => s.dateStr === dateStr)
-      const doneSessions = daySessions.filter(s => completedIds.has(s.id))
-      return {
-        dateStr,
-        letter: ['M', 'T', 'W', 'T', 'F', 'S', 'S'][i],
-        dayNum: day.getDate(),
-        isToday: dateStr === todayStr,
-        isPast: dateStr < todayStr,
-        hasSessions: daySessions.length > 0,
-        allDone: daySessions.length > 0 && doneSessions.length === daySessions.length,
-        dots: [...new Set(daySessions.map(s => s.color?.dot))].slice(0, 3),
-        primaryColor: daySessions[0]?.color?.dot ?? null,
-      }
-    })
-  }, [allSessions, completedIds, todayStr])
-
-  // Primary color for hero card — from next upcoming session's course
-  const heroColor = heroSession?.color?.dot ?? '#6366f1'
-
-  // ── Setup state: no courses yet ─────────────────────────────────────────────
+  // ── Empty state ──────────────────────────────────────────────────────────────
   if (courses.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a]">
-        <div className="px-6 py-10 max-w-2xl mx-auto">
+      <div style={{ minHeight: '100vh', backgroundColor: C.pageBg, padding: '40px 24px' }}>
+        <div style={{ maxWidth: 560, margin: '0 auto' }}>
+          <p style={{ color: C.textMuted, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8 }}>
+            {formatDateHeader(todayStr)}
+          </p>
+          <h1 style={{ color: C.textPrimary, fontSize: 32, fontWeight: 800, marginBottom: 8, lineHeight: 1.15 }}>
+            {greeting()}.
+          </h1>
+          <p style={{ color: C.textSec, fontSize: 14, marginBottom: 32 }}>
+            Add your first course to unlock your study plan.
+          </p>
 
-          {/* Header */}
-          <div className="mb-10">
-            <p className="text-slate-500 text-sm font-medium mb-1 tracking-wide">{formatDate(todayStr)}</p>
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight">{greeting()}</h1>
-          </div>
-
-          {/* Setup hero */}
-          <div className="rounded-3xl overflow-hidden mb-6" style={{ background: 'linear-gradient(135deg, #4f46e5 0%, #312e81 100%)' }}>
-            <div className="px-8 py-8 relative">
-              <div className="absolute -top-10 -right-10 w-52 h-52 rounded-full opacity-10 blur-3xl bg-white pointer-events-none" />
-              <div className="relative z-10">
-                <span className="inline-flex items-center gap-1.5 bg-white/15 text-white/80 text-xs font-bold px-3 py-1 rounded-full uppercase tracking-wider mb-4">
-                  <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-                  Setup required
-                </span>
-                <h2 className="text-2xl font-bold text-white mb-2 leading-tight">Your account is ready.<br />Now set up your courses.</h2>
-                <p className="text-white/60 text-sm mb-6 leading-relaxed">
-                  Everything in StudyEdge, your study plan, sessions, deadlines, coaching, and tools, runs on your courses. Add them to unlock the full app.
-                </p>
-                <button
-                  onClick={onNavigateToCourses}
-                  className="bg-white text-indigo-700 font-bold text-sm px-6 py-3 rounded-2xl shadow-lg shadow-black/20 hover:brightness-95 active:scale-95 transition-all inline-flex items-center gap-2"
-                >
-                  Add Your First Course
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
-                  </svg>
-                </button>
-              </div>
+          <Card style={{ padding: 32, textAlign: 'center' }}>
+            <div style={{
+              width: 56, height: 56, borderRadius: 14,
+              backgroundColor: `${C.accent}18`, border: `1px solid ${C.accent}30`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 16px',
+            }}>
+              <svg style={{ width: 28, height: 28, color: C.accent }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
             </div>
-
-            {/* Step checklist */}
-            <div className="border-t border-white/10 px-8 py-5 space-y-3">
-              {[
-                { done: false, label: 'Add your courses', note: 'Required. Unlocks your study plan.', required: true },
-                { done: false, label: 'Import your syllabus', note: 'Required. Pulls in all exams and deadlines.', required: true },
-                { done: false, label: 'Your sessions generate automatically', note: 'Sit back, we handle the scheduling.', required: false },
-              ].map(({ done, label, note, required }, i) => (
-                <div key={i} className="flex items-start gap-3">
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 mt-0.5 ${
-                    done ? 'bg-emerald-400 border-emerald-400' : 'border-white/30'
-                  }`}>
-                    {done && (
-                      <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                      </svg>
-                    )}
-                  </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-white/80 text-sm font-semibold">{label}</span>
-                      {required && <span className="text-amber-400 text-xs font-bold">Required</span>}
-                    </div>
-                    <p className="text-white/40 text-xs mt-0.5">{note}</p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
+            <p style={{ color: C.textPrimary, fontSize: 18, fontWeight: 700, marginBottom: 8 }}>
+              No courses added yet
+            </p>
+            <p style={{ color: C.textSec, fontSize: 13, marginBottom: 24 }}>
+              Add your courses to generate a personalized study plan, track progress, and get AI coaching.
+            </p>
+            <button
+              onClick={onNavigateToCourses}
+              style={{
+                backgroundColor: C.accent,
+                color: '#fff',
+                fontSize: 14,
+                fontWeight: 700,
+                padding: '11px 28px',
+                borderRadius: 10,
+                border: 'none',
+                cursor: 'pointer',
+              }}
+            >
+              Add Your First Course
+            </button>
+          </Card>
         </div>
       </div>
     )
   }
 
+  // ── Main layout ──────────────────────────────────────────────────────────────
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#0f172a]">
-      <div className="px-6 py-10 max-w-3xl mx-auto space-y-10">
+    <div style={{ minHeight: '100vh', backgroundColor: C.pageBg, overflowY: 'auto' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px 48px' }}>
 
-        {/* ── Header ── */}
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <p className="text-slate-500 text-sm font-medium mb-1 tracking-wide">{formatDate(todayStr)}</p>
-            <h1 className="text-4xl font-bold text-slate-900 dark:text-white tracking-tight">{greeting()}</h1>
-          </div>
-          {/* Streak badge */}
-          {(streak > 1 || lastCompletedDate === todayStr) ? (
-            <div className="shrink-0 flex items-center gap-2 bg-orange-500/15 border border-orange-500/30 rounded-2xl px-4 py-2.5">
-              <svg className="w-5 h-5 text-orange-500" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" /></svg>
-              <div>
-                <p className="text-orange-500 dark:text-orange-300 font-black text-xl leading-none">{streak}</p>
-                <p className="text-orange-500/70 dark:text-orange-400/70 text-xs font-semibold mt-0.5">day streak</p>
+        {/* Two-column grid */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24 }} className="dashboard-grid">
+          <style>{`
+            @media (min-width: 1024px) {
+              .dashboard-grid { grid-template-columns: 64fr 36fr !important; }
+            }
+          `}</style>
+
+          {/* ════════════════════════════════════════
+              LEFT COLUMN
+          ════════════════════════════════════════ */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+            {/* 1. Greeting header */}
+            <div>
+              <p style={{ color: C.textMuted, fontSize: 11, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', marginBottom: 6 }}>
+                {formatDateHeader(todayStr)}
+              </p>
+              <h1 style={{ color: C.textPrimary, fontSize: 30, fontWeight: 800, lineHeight: 1.2, marginBottom: 6 }}>
+                {greeting()}.
+              </h1>
+              <p style={{ color: C.textSec, fontSize: 14, lineHeight: 1.5 }}>
+                {subtitle}
+              </p>
+            </div>
+
+            {/* 2. UP NEXT TODAY */}
+            <Card accentBorder={nextUncompletedSession ? C.accent : C.cardBorder}>
+              <div style={{ padding: '18px 20px 14px' }}>
+                {/* Header row */}
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <SectionLabel>Up Next Today</SectionLabel>
+                    {todaySessions.length > 0 && (
+                      <span style={{
+                        fontSize: 11, fontWeight: 700,
+                        padding: '2px 8px', borderRadius: 999,
+                        backgroundColor: `${C.accent}20`,
+                        color: C.accent,
+                      }}>
+                        {todaySessions.length} session{todaySessions.length !== 1 ? 's' : ''}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
+                {nextUncompletedSession ? (
+                  <>
+                    {/* Course + time row */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                      <div style={{
+                        width: 10, height: 10, borderRadius: '50%', flexShrink: 0,
+                        backgroundColor: nextUncompletedSession.color?.dot ?? C.accent,
+                      }} />
+                      <span style={{ color: C.textSec, fontSize: 12, fontWeight: 500 }}>
+                        {nextUncompletedSession.courseName ?? ''}
+                      </span>
+                      {nextUncompletedSession.startTime && (
+                        <>
+                          <span style={{ color: C.textMuted, fontSize: 12 }}>·</span>
+                          <span style={{ color: C.textSec, fontSize: 12 }}>
+                            {formatTime(nextUncompletedSession.startTime)}
+                          </span>
+                        </>
+                      )}
+                      <span style={{
+                        marginLeft: 'auto',
+                        fontSize: 11, fontWeight: 600,
+                        padding: '2px 8px', borderRadius: 999,
+                        backgroundColor: '#1A2540',
+                        color: C.textSec,
+                      }}>
+                        Focus block
+                      </span>
+                    </div>
+
+                    {/* Session title */}
+                    <p style={{ color: C.textPrimary, fontSize: 20, fontWeight: 700, marginBottom: 16, lineHeight: 1.3 }}>
+                      {nextUncompletedSession.sessionType ?? 'Study Session'}
+                      {nextUncompletedSession.duration ? ` · ${nextUncompletedSession.duration} min` : ''}
+                    </p>
+
+                    {/* Button row */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+                      <button
+                        onClick={() => onStartFocus(nextUncompletedSession)}
+                        style={{
+                          backgroundColor: C.accent,
+                          color: '#fff',
+                          fontSize: 13,
+                          fontWeight: 700,
+                          padding: '9px 20px',
+                          borderRadius: 9,
+                          border: 'none',
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 6,
+                        }}
+                      >
+                        <svg style={{ width: 13, height: 13 }} fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" />
+                        </svg>
+                        Start Session
+                      </button>
+                      <button
+                        onClick={() => handleToggle(nextUncompletedSession.id)}
+                        style={{
+                          backgroundColor: 'transparent',
+                          color: C.textSec,
+                          fontSize: 13,
+                          fontWeight: 600,
+                          padding: '9px 16px',
+                          borderRadius: 9,
+                          border: `1px solid ${C.cardBorder}`,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Mark Done
+                      </button>
+                      <button
+                        style={{
+                          backgroundColor: 'transparent',
+                          color: C.textMuted,
+                          fontSize: 13,
+                          fontWeight: 500,
+                          padding: '9px 16px',
+                          borderRadius: 9,
+                          border: `1px solid ${C.cardBorder}`,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Skip
+                      </button>
+                    </div>
+                  </>
+                ) : (
+                  <div style={{ padding: '12px 0 4px', textAlign: 'center' }}>
+                    <p style={{ color: C.textSec, fontSize: 14, fontWeight: 600, marginBottom: 4 }}>
+                      No sessions scheduled today.
+                    </p>
+                    <p style={{ color: C.textMuted, fontSize: 13 }}>
+                      Add a course to get started with your study plan.
+                    </p>
+                  </div>
+                )}
               </div>
-            </div>
-          ) : (
-            <div className="shrink-0 flex items-center gap-2 bg-slate-200/80 dark:bg-slate-800/60 border border-slate-300/60 dark:border-slate-700/40 rounded-2xl px-4 py-2.5">
-              <svg className="w-5 h-5 text-slate-400" viewBox="0 0 20 20" fill="currentColor"><path fillRule="evenodd" d="M12.395 2.553a1 1 0 00-1.45-.385c-.345.23-.614.558-.822.88-.214.33-.403.713-.57 1.116-.334.804-.614 1.768-.84 2.734a31.365 31.365 0 00-.613 3.58 2.64 2.64 0 01-.945-1.067c-.328-.68-.398-1.534-.398-2.654A1 1 0 005.05 6.05 6.981 6.981 0 003 11a7 7 0 1011.95-4.95c-.592-.591-.98-.985-1.348-1.467-.363-.476-.724-1.063-1.207-2.03zM12.12 15.12A3 3 0 017 13s.879.5 2.5.5c0-1 .5-4 1.25-4.5.5 1 .786 1.293 1.371 1.879A2.99 2.99 0 0113 13a2.99 2.99 0 01-.879 2.121z" clipRule="evenodd" /></svg>
-              <p className="text-slate-500 dark:text-slate-400 font-bold text-sm">Start your streak</p>
-            </div>
-          )}
-        </div>
+            </Card>
 
-        {/* ── Stats Strip ── */}
-        <div className="grid grid-cols-3 gap-3">
-          {[
-            { value: streak, label: 'Day streak', icon: (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 18.657A8 8 0 016.343 7.343S7 9 9 10c0-2 .5-5 2.986-7C14 5 16.09 5.777 17.656 7.343A7.975 7.975 0 0120 13a7.975 7.975 0 01-2.343 5.657z" />
-              </svg>
-            ), accent: '#f97316' },
-            { value: weekSessions, label: 'Sessions this week', icon: (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            ), accent: '#10b981' },
-            { value: `${weekHours}h`, label: 'Studied this week', icon: (
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            ), accent: '#818cf8' },
-          ].map(({ value, label, icon, accent }) => (
-            <div
-              key={label}
-              className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/40 rounded-2xl px-4 py-5"
-              style={{ borderTopWidth: 2, borderTopColor: `${accent}40` }}
-            >
-              <div className="flex items-center gap-1.5 mb-2" style={{ color: accent }}>{icon}</div>
-              <p className="text-3xl font-bold text-slate-900 dark:text-white leading-none mb-1.5">{value}</p>
-              <p className="text-slate-500 text-xs font-medium leading-tight">{label}</p>
-            </div>
-          ))}
-        </div>
-
-        {/* ── Hero Study Card ── */}
-        <div>
-          {noSessions ? (
-            <div className="rounded-3xl border border-slate-200 dark:border-slate-700/40 bg-white dark:bg-slate-800/40 px-8 py-10 text-center">
-              <p className="text-slate-700 dark:text-slate-300 font-semibold text-lg mb-1">All clear</p>
-              <p className="text-slate-400 dark:text-slate-600 text-sm">No sessions scheduled for today or tomorrow</p>
-            </div>
-          ) : (
-            <div
-              className="rounded-3xl p-8 relative overflow-hidden"
-              style={{ background: colorToGradient(heroColor) }}
-            >
-              {/* Glow orb */}
-              <div
-                className="absolute -top-16 -right-16 w-64 h-64 rounded-full opacity-20 blur-3xl pointer-events-none"
-                style={{ backgroundColor: '#ffffff' }}
-              />
-              <div className="relative z-10 flex items-center justify-between gap-6">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2 mb-3">
-                    <span className="text-white/70 text-xs font-bold uppercase tracking-widest">
-                      {isToday ? 'Up next today' : 'Up next tomorrow'}
-                    </span>
-                    <span className="bg-white/15 text-white/80 text-xs font-semibold px-2.5 py-0.5 rounded-full">
-                      {isToday ? 'Today' : 'Tomorrow'}
+            {/* 3. STATS ROW */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+              {[
+                {
+                  label: 'Current Streak',
+                  value: streak,
+                  unit: streak === 1 ? 'day' : 'days',
+                  delta: streak > 0 ? `+${streak}` : '0',
+                  sub: 'Keep it going',
+                  color: '#F97316',
+                },
+                {
+                  label: 'Hours Studied',
+                  value: weekHours,
+                  unit: 'hrs',
+                  delta: deltaHours >= 0 ? `+${deltaHours}` : `${deltaHours}`,
+                  sub: 'vs last week',
+                  color: C.accent,
+                },
+                {
+                  label: 'Sessions Done',
+                  value: weekSessionCount,
+                  unit: '',
+                  delta: deltaSessions >= 0 ? `+${deltaSessions}` : `${deltaSessions}`,
+                  sub: 'this week',
+                  color: C.success,
+                },
+              ].map(({ label, value, unit, delta, sub, color }) => (
+                <Card key={label} style={{ padding: '18px 16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <SectionLabel>{label}</SectionLabel>
+                    <span style={{
+                      fontSize: 10, fontWeight: 700,
+                      padding: '2px 6px', borderRadius: 999,
+                      backgroundColor: `${color}18`,
+                      color: color,
+                    }}>
+                      {delta}
                     </span>
                   </div>
-                  <p className="text-white text-2xl font-bold leading-tight mb-1 truncate">
-                    {heroSession?.courseName}
+                  <p style={{ color: C.textPrimary, fontSize: 26, fontWeight: 800, lineHeight: 1, marginBottom: 2 }}>
+                    {value}<span style={{ fontSize: 13, fontWeight: 500, color: C.textSec, marginLeft: 3 }}>{unit}</span>
                   </p>
-                  <p className="text-white/60 text-sm font-medium">
-                    {heroSession?.sessionType}
-                    {heroSession?.startTime ? ` · ${heroSession.startTime}` : ''}
-                    {` · ${heroSession?.duration} min`}
-                  </p>
-                  {showSessions.length > 1 && (
-                    <p className="text-white/40 text-xs mt-2">
-                      +{showSessions.length - 1} more session{showSessions.length > 2 ? 's' : ''}
-                    </p>
-                  )}
-                </div>
-                <div className="shrink-0 flex flex-col gap-2.5">
-                  <button
-                    onClick={() => heroSession && onStartFocus(heroSession)}
-                    className="bg-white text-slate-900 font-bold text-sm px-6 py-3 rounded-2xl shadow-lg shadow-black/30 hover:brightness-95 active:scale-95 transition-all whitespace-nowrap"
-                  >
-                    Start Session
-                  </button>
-                  <button
-                    onClick={() => heroSession && handleToggle(heroSession.id)}
-                    className="bg-white/10 hover:bg-white/20 text-white/80 text-xs font-semibold px-4 py-2 rounded-xl transition-all text-center"
-                  >
-                    Mark done
-                  </button>
-                </div>
+                  <p style={{ color: C.textMuted, fontSize: 11, marginBottom: 10 }}>{sub}</p>
+                  <Sparkline color={color} />
+                </Card>
+              ))}
+            </div>
+
+            {/* 4. COURSES */}
+            <div>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <SectionLabel>Courses</SectionLabel>
+                <button
+                  onClick={onNavigateToCourses}
+                  style={{
+                    background: 'transparent', border: 'none', cursor: 'pointer',
+                    color: C.accent, fontSize: 12, fontWeight: 600,
+                  }}
+                >
+                  View all
+                </button>
               </div>
 
-              {/* Additional sessions row */}
-              {showSessions.length > 1 && (
-                <div className="relative z-10 mt-5 pt-5 border-t border-white/10 space-y-2">
-                  {showSessions.slice(1).map(session => {
-                    const done = completedIds.has(session.id)
-                    return (
-                      <div key={session.id} className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-2.5 min-w-0">
-                          <div className="w-1.5 h-1.5 rounded-full bg-white/40 shrink-0" />
-                          <span className={`text-sm font-medium truncate ${done ? 'line-through text-white/30' : 'text-white/70'}`}>
-                            {session.courseName} · {session.sessionType}
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {courses.map((course, idx) => {
+                  const color = course.color?.dot ?? courseColor(idx)
+                  const prog = progressPerCourse[idx] ?? { total: 0, done: 0 }
+                  const pct = prog.total > 0 ? Math.round((prog.done / prog.total) * 100) : 0
+                  const last = lastSessionPerCourse[idx]
+                  const daysToExam = course.examDate ? daysBetween(todayStr, course.examDate) : null
+                  const examSoon = daysToExam !== null && daysToExam >= 0 && daysToExam <= 14
+
+                  return (
+                    <Card key={idx} style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
+                      {/* Color bar */}
+                      <div style={{ width: 3, height: 44, borderRadius: 999, backgroundColor: color, flexShrink: 0 }} />
+
+                      {/* Course info */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 3 }}>
+                          {course.code && (
+                            <span style={{ color: C.textMuted, fontSize: 11, fontWeight: 600 }}>{course.code}</span>
+                          )}
+                          <span style={{ color: C.textPrimary, fontSize: 14, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {course.name}
                           </span>
                         </div>
-                        <button
-                          onClick={() => handleToggle(session.id)}
-                          className={`shrink-0 w-5 h-5 rounded-full border flex items-center justify-center transition-all ${
-                            done ? 'bg-white/40 border-transparent' : 'border-white/30 hover:border-white/60'
-                          }`}
-                        >
-                          {done && (
-                            <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                              <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                            </svg>
-                          )}
-                        </button>
+                        {last && (
+                          <p style={{ color: C.textMuted, fontSize: 11, marginBottom: 7 }}>
+                            Last session {formatRelativeTime(last.dateStr, todayStr)}
+                          </p>
+                        )}
+                        {/* Progress bar */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <div style={{ flex: 1, height: 4, backgroundColor: '#1A2540', borderRadius: 999, overflow: 'hidden' }}>
+                            <div style={{ width: `${pct}%`, height: '100%', backgroundColor: color, borderRadius: 999, transition: 'width 0.4s ease' }} />
+                          </div>
+                          <span style={{ color: C.textSec, fontSize: 11, fontWeight: 600, flexShrink: 0 }}>
+                            {prog.done}/{prog.total}
+                          </span>
+                        </div>
                       </div>
-                    )
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-        </div>
 
-        {/* ── Your Game Plan ── */}
-        {courses.length > 0 && (() => {
-          const courseId = courses[gamePlanIdx]?.id ?? gamePlanIdx
-          const cached = (coachPlans ?? {})[courseId]
-          const course = courses[gamePlanIdx]
-          const dot = course?.color?.dot ?? '#6366f1'
-          const daysLeft = daysBetween(todayStr, course?.examDate)
-          const isUrgent = daysLeft >= 0 && daysLeft <= 7
-          const isWarning = daysLeft > 7 && daysLeft <= 14
-          const nextSess = nextSessionPerCourse[gamePlanIdx]
-
-          return (
-            <div>
-              <h2 className="text-slate-500 dark:text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">Your Game Plan</h2>
-
-              {/* Course selector chips */}
-              {courses.length > 1 && (
-                <div className="flex flex-wrap gap-2 mb-4">
-                  {courses.map((c, i) => {
-                    const d = c.color?.dot ?? '#6366f1'
-                    const active = gamePlanIdx === i
-                    return (
-                      <button
-                        key={i}
-                        onClick={() => setGamePlanIdx(i)}
-                        className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium transition-all border"
-                        style={active
-                          ? { backgroundColor: `${d}18`, color: d, borderColor: `${d}50` }
-                          : { backgroundColor: 'transparent', color: '#64748b', borderColor: 'rgba(148,163,184,0.25)' }
-                        }
-                      >
-                        <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: d }} />
-                        <span className="truncate max-w-[120px]">{c.name}</span>
-                      </button>
-                    )
-                  })}
-                </div>
-              )}
-
-              {/* Single course card */}
-              {cached?.plan ? (
-                <div
-                  className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden"
-                  style={{ borderLeftWidth: 4, borderLeftColor: dot }}
-                >
-                  <div className="px-5 py-5">
-                    {/* Header + exam badge */}
-                    <div className="flex items-start justify-between gap-3 mb-4">
-                      <p className="text-slate-900 dark:text-white font-bold text-base">{course.name}</p>
-                      {daysLeft > 0 && (
-                        <span className={`shrink-0 text-[10px] font-bold px-2 py-1 rounded-full ${
-                          isUrgent ? 'bg-red-500/12 text-red-400 dark:bg-red-500/15 dark:text-red-400'
-                          : isWarning ? 'bg-amber-500/12 text-amber-500 dark:bg-amber-500/15 dark:text-amber-400'
-                          : 'bg-slate-100 text-slate-500 dark:bg-slate-700/60 dark:text-slate-400'
-                        }`}>
-                          Final in {daysLeft}d
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Current week focus */}
-                    {(() => {
-                      const weekInfo = getCurrentWeekInfo(cached.plan.weeklyFocus, cached.sessionIndex)
-                      const emphasis = cached.formData?.emphasisTopics
-                      const struggles = cached.struggles?.length ? cached.struggles : null
-                      const pct = weekInfo ? (weekInfo.weekSessions > 0 ? Math.round((weekInfo.completedInWeek / weekInfo.weekSessions) * 100) : 0) : 0
-                      return (
-                        <>
-                          {weekInfo && (
-                            <div className="mb-4">
-                              <p className="text-slate-600 dark:text-slate-300 text-sm font-medium">
-                                <span className="text-slate-400 dark:text-slate-500">Week {weekInfo.weekIndex + 1} of {weekInfo.total}</span>
-                                {weekInfo.theme && <span className="text-slate-400 dark:text-slate-600 mx-1.5">·</span>}
-                                {weekInfo.theme && <span>Focus: {weekInfo.theme}</span>}
-                              </p>
-                            </div>
-                          )}
-
-                          {/* Session progress */}
-                          {weekInfo && weekInfo.weekSessions > 0 && (
-                            <div className="mb-4">
-                              <div className="flex justify-between text-xs font-semibold mb-1.5">
-                                <span className="text-slate-500 dark:text-slate-400">{weekInfo.completedInWeek} of {weekInfo.weekSessions} sessions completed</span>
-                                <span style={{ color: dot }}>{pct}%</span>
-                              </div>
-                              <div className="h-1.5 bg-slate-200 dark:bg-slate-700/80 rounded-full overflow-hidden">
-                                <div
-                                  className="h-full rounded-full transition-all duration-500"
-                                  style={{ width: `${pct}%`, backgroundColor: dot }}
-                                />
-                              </div>
-                            </div>
-                          )}
-
-                          {/* Professor emphasis */}
-                          {emphasis && (
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mb-2 leading-relaxed">
-                              <span className="font-semibold text-slate-600 dark:text-slate-300">Prof emphasizes:</span> {emphasis}
-                            </p>
-                          )}
-
-                          {/* Struggles */}
-                          {struggles && (
-                            <p className="text-xs text-amber-600 dark:text-amber-400/80 mb-3 leading-relaxed">
-                              <svg className="w-3.5 h-3.5 mr-1 shrink-0 inline" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
-                              <span className="font-semibold">Needs attention:</span> {struggles.join(', ')}
-                            </p>
-                          )}
-                        </>
-                      )
-                    })()}
-
-                    {/* Actions */}
-                    <div className="flex items-center gap-3 mt-1">
-                      <button
-                        onClick={() => onOpenStudyCoach && onOpenStudyCoach(gamePlanIdx)}
-                        className="text-xs font-semibold text-indigo-500 dark:text-indigo-400 hover:text-indigo-400 dark:hover:text-indigo-300 transition-colors"
-                      >
-                        View Full Plan →
-                      </button>
-                      {nextSess && (
-                        <button
-                          onClick={() => onStartFocus(nextSess)}
-                          className="ml-auto text-xs font-bold px-4 py-2 rounded-xl transition-all"
-                          style={{
-                            background: `linear-gradient(135deg, ${dot}30, ${dot}18)`,
-                            color: dot,
-                            border: `1px solid ${dot}50`,
-                          }}
-                        >
-                          Start Studying →
-                        </button>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Connection reinforcement footer */}
-                  <div className="px-5 py-2.5 border-t border-slate-100 dark:border-slate-700/30">
-                    <p className="text-[10px] text-slate-400 dark:text-slate-600">Your sessions, flashcards, and AI tutor are all synced to this plan</p>
-                  </div>
-                </div>
-              ) : (
-                <div
-                  className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden"
-                  style={{ borderLeftWidth: 4, borderLeftColor: dot }}
-                >
-                  <div className="px-5 py-5">
-                    <p className="text-slate-900 dark:text-white font-bold text-base mb-4">{course.name}</p>
-                    <div className="flex items-start gap-4">
-                      <div className="w-10 h-10 rounded-xl bg-indigo-500/10 dark:bg-indigo-500/15 flex items-center justify-center shrink-0 mt-0.5">
-                        <svg className="w-5 h-5 text-indigo-500 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
-                        </svg>
+                      {/* Right: pct + exam */}
+                      <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                        <p style={{ color: C.textPrimary, fontSize: 16, fontWeight: 700, marginBottom: 2 }}>{pct}%</p>
+                        {daysToExam !== null && daysToExam >= 0 && (
+                          <span style={{
+                            fontSize: 10, fontWeight: 700,
+                            padding: '2px 6px', borderRadius: 999,
+                            backgroundColor: examSoon ? `${C.warning}18` : '#1A2540',
+                            color: examSoon ? C.warning : C.textMuted,
+                          }}>
+                            {daysToExam === 0 ? 'Exam today' : `${daysToExam}d`}
+                          </span>
+                        )}
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-slate-800 dark:text-slate-100 font-semibold text-sm mb-1">Set up your study plan</p>
-                        <p className="text-slate-500 dark:text-slate-400 text-xs leading-relaxed mb-1.5">
-                          Tell us your goals, what your professor emphasizes, and your schedule, and we'll build a week-by-week plan that powers your entire experience.
-                        </p>
-                        <p className="text-slate-400 dark:text-slate-500 text-[11px] leading-relaxed">
-                          This unlocks personalized sessions, smarter flashcards, and AI tutoring tailored to your course.
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => onOpenStudyCoach && onOpenStudyCoach(gamePlanIdx)}
-                      className="mt-4 w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all"
-                      style={{ backgroundColor: dot, boxShadow: `0 4px 14px ${dot}40` }}
-                    >
-                      Create Study Plan →
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )
-        })()}
-
-        {/* ── Grade Snapshot ── */}
-        <div>
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-slate-500 dark:text-slate-300 text-sm font-bold uppercase tracking-widest">Grade Snapshot</h2>
-            {plan !== 'free' && onNavigateToGrades && (
-              <button onClick={() => onNavigateToGrades(0)} className="text-xs text-indigo-400 hover:text-indigo-300 font-semibold transition-colors">
-                Grade Hub →
-              </button>
-            )}
-          </div>
-          {plan === 'free' ? (
-            <div className="relative rounded-2xl overflow-hidden">
-              {/* Blurred fake preview */}
-              <div className="filter blur-sm pointer-events-none select-none bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden">
-                {[['Calculus II', '#6366f1', 'A', '91%'], ['Physics', '#f59e0b', 'B+', '88%'], ['English', '#10b981', 'A-', '90%']].map(([name, color, letter, pct]) => (
-                  <div key={name} className="flex items-center gap-4 px-5 py-4 border-b border-slate-100 dark:border-slate-700/40 last:border-0" style={{ borderLeft: `3px solid ${color}` }}>
-                    <p className="flex-1 text-slate-700 dark:text-slate-200 font-semibold text-sm">{name}</p>
-                    <span className="text-xs font-bold px-2.5 py-1 rounded-full" style={{ backgroundColor: `${color}20`, color }}>{letter} · {pct}</span>
-                  </div>
-                ))}
-              </div>
-              {/* Lock overlay */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-[2px] rounded-2xl gap-3 px-6 text-center">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-white font-bold text-sm">Grade Hub is Pro</p>
-                  <p className="text-slate-400 text-xs mt-1">Track grades, project your final, and plan your path to your target grade.</p>
-                </div>
-                <button
-                  onClick={onShowPaywall}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all"
-                >
-                  Upgrade to Pro →
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden">
-              {courses.map((course, idx) => {
-                const comps = course.gradeData?.components ?? []
-                const current = getCurrentGrade(comps)
-                const target = course.gradeData?.targetGrade ?? null
-                const status = current !== null && target ? gradeStatus(current, target) : 'unknown'
-                const sc = STATUS_COLORS[status]
-                const dot = course.color?.dot ?? '#6366f1'
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => onNavigateToGrades && onNavigateToGrades(idx)}
-                    className="w-full flex items-center gap-4 px-5 py-4 hover:bg-slate-50 dark:hover:bg-slate-700/20 transition-colors text-left border-b border-slate-100 dark:border-slate-700/40 last:border-0"
-                    style={{ borderLeft: `3px solid ${dot}` }}
-                  >
-                    <div className="flex-1 min-w-0">
-                      <p className="text-slate-800 dark:text-slate-100 font-semibold text-sm truncate">{course.name}</p>
-                    </div>
-                    {current !== null ? (
-                      <span className="text-xs font-bold px-2.5 py-1 rounded-full shrink-0" style={{ backgroundColor: sc.bg, color: sc.color }}>
-                        {letterGrade(current)} · {current.toFixed(0)}%
-                      </span>
-                    ) : (
-                      <span className="text-xs text-slate-400 shrink-0">Set up →</span>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* ── AI Tutor Quick Access ── */}
-        <div>
-          <h2 className="text-slate-500 dark:text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">AI Tutor</h2>
-          {plan === 'free' ? (
-            <div className="relative rounded-2xl overflow-hidden">
-              {/* Blurred fake chat preview */}
-              <div className="filter blur-sm pointer-events-none select-none bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-5 space-y-3">
-                <div className="flex gap-3">
-                  <div className="w-7 h-7 rounded-full bg-indigo-500/30 shrink-0" />
-                  <div className="bg-slate-100 dark:bg-slate-700/50 rounded-xl px-3 py-2 text-xs text-slate-500 max-w-[80%]">Can you explain L'Hôpital's rule with an example?</div>
-                </div>
-                <div className="flex gap-3 justify-end">
-                  <div className="bg-indigo-600/20 rounded-xl px-3 py-2 text-xs text-indigo-300 max-w-[80%]">Sure! L'Hôpital's rule states that for indeterminate forms...</div>
-                </div>
-                <div className="flex gap-3">
-                  <div className="w-7 h-7 rounded-full bg-indigo-500/30 shrink-0" />
-                  <div className="bg-slate-100 dark:bg-slate-700/50 rounded-xl px-3 py-2 text-xs text-slate-500 max-w-[80%]">What should I focus on for my exam next week?</div>
-                </div>
-              </div>
-              {/* Lock overlay */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-900/60 backdrop-blur-[2px] rounded-2xl gap-3 px-6 text-center">
-                <div className="w-10 h-10 rounded-2xl bg-indigo-600/20 border border-indigo-500/30 flex items-center justify-center">
-                  <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-                  </svg>
-                </div>
-                <div>
-                  <p className="text-white font-bold text-sm">AI Tutor is Pro</p>
-                  <p className="text-slate-400 text-xs mt-1">Ask questions, get explanations, and flag topics that feed back into your study plan.</p>
-                </div>
-                <button
-                  onClick={onShowPaywall}
-                  className="bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold px-5 py-2.5 rounded-xl transition-all"
-                >
-                  Upgrade to Pro →
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-5">
-              <div className="flex flex-wrap gap-2 mb-4">
-                {courses.map((course, idx) => {
-                  const dot = course.color?.dot ?? '#6366f1'
-                  return (
-                    <button
-                      key={idx}
-                      onClick={() => onNavigateToTutor && onNavigateToTutor()}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-sm font-medium border transition-all hover:opacity-80"
-                      style={{ backgroundColor: `${dot}18`, color: dot, borderColor: `${dot}40` }}
-                    >
-                      <div className="w-1.5 h-1.5 rounded-full shrink-0" style={{ backgroundColor: dot }} />
-                      {course.name}
-                    </button>
+                    </Card>
                   )
                 })}
               </div>
-              <button
-                onClick={() => onNavigateToTutor && onNavigateToTutor()}
-                className="w-full flex items-center gap-3 bg-slate-50 dark:bg-slate-700/40 border border-slate-200 dark:border-slate-600/40 rounded-xl px-4 py-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors text-sm"
-              >
-                <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                </svg>
-                <span>Ask a question...</span>
-              </button>
             </div>
-          )}
-        </div>
 
-        {/* ── Upcoming Deadlines ── */}
-        <div className="pb-6">
-          <h2 className="text-slate-500 dark:text-slate-300 text-sm font-bold uppercase tracking-widest mb-4">Upcoming Deadlines</h2>
+          </div>
 
-          {upcomingDeadlines.length === 0 ? (
-            <div className="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 rounded-2xl px-8 py-10 flex flex-col items-center text-center">
-              <div className="w-14 h-14 bg-slate-100 dark:bg-slate-700/50 rounded-2xl flex items-center justify-center mb-4">
-                <svg className="w-7 h-7 text-slate-400 dark:text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-              </div>
-              <p className="text-slate-900 dark:text-white font-bold text-base mb-2">Import your syllabus</p>
-              <p className="text-slate-500 text-sm mb-6 max-w-xs">See all your exams, quizzes, and deadlines pulled straight from your course documents</p>
-              <button
-                onClick={onImportSyllabus}
-                className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white text-sm font-bold px-6 py-3 rounded-xl transition-all shadow-lg shadow-indigo-900/40"
-              >
-                Import Syllabus
-              </button>
-            </div>
-          ) : (
-            <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden">
-              {upcomingDeadlines.map((event, i) => {
-                const days = daysBetween(todayStr, event.date)
-                return (
-                  <div
-                    key={event.id}
-                    className={`flex items-center gap-4 px-6 py-4 transition-colors hover:bg-slate-50 dark:hover:bg-slate-700/30 ${
-                      i < upcomingDeadlines.length - 1 ? 'border-b border-slate-100 dark:border-slate-700/40' : ''
-                    }`}
-                  >
-                    <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: event.color.dot }} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-slate-900 dark:text-white text-sm font-bold truncate">{event.name}</p>
-                      <p className="text-slate-500 text-xs mt-0.5 font-medium">{event.courseName} · {event.type}</p>
-                    </div>
-                    <span className={`text-xs font-bold shrink-0 px-3 py-1.5 rounded-full ${
-                      days <= 3 ? 'bg-red-100 dark:bg-red-900/60 text-red-600 dark:text-red-300' :
-                      days <= 7 ? 'bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-300' :
-                      'bg-slate-100 dark:bg-slate-700/80 text-slate-500 dark:text-slate-400'
-                    }`}>
-                      {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d`}
-                    </span>
+          {/* ════════════════════════════════════════
+              RIGHT COLUMN
+          ════════════════════════════════════════ */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+
+            {/* 1. GOALS card */}
+            <Card>
+              <div style={{ padding: '18px 20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <SectionLabel>Weekly Goal</SectionLabel>
+                  <button style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: C.textMuted, fontSize: 12 }}>
+                    Edit
+                  </button>
+                </div>
+
+                {/* Donut */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 12 }}>
+                  <DonutRing pct={goalPct} />
+                  <p style={{ color: C.textSec, fontSize: 12, marginTop: 8 }}>
+                    {weekHours} of {weeklyGoalHours} hours
+                  </p>
+                </div>
+
+                {/* Exam targets */}
+                <div style={{ borderTop: `1px solid ${C.cardBorder}`, paddingTop: 14 }}>
+                  <SectionLabel>Exam Targets</SectionLabel>
+                  <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {courses.filter(c => c.examDate && daysBetween(todayStr, c.examDate) >= 0).length > 0 ? (
+                      courses
+                        .map((c, i) => ({ c, i }))
+                        .filter(({ c }) => c.examDate && daysBetween(todayStr, c.examDate) >= 0)
+                        .slice(0, 4)
+                        .map(({ c, i }) => {
+                          const days = daysBetween(todayStr, c.examDate)
+                          const color = c.color?.dot ?? courseColor(i)
+                          return (
+                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }} />
+                              <span style={{ flex: 1, color: C.textSec, fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {c.name}
+                              </span>
+                              <span style={{
+                                fontSize: 10, fontWeight: 700,
+                                padding: '2px 6px', borderRadius: 999,
+                                backgroundColor: days <= 7 ? `${C.warning}18` : '#1A2540',
+                                color: days <= 7 ? C.warning : C.textMuted,
+                                flexShrink: 0,
+                              }}>
+                                {days === 0 ? 'Today' : `${days}d`}
+                              </span>
+                            </div>
+                          )
+                        })
+                    ) : (
+                      <p style={{ color: C.textMuted, fontSize: 12 }}>No upcoming exams</p>
+                    )}
                   </div>
-                )
-              })}
-            </div>
-          )}
+                </div>
+              </div>
+            </Card>
+
+            {/* 2. TODAY'S PLAN */}
+            <Card>
+              <div style={{ padding: '18px 20px' }}>
+                <SectionLabel>Today's Plan</SectionLabel>
+
+                {todaySessions.length === 0 ? (
+                  <p style={{ color: C.textMuted, fontSize: 13, marginTop: 12 }}>No sessions scheduled today.</p>
+                ) : (
+                  <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {todaySessions.map(session => {
+                      const done = completedIds.has(session.id)
+                      const color = session.color?.dot ?? C.accent
+                      return (
+                        <div key={session.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          {/* Time */}
+                          <span style={{ color: C.textMuted, fontSize: 11, fontWeight: 500, width: 52, flexShrink: 0 }}>
+                            {session.startTime ? formatTime(session.startTime) : '--'}
+                          </span>
+                          {/* Dot */}
+                          <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: done ? C.success : color, flexShrink: 0 }} />
+                          {/* Name */}
+                          <span style={{
+                            flex: 1,
+                            color: done ? C.textMuted : C.textSec,
+                            fontSize: 13,
+                            fontWeight: 500,
+                            textDecoration: done ? 'line-through' : 'none',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>
+                            {session.courseName} {session.sessionType ? `· ${session.sessionType}` : ''}
+                          </span>
+                          {/* Duration */}
+                          {session.duration && (
+                            <span style={{
+                              fontSize: 10, fontWeight: 600,
+                              padding: '2px 6px', borderRadius: 999,
+                              backgroundColor: '#1A2540',
+                              color: C.textMuted,
+                              flexShrink: 0,
+                            }}>
+                              {session.duration}m
+                            </span>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            {/* 3. QUICK ACTIONS */}
+            <Card>
+              <div style={{ padding: '18px 20px' }}>
+                <SectionLabel>Quick Actions</SectionLabel>
+                <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 2 }}>
+                  {[
+                    {
+                      title: 'Study Tools',
+                      sub: 'Flashcards, timers, and more',
+                      iconBg: `${C.accent}20`,
+                      iconColor: C.accent,
+                      iconPath: 'M13 10V3L4 14h7v7l9-11h-7z',
+                      onClick: () => { if (typeof onNavigateToTutor === 'function') onNavigateToTutor() },
+                    },
+                    {
+                      title: 'Generate Study Plan',
+                      sub: 'AI-powered weekly plan',
+                      iconBg: '#7C3AED20',
+                      iconColor: '#8B5CF6',
+                      iconPath: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
+                      onClick: () => { if (typeof onOpenStudyCoach === 'function') onOpenStudyCoach(0) },
+                    },
+                    {
+                      title: 'Import Syllabus',
+                      sub: 'Add course deadlines',
+                      iconBg: `${C.warning}20`,
+                      iconColor: C.warning,
+                      iconPath: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+                      onClick: onImportSyllabus,
+                    },
+                  ].map(({ title, sub, iconBg, iconColor, iconPath, onClick }) => (
+                    <button
+                      key={title}
+                      onClick={onClick}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: '10px 8px',
+                        borderRadius: 10,
+                        border: 'none',
+                        background: 'transparent',
+                        cursor: 'pointer',
+                        textAlign: 'left',
+                        width: '100%',
+                      }}
+                      onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#0F1929' }}
+                      onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
+                    >
+                      {/* Icon square */}
+                      <div style={{
+                        width: 36, height: 36, borderRadius: 9,
+                        backgroundColor: iconBg,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        flexShrink: 0,
+                      }}>
+                        <svg style={{ width: 17, height: 17, color: iconColor }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={iconPath} />
+                        </svg>
+                      </div>
+                      {/* Text */}
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <p style={{ color: C.textPrimary, fontSize: 13, fontWeight: 600, marginBottom: 1 }}>{title}</p>
+                        <p style={{ color: C.textMuted, fontSize: 11 }}>{sub}</p>
+                      </div>
+                      <ChevronRight />
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </Card>
+
+            {/* 4. UPCOMING DEADLINES (right column, compact) */}
+            {upcomingDeadlines.length > 0 && (
+              <Card>
+                <div style={{ padding: '18px 20px' }}>
+                  <SectionLabel>Upcoming Deadlines</SectionLabel>
+                  <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {upcomingDeadlines.slice(0, 4).map((event, i) => {
+                      const days = daysBetween(todayStr, event.date)
+                      return (
+                        <div key={event.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: event.color?.dot ?? C.accent, flexShrink: 0 }} />
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <p style={{ color: C.textSec, fontSize: 12, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {event.name}
+                            </p>
+                            <p style={{ color: C.textMuted, fontSize: 11 }}>{event.courseName}</p>
+                          </div>
+                          <span style={{
+                            fontSize: 10, fontWeight: 700,
+                            padding: '2px 6px', borderRadius: 999,
+                            backgroundColor: days <= 3 ? '#ff444420' : days <= 7 ? `${C.warning}18` : '#1A2540',
+                            color: days <= 3 ? '#ff6b6b' : days <= 7 ? C.warning : C.textMuted,
+                            flexShrink: 0,
+                          }}>
+                            {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d`}
+                          </span>
+                        </div>
+                      )
+                    })}
+                  </div>
+                </div>
+              </Card>
+            )}
+
+          </div>
         </div>
 
       </div>
