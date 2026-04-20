@@ -28,6 +28,11 @@ export default function AuthScreen({ initialMode, onBack }) {
   })
   const [success, setSuccess] = useState('')
 
+  // After a successful email+password signup, flip into a dedicated
+  // "Check your inbox" confirmation screen so the user can't miss it.
+  const [signupPendingEmail, setSignupPendingEmail] = useState('')
+  const [resendStatus, setResendStatus] = useState('') // '' | 'sending' | 'sent' | 'error'
+
   // Cloudflare Turnstile — signup only
   const turnstileRef = useRef(null)
   const [captchaToken, setCaptchaToken] = useState('')
@@ -85,7 +90,11 @@ export default function AuthScreen({ initialMode, onBack }) {
         try { turnstileRef.current?.reset() } catch {}
         setCaptchaToken('')
         if (error) throw error
-        setSuccess('Check your email to confirm your account, then come back and log in.')
+        // Flip into the dedicated "Check your inbox" screen instead of showing
+        // a tiny green banner under the form. Remember the email so the user
+        // sees exactly where the link was sent, and so we can resend it.
+        setSignupPendingEmail(email)
+        setPassword('')
       } else if (mode === 'login') {
         if (TURNSTILE_SITE_KEY && !captchaToken) {
           throw new Error('Please complete the CAPTCHA before signing in.')
@@ -117,6 +126,134 @@ export default function AuthScreen({ initialMode, onBack }) {
     } finally {
       setLoading(false)
     }
+  }
+
+  // ── Post-signup confirmation screen ──
+  if (signupPendingEmail) {
+    const handleResend = async () => {
+      setResendStatus('sending')
+      try {
+        const { error: resendErr } = await supabase.auth.resend({
+          type: 'signup',
+          email: signupPendingEmail,
+        })
+        if (resendErr) throw resendErr
+        setResendStatus('sent')
+        setTimeout(() => setResendStatus(''), 4000)
+      } catch {
+        setResendStatus('error')
+        setTimeout(() => setResendStatus(''), 4000)
+      }
+    }
+
+    return (
+      <div
+        className="min-h-screen flex items-center justify-center px-4 py-10"
+        style={{ backgroundColor: '#0a0f1e' }}
+      >
+        <div className="w-full max-w-md">
+
+          {/* Logo */}
+          <div className="flex items-center justify-center gap-2.5 mb-10">
+            <img
+              src="/favicon.png"
+              alt="StudyEdge"
+              className="w-9 h-9 rounded-xl"
+              style={{ objectFit: 'contain' }}
+            />
+            <span className="text-white font-bold text-xl tracking-tight">StudyEdge</span>
+          </div>
+
+          {/* Confirmation card */}
+          <div
+            className="rounded-2xl p-8 text-center"
+            style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}
+          >
+            {/* Icon */}
+            <div
+              className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-5"
+              style={{
+                background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(79,70,229,0.15))',
+                border: '1px solid rgba(99,102,241,0.35)',
+              }}
+            >
+              <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+              </svg>
+            </div>
+
+            <h1 className="text-white font-bold text-2xl mb-2 tracking-tight">Check your inbox</h1>
+            <p className="text-slate-400 text-sm leading-relaxed mb-1">
+              We sent a confirmation link to
+            </p>
+            <p className="text-white font-semibold text-sm mb-5 break-all">
+              {signupPendingEmail}
+            </p>
+            <p className="text-slate-400 text-sm leading-relaxed mb-6">
+              Click the link in that email to verify your account and finish signing up. The email may take up to a minute to arrive.
+            </p>
+
+            {/* Hint box */}
+            <div
+              className="rounded-xl px-4 py-3 text-left mb-5 text-xs text-slate-300 leading-relaxed"
+              style={{ backgroundColor: '#0d1424', border: '1px solid #1e293b' }}
+            >
+              <span className="font-bold text-slate-200">Can't find it?</span> Check your Spam or Promotions folder, and search for "StudyEdge".
+            </div>
+
+            {/* Resend button */}
+            <button
+              onClick={handleResend}
+              disabled={resendStatus === 'sending'}
+              className="w-full py-3 rounded-xl font-semibold text-white text-sm transition-all disabled:opacity-60"
+              style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }}
+            >
+              {resendStatus === 'sending'
+                ? 'Resending…'
+                : resendStatus === 'sent'
+                  ? '✓ Email resent'
+                  : resendStatus === 'error'
+                    ? 'Try again'
+                    : 'Resend confirmation email'}
+            </button>
+
+            {/* Footer actions */}
+            <div className="mt-5 text-center space-y-2">
+              <button
+                onClick={() => {
+                  setSignupPendingEmail('')
+                  setMode('login')
+                  setError('')
+                  setSuccess('')
+                }}
+                className="block w-full text-slate-500 hover:text-slate-300 text-sm transition-colors"
+              >
+                Already verified? <span className="text-indigo-400">Sign in</span>
+              </button>
+              <button
+                onClick={() => {
+                  setSignupPendingEmail('')
+                  setError('')
+                  setSuccess('')
+                }}
+                className="block w-full text-slate-600 hover:text-slate-400 text-sm transition-colors"
+              >
+                Use a different email
+              </button>
+            </div>
+          </div>
+
+          {onBack && (
+            <button
+              onClick={onBack}
+              className="block w-full text-slate-600 hover:text-slate-400 text-sm transition-colors mt-4"
+            >
+              ← Back to home
+            </button>
+          )}
+        </div>
+      </div>
+    )
   }
 
   return (
