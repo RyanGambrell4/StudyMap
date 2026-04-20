@@ -85,8 +85,14 @@ function injectStyles() {
       color: #64748b !important;
       font-size: 12px !important;
     }
+    .driver-popover-next-btn::after {
+      content: '' !important;
+    }
+    .driver-popover-prev-btn::before {
+      content: '' !important;
+    }
     .driver-overlay {
-      background: rgba(0,0,0,0.55) !important;
+      background: rgba(0,0,0,0.3) !important;
     }
   `
   document.head.appendChild(style)
@@ -178,7 +184,7 @@ export default function OnboardingTour({ onReady }) {
       showProgress: true,
       progressText: '{{current}} of {{total}}',
       allowClose: true,
-      overlayOpacity: 0.55,
+      overlayOpacity: 0.3,
       nextBtnText: 'Next',
       prevBtnText: 'Previous',
       steps,

@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan } from '../lib/db'
+import { extractText } from '../utils/extractText'
 import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getAIQueriesUsed, getAIQueriesLimit } from '../lib/subscription'
@@ -23,6 +24,12 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   const [daysPerWeek, setDaysPerWeek] = useState(3)
   const [sessionMinutes, setSessionMinutes] = useState(60)
   const [importantDates, setImportantDates] = useState([{ label: '', date: '' }])
+
+  // ── Material upload state ──
+  const [coachMaterialText, setCoachMaterialText] = useState('')
+  const [coachMaterialFile, setCoachMaterialFile] = useState(null)
+  const [coachMaterialLoading, setCoachMaterialLoading] = useState(false)
+  const coachMaterialRef = useRef(null)
 
   // ── Plan state ──
   const [plan, setPlan] = useState(null)
@@ -70,6 +77,20 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
 
   const validDates = importantDates.filter(d => d.label.trim() && d.date)
 
+  const handleMaterialFile = async (file) => {
+    if (!file) return
+    setCoachMaterialFile(file)
+    setCoachMaterialLoading(true)
+    try {
+      const text = await extractText(file)
+      setCoachMaterialText(text)
+    } catch {
+      setCoachMaterialText('')
+    } finally {
+      setCoachMaterialLoading(false)
+    }
+  }
+
   const handleGenerate = async () => {
     if (!course || !goal.trim()) return
 
@@ -97,6 +118,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
           sessionMinutes,
           calendarEvents: googleEvents.length ? googleEvents : null,
           timePreference: preferredTime,
+          courseMaterials: coachMaterialText || null,
           struggles: struggles.length ? struggles : null,
           gradeGap: (() => {
             const comps = course?.gradeData?.components ?? []
@@ -248,6 +270,59 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
         />
       ) : (
         <div className="space-y-5">
+          {/* Course materials upload */}
+          <div>
+            <label className="block text-xs text-slate-500 uppercase tracking-widest font-bold mb-2">Course materials (optional) — syllabus, notes, or readings</label>
+            <div
+              className="relative flex flex-col items-center justify-center gap-2 rounded-xl border-2 border-dashed px-6 py-5 cursor-pointer transition-colors"
+              style={coachMaterialFile
+                ? { borderColor: `${dot}60`, backgroundColor: `${dot}08` }
+                : isDark ? { borderColor: '#1e293b', backgroundColor: '#111827' } : { borderColor: '#e2e8f0', backgroundColor: '#f8fafc' }}
+              onClick={() => coachMaterialRef.current?.click()}
+              onDragOver={e => e.preventDefault()}
+              onDrop={e => { e.preventDefault(); const f = e.dataTransfer.files[0]; if (f) handleMaterialFile(f) }}
+            >
+              <input
+                ref={coachMaterialRef}
+                type="file"
+                accept=".pdf,.docx,.doc,.png,.jpg,.jpeg"
+                className="hidden"
+                onChange={e => { const f = e.target.files?.[0]; if (f) handleMaterialFile(f) }}
+              />
+              {coachMaterialLoading ? (
+                <div className="flex items-center gap-2 text-slate-400 text-sm">
+                  <div className="w-4 h-4 rounded-full border-2 border-slate-600 border-t-current animate-spin" style={{ color: dot }} />
+                  Extracting text…
+                </div>
+              ) : coachMaterialFile ? (
+                <div className="flex items-center justify-between w-full gap-3">
+                  <div className="flex items-center gap-2 min-w-0">
+                    <svg className="w-4 h-4 shrink-0" style={{ color: dot }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <span className="text-sm truncate" style={{ color: dot }}>{coachMaterialFile.name}</span>
+                  </div>
+                  <button
+                    className="text-slate-500 hover:text-red-400 shrink-0 p-1 transition-colors"
+                    onClick={e => { e.stopPropagation(); setCoachMaterialFile(null); setCoachMaterialText('') }}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </button>
+                </div>
+              ) : (
+                <>
+                  <svg className="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <p className="text-slate-500 text-sm text-center">Drop a file or click to upload</p>
+                  <p className="text-slate-600 text-xs">PDF, DOCX, PNG, JPG</p>
+                </>
+              )}
+            </div>
+          </div>
+
           {/* Goal */}
           <div>
             <label className="block text-xs text-slate-500 uppercase tracking-widest font-bold mb-2">What's your goal for this course?</label>
