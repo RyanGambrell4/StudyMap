@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
+import { clean } from '../utils/strings'
 
 const HOUR_HEIGHT = 56
 const START_HOUR  = 6
@@ -398,7 +399,7 @@ export default function CalendarWeekView({
                 if (ev._type === 'gcal') return (
                   <div key={j} className="px-1.5 rounded text-[10px] truncate leading-none"
                     style={{ height: 16, lineHeight: '16px', background: tv.gcalBg, color: tv.gcalText }}>
-                    {ev.title}
+                    {clean(ev.title)}
                   </div>
                 )
                 if (ev._type === 'syllabus') return (
@@ -530,7 +531,7 @@ export default function CalendarWeekView({
                     style={{ top, height, background: tv.gcalBg, borderLeft: `2px solid ${GCAL_BORDER}` }}
                   >
                     <div className="px-1.5 py-0.5">
-                      <p className="text-[10px] font-medium leading-tight truncate" style={{ color: tv.gcalText }}>{ev.title}</p>
+                      <p className="text-[10px] font-medium leading-tight truncate" style={{ color: tv.gcalText }}>{clean(ev.title)}</p>
                     </div>
                   </div>
                 )

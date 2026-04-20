@@ -1,3 +1,5 @@
+import { clean } from '../utils/strings'
+
 const TIME_OPTIONS = ['Morning', 'Afternoon', 'Evening']
 
 const TIME_ICONS = {
@@ -101,7 +103,7 @@ export default function StepSchedule({ schedule, setSchedule, courses, onNext, o
           {courses.map((course, idx) => (
             <div key={idx} className="flex items-center gap-3">
               <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: course.color.dot }} />
-              <span className="text-sm font-medium text-slate-200 flex-1 truncate">{course.name}</span>
+              <span className="text-sm font-medium text-slate-200 flex-1 truncate">{clean(course.name)}</span>
               <span className="text-xs text-slate-500">
                 {new Date(course.examDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
               </span>

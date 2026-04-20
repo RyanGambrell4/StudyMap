@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
 import { getAccessToken } from '../lib/supabase'
+import { clean } from '../utils/strings'
 
 const HOUR_HEIGHT = 56
 const START_HOUR = 6
@@ -331,7 +332,7 @@ export default function CalendarDayView({
                 className="px-2 py-0.5 rounded text-[11px] truncate"
                 style={{ background: tv.gcalBg, color: tv.gcalText }}
               >
-                {ev.title}
+                {clean(ev.title)}
               </div>
             ))}
             {allDayBlocks.map((ev, i) => (
@@ -532,7 +533,7 @@ export default function CalendarDayView({
                 style={{ top, height, background: tv.gcalBg, borderLeft: `2px solid ${GCAL_BORDER}` }}
               >
                 <div className="px-2 py-1">
-                  <p className="text-[11px] font-medium leading-tight truncate" style={{ color: tv.gcalText }}>{e.title}</p>
+                  <p className="text-[11px] font-medium leading-tight truncate" style={{ color: tv.gcalText }}>{clean(e.title)}</p>
                   {height > 32 && <p className="text-[10px] mt-0.5" style={{ color: tv.timeText }}>Google Cal</p>}
                 </div>
               </div>

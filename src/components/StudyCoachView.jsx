@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan } from '../lib/db'
+import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getAIQueriesUsed, getAIQueriesLimit } from '../lib/subscription'
 import { getCurrentGrade, letterGrade, TARGET_OPTIONS } from '../utils/gradeCalc'
@@ -560,7 +561,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, theme = 'dark' }
         </button>
         {pushed && (
           <p className="text-center text-xs leading-relaxed" style={{ color: t.weekTheme }}>
-            When you start a session for <span className="font-medium" style={{ color: t.weekTitle }}>{course.name}</span>, the Blueprint screen will auto-fill the focus from this plan.
+            When you start a session for <span className="font-medium" style={{ color: t.weekTitle }}>{clean(course.name)}</span>, the Blueprint screen will auto-fill the focus from this plan.
           </p>
         )}
         <button onClick={onReset} className="w-full py-2.5 rounded-xl text-sm transition-colors" style={{ color: t.weekTheme, border: `1px solid ${t.cardBorder}` }}>

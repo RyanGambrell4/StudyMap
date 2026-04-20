@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { clean } from '../utils/strings'
 
 const ASSIGNMENT_TYPES = ['Assignment', 'Quiz', 'Midterm', 'Final Exam', 'Project', 'Lab']
 
@@ -75,7 +76,7 @@ export default function StepAssignments({ courses, assignments, setAssignments, 
               style={isActive ? { backgroundColor: course.color.dot } : {}}
             >
               <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: isActive ? 'rgba(255,255,255,0.7)' : course.color.dot }} />
-              <span className="truncate max-w-[120px]">{course.name}</span>
+              <span className="truncate max-w-[120px]">{clean(course.name)}</span>
               {count > 0 && <span className={`text-xs ${isActive ? 'text-white/70' : 'text-slate-500'}`}>{count}</span>}
             </button>
           )

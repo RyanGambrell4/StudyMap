@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { clean } from '../utils/strings'
 
 const STREAK_MSGS = [
   { min: 0,  msg: 'Start your first session today to build your streak!' },
@@ -151,7 +152,7 @@ export default function ProgressView({ courses, allSessions, completedIds, today
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2">
                   <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: course.color.dot }} />
-                  <span className="text-slate-700 dark:text-slate-300 text-sm truncate">{course.name}</span>
+                  <span className="text-slate-700 dark:text-slate-300 text-sm truncate">{clean(course.name)}</span>
                 </div>
                 <span className="text-slate-500 dark:text-slate-400 text-sm tabular-nums shrink-0">{completed}/{total}</span>
               </div>

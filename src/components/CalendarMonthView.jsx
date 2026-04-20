@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import { clean } from '../utils/strings'
 
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 function theme_vars(dark) {
@@ -204,7 +205,7 @@ export default function CalendarMonthView({
                         style={{ height: 18, background: tv.gcalBg, color: tv.gcalText }}
                       >
                         {t && <span className="shrink-0 opacity-70">{t}</span>}
-                        <span className="truncate">{ev.title}</span>
+                        <span className="truncate">{clean(ev.title)}</span>
                       </div>
                     )
                   }
@@ -292,7 +293,7 @@ export default function CalendarMonthView({
                   style={{ background: tv.gcalBg, borderLeft: `2px solid ${tv.gcalBorder}` }}
                 >
                   <div className="flex-1 min-w-0">
-                    <p className="text-[12px] font-medium truncate" style={{ color: tv.gcalText }}>{e.title}</p>
+                    <p className="text-[12px] font-medium truncate" style={{ color: tv.gcalText }}>{clean(e.title)}</p>
                     <p className="text-[10px] text-slate-600">Google Calendar{e.allDay ? ' · All day' : ''}</p>
                   </div>
                 </div>

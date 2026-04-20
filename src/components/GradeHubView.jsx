@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
 import { getActivePlan, canUseAI, incrementAIQuery } from '../lib/subscription'
+import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
 import { saveCoachPlanStruggles } from '../lib/db'
 import {
@@ -113,7 +114,7 @@ function CourseStrip({ courses, activeCourseIdx, onSelect }) {
           >
             <div className="flex items-center gap-2 mb-2">
               <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: dot }} />
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{course.name}</span>
+              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{clean(course.name)}</span>
             </div>
             {current !== null ? (
               <div

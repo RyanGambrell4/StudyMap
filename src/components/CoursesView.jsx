@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react'
 import { canAddCourse, getActivePlan, getPlanLimits } from '../lib/subscription'
+import { clean } from '../utils/strings'
 
 const TARGET_THRESHOLDS = { A: 80, B: 70, C: 60, 'Pass/Fail': 50 }
 
@@ -509,7 +510,7 @@ export default function CoursesView({
                 >
                   <div className="w-3 h-10 rounded-full shrink-0" style={{ backgroundColor: course.color.dot }} />
                   <div className="flex-1 min-w-0">
-                    <p className="font-bold text-slate-800 dark:text-slate-100">{course.name}</p>
+                    <p className="font-bold text-slate-800 dark:text-slate-100">{clean(course.name)}</p>
                     <div className="flex items-center gap-3 mt-1 flex-wrap text-xs text-slate-500">
                       <span>{daysLeft > 0 ? `${daysLeft}d to exam` : 'Exam passed'}</span>
                       <span>·</span>
@@ -570,7 +571,7 @@ export default function CoursesView({
               {/* Delete confirmation */}
               {confirmingDelete && (
                 <div className="border-t border-red-500/20 bg-red-500/5 px-5 py-3 flex items-center justify-between gap-4">
-                  <p className="text-sm text-red-300">Delete <span className="font-semibold">{course.name}</span>? This can't be undone.</p>
+                  <p className="text-sm text-red-300">Delete <span className="font-semibold">{clean(course.name)}</span>? This can't be undone.</p>
                   <div className="flex gap-2 shrink-0">
                     <button
                       onClick={() => setConfirmDeleteIdx(null)}
@@ -703,7 +704,7 @@ export default function CoursesView({
                     <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
-                    Import syllabus for {course.name}
+                    Import syllabus for {clean(course.name)}
                   </button>
 
                 </div>

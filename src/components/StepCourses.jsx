@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { clean } from '../utils/strings'
 
 const COURSE_COLORS = [
   { name: 'blue',   bg: 'bg-blue-500',   dot: '#3B82F6' },
@@ -88,7 +89,7 @@ export default function StepCourses({ courses, setCourses, yearLevel, setYearLev
             <div key={idx} className="flex items-center gap-4 px-4 py-3.5 rounded-xl bg-slate-800/50 border border-slate-700/60">
               <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: course.color.dot }} />
               <div className="flex-1 min-w-0">
-                <p className="font-semibold text-slate-100 truncate">{course.name}</p>
+                <p className="font-semibold text-slate-100 truncate">{clean(course.name)}</p>
                 <div className="flex items-center gap-2 mt-0.5 flex-wrap">
                   <span className="text-xs text-slate-500">
                     {new Date(course.examDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}

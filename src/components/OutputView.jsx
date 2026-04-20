@@ -1,5 +1,6 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import { generateSchedule } from '../utils/generateSchedule'
+import { clean } from '../utils/strings'
 import {
   getCachedSyllabusEvents,
   getCachedManualSessions,
@@ -69,7 +70,7 @@ function TutorView({ courses, userId, onShowPaywall }) {
         <div className="flex-1 min-h-0 bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden flex flex-col">
           <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700/50 shrink-0">
             <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
-              AI Tutor · <span style={{ color: course.color?.dot ?? '#6366f1' }}>{course.name}</span>
+              AI Tutor · <span style={{ color: course.color?.dot ?? '#6366f1' }}>{clean(course.name)}</span>
             </p>
           </div>
           <AIChatView
@@ -250,7 +251,7 @@ function ShareCardModal({ courses, stats, onClose }) {
               return (
                 <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 8 }}>
                   <div style={{ width: 8, height: 8, borderRadius: '50%', background: course.color.dot, flexShrink: 0 }} />
-                  <div style={{ flex: 1, minWidth: 0, color: '#e2e8f0', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{course.name}</div>
+                  <div style={{ flex: 1, minWidth: 0, color: '#e2e8f0', fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{clean(course.name)}</div>
                   <div style={{ color: '#64748b', fontSize: 11, flexShrink: 0 }}>{daysLeft > 0 ? `${daysLeft}d` : 'done'}</div>
                 </div>
               )

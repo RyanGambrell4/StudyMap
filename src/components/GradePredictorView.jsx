@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { getAccessToken } from '../lib/supabase'
+import { clean } from '../utils/strings'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
 
 const COMPONENT_TYPES = ['Exam', 'Quiz', 'Homework', 'Project', 'Lab', 'Participation', 'Other']
@@ -294,7 +295,7 @@ function ResultsCard({ prediction, course, dot, targetGrade, onEdit }) {
             <span className="text-xs font-semibold text-slate-500">{prediction.predictedGrade?.toFixed(0)}%</span>
           </div>
           <div>
-            <p className="text-base font-bold text-slate-900 dark:text-white mb-1">{course.name}</p>
+            <p className="text-base font-bold text-slate-900 dark:text-white mb-1">{clean(course.name)}</p>
             <div
               className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold"
               style={{ backgroundColor: status.bg, color: status.color, border: `1px solid ${status.border}` }}
