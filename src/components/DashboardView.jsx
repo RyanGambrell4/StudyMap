@@ -404,125 +404,7 @@ export default function DashboardView({
               </p>
             </div>
 
-            {/* 2. COMPACT STATS STRIP */}
-            <Card style={{ padding: '14px 20px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
-                {[
-                  {
-                    label: 'Streak',
-                    value: streak,
-                    unit: streak === 1 ? 'day' : 'days',
-                    delta: streak > 0 ? `+${streak}` : null,
-                    badgeVariant: 'orange',
-                  },
-                  {
-                    label: 'This Week',
-                    value: weekHours,
-                    unit: 'hrs',
-                    delta: deltaHours !== 0 ? (deltaHours > 0 ? `+${deltaHours}` : `${deltaHours}`) : null,
-                    badgeVariant: deltaHours >= 0 ? 'indigo' : 'rose',
-                  },
-                  {
-                    label: 'Sessions',
-                    value: weekSessionCount,
-                    unit: '',
-                    delta: deltaSessions !== 0 ? (deltaSessions > 0 ? `+${deltaSessions}` : `${deltaSessions}`) : null,
-                    badgeVariant: deltaSessions >= 0 ? 'sky' : 'rose',
-                  },
-                ].map(({ label, value, unit, delta, badgeVariant }, i, arr) => (
-                  <div
-                    key={label}
-                    style={{
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 3,
-                      paddingLeft: i === 0 ? 0 : 20,
-                      paddingRight: i === arr.length - 1 ? 0 : 20,
-                      borderLeft: i === 0 ? 'none' : `1px solid ${C.cardBorder}`,
-                    }}
-                  >
-                    <p style={{ color: C.textMuted, fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0 }}>
-                      {label}
-                    </p>
-                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
-                      <span style={{ color: C.textPrimary, fontSize: 22, fontWeight: 800, lineHeight: 1 }}>
-                        {value}
-                      </span>
-                      {unit && (
-                        <span style={{ color: C.textSec, fontSize: 12, fontWeight: 500 }}>{unit}</span>
-                      )}
-                      {delta && (
-                        <StatusBadge variant={badgeVariant}>{delta}</StatusBadge>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-
-            {/* 3. AI BRIEF */}
-            {!aiBriefDismissed && (
-              <Card accentBorder={`${C.accent}50`} style={{ padding: '16px 20px' }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
-                  {/* Icon */}
-                  <div style={{
-                    width: 32, height: 32, borderRadius: 8, flexShrink: 0,
-                    backgroundColor: `${C.accent}20`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  }}>
-                    <svg style={{ width: 16, height: 16, color: C.accent }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  {/* Content */}
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
-                      <span style={{ color: C.accent, fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-                        AI Brief
-                      </span>
-                    </div>
-                    <p style={{ color: C.textSec, fontSize: 13, lineHeight: 1.55, marginBottom: 12 }}>
-                      {aiBrief}
-                    </p>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <button
-                        onClick={() => nextUncompletedSession && onStartFocus && onStartFocus(nextUncompletedSession)}
-                        style={{
-                          backgroundColor: C.accent,
-                          color: '#fff',
-                          fontSize: 12,
-                          fontWeight: 600,
-                          padding: '6px 14px',
-                          borderRadius: 7,
-                          border: 'none',
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Swap Session
-                      </button>
-                      <button
-                        onClick={() => setAiBriefDismissed(true)}
-                        style={{
-                          backgroundColor: 'transparent',
-                          color: C.textMuted,
-                          fontSize: 12,
-                          fontWeight: 500,
-                          padding: '6px 10px',
-                          borderRadius: 7,
-                          border: `1px solid ${C.cardBorder}`,
-                          cursor: 'pointer',
-                        }}
-                      >
-                        Dismiss
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </Card>
-            )}
-
-            {/* 4. UP NEXT TODAY */}
+            {/* 2. UP NEXT TODAY */}
             <Card accentBorder={nextUncompletedSession ? C.accent : C.cardBorder}>
               <div style={{ padding: '18px 20px 14px' }}>
                 {/* Header row */}
@@ -631,6 +513,122 @@ export default function DashboardView({
                 )}
               </div>
             </Card>
+
+            {/* 3. COMPACT STATS STRIP */}
+            <Card style={{ padding: '14px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                {[
+                  {
+                    label: 'Streak',
+                    value: streak,
+                    unit: streak === 1 ? 'day' : 'days',
+                    delta: streak > 0 ? `+${streak}` : null,
+                    badgeVariant: 'orange',
+                  },
+                  {
+                    label: 'This Week',
+                    value: weekHours,
+                    unit: 'hrs',
+                    delta: deltaHours !== 0 ? (deltaHours > 0 ? `+${deltaHours}` : `${deltaHours}`) : null,
+                    badgeVariant: deltaHours >= 0 ? 'indigo' : 'rose',
+                  },
+                  {
+                    label: 'Sessions',
+                    value: weekSessionCount,
+                    unit: '',
+                    delta: deltaSessions !== 0 ? (deltaSessions > 0 ? `+${deltaSessions}` : `${deltaSessions}`) : null,
+                    badgeVariant: deltaSessions >= 0 ? 'sky' : 'rose',
+                  },
+                ].map(({ label, value, unit, delta, badgeVariant }, i, arr) => (
+                  <div
+                    key={label}
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 3,
+                      paddingLeft: i === 0 ? 0 : 20,
+                      paddingRight: i === arr.length - 1 ? 0 : 20,
+                      borderLeft: i === 0 ? 'none' : `1px solid ${C.cardBorder}`,
+                    }}
+                  >
+                    <p style={{ color: C.textMuted, fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0 }}>
+                      {label}
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+                      <span style={{ color: C.textPrimary, fontSize: 22, fontWeight: 800, lineHeight: 1 }}>
+                        {value}
+                      </span>
+                      {unit && (
+                        <span style={{ color: C.textSec, fontSize: 12, fontWeight: 500 }}>{unit}</span>
+                      )}
+                      {delta && (
+                        <StatusBadge variant={badgeVariant}>{delta}</StatusBadge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* 4. AI BRIEF */}
+            {!aiBriefDismissed && (
+              <Card accentBorder={`${C.accent}50`} style={{ padding: '16px 20px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                    backgroundColor: `${C.accent}20`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <svg style={{ width: 16, height: 16, color: C.accent }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                      <span style={{ color: C.accent, fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                        AI Brief
+                      </span>
+                    </div>
+                    <p style={{ color: C.textSec, fontSize: 13, lineHeight: 1.55, marginBottom: 12 }}>
+                      {aiBrief}
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <button
+                        onClick={() => nextUncompletedSession && onStartFocus && onStartFocus(nextUncompletedSession)}
+                        style={{
+                          backgroundColor: C.accent,
+                          color: '#fff',
+                          fontSize: 12,
+                          fontWeight: 600,
+                          padding: '6px 14px',
+                          borderRadius: 7,
+                          border: 'none',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Swap Session
+                      </button>
+                      <button
+                        onClick={() => setAiBriefDismissed(true)}
+                        style={{
+                          backgroundColor: 'transparent',
+                          color: C.textMuted,
+                          fontSize: 12,
+                          fontWeight: 500,
+                          padding: '6px 10px',
+                          borderRadius: 7,
+                          border: `1px solid ${C.cardBorder}`,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            )}
 
             {/* 5. COURSES */}
             <div>
@@ -765,96 +763,7 @@ export default function DashboardView({
           ════════════════════════════════════════ */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
 
-            {/* 1. GOALS card */}
-            <Card>
-              <div style={{ padding: '18px 20px' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-                  <SectionLabel>Weekly Goal</SectionLabel>
-                  <button style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: C.textMuted, fontSize: 12 }}>
-                    Edit
-                  </button>
-                </div>
-
-                {/* Donut */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 12 }}>
-                  <DonutRing pct={goalPct} />
-                  <p style={{ color: C.textSec, fontSize: 12, marginTop: 8 }}>
-                    {weekHours} of {weeklyGoalHours} hours
-                  </p>
-                </div>
-
-                {/* Exam targets */}
-                <div style={{ borderTop: `1px solid ${C.cardBorder}`, paddingTop: 14 }}>
-                  <SectionLabel>Exam Targets</SectionLabel>
-                  <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {courses.filter(c => c.examDate && daysBetween(todayStr, c.examDate) >= 0).length > 0 ? (
-                      courses
-                        .map((c, i) => ({ c, i }))
-                        .filter(({ c }) => c.examDate && daysBetween(todayStr, c.examDate) >= 0)
-                        .slice(0, 4)
-                        .map(({ c, i }) => {
-                          const days = daysBetween(todayStr, c.examDate)
-                          const color = c.color?.dot ?? courseColor(i)
-                          return (
-                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                              <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }} />
-                              <span style={{ flex: 1, color: C.textSec, fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                                {c.name}
-                              </span>
-                              <StatusBadge variant={days <= 7 ? 'orange' : 'slate'}>
-                                {days === 0 ? 'Today' : `${days}d`}
-                              </StatusBadge>
-                            </div>
-                          )
-                        })
-                    ) : (
-                      <p style={{ color: C.textMuted, fontSize: 12 }}>No upcoming exams</p>
-                    )}
-                  </div>
-                </div>
-              </div>
-            </Card>
-
-            {/* 2. TODAY'S PLAN */}
-            <Card>
-              <div style={{ padding: '18px 20px' }}>
-                <SectionLabel>Today's Plan</SectionLabel>
-
-                {todaySessions.length === 0 ? (
-                  <p style={{ color: C.textMuted, fontSize: 13, marginTop: 12 }}>No sessions scheduled today.</p>
-                ) : (
-                  <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {todaySessions.map(session => {
-                      const done = completedIds.has(session.id)
-                      const color = session.color?.dot ?? C.accent
-                      return (
-                        <div key={session.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <span style={{ color: C.textMuted, fontSize: 11, fontWeight: 500, width: 52, flexShrink: 0 }}>
-                            {session.startTime ? formatTime(session.startTime) : '--'}
-                          </span>
-                          <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: done ? C.success : color, flexShrink: 0 }} />
-                          <span style={{
-                            flex: 1,
-                            color: done ? C.textMuted : C.textSec,
-                            fontSize: 13,
-                            fontWeight: 500,
-                            textDecoration: done ? 'line-through' : 'none',
-                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-                          }}>
-                            {session.courseName} {session.sessionType ? `· ${session.sessionType}` : ''}
-                          </span>
-                          {session.duration && (
-                            <StatusBadge variant="slate">{session.duration}m</StatusBadge>
-                          )}
-                        </div>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            </Card>
-
-            {/* 3. QUICK ACTIONS */}
+            {/* 1. QUICK ACTIONS */}
             <Card>
               <div style={{ padding: '18px 20px' }}>
                 <SectionLabel>Quick Actions</SectionLabel>
@@ -921,6 +830,95 @@ export default function DashboardView({
                     </button>
                   ))}
                 </div>
+              </div>
+            </Card>
+
+            {/* 2. GOALS card */}
+            <Card>
+              <div style={{ padding: '18px 20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                  <SectionLabel>Weekly Goal</SectionLabel>
+                  <button style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: C.textMuted, fontSize: 12 }}>
+                    Edit
+                  </button>
+                </div>
+
+                {/* Donut */}
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 12 }}>
+                  <DonutRing pct={goalPct} />
+                  <p style={{ color: C.textSec, fontSize: 12, marginTop: 8 }}>
+                    {weekHours} of {weeklyGoalHours} hours
+                  </p>
+                </div>
+
+                {/* Exam targets */}
+                <div style={{ borderTop: `1px solid ${C.cardBorder}`, paddingTop: 14 }}>
+                  <SectionLabel>Exam Targets</SectionLabel>
+                  <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {courses.filter(c => c.examDate && daysBetween(todayStr, c.examDate) >= 0).length > 0 ? (
+                      courses
+                        .map((c, i) => ({ c, i }))
+                        .filter(({ c }) => c.examDate && daysBetween(todayStr, c.examDate) >= 0)
+                        .slice(0, 4)
+                        .map(({ c, i }) => {
+                          const days = daysBetween(todayStr, c.examDate)
+                          const color = c.color?.dot ?? courseColor(i)
+                          return (
+                            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                              <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }} />
+                              <span style={{ flex: 1, color: C.textSec, fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                                {c.name}
+                              </span>
+                              <StatusBadge variant={days <= 7 ? 'orange' : 'slate'}>
+                                {days === 0 ? 'Today' : `${days}d`}
+                              </StatusBadge>
+                            </div>
+                          )
+                        })
+                    ) : (
+                      <p style={{ color: C.textMuted, fontSize: 12 }}>No upcoming exams</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </Card>
+
+            {/* 3. TODAY'S PLAN */}
+            <Card>
+              <div style={{ padding: '18px 20px' }}>
+                <SectionLabel>Today's Plan</SectionLabel>
+
+                {todaySessions.length === 0 ? (
+                  <p style={{ color: C.textMuted, fontSize: 13, marginTop: 12 }}>No sessions scheduled today.</p>
+                ) : (
+                  <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {todaySessions.map(session => {
+                      const done = completedIds.has(session.id)
+                      const color = session.color?.dot ?? C.accent
+                      return (
+                        <div key={session.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <span style={{ color: C.textMuted, fontSize: 11, fontWeight: 500, width: 52, flexShrink: 0 }}>
+                            {session.startTime ? formatTime(session.startTime) : '--'}
+                          </span>
+                          <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: done ? C.success : color, flexShrink: 0 }} />
+                          <span style={{
+                            flex: 1,
+                            color: done ? C.textMuted : C.textSec,
+                            fontSize: 13,
+                            fontWeight: 500,
+                            textDecoration: done ? 'line-through' : 'none',
+                            overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                          }}>
+                            {session.courseName} {session.sessionType ? `· ${session.sessionType}` : ''}
+                          </span>
+                          {session.duration && (
+                            <StatusBadge variant="slate">{session.duration}m</StatusBadge>
+                          )}
+                        </div>
+                      )
+                    })}
+                  </div>
+                )}
               </div>
             </Card>
 
