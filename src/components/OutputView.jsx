@@ -936,6 +936,7 @@ export default function OutputView({
             onNavigateToCourses={() => setActiveSection('courses')}
             onNavigateToGrades={(idx) => { setGradesCourseIdx(idx); setActiveSection('grades') }}
             onNavigateToTutor={() => setActiveSection('tutor')}
+            onNavigateToTools={() => setActiveSection('tools')}
             onShowPaywall={onShowPaywall}
             coachPlans={coachPlans}
             onOpenStudyCoach={handleOpenStudyCoach}

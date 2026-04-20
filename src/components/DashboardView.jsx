@@ -165,6 +165,7 @@ export default function DashboardView({
   onNavigateToCourses,
   onNavigateToGrades,
   onNavigateToTutor,
+  onNavigateToTools,
   onShowPaywall,
   coachPlans,
   onOpenStudyCoach,
@@ -746,28 +747,28 @@ export default function DashboardView({
                 <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {[
                     {
-                      title: 'Study Tools',
-                      sub: 'Flashcards, timers, and more',
+                      title: 'AI Tutor',
+                      sub: 'Get instant help on any topic',
                       iconBg: `${C.accent}20`,
                       iconColor: C.accent,
-                      iconPath: 'M13 10V3L4 14h7v7l9-11h-7z',
+                      iconPath: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
                       onClick: () => { if (typeof onNavigateToTutor === 'function') onNavigateToTutor() },
                     },
                     {
-                      title: 'Generate Study Plan',
-                      sub: 'AI-powered weekly plan',
+                      title: 'Study Coach',
+                      sub: 'AI-powered weekly study plan',
                       iconBg: '#7C3AED20',
                       iconColor: '#8B5CF6',
-                      iconPath: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
+                      iconPath: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
                       onClick: () => { if (typeof onOpenStudyCoach === 'function') onOpenStudyCoach(0) },
                     },
                     {
-                      title: 'Import Syllabus',
-                      sub: 'Add course deadlines',
-                      iconBg: `${C.warning}20`,
-                      iconColor: C.warning,
-                      iconPath: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-                      onClick: onImportSyllabus,
+                      title: 'Quizzes',
+                      sub: 'Test your knowledge',
+                      iconBg: `${C.success}20`,
+                      iconColor: C.success,
+                      iconPath: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
+                      onClick: () => { if (typeof onNavigateToTools === 'function') onNavigateToTools() },
                     },
                   ].map(({ title, sub, iconBg, iconColor, iconPath, onClick }) => (
                     <button
@@ -840,6 +841,60 @@ export default function DashboardView({
                         </div>
                       )
                     })}
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            {/* 5. GRADE SNAPSHOT */}
+            {courses.some(c => (c.gradeData?.components ?? []).length > 0) && (
+              <Card>
+                <div style={{ padding: '18px 20px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                    <SectionLabel>Grade Snapshot</SectionLabel>
+                    <button
+                      onClick={() => typeof onNavigateToGrades === 'function' && onNavigateToGrades(0)}
+                      style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: C.accent, fontSize: 12, fontWeight: 600 }}
+                    >
+                      Details
+                    </button>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {courses.map((course, idx) => {
+                      const components = course.gradeData?.components ?? []
+                      if (!components.length) return null
+                      const current = getCurrentGrade(components)
+                      const target = course.gradeData?.targetGrade ?? null
+                      const status = current !== null && target ? gradeStatus(current, target) : 'unknown'
+                      const color = course.color?.dot ?? courseColor(idx)
+                      const statusColorMap = { 'on-track': C.success, 'at-risk': C.warning, 'needs-recovery': '#F87171', 'unknown': C.textMuted }
+                      const grade = letterGrade(current)
+                      return (
+                        <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                          <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: color, flexShrink: 0 }} />
+                          <span style={{ flex: 1, color: C.textSec, fontSize: 12, fontWeight: 500, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {course.name}
+                          </span>
+                          {current !== null ? (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+                              <span style={{ color: statusColorMap[status], fontSize: 12, fontWeight: 700 }}>
+                                {Math.round(current)}%
+                              </span>
+                              <span style={{
+                                fontSize: 10, fontWeight: 700,
+                                padding: '2px 6px', borderRadius: 999,
+                                backgroundColor: `${statusColorMap[status]}18`,
+                                color: statusColorMap[status],
+                              }}>
+                                {grade}
+                              </span>
+                            </div>
+                          ) : (
+                            <span style={{ color: C.textMuted, fontSize: 11 }}>No data</span>
+                          )}
+                        </div>
+                      )
+                    }).filter(Boolean)}
                   </div>
                 </div>
               </Card>
