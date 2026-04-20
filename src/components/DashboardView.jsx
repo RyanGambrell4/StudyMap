@@ -17,6 +17,15 @@ const C = {
   warning:     '#F59E0B',
 }
 
+// Badge palette: indigo / rose / orange / sky / slate
+const BADGE = {
+  indigo: { bg: '#6366F120', text: '#818CF8' },
+  rose:   { bg: '#F43F5E20', text: '#FB7185' },
+  orange: { bg: '#F9731620', text: '#FB923C' },
+  sky:    { bg: '#0EA5E920', text: '#38BDF8' },
+  slate:  { bg: '#64748B20', text: '#94A3B8' },
+}
+
 const COURSE_COLORS = ['#6366F1', '#EC4899', '#06B6D4', '#F59E0B', '#10B981', '#F97316']
 
 function courseColor(idx) {
@@ -57,24 +66,6 @@ function formatTime(timeStr) {
   const ampm = h >= 12 ? 'PM' : 'AM'
   const hour = h % 12 || 12
   return `${hour}:${String(m).padStart(2, '0')} ${ampm}`
-}
-
-// ── Sparkline ─────────────────────────────────────────────────────────────────
-function Sparkline({ color = '#6366F1', width = 80, height = 32 }) {
-  const points = '0,28 16,22 32,18 48,12 64,8 80,4'
-  return (
-    <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ display: 'block' }}>
-      <polyline
-        points={points}
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        opacity="0.7"
-      />
-    </svg>
-  )
 }
 
 // ── Card wrapper ──────────────────────────────────────────────────────────────
@@ -144,6 +135,24 @@ function ChevronRight() {
   )
 }
 
+// ── StatusBadge ───────────────────────────────────────────────────────────────
+function StatusBadge({ variant = 'slate', children }) {
+  const { bg, text } = BADGE[variant] ?? BADGE.slate
+  return (
+    <span style={{
+      fontSize: 10,
+      fontWeight: 700,
+      padding: '2px 7px',
+      borderRadius: 999,
+      backgroundColor: bg,
+      color: text,
+      flexShrink: 0,
+    }}>
+      {children}
+    </span>
+  )
+}
+
 // ═══════════════════════════════════════════════════════════════════════════════
 // DashboardView
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -174,6 +183,8 @@ export default function DashboardView({
   const { currentStreak, lastCompletedDate, recordCompletion } = useStreak()
   const celebrate = useCelebration()
   const streak = currentStreak
+
+  const [aiBriefDismissed, setAiBriefDismissed] = useState(false)
 
   // ── Celebration on all-complete ─────────────────────────────────────────────
   const allCompleteKey = todayStr + (allComplete ? '-done' : '')
@@ -245,7 +256,7 @@ export default function DashboardView({
     return exams[0] ?? null
   }, [courses, todayStr])
 
-  // Last session per course (for "last session X ago")
+  // Last session per course
   const lastSessionPerCourse = useMemo(() => {
     const map = {}
     courses.forEach((_, idx) => {
@@ -257,7 +268,7 @@ export default function DashboardView({
     return map
   }, [courses, allSessions, completedIds, todayStr])
 
-  // Progress per course (total sessions vs completed)
+  // Progress per course
   const progressPerCourse = useMemo(() => {
     const map = {}
     courses.forEach((_, idx) => {
@@ -268,7 +279,7 @@ export default function DashboardView({
     return map
   }, [courses, allSessions, completedIds])
 
-  // Weekly goal hours (from schedule or default 30)
+  // Weekly goal
   const weeklyGoalHours = 20
   const goalPct = Math.min(100, Math.round((weekHours / weeklyGoalHours) * 100))
 
@@ -285,6 +296,20 @@ export default function DashboardView({
     if (!parts.length) return 'Keep up the momentum. Every session counts.'
     return parts.join('. ') + '.'
   }, [todaySessions, upcomingExam])
+
+  // AI Brief message (derived from data)
+  const aiBrief = useMemo(() => {
+    if (upcomingExam && upcomingExam.days <= 7) {
+      return `${upcomingExam.course.name} is coming up in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. Focus on reviewing key concepts and past problems today.`
+    }
+    if (todaySessions.length > 0 && nextUncompletedSession) {
+      return `You have ${todaySessions.length} session${todaySessions.length > 1 ? 's' : ''} planned. Starting with ${nextUncompletedSession.courseName} is your best move right now.`
+    }
+    if (weekHours > 0 && deltaHours > 0) {
+      return `You're up ${deltaHours}h from last week. Keep the momentum going — consistency beats intensity every time.`
+    }
+    return `Add sessions to your schedule and stay consistent. Small daily progress compounds into big results at exam time.`
+  }, [upcomingExam, todaySessions, nextUncompletedSession, weekHours, deltaHours])
 
   // ── Upcoming deadlines ───────────────────────────────────────────────────────
   const upcomingDeadlines = useMemo(() => {
@@ -379,7 +404,125 @@ export default function DashboardView({
               </p>
             </div>
 
-            {/* 2. UP NEXT TODAY */}
+            {/* 2. COMPACT STATS STRIP */}
+            <Card style={{ padding: '14px 20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 0 }}>
+                {[
+                  {
+                    label: 'Streak',
+                    value: streak,
+                    unit: streak === 1 ? 'day' : 'days',
+                    delta: streak > 0 ? `+${streak}` : null,
+                    badgeVariant: 'orange',
+                  },
+                  {
+                    label: 'This Week',
+                    value: weekHours,
+                    unit: 'hrs',
+                    delta: deltaHours !== 0 ? (deltaHours > 0 ? `+${deltaHours}` : `${deltaHours}`) : null,
+                    badgeVariant: deltaHours >= 0 ? 'indigo' : 'rose',
+                  },
+                  {
+                    label: 'Sessions',
+                    value: weekSessionCount,
+                    unit: '',
+                    delta: deltaSessions !== 0 ? (deltaSessions > 0 ? `+${deltaSessions}` : `${deltaSessions}`) : null,
+                    badgeVariant: deltaSessions >= 0 ? 'sky' : 'rose',
+                  },
+                ].map(({ label, value, unit, delta, badgeVariant }, i, arr) => (
+                  <div
+                    key={label}
+                    style={{
+                      flex: 1,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 3,
+                      paddingLeft: i === 0 ? 0 : 20,
+                      paddingRight: i === arr.length - 1 ? 0 : 20,
+                      borderLeft: i === 0 ? 'none' : `1px solid ${C.cardBorder}`,
+                    }}
+                  >
+                    <p style={{ color: C.textMuted, fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', margin: 0 }}>
+                      {label}
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 5 }}>
+                      <span style={{ color: C.textPrimary, fontSize: 22, fontWeight: 800, lineHeight: 1 }}>
+                        {value}
+                      </span>
+                      {unit && (
+                        <span style={{ color: C.textSec, fontSize: 12, fontWeight: 500 }}>{unit}</span>
+                      )}
+                      {delta && (
+                        <StatusBadge variant={badgeVariant}>{delta}</StatusBadge>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </Card>
+
+            {/* 3. AI BRIEF */}
+            {!aiBriefDismissed && (
+              <Card accentBorder={`${C.accent}50`} style={{ padding: '16px 20px' }}>
+                <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12 }}>
+                  {/* Icon */}
+                  <div style={{
+                    width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                    backgroundColor: `${C.accent}20`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  }}>
+                    <svg style={{ width: 16, height: 16, color: C.accent }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                    </svg>
+                  </div>
+                  {/* Content */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+                      <span style={{ color: C.accent, fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                        AI Brief
+                      </span>
+                    </div>
+                    <p style={{ color: C.textSec, fontSize: 13, lineHeight: 1.55, marginBottom: 12 }}>
+                      {aiBrief}
+                    </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <button
+                        onClick={() => nextUncompletedSession && onStartFocus && onStartFocus(nextUncompletedSession)}
+                        style={{
+                          backgroundColor: C.accent,
+                          color: '#fff',
+                          fontSize: 12,
+                          fontWeight: 600,
+                          padding: '6px 14px',
+                          borderRadius: 7,
+                          border: 'none',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Swap Session
+                      </button>
+                      <button
+                        onClick={() => setAiBriefDismissed(true)}
+                        style={{
+                          backgroundColor: 'transparent',
+                          color: C.textMuted,
+                          fontSize: 12,
+                          fontWeight: 500,
+                          padding: '6px 10px',
+                          borderRadius: 7,
+                          border: `1px solid ${C.cardBorder}`,
+                          cursor: 'pointer',
+                        }}
+                      >
+                        Dismiss
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            )}
+
+            {/* 4. UP NEXT TODAY */}
             <Card accentBorder={nextUncompletedSession ? C.accent : C.cardBorder}>
               <div style={{ padding: '18px 20px 14px' }}>
                 {/* Header row */}
@@ -387,14 +530,9 @@ export default function DashboardView({
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                     <SectionLabel>Up Next Today</SectionLabel>
                     {todaySessions.length > 0 && (
-                      <span style={{
-                        fontSize: 11, fontWeight: 700,
-                        padding: '2px 8px', borderRadius: 999,
-                        backgroundColor: `${C.accent}20`,
-                        color: C.accent,
-                      }}>
+                      <StatusBadge variant="indigo">
                         {todaySessions.length} session{todaySessions.length !== 1 ? 's' : ''}
-                      </span>
+                      </StatusBadge>
                     )}
                   </div>
                 </div>
@@ -418,15 +556,7 @@ export default function DashboardView({
                           </span>
                         </>
                       )}
-                      <span style={{
-                        marginLeft: 'auto',
-                        fontSize: 11, fontWeight: 600,
-                        padding: '2px 8px', borderRadius: 999,
-                        backgroundColor: '#1A2540',
-                        color: C.textSec,
-                      }}>
-                        Focus block
-                      </span>
+                      <StatusBadge variant="slate" style={{ marginLeft: 'auto' }}>Focus block</StatusBadge>
                     </div>
 
                     {/* Session title */}
@@ -502,56 +632,7 @@ export default function DashboardView({
               </div>
             </Card>
 
-            {/* 3. STATS ROW */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-              {[
-                {
-                  label: 'Current Streak',
-                  value: streak,
-                  unit: streak === 1 ? 'day' : 'days',
-                  delta: streak > 0 ? `+${streak}` : '0',
-                  sub: 'Keep it going',
-                  color: '#F97316',
-                },
-                {
-                  label: 'Hours Studied',
-                  value: weekHours,
-                  unit: 'hrs',
-                  delta: deltaHours >= 0 ? `+${deltaHours}` : `${deltaHours}`,
-                  sub: 'vs last week',
-                  color: C.accent,
-                },
-                {
-                  label: 'Sessions Done',
-                  value: weekSessionCount,
-                  unit: '',
-                  delta: deltaSessions >= 0 ? `+${deltaSessions}` : `${deltaSessions}`,
-                  sub: 'this week',
-                  color: C.success,
-                },
-              ].map(({ label, value, unit, delta, sub, color }) => (
-                <Card key={label} style={{ padding: '18px 16px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
-                    <SectionLabel>{label}</SectionLabel>
-                    <span style={{
-                      fontSize: 10, fontWeight: 700,
-                      padding: '2px 6px', borderRadius: 999,
-                      backgroundColor: `${color}18`,
-                      color: color,
-                    }}>
-                      {delta}
-                    </span>
-                  </div>
-                  <p style={{ color: C.textPrimary, fontSize: 26, fontWeight: 800, lineHeight: 1, marginBottom: 2 }}>
-                    {value}<span style={{ fontSize: 13, fontWeight: 500, color: C.textSec, marginLeft: 3 }}>{unit}</span>
-                  </p>
-                  <p style={{ color: C.textMuted, fontSize: 11, marginBottom: 10 }}>{sub}</p>
-                  <Sparkline color={color} />
-                </Card>
-              ))}
-            </div>
-
-            {/* 4. COURSES */}
+            {/* 5. COURSES */}
             <div>
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
                 <SectionLabel>Courses</SectionLabel>
@@ -575,6 +656,12 @@ export default function DashboardView({
                   const daysToExam = course.examDate ? daysBetween(todayStr, course.examDate) : null
                   const examSoon = daysToExam !== null && daysToExam >= 0 && daysToExam <= 14
 
+                  // On track / Behind logic
+                  const hasUpcoming = allSessions.some(s => s.courseId === idx && s.dateStr >= todayStr)
+                  const onTrack = pct >= 50 || !hasUpcoming
+                  const trackVariant = onTrack ? 'sky' : 'rose'
+                  const trackLabel = onTrack ? 'On track' : 'Behind'
+
                   return (
                     <Card key={idx} style={{ padding: '14px 16px', display: 'flex', alignItems: 'center', gap: 14 }}>
                       {/* Color bar */}
@@ -582,13 +669,14 @@ export default function DashboardView({
 
                       {/* Course info */}
                       <div style={{ flex: 1, minWidth: 0 }}>
-                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 3 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
                           {course.code && (
                             <span style={{ color: C.textMuted, fontSize: 11, fontWeight: 600 }}>{course.code}</span>
                           )}
                           <span style={{ color: C.textPrimary, fontSize: 14, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {course.name}
                           </span>
+                          <StatusBadge variant={trackVariant}>{trackLabel}</StatusBadge>
                         </div>
                         {last && (
                           <p style={{ color: C.textMuted, fontSize: 11, marginBottom: 7 }}>
@@ -608,16 +696,11 @@ export default function DashboardView({
 
                       {/* Right: pct + exam */}
                       <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                        <p style={{ color: C.textPrimary, fontSize: 16, fontWeight: 700, marginBottom: 2 }}>{pct}%</p>
+                        <p style={{ color: C.textPrimary, fontSize: 16, fontWeight: 700, marginBottom: 4 }}>{pct}%</p>
                         {daysToExam !== null && daysToExam >= 0 && (
-                          <span style={{
-                            fontSize: 10, fontWeight: 700,
-                            padding: '2px 6px', borderRadius: 999,
-                            backgroundColor: examSoon ? `${C.warning}18` : '#1A2540',
-                            color: examSoon ? C.warning : C.textMuted,
-                          }}>
+                          <StatusBadge variant={examSoon ? 'orange' : 'slate'}>
                             {daysToExam === 0 ? 'Exam today' : `${daysToExam}d`}
-                          </span>
+                          </StatusBadge>
                         )}
                       </div>
                     </Card>
@@ -625,6 +708,55 @@ export default function DashboardView({
                 })}
               </div>
             </div>
+
+            {/* 6. DEADLINE RADAR */}
+            {upcomingDeadlines.length > 0 && (
+              <div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                  <SectionLabel>Deadline Radar</SectionLabel>
+                  <StatusBadge variant="rose">{upcomingDeadlines.length} upcoming</StatusBadge>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {upcomingDeadlines.map((event, i) => {
+                    const days = daysBetween(todayStr, event.date)
+                    const urgent = days <= 3
+                    const soon = days <= 7
+                    const badgeVariant = urgent ? 'rose' : soon ? 'orange' : 'slate'
+
+                    return (
+                      <Card key={event.id ?? i} style={{ padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12 }}>
+                        {/* Day number */}
+                        <div style={{
+                          width: 40, height: 40, borderRadius: 10, flexShrink: 0,
+                          backgroundColor: urgent ? `${BADGE.rose.bg}` : soon ? `${BADGE.orange.bg}` : '#1A2540',
+                          display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
+                          gap: 1,
+                        }}>
+                          <span style={{ color: urgent ? BADGE.rose.text : soon ? BADGE.orange.text : C.textMuted, fontSize: 16, fontWeight: 800, lineHeight: 1 }}>
+                            {days === 0 ? '!' : days}
+                          </span>
+                          <span style={{ color: urgent ? BADGE.rose.text : soon ? BADGE.orange.text : C.textMuted, fontSize: 8, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                            {days === 0 ? 'today' : days === 1 ? 'day' : 'days'}
+                          </span>
+                        </div>
+
+                        {/* Info */}
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <p style={{ color: C.textPrimary, fontSize: 13, fontWeight: 600, marginBottom: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                            {event.name}
+                          </p>
+                          <p style={{ color: C.textMuted, fontSize: 11 }}>{event.courseName}</p>
+                        </div>
+
+                        <StatusBadge variant={badgeVariant}>
+                          {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d`}
+                        </StatusBadge>
+                      </Card>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
 
           </div>
 
@@ -669,15 +801,9 @@ export default function DashboardView({
                               <span style={{ flex: 1, color: C.textSec, fontSize: 12, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                                 {c.name}
                               </span>
-                              <span style={{
-                                fontSize: 10, fontWeight: 700,
-                                padding: '2px 6px', borderRadius: 999,
-                                backgroundColor: days <= 7 ? `${C.warning}18` : '#1A2540',
-                                color: days <= 7 ? C.warning : C.textMuted,
-                                flexShrink: 0,
-                              }}>
+                              <StatusBadge variant={days <= 7 ? 'orange' : 'slate'}>
                                 {days === 0 ? 'Today' : `${days}d`}
-                              </span>
+                              </StatusBadge>
                             </div>
                           )
                         })
@@ -703,13 +829,10 @@ export default function DashboardView({
                       const color = session.color?.dot ?? C.accent
                       return (
                         <div key={session.id} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          {/* Time */}
                           <span style={{ color: C.textMuted, fontSize: 11, fontWeight: 500, width: 52, flexShrink: 0 }}>
                             {session.startTime ? formatTime(session.startTime) : '--'}
                           </span>
-                          {/* Dot */}
                           <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: done ? C.success : color, flexShrink: 0 }} />
-                          {/* Name */}
                           <span style={{
                             flex: 1,
                             color: done ? C.textMuted : C.textSec,
@@ -720,17 +843,8 @@ export default function DashboardView({
                           }}>
                             {session.courseName} {session.sessionType ? `· ${session.sessionType}` : ''}
                           </span>
-                          {/* Duration */}
                           {session.duration && (
-                            <span style={{
-                              fontSize: 10, fontWeight: 600,
-                              padding: '2px 6px', borderRadius: 999,
-                              backgroundColor: '#1A2540',
-                              color: C.textMuted,
-                              flexShrink: 0,
-                            }}>
-                              {session.duration}m
-                            </span>
+                            <StatusBadge variant="slate">{session.duration}m</StatusBadge>
                           )}
                         </div>
                       )
@@ -747,27 +861,27 @@ export default function DashboardView({
                 <div style={{ marginTop: 14, display: 'flex', flexDirection: 'column', gap: 2 }}>
                   {[
                     {
-                      title: 'AI Tutor',
-                      sub: 'Get instant help on any topic',
-                      iconBg: `${C.accent}20`,
-                      iconColor: C.accent,
-                      iconPath: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z',
-                      onClick: () => { if (typeof onNavigateToTutor === 'function') onNavigateToTutor() },
-                    },
-                    {
                       title: 'Study Coach',
                       sub: 'AI-powered weekly study plan',
-                      iconBg: '#7C3AED20',
-                      iconColor: '#8B5CF6',
+                      iconBg: `${C.accent}20`,
+                      iconColor: C.accent,
                       iconPath: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
                       onClick: () => { if (typeof onOpenStudyCoach === 'function') onOpenStudyCoach(0) },
                     },
                     {
-                      title: 'Quizzes',
+                      title: 'Grade Hub',
+                      sub: 'Track assignments and grades',
+                      iconBg: '#EC489920',
+                      iconColor: '#EC4899',
+                      iconPath: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z',
+                      onClick: () => { if (typeof onNavigateToGrades === 'function') onNavigateToGrades(0) },
+                    },
+                    {
+                      title: 'Review Flashcards',
                       sub: 'Test your knowledge',
                       iconBg: `${C.success}20`,
                       iconColor: C.success,
-                      iconPath: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4',
+                      iconPath: 'M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z',
                       onClick: () => { if (typeof onNavigateToTools === 'function') onNavigateToTools() },
                     },
                   ].map(({ title, sub, iconBg, iconColor, iconPath, onClick }) => (
@@ -789,7 +903,6 @@ export default function DashboardView({
                       onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#0F1929' }}
                       onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
                     >
-                      {/* Icon square */}
                       <div style={{
                         width: 36, height: 36, borderRadius: 9,
                         backgroundColor: iconBg,
@@ -800,7 +913,6 @@ export default function DashboardView({
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={iconPath} />
                         </svg>
                       </div>
-                      {/* Text */}
                       <div style={{ flex: 1, minWidth: 0 }}>
                         <p style={{ color: C.textPrimary, fontSize: 13, fontWeight: 600, marginBottom: 1 }}>{title}</p>
                         <p style={{ color: C.textMuted, fontSize: 11 }}>{sub}</p>
@@ -812,41 +924,7 @@ export default function DashboardView({
               </div>
             </Card>
 
-            {/* 4. UPCOMING DEADLINES (right column, compact) */}
-            {upcomingDeadlines.length > 0 && (
-              <Card>
-                <div style={{ padding: '18px 20px' }}>
-                  <SectionLabel>Upcoming Deadlines</SectionLabel>
-                  <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                    {upcomingDeadlines.slice(0, 4).map((event, i) => {
-                      const days = daysBetween(todayStr, event.date)
-                      return (
-                        <div key={event.id ?? i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                          <div style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: event.color?.dot ?? C.accent, flexShrink: 0 }} />
-                          <div style={{ flex: 1, minWidth: 0 }}>
-                            <p style={{ color: C.textSec, fontSize: 12, fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                              {event.name}
-                            </p>
-                            <p style={{ color: C.textMuted, fontSize: 11 }}>{event.courseName}</p>
-                          </div>
-                          <span style={{
-                            fontSize: 10, fontWeight: 700,
-                            padding: '2px 6px', borderRadius: 999,
-                            backgroundColor: days <= 3 ? '#ff444420' : days <= 7 ? `${C.warning}18` : '#1A2540',
-                            color: days <= 3 ? '#ff6b6b' : days <= 7 ? C.warning : C.textMuted,
-                            flexShrink: 0,
-                          }}>
-                            {days === 0 ? 'Today' : days === 1 ? 'Tomorrow' : `${days}d`}
-                          </span>
-                        </div>
-                      )
-                    })}
-                  </div>
-                </div>
-              </Card>
-            )}
-
-            {/* 5. GRADE SNAPSHOT */}
+            {/* 4. GRADE SNAPSHOT */}
             {courses.some(c => (c.gradeData?.components ?? []).length > 0) && (
               <Card>
                 <div style={{ padding: '18px 20px' }}>
@@ -868,6 +946,7 @@ export default function DashboardView({
                       const status = current !== null && target ? gradeStatus(current, target) : 'unknown'
                       const color = course.color?.dot ?? courseColor(idx)
                       const statusColorMap = { 'on-track': C.success, 'at-risk': C.warning, 'needs-recovery': '#F87171', 'unknown': C.textMuted }
+                      const statusBadgeVariant = { 'on-track': 'sky', 'at-risk': 'orange', 'needs-recovery': 'rose', 'unknown': 'slate' }
                       const grade = letterGrade(current)
                       return (
                         <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -880,14 +959,7 @@ export default function DashboardView({
                               <span style={{ color: statusColorMap[status], fontSize: 12, fontWeight: 700 }}>
                                 {Math.round(current)}%
                               </span>
-                              <span style={{
-                                fontSize: 10, fontWeight: 700,
-                                padding: '2px 6px', borderRadius: 999,
-                                backgroundColor: `${statusColorMap[status]}18`,
-                                color: statusColorMap[status],
-                              }}>
-                                {grade}
-                              </span>
+                              <StatusBadge variant={statusBadgeVariant[status]}>{grade}</StatusBadge>
                             </div>
                           ) : (
                             <span style={{ color: C.textMuted, fontSize: 11 }}>No data</span>
