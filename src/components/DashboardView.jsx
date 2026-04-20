@@ -83,6 +83,30 @@ function Card({ children, style }) {
   )
 }
 
+// ── HoverCard — clickable card with glow on hover ────────────────────────────
+function HoverCard({ children, style, gridColumn, onClick }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <div
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        gridColumn,
+        background: D.bgCard,
+        border: `1px solid ${hovered ? 'rgba(99,102,241,0.45)' : D.border}`,
+        borderRadius: 14,
+        cursor: 'pointer',
+        transition: 'border-color 0.2s, box-shadow 0.2s',
+        boxShadow: hovered ? '0 0 0 1px rgba(99,102,241,0.15), 0 8px 32px rgba(99,102,241,0.12)' : 'none',
+        ...style,
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
 // ── Section header ────────────────────────────────────────────────────────────
 function SectionHeader({ children }) {
   return (
@@ -109,6 +133,8 @@ export default function DashboardView({
   onImportSyllabus,
   onAddSession,
   onNavigateToCourses,
+  onNavigateToCalendar,
+  onNavigateToProgress,
   onNavigateToGrades,
   onNavigateToTutor,
   onNavigateToTools,
@@ -258,7 +284,7 @@ export default function DashboardView({
   // AI coach message
   const aiMessage = useMemo(() => {
     if (upcomingExam && upcomingExam.days <= 7) {
-      return `${upcomingExam.course.name} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''} — add focused review sessions this week to stay on track.`
+      return `${upcomingExam.course.name} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. Add focused review sessions this week to stay on track.`
     }
     if (upcomingDeadlines.length > 0) {
       const d = upcomingDeadlines[0]
@@ -266,7 +292,7 @@ export default function DashboardView({
       if (days <= 3) return `${d.name} is due ${days === 0 ? 'today' : days === 1 ? 'tomorrow' : `in ${days} days`}. Consider prioritizing this in your next session.`
     }
     if (weekHours > 0 && deltaHours > 0) {
-      return `You're up ${deltaHours}h from last week. Keep the momentum — consistency beats intensity every time.`
+      return `You're up ${deltaHours}h from last week. Keep the momentum. Consistency beats intensity every time.`
     }
     return `Stay consistent with your sessions. Small daily progress compounds into big results at exam time.`
   }, [upcomingExam, upcomingDeadlines, weekHours, deltaHours, todayStr])
@@ -277,7 +303,7 @@ export default function DashboardView({
     if (todaySessions.length > 0) parts.push(`${todaySessions.length} session${todaySessions.length > 1 ? 's' : ''} on the schedule`)
     if (upcomingExam && upcomingExam.days <= 14) parts.push(`${upcomingExam.course.name} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}`)
     if (!parts.length) return 'Keep up the momentum. Every session counts.'
-    return parts.join(' — ') + '.'
+    return parts.join('. ') + '.'
   }, [todaySessions, upcomingExam])
 
   const urgencyColor = (d) => d <= 2 ? '#F97316' : d <= 5 ? '#38BDF8' : D.textDim
@@ -511,7 +537,7 @@ export default function DashboardView({
                   Dismiss
                 </button>
                 <button
-                  onClick={() => typeof onOpenStudyCoach === 'function' && onOpenStudyCoach(0)}
+                  onClick={() => typeof onNavigateToCalendar === 'function' && onNavigateToCalendar()}
                   style={{ fontSize: 12, fontWeight: 600, color: 'white', padding: '7px 14px', borderRadius: 7, background: D.accent, boxShadow: `0 4px 14px ${D.accentGlow}`, border: 'none', cursor: 'pointer' }}
                 >
                   Swap session
@@ -521,41 +547,12 @@ export default function DashboardView({
           </div>
         )}
 
-        {/* ── STATS ROW (span 12) ── */}
-        <div style={{
-          gridColumn: 'span 12',
-          background: 'rgba(255,255,255,0.02)',
-          border: `1px solid ${D.border}`,
-          borderRadius: 999,
-          height: 44,
-          padding: '0 20px',
-          display: 'flex', alignItems: 'center',
-        }}>
-          {[
-            { label: 'Current streak', value: streak, unit: streak === 1 ? 'day' : 'days', trend: streak > 0 ? `+${streak}` : '0', icon: <IcoFlame />, accent: D.amber },
-            { label: 'Hours studied', value: weekHours, unit: 'hrs', trend: deltaHours >= 0 ? `+${deltaHours}` : `${deltaHours}`, icon: <IcoClock />, accent: D.accent },
-            { label: 'Sessions completed', value: weekSessionCount, unit: '', trend: deltaSessions >= 0 ? `+${deltaSessions}` : `${deltaSessions}`, icon: <IcoCheck />, accent: D.green },
-          ].map((stat, i) => (
-            <>
-              <div key={stat.label} style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
-                <span style={{ color: stat.accent, display: 'inline-flex' }}>{stat.icon}</span>
-                <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 13, fontWeight: 600, color: D.text, letterSpacing: -0.2 }}>
-                  {stat.value}{stat.unit && <span style={{ color: D.textMuted, fontWeight: 500, marginLeft: 2, fontSize: 11 }}>{stat.unit}</span>}
-                </span>
-                <span style={{ fontSize: 11, color: D.textDim }}>{stat.label.toLowerCase()}</span>
-                <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 10.5, color: D.green, fontWeight: 500 }}>{stat.trend}</span>
-              </div>
-              {i < 2 && <div style={{ width: 1, height: 14, background: D.borderStrong }} />}
-            </>
-          ))}
-        </div>
-
         {/* ── COURSES (span 6) ── */}
-        <Card style={{ gridColumn: 'span 6', padding: 20 }}>
+        <HoverCard gridColumn="span 6" onClick={onNavigateToCourses} style={{ padding: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
             <SectionHeader>Courses</SectionHeader>
             <div style={{ flex: 1 }} />
-            <button onClick={onNavigateToCourses} style={{ fontSize: 11.5, color: D.textDim, background: 'none', border: 'none', cursor: 'pointer' }}>View all →</button>
+            <span style={{ fontSize: 11.5, color: D.textDim }}>View all →</span>
           </div>
           {courses.map((course, idx) => {
             const color = course.color?.dot ?? courseColor(idx)
@@ -605,78 +602,73 @@ export default function DashboardView({
                 <div style={{ fontSize: 11.5, color: D.textMuted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>
                   {dueNext ?? ''}
                 </div>
-                <button
-                  onClick={() => typeof onNavigateToGrades === 'function' && onNavigateToGrades(idx)}
-                  style={{ fontSize: 11.5, color: D.textMuted, textAlign: 'right', background: 'none', border: 'none', cursor: 'pointer' }}
-                >
-                  Open →
-                </button>
+                <span style={{ fontSize: 11.5, color: D.textMuted, textAlign: 'right' }}>Open →</span>
               </div>
             )
           })}
-        </Card>
+        </HoverCard>
 
         {/* ── WEEKLY OVERVIEW (span 6) ── */}
-        <Card style={{ gridColumn: 'span 6', padding: 20, display: 'flex', flexDirection: 'column' }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <HoverCard gridColumn="span 6" onClick={onNavigateToProgress} style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <div>
               <SectionHeader>This week</SectionHeader>
-              <div style={{ fontSize: 12, color: D.textDim, marginTop: 2 }}>{weekHours} of {weeklyGoalHours} hours</div>
+              <div style={{ fontSize: 13, color: D.textDim, marginTop: 3 }}>{weekHours} of {weeklyGoalHours} hours</div>
             </div>
             <div style={{
-              fontSize: 10.5, color: D.accent, fontWeight: 600,
+              fontSize: 11, color: D.accent, fontWeight: 600,
               background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.25)',
-              padding: '3px 9px', borderRadius: 999, letterSpacing: '0.03em',
+              padding: '4px 11px', borderRadius: 999, letterSpacing: '0.03em',
             }}>
               {onPace ? 'ON PACE' : 'BEHIND'}
             </div>
           </div>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 22 }}>
-            {/* Donut */}
-            <div style={{ position: 'relative', width: 116, height: 116, flexShrink: 0 }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 28 }}>
+            {/* Donut — bigger */}
+            <div style={{ position: 'relative', width: 148, height: 148, flexShrink: 0 }}>
               {(() => {
-                const r = 48, c = 2 * Math.PI * r, pct = goalPct / 100
+                const r = 62, c = 2 * Math.PI * r, pct = goalPct / 100
                 return (
-                  <svg width="116" height="116" style={{ transform: 'rotate(-90deg)' }}>
-                    <circle cx="58" cy="58" r={r} stroke="rgba(255,255,255,0.05)" strokeWidth="8" fill="none" />
-                    <circle cx="58" cy="58" r={r} stroke={D.accent} strokeWidth="8" fill="none"
+                  <svg width="148" height="148" style={{ transform: 'rotate(-90deg)' }}>
+                    <circle cx="74" cy="74" r={r} stroke="rgba(255,255,255,0.05)" strokeWidth="9" fill="none" />
+                    <circle cx="74" cy="74" r={r} stroke={D.accent} strokeWidth="9" fill="none"
                       strokeLinecap="round"
                       strokeDasharray={c}
                       strokeDashoffset={c * (1 - pct)}
-                      style={{ filter: `drop-shadow(0 0 8px ${D.accentGlow})` }}
+                      style={{ filter: `drop-shadow(0 0 10px ${D.accentGlow})` }}
                     />
                   </svg>
                 )
               })()}
               <div style={{ position: 'absolute', inset: 0, display: 'grid', placeItems: 'center', textAlign: 'center' }}>
                 <div>
-                  <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 22, fontWeight: 600, letterSpacing: -0.5, color: D.text }}>{goalPct}%</div>
-                  <div style={{ fontSize: 10, color: D.textDim, marginTop: -2 }}>of goal</div>
+                  <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 28, fontWeight: 700, letterSpacing: -0.5, color: D.text }}>{goalPct}%</div>
+                  <div style={{ fontSize: 11, color: D.textDim, marginTop: 1 }}>of goal</div>
                 </div>
               </div>
             </div>
             {/* Stats */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 12, minWidth: 0 }}>
+            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
               {[
                 { label: 'Current streak', value: streak, unit: streak === 1 ? 'day' : 'days', trend: `+${streak}`, icon: <IcoFlame />, accent: D.amber },
                 { label: 'Hours studied', value: weekHours, unit: 'hrs', trend: deltaHours >= 0 ? `+${deltaHours}` : `${deltaHours}`, icon: <IcoClock />, accent: D.accent },
-                { label: 'Sessions completed', value: weekSessionCount, unit: '', trend: deltaSessions >= 0 ? `+${deltaSessions}` : `${deltaSessions}`, icon: <IcoCheck />, accent: D.green },
+                { label: 'Sessions done', value: weekSessionCount, unit: '', trend: deltaSessions >= 0 ? `+${deltaSessions}` : `${deltaSessions}`, icon: <IcoCheck />, accent: D.green },
               ].map(stat => (
-                <div key={stat.label} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                  <div style={{ width: 28, height: 28, borderRadius: 7, background: `${stat.accent}15`, color: stat.accent, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                <div key={stat.label} style={{ display: 'flex', alignItems: 'center', gap: 13 }}>
+                  <div style={{ width: 34, height: 34, borderRadius: 9, background: `${stat.accent}18`, color: stat.accent, display: 'grid', placeItems: 'center', flexShrink: 0 }}>
                     {stat.icon}
                   </div>
-                  <div style={{ fontSize: 11.5, color: D.textDim, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{stat.label}</div>
+                  <div style={{ fontSize: 12.5, color: D.textDim, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{stat.label}</div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 3, flexShrink: 0 }}>
-                    <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 17, fontWeight: 600, letterSpacing: -0.3, color: D.text }}>{stat.value}</span>
-                    {stat.unit && <span style={{ fontSize: 10.5, color: D.textMuted, fontWeight: 500 }}>{stat.unit}</span>}
+                    <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 20, fontWeight: 700, letterSpacing: -0.3, color: D.text }}>{stat.value}</span>
+                    {stat.unit && <span style={{ fontSize: 11.5, color: D.textMuted, fontWeight: 500 }}>{stat.unit}</span>}
                   </div>
                   <div style={{
                     fontFamily: 'ui-monospace, monospace',
                     display: 'flex', alignItems: 'center', gap: 2,
-                    fontSize: 10, color: D.green,
+                    fontSize: 11, color: D.green,
                     background: 'rgba(74,222,128,0.08)',
-                    padding: '2px 6px', borderRadius: 5, flexShrink: 0,
+                    padding: '3px 7px', borderRadius: 5, flexShrink: 0,
                   }}>
                     <svg width="7" height="7" viewBox="0 0 12 12" fill="none"><path d="M3 8l3-4 3 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
                     {stat.trend}
@@ -685,11 +677,11 @@ export default function DashboardView({
               ))}
             </div>
           </div>
-        </Card>
+        </HoverCard>
 
         {/* ── DEADLINE RADAR (span 7) ── */}
         {upcomingDeadlines.length > 0 && (
-          <Card style={{ gridColumn: 'span 7', padding: 20, display: 'flex', flexDirection: 'column' }}>
+          <HoverCard gridColumn="span 7" onClick={onNavigateToCalendar} style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
               <div>
                 <SectionHeader>Deadline radar</SectionHeader>
@@ -757,7 +749,7 @@ export default function DashboardView({
                 )
               })}
             </div>
-          </Card>
+          </HoverCard>
         )}
 
         {/* ── AI COACH RECOMMENDATION (span 5) ── */}
