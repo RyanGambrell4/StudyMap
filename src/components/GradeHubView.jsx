@@ -83,7 +83,7 @@ const GH_STYLE = `
 .gh-input-text:focus{border-color:rgba(99,102,241,0.5);}
 .gh-input-text::placeholder{color:#55556e;}
 @media(max-width:900px){.gh-grid{grid-template-columns:1fr!important;}.gh-rail{position:static!important;}}
-@media(max-width:640px){.gh-plan-row{grid-template-columns:1fr 64px 90px 64px 28px!important;gap:6px!important;}}
+@media(max-width:640px){.gh-plan-row{grid-template-columns:1fr 64px 90px 64px 28px!important;gap:6px!important;}.gh-header{padding:16px 14px 14px!important;}.gh-content{padding:14px 14px 48px!important;}}
 `
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -933,7 +933,7 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
       <style>{GH_STYLE}{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
       {/* Header */}
-      <div style={{ padding: '28px 32px 20px', borderBottom: `1px solid ${D.border}` }}>
+      <div className="gh-header" style={{ padding: '28px 32px 20px', borderBottom: `1px solid ${D.border}` }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
           <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.05em', color: D.muted, textTransform: 'uppercase' }}>Academic Control</span>
           <span style={{ width: 4, height: 4, borderRadius: '50%', background: D.dim }} />
@@ -952,7 +952,7 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
         </p>
       </div>
 
-      <div style={{ padding: '24px 32px 48px' }}>
+      <div className="gh-content" style={{ padding: '24px 32px 48px' }}>
         {/* Course pills */}
         <div style={{ display: 'flex', gap: 12, marginBottom: 20, overflowX: 'auto' }}>
           {courses.map((c, i) => (

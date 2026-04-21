@@ -381,6 +381,8 @@ export default function DashboardView({
           .dash-weekly-inner { flex-direction: column !important; align-items: center !important; }
           .dash-weekly-stats { width: 100% !important; }
           .dash-brief-inner { flex-direction: column !important; }
+          .dash-up-next-btns { flex-wrap: wrap !important; gap: 8px !important; }
+          .dash-pomodoro { display: none !important; }
         }
       `}</style>
       {/* Header */}
@@ -486,7 +488,7 @@ export default function DashboardView({
                 </div>
 
                 {/* Buttons */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 24 }}>
+                <div className="dash-up-next-btns" style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 24 }}>
                   <button
                     onClick={(e) => { e.stopPropagation(); onStartFocus && onStartFocus(displaySession) }}
                     style={{
@@ -511,8 +513,7 @@ export default function DashboardView({
                   >
                     Skip
                   </button>
-                  <div style={{ flex: 1 }} />
-                  <div style={{ fontSize: 11, color: D.textDim, display: 'flex', alignItems: 'center', gap: 5 }}>
+                  <div className="dash-pomodoro" style={{ marginLeft: 'auto', fontSize: 11, color: D.textDim, display: 'flex', alignItems: 'center', gap: 5 }}>
                     <IcoZap /> Pomodoro · 25 + 5
                   </div>
                 </div>

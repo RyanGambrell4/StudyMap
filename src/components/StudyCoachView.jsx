@@ -944,9 +944,9 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>Your Roadmap</span>
             <span style={{ fontSize: 11, color: D.dim }}>Tap a week to jump down</span>
           </div>
-          <div style={{ position: 'relative' }}>
+          <div style={{ position: 'relative', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
             <div style={{ position: 'absolute', top: 11, left: '5%', right: '5%', height: 2, background: `linear-gradient(90deg, ${dot}, ${D.violet})`, borderRadius: 1 }} />
-            <div style={{ display: 'flex', justifyContent: 'space-around', position: 'relative' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-around', position: 'relative', minWidth: 320 }}>
               {(plan.weeklyFocus || []).map((w, wi) => {
                 const range = weekDateRange(wi)
                 const phase = (w.theme || 'Foundation').split(' ')[0]
