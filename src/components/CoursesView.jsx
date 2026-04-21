@@ -38,6 +38,15 @@ const COURSES_STYLE = `
 
 // ── Constants ─────────────────────────────────────────────────────────────────
 const TARGET_THRESHOLDS = { A: 80, B: 70, C: 60, 'Pass/Fail': 50 }
+
+function getCurrentSemester() {
+  const now = new Date()
+  const month = now.getMonth() + 1
+  const year = now.getFullYear()
+  if (month >= 1 && month <= 5) return `Spring ${year}`
+  if (month >= 6 && month <= 8) return `Summer ${year}`
+  return `Fall ${year}`
+}
 const COURSE_COLORS = [
   '#6366f1', '#c084fc', '#34d399', '#F97316',
   '#F472B6', '#38BDF8', '#fbbf24', '#22d3ee',
@@ -794,7 +803,7 @@ export default function CoursesView({
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
             <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', color: D.accent, textTransform: 'uppercase' }}>Academic Control</span>
             <span style={{ width: 4, height: 4, borderRadius: '50%', background: D.dim }} />
-            <span style={{ fontSize: 11.5, color: D.dim }}>Spring 2026 · {courses.length} course{courses.length !== 1 ? 's' : ''} tracked{limitLabel ? ` (${limitLabel})` : ''}</span>
+            <span style={{ fontSize: 11.5, color: D.dim }}>{getCurrentSemester()} · {courses.length} course{courses.length !== 1 ? 's' : ''} tracked{limitLabel ? ` (${limitLabel})` : ''}</span>
           </div>
           <h1 style={{ margin: 0, fontSize: 32, fontWeight: 700, letterSpacing: -0.8, color: D.text }}>Courses</h1>
           <p style={{ margin: '6px 0 0', fontSize: 14, color: D.muted, maxWidth: 640 }}>

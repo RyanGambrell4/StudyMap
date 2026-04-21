@@ -276,7 +276,7 @@ function ShareCardModal({ courses, stats, onClose }) {
               </div>
             </div>
           )}
-          <div style={{ textAlign: 'center', color: '#334155', fontSize: 11, fontWeight: 500, letterSpacing: '0.04em' }}>studymap.app</div>
+          <div style={{ textAlign: 'center', color: '#334155', fontSize: 11, fontWeight: 500, letterSpacing: '0.04em' }}>getstudyedge.com</div>
         </div>
         <button onClick={onClose} className="text-slate-500 hover:text-slate-300 text-sm transition-colors">Close</button>
       </div>
@@ -385,7 +385,7 @@ export default function OutputView({
   const [syllabusEvents, setSyllabusEvents] = useState(() => getCachedSyllabusEvents() ?? [])
   const [syllabusModalCourse, setSyllabusModalCourse] = useState(null)
 
-  const [viewMode, setViewMode] = useState(() => localStorage.getItem('studymap_view_mode') ?? 'week')
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('studyedge_view_mode') ?? localStorage.getItem('studymap_view_mode') ?? 'week')
   const todayStr = new Date().toISOString().split('T')[0]
   const todayMonthStr = todayStr.slice(0, 7)
   const [activeDayStr, setActiveDayStr] = useState(todayStr)
@@ -401,7 +401,7 @@ export default function OutputView({
   const [fixConflictsLoading, setFixConflictsLoading] = useState(false)
   const [rescheduleResults, setRescheduleResults] = useState(null)
   const [sessionTimeOverrides, setSessionTimeOverrides] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('studymap_session_time_overrides') ?? '{}') } catch { return {} }
+    try { return JSON.parse(localStorage.getItem('studyedge_session_time_overrides') ?? localStorage.getItem('studymap_session_time_overrides') ?? '{}') } catch { return {} }
   })
 
   useEffect(() => {
@@ -501,8 +501,8 @@ export default function OutputView({
   }, [onSavePlan])
   useEffect(() => { saveSyllabusEvents(syllabusEvents) }, [syllabusEvents])
   useEffect(() => { saveManualSessions(manualSessions) }, [manualSessions])
-  useEffect(() => { localStorage.setItem('studymap_view_mode', viewMode) }, [viewMode])
-  useEffect(() => { localStorage.setItem('studymap_session_time_overrides', JSON.stringify(sessionTimeOverrides)) }, [sessionTimeOverrides])
+  useEffect(() => { localStorage.setItem('studyedge_view_mode', viewMode) }, [viewMode])
+  useEffect(() => { localStorage.setItem('studyedge_session_time_overrides', JSON.stringify(sessionTimeOverrides)) }, [sessionTimeOverrides])
 
   // ── recovery ──
   const recoveryCoursesIdx = useMemo(() => {

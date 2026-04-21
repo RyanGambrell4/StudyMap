@@ -133,7 +133,7 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, onConfi
   // ── render ──
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-2xl max-h-[90vh] flex flex-col shadow-2xl">
+      <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl">
 
         {/* ── Header ── */}
         <div className="px-6 pt-5 pb-4 border-b border-slate-700 shrink-0">
@@ -201,7 +201,7 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, onConfi
                   onDragOver={e => { e.preventDefault(); setDragging(true) }}
                   onDragLeave={() => setDragging(false)}
                   onClick={() => fileRef.current?.click()}
-                  className={`flex flex-col items-center gap-4 py-12 px-8 rounded-2xl border-2 border-dashed cursor-pointer transition-all select-none ${
+                  className={`flex flex-col items-center gap-4 py-20 px-8 rounded-2xl border-2 border-dashed cursor-pointer transition-all select-none ${
                     dragging
                       ? 'border-indigo-400 bg-indigo-500/10'
                       : 'border-slate-600 hover:border-indigo-500/70 hover:bg-indigo-500/5'
@@ -233,7 +233,8 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, onConfi
                     onChange={e => { setPastedText(e.target.value); setError('') }}
                     placeholder="Paste syllabus text here..."
                     autoFocus
-                    className="w-full h-64 bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
+                    className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
+                    style={{ minHeight: 320 }}
                   />
                 </div>
               )}

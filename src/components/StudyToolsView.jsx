@@ -481,6 +481,24 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             </button>
             <h1 className="text-lg font-semibold text-slate-900 dark:text-white">Upload Material</h1>
           </div>
+          {/* Course selector — always visible at top */}
+          {courses.length > 0 && (
+            <div>
+              <label className="block text-xs font-medium text-slate-400 mb-1.5">Which course is this for?</label>
+              <select
+                value={selectedCourse ?? ''}
+                onChange={e => setSelectedCourse(e.target.value === '' ? null : Number(e.target.value))}
+                className="w-full bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-slate-800 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
+                style={{ colorScheme: 'dark' }}
+              >
+                <option value="">No course</option>
+                {courses.map((c, i) => (
+                  <option key={i} value={i}>{c.name}</option>
+                ))}
+              </select>
+            </div>
+          )}
+
           {/* Drop zone */}
           <div
             onDrop={handleDrop}
@@ -613,22 +631,6 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             </div>
           )}
 
-          {/* Course selector */}
-          {hasText && (
-            <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Link to course (optional)</label>
-              <select
-                value={selectedCourse ?? ''}
-                onChange={e => setSelectedCourse(e.target.value === '' ? null : Number(e.target.value))}
-                className="w-full bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-slate-800 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none"
-              >
-                <option value="">No course</option>
-                {courses.map((c, i) => (
-                  <option key={i} value={i}>{c.name}</option>
-                ))}
-              </select>
-            </div>
-          )}
 
           {/* Text preview */}
           {hasText && (

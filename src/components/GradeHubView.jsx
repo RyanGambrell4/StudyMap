@@ -44,6 +44,15 @@ function letterColor(ltr) {
   return D.pink
 }
 
+function getCurrentSemester() {
+  const now = new Date()
+  const month = now.getMonth() + 1
+  const year = now.getFullYear()
+  if (month >= 1 && month <= 5) return `Spring ${year}`
+  if (month >= 6 && month <= 8) return `Summer ${year}`
+  return `Fall ${year}`
+}
+
 function daysTo(dateStr) {
   if (!dateStr) return null
   return Math.round((new Date(dateStr + 'T12:00:00') - new Date(new Date().toISOString().split('T')[0] + 'T12:00:00')) / 86400000)
@@ -448,9 +457,19 @@ function TrackTab({ course, gradeData, dot, onSave }) {
               <span style={{ fontSize: 28, fontWeight: 700, color: lc, marginLeft: 8 }}>{ltr}</span>
             </div>
           </div>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: D.mint, fontSize: 13, fontWeight: 600 }}>
-            <IcoCheck /> On track for {targetLabel}
-          </div>
+          {needed.impossible ? (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 999, background: 'rgba(244,114,182,0.12)', border: '1px solid rgba(244,114,182,0.3)', color: D.pink, fontSize: 13, fontWeight: 600 }}>
+              ✕ Target no longer reachable
+            </div>
+          ) : needed.needed !== null && needed.needed > 90 ? (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 999, background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', color: D.orange, fontSize: 13, fontWeight: 600 }}>
+              ⚡ Possible but tough — need {needed.needed.toFixed(0)}%+ avg
+            </div>
+          ) : (
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: D.mint, fontSize: 13, fontWeight: 600 }}>
+              <IcoCheck /> On track for {targetLabel}
+            </div>
+          )}
         </div>
 
         <div style={{ marginTop: 24, position: 'relative' }}>
@@ -918,7 +937,7 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
           <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.05em', color: D.muted, textTransform: 'uppercase' }}>Academic Control</span>
           <span style={{ width: 4, height: 4, borderRadius: '50%', background: D.dim }} />
-          <span style={{ fontSize: 11.5, color: D.dim }}>Spring 2026 · {courses.length} courses tracked</span>
+          <span style={{ fontSize: 11.5, color: D.dim }}>{getCurrentSemester()} · {courses.length} courses tracked</span>
         </div>
         <h1 style={{ margin: 0, fontSize: 32, fontWeight: 700, letterSpacing: -0.8, color: D.text, display: 'flex', alignItems: 'center', gap: 12 }}>
           Grade Hub
