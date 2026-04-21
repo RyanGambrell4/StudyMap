@@ -1,144 +1,212 @@
-import { useState, useEffect, useMemo, useRef, useCallback } from 'react'
+import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import { getActivePlan, canUseAI, incrementAIQuery } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
 import { saveCoachPlanStruggles } from '../lib/db'
 import {
-  TARGET_OPTIONS, letterGrade, gradeStatus, STATUS_COLORS,
+  TARGET_OPTIONS, letterGrade, gradeStatus,
   getCurrentGrade, getProjectedGrade, getNeededOnRemaining,
   getDefenseFloor, generateScenarioPaths,
 } from '../utils/gradeCalc'
 
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const D = {
+  bg:        '#060614',
+  bgCard:    '#0a0a1e',
+  border:    'rgba(255,255,255,0.06)',
+  borderStr: 'rgba(255,255,255,0.10)',
+  text:      '#e8e8f0',
+  muted:     '#8888a0',
+  dim:       '#55556e',
+  accent:    '#6366f1',
+  glow:      'rgba(99,102,241,0.35)',
+  indigo:    '#818CF8',
+  violet:    '#8b5cf6',
+  mint:      '#34d399',
+  orange:    '#F97316',
+  sky:       '#38BDF8',
+  pink:      '#F472B6',
+  amber:     '#fbbf24',
+}
+
+const PATH_COLORS = [D.sky, D.violet, D.orange]
+const PATH_ICONS  = ['↗', '⚡', '🛡']
+
 function uid() { return Math.random().toString(36).slice(2, 10) }
 const clamp = (v, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, v))
-const todayStr = () => new Date().toISOString().split('T')[0]
-const daysTo = (dateStr) => dateStr
-  ? Math.round((new Date(dateStr + 'T12:00:00') - new Date(todayStr() + 'T12:00:00')) / 86400000)
-  : null
 
-// ── Target grade colors (higher grade = cooler / more vibrant) ───────────────
-const TARGET_COLORS = {
-  'A+':   { color: '#d946ef', gradient: 'linear-gradient(135deg, #e879f9, #a855f7)' }, // fuchsia → purple
-  'A':    { color: '#8b5cf6', gradient: 'linear-gradient(135deg, #a78bfa, #7c3aed)' }, // violet
-  'A-':   { color: '#6366f1', gradient: 'linear-gradient(135deg, #818cf8, #4f46e5)' }, // indigo
-  'B+':   { color: '#0ea5e9', gradient: 'linear-gradient(135deg, #38bdf8, #0284c7)' }, // sky
-  'B':    { color: '#06b6d4', gradient: 'linear-gradient(135deg, #22d3ee, #0891b2)' }, // cyan
-  'B-':   { color: '#14b8a6', gradient: 'linear-gradient(135deg, #2dd4bf, #0d9488)' }, // teal
-  'C+':   { color: '#f59e0b', gradient: 'linear-gradient(135deg, #fbbf24, #d97706)' }, // amber
-  'C':    { color: '#f97316', gradient: 'linear-gradient(135deg, #fb923c, #ea580c)' }, // orange
-  'C-':   { color: '#ef4444', gradient: 'linear-gradient(135deg, #f87171, #dc2626)' }, // red
-  'D+':   { color: '#e11d48', gradient: 'linear-gradient(135deg, #fb7185, #be123c)' }, // rose
-  'D':    { color: '#94a3b8', gradient: 'linear-gradient(135deg, #cbd5e1, #64748b)' }, // slate
+function letterColor(ltr) {
+  if (!ltr || ltr === '-') return D.muted
+  if (ltr.startsWith('A')) return D.mint
+  if (ltr.startsWith('B')) return D.sky
+  if (ltr.startsWith('C')) return D.amber
+  if (ltr.startsWith('D')) return D.orange
+  return D.pink
 }
 
-// ── Score badge color ─────────────────────────────────────────────────────────
-function scoreBadgeColor(score) {
-  if (score === null || score === undefined) return '#64748b'
-  if (score > 100) return '#ef4444'
-  if (score >= 96) return '#ef4444'
-  if (score >= 85) return '#f59e0b'
-  return '#10b981'
+function daysTo(dateStr) {
+  if (!dateStr) return null
+  return Math.round((new Date(dateStr + 'T12:00:00') - new Date(new Date().toISOString().split('T')[0] + 'T12:00:00')) / 86400000)
 }
+
+function computeGPA(courses) {
+  const pts = { 'A+': 4.0, 'A': 4.0, 'A-': 3.7, 'B+': 3.3, 'B': 3.0, 'B-': 2.7, 'C+': 2.3, 'C': 2.0, 'C-': 1.7, 'D+': 1.3, 'D': 1.0, 'F': 0.0 }
+  const vals = courses.map(c => {
+    const g = getCurrentGrade(c.gradeData?.components ?? [])
+    return g !== null ? (pts[letterGrade(g)] ?? null) : null
+  }).filter(v => v !== null)
+  if (!vals.length) return null
+  return (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(2)
+}
+
+// Inject range + input styles once
+const GH_STYLE = `
+.gh-range{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,0.06);outline:none;position:relative;}
+.gh-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#6366f1;cursor:pointer;border:2px solid #0a0a1e;box-shadow:0 0 0 1px #818CF8,0 2px 8px rgba(99,102,241,0.35);}
+.gh-range::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#6366f1;cursor:pointer;border:2px solid #0a0a1e;}
+.gh-range:disabled{opacity:0.5;cursor:default;}
+.gh-input{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);color:#e8e8f0;border-radius:7px;padding:7px 10px;font-size:13px;outline:none;transition:border 0.15s;font-family:inherit;}
+.gh-input:focus{border-color:rgba(99,102,241,0.5);}
+.gh-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
+.gh-input::placeholder{color:#55556e;}
+.gh-input:disabled{opacity:0.4;}
+.gh-input-text{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);color:#e8e8f0;border-radius:7px;padding:7px 10px;font-size:13px;outline:none;transition:border 0.15s;font-family:inherit;}
+.gh-input-text:focus{border-color:rgba(99,102,241,0.5);}
+.gh-input-text::placeholder{color:#55556e;}
+@media(max-width:900px){.gh-grid{grid-template-columns:1fr!important;}.gh-rail{position:static!important;}}
+@media(max-width:640px){.gh-plan-row{grid-template-columns:1fr 64px 90px 64px 28px!important;gap:6px!important;}}
+`
+
+// ── Icons ─────────────────────────────────────────────────────────────────────
+function IcoSparkles() { return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg> }
+function IcoPlus()     { return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg> }
+function IcoX()        { return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 6l12 12M6 18L18 6"/></svg> }
+function IcoLock()     { return <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg> }
+function IcoShield()   { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"/></svg> }
+function IcoCheck()    { return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg> }
+function IcoPlan()     { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 10h8M8 14h5"/></svg> }
+function IcoTrack()    { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg> }
+function IcoBeaker()   { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3v6l-5 9a2 2 0 002 3h12a2 2 0 002-3l-5-9V3M9 3h6M8 14h8"/></svg> }
+function IcoCalendar() { return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg> }
+function IcoArrow()    { return <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg> }
 
 // ── Locked state ──────────────────────────────────────────────────────────────
 function LockedState({ onShowPaywall }) {
   return (
-    <div className="px-4 py-6 max-w-3xl mx-auto">
-      <div className="relative rounded-2xl overflow-hidden">
-        {/* Blurred fake preview */}
-        <div className="blur-sm opacity-30 pointer-events-none select-none p-4 space-y-4">
-          <div className="grid grid-cols-3 gap-3">
-            {['Calc 201', 'Physics', 'English'].map(n => (
-              <div key={n} className="bg-white dark:bg-slate-800 rounded-xl p-4 border border-slate-200 dark:border-slate-700">
-                <div className="text-sm font-bold text-slate-800 dark:text-white mb-1">{n}</div>
-                <div className="h-5 w-14 rounded-full bg-emerald-400/40" />
-              </div>
-            ))}
-          </div>
-          <div className="bg-white dark:bg-slate-800 rounded-2xl p-5 border border-slate-200 dark:border-slate-700">
-            <div className="h-8 w-40 bg-slate-200 dark:bg-slate-700 rounded mb-4" />
-            <div className="space-y-2">
-              {[85, 60, 95].map((w, i) => (
-                <div key={i} className="h-10 rounded-xl bg-slate-100 dark:bg-slate-700/60" style={{ width: `${w}%` }} />
-              ))}
-            </div>
-          </div>
-        </div>
-        {/* Overlay */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm p-6 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-indigo-500/10 border border-indigo-500/30 flex items-center justify-center mb-4">
-            <svg className="w-7 h-7 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-          </div>
-          <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Grade Hub · Pro Feature</h3>
-          <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xs mb-5">
-            Advanced grade planning, live tracking, and what-if scenario modeling require a Pro or Unlimited plan.
-          </p>
-          <button
-            onClick={() => onShowPaywall?.('grades')}
-            className="bg-indigo-600 hover:bg-indigo-500 active:scale-95 text-white font-semibold px-6 py-2.5 rounded-xl text-sm transition-all"
-          >
-            Upgrade to Pro
-          </button>
-        </div>
+    <div style={{ padding: '60px 32px', textAlign: 'center' }}>
+      <div style={{
+        width: 52, height: 52, borderRadius: 14, margin: '0 auto 16px',
+        background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)',
+        display: 'grid', placeItems: 'center', color: D.indigo,
+      }}>
+        <IcoShield />
       </div>
+      <div style={{ fontSize: 18, fontWeight: 700, color: D.text, marginBottom: 8 }}>Grade Hub · Pro Feature</div>
+      <p style={{ fontSize: 13.5, color: D.muted, maxWidth: 320, margin: '0 auto 20px', lineHeight: 1.55 }}>
+        Advanced grade planning, live tracking, and what-if scenario modeling require a Pro or Unlimited plan.
+      </p>
+      <button
+        onClick={() => onShowPaywall?.('grades')}
+        style={{ padding: '11px 26px', background: `linear-gradient(135deg, ${D.accent}, ${D.violet})`, borderRadius: 10, color: '#fff', fontSize: 13.5, fontWeight: 600, boxShadow: `0 6px 20px ${D.glow}` }}
+      >
+        Upgrade to Pro
+      </button>
     </div>
   )
 }
 
-// ── Course overview strip ─────────────────────────────────────────────────────
-function CourseStrip({ courses, activeCourseIdx, onSelect }) {
+// ── Course pill card ──────────────────────────────────────────────────────────
+function CourseCard({ course, active, onClick }) {
+  const dot   = course.color?.dot ?? D.accent
+  const comps = course.gradeData?.components ?? []
+  const curr  = getCurrentGrade(comps)
+  const ltr   = curr !== null ? letterGrade(curr) : null
+  const days  = daysTo(course.examDate)
+  const name  = clean(course.name)
+  const shortName = name.length > 18 ? name.slice(0, 16) + '…' : name
+
   return (
-    <div className="flex gap-3 overflow-x-auto pt-2 pb-2 scrollbar-hide mb-5 -mx-4 px-4">
-      {courses.map((course, idx) => {
-        const dot = course.color?.dot ?? '#6366f1'
-        const active = activeCourseIdx === idx
-        const comps = course.gradeData?.components ?? []
-        const current = getCurrentGrade(comps)
-        const target = course.gradeData?.targetGrade ?? null
-        const status = current !== null && target ? gradeStatus(current, target) : 'unknown'
-        const sc = STATUS_COLORS[status]
-        const days = daysTo(course.examDate)
+    <button onClick={onClick} style={{
+      flex: '1 1 0', minWidth: 0, padding: 14, textAlign: 'left',
+      background: active ? `linear-gradient(155deg, ${dot}20, ${dot}08 50%, ${D.bgCard})` : D.bgCard,
+      border: active ? `1px solid ${dot}55` : `1px solid ${D.border}`,
+      borderRadius: 12, cursor: 'pointer',
+      boxShadow: active ? `0 0 0 3px ${dot}15, 0 8px 24px ${dot}15` : 'none',
+      transition: 'all 0.15s', position: 'relative', overflow: 'hidden',
+    }}>
+      {active && <div style={{ position: 'absolute', top: -30, right: -30, width: 110, height: 110, background: `radial-gradient(circle, ${dot}25, transparent 70%)`, pointerEvents: 'none' }} />}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, position: 'relative' }}>
+        <span style={{ width: 8, height: 8, borderRadius: '50%', background: dot, boxShadow: `0 0 8px ${dot}90`, flexShrink: 0 }} />
+        <span style={{ fontSize: 12.5, fontWeight: 600, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {shortName}
+        </span>
+      </div>
+      {curr !== null ? (
+        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', borderRadius: 999, background: `${letterColor(ltr)}15`, border: `1px solid ${letterColor(ltr)}35`, color: letterColor(ltr), marginBottom: 8 }}>
+          <span style={{ fontSize: 12, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>{curr.toFixed(1)}%</span>
+          <span style={{ fontSize: 11, opacity: 0.6 }}>·</span>
+          <span style={{ fontSize: 11, fontWeight: 600 }}>{ltr}</span>
+        </div>
+      ) : (
+        <div style={{ fontSize: 12.5, color: D.muted, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
+          Set up <IcoArrow />
+        </div>
+      )}
+      {days !== null && (
+        <div style={{ fontSize: 10.5, color: D.dim, fontFamily: 'ui-monospace, monospace' }}>
+          {days > 0 ? `${days}d to exam` : days === 0 ? 'Exam today' : 'Exam passed'}
+        </div>
+      )}
+    </button>
+  )
+}
 
-        return (
-          <button
-            key={idx}
-            onClick={() => onSelect(idx)}
-            className={`flex-shrink-0 w-44 rounded-2xl p-4 border text-left transition-all ${
-              active
-                ? 'ring-2 ring-offset-1 ring-offset-slate-50 dark:ring-offset-slate-900'
-                : 'hover:scale-[1.02]'
-            } bg-white dark:bg-slate-800/50 border-slate-200 dark:border-slate-700/50`}
-            style={active ? { ringColor: dot } : {}}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: dot }} />
-              <span className="text-xs font-bold text-slate-700 dark:text-slate-200 truncate">{clean(course.name)}</span>
-            </div>
-            {current !== null ? (
-              <div
-                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-bold mb-1.5"
-                style={{ backgroundColor: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}
-              >
-                {current.toFixed(1)}% · {letterGrade(current)}
-              </div>
-            ) : (
-              <span className="text-xs text-slate-400 dark:text-slate-500 mb-1.5 block">Set up →</span>
-            )}
-            {days !== null && (
-              <p className="text-[10px] text-slate-400 dark:text-slate-500">
-                {days > 0 ? `${days}d to exam` : days === 0 ? 'Exam today' : 'Exam passed'}
-              </p>
-            )}
-          </button>
-        )
-      })}
+// ── Tab switcher ──────────────────────────────────────────────────────────────
+function Tabs({ active, onChange }) {
+  const tabs = [
+    { id: 'plan',    label: 'Plan',    Icon: IcoPlan    },
+    { id: 'track',   label: 'Track',   Icon: IcoTrack   },
+    { id: 'sandbox', label: 'Sandbox', Icon: IcoBeaker  },
+  ]
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4, background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 12, padding: 4 }}>
+      {tabs.map(t => (
+        <button key={t.id} onClick={() => onChange(t.id)} style={{
+          padding: '11px 14px', borderRadius: 9,
+          background: active === t.id ? 'rgba(99,102,241,0.15)' : 'transparent',
+          border: active === t.id ? '1px solid rgba(99,102,241,0.3)' : '1px solid transparent',
+          color: active === t.id ? D.text : D.muted,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          fontSize: 13, fontWeight: active === t.id ? 600 : 500,
+          cursor: 'pointer', transition: 'all 0.15s',
+        }}>
+          <t.Icon /> {t.label}
+        </button>
+      ))}
     </div>
   )
 }
 
-// ── Plan tab ──────────────────────────────────────────────────────────────────
+// ── PathCard ──────────────────────────────────────────────────────────────────
+function PathCard({ color, icon, title, desc, rows }) {
+  return (
+    <div style={{ padding: 14, borderRadius: 11, background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderTop: `2px solid ${color}` }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+        <div style={{ width: 24, height: 24, borderRadius: 6, background: `${color}18`, color, display: 'grid', placeItems: 'center', fontSize: 13 }}>{icon}</div>
+        <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>{title}</div>
+      </div>
+      <div style={{ fontSize: 11.5, color: D.muted, marginBottom: 12, lineHeight: 1.4 }}>{desc}</div>
+      {rows.map(([k, v], i) => (
+        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, padding: '3px 0' }}>
+          <span style={{ color: D.dim }}>{k}</span>
+          <span style={{ color, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>{v}</span>
+        </div>
+      ))}
+    </div>
+  )
+}
+
+// ── PLAN TAB ──────────────────────────────────────────────────────────────────
 function PlanTab({ course, gradeData, dot, onSave }) {
   const saved = gradeData ?? {}
   const [rows, setRows] = useState(() =>
@@ -146,16 +214,16 @@ function PlanTab({ course, gradeData, dot, onSave }) {
       ? saved.components.map(c => ({ ...c, weight: String(c.weight), grade: c.grade !== null ? String(c.grade) : '' }))
       : [{ id: uid(), component: '', weight: '', grade: '', graded: false }]
   )
-  const [targetGrade, setTargetGrade] = useState(saved.targetGrade ?? 73)
+  const [targetGrade, setTargetGrade] = useState(saved.targetGrade ?? 85)
   const [showPlan, setShowPlan] = useState(!!(saved.components?.length))
 
-  const totalWeight = rows.reduce((s, r) => s + (parseFloat(r.weight) || 0), 0)
-  const weightOk = Math.abs(totalWeight - 100) < 0.5
-  const canSave = rows.every(r => r.component.trim() && parseFloat(r.weight) > 0) && weightOk
+  const totalWeight  = rows.reduce((s, r) => s + (parseFloat(r.weight) || 0), 0)
+  const weightOk     = Math.abs(totalWeight - 100) < 0.5
+  const canSave      = rows.every(r => r.component.trim() && parseFloat(r.weight) > 0) && weightOk
 
-  const addRow = () => setRows(prev => [...prev, { id: uid(), component: '', weight: '', grade: '', graded: false }])
-  const removeRow = i => setRows(prev => prev.filter((_, j) => j !== i))
-  const setRow = (i, field, val) => setRows(prev => prev.map((r, j) => j === i ? { ...r, [field]: val } : r))
+  const addRow    = () => setRows(p => [...p, { id: uid(), component: '', weight: '', grade: '', graded: false }])
+  const removeRow = i  => setRows(p => p.filter((_, j) => j !== i))
+  const setRow    = (i, f, v) => setRows(p => p.map((r, j) => j === i ? { ...r, [f]: v } : r))
 
   const handleSave = () => {
     if (!canSave) return
@@ -166,215 +234,160 @@ function PlanTab({ course, gradeData, dot, onSave }) {
       grade: r.graded && r.grade !== '' ? parseFloat(r.grade) : null,
       graded: r.graded && r.grade !== '',
     }))
-    const newData = { ...(gradeData ?? {}), components, targetGrade, scenarios: gradeData?.scenarios ?? [] }
-    onSave(newData)
+    onSave({ ...(gradeData ?? {}), components, targetGrade, scenarios: gradeData?.scenarios ?? [] })
     setShowPlan(true)
   }
 
-  // Plan-of-attack calculations
-  const savedComps = gradeData?.components ?? []
-  const neededInfo = showPlan && savedComps.length ? getNeededOnRemaining(savedComps, gradeData?.targetGrade ?? 73) : null
-  const scenarioPaths = showPlan && savedComps.length ? generateScenarioPaths(savedComps, gradeData?.targetGrade ?? 73) : []
-  const ungraded = savedComps.filter(c => !c.graded || c.grade === null)
-  const targetLabel = TARGET_OPTIONS.find(o => o.value === (gradeData?.targetGrade ?? 73))?.label ?? 'B'
+  const savedComps   = gradeData?.components ?? []
+  const neededInfo   = showPlan && savedComps.length ? getNeededOnRemaining(savedComps, targetGrade) : null
+  const scenarioPaths = showPlan && savedComps.length ? generateScenarioPaths(savedComps, targetGrade) : []
+  const ungraded     = savedComps.filter(c => !c.graded || c.grade === null)
+  const targetLabel  = TARGET_OPTIONS.find(o => o.value === targetGrade)?.label ?? 'A'
 
   return (
-    <div className="space-y-5">
-      {/* Setup form */}
-      <div className="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-5">
-        <h3 className="text-sm font-bold text-slate-700 dark:text-slate-200 mb-4">Grade Components</h3>
-
-        {/* Column headers */}
-        <div className="hidden sm:grid grid-cols-[1fr_64px_90px_80px_36px] gap-2 mb-1 px-0.5">
-          {['Component', 'Weight', 'Status', 'Grade', ''].map(h => (
-            <span key={h} className="text-[10px] font-semibold text-slate-400 uppercase tracking-wide">{h}</span>
-          ))}
-        </div>
-
-        <div className="space-y-2.5">
-          {rows.map((row, i) => (
-            <div key={row.id} className="grid grid-cols-[1fr_64px_90px_80px_36px] gap-2 items-center">
-              <input
-                type="text" placeholder="e.g. Midterm"
-                value={row.component}
-                onChange={e => setRow(i, 'component', e.target.value)}
-                className="min-h-[44px] w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2.5 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-              />
-              <div className="relative">
-                <input
-                  type="number" placeholder="25" min="0" max="100"
-                  value={row.weight}
-                  onChange={e => setRow(i, 'weight', e.target.value)}
-                  className="min-h-[44px] w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2.5 pr-5 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-                />
-                <span className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-xs pointer-events-none">%</span>
-              </div>
-              <button
-                onClick={() => setRow(i, 'graded', !row.graded)}
-                className="min-h-[44px] rounded-xl text-xs font-semibold border transition-all px-2"
-                style={row.graded
-                  ? { backgroundColor: `${dot}18`, color: dot, borderColor: `${dot}40` }
-                  : { backgroundColor: 'transparent', color: '#64748b', borderColor: 'rgba(148,163,184,0.3)' }}
-              >
-                {row.graded ? 'Graded' : 'Not yet'}
-              </button>
-              <input
-                type="number" placeholder="-" min="0" max="100" step="0.1"
-                value={row.grade}
-                disabled={!row.graded}
-                onChange={e => setRow(i, 'grade', e.target.value)}
-                className="min-h-[44px] w-full bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2.5 text-sm text-slate-800 dark:text-slate-200 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 disabled:opacity-30"
-              />
-              <button
-                onClick={() => removeRow(i)}
-                disabled={rows.length === 1}
-                className="min-h-[44px] w-9 flex items-center justify-center rounded-xl text-slate-400 hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors disabled:opacity-30 disabled:pointer-events-none"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
-            </div>
-          ))}
-        </div>
-
-        <button onClick={addRow} className="mt-3 flex items-center gap-1.5 text-sm text-slate-500 dark:text-slate-400 hover:text-indigo-500 transition-colors">
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
-          </svg>
-          Add component
-        </button>
-
-        {/* Weight total */}
-        <div className={`mt-3 flex items-center gap-2 text-xs font-semibold ${weightOk ? 'text-emerald-500' : 'text-amber-400'}`}>
-          <div className={`w-2 h-2 rounded-full ${weightOk ? 'bg-emerald-500' : 'bg-amber-400'}`} />
-          {totalWeight.toFixed(0)}% / 100% {!weightOk && '· weights must sum to 100%'}
-        </div>
-
-        {/* Target grade */}
-        <div className="mt-4 pt-4 border-t border-slate-100 dark:border-slate-700/50">
-          <label className="block text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-2">Target Grade</label>
-          <div className="flex flex-wrap gap-2">
-            {TARGET_OPTIONS.map(opt => {
-              const c = TARGET_COLORS[opt.label] ?? TARGET_COLORS.B
-              const active = targetGrade === opt.value
-              return (
-                <button
-                  key={opt.label}
-                  onClick={() => setTargetGrade(opt.value)}
-                  className="min-h-[44px] px-4 rounded-xl text-sm font-bold border transition-all"
-                  style={active
-                    ? { background: c.gradient, color: '#fff', borderColor: c.color, boxShadow: `0 4px 14px ${c.color}40` }
-                    : { backgroundColor: 'transparent', color: c.color, borderColor: `${c.color}55` }}
-                >
-                  {opt.label}
-                </button>
-              )
-            })}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Components table */}
+      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 600, color: D.text }}>Grade components</div>
+            <div style={{ fontSize: 12, color: D.dim, marginTop: 2 }}>Define how this course is graded</div>
+          </div>
+          <div style={{ flex: 1 }} />
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px', borderRadius: 999, background: totalWeight === 100 ? 'rgba(52,211,153,0.1)' : 'rgba(249,115,22,0.1)', border: `1px solid ${totalWeight === 100 ? 'rgba(52,211,153,0.3)' : 'rgba(249,115,22,0.3)'}` }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: totalWeight === 100 ? D.mint : D.orange }} />
+            <span style={{ fontSize: 11.5, fontWeight: 600, color: totalWeight === 100 ? D.mint : D.orange, fontFamily: 'ui-monospace, monospace' }}>{totalWeight.toFixed(0)}% / 100%</span>
           </div>
         </div>
 
-        <button
-          onClick={handleSave}
-          disabled={!canSave}
-          className="mt-4 w-full min-h-[48px] rounded-xl text-sm font-bold text-white transition-all disabled:opacity-40"
-          style={{ background: canSave ? `linear-gradient(135deg, ${dot}, ${dot}cc)` : '#475569' }}
-        >
-          Save & Generate Plan
+        {/* Header row */}
+        <div className="gh-plan-row" style={{ display: 'grid', gridTemplateColumns: 'minmax(120px,1fr) 80px 100px 80px 28px', gap: 8, fontSize: 10.5, fontWeight: 600, letterSpacing: 0.5, color: D.dim, textTransform: 'uppercase', padding: '0 4px 10px' }}>
+          <span>Component</span><span>Weight</span><span>Status</span><span>Grade</span><span />
+        </div>
+
+        {rows.map((row, i) => (
+          <div key={row.id} className="gh-plan-row" style={{ display: 'grid', gridTemplateColumns: 'minmax(120px,1fr) 80px 100px 80px 28px', gap: 8, alignItems: 'center', padding: '6px 0' }}>
+            <input className="gh-input-text" type="text" value={row.component} onChange={e => setRow(i, 'component', e.target.value)} placeholder="e.g. Midterm" style={{ width: '100%' }} />
+            <div style={{ position: 'relative' }}>
+              <input className="gh-input" type="number" value={row.weight} onChange={e => setRow(i, 'weight', e.target.value)} style={{ width: '100%', paddingRight: 26 }} />
+              <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: D.dim, pointerEvents: 'none' }}>%</span>
+            </div>
+            <button onClick={() => setRow(i, 'graded', !row.graded)} style={{ padding: '7px 10px', fontSize: 12, fontWeight: 600, borderRadius: 7, cursor: 'pointer', background: row.graded ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)', border: row.graded ? '1px solid rgba(99,102,241,0.35)' : `1px solid ${D.border}`, color: row.graded ? D.indigo : D.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+              {row.graded && <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.indigo }} />}
+              {row.graded ? 'Graded' : 'Not yet'}
+            </button>
+            <input className="gh-input" type="number" value={row.grade} placeholder="—" onChange={e => setRow(i, 'grade', e.target.value)} disabled={!row.graded} style={{ width: '100%', opacity: row.graded ? 1 : 0.4 }} />
+            <button onClick={() => removeRow(i)} style={{ width: 28, height: 28, borderRadius: 6, color: D.dim, display: 'grid', placeItems: 'center', cursor: 'pointer', transition: 'all 0.15s' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(244,114,182,0.1)'; e.currentTarget.style.color = D.pink }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = D.dim }}>
+              <IcoX />
+            </button>
+          </div>
+        ))}
+
+        <button onClick={addRow} style={{ marginTop: 8, padding: '8px 0', width: '100%', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: D.indigo, fontWeight: 500, cursor: 'pointer' }}>
+          <IcoPlus /> Add component
         </button>
       </div>
 
-      {/* Plan of Attack */}
-      {showPlan && savedComps.length > 0 && (
-        <div className="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-5">
-          <h3 className="text-base font-bold text-slate-900 dark:text-white mb-1">
-            To hit {targetLabel}, here's what you need:
-          </h3>
-          <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">
-            {neededInfo?.impossible
-              ? 'Target is no longer mathematically achievable. Consider adjusting your target.'
-              : neededInfo?.needed !== null
-                ? `You need an average of ${neededInfo.needed.toFixed(1)}% on remaining work.`
-                : 'All components graded. See your current grade in the Track tab.'}
-          </p>
+      {/* Target grade */}
+      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
+        <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 12 }}>Target grade</div>
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+          {TARGET_OPTIONS.map(opt => {
+            const isActive = targetGrade === opt.value
+            const c = letterColor(opt.label)
+            return (
+              <button key={opt.label} onClick={() => setTargetGrade(opt.value)} style={{ width: 44, height: 44, borderRadius: 10, cursor: 'pointer', background: isActive ? `linear-gradient(135deg, ${D.accent}, ${D.violet})` : 'rgba(255,255,255,0.03)', border: isActive ? '1px solid rgba(139,92,246,0.5)' : `1px solid ${c}30`, color: isActive ? '#fff' : c, fontSize: 14, fontWeight: 700, boxShadow: isActive ? '0 0 16px rgba(99,102,241,0.4)' : 'none', transition: 'all 0.15s' }}>
+                {opt.label}
+              </button>
+            )
+          })}
+        </div>
+      </div>
 
-          {/* Per-component target scores */}
-          {ungraded.length > 0 && neededInfo && !neededInfo.impossible && (
-            <div className="space-y-2 mb-5">
-              {ungraded.map(c => {
-                const sc = scoreBadgeColor(neededInfo.needed)
-                return (
-                  <div key={c.id} className="flex items-center justify-between py-2.5 px-3 rounded-xl bg-slate-50 dark:bg-slate-900/40">
-                    <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{c.component}</span>
-                    <span
-                      className="text-sm font-bold px-2.5 py-0.5 rounded-full"
-                      style={{ backgroundColor: `${sc}18`, color: sc }}
-                    >
-                      {neededInfo.impossible ? 'Impossible' : `${neededInfo.needed.toFixed(1)}%`}
-                    </span>
-                  </div>
-                )
-              })}
+      {/* Save CTA */}
+      <button onClick={handleSave} disabled={!canSave} style={{ padding: '14px 20px', background: canSave ? `linear-gradient(135deg, ${D.accent}, ${D.violet})` : 'rgba(255,255,255,0.05)', borderRadius: 12, color: canSave ? '#fff' : D.muted, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: canSave ? `0 8px 24px ${D.glow}` : 'none', cursor: canSave ? 'pointer' : 'default', transition: 'all 0.2s' }}>
+        <IcoSparkles /> Save &amp; generate plan
+      </button>
+
+      {/* Required avg callout */}
+      {showPlan && savedComps.length > 0 && neededInfo && (
+        <div style={{ background: 'linear-gradient(155deg, rgba(99,102,241,0.14), rgba(99,102,241,0.04) 45%, #0a0a1e)', border: '1px solid rgba(99,102,241,0.28)', borderRadius: 14, padding: 20, position: 'relative', overflow: 'hidden' }}>
+          <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, background: 'radial-gradient(circle, rgba(99,102,241,0.22), transparent 70%)', pointerEvents: 'none' }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, position: 'relative' }}>
+            <div style={{ width: 28, height: 28, borderRadius: 7, background: `linear-gradient(135deg, ${D.accent}, ${D.violet})`, display: 'grid', placeItems: 'center', color: '#fff', boxShadow: `0 0 12px ${D.glow}` }}>
+              <IcoSparkles />
             </div>
-          )}
-
-          {/* Buffer bar */}
-          {neededInfo && !neededInfo.impossible && neededInfo.bufferPts > 0 && (
-            <div className="mb-5 p-3 bg-indigo-50 dark:bg-indigo-950/30 border border-indigo-200 dark:border-indigo-800/40 rounded-xl">
-              <p className="text-sm font-semibold text-indigo-700 dark:text-indigo-300 mb-1">
-                You have a {neededInfo.bufferPts.toFixed(1)}-point buffer on remaining work. Spend it wisely.
-              </p>
-              <div className="h-2 bg-indigo-100 dark:bg-indigo-900/40 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-indigo-500 rounded-full transition-all"
-                  style={{ width: `${Math.min(100, neededInfo.bufferPts)}%` }}
-                />
-              </div>
-            </div>
-          )}
-
-          {/* Scenario paths */}
-          {scenarioPaths.length > 0 && !scenarioPaths[0].possible === false && (
             <div>
-              <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">Three Paths to {targetLabel}</p>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                {scenarioPaths.filter(p => p.possible !== false).map(path => (
-                  <div key={path.name} className="rounded-xl border border-slate-200 dark:border-slate-700/50 bg-slate-50 dark:bg-slate-900/40 p-3">
-                    <div className="flex items-center gap-1.5 mb-1">
-                      <span className="text-base">{path.icon}</span>
-                      <span className="text-xs font-bold text-slate-700 dark:text-slate-200">{path.name}</span>
-                    </div>
-                    <p className="text-[10px] text-slate-400 mb-2">{path.description}</p>
-                    <div className="space-y-1">
-                      {ungraded.map(c => {
-                        const score = path.scores[c.id]
-                        const sc = scoreBadgeColor(score)
-                        return (
-                          <div key={c.id} className="flex justify-between text-xs">
-                            <span className="text-slate-500 truncate mr-2">{c.component}</span>
-                            <span className="font-bold shrink-0" style={{ color: sc }}>{score?.toFixed(0) ?? '-'}%</span>
-                          </div>
-                        )
-                      })}
-                    </div>
-                  </div>
-                ))}
+              <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase' }}>To hit {targetLabel}, here's what you need</div>
+              <div style={{ fontSize: 13, color: D.text, marginTop: 3 }}>
+                You need an average of <span style={{ color: D.indigo, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>{neededInfo.needed != null ? neededInfo.needed.toFixed(1) + '%' : '—'}</span> on remaining work
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, position: 'relative', marginBottom: 14 }}>
+            {ungraded.map(c => (
+              <div key={c.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 9 }}>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 500, color: D.text }}>{c.component || 'Untitled'}</div>
+                  <div style={{ fontSize: 11, color: D.dim, marginTop: 1 }}>Worth <span style={{ fontFamily: 'ui-monospace, monospace' }}>{c.weight}%</span> of final grade</div>
+                </div>
+                <div style={{ padding: '5px 11px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: D.mint, fontSize: 12, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>
+                  {neededInfo.needed != null ? neededInfo.needed.toFixed(1) + '%' : '—'}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {neededInfo.bufferPts > 0 && !neededInfo.impossible && (
+            <div style={{ padding: 12, borderRadius: 10, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.25)', position: 'relative' }}>
+              <div style={{ fontSize: 12.5, color: D.text, marginBottom: 8 }}>
+                You have a <span style={{ color: D.violet, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>{neededInfo.bufferPts.toFixed(1)}-point</span> buffer on remaining work. Spend it wisely.
+              </div>
+              <div style={{ height: 5, background: 'rgba(255,255,255,0.04)', borderRadius: 3, overflow: 'hidden' }}>
+                <div style={{ width: `${Math.min(100, neededInfo.bufferPts)}%`, height: '100%', background: `linear-gradient(90deg, ${D.accent}, ${D.violet})`, boxShadow: `0 0 8px ${D.glow}` }} />
               </div>
             </div>
           )}
+
+          {neededInfo.impossible && (
+            <div style={{ padding: 12, borderRadius: 10, background: 'rgba(244,114,182,0.08)', border: `1px solid ${D.pink}30` }}>
+              <div style={{ fontSize: 12.5, color: D.pink }}>Target is no longer mathematically achievable. Consider adjusting your target grade.</div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Three paths */}
+      {showPlan && scenarioPaths.length > 0 && (
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
+          <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 12 }}>Three paths to {targetLabel}</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+            {scenarioPaths.filter(p => p.possible !== false).slice(0, 3).map((path, pi) => (
+              <PathCard
+                key={path.name}
+                color={PATH_COLORS[pi]}
+                icon={PATH_ICONS[pi]}
+                title={path.name}
+                desc={path.description}
+                rows={ungraded.map(c => [c.component, (path.scores[c.id]?.toFixed(0) ?? '-') + '%'])}
+              />
+            ))}
+          </div>
         </div>
       )}
     </div>
   )
 }
 
-// ── Track tab ─────────────────────────────────────────────────────────────────
+// ── TRACK TAB ─────────────────────────────────────────────────────────────────
 function TrackTab({ course, gradeData, dot, onSave }) {
-  const components = gradeData?.components ?? []
-  const targetGrade = gradeData?.targetGrade ?? 73
+  const components  = gradeData?.components ?? []
+  const targetGrade = gradeData?.targetGrade ?? 85
   const [defenseMode, setDefenseMode] = useState(false)
 
-  // Local editable grades (mirrors gradeData, auto-saves)
   const [localGrades, setLocalGrades] = useState(() => {
     const m = {}
     components.forEach(c => { m[c.id] = c.grade !== null && c.grade !== undefined ? String(c.grade) : '' })
@@ -386,459 +399,333 @@ function TrackTab({ course, gradeData, dot, onSave }) {
     return m
   })
 
-  // Debounced auto-save
   const saveTimer = useRef(null)
   const autoSave = useCallback((grades, graded) => {
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(() => {
-      const updated = components.map(c => ({
-        ...c,
-        grade: graded[c.id] && grades[c.id] !== '' ? parseFloat(grades[c.id]) : null,
-        graded: graded[c.id] && grades[c.id] !== '',
-      }))
+      const updated = components.map(c => ({ ...c, grade: graded[c.id] && grades[c.id] !== '' ? parseFloat(grades[c.id]) : null, graded: graded[c.id] && grades[c.id] !== '' }))
       onSave({ ...gradeData, components: updated })
     }, 600)
   }, [components, gradeData, onSave])
 
-  const setGrade = (id, val) => {
-    const newGrades = { ...localGrades, [id]: val }
-    setLocalGrades(newGrades)
-    autoSave(newGrades, localGraded)
-  }
+  const setGrade     = (id, val) => { const g = { ...localGrades, [id]: val }; setLocalGrades(g); autoSave(g, localGraded) }
+  const toggleGraded = (id)      => { const g = { ...localGraded, [id]: !localGraded[id] }; setLocalGraded(g); autoSave(localGrades, g) }
 
-  const toggleGraded = (id) => {
-    const newGraded = { ...localGraded, [id]: !localGraded[id] }
-    setLocalGraded(newGraded)
-    autoSave(localGrades, newGraded)
-  }
-
-  // Derived live components
   const liveComponents = useMemo(() =>
-    components.map(c => ({
-      ...c,
-      grade: localGraded[c.id] && localGrades[c.id] !== '' ? parseFloat(localGrades[c.id]) : null,
-      graded: localGraded[c.id] && localGrades[c.id] !== '',
-    })),
+    components.map(c => ({ ...c, grade: localGraded[c.id] && localGrades[c.id] !== '' ? parseFloat(localGrades[c.id]) : null, graded: localGraded[c.id] && localGrades[c.id] !== '' })),
     [components, localGrades, localGraded]
   )
 
   const currentGrade = getCurrentGrade(liveComponents)
-  const needed = getNeededOnRemaining(liveComponents, targetGrade)
-  const defense = defenseMode ? getDefenseFloor(liveComponents, currentGrade) : null
+  const needed       = getNeededOnRemaining(liveComponents, targetGrade)
+  const defense      = defenseMode ? getDefenseFloor(liveComponents, currentGrade) : null
   const gradedWeight = liveComponents.filter(c => c.graded).reduce((s, c) => s + c.weight, 0)
-  const totalWeight = liveComponents.reduce((s, c) => s + c.weight, 0)
-  const pctGraded = totalWeight > 0 ? gradedWeight / totalWeight : 0
-  const targetLabel = TARGET_OPTIONS.find(o => o.value === targetGrade)?.label ?? 'B'
-  const status = currentGrade !== null ? gradeStatus(currentGrade, targetGrade) : 'unknown'
-  const sc = STATUS_COLORS[status]
+  const totalWeight  = liveComponents.reduce((s, c) => s + c.weight, 0)
+  const pctGraded    = totalWeight > 0 ? (gradedWeight / totalWeight) * 100 : 0
+  const targetLabel  = TARGET_OPTIONS.find(o => o.value === targetGrade)?.label ?? 'A'
+  const ltr          = letterGrade(currentGrade)
+  const lc           = letterColor(ltr)
 
-  if (!components.length) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-slate-500 text-sm">Set up your grade components in the Plan tab first.</p>
-      </div>
-    )
-  }
+  if (!components.length) return (
+    <div style={{ padding: '40px 0', textAlign: 'center' }}>
+      <p style={{ color: D.muted, fontSize: 13 }}>Set up your grade components in the Plan tab first.</p>
+    </div>
+  )
 
   return (
-    <div className="space-y-4">
-      {/* Current grade hero */}
-      <div className="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-5">
-        <div className="flex items-end gap-4 mb-4">
-          <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-0.5">Current Grade</p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-black" style={{ color: sc.color }}>
-                {currentGrade !== null ? currentGrade.toFixed(1) : '-'}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Hero */}
+      <div style={{ background: `linear-gradient(155deg, ${lc}1a, ${lc}05 40%, ${D.bgCard})`, border: `1px solid ${lc}30`, borderRadius: 14, padding: 24, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -60, right: -60, width: 240, height: 240, background: `radial-gradient(circle, ${lc}25, transparent 70%)`, pointerEvents: 'none' }} />
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 20, flexWrap: 'wrap', position: 'relative' }}>
+          <div style={{ flex: '1 1 auto', minWidth: 200 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 8 }}>Current grade</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <span style={{ fontSize: 64, fontWeight: 800, letterSpacing: -2, lineHeight: 1, background: `linear-gradient(135deg, ${lc}, ${lc}cc)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontFamily: 'ui-monospace, monospace' }}>
+                {currentGrade !== null ? currentGrade.toFixed(1) : '—'}
               </span>
-              <span className="text-2xl font-bold text-slate-400">%</span>
-              <span className="text-xl font-bold" style={{ color: sc.color }}>{letterGrade(currentGrade)}</span>
+              <span style={{ fontSize: 22, fontWeight: 500, color: D.muted }}>%</span>
+              <span style={{ fontSize: 28, fontWeight: 700, color: lc, marginLeft: 8 }}>{ltr}</span>
             </div>
           </div>
-          <div
-            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold"
-            style={{ backgroundColor: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}
-          >
-            {status === 'on-track' ? '✓' : '⚠'} {sc.label}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: D.mint, fontSize: 13, fontWeight: 600 }}>
+            <IcoCheck /> On track for {targetLabel}
           </div>
         </div>
 
-        {/* Progress bar */}
-        <div className="mb-4">
-          <div className="flex justify-between text-xs font-semibold text-slate-500 mb-1">
-            <span>{gradedWeight.toFixed(0)}% of grade graded</span>
-            <span>{(100 - gradedWeight).toFixed(0)}% remaining</span>
+        <div style={{ marginTop: 24, position: 'relative' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, color: D.dim, marginBottom: 8 }}>
+            <span><span style={{ color: D.text, fontFamily: 'ui-monospace, monospace', fontWeight: 500 }}>{pctGraded.toFixed(0)}%</span> of grade graded</span>
+            <span><span style={{ color: D.text, fontFamily: 'ui-monospace, monospace', fontWeight: 500 }}>{(100 - pctGraded).toFixed(0)}%</span> remaining</span>
           </div>
-          <div className="h-2.5 bg-slate-100 dark:bg-slate-700/60 rounded-full overflow-hidden">
-            <div
-              className="h-full rounded-full transition-all duration-500"
-              style={{ width: `${pctGraded * 100}%`, backgroundColor: dot }}
-            />
+          <div style={{ height: 8, background: 'rgba(255,255,255,0.04)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ width: `${pctGraded}%`, height: '100%', background: `linear-gradient(90deg, ${D.accent}, ${lc})`, boxShadow: `0 0 10px ${lc}60`, transition: 'width 0.4s' }} />
           </div>
         </div>
 
-        {/* Grade defense toggle */}
-        <button
-          onClick={() => setDefenseMode(v => !v)}
-          className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-semibold border transition-all ${
-            defenseMode
-              ? 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400 border-amber-300 dark:border-amber-700/50'
-              : 'text-slate-500 border-slate-200 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-800/60'
-          }`}
-        >
-          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-          Grade Defense Mode {defenseMode ? 'ON' : 'OFF'}
-        </button>
-
-        {defenseMode && defense && (
-          <div className="mt-3 p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700/40 rounded-xl">
-            <p className="text-xs font-semibold text-amber-700 dark:text-amber-300 mb-1">
-              To keep your current {currentGrade?.toFixed(1)}%, score at least:
-            </p>
-            {defense.impossible
-              ? <p className="text-xs text-red-400">Score is already locked in. No remaining work can change it.</p>
-              : <p className="text-2xl font-black text-amber-500">{defense.floor?.toFixed(1)}% on all remaining work</p>
-            }
-          </div>
-        )}
-      </div>
-
-      {/* Component table */}
-      <div className="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden">
-        <div className="px-5 py-3 border-b border-slate-100 dark:border-slate-700/50">
-          <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Grade Breakdown</p>
-        </div>
-        <div className="divide-y divide-slate-100 dark:divide-slate-700/40">
-          {liveComponents.map(c => {
-            const contribution = c.graded && c.grade !== null ? (c.grade * c.weight / (totalWeight || 100)) : null
-            const neededScore = defenseMode
-              ? (defense?.floor ?? null)
-              : (!c.graded && needed.needed !== null ? needed.needed : null)
-
-            return (
-              <div key={c.id} className="flex items-center gap-3 px-5 py-3.5">
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">{c.component}</p>
-                  <p className="text-xs text-slate-400">{c.weight}% weight
-                    {contribution !== null && ` · contributes ${contribution.toFixed(1)}% to final`}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2 shrink-0">
-                  {/* Graded toggle */}
-                  <button
-                    onClick={() => toggleGraded(c.id)}
-                    className="text-xs px-2.5 py-1.5 min-h-[36px] rounded-lg font-medium border transition-all"
-                    style={localGraded[c.id]
-                      ? { backgroundColor: `${dot}15`, color: dot, borderColor: `${dot}40` }
-                      : { color: '#94a3b8', borderColor: 'rgba(148,163,184,0.3)' }}
-                  >
-                    {localGraded[c.id] ? 'Graded' : 'Pending'}
-                  </button>
-                  {/* Grade input */}
-                  <div className="relative w-20">
-                    <input
-                      type="number"
-                      placeholder={neededScore !== null ? `${neededScore.toFixed(0)}` : '-'}
-                      value={localGrades[c.id]}
-                      min="0" max="100" step="0.1"
-                      onChange={e => setGrade(c.id, e.target.value)}
-                      className="w-full min-h-[44px] bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-slate-700 rounded-xl px-2.5 py-2 text-sm text-center font-bold text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-                      style={c.graded ? { borderColor: `${dot}50` } : {}}
-                    />
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* What you need on remaining */}
-      {needed.needed !== null && !defenseMode && (
-        <div className={`rounded-2xl p-4 border ${needed.impossible
-          ? 'bg-red-50 dark:bg-red-950/30 border-red-200 dark:border-red-800/40'
-          : 'bg-white dark:bg-slate-800/40 border-slate-200 dark:border-slate-700/40'}`}
-        >
-          {needed.impossible ? (
-            <>
-              <p className="text-sm font-bold text-red-500 mb-1 flex items-center gap-1.5"><svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg> Target grade no longer achievable</p>
-              <p className="text-xs text-red-400">You would need more than 100% on remaining work. Consider adjusting your target in the Plan tab.</p>
-            </>
-          ) : (
-            <>
-              <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">What You Need on Remaining Work</p>
-              <div className="flex items-baseline gap-1.5">
-                <span className="text-3xl font-black" style={{ color: scoreBadgeColor(needed.needed) }}>
-                  {needed.needed.toFixed(1)}%
-                </span>
-                <span className="text-sm text-slate-500">avg to hit {targetLabel}</span>
-              </div>
-            </>
+        <div style={{ marginTop: 16, position: 'relative' }}>
+          <button onClick={() => setDefenseMode(v => !v)} style={{ padding: '8px 14px', fontSize: 12.5, fontWeight: 500, borderRadius: 8, cursor: 'pointer', background: defenseMode ? 'rgba(251,191,36,0.1)' : 'rgba(255,255,255,0.03)', border: defenseMode ? `1px solid ${D.amber}40` : `1px solid ${D.border}`, color: defenseMode ? D.amber : D.muted, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <IcoShield /> Grade Defense Mode {defenseMode ? 'ON' : 'OFF'}
+          </button>
+          {defenseMode && defense && (
+            <div style={{ marginTop: 10, padding: 12, borderRadius: 10, background: `rgba(251,191,36,0.08)`, border: `1px solid ${D.amber}30` }}>
+              {defense.impossible
+                ? <p style={{ fontSize: 12.5, color: D.amber }}>Score is already locked in. No remaining work can change it.</p>
+                : <p style={{ fontSize: 12.5, color: D.amber }}>To keep your <span style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 700 }}>{currentGrade?.toFixed(1)}%</span>, score at least <span style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 700, fontSize: 16 }}>{defense.floor?.toFixed(1)}%</span> on all remaining work.</p>
+              }
+            </div>
           )}
+        </div>
+      </div>
+
+      {/* Breakdown */}
+      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
+        <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 14 }}>Grade breakdown</div>
+        {liveComponents.map((c, i) => {
+          const contrib = c.graded && c.grade !== null ? (c.grade * c.weight / (totalWeight || 100)) : null
+          return (
+            <div key={c.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 14, alignItems: 'center', padding: '14px 0', borderBottom: i < liveComponents.length - 1 ? `1px solid ${D.border}` : 'none' }}>
+              <div>
+                <div style={{ fontSize: 13.5, fontWeight: 500, color: D.text }}>{c.component}</div>
+                <div style={{ fontSize: 11.5, color: D.dim, marginTop: 2 }}>
+                  <span style={{ fontFamily: 'ui-monospace, monospace' }}>{c.weight}%</span> weight
+                  {contrib != null && <> · contributes <span style={{ color: D.indigo, fontFamily: 'ui-monospace, monospace' }}>{contrib.toFixed(1)}%</span> to final</>}
+                </div>
+              </div>
+              <button onClick={() => toggleGraded(c.id)} style={{ padding: '5px 11px', borderRadius: 999, fontSize: 11, fontWeight: 600, cursor: 'pointer', background: localGraded[c.id] ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)', border: localGraded[c.id] ? '1px solid rgba(99,102,241,0.3)' : `1px solid ${D.border}`, color: localGraded[c.id] ? D.indigo : D.muted, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                {localGraded[c.id] && <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.indigo }} />}
+                {localGraded[c.id] ? 'Graded' : 'Pending'}
+              </button>
+              <input type="number" value={localGrades[c.id]} onChange={e => setGrade(c.id, e.target.value)} placeholder="—" className="gh-input"
+                style={{ width: 66, textAlign: 'center', color: c.grade != null ? letterColor(letterGrade(parseFloat(localGrades[c.id]))) : D.dim }} />
+            </div>
+          )
+        })}
+      </div>
+
+      {/* What you need */}
+      {needed.needed !== null && !defenseMode && (
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20, display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+          <div style={{ flex: '1 1 auto', minWidth: 200 }}>
+            <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 8 }}>What you need on remaining work</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <span style={{ fontSize: 32, fontWeight: 700, letterSpacing: -0.8, fontFamily: 'ui-monospace, monospace', color: needed.impossible ? D.pink : needed.needed > 90 ? D.orange : D.indigo }}>
+                {needed.impossible ? '100+%' : needed.needed.toFixed(1) + '%'}
+              </span>
+              <span style={{ fontSize: 13, color: D.muted }}>avg to hit {targetLabel}</span>
+            </div>
+          </div>
+          <div style={{ padding: '8px 14px', borderRadius: 999, background: needed.impossible ? `rgba(244,114,182,0.12)` : 'rgba(52,211,153,0.12)', border: `1px solid ${needed.impossible ? D.pink + '30' : 'rgba(52,211,153,0.3)'}`, color: needed.impossible ? D.pink : D.mint, fontSize: 12, fontWeight: 600 }}>
+            {needed.impossible ? 'Not achievable' : 'Achievable'}
+          </div>
         </div>
       )}
     </div>
   )
 }
 
-// ── Sandbox tab ───────────────────────────────────────────────────────────────
+// ── SANDBOX TAB ───────────────────────────────────────────────────────────────
 function SandboxTab({ course, gradeData, dot, onSave }) {
-  const components = gradeData?.components ?? []
-  const targetGrade = gradeData?.targetGrade ?? 73
-  const scenarios = gradeData?.scenarios ?? []
-  const [showCompare, setShowCompare] = useState(false)
-  const [editingScenarioName, setEditingScenarioName] = useState(null)
-  const [nameInput, setNameInput] = useState('')
-  const [saveNameInput, setSaveNameInput] = useState('')
-  const [showSaveInput, setShowSaveInput] = useState(false)
+  const components  = gradeData?.components ?? []
+  const targetGrade = gradeData?.targetGrade ?? 85
+  const scenarios   = gradeData?.scenarios ?? []
 
-  // Initialize overrides from actuals or needed score
   const initOverrides = useCallback(() => {
     const { needed } = getNeededOnRemaining(components, targetGrade)
     const m = {}
-    components.forEach(c => {
-      m[c.id] = c.graded && c.grade !== null ? c.grade : Math.round(needed ?? 75)
-    })
+    components.forEach(c => { m[c.id] = c.graded && c.grade !== null ? c.grade : Math.round(needed ?? 75) })
     return m
   }, [components, targetGrade])
 
   const [overrides, setOverrides] = useState(initOverrides)
+  const [showSaveInput, setShowSaveInput] = useState(false)
+  const [saveName, setSaveName] = useState('')
+  const [showCompare, setShowCompare] = useState(false)
+  const [editingName, setEditingName] = useState(null)
+  const [nameInput, setNameInput] = useState('')
 
-  const projected = getProjectedGrade(components.map(c => ({ ...c, graded: false })), overrides)
-  const targetLabel = TARGET_OPTIONS.find(o => o.value === targetGrade)?.label ?? 'B'
-  const gap = projected !== null ? projected - targetGrade : null
-  const status = projected !== null ? gradeStatus(projected, targetGrade) : 'unknown'
-  const sc = STATUS_COLORS[status]
+  const projected  = getProjectedGrade(components.map(c => ({ ...c, graded: false })), overrides)
+  const targetLabel = TARGET_OPTIONS.find(o => o.value === targetGrade)?.label ?? 'A'
+  const diff       = projected !== null ? projected - targetGrade : 0
+  const ltr        = letterGrade(projected)
+  const lc         = letterColor(ltr)
 
-  const setSlider = (id, val) => setOverrides(prev => ({ ...prev, [id]: parseFloat(val) }))
-
+  const setSlider = (id, val) => setOverrides(p => ({ ...p, [id]: parseFloat(val) }))
   const handleReset = () => setOverrides(initOverrides())
 
   const handleSaveScenario = () => {
-    if (!saveNameInput.trim()) return
-    const name = saveNameInput.trim()
+    if (!saveName.trim()) return
+    const name = saveName.trim()
     const scenarioOverrides = {}
     components.forEach(c => { scenarioOverrides[c.id] = overrides[c.id] })
     const newScenarios = [...scenarios.filter(s => s.name !== name).slice(0, 2), { name, overrides: scenarioOverrides }]
     onSave({ ...gradeData, scenarios: newScenarios })
-    setSaveNameInput('')
+    setSaveName('')
     setShowSaveInput(false)
   }
 
-  const deleteScenario = (name) => {
-    onSave({ ...gradeData, scenarios: scenarios.filter(s => s.name !== name) })
-  }
-
+  const deleteScenario = name => onSave({ ...gradeData, scenarios: scenarios.filter(s => s.name !== name) })
   const renameScenario = (oldName, newName) => {
     if (!newName.trim()) return
     onSave({ ...gradeData, scenarios: scenarios.map(s => s.name === oldName ? { ...s, name: newName.trim() } : s) })
-    setEditingScenarioName(null)
+    setEditingName(null)
   }
 
-  if (!components.length) {
-    return (
-      <div className="text-center py-10">
-        <p className="text-slate-500 text-sm">Set up your grade components in the Plan tab first.</p>
-      </div>
-    )
-  }
+  if (!components.length) return (
+    <div style={{ padding: '40px 0', textAlign: 'center' }}>
+      <p style={{ color: D.muted, fontSize: 13 }}>Set up your grade components in the Plan tab first.</p>
+    </div>
+  )
 
   return (
-    <div className="space-y-4">
-      {/* Projected grade hero */}
-      <div className="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-5">
-        <div className="flex items-end justify-between mb-4">
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      {/* Projected hero */}
+      <div style={{ background: `linear-gradient(155deg, ${lc}1a, ${lc}05 40%, ${D.bgCard})`, border: `1px solid ${lc}30`, borderRadius: 14, padding: 24, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -60, right: -60, width: 240, height: 240, background: `radial-gradient(circle, ${lc}25, transparent 70%)`, pointerEvents: 'none' }} />
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, position: 'relative' }}>
           <div>
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-0.5">Projected Grade</p>
-            <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-black transition-all duration-200" style={{ color: sc.color }}>
-                {projected !== null ? projected.toFixed(1) : '-'}
+            <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 8 }}>Projected grade</div>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+              <span style={{ fontSize: 56, fontWeight: 800, letterSpacing: -2, lineHeight: 1, background: `linear-gradient(135deg, ${lc}, ${lc}cc)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontFamily: 'ui-monospace, monospace' }}>
+                {projected !== null ? projected.toFixed(1) : '—'}
               </span>
-              <span className="text-2xl font-bold text-slate-400">%</span>
-              <span className="text-2xl font-bold" style={{ color: sc.color }}>{letterGrade(projected)}</span>
+              <span style={{ fontSize: 20, color: D.muted }}>%</span>
+              <span style={{ fontSize: 26, fontWeight: 700, color: lc, marginLeft: 8 }}>{ltr}</span>
             </div>
           </div>
-          {gap !== null && (
-            <div
-              className="text-sm font-bold px-3 py-1.5 rounded-full"
-              style={{ backgroundColor: sc.bg, color: sc.color, border: `1px solid ${sc.border}` }}
-            >
-              {gap >= 0 ? `+${gap.toFixed(1)}%` : `${gap.toFixed(1)}%`} vs target {targetLabel}
-            </div>
-          )}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 999, background: diff >= 0 ? 'rgba(52,211,153,0.12)' : 'rgba(244,114,182,0.12)', border: `1px solid ${diff >= 0 ? 'rgba(52,211,153,0.3)' : 'rgba(244,114,182,0.3)'}`, color: diff >= 0 ? D.mint : D.pink, fontSize: 12.5, fontWeight: 600 }}>
+            {diff >= 0 ? '+' : ''}{diff.toFixed(1)}pt vs target {targetLabel}
+          </div>
+        </div>
+      </div>
+
+      {/* Sliders */}
+      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+          <div>
+            <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase' }}>Drag to model scenarios</div>
+            <div style={{ fontSize: 11.5, color: D.dim, marginTop: 3 }}>Graded items stay locked · drag the rest</div>
+          </div>
+          <div style={{ flex: 1 }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 14, fontSize: 10.5, color: D.dim }}>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 3, background: D.mint, borderRadius: 2 }} /> Locked</span>
+            <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}><span style={{ width: 10, height: 3, background: D.orange, borderRadius: 2 }} /> Hypothetical</span>
+          </div>
         </div>
 
-        {/* Sliders */}
-        <div className="space-y-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           {components.map(c => {
-            const val = overrides[c.id] ?? 0
-            const color = val >= 90 ? '#10b981' : val >= 70 ? '#f59e0b' : '#ef4444'
+            const isLocked  = c.graded && c.grade !== null
+            const v         = overrides[c.id] ?? 0
+            const fillColor = isLocked ? D.mint : D.orange
             return (
               <div key={c.id}>
-                <div className="flex items-center justify-between mb-1.5">
-                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    {c.component}
-                    {c.graded && <span className="ml-1.5 text-[10px] text-slate-400">(actual)</span>}
-                  </span>
-                  <input
-                    type="number" min="0" max="100" step="1"
-                    value={Math.round(val)}
-                    onChange={e => setSlider(c.id, clamp(parseFloat(e.target.value) || 0))}
-                    className="w-16 min-h-[36px] text-center text-sm font-bold rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-                    style={{ color }}
-                    disabled={c.graded}
-                  />
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ fontSize: 13.5, fontWeight: 500, color: D.text }}>{c.component}</span>
+                    {isLocked && <span style={{ fontSize: 10, color: D.mint, background: 'rgba(52,211,153,0.1)', padding: '1px 6px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 3 }}><IcoLock /> Actual</span>}
+                    <span style={{ fontSize: 10.5, color: D.dim, fontFamily: 'ui-monospace, monospace' }}>· {c.weight}% weight</span>
+                  </div>
+                  <div style={{ width: 64, textAlign: 'center', padding: '5px 10px', borderRadius: 7, background: 'rgba(255,255,255,0.02)', border: `1px solid ${isLocked ? 'rgba(52,211,153,0.3)' : D.border}`, fontSize: 13, fontWeight: 600, fontFamily: 'ui-monospace, monospace', color: isLocked ? D.mint : D.orange }}>
+                    {Math.round(v)}
+                  </div>
                 </div>
-                <input
-                  type="range" min="0" max="100" step="1"
-                  value={Math.round(val)}
-                  onChange={e => setSlider(c.id, parseFloat(e.target.value))}
-                  disabled={c.graded}
-                  className="w-full h-2 rounded-full appearance-none cursor-pointer disabled:opacity-50"
-                  style={{
-                    background: c.graded
-                      ? `${dot}40`
-                      : `linear-gradient(to right, ${color} 0%, ${color} ${val}%, #e2e8f0 ${val}%, #e2e8f0 100%)`,
-                    touchAction: 'manipulation',
-                  }}
-                />
+                <div style={{ position: 'relative', height: 16, display: 'flex', alignItems: 'center' }}>
+                  <div style={{ position: 'absolute', left: 0, right: 0, height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.05)' }} />
+                  <div style={{ position: 'absolute', left: 0, height: 6, borderRadius: 3, width: `${v}%`, background: `linear-gradient(90deg, ${fillColor}, ${fillColor}cc)`, boxShadow: `0 0 8px ${isLocked ? 'rgba(52,211,153,0.5)' : 'rgba(249,115,22,0.5)'}`, pointerEvents: 'none' }} />
+                  <input type="range" min="0" max="100" value={Math.round(v)} disabled={isLocked} onChange={e => setSlider(c.id, parseFloat(e.target.value))} className="gh-range" style={{ position: 'relative', background: 'transparent', opacity: isLocked ? 0.6 : 1 }} />
+                </div>
               </div>
             )
           })}
         </div>
+      </div>
 
-        <div className="flex gap-2 mt-4">
-          <button
-            onClick={handleReset}
-            className="flex-1 min-h-[44px] rounded-xl text-sm font-semibold border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors"
-          >
-            Reset to Actuals
+      {/* Actions */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 10 }}>
+        <button onClick={handleReset} style={{ padding: '13px 16px', background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, borderRadius: 10, fontSize: 13, fontWeight: 500, color: D.text, cursor: 'pointer' }}>
+          Reset to actuals
+        </button>
+        {scenarios.length < 3 && !showSaveInput ? (
+          <button onClick={() => setShowSaveInput(true)} style={{ padding: '13px 16px', background: `linear-gradient(135deg, ${D.accent}, ${D.violet})`, borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 600, boxShadow: `0 6px 20px ${D.glow}`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, cursor: 'pointer' }}>
+            <IcoSparkles /> Save scenario
           </button>
-          {scenarios.length < 3 && !showSaveInput && (
-            <button
-              onClick={() => setShowSaveInput(true)}
-              className="flex-1 min-h-[44px] rounded-xl text-sm font-semibold transition-colors text-white"
-              style={{ background: `linear-gradient(135deg, ${dot}, ${dot}cc)` }}
-            >
-              Save Scenario
-            </button>
-          )}
-        </div>
-
-        {showSaveInput && (
-          <div className="flex gap-2 mt-2">
-            <input
-              type="text" placeholder="Scenario name..." value={saveNameInput}
-              onChange={e => setSaveNameInput(e.target.value)}
-              onKeyDown={e => e.key === 'Enter' && handleSaveScenario()}
-              className="flex-1 min-h-[44px] rounded-xl border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900/50 px-3 text-sm text-slate-800 dark:text-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500/30"
-              autoFocus
-            />
-            <button onClick={handleSaveScenario} className="min-h-[44px] px-4 rounded-xl bg-indigo-600 text-white text-sm font-semibold">Save</button>
-            <button onClick={() => setShowSaveInput(false)} className="min-h-[44px] px-3 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500">✕</button>
+        ) : (
+          <div style={{ display: 'flex', gap: 6 }}>
+            <input className="gh-input-text" type="text" placeholder="Scenario name…" value={saveName} onChange={e => setSaveName(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSaveScenario()} autoFocus style={{ flex: 1, minWidth: 0 }} />
+            <button onClick={handleSaveScenario} style={{ padding: '8px 14px', background: `linear-gradient(135deg, ${D.accent}, ${D.violet})`, borderRadius: 8, color: '#fff', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Save</button>
+            <button onClick={() => setShowSaveInput(false)} style={{ padding: '8px 12px', border: `1px solid ${D.border}`, borderRadius: 8, color: D.muted, cursor: 'pointer' }}>✕</button>
           </div>
         )}
       </div>
 
       {/* Saved scenarios */}
       {scenarios.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Saved Scenarios</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase' }}>Saved scenarios</div>
             {scenarios.length >= 2 && (
-              <button
-                onClick={() => setShowCompare(v => !v)}
-                className="text-xs font-semibold text-indigo-500 hover:text-indigo-400 transition-colors"
-              >
+              <button onClick={() => setShowCompare(v => !v)} style={{ fontSize: 12, fontWeight: 600, color: D.indigo, cursor: 'pointer' }}>
                 {showCompare ? 'Hide compare' : 'Compare →'}
               </button>
             )}
           </div>
-
           {!showCompare ? (
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-              {scenarios.map(scenario => {
-                const proj = getProjectedGrade(components.map(c => ({ ...c, graded: false })), scenario.overrides)
-                const sc2 = STATUS_COLORS[gradeStatus(proj, targetGrade)]
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+              {scenarios.map(sc => {
+                const proj = getProjectedGrade(components.map(c => ({ ...c, graded: false })), sc.overrides)
+                const sltr = letterGrade(proj)
+                const slc  = letterColor(sltr)
                 return (
-                  <div key={scenario.name} className="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 rounded-xl p-4">
-                    <div className="flex items-start justify-between mb-2">
-                      {editingScenarioName === scenario.name ? (
-                        <input
-                          autoFocus
-                          value={nameInput}
-                          onChange={e => setNameInput(e.target.value)}
-                          onBlur={() => renameScenario(scenario.name, nameInput)}
-                          onKeyDown={e => e.key === 'Enter' && renameScenario(scenario.name, nameInput)}
-                          className="flex-1 mr-2 bg-transparent border-b border-indigo-400 text-sm font-bold text-slate-800 dark:text-slate-200 outline-none"
-                        />
+                  <div key={sc.name} style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 16 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                      {editingName === sc.name ? (
+                        <input autoFocus value={nameInput} onChange={e => setNameInput(e.target.value)} onBlur={() => renameScenario(sc.name, nameInput)} onKeyDown={e => e.key === 'Enter' && renameScenario(sc.name, nameInput)} className="gh-input-text" style={{ flex: 1, marginRight: 8, fontSize: 12 }} />
                       ) : (
-                        <button
-                          onClick={() => { setEditingScenarioName(scenario.name); setNameInput(scenario.name) }}
-                          className="text-sm font-bold text-slate-800 dark:text-slate-200 hover:text-indigo-500 transition-colors text-left"
-                        >
-                          {scenario.name}
-                        </button>
+                        <button onClick={() => { setEditingName(sc.name); setNameInput(sc.name) }} style={{ fontSize: 13, fontWeight: 600, color: D.text, cursor: 'pointer', textAlign: 'left' }}>{sc.name}</button>
                       )}
-                      <button onClick={() => deleteScenario(scenario.name)} className="text-slate-300 dark:text-slate-600 hover:text-red-400 transition-colors text-xs ml-2 shrink-0">✕</button>
+                      <button onClick={() => deleteScenario(sc.name)} style={{ color: D.dim, cursor: 'pointer', fontSize: 12 }}>✕</button>
                     </div>
-                    <div className="text-2xl font-black mb-1" style={{ color: sc2.color }}>{proj?.toFixed(1)}%</div>
-                    <div className="text-xs font-semibold" style={{ color: sc2.color }}>{letterGrade(proj)} · {sc2.label}</div>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: slc, fontFamily: 'ui-monospace, monospace' }}>{proj?.toFixed(1)}%</div>
+                    <div style={{ fontSize: 12, fontWeight: 600, color: slc, marginTop: 2 }}>{sltr}</div>
                   </div>
                 )
               })}
             </div>
           ) : (
-            /* Compare table */
-            <div className="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden">
-              <div className="overflow-x-auto">
-                <table className="w-full text-sm">
-                  <thead>
-                    <tr className="border-b border-slate-100 dark:border-slate-700/50">
-                      <th className="text-left px-4 py-3 text-xs font-bold text-slate-400 uppercase tracking-wide">Component</th>
-                      {scenarios.map(s => (
-                        <th key={s.name} className="text-center px-4 py-3 text-xs font-bold text-slate-600 dark:text-slate-300">{s.name}</th>
-                      ))}
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {components.map(c => {
-                      const scores = scenarios.map(s => s.overrides[c.id] ?? 0)
-                      const max = Math.max(...scores)
-                      const min = Math.min(...scores)
-                      return (
-                        <tr key={c.id} className="border-b border-slate-50 dark:border-slate-800/50">
-                          <td className="px-4 py-2.5 font-medium text-slate-700 dark:text-slate-300">{c.component}</td>
-                          {scenarios.map((s, si) => {
-                            const score = s.overrides[c.id]
-                            const isMax = score === max && max !== min
-                            const isMin = score === min && max !== min
-                            return (
-                              <td key={s.name} className="px-4 py-2.5 text-center font-bold"
-                                style={{ color: isMax ? '#10b981' : isMin ? '#ef4444' : '#64748b' }}
-                              >
-                                {score?.toFixed(0) ?? '-'}%
-                              </td>
-                            )
-                          })}
-                        </tr>
-                      )
+            <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, overflow: 'hidden' }}>
+              <table style={{ width: '100%', fontSize: 12.5, borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${D.border}` }}>
+                    <th style={{ textAlign: 'left', padding: '10px 16px', color: D.dim, fontWeight: 600, fontSize: 10.5, textTransform: 'uppercase', letterSpacing: 0.5 }}>Component</th>
+                    {scenarios.map(s => <th key={s.name} style={{ textAlign: 'center', padding: '10px 16px', color: D.muted, fontWeight: 600 }}>{s.name}</th>)}
+                  </tr>
+                </thead>
+                <tbody>
+                  {components.map(c => {
+                    const scores = scenarios.map(s => s.overrides[c.id] ?? 0)
+                    const max = Math.max(...scores), min = Math.min(...scores)
+                    return (
+                      <tr key={c.id} style={{ borderBottom: `1px solid ${D.border}` }}>
+                        <td style={{ padding: '10px 16px', color: D.text, fontWeight: 500 }}>{c.component}</td>
+                        {scenarios.map(s => {
+                          const score = s.overrides[c.id]
+                          const isMax = score === max && max !== min
+                          const isMin = score === min && max !== min
+                          return <td key={s.name} style={{ padding: '10px 16px', textAlign: 'center', fontWeight: 700, fontFamily: 'ui-monospace, monospace', color: isMax ? D.mint : isMin ? D.pink : D.muted }}>{score?.toFixed(0) ?? '—'}%</td>
+                        })}
+                      </tr>
+                    )
+                  })}
+                  <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                    <td style={{ padding: '12px 16px', color: D.muted, fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>Projected</td>
+                    {scenarios.map(s => {
+                      const proj = getProjectedGrade(components.map(c => ({ ...c, graded: false })), s.overrides)
+                      return <td key={s.name} style={{ padding: '12px 16px', textAlign: 'center', fontSize: 15, fontWeight: 800, color: letterColor(letterGrade(proj)), fontFamily: 'ui-monospace, monospace' }}>{proj?.toFixed(1)}% {letterGrade(proj)}</td>
                     })}
-                    {/* Final projected row */}
-                    <tr className="bg-slate-50 dark:bg-slate-900/40">
-                      <td className="px-4 py-3 text-xs font-bold text-slate-500 uppercase tracking-wide">Projected</td>
-                      {scenarios.map(s => {
-                        const proj = getProjectedGrade(components.map(c => ({ ...c, graded: false })), s.overrides)
-                        return (
-                          <td key={s.name} className="px-4 py-3 text-center text-base font-black" style={{ color: dot }}>
-                            {proj?.toFixed(1)}% {letterGrade(proj)}
-                          </td>
-                        )
-                      })}
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           )}
         </div>
@@ -847,37 +734,18 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
   )
 }
 
-// ── Connection section ────────────────────────────────────────────────────────
-function ConnectionSection({ course, gradeData, dot, onShowPaywall, userId }) {
-  const [toast, setToast] = useState(null)
-  const [aiLoading, setAiLoading] = useState(false)
+// ── RIGHT RAIL ────────────────────────────────────────────────────────────────
+function RightRail({ course, gradeData, onShowPaywall, userId, onSyncStudyPlan }) {
+  const [aiLoading, setAiLoading]     = useState(false)
   const [aiPrediction, setAiPrediction] = useState(null)
+  const [syncToast, setSyncToast]     = useState(false)
 
-  const components = gradeData?.components ?? []
-  const targetGrade = gradeData?.targetGrade ?? 73
-  const currentGrade = getCurrentGrade(components)
-  const gap = currentGrade !== null ? currentGrade - targetGrade : null
-  const below5 = gap !== null && gap < -2
-
-  const weakComponents = components
-    .filter(c => c.graded && c.grade !== null && c.grade < 70)
-    .map(c => c.component)
-
-  const handleUpdateStudyPlan = async () => {
-    if (!course) return
-    const courseId = course.id ?? 0
-    const struggles = [
-      gap !== null ? `Projected to ${gap >= 0 ? 'meet' : 'miss'} target by ${Math.abs(gap).toFixed(1)}%` : null,
-      weakComponents.length ? `Weak components: ${weakComponents.join(', ')}` : null,
-    ].filter(Boolean)
-    try {
-      await saveCoachPlanStruggles(courseId, struggles)
-      setToast('Study plan updated with your grade data.')
-      setTimeout(() => setToast(null), 3000)
-    } catch (e) {
-      console.error(e)
-    }
-  }
+  const components  = gradeData?.components ?? []
+  const targetGrade = gradeData?.targetGrade ?? 85
+  const graded      = components.filter(c => c.graded && c.grade !== null)
+  const curr        = getCurrentGrade(components)
+  const targetLabel = TARGET_OPTIONS.find(o => o.value === targetGrade)?.label ?? 'A'
+  const bestGrade   = graded.length ? Math.max(...graded.map(c => c.grade)) : null
 
   const handleRunPredictor = async () => {
     if (!components.length) return
@@ -886,7 +754,6 @@ function ConnectionSection({ course, gradeData, dot, onShowPaywall, userId }) {
     setAiPrediction(null)
     try {
       const token = await getAccessToken()
-      const targetLabel = TARGET_OPTIONS.find(o => o.value === targetGrade)?.label ?? 'B'
       const res = await fetch('/api/generate-study-tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -894,12 +761,7 @@ function ConnectionSection({ course, gradeData, dot, onShowPaywall, userId }) {
           mode: 'predict-grade',
           courseName: course.name,
           targetGrade: targetLabel,
-          components: components.map(c => ({
-            name: c.component,
-            weight: c.weight,
-            type: 'Assignment',
-            earnedGrade: c.graded ? c.grade : null,
-          })),
+          components: components.map(c => ({ name: c.component, weight: c.weight, type: 'Assignment', earnedGrade: c.graded ? c.grade : null })),
         }),
       })
       const data = await res.json()
@@ -913,174 +775,206 @@ function ConnectionSection({ course, gradeData, dot, onShowPaywall, userId }) {
     }
   }
 
-  if (!gradeData?.components?.length) return null
+  const handleSync = async () => {
+    await onSyncStudyPlan?.()
+    setSyncToast(true)
+    setTimeout(() => setSyncToast(false), 3000)
+  }
 
   return (
-    <div className="bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-5 space-y-4">
-      <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Connect to Study Plan</p>
-
-      {below5 && gap !== null && (
-        <div className="p-3 bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-700/40 rounded-xl">
-          <p className="text-sm font-semibold text-amber-700 dark:text-amber-300 mb-2">
-            You're {Math.abs(gap).toFixed(1)}% below your target. Update your study plan to close the gap?
-          </p>
-          <button
-            onClick={handleUpdateStudyPlan}
-            className="text-xs font-bold px-3 py-2 min-h-[36px] rounded-lg bg-amber-500 hover:bg-amber-400 text-white transition-colors"
-          >
-            Update Study Plan
-          </button>
+    <div className="gh-rail" style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'sticky', top: 20 }}>
+      {/* AI Prediction */}
+      <div style={{ background: 'linear-gradient(155deg, rgba(139,92,246,0.14), rgba(99,102,241,0.05) 45%, #0a0a1e)', border: '1px solid rgba(139,92,246,0.28)', borderRadius: 14, padding: 18, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, background: 'radial-gradient(circle, rgba(139,92,246,0.25), transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 12, position: 'relative' }}>
+          <div style={{ width: 26, height: 26, borderRadius: 7, background: `linear-gradient(135deg, ${D.accent}, ${D.violet})`, display: 'grid', placeItems: 'center', color: '#fff', boxShadow: `0 0 12px ${D.glow}` }}>
+            <IcoSparkles />
+          </div>
+          <div>
+            <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase' }}>AI Grade prediction</div>
+            <div style={{ fontSize: 11, color: D.dim, marginTop: 1, display: 'flex', alignItems: 'center', gap: 5 }}>
+              <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.mint, boxShadow: `0 0 6px ${D.mint}` }} />
+              Live forecast
+            </div>
+          </div>
         </div>
-      )}
 
-      {toast && (
-        <div className="text-xs font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1.5">
-          <span>✓</span> {toast}
-        </div>
-      )}
+        {aiPrediction ? (
+          <div style={{ position: 'relative', marginBottom: 14 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
+              <span style={{ fontSize: 36, fontWeight: 800, fontFamily: 'ui-monospace, monospace', color: letterColor(letterGrade(aiPrediction.predictedGrade)) }}>{aiPrediction.predictedGrade?.toFixed(1)}%</span>
+              <span style={{ fontSize: 18, fontWeight: 700, color: letterColor(letterGrade(aiPrediction.predictedGrade)) }}>{aiPrediction.letterGrade}</span>
+            </div>
+            {aiPrediction.recommendations?.length > 0 && (
+              <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                {aiPrediction.recommendations.map((r, i) => (
+                  <li key={i} style={{ fontSize: 12, color: D.muted, display: 'flex', gap: 6 }}><span style={{ color: D.mint }}>→</span> {r}</li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : (
+          <div style={{ fontSize: 13, color: D.text, lineHeight: 1.5, marginBottom: 14, position: 'relative' }}>
+            Based on <span style={{ color: D.indigo, fontFamily: 'ui-monospace, monospace' }}>{graded.length} graded items</span>, run a prediction to see your projected final grade.
+          </div>
+        )}
 
-      <div className="flex flex-col sm:flex-row gap-2">
-        <button
-          onClick={handleRunPredictor}
-          disabled={aiLoading}
-          className="flex-1 min-h-[44px] rounded-xl text-sm font-semibold border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800/60 transition-colors flex items-center justify-center gap-2 disabled:opacity-60"
-        >
-          {aiLoading ? (
-            <><div className="w-4 h-4 rounded-full border-2 border-slate-400 border-t-indigo-500 animate-spin" /> Running AI analysis...</>
-          ) : (
-            <><svg className="w-4 h-4" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg> Run AI Grade Prediction</>
-          )}
+        <button onClick={handleRunPredictor} disabled={aiLoading || !components.length} style={{ width: '100%', padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: D.text, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, cursor: 'pointer', position: 'relative', opacity: aiLoading ? 0.7 : 1 }}>
+          {aiLoading
+            ? <><div style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: D.violet, animation: 'spin 0.8s linear infinite' }} /> Analyzing…</>
+            : <><IcoSparkles /> Run AI grade prediction</>}
         </button>
       </div>
 
-      {aiPrediction && (
-        <div className="rounded-xl border border-indigo-200 dark:border-indigo-800/40 bg-indigo-50 dark:bg-indigo-950/30 p-4">
-          <div className="flex items-center gap-2 mb-3">
-            <svg className="w-4 h-4 text-indigo-500" viewBox="0 0 20 20" fill="currentColor"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
-            <p className="text-xs font-bold text-indigo-600 dark:text-indigo-400 uppercase tracking-wide">AI Prediction</p>
+      {/* At a glance */}
+      {components.length > 0 && (
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 18 }}>
+          <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 14 }}>At a glance</div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+            {[
+              { label: 'Best grade',   value: bestGrade !== null ? bestGrade + '%' : '—',  color: D.mint   },
+              { label: 'Current avg',  value: curr !== null ? curr.toFixed(1) + '%' : '—', color: D.indigo },
+              { label: 'Graded items', value: `${graded.length} / ${components.length}`,   color: D.violet },
+              { label: 'Target',       value: targetLabel,                                 color: D.sky    },
+            ].map((s, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ fontSize: 12, color: D.muted }}>{s.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: s.color, fontFamily: 'ui-monospace, monospace' }}>{s.value}</span>
+              </div>
+            ))}
           </div>
-          <div className="flex items-baseline gap-2 mb-3">
-            <span className="text-3xl font-black text-indigo-600 dark:text-indigo-300">{aiPrediction.predictedGrade?.toFixed(1)}%</span>
-            <span className="text-lg font-bold text-indigo-500">{aiPrediction.letterGrade}</span>
-          </div>
-          {aiPrediction.recommendations?.length > 0 && (
-            <ul className="space-y-1">
-              {aiPrediction.recommendations.map((r, i) => (
-                <li key={i} className="text-xs text-indigo-700 dark:text-indigo-300 flex gap-1.5">
-                  <span className="text-emerald-500 shrink-0">→</span> {r}
-                </li>
-              ))}
-            </ul>
-          )}
+        </div>
+      )}
+
+      {/* Connect to study plan */}
+      {components.length > 0 && (
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 16 }}>
+          <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 10 }}>Connect to study plan</div>
+          {syncToast && <div style={{ fontSize: 12, color: D.mint, marginBottom: 8 }}>✓ Study plan updated.</div>}
+          <button onClick={handleSync} style={{ width: '100%', padding: '10px 14px', background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 8, fontSize: 12.5, fontWeight: 500, color: D.text, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, cursor: 'pointer' }}>
+            <IcoCalendar /> Sync to schedule
+          </button>
         </div>
       )}
     </div>
   )
 }
 
-// ── Main component ────────────────────────────────────────────────────────────
+// ── Main ──────────────────────────────────────────────────────────────────────
 export default function GradeHubView({ courses, onEditCourse, userId, onShowPaywall, initialCourseIdx = 0 }) {
   const plan = getActivePlan()
-  const hubRef = useRef(null)
 
   const [activeCourseIdx, setActiveCourseIdx] = useState(() =>
     Math.max(0, Math.min(initialCourseIdx, courses.length - 1))
   )
   const [activeTab, setActiveTab] = useState('plan')
 
-  // When initialCourseIdx changes (from dashboard), update active course
   useEffect(() => {
     const idx = Math.max(0, Math.min(initialCourseIdx, courses.length - 1))
     setActiveCourseIdx(idx)
   }, [initialCourseIdx])
 
   if (plan === 'free') return <LockedState onShowPaywall={onShowPaywall} />
+  if (!courses.length) return (
+    <div style={{ padding: '60px 32px', textAlign: 'center' }}>
+      <p style={{ color: D.muted, fontSize: 13 }}>Add courses to use the Grade Hub.</p>
+    </div>
+  )
 
-  if (!courses.length) {
-    return (
-      <div className="px-4 py-12 text-center">
-        <p className="text-slate-500 text-sm">Add courses to use the Grade Hub.</p>
-      </div>
-    )
-  }
-
-  const course = courses[activeCourseIdx]
-  const dot = course?.color?.dot ?? '#6366f1'
+  const course    = courses[activeCourseIdx]
+  const dot       = course?.color?.dot ?? D.accent
   const gradeData = course?.gradeData ?? null
+  const hasSetup  = !!(gradeData?.components?.length)
+  const gpa       = computeGPA(courses)
 
-  const handleSelectCourse = (idx) => {
+  const handleSelectCourse = idx => {
     setActiveCourseIdx(idx)
     setActiveTab('plan')
-    setTimeout(() => hubRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }), 50)
   }
 
   const handleSaveGradeData = useCallback((newData) => {
     onEditCourse(activeCourseIdx, { ...course, gradeData: newData })
   }, [activeCourseIdx, course, onEditCourse])
 
-  const TABS = [
-    { id: 'plan',    label: 'Plan',    icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" /></svg> },
-    { id: 'track',   label: 'Track',   icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg> },
-    { id: 'sandbox', label: 'Sandbox', icon: <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg> },
-  ]
+  const handleSyncStudyPlan = useCallback(async () => {
+    const comps = gradeData?.components ?? []
+    const curr  = getCurrentGrade(comps)
+    const tg    = gradeData?.targetGrade ?? 85
+    const gap   = curr !== null ? curr - tg : null
+    const weak  = comps.filter(c => c.graded && c.grade !== null && c.grade < 70).map(c => c.component)
+    const struggles = [
+      gap !== null ? `Projected to ${gap >= 0 ? 'meet' : 'miss'} target by ${Math.abs(gap).toFixed(1)}%` : null,
+      weak.length ? `Weak components: ${weak.join(', ')}` : null,
+    ].filter(Boolean)
+    try { await saveCoachPlanStruggles(course.id ?? activeCourseIdx, struggles) } catch (e) { console.error(e) }
+  }, [gradeData, course, activeCourseIdx])
 
   return (
-    <div className="px-4 py-6 max-w-3xl mx-auto">
+    <div style={{ background: D.bg, minHeight: '100vh', backgroundImage: 'radial-gradient(1200px 600px at 85% -10%, rgba(99,102,241,0.10), transparent 60%), radial-gradient(900px 500px at 10% 110%, rgba(99,102,241,0.05), transparent 60%)' }}>
+      <style>{GH_STYLE}{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+
       {/* Header */}
-      <div className="mb-5">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">Grade Hub</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-sm">Plan, track, and model every scenario for your final grade.</p>
+      <div style={{ padding: '28px 32px 20px', borderBottom: `1px solid ${D.border}` }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
+          <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.05em', color: D.muted, textTransform: 'uppercase' }}>Academic Control</span>
+          <span style={{ width: 4, height: 4, borderRadius: '50%', background: D.dim }} />
+          <span style={{ fontSize: 11.5, color: D.dim }}>Spring 2026 · {courses.length} courses tracked</span>
+        </div>
+        <h1 style={{ margin: 0, fontSize: 32, fontWeight: 700, letterSpacing: -0.8, color: D.text, display: 'flex', alignItems: 'center', gap: 12 }}>
+          Grade Hub
+          {gpa && (
+            <span style={{ fontSize: 13, fontWeight: 500, color: D.indigo, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', padding: '4px 10px', borderRadius: 999, verticalAlign: 'middle' }}>
+              GPA {gpa}
+            </span>
+          )}
+        </h1>
+        <p style={{ margin: '6px 0 0', fontSize: 14, color: D.muted, maxWidth: 640 }}>
+          Plan, track, and model every scenario for your final grade — one calculator per course.
+        </p>
       </div>
 
-      {/* Course strip */}
-      <CourseStrip courses={courses} activeCourseIdx={activeCourseIdx} onSelect={handleSelectCourse} />
-
-      {/* Hub for active course */}
-      <div ref={hubRef}>
-        {/* Course label */}
-        <div className="flex items-center gap-2 mb-4">
-          <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: dot }} />
-          <h2 className="text-base font-bold text-slate-800 dark:text-slate-200">{course?.name}</h2>
-        </div>
-
-        {/* Tab bar */}
-        <div className="flex gap-1 bg-slate-100 dark:bg-slate-800/60 rounded-xl p-1 mb-5">
-          {TABS.map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 min-h-[44px] rounded-lg text-sm font-semibold transition-all ${
-                activeTab === tab.id
-                  ? 'bg-white dark:bg-slate-700 text-slate-900 dark:text-white shadow-sm'
-                  : 'text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200'
-              }`}
-            >
-              {tab.icon}
-              {tab.label}
-            </button>
+      <div style={{ padding: '24px 32px 48px' }}>
+        {/* Course pills */}
+        <div style={{ display: 'flex', gap: 12, marginBottom: 20, overflowX: 'auto' }}>
+          {courses.map((c, i) => (
+            <CourseCard key={i} course={c} active={activeCourseIdx === i} onClick={() => handleSelectCourse(i)} />
           ))}
         </div>
 
-        {/* Tab content */}
-        <div className="space-y-5">
-          {activeTab === 'plan' && (
-            <PlanTab course={course} gradeData={gradeData} dot={dot} onSave={handleSaveGradeData} />
-          )}
-          {activeTab === 'track' && (
-            <TrackTab course={course} gradeData={gradeData} dot={dot} onSave={handleSaveGradeData} />
-          )}
-          {activeTab === 'sandbox' && (
-            <SandboxTab course={course} gradeData={gradeData} dot={dot} onSave={handleSaveGradeData} />
-          )}
-
-          <ConnectionSection
-            course={course}
-            gradeData={gradeData}
-            dot={dot}
-            onShowPaywall={onShowPaywall}
-            userId={userId}
-          />
+        {/* Course label + tabs */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+          <span style={{ width: 10, height: 10, borderRadius: '50%', background: dot, boxShadow: `0 0 10px ${dot}` }} />
+          <span style={{ fontSize: 16, fontWeight: 600, color: D.text }}>{clean(course.name)}</span>
+          <span style={{ marginLeft: 'auto', fontSize: 11, color: D.dim, fontFamily: 'ui-monospace, monospace' }}>
+            {daysTo(course.examDate) !== null ? `${daysTo(course.examDate)}d to exam` : ''}
+          </span>
         </div>
+        <div style={{ marginBottom: 20 }}>
+          <Tabs active={activeTab} onChange={setActiveTab} />
+        </div>
+
+        {hasSetup ? (
+          <div className="gh-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 320px', gap: 20, alignItems: 'flex-start' }}>
+            <div>
+              {activeTab === 'plan'    && <PlanTab    course={course} gradeData={gradeData} dot={dot} onSave={handleSaveGradeData} />}
+              {activeTab === 'track'   && <TrackTab   course={course} gradeData={gradeData} dot={dot} onSave={handleSaveGradeData} />}
+              {activeTab === 'sandbox' && <SandboxTab course={course} gradeData={gradeData} dot={dot} onSave={handleSaveGradeData} />}
+            </div>
+            <RightRail course={course} gradeData={gradeData} onShowPaywall={onShowPaywall} userId={userId} onSyncStudyPlan={handleSyncStudyPlan} />
+          </div>
+        ) : (
+          // Setup empty state
+          <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 40, textAlign: 'center' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 12, margin: '0 auto 14px', background: `${dot}18`, color: dot, display: 'grid', placeItems: 'center' }}>
+              <IcoPlus />
+            </div>
+            <div style={{ fontSize: 16, fontWeight: 600, color: D.text, marginBottom: 6 }}>Set up {clean(course.name)}</div>
+            <div style={{ fontSize: 13, color: D.muted, marginBottom: 18 }}>Add grade components, weights, and your target to start tracking.</div>
+            <button onClick={() => setActiveTab('plan')} style={{ padding: '11px 22px', background: `linear-gradient(135deg, ${D.accent}, ${D.violet})`, borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7, boxShadow: `0 6px 20px ${D.glow}`, cursor: 'pointer' }}>
+              <IcoSparkles /> Set up course
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
