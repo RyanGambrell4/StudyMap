@@ -573,6 +573,13 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error 
   const course = courses[form.courseIdx]
   const color = course?.color?.dot || D.accent
   const sessionLen = form.sessionLen || 60
+  const allSessions = plan?.weeklyFocus?.flatMap(w => w.sessions || []) || []
+  const totalSessions = allSessions.length
+  const totalHours = ((totalSessions * sessionLen) / 60).toFixed(1)
+  const weeks = plan?.weeklyFocus?.length || 0
+  const priorityTopicsCount = plan?.priorityTopics?.length || 0
+  const deadlinesCount = (form?.dates || []).filter(d => d.date && d.label).length
+  const firstSession = plan?.weeklyFocus?.[0]?.sessions?.[0]
 
   if (error) {
     return (
@@ -588,21 +595,32 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error 
   return (
     <div className="sc-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: 24, alignItems: 'flex-start' }}>
       <div>
-        <PlanView plan={plan} course={course} dot={color} pushed={pushed} onPush={onPush} onReset={onRefine} theme="dark" />
+        <PlanView plan={plan} course={course} dot={color} pushed={pushed} onPush={onPush} onReset={onRefine} form={form} />
       </div>
-      {/* Right rail for plan step */}
+      {/* Right rail */}
       <div className="sc-rail" style={{ position: 'sticky', top: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 16 }}>
-          <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', color: D.muted, textTransform: 'uppercase', marginBottom: 12 }}>At a glance</div>
-          {plan?.weeklyFocus && (
-            <>
-              <StatRow label="Total sessions" value={plan.weeklyFocus.reduce((a, w) => a + (w.sessions?.length || 0), 0)} color={D.indigo} />
-              <StatRow label="Hours of study" value={((plan.weeklyFocus.reduce((a, w) => a + (w.sessions?.length || 0), 0) * sessionLen) / 60).toFixed(1) + 'h'} color={D.mint} />
-              <StatRow label="Weeks" value={plan.weeklyFocus.length} color={D.violet} />
-            </>
-          )}
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase', marginBottom: 12 }}>At a Glance</div>
+          <StatRow label="Total sessions" value={totalSessions} color={D.indigo} />
+          <StatRow label="Hours of study" value={`${totalHours}h`} color={D.mint} />
+          <StatRow label="Weeks" value={weeks} color={D.violet} />
           <StatRow label="Your cadence" value={`${form.daysPerWeek || 3}×${sessionLen}m`} color={D.amber} />
+          {priorityTopicsCount > 0 && <StatRow label="Priority topics" value={priorityTopicsCount} color={D.orange} />}
+          {deadlinesCount > 0 && <StatRow label="Deadlines tracked" value={deadlinesCount} color={D.pink} last />}
         </div>
+        {firstSession && (
+          <div style={{ background: 'linear-gradient(155deg, rgba(249,115,22,0.12) 0%, rgba(249,115,22,0.04) 50%, #0a0a1e 100%)', border: '1px solid rgba(249,115,22,0.28)', borderRadius: 14, padding: 16 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+              <Icon name="arrow" size={11} color={D.orange} />
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.orange, textTransform: 'uppercase' }}>Start Here</span>
+            </div>
+            <div style={{ fontSize: 13.5, fontWeight: 600, color: D.text, marginBottom: 4, lineHeight: 1.4 }}>{firstSession.focusArea}</div>
+            <div style={{ fontSize: 12, color: D.muted, marginBottom: 14 }}>{(firstSession.goal || '').split('.')[0]} · {firstSession.duration || sessionLen}m</div>
+            <button onClick={onPush} style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'linear-gradient(135deg, #F97316, #ea580c)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none', boxShadow: '0 4px 16px rgba(249,115,22,0.35)' }}>
+              Start first session →
+            </button>
+          </div>
+        )}
         <div style={{ padding: 14, borderRadius: 11, background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
             <Icon name="check" size={13} color={D.mint} stroke={2.5} />
@@ -615,9 +633,9 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error 
   )
 }
 
-function StatRow({ label, value, color }) {
+function StatRow({ label, value, color, last }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', alignItems: 'center', borderBottom: `1px solid ${D.border}` }}>
+    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', alignItems: 'center', borderBottom: last ? 'none' : `1px solid ${D.border}` }}>
       <span style={{ fontSize: 12, color: D.muted }}>{label}</span>
       <span style={{ fontSize: 13, fontWeight: 700, color, fontFamily: 'ui-monospace, monospace' }}>{value}</span>
     </div>
@@ -825,92 +843,231 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   )
 }
 
-// ── Plan display (real API output) ────────────────────────────────────────────
-function tv() {
-  return {
-    cardBg: '#0a0f1a', cardBorder: '#1e293b',
-    strategyBg: 'linear-gradient(160deg, #0d1420 0%, #0a0f1a 100%)',
-    labelColor: '#4b5563', topicText: '#e2e8f0', divider: '#111827',
-    summaryText: '#cbd5e1', weekBgClosed: '#0a0f1a', weekBgOpen: '#0d1117',
-    weekBorderClosed: '#141c2e', weekBorderOpen: '#1e293b',
-    weekNumBg: '#111827', weekNumBorder: '#1e293b', weekNumText: '#475569',
-    weekTitle: '#f1f5f9', weekTheme: '#475569',
-    sessCountBg: '#0d1117', sessCountBorder: '#1e293b', sessCountText: '#2d3d55',
-    chevron: '#2d4a6e', sessionBg: '#080d14', sessionBorder: '#141c2e',
-    goalText: '#64748b', chipBg: '#0d1117', chipText: '#3d526e', chipBorder: '#1a2744',
-    methodText: '#475569', warningText: '#94a3b8',
-  }
+// ── Plan display ──────────────────────────────────────────────────────────────
+function getPhaseColor(label) {
+  const l = (label || '').toUpperCase()
+  if (l.includes('LEARN')) return '#F97316'
+  if (l.includes('SYNTHESIZE') || l.includes('PRACTICE')) return '#34d399'
+  if (l.includes('REVIEW') || l.includes('TEST') || l.includes('EXAM')) return '#8b5cf6'
+  return D.accent
 }
 
-function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
+function weekDateRange(weekIndex) {
+  const today = new Date()
+  const dayOfWeek = today.getDay()
+  const monday = new Date(today)
+  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1) + weekIndex * 7)
+  const sunday = new Date(monday)
+  sunday.setDate(monday.getDate() + 6)
+  const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  return { start: fmt(monday), end: fmt(sunday), startDate: new Date(monday) }
+}
+
+// Legacy placeholder — kept for safety, unused
+function tv() { return {} }
+
+function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
+  const [checked, setChecked] = useState({})
   const [expandedWeek, setExpandedWeek] = useState(0)
-  const t = tv()
+  const sessionLen = form?.sessionLen || 60
+  const allSessions = plan?.weeklyFocus?.flatMap(w => w.sessions || []) || []
+  const totalSessions = allSessions.length
+  const doneCount = Object.values(checked).filter(Boolean).length
+  const completePct = totalSessions > 0 ? Math.round((doneCount / totalSessions) * 100) : 0
+  const totalHours = ((totalSessions * sessionLen) / 60).toFixed(1)
+  const weeks = plan?.weeklyFocus?.length || 0
+  const goal = form?.goal?.trim() || ''
+  const struggles = form?.struggles?.trim() || ''
+  const validDates = (form?.dates || []).filter(d => d.date && d.label)
+  const techniquesList = form?.style?.length ? form.style : ['Active recall', 'Reading + notes']
+  const toggleCheck = (wi, si) => setChecked(prev => ({ ...prev, [`${wi}-${si}`]: !prev[`${wi}-${si}`] }))
+
+  const TECHNIQUE_HINTS = {
+    'Active recall': 'Self-quiz without notes', 'Spaced repetition': 'Review at growing intervals',
+    'Practice problems': 'Solve, then check solutions', 'Teaching others': 'Explain it out loud',
+    'Visual diagrams': 'Draw concept maps', 'Reading + notes': 'Read, summarize, annotate',
+    'Flashcards': 'Key term card drills', 'Watching lectures': 'Re-watch key sections',
+  }
+
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-      {/* Strategy */}
-      <div style={{ background: t.strategyBg, border: `1px solid ${t.cardBorder}`, borderTop: `2px solid ${dot}`, borderRadius: '0.875rem', padding: '1.5rem' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-          <svg style={{ width: 14, height: 14, flexShrink: 0 }} viewBox="0 0 16 16" fill="none"><path d="M8 1.5L10.163 5.88L15 6.573L11.5 9.983L12.326 14.8L8 12.52L3.674 14.8L4.5 9.983L1 6.573L5.837 5.88L8 1.5Z" fill={dot} fillOpacity="0.85" /></svg>
-          <p style={{ color: dot, fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', margin: 0 }}>Study Strategy</p>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 80 }}>
+      {/* Overview header */}
+      <div style={{ background: 'linear-gradient(155deg, rgba(249,115,22,0.1) 0%, rgba(249,115,22,0.04) 40%, #0a0a1e 100%)', border: '1px solid rgba(249,115,22,0.25)', borderRadius: 14, padding: '20px 22px', position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, background: 'radial-gradient(circle, rgba(249,115,22,0.18), transparent 70%)', pointerEvents: 'none' }} />
+        <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', color: D.orange, textTransform: 'uppercase', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <Icon name="sparkles" size={11} color={D.orange} /> Your Personalized Plan
         </div>
-        <p style={{ color: t.summaryText, fontSize: '13.5px', lineHeight: '1.7', margin: 0 }}>{plan.summary}</p>
+        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <span style={{ width: 8, height: 8, borderRadius: '50%', background: dot, boxShadow: `0 0 8px ${dot}`, flexShrink: 0 }} />
+              <span style={{ fontSize: 15, fontWeight: 600, color: D.muted }}>{course?.name}</span>
+            </div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: D.text, lineHeight: 1.3, marginBottom: 12 }}>
+              <span style={{ color: D.orange }}>{weeks}</span> week{weeks !== 1 ? 's' : ''} &nbsp;·&nbsp; <span style={{ color: D.orange }}>{totalSessions}</span> sessions &nbsp;·&nbsp; <span style={{ color: D.orange }}>{totalHours}h</span> of focused study
+            </div>
+            <div style={{ fontSize: 13, color: D.muted, lineHeight: 1.6, maxWidth: 560 }}>
+              {goal ? <><span style={{ color: D.text }}>Structured to aim for "{goal}"</span>, </> : ''}
+              {validDates.length > 0 ? `hit ${validDates.length} deadline${validDates.length > 1 ? 's' : ''}, ` : ''}
+              via {techniquesList.slice(0, 2).join(' + ').toLowerCase()}, rotating through the {plan?.priorityTopics?.length || 0} topic{plan?.priorityTopics?.length === 1 ? '' : 's'} you gave me. No topic, date, or recommendation has been invented.
+            </div>
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+            <svg width={72} height={72} viewBox="0 0 72 72">
+              <circle cx={36} cy={36} r={28} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={5} />
+              <circle cx={36} cy={36} r={28} fill="none" stroke={dot} strokeWidth={5} strokeLinecap="round"
+                strokeDasharray={`${2 * Math.PI * 28}`}
+                strokeDashoffset={`${2 * Math.PI * 28 * (1 - completePct / 100)}`}
+                transform="rotate(-90 36 36)" style={{ transition: 'stroke-dashoffset 0.5s' }} />
+              <text x={36} y={33} textAnchor="middle" fill={D.text} fontSize={13} fontWeight={700}>{completePct}%</text>
+              <text x={36} y={46} textAnchor="middle" fill={D.muted} fontSize={9}>complete</text>
+            </svg>
+            <div style={{ fontSize: 11, color: D.dim }}>{doneCount} / {totalSessions} sessions done</div>
+          </div>
+        </div>
       </div>
 
-      {/* Priority Topics */}
-      {plan.priorityTopics?.length > 0 && (
-        <div style={{ backgroundColor: t.cardBg, border: `1px solid ${t.cardBorder}`, borderRadius: '0.875rem', padding: '1.5rem' }}>
-          <p style={{ color: t.labelColor, fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: '1.25rem', margin: '0 0 1.25rem' }}>Priority Topics</p>
-          {plan.priorityTopics.map((topic, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 16, padding: '0.875rem 0', borderBottom: i < plan.priorityTopics.length - 1 ? `1px solid ${t.divider}` : 'none' }}>
-              <span style={{ fontSize: '26px', fontWeight: 800, lineHeight: 1, color: `${dot}28`, minWidth: '2.25rem', textAlign: 'right', flexShrink: 0, paddingTop: '2px' }}>{i + 1}</span>
-              <p style={{ color: t.topicText, fontSize: '13.5px', lineHeight: '1.55', paddingTop: '3px', margin: 0 }}>{topic}</p>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* Warning zones */}
-      {plan.warningZones?.length > 0 && (
-        <div style={{ backgroundColor: 'rgba(239,68,68,0.03)', border: '1px solid rgba(239,68,68,0.14)', borderRadius: '0.875rem', padding: '1.5rem' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16 }}>
-            <svg style={{ width: 14, height: 14, flexShrink: 0 }} viewBox="0 0 16 16" fill="none"><path d="M8 2L14.5 13.5H1.5L8 2Z" stroke="#ef4444" strokeWidth="1.5" strokeLinejoin="round" /><path d="M8 6.5V9" stroke="#ef4444" strokeWidth="1.5" strokeLinecap="round" /><circle cx="8" cy="11.5" r="0.75" fill="#ef4444" /></svg>
-            <p style={{ color: '#ef4444', fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', margin: 0 }}>Watch Out For</p>
+      {/* Roadmap */}
+      {weeks > 0 && (
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '16px 20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>Your Roadmap</span>
+            <span style={{ fontSize: 11, color: D.dim }}>Tap a week to jump down</span>
           </div>
-          {plan.warningZones.map((w, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '0.75rem 0', borderBottom: i < plan.warningZones.length - 1 ? '1px solid rgba(239,68,68,0.07)' : 'none' }}>
-              <div style={{ width: 20, height: 20, borderRadius: '50%', backgroundColor: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                <div style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: '#ef4444' }} />
-              </div>
-              <p style={{ color: t.warningText, fontSize: '13px', lineHeight: '1.65', margin: 0 }}>{w}</p>
+          <div style={{ position: 'relative' }}>
+            <div style={{ position: 'absolute', top: 11, left: '5%', right: '5%', height: 2, background: `linear-gradient(90deg, ${dot}, ${D.violet})`, borderRadius: 1 }} />
+            <div style={{ display: 'flex', justifyContent: 'space-around', position: 'relative' }}>
+              {(plan.weeklyFocus || []).map((w, wi) => {
+                const range = weekDateRange(wi)
+                const phase = (w.theme || 'Foundation').split(' ')[0]
+                const anchored = validDates.find(d => {
+                  const dt = new Date(d.date + 'T12:00:00')
+                  const rs = range.startDate
+                  const re = new Date(rs); re.setDate(rs.getDate() + 6)
+                  return dt >= rs && dt <= re
+                })
+                return (
+                  <div key={wi} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer' }} onClick={() => setExpandedWeek(wi)}>
+                    <div style={{ width: 22, height: 22, borderRadius: '50%', background: wi === 0 ? dot : `${dot}50`, border: `2px solid ${dot}`, display: 'grid', placeItems: 'center', color: '#fff', fontSize: 10, fontWeight: 700, zIndex: 1, position: 'relative' }}>{wi + 1}</div>
+                    <span style={{ fontSize: 10, color: D.dim, whiteSpace: 'nowrap' }}>{range.start} – {range.end}</span>
+                    <span style={{ fontSize: 10, color: dot, fontWeight: 600 }}>{phase}</span>
+                    {anchored && <span style={{ fontSize: 9.5, color: D.violet, background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 4, padding: '1px 5px', fontWeight: 600 }}>★ {anchored.label}</span>}
+                  </div>
+                )
+              })}
             </div>
-          ))}
+          </div>
         </div>
       )}
 
-      {/* Weekly plan */}
+      {/* Info cards */}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: D.pink, textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}><Icon name="flag" size={10} color={D.pink} /> The Goal</div>
+          <div style={{ fontSize: 13, color: goal ? D.text : D.dim, fontStyle: goal ? 'normal' : 'italic' }}>{goal || 'No goal provided'}</div>
+        </div>
+        {validDates.length > 0 ? (
+          <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: D.violet, textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}><Icon name="calendar" size={10} color={D.violet} /> {validDates.length} Deadline{validDates.length > 1 ? 's' : ''}</div>
+            {validDates.map((d, i) => (
+              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginTop: i > 0 ? 4 : 0 }}>
+                <span style={{ color: D.text }}>{d.label}</span>
+                <span style={{ color: D.violet, fontFamily: 'ui-monospace,monospace', fontSize: 12 }}>{new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14 }}>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: D.violet, textTransform: 'uppercase', marginBottom: 6 }}>No Deadlines</div>
+            <div style={{ fontSize: 12, color: D.dim, fontStyle: 'italic' }}>No dates added</div>
+          </div>
+        )}
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14 }}>
+          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: D.cyan, textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}><Icon name="lightbulb" size={10} color={D.cyan} /> How We're Studying</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
+            {techniquesList.map((t, i) => <span key={i} style={{ fontSize: 11.5, padding: '3px 8px', borderRadius: 5, background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', color: D.cyan }}>{t}</span>)}
+          </div>
+        </div>
+      </div>
+
+      {/* Priority topics */}
+      {plan.priorityTopics?.length > 0 && (
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '16px 20px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>What You'll Master — Your {plan.priorityTopics.length} Topic{plan.priorityTopics.length !== 1 ? 's' : ''}</span>
+            {struggles && <span style={{ fontSize: 11, color: D.dim }}>From your list — nothing added</span>}
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
+            {plan.priorityTopics.map((topic, i) => {
+              const isStruggle = struggles && topic.toLowerCase().split(' ').some(w => w.length > 4 && struggles.toLowerCase().includes(w))
+              return (
+                <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                  <span style={{ fontSize: 13, fontWeight: 800, color: `${dot}50`, minWidth: 20 }}>{String(i + 1).padStart(2, '0')}</span>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontSize: 13, color: D.text, lineHeight: 1.4 }}>{topic}</div>
+                    {isStruggle && <span style={{ fontSize: 10, color: D.orange, background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', borderRadius: 4, padding: '2px 6px', display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 5, fontWeight: 600 }}>★ Extra reps</span>}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Struggles banner */}
+      {struggles && (
+        <div style={{ background: 'rgba(249,115,22,0.06)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 14, padding: '14px 18px' }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', color: D.orange, textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
+            <Icon name="warn" size={12} color={D.orange} /> Where I'll Spend Extra Time — From Your Struggles
+          </div>
+          <div style={{ fontSize: 13, color: D.muted, lineHeight: 1.5, fontStyle: 'italic' }}>"{struggles}"</div>
+        </div>
+      )}
+
+      {/* Week by week */}
       <div>
-        <p style={{ color: t.labelColor, fontSize: '10px', fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', margin: '0 0 0.75rem' }}>Your Week-by-Week Plan</p>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>Week by Week</span>
+          <span style={{ fontSize: 11, color: D.dim }}>Check sessions as you complete them</span>
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {plan.weeklyFocus?.map((week, wi) => {
             const isOpen = expandedWeek === wi
+            const range = weekDateRange(wi)
+            const phase = week.theme || 'Foundation'
+            const weekSessions = week.sessions || []
+            const weekDone = weekSessions.filter((_, si) => checked[`${wi}-${si}`]).length
+            const anchored = validDates.find(d => {
+              const dt = new Date(d.date + 'T12:00:00')
+              const rs = range.startDate
+              const re = new Date(rs); re.setDate(rs.getDate() + 6)
+              return dt >= rs && dt <= re
+            })
             return (
-              <div key={wi} style={{ borderRadius: 12, overflow: 'hidden', backgroundColor: isOpen ? t.weekBgOpen : t.weekBgClosed, border: `1px solid ${isOpen ? t.weekBorderOpen : t.weekBorderClosed}`, transition: 'all 0.15s' }}>
-                <button style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 16, padding: '16px', textAlign: 'left', cursor: 'pointer', background: 'none', border: 'none' }} onClick={() => setExpandedWeek(isOpen ? -1 : wi)}>
-                  <div style={{ width: 32, height: 32, borderRadius: 8, backgroundColor: isOpen ? `${dot}18` : t.weekNumBg, border: `1px solid ${isOpen ? `${dot}35` : t.weekNumBorder}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: isOpen ? dot : t.weekNumText }}>{wi + 1}</span>
-                  </div>
+              <div key={wi} style={{ borderRadius: 13, overflow: 'hidden', background: isOpen ? 'rgba(249,115,22,0.04)' : D.bgCard, border: `1px solid ${isOpen ? 'rgba(249,115,22,0.2)' : D.border}`, transition: 'all 0.15s' }}>
+                <button style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', textAlign: 'left', cursor: 'pointer', background: 'none', border: 'none' }} onClick={() => setExpandedWeek(isOpen ? -1 : wi)}>
+                  <div style={{ width: 32, height: 32, borderRadius: 9, background: 'linear-gradient(135deg, #F97316, #ea580c)', display: 'grid', placeItems: 'center', color: '#fff', fontSize: 13, fontWeight: 700, flexShrink: 0, boxShadow: '0 2px 10px rgba(249,115,22,0.35)' }}>{wi + 1}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <p style={{ color: t.weekTitle, fontWeight: 600, fontSize: 13.5, margin: 0 }}>{week.week}</p>
-                    <p style={{ color: t.weekTheme, fontSize: 12, marginTop: 1, margin: '1px 0 0', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{week.theme}</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                      <span style={{ fontSize: 14, fontWeight: 600, color: D.text }}>Week {wi + 1}</span>
+                      <span style={{ fontSize: 12, color: D.dim }}>· {range.start} – {range.end}</span>
+                      <span style={{ fontSize: 10.5, fontWeight: 600, padding: '2px 8px', borderRadius: 5, background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.25)', color: D.orange }}>{phase}</span>
+                    </div>
+                    <div style={{ fontSize: 11.5, color: D.dim, marginTop: 3 }}>
+                      {weekSessions.length} session{weekSessions.length !== 1 ? 's' : ''}
+                      {anchored && <> · anchored to <span style={{ color: D.violet }}>{anchored.label}</span></>}
+                    </div>
                   </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-                    <span style={{ fontSize: 11, fontWeight: 600, color: t.sessCountText, backgroundColor: t.sessCountBg, border: `1px solid ${t.sessCountBorder}`, borderRadius: 6, padding: '2px 8px' }}>{week.sessions?.length}</span>
-                    <svg style={{ width: 16, height: 16, color: t.chevron, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                    <span style={{ fontSize: 12, color: D.muted }}>{weekDone}/{weekSessions.length}</span>
+                    <svg style={{ width: 16, height: 16, color: D.dim, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
                   </div>
                 </button>
                 {isOpen && (
-                  <div style={{ padding: '0 12px 12px', display: 'flex', flexDirection: 'column', gap: 8, borderTop: `1px solid ${t.divider}` }}>
-                    {week.sessions?.map((sess, si) => <SessionCard key={si} session={sess} dot={dot} t={t} />)}
+                  <div style={{ padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {weekSessions.map((sess, si) => (
+                      <SessionCard key={si} session={sess} wi={wi} si={si} checked={!!checked[`${wi}-${si}`]} onCheck={() => toggleCheck(wi, si)} struggles={struggles} />
+                    ))}
                   </div>
                 )}
               </div>
@@ -919,49 +1076,80 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset }) {
         </div>
       </div>
 
-      {/* Actions */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 10, paddingTop: 8 }}>
-        <button onClick={onPush} disabled={pushed} style={{ width: '100%', padding: '16px', borderRadius: 16, fontWeight: 700, color: '#fff', fontSize: 15, backgroundColor: pushed ? '#065f46' : dot, boxShadow: pushed ? '0 0 24px #065f4650' : `0 0 28px ${dot}35`, opacity: pushed ? 0.8 : 1, cursor: 'pointer', border: 'none' }}>
-          {pushed ? '✓ Plan saved. Sessions will use this as their starting point.' : 'Push to Sessions'}
-        </button>
-        {pushed && (
-          <p style={{ textAlign: 'center', fontSize: 12, lineHeight: 1.5, color: t.weekTheme, margin: 0 }}>
-            When you start a session for <span style={{ fontWeight: 500, color: t.weekTitle }}>{clean(course?.name || '')}</span>, the Blueprint screen will auto-fill the focus from this plan.
-          </p>
-        )}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-          <button onClick={onReset} style={{ padding: '12px', borderRadius: 12, fontSize: 13.5, fontWeight: 500, color: t.weekTheme, border: `1px solid ${t.cardBorder}`, background: 'none', cursor: 'pointer' }}>Rebuild plan</button>
-          <button onClick={onReset} style={{ padding: '12px', borderRadius: 12, fontSize: 13.5, fontWeight: 500, color: t.weekTheme, border: `1px solid ${t.cardBorder}`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-            <svg style={{ width: 13, height: 13 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M23 4v6h-6M1 20v-6h6"/><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
-            Refine inputs
-          </button>
+      {/* Techniques in rotation */}
+      {techniquesList.length > 0 && (
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '16px 18px' }}>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase', marginBottom: 12 }}>Techniques in Rotation</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
+            {techniquesList.map((t, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 9, background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}` }}>
+                <div style={{ width: 22, height: 22, borderRadius: 7, background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 700, color: D.indigo, flexShrink: 0 }}>{i + 1}</div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>{t}</div>
+                  <div style={{ fontSize: 11, color: D.dim, marginTop: 2 }}>{TECHNIQUE_HINTS[t] || ''}</div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
+      )}
+
+      {/* Bottom action bar */}
+      <div style={{ position: 'sticky', bottom: 16, display: 'flex', gap: 10, padding: '14px 18px', background: D.bgEl, border: `1px solid ${D.border}`, borderRadius: 14, backdropFilter: 'blur(8px)' }}>
+        <button onClick={onReset} style={{ flex: 1, padding: '12px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          <Icon name="refresh" size={13} /> Refine inputs
+        </button>
+        <button onClick={onPush} disabled={pushed} style={{ flex: 2, padding: '12px 20px', borderRadius: 10, background: pushed ? 'rgba(52,211,153,0.15)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: 13.5, fontWeight: 700, cursor: pushed ? 'default' : 'pointer', border: pushed ? '1px solid rgba(52,211,153,0.3)' : 'none', boxShadow: pushed ? 'none' : `0 4px 20px ${D.glow}`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          {pushed ? <><Icon name="check" size={13} stroke={2.5} color={D.mint} /> Pushed to Schedule</> : <><Icon name="calendar" size={13} /> Push to Schedule</>}
+        </button>
+        <button style={{ flex: 1, padding: '12px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          <Icon name="upload" size={13} /> Export
+        </button>
       </div>
     </div>
   )
 }
 
-function SessionCard({ session, dot, t }) {
+function SessionCard({ session, wi, si, checked, onCheck, struggles }) {
+  const phaseColor = getPhaseColor(session.sessionLabel)
+  const sl = (struggles || '').toLowerCase()
+  const isStruggle = sl && ((session.focusArea || '').toLowerCase().split(' ').some(w => w.length > 4 && sl.includes(w)) || (session.keyTopics || []).some(t => sl.includes(t.toLowerCase())))
   return (
-    <div style={{ backgroundColor: t.sessionBg, border: `1px solid ${t.sessionBorder}`, borderLeft: `2px solid ${dot}`, borderRadius: 10, padding: '1rem 1rem 1rem 1.125rem', marginTop: 8 }}>
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-          <span style={{ fontSize: '9.5px', fontWeight: 700, padding: '2px 8px', borderRadius: 4, textTransform: 'uppercase', letterSpacing: '0.1em', backgroundColor: `${dot}15`, color: dot, border: `1px solid ${dot}28`, flexShrink: 0, whiteSpace: 'nowrap' }}>{session.sessionLabel}</span>
-          <p style={{ color: t.weekTitle, fontWeight: 600, fontSize: 13.5, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{session.focusArea}</p>
+    <div style={{ background: '#0a0a1e', border: `1px solid rgba(255,255,255,0.06)`, borderLeft: `3px solid ${phaseColor}`, borderRadius: 10, padding: '14px 16px', display: 'flex', gap: 12 }}>
+      <button onClick={onCheck} style={{ width: 18, height: 18, borderRadius: 5, border: `1.5px solid ${checked ? phaseColor : 'rgba(255,255,255,0.15)'}`, background: checked ? phaseColor : 'transparent', display: 'grid', placeItems: 'center', flexShrink: 0, marginTop: 2, cursor: 'pointer' }}>
+        {checked && <Icon name="check" size={10} color="#fff" stroke={3} />}
+      </button>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
+            <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '2px 8px', borderRadius: 5, background: `${phaseColor}18`, border: `1px solid ${phaseColor}35`, color: phaseColor, flexShrink: 0 }}>{session.sessionLabel}</span>
+            <span style={{ fontSize: 13.5, fontWeight: 600, color: checked ? D.muted : D.text, textDecoration: checked ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{session.focusArea}</span>
+          </div>
+          <span style={{ fontSize: 11.5, color: D.muted, flexShrink: 0 }}>{session.duration || 60}m</span>
         </div>
-        <span style={{ fontSize: 11, color: t.chevron, fontWeight: 600, flexShrink: 0 }}>{session.duration}m</span>
-      </div>
-      <p style={{ color: t.goalText, fontSize: 12.5, lineHeight: 1.6, margin: '0 0 12px' }}>{session.goal}</p>
-      {session.keyTopics?.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 12 }}>
-          {session.keyTopics.map((topic, ti) => (
-            <span key={ti} style={{ fontSize: 10.5, padding: '2px 9px', borderRadius: 5, fontWeight: 500, backgroundColor: t.chipBg, color: t.chipText, border: `1px solid ${t.chipBorder}` }}>{topic}</span>
-          ))}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
+          <div>
+            <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', color: D.dim, textTransform: 'uppercase', marginBottom: 3 }}>Focus</div>
+            <div style={{ fontSize: 12.5, color: D.muted, lineHeight: 1.4 }}>{session.goal}</div>
+          </div>
+          {session.studyMethod && (
+            <div>
+              <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', color: D.dim, textTransform: 'uppercase', marginBottom: 3 }}>Deliverable</div>
+              <div style={{ fontSize: 12.5, color: D.muted, lineHeight: 1.4 }}>{session.studyMethod}</div>
+            </div>
+          )}
         </div>
-      )}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <svg style={{ width: 12, height: 12, flexShrink: 0 }} fill="none" stroke={dot} viewBox="0 0 24 24" strokeOpacity="0.7"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
-        <p style={{ fontSize: 11.5, fontStyle: 'italic', color: t.methodText, margin: 0 }}>{session.studyMethod}</p>
+        {session.keyTopics?.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: isStruggle ? 8 : 0 }}>
+            <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', color: D.dim, textTransform: 'uppercase', marginRight: 2 }}>Technique</span>
+            {session.keyTopics.map((t, i) => <span key={i} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 5, background: 'rgba(255,255,255,0.04)', border: `1px solid rgba(255,255,255,0.1)`, color: D.muted }}>{t}</span>)}
+          </div>
+        )}
+        {isStruggle && (
+          <span style={{ fontSize: 10.5, color: D.orange, background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.25)', borderRadius: 5, padding: '2px 8px', display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
+            <Icon name="zap" size={9} color={D.orange} /> Priority — matches your struggles
+          </span>
+        )}
       </div>
     </div>
   )
