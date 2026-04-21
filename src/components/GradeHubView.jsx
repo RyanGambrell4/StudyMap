@@ -962,6 +962,8 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
             </div>
             <RightRail course={course} gradeData={gradeData} onShowPaywall={onShowPaywall} userId={userId} onSyncStudyPlan={handleSyncStudyPlan} />
           </div>
+        ) : activeTab === 'plan' ? (
+          <PlanTab course={course} gradeData={gradeData} dot={dot} onSave={handleSaveGradeData} />
         ) : (
           // Setup empty state
           <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 40, textAlign: 'center' }}>
