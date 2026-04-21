@@ -325,12 +325,14 @@ function AddCoursePanel({ courseCount, onClose, onAdd }) {
   const [targetGrade, setTargetGrade] = useState('A')
   const [color, setColor] = useState(COURSE_COLORS[courseCount % COURSE_COLORS.length])
   const [classSchedule, setClassSchedule] = useState(null)
+  const [syllabusFile, setSyllabusFile] = useState(null)
+  const [syllabusOpen, setSyllabusOpen] = useState(false)
+  const syllabusRef = useRef(null)
   const [error, setError] = useState('')
 
   const handleAdd = () => {
     if (!name.trim()) { setError('Enter a course name'); return }
-    if (!examDate) { setError('Select an exam/finals date'); return }
-    if (examDate <= todayStr) { setError('Exam date must be in the future'); return }
+    if (examDate && examDate <= todayStr) { setError('Exam date must be in the future'); return }
     const colorObj = { name: 'custom', dot: color }
     const courseId = Date.now().toString(36) + Math.random().toString(36).slice(2, 5)
     onAdd({ id: courseId, name: name.trim(), code: code.trim(), examDate, difficulty, targetGrade, color: colorObj, classSchedule: classSchedule || undefined })
@@ -371,7 +373,7 @@ function AddCoursePanel({ courseCount, onClose, onAdd }) {
 
           {/* Exam date */}
           <div>
-            <Label>Exam / finals date <span style={{ color: D.orange }}>*</span></Label>
+            <Label>Exam / finals date <span style={{ color: D.dim, fontWeight: 400 }}>(optional)</span></Label>
             <input type="date" className="cv-input" value={examDate} min={todayStr} onChange={e => { setExamDate(e.target.value); setError('') }} />
           </div>
 
@@ -390,6 +392,26 @@ function AddCoursePanel({ courseCount, onClose, onAdd }) {
             <div><Label>Difficulty</Label><SegmentedControl options={DIFFICULTY_LABELS} value={difficulty} onChange={setDifficulty} /></div>
             <div><Label>Target grade</Label><SegmentedControl options={GRADE_OPTIONS} value={targetGrade} onChange={setTargetGrade} /></div>
           </div>
+
+          {/* Import syllabus */}
+          <input ref={syllabusRef} type="file" accept=".pdf,.docx,.png,.jpg" style={{ display: 'none' }} onChange={e => { if (e.target.files[0]) setSyllabusFile(e.target.files[0]) }} />
+          <AddonToggle
+            active={syllabusOpen}
+            onToggle={() => { setSyllabusOpen(x => !x); if (syllabusFile && syllabusOpen) setSyllabusFile(null) }}
+            icon="file" color="#6366f1"
+            title="Import syllabus"
+            subtitle="Drop a PDF or paste a link — we'll extract dates, weights, and topics"
+          >
+            {syllabusOpen && (
+              <div style={{ padding: '12px 14px 14px', borderTop: `1px solid ${D.border}`, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <button onClick={() => syllabusRef.current?.click()} style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', color: D.text, fontSize: 13, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <Icon name="upload" size={14} color={D.indigo} />
+                  {syllabusFile ? syllabusFile.name : 'Choose file (PDF, DOCX, image)'}
+                </button>
+                <div style={{ fontSize: 11.5, color: D.dim }}>You can also import after adding the course from the Courses page.</div>
+              </div>
+            )}
+          </AddonToggle>
 
           {/* Class schedule */}
           <ClassScheduleSection value={classSchedule} onChange={setClassSchedule} />
@@ -418,11 +440,13 @@ function EditCoursePanel({ course, onClose, onSave }) {
   const [targetGrade, setTargetGrade] = useState(course.targetGrade)
   const [color, setColor] = useState(course.color?.dot || COURSE_COLORS[0])
   const [classSchedule, setClassSchedule] = useState(course.classSchedule ?? null)
+  const [syllabusFile, setSyllabusFile] = useState(null)
+  const [syllabusOpen, setSyllabusOpen] = useState(false)
+  const syllabusRef = useRef(null)
   const [error, setError] = useState('')
 
   const handleSave = () => {
     if (!name.trim()) { setError('Enter a course name'); return }
-    if (!examDate) { setError('Select an exam/finals date'); return }
     const colorObj = { ...course.color, dot: color }
     onSave({ ...course, name: name.trim(), code: code.trim(), examDate, difficulty, targetGrade, color: colorObj, classSchedule: classSchedule || undefined })
     onClose()
@@ -454,7 +478,7 @@ function EditCoursePanel({ course, onClose, onSave }) {
             </div>
           </div>
           <div>
-            <Label>Exam / finals date</Label>
+            <Label>Exam / finals date <span style={{ color: D.dim, fontWeight: 400 }}>(optional)</span></Label>
             <input type="date" className="cv-input" value={examDate} onChange={e => { setExamDate(e.target.value); setError('') }} />
           </div>
           <div>
@@ -469,6 +493,24 @@ function EditCoursePanel({ course, onClose, onSave }) {
             <div><Label>Difficulty</Label><SegmentedControl options={DIFFICULTY_LABELS} value={difficulty} onChange={setDifficulty} /></div>
             <div><Label>Target grade</Label><SegmentedControl options={GRADE_OPTIONS} value={targetGrade} onChange={setTargetGrade} /></div>
           </div>
+          <input ref={syllabusRef} type="file" accept=".pdf,.docx,.png,.jpg" style={{ display: 'none' }} onChange={e => { if (e.target.files[0]) setSyllabusFile(e.target.files[0]) }} />
+          <AddonToggle
+            active={syllabusOpen}
+            onToggle={() => { setSyllabusOpen(x => !x); if (syllabusFile && syllabusOpen) setSyllabusFile(null) }}
+            icon="file" color="#6366f1"
+            title="Import syllabus"
+            subtitle="Drop a PDF or paste a link — we'll extract dates, weights, and topics"
+          >
+            {syllabusOpen && (
+              <div style={{ padding: '12px 14px 14px', borderTop: `1px solid ${D.border}`, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                <button onClick={() => syllabusRef.current?.click()} style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', color: D.text, fontSize: 13, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <Icon name="upload" size={14} color={D.indigo} />
+                  {syllabusFile ? syllabusFile.name : 'Choose file (PDF, DOCX, image)'}
+                </button>
+                <div style={{ fontSize: 11.5, color: D.dim }}>You can also import after adding the course from the Courses page.</div>
+              </div>
+            )}
+          </AddonToggle>
           <ClassScheduleSection value={classSchedule} onChange={setClassSchedule} />
           {error && <div style={{ fontSize: 12, color: '#f87171', padding: '8px 12px', background: 'rgba(239,68,68,0.08)', borderRadius: 8, border: '1px solid rgba(239,68,68,0.2)' }}>{error}</div>}
         </div>
