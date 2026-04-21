@@ -321,11 +321,10 @@ function ImportBand({ onImportSyllabus }) {
       <ImportCard
         icon="calendar" color="#8b5cf6" eyebrow="Sync calendar"
         title="Import class schedule"
-        desc="Connect Google Calendar or upload an .ics: we'll sync to your Schedule."
+        desc="Upload an .ics file to sync your class schedule."
         accept=".ics"
         onFile={() => {}}
         gradient="linear-gradient(155deg, rgba(139,92,246,0.14) 0%, rgba(139,92,246,0.04) 45%, #0a0a1e 100%)"
-        secondary={{ label: 'Connect Google Calendar', icon: 'sync' }}
       />
     </div>
   )
