@@ -169,13 +169,6 @@ export default function DashboardView({
   const streak = currentStreak
   const [aiBriefDismissed, setAiBriefDismissed] = useState(false)
   const [sessionIdx, setSessionIdx] = useState(0)
-  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
-  useEffect(() => {
-    const handler = () => setIsMobile(window.innerWidth < 768)
-    window.addEventListener('resize', handler)
-    return () => window.removeEventListener('resize', handler)
-  }, [])
-
   // Celebration
   const allCompleteKey = todayStr + (allComplete ? '-done' : '')
   const firedRef = useRef(null)
@@ -362,8 +355,23 @@ export default function DashboardView({
     <div style={{ minHeight: '100vh', background: D.bg, overflowY: 'auto',
       backgroundImage: `radial-gradient(1200px 600px at 85% -10%, rgba(99,102,241,0.10), transparent 60%), radial-gradient(900px 500px at 10% 110%, rgba(99,102,241,0.05), transparent 60%)`,
     }}>
+      <style>{`
+        @media (max-width: 767px) {
+          .dash-header { padding: 20px 18px 6px !important; }
+          .dash-grid { grid-template-columns: 1fr !important; padding: 12px 16px 48px !important; gap: 12px !important; }
+          .dash-grid > * { grid-column: auto !important; }
+          .dash-course-row { grid-template-columns: 4px 1fr auto !important; gap: 10px !important; }
+          .dash-course-progress, .dash-course-due, .dash-course-open { display: none !important; }
+          .dash-course-status-m { display: inline-flex !important; }
+          .dash-radar-row { grid-template-columns: 3px 1fr auto auto !important; gap: 10px !important; }
+          .dash-radar-date { display: none !important; }
+          .dash-weekly-inner { flex-direction: column !important; align-items: center !important; }
+          .dash-weekly-stats { width: 100% !important; }
+          .dash-brief-inner { flex-direction: column !important; }
+        }
+      `}</style>
       {/* Header */}
-      <div style={{ padding: isMobile ? '20px 18px 6px' : '28px 32px 8px' }}>
+      <div className="dash-header" style={{ padding: '28px 32px 8px' }}>
         <div style={{ fontSize: 12, color: D.textDim, letterSpacing: '0.03em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: D.green, boxShadow: `0 0 8px ${D.green}` }} />
           {formatDateHeader(todayStr).toUpperCase()}
@@ -377,11 +385,11 @@ export default function DashboardView({
       </div>
 
       {/* Grid */}
-      <div style={{ padding: isMobile ? '12px 16px 48px' : '24px 32px 48px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(12, 1fr)', gap: isMobile ? 12 : 16 }}>
+      <div className="dash-grid" style={{ padding: '24px 32px 48px', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
 
         {/* ── UP NEXT (span 8) ── */}
         <div style={{
-          gridColumn: isMobile ? undefined : 'span 8',
+          gridColumn: 'span 8',
           background: D.bgCard,
           border: `1px solid ${D.border}`,
           borderRadius: 14,
@@ -501,7 +509,7 @@ export default function DashboardView({
         </div>
 
         {/* ── QUICK ACTIONS (span 4) ── */}
-        <Card style={{ gridColumn: isMobile ? undefined : 'span 4', padding: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <Card style={{ gridColumn: 'span 4', padding: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <SectionHeader style={{ marginBottom: 12 }}>Quick actions</SectionHeader>
           <div style={{ marginBottom: 12 }} />
           {[
@@ -541,7 +549,7 @@ export default function DashboardView({
             overflow: 'hidden',
           }}>
             <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(600px 180px at 8% 0%, rgba(99,102,241,0.22), transparent 60%), radial-gradient(500px 160px at 95% 100%, rgba(139,92,246,0.14), transparent 60%)' }} />
-            <div style={{ position: 'relative', display: 'flex', alignItems: isMobile ? 'stretch' : 'flex-start', flexDirection: isMobile ? 'column' : 'row', gap: 18 }}>
+            <div className="dash-brief-inner" style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: 18 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -575,7 +583,7 @@ export default function DashboardView({
         )}
 
         {/* ── COURSES (span 6) ── */}
-        <HoverCard gridColumn={isMobile ? undefined : 'span 6'} onClick={onNavigateToCourses} style={{ padding: 20 }}>
+        <HoverCard gridColumn="span 6" onClick={onNavigateToCourses} style={{ padding: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
             <SectionHeader>Courses</SectionHeader>
             <div style={{ flex: 1 }} />
@@ -598,10 +606,9 @@ export default function DashboardView({
             const pillBorder = onTrack ? 'rgba(129,140,248,0.3)' : 'rgba(244,114,182,0.3)'
 
             return (
-              <div key={idx} style={{
-                display: 'grid',
-                gridTemplateColumns: isMobile ? '4px 1fr auto' : '4px 1fr 200px auto 60px',
-                gap: isMobile ? 10 : 14, alignItems: 'center',
+              <div key={idx} className="dash-course-row" style={{
+                display: 'grid', gridTemplateColumns: '4px 1fr 200px auto 60px',
+                gap: 14, alignItems: 'center',
                 padding: '12px 0',
                 borderBottom: idx < courses.length - 1 ? `1px solid ${D.border}` : 'none',
               }}>
@@ -612,31 +619,13 @@ export default function DashboardView({
                     {lastLabel ? `Last session ${lastLabel}` : 'No sessions yet'}
                   </div>
                 </div>
-                {!isMobile && (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2, overflow: 'hidden' }}>
-                      <div style={{ width: `${prog.pct}%`, height: '100%', background: color, opacity: 0.85 }} />
-                    </div>
-                    <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: D.textMuted, width: 32, textAlign: 'right' }}>{prog.pct}%</span>
-                    <span style={{
-                      display: 'inline-flex', alignItems: 'center', gap: 5,
-                      fontSize: 10.5, fontWeight: 500, color: pillColor,
-                      background: pillBg, border: `1px solid ${pillBorder}`,
-                      padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
-                    }}>
-                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: pillColor }} />
-                      {onTrack ? 'On track' : 'Behind'}
-                    </span>
+                <div className="dash-course-progress" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2, overflow: 'hidden' }}>
+                    <div style={{ width: `${prog.pct}%`, height: '100%', background: color, opacity: 0.85 }} />
                   </div>
-                )}
-                {!isMobile && (
-                  <div style={{ fontSize: 11.5, color: D.textMuted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>
-                    {dueNext ?? ''}
-                  </div>
-                )}
-                {isMobile ? (
+                  <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: D.textMuted, width: 32, textAlign: 'right' }}>{prog.pct}%</span>
                   <span style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 4,
+                    display: 'inline-flex', alignItems: 'center', gap: 5,
                     fontSize: 10.5, fontWeight: 500, color: pillColor,
                     background: pillBg, border: `1px solid ${pillBorder}`,
                     padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
@@ -644,16 +633,26 @@ export default function DashboardView({
                     <span style={{ width: 5, height: 5, borderRadius: '50%', background: pillColor }} />
                     {onTrack ? 'On track' : 'Behind'}
                   </span>
-                ) : (
-                  <span style={{ fontSize: 11.5, color: D.textMuted, textAlign: 'right' }}>Open →</span>
-                )}
+                </div>
+                <div className="dash-course-due" style={{ fontSize: 11.5, color: D.textMuted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>
+                  {dueNext ?? ''}
+                </div>
+                <span className="dash-course-open" style={{ fontSize: 11.5, color: D.textMuted, textAlign: 'right' }}>Open →</span>
+                <span className="dash-course-status-m" style={{ display: 'none', alignItems: 'center', gap: 4,
+                  fontSize: 10.5, fontWeight: 500, color: pillColor,
+                  background: pillBg, border: `1px solid ${pillBorder}`,
+                  padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
+                }}>
+                  <span style={{ width: 5, height: 5, borderRadius: '50%', background: pillColor }} />
+                  {onTrack ? 'On track' : 'Behind'}
+                </span>
               </div>
             )
           })}
         </HoverCard>
 
         {/* ── WEEKLY OVERVIEW (span 6) ── */}
-        <HoverCard gridColumn={isMobile ? undefined : 'span 6'} onClick={onNavigateToProgress} style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
+        <HoverCard gridColumn="span 6" onClick={onNavigateToProgress} style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <div>
               <SectionHeader>This week</SectionHeader>
@@ -667,7 +666,7 @@ export default function DashboardView({
               {onPace ? 'ON PACE' : 'BEHIND'}
             </div>
           </div>
-          <div style={{ flex: 1, display: 'flex', alignItems: isMobile ? 'center' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: 28 }}>
+          <div className="dash-weekly-inner" style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 28 }}>
             {/* Donut — bigger */}
             <div style={{ position: 'relative', width: 148, height: 148, flexShrink: 0 }}>
               {(() => {
@@ -692,7 +691,7 @@ export default function DashboardView({
               </div>
             </div>
             {/* Stats */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
+            <div className="dash-weekly-stats" style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 16, minWidth: 0 }}>
               {[
                 { label: 'Current streak', value: streak, unit: streak === 1 ? 'day' : 'days', trend: `+${streak}`, icon: <IcoFlame />, accent: D.amber },
                 { label: 'Hours studied', value: weekHours, unit: 'hrs', trend: deltaHours >= 0 ? `+${deltaHours}` : `${deltaHours}`, icon: <IcoClock />, accent: D.accent },
@@ -725,7 +724,7 @@ export default function DashboardView({
 
         {/* ── DEADLINE RADAR (span 7) ── */}
         {upcomingDeadlines.length > 0 && (
-          <HoverCard gridColumn={isMobile ? undefined : 'span 7'} onClick={onNavigateToCalendar} style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
+          <HoverCard gridColumn="span 7" onClick={onNavigateToCalendar} style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
               <div>
                 <SectionHeader>Deadline radar</SectionHeader>
@@ -770,10 +769,9 @@ export default function DashboardView({
                 const days = daysBetween(todayStr, evt.date)
                 const uc = urgencyColor(days)
                 return (
-                  <div key={evt.id ?? i} style={{
-                    display: 'grid',
-                    gridTemplateColumns: isMobile ? '3px 1fr auto auto' : '3px 1fr 90px 50px 60px',
-                    gap: isMobile ? 10 : 12, alignItems: 'center',
+                  <div key={evt.id ?? i} className="dash-radar-row" style={{
+                    display: 'grid', gridTemplateColumns: '3px 1fr 90px 50px 60px',
+                    gap: 12, alignItems: 'center',
                     padding: '9px 0',
                     borderBottom: i < upcomingDeadlines.length - 1 ? `1px solid ${D.border}` : 'none',
                   }}>
@@ -782,9 +780,7 @@ export default function DashboardView({
                       <div style={{ fontSize: 13, fontWeight: 500, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{clean(evt.name)}</div>
                       <div style={{ fontSize: 11, color: D.textDim, marginTop: 1 }}>{clean(evt.courseName)}</div>
                     </div>
-                    {!isMobile && (
-                      <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: D.textMuted, whiteSpace: 'nowrap' }}>{formatShortDate(evt.date)}</div>
-                    )}
+                    <div className="dash-radar-date" style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: D.textMuted, whiteSpace: 'nowrap' }}>{formatShortDate(evt.date)}</div>
                     <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, color: uc, fontWeight: 600, whiteSpace: 'nowrap' }}>{days}d</div>
                     <div style={{
                       fontSize: 10, fontWeight: 500, color: uc,
@@ -801,7 +797,7 @@ export default function DashboardView({
 
         {/* ── AI COACH RECOMMENDATION (span 5) ── */}
         <div style={{
-          gridColumn: isMobile ? undefined : (upcomingDeadlines.length > 0 ? 'span 5' : 'span 12'),
+          gridColumn: upcomingDeadlines.length > 0 ? 'span 5' : 'span 12',
           background: 'linear-gradient(155deg, rgba(99,102,241,0.14) 0%, rgba(99,102,241,0.04) 45%, #0a0a1e 100%)',
           border: '1px solid rgba(99,102,241,0.28)',
           borderRadius: 14, padding: 20,
