@@ -352,7 +352,7 @@ export default function App() {
           boxShadow: '0 8px 32px rgba(0,0,0,0.5)', zIndex: 9999, whiteSpace: 'nowrap',
         }}>
           <span style={{ fontSize: 18 }}>🎉</span>
-          <span style={{ color: '#f1f5f9', fontSize: 14, fontWeight: 600 }}>You're on the plan — welcome!</span>
+          <span style={{ color: '#f1f5f9', fontSize: 14, fontWeight: 600 }}>You're on the plan, welcome!</span>
           <button
             onClick={() => setCheckoutSuccess(false)}
             style={{ marginLeft: 8, background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}

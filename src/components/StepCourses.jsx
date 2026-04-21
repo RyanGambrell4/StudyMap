@@ -193,7 +193,7 @@ export default function StepCourses({ courses, setCourses, yearLevel, setYearLev
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="text-sm font-semibold text-slate-200">Import syllabus</div>
-                  <div className="text-xs text-slate-500 mt-0.5">Drop a PDF or paste a link — we'll extract dates, weights, and topics</div>
+                  <div className="text-xs text-slate-500 mt-0.5">Drop a PDF or paste a link: we'll extract dates, weights, and topics</div>
                 </div>
                 <div className={`w-8 h-5 rounded-full relative transition-all shrink-0 ${syllabusOpen ? 'bg-indigo-500' : 'bg-slate-700'}`} style={{ boxShadow: syllabusOpen ? '0 0 10px rgba(99,102,241,0.5)' : 'none' }}>
                   <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-all ${syllabusOpen ? 'left-3.5' : 'left-0.5'}`} />

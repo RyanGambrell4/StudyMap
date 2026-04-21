@@ -88,7 +88,7 @@ function PageHeader({ step }) {
         <span style={{ marginLeft: 12, fontSize: 12.5, fontWeight: 500, color: D.indigo, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', padding: '4px 10px', borderRadius: 999, verticalAlign: 'middle' }}>Step {step}/3</span>
       </h1>
       <p style={{ margin: '6px 0 2px', fontSize: 14, color: D.muted, maxWidth: 680 }}>
-        Built only from what <em>you</em> tell me — I won't invent topics, dates, or facts. The more you share, the sharper your plan.
+        Built only from what <em>you</em> tell me. I won't invent topics, dates, or facts. The more you share, the sharper your plan.
       </p>
       <p style={{ margin: 0, fontSize: 13, color: D.indigo, fontWeight: 500 }}>
         Be as specific as possible for the best experience.
@@ -251,7 +251,7 @@ function CoachRail({ form, confidence, course }) {
         </div>
         <div style={{ fontSize: 12.5, color: D.text, lineHeight: 1.55, position: 'relative' }}>
           {!form.courseId && form.courseIdx === undefined ? (
-            <>Pick a course above to get started — I'll only plan for what you confirm.</>
+            <>Pick a course above to get started. I'll only plan for what you confirm.</>
           ) : !form.goal?.trim() && !topics.length ? (
             <>Great, <strong>{course?.name}</strong>. Now tell me your goal or list topics your professor emphasizes. <span style={{ color: D.dim }}>I won't add any I don't see from you.</span></>
           ) : (
@@ -273,7 +273,7 @@ function CoachRail({ form, confidence, course }) {
         <div style={{ marginTop: 12, fontSize: 11.5, color: D.muted, lineHeight: 1.45 }}>
           {confidence < 3 && 'A solid plan needs 3+ inputs. Add topics or a goal.'}
           {confidence >= 3 && confidence < 6 && 'Good foundation. Adding dates and materials sharpens week-by-week pacing.'}
-          {confidence >= 6 && 'Strong inputs — the plan will be specific and grounded in what you shared.'}
+          {confidence >= 6 && 'Strong inputs: the plan will be specific and grounded in what you shared.'}
         </div>
       </div>
 
@@ -331,7 +331,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
             <Icon name="bookmark" size={14} color={D.indigo} />
             <div style={{ fontSize: 12.5, color: D.indigo }}>
               <span style={{ fontWeight: 600 }}>Topics flagged from AI Tutor: </span>
-              {cachedStruggles.join(', ')} — these will be emphasized in your plan.
+              {cachedStruggles.join(', ')}: these will be emphasized in your plan.
             </div>
           </div>
         )}
@@ -343,22 +343,22 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
         </FieldBlock>
 
         {/* Topics */}
-        <FieldBlock icon="target" color={D.indigo} label="Topics your professor emphasizes" hint="Chapters, concepts, or themes — only what you actually know from lectures or the syllabus.">
+        <FieldBlock icon="target" color={D.indigo} label="Topics your professor emphasizes" hint="Chapters, concepts, or themes - only what you actually know from lectures or the syllabus.">
           <ChipInput values={form.topics || []} onChange={v => update('topics', v)} placeholder="e.g. Memory encoding, Cognitive biases, Research methods…" />
         </FieldBlock>
 
         {/* Strengths / Struggles */}
         <div className="sc-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <FieldBlock icon="check" color={D.mint} label="What feels solid" hint="Optional — topics you're comfortable with">
+          <FieldBlock icon="check" color={D.mint} label="What feels solid" hint="Optional: topics you're comfortable with">
             <textarea className="sc-input" value={form.strengths || ''} onChange={e => update('strengths', e.target.value)} placeholder={`e.g. "Chapter 1–3 readings, classical conditioning"`} />
           </FieldBlock>
-          <FieldBlock icon="warn" color={D.orange} label="What you're struggling with" hint="Optional — where I should spend extra time">
+          <FieldBlock icon="warn" color={D.orange} label="What you're struggling with" hint="Optional: where I should spend extra time">
             <textarea className="sc-input" value={form.struggles || ''} onChange={e => update('struggles', e.target.value)} placeholder={`e.g. "Statistical significance, research design"`} />
           </FieldBlock>
         </div>
 
         {/* Dates */}
-        <FieldBlock icon="calendar" color={D.violet} label="Upcoming deadlines" hint="Exam, quiz, or project dates — add them and I'll anchor the plan around them.">
+        <FieldBlock icon="calendar" color={D.violet} label="Upcoming deadlines" hint="Exam, quiz, or project dates. Add them and I'll anchor the plan around them.">
           {dates.length === 0 && (
             <div style={{ fontSize: 12.5, color: D.dim, fontStyle: 'italic', marginBottom: 8 }}>None yet. The plan will simply cover the weeks you tell me to.</div>
           )}
@@ -377,7 +377,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
         </FieldBlock>
 
         {/* Materials */}
-        <FieldBlock icon="file" color={D.cyan} label="Course materials" hint="Syllabus, notes, readings — optional but makes everything sharper.">
+        <FieldBlock icon="file" color={D.cyan} label="Course materials" hint="Syllabus, notes, readings - optional but makes everything sharper.">
           <FileDropZone
             files={form.materials || []}
             onChange={v => typeof v === 'function' ? setForm(f => ({ ...f, materials: v(f.materials || []) })) : update('materials', v)}
@@ -411,7 +411,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
         </div>
 
         {/* Learning style */}
-        <FieldBlock icon="lightbulb" color={D.mint} label="How you learn best" hint="Pick any that apply — I'll lean into them.">
+        <FieldBlock icon="lightbulb" color={D.mint} label="How you learn best" hint="Pick any that apply. I'll lean into them.">
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {['Active recall','Spaced repetition','Practice problems','Teaching others','Visual diagrams','Reading + notes','Flashcards','Watching lectures'].map(t => {
               const list = form.style || []
@@ -484,7 +484,7 @@ function CoachQuestion({ n, question, form, setForm, field }) {
           <button onClick={() => setAnswered(true)} style={{ padding: '0 12px', borderRadius: 8, flexShrink: 0, color: D.dim, fontSize: 12, cursor: 'pointer' }}>Skip</button>
         </div>
       )}
-      {answered && <div style={{ fontSize: 11.5, color: D.mint, marginLeft: 32, marginTop: 4 }}>{draft.trim() ? 'Saved' : 'Skipped — noted'}</div>}
+      {answered && <div style={{ fontSize: 11.5, color: D.mint, marginLeft: 32, marginTop: 4 }}>{draft.trim() ? 'Saved' : 'Skipped, noted'}</div>}
     </div>
   )
 }
@@ -498,7 +498,7 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
 
   const questions = []
   if (!form.goal?.trim()) questions.push({ id: 'goal', q: "You didn't specify a target grade or goal. What does success look like?", field: 'goal' })
-  if (!topics.length) questions.push({ id: 'topics', q: "I don't have any topics yet. Even one or two helps — what's on the exam or being covered?", field: 'topics-chip' })
+  if (!topics.length) questions.push({ id: 'topics', q: "I don't have any topics yet. Even one or two helps. What's on the exam or being covered?", field: 'topics-chip' })
   if (!form.struggles?.trim()) questions.push({ id: 'struggle', q: "Nothing noted for struggles. Is there a topic where you'd like extra reps?", field: 'struggles' })
 
   return (
@@ -547,9 +547,9 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
           <div style={{ background: 'linear-gradient(155deg, rgba(99,102,241,0.1) 0%, rgba(99,102,241,0.03) 50%, #0a0a1e 100%)', border: '1px solid rgba(99,102,241,0.28)', borderRadius: 14, padding: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <Icon name="msg" size={14} color={D.indigo} />
-              <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', color: D.indigo, textTransform: 'uppercase' }}>Before I build — a few gaps</span>
+              <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', color: D.indigo, textTransform: 'uppercase' }}>Before I build: a few gaps</span>
             </div>
-            <div style={{ fontSize: 12.5, color: D.muted, marginBottom: 16 }}>You can skip any of these — the plan will just note they weren't provided.</div>
+            <div style={{ fontSize: 12.5, color: D.muted, marginBottom: 16 }}>You can skip any of these. The plan will just note they weren't provided.</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
               {questions.map((q, i) => <CoachQuestion key={q.id} n={i+1} question={q.q} form={form} setForm={setForm} field={q.field} />)}
             </div>
@@ -568,7 +568,7 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
                 Building your plan…
               </>
             ) : (
-              <><Icon name="sparkles" size={14} /> Build my plan — only from what I've shared</>
+              <><Icon name="sparkles" size={14} /> Build my plan, only from what I've shared</>
             )}
           </button>
         </div>
@@ -1004,8 +1004,8 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
       {plan.priorityTopics?.length > 0 && (
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '16px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>What You'll Master — Your {plan.priorityTopics.length} Topic{plan.priorityTopics.length !== 1 ? 's' : ''}</span>
-            {struggles && <span style={{ fontSize: 11, color: D.dim }}>From your list — nothing added</span>}
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>What You'll Master: Your {plan.priorityTopics.length} Topic{plan.priorityTopics.length !== 1 ? 's' : ''}</span>
+            {struggles && <span style={{ fontSize: 11, color: D.dim }}>From your list, nothing added</span>}
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
             {plan.priorityTopics.map((topic, i) => {
@@ -1028,7 +1028,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
       {struggles && (
         <div style={{ background: 'rgba(249,115,22,0.06)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 14, padding: '14px 18px' }}>
           <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', color: D.orange, textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Icon name="warn" size={12} color={D.orange} /> Where I'll Spend Extra Time — From Your Struggles
+            <Icon name="warn" size={12} color={D.orange} /> Where I'll Spend Extra Time: From Your Struggles
           </div>
           <div style={{ fontSize: 13, color: D.muted, lineHeight: 1.5, fontStyle: 'italic' }}>"{struggles}"</div>
         </div>
@@ -1157,7 +1157,7 @@ function SessionCard({ session, wi, si, checked, onCheck, struggles }) {
         )}
         {isStruggle && (
           <span style={{ fontSize: 10.5, color: D.orange, background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.25)', borderRadius: 5, padding: '2px 8px', display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
-            <Icon name="zap" size={9} color={D.orange} /> Priority — matches your struggles
+            <Icon name="zap" size={9} color={D.orange} /> Priority: matches your struggles
           </span>
         )}
       </div>

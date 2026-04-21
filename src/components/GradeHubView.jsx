@@ -285,7 +285,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
               {row.graded && <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.indigo }} />}
               {row.graded ? 'Graded' : 'Not yet'}
             </button>
-            <input className="gh-input" type="number" value={row.grade} placeholder="—" onChange={e => setRow(i, 'grade', e.target.value)} disabled={!row.graded} style={{ width: '100%', opacity: row.graded ? 1 : 0.4 }} />
+            <input className="gh-input" type="number" value={row.grade} placeholder="-" onChange={e => setRow(i, 'grade', e.target.value)} disabled={!row.graded} style={{ width: '100%', opacity: row.graded ? 1 : 0.4 }} />
             <button onClick={() => removeRow(i)} style={{ width: 28, height: 28, borderRadius: 6, color: D.dim, display: 'grid', placeItems: 'center', cursor: 'pointer', transition: 'all 0.15s' }}
               onMouseEnter={e => { e.currentTarget.style.background = 'rgba(244,114,182,0.1)'; e.currentTarget.style.color = D.pink }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = D.dim }}>
@@ -331,7 +331,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
             <div>
               <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase' }}>To hit {targetLabel}, here's what you need</div>
               <div style={{ fontSize: 13, color: D.text, marginTop: 3 }}>
-                You need an average of <span style={{ color: D.indigo, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>{neededInfo.needed != null ? neededInfo.needed.toFixed(1) + '%' : '—'}</span> on remaining work
+                You need an average of <span style={{ color: D.indigo, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>{neededInfo.needed != null ? neededInfo.needed.toFixed(1) + '%' : '-'}</span> on remaining work
               </div>
             </div>
           </div>
@@ -344,7 +344,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
                   <div style={{ fontSize: 11, color: D.dim, marginTop: 1 }}>Worth <span style={{ fontFamily: 'ui-monospace, monospace' }}>{c.weight}%</span> of final grade</div>
                 </div>
                 <div style={{ padding: '5px 11px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: D.mint, fontSize: 12, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>
-                  {neededInfo.needed != null ? neededInfo.needed.toFixed(1) + '%' : '—'}
+                  {neededInfo.needed != null ? neededInfo.needed.toFixed(1) + '%' : '-'}
                 </div>
               </div>
             ))}
@@ -451,7 +451,7 @@ function TrackTab({ course, gradeData, dot, onSave }) {
             <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 8 }}>Current grade</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
               <span style={{ fontSize: 64, fontWeight: 800, letterSpacing: -2, lineHeight: 1, background: `linear-gradient(135deg, ${lc}, ${lc}cc)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontFamily: 'ui-monospace, monospace' }}>
-                {currentGrade !== null ? currentGrade.toFixed(1) : '—'}
+                {currentGrade !== null ? currentGrade.toFixed(1) : '-'}
               </span>
               <span style={{ fontSize: 22, fontWeight: 500, color: D.muted }}>%</span>
               <span style={{ fontSize: 28, fontWeight: 700, color: lc, marginLeft: 8 }}>{ltr}</span>
@@ -463,7 +463,7 @@ function TrackTab({ course, gradeData, dot, onSave }) {
             </div>
           ) : needed.needed !== null && needed.needed > 90 ? (
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 999, background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', color: D.orange, fontSize: 13, fontWeight: 600 }}>
-              ⚡ Possible but tough — need {needed.needed.toFixed(0)}%+ avg
+              ⚡ Possible but tough, need {needed.needed.toFixed(0)}%+ avg
             </div>
           ) : (
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: D.mint, fontSize: 13, fontWeight: 600 }}>
@@ -515,7 +515,7 @@ function TrackTab({ course, gradeData, dot, onSave }) {
                 {localGraded[c.id] && <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.indigo }} />}
                 {localGraded[c.id] ? 'Graded' : 'Pending'}
               </button>
-              <input type="number" value={localGrades[c.id]} onChange={e => setGrade(c.id, e.target.value)} placeholder="—" className="gh-input"
+              <input type="number" value={localGrades[c.id]} onChange={e => setGrade(c.id, e.target.value)} placeholder="-" className="gh-input"
                 style={{ width: 66, textAlign: 'center', color: c.grade != null ? letterColor(letterGrade(parseFloat(localGrades[c.id]))) : D.dim }} />
             </div>
           )
@@ -606,7 +606,7 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
             <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 8 }}>Projected grade</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
               <span style={{ fontSize: 56, fontWeight: 800, letterSpacing: -2, lineHeight: 1, background: `linear-gradient(135deg, ${lc}, ${lc}cc)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontFamily: 'ui-monospace, monospace' }}>
-                {projected !== null ? projected.toFixed(1) : '—'}
+                {projected !== null ? projected.toFixed(1) : '-'}
               </span>
               <span style={{ fontSize: 20, color: D.muted }}>%</span>
               <span style={{ fontSize: 26, fontWeight: 700, color: lc, marginLeft: 8 }}>{ltr}</span>
@@ -731,7 +731,7 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
                           const score = s.overrides[c.id]
                           const isMax = score === max && max !== min
                           const isMin = score === min && max !== min
-                          return <td key={s.name} style={{ padding: '10px 16px', textAlign: 'center', fontWeight: 700, fontFamily: 'ui-monospace, monospace', color: isMax ? D.mint : isMin ? D.pink : D.muted }}>{score?.toFixed(0) ?? '—'}%</td>
+                          return <td key={s.name} style={{ padding: '10px 16px', textAlign: 'center', fontWeight: 700, fontFamily: 'ui-monospace, monospace', color: isMax ? D.mint : isMin ? D.pink : D.muted }}>{score?.toFixed(0) ?? '-'}%</td>
                         })}
                       </tr>
                     )
@@ -851,8 +851,8 @@ function RightRail({ course, gradeData, onShowPaywall, userId, onSyncStudyPlan }
           <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 14 }}>At a glance</div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {[
-              { label: 'Best grade',   value: bestGrade !== null ? bestGrade + '%' : '—',  color: D.mint   },
-              { label: 'Current avg',  value: curr !== null ? curr.toFixed(1) + '%' : '—', color: D.indigo },
+              { label: 'Best grade',   value: bestGrade !== null ? bestGrade + '%' : '-',  color: D.mint   },
+              { label: 'Current avg',  value: curr !== null ? curr.toFixed(1) + '%' : '-', color: D.indigo },
               { label: 'Graded items', value: `${graded.length} / ${components.length}`,   color: D.violet },
               { label: 'Target',       value: targetLabel,                                 color: D.sky    },
             ].map((s, i) => (
@@ -948,7 +948,7 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
           )}
         </h1>
         <p style={{ margin: '6px 0 0', fontSize: 14, color: D.muted, maxWidth: 640 }}>
-          Plan, track, and model every scenario for your final grade — one calculator per course.
+          Plan, track, and model every scenario for your final grade, one calculator per course.
         </p>
       </div>
 

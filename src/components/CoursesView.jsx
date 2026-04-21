@@ -313,7 +313,7 @@ function ImportBand({ onImportSyllabus }) {
       <ImportCard
         icon="file" color="#6366f1" eyebrow="Quick Import"
         title="Import syllabus"
-        desc="Drop a PDF or paste a link — we'll extract dates, weights, and topics."
+        desc="Drop a PDF or paste a link: we'll extract dates, weights, and topics."
         accept=".pdf,.docx,.png,.jpg"
         onFile={() => onImportSyllabus?.(null)}
         gradient="linear-gradient(155deg, rgba(99,102,241,0.14) 0%, rgba(99,102,241,0.04) 45%, #0a0a1e 100%)"
@@ -321,7 +321,7 @@ function ImportBand({ onImportSyllabus }) {
       <ImportCard
         icon="calendar" color="#8b5cf6" eyebrow="Sync calendar"
         title="Import class schedule"
-        desc="Connect Google Calendar or upload an .ics — we'll sync to your Schedule."
+        desc="Connect Google Calendar or upload an .ics: we'll sync to your Schedule."
         accept=".ics"
         onFile={() => {}}
         gradient="linear-gradient(155deg, rgba(139,92,246,0.14) 0%, rgba(139,92,246,0.04) 45%, #0a0a1e 100%)"
@@ -368,7 +368,7 @@ function AddCoursePanel({ courseCount, onClose, onAdd }) {
           </div>
           <div style={{ marginLeft: 12, flex: 1 }}>
             <div style={{ fontSize: 15, fontWeight: 600, color: D.text }}>New course</div>
-            <div style={{ fontSize: 12, color: D.muted, marginTop: 2 }}>Add the basics — syllabus and schedule can come later.</div>
+            <div style={{ fontSize: 12, color: D.muted, marginTop: 2 }}>Add the basics. Syllabus and schedule can come later.</div>
           </div>
           <button onClick={onClose} className="cv-icon-btn"><Icon name="x" size={13} /></button>
         </div>
@@ -416,7 +416,7 @@ function AddCoursePanel({ courseCount, onClose, onAdd }) {
             onToggle={() => { setSyllabusOpen(x => !x); if (syllabusFile && syllabusOpen) setSyllabusFile(null) }}
             icon="file" color="#6366f1"
             title="Import syllabus"
-            subtitle="Drop a PDF or paste a link — we'll extract dates, weights, and topics"
+            subtitle="Drop a PDF or paste a link: we'll extract dates, weights, and topics"
           >
             {syllabusOpen && (
               <div style={{ padding: '12px 14px 14px', borderTop: `1px solid ${D.border}`, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -515,7 +515,7 @@ function EditCoursePanel({ course, onClose, onSave }) {
             onToggle={() => { setSyllabusOpen(x => !x); if (syllabusFile && syllabusOpen) setSyllabusFile(null) }}
             icon="file" color="#6366f1"
             title="Import syllabus"
-            subtitle="Drop a PDF or paste a link — we'll extract dates, weights, and topics"
+            subtitle="Drop a PDF or paste a link: we'll extract dates, weights, and topics"
           >
             {syllabusOpen && (
               <div style={{ padding: '12px 14px 14px', borderTop: `1px solid ${D.border}`, display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -637,7 +637,7 @@ function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, gra
                     <span style={{ fontSize: 11, color: D.muted }}>{g.weight}%</span>
                     {g.loggedGrade !== null
                       ? <span style={{ fontWeight: 700, color: g.loggedGrade >= threshold ? D.mint : g.loggedGrade >= threshold - 10 ? D.amber : D.pink, minWidth: 40, textAlign: 'right' }}>{g.loggedGrade}%</span>
-                      : <span style={{ fontSize: 11, color: D.dim, minWidth: 40, textAlign: 'right' }}>—</span>
+                      : <span style={{ fontSize: 11, color: D.dim, minWidth: 40, textAlign: 'right' }}>-</span>
                     }
                   </div>
                 ))}
@@ -657,7 +657,7 @@ function CourseRow({ course, idx, expanded, onToggle, sessions, completedIds, sy
   const pct = sessions.length ? Math.round((completed / sessions.length) * 100) : 0
   const daysLeft = Math.round((new Date(course.examDate + 'T12:00:00') - new Date(todayStr + 'T12:00:00')) / 86400000)
   const [confirmDelete, setConfirmDelete] = useState(false)
-  const displayName = course.code ? `${course.code} — ${course.name}` : course.name
+  const displayName = course.code ? `${course.code}: ${course.name}` : course.name
 
   return (
     <div className="cv-row" style={{ border: `1px solid ${expanded ? color + '40' : D.border}` }}>
@@ -807,7 +807,7 @@ export default function CoursesView({
           </div>
           <h1 style={{ margin: 0, fontSize: 32, fontWeight: 700, letterSpacing: -0.8, color: D.text }}>Courses</h1>
           <p style={{ margin: '6px 0 0', fontSize: 14, color: D.muted, maxWidth: 640 }}>
-            Organize every class — pull in syllabi, schedules, and let the AI map your semester.
+            Organize every class: pull in syllabi, schedules, and let the AI map your semester.
           </p>
         </div>
         <button

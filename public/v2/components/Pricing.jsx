@@ -106,11 +106,11 @@ function Pricing(){
 
 function Testimonials(){
   const quotes = [
-    {t:"I've always struggled to stay consistent — StudyEdge just plans it for me. Seeing my hours and progress tracked has genuinely helped bring my grades up.", n:"Andy G.", r:"Undergraduate"},
-    {t:"If you want to stay mediocre at studying, don't use this. Scheduling, coaching, daily organization — it has everything you need to take your marks to the next level with less effort.", n:"Danny K.", r:"PhD Student"},
-    {t:"First AI study platform I can confidently say has it all. Week-by-week study plans, progress tracking, flashcards, quizzes — and it cuts all the prep time so you can just focus on actually learning.", n:"Charlotte B.", r:"University Student"},
+    {t:"I've always struggled to stay consistent. StudyEdge just plans it for me. Seeing my hours and progress tracked has genuinely helped bring my grades up.", n:"Andy G.", r:"Undergraduate"},
+    {t:"If you want to stay mediocre at studying, don't use this. Scheduling, coaching, daily organization: it has everything you need to take your marks to the next level with less effort.", n:"Danny K.", r:"PhD Student"},
+    {t:"First AI study platform I can confidently say has it all. Week-by-week study plans, progress tracking, flashcards, quizzes, and it cuts all the prep time so you can just focus on actually learning.", n:"Charlotte B.", r:"University Student"},
     {t:"It does an amazing job of meeting you where you're at and taking you where you want to go academically.", n:"Gavin D.", r:"Graduate Student"},
-    {t:"Right when you log in you see a beautifully structured dashboard that makes you want to get to work. Personalized schedule, flashcards, quizzes — there's so much you can do, how can you not be excited?", n:"Alex G.", r:"College Student"},
+    {t:"Right when you log in you see a beautifully structured dashboard that makes you want to get to work. Personalized schedule, flashcards, quizzes: there's so much you can do, how can you not be excited?", n:"Alex G.", r:"College Student"},
   ];
   return (
     <section className="testimonials">

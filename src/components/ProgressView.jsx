@@ -508,7 +508,7 @@ export default function ProgressView({ courses, allSessions, completedIds, today
           </div>
         </div>
         <p style={{ margin: 0, fontSize: 13, color: D.textMuted }}>
-          Your study momentum across {courses.length} course{courses.length !== 1 ? 's' : ''} — visualized.
+          Your study momentum across {courses.length} course{courses.length !== 1 ? 's' : ''}, visualized.
         </p>
       </div>
 

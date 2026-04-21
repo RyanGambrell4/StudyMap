@@ -549,7 +549,7 @@ export default function CalendarDayView({
               </svg>
               <div style={{ textAlign: 'center' }}>
                 <p style={{ color: tv.subtitleText, fontSize: 14, fontWeight: 600, margin: 0 }}>No sessions scheduled</p>
-                <p style={{ color: tv.timeText, fontSize: 12, marginTop: 4 }}>This day is free — enjoy it or add a session.</p>
+                <p style={{ color: tv.timeText, fontSize: 12, marginTop: 4 }}>This day is free. Enjoy it or add a session.</p>
               </div>
               {onAddSession && (
                 <button
