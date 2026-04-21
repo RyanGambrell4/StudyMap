@@ -90,12 +90,6 @@ function TutorView({ courses, userId, onShowPaywall }) {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const TARGET_THRESHOLDS = { A: 80, B: 70, C: 60, 'Pass/Fail': 50 }
 
-function gradeStatus(avg, threshold) {
-  if (avg >= threshold) return 'on-track'
-  if (avg >= threshold - 10) return 'at-risk'
-  return 'needs-recovery'
-}
-
 function addDays(date, n) {
   const d = new Date(date); d.setDate(d.getDate() + n); return d
 }
@@ -496,6 +490,15 @@ export default function OutputView({
 
   // ── persist ──
   useEffect(() => { onSavePlan(completedIds, assignments) }, [completedIds, assignments])
+
+  // Safety net: flush latest state to Supabase on hard browser close
+  const _pendingSave = useRef({ completedIds, assignments })
+  useEffect(() => { _pendingSave.current = { completedIds, assignments } }, [completedIds, assignments])
+  useEffect(() => {
+    const flush = () => onSavePlan(_pendingSave.current.completedIds, _pendingSave.current.assignments)
+    window.addEventListener('beforeunload', flush)
+    return () => window.removeEventListener('beforeunload', flush)
+  }, [onSavePlan])
   useEffect(() => { saveSyllabusEvents(syllabusEvents) }, [syllabusEvents])
   useEffect(() => { saveManualSessions(manualSessions) }, [manualSessions])
   useEffect(() => { localStorage.setItem('studymap_view_mode', viewMode) }, [viewMode])

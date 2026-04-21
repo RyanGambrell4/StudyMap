@@ -1,9 +1,20 @@
 import confetti from 'canvas-confetti'
-import { useCallback } from 'react'
+import { useCallback, useRef } from 'react'
+
+const todayStr = () => new Date().toISOString().split('T')[0]
 
 export function useCelebration() {
+  // Track light-confetti fires per day — resets automatically when date changes
+  const lightRef = useRef({ date: todayStr(), count: 0 })
+
   const celebrate = useCallback((level = 'medium') => {
     if (level === 'light') {
+      const today = todayStr()
+      if (lightRef.current.date !== today) {
+        lightRef.current = { date: today, count: 0 }
+      }
+      if (lightRef.current.count >= 2) return
+      lightRef.current.count++
       confetti({
         particleCount: 60,
         spread: 50,

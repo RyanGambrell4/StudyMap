@@ -22,6 +22,19 @@ export const config = {
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
 
+// ── Basic in-memory rate limit for checkout (per IP, 5 req / 60s) ─────────────
+const _checkoutRateMap = new Map()
+function checkoutRateLimit(ip) {
+  const now = Date.now()
+  const window = 60_000
+  const limit = 5
+  const entry = _checkoutRateMap.get(ip) ?? { count: 0, resetAt: now + window }
+  if (now > entry.resetAt) { entry.count = 0; entry.resetAt = now + window }
+  entry.count++
+  _checkoutRateMap.set(ip, entry)
+  return entry.count > limit
+}
+
 const supabaseAdmin = createClient(
   process.env.SUPABASE_URL,
   process.env.SUPABASE_SERVICE_KEY
@@ -142,6 +155,11 @@ export default async function handler(req, res) {
   }
 
   // ── Checkout session path ──────────────────────────────────────────────────
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() ?? 'unknown'
+  if (checkoutRateLimit(ip)) {
+    return res.status(429).json({ error: 'Too many requests. Please try again later.' })
+  }
+
   let body
   try {
     body = JSON.parse(rawBody.toString())

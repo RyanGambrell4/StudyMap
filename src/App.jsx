@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from './lib/supabase'
-import { initUserData, clearUserData, savePlan } from './lib/db'
+import { initUserData, clearUserData, savePlan, refreshSubscription } from './lib/db'
 import { getActivePlan, canAddCourse, createCheckoutSession } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
 import AuthScreen from './components/AuthScreen'
@@ -29,6 +29,9 @@ export default function App() {
   // ── Paywall state ──────────────────────────────────────────────────────────
   const [paywallOpen, setPaywallOpen]     = useState(false)
   const [paywallTrigger, setPaywallTrigger] = useState('courses')
+
+  // ── Checkout success banner ────────────────────────────────────────────────
+  const [checkoutSuccess, setCheckoutSuccess] = useState(false)
 
   const openPaywall = useCallback((trigger = 'courses') => {
     setPaywallTrigger(trigger)
@@ -78,6 +81,15 @@ export default function App() {
       setDbReady(true)
     })
   }, [session?.user?.id])
+
+  // ── Checkout success handler ───────────────────────────────────────────────
+  useEffect(() => {
+    if (!session?.user || !dbReady) return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('checkout') !== 'success') return
+    window.history.replaceState({}, '', window.location.pathname)
+    refreshSubscription(session.user.id).then(() => setCheckoutSuccess(true))
+  }, [session?.user?.id, dbReady])
 
   // ── Handlers ──────────────────────────────────────────────────────────────
   const handleSignOut = async () => {
@@ -329,6 +341,23 @@ export default function App() {
           userId={session?.user?.id}
           currentPlan={getActivePlan()}
         />
+      )}
+
+      {/* Checkout success banner */}
+      {checkoutSuccess && (
+        <div style={{
+          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+          background: '#111827', border: '1px solid #22c55e', borderRadius: 12,
+          padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.5)', zIndex: 9999, whiteSpace: 'nowrap',
+        }}>
+          <span style={{ fontSize: 18 }}>🎉</span>
+          <span style={{ color: '#f1f5f9', fontSize: 14, fontWeight: 600 }}>You're on the plan — welcome!</span>
+          <button
+            onClick={() => setCheckoutSuccess(false)}
+            style={{ marginLeft: 8, background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}
+          >×</button>
+        </div>
       )}
     </>
   )

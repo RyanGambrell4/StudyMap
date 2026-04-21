@@ -1,5 +1,6 @@
 import { useMemo, useState, Fragment } from 'react'
 import { clean } from '../utils/strings'
+import { toDateStr, addDays, daysBetween } from '../utils/dateUtils'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
@@ -23,20 +24,11 @@ const COURSE_PALETTE = ['#6366f1','#f472b6','#22d3ee','#fbbf24','#4ade80','#f973
 const cc = (idx) => COURSE_PALETTE[idx % COURSE_PALETTE.length]
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
-function toDateStr(d) { return d.toISOString().split('T')[0] }
-function addDays(dateStr, n) {
-  const d = new Date(dateStr + 'T12:00:00')
-  d.setDate(d.getDate() + n)
-  return toDateStr(d)
-}
 function getMonWeekStart(dateStr) {
   const d = new Date(dateStr + 'T12:00:00')
   const dow = d.getDay()
   d.setDate(d.getDate() - (dow === 0 ? 6 : dow - 1))
   return toDateStr(d)
-}
-function daysBetween(a, b) {
-  return Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000)
 }
 function formatTime(t) {
   if (!t) return ''
@@ -78,7 +70,9 @@ function Sparkline({ data, color, w = 100, h = 38 }) {
 
 // ── Radar (Bloom's) ──────────────────────────────────────────────────────────
 function RadarChart({ values, labels, size = 210 }) {
-  const cx = size / 2, cy = size / 2, r = size * 0.34
+  const pad = 44 // padding for labels
+  const total = size + pad * 2
+  const cx = total / 2, cy = total / 2, r = size * 0.34
   const n = labels.length
   const angle = (i) => -Math.PI / 2 + (i / n) * Math.PI * 2
   const pt = (i, radius) => [cx + Math.cos(angle(i)) * radius, cy + Math.sin(angle(i)) * radius]
@@ -88,7 +82,7 @@ function RadarChart({ values, labels, size = 210 }) {
     return `${i === 0 ? 'M' : 'L'}${x},${y}`
   }).join(' ') + 'Z'
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+    <svg width={total} height={total} viewBox={`0 0 ${total} ${total}`} overflow="visible">
       {rings.map((ring, ri) => {
         const d = Array.from({ length: n }, (_, i) => {
           const [x, y] = pt(i, r * ring)
@@ -106,9 +100,10 @@ function RadarChart({ values, labels, size = 210 }) {
         return <circle key={i} cx={x} cy={y} r="3.5" fill={D.accent} />
       })}
       {labels.map((lbl, i) => {
-        const [x, y] = pt(i, r + 20)
+        const [x, y] = pt(i, r + 22)
+        const anchor = Math.abs(x - cx) < 5 ? 'middle' : x < cx ? 'end' : 'start'
         return (
-          <text key={i} x={x} y={y} textAnchor="middle" dominantBaseline="middle"
+          <text key={i} x={x} y={y} textAnchor={anchor} dominantBaseline="middle"
             style={{ fontSize: 10, fill: D.textMuted, fontFamily: 'Inter, system-ui, sans-serif', fontWeight: 500 }}>
             {lbl}
           </text>

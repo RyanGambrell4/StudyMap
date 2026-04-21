@@ -203,6 +203,16 @@ export default function AccountView({
           Sign Out
         </button>
       )}
+
+      {/* Delete account */}
+      <div className="text-center pb-2">
+        <a
+          href={`mailto:support@getstudyedge.com?subject=Delete%20my%20account&body=Please%20delete%20my%20account%20and%20all%20associated%20data.%0A%0AEmail%3A%20${encodeURIComponent(userEmail ?? '')}`}
+          className="text-xs text-slate-500 dark:text-slate-600 hover:text-red-400 transition-colors underline underline-offset-2"
+        >
+          Delete account &amp; data
+        </a>
+      </div>
     </div>
   )
 }

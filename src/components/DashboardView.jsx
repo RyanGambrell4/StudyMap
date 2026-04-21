@@ -3,6 +3,8 @@ import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
 import { getActivePlan } from '../lib/subscription'
+import { clean } from '../utils/strings'
+import { daysBetween, formatShortDate } from '../utils/dateUtils'
 
 // ── Design tokens (matching reference design) ──────────────────────────────────
 const D = {
@@ -24,17 +26,10 @@ const D = {
 const COURSE_COLORS = ['#6366f1', '#f472b6', '#22d3ee', '#fbbf24', '#4ade80', '#f97316']
 const courseColor = (idx) => COURSE_COLORS[idx % COURSE_COLORS.length]
 
-// Replace em dashes with a regular hyphen in any displayed string
-const clean = (str) => (str ?? '').replace(/\s*—\s*/g, ' - ')
-
 // ── Helpers ────────────────────────────────────────────────────────────────────
 function greeting() {
   const h = new Date().getHours()
   return h < 12 ? 'Good morning' : h < 18 ? 'Good afternoon' : 'Good evening'
-}
-
-function daysBetween(a, b) {
-  return Math.round((new Date(b + 'T12:00:00') - new Date(a + 'T12:00:00')) / 86400000)
 }
 
 function formatDateHeader(dateStr) {
@@ -42,12 +37,6 @@ function formatDateHeader(dateStr) {
   const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday']
   const months = ['January','February','March','April','May','June','July','August','September','October','November','December']
   return `${days[d.getDay()]}, ${months[d.getMonth()]} ${d.getDate()}`
-}
-
-function formatShortDate(dateStr) {
-  const d = new Date(dateStr + 'T12:00:00')
-  const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']
-  return `${months[d.getMonth()]} ${d.getDate()}`
 }
 
 function formatTime(timeStr) {
@@ -167,7 +156,9 @@ export default function DashboardView({
   const { currentStreak, recordCompletion } = useStreak()
   const celebrate = useCelebration()
   const streak = currentStreak
-  const [aiBriefDismissed, setAiBriefDismissed] = useState(false)
+  const [aiBriefDismissed, setAiBriefDismissed] = useState(() =>
+    sessionStorage.getItem('studyedge_brief_dismissed') === '1'
+  )
   const [sessionIdx, setSessionIdx] = useState(0)
   // Celebration
   const allCompleteKey = todayStr + (allComplete ? '-done' : '')
@@ -228,7 +219,7 @@ export default function DashboardView({
   const prevWeekSessionCount = prevWeekDone.length
   const deltaHours = Math.round((weekHours - prevWeekHours) * 10) / 10
   const deltaSessions = weekSessionCount - prevWeekSessionCount
-  const weeklyGoalHours = 30
+  const weeklyGoalHours = 10
   const goalPct = Math.min(100, Math.round((weekHours / weeklyGoalHours) * 100))
   const onPace = goalPct >= Math.round((new Date().getDay() / 7) * 100) - 10
 
@@ -302,6 +293,7 @@ export default function DashboardView({
   }, [courses, todayStr])
 
   // AI coach message
+  // AI Brief — short contextual summary shown at top of dashboard
   const aiMessage = useMemo(() => {
     if (upcomingExam && upcomingExam.days <= 7) {
       return `${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. Add focused review sessions this week to stay on track.`
@@ -316,6 +308,24 @@ export default function DashboardView({
     }
     return `Stay consistent with your sessions. Small daily progress compounds into big results at exam time.`
   }, [upcomingExam, upcomingDeadlines, weekHours, deltaHours, todayStr])
+
+  // AI Coach card — specific next action, intentionally different from the Brief
+  const aiCoachMessage = useMemo(() => {
+    if (upcomingExam && upcomingExam.days <= 3) {
+      return `Do a full practice test for ${clean(upcomingExam.course.name)} today. Testing yourself now reveals gaps while there's still time to fix them.`
+    }
+    if (upcomingExam && upcomingExam.days <= 14) {
+      return `Space out ${Math.min(upcomingExam.days, 3)} review sessions for ${clean(upcomingExam.course.name)} before the exam. Focus on your weakest topics first.`
+    }
+    if (upcomingDeadlines.length > 0) {
+      const d = upcomingDeadlines[0]
+      return `Work on ${clean(d.name)} in your next session. Break it into 25-minute blocks to make steady progress without burnout.`
+    }
+    if (weekSessionCount === 0) {
+      return `Start your first session of the week today. Even 30 minutes of focused study builds the habit that carries you through exams.`
+    }
+    return `Open your next scheduled session and spend the first 10 minutes on active recall before reviewing your notes.`
+  }, [upcomingExam, upcomingDeadlines, weekSessionCount])
 
   // Subtitle
   const subtitle = useMemo(() => {
@@ -485,6 +495,7 @@ export default function DashboardView({
                     Mark done
                   </button>
                   <button
+                    onClick={() => setSessionIdx(i => (i + 1) % Math.max(uncompletedToday.length, 1))}
                     style={{ fontSize: 12.5, color: D.textMuted, padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer' }}
                   >
                     Skip
@@ -566,7 +577,7 @@ export default function DashboardView({
               </div>
               <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
                 <button
-                  onClick={() => setAiBriefDismissed(true)}
+                  onClick={() => { sessionStorage.setItem('studyedge_brief_dismissed', '1'); setAiBriefDismissed(true) }}
                   style={{ fontSize: 12, fontWeight: 500, color: D.textMuted, padding: '7px 12px', borderRadius: 7, border: `1px solid ${D.borderStrong}`, background: 'none', cursor: 'pointer' }}
                 >
                   Dismiss
@@ -600,7 +611,7 @@ export default function DashboardView({
             const dueNext = dueNextPerCourse[idx] ?? null
             // on track: pct >= 50 or no sessions yet
             const total = allSessions.filter(s => s.courseId === idx).length
-            const onTrack = total === 0 || prog.pct >= 50
+            const onTrack = prog.done === 0 || prog.pct >= 50
             const pillColor  = onTrack ? '#818CF8' : '#F472B6'
             const pillBg     = onTrack ? 'rgba(99,102,241,0.12)' : 'rgba(244,114,182,0.12)'
             const pillBorder = onTrack ? 'rgba(129,140,248,0.3)' : 'rgba(244,114,182,0.3)'
@@ -826,7 +837,7 @@ export default function DashboardView({
           {/* Message */}
           <div style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '18px 8px', position: 'relative' }}>
             <div style={{ fontSize: 17, lineHeight: 1.45, fontWeight: 500, color: D.text, letterSpacing: -0.2, textAlign: 'center', maxWidth: 380 }}>
-              {aiMessage}
+              {aiCoachMessage}
             </div>
           </div>
 

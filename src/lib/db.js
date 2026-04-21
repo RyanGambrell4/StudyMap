@@ -43,6 +43,19 @@ export async function initUserData(uid) {
   return _cache
 }
 
+/** Re-fetch subscription from DB and refresh in-memory cache */
+export async function refreshSubscription(uid) {
+  const { data, error } = await supabase
+    .from('user_data')
+    .select('subscription')
+    .eq('user_id', uid)
+    .maybeSingle()
+  if (error) { console.error('[db] refreshSubscription error', error); return }
+  const sub = data?.subscription ?? null
+  if (_cache) _cache.subscription = sub
+  initSubscription(uid, sub)
+}
+
 /** Clear cache on sign-out */
 export function clearUserData() {
   _cache = null
@@ -55,7 +68,17 @@ export function clearUserData() {
 export function getCachedPlan()            { return _cache?.plan            ?? null }
 export function getCachedSyllabusEvents()  { return _cache?.syllabus_events ?? [] }
 export function getCachedManualSessions()  { return _cache?.manual_sessions ?? [] }
-export function getCachedStudyTools()      { return _cache?.study_tools     ?? null }
+export function getCachedStudyTools() {
+  const tools = _cache?.study_tools ?? null
+  if (!tools) return null
+  // eslint-disable-next-line no-unused-vars
+  const { _streak, ...rest } = tools
+  return Object.keys(rest).length ? rest : null
+}
+
+export function getCachedStreak() {
+  return _cache?.study_tools?._streak ?? null
+}
 export function getCachedSessionRecalls()  { return _cache?.session_recalls ?? [] }
 
 export function getCachedCoachPlan(courseId) {
@@ -93,8 +116,17 @@ export async function saveManualSessions(sessions) {
 }
 
 export async function saveStudyTools(data) {
-  if (_cache) _cache.study_tools = data
-  await _upsert({ study_tools: data })
+  const streak = _cache?.study_tools?._streak
+  const updated = streak !== undefined ? { ...data, _streak: streak } : data
+  if (_cache) _cache.study_tools = updated
+  await _upsert({ study_tools: updated })
+}
+
+export async function saveStreak(streakData) {
+  const existing = _cache?.study_tools ?? {}
+  const updated = { ...existing, _streak: streakData }
+  if (_cache) _cache.study_tools = updated
+  await _upsert({ study_tools: updated })
 }
 
 export async function saveCoachPlan(courseId, plan, formData) {

@@ -543,8 +543,33 @@ export default function CalendarDayView({
           {/* Empty state */}
           {timedBlocks.length === 0 && allDayBlocks.length === 0 &&
             timedGoogleBlocks.length === 0 && allDayGoogleBlocks.length === 0 && (
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-              <p className="text-[12px]" style={{ color: tv.timeText }}>No sessions scheduled</p>
+            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3" style={{ pointerEvents: 'none' }}>
+              <svg style={{ width: 32, height: 32, color: tv.timeText, opacity: 0.5 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ color: tv.subtitleText, fontSize: 14, fontWeight: 600, margin: 0 }}>No sessions scheduled</p>
+                <p style={{ color: tv.timeText, fontSize: 12, marginTop: 4 }}>This day is free — enjoy it or add a session.</p>
+              </div>
+              {onAddSession && (
+                <button
+                  onClick={onAddSession}
+                  style={{
+                    pointerEvents: 'auto',
+                    marginTop: 4,
+                    padding: '7px 16px',
+                    borderRadius: 8,
+                    border: '1px solid rgba(99,102,241,0.4)',
+                    background: 'rgba(99,102,241,0.12)',
+                    color: '#818cf8',
+                    fontSize: 13,
+                    fontWeight: 600,
+                    cursor: 'pointer',
+                  }}
+                >
+                  + Add session
+                </button>
+              )}
             </div>
           )}
         </div>

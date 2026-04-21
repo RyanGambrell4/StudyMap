@@ -73,10 +73,14 @@ export function useSessionReminders(allSessions, completedIds, todayStr) {
         const minutesLeft = sessionMinutes - (new Date().getHours() * 60 + new Date().getMinutes())
         const timeLabel = minutesLeft <= 1 ? 'now' : `in ${minutesLeft} minutes`
 
-        new Notification('Time to study 📚', {
-          body: `${session.courseName}: ${session.sessionType} starts ${timeLabel}`,
-          tag: notifId,
-        })
+        try {
+          new Notification('Time to study 📚', {
+            body: `${session.courseName}: ${session.sessionType} starts ${timeLabel}`,
+            tag: notifId,
+          })
+        } catch {
+          // Notification API unavailable or blocked (e.g. HTTP in dev)
+        }
       }, delayMs)
 
       timeouts.push(tid)
