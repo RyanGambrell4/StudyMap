@@ -938,7 +938,10 @@ export default function OutputView({
             onImportSyllabus={() => setSyllabusModalCourse(-1)}
             onAddSession={setAddSessionDayStr}
             onNavigateToCourses={() => setActiveSection('courses')}
-            onNavigateToCalendar={() => setActiveSection('calendar')}
+            onNavigateToCalendar={(dateStr) => {
+              if (dateStr) { setActiveDayStr(dateStr); setViewMode('day') }
+              setActiveSection('calendar')
+            }}
             onNavigateToProgress={() => setActiveSection('progress')}
             onNavigateToGrades={(idx) => { setGradesCourseIdx(idx); setActiveSection('grades') }}
             onNavigateToTutor={() => setActiveSection('tutor')}

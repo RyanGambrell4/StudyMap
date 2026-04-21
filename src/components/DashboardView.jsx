@@ -160,6 +160,9 @@ export default function DashboardView({
     sessionStorage.getItem('studyedge_brief_dismissed') === '1'
   )
   const [sessionIdx, setSessionIdx] = useState(0)
+  const [upNextHovered, setUpNextHovered] = useState(false)
+  const [aiBriefHovered, setAiBriefHovered] = useState(false)
+  const [aiCoachHovered, setAiCoachHovered] = useState(false)
   // Celebration
   const allCompleteKey = todayStr + (allComplete ? '-done' : '')
   const firedRef = useRef(null)
@@ -398,14 +401,22 @@ export default function DashboardView({
       <div className="dash-grid" style={{ padding: '24px 32px 48px', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
 
         {/* ── UP NEXT (span 8) ── */}
-        <div style={{
-          gridColumn: 'span 8',
-          background: D.bgCard,
-          border: `1px solid ${D.border}`,
-          borderRadius: 14,
-          display: 'flex', overflow: 'hidden',
-          position: 'relative',
-        }}>
+        <div
+          onMouseEnter={() => setUpNextHovered(true)}
+          onMouseLeave={() => setUpNextHovered(false)}
+          onClick={() => displaySession && typeof onNavigateToCalendar === 'function' && onNavigateToCalendar(displaySession.dateStr)}
+          style={{
+            gridColumn: 'span 8',
+            background: D.bgCard,
+            border: `1px solid ${upNextHovered ? 'rgba(99,102,241,0.45)' : D.border}`,
+            borderRadius: 14,
+            display: 'flex', overflow: 'hidden',
+            position: 'relative',
+            cursor: displaySession ? 'pointer' : 'default',
+            transition: 'border-color 0.2s, box-shadow 0.2s',
+            boxShadow: upNextHovered ? '0 0 0 1px rgba(99,102,241,0.15), 0 8px 32px rgba(99,102,241,0.12)' : 'none',
+          }}
+        >
           {/* Color bar */}
           <div style={{
             width: 4,
@@ -429,7 +440,7 @@ export default function DashboardView({
                 {uncompletedToday.slice(0, 6).map((_, i) => (
                   <button
                     key={i}
-                    onClick={() => setSessionIdx(i)}
+                    onClick={(e) => { e.stopPropagation(); setSessionIdx(i) }}
                     style={{
                       width: i === sessionIdx ? 18 : 6, height: 6, borderRadius: 3,
                       background: i === sessionIdx ? D.accent : 'rgba(255,255,255,0.12)',
@@ -477,7 +488,7 @@ export default function DashboardView({
                 {/* Buttons */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginTop: 24 }}>
                   <button
-                    onClick={() => onStartFocus && onStartFocus(displaySession)}
+                    onClick={(e) => { e.stopPropagation(); onStartFocus && onStartFocus(displaySession) }}
                     style={{
                       display: 'flex', alignItems: 'center', gap: 8,
                       background: D.accent, color: 'white',
@@ -489,13 +500,13 @@ export default function DashboardView({
                     <IcoPlay /> Start session
                   </button>
                   <button
-                    onClick={() => handleToggle(displaySession.id)}
+                    onClick={(e) => { e.stopPropagation(); handleToggle(displaySession.id) }}
                     style={{ fontSize: 12.5, color: D.textMuted, padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer' }}
                   >
                     Mark done
                   </button>
                   <button
-                    onClick={() => setSessionIdx(i => (i + 1) % Math.max(uncompletedToday.length, 1))}
+                    onClick={(e) => { e.stopPropagation(); setSessionIdx(i => (i + 1) % Math.max(uncompletedToday.length, 1)) }}
                     style={{ fontSize: 12.5, color: D.textMuted, padding: '8px 12px', background: 'none', border: 'none', cursor: 'pointer' }}
                   >
                     Skip
@@ -549,16 +560,22 @@ export default function DashboardView({
 
         {/* ── AI BRIEF (span 12) ── */}
         {!aiBriefDismissed && (
-          <div style={{
-            gridColumn: 'span 12',
-            position: 'relative',
-            background: 'linear-gradient(180deg, rgba(99,102,241,0.06), rgba(139,92,246,0.03) 60%, rgba(10,10,30,0.5))',
-            border: '1px solid rgba(99,102,241,0.28)',
-            borderRadius: 14,
-            padding: '22px 26px',
-            boxShadow: '0 0 0 1px rgba(99,102,241,0.06), 0 20px 60px -20px rgba(99,102,241,0.35), inset 0 1px 0 rgba(255,255,255,0.04)',
-            overflow: 'hidden',
-          }}>
+          <div
+            onMouseEnter={() => setAiBriefHovered(true)}
+            onMouseLeave={() => setAiBriefHovered(false)}
+            style={{
+              gridColumn: 'span 12',
+              position: 'relative',
+              background: 'linear-gradient(180deg, rgba(99,102,241,0.06), rgba(139,92,246,0.03) 60%, rgba(10,10,30,0.5))',
+              border: `1px solid ${aiBriefHovered ? 'rgba(99,102,241,0.55)' : 'rgba(99,102,241,0.28)'}`,
+              borderRadius: 14,
+              padding: '22px 26px',
+              boxShadow: aiBriefHovered
+                ? '0 0 0 1px rgba(99,102,241,0.15), 0 8px 32px rgba(99,102,241,0.18), 0 20px 60px -20px rgba(99,102,241,0.35), inset 0 1px 0 rgba(255,255,255,0.04)'
+                : '0 0 0 1px rgba(99,102,241,0.06), 0 20px 60px -20px rgba(99,102,241,0.35), inset 0 1px 0 rgba(255,255,255,0.04)',
+              overflow: 'hidden',
+              transition: 'border-color 0.2s, box-shadow 0.2s',
+            }}>
             <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(600px 180px at 8% 0%, rgba(99,102,241,0.22), transparent 60%), radial-gradient(500px 160px at 95% 100%, rgba(139,92,246,0.14), transparent 60%)' }} />
             <div className="dash-brief-inner" style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: 18 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
@@ -807,14 +824,19 @@ export default function DashboardView({
         )}
 
         {/* ── AI COACH RECOMMENDATION (span 5) ── */}
-        <div style={{
-          gridColumn: upcomingDeadlines.length > 0 ? 'span 5' : 'span 12',
-          background: 'linear-gradient(155deg, rgba(99,102,241,0.14) 0%, rgba(99,102,241,0.04) 45%, #0a0a1e 100%)',
-          border: '1px solid rgba(99,102,241,0.28)',
-          borderRadius: 14, padding: 20,
-          display: 'flex', flexDirection: 'column',
-          position: 'relative', overflow: 'hidden',
-        }}>
+        <div
+          onMouseEnter={() => setAiCoachHovered(true)}
+          onMouseLeave={() => setAiCoachHovered(false)}
+          style={{
+            gridColumn: upcomingDeadlines.length > 0 ? 'span 5' : 'span 12',
+            background: 'linear-gradient(155deg, rgba(99,102,241,0.14) 0%, rgba(99,102,241,0.04) 45%, #0a0a1e 100%)',
+            border: `1px solid ${aiCoachHovered ? 'rgba(99,102,241,0.55)' : 'rgba(99,102,241,0.28)'}`,
+            borderRadius: 14, padding: 20,
+            display: 'flex', flexDirection: 'column',
+            position: 'relative', overflow: 'hidden',
+            transition: 'border-color 0.2s, box-shadow 0.2s',
+            boxShadow: aiCoachHovered ? '0 0 0 1px rgba(99,102,241,0.15), 0 8px 32px rgba(99,102,241,0.12)' : 'none',
+          }}>
           {/* Ambient */}
           <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, background: 'radial-gradient(circle, rgba(99,102,241,0.22), transparent 70%)', pointerEvents: 'none' }} />
 
