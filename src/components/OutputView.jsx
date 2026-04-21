@@ -1157,6 +1157,7 @@ export default function OutputView({
             onDeleteCourse={onDeleteCourse}
             onShowPaywall={onShowPaywall}
             onOpenStudyCoach={handleOpenStudyCoach}
+            onNavigateToGradeHub={() => setActiveSection('grades')}
           />
         )}
 
