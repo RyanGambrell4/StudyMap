@@ -24,12 +24,21 @@ const D = {
 const SC_STYLE = `
   @keyframes sc-fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
   @keyframes sc-pulse { 0%,100% { opacity:0.3; } 50% { opacity:1; } }
-  .sc-input { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); color:#e8e8f0; border-radius:9px; padding:11px 14px; font-size:13.5px; outline:none; transition:all 0.15s; width:100%; font-family:inherit; box-sizing:border-box; }
-  .sc-input:focus { border-color:rgba(99,102,241,0.5); background:rgba(255,255,255,0.05); }
+  .sc-input { -webkit-appearance:none; background:#0d0d22; border:1px solid rgba(255,255,255,0.08); color:#e8e8f0; border-radius:9px; padding:11px 14px; font-size:13.5px; outline:none; transition:border-color 0.15s; width:100%; font-family:inherit; box-sizing:border-box; }
+  .sc-input:focus { border-color:rgba(99,102,241,0.5); background:#10102a; }
   .sc-input::placeholder { color:#55556e; }
   textarea.sc-input { resize:vertical; min-height:68px; line-height:1.5; }
   input[type="date"].sc-input { color-scheme:dark; }
   @media (max-width:1100px) { .sc-grid { grid-template-columns:1fr !important; } .sc-rail { position:static !important; } }
+  @media (max-width:640px) {
+    .sc-header-pad { padding:16px 14px 12px !important; }
+    .sc-page-pad { padding:14px 14px 60px !important; }
+    .sc-stepper { gap:3px !important; padding:4px !important; }
+    .sc-step-btn { padding:8px 8px !important; min-width:0 !important; }
+    .sc-step-label { display:none !important; }
+    .sc-2col { grid-template-columns:1fr !important; }
+    .sc-days-row { flex-wrap:wrap !important; }
+  }
 `
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -65,7 +74,7 @@ function Icon({ name, size = 16, color, stroke = 1.8 }) {
 // ── Page header ───────────────────────────────────────────────────────────────
 function PageHeader({ step }) {
   return (
-    <div style={{ padding: '28px 32px 20px', borderBottom: `1px solid ${D.border}` }}>
+    <div className="sc-header-pad" style={{ padding: '28px 32px 20px', borderBottom: `1px solid ${D.border}` }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
         <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', color: D.muted, textTransform: 'uppercase' }}>Your AI Study Coach</span>
         <span style={{ width: 4, height: 4, borderRadius: '50%', background: D.dim }} />
@@ -96,7 +105,7 @@ function Stepper({ step, go }) {
     { n: 3, label: 'Your study plan', icon: 'sparkles' },
   ]
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 6, background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 12, marginBottom: 24 }}>
+    <div className="sc-stepper" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 6, background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 12, marginBottom: 24 }}>
       {steps.map((s, i) => {
         const active = step === s.n
         const done = step > s.n
@@ -105,12 +114,13 @@ function Stepper({ step, go }) {
             <button
               disabled={!done && !active}
               onClick={() => done && go(s.n)}
+              className="sc-step-btn"
               style={{ flex: 1, padding: '10px 14px', borderRadius: 9, display: 'flex', alignItems: 'center', gap: 10, background: active ? 'rgba(99,102,241,0.15)' : 'transparent', border: active ? '1px solid rgba(99,102,241,0.35)' : '1px solid transparent', opacity: !active && !done ? 0.5 : 1, cursor: done ? 'pointer' : 'default' }}
             >
               <div style={{ width: 24, height: 24, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', background: done ? D.mint : active ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'rgba(255,255,255,0.05)', color: done || active ? '#fff' : D.muted, fontSize: 11, fontWeight: 700, boxShadow: active ? `0 0 10px ${D.glow}` : 'none' }}>
                 {done ? <Icon name="check" size={12} stroke={3} /> : s.n}
               </div>
-              <span style={{ fontSize: 13, fontWeight: active ? 600 : 500, color: active ? D.text : D.muted, whiteSpace: 'nowrap' }}>{s.label}</span>
+              <span className="sc-step-label" style={{ fontSize: 13, fontWeight: active ? 600 : 500, color: active ? D.text : D.muted, whiteSpace: 'nowrap' }}>{s.label}</span>
             </button>
             {i < steps.length - 1 && <div style={{ width: 16, height: 1, background: D.border, flexShrink: 0 }} />}
           </div>
@@ -338,7 +348,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
         </FieldBlock>
 
         {/* Strengths / Struggles */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div className="sc-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <FieldBlock icon="check" color={D.mint} label="What feels solid" hint="Optional — topics you're comfortable with">
             <textarea className="sc-input" value={form.strengths || ''} onChange={e => update('strengths', e.target.value)} placeholder={`e.g. "Chapter 1–3 readings, classical conditioning"`} />
           </FieldBlock>
@@ -377,7 +387,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
         </FieldBlock>
 
         {/* Cadence */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div className="sc-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <FieldBlock icon="clock" color={D.amber} label="Study days / week">
             <div style={{ display: 'flex', gap: 4 }}>
               {[1,2,3,4,5,6,7].map(n => {
@@ -511,7 +521,7 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
         </div>
 
         {/* Facts grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+        <div className="sc-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
           <FactCard icon="flag" color={D.pink} title="Goal" empty={!form.goal?.trim()}>{form.goal?.trim() || 'Not provided'}</FactCard>
           <FactCard icon="target" color={D.indigo} title="Topics" empty={!topics.length}>
             {topics.length ? (
@@ -809,7 +819,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     <>
       <style>{SC_STYLE}</style>
       <PageHeader step={step} />
-      <div style={{ padding: '24px 32px 48px' }}>
+      <div className="sc-page-pad" style={{ padding: '24px 32px 48px' }}>
         <Stepper step={step} go={setStep} />
         {gradeGapBanner}
         {step === 1 && (
@@ -961,7 +971,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
       )}
 
       {/* Info cards */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
+      <div className="sc-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: D.pink, textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}><Icon name="flag" size={10} color={D.pink} /> The Goal</div>
           <div style={{ fontSize: 13, color: goal ? D.text : D.dim, fontStyle: goal ? 'normal' : 'italic' }}>{goal || 'No goal provided'}</div>

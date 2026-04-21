@@ -16,8 +16,8 @@ const D = {
 const COURSES_STYLE = `
   @keyframes cv-fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
   @keyframes cv-slideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
-  .cv-input { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); color:#e8e8f0; border-radius:8px; padding:10px 12px; font-size:13px; outline:none; transition:all 0.15s; width:100%; font-family:inherit; box-sizing:border-box; }
-  .cv-input:focus { border-color:rgba(99,102,241,0.5); background:rgba(255,255,255,0.05); }
+  .cv-input { -webkit-appearance:none; background:#0d0d22; border:1px solid rgba(255,255,255,0.08); color:#e8e8f0; border-radius:8px; padding:10px 12px; font-size:13px; outline:none; transition:border-color 0.15s; width:100%; font-family:inherit; box-sizing:border-box; }
+  .cv-input:focus { border-color:rgba(99,102,241,0.5); background:#10102a; }
   .cv-input::placeholder { color:#55556e; }
   input[type="date"].cv-input, input[type="time"].cv-input { color-scheme:dark; }
   .cv-seg-btn { padding:8px 10px; border-radius:7px; font-size:12.5px; font-weight:600; transition:all 0.15s; cursor:pointer; font-family:inherit; }
@@ -27,6 +27,13 @@ const COURSES_STYLE = `
   .cv-row { background:#0a0a1e; border-radius:14px; overflow:hidden; transition:border 0.15s; }
   .cv-expanded { animation:cv-fadeUp 0.25s ease-out; }
   .cv-modal { animation:cv-slideIn 0.25s; }
+  .cv-import-band { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:22px; }
+  @media (max-width:640px) {
+    .cv-import-band { grid-template-columns:1fr !important; }
+    .cv-header-pad { padding:18px 16px 14px !important; }
+    .cv-page-pad { padding:14px 14px 48px !important; }
+    .cv-modal { width:calc(100vw - 32px) !important; max-width:none !important; }
+  }
 `
 
 // ── Constants ─────────────────────────────────────────────────────────────────
@@ -293,7 +300,7 @@ function ImportCard({ icon, color, eyebrow, title, desc, accept, onFile, gradien
 
 function ImportBand({ onImportSyllabus }) {
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 22 }}>
+    <div className="cv-import-band">
       <ImportCard
         icon="file" color="#6366f1" eyebrow="Quick Import"
         title="Import syllabus"
@@ -782,7 +789,7 @@ export default function CoursesView({
     <>
       <style>{COURSES_STYLE}</style>
 
-      <div style={{ padding: '28px 32px 20px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' }}>
+      <div className="cv-header-pad" style={{ padding: '28px 32px 20px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 20, flexWrap: 'wrap' }}>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
             <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', color: D.accent, textTransform: 'uppercase' }}>Academic Control</span>
@@ -802,7 +809,7 @@ export default function CoursesView({
         </button>
       </div>
 
-      <div style={{ padding: '24px 32px 48px' }}>
+      <div className="cv-page-pad" style={{ padding: '24px 32px 48px' }}>
         {courses.length === 0 && (
           <div style={{ padding: '16px 20px', borderRadius: 12, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)', display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 22 }}>
             <svg style={{ width: 20, height: 20, color: D.amber, flexShrink: 0, marginTop: 2 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
