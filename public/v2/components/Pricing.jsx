@@ -106,10 +106,11 @@ function Pricing(){
 
 function Testimonials(){
   const quotes = [
-    {t:"My first semester with a plan I actually followed. Went from a 2.9 to a 3.7 GPA.", n:"Maya R.", r:"Junior · Biology"},
-    {t:"I used to spend Sundays making study plans that I never stuck to. StudyEdge just does it.", n:"Chris D.", r:"Sophomore · CS"},
-    {t:"The session blueprints are the unlock. I show up, hit start, the work is already mapped.", n:"Priya S.", r:"Senior · Econ"},
-    {t:"Knowing my projected grade in real time is low-key addicting. Changed how I study.", n:"Jordan L.", r:"Freshman · Pre-med"},
+    {t:"I've always struggled to stay consistent — StudyEdge just plans it for me. Seeing my hours and progress tracked has genuinely helped bring my grades up.", n:"Andy G.", r:"Undergraduate"},
+    {t:"If you want to stay mediocre at studying, don't use this. Scheduling, coaching, daily organization — it has everything you need to take your marks to the next level with less effort.", n:"Danny K.", r:"PhD Student"},
+    {t:"First AI study platform I can confidently say has it all. Week-by-week study plans, progress tracking, flashcards, quizzes — and it cuts all the prep time so you can just focus on actually learning.", n:"Charlotte B.", r:"University Student"},
+    {t:"It does an amazing job of meeting you where you're at and taking you where you want to go academically.", n:"Gavin D.", r:"Graduate Student"},
+    {t:"Right when you log in you see a beautifully structured dashboard that makes you want to get to work. Personalized schedule, flashcards, quizzes — there's so much you can do, how can you not be excited?", n:"Alex G.", r:"College Student"},
   ];
   return (
     <section className="testimonials">
