@@ -52,16 +52,22 @@ function formatShortDate(dateStr) {
 
 function formatTime(timeStr) {
   if (!timeStr) return null
-  const [h, m] = timeStr.split(':').map(Number)
+  const parts = timeStr.split(':')
+  const h = Number(parts[0])
+  if (isNaN(h)) return null
+  const m = isNaN(Number(parts[1])) ? 0 : Number(parts[1])
   const ampm = h >= 12 ? 'PM' : 'AM'
-  return `${h % 12 || 12}:${String(m).padStart(2,'0')} ${ampm}`
+  return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${ampm}`
 }
 
 function addMinutes(timeStr, mins) {
   if (!timeStr) return null
-  const [h, m] = timeStr.split(':').map(Number)
-  const total = h * 60 + m + (mins ?? 0)
-  return `${String(Math.floor(total / 60)).padStart(2,'0')}:${String(total % 60).padStart(2,'0')}`
+  const parts = timeStr.split(':')
+  const h = Number(parts[0])
+  if (isNaN(h)) return null
+  const m = isNaN(Number(parts[1])) ? 0 : Number(parts[1])
+  const total = h * 60 + m + (Number(mins) || 0)
+  return `${String(Math.floor(total / 60)).padStart(2, '0')}:${String(total % 60).padStart(2, '0')}`
 }
 
 // ── Inline SVG icons ───────────────────────────────────────────────────────────
@@ -79,8 +85,20 @@ const IcoCards  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="no
 
 // ── Card ──────────────────────────────────────────────────────────────────────
 function Card({ children, style }) {
+  const [hovered, setHovered] = useState(false)
   return (
-    <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, ...style }}>
+    <div
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        background: D.bgCard,
+        border: `1px solid ${hovered ? 'rgba(99,102,241,0.45)' : D.border}`,
+        borderRadius: 14,
+        transition: 'border-color 0.2s, box-shadow 0.2s',
+        boxShadow: hovered ? '0 0 0 1px rgba(99,102,241,0.15), 0 8px 32px rgba(99,102,241,0.12)' : 'none',
+        ...style,
+      }}
+    >
       {children}
     </div>
   )
@@ -151,6 +169,12 @@ export default function DashboardView({
   const streak = currentStreak
   const [aiBriefDismissed, setAiBriefDismissed] = useState(false)
   const [sessionIdx, setSessionIdx] = useState(0)
+  const [isMobile, setIsMobile] = useState(() => window.innerWidth < 768)
+  useEffect(() => {
+    const handler = () => setIsMobile(window.innerWidth < 768)
+    window.addEventListener('resize', handler)
+    return () => window.removeEventListener('resize', handler)
+  }, [])
 
   // Celebration
   const allCompleteKey = todayStr + (allComplete ? '-done' : '')
@@ -339,7 +363,7 @@ export default function DashboardView({
       backgroundImage: `radial-gradient(1200px 600px at 85% -10%, rgba(99,102,241,0.10), transparent 60%), radial-gradient(900px 500px at 10% 110%, rgba(99,102,241,0.05), transparent 60%)`,
     }}>
       {/* Header */}
-      <div style={{ padding: '28px 32px 8px' }}>
+      <div style={{ padding: isMobile ? '20px 18px 6px' : '28px 32px 8px' }}>
         <div style={{ fontSize: 12, color: D.textDim, letterSpacing: '0.03em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: D.green, boxShadow: `0 0 8px ${D.green}` }} />
           {formatDateHeader(todayStr).toUpperCase()}
@@ -353,11 +377,11 @@ export default function DashboardView({
       </div>
 
       {/* Grid */}
-      <div style={{ padding: '24px 32px 48px', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+      <div style={{ padding: isMobile ? '12px 16px 48px' : '24px 32px 48px', display: 'grid', gridTemplateColumns: isMobile ? '1fr' : 'repeat(12, 1fr)', gap: isMobile ? 12 : 16 }}>
 
         {/* ── UP NEXT (span 8) ── */}
         <div style={{
-          gridColumn: 'span 8',
+          gridColumn: isMobile ? undefined : 'span 8',
           background: D.bgCard,
           border: `1px solid ${D.border}`,
           borderRadius: 14,
@@ -477,7 +501,7 @@ export default function DashboardView({
         </div>
 
         {/* ── QUICK ACTIONS (span 4) ── */}
-        <Card style={{ gridColumn: 'span 4', padding: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
+        <Card style={{ gridColumn: isMobile ? undefined : 'span 4', padding: 20, display: 'flex', flexDirection: 'column', gap: 4 }}>
           <SectionHeader style={{ marginBottom: 12 }}>Quick actions</SectionHeader>
           <div style={{ marginBottom: 12 }} />
           {[
@@ -517,7 +541,7 @@ export default function DashboardView({
             overflow: 'hidden',
           }}>
             <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none', background: 'radial-gradient(600px 180px at 8% 0%, rgba(99,102,241,0.22), transparent 60%), radial-gradient(500px 160px at 95% 100%, rgba(139,92,246,0.14), transparent 60%)' }} />
-            <div style={{ position: 'relative', display: 'flex', alignItems: 'flex-start', gap: 18 }}>
+            <div style={{ position: 'relative', display: 'flex', alignItems: isMobile ? 'stretch' : 'flex-start', flexDirection: isMobile ? 'column' : 'row', gap: 18 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{
                   display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -551,7 +575,7 @@ export default function DashboardView({
         )}
 
         {/* ── COURSES (span 6) ── */}
-        <HoverCard gridColumn="span 6" onClick={onNavigateToCourses} style={{ padding: 20 }}>
+        <HoverCard gridColumn={isMobile ? undefined : 'span 6'} onClick={onNavigateToCourses} style={{ padding: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
             <SectionHeader>Courses</SectionHeader>
             <div style={{ flex: 1 }} />
@@ -575,8 +599,9 @@ export default function DashboardView({
 
             return (
               <div key={idx} style={{
-                display: 'grid', gridTemplateColumns: '4px 1fr 200px auto 60px',
-                gap: 14, alignItems: 'center',
+                display: 'grid',
+                gridTemplateColumns: isMobile ? '4px 1fr auto' : '4px 1fr 200px auto 60px',
+                gap: isMobile ? 10 : 14, alignItems: 'center',
                 padding: '12px 0',
                 borderBottom: idx < courses.length - 1 ? `1px solid ${D.border}` : 'none',
               }}>
@@ -587,13 +612,31 @@ export default function DashboardView({
                     {lastLabel ? `Last session ${lastLabel}` : 'No sessions yet'}
                   </div>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2, overflow: 'hidden' }}>
-                    <div style={{ width: `${prog.pct}%`, height: '100%', background: color, opacity: 0.85 }} />
+                {!isMobile && (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <div style={{ flex: 1, height: 4, background: 'rgba(255,255,255,0.05)', borderRadius: 2, overflow: 'hidden' }}>
+                      <div style={{ width: `${prog.pct}%`, height: '100%', background: color, opacity: 0.85 }} />
+                    </div>
+                    <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: D.textMuted, width: 32, textAlign: 'right' }}>{prog.pct}%</span>
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 5,
+                      fontSize: 10.5, fontWeight: 500, color: pillColor,
+                      background: pillBg, border: `1px solid ${pillBorder}`,
+                      padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
+                    }}>
+                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: pillColor }} />
+                      {onTrack ? 'On track' : 'Behind'}
+                    </span>
                   </div>
-                  <span style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: D.textMuted, width: 32, textAlign: 'right' }}>{prog.pct}%</span>
+                )}
+                {!isMobile && (
+                  <div style={{ fontSize: 11.5, color: D.textMuted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>
+                    {dueNext ?? ''}
+                  </div>
+                )}
+                {isMobile ? (
                   <span style={{
-                    display: 'inline-flex', alignItems: 'center', gap: 5,
+                    display: 'inline-flex', alignItems: 'center', gap: 4,
                     fontSize: 10.5, fontWeight: 500, color: pillColor,
                     background: pillBg, border: `1px solid ${pillBorder}`,
                     padding: '2px 8px', borderRadius: 999, whiteSpace: 'nowrap',
@@ -601,18 +644,16 @@ export default function DashboardView({
                     <span style={{ width: 5, height: 5, borderRadius: '50%', background: pillColor }} />
                     {onTrack ? 'On track' : 'Behind'}
                   </span>
-                </div>
-                <div style={{ fontSize: 11.5, color: D.textMuted, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 120 }}>
-                  {dueNext ?? ''}
-                </div>
-                <span style={{ fontSize: 11.5, color: D.textMuted, textAlign: 'right' }}>Open →</span>
+                ) : (
+                  <span style={{ fontSize: 11.5, color: D.textMuted, textAlign: 'right' }}>Open →</span>
+                )}
               </div>
             )
           })}
         </HoverCard>
 
         {/* ── WEEKLY OVERVIEW (span 6) ── */}
-        <HoverCard gridColumn="span 6" onClick={onNavigateToProgress} style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
+        <HoverCard gridColumn={isMobile ? undefined : 'span 6'} onClick={onNavigateToProgress} style={{ padding: 24, display: 'flex', flexDirection: 'column' }}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <div>
               <SectionHeader>This week</SectionHeader>
@@ -626,7 +667,7 @@ export default function DashboardView({
               {onPace ? 'ON PACE' : 'BEHIND'}
             </div>
           </div>
-          <div style={{ flex: 1, display: 'flex', alignItems: 'center', gap: 28 }}>
+          <div style={{ flex: 1, display: 'flex', alignItems: isMobile ? 'center' : 'center', flexDirection: isMobile ? 'column' : 'row', gap: 28 }}>
             {/* Donut — bigger */}
             <div style={{ position: 'relative', width: 148, height: 148, flexShrink: 0 }}>
               {(() => {
@@ -684,7 +725,7 @@ export default function DashboardView({
 
         {/* ── DEADLINE RADAR (span 7) ── */}
         {upcomingDeadlines.length > 0 && (
-          <HoverCard gridColumn="span 7" onClick={onNavigateToCalendar} style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
+          <HoverCard gridColumn={isMobile ? undefined : 'span 7'} onClick={onNavigateToCalendar} style={{ padding: 20, display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
               <div>
                 <SectionHeader>Deadline radar</SectionHeader>
@@ -730,8 +771,9 @@ export default function DashboardView({
                 const uc = urgencyColor(days)
                 return (
                   <div key={evt.id ?? i} style={{
-                    display: 'grid', gridTemplateColumns: '3px 1fr 90px 50px 60px',
-                    gap: 12, alignItems: 'center',
+                    display: 'grid',
+                    gridTemplateColumns: isMobile ? '3px 1fr auto auto' : '3px 1fr 90px 50px 60px',
+                    gap: isMobile ? 10 : 12, alignItems: 'center',
                     padding: '9px 0',
                     borderBottom: i < upcomingDeadlines.length - 1 ? `1px solid ${D.border}` : 'none',
                   }}>
@@ -740,7 +782,9 @@ export default function DashboardView({
                       <div style={{ fontSize: 13, fontWeight: 500, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{clean(evt.name)}</div>
                       <div style={{ fontSize: 11, color: D.textDim, marginTop: 1 }}>{clean(evt.courseName)}</div>
                     </div>
-                    <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: D.textMuted, whiteSpace: 'nowrap' }}>{formatShortDate(evt.date)}</div>
+                    {!isMobile && (
+                      <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 11, color: D.textMuted, whiteSpace: 'nowrap' }}>{formatShortDate(evt.date)}</div>
+                    )}
                     <div style={{ fontFamily: 'ui-monospace, monospace', fontSize: 12, color: uc, fontWeight: 600, whiteSpace: 'nowrap' }}>{days}d</div>
                     <div style={{
                       fontSize: 10, fontWeight: 500, color: uc,
@@ -757,7 +801,7 @@ export default function DashboardView({
 
         {/* ── AI COACH RECOMMENDATION (span 5) ── */}
         <div style={{
-          gridColumn: upcomingDeadlines.length > 0 ? 'span 5' : 'span 12',
+          gridColumn: isMobile ? undefined : (upcomingDeadlines.length > 0 ? 'span 5' : 'span 12'),
           background: 'linear-gradient(155deg, rgba(99,102,241,0.14) 0%, rgba(99,102,241,0.04) 45%, #0a0a1e 100%)',
           border: '1px solid rgba(99,102,241,0.28)',
           borderRadius: 14, padding: 20,
