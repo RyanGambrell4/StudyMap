@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { getActivePlan } from '../lib/subscription'
 import OnboardingTour from './OnboardingTour'
 
@@ -85,6 +85,8 @@ export default function AppShell({
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [startTour, setStartTour] = useState(null)
   const handleTourReady = useCallback((fn) => setStartTour(() => fn), [])
+
+  useEffect(() => { window.scrollTo(0, 0) }, [activeSection])
 
   const plan = getActivePlan()
   const planLabel = plan === 'unlimited' ? 'Unlimited' : plan === 'pro' ? 'Pro' : 'Free'

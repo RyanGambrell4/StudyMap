@@ -100,7 +100,11 @@ export default function CalendarMonthView({
         </button>
       </div>
 
-      {/* ── Weekday headers ── */}
+      {/* ── Weekday headers + Day grid (scrollable on mobile) ── */}
+      <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+      <div style={{ minWidth: 490 }}>
+
+      {/* Weekday headers */}
       <div className="grid grid-cols-7" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
         {DAY_NAMES.map((n, i) => (
           <div key={n}
@@ -115,7 +119,7 @@ export default function CalendarMonthView({
         ))}
       </div>
 
-      {/* ── Day grid ── */}
+      {/* Day grid */}
       <div className="grid grid-cols-7"
         style={{ borderBottom: `1px solid ${tv.gridLine}` }}
       >
@@ -243,6 +247,8 @@ export default function CalendarMonthView({
           )
         })}
       </div>
+      </div>{/* end minWidth */}
+      </div>{/* end overflow-x scroll */}
 
       {/* ── Expanded day detail ── */}
       {expandedDayStr && (

@@ -472,7 +472,18 @@ export default function ProgressView({ courses, allSessions, completedIds, today
 
   // ─────────────────────────────────────────────────────────────────────────────
   return (
-    <div style={{ background: D.bg, minHeight: '100%', color: D.text, fontFamily: "'Inter', system-ui, sans-serif", padding: '28px 32px' }}>
+    <div className="pv-outer" style={{ background: D.bg, minHeight: '100%', color: D.text, fontFamily: "'Inter', system-ui, sans-serif", padding: '28px 32px' }}>
+      <style>{`
+        .pv-stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:16px; }
+        .pv-milestone-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
+        .pv-2col { display:grid; gap:14px; margin-bottom:16px; }
+        @media (max-width:640px) {
+          .pv-outer { padding:18px 14px !important; }
+          .pv-stat-grid { grid-template-columns:1fr 1fr !important; }
+          .pv-milestone-grid { grid-template-columns:1fr 1fr !important; }
+          .pv-2col { grid-template-columns:1fr !important; }
+        }
+      `}</style>
 
       {/* ── Header ── */}
       <div style={{ marginBottom: 24 }}>
@@ -502,7 +513,7 @@ export default function ProgressView({ courses, allSessions, completedIds, today
       </div>
 
       {/* ── Stat cards ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 14, marginBottom: 16 }}>
+      <div className="pv-stat-grid">
         {[
           {
             label: 'STREAK', value: streak, unit: 'days',
@@ -547,7 +558,7 @@ export default function ProgressView({ courses, allSessions, completedIds, today
       </div>
 
       {/* ── Skill Mastery + Standout Moments ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
+      <div className="pv-2col" style={{ gridTemplateColumns: '1fr 1fr' }}>
 
         {/* Skill Mastery */}
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '22px 26px' }}>
@@ -610,7 +621,7 @@ export default function ProgressView({ courses, allSessions, completedIds, today
       </div>
 
       {/* ── Weekly Hours + Time by Course ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '3fr 2fr', gap: 14, marginBottom: 16 }}>
+      <div className="pv-2col" style={{ gridTemplateColumns: '3fr 2fr' }}>
 
         {/* Weekly hours */}
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '22px 26px' }}>
@@ -666,7 +677,7 @@ export default function ProgressView({ courses, allSessions, completedIds, today
       </div>
 
       {/* ── Current Streak + Focus Heatmap ── */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14, marginBottom: 16 }}>
+      <div className="pv-2col" style={{ gridTemplateColumns: '1fr 1fr' }}>
 
         {/* Current streak */}
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '22px 26px' }}>
@@ -747,7 +758,7 @@ export default function ProgressView({ courses, allSessions, completedIds, today
             {earnedCount > 0 && ` · ${milestones.length - earnedCount} remaining`}
           </div>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4,1fr)', gap: 10 }}>
+        <div className="pv-milestone-grid">
           {milestones.map(m => (
             <div key={m.id} style={{
               background: m.earned ? `${D.accent}0e` : 'rgba(255,255,255,0.02)',
