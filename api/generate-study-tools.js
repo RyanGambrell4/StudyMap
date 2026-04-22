@@ -87,6 +87,7 @@ Rules:
       if (!content) throw new Error(data.error?.message ?? 'Empty AI response')
       const first = content.indexOf('[')
       const last = content.lastIndexOf(']')
+      if (first === -1 || last === -1 || last <= first) throw new Error('AI returned malformed quiz — please try again')
       const questions = JSON.parse(content.slice(first, last + 1))
 
       const LABELS = ['A', 'B', 'C', 'D']

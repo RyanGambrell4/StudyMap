@@ -211,7 +211,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const [inSessionFlashcards, setInSessionFlashcards] = useState(null)
   const [fcGenerating, setFcGenerating] = useState(false)
   const [fcGenerateError, setFcGenerateError] = useState('')
-  const flashcards = inSessionFlashcards ?? studyTools?.flashcards ?? []
+  const flashcards = inSessionFlashcards ?? []
 
   // ── Active Recall ──
   const [recallText, setRecallText] = useState('')
@@ -447,8 +447,12 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
           images: quizSourceImages.map(img => ({ media_type: img.media_type, data: img.data })),
         }),
       })
+      if (!res.ok) {
+        let errMsg = 'Quiz generation failed'
+        try { const d = await res.json(); errMsg = d.error ?? errMsg } catch {}
+        throw new Error(errMsg)
+      }
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Quiz generation failed')
       setQuizQuestions(data.questions)
       incrementAIQuery()
     } catch (e) { setQuizError(e.message) }
