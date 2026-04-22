@@ -74,16 +74,16 @@ const GH_STYLE = `
 .gh-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#6366f1;cursor:pointer;border:2px solid #0a0a1e;box-shadow:0 0 0 1px #818CF8,0 2px 8px rgba(99,102,241,0.35);}
 .gh-range::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#6366f1;cursor:pointer;border:2px solid #0a0a1e;}
 .gh-range:disabled{opacity:0.5;cursor:default;}
-.gh-input{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);color:#e8e8f0;border-radius:7px;padding:7px 10px;font-size:13px;outline:none;transition:border 0.15s;font-family:inherit;}
+.gh-input{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);color:#e8e8f0;border-radius:7px;padding:7px 10px;font-size:13px;outline:none;transition:border 0.15s;font-family:inherit;box-sizing:border-box;}
 .gh-input:focus{border-color:rgba(99,102,241,0.5);}
 .gh-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
 .gh-input::placeholder{color:#55556e;}
 .gh-input:disabled{opacity:0.4;}
-.gh-input-text{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);color:#e8e8f0;border-radius:7px;padding:7px 10px;font-size:13px;outline:none;transition:border 0.15s;font-family:inherit;}
+.gh-input-text{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);color:#e8e8f0;border-radius:7px;padding:7px 10px;font-size:13px;outline:none;transition:border 0.15s;font-family:inherit;box-sizing:border-box;}
 .gh-input-text:focus{border-color:rgba(99,102,241,0.5);}
 .gh-input-text::placeholder{color:#55556e;}
 @media(max-width:900px){.gh-grid{grid-template-columns:1fr!important;}.gh-rail{position:static!important;}}
-@media(max-width:640px){.gh-plan-row{display:flex!important;flex-direction:column!important;gap:8px!important;padding:12px 0!important;border-bottom:1px solid rgba(255,255,255,0.06)!important;}.gh-plan-row-header{display:none!important;}.gh-grade-row-inner{display:grid!important;grid-template-columns:1fr 80px 80px 24px!important;gap:8px!important;align-items:center!important;}.gh-header{padding:16px 14px 14px!important;}.gh-content{padding:14px 14px 48px!important;overflow-x:hidden!important;max-width:100%!important;}.gh-tab-btn{padding:9px 8px!important;font-size:12px!important;gap:5px!important;}.gh-scenarios-grid{grid-template-columns:1fr!important;}.gh-compare-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}.gh-bottom-bar{flex-wrap:wrap!important;gap:8px!important;}.gh-course-strip{flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;padding-bottom:6px!important;}}
+@media(max-width:640px){.gh-plan-row{display:flex!important;flex-direction:column!important;gap:8px!important;padding:12px 0!important;border-bottom:1px solid rgba(255,255,255,0.06)!important;}.gh-plan-row-header{display:none!important;}.gh-grade-row-inner{display:grid!important;grid-template-columns:64px 1fr 60px 24px!important;gap:8px!important;align-items:center!important;}.gh-header{padding:16px 14px 14px!important;}.gh-content{padding:14px 14px 48px!important;overflow-x:hidden!important;max-width:100%!important;}.gh-tab-btn{padding:9px 8px!important;font-size:12px!important;gap:5px!important;}.gh-scenarios-grid{grid-template-columns:1fr!important;}.gh-compare-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}.gh-bottom-bar{flex-wrap:wrap!important;gap:8px!important;}.gh-course-strip{flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;padding-bottom:6px!important;}}
 `
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -257,13 +257,13 @@ function PlanTab({ course, gradeData, dot, onSave }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Components table */}
       <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: D.text }}>Grade components</div>
             <div style={{ fontSize: 12, color: D.dim, marginTop: 2 }}>Define how this course is graded</div>
           </div>
           <div style={{ flex: 1 }} />
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px', borderRadius: 999, background: totalWeight === 100 ? 'rgba(52,211,153,0.1)' : 'rgba(249,115,22,0.1)', border: `1px solid ${totalWeight === 100 ? 'rgba(52,211,153,0.3)' : 'rgba(249,115,22,0.3)'}` }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px', borderRadius: 999, background: totalWeight === 100 ? 'rgba(52,211,153,0.1)' : 'rgba(249,115,22,0.1)', border: `1px solid ${totalWeight === 100 ? 'rgba(52,211,153,0.3)' : 'rgba(249,115,22,0.3)'}`, flexShrink: 0 }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: totalWeight === 100 ? D.mint : D.orange }} />
             <span style={{ fontSize: 11.5, fontWeight: 600, color: totalWeight === 100 ? D.mint : D.orange, fontFamily: 'ui-monospace, monospace' }}>{totalWeight.toFixed(0)}% / 100%</span>
           </div>
@@ -342,12 +342,12 @@ function PlanTab({ course, gradeData, dot, onSave }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, position: 'relative', marginBottom: 14 }}>
             {ungraded.map(c => (
-              <div key={c.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 12px', background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 9 }}>
+              <div key={c.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, padding: '10px 12px', background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 9 }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 500, color: D.text }}>{c.component || 'Untitled'}</div>
                   <div style={{ fontSize: 11, color: D.dim, marginTop: 1 }}>Worth <span style={{ fontFamily: 'ui-monospace, monospace' }}>{c.weight}%</span> of final grade</div>
                 </div>
-                <div style={{ padding: '5px 11px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: D.mint, fontSize: 12, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>
+                <div style={{ padding: '5px 11px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: D.mint, fontSize: 12, fontWeight: 700, fontFamily: 'ui-monospace, monospace', flexShrink: 0 }}>
                   {neededInfo.needed != null ? neededInfo.needed.toFixed(1) + '%' : '-'}
                 </div>
               </div>
@@ -356,7 +356,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
 
           {neededInfo.bufferPts > 0 && !neededInfo.impossible && (
             <div style={{ padding: 12, borderRadius: 10, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.25)', position: 'relative' }}>
-              <div style={{ fontSize: 12.5, color: D.text, marginBottom: 8 }}>
+              <div style={{ fontSize: 12.5, color: D.text, marginBottom: 8, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                 You have a <span style={{ color: D.violet, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>{neededInfo.bufferPts.toFixed(1)}-point</span> buffer on remaining work. Spend it wisely.
               </div>
               <div style={{ height: 5, background: 'rgba(255,255,255,0.04)', borderRadius: 3, overflow: 'hidden' }}>
@@ -377,7 +377,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
       {showPlan && scenarioPaths.length > 0 && (
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
           <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 12 }}>Three paths to {targetLabel}</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+          <div className="gh-scenarios-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
             {scenarioPaths.filter(p => p.possible !== false).slice(0, 3).map((path, pi) => (
               <PathCard
                 key={path.name}
@@ -933,7 +933,7 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
   }, [gradeData, course, activeCourseIdx])
 
   return (
-    <div style={{ background: D.bg, minHeight: '100vh', backgroundImage: 'radial-gradient(1200px 600px at 85% -10%, rgba(99,102,241,0.10), transparent 60%), radial-gradient(900px 500px at 10% 110%, rgba(99,102,241,0.05), transparent 60%)' }}>
+    <div style={{ background: D.bg, minHeight: '100vh', overflowX: 'hidden', maxWidth: '100vw', backgroundImage: 'radial-gradient(1200px 600px at 85% -10%, rgba(99,102,241,0.10), transparent 60%), radial-gradient(900px 500px at 10% 110%, rgba(99,102,241,0.05), transparent 60%)' }}>
       <style>{GH_STYLE}{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
       {/* Header */}
