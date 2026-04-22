@@ -85,7 +85,7 @@ body{overflow-x:hidden!important;}
 .gh-input-text:focus{border-color:rgba(99,102,241,0.5);}
 .gh-input-text::placeholder{color:#55556e;}
 @media(max-width:900px){.gh-grid{grid-template-columns:1fr!important;}.gh-rail{position:static!important;}}
-@media(max-width:640px){.gh-plan-row{display:flex!important;flex-direction:column!important;gap:8px!important;padding:12px 0!important;border-bottom:1px solid rgba(255,255,255,0.06)!important;}.gh-plan-row-header{display:none!important;}.gh-grade-row-inner{display:grid!important;grid-template-columns:64px 1fr 60px 24px!important;gap:8px!important;align-items:center!important;}.gh-header{padding:16px 14px 14px!important;}.gh-content{padding:14px 14px 48px!important;overflow-x:hidden!important;max-width:100%!important;}.gh-tab-btn{padding:9px 8px!important;font-size:12px!important;gap:5px!important;}.gh-scenarios-grid{grid-template-columns:1fr!important;}.gh-compare-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}.gh-bottom-bar{flex-wrap:wrap!important;gap:8px!important;}.gh-course-strip{flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;padding-bottom:6px!important;}}
+@media(max-width:640px){.gh-plan-row{display:flex!important;flex-direction:column!important;gap:8px!important;padding:12px 0!important;border-bottom:1px solid rgba(255,255,255,0.06)!important;min-width:0!important;width:100%!important;}.gh-plan-row-header{display:none!important;}.gh-grade-row-inner{display:grid!important;grid-template-columns:64px 1fr 60px 24px!important;gap:8px!important;align-items:center!important;min-width:0!important;width:100%!important;}.gh-table-wrap{overflow-x:hidden!important;}.gh-plan-content{overflow-x:hidden!important;max-width:100%!important;}.gh-plan-callout{overflow:hidden!important;}.gh-header{padding:16px 14px 14px!important;}.gh-content{padding:14px 14px 48px!important;overflow-x:hidden!important;max-width:100%!important;}.gh-tab-btn{padding:9px 8px!important;font-size:12px!important;gap:5px!important;}.gh-scenarios-grid{grid-template-columns:1fr!important;}.gh-compare-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}.gh-bottom-bar{flex-wrap:wrap!important;gap:8px!important;}.gh-course-strip{flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;padding-bottom:6px!important;}}
 `
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -256,7 +256,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
   const targetLabel  = TARGET_OPTIONS.find(o => o.value === targetGrade)?.label ?? 'A'
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div className="gh-plan-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Components table */}
       <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, rowGap: 8, marginBottom: 16 }}>
@@ -271,7 +271,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
           </div>
         </div>
 
-        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+        <div className="gh-table-wrap" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           {/* Header row */}
           <div className="gh-plan-row gh-plan-row-header" style={{ display: 'grid', gridTemplateColumns: 'minmax(120px,1fr) 80px 100px 80px 28px', gap: 8, fontSize: 10.5, fontWeight: 600, letterSpacing: 0.5, color: D.dim, textTransform: 'uppercase', padding: '0 4px 10px', minWidth: 400 }}>
             <span>Component</span><span>Weight</span><span>Status</span><span>Grade</span><span />
@@ -328,15 +328,15 @@ function PlanTab({ course, gradeData, dot, onSave }) {
 
       {/* Required avg callout */}
       {showPlan && savedComps.length > 0 && neededInfo && (
-        <div style={{ background: 'linear-gradient(155deg, rgba(99,102,241,0.14), rgba(99,102,241,0.04) 45%, #0a0a1e)', border: '1px solid rgba(99,102,241,0.28)', borderRadius: 14, padding: 20, position: 'relative', overflow: 'hidden' }}>
+        <div className="gh-plan-callout" style={{ background: 'linear-gradient(155deg, rgba(99,102,241,0.14), rgba(99,102,241,0.04) 45%, #0a0a1e)', border: '1px solid rgba(99,102,241,0.28)', borderRadius: 14, padding: 20, position: 'relative', overflow: 'hidden' }}>
           <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, background: 'radial-gradient(circle, rgba(99,102,241,0.22), transparent 70%)', pointerEvents: 'none' }} />
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, position: 'relative' }}>
-            <div style={{ width: 28, height: 28, borderRadius: 7, background: `linear-gradient(135deg, ${D.accent}, ${D.violet})`, display: 'grid', placeItems: 'center', color: '#fff', boxShadow: `0 0 12px ${D.glow}` }}>
+            <div style={{ width: 28, height: 28, borderRadius: 7, background: `linear-gradient(135deg, ${D.accent}, ${D.violet})`, display: 'grid', placeItems: 'center', color: '#fff', boxShadow: `0 0 12px ${D.glow}`, flexShrink: 0 }}>
               <IcoSparkles />
             </div>
-            <div>
-              <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase' }}>To hit {targetLabel}, here's what you need</div>
-              <div style={{ fontSize: 13, color: D.text, marginTop: 3 }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', wordBreak: 'break-word' }}>To hit {targetLabel}, here's what you need</div>
+              <div style={{ fontSize: 13, color: D.text, marginTop: 3, wordBreak: 'break-word' }}>
                 You need an average of <span style={{ color: D.indigo, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>{neededInfo.needed != null ? neededInfo.needed.toFixed(1) + '%' : '-'}</span> on remaining work
               </div>
             </div>
