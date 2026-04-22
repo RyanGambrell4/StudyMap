@@ -83,7 +83,7 @@ const GH_STYLE = `
 .gh-input-text:focus{border-color:rgba(99,102,241,0.5);}
 .gh-input-text::placeholder{color:#55556e;}
 @media(max-width:900px){.gh-grid{grid-template-columns:1fr!important;}.gh-rail{position:static!important;}}
-@media(max-width:640px){.gh-plan-row{grid-template-columns:1fr 64px 90px 64px 28px!important;gap:6px!important;}.gh-header{padding:16px 14px 14px!important;}.gh-content{padding:14px 14px 48px!important;}.gh-tab-btn{padding:9px 8px!important;font-size:12px!important;gap:5px!important;}}
+@media(max-width:640px){.gh-plan-row{grid-template-columns:1fr 64px 90px 64px 28px!important;gap:6px!important;}.gh-header{padding:16px 14px 14px!important;}.gh-content{padding:14px 14px 48px!important;}.gh-tab-btn{padding:9px 8px!important;font-size:12px!important;gap:5px!important;}.gh-scenarios-grid{grid-template-columns:1fr!important;}.gh-compare-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}.gh-bottom-bar{flex-wrap:wrap!important;gap:8px!important;}}
 `
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -661,7 +661,7 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
       </div>
 
       {/* Actions */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 10 }}>
+      <div className="gh-bottom-bar" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 10 }}>
         <button onClick={handleReset} style={{ padding: '13px 16px', background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, borderRadius: 10, fontSize: 13, fontWeight: 500, color: D.text, cursor: 'pointer' }}>
           Reset to actuals
         </button>
@@ -690,7 +690,7 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
             )}
           </div>
           {!showCompare ? (
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
+            <div className="gh-scenarios-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
               {scenarios.map(sc => {
                 const proj = getProjectedGrade(components.map(c => ({ ...c, graded: false })), sc.overrides)
                 const sltr = letterGrade(proj)
@@ -712,8 +712,8 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
               })}
             </div>
           ) : (
-            <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, overflow: 'hidden' }}>
-              <table style={{ width: '100%', fontSize: 12.5, borderCollapse: 'collapse' }}>
+            <div className="gh-compare-wrap" style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, overflow: 'hidden' }}>
+              <table style={{ width: '100%', minWidth: 360, fontSize: 12.5, borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: `1px solid ${D.border}` }}>
                     <th style={{ textAlign: 'left', padding: '10px 16px', color: D.dim, fontWeight: 600, fontSize: 10.5, textTransform: 'uppercase', letterSpacing: 0.5 }}>Component</th>

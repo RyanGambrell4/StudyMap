@@ -42,6 +42,11 @@ const SC_STYLE = `
     .sc-plan-text { min-width:0 !important; }
     .sc-roadmap-hint { display:none !important; }
     .sc-plan-title { font-size:18px !important; }
+    .sc-session-grid { grid-template-columns:1fr !important; }
+    .sc-topics-grid { grid-template-columns:1fr !important; }
+    .sc-techniques-grid { grid-template-columns:1fr !important; }
+    .sc-week-hint { display:none !important; }
+    .sc-topic-struggles-hint { display:none !important; }
   }
 `
 
@@ -1009,9 +1014,9 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '16px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>What You'll Master: Your {plan.priorityTopics.length} Topic{plan.priorityTopics.length !== 1 ? 's' : ''}</span>
-            {struggles && <span style={{ fontSize: 11, color: D.dim }}>From your list, nothing added</span>}
+            {struggles && <span className="sc-topic-struggles-hint" style={{ fontSize: 11, color: D.dim }}>From your list, nothing added</span>}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
+          <div className="sc-topics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
             {plan.priorityTopics.map((topic, i) => {
               const isStruggle = struggles && topic.toLowerCase().split(' ').some(w => w.length > 4 && struggles.toLowerCase().includes(w))
               return (
@@ -1042,7 +1047,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
           <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>Week by Week</span>
-          <span style={{ fontSize: 11, color: D.dim }}>Check sessions as you complete them</span>
+          <span className="sc-week-hint" style={{ fontSize: 11, color: D.dim }}>Check sessions as you complete them</span>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           {plan.weeklyFocus?.map((week, wi) => {
@@ -1094,7 +1099,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
       {techniquesList.length > 0 && (
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '16px 18px' }}>
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase', marginBottom: 12 }}>Techniques in Rotation</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
+          <div className="sc-techniques-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
             {techniquesList.map((t, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 9, background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}` }}>
                 <div style={{ width: 22, height: 22, borderRadius: 7, background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 700, color: D.indigo, flexShrink: 0 }}>{i + 1}</div>
@@ -1141,7 +1146,7 @@ function SessionCard({ session, wi, si, checked, onCheck, struggles }) {
           </div>
           <span style={{ fontSize: 11.5, color: D.muted, flexShrink: 0 }}>{session.duration || 60}m</span>
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
+        <div className="sc-session-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
           <div>
             <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', color: D.dim, textTransform: 'uppercase', marginBottom: 3 }}>Focus</div>
             <div style={{ fontSize: 12.5, color: D.muted, lineHeight: 1.4 }}>{session.goal}</div>
