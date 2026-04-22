@@ -83,7 +83,7 @@ const GH_STYLE = `
 .gh-input-text:focus{border-color:rgba(99,102,241,0.5);}
 .gh-input-text::placeholder{color:#55556e;}
 @media(max-width:900px){.gh-grid{grid-template-columns:1fr!important;}.gh-rail{position:static!important;}}
-@media(max-width:640px){.gh-plan-row{grid-template-columns:1fr 64px 90px 64px 28px!important;gap:6px!important;}.gh-header{padding:16px 14px 14px!important;}.gh-content{padding:14px 14px 48px!important;}.gh-tab-btn{padding:9px 8px!important;font-size:12px!important;gap:5px!important;}.gh-scenarios-grid{grid-template-columns:1fr!important;}.gh-compare-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}.gh-bottom-bar{flex-wrap:wrap!important;gap:8px!important;}.gh-course-strip{flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;padding-bottom:6px!important;}}
+@media(max-width:640px){.gh-plan-row{display:flex!important;flex-direction:column!important;gap:8px!important;padding:12px 0!important;border-bottom:1px solid rgba(255,255,255,0.06)!important;}.gh-plan-row-header{display:none!important;}.gh-grade-row-inner{display:grid!important;grid-template-columns:1fr 80px 80px 24px!important;gap:8px!important;align-items:center!important;}.gh-header{padding:16px 14px 14px!important;}.gh-content{padding:14px 14px 48px!important;overflow-x:hidden!important;max-width:100%!important;}.gh-tab-btn{padding:9px 8px!important;font-size:12px!important;gap:5px!important;}.gh-scenarios-grid{grid-template-columns:1fr!important;}.gh-compare-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}.gh-bottom-bar{flex-wrap:wrap!important;gap:8px!important;}.gh-course-strip{flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;padding-bottom:6px!important;}}
 `
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -271,27 +271,29 @@ function PlanTab({ course, gradeData, dot, onSave }) {
 
         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
           {/* Header row */}
-          <div className="gh-plan-row" style={{ display: 'grid', gridTemplateColumns: 'minmax(120px,1fr) 80px 100px 80px 28px', gap: 8, fontSize: 10.5, fontWeight: 600, letterSpacing: 0.5, color: D.dim, textTransform: 'uppercase', padding: '0 4px 10px', minWidth: 400 }}>
+          <div className="gh-plan-row gh-plan-row-header" style={{ display: 'grid', gridTemplateColumns: 'minmax(120px,1fr) 80px 100px 80px 28px', gap: 8, fontSize: 10.5, fontWeight: 600, letterSpacing: 0.5, color: D.dim, textTransform: 'uppercase', padding: '0 4px 10px', minWidth: 400 }}>
             <span>Component</span><span>Weight</span><span>Status</span><span>Grade</span><span />
           </div>
 
           {rows.map((row, i) => (
             <div key={row.id} className="gh-plan-row" style={{ display: 'grid', gridTemplateColumns: 'minmax(120px,1fr) 80px 100px 80px 28px', gap: 8, alignItems: 'center', padding: '6px 0', minWidth: 400 }}>
               <input className="gh-input-text" type="text" value={row.component} onChange={e => setRow(i, 'component', e.target.value)} placeholder="e.g. Midterm" style={{ width: '100%' }} />
-              <div style={{ position: 'relative' }}>
-                <input className="gh-input" type="number" value={row.weight} onChange={e => setRow(i, 'weight', e.target.value)} style={{ width: '100%', paddingRight: 26 }} />
-                <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: D.dim, pointerEvents: 'none' }}>%</span>
+              <div className="gh-grade-row-inner">
+                <div style={{ position: 'relative' }}>
+                  <input className="gh-input" type="number" value={row.weight} onChange={e => setRow(i, 'weight', e.target.value)} style={{ width: '100%', paddingRight: 26 }} />
+                  <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: D.dim, pointerEvents: 'none' }}>%</span>
+                </div>
+                <button onClick={() => setRow(i, 'graded', !row.graded)} style={{ padding: '7px 10px', fontSize: 12, fontWeight: 600, borderRadius: 7, cursor: 'pointer', background: row.graded ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)', border: row.graded ? '1px solid rgba(99,102,241,0.35)' : `1px solid ${D.border}`, color: row.graded ? D.indigo : D.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                  {row.graded && <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.indigo }} />}
+                  {row.graded ? 'Graded' : 'Not yet'}
+                </button>
+                <input className="gh-input" type="number" value={row.grade} placeholder="-" onChange={e => setRow(i, 'grade', e.target.value)} disabled={!row.graded} style={{ width: '100%', opacity: row.graded ? 1 : 0.4 }} />
+                <button onClick={() => removeRow(i)} style={{ width: 28, height: 28, borderRadius: 6, color: D.dim, display: 'grid', placeItems: 'center', cursor: 'pointer', transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(244,114,182,0.1)'; e.currentTarget.style.color = D.pink }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = D.dim }}>
+                  <IcoX />
+                </button>
               </div>
-              <button onClick={() => setRow(i, 'graded', !row.graded)} style={{ padding: '7px 10px', fontSize: 12, fontWeight: 600, borderRadius: 7, cursor: 'pointer', background: row.graded ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)', border: row.graded ? '1px solid rgba(99,102,241,0.35)' : `1px solid ${D.border}`, color: row.graded ? D.indigo : D.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
-                {row.graded && <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.indigo }} />}
-                {row.graded ? 'Graded' : 'Not yet'}
-              </button>
-              <input className="gh-input" type="number" value={row.grade} placeholder="-" onChange={e => setRow(i, 'grade', e.target.value)} disabled={!row.graded} style={{ width: '100%', opacity: row.graded ? 1 : 0.4 }} />
-              <button onClick={() => removeRow(i)} style={{ width: 28, height: 28, borderRadius: 6, color: D.dim, display: 'grid', placeItems: 'center', cursor: 'pointer', transition: 'all 0.15s' }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'rgba(244,114,182,0.1)'; e.currentTarget.style.color = D.pink }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = D.dim }}>
-                <IcoX />
-              </button>
             </div>
           ))}
         </div>
@@ -954,7 +956,7 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
         </p>
       </div>
 
-      <div className="gh-content" style={{ padding: '24px 32px 48px' }}>
+      <div className="gh-content" style={{ padding: '24px 32px 48px', overflowX: 'hidden', maxWidth: '100%' }}>
         {/* Course pills */}
         <div className="gh-course-strip" style={{ display: 'flex', gap: 12, marginBottom: 20, overflowX: 'auto' }}>
           {courses.map((c, i) => (

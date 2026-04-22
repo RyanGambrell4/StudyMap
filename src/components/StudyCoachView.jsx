@@ -29,7 +29,8 @@ const SC_STYLE = `
   .sc-input::placeholder { color:#55556e; }
   textarea.sc-input { resize:vertical; min-height:68px; line-height:1.5; }
   input[type="date"].sc-input { color-scheme:dark; }
-  @media (max-width:1100px) { .sc-grid { grid-template-columns:1fr !important; } .sc-rail { position:static !important; } }
+  @media (max-width:1200px) { .sc-grid { grid-template-columns:1fr !important; } .sc-rail { position:static !important; } }
+  @media (max-width:768px) { .sc-grid { grid-template-columns:1fr !important; } .sc-rail { position:static !important; top:auto !important; } }
   @media (max-width:640px) {
     .sc-header-pad { padding:16px 14px 12px !important; }
     .sc-page-pad { padding:14px 14px 60px !important; }
@@ -40,8 +41,11 @@ const SC_STYLE = `
     .sc-days-row { flex-wrap:wrap !important; }
     .sc-plan-ring { display:none !important; }
     .sc-plan-text { min-width:0 !important; }
+    .sc-plan-header-row { flex-direction:column !important; }
     .sc-roadmap-hint { display:none !important; }
-    .sc-plan-title { font-size:18px !important; }
+    .sc-page-pad { overflow-x: hidden !important; max-width: 100vw !important; }
+    * { min-width: 0; }
+    .sc-plan-title { font-size:18px !important; line-height:1.3 !important; word-break:break-word !important; }
     .sc-session-grid { grid-template-columns:1fr !important; }
     .sc-topics-grid { grid-template-columns:1fr !important; }
     .sc-techniques-grid { grid-template-columns:1fr !important; }
@@ -828,7 +832,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     <>
       <style>{SC_STYLE}</style>
       <PageHeader step={step} />
-      <div className="sc-page-pad" style={{ padding: '24px 32px 48px' }}>
+      <div className="sc-page-pad" style={{ padding: '24px 32px 48px', overflowX: 'hidden', maxWidth: '100vw' }}>
         <Stepper step={step} go={setStep} />
         {gradeGapBanner}
         {step === 1 && (
@@ -911,12 +915,12 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 80 }}>
       {/* Overview header */}
-      <div style={{ background: 'linear-gradient(155deg, rgba(249,115,22,0.1) 0%, rgba(249,115,22,0.04) 40%, #0a0a1e 100%)', border: '1px solid rgba(249,115,22,0.25)', borderRadius: 14, padding: '20px 22px', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ background: 'linear-gradient(155deg, rgba(249,115,22,0.1) 0%, rgba(249,115,22,0.04) 40%, #0a0a1e 100%)', border: '1px solid rgba(249,115,22,0.25)', borderRadius: 14, padding: '20px 22px', position: 'relative', overflow: 'hidden', overflowX: 'hidden' }}>
         <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, background: 'radial-gradient(circle, rgba(249,115,22,0.18), transparent 70%)', pointerEvents: 'none' }} />
         <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', color: D.orange, textTransform: 'uppercase', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
           <Icon name="sparkles" size={11} color={D.orange} /> Your Personalized Plan
         </div>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+        <div className="sc-plan-header-row" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div className="sc-plan-text" style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: dot, boxShadow: `0 0 8px ${dot}`, flexShrink: 0 }} />
@@ -980,13 +984,13 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
       )}
 
       {/* Info cards */}
-      <div className="sc-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 10 }}>
-        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14 }}>
+      <div className="sc-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14, minWidth: 0 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: D.pink, textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}><Icon name="flag" size={10} color={D.pink} /> The Goal</div>
           <div style={{ fontSize: 13, color: goal ? D.text : D.dim, fontStyle: goal ? 'normal' : 'italic' }}>{goal || 'No goal provided'}</div>
         </div>
         {validDates.length > 0 ? (
-          <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14 }}>
+          <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14, minWidth: 0 }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: D.violet, textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}><Icon name="calendar" size={10} color={D.violet} /> {validDates.length} Deadline{validDates.length > 1 ? 's' : ''}</div>
             {validDates.map((d, i) => (
               <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginTop: i > 0 ? 4 : 0 }}>
@@ -996,12 +1000,12 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
             ))}
           </div>
         ) : (
-          <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14 }}>
+          <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14, minWidth: 0 }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: D.violet, textTransform: 'uppercase', marginBottom: 6 }}>No Deadlines</div>
             <div style={{ fontSize: 12, color: D.dim, fontStyle: 'italic' }}>No dates added</div>
           </div>
         )}
-        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14 }}>
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14, minWidth: 0 }}>
           <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: D.cyan, textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}><Icon name="lightbulb" size={10} color={D.cyan} /> How We're Studying</div>
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
             {techniquesList.map((t, i) => <span key={i} style={{ fontSize: 11.5, padding: '3px 8px', borderRadius: 5, background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', color: D.cyan }}>{t}</span>)}
