@@ -1222,7 +1222,6 @@ export default function OutputView({
             googleCalendarConnected={gcalConnected}
             onConnectGoogleCalendar={handleConnectGoogleCalendar}
             onShowPaywall={onShowPaywall}
-            onToggleTheme={onToggleTheme}
           />
         )}
 
