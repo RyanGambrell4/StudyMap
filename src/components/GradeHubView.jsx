@@ -70,6 +70,8 @@ function computeGPA(courses) {
 
 // Inject range + input styles once
 const GH_STYLE = `
+body{overflow-x:hidden!important;}
+*{box-sizing:border-box;}
 .gh-range{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,0.06);outline:none;position:relative;}
 .gh-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#6366f1;cursor:pointer;border:2px solid #0a0a1e;box-shadow:0 0 0 1px #818CF8,0 2px 8px rgba(99,102,241,0.35);}
 .gh-range::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#6366f1;cursor:pointer;border:2px solid #0a0a1e;}
@@ -199,7 +201,7 @@ function Tabs({ active, onChange }) {
 // ── PathCard ──────────────────────────────────────────────────────────────────
 function PathCard({ color, icon, title, desc, rows }) {
   return (
-    <div style={{ padding: 14, borderRadius: 11, background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderTop: `2px solid ${color}` }}>
+    <div style={{ padding: 14, borderRadius: 11, background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderTop: `2px solid ${color}`, minWidth: 0, width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <div style={{ width: 24, height: 24, borderRadius: 6, background: `${color}18`, color, display: 'grid', placeItems: 'center', fontSize: 13 }}>{icon}</div>
         <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>{title}</div>
@@ -257,13 +259,13 @@ function PlanTab({ course, gradeData, dot, onSave }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Components table */}
       <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, rowGap: 8, marginBottom: 16 }}>
           <div>
             <div style={{ fontSize: 15, fontWeight: 600, color: D.text }}>Grade components</div>
             <div style={{ fontSize: 12, color: D.dim, marginTop: 2 }}>Define how this course is graded</div>
           </div>
           <div style={{ flex: 1 }} />
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px', borderRadius: 999, background: totalWeight === 100 ? 'rgba(52,211,153,0.1)' : 'rgba(249,115,22,0.1)', border: `1px solid ${totalWeight === 100 ? 'rgba(52,211,153,0.3)' : 'rgba(249,115,22,0.3)'}`, flexShrink: 0 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px', borderRadius: 999, background: totalWeight === 100 ? 'rgba(52,211,153,0.1)' : 'rgba(249,115,22,0.1)', border: `1px solid ${totalWeight === 100 ? 'rgba(52,211,153,0.3)' : 'rgba(249,115,22,0.3)'}`, flexShrink: 0, marginLeft: 'auto' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: totalWeight === 100 ? D.mint : D.orange }} />
             <span style={{ fontSize: 11.5, fontWeight: 600, color: totalWeight === 100 ? D.mint : D.orange, fontFamily: 'ui-monospace, monospace' }}>{totalWeight.toFixed(0)}% / 100%</span>
           </div>
@@ -342,12 +344,12 @@ function PlanTab({ course, gradeData, dot, onSave }) {
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, position: 'relative', marginBottom: 14 }}>
             {ungraded.map(c => (
-              <div key={c.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 8, padding: '10px 12px', background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 9 }}>
+              <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6, padding: '10px 12px', background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 9 }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 500, color: D.text }}>{c.component || 'Untitled'}</div>
                   <div style={{ fontSize: 11, color: D.dim, marginTop: 1 }}>Worth <span style={{ fontFamily: 'ui-monospace, monospace' }}>{c.weight}%</span> of final grade</div>
                 </div>
-                <div style={{ padding: '5px 11px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: D.mint, fontSize: 12, fontWeight: 700, fontFamily: 'ui-monospace, monospace', flexShrink: 0 }}>
+                <div style={{ padding: '5px 11px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: D.mint, fontSize: 12, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>
                   {neededInfo.needed != null ? neededInfo.needed.toFixed(1) + '%' : '-'}
                 </div>
               </div>
