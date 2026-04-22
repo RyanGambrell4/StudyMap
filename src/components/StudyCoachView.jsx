@@ -903,7 +903,69 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
   const struggles = form?.struggles?.trim() || ''
   const validDates = (form?.dates || []).filter(d => d.date && d.label)
   const techniquesList = form?.style?.length ? form.style : ['Active recall', 'Reading + notes']
+  const [exportOpen, setExportOpen] = useState(false)
   const toggleCheck = (wi, si) => setChecked(prev => ({ ...prev, [`${wi}-${si}`]: !prev[`${wi}-${si}`] }))
+
+  const buildPlanText = () => {
+    const lines = []
+    const courseName = course?.name || 'Course'
+    const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+    lines.push(`StudyEdge — ${courseName} Study Plan`)
+    lines.push(`Generated ${dateStr}`)
+    lines.push('')
+    if (goal) lines.push(`Goal: ${goal}`)
+    lines.push(`Duration: ${weeks} week${weeks !== 1 ? 's' : ''} · ${totalSessions} sessions · ${totalHours}h of focused study`)
+    if (validDates.length) {
+      lines.push('')
+      lines.push('DEADLINES')
+      validDates.forEach(d => {
+        const label = new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        lines.push(`  - ${d.label}: ${label}`)
+      })
+    }
+    ;(plan.weeklyFocus || []).forEach((week, wi) => {
+      const range = weekDateRange(wi)
+      lines.push('')
+      lines.push(`WEEK ${wi + 1} — ${week.theme || 'Foundation'} (${range.start} – ${range.end})`)
+      ;(week.sessions || []).forEach((sess, si) => {
+        lines.push(`  Session ${si + 1}: ${sess.sessionLabel || ''} — ${sess.focusArea || ''}`)
+        if (sess.keyTopics?.length) lines.push(`    Topics: ${sess.keyTopics.join(', ')}`)
+        if (sess.deliverable) lines.push(`    Deliverable: ${sess.deliverable}`)
+      })
+    })
+    if (techniquesList.length) {
+      lines.push('')
+      lines.push('TECHNIQUES IN ROTATION')
+      techniquesList.forEach((t, i) => lines.push(`  ${i + 1}. ${t}`))
+    }
+    return lines.join('\n')
+  }
+
+  const handleDownload = () => {
+    const text = buildPlanText()
+    const blob = new Blob([text], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${(course?.name || 'study-plan').replace(/\s+/g, '-').toLowerCase()}-plan.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+    setExportOpen(false)
+  }
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(buildPlanText())
+    } catch {
+      const ta = document.createElement('textarea')
+      ta.value = buildPlanText()
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
+    setExportOpen(false)
+  }
 
   const TECHNIQUE_HINTS = {
     'Active recall': 'Self-quiz without notes', 'Spaced repetition': 'Review at growing intervals',
@@ -1125,9 +1187,26 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
         <button onClick={onPush} disabled={pushed} style={{ flex: 2, padding: '12px 20px', borderRadius: 10, background: pushed ? 'rgba(52,211,153,0.15)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: 13.5, fontWeight: 700, cursor: pushed ? 'default' : 'pointer', border: pushed ? '1px solid rgba(52,211,153,0.3)' : 'none', boxShadow: pushed ? 'none' : `0 4px 20px ${D.glow}`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
           {pushed ? <><Icon name="check" size={13} stroke={2.5} color={D.mint} /> Pushed to Schedule</> : <><Icon name="calendar" size={13} /> Push to Schedule</>}
         </button>
-        <button style={{ flex: 1, padding: '12px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-          <Icon name="upload" size={13} /> Export
-        </button>
+        <div style={{ flex: 1, position: 'relative' }}>
+          <button onClick={() => setExportOpen(v => !v)} style={{ width: '100%', padding: '12px', borderRadius: 10, background: exportOpen ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${exportOpen ? 'rgba(99,102,241,0.3)' : D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+            <Icon name="upload" size={13} /> Export
+          </button>
+          {exportOpen && (
+            <div style={{ position: 'absolute', bottom: 'calc(100% + 8px)', right: 0, width: 200, background: '#12122a', border: `1px solid ${D.border}`, borderRadius: 11, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', zIndex: 50 }}>
+              <button onClick={handleDownload} style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: D.text, cursor: 'pointer', background: 'none', border: 'none', textAlign: 'left' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                <Icon name="file" size={14} color={D.indigo} /> Download .txt
+              </button>
+              <div style={{ height: 1, background: D.border }} />
+              <button onClick={handleCopy} style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: D.text, cursor: 'pointer', background: 'none', border: 'none', textAlign: 'left' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                <Icon name="edit" size={14} color={D.indigo} /> Copy to clipboard
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   )
