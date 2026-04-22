@@ -10,7 +10,7 @@ import { supabase } from './supabase'
 
 export const PLAN_LIMITS = {
   free:      { courses: 1,        aiQueries: 10 },
-  pro:       { courses: 5,        aiQueries: 30 },
+  pro:       { courses: 5,        aiQueries: 75 },
   unlimited: { courses: Infinity, aiQueries: Infinity },
 }
 
