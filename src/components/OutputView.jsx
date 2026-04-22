@@ -385,6 +385,7 @@ export default function OutputView({
 
   const [syllabusEvents, setSyllabusEvents] = useState(() => getCachedSyllabusEvents() ?? [])
   const [syllabusModalCourse, setSyllabusModalCourse] = useState(null)
+  const [syllabusInitialFile, setSyllabusInitialFile] = useState(null)
 
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('studyedge_view_mode') ?? localStorage.getItem('studymap_view_mode') ?? 'week')
   const todayStr = new Date().toISOString().split('T')[0]
@@ -860,8 +861,9 @@ export default function OutputView({
         <SyllabusUploadModal
           courses={courses}
           initialCourseIdx={syllabusModalCourse >= 0 ? syllabusModalCourse : null}
+          initialFile={syllabusInitialFile}
           onConfirm={(items, selectedCourseIdx) => handleSyllabusConfirm(selectedCourseIdx, items)}
-          onClose={() => setSyllabusModalCourse(null)}
+          onClose={() => { setSyllabusModalCourse(null); setSyllabusInitialFile(null) }}
           onShowPaywall={onShowPaywall}
         />
       )}
@@ -1151,7 +1153,7 @@ export default function OutputView({
             completedIds={completedIds}
             assignments={assignments}
             onLogGrade={id => { setLogGradeId(id); setGradeInput('') }}
-            onImportSyllabus={idx => setSyllabusModalCourse(idx)}
+            onImportSyllabus={(idx, file) => { setSyllabusInitialFile(file ?? null); setSyllabusModalCourse(idx ?? -1) }}
             onAddCourse={onAddCourse}
             onEditCourse={onEditCourse}
             onDeleteCourse={onDeleteCourse}

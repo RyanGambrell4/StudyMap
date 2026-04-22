@@ -53,7 +53,7 @@ async function extractPdfText(file) {
 // initialCourseIdx: number | null  (null = "All Courses / General")
 // onConfirm(items, selectedCourseIdx): called on confirm
 // onClose(): called on cancel/close
-export default function SyllabusUploadModal({ courses, initialCourseIdx, onConfirm, onClose, onShowPaywall }) {
+export default function SyllabusUploadModal({ courses, initialCourseIdx, initialFile, onConfirm, onClose, onShowPaywall }) {
   const [selectedCourseIdx, setSelectedCourseIdx] = useState(initialCourseIdx ?? null)
   const [activeTab, setActiveTab] = useState('pdf')
   const [step, setStep] = useState('input')   // 'input' | 'loading' | 'review'
@@ -62,6 +62,12 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, onConfi
   const [error, setError] = useState('')
   const [dragging, setDragging] = useState(false)
   const fileRef = useRef(null)
+
+  // Auto-process a file dropped on the import band before the modal opened
+  const { useEffect } = React
+  useEffect(() => {
+    if (initialFile) processFile(initialFile)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   const selectedColor =
     selectedCourseIdx !== null ? (courses[selectedCourseIdx]?.color ?? NEUTRAL_COLOR) : NEUTRAL_COLOR

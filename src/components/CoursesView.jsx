@@ -315,7 +315,7 @@ function ImportBand({ onImportSyllabus }) {
         title="Import syllabus"
         desc="Drop a PDF or paste a link: we'll extract dates, weights, and topics."
         accept=".pdf,.docx,.png,.jpg"
-        onFile={() => onImportSyllabus?.(null)}
+        onFile={file => onImportSyllabus?.(-1, file)}
         gradient="linear-gradient(155deg, rgba(99,102,241,0.14) 0%, rgba(99,102,241,0.04) 45%, #0a0a1e 100%)"
       />
       <ImportCard
