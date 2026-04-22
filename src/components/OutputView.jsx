@@ -19,6 +19,7 @@ import AppShell from './AppShell'
 import DashboardView from './DashboardView'
 import { useSessionReminders } from '../utils/useSessionReminders'
 import { getAccessToken } from '../lib/supabase'
+import { canUseAI, incrementAIQuery } from '../lib/subscription'
 import CoursesView from './CoursesView'
 import ProgressView from './ProgressView'
 import StudyToolsView from './StudyToolsView'
@@ -464,6 +465,7 @@ export default function OutputView({
 
   const handleFixConflicts = async () => {
     if (!conflictMap.size) return
+    if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setFixConflictsLoading(true)
     setRescheduleResults(null)
     try {
@@ -480,6 +482,7 @@ export default function OutputView({
       })
       const data = await res.json()
       setRescheduleResults(data.suggestions ?? [])
+      incrementAIQuery()
     } catch (e) {
       console.error('[handleFixConflicts]', e)
       setRescheduleResults([])
@@ -822,6 +825,7 @@ export default function OutputView({
           course={courses[blueprintSession.courseId] ?? null}
           onStartSession={handleBlueprintStart}
           onExit={handleBlueprintExit}
+          onShowPaywall={onShowPaywall}
         />
       )}
       {focusSession && (
@@ -858,6 +862,7 @@ export default function OutputView({
           initialCourseIdx={syllabusModalCourse >= 0 ? syllabusModalCourse : null}
           onConfirm={(items, selectedCourseIdx) => handleSyllabusConfirm(selectedCourseIdx, items)}
           onClose={() => setSyllabusModalCourse(null)}
+          onShowPaywall={onShowPaywall}
         />
       )}
 

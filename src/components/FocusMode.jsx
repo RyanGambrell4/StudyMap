@@ -6,6 +6,7 @@ import {
   appendSessionRecall,
 } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
+import { canUseAI, incrementAIQuery } from '../lib/subscription'
 import { useCelebration } from '../utils/useCelebration'
 import { extractText } from '../utils/extractText'
 import AIChatView from './AIChatView'
@@ -423,6 +424,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   }
 
   const handleGenerateQuiz = async () => {
+    if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setQuizLoading(true); setQuizError(''); setQuizQuestions(null)
     setQuizAnswers([]); setQuizIdx(0); setQuizSelected(null); setQuizConfirmed(false); setQuizDone(false)
     try {
@@ -448,6 +450,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Quiz generation failed')
       setQuizQuestions(data.questions)
+      incrementAIQuery()
     } catch (e) { setQuizError(e.message) }
     finally { setQuizLoading(false) }
   }
@@ -470,6 +473,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const resetQuiz = () => { setQuizQuestions(null); setQuizDone(false); setQuizAnswers([]); setQuizIdx(0); setQuizSelected(null); setQuizConfirmed(false) }
 
   const handleGenerateFlashcards = async () => {
+    if (!canUseAI()) { onShowPaywall?.('ai'); return }
     const sessionNotes = [
       notesConcepts && `Key concepts:\n${notesConcepts}`,
       notesMain && `Notes:\n${notesMain}`,
@@ -503,6 +507,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to generate flashcards')
       setInSessionFlashcards(data.flashcards ?? [])
+      incrementAIQuery()
       setFcIdx(0); setFcFlipped(false); setFcKnown(new Set())
     } catch (e) { setFcGenerateError(e.message) }
     finally { setFcGenerating(false) }

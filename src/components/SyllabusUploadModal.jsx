@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { getAccessToken } from '../lib/supabase'
+import { canUseAI, incrementAIQuery } from '../lib/subscription'
 
 const EVENT_TYPES = ['Exam', 'Quiz', 'Midterm', 'Final Exam', 'Assignment', 'Project', 'Lab', 'Reading', 'Other']
 const NEUTRAL_COLOR = { dot: '#64748b' }
@@ -52,7 +53,7 @@ async function extractPdfText(file) {
 // initialCourseIdx: number | null  (null = "All Courses / General")
 // onConfirm(items, selectedCourseIdx): called on confirm
 // onClose(): called on cancel/close
-export default function SyllabusUploadModal({ courses, initialCourseIdx, onConfirm, onClose }) {
+export default function SyllabusUploadModal({ courses, initialCourseIdx, onConfirm, onClose, onShowPaywall }) {
   const [selectedCourseIdx, setSelectedCourseIdx] = useState(initialCourseIdx ?? null)
   const [activeTab, setActiveTab] = useState('pdf')
   const [step, setStep] = useState('input')   // 'input' | 'loading' | 'review'
@@ -67,10 +68,12 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, onConfi
 
   // ── AI extraction ──
   const runAIExtraction = async (text) => {
+    if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setStep('loading')
     setError('')
     try {
       const events = await extractEventsFromAPI(text)
+      incrementAIQuery()
       if (!events.length) {
         setError('No events found. Make sure the text contains dates and deadlines.')
         setStep('input')

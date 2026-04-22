@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { getCachedCoachPlan, saveCoachPlan, getCachedStudyTools } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
+import { canUseAI, incrementAIQuery } from '../lib/subscription'
 
 const ACTIVITY_COLORS = {
   'review':           { border: '#3B82F6', bg: '#1e3a5f', label: 'Review' },
@@ -15,7 +16,7 @@ function activityColor(activity) {
   return ACTIVITY_COLORS[activity] ?? { border: '#6366F1', bg: '#1e1b4b', label: activity }
 }
 
-export default function BlueprintScreen({ session, course, onStartSession, onExit }) {
+export default function BlueprintScreen({ session, course, onStartSession, onExit, onShowPaywall }) {
   const [focus, setFocus] = useState('')
   const [blueprint, setBlueprint] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -59,6 +60,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
   })()
 
   const handleGenerate = async () => {
+    if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setLoading(true)
     setError('')
     setBlueprint(null)
@@ -80,6 +82,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to generate blueprint')
       setBlueprint(data)
+      incrementAIQuery()
     } catch (e) {
       setError(e.message)
     } finally {

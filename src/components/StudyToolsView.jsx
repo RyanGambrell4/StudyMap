@@ -251,6 +251,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
   async function handleScanImage(file) {
     if (!file) return
+    if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setScanError('')
     setIsScanning(true)
     try {
@@ -271,6 +272,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to scan notes')
       setPastedText(data.text)
+      incrementAIQuery()
       setUploadedFile(null)
       setExtractedText('')
       setMode('upload')
