@@ -74,8 +74,6 @@ export default function AppShell({
   onShare,
   onEditPlan,
   onSignOut,
-  onToggleTheme,
-  theme,
   userEmail,
   onNavigateToAccount,
   googleCalendarConnected,

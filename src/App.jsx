@@ -11,7 +11,7 @@ import PaywallModal from './components/PaywallModal'
 import './index.css'
 
 export default function App() {
-  const { theme, toggleTheme } = useTheme()
+  useTheme()
   const [session, setSession]   = useState(undefined) // undefined = still checking
   const [dbReady, setDbReady]   = useState(false)
   const [showOutput, setShowOutput]   = useState(false)
@@ -329,8 +329,6 @@ export default function App() {
           onAddCourse={handleAddCourse}
           onEditCourse={handleEditCourse}
           onDeleteCourse={handleDeleteCourse}
-          onToggleTheme={toggleTheme}
-          theme={theme}
           userEmail={session.user.email}
           userId={session.user.id}
           onShowPaywall={openPaywall}

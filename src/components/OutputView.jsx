@@ -321,7 +321,7 @@ function LogGradeModal({ logGradeId, assignments, courses, gradeInput, setGradeI
 export default function OutputView({
   courses, schedule, learningStyle, yearLevel,
   initialCompletedIds, initialAssignments, onSavePlan, onEditPlan, onSignOut, onAddCourse, onEditCourse, onDeleteCourse,
-  onToggleTheme, theme, userEmail, userId, onShowPaywall,
+  userEmail, userId, onShowPaywall,
 }) {
   const result = useMemo(
     () => generateSchedule(courses, schedule, learningStyle, yearLevel),
@@ -900,8 +900,6 @@ export default function OutputView({
         onShare={() => setShowShareCard(true)}
         onEditPlan={onEditPlan}
         onSignOut={onSignOut}
-        onToggleTheme={onToggleTheme}
-        theme={theme}
         userEmail={userEmail}
         onNavigateToAccount={() => setActiveSection('account')}
         googleCalendarConnected={gcalConnected}
@@ -1103,7 +1101,6 @@ export default function OutputView({
                 conflictMap={conflictMap}
                 onSessionMove={handleSessionMove}
                 onAddSession={setAddSessionDayStr}
-                theme={theme}
               />
             )}
 
@@ -1122,7 +1119,6 @@ export default function OutputView({
                 onAddSession={setAddSessionDayStr}
                 googleEvents={googleEvents}
                 conflictMap={conflictMap}
-                theme={theme}
               />
             )}
 
@@ -1141,7 +1137,6 @@ export default function OutputView({
                 googleEvents={googleEvents}
                 conflictMap={conflictMap}
                 onSessionMove={handleSessionMove}
-                theme={theme}
               />
             )}
           </div>
@@ -1194,7 +1189,6 @@ export default function OutputView({
             onShowPaywall={onShowPaywall}
             googleEvents={googleEvents}
             preferredTime={schedule.preferredTime}
-            theme={theme}
           />
         )}
 
@@ -1229,7 +1223,6 @@ export default function OutputView({
             onConnectGoogleCalendar={handleConnectGoogleCalendar}
             onShowPaywall={onShowPaywall}
             onToggleTheme={onToggleTheme}
-            theme={theme}
           />
         )}
 
