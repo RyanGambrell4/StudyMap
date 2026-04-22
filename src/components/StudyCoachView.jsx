@@ -38,6 +38,10 @@ const SC_STYLE = `
     .sc-step-label { display:none !important; }
     .sc-2col { grid-template-columns:1fr !important; }
     .sc-days-row { flex-wrap:wrap !important; }
+    .sc-plan-ring { display:none !important; }
+    .sc-plan-text { min-width:0 !important; }
+    .sc-roadmap-hint { display:none !important; }
+    .sc-plan-title { font-size:18px !important; }
   }
 `
 
@@ -908,21 +912,21 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
           <Icon name="sparkles" size={11} color={D.orange} /> Your Personalized Plan
         </div>
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
-          <div style={{ flex: 1 }}>
+          <div className="sc-plan-text" style={{ flex: 1, minWidth: 0 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
               <span style={{ width: 8, height: 8, borderRadius: '50%', background: dot, boxShadow: `0 0 8px ${dot}`, flexShrink: 0 }} />
-              <span style={{ fontSize: 15, fontWeight: 600, color: D.muted }}>{course?.name}</span>
+              <span style={{ fontSize: 15, fontWeight: 600, color: D.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{course?.name}</span>
             </div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: D.text, lineHeight: 1.3, marginBottom: 12 }}>
+            <div className="sc-plan-title" style={{ fontSize: 22, fontWeight: 700, color: D.text, lineHeight: 1.3, marginBottom: 12 }}>
               <span style={{ color: D.orange }}>{weeks}</span> week{weeks !== 1 ? 's' : ''} &nbsp;·&nbsp; <span style={{ color: D.orange }}>{totalSessions}</span> sessions &nbsp;·&nbsp; <span style={{ color: D.orange }}>{totalHours}h</span> of focused study
             </div>
-            <div style={{ fontSize: 13, color: D.muted, lineHeight: 1.6, maxWidth: 560 }}>
+            <div style={{ fontSize: 13, color: D.muted, lineHeight: 1.6 }}>
               {goal ? <><span style={{ color: D.text }}>Structured to aim for "{goal}"</span>, </> : ''}
               {validDates.length > 0 ? `hit ${validDates.length} deadline${validDates.length > 1 ? 's' : ''}, ` : ''}
               via {techniquesList.slice(0, 2).join(' + ').toLowerCase()}, rotating through the {plan?.priorityTopics?.length || 0} topic{plan?.priorityTopics?.length === 1 ? '' : 's'} you gave me. No topic, date, or recommendation has been invented.
             </div>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+          <div className="sc-plan-ring" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
             <svg width={72} height={72} viewBox="0 0 72 72">
               <circle cx={36} cy={36} r={28} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={5} />
               <circle cx={36} cy={36} r={28} fill="none" stroke={dot} strokeWidth={5} strokeLinecap="round"
@@ -942,7 +946,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '16px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>Your Roadmap</span>
-            <span style={{ fontSize: 11, color: D.dim }}>Tap a week to jump down</span>
+            <span className="sc-roadmap-hint" style={{ fontSize: 11, color: D.dim }}>Tap a week to jump down</span>
           </div>
           <div style={{ position: 'relative', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
             <div style={{ position: 'absolute', top: 11, left: '5%', right: '5%', height: 2, background: `linear-gradient(90deg, ${dot}, ${D.violet})`, borderRadius: 1 }} />

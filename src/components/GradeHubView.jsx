@@ -83,7 +83,7 @@ const GH_STYLE = `
 .gh-input-text:focus{border-color:rgba(99,102,241,0.5);}
 .gh-input-text::placeholder{color:#55556e;}
 @media(max-width:900px){.gh-grid{grid-template-columns:1fr!important;}.gh-rail{position:static!important;}}
-@media(max-width:640px){.gh-plan-row{grid-template-columns:1fr 64px 90px 64px 28px!important;gap:6px!important;}.gh-header{padding:16px 14px 14px!important;}.gh-content{padding:14px 14px 48px!important;}}
+@media(max-width:640px){.gh-plan-row{grid-template-columns:1fr 64px 90px 64px 28px!important;gap:6px!important;}.gh-header{padding:16px 14px 14px!important;}.gh-content{padding:14px 14px 48px!important;}.gh-tab-btn{padding:9px 8px!important;font-size:12px!important;gap:5px!important;}}
 `
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -180,7 +180,7 @@ function Tabs({ active, onChange }) {
   return (
     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4, background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 12, padding: 4 }}>
       {tabs.map(t => (
-        <button key={t.id} onClick={() => onChange(t.id)} style={{
+        <button key={t.id} onClick={() => onChange(t.id)} className="gh-tab-btn" style={{
           padding: '11px 14px', borderRadius: 9,
           background: active === t.id ? 'rgba(99,102,241,0.15)' : 'transparent',
           border: active === t.id ? '1px solid rgba(99,102,241,0.3)' : '1px solid transparent',

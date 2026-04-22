@@ -358,7 +358,7 @@ export default function AppShell({
       </aside>
 
       {/* ── Main content ── */}
-      <main className="flex-1 lg:ml-56 pb-20 lg:pb-0 min-h-screen">
+      <main className="flex-1 lg:ml-56 pb-20 lg:pb-0 min-h-screen" style={{ overflowX: 'hidden', minWidth: 0, width: '100%' }}>
         {children}
       </main>
 
