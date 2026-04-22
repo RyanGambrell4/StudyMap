@@ -53,6 +53,10 @@ const SC_STYLE = `
     .sc-week-hint { display:none !important; }
     .sc-topic-struggles-hint { display:none !important; }
   }
+  .sc-plans-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:28px;}
+  .sc-plans-cards{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:900px){.sc-plans-cards{grid-template-columns:repeat(2,1fr)!important;}}
+  @media(max-width:640px){.sc-plans-stats{grid-template-columns:repeat(2,1fr)!important;}.sc-plans-cards{grid-template-columns:1fr!important;}.sc-plans-back{flex-direction:column!important;align-items:flex-start!important;}}
 `
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -86,7 +90,8 @@ function Icon({ name, size = 16, color, stroke = 1.8 }) {
 }
 
 // ── Page header ───────────────────────────────────────────────────────────────
-function PageHeader({ step }) {
+function PageHeader({ step, uiMode, onBack, onNewPlan }) {
+  const isPlans = uiMode === 'plans'
   return (
     <div className="sc-header-pad" style={{ padding: '28px 32px 20px', borderBottom: `1px solid ${D.border}` }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
@@ -97,16 +102,40 @@ function PageHeader({ step }) {
           No-hallucination mode
         </span>
       </div>
-      <h1 style={{ margin: 0, fontSize: 32, fontWeight: 700, letterSpacing: -0.8, color: D.text }}>
-        Study Coach
-        <span style={{ marginLeft: 12, fontSize: 12.5, fontWeight: 500, color: D.indigo, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', padding: '4px 10px', borderRadius: 999, verticalAlign: 'middle' }}>Step {step}/3</span>
-      </h1>
-      <p style={{ margin: '6px 0 2px', fontSize: 14, color: D.muted, maxWidth: 680 }}>
-        Built only from what <em>you</em> tell me. I won't invent topics, dates, or facts. The more you share, the sharper your plan.
-      </p>
-      <p style={{ margin: 0, fontSize: 13, color: D.indigo, fontWeight: 500 }}>
-        Be as specific as possible for the best experience.
-      </p>
+      <div className="sc-plans-back" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          {!isPlans && onBack && (
+            <button onClick={onBack} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 10, padding: '5px 12px 5px 8px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: `1px solid ${D.border}`, color: D.muted, fontSize: 12.5, fontWeight: 500, cursor: 'pointer' }}>
+              <Icon name="arrowLeft" size={13} /> Back to My Plans
+            </button>
+          )}
+          <h1 style={{ margin: 0, fontSize: 32, fontWeight: 700, letterSpacing: -0.8, color: D.text }}>
+            Study Coach
+            <span style={{ marginLeft: 12, fontSize: 12.5, fontWeight: 500, color: D.indigo, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', padding: '4px 10px', borderRadius: 999, verticalAlign: 'middle' }}>
+              {isPlans ? 'My Plans' : `Step ${step}/3`}
+            </span>
+          </h1>
+          {isPlans ? (
+            <p style={{ margin: '6px 0 0', fontSize: 14, color: D.muted, maxWidth: 680 }}>
+              One plan per course, built only from what <em>you</em> tell me. Pick a course to view its plan, or start a new one.
+            </p>
+          ) : (
+            <>
+              <p style={{ margin: '6px 0 2px', fontSize: 14, color: D.muted, maxWidth: 680 }}>
+                Built only from what <em>you</em> tell me. I won't invent topics, dates, or facts. The more you share, the sharper your plan.
+              </p>
+              <p style={{ margin: 0, fontSize: 13, color: D.indigo, fontWeight: 500 }}>
+                Be as specific as possible for the best experience.
+              </p>
+            </>
+          )}
+        </div>
+        {isPlans && onNewPlan && (
+          <button onClick={onNewPlan} style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '11px 18px', borderRadius: 11, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: 13.5, fontWeight: 700, cursor: 'pointer', border: 'none', boxShadow: `0 4px 16px ${D.glow}`, whiteSpace: 'nowrap' }}>
+            <Icon name="plus" size={14} color="#fff" /> New Plan
+          </button>
+        )}
+      </div>
     </div>
   )
 }
@@ -666,6 +695,175 @@ function StatRow({ label, value, color, last }) {
   )
 }
 
+// ── My Plans landing view ─────────────────────────────────────────────────────
+function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
+  const savedPlans = courses.map((c, i) => loadCoachPlan(c.id ?? i))
+  const withPlans = courses.map((c, i) => ({ course: c, idx: i, saved: savedPlans[i] })).filter(x => x.saved?.plan)
+  const withoutPlans = courses.map((c, i) => ({ course: c, idx: i, saved: savedPlans[i] })).filter(x => !x.saved?.plan)
+
+  const totalHours = savedPlans.reduce((acc, p, i) => {
+    if (!p?.plan) return acc
+    const sessions = p.plan.weeklyFocus?.flatMap(w => w.sessions || []).length || 0
+    const sessionLen = p.formData?.sessionLen || p.formData?.sessionMinutes || 60
+    return acc + (sessions * sessionLen / 60)
+  }, 0)
+
+  const nextDeadline = (() => {
+    const today = new Date()
+    let earliest = null; let earliestCourse = null
+    savedPlans.forEach((p, i) => {
+      const dates = p?.formData?.dates || p?.formData?.importantDates || []
+      dates.forEach(d => {
+        if (!d.date) return
+        const dt = new Date(d.date + 'T12:00:00')
+        if (dt >= today && (!earliest || dt < earliest)) { earliest = dt; earliestCourse = courses[i] }
+      })
+    })
+    if (!earliest) return null
+    return { days: Math.ceil((earliest - today) / 86400000), course: earliestCourse }
+  })()
+
+  const getNearestDeadline = (formData) => {
+    if (!formData) return null
+    const today = new Date()
+    const dates = formData.dates || formData.importantDates || []
+    let nearest = null
+    dates.forEach(d => {
+      if (!d.date) return
+      const dt = new Date(d.date + 'T12:00:00')
+      if (!nearest || dt < nearest.dt) nearest = { dt, label: d.label }
+    })
+    if (!nearest) return null
+    return { days: Math.ceil((nearest.dt - today) / 86400000), label: nearest.label }
+  }
+
+  const Stat = ({ icon, label, value, sub }) => (
+    <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: '16px 20px' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
+        <Icon name={icon} size={13} color={D.muted} />
+        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: D.muted, textTransform: 'uppercase' }}>{label}</span>
+      </div>
+      <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: -0.5, color: D.text, lineHeight: 1 }}>{value}</div>
+      {sub && <div style={{ fontSize: 11.5, color: D.dim, marginTop: 4, fontWeight: 500 }}>{sub}</div>}
+    </div>
+  )
+
+  const parseName = (name) => {
+    const idx = name.indexOf(':')
+    if (idx > 0) return { code: name.slice(0, idx).trim(), title: name.slice(idx + 1).trim() }
+    return { code: null, title: name }
+  }
+
+  return (
+    <div>
+      {/* Stats bar */}
+      <div className="sc-plans-stats">
+        <Stat icon="check" label="Plans Ready" value={withPlans.length} />
+        <Stat icon="warn" label="Courses Without Plans" value={withoutPlans.length} />
+        <Stat icon="clock" label="Total Study Hours Planned" value={`${Math.round(totalHours)}h`} />
+        <Stat icon="calendar" label="Next Deadline"
+          value={nextDeadline ? `${nextDeadline.days}d` : '—'}
+          sub={nextDeadline ? nextDeadline.course.name : 'No deadlines added'} />
+      </div>
+
+      {/* Ready to study */}
+      {withPlans.length > 0 && (
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: D.text }}>Ready to study</span>
+            <span style={{ fontSize: 11.5, fontWeight: 600, color: D.muted, background: 'rgba(255,255,255,0.06)', border: `1px solid ${D.border}`, borderRadius: 999, padding: '2px 9px' }}>{withPlans.length}</span>
+            <span style={{ fontSize: 12.5, color: D.dim }}>Plans built and anchored to your dates</span>
+          </div>
+          <div className="sc-plans-cards">
+            {withPlans.map(({ course, idx, saved }) => {
+              const sessions = saved.plan.weeklyFocus?.flatMap(w => w.sessions || []).length || 0
+              const sessionLen = saved.formData?.sessionLen || saved.formData?.sessionMinutes || 60
+              const weeks = saved.plan.weeklyFocus?.length || 0
+              const hours = Math.round((sessions * sessionLen) / 60)
+              const deadline = getNearestDeadline(saved.formData)
+              const { code, title } = parseName(course.name)
+              const dot = course.color?.dot || D.accent
+              return (
+                <div key={idx} style={{ background: 'linear-gradient(155deg, rgba(99,102,241,0.08) 0%, #0a0a1e 100%)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 14, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: dot, flexShrink: 0 }} />
+                        <span style={{ fontSize: 11, fontWeight: 600, color: D.muted, textTransform: 'uppercase', letterSpacing: '0.06em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{code || title}</span>
+                      </div>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: D.text, lineHeight: 1.3, wordBreak: 'break-word' }}>{code ? title : ''}</div>
+                    </div>
+                    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)' }}>
+                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: D.mint, flexShrink: 0 }} />
+                      <span style={{ fontSize: 11, fontWeight: 600, color: D.mint, whiteSpace: 'nowrap' }}>Plan ready</span>
+                    </div>
+                  </div>
+                  {deadline && (
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <Icon name="calendar" size={12} color={D.dim} />
+                      <span style={{ fontSize: 12.5, color: D.muted, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deadline.label}</span>
+                      <span style={{ fontSize: 12.5, fontWeight: 600, flexShrink: 0, color: deadline.days <= 14 ? D.orange : D.muted }}>{deadline.days}d</span>
+                    </div>
+                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.14)', width: 'fit-content' }}>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: D.indigo }}>{weeks}w</span>
+                    <span style={{ color: D.dim, fontSize: 11 }}>·</span>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: D.indigo }}>{sessions} sessions</span>
+                    <span style={{ color: D.dim, fontSize: 11 }}>·</span>
+                    <span style={{ fontSize: 12.5, fontWeight: 700, color: D.indigo }}>{hours}h</span>
+                  </div>
+                  <button onClick={() => onViewPlan(idx)} style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', color: D.indigo, fontSize: 13.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                    View Plan →
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* No plan yet */}
+      {withoutPlans.length > 0 && (
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 15, fontWeight: 700, color: D.text }}>No plan yet</span>
+            <span style={{ fontSize: 11.5, fontWeight: 600, color: D.muted, background: 'rgba(255,255,255,0.06)', border: `1px solid ${D.border}`, borderRadius: 999, padding: '2px 9px' }}>{withoutPlans.length}</span>
+            <span style={{ fontSize: 12.5, color: D.dim }}>Start a plan and I'll only use what you tell me</span>
+          </div>
+          <div className="sc-plans-cards">
+            {withoutPlans.map(({ course, idx }) => {
+              const { code, title } = parseName(course.name)
+              const dot = course.color?.dot || D.accent
+              return (
+                <div key={idx} style={{ background: D.bgCard, border: `1px dashed rgba(255,255,255,0.1)`, borderRadius: 14, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
+                    <div style={{ minWidth: 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
+                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: dot, flexShrink: 0 }} />
+                        <span style={{ fontSize: 11, fontWeight: 600, color: D.muted, textTransform: 'uppercase', letterSpacing: '0.06em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{code || title}</span>
+                      </div>
+                      <div style={{ fontSize: 16, fontWeight: 700, color: D.text, lineHeight: 1.3, wordBreak: 'break-word' }}>{code ? title : ''}</div>
+                    </div>
+                    <div style={{ flexShrink: 0, padding: '4px 10px', borderRadius: 999, background: 'rgba(255,255,255,0.04)', border: `1px solid ${D.border}` }}>
+                      <span style={{ fontSize: 11, fontWeight: 600, color: D.dim }}>No plan</span>
+                    </div>
+                  </div>
+                  <p style={{ fontSize: 12.5, color: D.dim, lineHeight: 1.55, margin: 0, fontStyle: 'italic' }}>
+                    Tell me your goal, topics, and dates — I'll build a week-by-week plan grounded only in what you share.
+                  </p>
+                  <button onClick={() => onBuildPlan(idx)} style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', color: D.indigo, fontSize: 13.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', marginTop: 'auto' }}>
+                    Build Plan →
+                  </button>
+                </div>
+              )
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Main export ───────────────────────────────────────────────────────────────
 export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning' }) {
   const [step, setStep] = useState(1)
@@ -679,6 +877,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   const [error, setError] = useState('')
   const [pushed, setPushed] = useState(false)
   const [cachedStruggles, setCachedStruggles] = useState([])
+  const [uiMode, setUiMode] = useState('plans') // 'plans' | 'building' | 'viewing'
 
   // Material extraction
   const [materialText, setMaterialText] = useState('')
@@ -775,6 +974,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       saveCoachPlan(courseId, data, { ...form, sessionMinutes: form.sessionLen, importantDates: form.dates, emphasisTopics: form.topics?.join(', ') })
       await incrementAIQuery()
       setStep(3)
+      setUiMode('viewing')
     } catch (e) {
       setError(e.message)
       setStep(3) // Show error in step 3
@@ -789,6 +989,25 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     const courseId = course.id ?? form.courseIdx
     saveCoachPlan(courseId, plan, { ...form, sessionMinutes: form.sessionLen, importantDates: form.dates })
     setPushed(true)
+  }
+
+  const handleBuildPlan = (idx) => {
+    setPlan(null)
+    setError('')
+    setStep(1)
+    setForm(f => ({ ...f, courseIdx: idx }))
+    setUiMode('building')
+  }
+
+  const handleViewPlan = (idx) => {
+    setForm(f => ({ ...f, courseIdx: idx }))
+    setUiMode('viewing')
+    // useEffect will load the saved plan and setStep(3)
+  }
+
+  const handleNewPlan = () => {
+    const firstWithout = courses.findIndex((c, i) => !loadCoachPlan(c.id ?? i)?.plan)
+    handleBuildPlan(firstWithout >= 0 ? firstWithout : 0)
   }
 
   // Grade gap banner
@@ -832,37 +1051,48 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   return (
     <>
       <style>{SC_STYLE}</style>
-      <PageHeader step={step} />
-      <div className="sc-page-pad" style={{ padding: '24px 32px 48px', overflowX: 'hidden', maxWidth: '100vw' }}>
-        <Stepper step={step} go={setStep} />
-        {gradeGapBanner}
-        {step === 1 && (
-          <IntakeStep
-            form={form} setForm={setForm} courses={courses}
-            cachedStruggles={cachedStruggles}
-            materialLoading={materialLoading}
-            onMaterialFile={handleMaterialFile}
-            onNext={() => setStep(2)}
-          />
-        )}
-        {step === 2 && (
-          <ReviewStep
-            form={form} setForm={setForm} courses={courses}
-            onBack={() => setStep(1)}
-            onBuild={handleBuild}
-            loading={loading}
-          />
-        )}
-        {step === 3 && (
-          <PlanStepWrapper
-            plan={plan} form={form} courses={courses}
-            pushed={pushed}
-            onPush={handlePush}
-            onRefine={() => { setPlan(null); setError(''); setStep(1) }}
-            error={error}
-          />
-        )}
-      </div>
+      <PageHeader
+        step={step}
+        uiMode={uiMode}
+        onBack={uiMode !== 'plans' ? () => setUiMode('plans') : undefined}
+        onNewPlan={uiMode === 'plans' ? handleNewPlan : undefined}
+      />
+      {uiMode === 'plans' ? (
+        <div className="sc-page-pad" style={{ padding: '24px 32px 48px', overflowX: 'hidden', maxWidth: '100vw' }}>
+          <MyPlansView courses={courses} onBuildPlan={handleBuildPlan} onViewPlan={handleViewPlan} />
+        </div>
+      ) : (
+        <div className="sc-page-pad" style={{ padding: '24px 32px 48px', overflowX: 'hidden', maxWidth: '100vw' }}>
+          <Stepper step={step} go={setStep} />
+          {gradeGapBanner}
+          {step === 1 && (
+            <IntakeStep
+              form={form} setForm={setForm} courses={courses}
+              cachedStruggles={cachedStruggles}
+              materialLoading={materialLoading}
+              onMaterialFile={handleMaterialFile}
+              onNext={() => setStep(2)}
+            />
+          )}
+          {step === 2 && (
+            <ReviewStep
+              form={form} setForm={setForm} courses={courses}
+              onBack={() => setStep(1)}
+              onBuild={handleBuild}
+              loading={loading}
+            />
+          )}
+          {step === 3 && (
+            <PlanStepWrapper
+              plan={plan} form={form} courses={courses}
+              pushed={pushed}
+              onPush={handlePush}
+              onRefine={() => { setPlan(null); setError(''); setStep(1); setUiMode('building') }}
+              error={error}
+            />
+          )}
+        </div>
+      )}
     </>
   )
 }
