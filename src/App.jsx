@@ -33,6 +33,18 @@ export default function App() {
   // ── Checkout success banner ────────────────────────────────────────────────
   const [checkoutSuccess, setCheckoutSuccess] = useState(false)
 
+  // Capture checkout intent on mount before Supabase PKCE exchange clears the URL
+  const [checkoutIntent] = useState(() => {
+    const sp = new URLSearchParams(window.location.search)
+    const plan = sp.get('plan')
+    const billing = sp.get('billing')
+    const trial = sp.get('trial') === '1'
+    if (plan === 'pro' || plan === 'unlimited') {
+      return { plan, billing: ['monthly', 'semester', 'yearly'].includes(billing) ? billing : 'monthly', trial }
+    }
+    return null
+  })
+
   const openPaywall = useCallback((trigger = 'courses') => {
     setPaywallTrigger(trigger)
     setPaywallOpen(true)
@@ -286,14 +298,9 @@ export default function App() {
   }
 
   // ── Paid plan checkout redirect ──────────────────────────────────────────
-  const urlParams = new URLSearchParams(window.location.search)
-  const urlPlan = urlParams.get('plan')
-  const urlBilling = ['monthly', 'semester', 'yearly'].includes(urlParams.get('billing')) ? urlParams.get('billing') : 'monthly'
-  const urlTrial = urlParams.get('trial') === '1'
-  if (urlPlan && (urlPlan === 'pro' || urlPlan === 'unlimited') && getActivePlan() === 'free') {
-    // Clear the URL param so we don't loop
+  if (checkoutIntent && getActivePlan() === 'free') {
     window.history.replaceState({}, '', window.location.pathname)
-    createCheckoutSession(urlPlan, urlBilling, session.user.email, session.user.id, { trial: urlTrial }).then(url => {
+    createCheckoutSession(checkoutIntent.plan, checkoutIntent.billing, session.user.email, session.user.id, { trial: checkoutIntent.trial }).then(url => {
       if (url) window.location.href = url
     })
     return (

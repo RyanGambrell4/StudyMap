@@ -21,7 +21,7 @@ const PLANS = {
     },
     features: [
       '5 courses',
-      '30 study boosts / month',
+      '75 study boosts / month',
       'AI study plans',
       'Flashcards & quizzes',
       'Focus sessions',

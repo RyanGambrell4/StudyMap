@@ -57,13 +57,15 @@ export default function AuthScreen({ initialMode, onBack }) {
 
     try {
       if (mode === 'signup') {
-        // Preserve checkout intent (plan + billing) through email verification redirect
+        // Preserve checkout intent (plan + billing + trial) through email verification redirect
         const src = new URLSearchParams(window.location.search)
         const preserve = new URLSearchParams()
         const plan = src.get('plan')
         const billing = src.get('billing')
+        const trial = src.get('trial')
         if (plan === 'pro' || plan === 'unlimited') preserve.set('plan', plan)
         if (['monthly', 'semester', 'yearly'].includes(billing)) preserve.set('billing', billing)
+        if (trial === '1') preserve.set('trial', '1')
         const qs = preserve.toString()
         const emailRedirectTo = `${window.location.origin}/app${qs ? '?' + qs : ''}`
         const { error } = await supabase.auth.signUp({

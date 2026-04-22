@@ -34,7 +34,7 @@ function Pricing(){
       cta:'Get Pro', primary:true, popular:true, plan:'pro',
       feats:[
         [true,'5 courses'],
-        [true,'30 study boosts / month'],
+        [true,'75 study boosts / month'],
         [true,'Smart calendar'],
         [true,'Focus Mode timer'],
         [true,'Syllabus upload'],
