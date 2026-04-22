@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import { jsPDF } from 'jspdf'
 import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan } from '../lib/db'
 import { extractText } from '../utils/extractText'
 import { clean } from '../utils/strings'
@@ -967,6 +968,121 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
     setExportOpen(false)
   }
 
+  const handleDownloadPdf = () => {
+    const doc = new jsPDF({ unit: 'pt', format: 'letter' })
+    const margin = 48
+    const pageW = doc.internal.pageSize.getWidth()
+    const pageH = doc.internal.pageSize.getHeight()
+    const contentW = pageW - margin * 2
+    let y = margin
+
+    const checkPage = (needed = 20) => {
+      if (y + needed > pageH - margin) { doc.addPage(); y = margin }
+    }
+
+    const text = (str, size, color, bold = false) => {
+      doc.setFontSize(size)
+      doc.setTextColor(...color)
+      doc.setFont('helvetica', bold ? 'bold' : 'normal')
+      return str
+    }
+
+    const writeLine = (str, size, color, bold = false, extraY = 0) => {
+      checkPage(size + extraY + 6)
+      doc.setFontSize(size)
+      doc.setTextColor(...color)
+      doc.setFont('helvetica', bold ? 'bold' : 'normal')
+      const lines = doc.splitTextToSize(str, contentW)
+      doc.text(lines, margin, y)
+      y += lines.length * (size * 1.35) + extraY
+    }
+
+    const courseName = course?.name || 'Course'
+    const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
+
+    // Header bar
+    doc.setFillColor(15, 10, 40)
+    doc.rect(0, 0, pageW, 72, 'F')
+    doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(232, 232, 240)
+    doc.text(courseName + ' — Study Plan', margin, 36)
+    doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(136, 136, 160)
+    doc.text(`Generated ${dateStr} · StudyEdge`, margin, 54)
+    y = 96
+
+    // Summary line
+    writeLine(`${weeks} week${weeks !== 1 ? 's' : ''} · ${totalSessions} sessions · ${totalHours}h of focused study`, 11, [136, 136, 160])
+    y += 6
+
+    if (goal) {
+      writeLine('GOAL', 8, [99, 102, 241], true)
+      writeLine(goal, 12, [232, 232, 240], false, 10)
+    }
+
+    if (validDates.length) {
+      writeLine('DEADLINES', 8, [99, 102, 241], true)
+      validDates.forEach(d => {
+        const label = new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        writeLine(`${d.label}  —  ${label}`, 11, [232, 232, 240])
+      })
+      y += 6
+    }
+
+    // Weeks
+    ;(plan.weeklyFocus || []).forEach((week, wi) => {
+      const range = weekDateRange(wi)
+      y += 8
+      checkPage(60)
+
+      // Week header pill background
+      doc.setFillColor(249, 115, 22, 0.12)
+      doc.setDrawColor(249, 115, 22, 0.3)
+      doc.roundedRect(margin, y - 14, contentW, 22, 4, 4, 'FD')
+      doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(249, 115, 22)
+      doc.text(`WEEK ${wi + 1}  ·  ${week.theme || 'Foundation'}  ·  ${range.start} – ${range.end}`, margin + 8, y + 2)
+      y += 18
+
+      ;(week.sessions || []).forEach((sess, si) => {
+        checkPage(48)
+        y += 8
+        doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(232, 232, 240)
+        doc.text(`Session ${si + 1}: ${sess.sessionLabel || ''}`, margin + 8, y)
+        y += 16
+        if (sess.focusArea) {
+          const lines = doc.splitTextToSize(sess.focusArea, contentW - 16)
+          doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(136, 136, 160)
+          doc.text(lines, margin + 8, y)
+          y += lines.length * 14
+        }
+        if (sess.keyTopics?.length) {
+          doc.setFontSize(9.5); doc.setTextColor(85, 85, 110)
+          const tLine = doc.splitTextToSize('Topics: ' + sess.keyTopics.join(', '), contentW - 16)
+          doc.text(tLine, margin + 8, y)
+          y += tLine.length * 13
+        }
+      })
+    })
+
+    // Techniques
+    if (techniquesList.length) {
+      y += 14
+      checkPage(40)
+      writeLine('TECHNIQUES IN ROTATION', 8, [99, 102, 241], true)
+      techniquesList.forEach((t, i) => writeLine(`${i + 1}.  ${t}`, 11, [232, 232, 240]))
+    }
+
+    // Footer on every page
+    const totalPages = doc.internal.getNumberOfPages()
+    for (let p = 1; p <= totalPages; p++) {
+      doc.setPage(p)
+      doc.setFontSize(8); doc.setTextColor(85, 85, 110); doc.setFont('helvetica', 'normal')
+      doc.text(`StudyEdge · ${courseName}`, margin, pageH - 20)
+      doc.text(`Page ${p} of ${totalPages}`, pageW - margin, pageH - 20, { align: 'right' })
+    }
+
+    doc.save(`${(courseName).replace(/\s+/g, '-').toLowerCase()}-study-plan.pdf`)
+    setExportOpen(false)
+  }
+
   const TECHNIQUE_HINTS = {
     'Active recall': 'Self-quiz without notes', 'Spaced repetition': 'Review at growing intervals',
     'Practice problems': 'Solve, then check solutions', 'Teaching others': 'Explain it out loud',
@@ -1192,7 +1308,13 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
             <Icon name="upload" size={13} /> Export
           </button>
           {exportOpen && (
-            <div style={{ position: 'absolute', bottom: 'calc(100% + 8px)', right: 0, width: 200, background: '#12122a', border: `1px solid ${D.border}`, borderRadius: 11, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', zIndex: 50 }}>
+            <div style={{ position: 'absolute', bottom: 'calc(100% + 8px)', right: 0, width: 210, background: '#12122a', border: `1px solid ${D.border}`, borderRadius: 11, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', zIndex: 50 }}>
+              <button onClick={handleDownloadPdf} style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: D.text, cursor: 'pointer', background: 'none', border: 'none', textAlign: 'left' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'none'}>
+                <Icon name="file" size={14} color={D.pink} /> Download PDF
+              </button>
+              <div style={{ height: 1, background: D.border }} />
               <button onClick={handleDownload} style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: D.text, cursor: 'pointer', background: 'none', border: 'none', textAlign: 'left' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}>
