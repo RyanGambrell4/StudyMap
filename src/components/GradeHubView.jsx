@@ -2,7 +2,7 @@ import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import { getActivePlan, canUseAI, incrementAIQuery } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
-import { saveCoachPlanStruggles } from '../lib/db'
+import { saveCoachPlanStruggles, getCachedCoachPlan } from '../lib/db'
 import {
   TARGET_OPTIONS, letterGrade, gradeStatus,
   getCurrentGrade, getProjectedGrade, getNeededOnRemaining,
@@ -887,7 +887,7 @@ function RightRail({ course, gradeData, onShowPaywall, userId, onSyncStudyPlan }
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-export default function GradeHubView({ courses, onEditCourse, userId, onShowPaywall, initialCourseIdx = 0 }) {
+export default function GradeHubView({ courses, onEditCourse, userId, onShowPaywall, initialCourseIdx = 0, onSyncToCalendar }) {
   const plan = getActivePlan()
 
   const [activeCourseIdx, setActiveCourseIdx] = useState(() =>
@@ -923,6 +923,7 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
   }, [activeCourseIdx, course, onEditCourse])
 
   const handleSyncStudyPlan = useCallback(async () => {
+    // 1. Save grade struggles back to coach plan
     const comps = gradeData?.components ?? []
     const curr  = getCurrentGrade(comps)
     const tg    = gradeData?.targetGrade ?? 85
@@ -933,7 +934,40 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
       weak.length ? `Weak components: ${weak.join(', ')}` : null,
     ].filter(Boolean)
     try { await saveCoachPlanStruggles(course.id ?? activeCourseIdx, struggles) } catch (e) { console.error(e) }
-  }, [gradeData, course, activeCourseIdx])
+
+    // 2. Push coach plan sessions onto the calendar
+    const cached = getCachedCoachPlan(course.id ?? activeCourseIdx)
+    if (!cached?.plan?.weeklyFocus?.length) return
+    const today = new Date()
+    const dow = today.getDay()
+    const mondayOffset = dow === 0 ? -6 : 1 - dow
+    // Spread sessions across Mon/Wed/Fri/Tue/Thu so they don't stack on one day
+    const DAY_SPREAD = [0, 2, 4, 1, 3]
+    const sessions = []
+    cached.plan.weeklyFocus.forEach((week, wi) => {
+      const weekMonday = new Date(today)
+      weekMonday.setDate(today.getDate() + mondayOffset + wi * 7)
+      ;(week.sessions || []).forEach((sess, si) => {
+        const sessionDate = new Date(weekMonday)
+        sessionDate.setDate(weekMonday.getDate() + DAY_SPREAD[si % 5])
+        const dateStr = sessionDate.toISOString().split('T')[0]
+        sessions.push({
+          id: `coach-${dateStr}-${wi}-${si}-${Date.now()}`,
+          dateStr,
+          courseId: activeCourseIdx,
+          courseName: course.name,
+          color: course.color,
+          sessionType: sess.sessionLabel || 'Review',
+          duration: sess.duration || cached.formData?.sessionLen || cached.formData?.sessionMinutes || 60,
+          startTime: null,
+          endTime: null,
+          isManual: true,
+          fromCoachPlan: true,
+        })
+      })
+    })
+    if (sessions.length) onSyncToCalendar?.(sessions)
+  }, [gradeData, course, activeCourseIdx, onSyncToCalendar])
 
   return (
     <div style={{ background: D.bg, minHeight: '100vh', overflowX: 'hidden', maxWidth: '100vw', backgroundImage: 'radial-gradient(1200px 600px at 85% -10%, rgba(99,102,241,0.10), transparent 60%), radial-gradient(900px 500px at 10% 110%, rgba(99,102,241,0.05), transparent 60%)' }}>

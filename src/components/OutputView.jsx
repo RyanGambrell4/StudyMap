@@ -1202,6 +1202,14 @@ export default function OutputView({
             userId={userId}
             onShowPaywall={onShowPaywall}
             initialCourseIdx={gradesCourseIdx}
+            onSyncToCalendar={incoming => {
+              setManualSessions(prev => {
+                // Remove any previously synced coach-plan sessions for these course/week combos
+                // so re-syncing doesn't stack duplicates
+                const filtered = prev.filter(s => !s.fromCoachPlan || s.courseId !== incoming[0]?.courseId)
+                return [...filtered, ...incoming]
+              })
+            }}
           />
         )}
 
