@@ -1191,6 +1191,7 @@ export default function OutputView({
             onShowPaywall={onShowPaywall}
             googleEvents={googleEvents}
             preferredTime={schedule.preferredTime}
+            onStartFocus={handleStartFocus}
           />
         )}
 

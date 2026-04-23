@@ -622,7 +622,7 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
 }
 
 // ── Step 3: Plan ──────────────────────────────────────────────────────────────
-function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error }) {
+function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error, onStartFocus }) {
   const course = courses[form.courseIdx]
   const color = course?.color?.dot || D.accent
   const sessionLen = form.sessionLen || 60
@@ -669,7 +669,23 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error 
             </div>
             <div style={{ fontSize: 13.5, fontWeight: 600, color: D.text, marginBottom: 4, lineHeight: 1.4 }}>{firstSession.focusArea}</div>
             <div style={{ fontSize: 12, color: D.muted, marginBottom: 14 }}>{(firstSession.goal || '').split('.')[0]} · {firstSession.duration || sessionLen}m</div>
-            <button onClick={onPush} style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'linear-gradient(135deg, #F97316, #ea580c)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none', boxShadow: '0 4px 16px rgba(249,115,22,0.35)' }}>
+            <button
+              onClick={() => {
+                if (!onStartFocus || !course) return
+                const todayStr = new Date().toISOString().split('T')[0]
+                onStartFocus({
+                  id: `coach-${todayStr}-0-0`,
+                  courseId: form.courseIdx,
+                  courseName: course.name,
+                  color: course.color,
+                  sessionType: firstSession.sessionLabel || 'Review',
+                  duration: firstSession.duration || sessionLen,
+                  dateStr: todayStr,
+                  isManual: true,
+                })
+              }}
+              style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'linear-gradient(135deg, #F97316, #ea580c)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none', boxShadow: '0 4px 16px rgba(249,115,22,0.35)' }}
+            >
               Start first session →
             </button>
           </div>
@@ -865,7 +881,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning' }) {
+export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus }) {
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({
     courseIdx: courses.length > 0 ? 0 : -1,
@@ -1089,6 +1105,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
               onPush={handlePush}
               onRefine={() => { setPlan(null); setError(''); setStep(1); setUiMode('building') }}
               error={error}
+              onStartFocus={onStartFocus}
             />
           )}
         </div>
