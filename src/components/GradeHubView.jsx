@@ -612,7 +612,7 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
           <div>
             <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 8 }}>Projected grade</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-              <span style={{ fontSize: 56, fontWeight: 800, letterSpacing: -2, lineHeight: 1, background: `linear-gradient(135deg, ${lc}, ${lc}cc)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontFamily: 'ui-monospace, monospace' }}>
+              <span style={{ fontSize: 56, fontWeight: 800, letterSpacing: -2, lineHeight: 1, color: lc, fontFamily: 'ui-monospace, monospace' }}>
                 {projected !== null ? projected.toFixed(1) : '-'}
               </span>
               <span style={{ fontSize: 20, color: D.muted }}>%</span>
