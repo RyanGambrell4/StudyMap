@@ -682,6 +682,9 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
                   duration: firstSession.duration || sessionLen,
                   dateStr: todayStr,
                   isManual: true,
+                  focusArea: firstSession.focusArea,
+                  keyTopics: firstSession.keyTopics ?? [],
+                  goal: firstSession.goal ?? '',
                 })
               }}
               style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'linear-gradient(135deg, #F97316, #ea580c)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none', boxShadow: '0 4px 16px rgba(249,115,22,0.35)' }}

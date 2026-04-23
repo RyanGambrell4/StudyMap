@@ -26,6 +26,14 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
 
   // Pre-fill focus from Study Coach plan if available
   useEffect(() => {
+    // If the session already carries coach plan context (e.g. launched from
+    // "Start first session" button), use it directly — no lookup needed.
+    if (session.focusArea) {
+      const prefill = [session.focusArea, ...(session.keyTopics ?? [])].filter(Boolean).join(', ')
+      setFocus(prefill)
+      setCoachBanner(`Study Coach plan: ${session.focusArea}`)
+      return
+    }
     try {
       const courseId = session.courseId
       const saved = getCachedCoachPlan(courseId)
@@ -37,7 +45,6 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
       const prefill = [nextSession.focusArea, ...(nextSession.keyTopics ?? [])].filter(Boolean).join(', ')
       setFocus(prefill)
       setCoachBanner(`Loaded from your Study Coach plan: ${nextSession.focusArea}`)
-      // Advance the session index for next time
       const updatedIndex = Math.min(idx + 1, allSessions.length - 1)
       saveCoachPlan(courseId, saved.plan, saved.formData)
     } catch {}

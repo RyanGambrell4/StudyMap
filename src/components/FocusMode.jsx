@@ -243,13 +243,19 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const [quizAnswerFlash, setQuizAnswerFlash] = useState(null) // 'correct' | 'wrong'
 
   // ── Quiz/Flashcard custom source (topic + uploaded files/images) ──
-  const [quizTopic, setQuizTopic] = useState('')
+  const [quizTopic, setQuizTopic] = useState(() => {
+    const parts = [session.focusArea, ...(session.keyTopics ?? [])].filter(Boolean)
+    return parts.length ? parts.slice(0, 3).join(', ') : ''
+  })
   const [quizSourceText, setQuizSourceText] = useState('')
   const [quizSourceImages, setQuizSourceImages] = useState([]) // { name, dataUrl, media_type, data }
   const [quizSourceFiles, setQuizSourceFiles] = useState([])   // [{ name }]
   const [quizSourceLoading, setQuizSourceLoading] = useState(false)
 
-  const [fcTopic, setFcTopic] = useState('')
+  const [fcTopic, setFcTopic] = useState(() => {
+    const parts = [session.focusArea, ...(session.keyTopics ?? [])].filter(Boolean)
+    return parts.length ? parts.slice(0, 3).join(', ') : ''
+  })
   const [fcSourceText, setFcSourceText] = useState('')
   const [fcSourceImages, setFcSourceImages] = useState([])
   const [fcSourceFiles, setFcSourceFiles] = useState([])
