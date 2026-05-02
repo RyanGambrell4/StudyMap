@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>AI Study Schedule Generator for College Students | StudyEdge</title>
+  <meta name="description" content="Generate a personalized AI study schedule in seconds. StudyEdge automatically builds your weekly study plan around your courses, exams, and free time. Free for college students." />
+  <link rel="canonical" href="https://getstudyedge.com/study-schedule-generator" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://getstudyedge.com/study-schedule-generator" />
+  <meta property="og:title" content="AI Study Schedule Generator for College Students | StudyEdge" />
+  <meta property="og:description" content="Generate a personalized AI study schedule in seconds. StudyEdge builds your weekly plan around your courses, exams, and free time. Free to start." />
+  <meta property="og:image" content="https://getstudyedge.com/hero-landing.png" />
+  <meta property="og:site_name" content="StudyEdge" />
+  <meta property="og:locale" content="en_US" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@getstudyedge" />
+  <meta name="twitter:title" content="AI Study Schedule Generator for College Students | StudyEdge" />
+  <meta name="twitter:description" content="Generate a personalized AI study schedule in seconds. Free for college students." />
+  <meta name="twitter:image" content="https://getstudyedge.com/hero-landing.png" />
+
+  <meta name="keywords" content="AI study schedule generator, study schedule generator, AI study planner, college study schedule, personalized study plan, study schedule maker, automatic study schedule, study planner for college students" />
+  <meta name="robots" content="index, follow" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "StudyEdge AI Study Schedule Generator",
+    "url": "https://getstudyedge.com/study-schedule-generator",
+    "applicationCategory": "EducationApplication",
+    "operatingSystem": "Web",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": "AI-powered study schedule generator that automatically builds a personalized weekly study plan for college students based on courses, exam dates, and available hours."
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does the AI study schedule generator work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Add your courses and exam dates. StudyEdge's AI analyzes your workload, deadline urgency, and available free time, then builds a personalized weekly study schedule that fits your life. It prioritizes harder courses and upcoming exams automatically."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the study schedule generator free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. StudyEdge's study schedule generator is free for one course with no credit card required. Pro plans ($12.99/month) unlock up to 5 courses and Google Calendar sync."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can it sync with Google Calendar?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. StudyEdge syncs your generated study schedule directly to Google Calendar with one click. You also get push reminders for upcoming study sessions."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I customize the study schedule it generates?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. You can adjust session length, set your available study hours per day, move sessions, and add or remove study blocks. The AI adapts the rest of the schedule around your changes."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "StudyEdge", "item": "https://getstudyedge.com/" },
+      { "@type": "ListItem", "position": 2, "name": "AI Study Schedule Generator", "item": "https://getstudyedge.com/study-schedule-generator" }
+    ]
+  }
+  </script>
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: #080914; color: #e6e9f2; line-height: 1.6; }
+    body { min-height: 100vh; }
+    a { color: #6366f1; text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    nav { display: flex; align-items: center; justify-content: space-between; padding: 18px 32px; border-bottom: 1px solid rgba(255,255,255,0.07); max-width: 1100px; margin: 0 auto; }
+    .logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: #e6e9f2; text-decoration: none; }
+    .logo img { width: 28px; height: 28px; }
+    .nav-cta { background: #6366f1; color: #fff; padding: 9px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; }
+    .nav-cta:hover { background: #5254cc; text-decoration: none; }
+
+    .hero { max-width: 780px; margin: 80px auto 60px; padding: 0 24px; text-align: center; }
+    .badge { display: inline-block; background: rgba(99,102,241,0.15); color: #a5b4fc; font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(99,102,241,0.3); margin-bottom: 24px; letter-spacing: 0.05em; text-transform: uppercase; }
+    h1 { font-size: clamp(32px, 5vw, 54px); font-weight: 800; line-height: 1.15; color: #fff; margin-bottom: 20px; }
+    h1 span { color: #818cf8; }
+    .hero p { font-size: 18px; color: #94a3b8; max-width: 580px; margin: 0 auto 36px; }
+    .cta-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn-primary { background: #6366f1; color: #fff; padding: 14px 28px; border-radius: 12px; font-size: 16px; font-weight: 700; display: inline-block; }
+    .btn-primary:hover { background: #5254cc; text-decoration: none; }
+    .btn-ghost { background: rgba(255,255,255,0.06); color: #e6e9f2; padding: 14px 28px; border-radius: 12px; font-size: 16px; font-weight: 600; border: 1px solid rgba(255,255,255,0.1); display: inline-block; }
+    .btn-ghost:hover { background: rgba(255,255,255,0.1); text-decoration: none; }
+
+    .section { max-width: 900px; margin: 0 auto 80px; padding: 0 24px; }
+    h2 { font-size: clamp(24px, 3.5vw, 36px); font-weight: 800; color: #fff; margin-bottom: 12px; }
+    h3 { font-size: 18px; font-weight: 700; color: #e2e8f0; margin-bottom: 8px; }
+    p { color: #94a3b8; margin-bottom: 16px; }
+
+    .steps { display: grid; gap: 20px; margin-top: 36px; }
+    .step { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 28px; display: flex; gap: 20px; align-items: flex-start; }
+    .step-num { background: rgba(99,102,241,0.2); color: #818cf8; width: 36px; height: 36px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px; flex-shrink: 0; }
+
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 36px; }
+    .feature-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 22px; }
+    .feature-card h3 { font-size: 15px; margin-bottom: 6px; }
+    .feature-card p { font-size: 14px; margin: 0; }
+
+    .faq { margin-top: 36px; display: grid; gap: 16px; }
+    .faq-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 22px; }
+    .faq-item h3 { font-size: 16px; color: #e2e8f0; margin-bottom: 8px; }
+    .faq-item p { font-size: 14px; margin: 0; }
+
+    .cta-block { background: linear-gradient(135deg, rgba(99,102,241,0.15), rgba(139,92,246,0.1)); border: 1px solid rgba(99,102,241,0.25); border-radius: 20px; padding: 56px 32px; text-align: center; max-width: 700px; margin: 0 auto 80px; }
+    .cta-block h2 { margin-bottom: 12px; }
+    .cta-block p { margin-bottom: 28px; }
+
+    footer { border-top: 1px solid rgba(255,255,255,0.07); padding: 32px 24px; text-align: center; color: #475569; font-size: 14px; max-width: 900px; margin: 0 auto; }
+    footer a { color: #64748b; margin: 0 12px; }
+    footer a:hover { color: #94a3b8; }
+  </style>
+</head>
+<body>
+
+<header>
+  <nav>
+    <a class="logo" href="/">
+      <img src="/favicon.png" alt="StudyEdge logo" />
+      StudyEdge
+    </a>
+    <a class="nav-cta" href="/app?signup=1">Get Started Free</a>
+  </nav>
+</header>
+
+<main>
+  <div class="hero">
+    <div class="badge">AI Study Schedule Generator</div>
+    <h1>Build your <span>study schedule</span> automatically with AI</h1>
+    <p>Add your courses and exam dates. StudyEdge generates a personalized weekly study schedule that fits your life — prioritized by deadline, adapted to your workload. Free for college students.</p>
+    <div class="cta-group">
+      <a class="btn-primary" href="/app?signup=1">Generate My Schedule Free</a>
+      <a class="btn-ghost" href="/">See all features</a>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>How the AI study schedule generator works</h2>
+    <p>Three steps to a smarter study schedule. No spreadsheets, no guessing.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">1</div>
+        <div>
+          <h3>Add your courses and upload your syllabus</h3>
+          <p>Enter your courses with exam dates and difficulty. Drop in a PDF syllabus and StudyEdge automatically extracts all your assignments, exams, and deadlines so you never miss a due date.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">2</div>
+        <div>
+          <h3>Get your AI-generated study schedule</h3>
+          <p>StudyEdge's AI analyzes your free time, workload, and deadline urgency to build a personalized weekly study schedule. Harder courses and closer exams get more time. Sync it to Google Calendar in one click.</p>
+        </div>
+      </div>
+      <div class="step">
+        <div class="step-num">3</div>
+        <div>
+          <h3>Study smarter with an AI session plan every time</h3>
+          <p>Before every study session, StudyEdge AI builds a minute-by-minute plan for that specific course: warm-up, deep review, flashcards, active recall, and synthesis. No more staring at your notes wondering where to start.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>What makes StudyEdge different from other study schedule generators</h2>
+    <div class="features-grid">
+      <div class="feature-card">
+        <h3>Adapts to your real schedule</h3>
+        <p>Most generators give you a generic weekly template. StudyEdge builds around your actual class times, commitments, and free windows.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Prioritized by exam date</h3>
+        <p>Your hardest course with the soonest exam automatically gets more focus. The schedule re-prioritizes as deadlines approach.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Google Calendar sync</h3>
+        <p>Your generated study schedule syncs directly to Google Calendar. Push notifications remind you when a session is coming up.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Session plans built in</h3>
+        <p>Every scheduled session comes with a minute-by-minute AI Study Blueprint so you always know exactly what to work on.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Syllabus import</h3>
+        <p>Drop in a PDF syllabus and StudyEdge pulls all your exams, assignments, and deadlines automatically into the schedule.</p>
+      </div>
+      <div class="feature-card">
+        <h3>Works for any major</h3>
+        <p>STEM, humanities, social sciences — the AI adapts to your course material and how you need to study it.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <h2>Frequently asked questions</h2>
+    <div class="faq">
+      <div class="faq-item">
+        <h3>How does the AI study schedule generator work?</h3>
+        <p>Add your courses and exam dates. StudyEdge's AI analyzes your workload, deadline urgency, and available free time, then builds a personalized weekly study plan that fits your life. It prioritizes harder courses and upcoming exams automatically.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Is the study schedule generator free?</h3>
+        <p>Yes. StudyEdge is free for one course with no credit card required. Pro plans ($12.99/month) unlock up to 5 courses and Google Calendar sync.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can it sync with Google Calendar?</h3>
+        <p>Yes. Your generated study schedule syncs directly to Google Calendar with one click. You also get push reminders for upcoming sessions.</p>
+      </div>
+      <div class="faq-item">
+        <h3>Can I customize the schedule it generates?</h3>
+        <p>Yes. You can adjust session length, set your available hours per day, move sessions, and add or remove blocks. The AI adapts the rest of the schedule around your changes.</p>
+      </div>
+      <div class="faq-item">
+        <h3>How is this different from Scholarly, Taskade, or MyMap?</h3>
+        <p>Those tools generate a one-time study plan with no context about your courses. StudyEdge builds a live schedule that updates as your deadlines change, includes syllabus import, runs your actual study sessions with built-in flashcards and quizzes, and tracks your grades all in one place.</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="cta-block">
+    <h2>Generate your study schedule free</h2>
+    <p>No credit card. No setup time. Add your courses and get a personalized AI study schedule in under two minutes.</p>
+    <a class="btn-primary" href="/app?signup=1">Get Started Free</a>
+  </div>
+</main>
+
+<footer>
+  <p>© 2026 StudyEdge · <a href="/">Home</a> · <a href="/ai-flashcard-maker">AI Flashcard Maker</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a> · <a href="mailto:support@getstudyedge.com">Support</a></p>
+</footer>
+
+</body>
+</html>

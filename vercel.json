@@ -3,6 +3,8 @@
     { "source": "/app", "destination": "/app.html" },
     { "source": "/app/(.*)", "destination": "/app.html" },
     { "source": "/signup", "destination": "/signup.html" },
-    { "source": "/signup/(.*)", "destination": "/signup.html" }
+    { "source": "/signup/(.*)", "destination": "/signup.html" },
+    { "source": "/study-schedule-generator", "destination": "/study-schedule-generator.html" },
+    { "source": "/ai-flashcard-maker", "destination": "/ai-flashcard-maker.html" }
   ]
 }

@@ -7,6 +7,9 @@ import {
   saveSyllabusEvents,
   saveManualSessions,
   getCachedCoachPlan,
+  getCachedCompletedSessions,
+  saveCompletedSession,
+  removeCompletedSession,
 } from '../lib/db'
 import FocusMode from './FocusMode'
 import BlueprintScreen from './BlueprintScreen'
@@ -331,6 +334,7 @@ export default function OutputView({
 
   // ── state ──
   const [completedIds, setCompletedIds] = useState(() => initialCompletedIds ?? new Set())
+  const [completedSessionLog, setCompletedSessionLog] = useState(() => getCachedCompletedSessions())
   const [focusSession, setFocusSession] = useState(null)
   const [blueprintSession, setBlueprintSession] = useState(null) // session waiting for blueprint
   const [activeBlueprint, setActiveBlueprint] = useState(null)  // chosen blueprint (or null = skip)
@@ -729,7 +733,19 @@ export default function OutputView({
   }, [blueprintSession])
   const handleBlueprintExit = useCallback(() => { setBlueprintSession(null); setActiveBlueprint(null) }, [])
   const handleFocusComplete = useCallback((id) => {
-    setCompletedIds(prev => new Set([...prev, id])); setFocusSession(null); setActiveBlueprint(null)
+    setCompletedIds(prev => new Set([...prev, id]))
+    setFocusSession(sess => {
+      if (sess) {
+        const record = { id: sess.id, dateStr: sess.dateStr, courseId: sess.courseId, courseName: sess.courseName, duration: sess.duration }
+        setCompletedSessionLog(prev => {
+          const filtered = prev.filter(s => s.id !== record.id)
+          return [...filtered, record].slice(-500)
+        })
+        saveCompletedSession(record)
+      }
+      return null
+    })
+    setActiveBlueprint(null)
   }, [])
   const handleFocusStartNext = useCallback((id, _elapsed, nextSess) => {
     setCompletedIds(prev => new Set([...prev, id]))
@@ -739,8 +755,27 @@ export default function OutputView({
   }, [])
   const handleFocusExit = useCallback(() => { setFocusSession(null); setActiveBlueprint(null) }, [])
   const handleToggle = useCallback(id => {
-    setCompletedIds(prev => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n })
-  }, [])
+    setCompletedIds(prev => {
+      const n = new Set(prev)
+      if (n.has(id)) {
+        n.delete(id)
+        setCompletedSessionLog(prev => prev.filter(s => s.id !== id))
+        removeCompletedSession(id)
+      } else {
+        n.add(id)
+        const sess = allSessions.find(s => s.id === id)
+        if (sess) {
+          const record = { id: sess.id, dateStr: sess.dateStr, courseId: sess.courseId, courseName: sess.courseName, duration: sess.duration }
+          setCompletedSessionLog(prev => {
+            const filtered = prev.filter(s => s.id !== record.id)
+            return [...filtered, record].slice(-500)
+          })
+          saveCompletedSession(record)
+        }
+      }
+      return n
+    })
+  }, [allSessions])
 
   const handleLogGrade = () => {
     const score = parseFloat(gradeInput)
@@ -1169,6 +1204,7 @@ export default function OutputView({
             courses={courses}
             allSessions={allSessions}
             completedIds={completedIds}
+            completedSessionLog={completedSessionLog}
             todayStr={todayStr}
           />
         )}

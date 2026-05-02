@@ -173,14 +173,17 @@ function MilestoneIcon({ type, earned }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-export default function ProgressView({ courses, allSessions, completedIds, todayStr }) {
+export default function ProgressView({ courses, allSessions, completedIds, completedSessionLog = [], todayStr }) {
   const [period, setPeriod] = useState('Term')
 
   // ── Completed sessions ──────────────────────────────────────────────────────
-  const completedSessions = useMemo(() =>
-    allSessions.filter(s => completedIds.has(s.id)),
-    [allSessions, completedIds]
-  )
+  // Use persistent log as source of truth; merge in any schedule sessions that
+  // are completed but not yet in the log (handles existing users / edge cases).
+  const completedSessions = useMemo(() => {
+    const logIds = new Set(completedSessionLog.map(s => s.id))
+    const fromSchedule = allSessions.filter(s => completedIds.has(s.id) && !logIds.has(s.id))
+    return [...completedSessionLog, ...fromSchedule]
+  }, [completedSessionLog, allSessions, completedIds])
 
   // ── Period cutoff ────────────────────────────────────────────────────────────
   const periodStart = useMemo(() => {

@@ -34,8 +34,12 @@ export async function initUserData(uid) {
     study_tools: null,
     session_notes: {},
     session_recalls: [],
+    completed_sessions: [],
     subscription: null,
   }
+
+  // Backfill missing field for existing rows
+  if (_cache && !_cache.completed_sessions) _cache.completed_sessions = []
 
   // Initialise subscription cache from DB data
   initSubscription(uid, _cache.subscription ?? null)
@@ -80,6 +84,7 @@ export function getCachedStreak() {
   return _cache?.study_tools?._streak ?? null
 }
 export function getCachedSessionRecalls()  { return _cache?.session_recalls ?? [] }
+export function getCachedCompletedSessions() { return _cache?.completed_sessions ?? [] }
 
 export function getCachedCoachPlan(courseId) {
   return _cache?.coach_plans?.[courseId] ?? null
@@ -156,6 +161,21 @@ export async function saveNotes(courseId, dateStr, notes) {
   const updated = { ...existing, [key]: { ...notes, savedAt: Date.now() } }
   if (_cache) _cache.session_notes = updated
   await _upsert({ session_notes: updated })
+}
+
+export async function saveCompletedSession(record) {
+  const existing = _cache?.completed_sessions ?? []
+  const filtered = existing.filter(s => s.id !== record.id)
+  const updated = [...filtered, record].slice(-500)
+  if (_cache) _cache.completed_sessions = updated
+  await _upsert({ completed_sessions: updated })
+}
+
+export async function removeCompletedSession(id) {
+  const existing = _cache?.completed_sessions ?? []
+  const updated = existing.filter(s => s.id !== id)
+  if (_cache) _cache.completed_sessions = updated
+  await _upsert({ completed_sessions: updated })
 }
 
 export async function appendSessionRecall(entry) {
