@@ -26,6 +26,16 @@ export default function App() {
   const [showAuth, setShowAuth] = useState(false)
   const [authMode, setAuthMode] = useState('signup')
 
+  // ── Password recovery state ────────────────────────────────────────────────
+  const [passwordRecovery, setPasswordRecovery] = useState(false)
+  const [newPassword, setNewPassword]           = useState('')
+  const [confirmPassword, setConfirmPassword]   = useState('')
+  const [pwState, setPwState]                   = useState('') // '' | 'loading' | 'success' | 'error'
+  const [pwError, setPwError]                   = useState('')
+
+  // ── Email verification resend state ────────────────────────────────────────
+  const [resendState, setResendState] = useState('') // '' | 'sending' | 'sent' | 'error'
+
   // ── Paywall state ──────────────────────────────────────────────────────────
   const [paywallOpen, setPaywallOpen]     = useState(false)
   const [paywallTrigger, setPaywallTrigger] = useState('courses')
@@ -60,6 +70,9 @@ export default function App() {
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      if (_event === 'PASSWORD_RECOVERY') {
+        setPasswordRecovery(true)
+      }
       setSession(session)
       if (!session) {
         clearUserData()
@@ -276,13 +289,23 @@ export default function App() {
             <br />Click the link to verify your account and get started.
           </p>
           <button
-            onClick={() => {
-              supabase.auth.resend({ type: 'signup', email: session.user.email })
-              alert('Confirmation email resent!')
+            disabled={resendState === 'sending'}
+            onClick={async () => {
+              setResendState('sending')
+              try {
+                const { error } = await supabase.auth.resend({ type: 'signup', email: session.user.email })
+                if (error) throw error
+                setResendState('sent')
+                setTimeout(() => setResendState(''), 5000)
+              } catch {
+                setResendState('error')
+                setTimeout(() => setResendState(''), 5000)
+              }
             }}
-            className="text-sm text-indigo-400 hover:text-indigo-300 font-medium transition-colors"
+            className="text-sm font-medium transition-colors disabled:opacity-50"
+            style={{ color: resendState === 'sent' ? '#4ade80' : resendState === 'error' ? '#f87171' : '#818cf8' }}
           >
-            Resend confirmation email
+            {resendState === 'sending' ? 'Sending…' : resendState === 'sent' ? '✓ Email resent — check your inbox' : resendState === 'error' ? 'Failed to resend — try again' : 'Resend confirmation email'}
           </button>
           <div className="pt-2">
             <button
@@ -291,6 +314,65 @@ export default function App() {
             >
               Sign out
             </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Password recovery screen ────────────────────────────────────────────
+  if (passwordRecovery) {
+    const handlePasswordUpdate = async (e) => {
+      e.preventDefault()
+      if (newPassword !== confirmPassword) { setPwError('Passwords do not match.'); return }
+      if (newPassword.length < 8) { setPwError('Password must be at least 8 characters.'); return }
+      setPwError('')
+      setPwState('loading')
+      const { error } = await supabase.auth.updateUser({ password: newPassword })
+      if (error) { setPwError(error.message); setPwState('error') }
+      else {
+        setPwState('success')
+        setTimeout(() => { setPasswordRecovery(false); setNewPassword(''); setConfirmPassword(''); setPwState('') }, 2000)
+      }
+    }
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#0a0f1e' }}>
+        <div className="w-full max-w-sm">
+          <div className="flex items-center justify-center gap-2.5 mb-10">
+            <img src="/favicon.png" alt="StudyEdge" className="w-9 h-9 rounded-xl" style={{ objectFit: 'contain' }} />
+            <span className="text-white font-bold text-xl tracking-tight">StudyEdge</span>
+          </div>
+          <div className="rounded-2xl p-7" style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}>
+            <h1 className="text-white font-bold text-xl mb-1">Set a new password</h1>
+            <p className="text-slate-500 text-sm mb-6">Choose a strong password for your account.</p>
+            {pwState === 'success' ? (
+              <div className="rounded-xl px-4 py-4 text-center text-emerald-300 text-sm font-medium" style={{ backgroundColor: '#052e16', border: '1px solid #14532d' }}>
+                ✓ Password updated! Taking you to the app…
+              </div>
+            ) : (
+              <form onSubmit={handlePasswordUpdate} className="space-y-4">
+                <div>
+                  <label className="block text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">New password</label>
+                  <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Min. 8 characters" required minLength={8}
+                    className="w-full rounded-xl px-4 py-3 text-slate-200 placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 text-sm"
+                    style={{ backgroundColor: '#0d1424', border: '1px solid #1e293b' }} />
+                </div>
+                <div>
+                  <label className="block text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">Confirm password</label>
+                  <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Repeat password" required minLength={8}
+                    className="w-full rounded-xl px-4 py-3 text-slate-200 placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 text-sm"
+                    style={{ backgroundColor: '#0d1424', border: '1px solid #1e293b' }} />
+                </div>
+                {pwError && (
+                  <div className="rounded-xl px-4 py-3 text-red-300 text-sm" style={{ backgroundColor: '#450a0a', border: '1px solid #7f1d1d' }}>{pwError}</div>
+                )}
+                <button type="submit" disabled={pwState === 'loading'}
+                  className="w-full py-3.5 rounded-xl font-bold text-white text-sm transition-all disabled:opacity-50"
+                  style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)', boxShadow: '0 0 24px #6366f130' }}>
+                  {pwState === 'loading' ? 'Updating…' : 'Update password'}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </div>
