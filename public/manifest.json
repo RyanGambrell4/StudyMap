@@ -1,0 +1,21 @@
+{
+  "name": "StudyEdge",
+  "short_name": "StudyEdge",
+  "description": "The complete AI study system for college students. Build your schedule, plan every session, and study smarter with flashcards, quizzes, an AI tutor, and grade tracking — all in one place.",
+  "start_url": "/app",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#080914",
+  "theme_color": "#6366f1",
+  "lang": "en-US",
+  "orientation": "portrait-primary",
+  "categories": ["education", "productivity"],
+  "icons": [
+    {
+      "src": "/favicon.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

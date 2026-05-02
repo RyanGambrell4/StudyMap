@@ -44,7 +44,16 @@
   <meta name="description" content="Stop app-hopping. StudyEdge builds your study schedule, plans every session, and coaches you through it with flashcards, quizzes, an AI tutor, and grade tracking — all in one place. Free to start." />
   <link rel="canonical" href="https://getstudyedge.com/" />
   <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="manifest" href="/manifest.json" />
   <meta name="application-name" content="StudyEdge" />
+  <meta name="theme-color" content="#6366f1" />
+  <!-- Apple PWA / brand signals -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-title" content="StudyEdge" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <!-- rel="me" ties this domain to social accounts for brand entity -->
+  <link rel="me" href="https://www.tiktok.com/@getstudyedge" />
+  <link rel="me" href="https://www.instagram.com/getstudyedge/" />
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
@@ -84,6 +93,7 @@
   {
     "@context": "https://schema.org",
     "@type": "WebSite",
+    "@id": "https://getstudyedge.com/#website",
     "name": "StudyEdge",
     "alternateName": ["StudyEdge App", "getstudyedge", "Study Edge"],
     "url": "https://getstudyedge.com/",
@@ -152,6 +162,7 @@
   {
     "@context": "https://schema.org",
     "@type": "Organization",
+    "@id": "https://getstudyedge.com/#organization",
     "name": "StudyEdge",
     "alternateName": ["Study Edge", "getstudyedge", "StudyEdge App"],
     "url": "https://getstudyedge.com/",
@@ -163,7 +174,8 @@
     },
     "sameAs": [
       "https://www.tiktok.com/@getstudyedge",
-      "https://www.instagram.com/getstudyedge/"
+      "https://www.instagram.com/getstudyedge/",
+      "https://www.producthunt.com/posts/studyedge"
     ],
     "description": "StudyEdge is the complete AI study system for college and university students. Automatic study scheduling, minute-by-minute session plans, and built-in flashcards, quizzes, and active recall.",
     "foundingDate": "2025",
@@ -173,6 +185,21 @@
       "contactType": "customer support",
       "availableLanguage": "English"
     }
+  }
+  </script>
+
+  <!-- WebPage schema: ties homepage to the Organization entity -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "@id": "https://getstudyedge.com/#webpage",
+    "url": "https://getstudyedge.com/",
+    "name": "StudyEdge: The Complete AI Study System for College Students",
+    "isPartOf": { "@id": "https://getstudyedge.com/#website" },
+    "about": { "@id": "https://getstudyedge.com/#organization" },
+    "publisher": { "@id": "https://getstudyedge.com/#organization" },
+    "description": "AI study planner for college students. Build your study schedule, plan every session, and study smarter with flashcards, quizzes, and active recall."
   }
   </script>
 

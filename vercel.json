@@ -4,6 +4,7 @@
     { "source": "/app/(.*)", "destination": "/app.html" },
     { "source": "/signup", "destination": "/signup.html" },
     { "source": "/signup/(.*)", "destination": "/signup.html" },
+    { "source": "/about", "destination": "/about.html" },
     { "source": "/study-schedule-generator", "destination": "/study-schedule-generator.html" },
     { "source": "/ai-flashcard-maker", "destination": "/ai-flashcard-maker.html" },
     { "source": "/ai-study-coach", "destination": "/ai-study-coach.html" },
