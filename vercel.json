@@ -10,6 +10,9 @@
     { "source": "/ai-study-coach", "destination": "/ai-study-coach.html" },
     { "source": "/ai-tutor", "destination": "/ai-tutor.html" },
     { "source": "/grade-calculator-college", "destination": "/grade-calculator-college.html" },
-    { "source": "/active-recall-app", "destination": "/active-recall-app.html" }
+    { "source": "/active-recall-app", "destination": "/active-recall-app.html" },
+    { "source": "/quizlet-alternative", "destination": "/quizlet-alternative.html" },
+    { "source": "/anki-vs-quizlet", "destination": "/anki-vs-quizlet.html" },
+    { "source": "/how-to-make-a-study-schedule", "destination": "/how-to-make-a-study-schedule.html" }
   ]
 }
