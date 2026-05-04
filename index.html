@@ -11,6 +11,12 @@
   <script>
     (function(){
       try {
+        // If running inside a Capacitor native app (Android/iOS), skip the
+        // marketing landing page and go straight to the app shell.
+        if (typeof window !== 'undefined' && window.Capacitor) {
+          window.location.replace('/app.html');
+          return;
+        }
         if (window.location.pathname !== '/') return;
         var sp = new URLSearchParams(window.location.search);
         var hash = window.location.hash || '';
@@ -40,8 +46,8 @@
       } catch (e) {}
     })();
   </script>
-  <title>StudyEdge: The Complete AI Study System for College Students</title>
-  <meta name="description" content="Stop app-hopping. StudyEdge builds your study schedule, plans every session, and coaches you through it with flashcards, quizzes, an AI tutor, and grade tracking — all in one place. Free to start." />
+  <title>StudyEdge: AI Study Planner, Flashcards and Study Coach</title>
+  <meta name="description" content="StudyEdge is the AI study system that builds your schedule, plans every session, and coaches you through it. Flashcards, quizzes, active recall, all in one app. Free to start. Not affiliated with Study Edge tutoring." />
   <link rel="canonical" href="https://getstudyedge.com/" />
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="manifest" href="/manifest.json" />
@@ -439,13 +445,13 @@
           <p>Yes. StudyEdge works for any subject at the college or university level including STEM, humanities, and social sciences. You upload your syllabus, add your courses, and the AI adapts its Session Blueprints to your material and exam timeline.</p>
 
           <h3>How is StudyEdge different from Notion, Anki, or Quizlet?</h3>
-          <p>Notion is a blank document; Anki is only flashcards; Quizlet is only quizzes. StudyEdge is the complete study system: it builds the schedule, plans every session, runs the timer, and has flashcards, quizzes, active recall prompts, an AI tutor, and grade tracking all stitched into a single focus session. No tab-switching, no app-hopping.</p>
+          <p>Notion is a blank document; Anki is only flashcards; Quizlet is only quizzes. StudyEdge is the complete study system: it builds the schedule, plans every session, runs the timer, and has flashcards, quizzes, active recall prompts, an AI tutor, and grade tracking all stitched into a single focus session. No tab-switching, no app-hopping. See why students choose StudyEdge as a <a href="/quizlet-alternative">Quizlet alternative</a>.</p>
 
           <h3>Can StudyEdge generate a study schedule for me automatically?</h3>
-          <p>Yes. StudyEdge automatically builds a personalized study schedule based on your courses, exam dates, and available hours. It fills your free time with the right subjects at the right time, prioritized by deadline and difficulty. Sync it to Google Calendar in one click.</p>
+          <p>Yes. StudyEdge automatically builds a personalized study schedule based on your courses, exam dates, and available hours. It fills your free time with the right subjects at the right time, prioritized by deadline and difficulty. Sync it to Google Calendar in one click. Learn more about our <a href="/study-schedule-generator">study schedule generator</a>.</p>
 
           <h3>Does StudyEdge make AI flashcards automatically?</h3>
-          <p>Yes. StudyEdge generates AI flashcards from your notes, uploaded PDFs, or any topic. Flashcards are built into every study session alongside quizzes and active recall prompts — no separate app needed.</p>
+          <p>Yes. StudyEdge generates AI flashcards from your notes, uploaded PDFs, or any topic. Flashcards are built into every study session alongside quizzes and active recall prompts — no separate app needed. See how our <a href="/ai-flashcard-maker">AI flashcard maker</a> works.</p>
 
           <h3>Can StudyEdge predict my final grade?</h3>
           <p>Yes. StudyEdge's Grade Hub shows your current projected grade and calculates exactly what you need on remaining assignments to hit your target. It models multiple scenarios so you always know where you stand before it's too late.</p>
