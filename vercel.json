@@ -13,6 +13,8 @@
     { "source": "/active-recall-app", "destination": "/active-recall-app.html" },
     { "source": "/quizlet-alternative", "destination": "/quizlet-alternative.html" },
     { "source": "/anki-vs-quizlet", "destination": "/anki-vs-quizlet.html" },
-    { "source": "/how-to-make-a-study-schedule", "destination": "/how-to-make-a-study-schedule.html" }
+    { "source": "/how-to-make-a-study-schedule", "destination": "/how-to-make-a-study-schedule.html" },
+    { "source": "/best-study-app-for-students", "destination": "/best-study-app-for-students.html" },
+    { "source": "/anki-alternative", "destination": "/anki-alternative.html" }
   ]
 }
