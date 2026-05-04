@@ -195,6 +195,7 @@ export default async function handler(req, res) {
       payment_method_collection: wantsTrial ? 'always' : undefined,
       subscription_data: subscriptionData,
       metadata: { user_id: userId, trial: wantsTrial ? '1' : '0' },
+      allow_promotion_codes: true,
       success_url: 'https://getstudyedge.com/app?checkout=success',
       cancel_url: 'https://getstudyedge.com/app?checkout=cancelled',
     })

@@ -3,15 +3,21 @@
   "configurations": [
     {
       "name": "Dev Server",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "dev"],
+      "runtimeExecutable": "/usr/local/bin/node",
+      "runtimeArgs": ["/Users/ryangambrell/Desktop/StudyMap/node_modules/.bin/vite", "--port", "5173"],
       "port": 5173
     },
     {
       "name": "Preview Server",
-      "runtimeExecutable": "npm",
-      "runtimeArgs": ["run", "preview"],
+      "runtimeExecutable": "/usr/local/bin/node",
+      "runtimeArgs": ["/Users/ryangambrell/Desktop/StudyMap/node_modules/.bin/vite", "preview", "--port", "4173"],
       "port": 4173
+    }
+    ,{
+      "name": "Reddit Hero",
+      "runtimeExecutable": "/usr/bin/python3",
+      "runtimeArgs": ["-m", "http.server", "8091", "--directory", "/tmp/studyedge-reddit"],
+      "port": 8091
     }
   ]
 }

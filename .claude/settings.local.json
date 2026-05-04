@@ -27,7 +27,20 @@
       "Bash(rm -f .git/index.lock .git/HEAD.lock)",
       "Bash(you in…\" spinner until supabase.auth.onAuthStateChange fires. After:*)",
       "Bash(failed\" because Supabase''s Bot and Abuse Protection setting enforces:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "mcp__a9bac2d5-ee3b-47e5-ae22-56d42b7d0a64__list_projects",
+      "mcp__a9bac2d5-ee3b-47e5-ae22-56d42b7d0a64__list_tables",
+      "mcp__02cf278a-fb7d-46d0-88e3-73bdbab27fde__web_fetch_vercel_url",
+      "WebFetch(domain:api.anthropic.com)",
+      "Read(//private/tmp/**)",
+      "Bash(unzip -o /Users/ryangambrell/Downloads/StudyEdge.zip -d studyedge_design)",
+      "Bash(cp \"/Users/ryangambrell/.claude/projects/-Users-ryangambrell-Desktop-StudyMap/cd5a5ef8-7f81-4411-b14a-62e2d0e5e5ba/tool-results/webfetch-1776773885286-e69lfm.bin\" /tmp/gradehub.gz)",
+      "Bash(gunzip -f /tmp/gradehub.gz)",
+      "Read(//tmp/**)",
+      "Bash(PATH=\"/usr/local/bin:$PATH\" npm run build)",
+      "Bash(/Users/ryangambrell/Desktop/StudyMap/src/utils/useTheme.js:*)",
+      "Bash(sed -n '33,38p' /Users/ryangambrell/Desktop/StudyMap/src/components/AccountView.jsx)",
+      "Bash(sed -n '106,136p' /Users/ryangambrell/Desktop/StudyMap/src/components/AccountView.jsx)"
     ]
   }
 }
