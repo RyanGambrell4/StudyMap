@@ -253,13 +253,13 @@ function HowItWorks(){
           <h2 className="section-title">Three problems every student has.<br/><span className="grad-text">One system that fixes all of them.</span></h2>
         </div>
         <div className="steps">
-          <Step num="01" title="Your schedule, built around your real life." body="Add your classes and due dates. StudyEdge maps out your entire week automatically, filling your free time with the right courses at the right time, prioritized by exam date and difficulty.">
+          <Step num="01" title="Your schedule, built around your real life." body="Add your classes and due dates. StudyEdge AI maps out your entire week automatically, filling your free time with the right courses at the right time, prioritized by exam date and difficulty.">
             <CalendarVis/>
           </Step>
           <Step num="02" title="Every session planned before you open a book." body="Before each session, the AI builds a minute-by-minute plan for your course, your upcoming exams, and your goals. All mapped out before you sit down." reverse>
             <BlueprintVis/>
           </Step>
-          <Step num="03" title="An AI coach that runs the session while you're in it." body="Hit start and StudyEdge runs the clock. Flashcards, recall prompts, practice quizzes, and notes, all built in. You're not reading over slides hoping it sticks.">
+          <Step num="03" title="An AI coach that runs the session while you're in it." body="Hit start and StudyEdge AI runs the clock. Flashcards, recall prompts, practice quizzes, and notes, all built in. You're not reading over slides hoping it sticks.">
             <FocusVis/>
           </Step>
         </div>

@@ -53,10 +53,10 @@ export default function LandingPage({ onGetStarted }) {
         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
           <img
             src="/favicon.png"
-            alt="StudyEdge"
+            alt="StudyEdge AI"
             style={{ width: 34, height: 34, borderRadius: 10, objectFit: 'contain' }}
           />
-          <span style={{ color: '#fff', fontWeight: 700, fontSize: 18, letterSpacing: '-0.3px' }}>StudyEdge</span>
+          <span style={{ color: '#fff', fontWeight: 700, fontSize: 18, letterSpacing: '-0.3px' }}>StudyEdge AI</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
           <button
@@ -168,7 +168,7 @@ export default function LandingPage({ onGetStarted }) {
           }} />
           <img
             src="/ss-main-screen.png"
-            alt="StudyEdge app: dashboard, AI study planner, flashcards, focus mode, and study coach"
+            alt="StudyEdge AI app: dashboard, AI study planner, flashcards, focus mode, and study coach"
             style={{
               display: 'block', width: '100%', borderRadius: 16, position: 'relative',
               border: '1px solid rgba(255,255,255,0.08)',
@@ -375,7 +375,7 @@ export default function LandingPage({ onGetStarted }) {
         <p style={{
           fontSize: 16, color: 'rgba(226,232,240,0.45)', marginBottom: 32, position: 'relative',
         }}>
-          Join thousands of students already using StudyEdge to crush their classes.
+          Join thousands of students already using StudyEdge AI to crush their classes.
         </p>
         <button
           onClick={() => onGetStarted('signup')}
@@ -400,7 +400,7 @@ export default function LandingPage({ onGetStarted }) {
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         fontSize: 13, color: 'rgba(226,232,240,0.25)',
       }}>
-        <span>© 2026 StudyEdge. All rights reserved.</span>
+        <span>© 2026 StudyEdge AI. All rights reserved.</span>
         <div style={{ display: 'flex', gap: 20 }}>
           <a href="mailto:support@getstudyedge.com" style={{ color: 'rgba(226,232,240,0.35)', textDecoration: 'none' }}>Contact</a>
         </div>

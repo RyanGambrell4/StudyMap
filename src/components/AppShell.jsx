@@ -110,9 +110,9 @@ export default function AppShell({
           className="flex items-center gap-3 px-5 py-5"
           style={{ borderBottom: `1px solid ${BORDER_COLOR}` }}
         >
-          <img src="/favicon.png" alt="StudyEdge" style={{ height: 32, width: 32, objectFit: 'contain' }} />
+          <img src="/favicon.png" alt="StudyEdge AI" style={{ height: 32, width: 32, objectFit: 'contain' }} />
           <span style={{ color: LABEL_ACTIVE, fontWeight: 700, fontSize: 15, letterSpacing: '-0.01em' }}>
-            StudyEdge
+            StudyEdge AI
           </span>
           {startTour && (
             <button

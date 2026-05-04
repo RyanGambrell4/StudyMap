@@ -339,8 +339,8 @@ export default function App() {
       <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#0a0f1e' }}>
         <div className="w-full max-w-sm">
           <div className="flex items-center justify-center gap-2.5 mb-10">
-            <img src="/favicon.png" alt="StudyEdge" className="w-9 h-9 rounded-xl" style={{ objectFit: 'contain' }} />
-            <span className="text-white font-bold text-xl tracking-tight">StudyEdge</span>
+            <img src="/favicon.png" alt="StudyEdge AI" className="w-9 h-9 rounded-xl" style={{ objectFit: 'contain' }} />
+            <span className="text-white font-bold text-xl tracking-tight">StudyEdge AI</span>
           </div>
           <div className="rounded-2xl p-7" style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}>
             <h1 className="text-white font-bold text-xl mb-1">Set a new password</h1>

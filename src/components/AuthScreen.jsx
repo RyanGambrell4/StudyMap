@@ -127,11 +127,11 @@ export default function AuthScreen({ initialMode, onBack }) {
           <div className="flex items-center justify-center gap-2.5 mb-10">
             <img
               src="/favicon.png"
-              alt="StudyEdge"
+              alt="StudyEdge AI"
               className="w-9 h-9 rounded-xl"
               style={{ objectFit: 'contain' }}
             />
-            <span className="text-white font-bold text-xl tracking-tight">StudyEdge</span>
+            <span className="text-white font-bold text-xl tracking-tight">StudyEdge AI</span>
           </div>
 
           {/* Confirmation card */}
@@ -168,7 +168,7 @@ export default function AuthScreen({ initialMode, onBack }) {
               className="rounded-xl px-4 py-3 text-left mb-5 text-xs text-slate-300 leading-relaxed"
               style={{ backgroundColor: '#0d1424', border: '1px solid #1e293b' }}
             >
-              <span className="font-bold text-slate-200">Can't find it?</span> Check your Spam or Promotions folder, and search for "StudyEdge".
+              <span className="font-bold text-slate-200">Can't find it?</span> Check your Spam or Promotions folder, and search for "StudyEdge AI".
             </div>
 
             {/* Resend button */}
@@ -237,11 +237,11 @@ export default function AuthScreen({ initialMode, onBack }) {
         <div className="flex items-center justify-center gap-2.5 mb-10">
           <img
             src="/favicon.png"
-            alt="StudyEdge"
+            alt="StudyEdge AI"
             className="w-9 h-9 rounded-xl"
             style={{ objectFit: 'contain' }}
           />
-          <span className="text-white font-bold text-xl tracking-tight">StudyEdge</span>
+          <span className="text-white font-bold text-xl tracking-tight">StudyEdge AI</span>
         </div>
 
         {/* Card */}

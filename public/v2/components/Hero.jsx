@@ -165,7 +165,7 @@ function Hero(){
             <span className="grad-text">Start studying with a system.</span>
           </h1>
           <p className="hero-sub">
-            StudyEdge builds your schedule, plans every session, and coaches you through it, with flashcards, quizzes, and active recall built in. One system, for students who are done winging it.
+            StudyEdge AI builds your schedule, plans every session, and coaches you through it, with flashcards, quizzes, and active recall built in. One system, for students who are done winging it.
           </p>
           <div className="hero-ctas">
             <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Get Started Free <span aria-hidden>→</span></button>
@@ -194,7 +194,7 @@ function Hero(){
               {/* simulated dashboard */}
               <div className="dash">
                 <div className="dash-side">
-                  <div className="dash-logo"><div className="dash-logo-mark"/><span>StudyEdge</span></div>
+                  <div className="dash-logo"><div className="dash-logo-mark"/><span>StudyEdge AI</span></div>
                   {['Dashboard','Calendar','Courses','Progress','Study Tools','Study Coach'].map((x,i)=>(
                     <div key={x} className={`dash-nav ${i===0?'active':''}`}>
                       <div className="dash-nav-i"/>

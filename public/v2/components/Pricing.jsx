@@ -106,7 +106,7 @@ function Pricing(){
 
 function Testimonials(){
   const quotes = [
-    {t:"I've always struggled to stay consistent. StudyEdge just plans it for me. Seeing my hours and progress tracked has genuinely helped bring my grades up.", n:"Andy G.", r:"Undergraduate"},
+    {t:"I've always struggled to stay consistent. StudyEdge AI just plans it for me. Seeing my hours and progress tracked has genuinely helped bring my grades up.", n:"Andy G.", r:"Undergraduate"},
     {t:"If you want to stay mediocre at studying, don't use this. Scheduling, coaching, daily organization: it has everything you need to take your marks to the next level with less effort.", n:"Danny K.", r:"PhD Student"},
     {t:"First AI study platform I can confidently say has it all. Week-by-week study plans, progress tracking, flashcards, quizzes, and it cuts all the prep time so you can just focus on actually learning.", n:"Charlotte B.", r:"University Student"},
     {t:"It does an amazing job of meeting you where you're at and taking you where you want to go academically.", n:"Gavin D.", r:"Graduate Student"},
@@ -144,7 +144,7 @@ function FinalCTA(){
           <div className="cta-grid"/>
           <div className="cta-inner">
             <h2 className="section-title" style={{maxWidth:820,margin:'0 auto'}}>You already know you need a<br/><span className="grad-text">better system.</span></h2>
-            <p className="section-sub" style={{margin:'22px auto 32px',maxWidth:560}}>StudyEdge is your edge to success. Free to start, no credit card needed.</p>
+            <p className="section-sub" style={{margin:'22px auto 32px',maxWidth:560}}>StudyEdge AI is your edge to success. Free to start, no credit card needed.</p>
             <div className="cta-btns">
               <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1&plan=pro&billing=monthly&trial=1'}>Get Started Free →</button>
             </div>
@@ -167,22 +167,22 @@ function Footer(){
         <div className="footer-left">
           <div className="logo" style={{fontSize:17}}>
             <div className="logo-mark">
-              <img src="/favicon.png" alt="StudyEdge" style={{width:'100%',height:'100%',objectFit:'contain',mixBlendMode:'screen'}} />
+              <img src="/favicon.png" alt="StudyEdge AI" style={{width:'100%',height:'100%',objectFit:'contain',mixBlendMode:'screen'}} />
             </div>
-            <span>StudyEdge</span>
+            <span>StudyEdge AI</span>
           </div>
           <p className="footer-tag">One system for students who are done winging it.</p>
           <div style={{display:'flex',gap:12,marginTop:12}}>
-            <a href="https://www.tiktok.com/@getstudyedge" target="_blank" rel="noopener noreferrer" aria-label="StudyEdge on TikTok" style={{color:'var(--text-muted)',transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#fff'} onMouseLeave={e=>e.currentTarget.style.color='var(--text-muted)'}>
+            <a href="https://www.tiktok.com/@getstudyedge" target="_blank" rel="noopener noreferrer" aria-label="StudyEdge AI on TikTok" style={{color:'var(--text-muted)',transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#fff'} onMouseLeave={e=>e.currentTarget.style.color='var(--text-muted)'}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 01-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 01-2.88 2.5 2.89 2.89 0 01-2.89-2.89 2.89 2.89 0 012.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 00-.79-.05 6.34 6.34 0 00-6.34 6.34 6.34 6.34 0 006.34 6.34 6.34 6.34 0 006.33-6.34V8.69a8.17 8.17 0 004.78 1.52V6.76a4.85 4.85 0 01-1.01-.07z"/></svg>
             </a>
-            <a href="https://www.instagram.com/getstudyedge/" target="_blank" rel="noopener noreferrer" aria-label="StudyEdge on Instagram" style={{color:'var(--text-muted)',transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#fff'} onMouseLeave={e=>e.currentTarget.style.color='var(--text-muted)'}>
+            <a href="https://www.instagram.com/getstudyedge/" target="_blank" rel="noopener noreferrer" aria-label="StudyEdge AI on Instagram" style={{color:'var(--text-muted)',transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#fff'} onMouseLeave={e=>e.currentTarget.style.color='var(--text-muted)'}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1112.63 8 4 4 0 0116 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
             </a>
-            <a href="https://x.com/getstudyedge" target="_blank" rel="noopener noreferrer" aria-label="StudyEdge on X" style={{color:'var(--text-muted)',transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#fff'} onMouseLeave={e=>e.currentTarget.style.color='var(--text-muted)'}>
+            <a href="https://x.com/getstudyedge" target="_blank" rel="noopener noreferrer" aria-label="StudyEdge AI on X" style={{color:'var(--text-muted)',transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#fff'} onMouseLeave={e=>e.currentTarget.style.color='var(--text-muted)'}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L2.25 2.25h6.844l4.262 5.634 5.888-5.634Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             </a>
-            <a href="https://www.linkedin.com/company/getstudyedge/" target="_blank" rel="noopener noreferrer" aria-label="StudyEdge on LinkedIn" style={{color:'var(--text-muted)',transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#fff'} onMouseLeave={e=>e.currentTarget.style.color='var(--text-muted)'}>
+            <a href="https://www.linkedin.com/company/getstudyedge/" target="_blank" rel="noopener noreferrer" aria-label="StudyEdge AI on LinkedIn" style={{color:'var(--text-muted)',transition:'color .2s'}} onMouseEnter={e=>e.currentTarget.style.color='#fff'} onMouseLeave={e=>e.currentTarget.style.color='var(--text-muted)'}>
               <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.064 2.064 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
             </a>
           </div>
@@ -197,7 +197,7 @@ function Footer(){
         </div>
       </div>
       <div className="container footer-bot">
-        <span>© 2026 StudyEdge, Inc.</span>
+        <span>© 2026 StudyEdge AI, Inc.</span>
         <span>Built by students, for students.</span>
       </div>
     </footer>

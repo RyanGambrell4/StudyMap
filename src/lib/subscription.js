@@ -1,5 +1,5 @@
 /**
- * subscription.js — Stripe subscription layer for StudyEdge
+ * subscription.js — Stripe subscription layer for StudyEdge AI
  *
  * Tracks plan, limits, and study boost usage in memory (mirrored to Supabase).
  */

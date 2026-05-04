@@ -1161,7 +1161,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
     const lines = []
     const courseName = course?.name || 'Course'
     const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-    lines.push(`StudyEdge — ${courseName} Study Plan`)
+    lines.push(`StudyEdge AI — ${courseName} Study Plan`)
     lines.push(`Generated ${dateStr}`)
     lines.push('')
     if (goal) lines.push(`Goal: ${goal}`)
@@ -1256,7 +1256,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
     doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(232, 232, 240)
     doc.text(courseName + ' — Study Plan', margin, 36)
     doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(136, 136, 160)
-    doc.text(`Generated ${dateStr} · StudyEdge`, margin, 54)
+    doc.text(`Generated ${dateStr} · StudyEdge AI`, margin, 54)
     y = 96
 
     // Summary line
@@ -1325,7 +1325,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
     for (let p = 1; p <= totalPages; p++) {
       doc.setPage(p)
       doc.setFontSize(8); doc.setTextColor(85, 85, 110); doc.setFont('helvetica', 'normal')
-      doc.text(`StudyEdge · ${courseName}`, margin, pageH - 20)
+      doc.text(`StudyEdge AI · ${courseName}`, margin, pageH - 20)
       doc.text(`Page ${p} of ${totalPages}`, pageW - margin, pageH - 20, { align: 'right' })
     }
 

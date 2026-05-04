@@ -116,7 +116,7 @@ export default function OnboardingTour({ onReady }) {
       // Step 1: Welcome (centered, no element)
       {
         popover: {
-          title: 'Welcome to StudyEdge',
+          title: 'Welcome to StudyEdge AI',
           description: "Let's show you around in 60 seconds.",
           showButtons: ['next', 'close'],
         },

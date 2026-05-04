@@ -822,7 +822,7 @@ export default function CoursesView({
           <div style={{ padding: '16px 20px', borderRadius: 12, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)', display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 22 }}>
             <svg style={{ width: 20, height: 20, color: D.amber, flexShrink: 0, marginTop: 2 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             <div>
-              <p style={{ margin: 0, color: D.amber, fontWeight: 700, fontSize: 14 }}>Courses are required to use StudyEdge</p>
+              <p style={{ margin: 0, color: D.amber, fontWeight: 700, fontSize: 14 }}>Courses are required to use StudyEdge AI</p>
               <p style={{ margin: '4px 0 0', color: `${D.amber}99`, fontSize: 12 }}>Add each course you're taking this semester. Then import your syllabi to unlock your study schedule, deadlines, and AI tools.</p>
             </div>
           </div>

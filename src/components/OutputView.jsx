@@ -236,7 +236,7 @@ function ShareCardModal({ courses, stats, onClose }) {
               </svg>
             </div>
             <div>
-              <div style={{ color: '#fff', fontWeight: 700, fontSize: 18, letterSpacing: '-0.3px', lineHeight: 1 }}>StudyEdge</div>
+              <div style={{ color: '#fff', fontWeight: 700, fontSize: 18, letterSpacing: '-0.3px', lineHeight: 1 }}>StudyEdge AI</div>
               <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>My Semester Plan</div>
             </div>
           </div>
@@ -1274,7 +1274,7 @@ export default function OutputView({
 
         {/* Print header */}
         <div className="hidden print:block p-8 border-b border-gray-200">
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">StudyEdge · Personalized Study Plan</h1>
+          <h1 className="text-3xl font-bold text-gray-900 mb-1">StudyEdge AI · Personalized Study Plan</h1>
           <p className="text-gray-500">{stats.totalCourses} courses · {stats.totalHours}h planned</p>
         </div>
 

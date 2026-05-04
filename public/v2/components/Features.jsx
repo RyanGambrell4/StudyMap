@@ -58,7 +58,7 @@ function Bento(){
 
           <BentoCard
             title="Smart Scheduling"
-            body="StudyEdge reads your calendar, finds your free windows, and auto-fills them with the right course at the right time."
+            body="StudyEdge AI reads your calendar, finds your free windows, and auto-fills them with the right course at the right time."
             className="bc-f"
             accent="#818cf8"
             icon={<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 11h18M8 3v4M16 3v4"/></svg>}>
@@ -218,7 +218,7 @@ function GradeIntel(){
           <div className="section-kicker">Grade intelligence</div>
           <h2 className="section-title">Stop guessing.<br/><span className="grad-text">Know exactly where you stand.</span></h2>
           <p className="section-sub" style={{margin:'22px 0 28px 0',textAlign:'left',maxWidth:'480px'}}>
-            See your projected grade in real time. Scrub any score to test scenarios. StudyEdge tells you exactly what you need on every remaining assignment to hit your target.
+            See your projected grade in real time. Scrub any score to test scenarios. StudyEdge AI tells you exactly what you need on every remaining assignment to hit your target.
           </p>
           <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Try it free →</button>
         </div>

@@ -238,7 +238,7 @@ function SplashScreen({ onNext }) {
         <div className="ob-logo" style={{ marginBottom: '36px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px' }}>
           <img
             src="/favicon.png"
-            alt="StudyEdge"
+            alt="StudyEdge AI"
             style={{
               width: '34px', height: '34px',
               borderRadius: '9px',
@@ -246,7 +246,7 @@ function SplashScreen({ onNext }) {
               filter: 'drop-shadow(0 0 12px rgba(99,102,241,0.35))',
             }}
           />
-          <span style={{ color: 'white', fontWeight: 700, fontSize: '1.1rem', letterSpacing: '-0.4px' }}>StudyEdge</span>
+          <span style={{ color: 'white', fontWeight: 700, fontSize: '1.1rem', letterSpacing: '-0.4px' }}>StudyEdge AI</span>
         </div>
 
         {/* Animated headline */}
@@ -696,7 +696,7 @@ export default function Onboarding({ onComplete }) {
           <ContinueBtn
             onClick={() => onComplete({ yearLevel, learningStyle, preferredTime })}
             disabled={!preferredTime}
-            label="Enter StudyEdge"
+            label="Enter StudyEdge AI"
           />
         </div>
       </StepWrap>

@@ -1,6 +1,6 @@
 {
   "appId": "com.getstudyedge.app",
-  "appName": "StudyEdge",
+  "appName": "StudyEdge AI",
   "webDir": "dist",
   "server": {
     "androidScheme": "https",
