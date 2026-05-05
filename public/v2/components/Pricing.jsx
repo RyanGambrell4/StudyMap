@@ -2,22 +2,40 @@
 const { useState: p1, useEffect: p2 } = React;
 
 function Pricing(){
-  const [bill, setBill] = p1('monthly');
-  // Exact per-plan × per-billing prices (match Stripe price IDs)
+  const [bill, setBill] = p1('yearly');
+
+  // Actual charge amounts (match Stripe price IDs)
   const PRICE_TABLE = {
     pro:       { monthly: 12.99, semester: 39.99, yearly: 84.99 },
     unlimited: { monthly: 19.99, semester: 59.99, yearly: 119.99 },
   };
-  const PER_LABEL = { monthly: '/mo', semester: '/semester', yearly: '/yr' };
-  const SUB_LABEL = { monthly: 'Billed monthly', semester: 'Billed per semester', yearly: 'Billed yearly' };
+
+  // For semester/yearly show per-month equivalent so the number looks smaller
+  const MONTHLY_EQUIV = {
+    pro:       { monthly: 12.99, semester: (39.99/5), yearly: (84.99/12) },
+    unlimited: { monthly: 19.99, semester: (59.99/5), yearly: (119.99/12) },
+  };
+
+  const SAVE_LABEL = { monthly: null, semester: 'Save 23%', yearly: 'Save 45%' };
+
+  // What's actually billed (shown as sub-label)
+  const billedSub = (planKey) => {
+    if (bill === 'monthly') return 'Billed monthly';
+    if (bill === 'semester') return `Billed $${PRICE_TABLE[planKey].semester.toFixed(2)}/semester`;
+    return `Billed $${PRICE_TABLE[planKey].yearly.toFixed(2)}/year`;
+  };
+
+  const displayPrice = (planKey) => MONTHLY_EQUIV[planKey][bill];
+
   const goSignup = (plan)=>{
     const qs = new URLSearchParams({ signup: '1' });
     if (plan) { qs.set('plan', plan); qs.set('billing', bill); }
     window.location.href = '/app?' + qs.toString();
   };
+
   const tiers = [
     {
-      name:'Free', price:0, sub:'Try the system. No credit card.',
+      name:'Free', planKey:null, sub:'Try the system. No credit card.',
       cta:'Start for free', primary:false, plan:null,
       feats:[
         [true,'1 course'],
@@ -30,7 +48,7 @@ function Pricing(){
       ]
     },
     {
-      name:'Pro', price:PRICE_TABLE.pro[bill], sub:SUB_LABEL[bill],
+      name:'Pro', planKey:'pro',
       cta:'Get Pro', primary:true, popular:true, plan:'pro',
       feats:[
         [true,'5 courses'],
@@ -43,7 +61,7 @@ function Pricing(){
       ]
     },
     {
-      name:'Unlimited', price:PRICE_TABLE.unlimited[bill], sub:SUB_LABEL[bill],
+      name:'Unlimited', planKey:'unlimited',
       cta:'Get Unlimited', primary:false, plan:'unlimited',
       feats:[
         [true,'Unlimited courses'],
@@ -56,6 +74,7 @@ function Pricing(){
       ]
     }
   ];
+
   return (
     <section className="pricing-sec">
       <div className="container">
@@ -81,11 +100,17 @@ function Pricing(){
               {t.popular && <div className="tier-pop">MOST POPULAR</div>}
               <div className="tier-name">{t.name}</div>
               <div className="tier-price">
-                <span className="dollar">$</span>
-                <span className="amt">{t.price===0?'0':t.price.toFixed(2)}</span>
-                <span className="per">{t.price===0?'/forever':PER_LABEL[bill]}</span>
+                <span className="dollar">{t.planKey ? '$' : ''}</span>
+                <span className="amt">{t.planKey ? displayPrice(t.planKey).toFixed(2) : '0'}</span>
+                <span className="per">{t.planKey ? '/mo' : '/forever'}</span>
               </div>
-              <div className="tier-sub">{t.sub}</div>
+              {t.planKey && bill !== 'monthly' && (
+                <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:2}}>
+                  <span style={{fontSize:12,color:'var(--text-muted)',textDecoration:'line-through'}}>${PRICE_TABLE[t.planKey].monthly.toFixed(2)}/mo</span>
+                  <span style={{fontSize:11,fontWeight:700,color:'#34d399',background:'rgba(52,211,153,0.12)',border:'1px solid rgba(52,211,153,0.25)',borderRadius:20,padding:'2px 8px'}}>{SAVE_LABEL[bill]}</span>
+                </div>
+              )}
+              <div className="tier-sub">{t.planKey ? billedSub(t.planKey) : 'Try the system. No credit card.'}</div>
               <div className="tier-feats">
                 {t.feats.map(([on,f])=>(
                   <div key={f} className={`tf ${on?'on':'off'}`}>
