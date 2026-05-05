@@ -14,6 +14,7 @@
 
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
+import { Resend } from 'resend'
 
 // Disable Vercel's default body parsing — required for Stripe signature verification
 export const config = {
@@ -21,6 +22,7 @@ export const config = {
 }
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY)
+const resend = new Resend(process.env.RESEND_API_KEY)
 
 // ── Basic in-memory rate limit for checkout (per IP, 5 req / 60s) ─────────────
 const _checkoutRateMap = new Map()
@@ -60,6 +62,89 @@ const PRICE_TO_PLAN = {
   'price_1TMEqPKCY4pCgrHv65bsDflq': { plan: 'unlimited', billingPeriod: 'monthly'  },
   'price_1TMaOgKCY4pCgrHvPXqOb30f': { plan: 'unlimited', billingPeriod: 'semester' },
   'price_1TMEqPKCY4pCgrHvymo8ytBO': { plan: 'unlimited', billingPeriod: 'yearly'   },
+}
+
+async function sendWinBackEmail(toEmail) {
+  if (!process.env.RESEND_API_KEY) return
+  try {
+    await resend.emails.send({
+      from: 'StudyEdge AI <support@getstudyedge.com>',
+      to: toEmail,
+      subject: "You still have access until your period ends — here's what you'll miss",
+      html: `
+<!DOCTYPE html>
+<html>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+<body style="margin:0;padding:0;background:#080D1A;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background:#080D1A;padding:40px 0;">
+    <tr><td align="center">
+      <table width="560" cellpadding="0" cellspacing="0" style="background:#0D1425;border-radius:16px;border:1px solid rgba(255,255,255,0.07);padding:40px 48px;max-width:560px;">
+
+        <!-- Logo -->
+        <tr><td style="padding-bottom:28px;">
+          <span style="font-size:17px;font-weight:700;color:#F1F5F9;letter-spacing:-0.3px;">StudyEdge AI</span>
+        </td></tr>
+
+        <!-- Headline -->
+        <tr><td style="padding-bottom:16px;">
+          <h1 style="margin:0;font-size:24px;font-weight:800;color:#F1F5F9;letter-spacing:-0.8px;line-height:1.3;">
+            We're sorry to see you go.
+          </h1>
+        </td></tr>
+
+        <!-- Body -->
+        <tr><td style="padding-bottom:24px;">
+          <p style="margin:0 0 14px;font-size:15px;color:#94A3B8;line-height:1.7;">
+            Your Pro access has been cancelled. You'll keep your full access until the end of your current billing period — after that your account moves to the Free plan.
+          </p>
+          <p style="margin:0 0 14px;font-size:15px;color:#94A3B8;line-height:1.7;">
+            Here's what you'll lose when it expires:
+          </p>
+          <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:20px;">
+            ${[
+              '5 courses (drops to 1)',
+              '75 study boosts/month (drops to 10)',
+              'AI-generated study plans',
+              'Session Blueprints & Study Coach',
+              'Flashcards & quizzes',
+            ].map(f => `
+            <tr>
+              <td style="padding:6px 0;font-size:14px;color:#64748b;">✕</td>
+              <td style="padding:6px 0 6px 10px;font-size:14px;color:#CBD5E1;">${f}</td>
+            </tr>`).join('')}
+          </table>
+          <p style="margin:0;font-size:15px;color:#94A3B8;line-height:1.7;">
+            If you cancelled by mistake, or want to give it another shot — we've got you. Just click below to reactivate.
+          </p>
+        </td></tr>
+
+        <!-- CTA -->
+        <tr><td style="padding-bottom:32px;text-align:center;">
+          <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1"
+             style="display:inline-block;background:linear-gradient(135deg,#4F7EF7,#7C5CFA);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;letter-spacing:-0.2px;">
+            Reactivate Pro →
+          </a>
+        </td></tr>
+
+        <!-- Footer -->
+        <tr><td style="border-top:1px solid rgba(255,255,255,0.07);padding-top:24px;">
+          <p style="margin:0;font-size:12px;color:#334155;line-height:1.6;">
+            You're receiving this because you cancelled your StudyEdge AI Pro subscription.<br/>
+            <a href="https://getstudyedge.com/app" style="color:#475569;">Log in</a> ·
+            <a href="mailto:support@getstudyedge.com" style="color:#475569;">Contact support</a>
+          </p>
+        </td></tr>
+
+      </table>
+    </td></tr>
+  </table>
+</body>
+</html>`,
+    })
+    console.log(`[stripe webhook] Win-back email sent to ${toEmail}`)
+  } catch (err) {
+    console.error('[stripe webhook] Failed to send win-back email:', err)
+  }
 }
 
 function getRawBody(req) {
@@ -145,6 +230,17 @@ export default async function handler(req, res) {
 
         if (error) throw error
         console.log(`[stripe webhook] Updated user ${userId} → ${mergedSub.plan} (${mergedSub.status})`)
+
+        // ── Win-back email on cancellation/downgrade ─────────────────────────
+        const wasDowngraded =
+          event.type === 'customer.subscription.deleted' ||
+          (event.type === 'customer.subscription.updated' && !isActive)
+        if (wasDowngraded) {
+          // Fetch user email from Supabase Auth
+          const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
+          const email = authUser?.user?.email
+          if (email) await sendWinBackEmail(email)
+        }
       } catch (err) {
         console.error('[stripe webhook] DB error:', err)
         return res.status(500).json({ error: 'DB update failed' })
