@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { createCheckoutSession } from '../lib/subscription'
 
 // ── Options ───────────────────────────────────────────────────────────────────
 const STYLE_OPTIONS = [
@@ -534,7 +535,7 @@ function OptionCard({ selected, onClick, children, style = {} }) {
 }
 
 // ── Main ───────────────────────────────────────────────────────────────────────
-export default function Onboarding({ onComplete }) {
+export default function Onboarding({ onComplete, userEmail, userId }) {
   const [step, setStep]       = useState(1)
   const [animKey, setAnimKey] = useState(0)
   const [animDir, setAnimDir] = useState(1)
@@ -662,7 +663,7 @@ export default function Onboarding({ onComplete }) {
   if (step === 4) return (
     <Page>
       <StepWrap animKey={animKey} dir={animDir}>
-        <ProgressBar current={3} total={3} />
+        <ProgressBar current={3} total={4} />
         <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f1f5f9', letterSpacing: '-1.2px', marginBottom: '6px' }}>
           When do you do your best work?
         </h2>
@@ -694,11 +695,97 @@ export default function Onboarding({ onComplete }) {
         <div style={{ display: 'flex', gap: '10px' }}>
           <BackBtn onClick={() => goTo(3, -1)} />
           <ContinueBtn
-            onClick={() => onComplete({ yearLevel, learningStyle, preferredTime })}
+            onClick={() => goTo(5, 1)}
             disabled={!preferredTime}
-            label="Enter StudyEdge AI"
+            label="Continue"
           />
         </div>
+      </StepWrap>
+    </Page>
+  )
+
+  // ── Step 5: Plan upsell ─────────────────────────────────────────────────────
+  if (step === 5) return (
+    <Page>
+      <StepWrap animKey={animKey} dir={animDir}>
+        <ProgressBar current={4} total={4} />
+        <h2 style={{ fontSize: '1.75rem', fontWeight: 800, color: '#f1f5f9', letterSpacing: '-1.2px', marginBottom: '6px' }}>
+          Your plan is ready.
+        </h2>
+        <p style={{ color: '#475569', fontSize: '0.95rem', marginBottom: '24px' }}>
+          Start your 7-day free Pro trial — no credit card needed.
+        </p>
+
+        {/* Free vs Pro comparison */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '24px' }}>
+          {/* Free */}
+          <div style={{
+            background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)',
+            borderRadius: '14px', padding: '18px 16px',
+          }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#64748b', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>
+              Free
+            </div>
+            {[
+              '1 course',
+              '10 study boosts/mo',
+              'Basic calendar',
+              'Focus timer',
+            ].map(f => (
+              <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2.5"><path d="M6 6l12 12M18 6l-12 12"/></svg>
+                <span style={{ fontSize: '0.82rem', color: '#64748b' }}>{f}</span>
+              </div>
+            ))}
+          </div>
+
+          {/* Pro */}
+          <div style={{
+            background: 'rgba(99,102,241,0.10)', border: '1px solid rgba(99,102,241,0.30)',
+            borderRadius: '14px', padding: '18px 16px',
+          }}>
+            <div style={{ fontSize: '0.75rem', fontWeight: 700, color: '#818cf8', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: '12px' }}>
+              Pro ✦
+            </div>
+            {[
+              '5 courses',
+              '75 study boosts/mo',
+              'Smart calendar',
+              'AI study plans',
+              'Priority support',
+            ].map(f => (
+              <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="3"><polyline points="5 12 10 17 20 7"/></svg>
+                <span style={{ fontSize: '0.82rem', color: '#c7d2fe' }}>{f}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <button
+          onClick={async () => {
+            const url = await createCheckoutSession('pro', 'monthly', userEmail, userId, { trial: true })
+            if (url) window.location.href = url
+          }}
+          style={{
+            width: '100%', padding: '14px', marginBottom: '12px',
+            background: 'linear-gradient(135deg, #4F7EF7, #7C5CFA)',
+            border: 'none', borderRadius: '12px', color: '#fff',
+            fontSize: '0.97rem', fontWeight: 700, cursor: 'pointer', letterSpacing: '-0.2px',
+          }}
+        >
+          Start 7-day free trial →
+        </button>
+
+        <button
+          onClick={() => onComplete({ yearLevel, learningStyle, preferredTime })}
+          style={{
+            width: '100%', padding: '10px', background: 'none', border: 'none',
+            color: '#475569', fontSize: '0.88rem', cursor: 'pointer',
+          }}
+        >
+          Continue with free plan
+        </button>
       </StepWrap>
     </Page>
   )

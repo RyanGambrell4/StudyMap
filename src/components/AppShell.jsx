@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect } from 'react'
-import { getActivePlan } from '../lib/subscription'
+import { getActivePlan, getCachedSubscription } from '../lib/subscription'
 import OnboardingTour from './OnboardingTour'
 
 // ── Color tokens ───────────────────────────────────────────────────────────────
@@ -88,6 +88,21 @@ export default function AppShell({
 
   const plan = getActivePlan()
   const planLabel = plan === 'unlimited' ? 'Unlimited' : plan === 'pro' ? 'Pro' : 'Free'
+
+  const sub = getCachedSubscription()
+  const isTrialing = sub?.status === 'trialing'
+  const [trialBannerDismissed, setTrialBannerDismissed] = useState(
+    () => sessionStorage.getItem('studyedge_trial_banner_dismissed') === '1'
+  )
+  const daysLeft = isTrialing && sub?.currentPeriodEnd
+    ? Math.max(0, Math.ceil((new Date(sub.currentPeriodEnd) - new Date()) / (1000 * 60 * 60 * 24)))
+    : null
+  const trialMsg = daysLeft !== null && daysLeft <= 2
+    ? "Your trial ends tomorrow — don't lose access to your courses and AI tools."
+    : daysLeft !== null
+      ? `Your Pro trial ends in ${daysLeft} day${daysLeft !== 1 ? 's' : ''} — keep access to everything.`
+      : null
+  const showTrialBanner = isTrialing && trialMsg && !trialBannerDismissed
   const planColors = {
     free:      { bg: 'rgba(100,116,139,0.15)', color: '#94a3b8' },
     pro:       { bg: 'rgba(99,102,241,0.15)',  color: '#818cf8' },
@@ -357,6 +372,31 @@ export default function AppShell({
 
       {/* ── Main content ── */}
       <main className="flex-1 lg:ml-56 pb-20 lg:pb-0 min-h-screen" style={{ overflowX: 'hidden', minWidth: 0, width: '100%' }}>
+        {showTrialBanner && (
+          <div style={{
+            background: 'linear-gradient(90deg, rgba(99,102,241,0.18), rgba(124,92,250,0.18))',
+            borderBottom: '1px solid rgba(99,102,241,0.25)',
+            padding: '10px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+          }}>
+            <span style={{ fontSize: 13, color: '#c7d2fe', fontWeight: 500 }}>
+              ⏳ {trialMsg}
+            </span>
+            <button
+              onClick={() => {
+                sessionStorage.setItem('studyedge_trial_banner_dismissed', '1')
+                setTrialBannerDismissed(true)
+              }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontSize: 16, lineHeight: 1, padding: '0 4px', flexShrink: 0 }}
+              aria-label="Dismiss"
+            >
+              ×
+            </button>
+          </div>
+        )}
         {children}
       </main>
 

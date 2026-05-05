@@ -105,9 +105,12 @@ function Pricing(){
                 <span className="per">{t.planKey ? '/mo' : '/forever'}</span>
               </div>
               {t.planKey && bill !== 'monthly' && (
-                <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:2}}>
+                <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:2,flexWrap:'wrap'}}>
                   <span style={{fontSize:12,color:'var(--text-muted)',textDecoration:'line-through'}}>${PRICE_TABLE[t.planKey].monthly.toFixed(2)}/mo</span>
                   <span style={{fontSize:11,fontWeight:700,color:'#34d399',background:'rgba(52,211,153,0.12)',border:'1px solid rgba(52,211,153,0.25)',borderRadius:20,padding:'2px 8px'}}>{SAVE_LABEL[bill]}</span>
+                  {t.planKey === 'pro' && bill === 'yearly' && (
+                    <span style={{fontSize:11,fontWeight:600,color:'var(--text-muted)'}}>· Save $48/year</span>
+                  )}
                 </div>
               )}
               <div className="tier-sub">{t.planKey ? billedSub(t.planKey) : 'Try the system. No credit card.'}</div>
@@ -121,6 +124,9 @@ function Pricing(){
                 ))}
               </div>
               <button className={`btn ${t.primary?'btn-primary':'btn-ghost'} tier-cta`} onClick={()=>goSignup(t.plan)}>{t.cta}</button>
+              {t.primary && (
+                <p style={{textAlign:'center',fontSize:11,color:'var(--text-muted)',marginTop:8,marginBottom:0}}>✓ 7-day free trial included</p>
+              )}
             </div>
           ))}
         </div>

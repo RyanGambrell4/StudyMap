@@ -416,7 +416,7 @@ export default function App() {
           onShowPaywall={openPaywall}
         />
       ) : (
-        <Onboarding onComplete={handleOnboardingComplete} />
+        <Onboarding onComplete={handleOnboardingComplete} userEmail={session.user.email} userId={session.user.id} />
       )}
 
       {/* Global paywall modal — rendered at App level so any component can trigger it */}

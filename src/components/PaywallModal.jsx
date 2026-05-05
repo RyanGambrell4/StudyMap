@@ -54,11 +54,11 @@ const PLANS = {
 const LIMIT_MESSAGES = {
   courses: {
     title: 'Course limit reached',
-    body: 'Free accounts are limited to 1 course. Upgrade to add more.',
+    body: 'Add up to 5 courses with Pro — one for each class this semester.',
   },
   ai: {
     title: 'Study boost limit reached',
-    body: "You've used all your study boosts this month. Upgrade for more.",
+    body: "You've used your 10 boosts. Pro gets 75 — that's a full month of daily study sessions.",
   },
 }
 
@@ -177,6 +177,11 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             </button>
           ))}
         </div>
+
+        {/* ── Social proof ── */}
+        <p style={{ textAlign: 'center', fontSize: '0.78rem', color: '#34D399', fontWeight: 600, marginBottom: '14px', marginTop: '-4px' }}>
+          Join 2,000+ students already on Pro.
+        </p>
 
         {/* ── Plan cards ── */}
         <div style={{ display: 'grid', gridTemplateColumns: visiblePlanIds.length === 1 ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '20px' }}>

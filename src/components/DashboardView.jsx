@@ -2,7 +2,7 @@ import { useMemo, useEffect, useRef, useState } from 'react'
 import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
-import { getActivePlan } from '../lib/subscription'
+import { getActivePlan, getAIQueriesUsed } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import { daysBetween, formatShortDate } from '../utils/dateUtils'
 
@@ -153,6 +153,11 @@ export default function DashboardView({
   onOpenStudyCoach,
 }) {
   const plan = getActivePlan()
+  const aiUsed = getAIQueriesUsed()
+  const [aiChipDismissed, setAiChipDismissed] = useState(
+    () => sessionStorage.getItem('studyedge_ai_chip_dismissed') === '1'
+  )
+  const showAiChip = plan === 'free' && aiUsed >= 7 && !aiChipDismissed
   const { currentStreak, recordCompletion } = useStreak()
   const celebrate = useCelebration()
   const streak = currentStreak
@@ -387,6 +392,30 @@ export default function DashboardView({
       `}</style>
       {/* Header */}
       <div className="dash-header" style={{ padding: '28px 32px 8px' }}>
+        {showAiChip && (
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 10,
+            background: 'rgba(251,191,36,0.10)', border: '1px solid rgba(251,191,36,0.25)',
+            borderRadius: 999, padding: '5px 14px', marginBottom: 14,
+          }}>
+            <span style={{ fontSize: 12, color: '#fbbf24', fontWeight: 600 }}>
+              {10 - aiUsed} study boost{(10 - aiUsed) !== 1 ? 's' : ''} left this month
+            </span>
+            <button
+              onClick={() => onShowPaywall?.('ai')}
+              style={{ fontSize: 12, fontWeight: 700, color: '#818cf8', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+            >
+              Upgrade →
+            </button>
+            <button
+              onClick={() => { sessionStorage.setItem('studyedge_ai_chip_dismissed', '1'); setAiChipDismissed(true) }}
+              style={{ fontSize: 14, color: '#64748b', background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', lineHeight: 1 }}
+              aria-label="Dismiss"
+            >
+              ×
+            </button>
+          </div>
+        )}
         <div style={{ fontSize: 12, color: D.textDim, letterSpacing: '0.03em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 8 }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: D.green, boxShadow: `0 0 8px ${D.green}` }} />
           {formatDateHeader(todayStr).toUpperCase()}
