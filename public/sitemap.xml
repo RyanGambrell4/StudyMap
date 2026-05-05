@@ -96,7 +96,7 @@
 
   <!-- Privacy Policy -->
   <url>
-    <loc>https://getstudyedge.com/privacy.html</loc>
+    <loc>https://getstudyedge.com/privacy</loc>
     <lastmod>2026-05-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
@@ -104,7 +104,7 @@
 
   <!-- Terms of Service -->
   <url>
-    <loc>https://getstudyedge.com/terms.html</loc>
+    <loc>https://getstudyedge.com/terms</loc>
     <lastmod>2026-05-01</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
