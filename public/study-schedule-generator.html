@@ -435,6 +435,74 @@
     .hp-bar .hp-title { display: none; }
   }
 </style>
+  <!-- SoftwareApplication schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "StudyEdge AI",
+    "url": "https://getstudyedge.com/",
+    "logo": "https://getstudyedge.com/favicon.png",
+    "description": "AI-powered study schedule generator that builds a personalized weekly schedule around your courses, exam dates, and free time — then plans every session minute by minute.",
+    "applicationCategory": "EducationApplication",
+    "operatingSystem": "Web",
+    "offers": [
+      { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD" },
+      { "@type": "Offer", "name": "Pro", "price": "12.99", "priceCurrency": "USD" },
+      { "@type": "Offer", "name": "Unlimited", "price": "19.99", "priceCurrency": "USD" }
+    ]
+  }
+  </script>
+
+  <!-- FAQPage schema -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How does the AI study schedule generator work?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "You add your courses and exam dates. StudyEdge AI calculates how much study time each course needs based on difficulty and deadline proximity, then builds a weekly schedule that fits your free time — and plans every session minute by minute before you sit down."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the study schedule generator free?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. StudyEdge AI is free to start with no credit card required. The free plan supports 1 course and 10 AI study boosts per month. Pro unlocks 5 courses and 75 boosts per month."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I import my syllabus to build my study schedule?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. You can upload a syllabus PDF and StudyEdge AI will automatically extract every exam, paper, and deadline into your schedule — no manual entry needed."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How is this different from a study schedule template?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "A template is static — you fill it in yourself and it never changes. StudyEdge AI generates a personalized schedule based on your actual courses and deadlines, updates it as the semester moves, and plans every session with flashcards, active recall, and a quiz so you always know exactly what to do."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does the study schedule update automatically?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "Yes. As deadlines approach or your course load changes, StudyEdge AI reweights your schedule to put the highest-priority work first. You can also reschedule missed sessions and the AI will redistribute them across the remaining days."
+        }
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
   <div class="aurora"></div>
@@ -638,7 +706,7 @@
         <div class="step">
           <div class="num">STEP 03</div>
           <h3>Open a session, every minute is planned</h3>
-          <p>Each session ships with a minute-by-minute Session Blueprint: warm-up, deep review, AI flashcards, active recall, and a quiz to close. You never sit down wondering where to start.</p>
+          <p>Each session ships with a minute-by-minute Session Blueprint: warm-up, deep review, <a href="/ai-flashcard-maker" style="color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(129,140,248,0.3)">AI flashcards</a>, active recall, and a quiz to close. You never sit down wondering where to start.</p>
           <div class="step-visual">
             <div class="v-min">
               <div class="row"><span class="t">0–5</span><span class="blk hp-b-psyc">Warm-up · last 5 missed cards</span></div>
@@ -854,7 +922,7 @@
           <summary>How is StudyEdge AI different from Taskade, Scholarly, or Canva's study planners?
             <svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"></path></svg>
           </summary>
-          <div class="ans">Taskade, Scholarly, and Canva generate a one-time study plan template with no context about your specific courses. StudyEdge AI builds a live schedule that updates as deadlines approach, imports your syllabus, plans every session minute by minute with flashcards and active recall, and tracks your grades, all in one system.</div>
+          <div class="ans">Taskade, Scholarly, and Canva generate a one-time study plan template with no context about your specific courses. StudyEdge AI builds a live schedule that updates as deadlines approach, imports your syllabus, plans every session minute by minute with flashcards and active recall, and tracks your grades, all in one system. If you're switching from Quizlet, see how <a href="/quizlet-alternative" style="color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(129,140,248,0.3)">StudyEdge AI compares as a Quizlet alternative</a>. Or read our full guide on <a href="/how-to-make-a-study-schedule" style="color:var(--accent-soft);text-decoration:none;border-bottom:1px solid rgba(129,140,248,0.3)">how to make a study schedule that actually works</a>.</div>
         </details>
       </div>
     </div>
