@@ -125,7 +125,11 @@ function Pricing(){
               </div>
               <button className={`btn ${t.primary?'btn-primary':'btn-ghost'} tier-cta`} onClick={()=>goSignup(t.plan)}>{t.cta}</button>
               {t.primary && (
-                <p style={{textAlign:'center',fontSize:11,color:'var(--text-muted)',marginTop:8,marginBottom:0}}>✓ 7-day free trial included</p>
+                <p style={{textAlign:'center',fontSize:11,color:'var(--text-muted)',marginTop:8,marginBottom:0}}>
+                  {bill === 'monthly'
+                    ? '✓ 7-day free trial included'
+                    : 'Switch to Monthly to start your free trial'}
+                </p>
               )}
             </div>
           ))}
