@@ -158,6 +158,10 @@ export default function DashboardView({
     () => sessionStorage.getItem('studyedge_ai_chip_dismissed') === '1'
   )
   const showAiChip = plan === 'free' && aiUsed >= 7 && !aiChipDismissed
+  const [trialCardDismissed, setTrialCardDismissed] = useState(
+    () => localStorage.getItem('studyedge_trial_card_dismissed') === '1'
+  )
+  const showTrialCard = plan === 'free' && !trialCardDismissed
   const { currentStreak, recordCompletion } = useStreak()
   const celebrate = useCelebration()
   const streak = currentStreak
@@ -427,6 +431,46 @@ export default function DashboardView({
           {subtitle}
         </p>
       </div>
+
+      {/* Pro trial banner */}
+      {showTrialCard && (
+        <div style={{ padding: '0 32px 20px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(79,126,247,0.12), rgba(124,92,250,0.12))',
+            border: '1px solid rgba(99,102,241,0.25)',
+            borderRadius: 14, padding: '16px 20px',
+            display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+          }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 14, color: '#c7d2fe', letterSpacing: '-0.2px' }}>
+                ✦ Try Pro free for 7 days
+              </p>
+              <p style={{ margin: '3px 0 0', fontSize: 12, color: '#64748b', lineHeight: 1.5 }}>
+                5 courses · 75 AI boosts · Study Coach · Session Blueprints. Cancel before day 7, pay nothing.
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+              <button
+                onClick={() => onShowPaywall?.('courses')}
+                style={{
+                  background: 'linear-gradient(135deg, #4F7EF7, #7C5CFA)',
+                  border: 'none', borderRadius: 8, padding: '8px 18px',
+                  fontSize: 13, fontWeight: 700, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap',
+                }}
+              >
+                Start free trial →
+              </button>
+              <button
+                onClick={() => { localStorage.setItem('studyedge_trial_card_dismissed', '1'); setTrialCardDismissed(true) }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#475569', fontSize: 18, lineHeight: 1, padding: '0 4px', flexShrink: 0 }}
+                aria-label="Dismiss"
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Grid */}
       <div className="dash-grid" style={{ padding: '24px 32px 48px', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>

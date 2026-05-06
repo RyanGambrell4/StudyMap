@@ -713,7 +713,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           Your plan is ready.
         </h2>
         <p style={{ color: '#475569', fontSize: '0.95rem', marginBottom: '24px' }}>
-          Start your 7-day free Pro trial — no credit card needed.
+          Try Pro free for 7 days. Your card is charged after the trial — cancel before day 7 and you won't pay a thing.
         </p>
 
         {/* Free vs Pro comparison */}

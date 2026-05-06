@@ -179,14 +179,14 @@ function FinalCTA(){
           <div className="cta-grid"/>
           <div className="cta-inner">
             <h2 className="section-title" style={{maxWidth:820,margin:'0 auto'}}>You already know you need a<br/><span className="grad-text">better system.</span></h2>
-            <p className="section-sub" style={{margin:'22px auto 32px',maxWidth:560}}>StudyEdge AI is your edge to success. Free to start, no credit card needed.</p>
+            <p className="section-sub" style={{margin:'22px auto 32px',maxWidth:560}}>Try Pro free for 7 days. Your card is only charged after the trial ends — cancel before day 7 and you won't pay a thing.</p>
             <div className="cta-btns">
-              <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1&plan=pro&billing=monthly&trial=1'}>Get Started Free →</button>
+              <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1&plan=pro&billing=monthly&trial=1'}>Start Free Trial →</button>
             </div>
             <div className="cta-foot">
-              <span>✓ No credit card</span>
               <span>✓ 7-day free Pro trial</span>
-              <span>✓ Cancel anytime</span>
+              <span>✓ Cancel before day 7, pay nothing</span>
+              <span>✓ Full Pro access instantly</span>
             </div>
           </div>
         </div>
