@@ -4,6 +4,7 @@ import { initUserData, clearUserData, savePlan, refreshSubscription } from './li
 import { getActivePlan, canAddCourse, createCheckoutSession } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
 import { initAnalytics, identifyUser, resetUser, track } from './lib/analytics'
+import { captureReferralParam, getStoredReferrer, clearStoredReferrer } from './lib/referral'
 import AuthScreen from './components/AuthScreen'
 import LandingPage from './components/LandingPage'
 import Onboarding from './components/Onboarding'
@@ -13,7 +14,7 @@ import './index.css'
 
 export default function App() {
   useTheme()
-  useEffect(() => { initAnalytics() }, [])
+  useEffect(() => { initAnalytics(); captureReferralParam() }, [])
   const [session, setSession]   = useState(undefined) // undefined = still checking
   const [dbReady, setDbReady]   = useState(false)
   const [showOutput, setShowOutput]   = useState(false)
@@ -79,6 +80,21 @@ export default function App() {
       if (_event === 'SIGNED_IN' && session?.user) {
         identifyUser(session.user.id, { email: session.user.email })
         track('user_signed_in')
+        // Save referral — fire-and-forget, won't overwrite if already set
+        const referrer = getStoredReferrer()
+        if (referrer && referrer !== session.user.id) {
+          supabase.from('user_data').select('subscription').eq('user_id', session.user.id).maybeSingle()
+            .then(({ data }) => {
+              if (data?.subscription?.referredBy) return // already saved
+              const merged = { ...(data?.subscription ?? {}), referredBy: referrer }
+              return supabase.from('user_data').upsert(
+                { user_id: session.user.id, subscription: merged, updated_at: new Date().toISOString() },
+                { onConflict: 'user_id' }
+              )
+            })
+            .then(() => clearStoredReferrer())
+            .catch(() => {})
+        }
       }
       setSession(session)
       if (!session) {

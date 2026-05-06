@@ -327,6 +327,9 @@ export default async function handler(req, res) {
           ...newSubData,
           aiQueriesUsed:    existing?.subscription?.aiQueriesUsed    ?? 0,
           aiQueriesResetAt: existing?.subscription?.aiQueriesResetAt ?? null,
+          referredBy:       existing?.subscription?.referredBy       ?? null,
+          referralRewarded: existing?.subscription?.referralRewarded ?? false,
+          referralCount:    existing?.subscription?.referralCount    ?? 0,
         }
 
         const { error } = await supabaseAdmin
@@ -338,6 +341,67 @@ export default async function handler(req, res) {
 
         if (error) throw error
         console.log(`[stripe webhook] Updated user ${userId} → ${mergedSub.plan} (${mergedSub.status})`)
+
+        // ── Referral reward ───────────────────────────────────────────────────
+        // Fire when a referred user's subscription becomes active (trial→paid or direct).
+        // Applies a $12.99 Stripe credit to both the new subscriber and their referrer.
+        if (
+          sub.status === 'active' &&
+          mergedSub.referredBy &&
+          !mergedSub.referralRewarded
+        ) {
+          try {
+            const referrerId = mergedSub.referredBy
+            const { data: referrerRow } = await supabaseAdmin
+              .from('user_data')
+              .select('subscription')
+              .eq('user_id', referrerId)
+              .maybeSingle()
+
+            const referrerCustomerId = referrerRow?.subscription?.stripeCustomerId
+            const newCustomerId = sub.customer
+
+            const CREDIT_CENTS = 1299 // $12.99 — 1 month Pro
+
+            if (referrerCustomerId) {
+              await stripe.customers.createBalanceTransaction(referrerCustomerId, {
+                amount: -CREDIT_CENTS,
+                currency: 'usd',
+                description: 'Referral reward — friend upgraded to Pro',
+              })
+              // Increment referrer's count
+              const referrerMerged = {
+                ...(referrerRow?.subscription ?? {}),
+                referralCount: (referrerRow?.subscription?.referralCount ?? 0) + 1,
+              }
+              await supabaseAdmin.from('user_data').upsert(
+                { user_id: referrerId, subscription: referrerMerged, updated_at: new Date().toISOString() },
+                { onConflict: 'user_id' }
+              )
+            }
+
+            if (newCustomerId) {
+              await stripe.customers.createBalanceTransaction(newCustomerId, {
+                amount: -CREDIT_CENTS,
+                currency: 'usd',
+                description: 'Referral signup bonus — 1 month free',
+              })
+            }
+
+            // Mark as rewarded so it never fires twice
+            await supabaseAdmin.from('user_data').upsert(
+              {
+                user_id: userId,
+                subscription: { ...mergedSub, referralRewarded: true },
+                updated_at: new Date().toISOString(),
+              },
+              { onConflict: 'user_id' }
+            )
+            console.log(`[stripe webhook] Referral reward applied — referrer: ${referrerId}, new: ${userId}`)
+          } catch (refErr) {
+            console.error('[stripe webhook] Referral reward failed (non-fatal):', refErr)
+          }
+        }
 
         // ── Win-back email on cancellation/downgrade ─────────────────────────
         const wasDowngraded =

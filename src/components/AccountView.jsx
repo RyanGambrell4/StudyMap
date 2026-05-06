@@ -1,4 +1,5 @@
 import { getActivePlan } from '../lib/subscription'
+import ReferralCard from './ReferralCard'
 
 const PLAN_INFO = {
   free: {
@@ -115,6 +116,9 @@ export default function AccountView({
           <p className="text-center text-sm text-slate-500 dark:text-slate-400">You're on the best plan. Thank you!</p>
         )}
       </div>
+
+      {/* Referral */}
+      <ReferralCard />
 
       {/* Settings */}
       <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden">
