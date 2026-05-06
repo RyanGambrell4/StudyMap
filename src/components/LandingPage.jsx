@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 
 function FeatureCard({ color, icon, title, desc, children }) {
   return (
@@ -30,6 +30,9 @@ function FeatureCard({ color, icon, title, desc, children }) {
 
 export default function LandingPage({ onGetStarted }) {
   const [scrollY, setScrollY] = useState(0)
+  const [stickyDismissed, setStickyDismissed] = useState(
+    () => sessionStorage.getItem('sticky_bar_dismissed') === '1'
+  )
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY)
@@ -37,8 +40,41 @@ export default function LandingPage({ onGetStarted }) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  const goTrial = () => window.location.href = '/app?signup=1&plan=pro&billing=monthly&trial=1'
+
   return (
     <div style={{ backgroundColor: '#060614', color: '#e2e8f0', minHeight: '100vh', fontFamily: "'Inter', -apple-system, sans-serif" }}>
+
+      {/* ── Sticky bottom trial bar ── */}
+      {!stickyDismissed && scrollY > 300 && (
+        <div style={{
+          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 999,
+          background: 'linear-gradient(90deg, #1e1b4b, #312e81)',
+          borderTop: '1px solid rgba(99,102,241,0.4)',
+          padding: '12px 24px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
+          flexWrap: 'wrap',
+        }}>
+          <span style={{ fontSize: 14, color: '#c7d2fe', fontWeight: 500 }}>
+            ✦ Try Pro free for 7 days — card charged after trial, cancel anytime before.
+          </span>
+          <button
+            onClick={goTrial}
+            style={{
+              background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+              border: 'none', borderRadius: 8, padding: '8px 20px',
+              fontSize: 13, fontWeight: 700, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap',
+            }}
+          >
+            Start free trial →
+          </button>
+          <button
+            onClick={() => { sessionStorage.setItem('sticky_bar_dismissed', '1'); setStickyDismissed(true) }}
+            style={{ background: 'none', border: 'none', color: '#6366f1', fontSize: 20, cursor: 'pointer', lineHeight: 1, padding: '0 4px', flexShrink: 0 }}
+            aria-label="Dismiss"
+          >×</button>
+        </div>
+      )}
 
       {/* ── Nav ── */}
       <nav style={{
@@ -137,22 +173,30 @@ export default function LandingPage({ onGetStarted }) {
         </p>
 
         {/* CTA Buttons */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
           <button
-            onClick={() => onGetStarted('signup')}
+            onClick={goTrial}
             style={{
               background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-              border: 'none', color: '#fff', borderRadius: 12, padding: '14px 32px',
-              fontSize: 16, fontWeight: 700, cursor: 'pointer',
+              border: 'none', color: '#fff', borderRadius: 12, padding: '15px 36px',
+              fontSize: 17, fontWeight: 700, cursor: 'pointer',
               boxShadow: '0 0 30px rgba(99,102,241,0.35), 0 4px 20px rgba(0,0,0,0.3)',
               transition: 'all 0.2s',
             }}
-            onMouseEnter={e => e.target.style.boxShadow = '0 0 45px rgba(99,102,241,0.55), 0 4px 20px rgba(0,0,0,0.3)'}
-            onMouseLeave={e => e.target.style.boxShadow = '0 0 30px rgba(99,102,241,0.35), 0 4px 20px rgba(0,0,0,0.3)'}
+            onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 45px rgba(99,102,241,0.55), 0 4px 20px rgba(0,0,0,0.3)'}
+            onMouseLeave={e => e.currentTarget.style.boxShadow = '0 0 30px rgba(99,102,241,0.35), 0 4px 20px rgba(0,0,0,0.3)'}
           >
-            Start Studying Free →
+            Start 7-day free trial →
           </button>
-          <span style={{ fontSize: 13, color: 'rgba(226,232,240,0.35)' }}>No credit card required</span>
+          <span style={{ fontSize: 12, color: 'rgba(226,232,240,0.30)' }}>
+            Card charged after trial · Cancel anytime before day 7
+          </span>
+          <button
+            onClick={() => onGetStarted('signup')}
+            style={{ background: 'none', border: 'none', color: 'rgba(226,232,240,0.35)', fontSize: 13, cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
+          >
+            or start free, no card required
+          </button>
         </div>
 
         {/* Hero Image */}

@@ -129,6 +129,14 @@ export default function App() {
     setCourses([])
     setInitialCompletedIds(new Set())
     setShowOutput(true)
+    // Fire-and-forget welcome email — promotes 7-day Pro trial
+    if (session?.user?.email) {
+      fetch('/api/welcome-email', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: session.user.email }),
+      }).catch(() => {}) // silent fail
+    }
   }
 
   const handleSavePlan = (completedIds, updatedAssignments) => {

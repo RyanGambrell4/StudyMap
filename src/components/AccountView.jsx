@@ -79,12 +79,29 @@ export default function AccountView({
           </ul>
         </div>
         {plan === 'free' && (
-          <button
-            onClick={onShowPaywall}
-            className="w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-xl text-sm transition-all shadow-lg shadow-indigo-900/30"
-          >
-            Upgrade to Pro →
-          </button>
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(79,126,247,0.12), rgba(124,92,250,0.12))',
+            border: '1px solid rgba(99,102,241,0.3)', borderRadius: 14, padding: '20px',
+            marginTop: 4,
+          }}>
+            <p style={{ margin: '0 0 4px', fontWeight: 800, fontSize: 16, color: '#c7d2fe', letterSpacing: '-0.3px' }}>
+              ✦ Try Pro free for 7 days
+            </p>
+            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
+              5 courses · 75 AI boosts/mo · Study Coach · Flashcards · Session Blueprints.<br/>
+              Card charged after trial — cancel before day 7, pay nothing.
+            </p>
+            <button
+              onClick={() => onShowPaywall?.('courses')}
+              style={{
+                width: '100%', padding: '12px', background: 'linear-gradient(135deg, #4F7EF7, #7C5CFA)',
+                border: 'none', borderRadius: 10, color: '#fff',
+                fontSize: 14, fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              Start free trial →
+            </button>
+          </div>
         )}
         {plan === 'pro' && (
           <button

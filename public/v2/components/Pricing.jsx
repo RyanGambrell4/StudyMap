@@ -98,6 +98,15 @@ function Pricing(){
           {tiers.map(t=>(
             <div key={t.name} className={`tier ${t.primary?'tier-primary':''}`}>
               {t.popular && <div className="tier-pop">MOST POPULAR</div>}
+              {t.primary && bill === 'monthly' && (
+                <div style={{
+                  display:'inline-block', fontSize:10, fontWeight:800, letterSpacing:'0.06em',
+                  color:'#34d399', background:'rgba(52,211,153,0.1)', border:'1px solid rgba(52,211,153,0.3)',
+                  borderRadius:6, padding:'3px 8px', marginBottom:8,
+                }}>
+                  TRY FREE · 7 DAYS
+                </div>
+              )}
               <div className="tier-name">{t.name}</div>
               <div className="tier-price">
                 <span className="dollar">{t.planKey ? '$' : ''}</span>

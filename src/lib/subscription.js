@@ -104,6 +104,7 @@ export function incrementAIQuery() {
     aiQueriesUsed: newCount,
     aiQueriesResetAt: newMonth ? now.toISOString() : (_sub?.aiQueriesResetAt ?? now.toISOString()),
   }
+  window.dispatchEvent(new CustomEvent('studyedge:ai-query-used', { detail: { count: newCount } }))
 }
 
 // ── Stripe checkout session creator ──────────────────────────────────────────

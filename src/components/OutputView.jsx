@@ -339,6 +339,19 @@ export default function OutputView({
   const [blueprintSession, setBlueprintSession] = useState(null) // session waiting for blueprint
   const [activeBlueprint, setActiveBlueprint] = useState(null)  // chosen blueprint (or null = skip)
   const [activeSection, setActiveSection] = useState('dashboard')
+  const [showFirstQueryNudge, setShowFirstQueryNudge] = useState(false)
+
+  // ── First-query nudge listener ────────────────────────────────────────────────
+  useEffect(() => {
+    const handler = (e) => {
+      if (e.detail.count === 1 && !localStorage.getItem('first_query_nudge_shown')) {
+        setShowFirstQueryNudge(true)
+      }
+    }
+    window.addEventListener('studyedge:ai-query-used', handler)
+    return () => window.removeEventListener('studyedge:ai-query-used', handler)
+  }, [])
+  // ─────────────────────────────────────────────────────────────────────────────
 
   // ── Browser back-button support ──────────────────────────────────────────────
   const sectionMounted = useRef(false)
@@ -855,6 +868,52 @@ export default function OutputView({
   // ── render ────────────────────────────────────────────────────────────────
   return (
     <>
+      {/* ── First-query nudge modal ── */}
+      {showFirstQueryNudge && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 2000,
+          background: 'rgba(8,13,26,0.85)', backdropFilter: 'blur(8px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
+        }}>
+          <div style={{
+            background: '#0D1425', border: '1px solid rgba(99,102,241,0.25)',
+            borderRadius: 20, padding: '36px 32px', maxWidth: 420, width: '100%', textAlign: 'center',
+          }}>
+            <div style={{ fontSize: 36, marginBottom: 12 }}>⚡</div>
+            <h2 style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 800, letterSpacing: '-0.5px', marginBottom: 8 }}>
+              You just used your first AI boost.
+            </h2>
+            <p style={{ color: '#64748b', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+              Pro gives you <strong style={{ color: '#c7d2fe' }}>75 boosts per month</strong> — that's enough for a daily study session all month. Try it free for 7 days.
+            </p>
+            <button
+              onClick={() => {
+                localStorage.setItem('first_query_nudge_shown', '1')
+                setShowFirstQueryNudge(false)
+                onShowPaywall?.('ai')
+              }}
+              style={{
+                width: '100%', padding: '13px', marginBottom: 10,
+                background: 'linear-gradient(135deg, #4F7EF7, #7C5CFA)',
+                border: 'none', borderRadius: 12, color: '#fff',
+                fontSize: 15, fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              Start 7-day free trial →
+            </button>
+            <button
+              onClick={() => {
+                localStorage.setItem('first_query_nudge_shown', '1')
+                setShowFirstQueryNudge(false)
+              }}
+              style={{ background: 'none', border: 'none', color: '#475569', fontSize: 13, cursor: 'pointer' }}
+            >
+              Keep using the free plan
+            </button>
+          </div>
+        </div>
+      )}
+
       {blueprintSession && (
         <BlueprintScreen
           session={blueprintSession}
