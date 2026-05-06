@@ -152,24 +152,24 @@ export default function LandingPage({ onGetStarted }) {
         {/* Headline */}
         <h1 style={{
           fontSize: 'clamp(36px, 5vw, 64px)', fontWeight: 900, lineHeight: 1.08,
-          letterSpacing: '-1.5px', color: '#fff', maxWidth: 720,
+          letterSpacing: '-1.5px', color: '#fff', maxWidth: 760,
           margin: '0 auto 20px', position: 'relative',
         }}>
-          Study smarter.{' '}
+          Stop guessing when to study.{' '}
           <span style={{
             background: 'linear-gradient(135deg, #6366f1, #818cf8, #a5b4fc)',
             WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
           }}>
-            Score higher.
+            Start knowing.
           </span>
         </h1>
 
         {/* Subheadline */}
         <p style={{
           fontSize: 'clamp(16px, 2vw, 19px)', color: 'rgba(226,232,240,0.55)',
-          maxWidth: 540, margin: '0 auto 40px', lineHeight: 1.6, fontWeight: 400,
+          maxWidth: 520, margin: '0 auto 40px', lineHeight: 1.6, fontWeight: 400,
         }}>
-          AI builds your perfect study plan for every session. Flashcards, focus timer, study coach, everything you need in one app.
+          Add your courses and exams. StudyEdge AI builds a full study schedule, session plans, flashcards, and a study coach — in 60 seconds.
         </p>
 
         {/* CTA Buttons */}
@@ -197,6 +197,30 @@ export default function LandingPage({ onGetStarted }) {
           >
             or start free, no card required
           </button>
+        </div>
+
+        {/* Social proof row */}
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          gap: 10, marginTop: 28,
+        }}>
+          {/* Avatar stack */}
+          <div style={{ display: 'flex' }}>
+            {['#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981'].map((c, i) => (
+              <div key={i} style={{
+                width: 26, height: 26, borderRadius: '50%',
+                background: c, border: '2px solid #060614',
+                marginLeft: i === 0 ? 0 : -8,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontSize: 10, fontWeight: 700, color: '#fff',
+              }}>
+                {['R','M','J','A','S'][i]}
+              </div>
+            ))}
+          </div>
+          <span style={{ fontSize: 13, color: 'rgba(226,232,240,0.40)', fontWeight: 500 }}>
+            Joined by <strong style={{ color: 'rgba(226,232,240,0.65)' }}>2,000+ students</strong> this semester
+          </span>
         </div>
 
         {/* Hero Image */}
