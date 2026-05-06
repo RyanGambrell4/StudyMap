@@ -79,10 +79,10 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
 
-  const handleSelectPlan = async (planId) => {
+  const handleSelectPlan = async (planId, opts = {}) => {
     setLoading(planId)
 
-    const url = await createCheckoutSession(planId, billingPeriod, userEmail, userId)
+    const url = await createCheckoutSession(planId, billingPeriod, userEmail, userId, opts)
 
     setLoading(null)
 
@@ -93,6 +93,8 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
 
     window.location.href = url
   }
+
+  const isProMonthly = billingPeriod === 'monthly'
 
   return (
     <div
@@ -199,15 +201,32 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             >
               {/* Plan name + price */}
               <div>
-                <div style={{
-                  fontSize: '0.75rem', fontWeight: 700, color: plan.color,
-                  marginBottom: '6px', textTransform: 'uppercase', letterSpacing: '0.5px',
-                }}>
-                  {plan.name}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
+                  <div style={{
+                    fontSize: '0.75rem', fontWeight: 700, color: plan.color,
+                    textTransform: 'uppercase', letterSpacing: '0.5px',
+                  }}>
+                    {plan.name}
+                  </div>
+                  {planId === 'pro' && isProMonthly && (
+                    <div style={{
+                      fontSize: '0.65rem', fontWeight: 800, color: '#34d399',
+                      background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)',
+                      borderRadius: '999px', padding: '2px 8px', letterSpacing: '0.3px',
+                      textTransform: 'uppercase',
+                    }}>
+                      7-day free trial
+                    </div>
+                  )}
                 </div>
                 <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#F1F5F9', letterSpacing: '-0.5px' }}>
                   {plan.prices[billingPeriod]}
                 </div>
+                {planId === 'pro' && isProMonthly && (
+                  <div style={{ fontSize: '0.72rem', color: '#64748b', marginTop: '3px' }}>
+                    Card charged after trial · cancel before day 7, pay nothing
+                  </div>
+                )}
               </div>
 
               {/* Features */}
@@ -224,7 +243,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
 
               {/* CTA button */}
               <button
-                onClick={() => handleSelectPlan(planId)}
+                onClick={() => handleSelectPlan(planId, planId === 'pro' && isProMonthly ? { trial: true } : {})}
                 disabled={loading === planId}
                 style={{
                   width: '100%', padding: '11px',
@@ -240,7 +259,11 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 onMouseEnter={e => { if (loading !== planId) e.currentTarget.style.opacity = '0.85' }}
                 onMouseLeave={e => { e.currentTarget.style.opacity = loading === planId ? '0.7' : '1' }}
               >
-                {loading === planId ? 'Loading...' : `Get ${plan.name}`}
+                {loading === planId
+                  ? 'Loading...'
+                  : planId === 'pro' && isProMonthly
+                    ? 'Start 7-day free trial →'
+                    : `Get ${plan.name}`}
               </button>
             </div>
           ))}
