@@ -5,6 +5,7 @@
  */
 
 import { supabase } from './supabase'
+import { track } from './analytics'
 
 // ── Plan limits ───────────────────────────────────────────────────────────────
 
@@ -105,11 +106,16 @@ export function incrementAIQuery() {
     aiQueriesResetAt: newMonth ? now.toISOString() : (_sub?.aiQueriesResetAt ?? now.toISOString()),
   }
   window.dispatchEvent(new CustomEvent('studyedge:ai-query-used', { detail: { count: newCount } }))
+  const limit = getPlanLimits().aiQueries
+  if (limit !== Infinity && newCount >= limit) {
+    track('ai_limit_reached', { plan: getActivePlan(), count: newCount })
+  }
 }
 
 // ── Stripe checkout session creator ──────────────────────────────────────────
 
 export async function createCheckoutSession(plan, billingPeriod, userEmail, userId, opts = {}) {
+  track('checkout_started', { plan, billingPeriod, trial: !!opts.trial })
   try {
     const res = await fetch('/api/stripe', {
       method: 'POST',

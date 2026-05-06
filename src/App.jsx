@@ -3,6 +3,7 @@ import { supabase } from './lib/supabase'
 import { initUserData, clearUserData, savePlan, refreshSubscription } from './lib/db'
 import { getActivePlan, canAddCourse, createCheckoutSession } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
+import { initAnalytics, identifyUser, resetUser, track } from './lib/analytics'
 import AuthScreen from './components/AuthScreen'
 import LandingPage from './components/LandingPage'
 import Onboarding from './components/Onboarding'
@@ -12,6 +13,7 @@ import './index.css'
 
 export default function App() {
   useTheme()
+  useEffect(() => { initAnalytics() }, [])
   const [session, setSession]   = useState(undefined) // undefined = still checking
   const [dbReady, setDbReady]   = useState(false)
   const [showOutput, setShowOutput]   = useState(false)
@@ -58,6 +60,7 @@ export default function App() {
   const openPaywall = useCallback((trigger = 'courses') => {
     setPaywallTrigger(trigger)
     setPaywallOpen(true)
+    track('paywall_shown', { trigger })
   }, [])
 
   // Tracks the latest completedIds/assignments so handleAddCourse can save immediately
@@ -73,8 +76,13 @@ export default function App() {
       if (_event === 'PASSWORD_RECOVERY') {
         setPasswordRecovery(true)
       }
+      if (_event === 'SIGNED_IN' && session?.user) {
+        identifyUser(session.user.id, { email: session.user.email })
+        track('user_signed_in')
+      }
       setSession(session)
       if (!session) {
+        resetUser()
         clearUserData()
         setDbReady(false)
         setShowOutput(false)
@@ -113,7 +121,12 @@ export default function App() {
     const params = new URLSearchParams(window.location.search)
     if (params.get('checkout') !== 'success') return
     window.history.replaceState({}, '', window.location.pathname)
-    refreshSubscription(session.user.id).then(() => setCheckoutSuccess(true))
+    refreshSubscription(session.user.id).then(() => {
+      const plan = getActivePlan()
+      track('checkout_success', { plan })
+      identifyUser(session.user.id, { plan })
+      setCheckoutSuccess(true)
+    })
   }, [session?.user?.id, dbReady])
 
   // ── Handlers ──────────────────────────────────────────────────────────────
@@ -129,6 +142,7 @@ export default function App() {
     setCourses([])
     setInitialCompletedIds(new Set())
     setShowOutput(true)
+    track('onboarding_completed', { yearLevel: yl, learningStyle: ls, preferredTime })
     // Fire-and-forget welcome email — promotes 7-day Pro trial
     if (session?.user?.email) {
       fetch('/api/welcome-email', {
