@@ -22,7 +22,7 @@ import AppShell from './AppShell'
 import DashboardView from './DashboardView'
 import { useSessionReminders } from '../utils/useSessionReminders'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
 import CoursesView from './CoursesView'
 import ProgressView from './ProgressView'
 import StudyToolsView from './StudyToolsView'
@@ -396,9 +396,13 @@ export default function OutputView({
   }, [activeSection, courses])
 
   const handleOpenStudyCoach = useCallback((idx) => {
+    if (getActivePlan() === 'free') {
+      onShowPaywall?.('coach')
+      return
+    }
     setCoachCourseIdx(idx ?? 0)
     setActiveSection('coach')
-  }, [])
+  }, [onShowPaywall])
 
   const [syllabusEvents, setSyllabusEvents] = useState(() => getCachedSyllabusEvents() ?? [])
   const [syllabusModalCourse, setSyllabusModalCourse] = useState(null)
@@ -738,7 +742,14 @@ export default function OutputView({
   )
 
   // ── handlers ──
-  const handleStartFocus = useCallback(s => { setBlueprintSession(s); setActiveBlueprint(null) }, [])
+  const handleStartFocus = useCallback(s => {
+    if (getActivePlan() === 'free') {
+      onShowPaywall?.('blueprint')
+      return
+    }
+    setBlueprintSession(s)
+    setActiveBlueprint(null)
+  }, [onShowPaywall])
   const handleBlueprintStart = useCallback((blueprint) => {
     setActiveBlueprint(blueprint)
     setFocusSession(blueprintSession)
@@ -991,7 +1002,13 @@ export default function OutputView({
 
       <AppShell
         activeSection={activeSection}
-        setActiveSection={setActiveSection}
+        setActiveSection={section => {
+          if (section === 'coach' && getActivePlan() === 'free') {
+            onShowPaywall?.('coach')
+            return
+          }
+          setActiveSection(section)
+        }}
         onImportSyllabus={() => setSyllabusModalCourse(-1)}
         onShare={() => setShowShareCard(true)}
         onEditPlan={onEditPlan}
@@ -1274,7 +1291,7 @@ export default function OutputView({
             courses={courses}
             userId={userId}
             onShowPaywall={onShowPaywall}
-            onNavigateToCoach={() => setActiveSection('coach')}
+            onNavigateToCoach={() => { if (getActivePlan() === 'free') { onShowPaywall?.('coach'); return } setActiveSection('coach') }}
           />
         )}
 
