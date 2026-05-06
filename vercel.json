@@ -3,6 +3,10 @@
     {
       "path": "/api/re-engage",
       "schedule": "0 10 * * *"
+    },
+    {
+      "path": "/api/weekly-recap",
+      "schedule": "0 10 * * 0"
     }
   ],
   "rewrites": [
