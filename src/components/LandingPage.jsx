@@ -423,6 +423,101 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
+      {/* ── Testimonials ── */}
+      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 100px' }}>
+        <div style={{ textAlign: 'center', marginBottom: 48 }}>
+          <h2 style={{
+            fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: 800,
+            color: '#fff', letterSpacing: '-0.6px', marginBottom: 10,
+          }}>
+            Students who stopped winging it
+          </h2>
+          <p style={{ fontSize: 15, color: 'rgba(226,232,240,0.4)', maxWidth: 420, margin: '0 auto' }}>
+            Real results from real students this semester.
+          </p>
+        </div>
+        <div style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 16,
+        }}>
+          {[
+            {
+              quote: "I went from a C+ to a B+ in Organic Chemistry. Having a session plan every time I sat down made the difference — I stopped wasting time figuring out what to study.",
+              name: 'Maya R.',
+              role: '3rd year · Pre-Med',
+              color: '#6366f1',
+            },
+            {
+              quote: "Finals week used to be pure panic. This semester I had everything mapped out 3 weeks before. I actually slept the night before my Calc exam.",
+              name: 'Jordan T.',
+              role: '2nd year · Engineering',
+              color: '#8b5cf6',
+            },
+            {
+              quote: "The flashcards it generates from my notes are way better than what I'd make myself. I just do a session and it handles the rest.",
+              name: 'Priya S.',
+              role: '1st year · Business',
+              color: '#ec4899',
+            },
+            {
+              quote: "I have 5 courses and a part-time job. Before this I was always behind. Now I actually know what to do every day and I'm keeping up.",
+              name: 'Marcus L.',
+              role: '4th year · Psychology',
+              color: '#f59e0b',
+            },
+            {
+              quote: "The Study Coach is what got me. It knows which topics I'm weak on and focuses my sessions there. My GPA went from 2.8 to 3.4 in one semester.",
+              name: 'Aisha K.',
+              role: '2nd year · Biology',
+              color: '#10b981',
+            },
+            {
+              quote: "I was skeptical about another study app but the AI session blueprints are genuinely useful. It's the only app I've used for more than a week.",
+              name: 'Chris M.',
+              role: '3rd year · Computer Science',
+              color: '#22d3ee',
+            },
+          ].map(({ quote, name, role, color }) => (
+            <div key={name} style={{
+              background: 'rgba(255,255,255,0.025)',
+              border: '1px solid rgba(255,255,255,0.07)',
+              borderRadius: 16, padding: '24px',
+              display: 'flex', flexDirection: 'column', gap: 16,
+            }}>
+              {/* Stars */}
+              <div style={{ display: 'flex', gap: 3 }}>
+                {[...Array(5)].map((_, i) => (
+                  <svg key={i} width="13" height="13" viewBox="0 0 20 20" fill={color}>
+                    <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
+                  </svg>
+                ))}
+              </div>
+              {/* Quote */}
+              <p style={{
+                fontSize: 14, color: 'rgba(226,232,240,0.7)',
+                lineHeight: 1.65, margin: 0, flex: 1,
+              }}>
+                "{quote}"
+              </p>
+              {/* Author */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{
+                  width: 32, height: 32, borderRadius: '50%',
+                  background: `${color}22`, border: `1px solid ${color}44`,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 13, fontWeight: 700, color,
+                }}>
+                  {name[0]}
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#fff' }}>{name}</div>
+                  <div style={{ fontSize: 11, color: 'rgba(226,232,240,0.35)' }}>{role}</div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* ── Bottom CTA ── */}
       <section style={{
         textAlign: 'center', padding: '60px 24px 100px',
