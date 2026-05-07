@@ -380,9 +380,17 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
         )}
 
         {/* Goal */}
-        <FieldBlock icon="flag" color={D.pink} label="Your goal" hint="What does success look like to you? Be as specific as possible.">
+        <FieldBlock
+          icon="flag"
+          color={D.pink}
+          label={isExamMode ? 'Target score & biggest weakness' : 'Your goal'}
+          hint={isExamMode ? 'What score are you aiming for, and which area of this section gives you the most trouble?' : 'What does success look like to you? Be as specific as possible.'}
+        >
           <textarea className="sc-input" value={form.goal || ''} onChange={e => update('goal', e.target.value)}
-            placeholder={`e.g. "Score 90%+ on the final" · "Truly understand derivatives, not memorize them" · "Pass with a B+"`} />
+            placeholder={isExamMode
+              ? `e.g. "Target 130 in this section — struggling most with timing and discrete questions"`
+              : `e.g. "Score 90%+ on the final" · "Truly understand derivatives, not memorize them" · "Pass with a B+"`}
+          />
         </FieldBlock>
 
         {/* Topics */}
@@ -892,6 +900,8 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     dates: [], materials: [], daysPerWeek: 3, sessionLen: 60, style: [],
   })
   const [plan, setPlan] = useState(null)
+  const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
+  const isExamMode = form.courseIdx >= 0 && EXAM_PATTERN.test(courses[form.courseIdx]?.name ?? '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [pushed, setPushed] = useState(false)

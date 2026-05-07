@@ -351,6 +351,9 @@ export default function DashboardView({
   const urgencyColor = (d) => d <= 2 ? '#F97316' : d <= 5 ? '#38BDF8' : D.textDim
   const urgencyLabel = (d) => d <= 2 ? 'Tight' : d <= 5 ? 'Soon' : 'Planned'
 
+  const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
+  const isExamMode = courses.some(c => EXAM_PATTERN.test(c.name))
+
   // ── Empty state ──────────────────────────────────────────────────────────────
   if (courses.length === 0) {
     return (
@@ -360,7 +363,7 @@ export default function DashboardView({
             {formatDateHeader(todayStr)}
           </p>
           <h1 style={{ color: D.text, fontSize: 28, fontWeight: 600, letterSpacing: -0.5, marginBottom: 8 }}>{greeting()}.</h1>
-          <p style={{ color: D.textMuted, fontSize: 14, marginBottom: 28 }}>Add your first course to unlock your study plan.</p>
+          <p style={{ color: D.textMuted, fontSize: 14, marginBottom: 28 }}>{isExamMode ? 'Add your first section to unlock your prep plan.' : 'Add your first course to unlock your study plan.'}</p>
           <button
             onClick={onNavigateToCourses}
             style={{ background: D.accent, color: '#fff', fontSize: 13.5, fontWeight: 600, padding: '10px 24px', borderRadius: 8, border: 'none', cursor: 'pointer', boxShadow: `0 8px 24px ${D.accentGlow}` }}
@@ -598,7 +601,7 @@ export default function DashboardView({
             ) : (
               <div style={{ padding: '20px 0', textAlign: 'center' }}>
                 <p style={{ color: D.textMuted, fontSize: 14, fontWeight: 600, marginBottom: 4 }}>No sessions queued.</p>
-                <p style={{ color: D.textDim, fontSize: 13 }}>Add a course to generate your study plan.</p>
+                <p style={{ color: D.textDim, fontSize: 13 }}>{isExamMode ? 'Add a section to generate your prep plan.' : 'Add a course to generate your study plan.'}</p>
               </div>
             )}
           </div>
@@ -687,7 +690,7 @@ export default function DashboardView({
         {/* ── COURSES (span 6) ── */}
         <HoverCard gridColumn="span 6" onClick={onNavigateToCourses} style={{ padding: 20 }}>
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 14 }}>
-            <SectionHeader>Courses</SectionHeader>
+            <SectionHeader>{isExamMode ? 'Sections' : 'Courses'}</SectionHeader>
             <div style={{ flex: 1 }} />
             <span style={{ fontSize: 11.5, color: D.textDim }}>View all →</span>
           </div>

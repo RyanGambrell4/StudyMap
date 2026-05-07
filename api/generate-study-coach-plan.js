@@ -12,6 +12,9 @@ export default async function handler(req, res) {
   const { courseName, goal, emphasisTopics, importantDates, daysPerWeek, sessionMinutes, calendarEvents, timePreference, struggles, gradeGap, weakAreas, courseMaterials } = req.body
   if (!courseName || !goal) return res.status(400).json({ error: 'Missing required fields' })
 
+  const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|Reading Comprehension|FAR|AUD|REG|MBE|MEE|MPT|Verbal Reasoning|Quantitative Reasoning|Analytical Writing|Quantitative|Data Insights/i
+  const isExamMode = EXAM_PATTERN.test(courseName)
+
   const todayStr = new Date().toISOString().split('T')[0]
   const datesStr = importantDates?.length
     ? importantDates.map(d => `${d.label} — ${d.date}`).join('\n')
@@ -49,7 +52,61 @@ export default async function handler(req, res) {
         max_tokens: 8000,
         messages: [{
           role: 'user',
-          content: `You are an expert academic strategist building a comprehensive, week-by-week study plan for a student.
+          content: isExamMode ? `You are an elite professional exam prep coach. Build a phase-based study plan for a student preparing for a high-stakes licensing or admissions exam.
+
+Section: ${courseName}
+Target score / goal: ${goal}
+Study days per week: ${daysPerWeek || 5}
+Session length: ${sessionMinutes || 90} minutes
+Today's date: ${todayStr}
+
+Exam date / prep timeline:
+${datesStr}
+${calendarStr ? `\nBlocked times (never schedule over these):\n${calendarStr}\nPreferred study window: ${pref.hours}\n` : `Preferred study window: ${pref.hours}`}
+${struggles?.length ? `\nWeak areas requiring extra reps: ${struggles.join(', ')}\n` : ''}
+
+Structure the plan across FOUR phases in order:
+1. Content Foundation — master the core content systematically. Session types: Content Review, Active Recall Drill
+2. Practice & Passages — build speed and accuracy with practice problems. Session types: Practice Passage Block, Active Recall Drill
+3. Official Material Focus — work through official prep materials (AAMC, LSAC, AICPA, etc.). Session types: Practice Passage Block, Full Length Exam, FL Review Session
+4. Final Crunch — targeted weak-area elimination and test simulation. Session types: Full Length Exam, FL Review Session, Active Recall Drill
+
+Assign each week to the appropriate phase based on the timeline. Weeks close to the exam should be in Phase 3–4.
+
+Return ONLY this JSON:
+
+{
+  "summary": "2-3 sentence strategy overview written like a serious exam coach, not a school planner",
+  "weeklyFocus": [
+    {
+      "week": "Week of [Month Day]",
+      "startDate": "YYYY-MM-DD",
+      "endDate": "YYYY-MM-DD",
+      "theme": "Phase [1-4]: [what this week targets] — e.g. 'Phase 1: Electrochemistry & Thermodynamics'",
+      "sessions": [
+        {
+          "sessionLabel": "Session 1",
+          "focusArea": "specific content area or passage type",
+          "goal": "what the student should hit by end of session",
+          "keyTopics": ["topic 1", "topic 2", "topic 3"],
+          "studyMethod": "one of: Content Review, Practice Passage Block, Full Length Exam, FL Review Session, Active Recall Drill",
+          "duration": ${sessionMinutes || 90}
+        }
+      ]
+    }
+  ],
+  "priorityTopics": ["high-yield topic 1", "high-yield topic 2", "high-yield topic 3", "high-yield topic 4", "high-yield topic 5"],
+  "warningZones": ["common trap 1", "area students underestimate 2", "timing/pacing issue 3"]
+}
+
+Rules:
+- Each week MUST have startDate (Monday) and endDate (Sunday) as YYYY-MM-DD
+- Generate exactly ${daysPerWeek || 5} sessions per week
+- theme MUST start with the phase label: "Phase 1:", "Phase 2:", "Phase 3:", or "Phase 4:"
+- studyMethod must be one of the five exam session types listed above
+- Keep all strings SHORT — focusArea max 8 words, keyTopics max 4 words each
+- Generate enough weeks to reach the exam date, ramping intensity in later phases
+- CRITICAL: compact JSON only, no prose outside the JSON` : `You are an expert academic strategist building a comprehensive, week-by-week study plan for a student.
 
 Course: ${courseName}
 Student's goal: ${goal}

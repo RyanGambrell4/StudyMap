@@ -216,6 +216,8 @@ function DayCell({ day, completedIds, onToggle, syllabusEventsForDay, onAddSessi
 
 // ─── Share card modal ─────────────────────────────────────────────────────────
 function ShareCardModal({ courses, stats, onClose }) {
+  const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
+  const isExamMode = courses.some(c => EXAM_PATTERN.test(c.name))
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div onClick={e => e.stopPropagation()} className="flex flex-col items-center gap-4">
@@ -237,12 +239,12 @@ function ShareCardModal({ courses, stats, onClose }) {
             </div>
             <div>
               <div style={{ color: '#fff', fontWeight: 700, fontSize: 18, letterSpacing: '-0.3px', lineHeight: 1 }}>StudyEdge AI</div>
-              <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>My Semester Plan</div>
+              <div style={{ color: '#94a3b8', fontSize: 11, marginTop: 2 }}>{isExamMode ? 'My Prep Window' : 'My Semester Plan'}</div>
             </div>
           </div>
           <div style={{ height: 1, background: 'rgba(255,255,255,0.07)', marginBottom: 18 }} />
           <div style={{ marginBottom: 18 }}>
-            <div style={{ color: '#64748b', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Courses</div>
+            <div style={{ color: '#64748b', fontSize: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>{isExamMode ? 'Sections' : 'Courses'}</div>
             {courses.map((course, idx) => {
               const today = new Date(); today.setHours(0,0,0,0)
               const daysLeft = Math.round((new Date(course.examDate + 'T12:00:00') - today) / 86400000)

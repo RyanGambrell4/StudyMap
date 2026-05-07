@@ -54,7 +54,16 @@ const EXAM_PRESETS = {
   },
 }
 
-const emptyForm = () => ({ name: '', examDate: '', difficulty: 'Medium', targetGrade: 'B', syllabusFile: null })
+const TARGET_SCORE_PLACEHOLDERS = {
+  MCAT: 'e.g. 515 (out of 528)',
+  LSAT: 'e.g. 170 (out of 180)',
+  CPA: 'e.g. 85 (passing is 75)',
+  BAR: 'e.g. 266 (UBE passing varies by state)',
+  GRE: 'e.g. 320 (V+Q combined)',
+  GMAT: 'e.g. 700 (out of 805)',
+}
+
+const emptyForm = () => ({ name: '', examDate: '', difficulty: 'Medium', targetGrade: 'B', targetScore: '', syllabusFile: null })
 
 const inputBase = 'w-full bg-slate-800/60 border rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors'
 
@@ -289,18 +298,33 @@ export default function StepCourses({ courses, setCourses, yearLevel, setYearLev
                 </select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-slate-400 mb-1.5">Target Grade</label>
-                <select
-                  value={form.targetGrade}
-                  onChange={e => setForm({ ...form, targetGrade: e.target.value })}
-                  className={`${inputBase} border-slate-700`}
-                  style={{ colorScheme: 'dark' }}
-                >
-                  <option value="A">A (90%+)</option>
-                  <option value="B">B (80–89%)</option>
-                  <option value="C">C (70–79%)</option>
-                  <option value="Pass/Fail">Pass/Fail</option>
-                </select>
+                {selectedExam ? (
+                  <>
+                    <label className="block text-sm font-medium text-slate-400 mb-1.5">Target Score</label>
+                    <input
+                      type="text"
+                      value={form.targetScore || ''}
+                      onChange={e => setForm({ ...form, targetScore: e.target.value })}
+                      placeholder={TARGET_SCORE_PLACEHOLDERS[selectedExam] || 'e.g. 90'}
+                      className={`${inputBase} border-slate-700`}
+                    />
+                  </>
+                ) : (
+                  <>
+                    <label className="block text-sm font-medium text-slate-400 mb-1.5">Target Grade</label>
+                    <select
+                      value={form.targetGrade}
+                      onChange={e => setForm({ ...form, targetGrade: e.target.value })}
+                      className={`${inputBase} border-slate-700`}
+                      style={{ colorScheme: 'dark' }}
+                    >
+                      <option value="A">A (90%+)</option>
+                      <option value="B">B (80–89%)</option>
+                      <option value="C">C (70–79%)</option>
+                      <option value="Pass/Fail">Pass/Fail</option>
+                    </select>
+                  </>
+                )}
               </div>
             </div>
           </div>

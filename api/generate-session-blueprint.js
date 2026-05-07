@@ -12,6 +12,9 @@ export default async function handler(req, res) {
   const { courseName, sessionType, durationMinutes, examDate, targetGrade, uploadedTopics, studentFocus } = req.body
   if (!courseName || !durationMinutes) return res.status(400).json({ error: 'Missing required fields' })
 
+  const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|Reading Comprehension|FAR|AUD|REG|MBE|MEE|MPT|Verbal Reasoning|Quantitative Reasoning|Analytical Writing|Quantitative|Data Insights/i
+  const isExamMode = EXAM_PATTERN.test(courseName)
+
   const todayStr = new Date().toISOString().split('T')[0]
   const daysUntilExam = examDate
     ? Math.max(0, Math.round((new Date(examDate + 'T12:00:00') - new Date(todayStr + 'T12:00:00')) / 86400000))
@@ -30,7 +33,49 @@ export default async function handler(req, res) {
         max_tokens: 2000,
         messages: [{
           role: 'user',
-          content: `You are an expert academic study strategist designing a focused, structured study session. Your goal is to help the student walk in knowing exactly what to tackle and walk out having made real progress.
+          content: isExamMode ? `You are an elite professional exam prep coach designing a high-intensity study session for a licensing or admissions exam. Every block must be purposeful and exam-focused.
+
+Section: ${courseName}
+Session type: ${sessionType || 'Content Review'}
+Total duration: ${durationMinutes} minutes
+Days until exam: ${daysUntilExam}
+Target score: ${targetGrade || 'Top score'}
+Focus area: ${studentFocus || 'High-yield content for this section'}
+
+Session type definitions and how to structure each:
+- Content Review: systematic content pass through key concepts, notes, and mnemonics
+- Practice Passage Block: timed passage or question sets with immediate self-scoring
+- Full Length Exam: simulate real exam conditions — no interruptions, strict timing
+- FL Review Session: detailed wrong-answer analysis from a recent full-length exam
+- Active Recall Drill: flashcard and recall-based drilling of high-yield facts
+
+Design the session with blocks that match the session type. Return ONLY this JSON:
+
+{
+  "sessionTitle": "sharp, exam-coach-style session name like 'CARS Passage Assault — 60 min block'",
+  "objective": "one sentence: the specific measurable outcome for this session",
+  "blocks": [
+    {
+      "blockNumber": 1,
+      "title": "block name like 'Activation Recall' or 'Timed Passage Set 1'",
+      "duration": 5,
+      "activity": "one of: review, active-recall, practice-problems, timed-passages, fl-review, break",
+      "instruction": "specific 1-2 sentence instruction — reference the section and session type directly",
+      "why": "one sentence on why this block builds exam performance"
+    }
+  ],
+  "successNote": "one direct, coach-style closing statement"
+}
+
+Rules:
+- Total block durations must add up to exactly ${durationMinutes} minutes
+- For Practice Passage Block / Full Length Exam: most blocks should be timed-passages (10-15 min chunks)
+- For FL Review Session: blocks should be fl-review focused on wrong answers by category
+- For Content Review / Active Recall Drill: alternate review and active-recall blocks
+- Always start with a 5-min activation block (recall what you know before reviewing)
+- Always end with a 5-min consolidation block (what did you learn? what still needs work?)
+- Include one 5-min break if session is over 60 minutes
+- Instructions must be specific to ${courseName}, not generic` : `You are an expert academic study strategist designing a focused, structured study session. Your goal is to help the student walk in knowing exactly what to tackle and walk out having made real progress.
 
 Course: ${courseName}
 Session type: ${sessionType}
