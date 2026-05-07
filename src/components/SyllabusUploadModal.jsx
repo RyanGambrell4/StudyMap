@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
 
@@ -64,7 +64,6 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
   const fileRef = useRef(null)
 
   // Auto-process a file dropped on the import band before the modal opened
-  const { useEffect } = React
   useEffect(() => {
     if (initialFile) processFile(initialFile)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
