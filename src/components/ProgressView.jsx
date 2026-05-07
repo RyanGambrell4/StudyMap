@@ -1,4 +1,4 @@
-import { useMemo, useState, Fragment } from 'react'
+import { useMemo, useState, useEffect, Fragment } from 'react'
 import { clean } from '../utils/strings'
 import { toDateStr, addDays, daysBetween } from '../utils/dateUtils'
 
@@ -172,9 +172,92 @@ function MilestoneIcon({ type, earned }) {
   return icons[type] ?? icons.sessions
 }
 
+const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
+const SCORE_KEY = 'studyedge_practice_scores'
+
+// ── Score line chart ──────────────────────────────────────────────────────────
+function ScoreLineChart({ entries, color }) {
+  if (!entries || entries.length < 2) return (
+    <div style={{ height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      <span style={{ fontSize: 12, color: D.textDim }}>Log at least 2 scores to see your trend.</span>
+    </div>
+  )
+  const W = 480, H = 110
+  const padL = 36, padR = 14, padT = 10, padB = 24
+  const innerW = W - padL - padR
+  const innerH = H - padT - padB
+  const vals = entries.map(e => e.score)
+  const minV = Math.min(...vals)
+  const maxV = Math.max(...vals)
+  const range = maxV - minV || 1
+  const xS = i => padL + (i / (entries.length - 1)) * innerW
+  const yS = v => padT + innerH - ((v - minV) / range) * innerH
+  const pts = entries.map((e, i) => [xS(i), yS(e.score)])
+  const poly = pts.map(([x, y]) => `${x},${y}`).join(' ')
+  const area = `M${xS(0)},${H - padB} ` + pts.map(([x, y]) => `L${x},${y}`).join(' ') + ` L${xS(entries.length - 1)},${H - padB}Z`
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} style={{ width: '100%', height: 110, overflow: 'visible' }}>
+      <defs>
+        <linearGradient id="slGrad" x1="0" x2="0" y1="0" y2="1">
+          <stop offset="0%" stopColor={color} stopOpacity="0.22" />
+          <stop offset="100%" stopColor={color} stopOpacity="0.02" />
+        </linearGradient>
+      </defs>
+      <path d={area} fill="url(#slGrad)" />
+      <polyline points={poly} fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+      {pts.map(([x, y], i) => (
+        <g key={i}>
+          <circle cx={x} cy={y} r="4" fill={color} />
+          <text x={x} y={y - 8} textAnchor="middle" style={{ fontSize: 9, fill: color, fontWeight: 700 }}>{entries[i].score}</text>
+          <text x={x} y={H - 5} textAnchor="middle" style={{ fontSize: 8.5, fill: D.textDim }}>{entries[i].date.slice(5)}</text>
+        </g>
+      ))}
+      <text x={padL - 4} y={padT + 4} textAnchor="end" style={{ fontSize: 9, fill: D.textDim }}>{maxV}</text>
+      <text x={padL - 4} y={H - padB + 4} textAnchor="end" style={{ fontSize: 9, fill: D.textDim }}>{minV}</text>
+    </svg>
+  )
+}
+
 // ══════════════════════════════════════════════════════════════════════════════
 export default function ProgressView({ courses, allSessions, completedIds, completedSessionLog = [], todayStr }) {
   const [period, setPeriod] = useState('Term')
+
+  const isExamMode = courses.some(c => EXAM_PATTERN.test(c.name))
+
+  // ── Practice scores (exam mode) ──────────────────────────────────────────────
+  const [practiceScores, setPracticeScores] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(SCORE_KEY) ?? '[]') } catch { return [] }
+  })
+  const [showScoreForm, setShowScoreForm] = useState(false)
+  const [scoreForm, setScoreForm] = useState({ date: todayStr, sectionName: '', score: '', notes: '', isOfficial: false })
+  const [scoreFormErr, setScoreFormErr] = useState('')
+
+  useEffect(() => {
+    try { localStorage.setItem(SCORE_KEY, JSON.stringify(practiceScores)) } catch {}
+  }, [practiceScores])
+
+  const examSections = useMemo(() => courses.filter(c => EXAM_PATTERN.test(c.name)).map(c => c.name), [courses])
+
+  const scoresBySectionSorted = useMemo(() => {
+    const map = {}
+    practiceScores.forEach(e => {
+      if (!map[e.sectionName]) map[e.sectionName] = []
+      map[e.sectionName].push(e)
+    })
+    Object.keys(map).forEach(k => map[k].sort((a, b) => a.date.localeCompare(b.date)))
+    return map
+  }, [practiceScores])
+
+  function submitScore() {
+    setScoreFormErr('')
+    if (!scoreForm.sectionName) return setScoreFormErr('Select a section.')
+    const s = parseFloat(scoreForm.score)
+    if (isNaN(s)) return setScoreFormErr('Enter a valid score.')
+    const entry = { id: Date.now().toString(), date: scoreForm.date, sectionName: scoreForm.sectionName, score: s, notes: scoreForm.notes, isOfficial: scoreForm.isOfficial }
+    setPracticeScores(prev => [...prev, entry])
+    setScoreForm({ date: todayStr, sectionName: '', score: '', notes: '', isOfficial: false })
+    setShowScoreForm(false)
+  }
 
   // ── Completed sessions ──────────────────────────────────────────────────────
   // Use persistent log as source of truth; merge in any schedule sessions that
@@ -496,7 +579,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12, marginBottom: 8 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <h1 style={{ margin: 0, fontSize: 30, fontWeight: 800, color: D.text, letterSpacing: '-0.02em' }}>Progress</h1>
-            <span style={{ fontSize: 12, fontWeight: 600, color: D.accent, background: `${D.accent}1a`, border: `1px solid ${D.accent}40`, borderRadius: 6, padding: '3px 10px' }}>{semLabel}</span>
+            <span style={{ fontSize: 12, fontWeight: 600, color: D.accent, background: `${D.accent}1a`, border: `1px solid ${D.accent}40`, borderRadius: 6, padding: '3px 10px' }}>{isExamMode ? 'Exam Prep' : semLabel}</span>
           </div>
           {/* Period toggle */}
           <div style={{ display: 'flex', gap: 2, background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 10, padding: 3 }}>
@@ -511,9 +594,185 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
           </div>
         </div>
         <p style={{ margin: 0, fontSize: 13, color: D.textMuted }}>
-          Your study momentum across {courses.length} course{courses.length !== 1 ? 's' : ''}, visualized.
+          {isExamMode
+            ? `Your prep momentum across ${courses.length} section${courses.length !== 1 ? 's' : ''}, visualized.`
+            : `Your study momentum across ${courses.length} course${courses.length !== 1 ? 's' : ''}, visualized.`}
         </p>
       </div>
+
+      {/* ── Practice Score Tracker (exam mode only) ── */}
+      {isExamMode && (
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '22px 26px', marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18, gap: 12, flexWrap: 'wrap' }}>
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 4 }}>PRACTICE SCORE TRACKER</div>
+              <div style={{ fontSize: 12.5, color: D.textMuted }}>Log your full-length and section scores over time</div>
+            </div>
+            <button
+              onClick={() => setShowScoreForm(v => !v)}
+              style={{ padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: `${D.accent}18`, color: D.accent, border: `1px solid ${D.accent}30`, cursor: 'pointer' }}
+            >
+              + Log Score
+            </button>
+          </div>
+
+          {showScoreForm && (
+            <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.18)', borderRadius: 12, padding: '16px 20px', marginBottom: 18 }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: D.textMuted, display: 'block', marginBottom: 5 }}>Section</label>
+                  <select
+                    value={scoreForm.sectionName}
+                    onChange={e => setScoreForm(f => ({ ...f, sectionName: e.target.value }))}
+                    style={{ width: '100%', background: '#0d0d22', border: '1px solid rgba(255,255,255,0.08)', color: D.text, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'inherit' }}
+                  >
+                    <option value="">Select section…</option>
+                    {examSections.map(n => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: D.textMuted, display: 'block', marginBottom: 5 }}>Score</label>
+                  <input
+                    type="number"
+                    placeholder="e.g. 512"
+                    value={scoreForm.score}
+                    onChange={e => setScoreForm(f => ({ ...f, score: e.target.value }))}
+                    style={{ width: '100%', background: '#0d0d22', border: '1px solid rgba(255,255,255,0.08)', color: D.text, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: D.textMuted, display: 'block', marginBottom: 5 }}>Date</label>
+                  <input
+                    type="date"
+                    value={scoreForm.date}
+                    onChange={e => setScoreForm(f => ({ ...f, date: e.target.value }))}
+                    style={{ width: '100%', background: '#0d0d22', border: '1px solid rgba(255,255,255,0.08)', color: D.text, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'inherit', colorScheme: 'dark', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div>
+                  <label style={{ fontSize: 11, fontWeight: 600, color: D.textMuted, display: 'block', marginBottom: 5 }}>Notes (optional)</label>
+                  <input
+                    type="text"
+                    placeholder="e.g. felt strong on gen chem"
+                    value={scoreForm.notes}
+                    onChange={e => setScoreForm(f => ({ ...f, notes: e.target.value }))}
+                    style={{ width: '100%', background: '#0d0d22', border: '1px solid rgba(255,255,255,0.08)', color: D.text, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                  />
+                </div>
+              </div>
+              <div style={{ marginBottom: 12 }}>
+                <label style={{ fontSize: 11, fontWeight: 600, color: D.textMuted, display: 'block', marginBottom: 6 }}>Source</label>
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {[{ label: 'Official (AAMC / Bar / AICPA)', val: true }, { label: 'Third-party (Kaplan, Blueprint, etc.)', val: false }].map(opt => (
+                    <button
+                      key={String(opt.val)}
+                      onClick={() => setScoreForm(f => ({ ...f, isOfficial: opt.val }))}
+                      style={{
+                        padding: '6px 12px', borderRadius: 7, fontSize: 11.5, fontWeight: 600, cursor: 'pointer',
+                        background: scoreForm.isOfficial === opt.val ? `${D.accent}22` : 'transparent',
+                        color: scoreForm.isOfficial === opt.val ? D.accent : D.textMuted,
+                        border: `1px solid ${scoreForm.isOfficial === opt.val ? `${D.accent}50` : D.border}`,
+                      }}
+                    >{opt.label}</button>
+                  ))}
+                </div>
+              </div>
+              {scoreFormErr && <p style={{ margin: '0 0 10px', fontSize: 12, color: '#f87171' }}>{scoreFormErr}</p>}
+              <div style={{ display: 'flex', gap: 8 }}>
+                <button onClick={submitScore} style={{ padding: '8px 18px', borderRadius: 8, fontSize: 12, fontWeight: 700, background: D.accent, color: '#fff', border: 'none', cursor: 'pointer' }}>Save Score</button>
+                <button onClick={() => setShowScoreForm(false)} style={{ padding: '8px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'transparent', color: D.textMuted, border: `1px solid ${D.border}`, cursor: 'pointer' }}>Cancel</button>
+              </div>
+            </div>
+          )}
+
+          {practiceScores.length === 0 ? (
+            <p style={{ color: D.textDim, fontSize: 13, margin: 0 }}>No scores logged yet. Log your first practice test score above.</p>
+          ) : (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+              {Object.entries(scoresBySectionSorted).map(([section, entries], si) => {
+                const color = cc(si)
+                const latest = entries[entries.length - 1]
+                const first = entries[0]
+                const delta = entries.length > 1 ? latest.score - first.score : null
+                const target = courses.find(c => c.name === section)?.targetScore
+                return (
+                  <div key={section}>
+                    <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
+                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0, marginBottom: 2 }} />
+                      <span style={{ fontSize: 13, fontWeight: 700, color: D.text }}>{section}</span>
+                      <span style={{ fontSize: 20, fontWeight: 800, color, letterSpacing: '-0.02em' }}>{latest.score}</span>
+                      {delta !== null && (
+                        <span style={{ fontSize: 12, fontWeight: 600, color: delta >= 0 ? D.green : D.amber }}>
+                          {delta >= 0 ? '+' : ''}{delta} from FL1
+                        </span>
+                      )}
+                      {target && (
+                        <span style={{ fontSize: 11, color: D.textDim, marginLeft: 'auto' }}>Target: <span style={{ color: D.textMuted, fontWeight: 600 }}>{target}</span></span>
+                      )}
+                    </div>
+                    <ScoreLineChart entries={entries} color={color} />
+                    {entries.length > 0 && (
+                      <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
+                        {entries.map((e, i) => (
+                          <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: D.textMuted, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, borderRadius: 6, padding: '4px 9px' }}>
+                            <span style={{ color: D.textDim }}>FL{i + 1}</span>
+                            <span style={{ color: D.text, fontWeight: 700 }}>{e.score}</span>
+                            {e.isOfficial && (
+                              <span style={{ fontSize: 9, fontWeight: 700, color: '#34d399', background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)', borderRadius: 4, padding: '1px 5px', letterSpacing: '0.04em' }}>OFFICIAL</span>
+                            )}
+                            {e.notes && <span style={{ color: D.textDim }}>· {e.notes}</span>}
+                          </div>
+                        ))}
+                        <button
+                          onClick={() => setPracticeScores(prev => prev.filter(s => s.id !== entries[entries.length - 1].id))}
+                          style={{ fontSize: 10, color: D.textDim, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px' }}
+                          title="Remove last entry"
+                        >✕ last</button>
+                      </div>
+                    )}
+                  </div>
+                )
+              })}
+
+              {/* Projected MCAT composite */}
+              {(() => {
+                const mcatSections = ['C/P', 'CARS', 'B/B', 'P/S']
+                const latestPerSection = mcatSections.map(s => {
+                  const key = Object.keys(scoresBySectionSorted).find(k => k.includes(s))
+                  if (!key) return null
+                  const arr = scoresBySectionSorted[key]
+                  return arr[arr.length - 1]?.score ?? null
+                })
+                if (latestPerSection.every(v => v !== null)) {
+                  const total = latestPerSection.reduce((a, b) => a + b, 0)
+                  return (
+                    <div style={{ marginTop: 8, padding: '12px 16px', borderRadius: 10, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.22)', display: 'flex', alignItems: 'center', gap: 14 }}>
+                      <div>
+                        <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 2 }}>Projected MCAT Composite</div>
+                        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                          <span style={{ fontSize: 26, fontWeight: 900, color: D.accent, letterSpacing: '-0.03em' }}>{total}</span>
+                          <span style={{ fontSize: 12, color: D.textMuted }}>/ 528</span>
+                        </div>
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${((total - 472) / 56) * 100}%`, background: 'linear-gradient(90deg, #6366f1, #818cf8)', borderRadius: 3 }} />
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
+                          {mcatSections.map((s, i) => (
+                            <span key={s} style={{ fontSize: 10, color: D.textDim }}>{s}: <span style={{ color: D.textMuted, fontWeight: 600 }}>{latestPerSection[i]}</span></span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  )
+                }
+                return null
+              })()}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── Stat cards ── */}
       <div className="pv-stat-grid">

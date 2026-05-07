@@ -1,4 +1,5 @@
 import { useMemo, useEffect, useRef, useState } from 'react'
+import ReferralCard from './ReferralCard'
 import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
@@ -356,21 +357,124 @@ export default function DashboardView({
 
   // ── Empty state ──────────────────────────────────────────────────────────────
   if (courses.length === 0) {
+    // Ghost preview colours (always dark so blur effect reads well)
+    const G = { card: 'rgba(255,255,255,0.05)', border: 'rgba(255,255,255,0.08)', bar: 'rgba(99,102,241,0.5)', barBg: 'rgba(255,255,255,0.06)', text: 'rgba(255,255,255,0.7)', muted: 'rgba(255,255,255,0.3)' }
+    const GhostBar = ({ w, color = G.bar }) => (
+      <div style={{ height: 6, borderRadius: 3, background: G.barBg, overflow: 'hidden' }}>
+        <div style={{ width: w, height: '100%', background: color, borderRadius: 3 }} />
+      </div>
+    )
     return (
-      <div style={{ minHeight: '100vh', background: D.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <Card style={{ padding: 40, textAlign: 'center', maxWidth: 420 }}>
-          <p style={{ color: D.textDim, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 24 }}>
-            {formatDateHeader(todayStr)}
-          </p>
-          <h1 style={{ color: D.text, fontSize: 28, fontWeight: 600, letterSpacing: -0.5, marginBottom: 8 }}>{greeting()}.</h1>
-          <p style={{ color: D.textMuted, fontSize: 14, marginBottom: 28 }}>{isExamMode ? 'Add your first section to unlock your prep plan.' : 'Add your first course to unlock your study plan.'}</p>
-          <button
-            onClick={onNavigateToCourses}
-            style={{ background: D.accent, color: '#fff', fontSize: 13.5, fontWeight: 600, padding: '10px 24px', borderRadius: 8, border: 'none', cursor: 'pointer', boxShadow: `0 8px 24px ${D.accentGlow}` }}
-          >
-            Add Your First Course
-          </button>
-        </Card>
+      <div style={{ position: 'relative', minHeight: '100vh', background: D.bg, overflow: 'hidden' }}>
+
+        {/* ── Ghost dashboard preview (blurred) ── */}
+        <div style={{ filter: 'blur(3px)', opacity: 0.5, pointerEvents: 'none', userSelect: 'none', padding: '28px 32px' }}>
+          {/* Header */}
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: 12, color: G.muted, letterSpacing: '0.08em', marginBottom: 10 }}>{formatDateHeader(todayStr).toUpperCase()}</div>
+            <div style={{ fontSize: 34, fontWeight: 600, color: G.text, letterSpacing: -0.8, marginBottom: 6 }}>{greeting()}.</div>
+            <div style={{ fontSize: 15, color: G.muted }}>You have 3 sessions scheduled this week.</div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+            {/* Fake course cards */}
+            {[
+              { name: isExamMode ? 'C/P Section' : 'Organic Chemistry', pct: '68%', color: '#6366f1', due: 'Midterm in 12 days' },
+              { name: isExamMode ? 'CARS Passages' : 'Calculus II',      pct: '41%', color: '#8b5cf6', due: 'Quiz in 4 days' },
+            ].map(c => (
+              <div key={c.name} style={{ background: G.card, border: `1px solid ${G.border}`, borderRadius: 14, padding: 18 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+                  <div style={{ width: 10, height: 10, borderRadius: '50%', background: c.color }} />
+                  <span style={{ fontSize: 14, fontWeight: 600, color: G.text }}>{c.name}</span>
+                </div>
+                <GhostBar w={c.pct} color={c.color} />
+                <div style={{ fontSize: 12, color: G.muted, marginTop: 8 }}>{c.due}</div>
+              </div>
+            ))}
+
+            {/* Fake "Up next" */}
+            <div style={{ gridColumn: '1 / -1', background: G.card, border: `1px solid ${G.border}`, borderRadius: 14, padding: 18 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: G.muted, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10 }}>Up Next</div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <div>
+                  <div style={{ fontSize: 16, fontWeight: 600, color: G.text, marginBottom: 4 }}>{isExamMode ? 'CARS — Passage Practice Block' : 'Organic Chemistry — Review'}</div>
+                  <div style={{ fontSize: 13, color: G.muted }}>Today · 60 min · Chapters 4–6</div>
+                </div>
+                <div style={{ background: 'rgba(99,102,241,0.2)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#a5b4fc' }}>Start →</div>
+              </div>
+            </div>
+
+            {/* Fake weekly bars */}
+            <div style={{ background: G.card, border: `1px solid ${G.border}`, borderRadius: 14, padding: 18 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: G.muted, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14 }}>This Week</div>
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 6, height: 48 }}>
+                {[30, 70, 50, 90, 40, 0, 0].map((h, i) => (
+                  <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'flex-end' }}>
+                    <div style={{ height: `${h}%`, background: h ? 'rgba(99,102,241,0.5)' : G.barBg, borderRadius: 3 }} />
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Fake streak */}
+            <div style={{ background: G.card, border: `1px solid ${G.border}`, borderRadius: 14, padding: 18 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: G.muted, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 10 }}>Streak</div>
+              <div style={{ fontSize: 36, fontWeight: 700, color: '#f59e0b', letterSpacing: -1 }}>7🔥</div>
+              <div style={{ fontSize: 12, color: G.muted, marginTop: 4 }}>days in a row</div>
+            </div>
+          </div>
+        </div>
+
+        {/* ── CTA overlay ── */}
+        <div style={{
+          position: 'absolute', inset: 0,
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          background: 'rgba(8,13,26,0.55)',
+          backdropFilter: 'blur(1px)',
+          padding: 24,
+        }}>
+          <div style={{
+            background: '#0D1425',
+            border: '1px solid rgba(255,255,255,0.10)',
+            borderRadius: 20,
+            padding: '40px 36px',
+            maxWidth: 420, width: '100%',
+            textAlign: 'center',
+            boxShadow: '0 24px 64px rgba(0,0,0,0.6)',
+          }}>
+            <div style={{
+              width: 52, height: 52, borderRadius: 14,
+              background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              margin: '0 auto 20px',
+            }}>
+              <svg width="24" height="24" fill="none" stroke="#818cf8" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+              </svg>
+            </div>
+            <h2 style={{ color: '#F1F5F9', fontSize: 22, fontWeight: 700, letterSpacing: -0.5, margin: '0 0 10px' }}>
+              {isExamMode ? 'Your prep plan is ready to build.' : 'Your study plan is ready to build.'}
+            </h2>
+            <p style={{ color: '#94A3B8', fontSize: 14, lineHeight: 1.65, margin: '0 0 28px' }}>
+              {isExamMode
+                ? 'Add your first exam section to unlock your personalized prep schedule, session blueprints, and score tracker.'
+                : 'Add your first course to unlock your personalized study schedule, session blueprints, and grade tracker.'}
+            </p>
+            <button
+              onClick={onNavigateToCourses}
+              style={{
+                width: '100%', background: D.accent, color: '#fff',
+                fontSize: 14, fontWeight: 700, padding: '13px 24px',
+                borderRadius: 10, border: 'none', cursor: 'pointer',
+                boxShadow: `0 8px 24px ${D.accentGlow}`,
+                letterSpacing: -0.2,
+              }}
+            >
+              {isExamMode ? 'Add Your First Section →' : 'Add Your First Course →'}
+            </button>
+            <p style={{ color: '#334155', fontSize: 12, margin: '14px 0 0' }}>Takes about 30 seconds</p>
+          </div>
+        </div>
       </div>
     )
   }
@@ -435,6 +539,65 @@ export default function DashboardView({
         </p>
       </div>
 
+      {/* ── Exam countdown banner (exam mode only) ── */}
+      {isExamMode && upcomingExam && (() => {
+        const d = upcomingExam.days
+        const phase = d > 90 ? 0 : d > 60 ? 1 : d > 30 ? 2 : 3
+        const phases = ['Content Foundation', 'Practice & Passages', 'Official Materials', 'Final Crunch']
+        const phaseColors = ['#818cf8', '#22d3ee', '#fbbf24', '#f97316']
+        const accentColor = phaseColors[phase]
+        const hoursPerDay = d > 0 ? Math.max(2, Math.min(10, Math.round(300 / d))) : 8
+        return (
+          <div style={{ padding: '0 32px 16px' }}>
+            <div style={{
+              background: `${accentColor}09`,
+              border: `1px solid ${accentColor}28`,
+              borderRadius: 12, padding: '14px 18px',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap' }}>
+                {/* Days */}
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, flexShrink: 0 }}>
+                  <span style={{ fontSize: 30, fontWeight: 900, letterSpacing: '-0.03em', color: accentColor, lineHeight: 1 }}>{d}</span>
+                  <span style={{ fontSize: 12, color: D.textMuted, fontWeight: 500 }}>days</span>
+                </div>
+                <div style={{ width: 1, height: 32, background: 'rgba(255,255,255,0.07)', flexShrink: 0 }} />
+                {/* Section name + intensity tip */}
+                <div style={{ flex: 1, minWidth: 160 }}>
+                  <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: D.text }}>{clean(upcomingExam.course.name)}</p>
+                  <p style={{ margin: '2px 0 0', fontSize: 11.5, color: D.textMuted }}>
+                    {d <= 7 ? 'Final week — timed practice and weak-area review only.' : `~${hoursPerDay}h/day recommended to reach your target.`}
+                  </p>
+                </div>
+                {/* Phase indicator */}
+                <div style={{ flexShrink: 0, textAlign: 'right' }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', color: D.textDim, textTransform: 'uppercase', marginBottom: 5 }}>Prep phase</div>
+                  <div style={{ display: 'flex', gap: 4, justifyContent: 'flex-end', marginBottom: 4 }}>
+                    {phases.map((_, i) => (
+                      <div key={i} style={{
+                        height: 4, width: i === phase ? 18 : 8, borderRadius: 2,
+                        background: i <= phase ? accentColor : 'rgba(255,255,255,0.1)',
+                        transition: 'width 0.2s',
+                      }} />
+                    ))}
+                  </div>
+                  <div style={{ fontSize: 11.5, fontWeight: 600, color: accentColor }}>{phases[phase]}</div>
+                </div>
+                {/* Target score */}
+                {upcomingExam.course.targetScore && (
+                  <>
+                    <div style={{ width: 1, height: 32, background: 'rgba(255,255,255,0.07)', flexShrink: 0 }} />
+                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                      <div style={{ fontSize: 10, fontWeight: 600, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Target</div>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: D.text, letterSpacing: '-0.02em' }}>{upcomingExam.course.targetScore}</div>
+                    </div>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        )
+      })()}
+
       {/* Pro trial banner */}
       {showTrialCard && (
         <div style={{ padding: '0 32px 20px' }}>
@@ -477,6 +640,30 @@ export default function DashboardView({
 
       {/* Grid */}
       <div className="dash-grid" style={{ padding: '24px 32px 48px', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 16 }}>
+
+        {/* ── CARS Daily Drill nudge (MCAT users only) ── */}
+        {courses.some(c => /CARS/i.test(c.name)) && (
+          <div style={{
+            gridColumn: 'span 12',
+            display: 'flex', alignItems: 'center', gap: 14,
+            background: 'rgba(99,102,241,0.07)', border: '1px solid rgba(99,102,241,0.22)',
+            borderRadius: 12, padding: '14px 20px',
+          }}>
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(99,102,241,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg style={{ width: 18, height: 18, color: '#818cf8' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
+            </div>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 700, color: '#818cf8' }}>Daily CARS Drill</p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: D.textMuted }}>MCAT top scorers read one CARS passage every day. Make it the first thing you do — 10 minutes, no exceptions.</p>
+            </div>
+            <button
+              onClick={() => onOpenStudyCoach?.()}
+              style={{ padding: '7px 14px', borderRadius: 8, fontSize: 12, fontWeight: 600, background: 'rgba(99,102,241,0.15)', color: '#818cf8', border: '1px solid rgba(99,102,241,0.3)', cursor: 'pointer', whiteSpace: 'nowrap' }}
+            >
+              Plan today's session →
+            </button>
+          </div>
+        )}
 
         {/* ── UP NEXT (span 8) ── */}
         <div
@@ -600,8 +787,25 @@ export default function DashboardView({
               </>
             ) : (
               <div style={{ padding: '20px 0', textAlign: 'center' }}>
-                <p style={{ color: D.textMuted, fontSize: 14, fontWeight: 600, marginBottom: 4 }}>No sessions queued.</p>
-                <p style={{ color: D.textDim, fontSize: 13 }}>{isExamMode ? 'Add a section to generate your prep plan.' : 'Add a course to generate your study plan.'}</p>
+                {isExamMode && allSessions.length === 0 ? (
+                  <>
+                    <p style={{ color: D.text, fontSize: 14, fontWeight: 700, marginBottom: 6 }}>Generate your prep plan</p>
+                    <p style={{ color: D.textMuted, fontSize: 13, lineHeight: 1.55, marginBottom: 16, maxWidth: 380, marginLeft: 'auto', marginRight: 'auto' }}>
+                      Head to Study Coach, select your first section, enter your target score and test date, and your full prep schedule will be built automatically.
+                    </p>
+                    <button
+                      onClick={() => typeof onOpenStudyCoach === 'function' && onOpenStudyCoach(0)}
+                      style={{ background: D.accent, color: '#fff', fontSize: 13, fontWeight: 700, padding: '9px 20px', borderRadius: 8, border: 'none', cursor: 'pointer', boxShadow: `0 6px 18px ${D.accentGlow}` }}
+                    >
+                      Go to Study Coach →
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <p style={{ color: D.textMuted, fontSize: 14, fontWeight: 600, marginBottom: 4 }}>No sessions queued.</p>
+                    <p style={{ color: D.textDim, fontSize: 13 }}>{isExamMode ? 'Open Study Coach to generate your prep schedule.' : 'Add a course to generate your study plan.'}</p>
+                  </>
+                )}
               </div>
             )}
           </div>
@@ -971,6 +1175,13 @@ export default function DashboardView({
             </button>
           </div>
         </div>
+
+        {/* ── Referral card (free users only) ── */}
+        {plan === 'free' && (
+          <div style={{ gridColumn: 'span 12' }}>
+            <ReferralCard />
+          </div>
+        )}
 
       </div>
     </div>

@@ -1,4 +1,18 @@
 {
+  "headers": [
+    {
+      "source": "/(.*\\.html)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
+    },
+    {
+      "source": "/assets/(.*)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
+    },
+    {
+      "source": "/(favicon\\.png|hero-landing\\.png|manifest\\.json|robots\\.txt|sitemap\\.xml)",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=3600" }]
+    }
+  ],
   "crons": [
     {
       "path": "/api/crons?job=re-engage",
@@ -7,6 +21,22 @@
     {
       "path": "/api/crons?job=weekly-recap",
       "schedule": "0 10 * * 0"
+    },
+    {
+      "path": "/api/crons?job=exam-countdown",
+      "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/crons?job=day14-upgrade",
+      "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/crons?job=day1-tips",
+      "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/crons?job=day7-milestone",
+      "schedule": "0 11 * * *"
     }
   ],
   "rewrites": [

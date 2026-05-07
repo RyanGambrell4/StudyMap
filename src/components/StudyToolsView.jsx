@@ -204,6 +204,16 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
   const [answers, setAnswers] = useState([]) // array of booleans
   const [quizDone, setQuizDone] = useState(false)
 
+  // Topic Drill state
+  const [drillTopic, setDrillTopic] = useState('')
+  const [drillCourse, setDrillCourse] = useState(null)
+  const [drillQuiz, setDrillQuiz] = useState([])
+  const [drillQuestionIdx, setDrillQuestionIdx] = useState(0)
+  const [drillAnswers, setDrillAnswers] = useState([])
+  const [drillDone, setDrillDone] = useState(false)
+  const [drillGenerating, setDrillGenerating] = useState(false)
+  const [drillError, setDrillError] = useState('')
+
   // Load saved tools state on mount
   useEffect(() => {
     const saved = loadSaved()
@@ -372,6 +382,37 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     setMode('hub')
   }
 
+  async function handleGenerateDrill() {
+    if (!drillTopic.trim()) return
+    if (!canUseAI()) { onShowPaywall?.('ai'); return }
+    const course = drillCourse !== null ? courses[drillCourse] : null
+    const courseName = course?.name ?? 'General'
+    setDrillGenerating(true)
+    setDrillError('')
+    setDrillQuiz([])
+    setDrillQuestionIdx(0)
+    setDrillAnswers([])
+    setDrillDone(false)
+    try {
+      const token = await getAccessToken()
+      const res = await fetch('/api/generate-study-tools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ mode: 'quick-quiz', courseName, topic: drillTopic.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Generation failed')
+      const questions = (data.questions ?? []).map(q => ({ ...q, type: 'mc' }))
+      if (!questions.length) throw new Error('No questions returned — try a different topic.')
+      setDrillQuiz(questions)
+      await incrementAIQuery()
+    } catch (e) {
+      setDrillError(e.message)
+    } finally {
+      setDrillGenerating(false)
+    }
+  }
+
   const activeText = extractedText || pastedText
   const hasText = activeText.length > 50
   const score = answers.filter(Boolean).length
@@ -436,6 +477,30 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                     )}
                   </div>
                   <p className="text-slate-400 text-sm">Test your knowledge with multiple choice, true/false, and fill-in-the-blank questions.</p>
+                </div>
+                <svg className="w-4 h-4 text-slate-600 group-hover:text-slate-400 transition-colors shrink-0 mt-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </div>
+            </button>
+
+            {/* Topic Drill card */}
+            <button
+              onClick={() => { setDrillQuiz([]); setDrillAnswers([]); setDrillDone(false); setDrillQuestionIdx(0); setDrillError(''); setMode('drill') }}
+              className="w-full text-left bg-white dark:bg-slate-800/40 hover:bg-slate-50 dark:hover:bg-slate-800/70 border border-slate-200 dark:border-slate-700/60 hover:border-amber-300 dark:hover:border-amber-500/40 rounded-2xl p-5 transition-all group"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-amber-600/20 border border-amber-500/30 flex items-center justify-center shrink-0 group-hover:bg-amber-600/30 transition-colors">
+                  <svg className="w-5 h-5 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                  </svg>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <h2 className="text-base font-semibold text-slate-900 dark:text-white">Topic Drill</h2>
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-amber-900/40 text-amber-300 border border-amber-700/50">No upload needed</span>
+                  </div>
+                  <p className="text-slate-400 text-sm">Type any topic and get 5 AI-generated practice questions instantly — no file upload required.</p>
                 </div>
                 <svg className="w-4 h-4 text-slate-600 group-hover:text-slate-400 transition-colors shrink-0 mt-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -837,6 +902,168 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                   Take quiz
                 </button>
               </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ── Topic Drill mode ── */}
+      {mode === 'drill' && (
+        <div className="space-y-5">
+          {/* Header */}
+          <div className="flex items-center gap-3 mb-2">
+            <button onClick={() => setMode('hub')} className="flex items-center gap-2 text-slate-400 hover:text-slate-200 text-sm transition-colors">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+              </svg>
+              Back
+            </button>
+            <h1 className="text-lg font-semibold text-slate-900 dark:text-white">Topic Drill</h1>
+          </div>
+
+          {/* Setup form — shown until questions are generated */}
+          {drillQuiz.length === 0 && !drillGenerating && (
+            <div className="space-y-4">
+              {courses.length > 0 && (
+                <div>
+                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Course (optional)</label>
+                  <select
+                    value={drillCourse ?? ''}
+                    onChange={e => setDrillCourse(e.target.value === '' ? null : Number(e.target.value))}
+                    className="w-full bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-600 rounded-xl px-4 py-2.5 text-slate-800 dark:text-slate-200 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 appearance-none"
+                    style={{ colorScheme: 'dark' }}
+                  >
+                    <option value="">No course</option>
+                    {courses.map((c, i) => <option key={i} value={i}>{c.name}</option>)}
+                  </select>
+                </div>
+              )}
+              <div>
+                <label className="block text-xs font-medium text-slate-400 mb-1.5">What topic do you want to drill?</label>
+                <input
+                  type="text"
+                  value={drillTopic}
+                  onChange={e => setDrillTopic(e.target.value)}
+                  onKeyDown={e => e.key === 'Enter' && drillTopic.trim() && handleGenerateDrill()}
+                  placeholder="e.g. Cardiac output, CARS reasoning, Contract formation…"
+                  autoFocus
+                  className="w-full bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-amber-500/60 text-sm"
+                />
+              </div>
+              {drillError && (
+                <div className="bg-red-900/30 border border-red-800/50 rounded-xl px-4 py-3 text-red-300 text-sm">{drillError}</div>
+              )}
+              <button
+                onClick={handleGenerateDrill}
+                disabled={!drillTopic.trim()}
+                className="w-full bg-amber-500 hover:bg-amber-400 disabled:opacity-40 disabled:cursor-not-allowed text-slate-900 font-semibold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+              >
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+                Generate 5 Questions — 1 AI Boost
+              </button>
+            </div>
+          )}
+
+          {/* Loading */}
+          {drillGenerating && (
+            <div className="bg-amber-950/40 border border-amber-500/20 rounded-2xl px-6 py-8 flex flex-col items-center gap-4">
+              <svg className="w-8 h-8 text-amber-400 animate-spin" fill="none" viewBox="0 0 24 24">
+                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+              </svg>
+              <div className="text-center">
+                <p className="text-amber-300 font-semibold">Generating questions on "{drillTopic}"…</p>
+                <p className="text-slate-500 text-xs mt-1">This usually takes 5–10 seconds</p>
+              </div>
+            </div>
+          )}
+
+          {/* Active drill quiz */}
+          {drillQuiz.length > 0 && !drillDone && (
+            <div className="space-y-5">
+              <div className="flex items-center justify-between text-xs text-slate-500">
+                <span className="text-amber-400 font-medium">{drillTopic}</span>
+                <span>Question {drillQuestionIdx + 1} of {drillQuiz.length}</span>
+              </div>
+              <div className="h-1.5 bg-slate-800 rounded-full overflow-hidden">
+                <div
+                  className="h-full bg-amber-500 rounded-full transition-all duration-300"
+                  style={{ width: `${(drillQuestionIdx / drillQuiz.length) * 100}%` }}
+                />
+              </div>
+              <QuizQuestion
+                key={drillQuestionIdx}
+                question={drillQuiz[drillQuestionIdx]}
+                onAnswer={correct => {
+                  const next = [...drillAnswers, correct]
+                  setDrillAnswers(next)
+                  if (drillQuestionIdx + 1 >= drillQuiz.length) {
+                    setDrillDone(true)
+                  } else {
+                    setDrillQuestionIdx(i => i + 1)
+                  }
+                }}
+              />
+            </div>
+          )}
+
+          {/* Drill results */}
+          {drillDone && (
+            <div className="space-y-5">
+              {(() => {
+                const s = drillAnswers.filter(Boolean).length
+                const t = drillQuiz.length
+                const pct = Math.round((s / t) * 100)
+                return (
+                  <>
+                    <div className="bg-slate-800/50 border border-slate-700/50 rounded-2xl p-8 text-center">
+                      <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-bold"
+                        style={{
+                          background: pct >= 80 ? 'rgba(16,185,129,0.15)' : pct >= 60 ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
+                          border: `2px solid ${pct >= 80 ? '#10b981' : pct >= 60 ? '#f59e0b' : '#ef4444'}`,
+                          color: pct >= 80 ? '#10b981' : pct >= 60 ? '#f59e0b' : '#ef4444',
+                        }}
+                      >
+                        {s}/{t}
+                      </div>
+                      <h2 className="text-white text-xl font-bold mb-1">
+                        {pct >= 80 ? 'Solid understanding!' : pct >= 60 ? 'Getting there!' : 'Needs more work!'}
+                      </h2>
+                      <p className="text-slate-400 text-sm">{pct}% on <span className="text-amber-300">{drillTopic}</span></p>
+                    </div>
+                    <div className="space-y-2">
+                      {drillQuiz.map((q, i) => (
+                        <div key={i} className={`flex items-start gap-3 px-4 py-3 rounded-xl border text-sm ${
+                          drillAnswers[i] ? 'bg-emerald-900/20 border-emerald-800/40' : 'bg-red-900/20 border-red-800/40'
+                        }`}>
+                          <span className={`shrink-0 font-bold ${drillAnswers[i] ? 'text-emerald-400' : 'text-red-400'}`}>
+                            {drillAnswers[i] ? '✓' : '✗'}
+                          </span>
+                          <span className={`${drillAnswers[i] ? 'text-emerald-300' : 'text-red-300'}`}>
+                            {q.question.slice(0, 80)}{q.question.length > 80 ? '…' : ''}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                    <div className="flex gap-3">
+                      <button
+                        onClick={() => { setDrillQuestionIdx(0); setDrillAnswers([]); setDrillDone(false) }}
+                        className="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-900 font-semibold py-3 rounded-xl text-sm transition-colors"
+                      >
+                        Retry This Topic
+                      </button>
+                      <button
+                        onClick={() => { setDrillQuiz([]); setDrillAnswers([]); setDrillDone(false); setDrillQuestionIdx(0); setDrillTopic('') }}
+                        className="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-200 font-semibold py-3 rounded-xl text-sm transition-colors"
+                      >
+                        New Topic
+                      </button>
+                    </div>
+                  </>
+                )
+              })()}
             </div>
           )}
         </div>

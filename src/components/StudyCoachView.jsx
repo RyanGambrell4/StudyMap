@@ -892,7 +892,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus }) {
+export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses }) {
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({
     courseIdx: courses.length > 0 ? 0 : -1,
@@ -1066,13 +1066,64 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   })()
 
   if (courses.length === 0) {
+    const G = { card: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.07)', text: 'rgba(255,255,255,0.65)', muted: 'rgba(255,255,255,0.28)', accent: 'rgba(99,102,241,0.5)' }
+    const GhostBar = ({ w, color = G.accent }) => (
+      <div style={{ height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+        <div style={{ width: w, height: '100%', background: color, borderRadius: 3 }} />
+      </div>
+    )
+    const fakeWeeks = [
+      { label: 'Week 1–2', title: 'Content Foundation', tasks: ['Read Ch. 1–4', 'Active recall drills', 'Concept mapping'], pct: '100%', color: '#4ade80' },
+      { label: 'Week 3–4', title: 'Practice Problems',  tasks: ['Problem sets A–C', 'Timed quizzes x3', 'Review mistakes'],  pct: '60%',  color: '#6366f1' },
+      { label: 'Week 5–6', title: 'Exam Prep',          tasks: ['Past papers x2', 'Weak-area review', 'Formula sheet'],     pct: '20%',  color: '#f59e0b' },
+    ]
     return (
-      <div style={{ padding: '64px 32px', textAlign: 'center', maxWidth: 480, margin: '0 auto' }}>
-        <div style={{ width: 64, height: 64, borderRadius: 16, background: 'rgba(99,102,241,0.1)', border: `1px dashed ${D.border}`, display: 'grid', placeItems: 'center', margin: '0 auto 20px' }}>
-          <Icon name="sparkles" size={28} color={D.muted} />
+      <div style={{ position: 'relative', minHeight: '100vh', background: D.bg, overflow: 'hidden' }}>
+        {/* Ghost preview */}
+        <div style={{ filter: 'blur(3px)', opacity: 0.45, pointerEvents: 'none', userSelect: 'none', padding: '28px 32px' }}>
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: G.muted, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>8-Week Study Plan</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: G.text, letterSpacing: -0.5, marginBottom: 4 }}>Organic Chemistry · 83% on track</div>
+            <GhostBar w="62%" />
+          </div>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {fakeWeeks.map(w => (
+              <div key={w.label} style={{ background: G.card, border: `1px solid ${G.border}`, borderRadius: 14, padding: '16px 20px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                  <div>
+                    <div style={{ fontSize: 11, color: G.muted, fontWeight: 600, marginBottom: 2 }}>{w.label}</div>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: G.text }}>{w.title}</div>
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: w.color }}>{w.pct}</div>
+                </div>
+                <GhostBar w={w.pct} color={w.color} />
+                <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+                  {w.tasks.map(t => (
+                    <div key={t} style={{ fontSize: 11, color: G.muted, background: 'rgba(255,255,255,0.04)', border: `1px solid ${G.border}`, borderRadius: 6, padding: '3px 8px' }}>{t}</div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <p style={{ color: D.text, fontWeight: 700, fontSize: 18, margin: '0 0 8px' }}>No courses yet</p>
-        <p style={{ color: D.muted, fontSize: 14, margin: 0 }}>Add your courses in the setup flow to start building a Study Coach plan.</p>
+
+        {/* CTA overlay */}
+        <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(6,6,20,0.6)', backdropFilter: 'blur(1px)', padding: 24 }}>
+          <div style={{ background: '#0a0a1e', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 20, padding: '40px 36px', maxWidth: 400, width: '100%', textAlign: 'center', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <Icon name="sparkles" size={24} color="#818cf8" />
+            </div>
+            <h2 style={{ color: '#F1F5F9', fontSize: 20, fontWeight: 700, letterSpacing: -0.4, margin: '0 0 10px' }}>Your AI study plan is one step away.</h2>
+            <p style={{ color: '#94A3B8', fontSize: 14, lineHeight: 1.65, margin: '0 0 28px' }}>Add at least one course, then come back here. The AI Coach builds a personalized week-by-week plan around your exam dates and schedule.</p>
+            <button
+              onClick={onNavigateToCourses}
+              style={{ width: '100%', background: D.accent, color: '#fff', fontSize: 14, fontWeight: 700, padding: '13px 24px', borderRadius: 10, border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(99,102,241,0.4)', letterSpacing: -0.2 }}
+            >
+              Add Your First Course →
+            </button>
+            <p style={{ color: '#334155', fontSize: 12, margin: '14px 0 0' }}>Takes about 30 seconds</p>
+          </div>
+        </div>
       </div>
     )
   }

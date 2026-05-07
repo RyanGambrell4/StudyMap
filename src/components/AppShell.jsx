@@ -67,6 +67,8 @@ function NavIcon({ path, active }) {
   )
 }
 
+const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
+
 export default function AppShell({
   activeSection,
   setActiveSection,
@@ -78,8 +80,10 @@ export default function AppShell({
   onNavigateToAccount,
   googleCalendarConnected,
   onConnectGoogleCalendar,
+  courses,
   children,
 }) {
+  const isExamMode = Array.isArray(courses) && courses.some(c => EXAM_PATTERN.test(c.name))
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [startTour, setStartTour] = useState(null)
   const handleTourReady = useCallback((fn) => setStartTour(() => fn), [])
@@ -183,7 +187,7 @@ export default function AppShell({
                 onMouseLeave={e => { if (!active) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = LABEL_INACTIVE } }}
               >
                 <NavIcon path={item.icon} active={active} />
-                {item.label}
+                {item.id === 'grades' && isExamMode ? 'Scores' : item.label}
               </button>
             )
           })}
@@ -437,7 +441,7 @@ export default function AppShell({
             >
               <NavIcon path={item.icon} active={active} />
               <span style={{ fontSize: 9, fontWeight: 500, color: active ? LABEL_ACTIVE : LABEL_INACTIVE }}>
-                {item.label}
+                {item.id === 'grades' && isExamMode ? 'Scores' : item.label}
               </span>
             </button>
           )

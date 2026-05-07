@@ -16,6 +16,16 @@ function activityColor(activity) {
   return ACTIVITY_COLORS[activity] ?? { border: '#6366F1', bg: '#1e1b4b', label: activity }
 }
 
+const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
+
+const EXAM_SESSION_TYPES = [
+  'Content Review',
+  'Practice Passage Block',
+  'Full Length Exam',
+  'FL Review Session',
+  'Active Recall Drill',
+]
+
 export default function BlueprintScreen({ session, course, onStartSession, onExit, onShowPaywall }) {
   const [focus, setFocus] = useState('')
   const [blueprint, setBlueprint] = useState(null)
@@ -23,6 +33,11 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
   const [error, setError] = useState('')
   const [hoveredBlock, setHoveredBlock] = useState(null)
   const [coachBanner, setCoachBanner] = useState(null) // { text } if pre-filled from coach plan
+
+  const isExamMode = EXAM_PATTERN.test(session.courseName ?? '')
+  const [sessionType, setSessionType] = useState(
+    isExamMode ? EXAM_SESSION_TYPES[0] : (session.sessionType ?? 'Review')
+  )
 
   // Pre-fill focus from Study Coach plan if available
   useEffect(() => {
@@ -78,10 +93,11 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           courseName: session.courseName,
-          sessionType: session.sessionType,
+          sessionType,
           durationMinutes: session.duration,
           examDate: course?.examDate ?? null,
-          targetGrade: course?.targetGrade ?? 'B',
+          targetGrade: isExamMode ? null : (course?.targetGrade ?? 'B'),
+          targetScore: isExamMode ? (course?.targetScore ?? null) : null,
           uploadedTopics: studyTools?.text ? studyTools.text.slice(0, 500) : null,
           studentFocus: focus.trim() || null,
         }),
@@ -113,7 +129,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
           <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: dot, boxShadow: `0 0 8px ${dot}80` }} />
           <div className="min-w-0">
             <p className="text-white font-bold text-base truncate">{session.courseName}</p>
-            <p className="text-slate-500 text-xs font-medium">{session.sessionType} · {session.duration} min</p>
+            <p className="text-slate-500 text-xs font-medium">{sessionType} · {session.duration} min</p>
           </div>
           {daysLeft !== null && (
             <span
@@ -152,6 +168,27 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                   </svg>
                   <p className="text-xs leading-relaxed" style={{ color: dot }}>{coachBanner}</p>
+                </div>
+              )}
+
+              {isExamMode && (
+                <div className="mb-5">
+                  <label className="block text-xs text-slate-500 uppercase tracking-widest font-bold mb-2">Session type</label>
+                  <div className="flex flex-wrap gap-2">
+                    {EXAM_SESSION_TYPES.map(type => (
+                      <button
+                        key={type}
+                        onClick={() => setSessionType(type)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
+                        style={sessionType === type
+                          ? { backgroundColor: dot, color: '#fff', border: `1px solid ${dot}` }
+                          : { backgroundColor: '#111827', color: '#64748b', border: '1px solid #1e293b' }
+                        }
+                      >
+                        {type}
+                      </button>
+                    ))}
+                  </div>
                 </div>
               )}
 

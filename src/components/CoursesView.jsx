@@ -650,7 +650,7 @@ function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, gra
 }
 
 // ── Course row ────────────────────────────────────────────────────────────────
-function CourseRow({ course, idx, expanded, onToggle, sessions, completedIds, syllabusEvts, grades, todayStr, threshold, onImportSyllabus, onOpenStudyCoach, onEdit, onDelete, onNavigateToGradeHub }) {
+function CourseRow({ course, idx, expanded, onToggle, sessions, completedIds, syllabusEvts, grades, todayStr, threshold, onImportSyllabus, onOpenStudyCoach, onEdit, onDelete, onNavigateToGradeHub, latestScore }) {
   const color = course.color?.dot || D.accent
   const completed = sessions.filter(s => completedIds.has(s.id)).length
   const pct = sessions.length ? Math.round((completed / sessions.length) * 100) : 0
@@ -672,7 +672,23 @@ function CourseRow({ course, idx, expanded, onToggle, sessions, completedIds, sy
             <span style={{ fontFamily: 'ui-monospace, monospace' }}>{completed}/{sessions.length} sessions</span>
             <span style={{ width: 3, height: 3, borderRadius: '50%', background: D.dim }} />
             {/C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i.test(course.name)
-              ? <span>Target: <span style={{ fontFamily: 'ui-monospace, monospace', color: D.mint, fontWeight: 600 }}>{course.targetScore || 'Set target score'}</span></span>
+              ? (
+                latestScore && course.targetScore
+                  ? (
+                    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 600, color: D.text }}>{latestScore.score}</span>
+                      <span style={{ display: 'inline-block', width: 48, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.07)', overflow: 'hidden', verticalAlign: 'middle' }}>
+                        <span style={{
+                          display: 'block', height: '100%', borderRadius: 2,
+                          width: `${Math.min(100, Math.max(0, ((latestScore.score - (parseFloat(course.targetScore) * 0.8)) / (parseFloat(course.targetScore) * 0.2)) * 100))}%`,
+                          background: latestScore.score >= parseFloat(course.targetScore) ? D.mint : D.accent,
+                        }} />
+                      </span>
+                      <span style={{ fontFamily: 'ui-monospace, monospace', color: D.mint, fontWeight: 600 }}>{course.targetScore}</span>
+                    </span>
+                  )
+                  : <span>Target: <span style={{ fontFamily: 'ui-monospace, monospace', color: D.mint, fontWeight: 600 }}>{course.targetScore || 'Set target'}</span></span>
+              )
               : <span>Target: <span style={{ fontFamily: 'ui-monospace, monospace', color: D.mint, fontWeight: 600 }}>{course.targetGrade}</span></span>
             }
             {course.classSchedule?.days?.length > 0 && (
@@ -752,6 +768,47 @@ export default function CoursesView({
 
   const todayStr = new Date().toISOString().split('T')[0]
 
+  const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
+  const isExamMode = courses.some(c => EXAM_PATTERN.test(c.name))
+
+  // Latest practice score per section name (from shared localStorage store)
+  const latestScores = (() => {
+    try {
+      const all = JSON.parse(localStorage.getItem('studyedge_practice_scores') ?? '[]')
+      const map = {}
+      all.forEach(e => {
+        if (!map[e.sectionName] || e.date > map[e.sectionName].date) map[e.sectionName] = e
+      })
+      return map
+    } catch { return {} }
+  })()
+
+  const examSectionIndices = useMemo(
+    () => courses.reduce((acc, c, i) => { if (EXAM_PATTERN.test(c.name)) acc.push(i); return acc }, []),
+    [courses]
+  )
+  const existingExamDate = examSectionIndices.length > 0 ? (courses[examSectionIndices[0]]?.examDate ?? '') : ''
+  const [sharedExamDateInput, setSharedExamDateInput] = useState(existingExamDate)
+  const [examDateSaved, setExamDateSaved] = useState(false)
+
+  // Sync shared date input if courses change externally (e.g. user edits a section individually)
+  useEffect(() => {
+    if (examSectionIndices.length > 0) {
+      const d = courses[examSectionIndices[0]]?.examDate ?? ''
+      setSharedExamDateInput(d)
+    }
+  }, [examSectionIndices.join(','), courses])
+
+  function applySharedExamDate() {
+    if (!sharedExamDateInput) return
+    if (sharedExamDateInput <= todayStr) return
+    examSectionIndices.forEach(idx => {
+      onEditCourse?.(idx, { ...courses[idx], examDate: sharedExamDateInput })
+    })
+    setExamDateSaved(true)
+    setTimeout(() => setExamDateSaved(false), 2000)
+  }
+
   const syllabusForCourse = useMemo(() => {
     const map = {}
     Object.values(syllabusEventsByDate).flat().forEach(e => {
@@ -805,11 +862,13 @@ export default function CoursesView({
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
             <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', color: D.accent, textTransform: 'uppercase' }}>Academic Control</span>
             <span style={{ width: 4, height: 4, borderRadius: '50%', background: D.dim }} />
-            <span style={{ fontSize: 11.5, color: D.dim }}>{getCurrentSemester()} · {courses.length} course{courses.length !== 1 ? 's' : ''} tracked{limitLabel ? ` (${limitLabel})` : ''}</span>
+            <span style={{ fontSize: 11.5, color: D.dim }}>{isExamMode ? 'Exam Prep' : getCurrentSemester()} · {courses.length} {isExamMode ? 'section' : 'course'}{courses.length !== 1 ? 's' : ''} tracked{limitLabel ? ` (${limitLabel})` : ''}</span>
           </div>
-          <h1 style={{ margin: 0, fontSize: 32, fontWeight: 700, letterSpacing: -0.8, color: D.text }}>Courses</h1>
+          <h1 style={{ margin: 0, fontSize: 32, fontWeight: 700, letterSpacing: -0.8, color: D.text }}>{isExamMode ? 'Sections' : 'Courses'}</h1>
           <p style={{ margin: '6px 0 0', fontSize: 14, color: D.muted, maxWidth: 640 }}>
-            Organize every class: pull in syllabi, schedules, and let the AI map your semester.
+            {isExamMode
+              ? 'Organize your exam sections: import materials and let the AI build your prep plan.'
+              : 'Organize every class: pull in syllabi, schedules, and let the AI map your semester.'}
           </p>
         </div>
         <button
@@ -826,8 +885,28 @@ export default function CoursesView({
             <svg style={{ width: 20, height: 20, color: D.amber, flexShrink: 0, marginTop: 2 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             <div>
               <p style={{ margin: 0, color: D.amber, fontWeight: 700, fontSize: 14 }}>Courses are required to use StudyEdge AI</p>
-              <p style={{ margin: '4px 0 0', color: `${D.amber}99`, fontSize: 12 }}>Add each course you're taking this semester. Then import your syllabi to unlock your study schedule, deadlines, and AI tools.</p>
+              <p style={{ margin: '4px 0 0', color: `${D.amber}99`, fontSize: 12 }}>{isExamMode ? 'Add each exam section you\'re studying. Then import your materials to unlock your prep schedule and AI tools.' : 'Add each course you\'re taking this semester. Then import your syllabi to unlock your study schedule, deadlines, and AI tools.'}</p>
             </div>
+          </div>
+        )}
+
+        {isExamMode && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.18)', borderRadius: 12, marginBottom: 16 }}>
+            <svg style={{ width: 16, height: 16, color: D.accent, flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+            <span style={{ fontSize: 13, fontWeight: 600, color: D.accent }}>Exam Date</span>
+            <input
+              type="date"
+              value={sharedExamDateInput}
+              min={todayStr}
+              onChange={e => setSharedExamDateInput(e.target.value)}
+              style={{ background: '#0d0d22', border: '1px solid rgba(255,255,255,0.08)', color: D.text, borderRadius: 7, padding: '5px 10px', fontSize: 12, fontFamily: 'inherit', colorScheme: 'dark' }}
+            />
+            <button
+              onClick={applySharedExamDate}
+              style={{ padding: '5px 14px', borderRadius: 7, fontSize: 12, fontWeight: 600, background: examDateSaved ? 'rgba(52,211,153,0.15)' : `${D.accent}18`, color: examDateSaved ? D.mint : D.accent, border: `1px solid ${examDateSaved ? 'rgba(52,211,153,0.3)' : `${D.accent}30`}`, cursor: 'pointer' }}
+            >
+              {examDateSaved ? '✓ Saved' : `Apply to all ${examSectionIndices.length} sections`}
+            </button>
           </div>
         )}
 
@@ -871,6 +950,7 @@ export default function CoursesView({
                 onEdit={() => setEditingIdx(idx)}
                 onDelete={() => { onDeleteCourse?.(idx); if (expandedIdx === idx) setExpandedIdx(null) }}
                 onNavigateToGradeHub={onNavigateToGradeHub}
+                latestScore={latestScores[course.name] ?? null}
               />
             )
           })}
