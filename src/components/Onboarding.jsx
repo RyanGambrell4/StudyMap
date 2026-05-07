@@ -180,7 +180,7 @@ const SPLASH_CARDS = [
 
 // ── Staggered headline words ───────────────────────────────────────────────────
 function AnimHeadline() {
-  const lines = ['Your semester,', 'mapped in 60 seconds']
+  const lines = ['Your study plan,', 'built around your goals.']
   let wordIdx = 0
   return (
     <h1 style={{
@@ -272,7 +272,7 @@ function SplashScreen({ onNext }) {
           lineHeight: 1.6,
           marginBottom: '40px',
         }}>
-          Tell us your courses and goals. We'll build your entire study plan.
+          Tell us what you're studying. We'll build your plan around your timeline and goals.
         </p>
 
         {/* Feature cards */}

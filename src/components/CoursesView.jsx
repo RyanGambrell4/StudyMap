@@ -671,7 +671,10 @@ function CourseRow({ course, idx, expanded, onToggle, sessions, completedIds, sy
             <span style={{ width: 3, height: 3, borderRadius: '50%', background: D.dim }} />
             <span style={{ fontFamily: 'ui-monospace, monospace' }}>{completed}/{sessions.length} sessions</span>
             <span style={{ width: 3, height: 3, borderRadius: '50%', background: D.dim }} />
-            <span>Target: <span style={{ fontFamily: 'ui-monospace, monospace', color: D.mint, fontWeight: 600 }}>{course.targetGrade}</span></span>
+            {/C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i.test(course.name)
+              ? <span>Target: <span style={{ fontFamily: 'ui-monospace, monospace', color: D.mint, fontWeight: 600 }}>{course.targetScore || 'Set target score'}</span></span>
+              : <span>Target: <span style={{ fontFamily: 'ui-monospace, monospace', color: D.mint, fontWeight: 600 }}>{course.targetGrade}</span></span>
+            }
             {course.classSchedule?.days?.length > 0 && (
               <>
                 <span style={{ width: 3, height: 3, borderRadius: '50%', background: D.dim }} />
