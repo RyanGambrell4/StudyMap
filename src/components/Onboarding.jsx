@@ -67,6 +67,11 @@ const SCHOOL_OPTIONS = [
     label: 'University',
     desc: 'Lectures, labs, deadlines, and somehow a social life too.',
   },
+  {
+    key: 'exam',
+    label: 'Professional Exam',
+    desc: 'MCAT, LSAT, CPA, Bar, GRE, GMAT — a high-stakes certification or licensing exam.',
+  },
 ]
 
 const HS_YEARS = [
@@ -81,6 +86,13 @@ const UNI_YEARS = [
   { value: '2nd Year',  desc: 'Figuring it all out' },
   { value: '3rd Year',  desc: 'Deeper work, higher stakes' },
   { value: '4th Year+', desc: 'Endgame mode' },
+]
+
+const EXAM_TIMELINES = [
+  { value: '1-3 months',  desc: 'Final push, test is close' },
+  { value: '3-6 months',  desc: 'Building momentum' },
+  { value: '6-12 months', desc: 'Long game, structured prep' },
+  { value: '1 year+',     desc: 'Starting early, building deep' },
 ]
 
 // ── Splash canvas particles ────────────────────────────────────────────────────
@@ -573,7 +585,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
               key={key}
               selected={schoolType === key}
               onClick={() => { setSchoolType(key); setYearLevel(null) }}
-              style={{ padding: '20px 16px', width: '100%', textAlign: 'left' }}
+              style={{ padding: '20px 16px', width: '100%', textAlign: 'left', ...(key === 'exam' ? { gridColumn: 'span 2' } : {}) }}
             >
               <p style={{
                 color: schoolType === key ? '#c7d2fe' : '#cbd5e1',
@@ -587,10 +599,10 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         {schoolType && (
           <div className="ob-year-in" style={{ marginBottom: '24px' }}>
             <p style={{ color: '#334155', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.8px', marginBottom: '10px' }}>
-              What year are you in?
+              {schoolType === 'exam' ? 'How long until your exam?' : 'What year are you in?'}
             </p>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-              {(schoolType === 'hs' ? HS_YEARS : UNI_YEARS).map(({ value, desc }) => (
+              {(schoolType === 'hs' ? HS_YEARS : schoolType === 'exam' ? EXAM_TIMELINES : UNI_YEARS).map(({ value, desc }) => (
                 <OptionCard
                   key={value}
                   selected={yearLevel === value}
@@ -778,7 +790,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         </button>
 
         <button
-          onClick={() => onComplete({ yearLevel, learningStyle, preferredTime })}
+          onClick={() => onComplete({ yearLevel, learningStyle, preferredTime, schoolType })}
           style={{
             width: '100%', padding: '10px', background: 'none', border: 'none',
             color: '#475569', fontSize: '0.88rem', cursor: 'pointer',

@@ -14,6 +14,46 @@ const COURSE_COLORS = [
 
 const YEAR_OPTIONS = ['1st Year', '2nd Year', '3rd Year', '4th Year+']
 
+// ── Professional exam presets ──────────────────────────────────────────────────
+const EXAM_PRESETS = {
+  MCAT: {
+    label: 'MCAT',
+    color: '#6366f1',
+    desc: 'Med school entrance',
+    sections: ['C/P — Chemistry & Physics', 'CARS — Critical Analysis', 'B/B — Biology & Biochemistry', 'P/S — Psychology & Sociology'],
+  },
+  LSAT: {
+    label: 'LSAT',
+    color: '#8b5cf6',
+    desc: 'Law school entrance',
+    sections: ['Logical Reasoning', 'Analytical Reasoning', 'Reading Comprehension'],
+  },
+  CPA: {
+    label: 'CPA',
+    color: '#14b8a6',
+    desc: 'Accounting license',
+    sections: ['FAR — Financial Accounting', 'AUD — Auditing & Attestation', 'REG — Tax & Regulation', 'BAR — Business Analysis'],
+  },
+  BAR: {
+    label: 'Bar Exam',
+    color: '#f97316',
+    desc: 'Legal license',
+    sections: ['MBE — Multistate Bar', 'MEE — Multistate Essay', 'MPT — Performance Test'],
+  },
+  GRE: {
+    label: 'GRE',
+    color: '#ec4899',
+    desc: 'Grad school entrance',
+    sections: ['Verbal Reasoning', 'Quantitative Reasoning', 'Analytical Writing'],
+  },
+  GMAT: {
+    label: 'GMAT',
+    color: '#eab308',
+    desc: 'Business school',
+    sections: ['Quantitative', 'Verbal', 'Data Insights'],
+  },
+}
+
 const emptyForm = () => ({ name: '', examDate: '', difficulty: 'Medium', targetGrade: 'B', syllabusFile: null })
 
 const inputBase = 'w-full bg-slate-800/60 border rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-colors'
@@ -23,9 +63,28 @@ export default function StepCourses({ courses, setCourses, yearLevel, setYearLev
   const [errors, setErrors] = useState({})
   const [adding, setAdding] = useState(courses.length === 0)
   const [syllabusOpen, setSyllabusOpen] = useState(false)
+  const [examExpanded, setExamExpanded] = useState(false)
+  const [selectedExam, setSelectedExam] = useState(null)
   const syllabusRef = useRef(null)
 
   const today = new Date().toISOString().split('T')[0]
+
+  const applyExamPreset = (examKey) => {
+    const preset = EXAM_PRESETS[examKey]
+    const presetCourses = preset.sections.map((section, i) => ({
+      name: section,
+      examDate: '',
+      difficulty: 'Hard',
+      targetGrade: 'Pass/Fail',
+      syllabusFile: null,
+      color: COURSE_COLORS[i % COURSE_COLORS.length],
+    }))
+    setCourses(presetCourses)
+    setSelectedExam(examKey)
+    setYearLevel('Graduate / Professional')
+    setAdding(false)
+    setExamExpanded(false)
+  }
 
   const validate = () => {
     const e = {}
@@ -51,16 +110,81 @@ export default function StepCourses({ courses, setCourses, yearLevel, setYearLev
   }
 
   const canAdd = courses.length < 8
-  const canProceed = courses.length >= 1 && !!yearLevel
+  const canProceed = courses.length >= 1 && (!!yearLevel || !!selectedExam)
 
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-white mb-2">Add Your Courses</h2>
-        <p className="text-slate-400">Add up to 8 courses you're studying this semester</p>
+        <p className="text-slate-400">Add up to 8 courses — or pick an exam below to get started instantly</p>
       </div>
 
-      {/* Year level question */}
+      {/* Professional exam preset */}
+      <div className="mb-6">
+        <button
+          onClick={() => setExamExpanded(x => !x)}
+          className={`w-full flex items-center justify-between px-5 py-4 rounded-2xl border transition-all ${
+            examExpanded || selectedExam
+              ? 'bg-indigo-500/10 border-indigo-500/40'
+              : 'bg-slate-800/50 border-slate-700/60 hover:border-slate-600'
+          }`}
+        >
+          <div className="flex items-center gap-3">
+            <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${examExpanded || selectedExam ? 'bg-indigo-500/20' : 'bg-slate-700/60'}`}>
+              <svg className={`w-4 h-4 ${examExpanded || selectedExam ? 'text-indigo-400' : 'text-slate-500'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+              </svg>
+            </div>
+            <div className="text-left">
+              <p className={`text-sm font-semibold ${examExpanded || selectedExam ? 'text-indigo-300' : 'text-slate-200'}`}>
+                {selectedExam ? `${EXAM_PRESETS[selectedExam].label} sections loaded` : 'Studying for a professional exam?'}
+              </p>
+              <p className="text-xs text-slate-500 mt-0.5">
+                {selectedExam ? 'Tap to switch exam or clear' : 'MCAT, LSAT, CPA, Bar, GRE, GMAT — load sections instantly'}
+              </p>
+            </div>
+          </div>
+          <svg className={`w-4 h-4 text-slate-500 transition-transform ${examExpanded ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
+
+        {examExpanded && (
+          <div className="mt-2 p-4 bg-slate-800/50 rounded-2xl border border-slate-700/60">
+            <p className="text-xs text-slate-500 mb-3 font-medium uppercase tracking-wide">Select your exam to auto-load sections</p>
+            <div className="grid grid-cols-3 gap-2">
+              {Object.entries(EXAM_PRESETS).map(([key, preset]) => (
+                <button
+                  key={key}
+                  onClick={() => applyExamPreset(key)}
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-xl border text-center transition-all ${
+                    selectedExam === key
+                      ? 'border-indigo-500/60 bg-indigo-500/10'
+                      : 'border-slate-700 hover:border-slate-500 bg-slate-700/30 hover:bg-slate-700/50'
+                  }`}
+                >
+                  <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: `${preset.color}22` }}>
+                    <div className="w-2.5 h-2.5 rounded-full" style={{ background: preset.color }} />
+                  </div>
+                  <p className="text-xs font-bold text-slate-200">{preset.label}</p>
+                  <p className="text-xs text-slate-500 leading-tight">{preset.desc}</p>
+                </button>
+              ))}
+            </div>
+            {selectedExam && (
+              <button
+                onClick={() => { setCourses([]); setSelectedExam(null); setYearLevel(null) }}
+                className="mt-3 w-full text-xs text-slate-500 hover:text-red-400 transition-colors py-2"
+              >
+                Clear preset and start fresh
+              </button>
+            )}
+          </div>
+        )}
+      </div>
+
+      {/* Year level question — hidden for professional exam users */}
+      {!selectedExam && (
       <div className="bg-slate-800/50 rounded-2xl border border-slate-700/60 p-5 mb-6">
         <label className="block font-semibold text-slate-100 mb-1">What year are you in?</label>
         <p className="text-sm text-slate-500 mb-4">This shapes the type of study sessions we assign you</p>
@@ -83,6 +207,7 @@ export default function StepCourses({ courses, setCourses, yearLevel, setYearLev
           <p className="text-amber-500/80 text-xs mt-3">Select your year to continue</p>
         )}
       </div>
+      )}
 
       {/* Course cards */}
       {courses.length > 0 && (
@@ -251,7 +376,7 @@ export default function StepCourses({ courses, setCourses, yearLevel, setYearLev
       </button>
       {!canProceed && (
         <p className="text-center text-sm text-slate-600 mt-2">
-          {!yearLevel ? 'Select your year above to continue' : 'Add at least one course to continue'}
+          {courses.length === 0 ? 'Add at least one course or select an exam preset to continue' : 'Select your year above to continue'}
         </p>
       )}
     </div>
