@@ -42,7 +42,7 @@ function StatsBar(){
       <div className="container">
         <div className="section-head fade-up">
           <div className="section-kicker">Built for students who want results</div>
-          <h2 className="section-title">One system.<br/><span className="grad-text">Every edge.</span></h2>
+          <h2 className="section-title">One system.<br/><span className="grad-text">Better grades.</span></h2>
         </div>
         <div className="bento-grid">
 
@@ -71,13 +71,13 @@ function StatsBar(){
             </div>
             <div className="bento-feat-title">AI Study Coach</div>
             <div className="bento-feat-body">Personalized session plans built around your schedule, pace, and exam dates.</div>
-            <div className="bento-badge bento-badge-orange">Top differentiator</div>
+            <div className="bento-badge bento-badge-orange">Only StudyEdge does this</div>
           </div>
 
           {/* 10X stat card */}
           <div className="bento-card bento-stat-10x bento-stagger-3">
             <div className="bento-dots"/>
-            <span className="bento-10x">10X</span>
+            <span className="bento-10x">5 in 1</span>
           </div>
 
           {/* Smart Scheduling */}
@@ -103,7 +103,7 @@ function StatsBar(){
           {/* Wide bottom — CTA */}
           <div className="bento-card bento-wide bento-cta bento-stagger-6">
             <div className="bento-cta-left">
-              <div className="bento-cta-title">The complete study system — free to start.</div>
+              <div className="bento-cta-title">The complete study system. Free to start.</div>
               <div className="bento-cta-sub">Active Recall · Flashcards · Focus Mode · Grade Hub · Study Coach</div>
             </div>
             <button className="bento-cta-btn" onClick={()=>window.location.href='/app?signup=1'}>

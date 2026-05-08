@@ -56,7 +56,7 @@
 
 /* 10X stat card */
 .bento-stat-10x{display:grid;place-items:center}
-.bento-10x{font-size:clamp(52px,6vw,80px);font-weight:700;letter-spacing:-0.04em;color:#fff;position:relative;z-index:1}
+.bento-10x{font-size:clamp(40px,4.5vw,64px);font-weight:700;letter-spacing:-0.04em;color:#fff;position:relative;z-index:1;text-align:center}
 
 /* Wide bottom CTA */
 .bento-wide{grid-column:2/4;grid-row:3}
