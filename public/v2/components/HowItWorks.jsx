@@ -1,9 +1,9 @@
 // Stats bar + How it works + Bento + Grade + Pricing + Final CTA
 const { useState: uS, useEffect: uE, useRef: uR, useMemo: uM } = React;
 
-function useCountUp(target, decimals=0, duration=1800){
+function useCountUp(target, decimals=0, duration=1800, initialVal){
   const ref = uR(null);
-  const [v,setV] = uS(0);
+  const [v,setV] = uS(()=> initialVal !== undefined ? initialVal : Math.round(target * 0.93));
   const [seen,setSeen] = uS(false);
   uE(()=>{
     const io = new IntersectionObserver(([e])=>{ if(e.isIntersecting){ setSeen(true); io.disconnect(); }},{threshold:0.3});

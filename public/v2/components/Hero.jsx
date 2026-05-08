@@ -231,13 +231,14 @@ function Hero(){
               See how it works
             </button>
           </div>
+          <p style={{marginTop:10,fontSize:12,color:'var(--text-fade)',letterSpacing:'0.01em'}}>No credit card required</p>
           <div className="hero-trust">
             <div className="avatars">
               {['#818cf8','#a78bfa','#60a5fa','#f472b6'].map((c,i)=>(
                 <div key={i} className="av" style={{background:`linear-gradient(135deg,${c},${c}aa)`,zIndex:4-i}}/>
               ))}
             </div>
-            <div className="hero-trust-text"><strong>30,000+ students</strong> in our community</div>
+            <div className="hero-trust-text">Join <strong>30,000+ students</strong> already building their edge this semester</div>
           </div>
         </div>
         <div className="hero-right" style={{'--tx':`${tilt.x*6}deg`,'--ty':`${-tilt.y*4}deg`}}>

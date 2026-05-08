@@ -2,7 +2,7 @@
 const { useState: p1, useEffect: p2 } = React;
 
 function Pricing(){
-  const [bill, setBill] = p1('yearly');
+  const [bill, setBill] = p1('monthly');
 
   // Actual charge amounts (match Stripe price IDs)
   const PRICE_TABLE = {
@@ -20,16 +20,16 @@ function Pricing(){
 
   // What's actually billed (shown as sub-label)
   const billedSub = (planKey) => {
-    if (bill === 'monthly') return 'Billed monthly';
-    if (bill === 'semester') return `Billed $${PRICE_TABLE[planKey].semester.toFixed(2)}/semester`;
-    return `Billed $${PRICE_TABLE[planKey].yearly.toFixed(2)}/year`;
+    if (bill === 'monthly') return 'Billed monthly · 7-day free trial';
+    if (bill === 'semester') return `Billed $${PRICE_TABLE[planKey].semester.toFixed(2)}/semester · 7-day free trial`;
+    return `Billed $${PRICE_TABLE[planKey].yearly.toFixed(2)}/year · 7-day free trial`;
   };
 
   const displayPrice = (planKey) => MONTHLY_EQUIV[planKey][bill];
 
   const goSignup = (plan)=>{
     const qs = new URLSearchParams({ signup: '1' });
-    if (plan) { qs.set('plan', plan); qs.set('billing', bill); }
+    if (plan) { qs.set('plan', plan); qs.set('billing', bill); qs.set('trial', '1'); }
     window.location.href = '/app?' + qs.toString();
   };
 
@@ -39,12 +39,10 @@ function Pricing(){
       cta:'Start for free', primary:false, plan:null,
       feats:[
         [true,'1 course'],
-        [true,'10 study boosts / month'],
+        [true,'10 AI sessions / month'],
         [true,'Basic calendar'],
         [true,'Focus Mode timer'],
         [true,'Syllabus upload (1 course)'],
-        [false,'Push notifications'],
-        [false,'Priority support'],
       ]
     },
     {
@@ -52,7 +50,7 @@ function Pricing(){
       cta:'Get Pro', primary:true, popular:true, plan:'pro',
       feats:[
         [true,'5 courses'],
-        [true,'75 study boosts / month'],
+        [true,'75 AI sessions / month'],
         [true,'Smart calendar'],
         [true,'Focus Mode timer'],
         [true,'Syllabus upload'],
@@ -65,7 +63,7 @@ function Pricing(){
       cta:'Get Unlimited', primary:false, plan:'unlimited',
       feats:[
         [true,'Unlimited courses'],
-        [true,'Unlimited study boosts'],
+        [true,'Unlimited AI sessions'],
         [true,'Smart calendar'],
         [true,'Focus Mode timer'],
         [true,'Syllabus upload'],
@@ -98,7 +96,7 @@ function Pricing(){
           {tiers.map(t=>(
             <div key={t.name} className={`tier ${t.primary?'tier-primary':''}`}>
               {t.popular && <div className="tier-pop">MOST POPULAR</div>}
-              {t.primary && bill === 'monthly' && (
+              {t.primary && (
                 <div style={{
                   display:'inline-block', fontSize:10, fontWeight:800, letterSpacing:'0.06em',
                   color:'#34d399', background:'rgba(52,211,153,0.1)', border:'1px solid rgba(52,211,153,0.3)',
@@ -135,9 +133,7 @@ function Pricing(){
               <button className={`btn ${t.primary?'btn-primary':'btn-ghost'} tier-cta`} onClick={()=>goSignup(t.plan)}>{t.cta}</button>
               {t.primary && (
                 <p style={{textAlign:'center',fontSize:11,color:'var(--text-muted)',marginTop:8,marginBottom:0}}>
-                  {bill === 'monthly'
-                    ? '✓ 7-day free trial included'
-                    : 'Switch to Monthly to start your free trial'}
+                  ✓ 7-day free trial · cancel anytime
                 </p>
               )}
             </div>

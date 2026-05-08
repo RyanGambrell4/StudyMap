@@ -5,6 +5,18 @@ export default function AuthScreen({ initialMode, onBack }) {
   const [mode, setMode] = useState(() =>
     initialMode || (new URLSearchParams(window.location.search).get('signup') === '1' ? 'signup' : 'login')
   )
+
+  const planContext = (() => {
+    const sp = new URLSearchParams(window.location.search)
+    const plan = sp.get('plan')
+    const billing = sp.get('billing')
+    const trial = sp.get('trial')
+    if (!plan) return null
+    const planLabel = plan === 'pro' ? 'Pro' : 'Unlimited'
+    const billingLabel = billing === 'yearly' ? 'yearly' : billing === 'semester' ? 'per semester' : 'monthly'
+    if (trial === '1') return { icon: '🎉', text: `Starting your 7-day ${planLabel} trial`, sub: `Full access free for 7 days. Card charged ${billingLabel} after trial — cancel anytime.` }
+    return { icon: '⚡', text: `Signing up for ${planLabel}`, sub: `Billed ${billingLabel}. Cancel anytime.` }
+  })()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
@@ -243,6 +255,30 @@ export default function AuthScreen({ initialMode, onBack }) {
           />
           <span className="text-white font-bold text-xl tracking-tight">StudyEdge AI</span>
         </div>
+
+        {/* Plan context banner — shown when coming from pricing */}
+        {mode === 'signup' && planContext && (
+          <div
+            className="rounded-xl px-4 py-3 mb-4 flex items-start gap-3"
+            style={{ backgroundColor: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)' }}
+          >
+            <span className="text-lg mt-0.5">{planContext.icon}</span>
+            <div>
+              <p className="text-white font-semibold text-sm">{planContext.text}</p>
+              <p className="text-slate-400 text-xs mt-0.5 leading-relaxed">{planContext.sub}</p>
+            </div>
+          </div>
+        )}
+        {/* Free plan nudge when no plan context */}
+        {mode === 'signup' && !planContext && (
+          <div
+            className="rounded-xl px-4 py-3 mb-4 flex items-center gap-3"
+            style={{ backgroundColor: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.25)' }}
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round"><polyline points="5 12 10 17 20 7"/></svg>
+            <p className="text-emerald-300 text-sm font-medium">Free forever — no credit card required</p>
+          </div>
+        )}
 
         {/* Card */}
         <div
