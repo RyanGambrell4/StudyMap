@@ -6,6 +6,56 @@
 .stat-l{font-size:13px;color:var(--text-muted)}
 .stat-div{width:1px;height:48px;background:linear-gradient(180deg,transparent,var(--border-2),transparent)}
 
+/* Bento Features */
+.bento-sec{padding:40px 0 80px}
+.bento-grid{display:grid;grid-template-columns:1fr 1fr 1fr;grid-template-rows:auto auto auto;gap:16px;margin-top:56px}
+.bento-card{background:linear-gradient(180deg,rgba(255,255,255,0.035),rgba(255,255,255,0.008));border:1px solid var(--border-2);border-radius:20px;padding:28px;position:relative;overflow:hidden;transition:border-color .2s,box-shadow .2s}
+.bento-card:hover{border-color:var(--border-3);box-shadow:0 20px 60px -20px rgba(0,0,0,0.5)}
+
+/* Tall left card */
+.bento-tall{grid-column:1;grid-row:1/4;display:flex;flex-direction:column;gap:0;min-height:460px;background:linear-gradient(180deg,rgba(99,102,241,0.1),rgba(99,102,241,0.02));border-color:rgba(99,102,241,0.3)}
+.bento-card-aurora{position:absolute;inset:0;pointer-events:none;background:radial-gradient(280px 280px at 50% 90%,rgba(99,102,241,0.3),transparent 70%);filter:blur(30px)}
+.bento-tag{font-size:10px;font-weight:700;letter-spacing:0.18em;color:var(--indigo-2);margin-bottom:auto;padding-top:4px}
+.bento-countup{font-weight:700;letter-spacing:-0.035em;position:relative;z-index:1}
+.bento-countup-xl{font-size:clamp(56px,6vw,80px);margin-top:16px}
+.bento-countup-lg{font-size:clamp(36px,4vw,52px)}
+.bento-card-label{font-size:15px;font-weight:600;color:var(--text);margin-top:8px;position:relative;z-index:1}
+.bento-card-sub{font-size:13px;color:var(--text-muted);margin-top:4px;position:relative;z-index:1}
+.bento-avatars{display:flex;margin-top:28px;position:relative;z-index:1}
+.bento-av{width:32px;height:32px;border-radius:50%;border:2px solid rgba(10,10,30,0.8);margin-left:-10px}
+.bento-av:first-child{margin-left:0}
+.bento-rating{display:flex;align-items:center;gap:8px;margin-top:14px;position:relative;z-index:1}
+.bento-stars{color:#fbbf24;font-size:13px;letter-spacing:2px}
+.bento-rating-text{font-size:12px;color:var(--text-muted)}
+
+/* Feature cards */
+.bento-feature{display:flex;flex-direction:column;gap:10px}
+.bento-icon{width:44px;height:44px;border-radius:12px;border:1px solid;display:grid;place-items:center;flex-shrink:0}
+.bento-feat-title{font-size:16px;font-weight:700;letter-spacing:-0.01em;margin-top:2px}
+.bento-feat-body{font-size:13.5px;color:var(--text-muted);line-height:1.55;flex:1}
+.bento-feat-tag{font-size:11px;font-weight:600;padding:4px 10px;border-radius:99px;border:1px solid;width:fit-content;margin-top:4px}
+
+/* Wide bottom CTA */
+.bento-wide{grid-column:2/4;grid-row:3}
+.bento-cta{display:flex;align-items:center;justify-content:space-between;gap:24px;background:linear-gradient(135deg,rgba(99,102,241,0.12),rgba(124,58,237,0.08));border-color:rgba(99,102,241,0.3);padding:28px 32px;flex-wrap:wrap}
+.bento-cta-aurora{position:absolute;inset:-40%;background:radial-gradient(400px 300px at 30% 50%,rgba(99,102,241,0.2),transparent 60%);filter:blur(30px);pointer-events:none}
+.bento-cta-left{position:relative;z-index:1}
+.bento-cta-title{font-size:18px;font-weight:700;letter-spacing:-0.02em}
+.bento-cta-sub{font-size:13px;color:var(--text-muted);margin-top:6px}
+.bento-cta .btn{position:relative;z-index:1;white-space:nowrap;flex-shrink:0}
+
+@media(max-width:900px){
+  .bento-grid{grid-template-columns:1fr 1fr;grid-template-rows:auto}
+  .bento-tall{grid-column:1/3;grid-row:auto;min-height:220px;flex-direction:row;flex-wrap:wrap;align-items:center}
+  .bento-tag{width:100%}
+  .bento-wide{grid-column:1/3}
+}
+@media(max-width:600px){
+  .bento-grid{grid-template-columns:1fr}
+  .bento-tall,.bento-wide{grid-column:1}
+  .bento-cta{flex-direction:column;align-items:flex-start}
+}
+
 /* How it works */
 .how{padding:80px 0 40px}
 .steps{display:flex;flex-direction:column;gap:120px}

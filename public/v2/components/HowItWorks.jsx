@@ -1,27 +1,12 @@
 // Stats bar + How it works + Bento + Grade + Pricing + Final CTA
 const { useState: uS, useEffect: uE, useRef: uR, useMemo: uM } = React;
 
-function StatsBar(){
-  return (
-    <section className="stats-bar">
-      <div className="container">
-        <div className="stats-card">
-          <Stat n={30000} suffix="+" label="Students in our community" col="#818cf8"/>
-          <div className="stat-div"/>
-          <Stat n={12} suffix="" label="AI-powered study tools" col="#a78bfa"/>
-          <div className="stat-div"/>
-          <Stat n={4.9} label="Average rating" suffix="/5" decimals={1} col="#34d399"/>
-        </div>
-      </div>
-    </section>
-  );
-}
-function Stat({n,suffix="",label,col,decimals=0}){
+function useCountUp(target, decimals=0, duration=1800){
   const ref = uR(null);
   const [v,setV] = uS(0);
   const [seen,setSeen] = uS(false);
   uE(()=>{
-    const io = new IntersectionObserver(([e])=>{ if(e.isIntersecting){ setSeen(true); io.disconnect();} },{threshold:0.3});
+    const io = new IntersectionObserver(([e])=>{ if(e.isIntersecting){ setSeen(true); io.disconnect(); }},{threshold:0.3});
     if(ref.current) io.observe(ref.current);
     return ()=>io.disconnect();
   },[]);
@@ -30,20 +15,108 @@ function Stat({n,suffix="",label,col,decimals=0}){
     let raf, start;
     const anim=(t)=>{
       if(!start) start=t;
-      const p=Math.min(1,(t-start)/1800);
-      const eased = 1 - Math.pow(1-p,3);
-      setV(n*eased);
+      const p=Math.min(1,(t-start)/duration);
+      const eased=1-Math.pow(1-p,3);
+      setV(target*eased);
       if(p<1) raf=requestAnimationFrame(anim);
     };
     raf=requestAnimationFrame(anim);
     return ()=>cancelAnimationFrame(raf);
-  },[seen,n]);
+  },[seen,target]);
   const fmt = decimals>0 ? v.toFixed(decimals) : Math.round(v).toLocaleString();
+  return [ref, fmt];
+}
+
+function BentoCountUp({value, suffix='', decimals=0, color='#818cf8', size='lg'}){
+  const [ref, fmt] = useCountUp(value, decimals);
   return (
-    <div className="stat" ref={ref}>
-      <div className="stat-n" style={{color:col}}>{fmt}{suffix}</div>
-      <div className="stat-l">{label}</div>
+    <div ref={ref} className={`bento-countup bento-countup-${size}`} style={{color}}>
+      {fmt}{suffix}
     </div>
+  );
+}
+
+function StatsBar(){
+  return (
+    <section className="bento-sec">
+      <div className="container">
+        <div className="section-head fade-up">
+          <div className="section-kicker">Built for students who want results</div>
+          <h2 className="section-title">One system.<br/><span className="grad-text">Every edge.</span></h2>
+        </div>
+        <div className="bento-grid">
+
+          {/* Left tall — social proof */}
+          <div className="bento-card bento-tall">
+            <div className="bento-card-aurora"/>
+            <div className="bento-tag">COMMUNITY</div>
+            <BentoCountUp value={30000} suffix="+" color="#818cf8" size="xl"/>
+            <div className="bento-card-label">Students in our community</div>
+            <div className="bento-card-sub">and growing every week</div>
+            <div className="bento-avatars">
+              {['#818cf8','#a78bfa','#60a5fa','#f472b6','#34d399'].map((c,i)=>(
+                <div key={i} className="bento-av" style={{background:`linear-gradient(135deg,${c},${c}88)`,zIndex:5-i}}/>
+              ))}
+            </div>
+            <div className="bento-rating">
+              <span className="bento-stars">{'★★★★★'}</span>
+              <span className="bento-rating-text">4.9 average rating</span>
+            </div>
+          </div>
+
+          {/* AI Study Coach */}
+          <div className="bento-card bento-feature">
+            <div className="bento-icon" style={{background:'rgba(167,139,250,0.1)',borderColor:'rgba(167,139,250,0.25)'}}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="1.8" strokeLinecap="round"><path d="M12 2a7 7 0 0 1 7 7c0 3.5-2 5.5-2 7H7c0-1.5-2-3.5-2-7a7 7 0 0 1 7-7z"/><path d="M9 21h6M12 21v-5"/><circle cx="12" cy="9" r="2"/></svg>
+            </div>
+            <div className="bento-feat-title">AI Study Coach</div>
+            <div className="bento-feat-body">Personalized session plans built around your schedule, pace, and exam dates.</div>
+            <div className="bento-feat-tag" style={{color:'#a78bfa',borderColor:'rgba(167,139,250,0.3)',background:'rgba(167,139,250,0.08)'}}>🔥 Top differentiator</div>
+          </div>
+
+          {/* Grade Intelligence */}
+          <div className="bento-card bento-feature">
+            <div className="bento-icon" style={{background:'rgba(96,165,250,0.1)',borderColor:'rgba(96,165,250,0.25)'}}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
+            </div>
+            <div className="bento-feat-title">Grade Intelligence</div>
+            <div className="bento-feat-body">Real-time grade tracking with score projections that show exactly where you stand.</div>
+            <div className="bento-feat-tag" style={{color:'#60a5fa',borderColor:'rgba(96,165,250,0.3)',background:'rgba(96,165,250,0.08)'}}>📊 Know your number</div>
+          </div>
+
+          {/* Smart Scheduling */}
+          <div className="bento-card bento-feature">
+            <div className="bento-icon" style={{background:'rgba(52,211,153,0.1)',borderColor:'rgba(52,211,153,0.25)'}}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            </div>
+            <div className="bento-feat-title">Smart Scheduling</div>
+            <div className="bento-feat-body">Auto-builds your weekly study plan around classes, deadlines, and real availability.</div>
+            <div className="bento-feat-tag" style={{color:'#34d399',borderColor:'rgba(52,211,153,0.3)',background:'rgba(52,211,153,0.08)'}}>⏱ Saves hours of planning</div>
+          </div>
+
+          {/* Streak Tracking */}
+          <div className="bento-card bento-feature">
+            <div className="bento-icon" style={{background:'rgba(251,146,60,0.1)',borderColor:'rgba(251,146,60,0.25)'}}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fb923c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2c0 4-4 6-4 10a4 4 0 0 0 8 0c0-4-4-6-4-10z"/><path d="M12 12c0 2-2 3-2 5a2 2 0 0 0 4 0c0-2-2-3-2-5z"/></svg>
+            </div>
+            <div className="bento-feat-title">Streak Tracking</div>
+            <div className="bento-feat-body">Build unstoppable study habits with daily streaks, heatmaps, and session history.</div>
+            <div className="bento-feat-tag" style={{color:'#fb923c',borderColor:'rgba(251,146,60,0.3)',background:'rgba(251,146,60,0.08)'}}>🔥 Habit-forming</div>
+          </div>
+
+          {/* Wide bottom — CTA */}
+          <div className="bento-card bento-wide bento-cta">
+            <div className="bento-cta-aurora"/>
+            <div className="bento-cta-left">
+              <div className="bento-cta-title">The complete study system — free to start.</div>
+              <div className="bento-cta-sub">Active Recall · Flashcards · Focus Mode · Grade Hub · Study Coach</div>
+            </div>
+            <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Start Studying Free</button>
+          </div>
+
+        </div>
+      </div>
+    </section>
   );
 }
 
