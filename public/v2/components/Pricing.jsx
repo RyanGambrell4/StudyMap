@@ -38,36 +38,34 @@ function Pricing(){
       name:'Free', planKey:null, sub:'Try the system. No credit card.',
       cta:'Start for free', primary:false, plan:null,
       feats:[
-        [true,'1 course'],
-        [true,'10 AI sessions / month'],
-        [true,'Basic calendar'],
-        [true,'Focus Mode timer'],
-        [true,'Syllabus upload (1 course)'],
+        [true,'1 course · schedule, coach & flashcards'],
+        [true,'10 AI actions/month'],
+        [true,'Session Blueprint · AI-planned session structure'],
+        [true,'Syllabus import · deadlines pulled automatically'],
+        [true,'Focus Mode · timer with streak tracking'],
       ]
     },
     {
       name:'Pro', planKey:'pro',
       cta:'Get Pro', primary:true, popular:true, plan:'pro',
       feats:[
-        [true,'5 courses'],
-        [true,'75 AI sessions / month'],
-        [true,'Smart calendar'],
-        [true,'Focus Mode timer'],
-        [true,'Syllabus upload'],
-        [true,'Push notifications'],
-        [false,'Priority support'],
+        [true,'5 courses · your full semester planned'],
+        [true,'75 AI actions/month · enough for daily use'],
+        [true,'AI Study Coach · week-by-week exam plan'],
+        [true,'Session Blueprints · minute-by-minute structure'],
+        [true,'AI Flashcards & Quizzes from your material'],
+        [true,'Grade Hub · track grades & model scenarios'],
+        [true,'Smart calendar · all deadlines & sessions'],
+        [true,'Syllabus import for all 5 courses'],
       ]
     },
     {
       name:'Unlimited', planKey:'unlimited',
       cta:'Get Unlimited', primary:false, plan:'unlimited',
       feats:[
-        [true,'Unlimited courses'],
-        [true,'Unlimited AI sessions'],
-        [true,'Smart calendar'],
-        [true,'Focus Mode timer'],
-        [true,'Syllabus upload'],
-        [true,'Push notifications'],
+        [true,'Unlimited courses · every class, all year'],
+        [true,'Unlimited AI · no monthly cap, ever'],
+        [true,'Everything in Pro, zero restrictions'],
         [true,'Priority support'],
       ]
     }

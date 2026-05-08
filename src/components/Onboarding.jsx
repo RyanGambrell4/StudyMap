@@ -740,9 +740,9 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             </div>
             {[
               '1 course',
-              '10 study boosts/mo',
-              'Basic calendar',
-              'Focus timer',
+              '10 AI actions/month',
+              'Session Blueprint',
+              'Focus Mode',
             ].map(f => (
               <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#475569" strokeWidth="2.5"><path d="M6 6l12 12M18 6l-12 12"/></svg>
@@ -760,11 +760,10 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
               Pro ✦
             </div>
             {[
-              '5 courses',
-              '75 study boosts/mo',
-              'Smart calendar',
-              'AI study plans',
-              'Priority support',
+              'AI Study Coach for every course',
+              'Session Blueprints before every session',
+              'AI Flashcards, Quizzes & Grade tracking',
+              'Your full semester, fully planned',
             ].map(f => (
               <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="3"><polyline points="5 12 10 17 20 7"/></svg>
