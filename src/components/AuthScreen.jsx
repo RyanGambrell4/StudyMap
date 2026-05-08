@@ -243,10 +243,14 @@ export default function AuthScreen({ initialMode, onBack }) {
       className="min-h-screen flex items-center justify-center px-4"
       style={{ backgroundColor: '#0a0f1e', position: 'relative', overflow: 'hidden' }}
     >
-      {/* Subtle background blobs */}
+      {/* Background */}
       <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-        <div style={{ position: 'absolute', top: '-10%', left: '50%', transform: 'translateX(-50%)', width: 600, height: 400, background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.12) 0%, transparent 70%)', borderRadius: '50%' }} />
-        <div style={{ position: 'absolute', bottom: '-5%', left: '20%', width: 400, height: 300, background: 'radial-gradient(ellipse at center, rgba(139,92,246,0.08) 0%, transparent 70%)', borderRadius: '50%' }} />
+        {/* Dot grid */}
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
+        {/* Aurora blobs */}
+        <div style={{ position: 'absolute', top: '-15%', left: '50%', transform: 'translateX(-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.2) 0%, transparent 65%)', filter: 'blur(8px)' }} />
+        <div style={{ position: 'absolute', bottom: '-10%', right: '-5%', width: 450, height: 350, background: 'radial-gradient(ellipse at center, rgba(139,92,246,0.14) 0%, transparent 65%)', filter: 'blur(8px)' }} />
+        <div style={{ position: 'absolute', bottom: '20%', left: '-5%', width: 300, height: 250, background: 'radial-gradient(ellipse at center, rgba(56,189,248,0.07) 0%, transparent 65%)', filter: 'blur(8px)' }} />
       </div>
       <div className="w-full max-w-sm" style={{ position: 'relative', zIndex: 1 }}>
 
@@ -287,13 +291,15 @@ export default function AuthScreen({ initialMode, onBack }) {
         )}
 
         {/* Card */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgba(99,102,241,0.5) 0%, rgba(139,92,246,0.3) 50%, rgba(56,189,248,0.2) 100%)',
+          padding: '1px',
+          borderRadius: '1rem',
+          boxShadow: '0 0 48px rgba(99,102,241,0.22), 0 0 100px rgba(99,102,241,0.08)',
+        }}>
         <div
           className="rounded-2xl p-7"
-          style={{
-            backgroundColor: '#111827',
-            border: '1px solid rgba(99,102,241,0.2)',
-            boxShadow: '0 0 40px rgba(99,102,241,0.18), 0 0 80px rgba(99,102,241,0.08)',
-          }}
+          style={{ backgroundColor: '#111827' }}
         >
           <h1 className="text-white font-bold text-xl mb-1">
             {mode === 'login' ? 'Welcome back' : mode === 'signup' ? 'Create your account' : 'Reset password'}
@@ -400,6 +406,7 @@ export default function AuthScreen({ initialMode, onBack }) {
               {loading ? 'Loading…' : mode === 'login' ? 'Sign in' : mode === 'signup' ? 'Create account' : 'Send reset link'}
             </button>
           </form>
+        </div>
         </div>
 
         {/* Footer links */}
