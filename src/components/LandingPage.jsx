@@ -155,7 +155,7 @@ export default function LandingPage({ onGetStarted }) {
           letterSpacing: '-1.5px', color: '#fff', maxWidth: 760,
           margin: '0 auto 20px', position: 'relative',
         }}>
-          Prep for 5 Exams at Once — With One App and Zero Guesswork
+          Stop surviving your courses. Start owning them.
         </h1>
 
         {/* Subheadline */}
@@ -163,7 +163,7 @@ export default function LandingPage({ onGetStarted }) {
           fontSize: 'clamp(16px, 2vw, 19px)', color: 'rgba(226,232,240,0.55)',
           maxWidth: 520, margin: '0 auto 40px', lineHeight: 1.6, fontWeight: 400,
         }}>
-          StudyEdge AI builds your study schedule across every course, coaches you through each session, and adjusts priorities based on your actual grades — so you stop stitching together Quizlet, Anki, Notion, and Google Calendar.
+          StudyEdge AI builds your study system across every course, coaches every session, and shifts your focus to wherever your grades actually need help. One app. All semester.
         </p>
 
         {/* CTA Buttons */}

@@ -161,10 +161,10 @@ function Hero(){
         <div className="hero-left">
           <div className="eyebrow"><span className="dot"/>AI-Powered Study System</div>
           <h1 className="hero-h1">
-            Prep for 5 Exams at Once — With One App and Zero Guesswork
+            Stop surviving your courses. Start owning them.
           </h1>
           <p className="hero-sub">
-            StudyEdge AI builds your study schedule across every course, coaches you through each session, and adjusts priorities based on your actual grades — so you stop stitching together Quizlet, Anki, Notion, and Google Calendar.
+            StudyEdge AI builds your study system across every course, coaches every session, and shifts your focus to wherever your grades actually need help. One app. All semester.
           </p>
           <div className="hero-ctas">
             <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Start Your Exam Prep Plan — Free</button>
