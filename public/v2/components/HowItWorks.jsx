@@ -47,10 +47,10 @@ function StatsBar(){
         <div className="bento-grid">
 
           {/* Left tall — social proof */}
-          <div className="bento-card bento-tall">
-            <div className="bento-card-aurora"/>
+          <div className="bento-card bento-tall bento-stagger-1">
+            <div className="bento-dots"/>
             <div className="bento-tag">COMMUNITY</div>
-            <BentoCountUp value={30000} suffix="+" color="#818cf8" size="xl"/>
+            <BentoCountUp value={30000} suffix="+" color="#fff" size="xl"/>
             <div className="bento-card-label">Students in our community</div>
             <div className="bento-card-sub">and growing every week</div>
             <div className="bento-avatars">
@@ -65,53 +65,51 @@ function StatsBar(){
           </div>
 
           {/* AI Study Coach */}
-          <div className="bento-card bento-feature">
-            <div className="bento-icon" style={{background:'rgba(167,139,250,0.1)',borderColor:'rgba(167,139,250,0.25)'}}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="1.8" strokeLinecap="round"><path d="M12 2a7 7 0 0 1 7 7c0 3.5-2 5.5-2 7H7c0-1.5-2-3.5-2-7a7 7 0 0 1 7-7z"/><path d="M9 21h6M12 21v-5"/><circle cx="12" cy="9" r="2"/></svg>
+          <div className="bento-card bento-feature bento-stagger-2">
+            <div className="bento-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.8" strokeLinecap="round"><path d="M12 2a7 7 0 0 1 7 7c0 3.5-2 5.5-2 7H7c0-1.5-2-3.5-2-7a7 7 0 0 1 7-7z"/><path d="M9 21h6M12 21v-5"/><circle cx="12" cy="9" r="2"/></svg>
             </div>
             <div className="bento-feat-title">AI Study Coach</div>
             <div className="bento-feat-body">Personalized session plans built around your schedule, pace, and exam dates.</div>
-            <div className="bento-feat-tag" style={{color:'#a78bfa',borderColor:'rgba(167,139,250,0.3)',background:'rgba(167,139,250,0.08)'}}>🔥 Top differentiator</div>
+            <div className="bento-badge bento-badge-orange">Top differentiator</div>
           </div>
 
-          {/* Grade Intelligence */}
-          <div className="bento-card bento-feature">
-            <div className="bento-icon" style={{background:'rgba(96,165,250,0.1)',borderColor:'rgba(96,165,250,0.25)'}}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#60a5fa" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 7 13.5 15.5 8.5 10.5 2 17"/><polyline points="16 7 22 7 22 13"/></svg>
-            </div>
-            <div className="bento-feat-title">Grade Intelligence</div>
-            <div className="bento-feat-body">Real-time grade tracking with score projections that show exactly where you stand.</div>
-            <div className="bento-feat-tag" style={{color:'#60a5fa',borderColor:'rgba(96,165,250,0.3)',background:'rgba(96,165,250,0.08)'}}>📊 Know your number</div>
+          {/* 10X stat card */}
+          <div className="bento-card bento-stat-10x bento-stagger-3">
+            <div className="bento-dots"/>
+            <span className="bento-10x">10X</span>
           </div>
 
           {/* Smart Scheduling */}
-          <div className="bento-card bento-feature">
-            <div className="bento-icon" style={{background:'rgba(52,211,153,0.1)',borderColor:'rgba(52,211,153,0.25)'}}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <div className="bento-card bento-feature bento-stagger-4">
+            <div className="bento-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
             </div>
             <div className="bento-feat-title">Smart Scheduling</div>
             <div className="bento-feat-body">Auto-builds your weekly study plan around classes, deadlines, and real availability.</div>
-            <div className="bento-feat-tag" style={{color:'#34d399',borderColor:'rgba(52,211,153,0.3)',background:'rgba(52,211,153,0.08)'}}>⏱ Saves hours of planning</div>
+            <div className="bento-badge bento-badge-green">Saves hours of planning</div>
           </div>
 
           {/* Streak Tracking */}
-          <div className="bento-card bento-feature">
-            <div className="bento-icon" style={{background:'rgba(251,146,60,0.1)',borderColor:'rgba(251,146,60,0.25)'}}>
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#fb923c" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2c0 4-4 6-4 10a4 4 0 0 0 8 0c0-4-4-6-4-10z"/><path d="M12 12c0 2-2 3-2 5a2 2 0 0 0 4 0c0-2-2-3-2-5z"/></svg>
+          <div className="bento-card bento-feature bento-stagger-5">
+            <div className="bento-icon">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.7)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2c0 4-4 6-4 10a4 4 0 0 0 8 0c0-4-4-6-4-10z"/><path d="M12 12c0 2-2 3-2 5a2 2 0 0 0 4 0c0-2-2-3-2-5z"/></svg>
             </div>
             <div className="bento-feat-title">Streak Tracking</div>
             <div className="bento-feat-body">Build unstoppable study habits with daily streaks, heatmaps, and session history.</div>
-            <div className="bento-feat-tag" style={{color:'#fb923c',borderColor:'rgba(251,146,60,0.3)',background:'rgba(251,146,60,0.08)'}}>🔥 Habit-forming</div>
+            <div className="bento-badge bento-badge-amber">Habit-forming</div>
           </div>
 
           {/* Wide bottom — CTA */}
-          <div className="bento-card bento-wide bento-cta">
-            <div className="bento-cta-aurora"/>
+          <div className="bento-card bento-wide bento-cta bento-stagger-6">
             <div className="bento-cta-left">
               <div className="bento-cta-title">The complete study system — free to start.</div>
               <div className="bento-cta-sub">Active Recall · Flashcards · Focus Mode · Grade Hub · Study Coach</div>
             </div>
-            <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Start Studying Free</button>
+            <button className="bento-cta-btn" onClick={()=>window.location.href='/app?signup=1'}>
+              Start Studying Free
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
           </div>
 
         </div>
