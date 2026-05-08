@@ -22,6 +22,7 @@ export default function App() {
   const [schedule, setSchedule]       = useState({ hoursPerWeek: 15, preferredTime: 'Morning' })
   const [learningStyle, setLearningStyle]   = useState(null)
   const [yearLevel, setYearLevel]           = useState(null)
+  const [schoolType, setSchoolType]         = useState(null)
   const [assignments, setAssignments]       = useState([])
   const [initialCompletedIds, setInitialCompletedIds] = useState(null)
 
@@ -151,9 +152,10 @@ export default function App() {
     window.location.href = '/'
   }
 
-  const handleOnboardingComplete = ({ yearLevel: yl, learningStyle: ls, preferredTime }) => {
+  const handleOnboardingComplete = ({ yearLevel: yl, learningStyle: ls, preferredTime, schoolType: st }) => {
     setYearLevel(yl)
     setLearningStyle(ls)
+    setSchoolType(st ?? null)
     setSchedule({ hoursPerWeek: 15, preferredTime })
     setCourses([])
     setInitialCompletedIds(new Set())
@@ -441,6 +443,7 @@ export default function App() {
           schedule={schedule}
           learningStyle={learningStyle}
           yearLevel={yearLevel ?? '1st Year'}
+          schoolType={schoolType}
           initialCompletedIds={initialCompletedIds ?? new Set()}
           initialAssignments={assignments}
           onSavePlan={handleSavePlan}

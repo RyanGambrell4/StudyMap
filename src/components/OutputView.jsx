@@ -324,7 +324,7 @@ function LogGradeModal({ logGradeId, assignments, courses, gradeInput, setGradeI
 
 // ─── Main component ───────────────────────────────────────────────────────────
 export default function OutputView({
-  courses, schedule, learningStyle, yearLevel,
+  courses, schedule, learningStyle, yearLevel, schoolType,
   initialCompletedIds, initialAssignments, onSavePlan, onEditPlan, onSignOut, onAddCourse, onEditCourse, onDeleteCourse,
   userEmail, userId, onShowPaywall,
 }) {
@@ -1277,6 +1277,7 @@ export default function OutputView({
             onShowPaywall={onShowPaywall}
             onOpenStudyCoach={handleOpenStudyCoach}
             onNavigateToGradeHub={() => setActiveSection('grades')}
+            schoolType={schoolType}
           />
         )}
 

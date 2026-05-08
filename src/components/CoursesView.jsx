@@ -754,6 +754,7 @@ export default function CoursesView({
   onShowPaywall,
   onOpenStudyCoach,
   onNavigateToGradeHub,
+  schoolType,
 }) {
   const [expandedIdx, setExpandedIdx] = useState(null)
   const [showAddPanel, setShowAddPanel] = useState(false)
@@ -769,7 +770,7 @@ export default function CoursesView({
   const todayStr = new Date().toISOString().split('T')[0]
 
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
-  const isExamMode = courses.some(c => EXAM_PATTERN.test(c.name))
+  const isExamMode = schoolType === 'exam' || courses.some(c => EXAM_PATTERN.test(c.name))
 
   // Latest practice score per section name (from shared localStorage store)
   const latestScores = (() => {
@@ -867,7 +868,7 @@ export default function CoursesView({
           <h1 style={{ margin: 0, fontSize: 32, fontWeight: 700, letterSpacing: -0.8, color: D.text }}>{isExamMode ? 'Sections' : 'Courses'}</h1>
           <p style={{ margin: '6px 0 0', fontSize: 14, color: D.muted, maxWidth: 640 }}>
             {isExamMode
-              ? 'Organize your exam sections: import materials and let the AI build your prep plan.'
+              ? 'Track your exam sections and build your prep plan around your test date.'
               : 'Organize every class: pull in syllabi, schedules, and let the AI map your semester.'}
           </p>
         </div>
@@ -875,7 +876,7 @@ export default function CoursesView({
           onClick={() => { if (atLimit) { onShowPaywall?.('courses'); return } setShowAddPanel(true) }}
           style={{ padding: '11px 18px', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7, boxShadow: '0 6px 20px rgba(99,102,241,0.35)', border: 'none', cursor: 'pointer' }}
         >
-          <Icon name="plus" size={14} /> {atLimit ? 'Upgrade to Add' : 'Add Course'}
+          <Icon name="plus" size={14} /> {atLimit ? 'Upgrade to Add' : isExamMode ? 'Add Section' : 'Add Course'}
         </button>
       </div>
 
@@ -884,8 +885,8 @@ export default function CoursesView({
           <div style={{ padding: '16px 20px', borderRadius: 12, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)', display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 22 }}>
             <svg style={{ width: 20, height: 20, color: D.amber, flexShrink: 0, marginTop: 2 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
             <div>
-              <p style={{ margin: 0, color: D.amber, fontWeight: 700, fontSize: 14 }}>Courses are required to use StudyEdge AI</p>
-              <p style={{ margin: '4px 0 0', color: `${D.amber}99`, fontSize: 12 }}>{isExamMode ? 'Add each exam section you\'re studying. Then import your materials to unlock your prep schedule and AI tools.' : 'Add each course you\'re taking this semester. Then import your syllabi to unlock your study schedule, deadlines, and AI tools.'}</p>
+              <p style={{ margin: 0, color: D.amber, fontWeight: 700, fontSize: 14 }}>{isExamMode ? 'Add your exam sections to get started' : 'Courses are required to use StudyEdge AI'}</p>
+              <p style={{ margin: '4px 0 0', color: `${D.amber}99`, fontSize: 12 }}>{isExamMode ? 'Use the exam preset or add sections manually below.' : 'Add each course you\'re taking this semester. Then import your syllabi to unlock your study schedule, deadlines, and AI tools.'}</p>
             </div>
           </div>
         )}
@@ -910,7 +911,27 @@ export default function CoursesView({
           </div>
         )}
 
-        <ImportBand onImportSyllabus={onImportSyllabus} />
+        {isExamMode ? (
+          <div className="cv-import-band" style={{ gridTemplateColumns: '1fr' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '20px 24px', borderRadius: 14, background: 'linear-gradient(155deg, rgba(99,102,241,0.14) 0%, rgba(99,102,241,0.04) 45%, #0a0a1e 100%)', border: '1px solid rgba(99,102,241,0.18)' }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+              </div>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#c7d2fe', marginBottom: 3 }}>Use exam preset</div>
+                <div style={{ fontSize: 12, color: 'rgba(199,210,254,0.5)' }}>Load all sections for MCAT, LSAT, CPA, Bar, GRE, or GMAT instantly</div>
+              </div>
+              <button
+                onClick={() => setShowAddPanel(true)}
+                style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(99,102,241,0.18)', border: '1px solid rgba(99,102,241,0.35)', color: '#c7d2fe', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                Load preset →
+              </button>
+            </div>
+          </div>
+        ) : (
+          <ImportBand onImportSyllabus={onImportSyllabus} />
+        )}
 
         {/* Search + stats */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
