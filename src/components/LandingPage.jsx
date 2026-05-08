@@ -155,7 +155,8 @@ export default function LandingPage({ onGetStarted }) {
           letterSpacing: '-1.5px', color: '#fff', maxWidth: 760,
           margin: '0 auto 20px', position: 'relative',
         }}>
-          Stop surviving your courses. Start owning them.
+          Stop surviving your courses.{' '}
+          <span style={{ background: 'linear-gradient(135deg, #a5b4fc, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: 'drop-shadow(0 0 18px rgba(129,140,248,0.7))' }}>Start owning them.</span>
         </h1>
 
         {/* Subheadline */}
@@ -180,7 +181,7 @@ export default function LandingPage({ onGetStarted }) {
             onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 45px rgba(99,102,241,0.55), 0 4px 20px rgba(0,0,0,0.3)'}
             onMouseLeave={e => e.currentTarget.style.boxShadow = '0 0 30px rgba(99,102,241,0.35), 0 4px 20px rgba(0,0,0,0.3)'}
           >
-            Start Your Exam Prep Plan — Free
+            Start Studying Free
           </button>
           <span style={{ fontSize: 12, color: 'rgba(226,232,240,0.30)' }}>
             Card charged after trial · Cancel anytime before day 7

@@ -161,13 +161,14 @@ function Hero(){
         <div className="hero-left">
           <div className="eyebrow"><span className="dot"/>AI-Powered Study System</div>
           <h1 className="hero-h1">
-            Stop surviving your courses. Start owning them.
+            Stop surviving your courses.{' '}
+            <span style={{ background: 'linear-gradient(135deg, #a5b4fc, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: 'drop-shadow(0 0 18px rgba(129,140,248,0.7))' }}>Start owning them.</span>
           </h1>
           <p className="hero-sub">
             StudyEdge AI builds your study system across every course, coaches every session, and shifts your focus to wherever your grades actually need help. One app. All semester.
           </p>
           <div className="hero-ctas">
-            <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Start Your Exam Prep Plan — Free</button>
+            <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Start Studying Free</button>
             <button className="btn btn-ghost btn-lg" onClick={()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
               See how it works
