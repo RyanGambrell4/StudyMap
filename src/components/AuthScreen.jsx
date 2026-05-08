@@ -14,8 +14,8 @@ export default function AuthScreen({ initialMode, onBack }) {
     if (!plan) return null
     const planLabel = plan === 'pro' ? 'Pro' : 'Unlimited'
     const billingLabel = billing === 'yearly' ? 'yearly' : billing === 'semester' ? 'per semester' : 'monthly'
-    if (trial === '1') return { icon: '🎉', text: `Starting your 7-day ${planLabel} trial`, sub: `Full access free for 7 days. Card charged ${billingLabel} after trial — cancel anytime.` }
-    return { icon: '⚡', text: `Signing up for ${planLabel}`, sub: `Billed ${billingLabel}. Cancel anytime.` }
+    if (trial === '1') return { text: `7-day free trial — ${planLabel}`, sub: `Full access included. Card charged ${billingLabel} after trial ends. Cancel anytime.` }
+    return { text: `${planLabel} plan`, sub: `Billed ${billingLabel}. Cancel anytime.` }
   })()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -259,14 +259,11 @@ export default function AuthScreen({ initialMode, onBack }) {
         {/* Plan context banner — shown when coming from pricing */}
         {mode === 'signup' && planContext && (
           <div
-            className="rounded-xl px-4 py-3 mb-4 flex items-start gap-3"
-            style={{ backgroundColor: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)' }}
+            className="rounded-xl px-5 py-4 mb-4"
+            style={{ backgroundColor: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)' }}
           >
-            <span className="text-lg mt-0.5">{planContext.icon}</span>
-            <div>
-              <p className="text-white font-semibold text-sm">{planContext.text}</p>
-              <p className="text-slate-400 text-xs mt-0.5 leading-relaxed">{planContext.sub}</p>
-            </div>
+            <p className="text-white font-semibold text-sm mb-1">{planContext.text}</p>
+            <p className="text-slate-400 text-xs leading-relaxed">{planContext.sub}</p>
           </div>
         )}
         {/* Free plan nudge when no plan context */}
