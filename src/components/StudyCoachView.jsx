@@ -336,6 +336,8 @@ function CoachRail({ form, confidence, course }) {
 function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, onMaterialFile, onNext }) {
   const update = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const course = courses[form.courseIdx]
+  const _EXAM_PAT = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
+  const isExamMode = form.courseIdx >= 0 && _EXAM_PAT.test(courses[form.courseIdx]?.name ?? '')
   const dates = form.dates || []
   const addDate = () => update('dates', [...dates, { label: '', date: '' }])
   const updateDate = (i, patch) => update('dates', dates.map((d, j) => j === i ? { ...d, ...patch } : d))

@@ -152,6 +152,7 @@ export default function DashboardView({
   onShowPaywall,
   coachPlans,
   onOpenStudyCoach,
+  schoolType,
 }) {
   const plan = getActivePlan()
   const aiUsed = getAIQueriesUsed()
@@ -353,7 +354,7 @@ export default function DashboardView({
   const urgencyLabel = (d) => d <= 2 ? 'Tight' : d <= 5 ? 'Soon' : 'Planned'
 
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
-  const isExamMode = courses.some(c => EXAM_PATTERN.test(c.name))
+  const isExamMode = schoolType === 'exam' || courses.some(c => EXAM_PATTERN.test(c.name))
 
   // ── Empty state ──────────────────────────────────────────────────────────────
   if (courses.length === 0) {

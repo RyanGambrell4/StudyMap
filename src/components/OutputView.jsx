@@ -1071,6 +1071,7 @@ export default function OutputView({
             onShowPaywall={onShowPaywall}
             coachPlans={coachPlans}
             onOpenStudyCoach={handleOpenStudyCoach}
+            schoolType={schoolType}
           />
         )}
 

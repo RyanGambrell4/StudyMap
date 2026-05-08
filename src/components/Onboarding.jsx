@@ -395,10 +395,13 @@ const CARD_BASE = {
   transition: 'border-color 0.15s, box-shadow 0.15s, transform 0.15s, background 0.2s',
   fontFamily: 'inherit',
   textAlign: 'left',
+  WebkitAppearance: 'none',
+  appearance: 'none',
 }
 const CARD_HOVER = {
-  borderColor: 'rgba(99,102,241,0.35)',
-  boxShadow: '0 4px 20px rgba(0,0,0,0.35)',
+  background: 'rgba(20,26,55,0.9)',
+  borderColor: 'rgba(99,102,241,0.4)',
+  boxShadow: '0 0 20px rgba(99,102,241,0.18), 0 4px 20px rgba(0,0,0,0.35)',
   transform: 'translateY(-2px)',
 }
 const CARD_SELECTED = {
