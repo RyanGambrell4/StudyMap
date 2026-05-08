@@ -938,6 +938,16 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       setPlan(null)
       setStep(1)
     }
+    // Auto-populate exam date from course if not already present
+    const course = courses[idx]
+    if (course?.examDate) {
+      setForm(f => {
+        const alreadyHas = f.dates.some(d => d.date === course.examDate && d.label === 'Exam Day')
+        if (alreadyHas) return f
+        const filtered = f.dates.filter(d => d.label !== 'Exam Day')
+        return { ...f, dates: [{ label: 'Exam Day', date: course.examDate }, ...filtered] }
+      })
+    }
     setPushed(false)
     setError('')
   }, [form.courseIdx])

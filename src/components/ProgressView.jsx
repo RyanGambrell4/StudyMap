@@ -175,6 +175,24 @@ function MilestoneIcon({ type, earned }) {
 const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
 const SCORE_KEY = 'studyedge_practice_scores'
 
+// ── Score projection helper ───────────────────────────────────────────────────
+function getProjection(entries, target, examDate, todayStr) {
+  if (!entries || entries.length < 2) return null
+  const sorted = [...entries].sort((a, b) => a.date.localeCompare(b.date))
+  const first = sorted[0], last = sorted[sorted.length - 1]
+  const span = Math.max(1, (new Date(last.date + 'T12:00') - new Date(first.date + 'T12:00')) / 86400000)
+  const slopePerDay = (last.score - first.score) / span
+  const weeklyRate = +(slopePerDay * 7).toFixed(1)
+  const gap = (target && target > last.score) ? target - last.score : null
+  let projectedAtExam = null, onTrack = null
+  if (examDate && examDate > todayStr) {
+    const daysLeft = Math.round((new Date(examDate + 'T12:00') - new Date(todayStr + 'T12:00')) / 86400000)
+    projectedAtExam = Math.round(last.score + slopePerDay * daysLeft)
+    if (target) onTrack = projectedAtExam >= target
+  }
+  return { weeklyRate, latest: last.score, gap, projectedAtExam, onTrack, improving: slopePerDay > 0.01, flat: Math.abs(slopePerDay) <= 0.01 }
+}
+
 // ── Score line chart ──────────────────────────────────────────────────────────
 function ScoreLineChart({ entries, color }) {
   if (!entries || entries.length < 2) return (
@@ -695,6 +713,8 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                 const first = entries[0]
                 const delta = entries.length > 1 ? latest.score - first.score : null
                 const target = courses.find(c => c.name === section)?.targetScore
+                const examDate = courses.find(c => c.name === section)?.examDate
+                const proj = getProjection(entries, target, examDate, todayStr)
                 return (
                   <div key={section}>
                     <div style={{ display: 'flex', alignItems: 'baseline', gap: 10, marginBottom: 6 }}>
@@ -711,6 +731,24 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                       )}
                     </div>
                     <ScoreLineChart entries={entries} color={color} />
+                    {proj && (
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8, marginBottom: 4 }}>
+                        <div style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 6, background: proj.flat ? 'rgba(255,255,255,0.04)' : proj.improving ? 'rgba(52,211,153,0.1)' : 'rgba(251,191,36,0.1)', border: `1px solid ${proj.flat ? D.border : proj.improving ? 'rgba(52,211,153,0.25)' : 'rgba(251,191,36,0.25)'}`, color: proj.flat ? D.textMuted : proj.improving ? '#34d399' : '#fbbf24' }}>
+                          {proj.flat ? 'No change yet' : proj.improving ? `+${proj.weeklyRate} pts/wk` : `${proj.weeklyRate} pts/wk`}
+                        </div>
+                        {proj.projectedAtExam !== null && (
+                          <div style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 6, background: proj.onTrack ? 'rgba(52,211,153,0.1)' : 'rgba(251,191,36,0.1)', border: `1px solid ${proj.onTrack ? 'rgba(52,211,153,0.25)' : 'rgba(251,191,36,0.25)'}`, color: proj.onTrack ? '#34d399' : '#fbbf24' }}>
+                            Projected at exam: <span style={{ fontWeight: 800 }}>{proj.projectedAtExam}</span>
+                            {target && <span style={{ opacity: 0.7 }}>{proj.onTrack ? ' ✓ on track' : ` (need ${target})`}</span>}
+                          </div>
+                        )}
+                        {proj.gap !== null && proj.projectedAtExam === null && (
+                          <div style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.04)', border: `1px solid ${D.border}`, color: D.textMuted }}>
+                            Gap to target: <span style={{ color: D.text, fontWeight: 700 }}>+{proj.gap}</span> pts
+                          </div>
+                        )}
+                      </div>
+                    )}
                     {entries.length > 0 && (
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
                         {entries.map((e, i) => (

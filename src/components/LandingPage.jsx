@@ -155,13 +155,7 @@ export default function LandingPage({ onGetStarted }) {
           letterSpacing: '-1.5px', color: '#fff', maxWidth: 760,
           margin: '0 auto 20px', position: 'relative',
         }}>
-          Stop guessing when to study.{' '}
-          <span style={{
-            background: 'linear-gradient(135deg, #6366f1, #818cf8, #a5b4fc)',
-            WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent',
-          }}>
-            Start knowing.
-          </span>
+          Prep for 5 Exams at Once — With One App and Zero Guesswork
         </h1>
 
         {/* Subheadline */}
@@ -169,7 +163,7 @@ export default function LandingPage({ onGetStarted }) {
           fontSize: 'clamp(16px, 2vw, 19px)', color: 'rgba(226,232,240,0.55)',
           maxWidth: 520, margin: '0 auto 40px', lineHeight: 1.6, fontWeight: 400,
         }}>
-          Add your courses and exams. StudyEdge AI builds a full study schedule, session plans, flashcards, and a study coach — in 60 seconds.
+          StudyEdge AI builds your study schedule across every course, coaches you through each session, and adjusts priorities based on your actual grades — so you stop stitching together Quizlet, Anki, Notion, and Google Calendar.
         </p>
 
         {/* CTA Buttons */}
@@ -186,7 +180,7 @@ export default function LandingPage({ onGetStarted }) {
             onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 45px rgba(99,102,241,0.55), 0 4px 20px rgba(0,0,0,0.3)'}
             onMouseLeave={e => e.currentTarget.style.boxShadow = '0 0 30px rgba(99,102,241,0.35), 0 4px 20px rgba(0,0,0,0.3)'}
           >
-            Start 7-day free trial →
+            Start Your Exam Prep Plan — Free
           </button>
           <span style={{ fontSize: 12, color: 'rgba(226,232,240,0.30)' }}>
             Card charged after trial · Cancel anytime before day 7
