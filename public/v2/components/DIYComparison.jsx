@@ -42,12 +42,12 @@ function DIYComparison() {
             The Real Comparison
           </div>
           <h2 style={{
-            fontSize: 'clamp(36px, 5.5vw, 64px)', fontWeight: 900, lineHeight: 1.08,
-            letterSpacing: '-1.5px', color: '#fff', margin: '0 auto 18px',
+            fontSize: 'clamp(32px, 4vw, 52px)', fontWeight: 900, lineHeight: 1.1,
+            letterSpacing: '-1px', color: '#fff', margin: '0 auto 18px',
           }}>
             Stop being your own<br/>
-            <em style={{ fontStyle: 'italic', background: 'linear-gradient(135deg, #818cf8, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>project manager</em>
-            {' '}during finals.
+            <em style={{ fontStyle: 'italic', background: 'linear-gradient(135deg, #818cf8, #a5b4fc)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>project manager</em><br/>
+            during finals.
           </h2>
           <p style={{ fontSize: 16, color: 'rgba(226,232,240,0.40)', maxWidth: 400, margin: '0 auto', lineHeight: 1.5 }}>
             Your primary competitor isn't another app. It's the pile of tabs you already have open.
@@ -91,13 +91,14 @@ function DIYComparison() {
                 {icons.map((ic, i) => (
                   <div key={i} style={{ position: 'relative' }}>
                     <div style={{
-                      width: 52, height: 52, borderRadius: 13,
+                      width: 54, height: 54, borderRadius: 14,
                       background: ic.bg,
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
-                      fontSize: i === 3 ? 16 : 20, fontWeight: 900, color: '#fff',
-                      boxShadow: '0 6px 16px rgba(0,0,0,0.45), 0 1px 2px rgba(255,255,255,0.08) inset',
-                      border: '1px solid rgba(255,255,255,0.10)',
-                      transform: i === 0 ? 'rotate(-6deg) translateY(4px)' : i === 1 ? 'rotate(-3deg) translateY(2px)' : i === 3 ? 'rotate(3deg) translateY(2px)' : i === 4 ? 'rotate(6deg) translateY(4px)' : 'none',
+                      fontSize: i === 3 ? 15 : 21, fontWeight: 900, color: '#fff',
+                      boxShadow: '0 8px 20px rgba(0,0,0,0.5), 0 2px 4px rgba(255,255,255,0.15) inset, 0 -1px 2px rgba(0,0,0,0.3) inset',
+                      border: '1px solid rgba(255,255,255,0.18)',
+                      transform: i === 0 ? 'rotate(-7deg) translateY(5px)' : i === 1 ? 'rotate(-3deg) translateY(2px)' : i === 3 ? 'rotate(3deg) translateY(2px)' : i === 4 ? 'rotate(7deg) translateY(5px)' : 'none',
+                      textShadow: '0 1px 3px rgba(0,0,0,0.4)',
                     }}>
                       {ic.letter}
                     </div>
@@ -149,7 +150,7 @@ function DIYComparison() {
               </div>
               <div style={{ width: 1, height: 34, background: 'rgba(255,255,255,0.07)' }}/>
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 15, fontWeight: 900, color: '#fff', lineHeight: 1 }}>up to <span style={{ fontSize: 22, color: '#ef4444' }}>$37</span><span style={{ fontSize: 12, color: 'rgba(255,255,255,0.50)' }}>/mo</span></div>
+                <div style={{ fontSize: 15, fontWeight: 900, color: '#fff', lineHeight: 1 }}>up to <span style={{ fontSize: 22, color: '#fff' }}>$37</span><span style={{ fontSize: 12, color: 'rgba(255,255,255,0.50)' }}>/mo</span></div>
                 <div style={{ fontSize: 9, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginTop: 4 }}>In subscriptions</div>
               </div>
               <div style={{ width: 1, height: 34, background: 'rgba(255,255,255,0.07)' }}/>
@@ -167,30 +168,19 @@ function DIYComparison() {
             borderRadius: 18,
             overflow: 'hidden',
           }}>
-            {/* Browser-style top bar */}
+            {/* Browser-style top bar (single header) */}
             <div style={{
               padding: '14px 20px',
               background: 'rgba(99,102,241,0.10)',
               borderBottom: '1px solid rgba(99,102,241,0.15)',
               display: 'flex', alignItems: 'center', gap: 12,
             }}>
-              <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, #6366f1, #4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 10px rgba(99,102,241,0.4)' }}>
-                <img src="/favicon.png" alt="StudyEdge AI" style={{ width: 24, height: 24, objectFit: 'contain', mixBlendMode: 'screen' }} />
-              </div>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>StudyEdge AI</div>
-                <div style={{ fontSize: 11, color: 'rgba(165,180,252,0.55)' }}>app.studyedge.ai</div>
-              </div>
-            </div>
-
-            {/* SE header row */}
-            <div style={{ padding: '16px 20px 12px', display: 'flex', alignItems: 'center', gap: 10, borderBottom: '1px solid rgba(99,102,241,0.10)' }}>
-              <div style={{ width: 32, height: 32, borderRadius: 8, background: 'linear-gradient(135deg, #6366f1, #4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <img src="/favicon.png" alt="" style={{ width: 20, height: 20, objectFit: 'contain', mixBlendMode: 'screen' }} />
+              <div style={{ width: 38, height: 38, borderRadius: 10, background: 'linear-gradient(135deg, #6366f1, #4f46e5)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, boxShadow: '0 2px 10px rgba(99,102,241,0.4)' }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13L13 2Z" fill="#fff" stroke="#fff" strokeWidth="1" strokeLinejoin="round"/></svg>
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.07em', color: '#818cf8', textTransform: 'uppercase' }}>StudyEdge AI</div>
-                <div style={{ fontSize: 11, color: 'rgba(129,140,248,0.45)', marginTop: 2 }}>One app. Everything built in.</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#fff', lineHeight: 1.2 }}>StudyEdge AI</div>
+                <div style={{ fontSize: 11, color: 'rgba(165,180,252,0.55)' }}>app.studyedge.ai</div>
               </div>
               <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase', color: '#818cf8', background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.28)', borderRadius: 6, padding: '3px 10px', whiteSpace: 'nowrap' }}>Recommended</div>
             </div>
