@@ -161,14 +161,13 @@ function Hero(){
         <div className="hero-left">
           <div className="eyebrow"><span className="dot"/>AI-Powered Study System</div>
           <h1 className="hero-h1">
-            Stop studying harder.<br/>
-            <span className="grad-text">Start studying with a system.</span>
+            Prep for 5 Exams at Once — With One App and Zero Guesswork
           </h1>
           <p className="hero-sub">
-            StudyEdge AI builds your schedule, plans every session, and coaches you through it, with flashcards, quizzes, and active recall built in. One system, for students who are done winging it.
+            StudyEdge AI builds your study schedule across every course, coaches you through each session, and adjusts priorities based on your actual grades — so you stop stitching together Quizlet, Anki, Notion, and Google Calendar.
           </p>
           <div className="hero-ctas">
-            <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Get Started Free <span aria-hidden>→</span></button>
+            <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Start Your Exam Prep Plan — Free</button>
             <button className="btn btn-ghost btn-lg" onClick={()=>document.getElementById('how')?.scrollIntoView({behavior:'smooth'})}>
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>
               See how it works
