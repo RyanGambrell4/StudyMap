@@ -54,6 +54,22 @@ const COURSE_COLORS = [
 const DIFFICULTY_LABELS = ['Easy', 'Medium', 'Hard']
 const GRADE_OPTIONS = ['A', 'B', 'C', 'Pass/Fail']
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+const EXAM_PRESETS = {
+  MCAT:       { sections: ['C/P — Chemistry & Physics', 'CARS — Critical Analysis', 'B/B — Biology & Biochem', 'P/S — Psych & Sociology'], scoreLabel: 'e.g. 515' },
+  LSAT:       { sections: ['Logical Reasoning', 'Analytical Reasoning', 'Reading Comprehension'], scoreLabel: 'e.g. 170' },
+  CPA:        { sections: ['FAR — Financial Accounting', 'AUD — Auditing', 'REG — Regulation', 'BAR — Business Analysis'], scoreLabel: 'e.g. 85' },
+  'Bar Exam': { sections: ['MBE — Multistate Bar', 'MEE — Multistate Essay', 'MPT — Performance Test'], scoreLabel: 'Pass' },
+  GRE:        { sections: ['Verbal Reasoning', 'Quantitative Reasoning', 'Analytical Writing'], scoreLabel: 'e.g. 160' },
+  GMAT:       { sections: ['Quantitative', 'Verbal', 'Data Insights'], scoreLabel: 'e.g. 700' },
+}
+const EXAM_LIST = [
+  { key: 'MCAT',     desc: 'Medical school admissions' },
+  { key: 'LSAT',     desc: 'Law school admissions' },
+  { key: 'CPA',      desc: 'Certified Public Accountant' },
+  { key: 'Bar Exam', desc: 'State bar licensing' },
+  { key: 'GRE',      desc: 'Graduate school admissions' },
+  { key: 'GMAT',     desc: 'Business school admissions' },
+]
 
 function fmt12(t) {
   if (!t) return ''
@@ -739,6 +755,203 @@ function CourseRow({ course, idx, expanded, onToggle, sessions, completedIds, sy
   )
 }
 
+// ── Exam setup wizard ─────────────────────────────────────────────────────────
+function ExamSetupModal({ courseCount, onClose, onAdd, onOpenStudyCoach }) {
+  const [step, setStep] = useState(1)
+  const [exam, setExam] = useState(null)
+  const [testDate, setTestDate] = useState('')
+  const [targetScore, setTargetScore] = useState('')
+  const [currentScore, setCurrentScore] = useState('')
+  const [hoursPerDay, setHoursPerDay] = useState('')
+  const [daysPerWeek, setDaysPerWeek] = useState('')
+  const [weakness, setWeakness] = useState('')
+  const [done, setDone] = useState(false)
+  const todayStr = new Date().toISOString().split('T')[0]
+  const preset = exam ? EXAM_PRESETS[exam] : null
+
+  const canNext = (step === 1 && !!exam) || (step === 2 && !!testDate) || step === 3 || step === 4
+
+  const handleComplete = () => {
+    if (!exam || !testDate) return
+    preset.sections.forEach((sName, i) => {
+      const courseId = Date.now().toString(36) + Math.random().toString(36).slice(2, 5) + i
+      onAdd({ id: courseId, name: sName, code: '', examDate: testDate, difficulty: 'Hard', targetGrade: 'Pass/Fail', color: { name: 'custom', dot: COURSE_COLORS[i % COURSE_COLORS.length] } })
+    })
+    try { localStorage.setItem('studyedge_exam_context', JSON.stringify({ exam, testDate, targetScore, currentScore, hoursPerDay, daysPerWeek, weakness })) } catch {}
+    setDone(true)
+  }
+
+  if (done) return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(4,4,14,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose}>
+      <div className="cv-modal" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 460, background: 'linear-gradient(180deg, #0e0e24, #0a0a1e)', border: `1px solid ${D.borderStrong}`, borderRadius: 16, padding: 40, textAlign: 'center', boxShadow: '0 30px 80px rgba(0,0,0,0.5)' }}>
+        <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', display: 'grid', placeItems: 'center', margin: '0 auto 20px' }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round"><polyline points="5 12 10 17 20 7"/></svg>
+        </div>
+        <div style={{ fontSize: 20, fontWeight: 700, color: D.text, marginBottom: 10 }}>Your {exam} sections are loaded.</div>
+        <p style={{ fontSize: 14, color: D.muted, marginBottom: 28, lineHeight: 1.6 }}>Go to Study Coach to generate your full prep plan.</p>
+        <button onClick={() => { onClose(); onOpenStudyCoach?.() }} style={{ width: '100%', padding: 14, borderRadius: 10, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer', boxShadow: '0 6px 20px rgba(99,102,241,0.35)', marginBottom: 12 }}>
+          Go to Study Coach →
+        </button>
+        <button onClick={onClose} style={{ fontSize: 13, color: D.muted, background: 'none', border: 'none', cursor: 'pointer' }}>View my sections</button>
+      </div>
+    </div>
+  )
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(4,4,14,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '48px 20px 20px', overflowY: 'auto' }} onClick={onClose}>
+      <div className="cv-modal" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 560, background: 'linear-gradient(180deg, #0e0e24, #0a0a1e)', border: `1px solid ${D.borderStrong}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.08)' }}>
+        <div style={{ padding: '20px 24px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', background: 'linear-gradient(180deg, rgba(99,102,241,0.06), transparent)' }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: D.text }}>Set up your exam prep</div>
+            <div style={{ fontSize: 12, color: D.muted, marginTop: 2 }}>Step {step} of 4</div>
+          </div>
+          <div style={{ display: 'flex', gap: 5, marginRight: 16 }}>
+            {[1,2,3,4].map(s => <div key={s} style={{ width: s <= step ? 22 : 7, height: 7, borderRadius: 4, background: s <= step ? D.accent : 'rgba(255,255,255,0.1)', transition: 'all 0.2s' }} />)}
+          </div>
+          <button onClick={onClose} className="cv-icon-btn"><Icon name="x" size={13} /></button>
+        </div>
+
+        <div style={{ padding: 24 }}>
+          {step === 1 && (
+            <>
+              <div style={{ fontSize: 16, fontWeight: 700, color: D.text, marginBottom: 6 }}>Which exam are you preparing for?</div>
+              <div style={{ fontSize: 13, color: D.muted, marginBottom: 20 }}>We'll load all sections and build your plan around your test date.</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                {EXAM_LIST.map(e => (
+                  <button key={e.key} onClick={() => setExam(e.key)} style={{ padding: '16px', borderRadius: 12, textAlign: 'left', background: exam === e.key ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${exam === e.key ? 'rgba(99,102,241,0.5)' : D.border}`, cursor: 'pointer', transition: 'all 0.15s', boxShadow: exam === e.key ? '0 0 0 3px rgba(99,102,241,0.1)' : 'none' }}>
+                    <div style={{ fontSize: 15, fontWeight: 700, color: D.text, marginBottom: 4 }}>{e.key}</div>
+                    <div style={{ fontSize: 11.5, color: D.muted }}>{e.desc}</div>
+                  </button>
+                ))}
+              </div>
+            </>
+          )}
+
+          {step === 2 && preset && (
+            <>
+              <div style={{ fontSize: 16, fontWeight: 700, color: D.text, marginBottom: 6 }}>Exam details</div>
+              <div style={{ fontSize: 13, color: D.muted, marginBottom: 20 }}>We'll use this to structure your timeline and set clear targets.</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div><Label>When is your exam? <span style={{ color: D.orange }}>*</span></Label><input type="date" className="cv-input" min={todayStr} value={testDate} onChange={e => setTestDate(e.target.value)} /></div>
+                <div><Label>Target score <span style={{ color: D.dim, fontWeight: 400 }}>(optional)</span></Label><input type="text" className="cv-input" placeholder={preset.scoreLabel} value={targetScore} onChange={e => setTargetScore(e.target.value)} /></div>
+                <div><Label>Current practice score <span style={{ color: D.dim, fontWeight: 400 }}>(optional)</span></Label><input type="text" className="cv-input" placeholder={preset.scoreLabel} value={currentScore} onChange={e => setCurrentScore(e.target.value)} /></div>
+              </div>
+            </>
+          )}
+
+          {step === 3 && (
+            <>
+              <div style={{ fontSize: 16, fontWeight: 700, color: D.text, marginBottom: 6 }}>Study availability</div>
+              <div style={{ fontSize: 13, color: D.muted, marginBottom: 20 }}>We'll build your entire prep schedule around these numbers.</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                <div><Label>Hours available to study per day</Label><input type="number" className="cv-input" min="1" max="12" placeholder="e.g. 4" value={hoursPerDay} onChange={e => setHoursPerDay(e.target.value)} /></div>
+                <div>
+                  <Label>Days per week</Label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
+                    {[1,2,3,4,5,6,7].map(d => (
+                      <button key={d} onClick={() => setDaysPerWeek(d.toString())} style={{ padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: daysPerWeek === d.toString() ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.03)', border: `1px solid ${daysPerWeek === d.toString() ? 'rgba(99,102,241,0.5)' : D.border}`, color: daysPerWeek === d.toString() ? '#fff' : D.muted, transition: 'all 0.15s' }}>{d}</button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </>
+          )}
+
+          {step === 4 && preset && (
+            <>
+              <div style={{ fontSize: 16, fontWeight: 700, color: D.text, marginBottom: 6 }}>Biggest weakness</div>
+              <div style={{ fontSize: 13, color: D.muted, marginBottom: 20 }}>Your prep plan will prioritize this section. Skip if you're not sure yet.</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {preset.sections.map(s => (
+                  <button key={s} onClick={() => setWeakness(weakness === s ? '' : s)} style={{ padding: '14px 16px', borderRadius: 10, textAlign: 'left', background: weakness === s ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${weakness === s ? 'rgba(99,102,241,0.5)' : D.border}`, color: weakness === s ? '#fff' : D.text, fontSize: 13.5, fontWeight: weakness === s ? 600 : 400, cursor: 'pointer', transition: 'all 0.15s' }}>{s}</button>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+
+        <div style={{ padding: '16px 24px', borderTop: `1px solid ${D.border}`, display: 'flex', gap: 10, background: 'rgba(255,255,255,0.015)' }}>
+          {step > 1 && <button onClick={() => setStep(s => s - 1)} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Back</button>}
+          {step < 4 ? (
+            <button onClick={() => { if (!canNext) return; setStep(s => s + 1) }} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: canNext ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'rgba(255,255,255,0.04)', color: canNext ? '#fff' : D.dim, fontSize: 13, fontWeight: 600, border: 'none', cursor: canNext ? 'pointer' : 'not-allowed', boxShadow: canNext ? '0 6px 20px rgba(99,102,241,0.35)' : 'none' }}>
+              {step === 3 ? 'Next — almost done' : 'Next'}
+            </button>
+          ) : (
+            <button onClick={handleComplete} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer', boxShadow: '0 6px 20px rgba(99,102,241,0.35)' }}>
+              Load my {exam} sections →
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Exam add single section modal ─────────────────────────────────────────────
+function ExamAddSectionModal({ courseCount, onClose, onAdd }) {
+  const [name, setName] = useState('')
+  const [testDate, setTestDate] = useState('')
+  const [targetScore, setTargetScore] = useState('')
+  const [color, setColor] = useState(COURSE_COLORS[courseCount % COURSE_COLORS.length])
+  const [error, setError] = useState('')
+  const todayStr = new Date().toISOString().split('T')[0]
+
+  const handleAdd = () => {
+    if (!name.trim()) { setError('Enter a section name'); return }
+    const courseId = Date.now().toString(36) + Math.random().toString(36).slice(2, 5)
+    onAdd({ id: courseId, name: name.trim(), code: '', examDate: testDate, difficulty: 'Hard', targetGrade: 'Pass/Fail', color: { name: 'custom', dot: color } })
+    onClose()
+  }
+
+  return (
+    <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(4,4,14,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '48px 20px 20px', overflowY: 'auto' }} onClick={onClose}>
+      <div className="cv-modal" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 480, background: 'linear-gradient(180deg, #0e0e24, #0a0a1e)', border: `1px solid ${D.borderStrong}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.5)' }}>
+        <div style={{ padding: '20px 24px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', background: 'linear-gradient(180deg, rgba(99,102,241,0.06), transparent)' }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${color}, ${color}aa)`, boxShadow: `0 4px 14px ${color}50`, display: 'grid', placeItems: 'center', color: '#fff' }}>
+            <Icon name="plus" size={16} />
+          </div>
+          <div style={{ marginLeft: 12, flex: 1 }}>
+            <div style={{ fontSize: 15, fontWeight: 600, color: D.text }}>Add section</div>
+            <div style={{ fontSize: 12, color: D.muted, marginTop: 2 }}>Track a single exam section.</div>
+          </div>
+          <button onClick={onClose} className="cv-icon-btn"><Icon name="x" size={13} /></button>
+        </div>
+
+        <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 18 }}>
+          <div>
+            <Label>Section name <span style={{ color: D.orange }}>*</span></Label>
+            <input type="text" className="cv-input" placeholder="e.g. C/P — Chemistry & Physics" value={name} onChange={e => { setName(e.target.value); setError('') }} autoFocus />
+          </div>
+          <div>
+            <Label>Your exam date</Label>
+            <input type="date" className="cv-input" min={todayStr} value={testDate} onChange={e => setTestDate(e.target.value)} />
+          </div>
+          <div>
+            <Label>Target score <span style={{ color: D.dim, fontWeight: 400 }}>(optional)</span></Label>
+            <input type="text" className="cv-input" placeholder="e.g. 515" value={targetScore} onChange={e => setTargetScore(e.target.value)} />
+          </div>
+          <div>
+            <Label>Color</Label>
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+              {COURSE_COLORS.map(c => (
+                <button key={c} onClick={() => setColor(c)} style={{ width: 32, height: 32, borderRadius: 8, background: c, border: color === c ? '2px solid #fff' : '2px solid transparent', boxShadow: color === c ? `0 0 0 2px ${c}, 0 0 12px ${c}80` : 'none', transition: 'all 0.15s', cursor: 'pointer' }} />
+              ))}
+            </div>
+          </div>
+          {error && <div style={{ fontSize: 12, color: '#f87171', padding: '8px 12px', background: 'rgba(239,68,68,0.08)', borderRadius: 8, border: '1px solid rgba(239,68,68,0.2)' }}>{error}</div>}
+        </div>
+
+        <div style={{ padding: '16px 24px', borderTop: `1px solid ${D.border}`, display: 'flex', gap: 10, background: 'rgba(255,255,255,0.015)' }}>
+          <button onClick={onClose} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
+          <button onClick={handleAdd} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: name.trim() ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'rgba(255,255,255,0.04)', color: name.trim() ? '#fff' : D.dim, fontSize: 13, fontWeight: 600, border: 'none', cursor: name.trim() ? 'pointer' : 'not-allowed', boxShadow: name.trim() ? '0 6px 20px rgba(99,102,241,0.35)' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+            <Icon name="plus" size={13} /> Add section
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Main export ───────────────────────────────────────────────────────────────
 export default function CoursesView({
   courses,
@@ -758,6 +971,8 @@ export default function CoursesView({
 }) {
   const [expandedIdx, setExpandedIdx] = useState(null)
   const [showAddPanel, setShowAddPanel] = useState(false)
+  const [showExamSetup, setShowExamSetup] = useState(false)
+  const [showExamAddSection, setShowExamAddSection] = useState(false)
   const [editingIdx, setEditingIdx] = useState(null)
   const [search, setSearch] = useState('')
   const [toast, setToast] = useState(null)
@@ -873,7 +1088,7 @@ export default function CoursesView({
           </p>
         </div>
         <button
-          onClick={() => { if (atLimit) { onShowPaywall?.('courses'); return } setShowAddPanel(true) }}
+          onClick={() => { if (atLimit) { onShowPaywall?.('courses'); return } isExamMode ? setShowExamAddSection(true) : setShowAddPanel(true) }}
           style={{ padding: '11px 18px', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7, boxShadow: '0 6px 20px rgba(99,102,241,0.35)', border: 'none', cursor: 'pointer' }}
         >
           <Icon name="plus" size={14} /> {atLimit ? 'Upgrade to Add' : isExamMode ? 'Add Section' : 'Add Course'}
@@ -922,7 +1137,7 @@ export default function CoursesView({
                 <div style={{ fontSize: 12, color: 'rgba(199,210,254,0.5)' }}>Load all sections for MCAT, LSAT, CPA, Bar, GRE, or GMAT instantly</div>
               </div>
               <button
-                onClick={() => setShowAddPanel(true)}
+                onClick={() => setShowExamSetup(true)}
                 style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(99,102,241,0.18)', border: '1px solid rgba(99,102,241,0.35)', color: '#c7d2fe', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
               >
                 Load preset →
@@ -987,6 +1202,21 @@ export default function CoursesView({
         <AddCoursePanel
           courseCount={courses.length}
           onClose={() => setShowAddPanel(false)}
+          onAdd={handleAddCourse}
+        />
+      )}
+      {showExamSetup && (
+        <ExamSetupModal
+          courseCount={courses.length}
+          onClose={() => setShowExamSetup(false)}
+          onAdd={handleAddCourse}
+          onOpenStudyCoach={onOpenStudyCoach}
+        />
+      )}
+      {showExamAddSection && (
+        <ExamAddSectionModal
+          courseCount={courses.length}
+          onClose={() => setShowExamAddSection(false)}
           onAdd={handleAddCourse}
         />
       )}
