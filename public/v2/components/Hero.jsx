@@ -1,6 +1,51 @@
 // Hero: animated dashboard composition with floating cards
 const { useState, useEffect, useRef, useMemo } = React;
 
+function AuroraCanvas(){
+  const canvasRef = useRef(null);
+  useEffect(()=>{
+    const canvas = canvasRef.current;
+    if(!canvas) return;
+    const ctx = canvas.getContext('2d');
+    let raf;
+    let t = 0;
+
+    const blobs = [
+      { x:0.78, y:0.38, r:320, color:[124,58,237], speed:0.7 },
+      { x:0.62, y:0.62, r:280, color:[99,102,241], speed:0.5 },
+      { x:0.55, y:0.2,  r:200, color:[129,140,248], speed:0.9 },
+    ];
+
+    const resize = ()=>{
+      canvas.width  = canvas.offsetWidth;
+      canvas.height = canvas.offsetHeight;
+    };
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(canvas);
+
+    const draw = ()=>{
+      t += 0.008;
+      ctx.clearRect(0,0,canvas.width,canvas.height);
+      blobs.forEach(b=>{
+        const cx = canvas.width  * (b.x + Math.sin(t*b.speed)*0.07);
+        const cy = canvas.height * (b.y + Math.cos(t*b.speed)*0.06);
+        const grad = ctx.createRadialGradient(cx,cy,0,cx,cy,b.r);
+        grad.addColorStop(0, `rgba(${b.color},0.38)`);
+        grad.addColorStop(1, `rgba(${b.color},0)`);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.arc(cx,cy,b.r,0,Math.PI*2);
+        ctx.fill();
+      });
+      raf = requestAnimationFrame(draw);
+    };
+    draw();
+    return ()=>{ cancelAnimationFrame(raf); ro.disconnect(); };
+  },[]);
+  return <canvas ref={canvasRef} style={{position:'absolute',inset:0,width:'100%',height:'100%',pointerEvents:'none',filter:'blur(18px)'}}/>;
+}
+
 function StreakHeatmap(){
   // 7 rows x 20 cols animated grid
   const cells = useMemo(()=>{
@@ -142,6 +187,8 @@ function TimerChip(){
 function Hero(){
   const heroRef = useRef(null);
   const [tilt,setTilt] = useState({x:0,y:0});
+  const [scrollScale,setScrollScale] = useState(0.92);
+
   useEffect(()=>{
     const h = (e)=>{
       const r = heroRef.current?.getBoundingClientRect();
@@ -154,9 +201,19 @@ function Hero(){
     return ()=>window.removeEventListener('mousemove',h);
   },[]);
 
+  useEffect(()=>{
+    const onScroll = ()=>{
+      const heroH = heroRef.current?.offsetHeight || 700;
+      const p = Math.min(1, window.scrollY / (heroH * 0.5));
+      setScrollScale(0.92 + p * 0.08);
+    };
+    window.addEventListener('scroll',onScroll,{passive:true});
+    return ()=>window.removeEventListener('scroll',onScroll);
+  },[]);
+
   return (
     <section className="hero" ref={heroRef}>
-      <div className="hero-aurora"/>
+      <AuroraCanvas/>
       <div className="container hero-inner">
         <div className="hero-left">
           <div className="eyebrow"><span className="dot"/>AI-Powered Study System</div>
@@ -184,7 +241,7 @@ function Hero(){
           </div>
         </div>
         <div className="hero-right" style={{'--tx':`${tilt.x*6}deg`,'--ty':`${-tilt.y*4}deg`}}>
-          <div className="browser" style={{transform:`perspective(1400px) rotateY(var(--tx,-8deg)) rotateX(var(--ty,4deg))`}}>
+          <div className="browser" style={{transform:`perspective(1400px) rotateY(var(--tx,-8deg)) rotateX(var(--ty,4deg)) scale(${scrollScale})`,transformOrigin:'center top'}}>
             <div className="browser-bar">
               <div className="dots"><span/><span/><span/></div>
               <div className="url">getstudyedge.com/app</div>

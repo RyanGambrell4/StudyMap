@@ -27,7 +27,9 @@
 .testimonials{padding:60px 0 100px;overflow:hidden}
 .marquee{margin-top:40px;overflow:hidden;position:relative;mask-image:linear-gradient(90deg,transparent,black 10%,black 90%,transparent)}
 .marquee-track{display:flex;gap:16px;animation:mq 50s linear infinite;width:max-content}
+.marquee-track-rev{animation:mq-rev 55s linear infinite}
 @keyframes mq{to{transform:translateX(-50%)}}
+@keyframes mq-rev{from{transform:translateX(-50%)}to{transform:translateX(0)}}
 .tq{width:340px;padding:24px;border:1px solid var(--border-2);border-radius:14px;background:linear-gradient(180deg,rgba(255,255,255,0.03),rgba(255,255,255,0.005));flex-shrink:0}
 .tq-stars{color:#fbbf24;letter-spacing:2px;font-size:13px;margin-bottom:10px}
 .tq-t{font-size:15px;line-height:1.55;color:var(--text-dim);text-wrap:pretty}

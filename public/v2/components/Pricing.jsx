@@ -156,6 +156,7 @@ function Testimonials(){
     {t:"It does an amazing job of meeting you where you're at and taking you where you want to go academically.", n:"Gavin D.", r:"Graduate Student"},
     {t:"Right when you log in you see a beautifully structured dashboard that makes you want to get to work. Personalized schedule, flashcards, quizzes: there's so much you can do, how can you not be excited?", n:"Alex G.", r:"College Student"},
   ];
+  const quotesRow2 = [quotes[2], quotes[4], quotes[0], quotes[3], quotes[1]];
   return (
     <section className="testimonials">
       <div className="container">
@@ -167,6 +168,17 @@ function Testimonials(){
       <div className="marquee">
         <div className="marquee-track">
           {[...quotes, ...quotes].map((q,i)=>(
+            <div key={i} className="tq">
+              <div className="tq-stars">{'★★★★★'}</div>
+              <div className="tq-t">"{q.t}"</div>
+              <div className="tq-n">{q.n} <span>· {q.r}</span></div>
+            </div>
+          ))}
+        </div>
+      </div>
+      <div className="marquee" style={{marginTop:12}}>
+        <div className="marquee-track marquee-track-rev">
+          {[...quotesRow2, ...quotesRow2].map((q,i)=>(
             <div key={i} className="tq">
               <div className="tq-stars">{'★★★★★'}</div>
               <div className="tq-t">"{q.t}"</div>
