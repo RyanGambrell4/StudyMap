@@ -331,34 +331,289 @@
   }
   </script>
 
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400;1,500&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
 
-  <!-- Landing page styles (v2 design) -->
-  <link rel="stylesheet" href="/v2/styles.css" />
-  <link rel="stylesheet" href="/v2/hero.css" />
-  <link rel="stylesheet" href="/v2/sections.css" />
-  <link rel="stylesheet" href="/v2/features.css" />
-  <link rel="stylesheet" href="/v2/pricing.css" />
-
-  <!-- Basic styles to avoid FOUC flash -->
   <style>
-    html, body { background: #080914; color: #e6e9f2; margin: 0; }
-    #root:empty::before {
-      content: '';
-      position: fixed; inset: 0;
-      background: #080914;
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: 'DM Sans', system-ui, sans-serif;
+      background: #0A0A0A;
+      color: #F0EDE8;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
-    /* SEO pre-render: visible to crawlers, hidden visually so users don't see
-       a flash before React mounts. React replaces these nodes on mount. */
+    :root {
+      --bg:     #0A0A0A;
+      --bg1:    #111111;
+      --bg2:    #191919;
+      --text:   #F0EDE8;
+      --muted:  #8A8784;
+      --dim:    #3D3A38;
+      --border: rgba(255,255,255,0.07);
+      --accent: #5B5EF4;
+      --serif:  'Cormorant Garamond', Georgia, serif;
+      --sans:   'DM Sans', system-ui, sans-serif;
+    }
+
+    /* Nav */
+    .nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 40px; height: 62px;
+      background: rgba(10,10,10,0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 9px;
+      text-decoration: none; color: var(--text);
+      font-weight: 600; font-size: 15px; letter-spacing: -0.01em;
+    }
+    .nav-logo img { width: 22px; height: 22px; }
+    .nav-links { display: flex; gap: 32px; list-style: none; }
+    .nav-links a { font-size: 14px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+    .nav-links a:hover { color: var(--text); }
+    .nav-actions { display: flex; align-items: center; gap: 20px; }
+    .nav-signin { font-size: 14px; color: var(--muted); text-decoration: none; transition: color 0.15s; }
+    .nav-signin:hover { color: var(--text); }
+
+    /* Buttons */
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center;
+      border: none; cursor: pointer; text-decoration: none;
+      font-family: var(--sans); font-weight: 600;
+      transition: background 0.15s, transform 0.15s, border-color 0.15s;
+      border-radius: 8px; white-space: nowrap;
+    }
+    .btn-primary { background: var(--accent); color: #fff; padding: 11px 22px; font-size: 14px; }
+    .btn-primary:hover { background: #4A4DE3; transform: translateY(-1px); }
+    .btn-primary-lg { background: var(--accent); color: #fff; padding: 15px 38px; font-size: 16px; border-radius: 10px; }
+    .btn-primary-lg:hover { background: #4A4DE3; transform: translateY(-1px); }
+    .btn-ghost {
+      background: transparent; color: var(--muted);
+      border: 1px solid var(--border); padding: 13px 24px; font-size: 14px;
+    }
+    .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
+    .btn-block { display: block; width: 100%; text-align: center; }
+
+    /* Hero */
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      padding: 120px 24px 0;
+      text-align: center;
+    }
+    .hero-eyebrow {
+      font-size: 12px; font-weight: 600;
+      letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--muted); margin-bottom: 36px;
+    }
+    .hero-eyebrow strong { color: var(--accent); font-weight: 700; }
+    .hero-h1 {
+      font-family: var(--serif); font-weight: 300;
+      font-size: clamp(54px, 7.8vw, 108px);
+      line-height: 1.03; letter-spacing: -0.01em;
+      color: var(--text); margin-bottom: 28px;
+      max-width: 860px;
+    }
+    .hero-h1 em { font-style: italic; }
+    .hero-sub {
+      font-size: clamp(16px, 1.7vw, 18px); color: var(--muted);
+      line-height: 1.68; max-width: 480px; margin-bottom: 48px;
+    }
+    .hero-cta { display: flex; flex-direction: column; align-items: center; gap: 14px; }
+    .hero-fine { font-size: 13px; color: var(--dim); }
+    .hero-divider {
+      width: 100%; max-width: 700px; height: 1px;
+      background: var(--border); margin: 80px auto 0;
+    }
+    .hero-stats { display: flex; width: 100%; max-width: 700px; margin: 0 auto; }
+    .hero-stat {
+      flex: 1; padding: 36px 0; text-align: center;
+      border-right: 1px solid var(--border);
+    }
+    .hero-stat:last-child { border-right: none; }
+    .hero-stat-num {
+      font-family: var(--serif); font-size: 42px; font-weight: 400;
+      color: var(--text); line-height: 1; margin-bottom: 8px;
+    }
+    .hero-stat-label { font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; }
+
+    /* Sections */
+    .section-wrap { border-top: 1px solid var(--border); }
+    .section { padding: 96px 40px; max-width: 1120px; margin: 0 auto; }
+    .section-label {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.18em;
+      text-transform: uppercase; color: var(--dim); margin-bottom: 24px;
+    }
+    .section-h2 {
+      font-family: var(--serif); font-weight: 300;
+      font-size: clamp(38px, 4.8vw, 68px);
+      line-height: 1.07; letter-spacing: -0.01em; color: var(--text);
+    }
+    .section-h2 em { font-style: italic; }
+
+    /* How it works */
+    .how-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--border);
+      margin-top: 60px; border: 1px solid var(--border);
+    }
+    .how-cell { background: var(--bg); padding: 48px 36px; }
+    .how-num {
+      font-family: var(--serif); font-size: 64px; font-weight: 300;
+      color: var(--dim); line-height: 1; margin-bottom: 28px;
+    }
+    .how-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 12px; line-height: 1.4; }
+    .how-body { font-size: 14px; color: var(--muted); line-height: 1.7; }
+
+    /* Features */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(2, 1fr);
+      gap: 1px; background: var(--border);
+      margin-top: 60px; border: 1px solid var(--border);
+    }
+    .feature-cell { background: var(--bg); padding: 40px; }
+    .feature-label { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+    .feature-desc { font-size: 14px; color: var(--muted); line-height: 1.68; }
+
+    /* Testimonials */
+    .testimonials-wrap {
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg1);
+    }
+    .testimonials-inner {
+      max-width: 880px; margin: 0 auto;
+      padding: 96px 40px;
+      display: flex; flex-direction: column; gap: 72px;
+    }
+    .t-quote {
+      font-family: var(--serif); font-style: italic; font-weight: 300;
+      font-size: clamp(26px, 3.2vw, 42px); color: var(--text); line-height: 1.32;
+    }
+    .t-attr { display: flex; align-items: center; gap: 16px; margin-top: 24px; }
+    .t-line { width: 32px; height: 1px; background: var(--dim); flex-shrink: 0; }
+    .t-name { font-size: 13px; color: var(--muted); font-weight: 500; }
+
+    /* Pricing */
+    .pricing-wrap { border-top: 1px solid var(--border); }
+    .pricing-section { padding: 96px 40px; max-width: 1120px; margin: 0 auto; }
+    .billing-toggle {
+      display: inline-flex; gap: 3px; margin-top: 40px;
+      background: var(--bg1); border-radius: 10px; padding: 4px;
+      border: 1px solid var(--border);
+    }
+    .billing-btn {
+      padding: 8px 18px; border-radius: 7px; border: none; cursor: pointer;
+      font-size: 13px; font-weight: 600; font-family: var(--sans);
+      transition: background 0.15s, color 0.15s;
+    }
+    .billing-btn.active { background: var(--bg2); color: var(--text); }
+    .billing-btn:not(.active) { background: transparent; color: var(--muted); }
+    .billing-save { margin-left: 5px; font-size: 11px; color: var(--accent); }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr);
+      gap: 1px; background: var(--border);
+      border: 1px solid var(--border); margin-top: 24px;
+    }
+    .pricing-cell {
+      background: var(--bg); padding: 44px 36px;
+      display: flex; flex-direction: column; position: relative;
+    }
+    .pricing-cell.featured { background: var(--bg1); }
+    .pricing-badge {
+      position: absolute; top: 20px; right: 20px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--accent); background: rgba(91,94,244,0.1); border: 1px solid rgba(91,94,244,0.2);
+      padding: 4px 10px; border-radius: 999px;
+    }
+    .pricing-tier {
+      font-size: 11px; font-weight: 600; letter-spacing: 0.14em;
+      text-transform: uppercase; color: var(--muted); margin-bottom: 20px;
+    }
+    .pricing-price {
+      font-family: var(--serif); font-size: 58px; font-weight: 300;
+      color: var(--text); line-height: 1; margin-bottom: 4px;
+    }
+    .pricing-price sub {
+      font-family: var(--sans); font-size: 16px; font-weight: 400;
+      color: var(--muted); vertical-align: baseline;
+    }
+    .pricing-billing { font-size: 13px; color: var(--dim); margin-bottom: 32px; }
+    .pricing-hr { height: 1px; background: var(--border); margin-bottom: 28px; }
+    .pricing-features {
+      list-style: none; display: flex; flex-direction: column;
+      gap: 12px; margin-bottom: 36px; flex: 1;
+    }
+    .pf { font-size: 14px; color: var(--muted); display: flex; gap: 10px; align-items: flex-start; }
+    .pf.em { color: var(--text); }
+    .pf-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--dim); flex-shrink: 0; margin-top: 8px; }
+    .pf.em .pf-dot { background: var(--accent); }
+
+    /* Final CTA */
+    .finalcta {
+      padding: 128px 24px; text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    .finalcta-h2 {
+      font-family: var(--serif); font-weight: 300; font-style: italic;
+      font-size: clamp(42px, 5.8vw, 84px);
+      line-height: 1.1; color: var(--text); margin-bottom: 28px;
+    }
+    .finalcta-sub { font-size: 15px; color: var(--muted); margin-bottom: 44px; }
+
+    /* Footer */
+    .footer {
+      padding: 36px 40px; border-top: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 20px;
+    }
+    .footer-brand {
+      display: flex; align-items: center; gap: 9px;
+      text-decoration: none; color: var(--muted); font-size: 14px;
+    }
+    .footer-brand img { width: 20px; height: 20px; opacity: 0.45; }
+    .footer-links { display: flex; gap: 24px; flex-wrap: wrap; }
+    .footer-links a { font-size: 13px; color: var(--dim); text-decoration: none; transition: color 0.15s; }
+    .footer-links a:hover { color: var(--muted); }
+    .footer-copy { font-size: 13px; color: var(--dim); }
+
+    /* Animations */
+    .fade-up { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
+    .fade-up.in { opacity: 1; transform: translateY(0); }
+
+    /* SEO prerender */
     .seo-prerender {
-      position: absolute;
-      width: 1px; height: 1px;
-      padding: 0; margin: -1px;
-      overflow: hidden; clip: rect(0,0,0,0);
-      white-space: nowrap; border: 0;
+      position: absolute; width: 1px; height: 1px;
+      padding: 0; margin: -1px; overflow: hidden;
+      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .nav { padding: 0 20px; }
+      .nav-links, .nav-signin { display: none; }
+      .section { padding: 72px 20px; }
+      .how-grid { grid-template-columns: 1fr; }
+      .how-cell { padding: 36px 24px; }
+      .features-grid { grid-template-columns: 1fr; }
+      .feature-cell { padding: 32px 24px; }
+      .pricing-grid { grid-template-columns: 1fr; }
+      .pricing-section { padding: 72px 20px; }
+      .testimonials-inner { padding: 72px 20px; }
+      .footer { flex-direction: column; padding: 28px 20px; align-items: flex-start; }
+      .hero-stats { flex-direction: column; }
+      .hero-stat { border-right: none; border-bottom: 1px solid var(--border); }
+      .hero-stat:last-child { border-bottom: none; }
+      .finalcta { padding: 80px 20px; }
     }
   </style>
 </head>
@@ -375,28 +630,22 @@
           <a href="/app?signup=1">Get Started Free</a>
         </nav>
       </header>
-
       <main>
         <section>
           <h1>StudyEdge AI: AI Study Planner for College Students</h1>
           <p>StudyEdge AI (getstudyedge.com) is the AI study planner for college and university students. It builds your study schedule, plans every session, and coaches you through it with flashcards, quizzes, and active recall built in. One system, for students who are done winging it.</p>
-          <p>AI-Powered Study System for Students. Free to start at getstudyedge.com — no credit card required.</p>
+          <p>AI-Powered Study System for Students. Free to start at getstudyedge.com - no credit card required.</p>
           <a href="/app?signup=1">Get Started Free on StudyEdge AI</a>
         </section>
-
         <section id="how">
           <h2>How StudyEdge AI works: Three problems every student has. One system that fixes all of them.</h2>
-
           <h3>1. Your study schedule, built automatically around your real life</h3>
           <p>Add your classes and due dates. StudyEdge AI maps out your entire week automatically, filling your free time with the right courses at the right time, prioritized by exam date and difficulty. Push reminders handle the rest.</p>
-
           <h3>2. Every study session planned before you open a book</h3>
           <p>Before every study session, StudyEdge AI builds a minute-by-minute Session Blueprint for your specific course, upcoming exams, and goals. Warm-up, deep review, active recall, synthesis: all mapped out before you sit down.</p>
-
           <h3>3. An AI study coach that runs the session while you're in it</h3>
           <p>Hit start and StudyEdge AI runs the clock. Each block is timed and structured. Flashcards, recall prompts, practice quizzes, and notes are built in. You're working the material, not reading over slides hoping it sticks.</p>
         </section>
-
         <section id="features">
           <h2>Every study tool a serious student needs. All in one system.</h2>
           <ul>
@@ -414,12 +663,10 @@
             <li><strong>Progress Tracking:</strong> time studied, sessions completed, and per-course analytics.</li>
           </ul>
         </section>
-
         <section>
           <h2>Grade Intelligence: Stop guessing. Know exactly where you stand.</h2>
           <p>Most students find out their grade is in trouble too late to do anything about it. StudyEdge AI shows you your exact projected grade, what you need on every remaining assignment, and three different strategies to hit your target before the semester slips away.</p>
         </section>
-
         <section id="pricing">
           <h2>StudyEdge AI pricing: The full system, free to start.</h2>
           <dl>
@@ -431,38 +678,27 @@
             <dd>$19.99/month ($59.99/semester, $119.99/year). Unlimited courses, unlimited AI study boosts, smart calendar, Focus Mode timer, unlimited syllabus upload, push notifications, priority support.</dd>
           </dl>
         </section>
-
         <section>
           <h2>Frequently Asked Questions about StudyEdge AI</h2>
-
           <h3>What is StudyEdge AI?</h3>
           <p>StudyEdge AI is an AI-powered study planner for college and university students. It automatically builds your study schedule around your classes and deadlines, plans every study session minute-by-minute, and coaches you through it with flashcards, quizzes, and active recall built in.</p>
-
           <h3>Is StudyEdge AI free?</h3>
           <p>Yes. StudyEdge AI has a free plan with one course, basic calendar, Focus Mode timer, and 10 AI study boosts per month. No credit card required. Pro plans start at $12.99/month.</p>
-
           <h3>Does StudyEdge AI work for any major?</h3>
           <p>Yes. StudyEdge AI works for any subject at the college or university level including STEM, humanities, and social sciences. You upload your syllabus, add your courses, and the AI adapts its Session Blueprints to your material and exam timeline.</p>
-
           <h3>How is StudyEdge AI different from Notion, Anki, or Quizlet?</h3>
-          <p>Notion is a blank document; Anki is only flashcards; Quizlet is only quizzes. StudyEdge AI is the complete study system: it builds the schedule, plans every session, runs the timer, and has flashcards, quizzes, active recall prompts, an AI tutor, and grade tracking all stitched into a single focus session. No tab-switching, no app-hopping. See why students choose StudyEdge AI as a <a href="/quizlet-alternative">Quizlet alternative</a>.</p>
-
+          <p>Notion is a blank document; Anki is only flashcards; Quizlet is only quizzes. StudyEdge AI is the complete study system: it builds the schedule, plans every session, runs the timer, and has flashcards, quizzes, active recall prompts, an AI tutor, and grade tracking all stitched into a single focus session. No tab-switching, no app-hopping.</p>
           <h3>Can StudyEdge AI generate a study schedule for me automatically?</h3>
-          <p>Yes. StudyEdge AI automatically builds a personalized study schedule based on your courses, exam dates, and available hours. It fills your free time with the right subjects at the right time, prioritized by deadline and difficulty. Sync it to Google Calendar in one click. Learn more about our <a href="/study-schedule-generator">study schedule generator</a>.</p>
-
+          <p>Yes. StudyEdge AI automatically builds a personalized study schedule based on your courses, exam dates, and available hours. It fills your free time with the right subjects at the right time, prioritized by deadline and difficulty. Sync it to Google Calendar in one click.</p>
           <h3>Does StudyEdge AI make AI flashcards automatically?</h3>
-          <p>Yes. StudyEdge AI generates AI flashcards from your notes, uploaded PDFs, or any topic. Flashcards are built into every study session alongside quizzes and active recall prompts — no separate app needed. See how our <a href="/ai-flashcard-maker">AI flashcard maker</a> works.</p>
-
+          <p>Yes. StudyEdge AI generates AI flashcards from your notes, uploaded PDFs, or any topic. Flashcards are built into every study session alongside quizzes and active recall prompts - no separate app needed.</p>
           <h3>Can StudyEdge AI predict my final grade?</h3>
           <p>Yes. StudyEdge AI's Grade Hub shows your current projected grade and calculates exactly what you need on remaining assignments to hit your target. It models multiple scenarios so you always know where you stand before it's too late.</p>
-
           <h3>Is StudyEdge AI good for STEM students?</h3>
           <p>Yes. StudyEdge AI works for any college subject: math, engineering, chemistry, biology, computer science, and more. The AI Study Coach and Session Blueprint adapt to your specific course and exam timeline.</p>
-
           <h3>Can I cancel anytime?</h3>
           <p>Yes. Paid plans can be cancelled at any time and all new Pro subscriptions include a 7-day free trial.</p>
         </section>
-
         <section>
           <h2>How to build a study schedule with StudyEdge AI</h2>
           <ol>
@@ -471,9 +707,8 @@
             <li><strong>Start your AI session:</strong> The AI builds a minute-by-minute Session Blueprint for your course. Hit start and StudyEdge AI runs the timer, flashcards, quizzes, and active recall all in one place.</li>
           </ol>
         </section>
-
         <footer>
-          <p>© 2026 StudyEdge AI. Built by students, for students. getstudyedge.com</p>
+          <p>2026 StudyEdge AI. Built by students, for students. getstudyedge.com</p>
           <a href="/privacy.html">Privacy Policy</a>
           <a href="/terms.html">Terms of Service</a>
           <a href="mailto:support@getstudyedge.com">Contact StudyEdge AI Support</a>
@@ -482,71 +717,314 @@
     </div>
   </div>
 
-  <!-- React + Babel (in-browser compile of JSX) -->
   <script crossorigin src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
   <script crossorigin src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
   <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js"></script>
 
-  <!-- Landing page components -->
-  <script type="text/babel" src="/v2/components/Hero.jsx"></script>
-  <script type="text/babel" src="/v2/components/HowItWorks.jsx"></script>
-  <script type="text/babel" src="/v2/components/Features.jsx"></script>
-  <script type="text/babel" src="/v2/components/Pricing.jsx"></script>
-
   <script type="text/babel">
-    function Nav(){
+    const { useState, useEffect } = React;
+
+    function Nav() {
       return (
         <nav className="nav">
-          <div className="nav-inner">
-            <a className="logo" href="/" style={{textDecoration:'none'}}>
-              <div className="logo-mark">
-                <img src="/favicon.png" alt="StudyEdge AI" style={{width:'100%',height:'100%',objectFit:'contain',mixBlendMode:'screen'}} />
-              </div>
-              <span>StudyEdge AI</span>
-            </a>
-            <div className="nav-right">
-              <div className="nav-links hidden-sm">
-                <a href="#features">Features</a>
-                <a href="#how">How it works</a>
-                <a href="#pricing">Pricing</a>
-              </div>
-              <div className="nav-cta">
-                <a className="hidden-sm" href="/app?login=1" style={{fontSize:14,color:'var(--text-muted)',textDecoration:'none'}}>Sign in</a>
-                <button className="btn btn-primary btn-sm" onClick={()=>window.location.href='/app?signup=1'}>Start Studying Free</button>
-              </div>
-            </div>
+          <a className="nav-logo" href="/">
+            <img src="/favicon.png" alt="" aria-hidden="true" />
+            StudyEdge AI
+          </a>
+          <ul className="nav-links">
+            <li><a href="#how">How it works</a></li>
+            <li><a href="#features">Features</a></li>
+            <li><a href="#pricing">Pricing</a></li>
+          </ul>
+          <div className="nav-actions">
+            <a className="nav-signin" href="/app?login=1">Sign in</a>
+            <a className="btn btn-primary" href="/app?signup=1">Start free</a>
           </div>
         </nav>
       );
     }
 
-    function App(){
-      React.useEffect(()=>{
-        const io = new IntersectionObserver((entries)=>{
-          entries.forEach(e=>{ if(e.isIntersecting) e.target.classList.add('in'); });
-        },{threshold:0.12});
-        document.querySelectorAll('.fade-up').forEach(el=>io.observe(el));
-        return ()=>io.disconnect();
-      },[]);
+    function Hero() {
       return (
-        <div className="page">
-          <div className="grid-bg"/>
-          <div className="noise"/>
-          <Nav/>
-          <Hero/>
-          <StatsBar/>
-          <section id="how"><HowItWorks/></section>
-          <section id="features"><Bento/></section>
-          <GradeIntel/>
-          <section id="pricing"><Pricing/></section>
-          <Testimonials/>
-          <FinalCTA/>
-          <Footer/>
+        <section className="hero">
+          <p className="hero-eyebrow"><strong>30,000+</strong> students already using StudyEdge</p>
+          <h1 className="hero-h1">
+            Your grades aren't<br />
+            the problem.<br />
+            <em>Your system is.</em>
+          </h1>
+          <p className="hero-sub">
+            StudyEdge builds your schedule, plans every session minute by minute, and runs your study sessions with flashcards, quizzes, and active recall built in. One app. All semester.
+          </p>
+          <div className="hero-cta">
+            <a className="btn btn-primary-lg" href="/app?signup=1">Start for free</a>
+            <p className="hero-fine">No credit card required. Free plan available.</p>
+          </div>
+          <div className="hero-divider" />
+          <div className="hero-stats">
+            <div className="hero-stat">
+              <div className="hero-stat-num">30k+</div>
+              <div className="hero-stat-label">Students</div>
+            </div>
+            <div className="hero-stat">
+              <div className="hero-stat-num">Free</div>
+              <div className="hero-stat-label">To start</div>
+            </div>
+            <div className="hero-stat">
+              <div className="hero-stat-num">1 app</div>
+              <div className="hero-stat-label">All your courses</div>
+            </div>
+          </div>
+        </section>
+      );
+    }
+
+    function HowItWorks() {
+      const steps = [
+        {
+          n: '01',
+          title: "You don't know what to study",
+          body: "Add your courses and upload your syllabus. StudyEdge reads your exam dates, assignment weights, and deadlines and fills your week automatically, prioritized by urgency and difficulty."
+        },
+        {
+          n: '02',
+          title: "You sit down with no plan",
+          body: "Before every session, Session Blueprint generates a minute-by-minute study plan for that specific course, your current goal, and how much time you have. You never open a notebook wondering where to start."
+        },
+        {
+          n: '03',
+          title: "You study but it doesn't stick",
+          body: "Focus Mode runs the session. Flashcards, recall prompts, and quizzes are built into each block. You're actively retrieving information, not passively rereading notes."
+        }
+      ];
+      return (
+        <div className="section-wrap" id="how">
+          <div className="section">
+            <p className="section-label">How it works</p>
+            <h2 className="section-h2">
+              Three reasons students fail.<br />
+              <em>None of them are intelligence.</em>
+            </h2>
+            <div className="how-grid fade-up">
+              {steps.map(s => (
+                <div className="how-cell" key={s.n}>
+                  <div className="how-num">{s.n}</div>
+                  <div className="how-title">{s.title}</div>
+                  <div className="how-body">{s.body}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       );
     }
 
-    ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+    function Features() {
+      const feats = [
+        { label: 'Session Blueprint', desc: 'Before you sit down, AI builds a minute-by-minute plan for your session based on your course, your exam date, and your goals. Not a template. A plan for today.' },
+        { label: 'Focus Mode', desc: 'A structured timer that runs each block: warm-up, deep work, active recall, synthesis. The session runs itself. You just show up.' },
+        { label: 'AI Study Coach', desc: 'Week-by-week prep plan built for each course, adapted to your exact exam timeline. Not a generic calendar. An actual strategy.' },
+        { label: 'Flashcards and Quizzes', desc: 'AI generates cards and multiple-choice questions from your notes, PDFs, or any topic. Built directly into your sessions, not a separate app.' },
+        { label: 'Grade Hub', desc: 'Your exact projected grade, what you need on every remaining assignment, and three strategies to hit your target. Not a guess. A calculation.' },
+        { label: 'AI Tutor', desc: 'Ask anything about your course material. Get a direct explanation without searching, without tabs, right inside your session.' },
+        { label: 'Smart Calendar', desc: 'Syncs with Google Calendar and automatically fills your free time with the right courses at the right time. Your schedule, done for you.' },
+        { label: 'Syllabus Import', desc: 'Drop a PDF. StudyEdge extracts every exam, assignment, and deadline. Your semester is mapped before you do anything else.' },
+      ];
+      return (
+        <div className="section-wrap" id="features">
+          <div className="section">
+            <p className="section-label">What is included</p>
+            <h2 className="section-h2">
+              Everything in one place.<br />
+              <em>Nothing redundant.</em>
+            </h2>
+            <div className="features-grid fade-up">
+              {feats.map(f => (
+                <div className="feature-cell" key={f.label}>
+                  <div className="feature-label">{f.label}</div>
+                  <div className="feature-desc">{f.desc}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function Testimonials() {
+      const quotes = [
+        {
+          q: "Went from 504 to 516 in 8 weeks. The session blueprints kept me focused every single day.",
+          name: "Jordan M.", sub: "MCAT - admitted to med school"
+        },
+        {
+          q: "First study platform I can confidently say has it all. Week-by-week plans, progress tracking, flashcards, quizzes. It cuts all the prep time so you can just focus on learning.",
+          name: "Charlotte B.", sub: "University Student"
+        },
+        {
+          q: "I stopped procrastinating the second I had an actual week-by-week plan. Worth every penny.",
+          name: "Priya S.", sub: "Pre-law, 3.9 GPA"
+        },
+      ];
+      return (
+        <div className="testimonials-wrap">
+          <div className="testimonials-inner">
+            {quotes.map((t, i) => (
+              <div key={i} className="fade-up">
+                <p className="t-quote">"{t.q}"</p>
+                <div className="t-attr">
+                  <div className="t-line" />
+                  <span className="t-name">{t.name} - {t.sub}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function Pricing() {
+      const [billing, setBilling] = useState('monthly');
+      const prices = {
+        pro:       { monthly: '12.99', semester: '39.99', annual: '84.99' },
+        unlimited: { monthly: '19.99', semester: '59.99', annual: '119.99' },
+      };
+      const suffix = billing === 'monthly' ? '/mo' : billing === 'semester' ? '/sem' : '/yr';
+      const proUrl = '/app?signup=1&plan=pro&billing=' + billing + '&trial=1';
+      const unlimUrl = '/app?signup=1&plan=unlimited&billing=' + billing + '&trial=1';
+
+      return (
+        <div className="pricing-wrap" id="pricing">
+          <div className="pricing-section">
+            <p className="section-label">Pricing</p>
+            <h2 className="section-h2 fade-up">
+              The full system,<br />
+              <em>free to start.</em>
+            </h2>
+            <div className="billing-toggle">
+              {['monthly','semester','annual'].map(b => (
+                <button
+                  key={b}
+                  className={'billing-btn' + (billing === b ? ' active' : '')}
+                  onClick={() => setBilling(b)}
+                >
+                  {b.charAt(0).toUpperCase() + b.slice(1)}
+                  {b !== 'monthly' && (
+                    <span className="billing-save">Save {b === 'semester' ? '23' : '45'}%</span>
+                  )}
+                </button>
+              ))}
+            </div>
+            <div className="pricing-grid fade-up">
+              <div className="pricing-cell">
+                <div className="pricing-tier">Free</div>
+                <div className="pricing-price">$0</div>
+                <div className="pricing-billing">forever</div>
+                <div className="pricing-hr" />
+                <ul className="pricing-features">
+                  <li className="pf"><span className="pf-dot" /><span>1 course</span></li>
+                  <li className="pf"><span className="pf-dot" /><span>10 AI actions per month</span></li>
+                  <li className="pf"><span className="pf-dot" /><span>Session Blueprint</span></li>
+                  <li className="pf"><span className="pf-dot" /><span>Focus Mode timer</span></li>
+                  <li className="pf"><span className="pf-dot" /><span>Syllabus import</span></li>
+                </ul>
+                <a className="btn btn-ghost btn-block" href="/app?signup=1">Start free</a>
+              </div>
+
+              <div className="pricing-cell featured">
+                <div className="pricing-badge">Most popular</div>
+                <div className="pricing-tier">Pro</div>
+                <div className="pricing-price">${prices.pro[billing]}<sub>{suffix}</sub></div>
+                <div className="pricing-billing">7-day free trial, cancel anytime</div>
+                <div className="pricing-hr" />
+                <ul className="pricing-features">
+                  <li className="pf em"><span className="pf-dot" /><span>5 courses</span></li>
+                  <li className="pf em"><span className="pf-dot" /><span>75 AI actions per month</span></li>
+                  <li className="pf em"><span className="pf-dot" /><span>AI Study Coach</span></li>
+                  <li className="pf em"><span className="pf-dot" /><span>Session Blueprints</span></li>
+                  <li className="pf em"><span className="pf-dot" /><span>Flashcards and Quizzes</span></li>
+                  <li className="pf em"><span className="pf-dot" /><span>Grade Hub</span></li>
+                  <li className="pf em"><span className="pf-dot" /><span>Smart Calendar sync</span></li>
+                </ul>
+                <a className="btn btn-primary btn-block" style={{padding:'14px'}} href={proUrl}>Start free trial</a>
+              </div>
+
+              <div className="pricing-cell">
+                <div className="pricing-tier">Unlimited</div>
+                <div className="pricing-price">${prices.unlimited[billing]}<sub>{suffix}</sub></div>
+                <div className="pricing-billing">7-day free trial, cancel anytime</div>
+                <div className="pricing-hr" />
+                <ul className="pricing-features">
+                  <li className="pf em"><span className="pf-dot" /><span>Unlimited courses</span></li>
+                  <li className="pf em"><span className="pf-dot" /><span>Unlimited AI actions</span></li>
+                  <li className="pf"><span className="pf-dot" /><span>Everything in Pro</span></li>
+                  <li className="pf"><span className="pf-dot" /><span>Priority support</span></li>
+                </ul>
+                <a className="btn btn-ghost btn-block" style={{padding:'14px'}} href={unlimUrl}>Start free trial</a>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function FinalCTA() {
+      return (
+        <div className="finalcta">
+          <h2 className="finalcta-h2">
+            Your semester isn't<br />going to plan itself.
+          </h2>
+          <p className="finalcta-sub">Free to start. No credit card. Takes three minutes to set up.</p>
+          <a className="btn btn-primary-lg" href="/app?signup=1">Start for free</a>
+        </div>
+      );
+    }
+
+    function Footer() {
+      return (
+        <footer className="footer">
+          <a className="footer-brand" href="/">
+            <img src="/favicon.png" alt="StudyEdge AI" />
+            StudyEdge AI
+          </a>
+          <nav className="footer-links" aria-label="Footer">
+            <a href="#how">How it works</a>
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="/privacy.html">Privacy</a>
+            <a href="/terms.html">Terms</a>
+            <a href="mailto:support@getstudyedge.com">Support</a>
+          </nav>
+          <p className="footer-copy">2026 StudyEdge AI</p>
+        </footer>
+      );
+    }
+
+    function App() {
+      useEffect(() => {
+        const io = new IntersectionObserver(
+          entries => entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('in'); }),
+          { threshold: 0.1 }
+        );
+        document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
+        return () => io.disconnect();
+      }, []);
+
+      return (
+        <div>
+          <Nav />
+          <Hero />
+          <HowItWorks />
+          <Features />
+          <Testimonials />
+          <Pricing />
+          <FinalCTA />
+          <Footer />
+        </div>
+      );
+    }
+
+    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
   </script>
 </body>
 </html>
