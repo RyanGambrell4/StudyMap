@@ -346,7 +346,7 @@ export default function OutputView({
   // ── First-query nudge listener ────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e) => {
-      if (e.detail.count === 1 && !localStorage.getItem('first_query_nudge_shown')) {
+      if (e.detail.count === 1 && !localStorage.getItem('first_query_nudge_shown') && getActivePlan() === 'free') {
         setShowFirstQueryNudge(true)
       }
     }
