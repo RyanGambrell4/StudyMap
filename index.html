@@ -52,7 +52,7 @@
   <link rel="icon" type="image/png" href="/favicon.png" />
   <link rel="manifest" href="/manifest.json" />
   <meta name="application-name" content="StudyEdge AI" />
-  <meta name="theme-color" content="#6366f1" />
+  <meta name="theme-color" content="#3B61C4" />
   <!-- Apple PWA / brand signals -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-title" content="StudyEdge AI" />
@@ -342,20 +342,20 @@
     html { scroll-behavior: smooth; }
     body {
       font-family: 'DM Sans', system-ui, sans-serif;
-      background: #0A0A0A;
-      color: #F0EDE8;
+      background: #F7F6F3;
+      color: #1A1A1A;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
     }
     :root {
-      --bg:     #0A0A0A;
-      --bg1:    #111111;
-      --bg2:    #191919;
-      --text:   #F0EDE8;
-      --muted:  #8A8784;
-      --dim:    #3D3A38;
-      --border: rgba(255,255,255,0.07);
-      --accent: #5B5EF4;
+      --bg:     #F7F6F3;
+      --bg1:    #FFFFFF;
+      --bg2:    #EDECEA;
+      --text:   #1A1A1A;
+      --muted:  #6B6B6B;
+      --dim:    #9B9B9B;
+      --border: rgba(0,0,0,0.07);
+      --accent: #3B61C4;
       --serif:  'Cormorant Garamond', Georgia, serif;
       --sans:   'DM Sans', system-ui, sans-serif;
     }
@@ -365,7 +365,7 @@
       position: fixed; top: 0; left: 0; right: 0; z-index: 100;
       display: flex; align-items: center; justify-content: space-between;
       padding: 0 40px; height: 62px;
-      background: rgba(10,10,10,0.88);
+      background: rgba(247,246,243,0.92);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border-bottom: 1px solid var(--border);
@@ -392,9 +392,9 @@
       border-radius: 8px; white-space: nowrap;
     }
     .btn-primary { background: var(--accent); color: #fff; padding: 11px 22px; font-size: 14px; }
-    .btn-primary:hover { background: #4A4DE3; transform: translateY(-1px); }
+    .btn-primary:hover { background: #2D4FA8; transform: translateY(-1px); }
     .btn-primary-lg { background: var(--accent); color: #fff; padding: 15px 38px; font-size: 16px; border-radius: 10px; }
-    .btn-primary-lg:hover { background: #4A4DE3; transform: translateY(-1px); }
+    .btn-primary-lg:hover { background: #2D4FA8; transform: translateY(-1px); }
     .btn-ghost {
       background: transparent; color: var(--muted);
       border: 1px solid var(--border); padding: 13px 24px; font-size: 14px;
@@ -421,7 +421,7 @@
       line-height: 1.03; letter-spacing: -0.01em;
       color: var(--text); margin-bottom: 28px;
     }
-    .hero-h1 em { font-style: italic; }
+    .hero-h1 em { font-style: italic; color: var(--accent); }
     .hero-sub {
       font-size: clamp(16px, 1.7vw, 18px); color: var(--muted);
       line-height: 1.68; max-width: 480px; margin: 0 auto 48px;
@@ -443,6 +443,51 @@
       color: var(--text); line-height: 1; margin-bottom: 8px;
     }
     .hero-stat-label { font-size: 12px; color: var(--muted); font-weight: 500; letter-spacing: 0.04em; }
+
+    /* Aurora background */
+    @keyframes aurora {
+      from { background-position: 50% 50%, 50% 50%; }
+      to   { background-position: 350% 50%, 350% 50%; }
+    }
+    .hero-outer {
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-aurora {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .hero-aurora-layer {
+      position: absolute;
+      inset: -10px;
+      background-image:
+        repeating-linear-gradient(100deg, #ffffff 0%, #ffffff 7%, transparent 10%, transparent 12%, #ffffff 16%),
+        repeating-linear-gradient(100deg, #3b82f6 10%, #a5b4fc 15%, #93c5fd 20%, #ddd6fe 25%, #60a5fa 30%);
+      background-size: 300%, 200%;
+      background-position: 50% 50%, 50% 50%;
+      filter: blur(10px) invert(1);
+      opacity: 0.45;
+      animation: aurora 60s linear infinite;
+      -webkit-mask-image: radial-gradient(ellipse at 80% 0%, black 10%, transparent 65%);
+      mask-image: radial-gradient(ellipse at 80% 0%, black 10%, transparent 65%);
+      will-change: background-position;
+    }
+    .hero-aurora-layer::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background-image:
+        repeating-linear-gradient(100deg, #ffffff 0%, #ffffff 7%, transparent 10%, transparent 12%, #ffffff 16%),
+        repeating-linear-gradient(100deg, #3b82f6 10%, #a5b4fc 15%, #93c5fd 20%, #ddd6fe 25%, #60a5fa 30%);
+      background-size: 200%, 100%;
+      animation: aurora 60s linear infinite reverse;
+      background-attachment: fixed;
+      mix-blend-mode: difference;
+      opacity: 0.6;
+    }
 
     /* Hero image */
     .hero-img-wrap {
@@ -484,7 +529,7 @@
       font-size: clamp(38px, 4.8vw, 68px);
       line-height: 1.07; letter-spacing: -0.01em; color: var(--text);
     }
-    .section-h2 em { font-style: italic; }
+    .section-h2 em { font-style: italic; color: var(--accent); }
 
     /* How it works */
     .how-grid {
@@ -494,7 +539,7 @@
     }
     .how-cell { background: var(--bg); padding: 48px 36px; }
     .how-num {
-      font-family: var(--serif); font-size: 64px; font-weight: 300;
+      font-family: var(--serif); font-size: 64px; font-weight: 300; color: var(--accent) !important;
       color: var(--dim); line-height: 1; margin-bottom: 28px;
     }
     .how-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 12px; line-height: 1.4; }
@@ -591,7 +636,7 @@
     .pricing-badge {
       position: absolute; top: 20px; right: 20px;
       font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
-      color: var(--accent); background: rgba(91,94,244,0.1); border: 1px solid rgba(91,94,244,0.2);
+      color: var(--accent); background: rgba(59,97,196,0.08); border: 1px solid rgba(59,97,196,0.18);
       padding: 4px 10px; border-radius: 999px;
     }
     .pricing-tier {
@@ -772,9 +817,12 @@
 
     function Hero() {
       return (
-        <div>
-          <section className="hero">
-            <p className="hero-eyebrow"><strong>30,000+</strong> students already using StudyEdge</p>
+        <div className="hero-outer">
+          <div className="hero-aurora" aria-hidden="true">
+            <div className="hero-aurora-layer"></div>
+          </div>
+          <section className="hero" style={{position:'relative',zIndex:1}}>
+            <p className="hero-eyebrow"><strong>30,000+</strong> students in the StudyEdge community</p>
             <h1 className="hero-h1">
               Your grades aren't<br />
               the problem.<br />
@@ -791,7 +839,7 @@
             <div className="hero-stats">
               <div className="hero-stat">
                 <div className="hero-stat-num">30k+</div>
-                <div className="hero-stat-label">Students</div>
+                <div className="hero-stat-label">Community</div>
               </div>
               <div className="hero-stat">
                 <div className="hero-stat-num">Free</div>
@@ -803,8 +851,8 @@
               </div>
             </div>
           </section>
-          <div className="hero-img-wrap fade-up" style={{maxWidth:1120, margin:'0 auto'}}>
-            <img src="/lp-daily-view.png" alt="StudyEdge AI dashboard showing study schedule, courses, and progress" className="hero-img" />
+          <div className="hero-img-wrap fade-up" style={{maxWidth:1120, margin:'0 auto', border:'none', background:'transparent', overflow:'visible'}}>
+            <HeroShowcase />
           </div>
         </div>
       );
@@ -813,19 +861,19 @@
     function Outcomes() {
       const outcomes = [
         {
-          metric: '504 to 516',
-          claim: 'In 8 weeks. Session Blueprints kept me focused every single day. I knew exactly what to study before I opened a single book.',
-          who: 'Jordan M. - MCAT, admitted to medical school'
+          metric: 'finally consistent',
+          claim: "I've always struggled to stay consistent — then StudyEdge just planned everything for me. I didn't have to think, I just had to show up. My hours went up, my grades went up, and for the first time I actually felt in control of my semester.",
+          who: 'Andy G. — Undergraduate'
         },
         {
-          metric: '3.9 GPA',
-          claim: 'I stopped procrastinating the second I had an actual week-by-week plan. The system does the thinking so you can just execute.',
-          who: 'Priya S. - Pre-law'
+          metric: 'top of my cohort',
+          claim: "If you want to stay mediocre at studying, don't use this. I went from scraping by to leading my cohort. The scheduling, the coaching, the daily plan — it executes everything for you. I didn't change how hard I worked. I changed how smart I worked.",
+          who: 'Danny K. — PhD Student'
         },
         {
-          metric: '511 MCAT',
-          claim: 'The AI coach figured out I was underprepping for CARS before I even realized it. Caught it with 3 weeks to spare.',
-          who: 'Marcus T. - MCAT retaker'
+          metric: 'one app. all semester.',
+          claim: "First AI study platform I can genuinely say has it all. Week-by-week plans, grade tracking, flashcards, quizzes — all connected, all automatic. My prep time was cut in half. Nothing else comes close.",
+          who: 'Charlotte B. — University Student'
         },
       ];
       return (
@@ -884,38 +932,701 @@
       );
     }
 
+    function HeroShowcase() {
+      const courses = [
+        { name: 'PSYC 101 — Introduction to Psychology', exam: 'May 15', sessions: '8/10', target: 'A', progress: 78, days: 3, color: '#3B61C4' },
+        { name: 'CALC II — Multivariable Calculus', exam: 'May 20', sessions: '6/10', target: 'A', progress: 62, days: 8, color: '#7C5CBF' },
+        { name: 'BIO 1010 — General Biology', exam: 'May 30', sessions: '7/14', target: 'A', progress: 51, days: 18, color: '#10B981' },
+        { name: 'ECON 201 — Microeconomics', exam: 'Jun 3', sessions: '4/9', target: 'B+', progress: 44, days: 22, color: '#E87C3E' },
+      ];
+      const blocks = [
+        { time:'2:00 PM', dur:'30 MIN', type:'BLOCK 1 · RECALL', color:'#3B61C4', title:'Encoding, storage & retrieval — flashcard drill', desc:'Cycle 42 cards on sensory, working & long-term memory. Cards you missed last week resurface first.', dots:3 },
+        { time:'2:30 PM', dur:'35 MIN', type:'BLOCK 2 · APPLY + REVIEW', color:'#7C5CBF', title:'Perception illusions — case-by-case breakdown', desc:'Walk 6 classic illusions; explain each in two sentences using Gestalt principles.', dots:2 },
+        { time:'3:05 PM', dur:'25 MIN', type:'BLOCK 3 · QUIZ + REFLECT', color:'#E87C3E', title:'15-question exam-style quiz', desc:'Score posts to Grade Hub; weak items resurface. +2.2 since Quiz 3 ↗', dots:4 },
+      ];
+      const timeline = [
+        {label:'Recall',mins:30,color:'#3B61C4',flex:30},{label:'Apply',mins:18,color:'#7C5CBF',flex:18},
+        {label:'Review',mins:22,color:'#10B981',flex:22},{label:'Quiz',mins:13,color:'#E87C3E',flex:13},{label:'Reflect',mins:7,color:'#EC4899',flex:7},
+      ];
+      const WIN = 'background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 2px 0 rgba(0,0,0,0.04),0 8px 32px rgba(0,0,0,0.10),0 32px 80px rgba(0,0,0,0.08);font-family:DM Sans,system-ui,sans-serif;';
+      const TitleBar = ({title}) => (
+        <div style={{padding:'11px 16px',borderBottom:'1px solid rgba(0,0,0,0.07)',display:'flex',alignItems:'center',background:'#F7F6F3'}}>
+          <div style={{display:'flex',gap:6,marginRight:16}}>
+            <div style={{width:10,height:10,borderRadius:'50%',background:'#FF5F57'}}/>
+            <div style={{width:10,height:10,borderRadius:'50%',background:'#FEBC2E'}}/>
+            <div style={{width:10,height:10,borderRadius:'50%',background:'#28C840'}}/>
+          </div>
+          <div style={{flex:1,textAlign:'center',fontSize:11,fontWeight:500,color:'#6B6B6B'}}>{title}</div>
+        </div>
+      );
+      return (
+        <div style={{background:'#F7F6F3',display:'flex',alignItems:'flex-start',position:'relative',padding:'44px 20px 52px',gap:0}}>
+          {/* LEFT WINDOW — Dashboard */}
+          <div style={{flex:'0 0 570px',background:'#fff',borderRadius:16,boxShadow:'0 2px 0 rgba(0,0,0,0.04),0 8px 28px rgba(0,0,0,0.09),0 28px 70px rgba(0,0,0,0.07)',overflow:'hidden',position:'relative',zIndex:1,fontFamily:'DM Sans,system-ui,sans-serif'}}>
+            <TitleBar title="StudyEdge · Dashboard" />
+            <div style={{padding:'24px 28px 24px'}}>
+              {/* Date + greeting */}
+              <div style={{fontSize:10,fontWeight:700,letterSpacing:'0.12em',color:'#9B9B9B',textTransform:'uppercase',marginBottom:10}}>TUESDAY, MAY 12</div>
+              <div style={{fontSize:34,fontWeight:400,color:'#1A1A1A',lineHeight:1.1,marginBottom:10,fontFamily:'Cormorant Garamond,Georgia,serif'}}>
+                Good <em style={{fontStyle:'italic',color:'#3B61C4'}}>afternoon.</em>
+              </div>
+              <div style={{fontSize:13,color:'#6B6B6B',lineHeight:1.6,marginBottom:20}}>You're 9 days into the sprint. Three sessions queued for today — let's keep the streak going.</div>
+              {/* Up next card */}
+              <div style={{background:'#3B61C4',borderRadius:12,padding:'14px 18px',display:'flex',alignItems:'center',gap:14,marginBottom:20}}>
+                <div style={{background:'rgba(255,255,255,0.15)',borderRadius:9,padding:'9px 12px',textAlign:'center',flexShrink:0}}>
+                  <div style={{fontSize:14,fontWeight:800,color:'#fff',lineHeight:1}}>2:00</div>
+                  <div style={{fontSize:9,fontWeight:700,color:'rgba(255,255,255,0.7)',lineHeight:1,marginTop:2}}>PM</div>
+                  <div style={{fontSize:8,fontWeight:600,color:'rgba(255,255,255,0.6)',marginTop:3}}>90 MIN</div>
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:9,fontWeight:700,letterSpacing:'0.1em',color:'rgba(255,255,255,0.65)',textTransform:'uppercase',marginBottom:3}}>● UP NEXT TODAY</div>
+                  <div style={{fontSize:13,fontWeight:700,color:'#fff',marginBottom:3}}>Memory &amp; Perception — Active Recall Sprint</div>
+                  <div style={{fontSize:11,color:'rgba(255,255,255,0.7)',display:'flex',alignItems:'center',gap:6}}>
+                    <span style={{fontWeight:700,color:'rgba(255,255,255,0.9)'}}>PSYC 101</span>
+                    <span style={{opacity:0.5}}>·</span><span>Session 4 of 10</span><span style={{opacity:0.5}}>·</span><span>3 blocks</span>
+                  </div>
+                </div>
+                <button style={{background:'#fff',border:'none',borderRadius:9,padding:'9px 14px',fontSize:11,fontWeight:700,color:'#3B61C4',cursor:'pointer',flexShrink:0,whiteSpace:'nowrap'}}>Start →</button>
+              </div>
+              {/* Stats row */}
+              <div style={{display:'flex',gap:0,marginBottom:20,borderRadius:10,overflow:'hidden',border:'1px solid rgba(0,0,0,0.07)'}}>
+                {[['STUDY STREAK','14','days','+1'],['HOURS THIS WEEK','9.5','/12h',''],['FOCUS SCORE','87','/100','+8']].map(([label,val,unit,delta],i) => (
+                  <div key={label} style={{flex:1,padding:'12px 14px',borderRight: i<2 ? '1px solid rgba(0,0,0,0.07)' : 'none',background:'#FAFAF9'}}>
+                    <div style={{fontSize:7,fontWeight:700,letterSpacing:'0.1em',color:'#9B9B9B',textTransform:'uppercase',marginBottom:5}}>{label}</div>
+                    <div style={{display:'flex',alignItems:'baseline',gap:3}}>
+                      <span style={{fontSize:20,fontWeight:800,color:'#1A1A1A',lineHeight:1}}>{val}</span>
+                      <span style={{fontSize:10,color:'#9B9B9B'}}>{unit}</span>
+                      {delta && <span style={{fontSize:9,fontWeight:700,color:'#059669',background:'rgba(5,150,105,0.10)',borderRadius:4,padding:'1px 5px',marginLeft:3}}>{delta}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Courses */}
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:10}}>
+                <span style={{fontSize:9,fontWeight:700,letterSpacing:'0.1em',color:'#9B9B9B',textTransform:'uppercase'}}>COURSES · SPRING 2026</span>
+                <span style={{fontSize:11,fontWeight:600,color:'#3B61C4'}}>View all →</span>
+              </div>
+              <div style={{display:'flex',flexDirection:'column',gap:0}}>
+                {courses.map((c,i) => (
+                  <div key={c.name} style={{display:'flex',alignItems:'center',gap:14,padding:'10px 0',borderBottom: i<courses.length-1 ? '1px solid rgba(0,0,0,0.06)' : 'none'}}>
+                    <div style={{width:3,alignSelf:'stretch',background:c.color,borderRadius:2,flexShrink:0}}/>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:12,fontWeight:600,color:'#1A1A1A',marginBottom:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{c.name}</div>
+                      <div style={{fontSize:10,color:'#9B9B9B'}}>Exam · {c.exam} · {c.sessions} sessions · Target: <strong style={{color:'#1A1A1A'}}>{c.target}</strong></div>
+                    </div>
+                    <div style={{flex:'0 0 110px'}}>
+                      <div style={{display:'flex',justifyContent:'space-between',marginBottom:4}}>
+                        <span style={{fontSize:9,color:'#9B9B9B'}}>Progress</span>
+                        <span style={{fontSize:9,fontWeight:700,color:'#1A1A1A'}}>{c.progress}%</span>
+                      </div>
+                      <div style={{height:3,borderRadius:2,background:'rgba(0,0,0,0.08)'}}>
+                        <div style={{width:c.progress+'%',height:'100%',background:c.color,borderRadius:2}}/>
+                      </div>
+                    </div>
+                    <div style={{textAlign:'right',flexShrink:0}}>
+                      <div style={{fontSize:15,fontWeight:800,color: c.days<=5 ? '#E87C3E' : '#1A1A1A',lineHeight:1}}>{c.days}d</div>
+                      <div style={{fontSize:7,fontWeight:700,color:'#9B9B9B',letterSpacing:'0.08em',textTransform:'uppercase'}}>TO EXAM</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT WINDOW — AI Study Coach */}
+          <div style={{flex:'0 0 580px',background:'#fff',borderRadius:16,boxShadow:'0 2px 0 rgba(0,0,0,0.04),0 12px 40px rgba(0,0,0,0.14),0 40px 100px rgba(0,0,0,0.10)',overflow:'hidden',position:'relative',zIndex:2,marginLeft:-60,marginTop:-22,fontFamily:'DM Sans,system-ui,sans-serif'}}>
+            <TitleBar title="StudyEdge · AI Study Coach" />
+            <div style={{padding:'22px 28px 0'}}>
+              {/* Breadcrumb + adapted badge */}
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
+                <div style={{display:'flex',alignItems:'center',gap:8,fontSize:11,color:'#9B9B9B'}}>
+                  <span style={{width:8,height:8,borderRadius:'50%',background:'#3B61C4',display:'inline-block'}}></span>
+                  <span>PSYC 101</span>
+                  <span>·</span>
+                  <span>Week 2</span>
+                  <span>·</span>
+                  <span style={{fontWeight:700,color:'#1A1A1A'}}>Session 4</span>
+                </div>
+                <div style={{display:'flex',alignItems:'center',gap:6,background:'rgba(5,150,105,0.08)',border:'1px solid rgba(5,150,105,0.20)',borderRadius:99,padding:'4px 10px'}}>
+                  <span style={{width:6,height:6,borderRadius:'50%',background:'#059669',display:'inline-block'}}></span>
+                  <span style={{fontSize:9,fontWeight:700,color:'#059669',letterSpacing:'0.04em'}}>PLAN ADAPTED · 2 MIN AGO</span>
+                </div>
+              </div>
+              {/* Session title */}
+              <div style={{marginBottom:14}}>
+                <div style={{fontSize:26,fontWeight:800,color:'#1A1A1A',lineHeight:1.15,marginBottom:4}}>Memory &amp; Perception</div>
+                <div style={{fontSize:18,fontStyle:'italic',color:'#3B61C4',fontFamily:'Cormorant Garamond,Georgia,serif',fontWeight:600}}>Active Recall Sprint</div>
+              </div>
+              <div style={{display:'flex',gap:16,fontSize:11,color:'#6B6B6B',marginBottom:20,alignItems:'center'}}>
+                <span><strong style={{color:'#1A1A1A'}}>3</strong> blocks</span>
+                <span style={{color:'rgba(0,0,0,0.2)'}}>·</span>
+                <span><strong style={{color:'#1A1A1A'}}>90 min</strong> total</span>
+                <span style={{color:'rgba(0,0,0,0.2)'}}>·</span>
+                <span style={{background:'rgba(0,0,0,0.06)',borderRadius:5,padding:'2px 8px',fontWeight:600,color:'#1A1A1A',fontFamily:'monospace',fontSize:10}}>Chapters 5 – 7</span>
+              </div>
+              {/* Timeline */}
+              <div style={{marginBottom:20}}>
+                <div style={{display:'flex',justifyContent:'space-between',marginBottom:8}}>
+                  <span style={{fontSize:9,fontWeight:700,letterSpacing:'0.1em',color:'#9B9B9B',textTransform:'uppercase'}}>Session Timeline</span>
+                  <span style={{fontSize:9,color:'#C0C0C0'}}>2:00 PM → 3:30 PM</span>
+                </div>
+                <div style={{display:'flex',height:8,borderRadius:4,overflow:'hidden',gap:2}}>
+                  {timeline.map(t => <div key={t.label} style={{flex:t.flex,background:t.color,borderRadius:2}}/>)}
+                </div>
+                <div style={{display:'flex',gap:12,marginTop:7}}>
+                  {timeline.map(t => (
+                    <span key={t.label} style={{fontSize:9,color:'#6B6B6B',display:'flex',alignItems:'center',gap:4}}>
+                      <span style={{width:6,height:6,borderRadius:1,background:t.color,display:'inline-block'}}></span>
+                      {t.label} · {t.mins}m
+                    </span>
+                  ))}
+                </div>
+              </div>
+              {/* Adaptive note */}
+              <div style={{background:'rgba(59,97,196,0.04)',border:'1px solid rgba(59,97,196,0.14)',borderRadius:10,padding:'12px 14px',marginBottom:16,display:'flex',alignItems:'flex-start',gap:12}}>
+                <div style={{width:28,height:28,borderRadius:7,background:'rgba(59,97,196,0.10)',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0,fontSize:13}}>↗</div>
+                <div style={{flex:1}}>
+                  <span style={{fontSize:12,color:'#1A1A1A',lineHeight:1.5}}>Built from <strong style={{color:'#3B61C4'}}>your 3 weakest topics</strong> on Quiz 3 — <strong>encoding, retrieval cues</strong>, and Gestalt grouping.</span>
+                </div>
+                <span style={{fontSize:9,fontWeight:700,color:'#059669',background:'rgba(5,150,105,0.10)',borderRadius:4,padding:'2px 7px',flexShrink:0}}>UPDATED</span>
+              </div>
+              {/* Blocks */}
+              {blocks.map((b,i) => (
+                <div key={b.type} style={{background: i===0 ? 'rgba(59,97,196,0.03)' : '#fff',border:'1px solid rgba(0,0,0,0.07)',borderLeft:'3px solid '+b.color,borderRadius:10,padding:'13px 16px',marginBottom:8,display:'flex',gap:14,alignItems:'flex-start'}}>
+                  <div style={{flexShrink:0,textAlign:'center'}}>
+                    <div style={{fontSize:12,fontWeight:800,color:'#1A1A1A',lineHeight:1}}>{b.time}</div>
+                    <div style={{fontSize:8,fontWeight:600,color:'#9B9B9B',marginTop:2}}>{b.dur}</div>
+                  </div>
+                  <div style={{flex:1,minWidth:0}}>
+                    <div style={{fontSize:8,fontWeight:700,letterSpacing:'0.1em',color:b.color,textTransform:'uppercase',marginBottom:4}}>{b.type}</div>
+                    <div style={{fontSize:12,fontWeight:700,color:'#1A1A1A',marginBottom:4,lineHeight:1.3}}>{b.title}</div>
+                    <div style={{fontSize:11,color:'#6B6B6B',lineHeight:1.5}}>{b.desc}</div>
+                  </div>
+                  <div style={{display:'flex',gap:3,flexShrink:0,alignItems:'center',marginTop:2}}>
+                    {Array.from({length:b.dots}).map((_,j) => <div key={j} style={{width:5,height:5,borderRadius:'50%',background: j<b.dots ? b.color : 'rgba(0,0,0,0.12)',opacity: j<b.dots ? (j===0?1:j===1?0.6:0.3) : 0.2}}/>)}
+                  </div>
+                </div>
+              ))}
+            </div>
+            {/* Grade bar — bottom of right window */}
+            <div style={{margin:'0 20px 20px',background:'rgba(59,97,196,0.04)',border:'1px solid rgba(59,97,196,0.14)',borderLeft:'4px solid #3B61C4',borderRadius:10,padding:'12px 16px',display:'flex',alignItems:'center',gap:14}}>
+              <div style={{flexShrink:0}}>
+                <div style={{fontSize:8,fontWeight:700,letterSpacing:'0.1em',color:'#3B61C4',textTransform:'uppercase',marginBottom:3}}>PSYC 101 · CURRENT GRADE</div>
+                <div style={{display:'flex',alignItems:'baseline',gap:5}}>
+                  <span style={{fontSize:20,fontWeight:800,color:'#3B61C4'}}>87.4%</span>
+                  <span style={{fontSize:13,fontWeight:600,color:'#3B61C4'}}>B+</span>
+                </div>
+              </div>
+              <div style={{width:1,alignSelf:'stretch',background:'rgba(59,97,196,0.15)'}}/>
+              <div style={{flex:1,fontSize:11,color:'#6B6B6B',lineHeight:1.5}}>Need <strong style={{color:'#1A1A1A'}}>91% on final</strong> to lock in an <strong style={{color:'#1A1A1A'}}>A</strong> — plan targets this gap. <span style={{color:'#059669',fontWeight:600}}>↑ +2.2 since Quiz 3</span></div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function SessionPlanCard() {
+      const blocks = [
+        { time: 5,  type: 'WARM-UP',      color: '#E87C3E', title: 'Functional Group Flash Recall',       desc: 'Sketch the structure and one defining reaction for alkyl halides, alcohols, ethers, amines, and carbonyls.' },
+        { time: 16, type: 'DEEP REVIEW',  color: '#3B61C4', title: 'SN1 vs SN2 — The Decision Tree',     desc: 'Build one decision tree with four branches: substrate, nucleophile, leaving group, solvent.' },
+        { time: 14, type: 'ACTIVE RECALL',color: '#7C5CBF', title: 'Predict the Product — 8 Substrates', desc: 'Close every reference. Work eight substrates and predict the major product with stereochemistry.' },
+      ];
+      const timeline = [
+        { label: 'Warm-Up',      color: '#E87C3E', flex: 10 },
+        { label: 'Deep Review',  color: '#3B61C4', flex: 30 },
+        { label: 'Active Recall',color: '#7C5CBF', flex: 27 },
+        { label: 'Break',        color: '#10B981', flex: 8  },
+        { label: 'Summary',      color: '#6B6B6B', flex: 25 },
+      ];
+      return (
+        <div style={{background:'#fff', border:'1px solid rgba(0,0,0,0.08)', borderRadius:12, overflow:'hidden', fontSize:13, fontFamily:'DM Sans, system-ui, sans-serif'}}>
+          {/* Header */}
+          <div style={{padding:'12px 18px', borderBottom:'1px solid rgba(0,0,0,0.07)', display:'flex', justifyContent:'space-between', alignItems:'center', background:'#FAFAF9'}}>
+            <span style={{fontSize:10, fontWeight:700, letterSpacing:'0.12em', color:'#10B981', textTransform:'uppercase'}}>✦ Session Plan Ready</span>
+            <span style={{fontSize:10, color:'#9B9B9B', letterSpacing:'0.04em'}}>TODAY · TUE 4:30 PM · EXAM IN 11 DAYS</span>
+          </div>
+          {/* Title + stats row */}
+          <div style={{padding:'14px 18px', borderBottom:'1px solid rgba(0,0,0,0.07)', display:'flex', justifyContent:'space-between', alignItems:'flex-start', gap:16}}>
+            <div style={{flex:1, minWidth:0}}>
+              <div style={{fontSize:10, fontWeight:700, letterSpacing:'0.1em', color:'#9B9B9B', textTransform:'uppercase', marginBottom:5}}>Organic Chemistry II · Chem 2320</div>
+              <div style={{fontSize:16, fontWeight:700, color:'#10B981', lineHeight:1.3}}>Reaction Mechanisms &<br/>Stereochemistry Mastery</div>
+            </div>
+            <div style={{display:'flex', gap:0, flexShrink:0, border:'1px solid rgba(0,0,0,0.08)', borderRadius:8, overflow:'hidden'}}>
+              {[['52', 'min', 'Total'], ['5', '', 'Blocks'], ['High', '', 'Intensity']].map(([val, unit, label]) => (
+                <div key={label} style={{padding:'8px 14px', borderRight:'1px solid rgba(0,0,0,0.07)', textAlign:'center', background:'#FAFAF9'}}>
+                  <div style={{fontSize:15, fontWeight:700, color:'#1A1A1A', lineHeight:1}}>{val}<span style={{fontSize:10, color:'#9B9B9B', fontWeight:400}}>{unit}</span></div>
+                  <div style={{fontSize:9, color:'#9B9B9B', fontWeight:600, letterSpacing:'0.08em', textTransform:'uppercase', marginTop:2}}>{label}</div>
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Timeline */}
+          <div style={{padding:'10px 18px', borderBottom:'1px solid rgba(0,0,0,0.07)'}}>
+            <div style={{display:'flex', justifyContent:'space-between', marginBottom:6}}>
+              <span style={{fontSize:9, fontWeight:700, letterSpacing:'0.12em', color:'#9B9B9B', textTransform:'uppercase'}}>Session Timeline</span>
+              <span style={{fontSize:9, color:'#C0C0C0'}}>0 → 52 min</span>
+            </div>
+            <div style={{display:'flex', height:5, borderRadius:3, overflow:'hidden', gap:2}}>
+              {timeline.map(t => <div key={t.label} style={{flex:t.flex, background:t.color, borderRadius:2}} />)}
+            </div>
+            <div style={{display:'flex', gap:6, marginTop:7, flexWrap:'wrap'}}>
+              {timeline.map(t => (
+                <span key={t.label} style={{fontSize:9, color:t.color, background:t.color+'18', padding:'2px 7px', borderRadius:99, fontWeight:700, letterSpacing:'0.02em'}}>{t.label}</span>
+              ))}
+            </div>
+          </div>
+          {/* Blocks */}
+          {blocks.map((b, i) => (
+            <div key={b.type} style={{padding:'10px 18px', borderBottom: i < blocks.length-1 ? '1px solid rgba(0,0,0,0.06)' : 'none', display:'flex', gap:12, alignItems:'flex-start'}}>
+              <div style={{background:b.color+'14', color:b.color, borderRadius:6, padding:'4px 9px', fontSize:11, fontWeight:700, whiteSpace:'nowrap', flexShrink:0, lineHeight:1.4}}>
+                {b.time}<span style={{fontSize:9, fontWeight:400}}> min</span>
+              </div>
+              <div style={{flex:1, minWidth:0}}>
+                <div style={{display:'flex', justifyContent:'space-between', alignItems:'baseline', marginBottom:2}}>
+                  <span style={{fontSize:9, fontWeight:700, letterSpacing:'0.1em', color:b.color, textTransform:'uppercase'}}>{b.type}</span>
+                  <span style={{fontSize:9, color:'#C0C0C0'}}>{String(i+1).padStart(2,'0')} / 05</span>
+                </div>
+                <div style={{fontSize:12, fontWeight:600, color:'#1A1A1A', marginBottom:2, lineHeight:1.35}}>{b.title}</div>
+                <div style={{fontSize:11, color:'#6B6B6B', lineHeight:1.5, overflow:'hidden', display:'-webkit-box', WebkitLineClamp:1, WebkitBoxOrient:'vertical'}}>{b.desc}</div>
+              </div>
+            </div>
+          ))}
+          {/* Footer */}
+          <div style={{padding:'10px 18px', display:'flex', justifyContent:'space-between', alignItems:'center', background:'#FAFAF9', borderTop:'1px solid rgba(0,0,0,0.07)'}}>
+            <span style={{fontSize:10, color:'#9B9B9B'}}>⏱ Synced to Google Calendar · 4:30 – 5:22 PM</span>
+            <div style={{background:'#1A1A1A', color:'#fff', borderRadius:7, padding:'7px 14px', fontSize:11, fontWeight:600}}>Start session ▶</div>
+          </div>
+        </div>
+      );
+    }
+
+    function FocusModeHero() {
+      const blocks = [
+        { label: 'Warm-Up',       color: '#E87C3E', done: true  },
+        { label: 'Deep Review',   color: '#3B61C4', done: false, active: true },
+        { label: 'Active Recall', color: '#7C5CBF', done: false },
+        { label: 'Quiz',          color: '#10B981', done: false },
+        { label: 'Summary',       color: '#6B6B6B', done: false },
+      ];
+      return (
+        <div style={{background:'#fff', border:'1px solid rgba(0,0,0,0.08)', borderRadius:14, overflow:'hidden', fontFamily:'DM Sans, system-ui, sans-serif', display:'flex', flexDirection:'column'}}>
+          {/* Top bar */}
+          <div style={{padding:'11px 18px', borderBottom:'1px solid rgba(0,0,0,0.07)', display:'flex', justifyContent:'space-between', alignItems:'center', background:'#FAFAF9'}}>
+            <div style={{display:'flex', alignItems:'center', gap:8}}>
+              <span style={{fontSize:11, fontWeight:800, letterSpacing:'0.04em', color:'#1A1A1A'}}>StudyEdge AI</span>
+              <span style={{width:4, height:4, borderRadius:'50%', background:'#C0C0C0', display:'inline-block'}}></span>
+              <span style={{fontSize:10, color:'#9B9B9B', fontWeight:500}}>Organic Chemistry II</span>
+            </div>
+            <div style={{display:'flex', alignItems:'center', gap:6}}>
+              <span style={{fontSize:9, fontWeight:700, letterSpacing:'0.1em', color:'#3B61C4', background:'rgba(59,97,196,0.08)', padding:'2px 8px', borderRadius:99, textTransform:'uppercase'}}>Block 2 of 5</span>
+              <span style={{fontSize:10, color:'#C0C0C0'}}>·</span>
+              <span style={{fontSize:10, color:'#9B9B9B'}}>Deep Review</span>
+            </div>
+          </div>
+          {/* Block progress bar */}
+          <div style={{padding:'10px 18px 8px', borderBottom:'1px solid rgba(0,0,0,0.06)'}}>
+            <div style={{display:'flex', gap:4}}>
+              {blocks.map(b => (
+                <div key={b.label} style={{flex:1, height:4, borderRadius:2, background: b.done ? b.color : b.active ? b.color : 'rgba(0,0,0,0.07)', opacity: b.active ? 1 : b.done ? 0.85 : 0.4}} />
+              ))}
+            </div>
+            <div style={{display:'flex', justifyContent:'space-between', marginTop:5}}>
+              {blocks.map(b => (
+                <span key={b.label} style={{fontSize:8, fontWeight: b.active ? 700 : 500, color: b.active ? b.color : b.done ? '#C0C0C0' : '#C0C0C0', letterSpacing:'0.03em', flex:1, textAlign:'center'}}>{b.label}</span>
+              ))}
+            </div>
+          </div>
+          {/* Timer hero — perfectly centered */}
+          <div style={{flex:1, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', padding:'28px 24px 20px'}}>
+            <div style={{fontSize:'clamp(4rem, 12vw, 5.5rem)', fontWeight:800, fontFamily:'"SF Mono","Fira Code",ui-monospace,monospace', color:'#1A1A1A', lineHeight:1, letterSpacing:'-0.02em'}}>
+              24:15
+            </div>
+            {/* Labels under timer */}
+            <div style={{display:'flex', alignItems:'center', gap:10, marginTop:12}}>
+              <span style={{fontSize:10, color:'#9B9B9B', fontWeight:500}}>remaining</span>
+              <span style={{fontSize:10, color:'rgba(0,0,0,0.15)'}}>·</span>
+              <span style={{fontSize:10, color:'#9B9B9B', fontWeight:500}}>15 min block</span>
+              <span style={{fontSize:10, color:'rgba(0,0,0,0.15)'}}>·</span>
+              <span style={{fontSize:10, color:'#9B9B9B', fontWeight:500}}>60 min total</span>
+            </div>
+          </div>
+          {/* Controls */}
+          <div style={{padding:'0 18px 18px', display:'flex', alignItems:'center', justifyContent:'center', gap:10}}>
+            <button style={{flex:1, padding:'10px 0', background:'none', border:'1px solid rgba(0,0,0,0.10)', borderRadius:9, fontSize:12, fontWeight:600, color:'#6B6B6B', cursor:'pointer', letterSpacing:'0.01em'}}>
+              ‹‹ Skip
+            </button>
+            <button style={{flex:2, padding:'11px 0', background:'#1A1A1A', border:'none', borderRadius:9, fontSize:13, fontWeight:700, color:'#fff', cursor:'pointer', letterSpacing:'0.01em'}}>
+              ❚❚ Pause
+            </button>
+            <button style={{flex:1, padding:'10px 0', background:'none', border:'1px solid rgba(0,0,0,0.10)', borderRadius:9, fontSize:12, fontWeight:600, color:'#6B6B6B', cursor:'pointer', letterSpacing:'0.01em'}}>
+              Skip ›
+            </button>
+          </div>
+          {/* Bottom tab bar */}
+          <div style={{borderTop:'1px solid rgba(0,0,0,0.07)', display:'flex', background:'#FAFAF9'}}>
+            {['Active Recall', 'Flashcards', 'Notes'].map((tab, i) => (
+              <div key={tab} style={{flex:1, padding:'10px 0', textAlign:'center', fontSize:11, fontWeight: i===0 ? 700 : 500, color: i===0 ? '#3B61C4' : '#9B9B9B', borderTop: i===0 ? '2px solid #3B61C4' : '2px solid transparent', cursor:'pointer'}}>
+                {tab}
+              </div>
+            ))}
+          </div>
+        </div>
+      );
+    }
+
+    function StudyCoachHero() {
+      const weeks = ['W1','W2','W3','W4','W5','W6','W7','W8','W9','W10','W11','EXAM'];
+      return (
+        <div style={{background:'#fff', border:'1px solid rgba(0,0,0,0.08)', borderRadius:14, overflow:'hidden', fontFamily:'DM Sans, system-ui, sans-serif', display:'flex', flexDirection:'column'}}>
+          {/* macOS title bar */}
+          <div style={{padding:'10px 16px', borderBottom:'1px solid rgba(0,0,0,0.07)', display:'flex', alignItems:'center', background:'#F7F6F3'}}>
+            <div style={{display:'flex', gap:6, marginRight:16}}>
+              <div style={{width:10,height:10,borderRadius:'50%',background:'#FF5F57'}}/>
+              <div style={{width:10,height:10,borderRadius:'50%',background:'#FEBC2E'}}/>
+              <div style={{width:10,height:10,borderRadius:'50%',background:'#28C840'}}/>
+            </div>
+            <div style={{flex:1,textAlign:'center',fontSize:11,fontWeight:500,color:'#6B6B6B'}}>StudyEdge · AI Study Coach</div>
+          </div>
+          {/* Course header */}
+          <div style={{padding:'11px 20px',borderBottom:'1px solid rgba(0,0,0,0.07)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+            <div style={{display:'flex',alignItems:'center',gap:8}}>
+              <span style={{width:8,height:8,borderRadius:'50%',background:'#3B61C4',display:'inline-block'}}></span>
+              <span style={{fontSize:13,fontWeight:600,color:'#1A1A1A'}}>PSYC 101 — Introduction to Psychology</span>
+            </div>
+            <span style={{fontSize:10,fontWeight:700,letterSpacing:'0.1em',color:'#9B9B9B',textTransform:'uppercase'}}>Study Plan</span>
+          </div>
+          {/* Plan header + timeline */}
+          <div style={{padding:'14px 20px 10px'}}>
+            <div style={{display:'flex',justifyContent:'space-between',alignItems:'flex-start',marginBottom:14}}>
+              <span style={{fontSize:9,fontWeight:700,letterSpacing:'0.12em',color:'#3B61C4',textTransform:'uppercase',display:'flex',alignItems:'center',gap:6}}>
+                <span style={{width:6,height:6,borderRadius:'50%',background:'#3B61C4',display:'inline-block'}}></span>
+                Your 12-Week Plan
+              </span>
+              <div style={{textAlign:'right'}}>
+                <div style={{fontSize:9,fontWeight:700,letterSpacing:'0.1em',color:'#9B9B9B',textTransform:'uppercase'}}>Final Exam</div>
+                <div style={{fontSize:12,fontWeight:700,color:'#1A1A1A'}}>May 17 · <span style={{color:'#E87C3E'}}>6 days</span></div>
+              </div>
+            </div>
+            {/* Week timeline */}
+            <div style={{display:'flex',alignItems:'center',gap:0,marginBottom:4}}>
+              {weeks.map((w,i) => (
+                <div key={w} style={{flex:1,display:'flex',flexDirection:'column',alignItems:'center',position:'relative'}}>
+                  {i > 0 && <div style={{position:'absolute',top:5,left:'-50%',right:'50%',height:1,background: i===1 ? '#3B61C4' : 'rgba(0,0,0,0.12)',zIndex:0}}/>}
+                  <div style={{width:10,height:10,borderRadius:'50%',background: i===0 ? '#3B61C4' : i===11 ? '#E87C3E' : 'rgba(0,0,0,0.15)',border: i===0 ? '2px solid #3B61C4' : 'none',zIndex:1,position:'relative'}}/>
+                  <span style={{fontSize:8,fontWeight: i===0||i===11 ? 700 : 400,color: i===0 ? '#3B61C4' : i===11 ? '#E87C3E' : '#9B9B9B',marginTop:3}}>{w}</span>
+                  {i===0 && <span style={{fontSize:7,fontWeight:700,color:'#3B61C4',letterSpacing:'0.05em'}}>NOW</span>}
+                </div>
+              ))}
+            </div>
+          </div>
+          {/* Week 1 card */}
+          <div style={{margin:'0 14px 10px',border:'1px solid rgba(59,97,196,0.25)',borderRadius:10,overflow:'hidden',borderLeft:'3px solid #3B61C4'}}>
+            <div style={{padding:'10px 14px',display:'flex',alignItems:'flex-start',justifyContent:'space-between',borderBottom:'1px solid rgba(0,0,0,0.06)'}}>
+              <div style={{display:'flex',alignItems:'center',gap:10}}>
+                <div style={{width:26,height:26,borderRadius:7,background:'#3B61C4',display:'flex',alignItems:'center',justifyContent:'center',color:'#fff',fontSize:12,fontWeight:800,flexShrink:0}}>1</div>
+                <div>
+                  <div style={{fontSize:13,fontWeight:700,color:'#1A1A1A'}}>Week 1 <span style={{fontWeight:400,color:'#9B9B9B',fontSize:11}}>May 11 – May 17</span></div>
+                  <span style={{fontSize:9,fontWeight:700,color:'#E87C3E',background:'rgba(232,124,62,0.10)',border:'1px solid rgba(232,124,62,0.25)',borderRadius:99,padding:'2px 8px',letterSpacing:'0.03em'}}>● Final exam sprint · deep mastery</span>
+                </div>
+              </div>
+              <div style={{textAlign:'right',flexShrink:0}}>
+                <div style={{fontSize:16,fontWeight:800,color:'#1A1A1A'}}>0/4</div>
+                <div style={{fontSize:8,fontWeight:700,color:'#9B9B9B',letterSpacing:'0.1em',textTransform:'uppercase'}}>Sessions</div>
+              </div>
+            </div>
+            {/* Session 1 expanded */}
+            <div style={{padding:'10px 14px',borderBottom:'1px solid rgba(0,0,0,0.06)',background:'rgba(59,97,196,0.02)'}}>
+              <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:8}}>
+                <div style={{display:'flex',alignItems:'center',gap:8}}>
+                  <span style={{fontSize:9,fontWeight:700,color:'#3B61C4',background:'rgba(59,97,196,0.10)',borderRadius:4,padding:'2px 7px',letterSpacing:'0.04em'}}>SESSION 1</span>
+                  <span style={{fontSize:12,fontWeight:600,color:'#1A1A1A'}}>Memory systems: encoding, storage, retrieval</span>
+                </div>
+                <span style={{fontSize:10,color:'#9B9B9B',flexShrink:0,marginLeft:8}}>60 min</span>
+              </div>
+              <div style={{display:'grid',gridTemplateColumns:'1fr 1fr',gap:'6px 16px',marginBottom:8}}>
+                <div>
+                  <div style={{fontSize:8,fontWeight:700,letterSpacing:'0.1em',color:'#9B9B9B',textTransform:'uppercase',marginBottom:3}}>Focus</div>
+                  <div style={{fontSize:11,color:'#1A1A1A',lineHeight:1.4}}>Explain <strong>three memory types</strong> and retrieval failure causes</div>
+                </div>
+                <div>
+                  <div style={{fontSize:8,fontWeight:700,letterSpacing:'0.1em',color:'#9B9B9B',textTransform:'uppercase',marginBottom:3}}>Deliverable</div>
+                  <div style={{fontSize:11,color:'#1A1A1A',lineHeight:1.4}}><strong>Active recall</strong> + Ebbinghaus curve review</div>
+                </div>
+              </div>
+              <div>
+                <div style={{fontSize:8,fontWeight:700,letterSpacing:'0.1em',color:'#9B9B9B',textTransform:'uppercase',marginBottom:5}}>Technique</div>
+                <div style={{display:'flex',gap:5,flexWrap:'wrap'}}>
+                  {['Sensory memory','Working memory','Long-term memory','Forgetting curves'].map((t,i) => (
+                    <span key={t} style={{fontSize:10,fontWeight: i===0 ? 600 : 400,color: i===0 ? '#3B61C4' : '#6B6B6B',background: i===0 ? 'rgba(59,97,196,0.10)' : 'rgba(0,0,0,0.05)',borderRadius:5,padding:'2px 8px'}}>{t}</span>
+                  ))}
+                </div>
+              </div>
+            </div>
+            {/* S2, S3 collapsed */}
+            {[['S2','Cognitive biases and judgment errors',['Confirmation','Anchoring','+2']],['S3','Social influence and compliance mechanisms',['Milgram','Asch','+2']]].map(([id,title,tags]) => (
+              <div key={id} style={{padding:'8px 14px',borderBottom:'1px solid rgba(0,0,0,0.05)',display:'flex',alignItems:'center',gap:10}}>
+                <span style={{fontSize:9,fontWeight:700,color:'#9B9B9B',background:'rgba(0,0,0,0.06)',borderRadius:4,padding:'2px 6px',flexShrink:0}}>{id}</span>
+                <span style={{fontSize:11,fontWeight:500,color:'#1A1A1A',flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{title}</span>
+                <div style={{display:'flex',gap:5,alignItems:'center',flexShrink:0}}>
+                  {tags.map((t,i) => <span key={t} style={{fontSize:9,color:'#9B9B9B'}}>{t}{i<tags.length-1 ? '' : ''}</span>)}
+                  <span style={{fontSize:9,color:'#9B9B9B'}}>60 min</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* Footer */}
+          <div style={{margin:'0 14px 14px',background:'rgba(59,97,196,0.04)',border:'1px solid rgba(59,97,196,0.12)',borderRadius:9,padding:'10px 14px',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
+            <div style={{display:'flex',alignItems:'center',gap:10}}>
+              <div style={{width:22,height:22,borderRadius:'50%',border:'2px solid #3B61C4',display:'flex',alignItems:'center',justifyContent:'center',flexShrink:0}}>
+                <div style={{width:8,height:8,borderRadius:'50%',background:'#3B61C4'}}/>
+              </div>
+              <div>
+                <div style={{fontSize:11,fontWeight:600,color:'#1A1A1A'}}>Plan re-balances <em style={{fontStyle:'italic'}}>automatically</em> as the semester changes</div>
+                <div style={{fontSize:10,color:'#9B9B9B',marginTop:1}}>Sessions shift focus when grades, dates or material drift</div>
+              </div>
+            </div>
+            <div style={{textAlign:'right',flexShrink:0,marginLeft:12}}>
+              <div style={{fontSize:18,fontWeight:800,color:'#3B61C4',lineHeight:1}}>12<span style={{fontSize:11}}>w</span></div>
+              <div style={{fontSize:8,fontWeight:700,color:'#9B9B9B',letterSpacing:'0.1em',textTransform:'uppercase'}}>Adaptive</div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function GradeHubHero() {
+      const [slide, setSlide] = React.useState(0);
+      const INTERVAL = 4000;
+
+      React.useEffect(() => {
+        const t = setInterval(() => setSlide(s => (s + 1) % 4), INTERVAL);
+        return () => clearInterval(t);
+      }, []);
+
+      const slideLabels = ['Current Grade', 'Grade Breakdown', 'What you need', 'Three Paths'];
+
+      const Slide0 = () => (
+        <div style={{flex:1, display:'flex', flexDirection:'column', padding:'20px 24px 0'}}>
+          <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:4}}>
+            <span style={{fontSize:9, fontWeight:700, letterSpacing:'0.12em', color:'#3B61C4', textTransform:'uppercase', display:'flex', alignItems:'center', gap:6}}>
+              <span style={{width:6, height:6, borderRadius:'50%', background:'#3B61C4', display:'inline-block'}}></span>
+              Current Grade
+            </span>
+            <span style={{fontSize:10, color:'#9B9B9B'}}>01 / 04</span>
+          </div>
+          <div style={{display:'flex', alignItems:'flex-end', gap:10, marginTop:8, marginBottom:6}}>
+            <span style={{fontSize:52, fontWeight:800, color:'#059669', lineHeight:1, letterSpacing:'-0.03em'}}>96.0</span>
+            <span style={{fontSize:20, fontWeight:700, color:'#059669', marginBottom:8}}>%</span>
+            <span style={{fontSize:26, fontWeight:700, color:'#059669', marginBottom:6}}>A+</span>
+            <div style={{marginBottom:8, marginLeft:8, background:'rgba(5,150,105,0.10)', border:'1px solid rgba(5,150,105,0.25)', borderRadius:8, padding:'5px 12px', display:'flex', alignItems:'center', gap:6}}>
+              <span style={{fontSize:11, color:'#059669'}}>✓</span>
+              <span style={{fontSize:11, fontWeight:600, color:'#059669'}}>On track for A</span>
+            </div>
+          </div>
+          <div style={{marginBottom:12}}>
+            <div style={{display:'flex', justifyContent:'space-between', marginBottom:5}}>
+              <span style={{fontSize:11, color:'#1A1A1A'}}><strong>45%</strong> <span style={{color:'#6B6B6B'}}>of grade graded</span></span>
+              <span style={{fontSize:11, color:'#6B6B6B'}}><strong>55%</strong> remaining</span>
+            </div>
+            <div style={{height:5, borderRadius:3, background:'rgba(0,0,0,0.08)', overflow:'hidden'}}>
+              <div style={{width:'45%', height:'100%', background:'#3B61C4', borderRadius:3}} />
+            </div>
+          </div>
+          <div style={{display:'flex', gap:8, marginBottom:16}}>
+            {[['TARGET','A','90.0 – 92.9%'],['GRADED ITEMS','3','of 5'],['BEST GRADE','98','Midterm']].map(([label,val,sub]) => (
+              <div key={label} style={{flex:1, background:'#F7F6F3', borderRadius:9, padding:'10px 12px', border:'1px solid rgba(0,0,0,0.07)'}}>
+                <div style={{fontSize:8, fontWeight:700, letterSpacing:'0.1em', color:'#9B9B9B', textTransform:'uppercase', marginBottom:5}}>{label}</div>
+                <div style={{fontSize:17, fontWeight:800, color:'#1A1A1A', lineHeight:1}}>{val}</div>
+                <div style={{fontSize:10, color:'#9B9B9B', marginTop:3}}>{sub}</div>
+              </div>
+            ))}
+          </div>
+          <div style={{borderTop:'1px solid rgba(0,0,0,0.07)', padding:'10px 0', fontSize:11, color:'#6B6B6B', lineHeight:1.5}}>
+            You're <em style={{fontStyle:'italic'}}>six points clear</em> of your A target with the final and weekly quizzes still ahead.
+          </div>
+        </div>
+      );
+
+      const Slide1 = () => (
+        <div style={{flex:1, display:'flex', flexDirection:'column', padding:'20px 24px 0'}}>
+          <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:14}}>
+            <span style={{fontSize:9, fontWeight:700, letterSpacing:'0.12em', color:'#3B61C4', textTransform:'uppercase', display:'flex', alignItems:'center', gap:6}}>
+              <span style={{width:6, height:6, borderRadius:'50%', background:'#3B61C4', display:'inline-block'}}></span>
+              Grade Breakdown
+            </span>
+            <span style={{fontSize:10, color:'#9B9B9B'}}>02 / 04</span>
+          </div>
+          {[
+            {name:'Midterm', weight:'25% weight · contributes 24.5% to final', status:'Graded', score:98},
+            {name:'Final exam', weight:'30% weight · largest single component', status:'Pending', score:null},
+            {name:'Research project', weight:'10% weight · contributes 9.5% to final', status:'Graded', score:95},
+            {name:'Weekly quizzes', weight:'25% weight · 8 quizzes remaining', status:'Pending', score:null},
+            {name:'Lab report', weight:'10% weight · contributes 9.2% to final', status:'Graded', score:92},
+          ].map((item, i) => (
+            <div key={item.name} style={{display:'flex', alignItems:'center', justifyContent:'space-between', padding:'9px 0', borderBottom:'1px solid rgba(0,0,0,0.06)'}}>
+              <div>
+                <div style={{fontSize:13, fontWeight:600, color:'#1A1A1A', marginBottom:2}}>{item.name}</div>
+                <div style={{fontSize:10, color:'#9B9B9B'}}>{item.weight}</div>
+              </div>
+              <div style={{display:'flex', alignItems:'center', gap:12}}>
+                <span style={{fontSize:10, fontWeight:600, padding:'3px 10px', borderRadius:99, background: item.status==='Graded' ? 'rgba(59,97,196,0.08)' : 'rgba(0,0,0,0.06)', color: item.status==='Graded' ? '#3B61C4' : '#9B9B9B', display:'flex', alignItems:'center', gap:4}}>
+                  {item.status==='Graded' && <span style={{width:5,height:5,borderRadius:'50%',background:'#3B61C4',display:'inline-block'}}></span>}
+                  {item.status}
+                </span>
+                <span style={{fontSize:16, fontWeight:700, color: item.score ? '#059669' : '#C0C0C0', minWidth:24, textAlign:'right'}}>{item.score ?? '—'}</span>
+              </div>
+            </div>
+          ))}
+          <div style={{marginTop:'auto', padding:'10px 0', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
+            <span style={{fontSize:11, color:'#6B6B6B'}}>Locked in <strong style={{color:'#3B61C4'}}>43.2%</strong> of your final grade across <strong style={{color:'#3B61C4'}}>3 graded items</strong></span>
+            <span style={{fontSize:16, fontWeight:800, color:'#3B61C4'}}>96.0%</span>
+          </div>
+        </div>
+      );
+
+      const Slide2 = () => (
+        <div style={{flex:1, display:'flex', flexDirection:'column', padding:'20px 24px 0'}}>
+          <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:8}}>
+            <span style={{fontSize:9, fontWeight:700, letterSpacing:'0.12em', color:'#3B61C4', textTransform:'uppercase', display:'flex', alignItems:'center', gap:6}}>
+              <span style={{width:6, height:6, borderRadius:'50%', background:'#3B61C4', display:'inline-block'}}></span>
+              What You Need · Target A
+            </span>
+            <span style={{fontSize:10, color:'#9B9B9B'}}>03 / 04</span>
+          </div>
+          <div style={{display:'flex', alignItems:'flex-end', gap:6, marginTop:6, marginBottom:4}}>
+            <span style={{fontSize:58, fontWeight:800, color:'#3B61C4', lineHeight:1, letterSpacing:'-0.03em'}}>76.0</span>
+            <div style={{marginBottom:10}}>
+              <span style={{fontSize:22, fontWeight:700, color:'#3B61C4'}}>%</span>
+              <div style={{fontSize:11, color:'#6B6B6B', lineHeight:1.4, maxWidth:160}}>average across remaining work to land your <strong>A</strong>. <em style={{fontStyle:'italic'}}>A calculation, not a guess.</em></div>
+            </div>
+          </div>
+          <div style={{display:'flex', flexDirection:'column', gap:8, marginBottom:12}}>
+            {[['Final exam','Worth 30% of final grade · Pending','76.0%'],['Weekly quizzes','Worth 25% of final grade · 8 remaining','76.0%']].map(([name,sub,pct]) => (
+              <div key={name} style={{display:'flex', alignItems:'center', justifyContent:'space-between', background:'#F7F6F3', borderRadius:9, padding:'11px 14px', border:'1px solid rgba(0,0,0,0.07)'}}>
+                <div>
+                  <div style={{fontSize:13, fontWeight:600, color:'#1A1A1A'}}>{name}</div>
+                  <div style={{fontSize:10, color:'#9B9B9B', marginTop:2}}>{sub}</div>
+                </div>
+                <span style={{fontSize:14, fontWeight:700, color:'#3B61C4', background:'rgba(59,97,196,0.10)', borderRadius:7, padding:'4px 12px'}}>{pct}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{background:'rgba(59,97,196,0.06)', border:'1px solid rgba(59,97,196,0.15)', borderRadius:9, padding:'12px 14px'}}>
+            <div style={{fontSize:12, color:'#3B61C4', marginBottom:8}}>You have a <strong>24-point buffer</strong> on remaining work. Spend it wisely.</div>
+            <div style={{height:4, borderRadius:2, background:'rgba(59,97,196,0.15)', overflow:'hidden'}}>
+              <div style={{width:'30%', height:'100%', background:'#3B61C4', borderRadius:2}} />
+            </div>
+          </div>
+        </div>
+      );
+
+      const Slide3 = () => (
+        <div style={{flex:1, display:'flex', flexDirection:'column', padding:'20px 24px 0'}}>
+          <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6}}>
+            <span style={{fontSize:9, fontWeight:700, letterSpacing:'0.12em', color:'#3B61C4', textTransform:'uppercase', display:'flex', alignItems:'center', gap:6}}>
+              <span style={{width:6, height:6, borderRadius:'50%', background:'#3B61C4', display:'inline-block'}}></span>
+              Three Paths to A
+            </span>
+            <span style={{fontSize:10, color:'#9B9B9B'}}>04 / 04</span>
+          </div>
+          <div style={{fontSize:12, color:'#6B6B6B', marginBottom:14}}>Same target, three strategies — <em style={{fontStyle:'italic'}}>pick the one that fits your semester.</em></div>
+          <div style={{display:'flex', gap:8, flex:1}}>
+            {[
+              {title:'Consistent', tag:'STEADY · RECOMMENDED', desc:'Same effort across all remaining work.', accentColor:'#3B61C4', bg:'rgba(59,97,196,0.05)', border:'rgba(59,97,196,0.20)', icon:'↗', items:[['Final','76%'],['Quizzes','76%']], itemColor:'#3B61C4'},
+              {title:'Strong Finish', tag:'LATE SURGE', desc:'Build early, dominate the final exam.', accentColor:'#1A1A1A', bg:'#F7F6F3', border:'rgba(0,0,0,0.10)', icon:'⚡', items:[['Final','66%'],['Quizzes','88%']], itemColor:'#1A1A1A'},
+              {title:'Front-Loaded', tag:'BANK NOW', desc:'Bank points now, less pressure later.', accentColor:'#D97706', bg:'rgba(217,119,6,0.04)', border:'rgba(217,119,6,0.20)', icon:'🛡', items:[['Final','88%'],['Quizzes','62%']], itemColor:'#D97706'},
+            ].map(p => (
+              <div key={p.title} style={{flex:1, background:p.bg, border:`1px solid ${p.border}`, borderRadius:10, padding:'12px 12px', display:'flex', flexDirection:'column', borderTop:`3px solid ${p.accentColor}`}}>
+                <div style={{fontSize:15, marginBottom:2}}>{p.icon}</div>
+                <div style={{fontSize:13, fontWeight:700, color:'#1A1A1A', marginBottom:2}}>{p.title}</div>
+                <div style={{fontSize:8, fontWeight:700, letterSpacing:'0.1em', color:'#9B9B9B', textTransform:'uppercase', marginBottom:6}}>{p.tag}</div>
+                <div style={{fontSize:11, color:'#6B6B6B', lineHeight:1.4, marginBottom:'auto'}}>{p.desc}</div>
+                <div style={{marginTop:16}}>
+                  {p.items.map(([label, val]) => (
+                    <div key={label} style={{display:'flex', justifyContent:'space-between', alignItems:'center', paddingTop:5, borderTop:'1px solid rgba(0,0,0,0.06)'}}>
+                      <span style={{fontSize:11, color:'#6B6B6B'}}>{label}</span>
+                      <span style={{fontSize:13, fontWeight:700, color:p.itemColor}}>{val}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+          <div style={{padding:'10px 0', display:'flex', alignItems:'center', justifyContent:'center', gap:8}}>
+            <span style={{fontSize:11, color:'#9B9B9B'}}>Each path lands the same target —</span>
+            <span style={{fontSize:11, fontWeight:700, color:'#1A1A1A', background:'rgba(0,0,0,0.06)', borderRadius:5, padding:'2px 8px'}}>A</span>
+            <span style={{fontSize:11, color:'#9B9B9B'}}>at</span>
+            <span style={{fontSize:11, fontWeight:700, color:'#1A1A1A', background:'rgba(0,0,0,0.06)', borderRadius:5, padding:'2px 8px'}}>90.0%</span>
+          </div>
+        </div>
+      );
+
+      const slides = [Slide0, Slide1, Slide2, Slide3];
+      const CurrentSlide = slides[slide];
+
+      return (
+        <div style={{background:'#fff', border:'1px solid rgba(0,0,0,0.08)', borderRadius:14, overflow:'hidden', fontFamily:'DM Sans, system-ui, sans-serif', display:'flex', flexDirection:'column', minHeight:480}}>
+          {/* macOS-style title bar */}
+          <div style={{padding:'10px 16px', borderBottom:'1px solid rgba(0,0,0,0.07)', display:'flex', alignItems:'center', background:'#F7F6F3'}}>
+            <div style={{display:'flex', gap:6, marginRight:16}}>
+              <div style={{width:10, height:10, borderRadius:'50%', background:'#FF5F57'}} />
+              <div style={{width:10, height:10, borderRadius:'50%', background:'#FEBC2E'}} />
+              <div style={{width:10, height:10, borderRadius:'50%', background:'#28C840'}} />
+            </div>
+            <div style={{flex:1, textAlign:'center', fontSize:11, fontWeight:500, color:'#6B6B6B'}}>StudyEdge · Grade Hub</div>
+          </div>
+          {/* Course header */}
+          <div style={{padding:'12px 24px', borderBottom:'1px solid rgba(0,0,0,0.07)', display:'flex', alignItems:'center', justifyContent:'space-between'}}>
+            <div style={{display:'flex', alignItems:'center', gap:8}}>
+              <span style={{width:8, height:8, borderRadius:'50%', background:'#059669', display:'inline-block'}}></span>
+              <span style={{fontSize:13, fontWeight:600, color:'#1A1A1A'}}>PSYC 101 — Introduction to Psychology</span>
+            </div>
+            <span style={{fontSize:10, fontWeight:700, letterSpacing:'0.1em', color:'#9B9B9B', textTransform:'uppercase'}}>Grade Hub</span>
+          </div>
+          {/* Slide content */}
+          <CurrentSlide />
+          {/* Slide progress footer */}
+          <div style={{padding:'8px 24px 12px', borderTop:'1px solid rgba(0,0,0,0.07)', display:'flex', alignItems:'center', justifyContent:'space-between', background:'#FAFAF9', marginTop:'auto'}}>
+            <span style={{fontSize:10, color:'#9B9B9B', fontWeight:500}}>{slideLabels[slide]}</span>
+            <div style={{display:'flex', gap:4, alignItems:'center'}}>
+              {[0,1,2,3].map(i => (
+                <div key={i} onClick={() => setSlide(i)} style={{width: i===slide ? 20 : 6, height:4, borderRadius:2, background: i===slide ? '#1A1A1A' : '#D0D0D0', cursor:'pointer', transition:'all 0.3s'}} />
+              ))}
+            </div>
+            <span style={{fontSize:10, color:'#9B9B9B', fontWeight:600, letterSpacing:'0.06em'}}>AUTO</span>
+          </div>
+        </div>
+      );
+    }
+
     function ProductShowcase() {
       const features = [
         {
           label: 'Session Blueprint',
           h3: <>Every session planned<br /><em>before you sit down.</em></>,
           body: "Before you open a single tab, Session Blueprint builds a minute-by-minute study plan for your course, your exam date, and your exact goal today. Warm-up, deep review, active recall, synthesis — all sequenced. You just execute.",
-          img: '/ss-session-blueprint.png',
-          alt: 'Session Blueprint showing minute-by-minute study plan',
+          card: true,
           rev: false
         },
         {
           label: 'Focus Mode',
           h3: <>The session runs itself.<br /><em>You just show up.</em></>,
           body: "A structured timer that runs each block with built-in flashcards, recall prompts, and quizzes. No tab-switching, no deciding what to do next. The work is already organized. You just do it.",
-          img: '/ss-focus.png',
-          alt: 'Focus Mode timer with active recall prompts',
+          card: 'focus',
           rev: true
         },
         {
           label: 'Grade Hub',
           h3: <>Know exactly where<br /><em>you stand.</em></>,
           body: "Your exact projected grade, what you need on every remaining assignment, and three different scenarios to hit your target. Not a guess. A calculation. Most students find out too late — this tells you now.",
-          img: '/lp-grade-predictor.png',
-          alt: 'Grade Hub showing projected grades and scenarios',
+          card: 'grade',
           rev: false
         },
         {
           label: 'AI Study Coach',
           h3: <>A week-by-week plan<br /><em>built for your exam.</em></>,
           body: "The AI Coach builds a full prep plan for each course, adapted to your exact exam date and how much time you have left. It shifts focus automatically as the semester changes.",
-          img: '/ss-coach.png',
-          alt: 'AI Study Coach showing weekly study plan',
+          card: 'coach',
           rev: true
         },
       ];
@@ -929,8 +1640,8 @@
                   <h3 className="product-h3">{f.h3}</h3>
                   <p className="product-body">{f.body}</p>
                 </div>
-                <div className="product-img-wrap fade-up">
-                  <img src={f.img} alt={f.alt} />
+                <div className="product-img-wrap fade-up" style={(f.card === true || f.card === 'focus' || f.card === 'grade' || f.card === 'coach') ? {border:'none', borderRadius:0, background:'transparent'} : {}}>
+                  {f.card === true ? <SessionPlanCard /> : f.card === 'focus' ? <FocusModeHero /> : f.card === 'grade' ? <GradeHubHero /> : f.card === 'coach' ? <StudyCoachHero /> : <img src={f.img} alt={f.alt} />}
                 </div>
               </div>
             </div>
