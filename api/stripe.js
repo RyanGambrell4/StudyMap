@@ -453,6 +453,29 @@ export default async function handler(req, res) {
     }),
   }
 
+  // Guard: if this user already has an active or trialing subscription, block the duplicate
+  if (userId) {
+    try {
+      const { data: existingUser } = await supabaseAdmin
+        .from('user_data')
+        .select('subscription')
+        .eq('user_id', userId)
+        .maybeSingle()
+
+      const existingSub = existingUser?.subscription
+      if (existingSub?.status === 'active' || existingSub?.status === 'trialing') {
+        console.warn(`[stripe checkout] Blocked duplicate checkout for user ${userId} — already ${existingSub.status}`)
+        return res.status(409).json({
+          error: 'You already have an active subscription.',
+          alreadySubscribed: true,
+        })
+      }
+    } catch (dbErr) {
+      console.error('[stripe checkout] Error checking existing subscription:', dbErr)
+      // Non-fatal — allow checkout to proceed if the check itself fails
+    }
+  }
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',

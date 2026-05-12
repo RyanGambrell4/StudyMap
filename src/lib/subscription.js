@@ -125,6 +125,12 @@ export async function createCheckoutSession(plan, billingPeriod, userEmail, user
 
     const data = await res.json()
 
+    // User already has an active subscription — no need to go through checkout again
+    if (res.status === 409 && data.alreadySubscribed) {
+      console.warn('[subscription] User already subscribed — skipping checkout')
+      return { alreadySubscribed: true }
+    }
+
     if (!res.ok || !data.url) {
       console.error('[subscription] Checkout session error:', data.error)
       return null

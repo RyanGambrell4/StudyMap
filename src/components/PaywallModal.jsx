@@ -128,6 +128,8 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     const url = await createCheckoutSession(planId, billingPeriod, userEmail, userId, opts)
     setLoading(null)
     if (!url) { alert('Something went wrong. Please try again.'); return }
+    // Already subscribed — close the paywall, no redirect needed
+    if (url?.alreadySubscribed) { onClose(); return }
     window.location.href = url
   }
 
