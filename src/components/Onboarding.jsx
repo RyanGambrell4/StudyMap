@@ -540,8 +540,13 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
         <button
           onClick={async () => {
-            const url = await createCheckoutSession('pro', 'monthly', userEmail, userId, { trial: true })
-            if (url) window.location.href = url
+            const result = await createCheckoutSession('pro', 'monthly', userEmail, userId, { trial: true })
+            if (!result) return
+            if (result.alreadySubscribed) {
+              onComplete({ yearLevel, learningStyle, preferredTime, schoolType })
+              return
+            }
+            window.location.href = result
           }}
           style={{
             width: '100%', padding: '14px', marginBottom: 10,

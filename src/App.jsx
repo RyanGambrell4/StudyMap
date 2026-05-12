@@ -422,8 +422,9 @@ export default function App() {
   // ── Paid plan checkout redirect ──────────────────────────────────────────
   if (checkoutIntent && getActivePlan() === 'free') {
     window.history.replaceState({}, '', window.location.pathname)
-    createCheckoutSession(checkoutIntent.plan, checkoutIntent.billing, session.user.email, session.user.id, { trial: checkoutIntent.trial }).then(url => {
-      if (url) window.location.href = url
+    createCheckoutSession(checkoutIntent.plan, checkoutIntent.billing, session.user.email, session.user.id, { trial: checkoutIntent.trial }).then(result => {
+      if (!result || result.alreadySubscribed) return
+      window.location.href = result
     })
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0f1e' }}>
