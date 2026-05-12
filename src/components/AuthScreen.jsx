@@ -45,8 +45,10 @@ export default function AuthScreen({ initialMode, onBack }) {
     const preserve = new URLSearchParams()
     const plan = src.get('plan')
     const billing = src.get('billing')
+    const trial = src.get('trial')
     if (plan === 'pro' || plan === 'unlimited') preserve.set('plan', plan)
     if (['monthly', 'semester', 'yearly'].includes(billing)) preserve.set('billing', billing)
+    if (trial === '1') preserve.set('trial', '1')
     const qs = preserve.toString()
     const redirectTo = `${window.location.origin}/app${qs ? '?' + qs : ''}`
     const { error } = await supabase.auth.signInWithOAuth({

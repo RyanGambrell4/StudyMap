@@ -427,10 +427,10 @@ export default function App() {
       window.location.href = result
     })
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0f1e' }}>
-        <div className="text-center space-y-4">
-          <div className="w-8 h-8 mx-auto rounded-full border-4 border-slate-800 border-t-indigo-500 animate-spin" />
-          <p className="text-slate-400 text-sm">Redirecting to checkout…</p>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F6F3' }}>
+        <div style={{ textAlign: 'center' }}>
+          <div style={{ width: 32, height: 32, margin: '0 auto 12px', borderRadius: '50%', border: '3px solid rgba(0,0,0,0.08)', borderTopColor: '#3B61C4', animation: 'spin 0.8s linear infinite' }} />
+          <p style={{ color: '#6B6B6B', fontSize: 14 }}>Redirecting to checkout…</p>
         </div>
       </div>
     )
