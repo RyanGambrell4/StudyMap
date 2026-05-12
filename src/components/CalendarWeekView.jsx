@@ -325,7 +325,8 @@ export default function CalendarWeekView({
       {/* ── Week nav ── */}
       <div className="flex items-center justify-between mb-4 pb-3" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
         <button onClick={onPrevWeek}
-          className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors text-sm"
+          className="flex items-center gap-1.5 transition-colors text-sm"
+          style={{ color: '#9B9B9B' }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
@@ -333,11 +334,12 @@ export default function CalendarWeekView({
           Prev week
         </button>
         <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-slate-400 tracking-tight">{weekLabel}</span>
+          <span className="text-sm font-medium tracking-tight" style={{ color: '#6B6B6B' }}>{weekLabel}</span>
           {onAddSession && (
             <button
               onClick={() => onAddSession(activeDayStr)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-400 hover:text-indigo-300 border border-indigo-500/30 hover:border-indigo-400/50 hover:bg-indigo-500/10 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+              style={{ color: '#3B61C4', border: '1px solid rgba(59,97,196,0.25)', backgroundColor: 'rgba(59,97,196,0.06)' }}
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -347,7 +349,8 @@ export default function CalendarWeekView({
           )}
         </div>
         <button onClick={onNextWeek}
-          className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors text-sm"
+          className="flex items-center gap-1.5 transition-colors text-sm"
+          style={{ color: '#9B9B9B' }}
         >
           Next week
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

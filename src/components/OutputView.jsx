@@ -1088,13 +1088,14 @@ export default function OutputView({
                       const idx = availableMonths.indexOf(currentMonthStr)
                       if (idx > 0) handleJumpToMonth(availableMonths[idx - 1])
                     }}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all"
+                    className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
+                    style={{ color: '#9B9B9B' }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                     </svg>
                   </button>
-                  <span className="text-base font-semibold text-slate-200 min-w-[140px] text-center">
+                  <span className="text-base font-semibold min-w-[140px] text-center" style={{ color: '#1A1A1A' }}>
                     {(() => {
                       const [y, m] = currentMonthStr.split('-').map(Number)
                       return new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
@@ -1105,7 +1106,8 @@ export default function OutputView({
                       const idx = availableMonths.indexOf(currentMonthStr)
                       if (idx < availableMonths.length - 1) handleJumpToMonth(availableMonths[idx + 1])
                     }}
-                    className="w-8 h-8 flex items-center justify-center rounded-lg text-slate-400 hover:text-white hover:bg-slate-700/50 transition-all"
+                    className="w-8 h-8 flex items-center justify-center rounded-lg transition-all"
+                    style={{ color: '#9B9B9B' }}
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -1135,14 +1137,14 @@ export default function OutputView({
               )}
 
             {/* View toggle */}
-              <div className="flex items-center rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700/60 bg-slate-100 dark:bg-slate-800/50">
+              <div style={{ display: 'flex', alignItems: 'center', borderRadius: 8, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.10)', backgroundColor: '#F1F3F5' }}>
                 {[['day', 'Day'], ['week', 'Week'], ['month', 'Month']].map(([mode, label]) => (
                   <button key={mode} onClick={() => setViewMode(mode)}
-                    className={`px-4 py-1.5 text-sm font-medium transition-all ${
-                      viewMode === mode
-                        ? 'bg-indigo-600 text-white'
-                        : 'text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-slate-200 hover:bg-slate-200/60 dark:hover:bg-slate-700/40'
-                    }`}>
+                    style={{
+                      padding: '6px 16px', fontSize: 13, fontWeight: 500, border: 'none', cursor: 'pointer', transition: 'all 0.15s',
+                      backgroundColor: viewMode === mode ? '#3B61C4' : 'transparent',
+                      color: viewMode === mode ? '#FFFFFF' : '#6B6B6B',
+                    }}>
                     {label}
                   </button>
                 ))}

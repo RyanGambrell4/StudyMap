@@ -13,23 +13,23 @@ function saveCoachPlan(courseId, plan, formData) { dbSaveCoachPlan(courseId, pla
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
-  bg: '#060614', bgCard: '#0a0a1e', bgEl: '#0d0d22',
-  border: 'rgba(255,255,255,0.06)', borderStrong: 'rgba(255,255,255,0.1)',
-  text: '#e8e8f0', muted: '#8888a0', dim: '#55556e',
-  accent: '#6366f1', glow: 'rgba(99,102,241,0.35)',
-  indigo: '#818CF8', violet: '#8b5cf6',
-  mint: '#34d399', orange: '#F97316', sky: '#38BDF8',
-  pink: '#F472B6', amber: '#fbbf24', cyan: '#22d3ee',
+  bg: '#F7F6F3', bgCard: '#FFFFFF', bgEl: '#F0EFEC',
+  border: 'rgba(0,0,0,0.07)', borderStrong: 'rgba(0,0,0,0.12)',
+  text: '#111111', muted: '#6B6B6B', dim: '#9B9B9B',
+  accent: '#3B61C4', glow: 'rgba(59,97,196,0.2)',
+  indigo: '#3B61C4', violet: '#111111',
+  mint: '#16A34A', orange: '#E8531A', sky: '#2563EB',
+  pink: '#DC2626', amber: '#D97706', cyan: '#0891B2',
 }
 
 const SC_STYLE = `
   @keyframes sc-fadeUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:translateY(0); } }
   @keyframes sc-pulse { 0%,100% { opacity:0.3; } 50% { opacity:1; } }
-  .sc-input { -webkit-appearance:none; background:#0d0d22; border:1px solid rgba(255,255,255,0.08); color:#e8e8f0; border-radius:9px; padding:11px 14px; font-size:13.5px; outline:none; transition:border-color 0.15s; width:100%; font-family:inherit; box-sizing:border-box; }
-  .sc-input:focus { border-color:rgba(99,102,241,0.5); background:#10102a; }
-  .sc-input::placeholder { color:#55556e; }
+  .sc-input { -webkit-appearance:none; background:#FFFFFF; border:1px solid rgba(0,0,0,0.12); color:#111111; border-radius:9px; padding:11px 14px; font-size:13.5px; outline:none; transition:border-color 0.15s; width:100%; font-family:inherit; box-sizing:border-box; }
+  .sc-input:focus { border-color:rgba(59,97,196,0.5); background:#FFFFFF; }
+  .sc-input::placeholder { color:#9B9B9B; }
   textarea.sc-input { resize:vertical; min-height:68px; line-height:1.5; }
-  input[type="date"].sc-input { color-scheme:dark; }
+  input[type="date"].sc-input { color-scheme:light; }
   @media (max-width:1200px) { .sc-grid { grid-template-columns:1fr !important; } .sc-rail { position:static !important; } }
   @media (max-width:768px) { .sc-grid { grid-template-columns:1fr !important; } .sc-rail { position:static !important; top:auto !important; } }
   @media (max-width:640px) {
@@ -94,24 +94,16 @@ function PageHeader({ step, uiMode, onBack, onNewPlan }) {
   const isPlans = uiMode === 'plans'
   return (
     <div className="sc-header-pad" style={{ padding: '28px 32px 20px', borderBottom: `1px solid ${D.border}` }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6, flexWrap: 'wrap' }}>
-        <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', color: D.muted, textTransform: 'uppercase' }}>Your AI Study Coach</span>
-        <span style={{ width: 4, height: 4, borderRadius: '50%', background: D.dim }} />
-        <span style={{ fontSize: 11.5, color: D.dim, display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: D.mint, boxShadow: `0 0 6px ${D.mint}` }} />
-          No-hallucination mode
-        </span>
-      </div>
       <div className="sc-plans-back" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           {!isPlans && onBack && (
-            <button onClick={onBack} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 10, padding: '5px 12px 5px 8px', borderRadius: 8, background: 'rgba(255,255,255,0.04)', border: `1px solid ${D.border}`, color: D.muted, fontSize: 12.5, fontWeight: 500, cursor: 'pointer' }}>
+            <button onClick={onBack} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 10, padding: '5px 12px 5px 8px', borderRadius: 8, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.muted, fontSize: 12.5, fontWeight: 500, cursor: 'pointer' }}>
               <Icon name="arrowLeft" size={13} /> Back to My Plans
             </button>
           )}
           <h1 style={{ margin: 0, fontSize: 32, fontWeight: 700, letterSpacing: -0.8, color: D.text }}>
             Study Coach
-            <span style={{ marginLeft: 12, fontSize: 12.5, fontWeight: 500, color: D.indigo, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', padding: '4px 10px', borderRadius: 999, verticalAlign: 'middle' }}>
+            <span style={{ marginLeft: 12, fontSize: 12.5, fontWeight: 500, color: D.indigo, background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)', padding: '4px 10px', borderRadius: 999, verticalAlign: 'middle' }}>
               {isPlans ? 'My Plans' : `Step ${step}/3`}
             </span>
           </h1>
@@ -131,7 +123,7 @@ function PageHeader({ step, uiMode, onBack, onNewPlan }) {
           )}
         </div>
         {isPlans && onNewPlan && (
-          <button onClick={onNewPlan} style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '11px 18px', borderRadius: 11, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: 13.5, fontWeight: 700, cursor: 'pointer', border: 'none', boxShadow: `0 4px 16px ${D.glow}`, whiteSpace: 'nowrap' }}>
+          <button onClick={onNewPlan} style={{ flexShrink: 0, display: 'inline-flex', alignItems: 'center', gap: 7, padding: '11px 18px', borderRadius: 11, background: '#3B61C4', color: '#fff', fontSize: 13.5, fontWeight: 700, cursor: 'pointer', border: 'none', whiteSpace: 'nowrap' }}>
             <Icon name="plus" size={14} color="#fff" /> New Plan
           </button>
         )}
@@ -148,7 +140,7 @@ function Stepper({ step, go }) {
     { n: 3, label: 'Your study plan', icon: 'sparkles' },
   ]
   return (
-    <div className="sc-stepper" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 6, background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 12, marginBottom: 24 }}>
+    <div className="sc-stepper" style={{ display: 'flex', alignItems: 'center', gap: 8, padding: 6, background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, borderRadius: 12, marginBottom: 24 }}>
       {steps.map((s, i) => {
         const active = step === s.n
         const done = step > s.n
@@ -158,9 +150,9 @@ function Stepper({ step, go }) {
               disabled={!done && !active}
               onClick={() => done && go(s.n)}
               className="sc-step-btn"
-              style={{ flex: 1, padding: '10px 14px', borderRadius: 9, display: 'flex', alignItems: 'center', gap: 10, background: active ? 'rgba(99,102,241,0.15)' : 'transparent', border: active ? '1px solid rgba(99,102,241,0.35)' : '1px solid transparent', opacity: !active && !done ? 0.5 : 1, cursor: done ? 'pointer' : 'default' }}
+              style={{ flex: 1, padding: '10px 14px', borderRadius: 9, display: 'flex', alignItems: 'center', gap: 10, background: active ? 'rgba(59,97,196,0.07)' : 'transparent', border: active ? '1px solid rgba(59,97,196,0.2)' : '1px solid transparent', opacity: !active && !done ? 0.5 : 1, cursor: done ? 'pointer' : 'default' }}
             >
-              <div style={{ width: 24, height: 24, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', background: done ? D.mint : active ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'rgba(255,255,255,0.05)', color: done || active ? '#fff' : D.muted, fontSize: 11, fontWeight: 700, boxShadow: active ? `0 0 10px ${D.glow}` : 'none' }}>
+              <div style={{ width: 24, height: 24, borderRadius: '50%', flexShrink: 0, display: 'grid', placeItems: 'center', background: done ? D.mint : active ? '#3B61C4' : 'rgba(0,0,0,0.04)', color: done || active ? '#fff' : D.muted, fontSize: 11, fontWeight: 700 }}>
                 {done ? <Icon name="check" size={12} stroke={3} /> : s.n}
               </div>
               <span className="sc-step-label" style={{ fontSize: 13, fontWeight: active ? 600 : 500, color: active ? D.text : D.muted, whiteSpace: 'nowrap' }}>{s.label}</span>
@@ -187,7 +179,7 @@ function ChipInput({ values, onChange, placeholder, color = D.indigo }) {
         <input type="text" className="sc-input" value={draft} placeholder={placeholder}
           onChange={e => setDraft(e.target.value)}
           onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); add() } }} />
-        <button onClick={add} style={{ padding: '0 16px', borderRadius: 9, flexShrink: 0, background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.35)', color: D.indigo, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Add</button>
+        <button onClick={add} style={{ padding: '0 16px', borderRadius: 9, flexShrink: 0, background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.25)', color: D.indigo, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Add</button>
       </div>
       {values.length > 0 && (
         <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
@@ -222,7 +214,7 @@ function FileDropZone({ files, onChange, onExtract, loading }) {
         onDragOver={e => { e.preventDefault(); setDrag(true) }}
         onDragLeave={() => setDrag(false)}
         onDrop={e => { e.preventDefault(); setDrag(false); addFiles(e.dataTransfer.files) }}
-        style={{ padding: 20, borderRadius: 11, cursor: 'pointer', background: drag ? 'rgba(34,211,238,0.08)' : 'rgba(255,255,255,0.02)', border: `1px dashed ${drag ? D.cyan : D.borderStrong}`, textAlign: 'center', transition: 'all 0.15s' }}
+        style={{ padding: 20, borderRadius: 11, cursor: 'pointer', background: drag ? 'rgba(34,211,238,0.08)' : 'rgba(0,0,0,0.03)', border: `1px dashed ${drag ? D.cyan : D.borderStrong}`, textAlign: 'center', transition: 'all 0.15s' }}
       >
         {loading ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: D.muted, fontSize: 13 }}>
@@ -276,57 +268,32 @@ function CoachRail({ form, confidence, course }) {
   const topics = form.topics || []
   const dates = (form.dates || []).filter(d => d.date && d.label)
   return (
-    <div className="sc-rail" style={{ position: 'sticky', top: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
-      {/* Coach card */}
-      <div style={{ background: 'linear-gradient(155deg, rgba(139,92,246,0.14) 0%, rgba(99,102,241,0.05) 45%, #0a0a1e 100%)', border: '1px solid rgba(139,92,246,0.28)', borderRadius: 14, padding: 18, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, background: 'radial-gradient(circle, rgba(139,92,246,0.25), transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 12, position: 'relative' }}>
-          <div style={{ width: 32, height: 32, borderRadius: 9, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', display: 'grid', placeItems: 'center', color: '#fff', boxShadow: `0 0 12px ${D.glow}`, flexShrink: 0 }}>
-            <Icon name="sparkles" size={15} />
-          </div>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>Your Coach</div>
-            <div style={{ fontSize: 11, color: D.dim, marginTop: 2, display: 'flex', alignItems: 'center', gap: 5 }}>
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.mint, boxShadow: `0 0 6px ${D.mint}`, animation: 'sc-pulse 1.2s infinite' }} />
-              Listening
-            </div>
-          </div>
-        </div>
-        <div style={{ fontSize: 12.5, color: D.text, lineHeight: 1.55, position: 'relative' }}>
+    <div className="sc-rail" style={{ position: 'sticky', top: 20 }}>
+      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 18 }}>
+        <div style={{ fontSize: 12.5, color: D.muted, lineHeight: 1.55, marginBottom: 14 }}>
           {!form.courseId && form.courseIdx === undefined ? (
-            <>Pick a course above to get started. I'll only plan for what you confirm.</>
+            'Pick a course to get started.'
           ) : !form.goal?.trim() && !topics.length ? (
-            <>Great, <strong>{course?.name}</strong>. Now tell me your goal or list topics your professor emphasizes. <span style={{ color: D.dim }}>I won't add any I don't see from you.</span></>
+            <><strong style={{ color: D.text }}>{course?.name}</strong> — add a goal or topics to start building.</>
           ) : (
-            <>Got it. Working with <strong>{topics.length || 0} topic{topics.length === 1 ? '' : 's'}</strong>{dates.length > 0 && <>, <strong>{dates.length} date{dates.length === 1 ? '' : 's'}</strong></>}, and your goal. The more you add, the more grounded the plan.</>
+            <>Working with <strong style={{ color: D.text }}>{topics.length}</strong> topic{topics.length === 1 ? '' : 's'}{dates.length > 0 && <> and <strong style={{ color: D.text }}>{dates.length}</strong> date{dates.length === 1 ? '' : 's'}</>}.</>
           )}
         </div>
-      </div>
-
-      {/* Confidence */}
-      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 16 }}>
-        <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', color: D.muted, textTransform: 'uppercase', marginBottom: 10 }}>Plan Confidence</div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 10 }}>
-          <span style={{ fontSize: 24, fontWeight: 700, color: confidence >= 6 ? D.mint : confidence >= 3 ? D.indigo : D.dim, fontFamily: 'ui-monospace, monospace' }}>{Math.round(confidence / 9 * 100)}%</span>
-          <span style={{ fontSize: 11, color: D.dim }}>based on {confidence}/9 signals</span>
+        <div style={{ marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+          <span style={{ fontSize: 12, color: D.muted }}>Plan confidence</span>
+          <span style={{ fontSize: 15, fontWeight: 700, color: confidence >= 6 ? D.mint : confidence >= 3 ? D.indigo : D.dim }}>{Math.round(confidence / 9 * 100)}%</span>
         </div>
-        <div style={{ height: 6, background: 'rgba(255,255,255,0.04)', borderRadius: 3, overflow: 'hidden' }}>
-          <div style={{ width: `${(confidence / 9) * 100}%`, height: '100%', background: confidence >= 6 ? `linear-gradient(90deg, ${D.mint}, ${D.cyan})` : `linear-gradient(90deg, ${D.accent}, ${D.violet})`, transition: 'all 0.3s' }} />
+        <div style={{ height: 4, background: 'rgba(0,0,0,0.06)', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
+          <div style={{ width: `${(confidence / 9) * 100}%`, height: '100%', background: confidence >= 6 ? D.mint : D.accent, transition: 'width 0.3s' }} />
         </div>
-        <div style={{ marginTop: 12, fontSize: 11.5, color: D.muted, lineHeight: 1.45 }}>
-          {confidence < 3 && 'A solid plan needs 3+ inputs. Add topics or a goal.'}
-          {confidence >= 3 && confidence < 6 && 'Good foundation. Adding dates and materials sharpens week-by-week pacing.'}
-          {confidence >= 6 && 'Strong inputs: the plan will be specific and grounded in what you shared.'}
+        <div style={{ fontSize: 11.5, color: D.dim, lineHeight: 1.45, marginBottom: 14 }}>
+          {confidence < 3 && 'Add topics or a goal to strengthen the plan.'}
+          {confidence >= 3 && confidence < 6 && 'Good start. Dates and materials improve pacing.'}
+          {confidence >= 6 && 'Strong inputs — the plan will be specific to what you shared.'}
         </div>
-      </div>
-
-      {/* No-invent pledge */}
-      <div style={{ padding: 14, borderRadius: 11, background: `rgba(52,211,153,0.06)`, border: `1px solid rgba(52,211,153,0.2)` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-          <Icon name="check" size={13} color={D.mint} stroke={2.5} />
-          <span style={{ fontSize: 12, fontWeight: 600, color: D.mint }}>No-invent pledge</span>
+        <div style={{ borderTop: `1px solid ${D.border}`, paddingTop: 12, fontSize: 11.5, color: D.dim, lineHeight: 1.5 }}>
+          Only plans from what you tell me — no invented topics or dates.
         </div>
-        <div style={{ fontSize: 11.5, color: D.muted, lineHeight: 1.5 }}>I will never add topics, dates, or recommendations you didn't mention. If I need something, I'll ask.</div>
       </div>
     </div>
   )
@@ -361,7 +328,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
               const active = form.courseIdx === i
               const color = c.color?.dot || D.accent
               return (
-                <button key={i} onClick={() => update('courseIdx', i)} style={{ padding: '10px 14px', borderRadius: 10, background: active ? `linear-gradient(135deg, ${color}22, ${color}0a)` : 'rgba(255,255,255,0.02)', border: active ? `1px solid ${color}55` : `1px solid ${D.border}`, boxShadow: active ? `0 0 0 3px ${color}12` : 'none', color: active ? D.text : D.muted, fontSize: 12.5, fontWeight: active ? 600 : 500, display: 'inline-flex', alignItems: 'center', gap: 8, transition: 'all 0.15s', cursor: 'pointer' }}>
+                <button key={i} onClick={() => update('courseIdx', i)} style={{ padding: '10px 14px', borderRadius: 10, background: active ? `linear-gradient(135deg, ${color}22, ${color}0a)` : 'rgba(0,0,0,0.03)', border: active ? `1px solid ${color}55` : `1px solid ${D.border}`, boxShadow: active ? `0 0 0 3px ${color}12` : 'none', color: active ? D.text : D.muted, fontSize: 12.5, fontWeight: active ? 600 : 500, display: 'inline-flex', alignItems: 'center', gap: 8, transition: 'all 0.15s', cursor: 'pointer' }}>
                   <span style={{ width: 7, height: 7, borderRadius: '50%', background: color, boxShadow: `0 0 6px ${color}90` }} />
                   {c.name}
                 </button>
@@ -372,7 +339,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
 
         {/* Struggles from AI Tutor */}
         {cachedStruggles.length > 0 && (
-          <div style={{ padding: '12px 16px', borderRadius: 11, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.25)', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+          <div style={{ padding: '12px 16px', borderRadius: 11, background: 'rgba(59,97,196,0.05)', border: `1px solid ${D.border}`, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
             <Icon name="bookmark" size={14} color={D.indigo} />
             <div style={{ fontSize: 12.5, color: D.indigo }}>
               <span style={{ fontWeight: 600 }}>Topics flagged from AI Tutor: </span>
@@ -419,7 +386,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
             <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 160px 32px', gap: 8, marginBottom: 8 }}>
               <input type="text" className="sc-input" placeholder="e.g. Midterm, Essay 1 due" value={d.label} onChange={e => updateDate(i, { label: e.target.value })} />
               <input type="date" className="sc-input" value={d.date} onChange={e => updateDate(i, { date: e.target.value })} />
-              <button onClick={() => removeDate(i)} style={{ width: 32, height: 40, borderRadius: 8, display: 'grid', placeItems: 'center', background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, color: D.muted, cursor: 'pointer' }}>
+              <button onClick={() => removeDate(i)} style={{ width: 32, height: 40, borderRadius: 8, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, color: D.muted, cursor: 'pointer' }}>
                 <Icon name="x" size={12} />
               </button>
             </div>
@@ -446,7 +413,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
               {[1,2,3,4,5,6,7].map(n => {
                 const active = form.daysPerWeek === n
                 return (
-                  <button key={n} onClick={() => update('daysPerWeek', n)} style={{ flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: active ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.02)', border: `1px solid ${active ? 'rgba(99,102,241,0.5)' : D.border}`, color: active ? '#fff' : D.muted, boxShadow: active ? `0 0 10px ${D.glow}` : 'none' }}>{n}</button>
+                  <button key={n} onClick={() => update('daysPerWeek', n)} style={{ flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: active ? '#3B61C4' : 'rgba(0,0,0,0.03)', border: `1px solid ${active ? '#3B61C4' : D.border}`, color: active ? '#fff' : D.muted }}>{n}</button>
                 )
               })}
             </div>
@@ -456,7 +423,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
               {[30,45,60,75,90].map(m => {
                 const active = form.sessionLen === m
                 return (
-                  <button key={m} onClick={() => update('sessionLen', m)} style={{ flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', background: active ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.02)', border: `1px solid ${active ? 'rgba(99,102,241,0.5)' : D.border}`, color: active ? '#fff' : D.muted }}>{m}m</button>
+                  <button key={m} onClick={() => update('sessionLen', m)} style={{ flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', background: active ? '#3B61C4' : 'rgba(0,0,0,0.03)', border: `1px solid ${active ? '#3B61C4' : D.border}`, color: active ? '#fff' : D.muted }}>{m}m</button>
                 )
               })}
             </div>
@@ -470,7 +437,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
               const list = form.style || []
               const active = list.includes(t)
               return (
-                <button key={t} onClick={() => update('style', active ? list.filter(x => x !== t) : [...list, t])} style={{ padding: '7px 12px', borderRadius: 999, fontSize: 12, cursor: 'pointer', background: active ? 'rgba(52,211,153,0.15)' : 'rgba(255,255,255,0.02)', border: `1px solid ${active ? 'rgba(52,211,153,0.4)' : D.border}`, color: active ? D.mint : D.muted, fontWeight: active ? 600 : 500 }}>
+                <button key={t} onClick={() => update('style', active ? list.filter(x => x !== t) : [...list, t])} style={{ padding: '7px 12px', borderRadius: 999, fontSize: 12, cursor: 'pointer', background: active ? 'rgba(52,211,153,0.15)' : 'rgba(0,0,0,0.03)', border: `1px solid ${active ? 'rgba(52,211,153,0.4)' : D.border}`, color: active ? D.mint : D.muted, fontWeight: active ? 600 : 500 }}>
                   {active && '✓ '}{t}
                 </button>
               )
@@ -482,7 +449,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
         <button
           disabled={!canProceed}
           onClick={onNext}
-          style={{ width: '100%', padding: '14px 20px', borderRadius: 11, background: canProceed ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'rgba(255,255,255,0.04)', color: canProceed ? '#fff' : D.dim, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: canProceed ? `0 8px 24px ${D.glow}` : 'none', cursor: canProceed ? 'pointer' : 'not-allowed', border: 'none' }}
+          style={{ width: '100%', padding: '14px 20px', borderRadius: 11, background: canProceed ? '#3B61C4' : 'rgba(0,0,0,0.04)', color: canProceed ? '#fff' : D.dim, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: canProceed ? 'pointer' : 'not-allowed', border: 'none' }}
         >
           Review what I've got <Icon name="arrow" size={14} />
         </button>
@@ -521,9 +488,9 @@ function CoachQuestion({ n, question, form, setForm, field }) {
     setAnswered(true)
   }
   return (
-    <div style={{ padding: 14, borderRadius: 10, background: answered ? 'rgba(52,211,153,0.06)' : 'rgba(255,255,255,0.02)', border: `1px solid ${answered ? 'rgba(52,211,153,0.25)' : D.border}` }}>
+    <div style={{ padding: 14, borderRadius: 10, background: answered ? 'rgba(52,211,153,0.06)' : 'rgba(0,0,0,0.03)', border: `1px solid ${answered ? 'rgba(52,211,153,0.25)' : D.border}` }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: answered ? 0 : 10 }}>
-        <div style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, background: answered ? D.mint : 'rgba(99,102,241,0.2)', color: answered ? '#fff' : D.indigo, display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 700 }}>
+        <div style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, background: answered ? D.mint : 'rgba(232,83,26,0.12)', color: answered ? '#fff' : D.indigo, display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 700 }}>
           {answered ? <Icon name="check" size={11} stroke={3} /> : n}
         </div>
         <div style={{ fontSize: 13, color: D.text, lineHeight: 1.5 }}>{question}</div>
@@ -533,7 +500,7 @@ function CoachQuestion({ n, question, form, setForm, field }) {
           <input type="text" className="sc-input" placeholder={field === 'topics-chip' ? 'Comma-separated, or skip' : 'Type your answer, or skip'}
             value={draft} onChange={e => setDraft(e.target.value)}
             onKeyDown={e => { if (e.key === 'Enter') submit() }} />
-          <button onClick={submit} disabled={!draft.trim()} style={{ padding: '0 14px', borderRadius: 8, flexShrink: 0, background: draft.trim() ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.03)', border: `1px solid ${draft.trim() ? 'rgba(99,102,241,0.4)' : D.border}`, color: draft.trim() ? '#fff' : D.dim, fontSize: 12.5, fontWeight: 600, cursor: draft.trim() ? 'pointer' : 'not-allowed' }}>Save</button>
+          <button onClick={submit} disabled={!draft.trim()} style={{ padding: '0 14px', borderRadius: 8, flexShrink: 0, background: draft.trim() ? '#3B61C4' : 'rgba(0,0,0,0.03)', border: `1px solid ${draft.trim() ? '#3B61C4' : D.border}`, color: draft.trim() ? '#fff' : D.dim, fontSize: 12.5, fontWeight: 600, cursor: draft.trim() ? 'pointer' : 'not-allowed' }}>Save</button>
           <button onClick={() => setAnswered(true)} style={{ padding: '0 12px', borderRadius: 8, flexShrink: 0, color: D.dim, fontSize: 12, cursor: 'pointer' }}>Skip</button>
         </div>
       )}
@@ -558,18 +525,17 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
     <div className="sc-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: 24, alignItems: 'flex-start' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {/* Summary */}
-        <div style={{ background: `linear-gradient(155deg, ${color}18 0%, ${color}05 40%, #0a0a1e 100%)`, border: `1px solid ${color}30`, borderRadius: 14, padding: 22, position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -50, right: -50, width: 200, height: 200, background: `radial-gradient(circle, ${color}25, transparent 70%)`, pointerEvents: 'none' }} />
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 22 }}>
           <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', color: D.muted, textTransform: 'uppercase', marginBottom: 10 }}>Here's what you told me</div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 18, fontWeight: 600, color: D.text, marginBottom: 8, position: 'relative' }}>
-            <span style={{ width: 10, height: 10, borderRadius: '50%', background: color, boxShadow: `0 0 10px ${color}` }} />
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 18, fontWeight: 600, color: D.text, marginBottom: 8 }}>
+            <span style={{ width: 10, height: 10, borderRadius: '50%', background: color, flexShrink: 0 }} />
             {course?.name}
           </div>
-          <div style={{ fontSize: 13, color: D.muted, lineHeight: 1.6, position: 'relative' }}>
+          <div style={{ fontSize: 13, color: D.muted, lineHeight: 1.6 }}>
             {form.goal?.trim() ? <>Your goal: <span style={{ color: D.text }}>{form.goal}</span>. </> : 'No goal on file. '}
-            {topics.length > 0 ? <>Emphasizing <span style={{ color: D.indigo, fontFamily: 'ui-monospace,monospace' }}>{topics.length}</span> topic{topics.length === 1 ? '' : 's'}. </> : 'No topics yet. '}
-            {dates.length > 0 && <><span style={{ color: D.pink, fontFamily: 'ui-monospace,monospace' }}>{dates.length}</span> deadline{dates.length === 1 ? '' : 's'} noted. </>}
-            Cadence: <span style={{ color: D.amber, fontFamily: 'ui-monospace,monospace' }}>{form.daysPerWeek || 3}</span> days × <span style={{ color: D.amber, fontFamily: 'ui-monospace,monospace' }}>{form.sessionLen || 60}m</span>.
+            {topics.length > 0 ? <>Emphasizing <span style={{ color: D.indigo }}>{topics.length}</span> topic{topics.length === 1 ? '' : 's'}. </> : 'No topics yet. '}
+            {dates.length > 0 && <><span style={{ color: D.pink }}>{dates.length}</span> deadline{dates.length === 1 ? '' : 's'} noted. </>}
+            Cadence: <span style={{ color: D.amber }}>{form.daysPerWeek || 3}</span> days x <span style={{ color: D.amber }}>{form.sessionLen || 60}m</span>.
           </div>
         </div>
 
@@ -586,7 +552,7 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
           <FactCard icon="calendar" color={D.violet} title="Deadlines" empty={dates.length === 0}>
             {dates.length ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {dates.map((d, i) => <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5 }}><span style={{ color: D.text }}>{d.label}</span><span style={{ color: D.violet, fontFamily: 'ui-monospace,monospace' }}>{d.date}</span></div>)}
+                {dates.map((d, i) => <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12.5 }}><span style={{ color: D.text }}>{d.label}</span><span style={{ color: D.violet }}>{d.date}</span></div>)}
               </div>
             ) : 'None'}
           </FactCard>
@@ -597,7 +563,7 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
 
         {/* Coach questions */}
         {questions.length > 0 && (
-          <div style={{ background: 'linear-gradient(155deg, rgba(99,102,241,0.1) 0%, rgba(99,102,241,0.03) 50%, #0a0a1e 100%)', border: '1px solid rgba(99,102,241,0.28)', borderRadius: 14, padding: 20 }}>
+          <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <Icon name="msg" size={14} color={D.indigo} />
               <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', color: D.indigo, textTransform: 'uppercase' }}>Before I build: a few gaps</span>
@@ -611,10 +577,10 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
 
         {/* Nav */}
         <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={onBack} style={{ padding: '14px 18px', borderRadius: 11, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13.5, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer' }}>
+          <button onClick={onBack} style={{ padding: '14px 18px', borderRadius: 11, background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13.5, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer' }}>
             <Icon name="arrowLeft" size={13} /> Edit inputs
           </button>
-          <button onClick={onBuild} disabled={loading} style={{ flex: 1, padding: '14px 20px', borderRadius: 11, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: `0 8px 24px ${D.glow}`, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, border: 'none' }}>
+          <button onClick={onBuild} disabled={loading} style={{ flex: 1, padding: '14px 20px', borderRadius: 11, background: '#3B61C4', color: '#fff', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, border: 'none' }}>
             {loading ? (
               <>
                 <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', animation: 'spin 0.8s linear infinite' }} />
@@ -650,7 +616,7 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
         <Icon name="warn" size={28} color={D.orange} />
         <div style={{ fontSize: 16, fontWeight: 600, color: D.text, marginTop: 12, marginBottom: 6 }}>Couldn't generate plan</div>
         <div style={{ fontSize: 13, color: D.muted, marginBottom: 18 }}>{error}</div>
-        <button onClick={onRefine} style={{ padding: '11px 20px', borderRadius: 10, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: 13, fontWeight: 600, boxShadow: `0 6px 20px ${D.glow}`, cursor: 'pointer', border: 'none' }}>Go back and try again</button>
+        <button onClick={onRefine} style={{ padding: '11px 20px', borderRadius: 10, background: '#3B61C4', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none' }}>Go back and try again</button>
       </div>
     )
   }
@@ -672,10 +638,9 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
           {deadlinesCount > 0 && <StatRow label="Deadlines tracked" value={deadlinesCount} color={D.pink} last />}
         </div>
         {firstSession && (
-          <div style={{ background: 'linear-gradient(155deg, rgba(249,115,22,0.12) 0%, rgba(249,115,22,0.04) 50%, #0a0a1e 100%)', border: '1px solid rgba(249,115,22,0.28)', borderRadius: 14, padding: 16 }}>
+          <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 16 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-              <Icon name="arrow" size={11} color={D.orange} />
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.orange, textTransform: 'uppercase' }}>Start Here</span>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>Start Here</span>
             </div>
             <div style={{ fontSize: 13.5, fontWeight: 600, color: D.text, marginBottom: 4, lineHeight: 1.4 }}>{firstSession.focusArea}</div>
             <div style={{ fontSize: 12, color: D.muted, marginBottom: 14 }}>{(firstSession.goal || '').split('.')[0]} · {firstSession.duration || sessionLen}m</div>
@@ -697,7 +662,7 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
                   goal: firstSession.goal ?? '',
                 })
               }}
-              style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'linear-gradient(135deg, #F97316, #ea580c)', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none', boxShadow: '0 4px 16px rgba(249,115,22,0.35)' }}
+              style={{ width: '100%', padding: '11px', borderRadius: 10, background: '#3B61C4', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none' }}
             >
               Start first session →
             </button>
@@ -719,7 +684,7 @@ function StatRow({ label, value, color, last }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', alignItems: 'center', borderBottom: last ? 'none' : `1px solid ${D.border}` }}>
       <span style={{ fontSize: 12, color: D.muted }}>{label}</span>
-      <span style={{ fontSize: 13, fontWeight: 700, color, fontFamily: 'ui-monospace, monospace' }}>{value}</span>
+      <span style={{ fontSize: 13, fontWeight: 700, color }}>{value}</span>
     </div>
   )
 }
@@ -766,14 +731,11 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
     return { days: Math.ceil((nearest.dt - today) / 86400000), label: nearest.label }
   }
 
-  const Stat = ({ icon, label, value, sub }) => (
-    <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: '16px 20px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 10 }}>
-        <Icon name={icon} size={13} color={D.muted} />
-        <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: D.muted, textTransform: 'uppercase' }}>{label}</span>
-      </div>
+  const Stat = ({ label, value, sub }) => (
+    <div style={{ padding: '0 20px', textAlign: 'center' }}>
       <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: -0.5, color: D.text, lineHeight: 1 }}>{value}</div>
-      {sub && <div style={{ fontSize: 11.5, color: D.dim, marginTop: 4, fontWeight: 500 }}>{sub}</div>}
+      <div style={{ fontSize: 11, fontWeight: 600, color: D.muted, marginTop: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
+      {sub && <div style={{ fontSize: 11.5, color: D.dim, marginTop: 2 }}>{sub}</div>}
     </div>
   )
 
@@ -786,13 +748,16 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
   return (
     <div>
       {/* Stats bar */}
-      <div className="sc-plans-stats">
-        <Stat icon="check" label="Plans Ready" value={withPlans.length} />
-        <Stat icon="warn" label="Courses Without Plans" value={withoutPlans.length} />
-        <Stat icon="clock" label="Total Study Hours Planned" value={`${Math.round(totalHours)}h`} />
-        <Stat icon="calendar" label="Next Deadline"
+      <div style={{ display: 'flex', alignItems: 'stretch', marginBottom: 28, paddingBottom: 24, borderBottom: `1px solid ${D.border}` }}>
+        <Stat label="Plans Ready" value={withPlans.length} />
+        <div style={{ width: 1, background: D.border, flexShrink: 0 }} />
+        <Stat label="Without Plans" value={withoutPlans.length} />
+        <div style={{ width: 1, background: D.border, flexShrink: 0 }} />
+        <Stat label="Study Hours" value={`${Math.round(totalHours)}h`} />
+        <div style={{ width: 1, background: D.border, flexShrink: 0 }} />
+        <Stat label="Next Deadline"
           value={nextDeadline ? `${nextDeadline.days}d` : '—'}
-          sub={nextDeadline ? nextDeadline.course.name : 'No deadlines added'} />
+          sub={nextDeadline ? nextDeadline.course.name : 'No deadlines'} />
       </div>
 
       {/* Ready to study */}
@@ -800,7 +765,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
         <div style={{ marginBottom: 32 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 15, fontWeight: 700, color: D.text }}>Ready to study</span>
-            <span style={{ fontSize: 11.5, fontWeight: 600, color: D.muted, background: 'rgba(255,255,255,0.06)', border: `1px solid ${D.border}`, borderRadius: 999, padding: '2px 9px' }}>{withPlans.length}</span>
+            <span style={{ fontSize: 11.5, fontWeight: 600, color: D.muted, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, borderRadius: 999, padding: '2px 9px' }}>{withPlans.length}</span>
             <span style={{ fontSize: 12.5, color: D.dim }}>Plans built and anchored to your dates</span>
           </div>
           <div className="sc-plans-cards">
@@ -813,7 +778,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
               const { code, title } = parseName(course.name)
               const dot = course.color?.dot || D.accent
               return (
-                <div key={idx} style={{ background: 'linear-gradient(155deg, rgba(99,102,241,0.08) 0%, #0a0a1e 100%)', border: '1px solid rgba(99,102,241,0.3)', borderRadius: 14, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div key={idx} style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
@@ -834,14 +799,14 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
                       <span style={{ fontSize: 12.5, fontWeight: 600, flexShrink: 0, color: deadline.days <= 14 ? D.orange : D.muted }}>{deadline.days}d</span>
                     </div>
                   )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 8, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.14)', width: 'fit-content' }}>
-                    <span style={{ fontSize: 12.5, fontWeight: 700, color: D.indigo }}>{weeks}w</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: 'fit-content' }}>
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: D.muted }}>{weeks}w</span>
                     <span style={{ color: D.dim, fontSize: 11 }}>·</span>
-                    <span style={{ fontSize: 12.5, fontWeight: 700, color: D.indigo }}>{sessions} sessions</span>
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: D.muted }}>{sessions} sessions</span>
                     <span style={{ color: D.dim, fontSize: 11 }}>·</span>
-                    <span style={{ fontSize: 12.5, fontWeight: 700, color: D.indigo }}>{hours}h</span>
+                    <span style={{ fontSize: 12.5, fontWeight: 600, color: D.muted }}>{hours}h</span>
                   </div>
-                  <button onClick={() => onViewPlan(idx)} style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', color: D.indigo, fontSize: 13.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+                  <button onClick={() => onViewPlan(idx)} style={{ background: 'none', border: 'none', padding: 0, color: D.indigo, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
                     View Plan →
                   </button>
                 </div>
@@ -856,7 +821,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 15, fontWeight: 700, color: D.text }}>No plan yet</span>
-            <span style={{ fontSize: 11.5, fontWeight: 600, color: D.muted, background: 'rgba(255,255,255,0.06)', border: `1px solid ${D.border}`, borderRadius: 999, padding: '2px 9px' }}>{withoutPlans.length}</span>
+            <span style={{ fontSize: 11.5, fontWeight: 600, color: D.muted, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, borderRadius: 999, padding: '2px 9px' }}>{withoutPlans.length}</span>
             <span style={{ fontSize: 12.5, color: D.dim }}>Start a plan and I'll only use what you tell me</span>
           </div>
           <div className="sc-plans-cards">
@@ -864,7 +829,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
               const { code, title } = parseName(course.name)
               const dot = course.color?.dot || D.accent
               return (
-                <div key={idx} style={{ background: D.bgCard, border: `1px dashed rgba(255,255,255,0.1)`, borderRadius: 14, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+                <div key={idx} style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
                     <div style={{ minWidth: 0 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
@@ -873,14 +838,14 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
                       </div>
                       <div style={{ fontSize: 16, fontWeight: 700, color: D.text, lineHeight: 1.3, wordBreak: 'break-word' }}>{code ? title : ''}</div>
                     </div>
-                    <div style={{ flexShrink: 0, padding: '4px 10px', borderRadius: 999, background: 'rgba(255,255,255,0.04)', border: `1px solid ${D.border}` }}>
+                    <div style={{ flexShrink: 0, padding: '4px 10px', borderRadius: 999, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}` }}>
                       <span style={{ fontSize: 11, fontWeight: 600, color: D.dim }}>No plan</span>
                     </div>
                   </div>
                   <p style={{ fontSize: 12.5, color: D.dim, lineHeight: 1.55, margin: 0, fontStyle: 'italic' }}>
                     Tell me your goal, topics, and dates — I'll build a week-by-week plan grounded only in what you share.
                   </p>
-                  <button onClick={() => onBuildPlan(idx)} style={{ width: '100%', padding: '11px', borderRadius: 10, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', color: D.indigo, fontSize: 13.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', marginTop: 'auto' }}>
+                  <button onClick={() => onBuildPlan(idx)} style={{ background: 'none', border: 'none', padding: 0, color: D.indigo, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', marginTop: 'auto' }}>
                     Build Plan →
                   </button>
                 </div>
@@ -1064,7 +1029,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     const isRecovery = gap < -10
     const weakAreas = comps.filter(c => c.graded && c.grade !== null && c.grade < 70).map(c => c.component)
     const targetLabel = TARGET_OPTIONS.find(o => o.value === target)?.label ?? `${target}%`
-    const col = isRecovery ? { bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.2)', text: '#fca5a5' } : { bg: 'rgba(251,191,36,0.08)', border: 'rgba(251,191,36,0.2)', text: '#fde68a' }
+    const col = isRecovery ? { bg: 'rgba(239,68,68,0.06)', border: 'rgba(239,68,68,0.2)', text: '#dc2626' } : { bg: 'rgba(251,191,36,0.06)', border: 'rgba(251,191,36,0.2)', text: '#d97706' }
     return (
       <div style={{ marginBottom: 16, padding: '12px 16px', borderRadius: 11, background: col.bg, border: `1px solid ${col.border}`, display: 'flex', gap: 10, alignItems: 'flex-start' }}>
         <Icon name={isRecovery ? 'warn' : 'info'} size={14} color={col.text} />
@@ -1078,7 +1043,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   })()
 
   if (courses.length === 0) {
-    const G = { card: 'rgba(255,255,255,0.04)', border: 'rgba(255,255,255,0.07)', text: 'rgba(255,255,255,0.65)', muted: 'rgba(255,255,255,0.28)', accent: 'rgba(99,102,241,0.5)' }
+    const G = { card: 'rgba(0,0,0,0.04)', border: 'rgba(255,255,255,0.07)', text: 'rgba(255,255,255,0.65)', muted: 'rgba(255,255,255,0.28)', accent: 'rgba(99,102,241,0.5)' }
     const GhostBar = ({ w, color = G.accent }) => (
       <div style={{ height: 5, borderRadius: 3, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
         <div style={{ width: w, height: '100%', background: color, borderRadius: 3 }} />
@@ -1111,7 +1076,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
                 <GhostBar w={w.pct} color={w.color} />
                 <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
                   {w.tasks.map(t => (
-                    <div key={t} style={{ fontSize: 11, color: G.muted, background: 'rgba(255,255,255,0.04)', border: `1px solid ${G.border}`, borderRadius: 6, padding: '3px 8px' }}>{t}</div>
+                    <div key={t} style={{ fontSize: 11, color: G.muted, background: 'rgba(0,0,0,0.04)', border: `1px solid ${G.border}`, borderRadius: 6, padding: '3px 8px' }}>{t}</div>
                   ))}
                 </div>
               </div>
@@ -1121,8 +1086,8 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
 
         {/* CTA overlay */}
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(6,6,20,0.6)', backdropFilter: 'blur(1px)', padding: 24 }}>
-          <div style={{ background: '#0a0a1e', border: '1px solid rgba(255,255,255,0.10)', borderRadius: 20, padding: '40px 36px', maxWidth: 400, width: '100%', textAlign: 'center', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}>
-            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+          <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 20, padding: '40px 36px', maxWidth: 400, width: '100%', textAlign: 'center', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(232,83,26,0.1)', border: '1px solid rgba(232,83,26,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
               <Icon name="sparkles" size={24} color="#818cf8" />
             </div>
             <h2 style={{ color: '#F1F5F9', fontSize: 20, fontWeight: 700, letterSpacing: -0.4, margin: '0 0 10px' }}>Your AI study plan is one step away.</h2>
@@ -1416,10 +1381,9 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 80 }}>
       {/* Overview header */}
-      <div style={{ background: 'linear-gradient(155deg, rgba(249,115,22,0.1) 0%, rgba(249,115,22,0.04) 40%, #0a0a1e 100%)', border: '1px solid rgba(249,115,22,0.25)', borderRadius: 14, padding: '20px 22px', position: 'relative', overflow: 'hidden', overflowX: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -60, right: -60, width: 220, height: 220, background: 'radial-gradient(circle, rgba(249,115,22,0.18), transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', color: D.orange, textTransform: 'uppercase', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-          <Icon name="sparkles" size={11} color={D.orange} /> Your Personalized Plan
+      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '20px 22px', overflow: 'hidden', overflowX: 'hidden' }}>
+        <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase', marginBottom: 10 }}>
+          Your Personalized Plan
         </div>
         <div className="sc-plan-header-row" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div className="sc-plan-text" style={{ flex: 1, minWidth: 0 }}>
@@ -1428,7 +1392,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
               <span style={{ fontSize: 15, fontWeight: 600, color: D.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{course?.name}</span>
             </div>
             <div className="sc-plan-title" style={{ fontSize: 22, fontWeight: 700, color: D.text, lineHeight: 1.3, marginBottom: 12 }}>
-              <span style={{ color: D.orange }}>{weeks}</span> week{weeks !== 1 ? 's' : ''} &nbsp;·&nbsp; <span style={{ color: D.orange }}>{totalSessions}</span> sessions &nbsp;·&nbsp; <span style={{ color: D.orange }}>{totalHours}h</span> of focused study
+              <span style={{ color: D.accent }}>{weeks}</span> week{weeks !== 1 ? 's' : ''} &nbsp;·&nbsp; <span style={{ color: D.accent }}>{totalSessions}</span> sessions &nbsp;·&nbsp; <span style={{ color: D.accent }}>{totalHours}h</span> of focused study
             </div>
             <div style={{ fontSize: 13, color: D.muted, lineHeight: 1.6 }}>
               {goal ? <><span style={{ color: D.text }}>Structured to aim for "{goal}"</span>, </> : ''}
@@ -1436,83 +1400,14 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
               via {techniquesList.slice(0, 2).join(' + ').toLowerCase()}, rotating through the {plan?.priorityTopics?.length || 0} topic{plan?.priorityTopics?.length === 1 ? '' : 's'} you gave me. No topic, date, or recommendation has been invented.
             </div>
           </div>
-          <div className="sc-plan-ring" style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flexShrink: 0 }}>
-            <svg width={72} height={72} viewBox="0 0 72 72">
-              <circle cx={36} cy={36} r={28} fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth={5} />
-              <circle cx={36} cy={36} r={28} fill="none" stroke={dot} strokeWidth={5} strokeLinecap="round"
-                strokeDasharray={`${2 * Math.PI * 28}`}
-                strokeDashoffset={`${2 * Math.PI * 28 * (1 - completePct / 100)}`}
-                transform="rotate(-90 36 36)" style={{ transition: 'stroke-dashoffset 0.5s' }} />
-              <text x={36} y={33} textAnchor="middle" fill={D.text} fontSize={13} fontWeight={700}>{completePct}%</text>
-              <text x={36} y={46} textAnchor="middle" fill={D.muted} fontSize={9}>complete</text>
-            </svg>
-            <div style={{ fontSize: 11, color: D.dim }}>{doneCount} / {totalSessions} sessions done</div>
+          <div style={{ flexShrink: 0, textAlign: 'right' }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: completePct > 0 ? D.mint : D.dim }}>{completePct}%</div>
+            <div style={{ fontSize: 11, color: D.dim }}>{doneCount}/{totalSessions} done</div>
           </div>
         </div>
       </div>
 
-      {/* Roadmap */}
-      {weeks > 0 && (
-        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '16px 20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 20 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>Your Roadmap</span>
-            <span className="sc-roadmap-hint" style={{ fontSize: 11, color: D.dim }}>Tap a week to jump down</span>
-          </div>
-          <div style={{ position: 'relative', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-            <div style={{ position: 'absolute', top: 11, left: '5%', right: '5%', height: 2, background: `linear-gradient(90deg, ${dot}, ${D.violet})`, borderRadius: 1 }} />
-            <div style={{ display: 'flex', justifyContent: 'space-around', position: 'relative', minWidth: 320 }}>
-              {(plan.weeklyFocus || []).map((w, wi) => {
-                const range = weekDateRange(wi)
-                const phase = (w.theme || 'Foundation').split(' ')[0]
-                const anchored = validDates.find(d => {
-                  const dt = new Date(d.date + 'T12:00:00')
-                  const rs = range.startDate
-                  const re = new Date(rs); re.setDate(rs.getDate() + 6)
-                  return dt >= rs && dt <= re
-                })
-                return (
-                  <div key={wi} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, cursor: 'pointer' }} onClick={() => setExpandedWeek(wi)}>
-                    <div style={{ width: 22, height: 22, borderRadius: '50%', background: wi === 0 ? dot : `${dot}50`, border: `2px solid ${dot}`, display: 'grid', placeItems: 'center', color: '#fff', fontSize: 10, fontWeight: 700, zIndex: 1, position: 'relative' }}>{wi + 1}</div>
-                    <span style={{ fontSize: 10, color: D.dim, whiteSpace: 'nowrap' }}>{range.start} – {range.end}</span>
-                    <span style={{ fontSize: 10, color: dot, fontWeight: 600 }}>{phase}</span>
-                    {anchored && <span style={{ fontSize: 9.5, color: D.violet, background: 'rgba(139,92,246,0.15)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 4, padding: '1px 5px', fontWeight: 600 }}>★ {anchored.label}</span>}
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Info cards */}
-      <div className="sc-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14, minWidth: 0 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: D.pink, textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}><Icon name="flag" size={10} color={D.pink} /> The Goal</div>
-          <div style={{ fontSize: 13, color: goal ? D.text : D.dim, fontStyle: goal ? 'normal' : 'italic' }}>{goal || 'No goal provided'}</div>
-        </div>
-        {validDates.length > 0 ? (
-          <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14, minWidth: 0 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: D.violet, textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}><Icon name="calendar" size={10} color={D.violet} /> {validDates.length} Deadline{validDates.length > 1 ? 's' : ''}</div>
-            {validDates.map((d, i) => (
-              <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, marginTop: i > 0 ? 4 : 0 }}>
-                <span style={{ color: D.text }}>{d.label}</span>
-                <span style={{ color: D.violet, fontFamily: 'ui-monospace,monospace', fontSize: 12 }}>{new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</span>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14, minWidth: 0 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: D.violet, textTransform: 'uppercase', marginBottom: 6 }}>No Deadlines</div>
-            <div style={{ fontSize: 12, color: D.dim, fontStyle: 'italic' }}>No dates added</div>
-          </div>
-        )}
-        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 12, padding: 14, minWidth: 0 }}>
-          <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.1em', color: D.cyan, textTransform: 'uppercase', marginBottom: 6, display: 'flex', alignItems: 'center', gap: 5 }}><Icon name="lightbulb" size={10} color={D.cyan} /> How We're Studying</div>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 5 }}>
-            {techniquesList.map((t, i) => <span key={i} style={{ fontSize: 11.5, padding: '3px 8px', borderRadius: 5, background: 'rgba(34,211,238,0.1)', border: '1px solid rgba(34,211,238,0.25)', color: D.cyan }}>{t}</span>)}
-          </div>
-        </div>
-      </div>
 
       {/* Priority topics */}
       {plan.priorityTopics?.length > 0 && (
@@ -1525,11 +1420,11 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
             {plan.priorityTopics.map((topic, i) => {
               const isStruggle = struggles && topic.toLowerCase().split(' ').some(w => w.length > 4 && struggles.toLowerCase().includes(w))
               return (
-                <div key={i} style={{ background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                <div key={i} style={{ background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
                   <span style={{ fontSize: 13, fontWeight: 800, color: `${dot}50`, minWidth: 20 }}>{String(i + 1).padStart(2, '0')}</span>
                   <div style={{ flex: 1 }}>
                     <div style={{ fontSize: 13, color: D.text, lineHeight: 1.4 }}>{topic}</div>
-                    {isStruggle && <span style={{ fontSize: 10, color: D.orange, background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', borderRadius: 4, padding: '2px 6px', display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 5, fontWeight: 600 }}>★ Extra reps</span>}
+                    {isStruggle && <span style={{ fontSize: 10, color: D.accent, background: 'rgba(59,97,196,0.1)', border: '1px solid rgba(59,97,196,0.25)', borderRadius: 4, padding: '2px 6px', display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 5, fontWeight: 600 }}>+ Extra reps</span>}
                   </div>
                 </div>
               )
@@ -1540,9 +1435,9 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
 
       {/* Struggles banner */}
       {struggles && (
-        <div style={{ background: 'rgba(249,115,22,0.06)', border: '1px solid rgba(249,115,22,0.2)', borderRadius: 14, padding: '14px 18px' }}>
-          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', color: D.orange, textTransform: 'uppercase', marginBottom: 8, display: 'flex', alignItems: 'center', gap: 6 }}>
-            <Icon name="warn" size={12} color={D.orange} /> Where I'll Spend Extra Time: From Your Struggles
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '14px 18px' }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase', marginBottom: 8 }}>
+            Extra focus from your struggles
           </div>
           <div style={{ fontSize: 13, color: D.muted, lineHeight: 1.5, fontStyle: 'italic' }}>"{struggles}"</div>
         </div>
@@ -1568,14 +1463,14 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
               return dt >= rs && dt <= re
             })
             return (
-              <div key={wi} style={{ borderRadius: 13, overflow: 'hidden', background: isOpen ? 'rgba(249,115,22,0.04)' : D.bgCard, border: `1px solid ${isOpen ? 'rgba(249,115,22,0.2)' : D.border}`, transition: 'all 0.15s' }}>
+              <div key={wi} style={{ borderRadius: 13, overflow: 'hidden', background: D.bgCard, border: `1px solid ${isOpen ? 'rgba(59,97,196,0.25)' : D.border}`, transition: 'all 0.15s' }}>
                 <button style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', textAlign: 'left', cursor: 'pointer', background: 'none', border: 'none' }} onClick={() => setExpandedWeek(isOpen ? -1 : wi)}>
-                  <div style={{ width: 32, height: 32, borderRadius: 9, background: 'linear-gradient(135deg, #F97316, #ea580c)', display: 'grid', placeItems: 'center', color: '#fff', fontSize: 13, fontWeight: 700, flexShrink: 0, boxShadow: '0 2px 10px rgba(249,115,22,0.35)' }}>{wi + 1}</div>
+                  <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(59,97,196,0.1)', display: 'grid', placeItems: 'center', color: '#3B61C4', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{wi + 1}</div>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                       <span style={{ fontSize: 14, fontWeight: 600, color: D.text }}>Week {wi + 1}</span>
                       <span style={{ fontSize: 12, color: D.dim }}>· {range.start} – {range.end}</span>
-                      <span style={{ fontSize: 10.5, fontWeight: 600, padding: '2px 8px', borderRadius: 5, background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.25)', color: D.orange }}>{phase}</span>
+                      <span style={{ fontSize: 10.5, fontWeight: 500, padding: '2px 8px', borderRadius: 5, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.muted }}>{phase}</span>
                     </div>
                     <div style={{ fontSize: 11.5, color: D.dim, marginTop: 3 }}>
                       {weekSessions.length} session{weekSessions.length !== 1 ? 's' : ''}
@@ -1606,8 +1501,8 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
           <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase', marginBottom: 12 }}>Techniques in Rotation</div>
           <div className="sc-techniques-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
             {techniquesList.map((t, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 9, background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}` }}>
-                <div style={{ width: 22, height: 22, borderRadius: 7, background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.3)', display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 700, color: D.indigo, flexShrink: 0 }}>{i + 1}</div>
+              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 9, background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}` }}>
+                <div style={{ width: 22, height: 22, borderRadius: 7, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 700, color: D.muted, flexShrink: 0 }}>{i + 1}</div>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>{t}</div>
                   <div style={{ fontSize: 11, color: D.dim, marginTop: 2 }}>{TECHNIQUE_HINTS[t] || ''}</div>
@@ -1620,32 +1515,32 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
 
       {/* Bottom action bar */}
       <div style={{ position: 'sticky', bottom: 16, display: 'flex', gap: 10, padding: '14px 18px', background: D.bgEl, border: `1px solid ${D.border}`, borderRadius: 14, backdropFilter: 'blur(8px)' }}>
-        <button onClick={onReset} style={{ flex: 1, padding: '12px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <button onClick={onReset} style={{ flex: 1, padding: '12px', borderRadius: 10, background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
           <Icon name="refresh" size={13} /> Refine inputs
         </button>
-        <button onClick={onPush} disabled={pushed} style={{ flex: 2, padding: '12px 20px', borderRadius: 10, background: pushed ? 'rgba(52,211,153,0.15)' : 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: 13.5, fontWeight: 700, cursor: pushed ? 'default' : 'pointer', border: pushed ? '1px solid rgba(52,211,153,0.3)' : 'none', boxShadow: pushed ? 'none' : `0 4px 20px ${D.glow}`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+        <button onClick={onPush} disabled={pushed} style={{ flex: 2, padding: '12px 20px', borderRadius: 10, background: pushed ? 'rgba(52,211,153,0.15)' : '#3B61C4', color: '#fff', fontSize: 13.5, fontWeight: 700, cursor: pushed ? 'default' : 'pointer', border: pushed ? '1px solid rgba(52,211,153,0.3)' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
           {pushed ? <><Icon name="check" size={13} stroke={2.5} color={D.mint} /> Pushed to Schedule</> : <><Icon name="calendar" size={13} /> Push to Schedule</>}
         </button>
         <div style={{ flex: 1, position: 'relative' }}>
-          <button onClick={() => setExportOpen(v => !v)} style={{ width: '100%', padding: '12px', borderRadius: 10, background: exportOpen ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${exportOpen ? 'rgba(99,102,241,0.3)' : D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          <button onClick={() => setExportOpen(v => !v)} style={{ width: '100%', padding: '12px', borderRadius: 10, background: exportOpen ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${exportOpen ? 'rgba(232,83,26,0.25)' : D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
             <Icon name="upload" size={13} /> Export
           </button>
           {exportOpen && (
             <div style={{ position: 'absolute', bottom: 'calc(100% + 8px)', right: 0, width: 210, background: '#12122a', border: `1px solid ${D.border}`, borderRadius: 11, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', zIndex: 50 }}>
               <button onClick={handleDownloadPdf} style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: D.text, cursor: 'pointer', background: 'none', border: 'none', textAlign: 'left' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.04)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                 <Icon name="file" size={14} color={D.pink} /> Download PDF
               </button>
               <div style={{ height: 1, background: D.border }} />
               <button onClick={handleDownload} style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: D.text, cursor: 'pointer', background: 'none', border: 'none', textAlign: 'left' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.04)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                 <Icon name="file" size={14} color={D.indigo} /> Download .txt
               </button>
               <div style={{ height: 1, background: D.border }} />
               <button onClick={handleCopy} style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: D.text, cursor: 'pointer', background: 'none', border: 'none', textAlign: 'left' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.05)'}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.04)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}>
                 <Icon name="edit" size={14} color={D.indigo} /> Copy to clipboard
               </button>
@@ -1662,7 +1557,7 @@ function SessionCard({ session, wi, si, checked, onCheck, struggles }) {
   const sl = (struggles || '').toLowerCase()
   const isStruggle = sl && ((session.focusArea || '').toLowerCase().split(' ').some(w => w.length > 4 && sl.includes(w)) || (session.keyTopics || []).some(t => sl.includes(t.toLowerCase())))
   return (
-    <div style={{ background: '#0a0a1e', border: `1px solid rgba(255,255,255,0.06)`, borderLeft: `3px solid ${phaseColor}`, borderRadius: 10, padding: '14px 16px', display: 'flex', gap: 12 }}>
+    <div style={{ background: '#FFFFFF', border: `1px solid rgba(0,0,0,0.07)`, borderLeft: `3px solid ${phaseColor}`, borderRadius: 10, padding: '14px 16px', display: 'flex', gap: 12 }}>
       <button onClick={onCheck} style={{ width: 18, height: 18, borderRadius: 5, border: `1.5px solid ${checked ? phaseColor : 'rgba(255,255,255,0.15)'}`, background: checked ? phaseColor : 'transparent', display: 'grid', placeItems: 'center', flexShrink: 0, marginTop: 2, cursor: 'pointer' }}>
         {checked && <Icon name="check" size={10} color="#fff" stroke={3} />}
       </button>
@@ -1689,7 +1584,7 @@ function SessionCard({ session, wi, si, checked, onCheck, struggles }) {
         {session.keyTopics?.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: isStruggle ? 8 : 0 }}>
             <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', color: D.dim, textTransform: 'uppercase', marginRight: 2 }}>Technique</span>
-            {session.keyTopics.map((t, i) => <span key={i} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 5, background: 'rgba(255,255,255,0.04)', border: `1px solid rgba(255,255,255,0.1)`, color: D.muted }}>{t}</span>)}
+            {session.keyTopics.map((t, i) => <span key={i} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 5, background: 'rgba(0,0,0,0.04)', border: `1px solid rgba(255,255,255,0.1)`, color: D.muted }}>{t}</span>)}
           </div>
         )}
         {isStruggle && (

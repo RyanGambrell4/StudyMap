@@ -4,16 +4,16 @@ import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
 
 const ACTIVITY_COLORS = {
-  'review':           { border: '#3B82F6', bg: '#1e3a5f', label: 'Review' },
-  'active-recall':    { border: '#A855F7', bg: '#3b1f5e', label: 'Active Recall' },
-  'flashcards':       { border: '#EC4899', bg: '#4a1230', label: 'Flashcards' },
-  'practice-problems':{ border: '#F97316', bg: '#4a2210', label: 'Practice' },
-  'summary':          { border: '#14B8A6', bg: '#0f3530', label: 'Summary' },
-  'break':            { border: '#22C55E', bg: '#0f2e1a', label: 'Break' },
+  'review':           { border: '#3B82F6', bg: '#EFF6FF', label: 'Review' },
+  'active-recall':    { border: '#A855F7', bg: '#FAF5FF', label: 'Active Recall' },
+  'flashcards':       { border: '#EC4899', bg: '#FDF2F8', label: 'Flashcards' },
+  'practice-problems':{ border: '#F97316', bg: '#FFF7ED', label: 'Practice' },
+  'summary':          { border: '#14B8A6', bg: '#F0FDFA', label: 'Summary' },
+  'break':            { border: '#22C55E', bg: '#F0FDF4', label: 'Break' },
 }
 
 function activityColor(activity) {
-  return ACTIVITY_COLORS[activity] ?? { border: '#6366F1', bg: '#1e1b4b', label: activity }
+  return ACTIVITY_COLORS[activity] ?? { border: '#6366F1', bg: '#EEF2FF', label: activity }
 }
 
 const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
@@ -31,18 +31,14 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
   const [blueprint, setBlueprint] = useState(null)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [hoveredBlock, setHoveredBlock] = useState(null)
-  const [coachBanner, setCoachBanner] = useState(null) // { text } if pre-filled from coach plan
+  const [coachBanner, setCoachBanner] = useState(null)
 
   const isExamMode = EXAM_PATTERN.test(session.courseName ?? '')
   const [sessionType, setSessionType] = useState(
     isExamMode ? EXAM_SESSION_TYPES[0] : (session.sessionType ?? 'Review')
   )
 
-  // Pre-fill focus from Study Coach plan if available
   useEffect(() => {
-    // If the session already carries coach plan context (e.g. launched from
-    // "Start first session" button), use it directly — no lookup needed.
     if (session.focusArea) {
       const prefill = [session.focusArea, ...(session.keyTopics ?? [])].filter(Boolean).join(', ')
       setFocus(prefill)
@@ -116,35 +112,36 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
   const totalDuration = blueprint?.blocks?.reduce((s, b) => s + b.duration, 0) ?? session.duration
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#070D1A' }}>
+    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#F7F6F3' }}>
       {/* Top accent */}
       <div className="h-0.5 w-full shrink-0" style={{ backgroundColor: dot }} />
 
-      {/* Background glow */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 70% 35% at 50% 0%, ${dot}10 0%, transparent 65%)` }} />
-
       {/* Header */}
-      <div className="relative z-10 flex items-center justify-between px-5 py-4 shrink-0">
+      <div className="flex items-center justify-between px-5 py-4 shrink-0" style={{ borderBottom: '1px solid rgba(0,0,0,0.07)', backgroundColor: '#FFFFFF' }}>
         <div className="flex items-center gap-3 min-w-0">
-          <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: dot, boxShadow: `0 0 8px ${dot}80` }} />
+          <div className="w-2.5 h-2.5 rounded-full shrink-0" style={{ backgroundColor: dot }} />
           <div className="min-w-0">
-            <p className="text-white font-bold text-base truncate">{session.courseName}</p>
-            <p className="text-slate-500 text-xs font-medium">{sessionType} · {session.duration} min</p>
+            <p className="font-bold text-base truncate" style={{ color: '#1A1A1A' }}>{session.courseName}</p>
+            <p className="text-xs font-medium" style={{ color: '#9B9B9B' }}>{sessionType} · {session.duration} min</p>
           </div>
           {daysLeft !== null && (
             <span
-              className="text-xs font-bold px-2.5 py-1 rounded-full shrink-0"
+              className="text-xs font-semibold px-2.5 py-1 rounded-full shrink-0"
               style={
-                urgency === 'red' ? { backgroundColor: '#450a0a', color: '#f87171', border: '1px solid #7f1d1d' }
-                : urgency === 'amber' ? { backgroundColor: '#451a03', color: '#fb923c', border: '1px solid #7c2d12' }
-                : { backgroundColor: '#0f172a', color: '#64748b', border: '1px solid #1e293b' }
+                urgency === 'red' ? { backgroundColor: '#FEF2F2', color: '#DC2626', border: '1px solid #FCA5A5' }
+                : urgency === 'amber' ? { backgroundColor: '#FFFBEB', color: '#D97706', border: '1px solid #FCD34D' }
+                : { backgroundColor: '#F1F5F9', color: '#64748B', border: '1px solid #E2E8F0' }
               }
             >
               {daysLeft === 0 ? 'Exam today' : `${daysLeft}d to exam`}
             </span>
           )}
         </div>
-        <button onClick={onExit} className="text-slate-600 hover:text-slate-300 transition-colors flex items-center gap-1.5 text-sm shrink-0 ml-4">
+        <button
+          onClick={onExit}
+          className="flex items-center gap-1.5 text-sm shrink-0 ml-4 transition-colors"
+          style={{ color: '#9B9B9B' }}
+        >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
           </svg>
@@ -153,14 +150,13 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
       </div>
 
       {/* Scrollable content */}
-      <div className="flex-1 overflow-y-auto relative z-10">
-        <div className="max-w-xl mx-auto px-5 py-4 pb-10">
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-xl mx-auto px-5 py-6 pb-10">
 
-          {/* Focus input always shown */}
           {!blueprint && (
-            <div className="mb-6">
-              <h1 className="text-2xl font-bold text-white mb-1">Session Blueprint</h1>
-              <p className="text-slate-500 text-sm mb-6">Your session, mapped out before you start. Tell us what you're working with and we'll build the plan.</p>
+            <div>
+              <h1 className="text-2xl font-bold mb-1" style={{ color: '#1A1A1A' }}>Session Blueprint</h1>
+              <p className="text-sm mb-6" style={{ color: '#9B9B9B' }}>Your session, mapped out before you start. Tell us what you're working with and we'll build the plan.</p>
 
               {coachBanner && (
                 <div className="flex items-start gap-2.5 rounded-xl px-3.5 py-2.5 mb-4" style={{ backgroundColor: `${dot}12`, border: `1px solid ${dot}30` }}>
@@ -173,7 +169,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
 
               {isExamMode && (
                 <div className="mb-5">
-                  <label className="block text-xs text-slate-500 uppercase tracking-widest font-bold mb-2">Session type</label>
+                  <label className="block text-xs uppercase tracking-widest font-bold mb-2" style={{ color: '#9B9B9B' }}>Session type</label>
                   <div className="flex flex-wrap gap-2">
                     {EXAM_SESSION_TYPES.map(type => (
                       <button
@@ -182,7 +178,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
                         className="px-3 py-1.5 rounded-lg text-xs font-semibold transition-all"
                         style={sessionType === type
                           ? { backgroundColor: dot, color: '#fff', border: `1px solid ${dot}` }
-                          : { backgroundColor: '#111827', color: '#64748b', border: '1px solid #1e293b' }
+                          : { backgroundColor: '#FFFFFF', color: '#6B6B6B', border: '1px solid rgba(0,0,0,0.12)' }
                         }
                       >
                         {type}
@@ -192,38 +188,38 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
                 </div>
               )}
 
-              <label className="block text-xs text-slate-500 uppercase tracking-widest font-bold mb-2">What do you want to focus on today?</label>
+              <label className="block text-xs uppercase tracking-widest font-bold mb-2" style={{ color: '#9B9B9B' }}>What do you want to focus on today?</label>
               <input
                 type="text"
                 value={focus}
                 onChange={e => setFocus(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && !loading && handleGenerate()}
                 placeholder="e.g. 'WACC formula and capital structure' or leave blank to let StudyEdge AI decide"
-                className="w-full rounded-xl px-4 py-3 text-slate-200 placeholder-slate-700 focus:outline-none text-sm mb-4"
-                style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}
+                className="w-full rounded-xl px-4 py-3 focus:outline-none text-sm mb-4"
+                style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.12)', color: '#1A1A1A' }}
               />
 
               {error && (
-                <div className="bg-red-950/40 border border-red-800/40 rounded-xl px-4 py-3 mb-4 text-red-300 text-sm">{error}</div>
+                <div className="rounded-xl px-4 py-3 mb-4 text-sm" style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', color: '#DC2626' }}>{error}</div>
               )}
 
               {loading ? (
                 <div className="flex flex-col items-center gap-4 py-12">
                   <div className="relative">
-                    <div className="w-12 h-12 rounded-full border-4 border-slate-800" />
+                    <div className="w-12 h-12 rounded-full border-4" style={{ borderColor: 'rgba(0,0,0,0.08)' }} />
                     <div
                       className="absolute inset-0 w-12 h-12 rounded-full border-4 border-transparent border-t-current animate-spin"
                       style={{ color: dot }}
                     />
                   </div>
-                  <p className="text-slate-300 font-medium">Building your session blueprint…</p>
-                  <p className="text-slate-600 text-xs text-center max-w-xs">Designing structured intervals for {session.courseName}</p>
+                  <p className="font-medium" style={{ color: '#1A1A1A' }}>Building your session blueprint…</p>
+                  <p className="text-xs text-center max-w-xs" style={{ color: '#9B9B9B' }}>Designing structured intervals for {session.courseName}</p>
                 </div>
               ) : (
                 <button
                   onClick={handleGenerate}
                   className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all"
-                  style={{ backgroundColor: dot, boxShadow: `0 0 24px ${dot}35` }}
+                  style={{ backgroundColor: dot }}
                 >
                   Build My Session Plan
                 </button>
@@ -232,7 +228,8 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
               {!loading && (
                 <button
                   onClick={() => onStartSession(null)}
-                  className="w-full mt-3 py-3 rounded-2xl text-sm font-medium text-slate-500 hover:text-slate-300 transition-colors"
+                  className="w-full mt-3 py-3 rounded-2xl text-sm font-medium transition-colors"
+                  style={{ color: '#9B9B9B' }}
                 >
                   Skip and just start the timer
                 </button>
@@ -240,43 +237,30 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
             </div>
           )}
 
-          {/* Blueprint result */}
           {blueprint && (
             <div>
-              {/* Title + objective */}
-              <div className="mb-6">
-                <p className="text-xs font-bold uppercase tracking-widest mb-2" style={{ color: dot }}>Session Plan Ready</p>
-                <h2 className="text-2xl font-bold text-white mb-2 leading-tight">{blueprint.sessionTitle}</h2>
-                <p className="text-slate-400 text-sm leading-relaxed">{blueprint.objective}</p>
-              </div>
+              <h2 className="text-2xl font-bold mb-2 leading-tight" style={{ color: '#1A1A1A' }}>{blueprint.sessionTitle}</h2>
+              <p className="text-sm leading-relaxed mb-6" style={{ color: '#6B6B6B' }}>{blueprint.objective}</p>
 
               {/* Visual session bar */}
-              <div className="flex h-3 rounded-full overflow-hidden mb-2 gap-px">
+              <div className="flex h-1.5 rounded-full overflow-hidden mb-1 gap-px">
                 {blueprint.blocks.map((block, i) => {
                   const pct = (block.duration / totalDuration) * 100
                   const ac = activityColor(block.activity)
-                  return (
-                    <div
-                      key={i}
-                      style={{ width: `${pct}%`, backgroundColor: hoveredBlock === i ? ac.border : ac.border + '80', transition: 'background-color 0.15s' }}
-                      className="cursor-pointer"
-                      onMouseEnter={() => setHoveredBlock(i)}
-                      onMouseLeave={() => setHoveredBlock(null)}
-                    />
-                  )
+                  return <div key={i} style={{ width: `${pct}%`, backgroundColor: ac.border }} />
                 })}
               </div>
-              <div className="flex justify-between text-xs text-slate-700 mb-6">
+              <div className="flex justify-between text-xs mb-5" style={{ color: '#C0C0C0' }}>
                 <span>0 min</span>
                 <span>{totalDuration} min</span>
               </div>
 
               {/* Activity legend */}
-              <div className="flex flex-wrap gap-2 mb-5">
+              <div className="flex flex-wrap gap-1.5 mb-5">
                 {[...new Set(blueprint.blocks.map(b => b.activity))].map(act => {
                   const ac = activityColor(act)
                   return (
-                    <span key={act} className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ backgroundColor: ac.bg, color: ac.border, border: `1px solid ${ac.border}40` }}>
+                    <span key={act} className="text-xs px-2.5 py-1 rounded-full font-medium" style={{ backgroundColor: ac.bg, color: ac.border }}>
                       {ac.label}
                     </span>
                   )
@@ -284,54 +268,42 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
               </div>
 
               {/* Block list */}
-              <div className="space-y-3 mb-6">
+              <div className="mb-6" style={{ borderTop: '1px solid rgba(0,0,0,0.07)' }}>
                 {blueprint.blocks.map((block, i) => {
                   const ac = activityColor(block.activity)
-                  const isHovered = hoveredBlock === i
                   return (
                     <div
                       key={i}
-                      className="rounded-2xl p-4 transition-all cursor-default"
+                      className="py-4"
                       style={{
-                        borderLeft: `4px solid ${ac.border}`,
-                        backgroundColor: isHovered ? ac.bg : '#0d1424',
-                        border: `1px solid ${isHovered ? ac.border + '50' : '#1e293b'}`,
-                        borderLeftColor: ac.border,
-                        borderLeftWidth: '4px',
+                        borderBottom: '1px solid rgba(0,0,0,0.07)',
+                        borderLeft: `3px solid ${ac.border}`,
+                        paddingLeft: 16,
                       }}
-                      onMouseEnter={() => setHoveredBlock(i)}
-                      onMouseLeave={() => setHoveredBlock(null)}
                     >
-                      <div className="flex items-center gap-3 mb-2">
-                        <span
-                          className="text-xs font-bold px-2.5 py-1 rounded-full shrink-0"
-                          style={{ backgroundColor: ac.bg, color: ac.border, border: `1px solid ${ac.border}40` }}
-                        >
-                          {block.duration} min
-                        </span>
-                        <p className="text-white font-semibold text-sm">{block.title}</p>
-                        <span className="ml-auto text-xs text-slate-700 shrink-0">#{block.blockNumber}</span>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span style={{ color: ac.border, fontSize: 11, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{ac.label}</span>
+                        <span style={{ color: '#C0C0C0', fontSize: 11 }}>· {block.duration} min</span>
                       </div>
-                      <p className="text-slate-300 text-sm leading-relaxed mb-1.5">{block.instruction}</p>
-                      <p className="text-slate-600 text-xs italic leading-relaxed">{block.why}</p>
+                      <p style={{ fontWeight: 600, color: '#1A1A1A', fontSize: 14, marginBottom: 4 }}>{block.title}</p>
+                      <p style={{ color: '#6B6B6B', fontSize: 13, lineHeight: 1.5 }}>{block.instruction}</p>
                     </div>
                   )
                 })}
               </div>
 
-              {/* Regenerate option */}
               <button
                 onClick={() => { setBlueprint(null); setError('') }}
-                className="w-full mb-3 py-2.5 rounded-xl text-sm text-slate-500 hover:text-slate-300 border border-slate-800 hover:border-slate-700 transition-colors"
+                className="w-full mb-3 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                style={{ color: '#9B9B9B', border: '1px solid rgba(0,0,0,0.10)', backgroundColor: '#FFFFFF' }}
               >
                 Regenerate plan
               </button>
 
-              {/* Start button */}
               <button
                 onClick={() => onStartSession(blueprint)}
-                className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all"
-                style={{ backgroundColor: dot, boxShadow: `0 0 28px ${dot}40` }}
+                className="w-full py-4 rounded-2xl font-bold text-white text-base"
+                style={{ backgroundColor: dot }}
               >
                 Start Session →
               </button>

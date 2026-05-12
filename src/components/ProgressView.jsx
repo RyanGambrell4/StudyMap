@@ -4,20 +4,20 @@ import { toDateStr, addDays, daysBetween } from '../utils/dateUtils'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
-  bg:           '#060614',
-  bgCard:       '#0a0a1e',
-  border:       'rgba(255,255,255,0.06)',
-  text:         '#e8e8f0',
-  textMuted:    '#8888a0',
-  textDim:      '#55556e',
-  accent:       '#6366f1',
-  green:        '#4ade80',
-  amber:        '#fbbf24',
-  pink:         '#f472b6',
-  cyan:         '#22d3ee',
-  orange:       '#f97316',
-  blue:         '#60a5fa',
-  purple:       '#a78bfa',
+  bg:           '#F7F6F3',
+  bgCard:       '#FFFFFF',
+  border:       'rgba(0,0,0,0.07)',
+  text:         '#111111',
+  textMuted:    '#6B6B6B',
+  textDim:      '#9B9B9B',
+  accent:       '#E8531A',
+  green:        '#16A34A',
+  amber:        '#D97706',
+  pink:         '#DC2626',
+  cyan:         '#0891B2',
+  orange:       '#E8531A',
+  blue:         '#2563EB',
+  purple:       '#7C3AED',
 }
 
 const COURSE_PALETTE = ['#6366f1','#f472b6','#22d3ee','#fbbf24','#4ade80','#f97316']
@@ -635,14 +635,14 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
           </div>
 
           {showScoreForm && (
-            <div style={{ background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.18)', borderRadius: 12, padding: '16px 20px', marginBottom: 18 }}>
+            <div style={{ background: 'rgba(232,83,26,0.04)', border: '1px solid rgba(232,83,26,0.15)', borderRadius: 12, padding: '16px 20px', marginBottom: 18 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
                 <div>
                   <label style={{ fontSize: 11, fontWeight: 600, color: D.textMuted, display: 'block', marginBottom: 5 }}>Section</label>
                   <select
                     value={scoreForm.sectionName}
                     onChange={e => setScoreForm(f => ({ ...f, sectionName: e.target.value }))}
-                    style={{ width: '100%', background: '#0d0d22', border: '1px solid rgba(255,255,255,0.08)', color: D.text, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'inherit' }}
+                    style={{ width: '100%', background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: D.text, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'inherit' }}
                   >
                     <option value="">Select section…</option>
                     {examSections.map(n => <option key={n} value={n}>{n}</option>)}
@@ -655,7 +655,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                     placeholder="e.g. 512"
                     value={scoreForm.score}
                     onChange={e => setScoreForm(f => ({ ...f, score: e.target.value }))}
-                    style={{ width: '100%', background: '#0d0d22', border: '1px solid rgba(255,255,255,0.08)', color: D.text, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                    style={{ width: '100%', background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: D.text, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}
                   />
                 </div>
                 <div>
@@ -664,7 +664,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                     type="date"
                     value={scoreForm.date}
                     onChange={e => setScoreForm(f => ({ ...f, date: e.target.value }))}
-                    style={{ width: '100%', background: '#0d0d22', border: '1px solid rgba(255,255,255,0.08)', color: D.text, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'inherit', colorScheme: 'dark', boxSizing: 'border-box' }}
+                    style={{ width: '100%', background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: D.text, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'inherit', colorScheme: 'light', boxSizing: 'border-box' }}
                   />
                 </div>
                 <div>
@@ -674,7 +674,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                     placeholder="e.g. felt strong on gen chem"
                     value={scoreForm.notes}
                     onChange={e => setScoreForm(f => ({ ...f, notes: e.target.value }))}
-                    style={{ width: '100%', background: '#0d0d22', border: '1px solid rgba(255,255,255,0.08)', color: D.text, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}
+                    style={{ width: '100%', background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: D.text, borderRadius: 8, padding: '8px 10px', fontSize: 13, fontFamily: 'inherit', boxSizing: 'border-box' }}
                   />
                 </div>
               </div>
@@ -733,7 +733,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                     <ScoreLineChart entries={entries} color={color} />
                     {proj && (
                       <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 8, marginBottom: 4 }}>
-                        <div style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 6, background: proj.flat ? 'rgba(255,255,255,0.04)' : proj.improving ? 'rgba(52,211,153,0.1)' : 'rgba(251,191,36,0.1)', border: `1px solid ${proj.flat ? D.border : proj.improving ? 'rgba(52,211,153,0.25)' : 'rgba(251,191,36,0.25)'}`, color: proj.flat ? D.textMuted : proj.improving ? '#34d399' : '#fbbf24' }}>
+                        <div style={{ fontSize: 11, fontWeight: 600, padding: '4px 10px', borderRadius: 6, background: proj.flat ? 'rgba(0,0,0,0.04)' : proj.improving ? 'rgba(52,211,153,0.1)' : 'rgba(251,191,36,0.1)', border: `1px solid ${proj.flat ? D.border : proj.improving ? 'rgba(52,211,153,0.25)' : 'rgba(251,191,36,0.25)'}`, color: proj.flat ? D.textMuted : proj.improving ? '#34d399' : '#fbbf24' }}>
                           {proj.flat ? 'No change yet' : proj.improving ? `+${proj.weeklyRate} pts/wk` : `${proj.weeklyRate} pts/wk`}
                         </div>
                         {proj.projectedAtExam !== null && (
@@ -743,7 +743,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                           </div>
                         )}
                         {proj.gap !== null && proj.projectedAtExam === null && (
-                          <div style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, background: 'rgba(255,255,255,0.04)', border: `1px solid ${D.border}`, color: D.textMuted }}>
+                          <div style={{ fontSize: 11, padding: '4px 10px', borderRadius: 6, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.textMuted }}>
                             Gap to target: <span style={{ color: D.text, fontWeight: 700 }}>+{proj.gap}</span> pts
                           </div>
                         )}
@@ -752,7 +752,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                     {entries.length > 0 && (
                       <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginTop: 8 }}>
                         {entries.map((e, i) => (
-                          <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: D.textMuted, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, borderRadius: 6, padding: '4px 9px' }}>
+                          <div key={e.id} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: D.textMuted, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, borderRadius: 6, padding: '4px 9px' }}>
                             <span style={{ color: D.textDim }}>FL{i + 1}</span>
                             <span style={{ color: D.text, fontWeight: 700 }}>{e.score}</span>
                             {e.isOfficial && (
@@ -784,7 +784,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                 if (latestPerSection.every(v => v !== null)) {
                   const total = latestPerSection.reduce((a, b) => a + b, 0)
                   return (
-                    <div style={{ marginTop: 8, padding: '12px 16px', borderRadius: 10, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.22)', display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ marginTop: 8, padding: '12px 16px', borderRadius: 10, background: 'rgba(232,83,26,0.06)', border: '1px solid rgba(232,83,26,0.18)', display: 'flex', alignItems: 'center', gap: 14 }}>
                       <div>
                         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 2 }}>Projected MCAT Composite</div>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
@@ -793,7 +793,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                         </div>
                       </div>
                       <div style={{ flex: 1 }}>
-                        <div style={{ height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.06)', overflow: 'hidden' }}>
+                        <div style={{ height: 6, borderRadius: 3, background: 'rgba(0,0,0,0.07)', overflow: 'hidden' }}>
                           <div style={{ height: '100%', width: `${((total - 472) / 56) * 100}%`, background: 'linear-gradient(90deg, #6366f1, #818cf8)', borderRadius: 3 }} />
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
@@ -1037,9 +1037,9 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                     <div key={s} style={{
                       height: 22, borderRadius: 4,
                       background: intensity > 0
-                        ? `rgba(99,102,241,${0.1 + intensity * 0.78})`
-                        : 'rgba(255,255,255,0.03)',
-                      border: '1px solid rgba(255,255,255,0.04)',
+                        ? `rgba(232,83,26,${0.1 + intensity * 0.75})`
+                        : 'rgba(0,0,0,0.04)',
+                      border: '1px solid rgba(0,0,0,0.04)',
                     }} />
                   )
                 })}
@@ -1061,7 +1061,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
         <div className="pv-milestone-grid">
           {milestones.map(m => (
             <div key={m.id} style={{
-              background: m.earned ? `${D.accent}0e` : 'rgba(255,255,255,0.02)',
+              background: m.earned ? `${D.accent}0e` : 'rgba(0,0,0,0.03)',
               border: `1px solid ${m.earned ? `${D.accent}28` : D.border}`,
               borderRadius: 12, padding: '14px 16px',
               opacity: m.earned ? 1 : 0.4,

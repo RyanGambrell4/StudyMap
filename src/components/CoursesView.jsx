@@ -4,27 +4,27 @@ import { clean } from '../utils/strings'
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const D = {
-  bg: '#060614', bgCard: '#0a0a1e', bgEl: '#0d0d22',
-  border: 'rgba(255,255,255,0.06)', borderStrong: 'rgba(255,255,255,0.1)',
-  text: '#e8e8f0', muted: '#8888a0', dim: '#55556e',
-  accent: '#6366f1', glow: 'rgba(99,102,241,0.35)',
-  indigo: '#818CF8', violet: '#8b5cf6',
-  mint: '#34d399', orange: '#F97316', sky: '#38BDF8',
-  pink: '#F472B6', amber: '#fbbf24', cyan: '#22d3ee',
+  bg: '#F7F6F3', bgCard: '#FFFFFF', bgEl: '#F0EFEC',
+  border: 'rgba(0,0,0,0.07)', borderStrong: 'rgba(0,0,0,0.12)',
+  text: '#111111', muted: '#6B6B6B', dim: '#9B9B9B',
+  accent: '#E8531A', glow: 'rgba(232,83,26,0.2)',
+  indigo: '#E8531A', violet: '#111111',
+  mint: '#16A34A', orange: '#E8531A', sky: '#2563EB',
+  pink: '#DC2626', amber: '#D97706', cyan: '#0891B2',
 }
 
 const COURSES_STYLE = `
   @keyframes cv-fadeUp { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
   @keyframes cv-slideIn { from { opacity:0; transform:translateY(-8px); } to { opacity:1; transform:translateY(0); } }
-  .cv-input { -webkit-appearance:none; background:#0d0d22; border:1px solid rgba(255,255,255,0.08); color:#e8e8f0; border-radius:8px; padding:10px 12px; font-size:13px; outline:none; transition:border-color 0.15s; width:100%; font-family:inherit; box-sizing:border-box; }
-  .cv-input:focus { border-color:rgba(99,102,241,0.5); background:#10102a; }
-  .cv-input::placeholder { color:#55556e; }
-  input[type="date"].cv-input, input[type="time"].cv-input { color-scheme:dark; }
+  .cv-input { -webkit-appearance:none; background:#FFFFFF; border:1px solid rgba(0,0,0,0.12); color:#111111; border-radius:8px; padding:10px 12px; font-size:13px; outline:none; transition:border-color 0.15s; width:100%; font-family:inherit; box-sizing:border-box; }
+  .cv-input:focus { border-color:rgba(232,83,26,0.5); background:#FFFFFF; }
+  .cv-input::placeholder { color:#9B9B9B; }
+  input[type="date"].cv-input, input[type="time"].cv-input { color-scheme:light; }
   .cv-seg-btn { padding:8px 10px; border-radius:7px; font-size:12.5px; font-weight:600; transition:all 0.15s; cursor:pointer; font-family:inherit; }
-  .cv-icon-btn { width:30px; height:30px; border-radius:7px; display:grid; place-items:center; background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.06); color:#8888a0; transition:all 0.15s; cursor:pointer; }
-  .cv-icon-btn:hover { background:rgba(99,102,241,0.12); border-color:rgba(99,102,241,0.4); color:#818CF8; }
-  .cv-icon-btn.danger:hover { background:rgba(244,114,182,0.12); border-color:rgba(244,114,182,0.4); color:#F472B6; }
-  .cv-row { background:#0a0a1e; border-radius:14px; overflow:hidden; transition:border 0.15s; }
+  .cv-icon-btn { width:30px; height:30px; border-radius:7px; display:grid; place-items:center; background:rgba(0,0,0,0.03); border:1px solid rgba(0,0,0,0.07); color:#6B6B6B; transition:all 0.15s; cursor:pointer; }
+  .cv-icon-btn:hover { background:rgba(232,83,26,0.08); border-color:rgba(232,83,26,0.3); color:#E8531A; }
+  .cv-icon-btn.danger:hover { background:rgba(220,38,38,0.08); border-color:rgba(220,38,38,0.3); color:#DC2626; }
+  .cv-row { background:#FFFFFF; border-radius:14px; overflow:hidden; transition:border 0.15s; box-shadow:0 1px 3px rgba(0,0,0,0.06); }
   .cv-expanded { animation:cv-fadeUp 0.25s ease-out; }
   .cv-modal { animation:cv-slideIn 0.25s; }
   .cv-import-band { display:grid; grid-template-columns:1fr 1fr; gap:14px; margin-bottom:22px; }
@@ -139,7 +139,7 @@ function Section({ title, icon, color, action, children }) {
             fontSize: 11.5, color: D.indigo,
             display: 'inline-flex', alignItems: 'center', gap: 5,
             padding: '4px 8px', borderRadius: 6,
-            background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)',
+            background: 'rgba(232,83,26,0.06)', border: '1px solid rgba(232,83,26,0.12)',
             cursor: 'pointer',
           }}>
             <Icon name={action.icon} size={11} /> {action.label}
@@ -161,13 +161,13 @@ function SegmentedControl({ options, value, onChange }) {
   return (
     <div style={{
       display: 'grid', gridTemplateColumns: `repeat(${options.length}, 1fr)`, gap: 4,
-      padding: 4, background: 'rgba(255,255,255,0.02)',
+      padding: 4, background: 'rgba(0,0,0,0.03)',
       border: `1px solid ${D.border}`, borderRadius: 9,
     }}>
       {options.map(o => (
         <button key={o} onClick={() => onChange(o)} className="cv-seg-btn" style={{
-          background: value === o ? 'rgba(99,102,241,0.2)' : 'transparent',
-          border: value === o ? '1px solid rgba(99,102,241,0.4)' : '1px solid transparent',
+          background: value === o ? 'rgba(232,83,26,0.12)' : 'transparent',
+          border: value === o ? '1px solid rgba(232,83,26,0.25)' : '1px solid transparent',
           color: value === o ? '#fff' : D.muted,
         }}>{o}</button>
       ))}
@@ -192,7 +192,7 @@ function AddonToggle({ active, onToggle, icon, color, title, subtitle, badge, ch
           <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <span style={{ fontSize: 13.5, fontWeight: 600, color: D.text }}>{title}</span>
             {badge && (
-              <span style={{ fontSize: 10, fontWeight: 600, color: D.indigo, padding: '2px 7px', borderRadius: 999, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)' }}>{badge}</span>
+              <span style={{ fontSize: 10, fontWeight: 600, color: D.indigo, padding: '2px 7px', borderRadius: 999, background: 'rgba(232,83,26,0.08)', border: '1px solid rgba(232,83,26,0.25)' }}>{badge}</span>
             )}
           </div>
           <div style={{ fontSize: 11.5, color: D.muted, marginTop: 2 }}>{subtitle}</div>
@@ -234,8 +234,8 @@ function ClassScheduleSection({ value, onChange }) {
                 return (
                   <button key={label} onClick={() => set('isDE', i === 1)} style={{
                     padding: '9px 0', borderRadius: 7, fontSize: 12.5, fontWeight: 600, cursor: 'pointer',
-                    background: isActive ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${isActive ? 'rgba(99,102,241,0.5)' : D.border}`,
+                    background: isActive ? 'rgba(232,83,26,0.12)' : 'rgba(0,0,0,0.04)',
+                    border: `1px solid ${isActive ? 'rgba(232,83,26,0.4)' : D.border}`,
                     color: isActive ? '#fff' : D.muted, transition: 'all 0.15s',
                   }}>{label}</button>
                 )
@@ -251,8 +251,8 @@ function ClassScheduleSection({ value, onChange }) {
                 return (
                   <button key={d} onClick={() => toggleDay(d)} style={{
                     flex: 1, padding: '9px 0', borderRadius: 7, cursor: 'pointer',
-                    background: active ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.03)',
-                    border: `1px solid ${active ? 'rgba(99,102,241,0.5)' : D.border}`,
+                    background: active ? 'rgba(232,83,26,0.12)' : 'rgba(0,0,0,0.04)',
+                    border: `1px solid ${active ? 'rgba(232,83,26,0.4)' : D.border}`,
                     color: active ? '#fff' : D.muted, fontSize: 12, fontWeight: 600, transition: 'all 0.15s',
                   }}>{d.slice(0, 1)}</button>
                 )
@@ -270,7 +270,7 @@ function ClassScheduleSection({ value, onChange }) {
             <div><Label>Last class date</Label><input type="date" className="cv-input" value={cs.semesterEnd} onChange={e => set('semesterEnd', e.target.value)} /></div>
           </div>
           {cs.days.length > 0 && cs.startTime && (
-            <div style={{ fontSize: 11, color: D.muted, background: 'rgba(255,255,255,0.02)', borderRadius: 8, padding: '8px 12px' }}>
+            <div style={{ fontSize: 11, color: D.muted, background: 'rgba(0,0,0,0.03)', borderRadius: 8, padding: '8px 12px' }}>
               {cs.days.join(', ')} · {fmt12(cs.startTime)} – {fmt12(cs.endTime)}{cs.isDE ? ' · DE (not on calendar)' : ' · shown on calendar'}
             </div>
           )}
@@ -311,7 +311,7 @@ function ImportCard({ icon, color, eyebrow, title, desc, accept, onFile, gradien
               <Icon name="upload" size={12} /> Choose file
             </button>
             {secondary && (
-              <button style={{ padding: '8px 14px', borderRadius: 8, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 12.5, fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+              <button style={{ padding: '8px 14px', borderRadius: 8, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.text, fontSize: 12.5, fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
                 <Icon name={secondary.icon} size={12} color={color} /> {secondary.label}
               </button>
             )}
@@ -332,7 +332,7 @@ function ImportBand({ onImportSyllabus }) {
         desc="Drop a PDF or paste a link: we'll extract dates, weights, and topics."
         accept=".pdf,.docx,.png,.jpg"
         onFile={file => onImportSyllabus?.(-1, file)}
-        gradient="linear-gradient(155deg, rgba(99,102,241,0.14) 0%, rgba(99,102,241,0.04) 45%, #0a0a1e 100%)"
+        gradient="linear-gradient(155deg, rgba(232,83,26,0.06) 0%, rgba(99,102,241,0.04) 45%, transparent 100%)"
       />
       <ImportCard
         icon="calendar" color="#8b5cf6" eyebrow="Sync calendar"
@@ -340,7 +340,7 @@ function ImportBand({ onImportSyllabus }) {
         desc="Upload an .ics file to sync your class schedule."
         accept=".ics"
         onFile={() => {}}
-        gradient="linear-gradient(155deg, rgba(139,92,246,0.14) 0%, rgba(139,92,246,0.04) 45%, #0a0a1e 100%)"
+        gradient="linear-gradient(155deg, rgba(232,83,26,0.06) 0%, rgba(139,92,246,0.04) 45%, transparent 100%)"
       />
     </div>
   )
@@ -372,12 +372,12 @@ function AddCoursePanel({ courseCount, onClose, onAdd }) {
 
   return (
     <div
-      style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(4,4,14,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '48px 20px 20px', overflowY: 'auto' }}
+      style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '48px 20px 20px', overflowY: 'auto' }}
       onClick={onClose}
     >
-      <div className="cv-modal" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 640, background: 'linear-gradient(180deg, #0e0e24, #0a0a1e)', border: `1px solid ${D.borderStrong}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.08)' }}>
+      <div className="cv-modal" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 640, background: '#FFFFFF', border: `1px solid ${D.borderStrong}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(232,83,26,0.06)' }}>
         {/* Header */}
-        <div style={{ padding: '20px 24px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', background: 'linear-gradient(180deg, rgba(99,102,241,0.06), transparent)' }}>
+        <div style={{ padding: '20px 24px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', background: 'linear-gradient(180deg, rgba(0,0,0,0.03), transparent)' }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${color}, ${color}aa)`, boxShadow: `0 4px 14px ${color}50`, display: 'grid', placeItems: 'center', color: '#fff' }}>
             <Icon name="plus" size={16} />
           </div>
@@ -435,7 +435,7 @@ function AddCoursePanel({ courseCount, onClose, onAdd }) {
           >
             {syllabusOpen && (
               <div style={{ padding: '12px 14px 14px', borderTop: `1px solid ${D.border}`, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <button onClick={() => syllabusRef.current?.click()} style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', color: D.text, fontSize: 13, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <button onClick={() => syllabusRef.current?.click()} style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(232,83,26,0.08)', border: '1px solid rgba(232,83,26,0.25)', color: D.text, fontSize: 13, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                   <Icon name="upload" size={14} color={D.indigo} />
                   {syllabusFile ? syllabusFile.name : 'Choose file (PDF, DOCX, image)'}
                 </button>
@@ -452,8 +452,8 @@ function AddCoursePanel({ courseCount, onClose, onAdd }) {
 
         {/* Footer */}
         <div style={{ padding: '16px 24px', borderTop: `1px solid ${D.border}`, display: 'flex', gap: 10, background: 'rgba(255,255,255,0.015)' }}>
-          <button onClick={onClose} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
-          <button onClick={handleAdd} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: name.trim() ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'rgba(255,255,255,0.04)', color: name.trim() ? '#fff' : D.dim, fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, boxShadow: name.trim() ? '0 6px 20px rgba(99,102,241,0.35)' : 'none', cursor: name.trim() ? 'pointer' : 'not-allowed', border: 'none' }}>
+          <button onClick={onClose} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
+          <button onClick={handleAdd} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: name.trim() ? '#E8531A' : 'rgba(0,0,0,0.04)', color: name.trim() ? '#fff' : D.dim, fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, boxShadow: name.trim() ? '0 4px 12px rgba(232,83,26,0.25)' : 'none', cursor: name.trim() ? 'pointer' : 'not-allowed', border: 'none' }}>
             <Icon name="plus" size={13} /> Add course
           </button>
         </div>
@@ -485,11 +485,11 @@ function EditCoursePanel({ course, onClose, onSave }) {
 
   return (
     <div
-      style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(4,4,14,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '48px 20px 20px', overflowY: 'auto' }}
+      style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '48px 20px 20px', overflowY: 'auto' }}
       onClick={onClose}
     >
-      <div className="cv-modal" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 640, background: 'linear-gradient(180deg, #0e0e24, #0a0a1e)', border: `1px solid ${D.borderStrong}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.5)' }}>
-        <div style={{ padding: '20px 24px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', background: 'linear-gradient(180deg, rgba(99,102,241,0.06), transparent)' }}>
+      <div className="cv-modal" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 640, background: '#FFFFFF', border: `1px solid ${D.borderStrong}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.5)' }}>
+        <div style={{ padding: '20px 24px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', background: 'linear-gradient(180deg, rgba(0,0,0,0.03), transparent)' }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${color}, ${color}aa)`, boxShadow: `0 4px 14px ${color}50`, display: 'grid', placeItems: 'center', color: '#fff' }}>
             <Icon name="edit" size={14} />
           </div>
@@ -534,7 +534,7 @@ function EditCoursePanel({ course, onClose, onSave }) {
           >
             {syllabusOpen && (
               <div style={{ padding: '12px 14px 14px', borderTop: `1px solid ${D.border}`, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <button onClick={() => syllabusRef.current?.click()} style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.3)', color: D.text, fontSize: 13, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                <button onClick={() => syllabusRef.current?.click()} style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(232,83,26,0.08)', border: '1px solid rgba(232,83,26,0.25)', color: D.text, fontSize: 13, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                   <Icon name="upload" size={14} color={D.indigo} />
                   {syllabusFile ? syllabusFile.name : 'Choose file (PDF, DOCX, image)'}
                 </button>
@@ -547,8 +547,8 @@ function EditCoursePanel({ course, onClose, onSave }) {
         </div>
 
         <div style={{ padding: '16px 24px', borderTop: `1px solid ${D.border}`, display: 'flex', gap: 10, background: 'rgba(255,255,255,0.015)' }}>
-          <button onClick={onClose} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
-          <button onClick={handleSave} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, boxShadow: '0 6px 20px rgba(99,102,241,0.35)', cursor: 'pointer', border: 'none' }}>
+          <button onClick={onClose} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
+          <button onClick={handleSave} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: '#E8531A', color: '#fff', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, boxShadow: '0 4px 12px rgba(232,83,26,0.25)', cursor: 'pointer', border: 'none' }}>
             Save changes
           </button>
         </div>
@@ -585,7 +585,7 @@ function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, gra
             const done = completedIds.has(s.id)
             const dateLabel = new Date(s.dateStr + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
             return (
-              <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 9, opacity: done ? 0.45 : 1 }}>
+              <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, borderRadius: 9, opacity: done ? 0.45 : 1 }}>
                 <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, boxShadow: `0 0 6px ${color}`, flexShrink: 0 }} />
                 <span style={{ flex: 1, fontSize: 13, color: D.text, fontWeight: 500, textDecoration: done ? 'line-through' : 'none' }}>{s.sessionType}</span>
                 <span style={{ fontSize: 12, color: D.muted, fontFamily: 'ui-monospace, monospace' }}>{dateLabel}</span>
@@ -601,12 +601,12 @@ function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, gra
         <Section title="Syllabus events" icon="file" color={color} action={{ label: 'Re-import', icon: 'sync', onClick: () => onImportSyllabus?.(idx) }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
             {syllabusEvts.sort((a, b) => (a.date || '').localeCompare(b.date || '')).map(ev => (
-              <div key={ev.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderLeft: `3px solid ${typeColor(ev.type)}`, borderRadius: 8 }}>
+              <div key={ev.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, borderLeft: `3px solid ${typeColor(ev.type)}`, borderRadius: 8 }}>
                 <div style={{ flex: 1, minWidth: 0 }}>
                   <div style={{ fontSize: 13, color: D.text, fontWeight: 500, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{ev.name}</div>
                   <div style={{ fontSize: 11, color: typeColor(ev.type), marginTop: 2, fontWeight: 500 }}>{ev.type}</div>
                 </div>
-                <div style={{ fontSize: 11.5, padding: '3px 8px', borderRadius: 5, background: ev.date ? 'rgba(99,102,241,0.1)' : 'rgba(244,114,182,0.08)', color: ev.date ? D.indigo : D.pink, whiteSpace: 'nowrap', fontFamily: 'ui-monospace, monospace' }}>
+                <div style={{ fontSize: 11.5, padding: '3px 8px', borderRadius: 5, background: ev.date ? 'rgba(232,83,26,0.08)' : 'rgba(244,114,182,0.08)', color: ev.date ? D.indigo : D.pink, whiteSpace: 'nowrap', fontFamily: 'ui-monospace, monospace' }}>
                   {ev.date ? new Date(ev.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' }) : 'Set date'}
                 </div>
               </div>
@@ -614,15 +614,15 @@ function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, gra
           </div>
         </Section>
       ) : (
-        <div style={{ padding: 20, borderRadius: 11, background: 'rgba(99,102,241,0.05)', border: '1px dashed rgba(99,102,241,0.25)', display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
-          <div style={{ width: 36, height: 36, borderRadius: 9, background: 'rgba(99,102,241,0.12)', display: 'grid', placeItems: 'center', color: D.indigo }}>
+        <div style={{ padding: 20, borderRadius: 11, background: 'rgba(232,83,26,0.03)', border: '1px dashed rgba(99,102,241,0.25)', display: 'flex', alignItems: 'center', gap: 14, marginBottom: 18 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 9, background: 'rgba(232,83,26,0.08)', display: 'grid', placeItems: 'center', color: D.indigo }}>
             <Icon name="file" size={16} />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13.5, fontWeight: 600, color: D.text, marginBottom: 2 }}>No syllabus yet</div>
             <div style={{ fontSize: 12, color: D.muted }}>Import one and we'll pull in every date, weight, and deadline.</div>
           </div>
-          <button onClick={() => onImportSyllabus?.(idx)} style={{ padding: '8px 14px', borderRadius: 8, background: 'rgba(99,102,241,0.18)', border: '1px solid rgba(99,102,241,0.4)', color: D.text, fontSize: 12.5, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+          <button onClick={() => onImportSyllabus?.(idx)} style={{ padding: '8px 14px', borderRadius: 8, background: 'rgba(99,102,241,0.18)', border: '1px solid rgba(232,83,26,0.25)', color: D.text, fontSize: 12.5, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
             <Icon name="upload" size={12} /> Import syllabus
           </button>
         </div>
@@ -630,11 +630,11 @@ function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, gra
 
       {/* Grades */}
       <Section title="Grades" icon="award" color={color}>
-        <div style={{ padding: 14, background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 9, display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div style={{ padding: 14, background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, borderRadius: 9, display: 'flex', alignItems: 'center', gap: 12 }}>
           {grades.length === 0 ? (
             <>
               <div style={{ flex: 1, fontSize: 13, color: D.muted }}>No assignments logged. Head to Grade Hub to configure weights and log grades.</div>
-              <button onClick={() => onNavigateToGradeHub?.()} style={{ padding: '7px 12px', borderRadius: 7, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 12, fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 5, cursor: 'pointer', whiteSpace: 'nowrap' }}>
+              <button onClick={() => onNavigateToGradeHub?.()} style={{ padding: '7px 12px', borderRadius: 7, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.text, fontSize: 12, fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 5, cursor: 'pointer', whiteSpace: 'nowrap' }}>
                 Open Grade Hub <Icon name="arrow" size={11} />
               </button>
             </>
@@ -725,7 +725,7 @@ function CourseRow({ course, idx, expanded, onToggle, sessions, completedIds, sy
             <button className="cv-icon-btn" onClick={e => { e.stopPropagation(); onEdit() }}><Icon name="edit" size={13} /></button>
             <button className="cv-icon-btn danger" onClick={e => { e.stopPropagation(); setConfirmDelete(true) }}><Icon name="trash" size={13} /></button>
           </div>
-          <div style={{ width: 28, height: 28, borderRadius: 7, display: 'grid', placeItems: 'center', background: expanded ? `${color}18` : 'rgba(255,255,255,0.03)', border: expanded ? `1px solid ${color}40` : `1px solid ${D.border}`, color: expanded ? color : D.muted, transition: 'all 0.2s', transform: expanded ? 'rotate(180deg)' : 'rotate(0)' }}>
+          <div style={{ width: 28, height: 28, borderRadius: 7, display: 'grid', placeItems: 'center', background: expanded ? `${color}18` : 'rgba(0,0,0,0.04)', border: expanded ? `1px solid ${color}40` : `1px solid ${D.border}`, color: expanded ? color : D.muted, transition: 'all 0.2s', transform: expanded ? 'rotate(180deg)' : 'rotate(0)' }}>
             <Icon name="chevron" size={14} />
           </div>
         </div>
@@ -783,13 +783,13 @@ function ExamSetupModal({ courseCount, onClose, onAdd, onOpenStudyCoach }) {
 
   if (done) return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(4,4,14,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }} onClick={onClose}>
-      <div className="cv-modal" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 460, background: 'linear-gradient(180deg, #0e0e24, #0a0a1e)', border: `1px solid ${D.borderStrong}`, borderRadius: 16, padding: 40, textAlign: 'center', boxShadow: '0 30px 80px rgba(0,0,0,0.5)' }}>
+      <div className="cv-modal" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 460, background: '#FFFFFF', border: `1px solid ${D.borderStrong}`, borderRadius: 16, padding: 40, textAlign: 'center', boxShadow: '0 30px 80px rgba(0,0,0,0.5)' }}>
         <div style={{ width: 56, height: 56, borderRadius: 16, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', display: 'grid', placeItems: 'center', margin: '0 auto 20px' }}>
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round"><polyline points="5 12 10 17 20 7"/></svg>
         </div>
         <div style={{ fontSize: 20, fontWeight: 700, color: D.text, marginBottom: 10 }}>Your {exam} sections are loaded.</div>
         <p style={{ fontSize: 14, color: D.muted, marginBottom: 28, lineHeight: 1.6 }}>Go to Study Coach to generate your full prep plan.</p>
-        <button onClick={() => { onClose(); onOpenStudyCoach?.() }} style={{ width: '100%', padding: 14, borderRadius: 10, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer', boxShadow: '0 6px 20px rgba(99,102,241,0.35)', marginBottom: 12 }}>
+        <button onClick={() => { onClose(); onOpenStudyCoach?.() }} style={{ width: '100%', padding: 14, borderRadius: 10, background: '#E8531A', color: '#fff', fontSize: 14, fontWeight: 600, border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(232,83,26,0.25)', marginBottom: 12 }}>
           Go to Study Coach →
         </button>
         <button onClick={onClose} style={{ fontSize: 13, color: D.muted, background: 'none', border: 'none', cursor: 'pointer' }}>View my sections</button>
@@ -799,8 +799,8 @@ function ExamSetupModal({ courseCount, onClose, onAdd, onOpenStudyCoach }) {
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(4,4,14,0.8)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '48px 20px 20px', overflowY: 'auto' }} onClick={onClose}>
-      <div className="cv-modal" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 560, background: 'linear-gradient(180deg, #0e0e24, #0a0a1e)', border: `1px solid ${D.borderStrong}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.08)' }}>
-        <div style={{ padding: '20px 24px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', background: 'linear-gradient(180deg, rgba(99,102,241,0.06), transparent)' }}>
+      <div className="cv-modal" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 560, background: '#FFFFFF', border: `1px solid ${D.borderStrong}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(232,83,26,0.06)' }}>
+        <div style={{ padding: '20px 24px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', background: 'linear-gradient(180deg, rgba(0,0,0,0.03), transparent)' }}>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 15, fontWeight: 600, color: D.text }}>Set up your exam prep</div>
             <div style={{ fontSize: 12, color: D.muted, marginTop: 2 }}>Step {step} of 4</div>
@@ -818,7 +818,7 @@ function ExamSetupModal({ courseCount, onClose, onAdd, onOpenStudyCoach }) {
               <div style={{ fontSize: 13, color: D.muted, marginBottom: 20 }}>We'll load all sections and build your plan around your test date.</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 {EXAM_LIST.map(e => (
-                  <button key={e.key} onClick={() => setExam(e.key)} style={{ padding: '16px', borderRadius: 12, textAlign: 'left', background: exam === e.key ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${exam === e.key ? 'rgba(99,102,241,0.5)' : D.border}`, cursor: 'pointer', transition: 'all 0.15s', boxShadow: exam === e.key ? '0 0 0 3px rgba(99,102,241,0.1)' : 'none' }}>
+                  <button key={e.key} onClick={() => setExam(e.key)} style={{ padding: '16px', borderRadius: 12, textAlign: 'left', background: exam === e.key ? 'rgba(232,83,26,0.1)' : 'rgba(0,0,0,0.04)', border: `1px solid ${exam === e.key ? 'rgba(232,83,26,0.4)' : D.border}`, cursor: 'pointer', transition: 'all 0.15s', boxShadow: exam === e.key ? '0 0 0 3px rgba(232,83,26,0.08)' : 'none' }}>
                     <div style={{ fontSize: 15, fontWeight: 700, color: D.text, marginBottom: 4 }}>{e.key}</div>
                     <div style={{ fontSize: 11.5, color: D.muted }}>{e.desc}</div>
                   </button>
@@ -849,7 +849,7 @@ function ExamSetupModal({ courseCount, onClose, onAdd, onOpenStudyCoach }) {
                   <Label>Days per week</Label>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 1fr)', gap: 6 }}>
                     {[1,2,3,4,5,6,7].map(d => (
-                      <button key={d} onClick={() => setDaysPerWeek(d.toString())} style={{ padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: daysPerWeek === d.toString() ? 'rgba(99,102,241,0.2)' : 'rgba(255,255,255,0.03)', border: `1px solid ${daysPerWeek === d.toString() ? 'rgba(99,102,241,0.5)' : D.border}`, color: daysPerWeek === d.toString() ? '#fff' : D.muted, transition: 'all 0.15s' }}>{d}</button>
+                      <button key={d} onClick={() => setDaysPerWeek(d.toString())} style={{ padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: daysPerWeek === d.toString() ? 'rgba(232,83,26,0.12)' : 'rgba(0,0,0,0.04)', border: `1px solid ${daysPerWeek === d.toString() ? 'rgba(232,83,26,0.4)' : D.border}`, color: daysPerWeek === d.toString() ? '#fff' : D.muted, transition: 'all 0.15s' }}>{d}</button>
                     ))}
                   </div>
                 </div>
@@ -863,7 +863,7 @@ function ExamSetupModal({ courseCount, onClose, onAdd, onOpenStudyCoach }) {
               <div style={{ fontSize: 13, color: D.muted, marginBottom: 20 }}>Your prep plan will prioritize this section. Skip if you're not sure yet.</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 {preset.sections.map(s => (
-                  <button key={s} onClick={() => setWeakness(weakness === s ? '' : s)} style={{ padding: '14px 16px', borderRadius: 10, textAlign: 'left', background: weakness === s ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)', border: `1px solid ${weakness === s ? 'rgba(99,102,241,0.5)' : D.border}`, color: weakness === s ? '#fff' : D.text, fontSize: 13.5, fontWeight: weakness === s ? 600 : 400, cursor: 'pointer', transition: 'all 0.15s' }}>{s}</button>
+                  <button key={s} onClick={() => setWeakness(weakness === s ? '' : s)} style={{ padding: '14px 16px', borderRadius: 10, textAlign: 'left', background: weakness === s ? 'rgba(232,83,26,0.1)' : 'rgba(0,0,0,0.04)', border: `1px solid ${weakness === s ? 'rgba(232,83,26,0.4)' : D.border}`, color: weakness === s ? '#fff' : D.text, fontSize: 13.5, fontWeight: weakness === s ? 600 : 400, cursor: 'pointer', transition: 'all 0.15s' }}>{s}</button>
                 ))}
               </div>
             </>
@@ -871,13 +871,13 @@ function ExamSetupModal({ courseCount, onClose, onAdd, onOpenStudyCoach }) {
         </div>
 
         <div style={{ padding: '16px 24px', borderTop: `1px solid ${D.border}`, display: 'flex', gap: 10, background: 'rgba(255,255,255,0.015)' }}>
-          {step > 1 && <button onClick={() => setStep(s => s - 1)} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Back</button>}
+          {step > 1 && <button onClick={() => setStep(s => s - 1)} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Back</button>}
           {step < 4 ? (
-            <button onClick={() => { if (!canNext) return; setStep(s => s + 1) }} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: canNext ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'rgba(255,255,255,0.04)', color: canNext ? '#fff' : D.dim, fontSize: 13, fontWeight: 600, border: 'none', cursor: canNext ? 'pointer' : 'not-allowed', boxShadow: canNext ? '0 6px 20px rgba(99,102,241,0.35)' : 'none' }}>
+            <button onClick={() => { if (!canNext) return; setStep(s => s + 1) }} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: canNext ? '#E8531A' : 'rgba(0,0,0,0.04)', color: canNext ? '#fff' : D.dim, fontSize: 13, fontWeight: 600, border: 'none', cursor: canNext ? 'pointer' : 'not-allowed', boxShadow: canNext ? '0 4px 12px rgba(232,83,26,0.25)' : 'none' }}>
               {step === 3 ? 'Next — almost done' : 'Next'}
             </button>
           ) : (
-            <button onClick={handleComplete} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', color: '#fff', fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer', boxShadow: '0 6px 20px rgba(99,102,241,0.35)' }}>
+            <button onClick={handleComplete} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: '#E8531A', color: '#fff', fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(232,83,26,0.25)' }}>
               Load my {exam} sections →
             </button>
           )}
@@ -904,9 +904,9 @@ function ExamAddSectionModal({ courseCount, onClose, onAdd }) {
   }
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(4,4,14,0.75)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '48px 20px 20px', overflowY: 'auto' }} onClick={onClose}>
-      <div className="cv-modal" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 480, background: 'linear-gradient(180deg, #0e0e24, #0a0a1e)', border: `1px solid ${D.borderStrong}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.5)' }}>
-        <div style={{ padding: '20px 24px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', background: 'linear-gradient(180deg, rgba(99,102,241,0.06), transparent)' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 50, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '48px 20px 20px', overflowY: 'auto' }} onClick={onClose}>
+      <div className="cv-modal" onClick={e => e.stopPropagation()} style={{ width: '100%', maxWidth: 480, background: '#FFFFFF', border: `1px solid ${D.borderStrong}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 30px 80px rgba(0,0,0,0.5)' }}>
+        <div style={{ padding: '20px 24px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', background: 'linear-gradient(180deg, rgba(0,0,0,0.03), transparent)' }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: `linear-gradient(135deg, ${color}, ${color}aa)`, boxShadow: `0 4px 14px ${color}50`, display: 'grid', placeItems: 'center', color: '#fff' }}>
             <Icon name="plus" size={16} />
           </div>
@@ -942,8 +942,8 @@ function ExamAddSectionModal({ courseCount, onClose, onAdd }) {
         </div>
 
         <div style={{ padding: '16px 24px', borderTop: `1px solid ${D.border}`, display: 'flex', gap: 10, background: 'rgba(255,255,255,0.015)' }}>
-          <button onClick={onClose} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
-          <button onClick={handleAdd} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: name.trim() ? 'linear-gradient(135deg, #6366f1, #8b5cf6)' : 'rgba(255,255,255,0.04)', color: name.trim() ? '#fff' : D.dim, fontSize: 13, fontWeight: 600, border: 'none', cursor: name.trim() ? 'pointer' : 'not-allowed', boxShadow: name.trim() ? '0 6px 20px rgba(99,102,241,0.35)' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
+          <button onClick={onClose} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
+          <button onClick={handleAdd} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: name.trim() ? '#E8531A' : 'rgba(0,0,0,0.04)', color: name.trim() ? '#fff' : D.dim, fontSize: 13, fontWeight: 600, border: 'none', cursor: name.trim() ? 'pointer' : 'not-allowed', boxShadow: name.trim() ? '0 4px 12px rgba(232,83,26,0.25)' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
             <Icon name="plus" size={13} /> Add section
           </button>
         </div>
@@ -1089,7 +1089,7 @@ export default function CoursesView({
         </div>
         <button
           onClick={() => { if (atLimit) { onShowPaywall?.('courses'); return } isExamMode ? setShowExamAddSection(true) : setShowAddPanel(true) }}
-          style={{ padding: '11px 18px', background: 'linear-gradient(135deg, #6366f1, #8b5cf6)', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7, boxShadow: '0 6px 20px rgba(99,102,241,0.35)', border: 'none', cursor: 'pointer' }}
+          style={{ padding: '11px 18px', background: '#E8531A', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7, boxShadow: '0 4px 12px rgba(232,83,26,0.25)', border: 'none', cursor: 'pointer' }}
         >
           <Icon name="plus" size={14} /> {atLimit ? 'Upgrade to Add' : isExamMode ? 'Add Section' : 'Add Course'}
         </button>
@@ -1107,7 +1107,7 @@ export default function CoursesView({
         )}
 
         {isExamMode && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'rgba(99,102,241,0.06)', border: '1px solid rgba(99,102,241,0.18)', borderRadius: 12, marginBottom: 16 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(99,102,241,0.18)', borderRadius: 12, marginBottom: 16 }}>
             <svg style={{ width: 16, height: 16, color: D.accent, flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
             <span style={{ fontSize: 13, fontWeight: 600, color: D.accent }}>Exam Date</span>
             <input
@@ -1115,7 +1115,7 @@ export default function CoursesView({
               value={sharedExamDateInput}
               min={todayStr}
               onChange={e => setSharedExamDateInput(e.target.value)}
-              style={{ background: '#0d0d22', border: '1px solid rgba(255,255,255,0.08)', color: D.text, borderRadius: 7, padding: '5px 10px', fontSize: 12, fontFamily: 'inherit', colorScheme: 'dark' }}
+              style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: D.text, borderRadius: 7, padding: '5px 10px', fontSize: 12, fontFamily: 'inherit', colorScheme: 'light' }}
             />
             <button
               onClick={applySharedExamDate}
@@ -1128,8 +1128,8 @@ export default function CoursesView({
 
         {isExamMode ? (
           <div className="cv-import-band" style={{ gridTemplateColumns: '1fr' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '20px 24px', borderRadius: 14, background: 'linear-gradient(155deg, rgba(99,102,241,0.14) 0%, rgba(99,102,241,0.04) 45%, #0a0a1e 100%)', border: '1px solid rgba(99,102,241,0.18)' }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(99,102,241,0.15)', border: '1px solid rgba(99,102,241,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '20px 24px', borderRadius: 14, background: 'linear-gradient(155deg, rgba(232,83,26,0.06) 0%, rgba(99,102,241,0.04) 45%, transparent 100%)', border: '1px solid rgba(99,102,241,0.18)' }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(232,83,26,0.1)', border: '1px solid rgba(99,102,241,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
               </div>
               <div style={{ flex: 1 }}>

@@ -386,6 +386,11 @@ Return ONLY the JSON array with no other text. Example:
 
 export default defineConfig({
   plugins: [react(), apiDevPlugin()],
+  resolve: {
+    alias: {
+      '@': path.resolve(process.cwd(), 'src'),
+    },
+  },
   build: {
     rollupOptions: {
       input: {

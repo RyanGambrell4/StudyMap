@@ -1,27 +1,21 @@
-import { getActivePlan } from '../lib/subscription'
+import { getActivePlan, getCachedSubscription } from '../lib/subscription'
 import ReferralCard from './ReferralCard'
 
 const PLAN_INFO = {
   free: {
     label: 'Free',
     features: ['Calendar & study planner', 'AI study plan (1 course)', 'Basic progress tracking'],
-    color: '#94a3b8',
-    bg: 'rgba(100,116,139,0.12)',
-    border: 'rgba(100,116,139,0.25)',
+    color: '#64748b',
   },
   pro: {
     label: 'Pro',
     features: ['Everything in Free', 'Unlimited AI Study Coach', 'Grade Hub & grade tracking', 'AI Tutor chat', 'Flashcards & quizzes'],
-    color: '#818cf8',
-    bg: 'rgba(99,102,241,0.12)',
-    border: 'rgba(99,102,241,0.25)',
+    color: '#3B61C4',
   },
   unlimited: {
     label: 'Unlimited',
     features: ['Everything in Pro', 'Priority AI responses', 'Advanced analytics', 'Early access to new features'],
-    color: '#34d399',
-    bg: 'rgba(16,185,129,0.12)',
-    border: 'rgba(16,185,129,0.25)',
+    color: '#059669',
   },
 }
 
@@ -35,153 +29,155 @@ export default function AccountView({
   onShowPaywall,
 }) {
   const plan = getActivePlan()
+  const sub = getCachedSubscription()
+  const isTrialing = sub?.status === 'trialing'
+  const trialEndsAt = isTrialing && sub?.currentPeriodEnd
+    ? new Date(sub.currentPeriodEnd)
+    : null
+  const trialDaysLeft = trialEndsAt
+    ? Math.max(0, Math.ceil((trialEndsAt - Date.now()) / 86400000))
+    : null
   const planInfo = PLAN_INFO[plan] ?? PLAN_INFO.free
   const initials = userEmail ? userEmail.split('@')[0].slice(0, 2).toUpperCase() : 'U'
 
   return (
-    <div className="px-6 py-10 max-w-2xl mx-auto space-y-6">
-      <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Account</h1>
+    <div style={{ padding: '40px 24px', maxWidth: 560, margin: '0 auto' }}>
+      <h1 style={{ fontSize: 28, fontWeight: 700, color: '#1A1A1A', marginBottom: 32 }}>Account</h1>
 
-      {/* Profile card */}
-      <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-6 flex items-center gap-5">
-        <div
-          className="w-16 h-16 rounded-2xl bg-indigo-600 flex items-center justify-center text-white text-2xl font-black shrink-0 shadow-lg shadow-indigo-500/25"
-        >
+      {/* Profile */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 32, paddingBottom: 32, borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+        <div style={{
+          width: 44, height: 44, borderRadius: 12, background: '#3B61C4',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          color: '#fff', fontSize: 15, fontWeight: 800, flexShrink: 0,
+        }}>
           {initials}
         </div>
         <div>
-          <p className="text-slate-900 dark:text-white font-bold text-base">{userEmail ?? 'User'}</p>
-          <span
-            className="inline-block mt-2 text-xs font-bold px-2.5 py-1 rounded-full"
-            style={{ backgroundColor: planInfo.bg, color: planInfo.color, border: `1px solid ${planInfo.border}` }}
-          >
+          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>{userEmail ?? 'User'}</p>
+          <p style={{ margin: 0, fontSize: 12, color: planInfo.color, fontWeight: 600, marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
             {planInfo.label}
-          </span>
+            {isTrialing && (
+              <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4, backgroundColor: 'rgba(59,97,196,0.10)', color: '#3B61C4' }}>
+                FREE TRIAL
+              </span>
+            )}
+          </p>
         </div>
       </div>
 
-      {/* Plan card */}
-      <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl p-6">
-        <h2 className="text-base font-bold text-slate-900 dark:text-white mb-4">Current Plan</h2>
-        <div
-          className="rounded-xl p-4 mb-5"
-          style={{ backgroundColor: planInfo.bg, border: `1px solid ${planInfo.border}` }}
-        >
-          <p className="font-bold text-base mb-3" style={{ color: planInfo.color }}>{planInfo.label}</p>
-          <ul className="space-y-2">
-            {planInfo.features.map(f => (
-              <li key={f} className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
-                <svg className="w-3.5 h-3.5 shrink-0" style={{ color: planInfo.color }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-                {f}
-              </li>
-            ))}
-          </ul>
+      {/* Plan */}
+      <div style={{ marginBottom: 32, paddingBottom: 32, borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+        <p style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Current Plan</p>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+          <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#1A1A1A' }}>{planInfo.label}</p>
+          {isTrialing && (
+            <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6, backgroundColor: 'rgba(59,97,196,0.08)', color: '#3B61C4', border: '1px solid rgba(59,97,196,0.20)' }}>
+              Free Trial
+            </span>
+          )}
         </div>
+        {isTrialing && (
+          <p style={{ margin: '0 0 10px', fontSize: 12, color: '#6B6B6B', lineHeight: 1.5 }}>
+            {trialDaysLeft !== null && trialDaysLeft > 0
+              ? <>Your free trial ends in <strong style={{ color: '#1A1A1A' }}>{trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''}</strong>. You won't be charged until then — cancel anytime before day 7.</>
+              : <>Your free trial has ended. You now have full Pro access.</>
+            }
+          </p>
+        )}
+        <ul style={{ margin: '0 0 16px', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {planInfo.features.map(f => (
+            <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#6B6B6B' }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={planInfo.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 13l4 4L19 7" />
+              </svg>
+              {f}
+            </li>
+          ))}
+        </ul>
         {plan === 'free' && (
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(79,126,247,0.12), rgba(124,92,250,0.12))',
-            border: '1px solid rgba(99,102,241,0.3)', borderRadius: 14, padding: '20px',
-            marginTop: 4,
-          }}>
-            <p style={{ margin: '0 0 4px', fontWeight: 800, fontSize: 16, color: '#c7d2fe', letterSpacing: '-0.3px' }}>
-              ✦ Try Pro free for 7 days
-            </p>
-            <p style={{ margin: '0 0 16px', fontSize: 13, color: '#64748b', lineHeight: 1.5 }}>
-              5 courses · 75 AI boosts/mo · Study Coach · Flashcards · Session Blueprints.<br/>
-              Card charged after trial — cancel before day 7, pay nothing.
-            </p>
-            <button
-              onClick={() => onShowPaywall?.('courses')}
-              style={{
-                width: '100%', padding: '12px', background: 'linear-gradient(135deg, #4F7EF7, #7C5CFA)',
-                border: 'none', borderRadius: 10, color: '#fff',
-                fontSize: 14, fontWeight: 700, cursor: 'pointer',
-              }}
-            >
-              Start free trial →
-            </button>
-          </div>
+          <button
+            onClick={() => onShowPaywall?.('courses')}
+            style={{
+              width: '100%', padding: '11px', backgroundColor: '#3B61C4',
+              border: 'none', borderRadius: 10, color: '#fff',
+              fontSize: 14, fontWeight: 700, cursor: 'pointer',
+            }}
+          >
+            Start free trial →
+          </button>
         )}
         {plan === 'pro' && (
           <button
             onClick={onShowPaywall}
-            className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-xl text-sm transition-all shadow-lg shadow-emerald-900/30"
+            style={{
+              width: '100%', padding: '11px', backgroundColor: '#059669',
+              border: 'none', borderRadius: 10, color: '#fff',
+              fontSize: 14, fontWeight: 700, cursor: 'pointer',
+            }}
           >
             Upgrade to Unlimited →
           </button>
         )}
         {plan === 'unlimited' && (
-          <p className="text-center text-sm text-slate-500 dark:text-slate-400">You're on the best plan. Thank you!</p>
+          <p style={{ fontSize: 13, color: '#9B9B9B' }}>You're on the best plan. Thank you!</p>
         )}
       </div>
 
       {/* Referral */}
-      <ReferralCard />
+      <div style={{ marginBottom: 32, paddingBottom: 32, borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+        <ReferralCard />
+      </div>
 
       {/* Settings */}
-      <div className="bg-white dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden">
-        <h2 className="text-base font-bold text-slate-900 dark:text-white px-6 pt-5 pb-3">Settings</h2>
-        <div className="divide-y divide-slate-100 dark:divide-slate-700/40">
+      <div style={{ marginBottom: 32, paddingBottom: 32, borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+        <p style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Settings</p>
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
           {onConnectGoogleCalendar && (
             <button
               onClick={googleCalendarConnected ? undefined : onConnectGoogleCalendar}
-              className="w-full flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors text-left"
+              style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 0', borderBottom: '1px solid rgba(0,0,0,0.07)', background: 'none', border: 'none', borderBottom: '1px solid rgba(0,0,0,0.07)', cursor: 'pointer', textAlign: 'left', width: '100%' }}
             >
-              <div className="w-9 h-9 rounded-xl bg-blue-500/10 flex items-center justify-center shrink-0">
-                <svg className="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                </svg>
-              </div>
-              <div className="flex-1">
-                <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Google Calendar</p>
-                <p className="text-xs text-slate-500 mt-0.5">
-                  {googleCalendarConnected ? 'Connected, syncing your schedule' : 'Connect to sync your schedule'}
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>Google Calendar</p>
+                <p style={{ margin: 0, fontSize: 12, color: '#9B9B9B', marginTop: 2 }}>
+                  {googleCalendarConnected ? 'Connected — syncing your schedule' : 'Connect to sync your schedule'}
                 </p>
               </div>
-              {googleCalendarConnected ? (
-                <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2.5 py-1 rounded-full shrink-0">Connected</span>
-              ) : (
-                <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              )}
+              {googleCalendarConnected
+                ? <span style={{ fontSize: 11, fontWeight: 700, color: '#059669', background: 'rgba(5,150,105,0.08)', padding: '3px 10px', borderRadius: 999 }}>Connected</span>
+                : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
+              }
             </button>
           )}
           <button
             onClick={onImportSyllabus}
-            className="w-full flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors text-left"
+            style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 0', background: 'none', border: 'none', borderBottom: '1px solid rgba(0,0,0,0.07)', cursor: 'pointer', textAlign: 'left', width: '100%' }}
           >
-            <div className="w-9 h-9 rounded-xl bg-violet-500/10 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-violet-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Import Syllabus</p>
-              <p className="text-xs text-slate-500 mt-0.5">Add exams and deadlines from a course document</p>
-            </div>
-            <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>Import Syllabus</p>
+              <p style={{ margin: 0, fontSize: 12, color: '#9B9B9B', marginTop: 2 }}>Add exams and deadlines from a course document</p>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
           </button>
           <button
             onClick={onEditPlan}
-            className="w-full flex items-center gap-4 px-6 py-4 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-colors text-left"
+            style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}
           >
-            <div className="w-9 h-9 rounded-xl bg-amber-500/10 flex items-center justify-center shrink-0">
-              <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-              </svg>
-            </div>
-            <div className="flex-1">
-              <p className="text-sm font-semibold text-slate-800 dark:text-slate-100">Edit Study Plan</p>
-              <p className="text-xs text-slate-500 mt-0.5">Modify your courses and schedule settings</p>
-            </div>
-            <svg className="w-4 h-4 text-slate-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>Edit Study Plan</p>
+              <p style={{ margin: 0, fontSize: 12, color: '#9B9B9B', marginTop: 2 }}>Modify your courses and schedule settings</p>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
           </button>
         </div>
       </div>
@@ -190,17 +186,16 @@ export default function AccountView({
       {onSignOut && (
         <button
           onClick={onSignOut}
-          className="w-full text-red-500 dark:text-red-400 font-semibold text-sm py-3 rounded-xl border border-red-500/20 hover:bg-red-500/5 transition-all"
+          style={{ width: '100%', padding: '11px', background: 'none', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, color: '#EF4444', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
         >
           Sign Out
         </button>
       )}
 
-      {/* Delete account */}
-      <div className="text-center pb-2">
+      <div style={{ textAlign: 'center', marginTop: 16 }}>
         <a
           href={`mailto:support@getstudyedge.com?subject=Delete%20my%20account&body=Please%20delete%20my%20account%20and%20all%20associated%20data.%0A%0AEmail%3A%20${encodeURIComponent(userEmail ?? '')}`}
-          className="text-xs text-slate-500 dark:text-slate-600 hover:text-red-400 transition-colors underline underline-offset-2"
+          style={{ fontSize: 12, color: '#C0C0C0', textDecoration: 'underline', textUnderlineOffset: 2 }}
         >
           Delete account &amp; data
         </a>

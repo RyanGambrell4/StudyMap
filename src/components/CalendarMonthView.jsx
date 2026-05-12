@@ -84,15 +84,17 @@ export default function CalendarMonthView({
       {/* ── Month nav ── */}
       <div className="flex items-center justify-between mb-4">
         <button onClick={onPrevMonth}
-          className="flex items-center gap-1 text-slate-500 hover:text-slate-300 transition-colors text-sm px-2 py-1.5 rounded-lg hover:bg-slate-800/50"
+          className="flex items-center gap-1 transition-colors text-sm px-2 py-1.5 rounded-lg"
+          style={{ color: '#9B9B9B' }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
-        <h3 className="text-sm font-medium text-slate-300 tracking-tight">{monthLabel}</h3>
+        <h3 className="text-sm font-medium tracking-tight" style={{ color: '#1A1A1A' }}>{monthLabel}</h3>
         <button onClick={onNextMonth}
-          className="flex items-center gap-1 text-slate-500 hover:text-slate-300 transition-colors text-sm px-2 py-1.5 rounded-lg hover:bg-slate-800/50"
+          className="flex items-center gap-1 transition-colors text-sm px-2 py-1.5 rounded-lg"
+          style={{ color: '#9B9B9B' }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
@@ -110,7 +112,7 @@ export default function CalendarMonthView({
           <div key={n}
             className="py-2 text-center text-[10px] font-medium uppercase tracking-widest"
             style={{
-              color: i === 6 ? '#374151' : '#4B5563',
+              color: i === 6 ? '#C0C0C0' : '#9B9B9B',
               borderRight: i < 6 ? `1px solid ${tv.gridLine}` : 'none',
             }}
           >
@@ -167,11 +169,11 @@ export default function CalendarMonthView({
                 borderRight: colIdx < 6 ? `1px solid ${tv.gridLine}` : 'none',
                 borderBottom: !isLastRow ? `1px solid ${tv.gridLine}` : 'none',
                 background: isExpanded
-                  ? 'rgba(99,102,241,0.07)'
+                  ? 'rgba(59,97,196,0.05)'
                   : isToday
-                    ? 'rgba(79,70,229,0.05)'
+                    ? 'rgba(59,97,196,0.04)'
                     : isPast
-                      ? 'rgba(0,0,0,0.08)'
+                      ? 'rgba(0,0,0,0.03)'
                       : 'transparent',
               }}
             >
@@ -180,8 +182,8 @@ export default function CalendarMonthView({
                 <div
                   className="w-6 h-6 flex items-center justify-center rounded-full text-[11px] font-medium"
                   style={isToday
-                    ? { background: '#4F46E5', color: 'white' }
-                    : { color: isPast ? '#374151' : isExpanded ? '#818CF8' : '#6B7280' }
+                    ? { background: '#3B61C4', color: 'white' }
+                    : { color: isPast ? '#C0C0C0' : isExpanded ? '#3B61C4' : '#1A1A1A' }
                   }
                 >
                   {dayNum}
@@ -240,7 +242,7 @@ export default function CalendarMonthView({
                   )
                 })}
                 {overflow > 0 && (
-                  <p className="text-[10px] px-1" style={{ color: '#4B5563' }}>+{overflow} more</p>
+                  <p className="text-[10px] px-1" style={{ color: '#9B9B9B' }}>+{overflow} more</p>
                 )}
               </div>
             </button>
@@ -253,10 +255,10 @@ export default function CalendarMonthView({
       {/* ── Expanded day detail ── */}
       {expandedDayStr && (
         <div className="mt-3 rounded-xl p-4"
-          style={{ background: 'rgba(255,255,255,0.03)', border: `1px solid ${tv.gridLine}` }}
+          style={{ background: '#FFFFFF', border: `1px solid rgba(0,0,0,0.07)` }}
         >
           <div className="flex items-center justify-between mb-3">
-            <h4 className="text-sm font-medium text-slate-300">
+            <h4 className="text-sm font-medium" style={{ color: '#1A1A1A' }}>
               {new Date(expandedDayStr + 'T12:00:00').toLocaleDateString('en-US', {
                 weekday: 'long', month: 'long', day: 'numeric',
               })}
@@ -265,7 +267,8 @@ export default function CalendarMonthView({
               {onAddSession && (
                 <button
                   onClick={() => onAddSession(expandedDayStr)}
-                  className="flex items-center gap-1 text-[11px] font-medium text-indigo-400 hover:text-indigo-300 border border-indigo-500/30 hover:border-indigo-400/50 hover:bg-indigo-500/10 px-2 py-1 rounded-lg transition-all"
+                  className="flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-lg transition-all"
+                  style={{ color: '#3B61C4', border: '1px solid rgba(59,97,196,0.25)', backgroundColor: 'rgba(59,97,196,0.06)' }}
                 >
                   <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -275,12 +278,14 @@ export default function CalendarMonthView({
               )}
               <button
                 onClick={() => onDayClick(expandedDayStr)}
-                className="text-[11px] text-indigo-400 hover:text-indigo-300 transition-colors"
+                className="text-[11px] transition-colors"
+                style={{ color: '#3B61C4' }}
               >
                 Day view →
               </button>
               <button onClick={() => setExpandedDayStr(null)}
-                className="text-slate-600 hover:text-slate-400 transition-colors"
+                className="transition-colors"
+                style={{ color: '#C0C0C0' }}
               >
                 <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

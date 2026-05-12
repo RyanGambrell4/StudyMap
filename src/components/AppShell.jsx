@@ -1,16 +1,14 @@
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { getActivePlan, getCachedSubscription } from '../lib/subscription'
 import OnboardingTour from './OnboardingTour'
 
-// ── Color tokens ───────────────────────────────────────────────────────────────
-const SIDEBAR_BG      = '#060B14'
-const ITEM_ACTIVE_BG  = '#1A2952'
-const ACCENT          = '#6366F1'
-const ICON_ACTIVE     = '#6366F1'
-const LABEL_ACTIVE    = '#F0F4FF'
-const ICON_INACTIVE   = '#3D4F6B'
-const LABEL_INACTIVE  = '#8896B3'
-const BORDER_COLOR    = '#0F1929'
+// ── Design tokens ─────────────────────────────────────────────────────────────
+const NAV_BG      = '#FFFFFF'
+const PAGE_BG     = '#F7F6F3'
+const ACCENT      = '#3B61C4'
+const TEXT        = '#111111'
+const MUTED       = '#6B6B6B'
+const BORDER      = '#E5E5E5'
 
 // ── Nav items ─────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
@@ -51,13 +49,15 @@ const NAV_ITEMS = [
   },
 ]
 
-// ── Mobile tab items (all items, horizontally scrollable) ─────────────────────
-const MOBILE_NAV = NAV_ITEMS
+// Mobile: first 5 items
+const MOBILE_NAV = NAV_ITEMS.slice(0, 5)
+
+const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
 
 function NavIcon({ path, active }) {
   return (
     <svg
-      style={{ width: 18, height: 18, flexShrink: 0, color: active ? ICON_ACTIVE : ICON_INACTIVE }}
+      style={{ width: 18, height: 18, flexShrink: 0, color: active ? ACCENT : MUTED }}
       fill="none"
       stroke="currentColor"
       viewBox="0 0 24 24"
@@ -66,8 +66,6 @@ function NavIcon({ path, active }) {
     </svg>
   )
 }
-
-const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
 
 export default function AppShell({
   activeSection,
@@ -86,9 +84,22 @@ export default function AppShell({
   const isExamMode = Array.isArray(courses) && courses.some(c => EXAM_PATTERN.test(c.name))
   const [settingsOpen, setSettingsOpen] = useState(false)
   const [startTour, setStartTour] = useState(null)
+  const settingsRef = useRef(null)
   const handleTourReady = useCallback((fn) => setStartTour(() => fn), [])
 
   useEffect(() => { window.scrollTo(0, 0) }, [activeSection])
+
+  // Close settings dropdown on outside click
+  useEffect(() => {
+    if (!settingsOpen) return
+    const handler = (e) => {
+      if (settingsRef.current && !settingsRef.current.contains(e.target)) {
+        setSettingsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [settingsOpen])
 
   const plan = getActivePlan()
   const planLabel = plan === 'unlimited' ? 'Unlimited' : plan === 'pro' ? 'Pro' : 'Free'
@@ -107,59 +118,70 @@ export default function AppShell({
       ? `Your Pro trial ends in ${daysLeft} day${daysLeft !== 1 ? 's' : ''} — keep access to everything.`
       : null
   const showTrialBanner = isTrialing && trialMsg && !trialBannerDismissed
-  const planColors = {
-    free:      { bg: 'rgba(100,116,139,0.15)', color: '#94a3b8' },
-    pro:       { bg: 'rgba(99,102,241,0.15)',  color: '#818cf8' },
-    unlimited: { bg: 'rgba(16,185,129,0.15)',  color: '#34d399' },
-  }
-  const pc = planColors[plan] ?? planColors.free
+
   const initials = userEmail ? userEmail.split('@')[0].slice(0, 2).toUpperCase() : 'U'
   const displayName = userEmail?.split('@')[0] ?? 'Account'
 
-  return (
-    <div className="min-h-screen flex" style={{ backgroundColor: '#080D18' }}>
+  const SETTINGS_ITEMS = [
+    {
+      label: 'Import Syllabus',
+      onClick: () => { setSettingsOpen(false); onImportSyllabus?.() },
+      icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
+    },
+    {
+      label: 'Share Plan',
+      onClick: () => { setSettingsOpen(false); onShare?.() },
+      icon: 'M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z',
+    },
+    {
+      label: 'Edit Plan',
+      onClick: () => { setSettingsOpen(false); onEditPlan?.() },
+      icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
+    },
+  ]
 
-      {/* ── Desktop Sidebar ── */}
-      <aside
-        className="hidden lg:flex flex-col w-56 shrink-0 fixed inset-y-0 left-0 z-40"
-        style={{ backgroundColor: SIDEBAR_BG, borderRight: `1px solid ${BORDER_COLOR}` }}
+  return (
+    <div style={{ minHeight: '100vh', background: PAGE_BG }}>
+
+      {/* ── Top navigation bar ── */}
+      <header
+        className="hidden lg:flex"
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          height: 56,
+          background: NAV_BG,
+          borderBottom: `1px solid ${BORDER}`,
+          zIndex: 40,
+          display: 'flex',
+          alignItems: 'center',
+          padding: '0 32px',
+          gap: 0,
+        }}
       >
         {/* Logo */}
-        <div
-          className="flex items-center gap-3 px-5 py-5"
-          style={{ borderBottom: `1px solid ${BORDER_COLOR}` }}
-        >
-          <img src="/favicon.png" alt="StudyEdge AI" style={{ height: 32, width: 32, objectFit: 'contain' }} />
-          <span style={{ color: LABEL_ACTIVE, fontWeight: 700, fontSize: 15, letterSpacing: '-0.01em' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginRight: 36, flexShrink: 0 }}>
+          <img src="/favicon.png" alt="StudyEdge AI" style={{ height: 28, width: 28, objectFit: 'contain' }} />
+          <span style={{ fontWeight: 700, fontSize: 15, color: TEXT, letterSpacing: '-0.01em' }}>
             StudyEdge AI
           </span>
           {startTour && (
             <button
               onClick={startTour}
               title="Take a tour"
-              style={{
-                marginLeft: 'auto',
-                width: 26,
-                height: 26,
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                borderRadius: 6,
-                color: ICON_INACTIVE,
-                background: 'transparent',
-                border: 'none',
-                cursor: 'pointer',
-              }}
+              style={{ marginLeft: 4, width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 5, color: MUTED, background: 'transparent', border: 'none', cursor: 'pointer' }}
             >
-              <svg style={{ width: 14, height: 14 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg style={{ width: 13, height: 13 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
             </button>
           )}
         </div>
 
-        {/* Nav items */}
-        <nav style={{ flex: 1, padding: '12px 10px', display: 'flex', flexDirection: 'column', gap: 2 }}>
+        {/* Nav links */}
+        <nav style={{ display: 'flex', alignItems: 'stretch', height: '100%', flex: 1 }}>
           {NAV_ITEMS.map(item => {
             const active = activeSection === item.id
             return (
@@ -168,233 +190,169 @@ export default function AppShell({
                 id={`tour-nav-${item.id}`}
                 onClick={() => setActiveSection(item.id)}
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: 10,
-                  padding: '9px 12px',
-                  borderRadius: 10,
-                  fontSize: 13,
+                  padding: '0 14px',
+                  height: '100%',
+                  borderBottom: active ? `2px solid ${ACCENT}` : '2px solid transparent',
+                  borderTop: 'none',
+                  borderLeft: 'none',
+                  borderRight: 'none',
+                  color: active ? ACCENT : MUTED,
                   fontWeight: active ? 600 : 500,
-                  color: active ? LABEL_ACTIVE : LABEL_INACTIVE,
-                  backgroundColor: active ? ITEM_ACTIVE_BG : 'transparent',
-                  border: 'none',
+                  fontSize: 13,
+                  background: 'none',
                   cursor: 'pointer',
-                  width: '100%',
-                  textAlign: 'left',
-                  transition: 'background-color 0.15s, color 0.15s',
+                  whiteSpace: 'nowrap',
+                  transition: 'color 0.12s',
                 }}
-                onMouseEnter={e => { if (!active) { e.currentTarget.style.backgroundColor = '#0F1929'; e.currentTarget.style.color = '#C8D6F0' } }}
-                onMouseLeave={e => { if (!active) { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = LABEL_INACTIVE } }}
+                onMouseEnter={e => { if (!active) e.currentTarget.style.color = TEXT }}
+                onMouseLeave={e => { if (!active) e.currentTarget.style.color = MUTED }}
               >
-                <NavIcon path={item.icon} active={active} />
                 {item.id === 'grades' && isExamMode ? 'Scores' : item.label}
               </button>
             )
           })}
         </nav>
 
-        {/* Settings overflow */}
-        <div style={{ padding: '0 10px', borderTop: `1px solid ${BORDER_COLOR}` }}>
-          <button
-            onClick={() => setSettingsOpen(v => !v)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 10,
-              padding: '10px 12px',
-              borderRadius: 10,
-              fontSize: 13,
-              fontWeight: 500,
-              color: LABEL_INACTIVE,
-              backgroundColor: 'transparent',
-              border: 'none',
-              cursor: 'pointer',
-              width: '100%',
-              textAlign: 'left',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#0F1929'; e.currentTarget.style.color = '#C8D6F0' }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = LABEL_INACTIVE }}
-          >
-            <svg style={{ width: 18, height: 18, flexShrink: 0, color: ICON_INACTIVE }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
-            Settings
-            <svg
+        {/* Right side: settings + avatar */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto', flexShrink: 0 }}>
+          {/* Settings dropdown */}
+          <div ref={settingsRef} style={{ position: 'relative' }}>
+            <button
+              onClick={() => setSettingsOpen(v => !v)}
               style={{
-                width: 12,
-                height: 12,
-                marginLeft: 'auto',
-                color: ICON_INACTIVE,
-                transform: settingsOpen ? 'rotate(180deg)' : 'rotate(0deg)',
-                transition: 'transform 0.2s',
+                width: 34,
+                height: 34,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                borderRadius: 8,
+                color: settingsOpen ? TEXT : MUTED,
+                background: settingsOpen ? '#F0EFEC' : 'transparent',
+                border: 'none',
+                cursor: 'pointer',
+                transition: 'background 0.12s, color 0.12s',
               }}
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
+              onMouseEnter={e => { if (!settingsOpen) { e.currentTarget.style.background = '#F0EFEC'; e.currentTarget.style.color = TEXT } }}
+              onMouseLeave={e => { if (!settingsOpen) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = MUTED } }}
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-            </svg>
-          </button>
+              <svg style={{ width: 17, height: 17 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+            </button>
 
-          {settingsOpen && (
-            <div style={{ paddingBottom: 8, display: 'flex', flexDirection: 'column', gap: 1 }}>
-              {[
-                {
-                  label: 'Import Syllabus',
-                  onClick: onImportSyllabus,
-                  icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
-                },
-                {
-                  label: 'Share Plan',
-                  onClick: onShare,
-                  icon: 'M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z',
-                },
-                {
-                  label: 'Edit Plan',
-                  onClick: onEditPlan,
-                  icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
-                  danger: true,
-                },
-              ].map(({ label, onClick, icon, danger }) => (
-                <button
-                  key={label}
-                  onClick={onClick}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '8px 12px',
-                    borderRadius: 10,
-                    fontSize: 12,
-                    fontWeight: 500,
-                    color: LABEL_INACTIVE,
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    cursor: 'pointer',
-                    width: '100%',
-                    textAlign: 'left',
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#0F1929'; e.currentTarget.style.color = danger ? '#f87171' : '#C8D6F0' }}
-                  onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent'; e.currentTarget.style.color = LABEL_INACTIVE }}
-                >
-                  <svg style={{ width: 15, height: 15, flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
-                  </svg>
-                  {label}
-                </button>
-              ))}
+            {settingsOpen && (
+              <div style={{
+                position: 'absolute',
+                top: 40,
+                right: 0,
+                width: 200,
+                background: '#FFFFFF',
+                border: `1px solid ${BORDER}`,
+                borderRadius: 10,
+                boxShadow: '0 8px 24px rgba(0,0,0,0.10)',
+                padding: '6px 0',
+                zIndex: 100,
+              }}>
+                {SETTINGS_ITEMS.map(({ label, onClick, icon }) => (
+                  <button
+                    key={label}
+                    onClick={onClick}
+                    style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '9px 14px', width: '100%', background: 'none', border: 'none', color: TEXT, fontSize: 13, fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}
+                    onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
+                    onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                  >
+                    <svg style={{ width: 14, height: 14, color: MUTED, flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
+                    </svg>
+                    {label}
+                  </button>
+                ))}
+                {onConnectGoogleCalendar && (
+                  <button
+                    onClick={googleCalendarConnected ? undefined : () => { setSettingsOpen(false); onConnectGoogleCalendar?.() }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '9px 14px', width: '100%', background: 'none', border: 'none', color: googleCalendarConnected ? '#16A34A' : TEXT, fontSize: 13, fontWeight: 500, cursor: googleCalendarConnected ? 'default' : 'pointer', textAlign: 'left' }}
+                    onMouseEnter={e => { if (!googleCalendarConnected) e.currentTarget.style.background = '#F7F6F3' }}
+                    onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                  >
+                    <svg style={{ width: 14, height: 14, color: googleCalendarConnected ? '#16A34A' : MUTED, flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                    </svg>
+                    {googleCalendarConnected ? '✓ Calendar Connected' : 'Connect Google Cal'}
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
 
-              {onConnectGoogleCalendar && (
-                <button
-                  onClick={googleCalendarConnected ? undefined : onConnectGoogleCalendar}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 10,
-                    padding: '8px 12px',
-                    borderRadius: 10,
-                    fontSize: 12,
-                    fontWeight: 500,
-                    color: googleCalendarConnected ? '#34d399' : LABEL_INACTIVE,
-                    backgroundColor: 'transparent',
-                    border: 'none',
-                    cursor: googleCalendarConnected ? 'default' : 'pointer',
-                    width: '100%',
-                    textAlign: 'left',
-                  }}
-                >
-                  <svg style={{ width: 15, height: 15, flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  {googleCalendarConnected ? 'Calendar Connected' : 'Connect Google Cal'}
-                </button>
-              )}
-            </div>
-          )}
-        </div>
-
-        {/* Account section */}
-        <div style={{ padding: '10px', borderTop: `1px solid ${BORDER_COLOR}` }}>
+          {/* Avatar / Account */}
           <button
             onClick={onNavigateToAccount}
+            title={displayName}
             style={{
               display: 'flex',
               alignItems: 'center',
-              gap: 10,
-              padding: '10px 12px',
-              borderRadius: 10,
-              backgroundColor: 'transparent',
+              gap: 8,
+              padding: '4px 4px 4px 4px',
+              borderRadius: 8,
+              background: 'transparent',
               border: 'none',
               cursor: 'pointer',
-              width: '100%',
-              textAlign: 'left',
             }}
-            onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#0F1929' }}
-            onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'transparent' }}
+            onMouseEnter={e => e.currentTarget.style.background = '#F0EFEC'}
+            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
-            {/* Avatar */}
             <div style={{
               width: 32,
               height: 32,
               borderRadius: '50%',
-              backgroundColor: ACCENT,
+              background: ACCENT,
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              flexShrink: 0,
               color: '#fff',
               fontSize: 11,
               fontWeight: 700,
+              flexShrink: 0,
             }}>
               {initials}
             </div>
-
-            {/* Name + plan */}
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <p style={{ color: LABEL_ACTIVE, fontSize: 12, fontWeight: 600, margin: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {displayName}
-              </p>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 2 }}>
-                <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 999, backgroundColor: pc.bg, color: pc.color }}>
-                  {planLabel}
-                </span>
-                {plan === 'free' && (
-                  <span style={{ fontSize: 10, color: '#818cf8', fontWeight: 600 }}>Upgrade</span>
-                )}
-              </div>
-            </div>
-
-            {/* Gear icon */}
-            <svg style={{ width: 15, height: 15, color: ICON_INACTIVE, flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            </svg>
+            {plan !== 'free' && (
+              <span style={{ fontSize: 11, fontWeight: 700, color: plan === 'unlimited' ? '#16A34A' : ACCENT }}>
+                {planLabel}
+              </span>
+            )}
+            {plan === 'free' && (
+              <span style={{ fontSize: 11, fontWeight: 700, color: ACCENT }}>Upgrade</span>
+            )}
           </button>
         </div>
-      </aside>
+      </header>
 
       {/* ── Main content ── */}
-      <main className="flex-1 lg:ml-56 pb-20 lg:pb-0 min-h-screen" style={{ overflowX: 'hidden', minWidth: 0, width: '100%' }}>
+      <main
+        className="lg:pt-14 pb-20 lg:pb-0 min-h-screen"
+        style={{ overflowX: 'hidden', minWidth: 0, width: '100%' }}
+      >
         {showTrialBanner && (
           <div style={{
-            background: 'linear-gradient(90deg, rgba(99,102,241,0.18), rgba(124,92,250,0.18))',
-            borderBottom: '1px solid rgba(99,102,241,0.25)',
-            padding: '10px 20px',
+            background: '#FFF7ED',
+            borderBottom: '1px solid #FED7AA',
+            padding: '10px 32px',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
             gap: 12,
           }}>
-            <span style={{ fontSize: 13, color: '#c7d2fe', fontWeight: 500 }}>
-              ⏳ {trialMsg}
+            <span style={{ fontSize: 13, color: '#92400E', fontWeight: 500 }}>
+              {trialMsg}
             </span>
             <button
               onClick={() => {
                 sessionStorage.setItem('studyedge_trial_banner_dismissed', '1')
                 setTrialBannerDismissed(true)
               }}
-              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#64748b', fontSize: 16, lineHeight: 1, padding: '0 4px', flexShrink: 0 }}
+              style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', fontSize: 18, lineHeight: 1, padding: '0 4px', flexShrink: 0 }}
               aria-label="Dismiss"
             >
               ×
@@ -411,12 +369,8 @@ export default function AppShell({
       <nav
         className="lg:hidden fixed bottom-0 inset-x-0 z-40 flex"
         style={{
-          backgroundColor: 'rgba(6,11,20,0.97)',
-          borderTop: `1px solid ${BORDER_COLOR}`,
-          backdropFilter: 'blur(12px)',
-          overflowX: 'auto',
-          scrollbarWidth: 'none',
-          WebkitOverflowScrolling: 'touch',
+          background: '#FFFFFF',
+          borderTop: `1px solid ${BORDER}`,
         }}
       >
         {MOBILE_NAV.map(item => {
@@ -426,21 +380,19 @@ export default function AppShell({
               key={item.id}
               onClick={() => setActiveSection(item.id)}
               style={{
-                minWidth: 64,
-                flex: '0 0 auto',
+                flex: 1,
                 display: 'flex',
                 flexDirection: 'column',
                 alignItems: 'center',
-                gap: 4,
+                gap: 3,
                 padding: '10px 0',
                 background: 'transparent',
                 border: 'none',
                 cursor: 'pointer',
-                color: active ? ACCENT : ICON_INACTIVE,
               }}
             >
               <NavIcon path={item.icon} active={active} />
-              <span style={{ fontSize: 9, fontWeight: 500, color: active ? LABEL_ACTIVE : LABEL_INACTIVE }}>
+              <span style={{ fontSize: 9, fontWeight: 500, color: active ? ACCENT : MUTED }}>
                 {item.id === 'grades' && isExamMode ? 'Scores' : item.label}
               </span>
             </button>
@@ -450,12 +402,11 @@ export default function AppShell({
         <button
           onClick={onNavigateToAccount}
           style={{
-            minWidth: 64,
-            flex: '0 0 auto',
+            flex: 1,
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            gap: 4,
+            gap: 3,
             padding: '10px 0',
             background: 'transparent',
             border: 'none',
@@ -463,14 +414,14 @@ export default function AppShell({
           }}
         >
           <svg
-            style={{ width: 18, height: 18, color: activeSection === 'account' ? ACCENT : ICON_INACTIVE }}
+            style={{ width: 18, height: 18, color: activeSection === 'account' ? ACCENT : MUTED }}
             fill="none"
             stroke="currentColor"
             viewBox="0 0 24 24"
           >
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={activeSection === 'account' ? 2.5 : 2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
           </svg>
-          <span style={{ fontSize: 9, fontWeight: 500, color: activeSection === 'account' ? LABEL_ACTIVE : LABEL_INACTIVE }}>
+          <span style={{ fontSize: 9, fontWeight: 500, color: activeSection === 'account' ? ACCENT : MUTED }}>
             Account
           </span>
         </button>

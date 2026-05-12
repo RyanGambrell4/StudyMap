@@ -11,22 +11,22 @@ import {
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
-  bg:        '#060614',
-  bgCard:    '#0a0a1e',
-  border:    'rgba(255,255,255,0.06)',
-  borderStr: 'rgba(255,255,255,0.10)',
-  text:      '#e8e8f0',
-  muted:     '#8888a0',
-  dim:       '#55556e',
-  accent:    '#6366f1',
-  glow:      'rgba(99,102,241,0.35)',
-  indigo:    '#818CF8',
-  violet:    '#8b5cf6',
-  mint:      '#34d399',
-  orange:    '#F97316',
-  sky:       '#38BDF8',
-  pink:      '#F472B6',
-  amber:     '#fbbf24',
+  bg:        '#F7F6F3',
+  bgCard:    '#FFFFFF',
+  border:    'rgba(0,0,0,0.07)',
+  borderStr: 'rgba(0,0,0,0.12)',
+  text:      '#111111',
+  muted:     '#6B6B6B',
+  dim:       '#9B9B9B',
+  accent:    '#3B61C4',
+  glow:      'rgba(59,97,196,0.2)',
+  indigo:    '#3B61C4',
+  violet:    '#111111',
+  mint:      '#16A34A',
+  orange:    '#E8531A',
+  sky:       '#2563EB',
+  pink:      '#DC2626',
+  amber:     '#D97706',
 }
 
 const PATH_COLORS = [D.sky, D.violet, D.orange]
@@ -72,21 +72,21 @@ function computeGPA(courses) {
 const GH_STYLE = `
 body{overflow-x:hidden!important;}
 *{box-sizing:border-box;}
-.gh-range{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:rgba(255,255,255,0.06);outline:none;position:relative;}
-.gh-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#6366f1;cursor:pointer;border:2px solid #0a0a1e;box-shadow:0 0 0 1px #818CF8,0 2px 8px rgba(99,102,241,0.35);}
-.gh-range::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#6366f1;cursor:pointer;border:2px solid #0a0a1e;}
+.gh-range{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:rgba(0,0,0,0.10);outline:none;position:relative;}
+.gh-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#3B61C4;cursor:pointer;border:2px solid #FFFFFF;box-shadow:0 0 0 1px #3B61C4,0 2px 8px rgba(59,97,196,0.3);}
+.gh-range::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#3B61C4;cursor:pointer;border:2px solid #FFFFFF;}
 .gh-range:disabled{opacity:0.5;cursor:default;}
-.gh-input{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);color:#e8e8f0;border-radius:7px;padding:7px 10px;font-size:13px;outline:none;transition:border 0.15s;font-family:inherit;box-sizing:border-box;}
-.gh-input:focus{border-color:rgba(99,102,241,0.5);}
+.gh-input{background:#FFFFFF;border:1px solid rgba(0,0,0,0.10);color:#111111;border-radius:7px;padding:7px 10px;font-size:13px;outline:none;transition:border 0.15s;font-family:inherit;box-sizing:border-box;}
+.gh-input:focus{border-color:rgba(59,97,196,0.5);}
 .gh-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
-.gh-input::placeholder{color:#55556e;}
+.gh-input::placeholder{color:#9B9B9B;}
 .gh-input:disabled{opacity:0.4;}
-.gh-input-text{background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);color:#e8e8f0;border-radius:7px;padding:7px 10px;font-size:13px;outline:none;transition:border 0.15s;font-family:inherit;box-sizing:border-box;}
-.gh-input-text:focus{border-color:rgba(99,102,241,0.5);}
-.gh-input-text::placeholder{color:#55556e;}
+.gh-input-text{background:#FFFFFF;border:1px solid rgba(0,0,0,0.10);color:#111111;border-radius:7px;padding:7px 10px;font-size:13px;outline:none;transition:border 0.15s;font-family:inherit;box-sizing:border-box;}
+.gh-input-text:focus{border-color:rgba(59,97,196,0.5);}
+.gh-input-text::placeholder{color:#9B9B9B;}
 .gh-grade-row-inner{display:contents;}
 @media(max-width:900px){.gh-grid{grid-template-columns:1fr!important;}.gh-rail{position:static!important;}}
-@media(max-width:640px){.gh-plan-row{display:flex!important;flex-direction:column!important;gap:8px!important;padding:12px 0!important;border-bottom:1px solid rgba(255,255,255,0.06)!important;min-width:0!important;width:100%!important;}.gh-plan-row-header{display:none!important;}.gh-grade-row-inner{display:grid!important;grid-template-columns:64px 1fr 60px 24px!important;gap:8px!important;align-items:center!important;min-width:0!important;width:100%!important;}.gh-table-wrap{overflow-x:hidden!important;}.gh-plan-content{overflow-x:hidden!important;max-width:100%!important;}.gh-plan-callout{overflow:hidden!important;}.gh-header{padding:16px 14px 14px!important;}.gh-content{padding:14px 14px 48px!important;overflow-x:hidden!important;max-width:100%!important;}.gh-tab-btn{padding:9px 8px!important;font-size:12px!important;gap:5px!important;}.gh-scenarios-grid{grid-template-columns:1fr!important;}.gh-compare-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}.gh-bottom-bar{flex-wrap:wrap!important;gap:8px!important;}.gh-course-strip{flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;padding-bottom:6px!important;}}
+@media(max-width:640px){.gh-plan-row{display:flex!important;flex-direction:column!important;gap:8px!important;padding:12px 0!important;border-bottom:1px solid rgba(0,0,0,0.07)!important;min-width:0!important;width:100%!important;}.gh-plan-row-header{display:none!important;}.gh-grade-row-inner{display:grid!important;grid-template-columns:64px 1fr 60px 24px!important;gap:8px!important;align-items:center!important;min-width:0!important;width:100%!important;}.gh-table-wrap{overflow-x:hidden!important;}.gh-plan-content{overflow-x:hidden!important;max-width:100%!important;}.gh-plan-callout{overflow:hidden!important;}.gh-header{padding:16px 14px 14px!important;}.gh-content{padding:14px 14px 48px!important;overflow-x:hidden!important;max-width:100%!important;}.gh-tab-btn{padding:9px 8px!important;font-size:12px!important;gap:5px!important;}.gh-scenarios-grid{grid-template-columns:1fr!important;}.gh-compare-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}.gh-bottom-bar{flex-wrap:wrap!important;gap:8px!important;}.gh-course-strip{flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;padding-bottom:6px!important;}}
 `
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
@@ -108,7 +108,7 @@ function LockedState({ onShowPaywall }) {
     <div style={{ padding: '60px 32px', textAlign: 'center' }}>
       <div style={{
         width: 52, height: 52, borderRadius: 14, margin: '0 auto 16px',
-        background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)',
+        background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)',
         display: 'grid', placeItems: 'center', color: D.indigo,
       }}>
         <IcoShield />
@@ -119,7 +119,7 @@ function LockedState({ onShowPaywall }) {
       </p>
       <button
         onClick={() => onShowPaywall?.('grades')}
-        style={{ padding: '11px 26px', background: `linear-gradient(135deg, ${D.accent}, ${D.violet})`, borderRadius: 10, color: '#fff', fontSize: 13.5, fontWeight: 600, boxShadow: `0 6px 20px ${D.glow}` }}
+        style={{ padding: '11px 26px', background: '#3B61C4', borderRadius: 10, color: '#fff', fontSize: 13.5, fontWeight: 600, border: 'none' }}
       >
         Upgrade to Pro
       </button>
@@ -129,46 +129,26 @@ function LockedState({ onShowPaywall }) {
 
 // ── Course pill card ──────────────────────────────────────────────────────────
 function CourseCard({ course, active, onClick }) {
-  const dot   = course.color?.dot ?? D.accent
+  const dot  = course.color?.dot ?? D.accent
   const comps = course.gradeData?.components ?? []
-  const curr  = getCurrentGrade(comps)
-  const ltr   = curr !== null ? letterGrade(curr) : null
-  const days  = daysTo(course.examDate)
-  const name  = clean(course.name)
-  const shortName = name.length > 18 ? name.slice(0, 16) + '…' : name
+  const curr = getCurrentGrade(comps)
+  const ltr  = curr !== null ? letterGrade(curr) : null
+  const name = clean(course.name)
+  const shortName = name.length > 22 ? name.slice(0, 20) + '…' : name
 
   return (
     <button onClick={onClick} style={{
-      flex: '1 1 0', minWidth: 0, padding: 14, textAlign: 'left',
-      background: active ? `linear-gradient(155deg, ${dot}20, ${dot}08 50%, ${D.bgCard})` : D.bgCard,
-      border: active ? `1px solid ${dot}55` : `1px solid ${D.border}`,
-      borderRadius: 12, cursor: 'pointer',
-      boxShadow: active ? `0 0 0 3px ${dot}15, 0 8px 24px ${dot}15` : 'none',
-      transition: 'all 0.15s', position: 'relative', overflow: 'hidden',
+      padding: '7px 16px', borderRadius: 999, cursor: 'pointer', flexShrink: 0,
+      background: active ? dot : '#FFFFFF',
+      border: `1px solid ${active ? dot : D.border}`,
+      color: active ? '#fff' : D.muted,
+      fontSize: 13, fontWeight: active ? 600 : 500,
+      display: 'inline-flex', alignItems: 'center', gap: 7,
+      whiteSpace: 'nowrap', transition: 'all 0.15s',
     }}>
-      {active && <div style={{ position: 'absolute', top: -30, right: -30, width: 110, height: 110, background: `radial-gradient(circle, ${dot}25, transparent 70%)`, pointerEvents: 'none' }} />}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10, position: 'relative' }}>
-        <span style={{ width: 8, height: 8, borderRadius: '50%', background: dot, boxShadow: `0 0 8px ${dot}90`, flexShrink: 0 }} />
-        <span style={{ fontSize: 12.5, fontWeight: 600, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {shortName}
-        </span>
-      </div>
-      {curr !== null ? (
-        <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '3px 10px', borderRadius: 999, background: `${letterColor(ltr)}15`, border: `1px solid ${letterColor(ltr)}35`, color: letterColor(ltr), marginBottom: 8 }}>
-          <span style={{ fontSize: 12, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>{curr.toFixed(1)}%</span>
-          <span style={{ fontSize: 11, opacity: 0.6 }}>·</span>
-          <span style={{ fontSize: 11, fontWeight: 600 }}>{ltr}</span>
-        </div>
-      ) : (
-        <div style={{ fontSize: 12.5, color: D.muted, marginBottom: 8, display: 'flex', alignItems: 'center', gap: 4 }}>
-          Set up <IcoArrow />
-        </div>
-      )}
-      {days !== null && (
-        <div style={{ fontSize: 10.5, color: D.dim, fontFamily: 'ui-monospace, monospace' }}>
-          {days > 0 ? `${days}d to exam` : days === 0 ? 'Exam today' : 'Exam passed'}
-        </div>
-      )}
+      <span style={{ width: 6, height: 6, borderRadius: '50%', background: active ? 'rgba(255,255,255,0.8)' : dot, flexShrink: 0 }} />
+      {shortName}
+      {ltr && <span style={{ fontSize: 11, fontWeight: 600, color: active ? 'rgba(255,255,255,0.85)' : letterColor(ltr) }}>{ltr}</span>}
     </button>
   )
 }
@@ -181,16 +161,17 @@ function Tabs({ active, onChange }) {
     { id: 'sandbox', label: 'Sandbox', Icon: IcoBeaker  },
   ]
   return (
-    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 4, background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 12, padding: 4 }}>
+    <div style={{ display: 'flex', gap: 0, borderBottom: `1px solid ${D.border}`, marginBottom: 4 }}>
       {tabs.map(t => (
         <button key={t.id} onClick={() => onChange(t.id)} className="gh-tab-btn" style={{
-          padding: '11px 14px', borderRadius: 9,
-          background: active === t.id ? 'rgba(99,102,241,0.15)' : 'transparent',
-          border: active === t.id ? '1px solid rgba(99,102,241,0.3)' : '1px solid transparent',
-          color: active === t.id ? D.text : D.muted,
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          padding: '10px 20px',
+          background: 'transparent',
+          border: 'none',
+          borderBottom: active === t.id ? '2px solid #3B61C4' : '2px solid transparent',
+          color: active === t.id ? '#3B61C4' : D.muted,
+          display: 'flex', alignItems: 'center', gap: 7,
           fontSize: 13, fontWeight: active === t.id ? 600 : 500,
-          cursor: 'pointer', transition: 'all 0.15s',
+          cursor: 'pointer', marginBottom: -1,
         }}>
           <t.Icon /> {t.label}
         </button>
@@ -202,7 +183,7 @@ function Tabs({ active, onChange }) {
 // ── PathCard ──────────────────────────────────────────────────────────────────
 function PathCard({ color, icon, title, desc, rows }) {
   return (
-    <div style={{ padding: 14, borderRadius: 11, background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderTop: `2px solid ${color}`, minWidth: 0, width: '100%' }}>
+    <div style={{ padding: 14, borderRadius: 11, background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, borderTop: `2px solid ${color}`, minWidth: 0, width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
         <div style={{ width: 24, height: 24, borderRadius: 6, background: `${color}18`, color, display: 'grid', placeItems: 'center', fontSize: 13 }}>{icon}</div>
         <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>{title}</div>
@@ -211,7 +192,7 @@ function PathCard({ color, icon, title, desc, rows }) {
       {rows.map(([k, v], i) => (
         <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, padding: '3px 0' }}>
           <span style={{ color: D.dim }}>{k}</span>
-          <span style={{ color, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>{v}</span>
+          <span style={{ color, fontWeight: 700, fontFamily: 'inherit' }}>{v}</span>
         </div>
       ))}
     </div>
@@ -268,7 +249,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
           <div style={{ flex: 1 }} />
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px', borderRadius: 999, background: totalWeight === 100 ? 'rgba(52,211,153,0.1)' : 'rgba(249,115,22,0.1)', border: `1px solid ${totalWeight === 100 ? 'rgba(52,211,153,0.3)' : 'rgba(249,115,22,0.3)'}`, flexShrink: 0, marginLeft: 'auto' }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: totalWeight === 100 ? D.mint : D.orange }} />
-            <span style={{ fontSize: 11.5, fontWeight: 600, color: totalWeight === 100 ? D.mint : D.orange, fontFamily: 'ui-monospace, monospace' }}>{totalWeight.toFixed(0)}% / 100%</span>
+            <span style={{ fontSize: 11.5, fontWeight: 600, color: totalWeight === 100 ? D.mint : D.orange, fontFamily: 'inherit' }}>{totalWeight.toFixed(0)}% / 100%</span>
           </div>
         </div>
 
@@ -286,7 +267,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
                   <input className="gh-input" type="number" value={row.weight} onChange={e => setRow(i, 'weight', e.target.value)} style={{ width: '100%', paddingRight: 26 }} />
                   <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: D.dim, pointerEvents: 'none' }}>%</span>
                 </div>
-                <button onClick={() => setRow(i, 'graded', !row.graded)} style={{ padding: '7px 10px', fontSize: 12, fontWeight: 600, borderRadius: 7, cursor: 'pointer', background: row.graded ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)', border: row.graded ? '1px solid rgba(99,102,241,0.35)' : `1px solid ${D.border}`, color: row.graded ? D.indigo : D.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
+                <button onClick={() => setRow(i, 'graded', !row.graded)} style={{ padding: '7px 10px', fontSize: 12, fontWeight: 600, borderRadius: 7, cursor: 'pointer', background: row.graded ? 'rgba(59,97,196,0.08)' : 'rgba(0,0,0,0.04)', border: row.graded ? '1px solid rgba(59,97,196,0.25)' : `1px solid ${D.border}`, color: row.graded ? D.indigo : D.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
                   {row.graded && <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.indigo }} />}
                   {row.graded ? 'Graded' : 'Not yet'}
                 </button>
@@ -314,7 +295,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
             const isActive = targetGrade === opt.value
             const c = letterColor(opt.label)
             return (
-              <button key={opt.label} onClick={() => setTargetGrade(opt.value)} style={{ width: 44, height: 44, borderRadius: 10, cursor: 'pointer', background: isActive ? `linear-gradient(135deg, ${D.accent}, ${D.violet})` : 'rgba(255,255,255,0.03)', border: isActive ? '1px solid rgba(139,92,246,0.5)' : `1px solid ${c}30`, color: isActive ? '#fff' : c, fontSize: 14, fontWeight: 700, boxShadow: isActive ? '0 0 16px rgba(99,102,241,0.4)' : 'none', transition: 'all 0.15s' }}>
+              <button key={opt.label} onClick={() => setTargetGrade(opt.value)} style={{ width: 44, height: 44, borderRadius: 10, cursor: 'pointer', background: isActive ? '#3B61C4' : 'rgba(0,0,0,0.04)', border: isActive ? '1px solid rgba(59,97,196,0.5)' : `1px solid ${c}30`, color: isActive ? '#fff' : c, fontSize: 14, fontWeight: 700, transition: 'all 0.15s' }}>
                 {opt.label}
               </button>
             )
@@ -323,34 +304,30 @@ function PlanTab({ course, gradeData, dot, onSave }) {
       </div>
 
       {/* Save CTA */}
-      <button onClick={handleSave} disabled={!canSave} style={{ padding: '14px 20px', background: canSave ? `linear-gradient(135deg, ${D.accent}, ${D.violet})` : 'rgba(255,255,255,0.05)', borderRadius: 12, color: canSave ? '#fff' : D.muted, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: canSave ? `0 8px 24px ${D.glow}` : 'none', cursor: canSave ? 'pointer' : 'default', transition: 'all 0.2s' }}>
-        <IcoSparkles /> Save &amp; generate plan
+      <button onClick={handleSave} disabled={!canSave} style={{ padding: '14px 20px', background: canSave ? '#3B61C4' : 'rgba(0,0,0,0.05)', border: 'none', borderRadius: 12, color: canSave ? '#fff' : D.muted, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: canSave ? 'pointer' : 'default', transition: 'all 0.2s' }}>
+        Save &amp; generate plan
       </button>
 
       {/* Required avg callout */}
       {showPlan && savedComps.length > 0 && neededInfo && (
-        <div className="gh-plan-callout" style={{ background: 'linear-gradient(155deg, rgba(99,102,241,0.14), rgba(99,102,241,0.04) 45%, #0a0a1e)', border: '1px solid rgba(99,102,241,0.28)', borderRadius: 14, padding: 20, position: 'relative', overflow: 'hidden' }}>
-          <div style={{ position: 'absolute', top: -40, right: -40, width: 180, height: 180, background: 'radial-gradient(circle, rgba(99,102,241,0.22), transparent 70%)', pointerEvents: 'none' }} />
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14, position: 'relative' }}>
-            <div style={{ width: 28, height: 28, borderRadius: 7, background: `linear-gradient(135deg, ${D.accent}, ${D.violet})`, display: 'grid', placeItems: 'center', color: '#fff', boxShadow: `0 0 12px ${D.glow}`, flexShrink: 0 }}>
-              <IcoSparkles />
-            </div>
+        <div className="gh-plan-callout" style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', wordBreak: 'break-word' }}>To hit {targetLabel}, here's what you need</div>
               <div style={{ fontSize: 13, color: D.text, marginTop: 3, wordBreak: 'break-word' }}>
-                You need an average of <span style={{ color: D.indigo, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>{neededInfo.needed != null ? neededInfo.needed.toFixed(1) + '%' : '-'}</span> on remaining work
+                You need an average of <span style={{ color: D.indigo, fontWeight: 700, fontFamily: 'inherit' }}>{neededInfo.needed != null ? neededInfo.needed.toFixed(1) + '%' : '-'}</span> on remaining work
               </div>
             </div>
           </div>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, position: 'relative', marginBottom: 14 }}>
             {ungraded.map(c => (
-              <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6, padding: '10px 12px', background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 9 }}>
+              <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6, padding: '10px 12px', background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, borderRadius: 9 }}>
                 <div>
                   <div style={{ fontSize: 13, fontWeight: 500, color: D.text }}>{c.component || 'Untitled'}</div>
-                  <div style={{ fontSize: 11, color: D.dim, marginTop: 1 }}>Worth <span style={{ fontFamily: 'ui-monospace, monospace' }}>{c.weight}%</span> of final grade</div>
+                  <div style={{ fontSize: 11, color: D.dim, marginTop: 1 }}>Worth <span style={{ fontFamily: 'inherit' }}>{c.weight}%</span> of final grade</div>
                 </div>
-                <div style={{ padding: '5px 11px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: D.mint, fontSize: 12, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>
+                <div style={{ padding: '5px 11px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: D.mint, fontSize: 12, fontWeight: 700, fontFamily: 'inherit' }}>
                   {neededInfo.needed != null ? neededInfo.needed.toFixed(1) + '%' : '-'}
                 </div>
               </div>
@@ -360,10 +337,10 @@ function PlanTab({ course, gradeData, dot, onSave }) {
           {neededInfo.bufferPts > 0 && !neededInfo.impossible && (
             <div style={{ padding: 12, borderRadius: 10, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.25)', position: 'relative' }}>
               <div style={{ fontSize: 12.5, color: D.text, marginBottom: 8, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
-                You have a <span style={{ color: D.violet, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>{neededInfo.bufferPts.toFixed(1)}-point</span> buffer on remaining work. Spend it wisely.
+                You have a <span style={{ color: D.violet, fontWeight: 700, fontFamily: 'inherit' }}>{neededInfo.bufferPts.toFixed(1)}-point</span> buffer on remaining work. Spend it wisely.
               </div>
-              <div style={{ height: 5, background: 'rgba(255,255,255,0.04)', borderRadius: 3, overflow: 'hidden' }}>
-                <div style={{ width: `${Math.min(100, neededInfo.bufferPts)}%`, height: '100%', background: `linear-gradient(90deg, ${D.accent}, ${D.violet})`, boxShadow: `0 0 8px ${D.glow}` }} />
+              <div style={{ height: 5, background: 'rgba(0,0,0,0.04)', borderRadius: 3, overflow: 'hidden' }}>
+                <div style={{ width: `${Math.min(100, neededInfo.bufferPts)}%`, height: '100%', background: D.accent }} />
               </div>
             </div>
           )}
@@ -451,13 +428,12 @@ function TrackTab({ course, gradeData, dot, onSave }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Hero */}
-      <div style={{ background: `linear-gradient(155deg, ${lc}1a, ${lc}05 40%, ${D.bgCard})`, border: `1px solid ${lc}30`, borderRadius: 14, padding: 24, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -60, right: -60, width: 240, height: 240, background: `radial-gradient(circle, ${lc}25, transparent 70%)`, pointerEvents: 'none' }} />
-        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 20, flexWrap: 'wrap', position: 'relative' }}>
+      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 24, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'flex-end', gap: 20, flexWrap: 'wrap' }}>
           <div style={{ flex: '1 1 auto', minWidth: 200 }}>
             <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 8 }}>Current grade</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-              <span style={{ fontSize: 64, fontWeight: 800, letterSpacing: -2, lineHeight: 1, background: `linear-gradient(135deg, ${lc}, ${lc}cc)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', fontFamily: 'ui-monospace, monospace' }}>
+              <span style={{ fontSize: 64, fontWeight: 800, letterSpacing: -2, lineHeight: 1, color: lc }}>
                 {currentGrade !== null ? currentGrade.toFixed(1) : '-'}
               </span>
               <span style={{ fontSize: 22, fontWeight: 500, color: D.muted }}>%</span>
@@ -481,23 +457,23 @@ function TrackTab({ course, gradeData, dot, onSave }) {
 
         <div style={{ marginTop: 24, position: 'relative' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, color: D.dim, marginBottom: 8 }}>
-            <span><span style={{ color: D.text, fontFamily: 'ui-monospace, monospace', fontWeight: 500 }}>{pctGraded.toFixed(0)}%</span> of grade graded</span>
-            <span><span style={{ color: D.text, fontFamily: 'ui-monospace, monospace', fontWeight: 500 }}>{(100 - pctGraded).toFixed(0)}%</span> remaining</span>
+            <span><span style={{ color: D.text, fontFamily: 'inherit', fontWeight: 500 }}>{pctGraded.toFixed(0)}%</span> of grade graded</span>
+            <span><span style={{ color: D.text, fontFamily: 'inherit', fontWeight: 500 }}>{(100 - pctGraded).toFixed(0)}%</span> remaining</span>
           </div>
-          <div style={{ height: 8, background: 'rgba(255,255,255,0.04)', borderRadius: 4, overflow: 'hidden' }}>
-            <div style={{ width: `${pctGraded}%`, height: '100%', background: `linear-gradient(90deg, ${D.accent}, ${lc})`, boxShadow: `0 0 10px ${lc}60`, transition: 'width 0.4s' }} />
+          <div style={{ height: 8, background: 'rgba(0,0,0,0.06)', borderRadius: 4, overflow: 'hidden' }}>
+            <div style={{ width: `${pctGraded}%`, height: '100%', background: D.accent, transition: 'width 0.4s' }} />
           </div>
         </div>
 
         <div style={{ marginTop: 16, position: 'relative' }}>
-          <button onClick={() => setDefenseMode(v => !v)} style={{ padding: '8px 14px', fontSize: 12.5, fontWeight: 500, borderRadius: 8, cursor: 'pointer', background: defenseMode ? 'rgba(251,191,36,0.1)' : 'rgba(255,255,255,0.03)', border: defenseMode ? `1px solid ${D.amber}40` : `1px solid ${D.border}`, color: defenseMode ? D.amber : D.muted, display: 'flex', alignItems: 'center', gap: 6 }}>
+          <button onClick={() => setDefenseMode(v => !v)} style={{ padding: '8px 14px', fontSize: 12.5, fontWeight: 500, borderRadius: 8, cursor: 'pointer', background: defenseMode ? 'rgba(251,191,36,0.1)' : 'rgba(0,0,0,0.04)', border: defenseMode ? `1px solid ${D.amber}40` : `1px solid ${D.border}`, color: defenseMode ? D.amber : D.muted, display: 'flex', alignItems: 'center', gap: 6 }}>
             <IcoShield /> Grade Defense Mode {defenseMode ? 'ON' : 'OFF'}
           </button>
           {defenseMode && defense && (
             <div style={{ marginTop: 10, padding: 12, borderRadius: 10, background: `rgba(251,191,36,0.08)`, border: `1px solid ${D.amber}30` }}>
               {defense.impossible
                 ? <p style={{ fontSize: 12.5, color: D.amber }}>Score is already locked in. No remaining work can change it.</p>
-                : <p style={{ fontSize: 12.5, color: D.amber }}>To keep your <span style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 700 }}>{currentGrade?.toFixed(1)}%</span>, score at least <span style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 700, fontSize: 16 }}>{defense.floor?.toFixed(1)}%</span> on all remaining work.</p>
+                : <p style={{ fontSize: 12.5, color: D.amber }}>To keep your <span style={{ fontFamily: 'inherit', fontWeight: 700 }}>{currentGrade?.toFixed(1)}%</span>, score at least <span style={{ fontFamily: 'inherit', fontWeight: 700, fontSize: 16 }}>{defense.floor?.toFixed(1)}%</span> on all remaining work.</p>
               }
             </div>
           )}
@@ -514,11 +490,11 @@ function TrackTab({ course, gradeData, dot, onSave }) {
               <div>
                 <div style={{ fontSize: 13.5, fontWeight: 500, color: D.text }}>{c.component}</div>
                 <div style={{ fontSize: 11.5, color: D.dim, marginTop: 2 }}>
-                  <span style={{ fontFamily: 'ui-monospace, monospace' }}>{c.weight}%</span> weight
-                  {contrib != null && <> · contributes <span style={{ color: D.indigo, fontFamily: 'ui-monospace, monospace' }}>{contrib.toFixed(1)}%</span> to final</>}
+                  <span style={{ fontFamily: 'inherit' }}>{c.weight}%</span> weight
+                  {contrib != null && <> · contributes <span style={{ color: D.indigo, fontFamily: 'inherit' }}>{contrib.toFixed(1)}%</span> to final</>}
                 </div>
               </div>
-              <button onClick={() => toggleGraded(c.id)} style={{ padding: '5px 11px', borderRadius: 999, fontSize: 11, fontWeight: 600, cursor: 'pointer', background: localGraded[c.id] ? 'rgba(99,102,241,0.15)' : 'rgba(255,255,255,0.03)', border: localGraded[c.id] ? '1px solid rgba(99,102,241,0.3)' : `1px solid ${D.border}`, color: localGraded[c.id] ? D.indigo : D.muted, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+              <button onClick={() => toggleGraded(c.id)} style={{ padding: '5px 11px', borderRadius: 999, fontSize: 11, fontWeight: 600, cursor: 'pointer', background: localGraded[c.id] ? 'rgba(59,97,196,0.08)' : 'rgba(0,0,0,0.04)', border: localGraded[c.id] ? '1px solid rgba(59,97,196,0.25)' : `1px solid ${D.border}`, color: localGraded[c.id] ? D.indigo : D.muted, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
                 {localGraded[c.id] && <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.indigo }} />}
                 {localGraded[c.id] ? 'Graded' : 'Pending'}
               </button>
@@ -535,7 +511,7 @@ function TrackTab({ course, gradeData, dot, onSave }) {
           <div style={{ flex: '1 1 auto', minWidth: 200 }}>
             <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 8 }}>What you need on remaining work</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-              <span style={{ fontSize: 32, fontWeight: 700, letterSpacing: -0.8, fontFamily: 'ui-monospace, monospace', color: needed.impossible ? D.pink : needed.needed > 90 ? D.orange : D.indigo }}>
+              <span style={{ fontSize: 32, fontWeight: 700, letterSpacing: -0.8, fontFamily: 'inherit', color: needed.impossible ? D.pink : needed.needed > 90 ? D.orange : D.indigo }}>
                 {needed.impossible ? '100+%' : needed.needed.toFixed(1) + '%'}
               </span>
               <span style={{ fontSize: 13, color: D.muted }}>avg to hit {targetLabel}</span>
@@ -606,13 +582,12 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
       {/* Projected hero */}
-      <div style={{ background: `linear-gradient(155deg, ${lc}1a, ${lc}05 40%, ${D.bgCard})`, border: `1px solid ${lc}30`, borderRadius: 14, padding: 24, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -60, right: -60, width: 240, height: 240, background: `radial-gradient(circle, ${lc}25, transparent 70%)`, pointerEvents: 'none' }} />
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16, position: 'relative' }}>
+      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 24, overflow: 'hidden' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
           <div>
             <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 8 }}>Projected grade</div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-              <span style={{ fontSize: 56, fontWeight: 800, letterSpacing: -2, lineHeight: 1, color: lc, fontFamily: 'ui-monospace, monospace' }}>
+              <span style={{ fontSize: 56, fontWeight: 800, letterSpacing: -2, lineHeight: 1, color: lc }}>
                 {projected !== null ? projected.toFixed(1) : '-'}
               </span>
               <span style={{ fontSize: 20, color: D.muted }}>%</span>
@@ -650,15 +625,15 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                     <span style={{ fontSize: 13.5, fontWeight: 500, color: D.text }}>{c.component}</span>
                     {isLocked && <span style={{ fontSize: 10, color: D.mint, background: 'rgba(52,211,153,0.1)', padding: '1px 6px', borderRadius: 4, display: 'inline-flex', alignItems: 'center', gap: 3 }}><IcoLock /> Actual</span>}
-                    <span style={{ fontSize: 10.5, color: D.dim, fontFamily: 'ui-monospace, monospace' }}>· {c.weight}% weight</span>
+                    <span style={{ fontSize: 10.5, color: D.dim, fontFamily: 'inherit' }}>· {c.weight}% weight</span>
                   </div>
-                  <div style={{ width: 64, textAlign: 'center', padding: '5px 10px', borderRadius: 7, background: 'rgba(255,255,255,0.02)', border: `1px solid ${isLocked ? 'rgba(52,211,153,0.3)' : D.border}`, fontSize: 13, fontWeight: 600, fontFamily: 'ui-monospace, monospace', color: isLocked ? D.mint : D.orange }}>
+                  <div style={{ width: 64, textAlign: 'center', padding: '5px 10px', borderRadius: 7, background: 'rgba(0,0,0,0.03)', border: `1px solid ${isLocked ? 'rgba(52,211,153,0.3)' : D.border}`, fontSize: 13, fontWeight: 600, fontFamily: 'inherit', color: isLocked ? D.mint : D.orange }}>
                     {Math.round(v)}
                   </div>
                 </div>
                 <div style={{ position: 'relative', height: 16, display: 'flex', alignItems: 'center' }}>
-                  <div style={{ position: 'absolute', left: 0, right: 0, height: 6, borderRadius: 3, background: 'rgba(255,255,255,0.05)' }} />
-                  <div style={{ position: 'absolute', left: 0, height: 6, borderRadius: 3, width: `${v}%`, background: `linear-gradient(90deg, ${fillColor}, ${fillColor}cc)`, boxShadow: `0 0 8px ${isLocked ? 'rgba(52,211,153,0.5)' : 'rgba(249,115,22,0.5)'}`, pointerEvents: 'none' }} />
+                  <div style={{ position: 'absolute', left: 0, right: 0, height: 6, borderRadius: 3, background: 'rgba(0,0,0,0.05)' }} />
+                  <div style={{ position: 'absolute', left: 0, height: 6, borderRadius: 3, width: `${v}%`, background: fillColor, pointerEvents: 'none' }} />
                   <input type="range" min="0" max="100" value={Math.round(v)} disabled={isLocked} onChange={e => setSlider(c.id, parseFloat(e.target.value))} className="gh-range" style={{ position: 'relative', background: 'transparent', opacity: isLocked ? 0.6 : 1 }} />
                 </div>
               </div>
@@ -669,17 +644,17 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
 
       {/* Actions */}
       <div className="gh-bottom-bar" style={{ display: 'grid', gridTemplateColumns: '1fr 1.2fr', gap: 10 }}>
-        <button onClick={handleReset} style={{ padding: '13px 16px', background: 'rgba(255,255,255,0.03)', border: `1px solid ${D.border}`, borderRadius: 10, fontSize: 13, fontWeight: 500, color: D.text, cursor: 'pointer' }}>
+        <button onClick={handleReset} style={{ padding: '13px 16px', background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, borderRadius: 10, fontSize: 13, fontWeight: 500, color: D.text, cursor: 'pointer' }}>
           Reset to actuals
         </button>
         {scenarios.length < 3 && !showSaveInput ? (
-          <button onClick={() => setShowSaveInput(true)} style={{ padding: '13px 16px', background: `linear-gradient(135deg, ${D.accent}, ${D.violet})`, borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 600, boxShadow: `0 6px 20px ${D.glow}`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, cursor: 'pointer' }}>
-            <IcoSparkles /> Save scenario
+          <button onClick={() => setShowSaveInput(true)} style={{ padding: '13px 16px', background: '#3B61C4', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, cursor: 'pointer' }}>
+            Save scenario
           </button>
         ) : (
           <div style={{ display: 'flex', gap: 6 }}>
             <input className="gh-input-text" type="text" placeholder="Scenario name…" value={saveName} onChange={e => setSaveName(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSaveScenario()} autoFocus style={{ flex: 1, minWidth: 0 }} />
-            <button onClick={handleSaveScenario} style={{ padding: '8px 14px', background: `linear-gradient(135deg, ${D.accent}, ${D.violet})`, borderRadius: 8, color: '#fff', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Save</button>
+            <button onClick={handleSaveScenario} style={{ padding: '8px 14px', background: '#3B61C4', borderRadius: 8, color: '#fff', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Save</button>
             <button onClick={() => setShowSaveInput(false)} style={{ padding: '8px 12px', border: `1px solid ${D.border}`, borderRadius: 8, color: D.muted, cursor: 'pointer' }}>✕</button>
           </div>
         )}
@@ -712,7 +687,7 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
                       )}
                       <button onClick={() => deleteScenario(sc.name)} style={{ color: D.dim, cursor: 'pointer', fontSize: 12 }}>✕</button>
                     </div>
-                    <div style={{ fontSize: 22, fontWeight: 800, color: slc, fontFamily: 'ui-monospace, monospace' }}>{proj?.toFixed(1)}%</div>
+                    <div style={{ fontSize: 22, fontWeight: 800, color: slc, fontFamily: 'inherit' }}>{proj?.toFixed(1)}%</div>
                     <div style={{ fontSize: 12, fontWeight: 600, color: slc, marginTop: 2 }}>{sltr}</div>
                   </div>
                 )
@@ -738,16 +713,16 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
                           const score = s.overrides[c.id]
                           const isMax = score === max && max !== min
                           const isMin = score === min && max !== min
-                          return <td key={s.name} style={{ padding: '10px 16px', textAlign: 'center', fontWeight: 700, fontFamily: 'ui-monospace, monospace', color: isMax ? D.mint : isMin ? D.pink : D.muted }}>{score?.toFixed(0) ?? '-'}%</td>
+                          return <td key={s.name} style={{ padding: '10px 16px', textAlign: 'center', fontWeight: 700, fontFamily: 'inherit', color: isMax ? D.mint : isMin ? D.pink : D.muted }}>{score?.toFixed(0) ?? '-'}%</td>
                         })}
                       </tr>
                     )
                   })}
-                  <tr style={{ background: 'rgba(255,255,255,0.02)' }}>
+                  <tr style={{ background: 'rgba(0,0,0,0.03)' }}>
                     <td style={{ padding: '12px 16px', color: D.muted, fontSize: 10.5, fontWeight: 700, textTransform: 'uppercase', letterSpacing: 0.5 }}>Projected</td>
                     {scenarios.map(s => {
                       const proj = getProjectedGrade(components.map(c => ({ ...c, graded: false })), s.overrides)
-                      return <td key={s.name} style={{ padding: '12px 16px', textAlign: 'center', fontSize: 15, fontWeight: 800, color: letterColor(letterGrade(proj)), fontFamily: 'ui-monospace, monospace' }}>{proj?.toFixed(1)}% {letterGrade(proj)}</td>
+                      return <td key={s.name} style={{ padding: '12px 16px', textAlign: 'center', fontSize: 15, fontWeight: 800, color: letterColor(letterGrade(proj)), fontFamily: 'inherit' }}>{proj?.toFixed(1)}% {letterGrade(proj)}</td>
                     })}
                   </tr>
                 </tbody>
@@ -809,26 +784,13 @@ function RightRail({ course, gradeData, onShowPaywall, userId, onSyncStudyPlan }
 
   return (
     <div className="gh-rail" style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'sticky', top: 20 }}>
-      {/* AI Prediction */}
-      <div style={{ background: 'linear-gradient(155deg, rgba(139,92,246,0.14), rgba(99,102,241,0.05) 45%, #0a0a1e)', border: '1px solid rgba(139,92,246,0.28)', borderRadius: 14, padding: 18, position: 'relative', overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, background: 'radial-gradient(circle, rgba(139,92,246,0.25), transparent 70%)', pointerEvents: 'none' }} />
-        <div style={{ display: 'flex', alignItems: 'center', gap: 9, marginBottom: 12, position: 'relative' }}>
-          <div style={{ width: 26, height: 26, borderRadius: 7, background: `linear-gradient(135deg, ${D.accent}, ${D.violet})`, display: 'grid', placeItems: 'center', color: '#fff', boxShadow: `0 0 12px ${D.glow}` }}>
-            <IcoSparkles />
-          </div>
-          <div>
-            <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase' }}>AI Grade prediction</div>
-            <div style={{ fontSize: 11, color: D.dim, marginTop: 1, display: 'flex', alignItems: 'center', gap: 5 }}>
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.mint, boxShadow: `0 0 6px ${D.mint}` }} />
-              Live forecast
-            </div>
-          </div>
-        </div>
+      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 18 }}>
+        <div style={{ fontSize: 13, fontWeight: 600, color: D.text, marginBottom: 12 }}>Grade prediction</div>
 
         {aiPrediction ? (
-          <div style={{ position: 'relative', marginBottom: 14 }}>
+          <div style={{ marginBottom: 14 }}>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
-              <span style={{ fontSize: 36, fontWeight: 800, fontFamily: 'ui-monospace, monospace', color: letterColor(letterGrade(aiPrediction.predictedGrade)) }}>{aiPrediction.predictedGrade?.toFixed(1)}%</span>
+              <span style={{ fontSize: 36, fontWeight: 800, color: letterColor(letterGrade(aiPrediction.predictedGrade)) }}>{aiPrediction.predictedGrade?.toFixed(1)}%</span>
               <span style={{ fontSize: 18, fontWeight: 700, color: letterColor(letterGrade(aiPrediction.predictedGrade)) }}>{aiPrediction.letterGrade}</span>
             </div>
             {aiPrediction.recommendations?.length > 0 && (
@@ -840,48 +802,42 @@ function RightRail({ course, gradeData, onShowPaywall, userId, onSyncStudyPlan }
             )}
           </div>
         ) : (
-          <div style={{ fontSize: 13, color: D.text, lineHeight: 1.5, marginBottom: 14, position: 'relative' }}>
-            Based on <span style={{ color: D.indigo, fontFamily: 'ui-monospace, monospace' }}>{graded.length} graded items</span>, run a prediction to see your projected final grade.
+          <div style={{ fontSize: 13, color: D.muted, lineHeight: 1.5, marginBottom: 14 }}>
+            {graded.length > 0 ? `Based on ${graded.length} graded item${graded.length === 1 ? '' : 's'}.` : 'Add graded scores in the Track tab first.'}
           </div>
         )}
 
-        <button onClick={handleRunPredictor} disabled={aiLoading || !components.length} style={{ width: '100%', padding: '10px 14px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(139,92,246,0.3)', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: D.text, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, cursor: 'pointer', position: 'relative', opacity: aiLoading ? 0.7 : 1 }}>
+        <button onClick={handleRunPredictor} disabled={aiLoading || !components.length} style={{ width: '100%', padding: '10px 14px', background: '#3B61C4', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, cursor: 'pointer', opacity: aiLoading ? 0.7 : 1 }}>
           {aiLoading
-            ? <><div style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: D.violet, animation: 'spin 0.8s linear infinite' }} /> Analyzing…</>
-            : <><IcoSparkles /> Run AI grade prediction</>}
+            ? <><div style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', animation: 'spin 0.8s linear infinite' }} /> Analyzing…</>
+            : <>Run prediction</>}
         </button>
+
+        {components.length > 0 && (
+          <>
+            <div style={{ borderTop: `1px solid ${D.border}`, margin: '14px 0 12px' }} />
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { label: 'Best grade',   value: bestGrade !== null ? bestGrade + '%' : '-',  color: D.mint   },
+                { label: 'Current avg',  value: curr !== null ? curr.toFixed(1) + '%' : '-', color: D.indigo },
+                { label: 'Graded items', value: `${graded.length} / ${components.length}`,   color: D.text   },
+                { label: 'Target',       value: targetLabel,                                 color: D.text   },
+              ].map((s, i) => (
+                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <span style={{ fontSize: 12, color: D.muted }}>{s.label}</span>
+                  <span style={{ fontSize: 12.5, fontWeight: 600, color: s.color }}>{s.value}</span>
+                </div>
+              ))}
+            </div>
+            <div style={{ borderTop: `1px solid ${D.border}`, marginTop: 14, paddingTop: 12 }}>
+              {syncToast && <div style={{ fontSize: 12, color: D.mint, marginBottom: 8 }}>Synced to schedule.</div>}
+              <button onClick={handleSync} style={{ fontSize: 12.5, fontWeight: 500, color: D.indigo, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, padding: 0 }}>
+                <IcoCalendar /> Sync to study plan
+              </button>
+            </div>
+          </>
+        )}
       </div>
-
-      {/* At a glance */}
-      {components.length > 0 && (
-        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 18 }}>
-          <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 14 }}>At a glance</div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-            {[
-              { label: 'Best grade',   value: bestGrade !== null ? bestGrade + '%' : '-',  color: D.mint   },
-              { label: 'Current avg',  value: curr !== null ? curr.toFixed(1) + '%' : '-', color: D.indigo },
-              { label: 'Graded items', value: `${graded.length} / ${components.length}`,   color: D.violet },
-              { label: 'Target',       value: targetLabel,                                 color: D.sky    },
-            ].map((s, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <span style={{ fontSize: 12, color: D.muted }}>{s.label}</span>
-                <span style={{ fontSize: 13, fontWeight: 700, color: s.color, fontFamily: 'ui-monospace, monospace' }}>{s.value}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Connect to study plan */}
-      {components.length > 0 && (
-        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 16 }}>
-          <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 10 }}>Connect to study plan</div>
-          {syncToast && <div style={{ fontSize: 12, color: D.mint, marginBottom: 8 }}>✓ Study plan updated.</div>}
-          <button onClick={handleSync} style={{ width: '100%', padding: '10px 14px', background: 'rgba(255,255,255,0.02)', border: `1px solid ${D.border}`, borderRadius: 8, fontSize: 12.5, fontWeight: 500, color: D.text, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, cursor: 'pointer' }}>
-            <IcoCalendar /> Sync to schedule
-          </button>
-        </div>
-      )}
     </div>
   )
 }
@@ -970,7 +926,7 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
   }, [gradeData, course, activeCourseIdx, onSyncToCalendar])
 
   return (
-    <div style={{ background: D.bg, minHeight: '100vh', overflowX: 'hidden', maxWidth: '100vw', backgroundImage: 'radial-gradient(1200px 600px at 85% -10%, rgba(99,102,241,0.10), transparent 60%), radial-gradient(900px 500px at 10% 110%, rgba(99,102,241,0.05), transparent 60%)' }}>
+    <div style={{ background: D.bg, minHeight: '100vh', overflowX: 'hidden', maxWidth: '100vw', backgroundImage: 'none' }}>
       <style>{GH_STYLE}{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
       {/* Header */}
@@ -983,7 +939,7 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
         <h1 style={{ margin: 0, fontSize: 32, fontWeight: 700, letterSpacing: -0.8, color: D.text, display: 'flex', alignItems: 'center', gap: 12 }}>
           Grade Hub
           {gpa && (
-            <span style={{ fontSize: 13, fontWeight: 500, color: D.indigo, background: 'rgba(99,102,241,0.12)', border: '1px solid rgba(99,102,241,0.3)', padding: '4px 10px', borderRadius: 999, verticalAlign: 'middle' }}>
+            <span style={{ fontSize: 13, fontWeight: 500, color: D.indigo, background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)', padding: '4px 10px', borderRadius: 999, verticalAlign: 'middle' }}>
               GPA {gpa}
             </span>
           )}
@@ -1005,7 +961,7 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
           <span style={{ width: 10, height: 10, borderRadius: '50%', background: dot, boxShadow: `0 0 10px ${dot}` }} />
           <span style={{ fontSize: 16, fontWeight: 600, color: D.text }}>{clean(course.name)}</span>
-          <span style={{ marginLeft: 'auto', fontSize: 11, color: D.dim, fontFamily: 'ui-monospace, monospace' }}>
+          <span style={{ marginLeft: 'auto', fontSize: 11, color: D.dim, fontFamily: 'inherit' }}>
             {daysTo(course.examDate) !== null ? `${daysTo(course.examDate)}d to exam` : ''}
           </span>
         </div>
@@ -1032,8 +988,8 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
             </div>
             <div style={{ fontSize: 16, fontWeight: 600, color: D.text, marginBottom: 6 }}>Set up {clean(course.name)}</div>
             <div style={{ fontSize: 13, color: D.muted, marginBottom: 18 }}>Add grade components, weights, and your target to start tracking.</div>
-            <button onClick={() => setActiveTab('plan')} style={{ padding: '11px 22px', background: `linear-gradient(135deg, ${D.accent}, ${D.violet})`, borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7, boxShadow: `0 6px 20px ${D.glow}`, cursor: 'pointer' }}>
-              <IcoSparkles /> Set up course
+            <button onClick={() => setActiveTab('plan')} style={{ padding: '11px 22px', background: '#3B61C4', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer', border: 'none' }}>
+              Set up course
             </button>
           </div>
         )}

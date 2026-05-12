@@ -600,104 +600,134 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
   const autoGrow = e => { e.target.style.height = 'auto'; e.target.style.height = e.target.scrollHeight + 'px' }
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handler = e => {
+      if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return
+      if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); setRunning(r => !r) }
+      if (e.key === 'Enter') { e.preventDefault(); handleMarkComplete() }
+      if (e.key === 'Escape') { e.preventDefault(); setActiveTab(null) }
+      if (e.key === '1') visitTab('recall')
+      if (e.key === '2') visitTab('flashcards')
+      if (e.key === '3') visitTab('quiz')
+      if (e.key === '4') visitTab('notes')
+      if (e.key === '5') visitTab('ai')
+    }
+    document.addEventListener('keydown', handler)
+    return () => document.removeEventListener('keydown', handler)
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const SESSION_TABS = [
+    { id: 'recall',     label: 'Active Recall', num: 1 },
+    { id: 'flashcards', label: 'Flashcards',    num: 2 },
+    { id: 'quiz',       label: 'Quick Quiz',    num: 3 },
+    { id: 'notes',      label: 'Notes',         num: 4 },
+    { id: 'ai',         label: 'Ask AI',        num: 5 },
+  ]
+
   // ─── RENDER ─────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden bg-slate-50 dark:bg-[#070D1A]">
+    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#F7F6F3' }}>
       {/* Top accent line */}
       <div className="h-0.5 w-full shrink-0" style={{ backgroundColor: dot }} />
-
-      {/* Background glow */}
-      <div className="absolute inset-0 pointer-events-none" style={{ background: `radial-gradient(ellipse 80% 40% at 50% 0%, ${dot}14 0%, transparent 65%)` }} />
 
       {/* ── Pomodoro break banner ── */}
       {breakBanner && !breakOverlay && (
         <div className="relative z-10 flex items-center gap-3 px-4 py-2.5 shrink-0" style={{ backgroundColor: `${dot}18`, borderBottom: `1px solid ${dot}28` }}>
           <div className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ backgroundColor: dot }} />
-          <span className="text-slate-300 text-xs">5-minute break recommended. You've been studying for 25 minutes</span>
+          <span className="text-xs" style={{ color: '#4B4B4B' }}>5-minute break recommended. You've been studying for 25 minutes</span>
           <div className="ml-auto flex items-center gap-2 shrink-0">
             <button onClick={() => setBreakOverlay(true)} className="text-xs px-3 py-1 rounded-lg font-medium text-white" style={{ backgroundColor: dot }}>Take Break</button>
-            <button onClick={() => setBreakBanner(false)} className="text-xs text-slate-500 hover:text-slate-300 transition-colors">Dismiss</button>
+            <button onClick={() => setBreakBanner(false)} className="text-xs transition-colors" style={{ color: '#9B9B9B' }}>Dismiss</button>
           </div>
         </div>
       )}
 
       {/* ── Break overlay ── */}
       {breakOverlay && (
-        <div className="absolute inset-0 z-[110] flex flex-col items-center justify-center bg-slate-50 dark:bg-[#070D1A]">
+        <div className="absolute inset-0 z-[110] flex flex-col items-center justify-center" style={{ backgroundColor: '#F7F6F3' }}>
           <div className="text-center">
             <div className="relative flex items-center justify-center mb-10">
-              <div className="w-36 h-36 rounded-full" style={{ backgroundColor: dot, opacity: 0.15, animation: 'breathe 4s ease-in-out infinite' }} />
-              <div className="absolute w-24 h-24 rounded-full" style={{ backgroundColor: dot, opacity: 0.3, animation: 'breathe 4s ease-in-out infinite 0.8s' }} />
+              <div className="w-36 h-36 rounded-full" style={{ backgroundColor: dot, opacity: 0.08, animation: 'breathe 4s ease-in-out infinite' }} />
+              <div className="absolute w-24 h-24 rounded-full" style={{ backgroundColor: dot, opacity: 0.15, animation: 'breathe 4s ease-in-out infinite 0.8s' }} />
               <div className="absolute w-12 h-12 rounded-full" style={{ backgroundColor: dot }} />
             </div>
-            <h2 className="text-3xl font-bold text-white mb-2">Take a breath</h2>
-            <p className="text-slate-400 text-sm mb-3">Inhale 4s &nbsp;·&nbsp; Hold 4s &nbsp;·&nbsp; Exhale 4s</p>
+            <h2 className="text-3xl font-bold mb-2" style={{ color: '#1A1A1A' }}>Take a breath</h2>
+            <p className="text-sm mb-3" style={{ color: '#6B6B6B' }}>Inhale 4s &nbsp;·&nbsp; Hold 4s &nbsp;·&nbsp; Exhale 4s</p>
             <p className="text-5xl font-mono font-bold mb-8" style={{ color: dot }}>{fmt(breakRemaining)}</p>
-            <button onClick={() => { setBreakOverlay(false); setBreakBanner(false) }} className="text-slate-500 hover:text-slate-300 text-sm transition-colors">Skip break, keep studying</button>
+            <button onClick={() => { setBreakOverlay(false); setBreakBanner(false) }} className="text-sm transition-colors" style={{ color: '#9B9B9B' }}>Skip break, keep studying</button>
           </div>
         </div>
       )}
 
       {/* ── Session complete screen ── */}
       {showComplete && (
-        <div className="absolute inset-0 z-[105] flex flex-col items-center justify-center px-6 overflow-y-auto py-10 bg-slate-50 dark:bg-[#070D1A]">
-          <div className="w-full max-w-md">
-            <div className="flex items-center justify-center mb-6">
-              <div className="w-20 h-20 rounded-full flex items-center justify-center" style={{ backgroundColor: `${dot}20`, border: `2px solid ${dot}50`, boxShadow: `0 0 40px ${dot}30` }}>
-                <svg className="w-10 h-10" style={{ color: dot }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
-            </div>
-            <h2 className="text-3xl font-bold text-white text-center mb-2">Session Complete</h2>
-            <p className="text-slate-400 text-center text-sm mb-8 leading-relaxed">{encourageMsg}</p>
-
-            <div className="grid grid-cols-2 gap-3 mb-4">
-              <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 text-center">
-                <p className="text-2xl font-bold text-slate-900 dark:text-white font-mono">{fmt(Math.max(elapsed, 1))}</p>
-                <p className="text-xs text-slate-500 mt-1">Time studied</p>
-              </div>
-              <div className="bg-white dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700/60 rounded-2xl p-4 text-center">
-                <p className="text-2xl font-bold text-white">{tabsVisited.size}</p>
-                <p className="text-xs text-slate-500 mt-1">Activities used</p>
-              </div>
+        <div className="absolute inset-0 z-[105] flex flex-col items-center justify-center px-6 overflow-y-auto py-10" style={{ backgroundColor: '#F7F6F3' }}>
+          <div className="w-full max-w-sm">
+            {/* Check mark */}
+            <div className="flex items-center justify-center mb-8">
+              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={dot} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 13l4 4L19 7" />
+              </svg>
             </div>
 
-            <div className="bg-slate-800/40 border border-slate-700/40 rounded-2xl p-4 mb-4">
-              <p className="text-xs text-slate-600 mb-3 uppercase tracking-widest font-medium">Activities</p>
+            <h2 className="text-2xl font-bold text-center mb-2" style={{ color: '#1A1A1A' }}>Session Complete</h2>
+            <p className="text-center text-sm mb-8 leading-relaxed" style={{ color: '#9B9B9B' }}>{encourageMsg}</p>
+
+            {/* Stats inline row */}
+            <div className="flex items-center justify-center gap-8 mb-8" style={{ borderTop: '1px solid rgba(0,0,0,0.07)', borderBottom: '1px solid rgba(0,0,0,0.07)', padding: '16px 0' }}>
+              <div className="text-center">
+                <p className="text-xl font-bold font-mono" style={{ color: '#1A1A1A' }}>{fmt(Math.max(elapsed, 1))}</p>
+                <p className="text-xs mt-0.5" style={{ color: '#9B9B9B' }}>Time studied</p>
+              </div>
+              <div style={{ width: 1, height: 32, backgroundColor: 'rgba(0,0,0,0.07)' }} />
+              <div className="text-center">
+                <p className="text-xl font-bold font-mono" style={{ color: '#1A1A1A' }}>{tabsVisited.size}</p>
+                <p className="text-xs mt-0.5" style={{ color: '#9B9B9B' }}>Activities used</p>
+              </div>
+            </div>
+
+            {/* Activities used — simple list, no card */}
+            <div className="mb-8">
               {[
                 { id: 'recall', label: 'Active Recall' },
                 { id: 'flashcards', label: 'Flashcards' },
                 { id: 'quiz', label: 'Quick Quiz' },
                 { id: 'notes', label: 'Notes' },
               ].map(({ id, label }) => (
-                <div key={id} className="flex items-center gap-3 py-1.5">
-                  <span className="text-base">{tabsVisited.has(id) ? '✅' : '⬜'}</span>
-                  <span className={`text-sm ${tabsVisited.has(id) ? 'text-slate-200' : 'text-slate-600'}`}>{label}</span>
+                <div key={id} className="flex items-center gap-2.5 py-1.5">
+                  <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: tabsVisited.has(id) ? dot : 'rgba(0,0,0,0.07)' }}>
+                    {tabsVisited.has(id) && (
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M5 13l4 4L19 7" />
+                      </svg>
+                    )}
+                  </div>
+                  <span className="text-sm" style={{ color: tabsVisited.has(id) ? '#1A1A1A' : '#C0C0C0' }}>{label}</span>
                 </div>
               ))}
             </div>
 
-            {hasNotes && (
-              <button
-                onClick={handleDownloadPDF}
-                disabled={pdfDownloading}
-                className="w-full py-3 rounded-xl text-sm font-medium text-slate-300 bg-slate-800/80 border border-slate-700 hover:bg-slate-700/80 transition-colors mb-3 flex items-center justify-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                {pdfDownloading ? 'Generating PDF…' : 'Download Session Notes'}
-              </button>
-            )}
-
-            <div className="flex flex-col gap-3">
+            <div className="flex flex-col gap-2.5">
+              {hasNotes && (
+                <button
+                  onClick={handleDownloadPDF}
+                  disabled={pdfDownloading}
+                  className="w-full py-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                  style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B' }}
+                >
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  {pdfDownloading ? 'Generating PDF…' : 'Download Session Notes'}
+                </button>
+              )}
               {nextSession && (
-                <button onClick={handleStartNext} className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all" style={{ backgroundColor: dot, boxShadow: `0 0 28px ${dot}40` }}>
+                <button onClick={handleStartNext} className="w-full py-3.5 rounded-2xl font-bold text-white text-sm" style={{ backgroundColor: dot }}>
                   Start Next: {nextSession.courseName}
                 </button>
               )}
-              <button onClick={handleBackToDashboard} className="w-full py-3.5 rounded-2xl font-semibold text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 transition-colors">
+              <button onClick={handleBackToDashboard} className="w-full py-3 rounded-xl text-sm font-medium transition-colors" style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B' }}>
                 Back to Dashboard
               </button>
             </div>
@@ -708,234 +738,226 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       {/* ── Main session layout ── */}
       <div className="relative flex flex-col h-full overflow-hidden">
 
-        {/* Top bar */}
-        <div className="flex items-center justify-between px-5 py-3 shrink-0">
-          <div className="flex items-center gap-3 min-w-0">
-            <div className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: dot, boxShadow: `0 0 8px ${dot}80` }} />
-            <span className="text-white font-bold text-base truncate">{session.courseName}</span>
-            <span className="text-slate-700 shrink-0">·</span>
-            <span className="text-slate-400 text-sm shrink-0 font-medium">{session.sessionType}</span>
+        {/* ── Top bar ── */}
+        <div className="relative flex items-center px-5 py-3 shrink-0" style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+          {/* Left: course info */}
+          <div className="flex items-center gap-2 flex-1 min-w-0">
+            <div className="rounded-full shrink-0" style={{ width: 8, height: 8, backgroundColor: dot }} />
+            <span className="font-semibold text-sm truncate" style={{ color: '#1A1A1A' }}>{session.courseName}</span>
+            <span className="shrink-0" style={{ color: 'rgba(0,0,0,0.18)', fontSize: 12 }}>·</span>
+            <span className="text-xs shrink-0" style={{ color: '#9B9B9B' }}>{session.sessionType}</span>
           </div>
-          <button onClick={onExit} className="text-slate-600 hover:text-slate-300 transition-colors flex items-center gap-1.5 text-sm shrink-0 ml-4">
-            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-            Exit
-          </button>
+          {/* Center: label */}
+          <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#C0C0C0' }}>Focus Session</span>
+          </div>
+          {/* Right: elapsed + exit */}
+          <div className="flex items-center gap-4 shrink-0">
+            <span style={{ fontSize: 12, color: '#9B9B9B', fontFamily: 'ui-monospace, monospace' }}>
+              {fmt(elapsed)} <span style={{ color: '#C0C0C0' }}>/ {String(session.duration).padStart(2,'0')}:00</span>
+            </span>
+            <button onClick={onExit} className="text-xs transition-colors" style={{ color: '#9B9B9B' }}>Exit</button>
+          </div>
         </div>
 
-        {/* Timer section */}
-        <div className="flex flex-col items-center px-4 pb-2 shrink-0">
-          {/* Block label */}
-          {blocks && currentBlock && !finished && (
-            <p className="text-xs font-bold uppercase tracking-widest mb-2 transition-colors" style={{ color: blockColor }}>
-              Block {blockIdx + 1} of {blocks.length}: {currentBlock.title}
-            </p>
-          )}
-          <div className="flex items-center justify-center gap-10 w-full">
-          {/* Progress ring */}
-          <div className="relative flex items-center justify-center">
-            <svg width="190" height="190" className="-rotate-90" style={{ filter: `drop-shadow(0 0 ${running ? '20px' : '8px'} ${strokeColor}${running ? '60' : '30'})` }}>
-              <circle cx="95" cy="95" r={R} fill="none" stroke="#111827" strokeWidth="8" />
-              {/* Glow track */}
-              <circle
-                cx="95" cy="95" r={R}
-                fill="none"
-                stroke={strokeColor}
-                strokeWidth="3"
-                strokeDasharray={CIRC}
-                strokeDashoffset={CIRC * (1 - pct)}
-                opacity="0.25"
-                style={{ filter: `blur(4px)`, transition: 'stroke-dashoffset 1s linear' }}
-              />
-              {/* Main ring */}
-              <circle
-                cx="95" cy="95" r={R}
-                fill="none"
-                stroke={strokeColor}
-                strokeWidth="8"
-                strokeLinecap="round"
-                strokeDasharray={CIRC}
-                strokeDashoffset={CIRC * (1 - pct)}
-                style={{ transition: 'stroke-dashoffset 1s linear, stroke 0.5s', animation: running && !finished ? 'ringPulse 3s ease-in-out infinite' : 'none' }}
-              />
-            </svg>
-            <div className="absolute inset-0 flex flex-col items-center justify-center">
-              {finished ? (
-                <svg className="w-9 h-9 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-              ) : (
-                <>
-                  <span className="font-mono font-bold tabular-nums leading-none" style={{ fontSize: '2.2rem', color: running ? 'white' : '#94a3b8' }}>
-                    {fmt(blocks ? blockRemaining : remaining)}
-                  </span>
-                  <span className="text-xs mt-1 font-medium" style={{ color: running ? `${strokeColor}cc` : '#475569' }}>{running ? (blocks ? 'this block' : 'remaining') : 'paused'}</span>
-                </>
-              )}
-            </div>
-          </div>
-
-          {/* Controls */}
-          <div className="flex flex-col gap-3">
-            <p className="text-slate-600 text-xs text-center">{session.duration} min session</p>
-            {!finished && (
-              <button
-                onClick={() => setRunning(r => !r)}
-                className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800/80 hover:bg-slate-200 dark:hover:bg-slate-700/80 border border-slate-200 dark:border-slate-700 transition-colors text-sm"
-              >
-                {running
-                  ? <><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>Pause</>
-                  : <><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>Resume</>
-                }
-              </button>
+        {/* ── Block info + segmented progress bar ── */}
+        {blocks && (
+          <div className="shrink-0 px-6 pt-3 pb-2" style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+            {currentBlock && !finished && (
+              <div className="flex items-center gap-2 mb-2">
+                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: blockColor }}>
+                  Block {String(blockIdx + 1).padStart(2, '0')}/{String(blocks.length).padStart(2, '0')}
+                </span>
+                <span style={{ color: 'rgba(0,0,0,0.15)', fontSize: 10 }}>·</span>
+                <span style={{ fontSize: 13, color: '#1A1A1A', fontWeight: 500 }}>{currentBlock.title}</span>
+                {currentBlock.activity && (
+                  <>
+                    <span style={{ color: 'rgba(0,0,0,0.15)', fontSize: 10 }}>·</span>
+                    <span style={{ fontSize: 11, color: '#9B9B9B', fontStyle: 'italic' }}>{currentBlock.activity}</span>
+                  </>
+                )}
+              </div>
             )}
-            {blocks && nextBlock && !finished && (
-              <button
-                onClick={handleSkipBlock}
-                className="flex items-center justify-center gap-1.5 px-5 py-2 rounded-xl text-xs font-medium text-slate-500 hover:text-slate-300 bg-slate-800/50 border border-slate-800 hover:border-slate-700 transition-colors"
-              >
-                Skip Block
-                <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" /></svg>
-              </button>
-            )}
-            <button
-              onClick={handleMarkComplete}
-              className="flex items-center justify-center gap-2 px-5 py-2.5 rounded-xl font-bold text-white text-sm transition-all"
-              style={{ backgroundColor: finished ? '#10B981' : dot, boxShadow: `0 0 20px ${finished ? '#10B98150' : dot + '45'}` }}
-            >
-              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-              </svg>
-              {finished ? 'Complete!' : elapsed > 0 ? `Finish (${fmt(elapsed)})` : 'Mark Complete'}
-            </button>
-          </div>
-          </div>{/* end ring+controls row */}
-
-          {/* Block instruction */}
-          {blocks && currentBlock && !finished && !blockTransition && (
-            <p className="text-xs text-slate-500 text-center mt-2.5 max-w-xs leading-relaxed px-2">
-              {currentBlock.instruction}
-            </p>
-          )}
-
-          {/* Block transition banner */}
-          {blockTransition && (
-            <div className="mt-3 w-full max-w-sm rounded-xl px-4 py-3 text-center" style={{ backgroundColor: `${blockColor}15`, border: `1px solid ${blockColor}35` }}>
-              <p className="text-sm font-semibold" style={{ color: blockColor }}>Block complete ✓. Next: {blockTransition.nextTitle}</p>
-              <p className="text-xs text-slate-500 mt-1 leading-relaxed">{blockTransition.nextInstruction}</p>
-            </div>
-          )}
-
-          {/* Segmented block bar */}
-          {blocks && (
-            <div className="flex w-full max-w-xs gap-1 mt-3">
-              {blocks.map((block, i) => {
-                const ac = ACTIVITY_COLORS[block.activity] ?? dot
+            <div style={{ display: 'flex', gap: 3 }}>
+              {blocks.map((b, i) => {
+                const ac = ACTIVITY_COLORS[b.activity] ?? dot
                 const isDone = completedBlocks.has(i)
                 const isCurrent = i === blockIdx
                 return (
-                  <div key={i} className="flex-1 flex flex-col items-center gap-1">
-                    <div
-                      className="w-full h-1.5 rounded-full transition-all"
-                      style={{ backgroundColor: isDone ? ac : isCurrent ? ac : ac + '30' }}
-                    />
-                    {isDone && <span style={{ fontSize: '8px', color: ac }}>✓</span>}
-                  </div>
+                  <div key={i} style={{ flex: 1, height: 3, borderRadius: 2, backgroundColor: isDone ? ac : isCurrent ? ac : ac + '28', transition: 'background-color 0.4s' }} />
                 )
               })}
             </div>
+          </div>
+        )}
+
+        {/* ── Timer + controls (hero section) ── */}
+        <div className="flex-1 flex flex-col items-center justify-center px-6 min-h-0" style={{ minHeight: 160, overflow: 'hidden' }}>
+          {finished ? (
+            <div className="flex flex-col items-center gap-3">
+              <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke={dot} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M5 13l4 4L19 7" />
+              </svg>
+              <p style={{ fontSize: 14, color: '#9B9B9B' }}>Session complete</p>
+            </div>
+          ) : (
+            <>
+              {/* Huge timer */}
+              <div
+                style={{
+                  fontSize: 'clamp(4.5rem, 14vw, 8.5rem)',
+                  fontWeight: 800,
+                  fontFamily: '"SF Mono", "Fira Code", ui-monospace, monospace',
+                  letterSpacing: '-0.03em',
+                  lineHeight: 1,
+                  color: running ? '#1A1A1A' : '#C0C0C0',
+                  transition: 'color 0.3s',
+                  userSelect: 'none',
+                  tabularNums: true,
+                }}
+              >
+                {fmt(blocks ? blockRemaining : remaining)}
+              </div>
+
+              {/* Sub-label */}
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, fontSize: 12, color: '#9B9B9B' }}>
+                <span>{blocks ? 'remaining this block' : 'remaining'}</span>
+                <span style={{ opacity: 0.35 }}>·</span>
+                <span>{session.duration} min total</span>
+              </div>
+
+              {/* Block instruction */}
+              {blocks && currentBlock && !blockTransition && (
+                <p style={{ fontSize: 13, color: '#6B6B6B', marginTop: 18, textAlign: 'center', maxWidth: 420, lineHeight: 1.65 }}>
+                  {currentBlock.instruction}
+                </p>
+              )}
+
+              {/* Block transition */}
+              {blockTransition && (
+                <div style={{ marginTop: 16, padding: '10px 18px', borderRadius: 10, backgroundColor: `${blockColor}10`, border: `1px solid ${blockColor}28`, textAlign: 'center', maxWidth: 380 }}>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: blockColor }}>Block complete ✓ &nbsp;·&nbsp; Next: {blockTransition.nextTitle}</p>
+                  <p style={{ fontSize: 12, color: '#6B6B6B', marginTop: 4 }}>{blockTransition.nextInstruction}</p>
+                </div>
+              )}
+
+              {/* ── Control buttons ── */}
+              <div style={{ display: 'flex', gap: 10, marginTop: 28, flexWrap: 'wrap', justifyContent: 'center' }}>
+                {/* Pause / Resume */}
+                <button
+                  onClick={() => setRunning(r => !r)}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 16px', borderRadius: 10, backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B', fontSize: 13, fontWeight: 500, cursor: 'pointer', lineHeight: 1 }}
+                >
+                  {running ? (
+                    <svg width="13" height="13" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
+                  ) : (
+                    <svg width="13" height="13" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
+                  )}
+                  <span>{running ? 'Pause' : 'Resume'}</span>
+                  <span style={{ fontSize: 10, color: '#C0C0C0' }}>[Space]</span>
+                </button>
+
+                {/* Skip block */}
+                {blocks && nextBlock && (
+                  <button
+                    onClick={handleSkipBlock}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 16px', borderRadius: 10, backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#9B9B9B', fontSize: 13, fontWeight: 500, cursor: 'pointer', lineHeight: 1 }}
+                  >
+                    <span>Skip block</span>
+                    <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
+                  </button>
+                )}
+
+                {/* Finish / Mark complete */}
+                <button
+                  onClick={handleMarkComplete}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 16px', borderRadius: 10, backgroundColor: '#1A1A1A', color: '#FFFFFF', fontSize: 13, fontWeight: 600, cursor: 'pointer', lineHeight: 1 }}
+                >
+                  <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" /></svg>
+                  <span>{elapsed > 0 ? `Finish (${fmt(elapsed)})` : 'Finish block'}</span>
+                  <span style={{ fontSize: 10, color: 'rgba(255,255,255,0.4)' }}>[↵]</span>
+                </button>
+              </div>
+
+              {/* Keyboard hint */}
+              <p style={{ fontSize: 11, color: '#C0C0C0', marginTop: 16 }}>
+                [Space] pause &nbsp;·&nbsp; [↵] finish &nbsp;·&nbsp; [1–5] tools &nbsp;·&nbsp; [Esc] close panel
+              </p>
+            </>
           )}
         </div>
 
-        {/* Divider */}
-        <div className="h-px bg-slate-800/80 shrink-0" />
-
-        {/* Tab bar */}
-        <div className="flex items-center px-3 pt-2.5 pb-0 gap-0.5 shrink-0 overflow-x-auto">
-          {[
-            { id: 'recall', label: 'Active Recall' },
-            { id: 'flashcards', label: 'Flashcards' },
-            { id: 'quiz', label: 'Quick Quiz' },
-            { id: 'notes', label: 'Notes' },
-            { id: 'ai', label: 'Ask AI' },
-          ].map(({ id, label }) => (
-            <button
-              key={id}
-              onClick={() => visitTab(id)}
-              className="px-3.5 py-2 rounded-xl text-sm font-medium transition-all whitespace-nowrap"
-              style={activeTab === id
-                ? { backgroundColor: `${dot}20`, color: dot, boxShadow: `0 0 12px ${dot}20` }
-                : { color: '#64748b' }
-              }
-            >
-              {label}
-              {tabsVisited.has(id) && activeTab !== id && (
-                <span className="ml-1.5 inline-block w-1.5 h-1.5 rounded-full align-middle" style={{ backgroundColor: `${dot}60` }} />
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* Tab content */}
-        <div className={`flex-1 ${activeTab === 'ai' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'}`}>
-          {/* AIChatView stays mounted so the conversation persists across tab switches */}
-          <div className={activeTab === 'ai' ? 'flex-1 flex flex-col overflow-hidden' : 'hidden'}>
-            <AIChatView
-              courseId={session.courseId}
-              courseName={session.courseName}
-              examDate={course?.examDate ?? null}
-              targetGrade={course?.targetGrade ?? null}
-              userId={userId}
-              onShowPaywall={onShowPaywall}
-            />
-          </div>
-          <div className={activeTab === 'ai' ? 'hidden' : 'px-5 py-4'}>
+        {/* ── Tab panel (slides up from bottom) ── */}
+        {activeTab && (
+          <div
+            className={activeTab === 'ai' ? 'flex flex-col overflow-hidden' : 'overflow-y-auto'}
+            style={{ height: '40vh', borderTop: '1px solid rgba(0,0,0,0.07)', flexShrink: 0 }}
+          >
+            {/* AIChatView stays mounted */}
+            <div className={activeTab === 'ai' ? 'flex-1 flex flex-col overflow-hidden h-full' : 'hidden'}>
+              <AIChatView
+                courseId={session.courseId}
+                courseName={session.courseName}
+                examDate={course?.examDate ?? null}
+                targetGrade={course?.targetGrade ?? null}
+                userId={userId}
+                onShowPaywall={onShowPaywall}
+              />
+            </div>
+            <div className={activeTab === 'ai' ? 'hidden' : 'px-5 py-4'}>
 
             {/* ── Active Recall ── */}
             {activeTab === 'recall' && (
               <div className="space-y-3">
-                <div>
-                  <p className="text-slate-200 font-semibold text-sm mb-0.5">
-                    Without looking at your notes, write down everything you know about{' '}
-                    <span style={{ color: dot }}>{session.courseName}</span>{' '}
-                    · {session.sessionType}.
-                  </p>
-                  <p className="text-slate-600 text-xs leading-relaxed">Spend at least 5 minutes on this. The act of retrieving information is what builds memory.</p>
-                </div>
-
-                <div className="relative">
-                  <textarea
-                    value={recallText}
-                    onChange={e => { setRecallText(e.target.value); setRecallSaved(false) }}
-                    placeholder="Start writing everything you know…"
-                    className="w-full min-h-48 rounded-2xl px-4 py-3 text-slate-100 placeholder-slate-700 focus:outline-none text-sm resize-none leading-relaxed"
-                    style={{
-                      backgroundColor: '#111827',
-                      border: `1px solid #1e293b`,
-                      boxShadow: 'inset 0 2px 8px rgba(0,0,0,0.3)',
-                    }}
-                  />
-                  <div className="absolute bottom-3 right-3 flex items-center gap-3">
-                    {recallWritingTimer > 0 && (
-                      <span className="text-slate-700 text-xs font-mono">{fmt(recallWritingTimer)}</span>
-                    )}
-                    <span className="text-slate-700 text-xs">{wordCount(recallText)} words</span>
+                {/* Header row */}
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm leading-snug" style={{ color: '#1A1A1A' }}>
+                      Without looking at your notes, write down everything you know about{' '}
+                      <span style={{ color: dot }}>{session.courseName}</span>.
+                    </p>
+                    <p className="text-xs mt-1 leading-relaxed" style={{ color: '#9B9B9B' }}>The act of retrieving information is what builds memory. Aim for five minutes of free recall.</p>
+                  </div>
+                  <div className="shrink-0 text-right" style={{ fontSize: 12, color: '#C0C0C0', fontFamily: 'ui-monospace, monospace', whiteSpace: 'nowrap' }}>
+                    {wordCount(recallText)} words
+                    {recallWritingTimer > 0 && <span> · {fmt(recallWritingTimer)} elapsed</span>}
                   </div>
                 </div>
 
+                <textarea
+                  value={recallText}
+                  onChange={e => { setRecallText(e.target.value); setRecallSaved(false) }}
+                  placeholder={`Start writing everything you remember about ${session.courseName}…`}
+                  className="w-full rounded-xl px-4 py-3 focus:outline-none text-sm resize-none leading-relaxed"
+                  style={{
+                    minHeight: 120,
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid rgba(0,0,0,0.10)',
+                    color: '#1A1A1A',
+                  }}
+                />
+
                 {!showRecallCards ? (
-                  <button
-                    onClick={handleCheckYourself}
-                    className="w-full py-3.5 rounded-xl font-semibold text-white text-sm transition-all"
-                    style={{
-                      backgroundColor: dot,
-                      boxShadow: `0 0 18px ${dot}30`,
-                      animation: checkPulse ? 'checkPulse 2s ease-in-out infinite' : 'none',
-                    }}
-                  >
-                    Check Yourself
-                  </button>
+                  <div className="flex items-center justify-between">
+                    <button
+                      onClick={() => { /* save for later — keep recallText, close panel */ setActiveTab(null) }}
+                      className="text-sm transition-colors"
+                      style={{ color: '#9B9B9B' }}
+                    >
+                      Save and continue later
+                    </button>
+                    <button
+                      onClick={handleCheckYourself}
+                      className="px-5 py-2 rounded-full font-semibold text-sm transition-all"
+                      style={{
+                        backgroundColor: dot,
+                        color: '#FFFFFF',
+                        animation: checkPulse ? 'checkPulse 2s ease-in-out infinite' : 'none',
+                      }}
+                    >
+                      Check yourself
+                    </button>
+                  </div>
                 ) : (
                   <div className="space-y-3">
                     {flashcards.length > 0 ? (
@@ -946,23 +968,23 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                         </div>
                         <div className="relative cursor-pointer select-none" style={{ perspective: '1200px', height: '150px' }} onClick={() => setRcFlipped(f => !f)}>
                           <div className="absolute inset-0 rounded-2xl" style={{ transformStyle: 'preserve-3d', WebkitTransformStyle: 'preserve-3d', transition: 'transform 0.55s cubic-bezier(0.4,0,0.2,1)', transform: rcFlipped ? 'rotateY(180deg)' : 'rotateY(0)' }}>
-                            <div className="absolute inset-0 rounded-2xl flex items-center justify-center p-5 text-center" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', backgroundColor: '#111827', border: '1px solid #1e293b' }}>
-                              <p className="text-slate-100 font-medium text-sm leading-relaxed">{flashcards[rcIdx]?.front}</p>
+                            <div className="absolute inset-0 rounded-2xl flex items-center justify-center p-5 text-center" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)' }}>
+                              <p className="font-medium text-sm leading-relaxed" style={{ color: '#1A1A1A' }}>{flashcards[rcIdx]?.front}</p>
                             </div>
-                            <div className="absolute inset-0 rounded-2xl flex items-center justify-center p-5 text-center" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', backgroundColor: `${dot}15`, border: `1px solid ${dot}35`, transform: 'rotateY(180deg)', WebkitTransform: 'rotateY(180deg)' }}>
-                              <p className="text-slate-200 text-sm leading-relaxed">{flashcards[rcIdx]?.back}</p>
+                            <div className="absolute inset-0 rounded-2xl flex items-center justify-center p-5 text-center" style={{ backfaceVisibility: 'hidden', WebkitBackfaceVisibility: 'hidden', backgroundColor: `${dot}10`, border: `1px solid ${dot}30`, transform: 'rotateY(180deg)', WebkitTransform: 'rotateY(180deg)' }}>
+                              <p className="text-sm leading-relaxed" style={{ color: '#1A1A1A' }}>{flashcards[rcIdx]?.back}</p>
                             </div>
                           </div>
                         </div>
-                        <p className="text-center text-xs text-slate-700">Tap to flip</p>
+                        <p className="text-center text-xs" style={{ color: '#C0C0C0' }}>Tap to flip</p>
                         <div className="flex gap-2">
-                          <button onClick={() => { setRcIdx(i => Math.max(0, i - 1)); setRcFlipped(false) }} disabled={rcIdx === 0} className="flex-1 py-2 rounded-xl text-sm text-slate-400 bg-slate-800 border border-slate-700 disabled:opacity-30 hover:bg-slate-700 transition-colors">← Prev</button>
-                          <button onClick={() => { setRcIdx(i => Math.min(flashcards.length - 1, i + 1)); setRcFlipped(false) }} disabled={rcIdx === flashcards.length - 1} className="flex-1 py-2 rounded-xl text-sm text-slate-400 bg-slate-800 border border-slate-700 disabled:opacity-30 hover:bg-slate-700 transition-colors">Next →</button>
+                          <button onClick={() => { setRcIdx(i => Math.max(0, i - 1)); setRcFlipped(false) }} disabled={rcIdx === 0} className="flex-1 py-2 rounded-xl text-sm transition-colors disabled:opacity-30" style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B' }}>← Prev</button>
+                          <button onClick={() => { setRcIdx(i => Math.min(flashcards.length - 1, i + 1)); setRcFlipped(false) }} disabled={rcIdx === flashcards.length - 1} className="flex-1 py-2 rounded-xl text-sm transition-colors disabled:opacity-30" style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B' }}>Next →</button>
                         </div>
                       </>
                     ) : (
-                      <div className="bg-slate-800/40 border border-slate-700/40 rounded-2xl p-5 text-center">
-                        <p className="text-slate-400 text-sm">Upload course notes in <span className="font-medium" style={{ color: dot }}>Study Tools</span> to unlock personalized recall checks.</p>
+                      <div className="rounded-2xl p-5 text-center" style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
+                        <p className="text-sm" style={{ color: '#9B9B9B' }}>Upload course notes in <span className="font-medium" style={{ color: dot }}>Study Tools</span> to unlock personalized recall checks.</p>
                       </div>
                     )}
                   </div>
@@ -989,7 +1011,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                       </p>
                       <div className="flex gap-1">
                         {flashcards.map((_, i) => (
-                          <div key={i} className="w-1.5 h-1.5 rounded-full transition-colors" style={{ backgroundColor: fcKnown.has(i) ? '#10B981' : i === fcIdx ? dot : '#1e293b' }} />
+                          <div key={i} className="w-1.5 h-1.5 rounded-full transition-colors" style={{ backgroundColor: fcKnown.has(i) ? '#10B981' : i === fcIdx ? dot : 'rgba(0,0,0,0.12)' }} />
                         ))}
                       </div>
                     </div>
@@ -999,7 +1021,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                       <button
                         onClick={() => { setFcIdx(i => Math.max(0, i - 1)); setFcFlipped(false) }}
                         disabled={fcIdx === 0}
-                        className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-slate-600 hover:text-slate-300 disabled:opacity-20 transition-colors bg-slate-800/60"
+                        className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-20 transition-colors"
+                        style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#9B9B9B' }}
                       >
                         ‹
                       </button>
@@ -1008,11 +1031,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                         className="flex-1 relative cursor-pointer select-none rounded-2xl transition-all duration-200"
                         style={{
                           minHeight: '210px',
-                          backgroundColor: fcFlipped ? '#0f172a' : '#111827',
-                          border: fcFlipped ? `1px solid ${dot}55` : '1px solid #1e293b',
-                          boxShadow: fcFlipped
-                            ? `0 0 24px ${dot}25, inset 0 1px 0 rgba(255,255,255,0.04)`
-                            : 'inset 0 1px 0 rgba(255,255,255,0.04)',
+                          backgroundColor: fcFlipped ? `${dot}08` : '#FFFFFF',
+                          border: fcFlipped ? `1px solid ${dot}40` : '1px solid rgba(0,0,0,0.10)',
                         }}
                         onClick={() => setFcFlipped(f => !f)}
                       >
@@ -1021,14 +1041,14 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                             {flashcards[fcIdx]?.topic && (
                               <span className="text-xs mb-3 px-2 py-0.5 rounded-full border font-medium uppercase tracking-wide" style={{ color: dot, borderColor: `${dot}40`, backgroundColor: `${dot}15` }}>{flashcards[fcIdx].topic}</span>
                             )}
-                            <p className="text-slate-100 font-semibold leading-relaxed text-base">{flashcards[fcIdx]?.front}</p>
-                            <p className="text-slate-700 text-xs mt-4">Tap card to reveal answer</p>
+                            <p className="font-semibold leading-relaxed text-base" style={{ color: '#1A1A1A' }}>{flashcards[fcIdx]?.front}</p>
+                            <p className="text-xs mt-4" style={{ color: '#C0C0C0' }}>Tap card to reveal answer</p>
                           </div>
                         ) : (
                           <div className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center p-6 text-center">
                             <span className="text-[10px] mb-3 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest" style={{ color: dot, backgroundColor: `${dot}15`, border: `1px solid ${dot}40` }}>Answer</span>
                             <p className="font-semibold leading-relaxed text-base" style={{ color: dot }}>{flashcards[fcIdx]?.back}</p>
-                            <p className="text-slate-600 text-xs mt-4">Tap card to flip back</p>
+                            <p className="text-xs mt-4" style={{ color: '#C0C0C0' }}>Tap card to flip back</p>
                           </div>
                         )}
                       </div>
@@ -1036,113 +1056,80 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                       <button
                         onClick={() => { setFcIdx(i => Math.min(flashcards.length - 1, i + 1)); setFcFlipped(false) }}
                         disabled={fcIdx === flashcards.length - 1}
-                        className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center text-slate-600 hover:text-slate-300 disabled:opacity-20 transition-colors bg-slate-800/60"
+                        className="shrink-0 w-8 h-8 rounded-full flex items-center justify-center disabled:opacity-20 transition-colors"
+                        style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#9B9B9B' }}
                       >
                         ›
                       </button>
                     </div>
 
-                    <p className="text-center text-xs text-slate-700 mb-3">← → or tap arrows to navigate · tap card to flip</p>
+                    <p className="text-center text-xs mb-3" style={{ color: '#C0C0C0' }}>← → or tap arrows to navigate · tap card to flip</p>
 
                     <div className="flex gap-2">
                       <button
                         onClick={() => { setFcKnown(prev => { const n = new Set(prev); n.has(fcIdx) ? n.delete(fcIdx) : n.add(fcIdx); return n }) }}
                         className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors border"
                         style={fcKnown.has(fcIdx)
-                          ? { backgroundColor: '#064e3b', borderColor: '#059669', color: '#34d399' }
-                          : { borderColor: '#1e293b', color: '#64748b' }
+                          ? { backgroundColor: '#F0FDF4', borderColor: '#86EFAC', color: '#16A34A' }
+                          : { backgroundColor: '#FFFFFF', borderColor: 'rgba(0,0,0,0.10)', color: '#6B6B6B' }
                         }
                       >
                         {fcKnown.has(fcIdx) ? '✓ Mastered' : 'Mark as Mastered'}
                       </button>
                       <button
                         onClick={() => setFcKnown(prev => { const n = new Set(prev); n.delete(fcIdx); return n })}
-                        className="flex-1 py-2.5 rounded-xl text-sm font-medium text-slate-600 border border-slate-800 hover:border-slate-700 hover:text-slate-400 transition-colors"
+                        className="flex-1 py-2.5 rounded-xl text-sm font-medium transition-colors"
+                        style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B' }}
                       >
                         Still Learning
                       </button>
                     </div>
                   </div>
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <div className="w-20 h-20 rounded-3xl flex items-center justify-center mb-5" style={{ backgroundColor: `${dot}12`, border: `1px dashed ${dot}30` }}>
-                      <svg className="w-10 h-10" style={{ color: dot, opacity: 0.7 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                      </svg>
-                    </div>
-                    <p className="text-white font-bold text-lg mb-2">Build creative flashcards</p>
-                    <p className="text-slate-500 text-sm mb-5 max-w-md">
-                      Tell it exactly what to quiz you on, upload the source material, or both. It will only make cards on what you asked for.
-                    </p>
-
-                    <div className="w-full max-w-md space-y-3 text-left">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-400 mb-1.5">What do you want flashcards on?</label>
-                        <textarea
-                          value={fcTopic}
-                          onChange={e => setFcTopic(e.target.value)}
-                          placeholder={`e.g. "Only the Krebs cycle: each enzyme, substrate, and product" or "Chapters 4–5 vocabulary"`}
-                          className="w-full min-h-20 rounded-xl px-3 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none resize-none"
-                          style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-400 mb-1.5">Upload source material (optional)</label>
-                        <div className="flex flex-wrap gap-2 items-center">
-                          <label
-                            className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors"
-                            style={{ backgroundColor: `${dot}15`, color: dot, border: `1px solid ${dot}35` }}
-                          >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0L8 12m4-4v12" />
-                            </svg>
-                            {fcSourceLoading ? 'Reading…' : 'Upload PDF / image / slides'}
-                            <input
-                              type="file"
-                              className="hidden"
-                              multiple
-                              accept=".pdf,.docx,.pptx,image/*"
-                              onChange={async e => {
-                                if (e.target.files?.length) await handleUploadSource('fc', Array.from(e.target.files))
-                                e.target.value = ''
-                              }}
-                            />
-                          </label>
-                          {fcSourceFiles.length > 0 && (
-                            <button onClick={clearFcSource} className="text-xs text-slate-500 hover:text-slate-300 transition-colors">Clear</button>
-                          )}
-                        </div>
-                        {fcSourceFiles.length > 0 && (
-                          <ul className="mt-2 space-y-1">
-                            {fcSourceFiles.map((f, i) => (
-                              <li key={i} className="text-xs text-slate-400 truncate">• {f.name}</li>
-                            ))}
-                          </ul>
-                        )}
-                      </div>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-semibold text-sm" style={{ color: '#1A1A1A' }}>Build flashcards on demand</p>
+                      <p className="text-xs mt-1 leading-relaxed" style={{ color: '#9B9B9B' }}>Describe what to drill on, attach a PDF or slides, and StudyEdge will generate cards on exactly what you asked for. Nothing more.</p>
                     </div>
 
-                    {fcGenerateError && (
-                      <div className="mt-4 bg-red-950/40 border border-red-800/40 rounded-xl px-4 py-3 text-red-300 text-sm w-full max-w-md">{fcGenerateError}</div>
-                    )}
-
-                    <div className="mt-5">
-                      {fcGenerating ? (
-                        <div className="flex flex-col items-center gap-3">
-                          <div className="w-8 h-8 border-4 rounded-full animate-spin" style={{ borderColor: `${dot}30`, borderTopColor: dot }} />
-                          <p className="text-slate-400 text-sm">Generating flashcards…</p>
-                        </div>
-                      ) : (
+                    <div className="flex gap-2 items-start">
+                      <input
+                        value={fcTopic}
+                        onChange={e => setFcTopic(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && !fcGenerating && handleGenerateFlashcards()}
+                        placeholder={`e.g. Memory systems: encoding, storage, retrieval, sensory and working memory`}
+                        className="flex-1 rounded-xl px-3 py-2.5 text-sm focus:outline-none"
+                        style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#1A1A1A' }}
+                      />
+                      <div className="flex items-center gap-2 shrink-0">
+                        <label className="cursor-pointer flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm transition-colors" style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#9B9B9B' }} title="Attach PDF or slides">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+                          {fcSourceFiles.length > 0 && <span style={{ fontSize: 11, color: dot }}>{fcSourceFiles.length}</span>}
+                          <input type="file" className="hidden" multiple accept=".pdf,.docx,.pptx,image/*" onChange={async e => { if (e.target.files?.length) await handleUploadSource('fc', Array.from(e.target.files)); e.target.value = '' }} />
+                        </label>
                         <button
                           onClick={handleGenerateFlashcards}
-                          className="px-6 py-2.5 rounded-xl text-sm font-semibold transition-all"
-                          style={{ backgroundColor: `${dot}20`, color: dot, border: `1px solid ${dot}40` }}
+                          disabled={fcGenerating}
+                          className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-50"
+                          style={{ backgroundColor: dot, color: '#FFFFFF' }}
                         >
-                          Generate Flashcards
+                          {fcGenerating ? 'Generating…' : 'Generate'}
                         </button>
-                      )}
+                      </div>
                     </div>
+
+                    {fcSourceFiles.length > 0 && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {fcSourceFiles.map((f, i) => (
+                          <span key={i} className="text-xs px-2 py-1 rounded-lg" style={{ backgroundColor: `${dot}10`, color: dot }}>📎 {f.name}</span>
+                        ))}
+                        <button onClick={clearFcSource} className="text-xs" style={{ color: '#C0C0C0' }}>Clear</button>
+                      </div>
+                    )}
+
+                    {fcGenerateError && (
+                      <div className="rounded-xl px-4 py-3 text-sm" style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', color: '#DC2626' }}>{fcGenerateError}</div>
+                    )}
                   </div>
                 )}
               </>
@@ -1153,87 +1140,61 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               <>
                 {quizLoading ? (
                   <div className="flex flex-col items-center gap-3 py-14">
-                    <div className="w-8 h-8 border-4 rounded-full animate-spin" style={{ borderColor: `${dot}30`, borderTopColor: dot }} />
-                    <p className="text-slate-400 text-sm">Generating your quiz…</p>
+                    <div className="w-8 h-8 border-4 rounded-full animate-spin" style={{ borderColor: `${dot}20`, borderTopColor: dot }} />
+                    <p className="text-sm" style={{ color: '#9B9B9B' }}>Generating your quiz…</p>
                   </div>
                 ) : quizError ? (
                   <div className="space-y-3">
-                    <div className="bg-red-950/40 border border-red-800/40 rounded-xl px-4 py-3 text-red-300 text-sm">{quizError}</div>
-                    <button onClick={handleGenerateQuiz} className="w-full py-3 rounded-xl text-sm font-medium bg-slate-800 border border-slate-700 text-slate-300 hover:bg-slate-700 transition-colors">Try Again</button>
+                    <div className="rounded-xl px-4 py-3 text-sm" style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5', color: '#DC2626' }}>{quizError}</div>
+                    <button onClick={handleGenerateQuiz} className="w-full py-3 rounded-xl text-sm font-medium transition-colors" style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B' }}>Try Again</button>
                   </div>
                 ) : !quizQuestions ? (
-                  <div className="flex flex-col items-center text-center py-6">
-                    <div className="w-20 h-20 rounded-3xl flex items-center justify-center mb-5" style={{ backgroundColor: `${dot}15`, border: `1px solid ${dot}25` }}>
-                      <svg className="w-10 h-10" style={{ color: dot }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                      </svg>
+                  <div className="space-y-3">
+                    <div>
+                      <p className="font-semibold text-sm" style={{ color: '#1A1A1A' }}>Test yourself, your way</p>
+                      <p className="text-xs mt-1 leading-relaxed" style={{ color: '#9B9B9B' }}>Describe exactly what to quiz you on, attach source material, or both. The quiz will only cover what you asked for.</p>
                     </div>
-                    <p className="text-white font-bold text-xl mb-2">Test yourself, your way</p>
-                    <p className="text-slate-500 text-sm mb-5 max-w-md">
-                      Describe exactly what to quiz you on, upload the source material, or both. The quiz will only cover what you asked for.
-                    </p>
 
-                    <div className="w-full max-w-md space-y-3 text-left">
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-400 mb-1.5">What do you want to be quizzed on?</label>
-                        <textarea
-                          value={quizTopic}
-                          onChange={e => setQuizTopic(e.target.value)}
-                          placeholder={`e.g. "Only the three types of market structures from Chapter 6" or "Spanish preterite vs imperfect tenses"`}
-                          className="w-full min-h-20 rounded-xl px-3 py-2.5 text-sm text-slate-100 placeholder-slate-600 focus:outline-none resize-none"
-                          style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}
-                        />
-                      </div>
-
-                      <div>
-                        <label className="block text-xs font-semibold text-slate-400 mb-1.5">Upload source material (optional)</label>
-                        <div className="flex flex-wrap gap-2 items-center">
-                          <label
-                            className="cursor-pointer inline-flex items-center gap-2 px-3 py-2 rounded-lg text-xs font-semibold transition-colors"
-                            style={{ backgroundColor: `${dot}15`, color: dot, border: `1px solid ${dot}35` }}
-                          >
-                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0L8 12m4-4v12" />
-                            </svg>
-                            {quizSourceLoading ? 'Reading…' : 'Upload PDF / image / slides'}
-                            <input
-                              type="file"
-                              className="hidden"
-                              multiple
-                              accept=".pdf,.docx,.pptx,image/*"
-                              onChange={async e => {
-                                if (e.target.files?.length) await handleUploadSource('quiz', Array.from(e.target.files))
-                                e.target.value = ''
-                              }}
-                            />
-                          </label>
-                          {quizSourceFiles.length > 0 && (
-                            <button onClick={clearQuizSource} className="text-xs text-slate-500 hover:text-slate-300 transition-colors">Clear</button>
-                          )}
-                        </div>
-                        {quizSourceFiles.length > 0 && (
-                          <ul className="mt-2 space-y-1">
-                            {quizSourceFiles.map((f, i) => (
-                              <li key={i} className="text-xs text-slate-400 truncate">• {f.name}</li>
-                            ))}
-                          </ul>
-                        )}
+                    <div className="flex gap-2 items-start">
+                      <input
+                        value={quizTopic}
+                        onChange={e => setQuizTopic(e.target.value)}
+                        onKeyDown={e => e.key === 'Enter' && !quizLoading && handleGenerateQuiz()}
+                        placeholder={`e.g. Three types of market structures from Chapter 6`}
+                        className="flex-1 rounded-xl px-3 py-2.5 text-sm focus:outline-none"
+                        style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#1A1A1A' }}
+                      />
+                      <div className="flex items-center gap-2 shrink-0">
+                        <label className="cursor-pointer flex items-center gap-1.5 px-3 py-2.5 rounded-xl text-sm transition-colors" style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#9B9B9B' }} title="Attach PDF or slides">
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
+                          {quizSourceFiles.length > 0 && <span style={{ fontSize: 11, color: dot }}>{quizSourceFiles.length}</span>}
+                          <input type="file" className="hidden" multiple accept=".pdf,.docx,.pptx,image/*" onChange={async e => { if (e.target.files?.length) await handleUploadSource('quiz', Array.from(e.target.files)); e.target.value = '' }} />
+                        </label>
+                        <button
+                          onClick={handleGenerateQuiz}
+                          disabled={quizLoading}
+                          className="px-4 py-2.5 rounded-xl text-sm font-semibold transition-all disabled:opacity-50"
+                          style={{ backgroundColor: dot, color: '#FFFFFF' }}
+                        >
+                          {quizLoading ? 'Generating…' : 'Generate'}
+                        </button>
                       </div>
                     </div>
 
-                    <button
-                      onClick={handleGenerateQuiz}
-                      className="mt-6 w-full max-w-md py-3.5 rounded-xl font-bold text-white text-sm transition-all"
-                      style={{ backgroundColor: dot, boxShadow: `0 0 24px ${dot}40` }}
-                    >
-                      Generate My Quiz
-                    </button>
+                    {quizSourceFiles.length > 0 && (
+                      <div className="flex items-center gap-2 flex-wrap">
+                        {quizSourceFiles.map((f, i) => (
+                          <span key={i} className="text-xs px-2 py-1 rounded-lg" style={{ backgroundColor: `${dot}10`, color: dot }}>📎 {f.name}</span>
+                        ))}
+                        <button onClick={clearQuizSource} className="text-xs" style={{ color: '#C0C0C0' }}>Clear</button>
+                      </div>
+                    )}
                   </div>
                 ) : quizDone ? (
                   <div>
                     <div className="text-center mb-6">
-                      <p className="text-5xl font-bold text-white mb-1 font-mono">
-                        {quizAnswers.filter(a => a.correct).length}<span className="text-slate-700 text-3xl">/{quizQuestions.length}</span>
+                      <p className="text-5xl font-bold mb-1 font-mono" style={{ color: '#1A1A1A' }}>
+                        {quizAnswers.filter(a => a.correct).length}<span className="text-3xl" style={{ color: '#C0C0C0' }}>/{quizQuestions.length}</span>
                       </p>
                       <p className="font-semibold" style={{ color: dot }}>
                         {quizAnswers.filter(a => a.correct).length === quizQuestions.length ? 'Perfect score!'
@@ -1243,17 +1204,17 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     </div>
                     <div className="space-y-2.5 mb-5">
                       {quizAnswers.map((a, i) => (
-                        <div key={i} className="rounded-xl p-3.5 border" style={a.correct ? { backgroundColor: '#022c22', borderColor: '#065f46' } : { backgroundColor: '#1c0606', borderColor: '#7f1d1d' }}>
+                        <div key={i} className="rounded-xl p-3.5 border" style={a.correct ? { backgroundColor: '#F0FDF4', borderColor: '#86EFAC' } : { backgroundColor: '#FEF2F2', borderColor: '#FCA5A5' }}>
                           <div className="flex items-start gap-2 mb-1">
-                            <span className="text-xs font-bold shrink-0 mt-0.5" style={{ color: a.correct ? '#34d399' : '#f87171' }}>{a.correct ? '✓' : '✗'}</span>
-                            <p className="text-slate-200 text-sm leading-relaxed">{a.question.question}</p>
+                            <span className="text-xs font-bold shrink-0 mt-0.5" style={{ color: a.correct ? '#16A34A' : '#DC2626' }}>{a.correct ? '✓' : '✗'}</span>
+                            <p className="text-sm leading-relaxed" style={{ color: '#1A1A1A' }}>{a.question.question}</p>
                           </div>
-                          {!a.correct && <p className="text-xs text-slate-500 ml-4 mt-1">Correct: {a.question.answer}</p>}
-                          {a.question.explanation && <p className="text-xs text-slate-700 ml-4 mt-0.5 italic">{a.question.explanation}</p>}
+                          {!a.correct && <p className="text-xs ml-4 mt-1" style={{ color: '#6B6B6B' }}>Correct: {a.question.answer}</p>}
+                          {a.question.explanation && <p className="text-xs ml-4 mt-0.5 italic" style={{ color: '#9B9B9B' }}>{a.question.explanation}</p>}
                         </div>
                       ))}
                     </div>
-                    <button onClick={resetQuiz} className="w-full py-3 rounded-xl text-sm font-medium text-slate-300 bg-slate-800 border border-slate-700 hover:bg-slate-700 transition-colors">New Quiz</button>
+                    <button onClick={resetQuiz} className="w-full py-3 rounded-xl text-sm font-medium transition-colors" style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B' }}>New Quiz</button>
                   </div>
                 ) : (
                   <div style={{ animation: quizAnswerFlash === 'correct' ? 'flashGreen 0.5s ease' : quizAnswerFlash === 'wrong' ? 'shakeRed 0.5s ease' : 'none' }}>
@@ -1261,11 +1222,11 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                       <p className="text-xs uppercase tracking-widest font-medium" style={{ color: dot }}>Question {quizIdx + 1} of {quizQuestions.length}</p>
                       <div className="flex gap-1.5">
                         {quizQuestions.map((_, i) => (
-                          <div key={i} className="w-2 h-2 rounded-full transition-colors" style={{ backgroundColor: i < quizIdx ? (quizAnswers[i]?.correct ? '#10B981' : '#ef4444') : i === quizIdx ? dot : '#1e293b' }} />
+                          <div key={i} className="w-2 h-2 rounded-full transition-colors" style={{ backgroundColor: i < quizIdx ? (quizAnswers[i]?.correct ? '#10B981' : '#ef4444') : i === quizIdx ? dot : 'rgba(0,0,0,0.12)' }} />
                         ))}
                       </div>
                     </div>
-                    <p className="text-white font-semibold mb-5 leading-relaxed text-base">{quizQuestions[quizIdx]?.question}</p>
+                    <p className="font-semibold mb-5 leading-relaxed text-base" style={{ color: '#1A1A1A' }}>{quizQuestions[quizIdx]?.question}</p>
                     <div className="space-y-2.5 mb-4">
                       {quizQuestions[quizIdx]?.options.map((opt, i) => {
                         const isSelected = quizSelected === opt
@@ -1277,10 +1238,10 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                             onClick={() => !quizConfirmed && setQuizSelected(opt)}
                             className="w-full text-left px-4 py-3.5 rounded-xl border text-sm transition-all font-medium"
                             style={
-                              isCorrect ? { backgroundColor: '#064e3b', borderColor: '#059669', color: '#34d399' }
-                              : isWrong ? { backgroundColor: '#450a0a', borderColor: '#b91c1c', color: '#f87171' }
-                              : isSelected ? { borderColor: dot, backgroundColor: `${dot}18`, color: 'white' }
-                              : { borderColor: '#1e293b', color: '#94a3b8', backgroundColor: 'transparent' }
+                              isCorrect ? { backgroundColor: '#F0FDF4', borderColor: '#86EFAC', color: '#16A34A' }
+                              : isWrong ? { backgroundColor: '#FEF2F2', borderColor: '#FCA5A5', color: '#DC2626' }
+                              : isSelected ? { borderColor: dot, backgroundColor: `${dot}12`, color: '#1A1A1A' }
+                              : { borderColor: 'rgba(0,0,0,0.10)', color: '#6B6B6B', backgroundColor: '#FFFFFF' }
                             }
                           >
                             {opt}
@@ -1290,14 +1251,14 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     </div>
                     {quizConfirmed && quizQuestions[quizIdx]?.explanation && (
                       <div className="rounded-xl px-4 py-3 mb-4" style={{ backgroundColor: `${dot}08`, border: `1px solid ${dot}20` }}>
-                        <p className="text-slate-400 text-xs leading-relaxed italic">{quizQuestions[quizIdx].explanation}</p>
+                        <p className="text-xs leading-relaxed italic" style={{ color: '#9B9B9B' }}>{quizQuestions[quizIdx].explanation}</p>
                       </div>
                     )}
                     <button
                       onClick={quizConfirmed ? handleNextQuestion : handleConfirmAnswer}
                       disabled={!quizConfirmed && quizSelected === null}
                       className="w-full py-3.5 rounded-xl text-sm font-bold text-white disabled:opacity-30 transition-all"
-                      style={{ backgroundColor: quizConfirmed || quizSelected ? dot : '#1e293b', boxShadow: (quizConfirmed || quizSelected) ? `0 0 16px ${dot}35` : 'none' }}
+                      style={{ backgroundColor: quizConfirmed || quizSelected ? dot : 'rgba(0,0,0,0.08)' }}
                     >
                       {quizConfirmed ? (quizIdx + 1 >= quizQuestions.length ? 'See Results' : 'Next Question →') : 'Check Answer'}
                     </button>
@@ -1308,104 +1269,97 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
             {/* ── Notes ── */}
             {activeTab === 'notes' && (
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-xs uppercase tracking-widest font-bold" style={{ color: dot }}>{session.courseName}</p>
-                    <p className="text-xs text-slate-600">{todayStr} · {session.sessionType}</p>
+              <div className="space-y-3">
+                <div className="flex items-start justify-between gap-4">
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-sm" style={{ color: '#1A1A1A' }}>Today's notes</p>
+                    <p className="text-xs mt-0.5 leading-relaxed" style={{ color: '#9B9B9B' }}>
+                      Capture key concepts, definitions, and a short summary. Saved to{' '}
+                      <strong style={{ color: '#6B6B6B', fontWeight: 600 }}>{session.courseName} · {session.sessionType}</strong> automatically.
+                    </p>
                   </div>
-                  {notesAutoSaved && (
-                    <span className="text-xs text-emerald-500 flex items-center gap-1 transition-opacity">
-                      <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
-                      Auto-saved
-                    </span>
-                  )}
-                </div>
-
-                {/* Cornell layout */}
-                <div className="flex gap-0 rounded-2xl overflow-hidden border border-slate-800">
-                  {/* Key Concepts column */}
-                  <div className="w-[32%] border-r border-slate-800">
-                    <div className="px-3 py-2 border-b border-slate-800" style={{ backgroundColor: `${dot}08` }}>
-                      <p className="text-xs font-bold uppercase tracking-wider" style={{ color: dot }}>Key Concepts</p>
-                      <p className="text-xs text-slate-700">{notesConcepts.length} chars</p>
-                    </div>
-                    <textarea
-                      ref={conceptsRef}
-                      value={notesConcepts}
-                      onChange={e => { setNotesConcepts(e.target.value); autoGrow(e) }}
-                      placeholder={'• concept\n• term = ...\n• key idea'}
-                      className="w-full bg-transparent px-3 py-2.5 text-slate-300 placeholder-slate-800 focus:outline-none text-xs resize-none leading-relaxed"
-                      style={{ minHeight: '200px' }}
-                    />
-                  </div>
-                  {/* Notes column */}
-                  <div className="flex-1">
-                    <div className="px-3 py-2 border-b border-slate-800" style={{ backgroundColor: `${dot}05` }}>
-                      <p className="text-xs font-bold uppercase tracking-wider" style={{ color: dot }}>Notes</p>
-                      <p className="text-xs text-slate-700">{notesMain.length} chars</p>
-                    </div>
-                    <textarea
-                      ref={mainRef}
-                      value={notesMain}
-                      onChange={e => { setNotesMain(e.target.value); autoGrow(e) }}
-                      placeholder="Write your notes here…"
-                      className="w-full bg-transparent px-3 py-2.5 text-slate-200 placeholder-slate-800 focus:outline-none text-sm resize-none leading-relaxed"
-                      style={{ minHeight: '200px' }}
-                    />
+                  <div className="flex items-center gap-3 shrink-0">
+                    {notesAutoSaved && (
+                      <span className="text-xs flex items-center gap-1" style={{ color: '#10B981' }}>
+                        <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>
+                        Saved
+                      </span>
+                    )}
+                    <button
+                      onClick={handleDownloadPDF}
+                      disabled={pdfDownloading || !hasNotes}
+                      className="flex items-center gap-1.5 text-xs transition-colors disabled:opacity-40"
+                      style={{ color: '#9B9B9B' }}
+                    >
+                      <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                      </svg>
+                      {pdfDownloading ? 'Generating…' : 'Export PDF'}
+                    </button>
                   </div>
                 </div>
 
-                {/* Summary */}
-                <div className="rounded-2xl overflow-hidden border border-slate-800">
-                  <div className="px-3 py-2 border-b border-slate-800" style={{ backgroundColor: `${dot}06` }}>
-                    <div className="flex items-center justify-between">
-                      <p className="text-xs font-bold uppercase tracking-wider" style={{ color: dot }}>Summary</p>
-                      <p className="text-xs text-slate-700">{notesSummary.length} chars</p>
-                    </div>
-                  </div>
-                  <textarea
-                    ref={summaryRef}
-                    value={notesSummary}
-                    onChange={e => { setNotesSummary(e.target.value); autoGrow(e) }}
-                    placeholder="In 2-3 sentences, summarize what you studied today…"
-                    className="w-full bg-transparent px-3 py-2.5 text-slate-200 placeholder-slate-800 focus:outline-none text-sm resize-none leading-relaxed"
-                    style={{ minHeight: '80px' }}
-                  />
-                </div>
-
-                {/* Action buttons */}
-                <div className="flex gap-2.5">
-                  <button
-                    onClick={handleSaveNotes}
-                    className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 border"
-                    style={notesSaved
-                      ? { backgroundColor: '#064e3b', borderColor: '#059669', color: '#34d399' }
-                      : { borderColor: '#1e293b', color: '#94a3b8', backgroundColor: 'transparent' }
-                    }
-                  >
-                    {notesSaved
-                      ? <><svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" /></svg>Saved!</>
-                      : <><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" /></svg>Save Notes</>
-                    }
-                  </button>
-                  <button
-                    onClick={handleDownloadPDF}
-                    disabled={pdfDownloading || !hasNotes}
-                    className="flex-1 py-3 rounded-xl text-sm font-semibold transition-all flex items-center justify-center gap-2 text-white disabled:opacity-40"
-                    style={{ backgroundColor: dot, boxShadow: hasNotes ? `0 0 16px ${dot}30` : 'none' }}
-                  >
-                    <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                    </svg>
-                    {pdfDownloading ? 'Generating…' : 'Download PDF'}
-                  </button>
-                </div>
+                <textarea
+                  ref={mainRef}
+                  value={notesMain}
+                  onChange={e => { setNotesMain(e.target.value); autoGrow(e) }}
+                  placeholder={'• concept\n• term = ...\n• key idea'}
+                  className="w-full rounded-xl px-4 py-3 focus:outline-none text-sm resize-none leading-relaxed"
+                  style={{
+                    minHeight: 120,
+                    backgroundColor: '#FFFFFF',
+                    border: '1px solid rgba(0,0,0,0.10)',
+                    color: '#1A1A1A',
+                  }}
+                />
               </div>
             )}
 
+            </div>
+          </div>
+        )}
+
+        {/* ── Bottom tab bar ── */}
+        <div className="shrink-0 overflow-x-auto" style={{ backgroundColor: '#FFFFFF', borderTop: '1px solid rgba(0,0,0,0.07)' }}>
+          <div style={{ display: 'flex', minWidth: 'fit-content' }}>
+            {SESSION_TABS.map(({ id, label, num }) => {
+              const isActive = activeTab === id
+              const wasVisited = tabsVisited.has(id)
+              return (
+                <button
+                  key={id}
+                  onClick={() => isActive ? setActiveTab(null) : visitTab(id)}
+                  style={{
+                    flex: '1 1 0',
+                    minWidth: 80,
+                    padding: '10px 8px 8px',
+                    border: 'none',
+                    borderTop: isActive ? `2px solid ${dot}` : '2px solid transparent',
+                    backgroundColor: 'transparent',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: 2,
+                    transition: 'color 0.15s',
+                    color: isActive ? dot : wasVisited && !isActive ? '#6B6B6B' : '#C0C0C0',
+                  }}
+                >
+                  <span style={{ fontSize: 12, fontWeight: isActive ? 600 : 400, whiteSpace: 'nowrap' }}>
+                    {label}
+                    {wasVisited && !isActive && (
+                      <span style={{ display: 'inline-block', width: 4, height: 4, borderRadius: '50%', backgroundColor: dot, marginLeft: 4, verticalAlign: 'middle', marginBottom: 1, opacity: 0.6 }} />
+                    )}
+                  </span>
+                  <span style={{ fontSize: 10, color: isActive ? dot : '#C0C0C0', fontFamily: 'ui-monospace, monospace' }}>
+                    {isActive ? 'Hide ↑' : num}
+                  </span>
+                </button>
+              )
+            })}
           </div>
         </div>
+
       </div>
 
       <style>{`
@@ -1418,8 +1372,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
           50% { opacity: 0.78; }
         }
         @keyframes checkPulse {
-          0%, 100% { box-shadow: 0 0 18px ${dot}30; }
-          50% { box-shadow: 0 0 36px ${dot}70, 0 0 60px ${dot}30; }
+          0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+          50% { box-shadow: 0 4px 16px rgba(0,0,0,0.12); }
         }
         @keyframes flashGreen {
           0%, 100% { background-color: transparent; }

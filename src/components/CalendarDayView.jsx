@@ -281,7 +281,8 @@ export default function CalendarDayView({
       <div className="flex items-center justify-between mb-3 pb-3" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
         <button
           onClick={onPrev}
-          className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors text-sm"
+          className="flex items-center gap-1.5 transition-colors text-sm"
+          style={{ color: '#9B9B9B' }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
@@ -290,17 +291,18 @@ export default function CalendarDayView({
         </button>
 
         <div className="text-center">
-          <p className={`text-sm font-medium tracking-tight ${isToday ? 'text-indigo-400' : 'text-slate-300'}`}>
+          <p className="text-sm font-medium tracking-tight" style={{ color: isToday ? '#3B61C4' : '#1A1A1A' }}>
             {dateLabel}
           </p>
-          {isToday && <p className="text-[10px] text-indigo-500/60 mt-0.5 tracking-wide">TODAY</p>}
+          {isToday && <p className="text-[10px] mt-0.5 tracking-wide" style={{ color: '#3B61C4' }}>TODAY</p>}
         </div>
 
         <div className="flex items-center gap-2">
           {onAddSession && (
             <button
               onClick={() => onAddSession(dayStr)}
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-indigo-400 hover:text-indigo-300 border border-indigo-500/30 hover:border-indigo-400/50 hover:bg-indigo-500/10 transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+              style={{ color: '#3B61C4', border: '1px solid rgba(59,97,196,0.25)', backgroundColor: 'rgba(59,97,196,0.05)' }}
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 4v16m8-8H4" />
@@ -310,7 +312,8 @@ export default function CalendarDayView({
           )}
           <button
             onClick={onNext}
-            className="flex items-center gap-1.5 text-slate-500 hover:text-slate-300 transition-colors text-sm"
+            className="flex items-center gap-1.5 transition-colors text-sm"
+            style={{ color: '#9B9B9B' }}
           >
             Next
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -559,9 +562,9 @@ export default function CalendarDayView({
                     marginTop: 4,
                     padding: '7px 16px',
                     borderRadius: 8,
-                    border: '1px solid rgba(99,102,241,0.4)',
-                    background: 'rgba(99,102,241,0.12)',
-                    color: '#818cf8',
+                    border: '1px solid rgba(59,97,196,0.25)',
+                    background: 'rgba(59,97,196,0.06)',
+                    color: '#3B61C4',
                     fontSize: 13,
                     fontWeight: 600,
                     cursor: 'pointer',
