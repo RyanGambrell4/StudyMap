@@ -17,15 +17,14 @@ export default function AuthScreen({ initialMode, onBack }) {
     if (trial === '1') return { text: `7-day free trial · ${planLabel}`, sub: `Full access included. Card charged ${billingLabel} after trial ends. Cancel anytime.` }
     return { text: `${planLabel} plan`, sub: `Billed ${billingLabel}. Cancel anytime.` }
   })()
+
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(() => {
-    // Surface OAuth errors redirected back from Supabase (e.g. "Unable to exchange external code")
     const sp = new URLSearchParams(window.location.search)
     const raw = sp.get('error_description') || sp.get('error')
     if (!raw) return ''
-    // Clean up the URL so the error doesn't persist on refresh
     const clean = new URLSearchParams()
     const plan = sp.get('plan'); const billing = sp.get('billing'); const signup = sp.get('signup')
     if (plan) clean.set('plan', plan)
@@ -36,17 +35,12 @@ export default function AuthScreen({ initialMode, onBack }) {
     return `Sign in failed: ${decodeURIComponent(raw).replace(/\+/g, ' ')}`
   })
   const [success, setSuccess] = useState('')
-
-  // After a successful email+password signup, flip into a dedicated
-  // "Check your inbox" confirmation screen so the user can't miss it.
   const [signupPendingEmail, setSignupPendingEmail] = useState('')
-  const [resendStatus, setResendStatus] = useState('') // '' | 'sending' | 'sent' | 'error'
+  const [resendStatus, setResendStatus] = useState('')
   const [showPassword, setShowPassword] = useState(false)
 
   const handleGoogleSignIn = async () => {
     setError('')
-    // Preserve checkout intent (plan + billing) across the OAuth round-trip
-    // so users who came from landing page pricing still land in Stripe checkout.
     const src = new URLSearchParams(window.location.search)
     const preserve = new URLSearchParams()
     const plan = src.get('plan')
@@ -67,10 +61,8 @@ export default function AuthScreen({ initialMode, onBack }) {
     setError('')
     setSuccess('')
     setLoading(true)
-
     try {
       if (mode === 'signup') {
-        // Preserve checkout intent (plan + billing + trial) through email verification redirect
         const src = new URLSearchParams(window.location.search)
         const preserve = new URLSearchParams()
         const plan = src.get('plan')
@@ -81,21 +73,13 @@ export default function AuthScreen({ initialMode, onBack }) {
         if (trial === '1') preserve.set('trial', '1')
         const qs = preserve.toString()
         const emailRedirectTo = `${window.location.origin}/app${qs ? '?' + qs : ''}`
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: { emailRedirectTo },
-        })
+        const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo } })
         if (error) throw error
-        // Flip into the dedicated "Check your inbox" screen instead of showing
-        // a tiny green banner under the form. Remember the email so the user
-        // sees exactly where the link was sent, and so we can resend it.
         setSignupPendingEmail(email)
         setPassword('')
       } else if (mode === 'login') {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
-        // App.jsx listens for auth state change — no need to do anything here
       } else if (mode === 'forgot') {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/app`,
@@ -115,10 +99,7 @@ export default function AuthScreen({ initialMode, onBack }) {
     const handleResend = async () => {
       setResendStatus('sending')
       try {
-        const { error: resendErr } = await supabase.auth.resend({
-          type: 'signup',
-          email: signupPendingEmail,
-        })
+        const { error: resendErr } = await supabase.auth.resend({ type: 'signup', email: signupPendingEmail })
         if (resendErr) throw resendErr
         setResendStatus('sent')
         setTimeout(() => setResendStatus(''), 4000)
@@ -129,192 +110,151 @@ export default function AuthScreen({ initialMode, onBack }) {
     }
 
     return (
-      <div
-        className="min-h-screen flex items-center justify-center px-4 py-10"
-        style={{ backgroundColor: '#0a0f1e' }}
-      >
-        <div className="w-full max-w-md">
+      <div style={{ minHeight: '100vh', display: 'flex' }}>
+        {/* Left panel */}
+        <LeftPanel />
 
-          {/* Logo */}
-          <div className="flex items-center justify-center gap-2.5 mb-10">
-            <img
-              src="/favicon.png"
-              alt="StudyEdge AI"
-              className="w-9 h-9 rounded-xl"
-              style={{ objectFit: 'contain' }}
-            />
-            <span className="text-white font-bold text-xl tracking-tight">StudyEdge AI</span>
-          </div>
+        {/* Right panel */}
+        <div style={{
+          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backgroundColor: '#F7F6F3', padding: '40px 24px',
+        }}>
+          <div style={{ width: '100%', maxWidth: 400 }}>
+            {/* Mobile logo */}
+            <div style={{ display: 'none', alignItems: 'center', gap: 10, marginBottom: 32, justifyContent: 'center' }}
+              className="mobile-logo">
+              <img src="/favicon.png" alt="StudyEdge AI" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain' }} />
+              <span style={{ fontWeight: 700, fontSize: 18, color: '#1A1A1A' }}>StudyEdge AI</span>
+            </div>
 
-          {/* Confirmation card */}
-          <div
-            className="rounded-2xl p-8 text-center"
-            style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}
-          >
             {/* Icon */}
-            <div
-              className="w-16 h-16 mx-auto rounded-2xl flex items-center justify-center mb-5"
-              style={{
-                background: 'linear-gradient(135deg, rgba(99,102,241,0.2), rgba(79,70,229,0.15))',
-                border: '1px solid rgba(99,102,241,0.35)',
-              }}
-            >
-              <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            <div style={{
+              width: 56, height: 56, borderRadius: 16, backgroundColor: 'rgba(59,97,196,0.1)',
+              border: '1px solid rgba(59,97,196,0.2)', display: 'flex', alignItems: 'center',
+              justifyContent: 'center', marginBottom: 20,
+            }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
               </svg>
             </div>
 
-            <h1 className="text-white font-bold text-2xl mb-2 tracking-tight">Check your inbox</h1>
-            <p className="text-slate-400 text-sm leading-relaxed mb-1">
-              We sent a confirmation link to
-            </p>
-            <p className="text-white font-semibold text-sm mb-5 break-all">
-              {signupPendingEmail}
-            </p>
-            <p className="text-slate-400 text-sm leading-relaxed mb-6">
+            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>Check your inbox</h1>
+            <p style={{ fontSize: 14, color: '#6B6B6B', margin: '0 0 4px', lineHeight: 1.5 }}>We sent a confirmation link to</p>
+            <p style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 16px', wordBreak: 'break-all' }}>{signupPendingEmail}</p>
+            <p style={{ fontSize: 13, color: '#6B6B6B', margin: '0 0 20px', lineHeight: 1.6 }}>
               Click the link in that email to verify your account and finish signing up. The email may take up to a minute to arrive.
             </p>
 
-            {/* Hint box */}
-            <div
-              className="rounded-xl px-4 py-3 text-left mb-5 text-xs text-slate-300 leading-relaxed"
-              style={{ backgroundColor: '#0d1424', border: '1px solid #1e293b' }}
-            >
-              <span className="font-bold text-slate-200">Can't find it?</span> Check your Spam or Promotions folder, and search for "StudyEdge AI".
+            <div style={{
+              backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12,
+              padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#6B6B6B', lineHeight: 1.6,
+            }}>
+              <strong style={{ color: '#1A1A1A' }}>Can't find it?</strong> Check your Spam or Promotions folder, and search for "StudyEdge AI".
             </div>
 
-            {/* Resend button */}
             <button
               onClick={handleResend}
               disabled={resendStatus === 'sending'}
-              className="w-full py-3 rounded-xl font-semibold text-white text-sm transition-all disabled:opacity-60"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)' }}
+              style={{
+                width: '100%', padding: '12px', borderRadius: 12, border: 'none',
+                backgroundColor: '#3B61C4', color: '#fff', fontSize: 14, fontWeight: 600,
+                cursor: resendStatus === 'sending' ? 'default' : 'pointer', opacity: resendStatus === 'sending' ? 0.6 : 1,
+                marginBottom: 16,
+              }}
             >
-              {resendStatus === 'sending'
-                ? 'Resending…'
-                : resendStatus === 'sent'
-                  ? '✓ Email resent'
-                  : resendStatus === 'error'
-                    ? 'Try again'
-                    : 'Resend confirmation email'}
+              {resendStatus === 'sending' ? 'Resending…' : resendStatus === 'sent' ? '✓ Email resent' : resendStatus === 'error' ? 'Try again' : 'Resend confirmation email'}
             </button>
 
-            {/* Footer actions */}
-            <div className="mt-5 text-center space-y-2">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, textAlign: 'center' }}>
               <button
-                onClick={() => {
-                  setSignupPendingEmail('')
-                  setMode('login')
-                  setError('')
-                  setSuccess('')
-                }}
-                className="block w-full text-slate-500 hover:text-slate-300 text-sm transition-colors"
+                onClick={() => { setSignupPendingEmail(''); setMode('login'); setError(''); setSuccess('') }}
+                style={{ background: 'none', border: 'none', fontSize: 14, color: '#6B6B6B', cursor: 'pointer' }}
               >
-                Already verified? <span className="text-indigo-400">Sign in</span>
+                Already verified? <span style={{ color: '#3B61C4', fontWeight: 600 }}>Sign in</span>
               </button>
               <button
-                onClick={() => {
-                  setSignupPendingEmail('')
-                  setError('')
-                  setSuccess('')
-                }}
-                className="block w-full text-slate-600 hover:text-slate-400 text-sm transition-colors"
+                onClick={() => { setSignupPendingEmail(''); setError(''); setSuccess('') }}
+                style={{ background: 'none', border: 'none', fontSize: 13, color: '#9B9B9B', cursor: 'pointer' }}
               >
                 Use a different email
               </button>
             </div>
-          </div>
 
-          {onBack && (
-            <button
-              onClick={onBack}
-              className="block w-full text-slate-600 hover:text-slate-400 text-sm transition-colors mt-4"
-            >
-              ← Back to home
-            </button>
-          )}
+            {onBack && (
+              <button onClick={onBack} style={{ display: 'block', width: '100%', marginTop: 16, background: 'none', border: 'none', fontSize: 13, color: '#9B9B9B', cursor: 'pointer', textAlign: 'center' }}>
+                ← Back to home
+              </button>
+            )}
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div
-      className="min-h-screen flex items-center justify-center px-4"
-      style={{ backgroundColor: '#0a0f1e', position: 'relative', overflow: 'hidden' }}
-    >
-      {/* Background */}
-      <div style={{ position: 'absolute', inset: 0, pointerEvents: 'none' }}>
-        {/* Dot grid */}
-        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(rgba(255,255,255,0.07) 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
-        {/* Aurora blobs */}
-        <div style={{ position: 'absolute', top: '-15%', left: '50%', transform: 'translateX(-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse at center, rgba(99,102,241,0.2) 0%, transparent 65%)', filter: 'blur(8px)' }} />
-        <div style={{ position: 'absolute', bottom: '-10%', right: '-5%', width: 450, height: 350, background: 'radial-gradient(ellipse at center, rgba(139,92,246,0.14) 0%, transparent 65%)', filter: 'blur(8px)' }} />
-        <div style={{ position: 'absolute', bottom: '20%', left: '-5%', width: 300, height: 250, background: 'radial-gradient(ellipse at center, rgba(56,189,248,0.07) 0%, transparent 65%)', filter: 'blur(8px)' }} />
-      </div>
-      <div className="w-full max-w-sm" style={{ position: 'relative', zIndex: 1 }}>
+    <div style={{ minHeight: '100vh', display: 'flex' }}>
+      {/* Left panel */}
+      <LeftPanel />
 
-        {/* Logo */}
-        <div className="flex items-center justify-center gap-2.5 mb-10">
-          <img
-            src="/favicon.png"
-            alt="StudyEdge AI"
-            className="w-9 h-9 rounded-xl"
-            style={{ objectFit: 'contain' }}
-          />
-          <span className="text-white font-bold text-xl tracking-tight">StudyEdge AI</span>
-        </div>
+      {/* Right panel */}
+      <div style={{
+        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        backgroundColor: '#F7F6F3', padding: '40px 24px', overflowY: 'auto',
+      }}>
+        <div style={{ width: '100%', maxWidth: 400 }}>
 
-        {/* Plan context banner — shown when coming from pricing */}
-        {mode === 'signup' && planContext && (
-          <div
-            className="rounded-xl px-5 py-4 mb-4 text-center"
-            style={{
-              backgroundColor: 'rgba(255,255,255,0.04)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              boxShadow: '0 0 24px rgba(99,102,241,0.25), 0 0 8px rgba(99,102,241,0.12)',
-            }}
-          >
-            <p className="text-white font-semibold text-sm mb-1">{planContext.text}</p>
-            <p className="text-slate-400 text-xs leading-relaxed">{planContext.sub}</p>
+          {/* Mobile logo (shown only on small screens via CSS) */}
+          <style>{`
+            @media (max-width: 767px) {
+              .auth-left-panel { display: none !important; }
+              .auth-mobile-logo { display: flex !important; }
+            }
+          `}</style>
+          <div className="auth-mobile-logo" style={{ display: 'none', alignItems: 'center', gap: 10, marginBottom: 32, justifyContent: 'center' }}>
+            <img src="/favicon.png" alt="StudyEdge AI" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain' }} />
+            <span style={{ fontWeight: 700, fontSize: 18, color: '#1A1A1A' }}>StudyEdge AI</span>
           </div>
-        )}
-        {/* Free plan nudge when no plan context */}
-        {mode === 'signup' && !planContext && (
-          <div
-            className="rounded-xl px-4 py-3 mb-4 flex items-center gap-3"
-            style={{ backgroundColor: 'rgba(52,211,153,0.07)', border: '1px solid rgba(52,211,153,0.25)' }}
-          >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#34d399" strokeWidth="2.5" strokeLinecap="round"><polyline points="5 12 10 17 20 7"/></svg>
-            <p className="text-emerald-300 text-sm font-medium">Free forever — no credit card required</p>
-          </div>
-        )}
 
-        {/* Card */}
-        <div style={{
-          background: 'linear-gradient(135deg, rgba(99,102,241,0.5) 0%, rgba(139,92,246,0.3) 50%, rgba(56,189,248,0.2) 100%)',
-          padding: '1px',
-          borderRadius: '1rem',
-          boxShadow: '0 0 48px rgba(99,102,241,0.22), 0 0 100px rgba(99,102,241,0.08)',
-        }}>
-        <div
-          className="rounded-2xl p-7"
-          style={{ backgroundColor: '#111827' }}
-        >
-          <h1 className="text-white font-bold text-xl mb-1">
+          {/* Header */}
+          <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
             {mode === 'login' ? 'Welcome back' : mode === 'signup' ? 'Create your account' : 'Reset password'}
           </h1>
-          <p className="text-slate-500 text-sm mb-6">
-            {mode === 'login' ? 'Sign in to access your study plans.' : mode === 'signup' ? 'Your data will sync across all your devices.' : 'We\'ll send a reset link to your email.'}
+          <p style={{ fontSize: 14, color: '#6B6B6B', margin: '0 0 24px' }}>
+            {mode === 'login' ? 'Sign in to access your study plans.' : mode === 'signup' ? 'Your data will sync across all your devices.' : "We'll send a reset link to your email."}
           </p>
 
+          {/* Plan context banner */}
+          {mode === 'signup' && planContext && (
+            <div style={{
+              backgroundColor: 'rgba(59,97,196,0.07)', border: '1px solid rgba(59,97,196,0.2)',
+              borderRadius: 12, padding: '12px 16px', marginBottom: 20, textAlign: 'center',
+            }}>
+              <p style={{ margin: '0 0 3px', fontSize: 13, fontWeight: 600, color: '#3B61C4' }}>{planContext.text}</p>
+              <p style={{ margin: 0, fontSize: 12, color: '#6B6B6B' }}>{planContext.sub}</p>
+            </div>
+          )}
+          {mode === 'signup' && !planContext && (
+            <div style={{
+              backgroundColor: 'rgba(5,150,105,0.06)', border: '1px solid rgba(5,150,105,0.2)',
+              borderRadius: 12, padding: '10px 14px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10,
+            }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round"><polyline points="5 12 10 17 20 7"/></svg>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: '#059669' }}>Free forever — no credit card required</p>
+            </div>
+          )}
+
+          {/* Google button */}
           {mode !== 'forgot' && (
             <>
               <button
                 type="button"
                 onClick={handleGoogleSignIn}
-                className="w-full flex items-center justify-center gap-3 py-3 rounded-xl text-sm font-semibold text-slate-200 transition-all hover:border-slate-500"
-                style={{ backgroundColor: '#0d1424', border: '1px solid #1e293b' }}
+                style={{
+                  width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
+                  padding: '12px', borderRadius: 12, backgroundColor: '#fff',
+                  border: '1px solid rgba(0,0,0,0.12)', fontSize: 14, fontWeight: 600, color: '#1A1A1A',
+                  cursor: 'pointer', marginBottom: 4,
+                }}
               >
                 <svg width="18" height="18" viewBox="0 0 48 48">
                   <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
@@ -325,32 +265,38 @@ export default function AuthScreen({ initialMode, onBack }) {
                 Continue with Google
               </button>
 
-              <div className="flex items-center gap-3 my-1">
-                <div className="flex-1 h-px" style={{ backgroundColor: '#1e293b' }} />
-                <span className="text-slate-600 text-xs">or</span>
-                <div className="flex-1 h-px" style={{ backgroundColor: '#1e293b' }} />
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '16px 0' }}>
+                <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(0,0,0,0.08)' }} />
+                <span style={{ fontSize: 12, color: '#9B9B9B' }}>or</span>
+                <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(0,0,0,0.08)' }} />
               </div>
             </>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Form */}
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
-              <label className="block text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">Email</label>
+              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Email</label>
               <input
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
                 placeholder="you@example.com"
                 required
-                className="w-full rounded-xl px-4 py-3 text-slate-200 placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 text-sm"
-                style={{ backgroundColor: '#0d1424', border: '1px solid #1e293b' }}
+                style={{
+                  width: '100%', padding: '11px 14px', borderRadius: 10, fontSize: 14, color: '#1A1A1A',
+                  backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.12)', outline: 'none',
+                  boxSizing: 'border-box',
+                }}
+                onFocus={e => e.target.style.borderColor = '#3B61C4'}
+                onBlur={e => e.target.style.borderColor = 'rgba(0,0,0,0.12)'}
               />
             </div>
 
             {mode !== 'forgot' && (
               <div>
-                <label className="block text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">Password</label>
-                <div className="relative">
+                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Password</label>
+                <div style={{ position: 'relative' }}>
                   <input
                     type={showPassword ? 'text' : 'password'}
                     value={password}
@@ -358,15 +304,20 @@ export default function AuthScreen({ initialMode, onBack }) {
                     placeholder="••••••••"
                     required
                     minLength={6}
-                    className="w-full rounded-xl px-4 py-3 pr-11 text-slate-200 placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 text-sm"
-                    style={{ backgroundColor: '#0d1424', border: '1px solid #1e293b' }}
+                    style={{
+                      width: '100%', padding: '11px 40px 11px 14px', borderRadius: 10, fontSize: 14, color: '#1A1A1A',
+                      backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.12)', outline: 'none',
+                      boxSizing: 'border-box',
+                    }}
+                    onFocus={e => e.target.style.borderColor = '#3B61C4'}
+                    onBlur={e => e.target.style.borderColor = 'rgba(0,0,0,0.12)'}
                   />
                   <button
                     type="button"
                     onClick={() => setShowPassword(v => !v)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
                     tabIndex={-1}
                     aria-label={showPassword ? 'Hide password' : 'Show password'}
+                    style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', padding: 0, display: 'flex' }}
                   >
                     {showPassword ? (
                       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -386,13 +337,12 @@ export default function AuthScreen({ initialMode, onBack }) {
             )}
 
             {error && (
-              <div className="rounded-xl px-4 py-3 text-red-300 text-sm" style={{ backgroundColor: '#450a0a', border: '1px solid #7f1d1d' }}>
+              <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#dc2626' }}>
                 {error}
               </div>
             )}
-
             {success && (
-              <div className="rounded-xl px-4 py-3 text-emerald-300 text-sm" style={{ backgroundColor: '#052e16', border: '1px solid #14532d' }}>
+              <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#16a34a' }}>
                 {success}
               </div>
             )}
@@ -400,47 +350,124 @@ export default function AuthScreen({ initialMode, onBack }) {
             <button
               type="submit"
               disabled={loading}
-              className="w-full py-3.5 rounded-xl font-bold text-white text-sm transition-all disabled:opacity-50"
-              style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)', boxShadow: '0 0 24px #6366f130' }}
+              style={{
+                width: '100%', padding: '13px', borderRadius: 12, border: 'none',
+                backgroundColor: '#3B61C4', color: '#fff', fontSize: 14, fontWeight: 700,
+                cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.6 : 1, marginTop: 2,
+              }}
             >
               {loading ? 'Loading…' : mode === 'login' ? 'Sign in' : mode === 'signup' ? 'Create account' : 'Send reset link'}
             </button>
           </form>
-        </div>
-        </div>
 
-        {/* Footer links */}
-        <div className="mt-5 text-center space-y-2">
-          {mode === 'login' && (
-            <>
-              <button onClick={() => { setMode('forgot'); setError(''); setSuccess('') }} className="block w-full text-slate-600 hover:text-slate-400 text-sm transition-colors">
-                Forgot password?
+          {/* Footer links */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10, textAlign: 'center', marginTop: 20 }}>
+            {mode === 'login' && (
+              <>
+                <button onClick={() => { setMode('forgot'); setError(''); setSuccess('') }} style={{ background: 'none', border: 'none', fontSize: 13, color: '#9B9B9B', cursor: 'pointer' }}>
+                  Forgot password?
+                </button>
+                <button onClick={() => { setMode('signup'); setError(''); setSuccess('') }} style={{ background: 'none', border: 'none', fontSize: 14, color: '#6B6B6B', cursor: 'pointer' }}>
+                  Don't have an account? <span style={{ color: '#3B61C4', fontWeight: 600 }}>Sign up</span>
+                </button>
+              </>
+            )}
+            {mode === 'signup' && (
+              <button onClick={() => { setMode('login'); setError(''); setSuccess('') }} style={{ background: 'none', border: 'none', fontSize: 14, color: '#6B6B6B', cursor: 'pointer' }}>
+                Already have an account? <span style={{ color: '#3B61C4', fontWeight: 600 }}>Sign in</span>
               </button>
-              <button onClick={() => { setMode('signup'); setError(''); setSuccess('') }} className="block w-full text-slate-500 hover:text-slate-300 text-sm transition-colors">
-                Don't have an account? <span className="text-indigo-400">Sign up</span>
+            )}
+            {mode === 'forgot' && (
+              <button onClick={() => { setMode('login'); setError(''); setSuccess('') }} style={{ background: 'none', border: 'none', fontSize: 14, color: '#6B6B6B', cursor: 'pointer' }}>
+                Back to sign in
               </button>
-            </>
-          )}
-          {mode === 'signup' && (
-            <button onClick={() => { setMode('login'); setError(''); setSuccess('') }} className="text-slate-500 hover:text-slate-300 text-sm transition-colors">
-              Already have an account? <span className="text-indigo-400">Sign in</span>
+            )}
+          </div>
+
+          {onBack && (
+            <button onClick={onBack} style={{ display: 'block', width: '100%', marginTop: 12, background: 'none', border: 'none', fontSize: 13, color: '#9B9B9B', cursor: 'pointer', textAlign: 'center' }}>
+              ← Back to home
             </button>
           )}
-          {mode === 'forgot' && (
-            <button onClick={() => { setMode('login'); setError(''); setSuccess('') }} className="text-slate-500 hover:text-slate-300 text-sm transition-colors">
-              Back to sign in
-            </button>
-          )}
         </div>
+      </div>
+    </div>
+  )
+}
 
-        {onBack && (
-          <button
-            onClick={onBack}
-            className="block w-full text-slate-600 hover:text-slate-400 text-sm transition-colors mt-2"
-          >
-            ← Back to home
-          </button>
-        )}
+function LeftPanel() {
+  return (
+    <div
+      className="auth-left-panel"
+      style={{
+        width: '45%',
+        minWidth: 380,
+        background: 'linear-gradient(145deg, #3B61C4 0%, #2D4FA8 45%, #1e3a7a 100%)',
+        display: 'flex',
+        flexDirection: 'column',
+        justifyContent: 'space-between',
+        padding: '48px 48px 40px',
+        position: 'relative',
+        overflow: 'hidden',
+      }}
+    >
+      {/* Subtle background texture */}
+      <div style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none',
+        backgroundImage: 'radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)',
+        backgroundSize: '28px 28px',
+      }} />
+      <div style={{
+        position: 'absolute', top: '-10%', right: '-15%', width: 400, height: 400,
+        background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.08) 0%, transparent 65%)',
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        position: 'absolute', bottom: '10%', left: '-10%', width: 300, height: 300,
+        background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.05) 0%, transparent 65%)',
+        pointerEvents: 'none',
+      }} />
+
+      {/* Logo */}
+      <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 12 }}>
+        <img src="/favicon.png" alt="StudyEdge AI" style={{ width: 38, height: 38, borderRadius: 10, objectFit: 'contain' }} />
+        <span style={{ color: '#fff', fontWeight: 700, fontSize: 18, letterSpacing: '-0.01em' }}>StudyEdge AI</span>
+      </div>
+
+      {/* Headline */}
+      <div style={{ position: 'relative' }}>
+        <h2 style={{
+          color: '#fff',
+          fontSize: 36,
+          fontWeight: 700,
+          lineHeight: 1.2,
+          margin: '0 0 16px',
+          fontFamily: "'Cormorant Garamond', Georgia, serif",
+          letterSpacing: '-0.02em',
+        }}>
+          Study smarter.<br />Score higher.<br /><em style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.75)' }}>Every semester.</em>
+        </h2>
+        <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 15, lineHeight: 1.6, margin: 0, maxWidth: 300 }}>
+          AI-powered study plans, grade tracking, and an always-on tutor — all in one place.
+        </p>
+      </div>
+
+      {/* Social proof */}
+      <div style={{ position: 'relative' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {[
+            { quote: '"finally consistent with my studying for the first time ever"', name: 'Andy G.' },
+            { quote: '"finished top of my cohort last semester"', name: 'Danny K.' },
+          ].map(t => (
+            <div key={t.name} style={{
+              backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 12,
+              padding: '12px 16px', border: '1px solid rgba(255,255,255,0.12)',
+            }}>
+              <p style={{ margin: '0 0 6px', fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5 }}>{t.quote}</p>
+              <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t.name}</p>
+            </div>
+          ))}
+        </div>
       </div>
     </div>
   )
