@@ -155,7 +155,6 @@ export default function AppShell({
           background: NAV_BG,
           borderBottom: `1px solid ${BORDER}`,
           zIndex: 40,
-          display: 'flex',
           alignItems: 'center',
           padding: '0 32px',
           gap: 0,
@@ -331,7 +330,7 @@ export default function AppShell({
 
       {/* ── Main content ── */}
       <main
-        className="lg:pt-14 pb-20 lg:pb-0 min-h-screen"
+        className="lg:pt-14 pb-24 lg:pb-0 min-h-screen"
         style={{ overflowX: 'hidden', minWidth: 0, width: '100%' }}
       >
         {showTrialBanner && (
@@ -371,6 +370,7 @@ export default function AppShell({
         style={{
           background: '#FFFFFF',
           borderTop: `1px solid ${BORDER}`,
+          paddingBottom: 'env(safe-area-inset-bottom)',
         }}
       >
         {MOBILE_NAV.map(item => {
