@@ -229,9 +229,6 @@ export default function App() {
     setInitialCompletedIds(null)
     setAssignments([])
     setShowOutput(false)
-    setCourses([])
-    setYearLevel(null)
-    setLearningStyle(null)
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────
