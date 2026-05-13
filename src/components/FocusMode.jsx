@@ -39,107 +39,291 @@ function appendRecall(courseId, courseName, sessionType, text) {
   appendSessionRecall({ courseId, courseName, sessionType, text, timestamp: Date.now() })
 }
 
-async function loadJsPDF() {
-  if (window.jspdf?.jsPDF) return window.jspdf.jsPDF
-  return new Promise((resolve, reject) => {
-    const s = document.createElement('script')
-    s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'
-    s.onload = () => resolve(window.jspdf.jsPDF)
-    s.onerror = () => reject(new Error('Failed to load jsPDF'))
-    document.head.appendChild(s)
+function generatePDF({ courseName, dateStr, sessionType, recallText, concepts, main, summary }) {
+  // ── Helpers ────────────────────────────────────────────────────────────────
+  const esc = (t) => String(t ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+
+  // ── Content parser ─────────────────────────────────────────────────────────
+  function parseBlocks(text) {
+    if (!text?.trim()) return []
+    const lines = text.split('\n')
+    const out = []
+    let tableRows = []
+
+    const flushTable = () => {
+      if (tableRows.length > 0) { out.push({ type: 'table', rows: [...tableRows] }); tableRows = [] }
+    }
+
+    for (const raw of lines) {
+      const line = raw.trim()
+      if (!line) { flushTable(); continue }
+
+      // Table row
+      if (line.split('|').length >= 3 && line.includes('|')) {
+        if (/^[\|\-\s:]+$/.test(line)) continue // separator
+        tableRows.push(line.split('|').map(c => c.trim()).filter(Boolean))
+        continue
+      }
+      flushTable()
+
+      // Bullet
+      if (/^[-•*·]\s+/.test(line)) { out.push({ type: 'bullet', text: line.replace(/^[-•*·]\s+/, '') }); continue }
+      // Numbered list
+      if (/^\d+[\.\)]\s+/.test(line)) { out.push({ type: 'bullet', text: line.replace(/^\d+[\.\)]\s+/, '') }); continue }
+      // Markdown heading
+      if (/^#{1,3}\s/.test(line)) { out.push({ type: 'heading', text: line.replace(/^#+\s+/, '') }); continue }
+      // Section heading: short, ends in colon, no sentence structure
+      if (line.endsWith(':') && line.length < 70 && !line.slice(0,-1).includes('.') && !line.includes('(')) {
+        out.push({ type: 'heading', text: line.slice(0,-1) }); continue
+      }
+      // ALL CAPS heading
+      if (line === line.toUpperCase() && /[A-Z]{2}/.test(line) && line.length > 2 && line.length < 60 && !/\d/.test(line)) {
+        out.push({ type: 'heading', text: line }); continue
+      }
+      // Formula / equation
+      if (/[=÷×±√∑∫∂∆→⟶]/.test(line) || (/\s=\s/.test(line) && line.length < 120)) {
+        out.push({ type: 'formula', text: line }); continue
+      }
+      // Key term definition: "Term: definition" with short term (≤6 words)
+      const defMatch = line.match(/^([A-Z][^:\.]{1,45}):\s+(.{8,})$/)
+      if (defMatch && defMatch[1].split(' ').length <= 6) {
+        out.push({ type: 'definition', term: defMatch[1], def: defMatch[2] }); continue
+      }
+      out.push({ type: 'para', text: line })
+    }
+    flushTable()
+    return out
+  }
+
+  function renderTable(rows) {
+    if (!rows.length) return ''
+    const [header, ...body] = rows
+    return `<div class="tbl-wrap"><table>
+      <thead><tr>${header.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead>
+      <tbody>${body.map(row => `<tr>${row.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody>
+    </table></div>`
+  }
+
+  function renderBlocks(blocks) {
+    let html = '', inList = false
+    for (const b of blocks) {
+      if (b.type === 'bullet') {
+        if (!inList) { html += '<ul class="blist">'; inList = true }
+        html += `<li><span class="bdot"></span><span>${esc(b.text)}</span></li>`
+      } else {
+        if (inList) { html += '</ul>'; inList = false }
+        if      (b.type === 'heading')    html += `<div class="nh"><div class="nhbar"></div><span>${esc(b.text)}</span></div>`
+        else if (b.type === 'definition') html += `<div class="defrow"><span class="deft">${esc(b.term)}</span><span class="defb">${esc(b.def)}</span></div>`
+        else if (b.type === 'formula')    html += `<div class="formula">${esc(b.text)}</div>`
+        else if (b.type === 'table')      html += renderTable(b.rows)
+        else                              html += `<p class="np">${esc(b.text)}</p>`
+      }
+    }
+    if (inList) html += '</ul>'
+    return html
+  }
+
+  function parseConcepts(text) {
+    if (!text?.trim()) return []
+    return text.split('\n').map(l => l.trim().replace(/^[-•*\d\.\)]+\s*/, '')).filter(l => l.length > 2).slice(0, 12)
+  }
+
+  // ── Parse ──────────────────────────────────────────────────────────────────
+  const mainBlocks    = parseBlocks(main)
+  const recallBlocks  = parseBlocks(recallText)
+  const summaryBlocks = parseBlocks(summary)
+  const conceptList   = parseConcepts(concepts)
+
+  const prettyDate = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
+    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
   })
+
+  // ── HTML ───────────────────────────────────────────────────────────────────
+  const html = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>StudyEdge AI · ${esc(courseName)}</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F7F6F3;color:#1A1A1A;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+
+/* Header */
+.hdr{background:linear-gradient(135deg,#162d6b 0%,#3B61C4 55%,#4f7cd4 100%);color:#fff;padding:40px 52px 36px;position:relative;overflow:hidden}
+.hdr::before{content:'';position:absolute;right:-80px;top:-80px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,0.05)}
+.hdr::after{content:'';position:absolute;left:40%;bottom:-100px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,0.04)}
+.brand{font-size:10px;letter-spacing:3.5px;text-transform:uppercase;opacity:.6;margin-bottom:14px;font-weight:600}
+.course{font-size:40px;font-weight:800;letter-spacing:-1.5px;line-height:1.05;margin-bottom:6px}
+.sub{font-size:15px;opacity:.7;margin-bottom:20px;font-weight:400}
+.badges{display:flex;gap:8px;flex-wrap:wrap}
+.badge{background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.22);padding:5px 14px;border-radius:20px;font-size:11.5px;font-weight:500}
+.badge.orange{background:rgba(232,83,26,0.75);border-color:rgba(232,83,26,0.4)}
+
+/* Layout */
+.body{max-width:800px;margin:0 auto;padding:40px 52px 56px}
+
+/* Section wrapper */
+.sec{margin-bottom:36px}
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.sec-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.sec-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
+.sec-rule{flex:1;height:1px;opacity:.18}
+
+/* Recall */
+.recall-card{background:linear-gradient(135deg,#fff8f2,#fffaf6);border:1.5px solid #fcd4b0;border-radius:14px;padding:24px 28px}
+
+/* Concept grid */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.ccard{background:#fff;border:1px solid rgba(59,97,196,0.14);border-top:3px solid #3B61C4;border-radius:10px;padding:14px 16px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
+.cnum{font-size:9.5px;font-weight:700;color:#3B61C4;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px}
+.ctxt{font-size:13px;line-height:1.55;color:#2d2d2d}
+
+/* Notes card */
+.ncard{background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:14px;padding:28px 32px;box-shadow:0 2px 14px rgba(0,0,0,0.04)}
+.np{font-size:14px;line-height:1.85;color:#2d2d2d;margin-bottom:12px}
+.nh{display:flex;align-items:center;gap:10px;margin:22px 0 10px}
+.nhbar{width:4px;height:18px;background:#3B61C4;border-radius:2px;flex-shrink:0}
+.nh span{font-size:15px;font-weight:700;color:#1a1a1a}
+.blist{list-style:none;margin:8px 0 14px;padding:0}
+.blist li{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;font-size:14px;line-height:1.65;color:#2d2d2d}
+.bdot{width:7px;height:7px;border-radius:50%;background:#3B61C4;flex-shrink:0;margin-top:8px}
+.defrow{display:flex;gap:14px;padding:10px 14px;background:#eef2ff;border-radius:8px;margin:6px 0;align-items:flex-start}
+.deft{font-weight:700;font-size:13px;color:#3B61C4;white-space:nowrap;min-width:110px;flex-shrink:0;padding-top:1px}
+.defb{font-size:13px;color:#374151;line-height:1.55}
+.formula{font-family:'Courier New',monospace;font-size:14px;background:#1e293b;color:#7dd3fc;padding:13px 20px;border-radius:9px;margin:12px 0;letter-spacing:.5px;word-break:break-all}
+
+/* Table */
+.tbl-wrap{border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.09);margin:14px 0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:#3B61C4;color:#fff;padding:11px 16px;text-align:left;font-weight:600;font-size:12px;letter-spacing:.3px}
+td{padding:10px 16px;border-bottom:1px solid #f0f0f0;color:#374151}
+tr:last-child td{border-bottom:none}
+tr:nth-child(even) td{background:#f9fafb}
+
+/* Summary */
+.sum-card{background:linear-gradient(135deg,#eef2ff,#e8eeff);border:1.5px solid rgba(59,97,196,0.22);border-radius:14px;padding:24px 28px}
+
+/* Tips */
+.tips{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:28px}
+.tip{background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:10px;padding:15px 16px}
+.tipn{font-size:9.5px;font-weight:700;color:#E8531A;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px}
+.tipt{font-size:12px;line-height:1.55;color:#4b5563}
+
+/* Footer */
+.footer{text-align:center;padding:28px 52px;border-top:1px solid rgba(0,0,0,0.07);margin-top:8px}
+.ftop{font-size:13.5px;font-weight:700;color:#3B61C4;margin-bottom:4px}
+.fsub{font-size:11px;color:#9B9B9B}
+
+@page{margin:0;size:A4}
+@media print{
+  body{background:#fff}
+  .hdr,.recall-card,.sum-card,.formula,th,.nhbar,.bdot,.badge.orange,.ccard{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .sec{break-inside:avoid}
+  .cgrid,.tips{break-inside:avoid}
+  .ncard,.ccard,.tip{box-shadow:none!important}
 }
+</style>
+</head>
+<body>
 
-async function generatePDF({ courseName, dateStr, sessionType, recallText, concepts, main, summary }) {
-  const JsPDF = await loadJsPDF()
-  const doc = new JsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' })
-  const pageW = 210
-  const margin = 18
-  const contentW = pageW - margin * 2
-  let y = 20
+<div class="hdr">
+  <div class="brand">StudyEdge AI &nbsp;·&nbsp; Session Notes</div>
+  <div class="course">${esc(courseName)}</div>
+  <div class="sub">${esc(sessionType || 'Study Session')}</div>
+  <div class="badges">
+    <span class="badge">${esc(prettyDate)}</span>
+    <span class="badge orange">${esc(sessionType || 'Study Session')}</span>
+    ${conceptList.length ? `<span class="badge">${conceptList.length} concept${conceptList.length !== 1 ? 's' : ''} covered</span>` : ''}
+  </div>
+</div>
 
-  const addText = (text, x, size, color, bold) => {
-    doc.setFontSize(size)
-    doc.setTextColor(...color)
-    if (bold) doc.setFont('helvetica', 'bold')
-    else doc.setFont('helvetica', 'normal')
-    doc.text(text, x, y)
+<div class="body">
+
+${recallText?.trim() ? `
+<div class="sec">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(232,83,26,0.1)">✍️</div>
+    <div class="sec-label" style="color:#E8531A">Active Recall</div>
+    <div class="sec-rule" style="background:#E8531A"></div>
+  </div>
+  <div class="recall-card">
+    ${renderBlocks(recallBlocks) || `<p class="np">${esc(recallText.trim())}</p>`}
+  </div>
+</div>` : ''}
+
+${conceptList.length ? `
+<div class="sec">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(59,97,196,0.1);color:#3B61C4;font-size:16px">◈</div>
+    <div class="sec-label" style="color:#3B61C4">Key Concepts</div>
+    <div class="sec-rule" style="background:#3B61C4"></div>
+  </div>
+  <div class="cgrid">
+    ${conceptList.map((c, i) => `
+      <div class="ccard">
+        <div class="cnum">Concept ${String(i+1).padStart(2,'0')}</div>
+        <div class="ctxt">${esc(c)}</div>
+      </div>`).join('')}
+  </div>
+</div>` : ''}
+
+${main?.trim() ? `
+<div class="sec">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(0,0,0,0.06);font-size:16px">≡</div>
+    <div class="sec-label" style="color:#6B6B6B">Session Notes</div>
+    <div class="sec-rule" style="background:#1A1A1A"></div>
+  </div>
+  <div class="ncard">
+    ${renderBlocks(mainBlocks)}
+  </div>
+</div>` : ''}
+
+${summary?.trim() ? `
+<div class="sec">
+  <div class="sec-hdr">
+    <div class="sec-icon" style="background:rgba(59,97,196,0.1);color:#3B61C4">★</div>
+    <div class="sec-label" style="color:#3B61C4">Summary &amp; Takeaways</div>
+    <div class="sec-rule" style="background:#3B61C4"></div>
+  </div>
+  <div class="sum-card">
+    ${renderBlocks(summaryBlocks) || `<p class="np">${esc(summary.trim())}</p>`}
+  </div>
+</div>` : ''}
+
+<div class="tips">
+  <div class="tip">
+    <div class="tipn">Tip 01 · Spaced Repetition</div>
+    <div class="tipt">Review these notes again in 24 hours, then 3 days, then 1 week to move them into long-term memory.</div>
+  </div>
+  <div class="tip">
+    <div class="tipn">Tip 02 · Active Recall</div>
+    <div class="tipt">Cover your notes and try to retrieve the key points from scratch — struggling is how memory forms.</div>
+  </div>
+  <div class="tip">
+    <div class="tipn">Tip 03 · Teach It</div>
+    <div class="tipt">Explain these concepts aloud as if teaching someone. If you can't explain it simply, study it again.</div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">
+  <div class="ftop">StudyEdge AI</div>
+  <div class="fsub">getstudyedge.com &nbsp;·&nbsp; Generated ${esc(prettyDate)}</div>
+</div>
+
+<script>window.onload=function(){setTimeout(function(){window.print()},700)}</script>
+</body>
+</html>`
+
+  const win = window.open('', '_blank', 'width=960,height=800')
+  if (!win) {
+    alert('Allow pop-ups for StudyEdge AI to export your notes.')
+    return
   }
-
-  const addWrapped = (text, x, size, color, maxW) => {
-    doc.setFontSize(size)
-    doc.setTextColor(...color)
-    doc.setFont('helvetica', 'normal')
-    const lines = doc.splitTextToSize(text, maxW)
-    doc.text(lines, x, y)
-    y += lines.length * (size * 0.4 + 1)
-  }
-
-  const section = (title) => {
-    y += 4
-    doc.setFillColor(245, 247, 252)
-    doc.roundedRect(margin, y - 5, contentW, 9, 2, 2, 'F')
-    doc.setFontSize(10)
-    doc.setTextColor(80, 80, 120)
-    doc.setFont('helvetica', 'bold')
-    doc.text(title, margin + 4, y + 1)
-    y += 8
-  }
-
-  // ── Header ──
-  doc.setFillColor(99, 102, 241)
-  doc.rect(0, 0, pageW, 14, 'F')
-  doc.setFontSize(12)
-  doc.setTextColor(255, 255, 255)
-  doc.setFont('helvetica', 'bold')
-  doc.text('StudyEdge AI Session Notes', margin, 9)
-  doc.setFontSize(9)
-  doc.setFont('helvetica', 'normal')
-  doc.text(`${dateStr}`, pageW - margin, 9, { align: 'right' })
-  y = 24
-
-  addText(`${courseName}`, margin, 18, [20, 20, 40], true)
-  y += 9
-  addText(`${sessionType} Session`, margin, 11, [100, 100, 130], false)
-  y += 8
-  doc.setDrawColor(220, 220, 235)
-  doc.line(margin, y, pageW - margin, y)
-  y += 8
-
-  // ── Sections ──
-  if (recallText?.trim()) {
-    section('Active Recall')
-    addWrapped(recallText.trim(), margin, 10, [40, 40, 60], contentW)
-    y += 4
-  }
-
-  if (concepts?.trim()) {
-    section('Key Concepts')
-    addWrapped(concepts.trim(), margin, 10, [40, 40, 60], contentW)
-    y += 4
-  }
-
-  if (main?.trim()) {
-    section('Session Notes')
-    addWrapped(main.trim(), margin, 10, [40, 40, 60], contentW)
-    y += 4
-  }
-
-  if (summary?.trim()) {
-    section('Summary')
-    addWrapped(summary.trim(), margin, 10, [40, 40, 60], contentW)
-    y += 4
-  }
-
-  // ── Footer ──
-  const pageH = 297
-  doc.setFontSize(8)
-  doc.setTextColor(160, 160, 180)
-  doc.setFont('helvetica', 'normal')
-  doc.text('Generated by StudyEdge AI • studyedge.app', pageW / 2, pageH - 8, { align: 'center' })
-
-  const filename = `StudyEdge AI_${courseName.replace(/\s+/g, '_')}_${dateStr}.pdf`
-  doc.save(filename)
+  win.document.write(html)
+  win.document.close()
 }
 
 const ENCOURAGE = [
