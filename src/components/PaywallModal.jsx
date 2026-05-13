@@ -22,7 +22,7 @@ const PLANS = {
     subPrices: {
       monthly:  null,
       semester: '$13.33/mo equivalent',
-      yearly:   '$7.08/mo — billed annually',
+      yearly:   '$7.08/mo · billed annually',
     },
     features: [
       '5 courses',
@@ -46,7 +46,7 @@ const PLANS = {
     subPrices: {
       monthly:  null,
       semester: '$20.00/mo equivalent',
-      yearly:   '$10.00/mo — billed annually',
+      yearly:   '$10.00/mo · billed annually',
     },
     features: [
       'Unlimited courses',
@@ -65,12 +65,12 @@ const LIMIT_MESSAGES = {
   courses: {
     tag: 'Course limit reached',
     title: 'You\'re out of course slots.',
-    body: 'Free plan holds 1 course. Pro gives you 5 — enough for a full semester with room to spare.',
+    body: 'Free plan holds 1 course. Pro gives you 5, enough for a full semester with room to spare.',
   },
   ai: {
     tag: 'Boost limit reached',
     title: 'You\'ve used all 10 study boosts.',
-    body: 'Pro gets 75 boosts a month — that\'s enough to build a plan, run blueprints, and coach every session for the entire semester.',
+    body: 'Pro gets 75 boosts a month. That\'s enough to build a plan, run blueprints, and coach every session for the entire semester.',
   },
   coach: {
     tag: 'Pro feature',
@@ -80,7 +80,7 @@ const LIMIT_MESSAGES = {
   blueprint: {
     tag: 'Pro feature',
     title: 'Session Blueprints are a Pro feature.',
-    body: 'Your session plan is built and ready to go. Upgrade to access it — and every blueprint you generate from here on.',
+    body: 'Your session plan is built and ready to go. Upgrade to access it and every blueprint you generate from here on.',
   },
   focus: {
     tag: 'Pro feature',
@@ -90,13 +90,13 @@ const LIMIT_MESSAGES = {
   tools: {
     tag: 'Pro feature',
     title: 'Study Tools are a Pro feature.',
-    body: 'Flashcards, practice quizzes, and AI-generated study materials — all from your own course content. Upgrade to unlock.',
+    body: 'Flashcards, practice quizzes, and AI-generated study materials from your own course content. Upgrade to unlock.',
   },
 }
 
 const TESTIMONIALS = [
   { quote: 'finally consistent with my studying for the first time ever', name: 'Andy G.', detail: 'University, 2nd year' },
-  { quote: 'finished top of my cohort last semester — I genuinely could not have done it without this', name: 'Danny K.', detail: 'Pre-med, 3.8 GPA' },
+  { quote: 'finished top of my cohort last semester. I genuinely could not have done it without this', name: 'Danny K.', detail: 'Pre-med, 3.8 GPA' },
   { quote: 'one app. all semester. I don\'t need anything else.', name: 'Charlotte B.', detail: 'Law school prep' },
 ]
 
@@ -226,19 +226,6 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
           </div>
         </div>
 
-        {/* ── Stats row ── */}
-        <div style={{ display: 'flex', gap: 20, marginBottom: '20px' }}>
-          {[
-            { stat: '3,200+', label: 'students on Pro' },
-            { stat: '4.8★', label: 'avg rating' },
-            { stat: 'Cancel', label: 'anytime, no fees' },
-          ].map(({ stat, label }) => (
-            <div key={label} style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: '#F7F6F3', borderRadius: 10, border: '1px solid rgba(0,0,0,0.07)' }}>
-              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1A1A1A', letterSpacing: '-0.3px' }}>{stat}</div>
-              <div style={{ fontSize: '0.68rem', color: '#9B9B9B', fontWeight: 500, marginTop: 2 }}>{label}</div>
-            </div>
-          ))}
-        </div>
 
         {/* ── Billing period toggle ── */}
         <div style={{
@@ -367,9 +354,9 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 {loading === planId
                   ? 'Loading...'
                   : planId === 'pro' && isProMonthly
-                    ? 'Start free trial — 7 days →'
+                    ? 'Start free trial · 7 days →'
                     : planId === 'pro' && isAnnual
-                      ? 'Get Pro Annual — best value →'
+                      ? 'Get Pro Annual · best value →'
                       : `Get ${plan.name} →`}
               </button>
             </div>
