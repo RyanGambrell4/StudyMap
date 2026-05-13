@@ -1,4 +1,6 @@
-import { getActivePlan, getCachedSubscription } from '../lib/subscription'
+import { useState } from 'react'
+import { getActivePlan, getCachedSubscription, initSubscription } from '../lib/subscription'
+import { supabase } from '../lib/supabase'
 import ReferralCard from './ReferralCard'
 
 const PLAN_INFO = {
@@ -40,6 +42,29 @@ export default function AccountView({
   const planInfo = PLAN_INFO[plan] ?? PLAN_INFO.free
   const initials = userEmail ? userEmail.split('@')[0].slice(0, 2).toUpperCase() : 'U'
 
+  const [canceling, setCanceling] = useState(false)
+  const [canceled, setCanceled] = useState(false)
+
+  const handleCancelTrial = async () => {
+    if (!confirm('Cancel your free trial? You\'ll lose Pro access immediately and won\'t be charged.')) return
+    setCanceling(true)
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const res = await fetch('/api/cancel-trial', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      })
+      if (!res.ok) throw new Error('Failed')
+      initSubscription(user.id, { plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null })
+      setCanceled(true)
+    } catch {
+      alert('Something went wrong. Please try again or contact support@getstudyedge.com.')
+    } finally {
+      setCanceling(false)
+    }
+  }
+
   return (
     <div style={{ padding: '40px 24px', maxWidth: 560, margin: '0 auto' }}>
       <h1 style={{ fontSize: 28, fontWeight: 700, color: '#1A1A1A', marginBottom: 32 }}>Account</h1>
@@ -78,12 +103,33 @@ export default function AccountView({
           )}
         </div>
         {isTrialing && (
-          <p style={{ margin: '0 0 10px', fontSize: 12, color: '#6B6B6B', lineHeight: 1.5 }}>
-            {trialDaysLeft !== null && trialDaysLeft > 0
-              ? <>Your free trial ends in <strong style={{ color: '#1A1A1A' }}>{trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''}</strong>. You won't be charged until then — cancel anytime before day 7.</>
-              : <>Your free trial has ended. You now have full Pro access.</>
-            }
-          </p>
+          <>
+            <p style={{ margin: '0 0 10px', fontSize: 12, color: '#6B6B6B', lineHeight: 1.5 }}>
+              {trialDaysLeft !== null && trialDaysLeft > 0
+                ? <>Your free trial ends in <strong style={{ color: '#1A1A1A' }}>{trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''}</strong>. You won't be charged until then.</>
+                : <>Your free trial has ended. You now have full Pro access.</>
+              }
+            </p>
+            {!canceled ? (
+              <button
+                onClick={handleCancelTrial}
+                disabled={canceling}
+                style={{
+                  marginBottom: 10, padding: '8px 14px',
+                  background: 'none', border: '1px solid rgba(0,0,0,0.15)',
+                  borderRadius: 8, fontSize: 12, fontWeight: 600,
+                  color: '#9B9B9B', cursor: canceling ? 'not-allowed' : 'pointer',
+                  opacity: canceling ? 0.6 : 1,
+                }}
+              >
+                {canceling ? 'Canceling…' : 'Cancel trial'}
+              </button>
+            ) : (
+              <p style={{ marginBottom: 10, fontSize: 12, color: '#059669', fontWeight: 600 }}>
+                ✓ Trial canceled. You won't be charged.
+              </p>
+            )}
+          </>
         )}
         <ul style={{ margin: '0 0 16px', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
           {planInfo.features.map(f => (
