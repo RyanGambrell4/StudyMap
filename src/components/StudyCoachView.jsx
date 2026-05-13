@@ -1090,8 +1090,8 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
             <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(232,83,26,0.1)', border: '1px solid rgba(232,83,26,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
               <Icon name="sparkles" size={24} color="#818cf8" />
             </div>
-            <h2 style={{ color: '#F1F5F9', fontSize: 20, fontWeight: 700, letterSpacing: -0.4, margin: '0 0 10px' }}>Your AI study plan is one step away.</h2>
-            <p style={{ color: '#94A3B8', fontSize: 14, lineHeight: 1.65, margin: '0 0 28px' }}>Add at least one course, then come back here. The AI Coach builds a personalized week-by-week plan around your exam dates and schedule.</p>
+            <h2 style={{ color: '#1A1A1A', fontSize: 20, fontWeight: 700, letterSpacing: -0.4, margin: '0 0 10px' }}>Your AI study plan is one step away.</h2>
+            <p style={{ color: '#6B6B6B', fontSize: 14, lineHeight: 1.65, margin: '0 0 28px' }}>Add at least one course, then come back here. The AI Coach builds a personalized week-by-week plan around your exam dates and schedule.</p>
             <button
               onClick={onNavigateToCourses}
               style={{ width: '100%', background: D.accent, color: '#fff', fontSize: 14, fontWeight: 700, padding: '13px 24px', borderRadius: 10, border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(99,102,241,0.4)', letterSpacing: -0.2 }}

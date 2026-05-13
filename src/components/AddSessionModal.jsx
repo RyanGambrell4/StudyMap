@@ -67,113 +67,77 @@ export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }
     })
   }
 
+  const inputStyle = { width: '100%', background: '#fff', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 10, padding: '10px 12px', fontSize: 13, color: '#1A1A1A', outline: 'none', boxSizing: 'border-box', colorScheme: 'light' }
+  const labelStyle = { display: 'block', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 5 }
+
   return (
-    <div className="fixed inset-0 z-[200] flex items-end sm:items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-sm shadow-2xl p-5">
-        <div className="flex items-center justify-between mb-4">
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(6px)' }}>
+      <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 20, width: '100%', maxWidth: 360, boxShadow: '0 16px 48px rgba(0,0,0,0.12)', padding: 20 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <div>
-            <h3 className="text-white font-bold">{mode === 'event' ? 'Add Event' : 'Add Session'}</h3>
-            <p className="text-slate-400 text-xs mt-0.5">{dateLabel}</p>
+            <h3 style={{ color: '#1A1A1A', fontWeight: 700, fontSize: 15, margin: 0 }}>{mode === 'event' ? 'Add Event' : 'Add Session'}</h3>
+            <p style={{ color: '#9B9B9B', fontSize: 12, margin: '2px 0 0' }}>{dateLabel}</p>
           </div>
-          <button onClick={onClose} className="text-slate-500 hover:text-slate-300 transition-colors">
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', padding: 4 }}>
+            <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
           </button>
         </div>
 
         {/* Mode toggle */}
-        <div className="flex gap-1 bg-slate-900/60 border border-slate-700 rounded-xl p-1 mb-4">
-          <button
-            onClick={() => { setMode('session'); setError('') }}
-            className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
-              mode === 'session' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Study Session
-          </button>
-          <button
-            onClick={() => { setMode('event'); setError('') }}
-            className={`flex-1 py-2 rounded-lg text-xs font-semibold transition-colors ${
-              mode === 'event' ? 'bg-indigo-600 text-white' : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            Event
-          </button>
+        <div style={{ display: 'flex', gap: 4, background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: 4, marginBottom: 16 }}>
+          {[['session', 'Study Session'], ['event', 'Event']].map(([m, label]) => (
+            <button
+              key={m}
+              onClick={() => { setMode(m); setError('') }}
+              style={{ flex: 1, padding: '7px', borderRadius: 9, border: 'none', cursor: 'pointer', fontSize: 12, fontWeight: 600, background: mode === m ? '#3B61C4' : 'transparent', color: mode === m ? '#fff' : '#9B9B9B', transition: 'all 0.15s' }}
+            >
+              {label}
+            </button>
+          ))}
         </div>
 
-        <div className="space-y-3">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {mode === 'event' ? (
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Event name</label>
-              <input
-                type="text"
-                value={eventTitle}
-                onChange={e => { setEventTitle(e.target.value); setError('') }}
-                placeholder="e.g. Doctor's appointment, Dinner with friends"
-                className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-100 text-sm placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
+              <label style={labelStyle}>Event name</label>
+              <input type="text" value={eventTitle} onChange={e => { setEventTitle(e.target.value); setError('') }} placeholder="e.g. Doctor's appointment" style={inputStyle} />
             </div>
           ) : (
             <>
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Course</label>
-                <select
-                  value={courseIdx}
-                  onChange={e => setCourseIdx(parseInt(e.target.value))}
-                  className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  style={{ colorScheme: 'dark' }}
-                >
+                <label style={labelStyle}>Course</label>
+                <select value={courseIdx} onChange={e => setCourseIdx(parseInt(e.target.value))} style={inputStyle}>
                   {courses.map((c, i) => <option key={i} value={i}>{c.name}</option>)}
                 </select>
               </div>
-
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">Session Type</label>
-                <select
-                  value={sessionType}
-                  onChange={e => setSessionType(e.target.value)}
-                  className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  style={{ colorScheme: 'dark' }}
-                >
+                <label style={labelStyle}>Session Type</label>
+                <select value={sessionType} onChange={e => setSessionType(e.target.value)} style={inputStyle}>
                   {SESSION_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
             </>
           )}
 
-          <div className="grid grid-cols-2 gap-3">
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Duration (min)</label>
-              <input
-                type="number"
-                value={duration}
-                min="5"
-                max="480"
-                onChange={e => { setDuration(e.target.value); setError('') }}
-                className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-              />
+              <label style={labelStyle}>Duration (min)</label>
+              <input type="number" value={duration} min="5" max="480" onChange={e => { setDuration(e.target.value); setError('') }} style={inputStyle} />
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Start time (opt.)</label>
-              <input
-                type="time"
-                value={startTime}
-                onChange={e => setStartTime(e.target.value)}
-                className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-3 py-2.5 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                style={{ colorScheme: 'dark' }}
-              />
+              <label style={labelStyle}>Start time (opt.)</label>
+              <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} style={inputStyle} />
             </div>
           </div>
 
-          {error && <p className="text-red-400 text-xs">{error}</p>}
+          {error && <p style={{ color: '#dc2626', fontSize: 12, margin: 0 }}>{error}</p>}
         </div>
 
-        <div className="flex gap-3 mt-5">
-          <button onClick={onClose} className="flex-1 bg-slate-700/70 hover:bg-slate-700 text-slate-300 font-medium py-2.5 rounded-xl text-sm transition-colors">
-            Cancel
-          </button>
-          <button onClick={handleSave} className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
+        <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
+          <button onClick={onClose} style={{ flex: 1, background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', color: '#6B6B6B', fontWeight: 600, padding: '10px', borderRadius: 10, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+          <button onClick={handleSave} style={{ flex: 1, background: '#3B61C4', border: 'none', color: '#fff', fontWeight: 700, padding: '10px', borderRadius: 10, fontSize: 13, cursor: 'pointer' }}>
             {mode === 'event' ? 'Add Event' : 'Add Session'}
           </button>
         </div>

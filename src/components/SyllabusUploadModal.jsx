@@ -139,198 +139,136 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
     setItems(prev => prev.map(it => it.id === id ? { ...it, [field]: value } : it))
 
   // ── render ──
+  const inputStyle = { background: '#fff', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 8, padding: '8px 12px', fontSize: 13, color: '#1A1A1A', outline: 'none', width: '100%', boxSizing: 'border-box', colorScheme: 'light' }
+
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-4xl max-h-[92vh] flex flex-col shadow-2xl">
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(6px)' }}>
+      <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 20, width: '100%', maxWidth: 800, maxHeight: '92vh', display: 'flex', flexDirection: 'column', boxShadow: '0 24px 64px rgba(0,0,0,0.12)' }}>
 
         {/* ── Header ── */}
-        <div className="px-6 pt-5 pb-4 border-b border-slate-700 shrink-0">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-white font-bold text-lg">Import Syllabus</h2>
-            <button onClick={onClose} className="text-slate-500 hover:text-slate-300 transition-colors">
-              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <div style={{ padding: '20px 24px 16px', borderBottom: '1px solid rgba(0,0,0,0.07)', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+            <h2 style={{ color: '#1A1A1A', fontWeight: 700, fontSize: 17, margin: 0 }}>Import Syllabus</h2>
+            <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', padding: 4 }}>
+              <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
-
-          {/* Course selector */}
           <div>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Which course is this syllabus for?</label>
-            <div className="relative">
-              <div
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-2.5 h-2.5 rounded-full pointer-events-none"
-                style={{ backgroundColor: selectedColor.dot }}
-              />
+            <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Which course is this syllabus for?</label>
+            <div style={{ position: 'relative' }}>
+              <div style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', width: 10, height: 10, borderRadius: '50%', backgroundColor: selectedColor.dot, pointerEvents: 'none' }} />
               <select
                 value={selectedCourseIdx ?? 'all'}
                 onChange={e => setSelectedCourseIdx(e.target.value === 'all' ? null : parseInt(e.target.value))}
-                className="w-full bg-slate-900/60 border border-slate-700 rounded-xl pl-8 pr-4 py-2.5 text-slate-100 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                style={{ colorScheme: 'dark' }}
+                style={{ ...inputStyle, paddingLeft: 30, colorScheme: 'light' }}
               >
                 <option value="all">All Courses / General</option>
-                {courses.map((c, i) => (
-                  <option key={i} value={i}>{c.name}</option>
-                ))}
+                {courses.map((c, i) => <option key={i} value={i}>{c.name}</option>)}
               </select>
             </div>
           </div>
         </div>
 
         {/* ── Body ── */}
-        <div className="flex-1 overflow-y-auto">
+        <div style={{ flex: 1, overflowY: 'auto' }}>
 
-          {/* Input step */}
           {step === 'input' && (
-            <div className="p-6">
+            <div style={{ padding: 24 }}>
               {error && (
-                <div className="bg-red-950/40 border border-red-800/40 rounded-xl px-4 py-3 mb-4 text-red-300 text-sm">{error}</div>
+                <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '10px 14px', marginBottom: 16, color: '#dc2626', fontSize: 13 }}>{error}</div>
               )}
-
-              {/* Tabs */}
-              <div className="flex gap-1 mb-5 bg-slate-900/50 rounded-xl p-1">
+              <div style={{ display: 'flex', gap: 4, marginBottom: 20, background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: 4 }}>
                 {[['pdf', 'Upload PDF'], ['paste', 'Paste Text']].map(([tab, label]) => (
                   <button
                     key={tab}
                     onClick={() => { setActiveTab(tab); setError('') }}
-                    className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-                      activeTab === tab ? 'bg-slate-700 text-white shadow-sm' : 'text-slate-400 hover:text-slate-200'
-                    }`}
+                    style={{ flex: 1, padding: '8px', borderRadius: 9, border: 'none', cursor: 'pointer', fontSize: 13, fontWeight: 600, background: activeTab === tab ? '#fff' : 'transparent', color: activeTab === tab ? '#1A1A1A' : '#9B9B9B', boxShadow: activeTab === tab ? '0 1px 4px rgba(0,0,0,0.08)' : 'none', transition: 'all 0.15s' }}
                   >
                     {label}
                   </button>
                 ))}
               </div>
 
-              {/* PDF tab */}
               {activeTab === 'pdf' && (
                 <div
                   onDrop={handleDrop}
                   onDragOver={e => { e.preventDefault(); setDragging(true) }}
                   onDragLeave={() => setDragging(false)}
                   onClick={() => fileRef.current?.click()}
-                  className={`flex flex-col items-center gap-4 py-20 px-8 rounded-2xl border-2 border-dashed cursor-pointer transition-all select-none ${
-                    dragging
-                      ? 'border-indigo-400 bg-indigo-500/10'
-                      : 'border-slate-600 hover:border-indigo-500/70 hover:bg-indigo-500/5'
-                  }`}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, padding: '64px 32px', borderRadius: 16, border: `2px dashed ${dragging ? '#3B61C4' : 'rgba(0,0,0,0.12)'}`, background: dragging ? 'rgba(59,97,196,0.04)' : '#FAFAF8', cursor: 'pointer', userSelect: 'none' }}
                 >
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${
-                    dragging ? 'bg-indigo-500/20' : 'bg-slate-700/60'
-                  }`}>
-                    <svg className={`w-7 h-7 transition-colors ${dragging ? 'text-indigo-400' : 'text-slate-400'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div style={{ width: 56, height: 56, borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', background: dragging ? 'rgba(59,97,196,0.1)' : 'rgba(0,0,0,0.05)' }}>
+                    <svg width="28" height="28" fill="none" stroke={dragging ? '#3B61C4' : '#9B9B9B'} viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                     </svg>
                   </div>
-                  <div className="text-center">
-                    <p className={`font-semibold text-base transition-colors ${dragging ? 'text-indigo-300' : 'text-slate-200'}`}>
-                      {dragging ? 'Drop to upload' : 'Drop your PDF here'}
-                    </p>
-                    <p className="text-slate-500 text-sm mt-1">or click to browse. PDF files only.</p>
+                  <div style={{ textAlign: 'center' }}>
+                    <p style={{ fontWeight: 600, fontSize: 15, color: dragging ? '#3B61C4' : '#1A1A1A', margin: '0 0 4px' }}>{dragging ? 'Drop to upload' : 'Drop your PDF here'}</p>
+                    <p style={{ color: '#9B9B9B', fontSize: 13, margin: 0 }}>or click to browse. PDF files only.</p>
                   </div>
-                  <input ref={fileRef} type="file" accept=".pdf,application/pdf" className="hidden" onChange={handleFileInput} />
+                  <input ref={fileRef} type="file" accept=".pdf,application/pdf" style={{ display: 'none' }} onChange={handleFileInput} />
                 </div>
               )}
 
-              {/* Paste tab */}
               {activeTab === 'paste' && (
                 <div>
-                  <p className="text-slate-400 text-sm mb-3">Paste the section of your syllabus with assignment dates, exams, and deadlines.</p>
+                  <p style={{ color: '#6B6B6B', fontSize: 13, margin: '0 0 12px' }}>Paste the section of your syllabus with assignment dates, exams, and deadlines.</p>
                   <textarea
                     value={pastedText}
                     onChange={e => { setPastedText(e.target.value); setError('') }}
                     placeholder="Paste syllabus text here..."
                     autoFocus
-                    className="w-full bg-slate-900/60 border border-slate-700 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm resize-none"
-                    style={{ minHeight: 320 }}
+                    style={{ ...inputStyle, minHeight: 320, resize: 'none', padding: '12px 14px' }}
                   />
                 </div>
               )}
             </div>
           )}
 
-          {/* Loading */}
           {step === 'loading' && (
-            <div className="flex flex-col items-center justify-center py-20 gap-4">
-              <div className="w-10 h-10 border-4 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
-              <div className="text-center">
-                <p className="text-indigo-300 font-semibold text-sm">AI is reading your syllabus…</p>
-                <p className="text-slate-500 text-xs mt-1">Extracting deadlines, exams, and assignments</p>
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 24px', gap: 16 }}>
+              <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(59,97,196,0.2)', borderTopColor: '#3B61C4', animation: 'spin 0.8s linear infinite' }} />
+              <div style={{ textAlign: 'center' }}>
+                <p style={{ color: '#3B61C4', fontWeight: 600, fontSize: 14, margin: '0 0 4px' }}>AI is reading your syllabus…</p>
+                <p style={{ color: '#9B9B9B', fontSize: 12, margin: 0 }}>Extracting deadlines, exams, and assignments</p>
               </div>
             </div>
           )}
 
-          {/* Review */}
           {step === 'review' && (
-            <div className="p-6">
-              <div className="mb-5">
-                <p className="text-white font-semibold text-base">
-                  We found{' '}
-                  <span className="text-indigo-400">{items.length}</span>{' '}
-                  event{items.length !== 1 ? 's' : ''} in your syllabus.
+            <div style={{ padding: 24 }}>
+              <div style={{ marginBottom: 20 }}>
+                <p style={{ color: '#1A1A1A', fontWeight: 600, fontSize: 15, margin: '0 0 4px' }}>
+                  We found <span style={{ color: '#3B61C4' }}>{items.length}</span> event{items.length !== 1 ? 's' : ''} in your syllabus.
                 </p>
-                <p className="text-slate-400 text-sm mt-1">Review and edit before adding to your calendar.</p>
-                <button
-                  onClick={() => { setStep('input'); setItems([]); setError('') }}
-                  className="text-xs text-slate-500 hover:text-slate-300 underline mt-2 block"
-                >
-                  Start over
-                </button>
+                <p style={{ color: '#6B6B6B', fontSize: 13, margin: '0 0 6px' }}>Review and edit before adding to your calendar.</p>
+                <button onClick={() => { setStep('input'); setItems([]); setError('') }} style={{ background: 'none', border: 'none', color: '#9B9B9B', fontSize: 12, cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>Start over</button>
               </div>
 
-              {items.length === 0 && (
-                <p className="text-center py-10 text-slate-600 text-sm">All items removed.</p>
-              )}
+              {items.length === 0 && <p style={{ textAlign: 'center', padding: '40px 0', color: '#9B9B9B', fontSize: 14 }}>All items removed.</p>}
 
-              <div className="space-y-3">
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {items.map(item => (
-                  <div
-                    key={item.id}
-                    className="bg-slate-700/40 border border-slate-600/60 rounded-xl p-4 flex gap-3"
-                    style={{ borderLeftWidth: 3, borderLeftColor: selectedColor.dot }}
-                  >
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="text"
-                          value={item.name}
-                          onChange={e => update(item.id, 'name', e.target.value)}
-                          className="flex-1 bg-slate-800/60 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                        />
+                  <div key={item.id} style={{ background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', borderLeft: `3px solid ${selectedColor.dot}`, borderRadius: 12, padding: 16, display: 'flex', gap: 12 }}>
+                    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <input type="text" value={item.name} onChange={e => update(item.id, 'name', e.target.value)} style={inputStyle} />
                         {item.weight != null && (
-                          <span className="shrink-0 text-xs font-bold px-2 py-1 rounded-full bg-indigo-900/50 text-indigo-300 border border-indigo-700/40">
-                            {item.weight}%
-                          </span>
+                          <span style={{ flexShrink: 0, fontSize: 11, fontWeight: 700, padding: '3px 8px', borderRadius: 999, background: 'rgba(59,97,196,0.1)', color: '#3B61C4', border: '1px solid rgba(59,97,196,0.2)' }}>{item.weight}%</span>
                         )}
                       </div>
-                      <div className="flex gap-2 flex-wrap">
-                        <input
-                          type="date"
-                          value={item.date}
-                          onChange={e => update(item.id, 'date', e.target.value)}
-                          className="flex-1 min-w-[130px] bg-slate-800/60 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                          style={{ colorScheme: 'dark' }}
-                        />
-                        <select
-                          value={item.type}
-                          onChange={e => update(item.id, 'type', e.target.value)}
-                          className="flex-1 min-w-[130px] bg-slate-800/60 border border-slate-600 rounded-lg px-3 py-2 text-slate-100 text-sm focus:outline-none focus:ring-1 focus:ring-indigo-500"
-                          style={{ colorScheme: 'dark' }}
-                        >
+                      <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                        <input type="date" value={item.date} onChange={e => update(item.id, 'date', e.target.value)} style={{ ...inputStyle, flex: 1, minWidth: 130 }} />
+                        <select value={item.type} onChange={e => update(item.id, 'type', e.target.value)} style={{ ...inputStyle, flex: 1, minWidth: 130 }}>
                           {EVENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                         </select>
                       </div>
-                      {item.notes && (
-                        <p className="text-slate-500 text-xs px-1">{item.notes}</p>
-                      )}
+                      {item.notes && <p style={{ color: '#9B9B9B', fontSize: 11, margin: 0 }}>{item.notes}</p>}
                     </div>
-                    <button
-                      onClick={() => setItems(prev => prev.filter(it => it.id !== item.id))}
-                      className="text-slate-600 hover:text-red-400 transition-colors shrink-0 p-1 self-start mt-1"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                      </svg>
+                    <button onClick={() => setItems(prev => prev.filter(it => it.id !== item.id))} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#C0C0C0', padding: 4, alignSelf: 'flex-start', marginTop: 2, flexShrink: 0 }}>
+                      <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                   </div>
                 ))}
@@ -340,34 +278,26 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
         </div>
 
         {/* ── Footer ── */}
-        <div className="border-t border-slate-700 px-6 py-4 flex gap-3 shrink-0">
+        <div style={{ borderTop: '1px solid rgba(0,0,0,0.07)', padding: '16px 24px', display: 'flex', gap: 12, flexShrink: 0 }}>
           {(step === 'input' || step === 'loading') && (
             <>
               {step === 'input' && activeTab === 'paste' ? (
                 <>
-                  <button onClick={onClose} className="px-4 bg-slate-700/70 hover:bg-slate-700 text-slate-300 font-medium py-2.5 rounded-xl text-sm transition-colors">
-                    Cancel
-                  </button>
-                  <button onClick={handlePasteConfirm} className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">
-                    Extract Events
-                  </button>
+                  <button onClick={onClose} style={{ padding: '10px 16px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+                  <button onClick={handlePasteConfirm} style={{ flex: 1, padding: '10px', background: '#3B61C4', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Extract Events</button>
                 </>
               ) : (
-                <button onClick={onClose} className="flex-1 bg-slate-700/70 hover:bg-slate-700 text-slate-300 font-medium py-2.5 rounded-xl text-sm transition-colors">
-                  Cancel
-                </button>
+                <button onClick={onClose} style={{ flex: 1, padding: '10px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
               )}
             </>
           )}
           {step === 'review' && (
             <>
-              <button onClick={onClose} className="px-4 bg-slate-700/70 hover:bg-slate-700 text-slate-300 font-medium py-2.5 rounded-xl text-sm transition-colors">
-                Cancel
-              </button>
+              <button onClick={onClose} style={{ padding: '10px 16px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
               <button
                 onClick={() => onConfirm(items, selectedCourseIdx)}
                 disabled={items.length === 0}
-                className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-semibold py-2.5 rounded-xl text-sm transition-colors"
+                style={{ flex: 1, padding: '10px', background: '#3B61C4', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer', opacity: items.length === 0 ? 0.4 : 1 }}
               >
                 Add {items.length} Event{items.length !== 1 ? 's' : ''} to Calendar
               </button>

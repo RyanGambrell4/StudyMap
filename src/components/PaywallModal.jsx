@@ -95,9 +95,9 @@ const LIMIT_MESSAGES = {
 }
 
 const TESTIMONIALS = [
-  { quote: 'Went from 504 to 516 in 8 weeks. The session blueprints kept me focused every single day.', name: 'Jordan M.', detail: 'MCAT — admitted to med school' },
-  { quote: 'I stopped procrastinating the second I had an actual week-by-week plan. Worth every penny.', name: 'Priya S.', detail: 'Pre-law, 3.9 GPA' },
-  { quote: 'The AI coach figured out I was underprepping for CARS before I even realized it.', name: 'Marcus T.', detail: 'MCAT retaker — 511' },
+  { quote: 'finally consistent with my studying for the first time ever', name: 'Andy G.', detail: 'University, 2nd year' },
+  { quote: 'finished top of my cohort last semester — I genuinely could not have done it without this', name: 'Danny K.', detail: 'Pre-med, 3.8 GPA' },
+  { quote: 'one app. all semester. I don\'t need anything else.', name: 'Charlotte B.', detail: 'Law school prep' },
 ]
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -141,21 +141,21 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     <div
       style={{
         position: 'fixed', inset: 0,
-        background: 'rgba(8,13,26,0.88)',
-        backdropFilter: 'blur(10px)',
+        background: 'rgba(0,0,0,0.45)',
+        backdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center',
         zIndex: 1000, padding: '24px',
       }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
       <div style={{
-        background: '#0D1425',
-        border: '1px solid rgba(255,255,255,0.09)',
+        background: '#fff',
+        border: '1px solid rgba(0,0,0,0.08)',
         borderRadius: '22px',
         padding: '32px',
         maxWidth: '600px',
         width: '100%',
-        boxShadow: '0 32px 80px rgba(0,0,0,0.75)',
+        boxShadow: '0 24px 64px rgba(0,0,0,0.12)',
       }}>
 
         {/* ── Header ── */}
@@ -163,9 +163,9 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
           <div>
             <div style={{
               display: 'inline-flex', alignItems: 'center', gap: '6px',
-              background: 'rgba(79,126,247,0.1)', border: '1px solid rgba(79,126,247,0.2)',
+              background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)',
               borderRadius: '999px', padding: '4px 12px',
-              fontSize: '0.72rem', fontWeight: 700, color: '#4F7EF7',
+              fontSize: '0.72rem', fontWeight: 700, color: '#3B61C4',
               textTransform: 'uppercase', letterSpacing: '0.4px',
               marginBottom: '10px',
             }}>
@@ -174,18 +174,18 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               </svg>
               {msg.tag}
             </div>
-            <h2 style={{ fontSize: '1.3rem', fontWeight: 800, letterSpacing: '-0.4px', color: '#F1F5F9', margin: '0 0 6px' }}>
+            <h2 style={{ fontSize: '1.3rem', fontWeight: 800, letterSpacing: '-0.4px', color: '#1A1A1A', margin: '0 0 6px' }}>
               {msg.title}
             </h2>
-            <p style={{ color: '#94A3B8', fontSize: '0.875rem', lineHeight: 1.55, margin: 0, maxWidth: 420 }}>
+            <p style={{ color: '#6B6B6B', fontSize: '0.875rem', lineHeight: 1.55, margin: 0, maxWidth: 420 }}>
               {msg.body}
             </p>
           </div>
           <button
             onClick={onClose}
             style={{
-              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-              borderRadius: '8px', color: '#94A3B8', cursor: 'pointer',
+              background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)',
+              borderRadius: '8px', color: '#9B9B9B', cursor: 'pointer',
               width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
               flexShrink: 0, marginLeft: '16px', fontSize: '14px',
             }}
@@ -194,19 +194,19 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
 
         {/* ── Social proof bar ── */}
         <div style={{
-          background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.07)',
+          background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)',
           borderRadius: '12px', padding: '12px 16px', marginBottom: '18px',
           display: 'flex', alignItems: 'flex-start', gap: '12px',
           minHeight: 62,
         }}>
-          <svg style={{ width: 16, height: 16, color: '#7C5CFA', flexShrink: 0, marginTop: 2 }} fill="currentColor" viewBox="0 0 24 24">
+          <svg style={{ width: 16, height: 16, color: '#3B61C4', flexShrink: 0, marginTop: 2 }} fill="currentColor" viewBox="0 0 24 24">
             <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
           </svg>
           <div style={{ flex: 1 }}>
-            <p style={{ margin: '0 0 4px', fontSize: '0.82rem', color: '#CBD5E1', lineHeight: 1.5, fontStyle: 'italic' }}>
+            <p style={{ margin: '0 0 4px', fontSize: '0.82rem', color: '#1A1A1A', lineHeight: 1.5, fontStyle: 'italic' }}>
               "{t.quote}"
             </p>
-            <p style={{ margin: 0, fontSize: '0.72rem', color: '#64748B', fontWeight: 600 }}>
+            <p style={{ margin: 0, fontSize: '0.72rem', color: '#9B9B9B', fontWeight: 600 }}>
               {t.name} · {t.detail}
             </p>
           </div>
@@ -218,7 +218,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 onClick={() => setTestimonialIdx(i)}
                 style={{
                   width: i === testimonialIdx ? 14 : 5, height: 5, borderRadius: 3,
-                  background: i === testimonialIdx ? '#7C5CFA' : 'rgba(255,255,255,0.15)',
+                  background: i === testimonialIdx ? '#3B61C4' : 'rgba(0,0,0,0.12)',
                   border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.2s',
                 }}
               />
@@ -233,9 +233,9 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             { stat: '4.8★', label: 'avg rating' },
             { stat: 'Cancel', label: 'anytime, no fees' },
           ].map(({ stat, label }) => (
-            <div key={label} style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: 'rgba(255,255,255,0.025)', borderRadius: 10, border: '1px solid rgba(255,255,255,0.06)' }}>
-              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#F1F5F9', letterSpacing: '-0.3px' }}>{stat}</div>
-              <div style={{ fontSize: '0.68rem', color: '#64748B', fontWeight: 500, marginTop: 2 }}>{label}</div>
+            <div key={label} style={{ flex: 1, textAlign: 'center', padding: '10px 8px', background: '#F7F6F3', borderRadius: 10, border: '1px solid rgba(0,0,0,0.07)' }}>
+              <div style={{ fontSize: '0.95rem', fontWeight: 800, color: '#1A1A1A', letterSpacing: '-0.3px' }}>{stat}</div>
+              <div style={{ fontSize: '0.68rem', color: '#9B9B9B', fontWeight: 500, marginTop: 2 }}>{label}</div>
             </div>
           ))}
         </div>
@@ -243,8 +243,8 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
         {/* ── Billing period toggle ── */}
         <div style={{
           display: 'flex', gap: '4px',
-          background: 'rgba(255,255,255,0.04)',
-          border: '1px solid rgba(255,255,255,0.08)',
+          background: '#F7F6F3',
+          border: '1px solid rgba(0,0,0,0.07)',
           borderRadius: '12px', padding: '4px',
           marginBottom: '14px',
         }}>
@@ -256,18 +256,19 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 onClick={() => setBillingPeriod(bp.id)}
                 style={{
                   flex: 1, padding: '8px 12px', borderRadius: '9px',
-                  border: isActive && bp.best ? '1px solid rgba(52,211,153,0.35)' : 'none',
+                  border: 'none',
                   cursor: 'pointer',
-                  background: isActive ? (bp.best ? 'rgba(52,211,153,0.1)' : '#1E2D4A') : 'transparent',
-                  color: isActive ? (bp.best ? '#34D399' : '#F1F5F9') : '#64748B',
+                  background: isActive ? '#fff' : 'transparent',
+                  color: isActive ? '#1A1A1A' : '#9B9B9B',
                   fontFamily: 'inherit', fontSize: '0.82rem', fontWeight: 600,
                   transition: 'all 0.15s',
                   display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
+                  boxShadow: isActive ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
                 }}
               >
                 <span>{bp.label}</span>
                 {bp.badge && (
-                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: isActive && bp.best ? '#34D399' : '#34D399', letterSpacing: '0.3px' }}>
+                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#059669', letterSpacing: '0.3px' }}>
                     {bp.badge}
                   </span>
                 )}
@@ -282,8 +283,8 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             <div
               key={planId}
               style={{
-                background: '#111C30',
-                border: i === 0 ? '1px solid rgba(124,92,250,0.4)' : '1px solid rgba(52,211,153,0.2)',
+                background: '#fff',
+                border: i === 0 ? '1.5px solid rgba(59,97,196,0.3)' : '1.5px solid rgba(5,150,105,0.3)',
                 borderRadius: '16px', padding: '20px',
                 display: 'flex', flexDirection: 'column', gap: '14px',
                 position: 'relative', overflow: 'hidden',
@@ -318,7 +319,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                     </div>
                   )}
                 </div>
-                <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#F1F5F9', letterSpacing: '-0.5px' }}>
+                <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#1A1A1A', letterSpacing: '-0.5px' }}>
                   {plan.prices[billingPeriod]}
                 </div>
                 {plan.subPrices?.[billingPeriod] && (
@@ -336,7 +337,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               {/* Features */}
               <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '7px', margin: 0, padding: 0, flex: 1 }}>
                 {plan.features.map(f => (
-                  <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '0.81rem', color: '#CBD5E1' }}>
+                  <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '0.81rem', color: '#1A1A1A' }}>
                     <svg width="12" height="12" fill="none" stroke={plan.color} viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                     </svg>
@@ -351,10 +352,10 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 disabled={loading === planId}
                 style={{
                   width: '100%', padding: '12px',
-                  background: i === 0 ? plan.gradient : 'rgba(52,211,153,0.1)',
-                  border: i === 0 ? 'none' : '1px solid rgba(52,211,153,0.3)',
+                  background: i === 0 ? '#3B61C4' : 'rgba(5,150,105,0.08)',
+                  border: i === 0 ? 'none' : '1px solid rgba(5,150,105,0.3)',
                   borderRadius: '10px',
-                  color: i === 0 ? 'white' : '#34D399',
+                  color: i === 0 ? 'white' : '#059669',
                   fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 700,
                   cursor: loading === planId ? 'not-allowed' : 'pointer',
                   opacity: loading === planId ? 0.7 : 1,
@@ -376,7 +377,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
         </div>
 
         {/* ── Footer ── */}
-        <p style={{ textAlign: 'center', color: '#475569', fontSize: '0.75rem', margin: 0 }}>
+        <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.75rem', margin: 0 }}>
           Secure checkout via Stripe · Cancel anytime · No hidden fees
         </p>
       </div>

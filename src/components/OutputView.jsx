@@ -294,28 +294,28 @@ function ShareCardModal({ courses, stats, onClose }) {
 function LogGradeModal({ logGradeId, assignments, courses, gradeInput, setGradeInput, gradeError, onSave, onClose }) {
   const logTarget = assignments.find(a => a.id === logGradeId)
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-      <div className="bg-slate-800 border border-slate-700 rounded-2xl p-6 w-full max-w-sm shadow-2xl">
-        <h3 className="text-white font-bold text-lg mb-1">Log Grade</h3>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(6px)' }}>
+      <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 18, padding: 24, width: '100%', maxWidth: 360, boxShadow: '0 16px 48px rgba(0,0,0,0.12)' }}>
+        <h3 style={{ color: '#1A1A1A', fontWeight: 700, fontSize: 18, margin: '0 0 4px' }}>Log Grade</h3>
         {logTarget && (
-          <p className="text-slate-400 text-sm mb-4">
-            <span className="text-slate-200 font-medium">{logTarget.name}</span>
-            <span className="mx-1.5 text-slate-600">·</span>{courses[logTarget.courseIdx]?.name}
-            <span className="mx-1.5 text-slate-600">·</span>{logTarget.weight}% of grade
+          <p style={{ color: '#6B6B6B', fontSize: 14, margin: '0 0 16px' }}>
+            <span style={{ color: '#1A1A1A', fontWeight: 600 }}>{logTarget.name}</span>
+            <span style={{ margin: '0 6px', color: '#C0C0C0' }}>·</span>{courses[logTarget.courseIdx]?.name}
+            <span style={{ margin: '0 6px', color: '#C0C0C0' }}>·</span>{logTarget.weight}% of grade
           </p>
         )}
-        <label className="block text-xs font-medium text-slate-400 mb-1.5">Your score (%)</label>
+        <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Your score (%)</label>
         <input
           type="number" value={gradeInput} min="0" max="100" step="0.1"
           onChange={e => setGradeInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && onSave()}
           placeholder="e.g. 84" autoFocus
-          className="w-full bg-slate-900/60 border border-slate-600 rounded-xl px-4 py-3 text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm mb-1"
+          style={{ width: '100%', background: '#fff', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 10, padding: '11px 14px', fontSize: 14, color: '#1A1A1A', outline: 'none', boxSizing: 'border-box', marginBottom: 4 }}
         />
-        {gradeError && <p className="text-red-400 text-xs mb-3">{gradeError}</p>}
-        <div className="flex gap-3 mt-4">
-          <button onClick={onClose} className="flex-1 bg-slate-700 hover:bg-slate-600 text-slate-300 font-medium py-2.5 rounded-xl text-sm transition-colors">Cancel</button>
-          <button onClick={onSave} className="flex-1 bg-indigo-600 hover:bg-indigo-500 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors">Save Grade</button>
+        {gradeError && <p style={{ color: '#dc2626', fontSize: 12, margin: '0 0 12px' }}>{gradeError}</p>}
+        <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+          <button onClick={onClose} style={{ flex: 1, background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', color: '#6B6B6B', fontWeight: 600, padding: '10px', borderRadius: 10, fontSize: 14, cursor: 'pointer' }}>Cancel</button>
+          <button onClick={onSave} style={{ flex: 1, background: '#3B61C4', border: 'none', color: '#fff', fontWeight: 700, padding: '10px', borderRadius: 10, fontSize: 14, cursor: 'pointer' }}>Save Grade</button>
         </div>
       </div>
     </div>
@@ -888,19 +888,20 @@ export default function OutputView({
       {showFirstQueryNudge && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 2000,
-          background: 'rgba(8,13,26,0.85)', backdropFilter: 'blur(8px)',
+          background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(6px)',
           display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24,
         }}>
           <div style={{
-            background: '#0D1425', border: '1px solid rgba(99,102,241,0.25)',
+            background: '#fff', border: '1px solid rgba(0,0,0,0.08)',
             borderRadius: 20, padding: '36px 32px', maxWidth: 420, width: '100%', textAlign: 'center',
+            boxShadow: '0 24px 64px rgba(0,0,0,0.12)',
           }}>
             <div style={{ fontSize: 36, marginBottom: 12 }}>⚡</div>
-            <h2 style={{ color: '#f1f5f9', fontSize: 22, fontWeight: 800, letterSpacing: '-0.5px', marginBottom: 8 }}>
+            <h2 style={{ color: '#1A1A1A', fontSize: 22, fontWeight: 800, letterSpacing: '-0.5px', marginBottom: 8 }}>
               You just used your first AI boost.
             </h2>
-            <p style={{ color: '#64748b', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
-              Pro gives you <strong style={{ color: '#c7d2fe' }}>75 boosts per month</strong> — that's enough for a daily study session all month. Try it free for 7 days.
+            <p style={{ color: '#6B6B6B', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+              Pro gives you <strong style={{ color: '#3B61C4' }}>75 boosts per month</strong> — that's enough for a daily study session all month. Try it free for 7 days.
             </p>
             <button
               onClick={() => {
@@ -910,7 +911,7 @@ export default function OutputView({
               }}
               style={{
                 width: '100%', padding: '13px', marginBottom: 10,
-                background: 'linear-gradient(135deg, #4F7EF7, #7C5CFA)',
+                background: '#3B61C4',
                 border: 'none', borderRadius: 12, color: '#fff',
                 fontSize: 15, fontWeight: 700, cursor: 'pointer',
               }}
@@ -922,7 +923,7 @@ export default function OutputView({
                 localStorage.setItem('first_query_nudge_shown', '1')
                 setShowFirstQueryNudge(false)
               }}
-              style={{ background: 'none', border: 'none', color: '#475569', fontSize: 13, cursor: 'pointer' }}
+              style={{ background: 'none', border: 'none', color: '#9B9B9B', fontSize: 13, cursor: 'pointer' }}
             >
               Keep using the free plan
             </button>
