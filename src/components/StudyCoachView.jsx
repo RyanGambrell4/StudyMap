@@ -328,7 +328,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
               const active = form.courseIdx === i
               const color = c.color?.dot || D.accent
               return (
-                <button key={i} onClick={() => update('courseIdx', i)} style={{ padding: '10px 14px', borderRadius: 10, background: active ? `linear-gradient(135deg, ${color}22, ${color}0a)` : 'rgba(0,0,0,0.03)', border: active ? `1px solid ${color}55` : `1px solid ${D.border}`, boxShadow: active ? `0 0 0 3px ${color}12` : 'none', color: active ? D.text : D.muted, fontSize: 12.5, fontWeight: active ? 600 : 500, display: 'inline-flex', alignItems: 'center', gap: 8, transition: 'all 0.15s', cursor: 'pointer' }}>
+                <button key={i} onClick={() => setForm({ courseIdx: i, goal: '', topics: [], strengths: '', struggles: '', dates: [], materials: [], daysPerWeek: 3, sessionLen: 60, style: [] })} style={{ padding: '10px 14px', borderRadius: 10, background: active ? `linear-gradient(135deg, ${color}22, ${color}0a)` : 'rgba(0,0,0,0.03)', border: active ? `1px solid ${color}55` : `1px solid ${D.border}`, boxShadow: active ? `0 0 0 3px ${color}12` : 'none', color: active ? D.text : D.muted, fontSize: 12.5, fontWeight: active ? 600 : 500, display: 'inline-flex', alignItems: 'center', gap: 8, transition: 'all 0.15s', cursor: 'pointer' }}>
                   <span style={{ width: 7, height: 7, borderRadius: '50%', background: color, boxShadow: `0 0 6px ${color}90` }} />
                   {c.name}
                 </button>
@@ -859,7 +859,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses }) {
+export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule }) {
   const [step, setStep] = useState(1)
   const [form, setForm] = useState({
     courseIdx: courses.length > 0 ? 0 : -1,
@@ -994,6 +994,39 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     if (!plan || !course) return
     const courseId = course.id ?? form.courseIdx
     saveCoachPlan(courseId, plan, { ...form, sessionMinutes: form.sessionLen, importantDates: form.dates })
+
+    // Convert AI plan sessions into actual calendar sessions
+    const sessionLen = form.sessionLen || 60
+    const calSessions = []
+    const dayOffsets = [0, 1, 2, 3, 4, 5] // Mon–Sat
+    ;(plan.weeklyFocus || []).forEach((week, wi) => {
+      const { startDate } = weekDateRange(wi)
+      const weekSessions = week.sessions || []
+      weekSessions.forEach((sess, si) => {
+        const offset = dayOffsets[si % dayOffsets.length]
+        const d = new Date(startDate)
+        d.setDate(d.getDate() + offset)
+        const dateStr = d.toISOString().split('T')[0]
+        const label = sess.sessionLabel
+          ? `${sess.sessionLabel} · ${sess.focusArea || ''}`.slice(0, 45)
+          : (sess.focusArea || 'Study Session').slice(0, 45)
+        calSessions.push({
+          id: `coach-${courseId}-w${wi}-s${si}-${Date.now()}`,
+          dateStr,
+          courseId: form.courseIdx,
+          courseName: course.name,
+          color: course.color,
+          sessionType: label,
+          duration: sess.duration || sessionLen,
+          startTime: null,
+          endTime: null,
+          isManual: true,
+          fromCoachPlan: true,
+        })
+      })
+    })
+
+    if (onPushToSchedule && calSessions.length) onPushToSchedule(calSessions)
     setPushed(true)
   }
 
@@ -1001,7 +1034,8 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     setPlan(null)
     setError('')
     setStep(1)
-    setForm(f => ({ ...f, courseIdx: idx }))
+    setPushed(false)
+    setForm({ courseIdx: idx, goal: '', topics: [], strengths: '', struggles: '', dates: [], materials: [], daysPerWeek: 3, sessionLen: 60, style: [] })
     setUiMode('building')
   }
 
@@ -1522,11 +1556,11 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
           {pushed ? <><Icon name="check" size={13} stroke={2.5} color={D.mint} /> Pushed to Schedule</> : <><Icon name="calendar" size={13} /> Push to Schedule</>}
         </button>
         <div style={{ flex: 1, position: 'relative' }}>
-          <button onClick={() => setExportOpen(v => !v)} style={{ width: '100%', padding: '12px', borderRadius: 10, background: exportOpen ? 'rgba(99,102,241,0.1)' : 'rgba(255,255,255,0.03)', border: `1px solid ${exportOpen ? 'rgba(232,83,26,0.25)' : D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
+          <button onClick={() => setExportOpen(v => !v)} style={{ width: '100%', padding: '12px', borderRadius: 10, background: exportOpen ? 'rgba(59,97,196,0.07)' : 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
             <Icon name="upload" size={13} /> Export
           </button>
           {exportOpen && (
-            <div style={{ position: 'absolute', bottom: 'calc(100% + 8px)', right: 0, width: 210, background: '#12122a', border: `1px solid ${D.border}`, borderRadius: 11, overflow: 'hidden', boxShadow: '0 8px 32px rgba(0,0,0,0.4)', zIndex: 50 }}>
+            <div style={{ position: 'absolute', bottom: 'calc(100% + 8px)', right: 0, width: 210, background: '#ffffff', border: `1px solid ${D.borderStrong}`, borderRadius: 11, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', zIndex: 50 }}>
               <button onClick={handleDownloadPdf} style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: D.text, cursor: 'pointer', background: 'none', border: 'none', textAlign: 'left' }}
                 onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.04)'}
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}>
