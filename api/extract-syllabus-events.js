@@ -12,6 +12,10 @@ export default async function handler(req, res) {
   const { text } = req.body
   if (!text || text.length < 50) return res.status(400).json({ error: 'Not enough text' })
 
+  const now = new Date()
+  const currentYear = now.getFullYear()
+  const currentMonth = now.toLocaleString('en-US', { month: 'long' })
+
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -22,27 +26,33 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2000,
+        max_tokens: 4000,
         messages: [{
           role: 'user',
           content: `Extract all academic deadlines and important dates from this course syllabus.
 
-Syllabus text:
-${text.slice(0, 6000)}
+Today is ${currentMonth} ${currentYear}. Use ${currentYear} for any dates that don't specify a year (or the next calendar year if the month has already passed this year).
 
-Return ONLY a JSON array. Extract every assignment, quiz, exam, project, presentation, and deadline you can find. For recurring items like "weekly quizzes", create one entry with the note "recurring weekly".
+Syllabus text:
+${text.slice(0, 25000)}
+
+Return ONLY a JSON array. Extract every assignment, quiz, exam, project, presentation, paper, lab report, and deadline you can find.
+- Look carefully at course schedule tables (Week 1, Week 2 etc.) and convert relative dates to absolute YYYY-MM-DD dates using the semester start date if mentioned.
+- For recurring items like "weekly quizzes every Friday", create one entry per occurrence if dates are listed, otherwise create a single entry with notes "recurring weekly".
+- If a date range is given (e.g. "March 10-14"), use the last day as the due date.
+- Include readings/textbook chapters only if they have explicit due dates.
 
 For each item return:
 {
   "name": "clear short name like 'Midterm Exam' or 'Group Project Due'",
-  "date": "YYYY-MM-DD format, use current year if not specified",
+  "date": "YYYY-MM-DD format",
   "type": "one of: Exam, Midterm, Assignment, Project, Quiz, Lab, Other",
-  "weight": "percentage as number if mentioned, null if not",
-  "notes": "any extra details like time or location, null if none"
+  "weight": percentage as number if mentioned or null,
+  "notes": "any extra details like time, room, or chapters — null if none"
 }
 
-Return ONLY the JSON array with no other text. Example:
-[{"name": "Midterm Exam", "date": "2026-02-12", "type": "Midterm", "weight": 20, "notes": "In Class"}]`
+Return ONLY the JSON array with no other text, markdown, or explanation.
+Example: [{"name":"Midterm Exam","date":"${currentYear}-03-12","type":"Midterm","weight":25,"notes":"In class, closed book"}]`
         }]
       })
     })

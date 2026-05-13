@@ -20,7 +20,11 @@ async function extractFromPDF(file) {
   for (let i = 1; i <= pdf.numPages; i++) {
     const page = await pdf.getPage(i)
     const content = await page.getTextContent()
-    text += content.items.map(item => item.str).join(' ') + '\n'
+    // Use hasEOL to preserve line breaks — critical for date/table structure in syllabi
+    const pageText = content.items
+      .map(item => item.str + (item.hasEOL ? '\n' : ' '))
+      .join('')
+    text += pageText + '\n'
   }
   return text
 }

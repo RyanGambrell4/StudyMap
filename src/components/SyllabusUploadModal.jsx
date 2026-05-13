@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
+import { extractText } from '../utils/extractText'
 
 const EVENT_TYPES = ['Exam', 'Quiz', 'Midterm', 'Final Exam', 'Assignment', 'Project', 'Lab', 'Reading', 'Other']
 const NEUTRAL_COLOR = { dot: '#64748b' }
@@ -20,33 +21,6 @@ async function extractEventsFromAPI(text) {
   return data.events ?? []
 }
 
-async function loadPdfJs() {
-  if (window.pdfjsLib) return window.pdfjsLib
-  return new Promise((resolve, reject) => {
-    const script = document.createElement('script')
-    script.src = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js'
-    script.onload = () => {
-      window.pdfjsLib.GlobalWorkerOptions.workerSrc =
-        'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js'
-      resolve(window.pdfjsLib)
-    }
-    script.onerror = () => reject(new Error('Failed to load PDF.js'))
-    document.head.appendChild(script)
-  })
-}
-
-async function extractPdfText(file) {
-  const pdfjsLib = await loadPdfJs()
-  const arrayBuffer = await file.arrayBuffer()
-  const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise
-  let text = ''
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i)
-    const content = await page.getTextContent()
-    text += content.items.map(item => item.str).join(' ') + '\n'
-  }
-  return text
-}
 
 // ─── Props ────────────────────────────────────────────────────────────────────
 // courses: array of course objects
@@ -101,17 +75,19 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
   }
 
   const processFile = async (file) => {
-    if (!file.name.toLowerCase().endsWith('.pdf') && file.type !== 'application/pdf') {
-      setError('Please upload a PDF file.')
+    const ext = file.name.split('.').pop().toLowerCase()
+    if (!['pdf', 'docx', 'pptx'].includes(ext)) {
+      setError('Please upload a PDF, DOCX, or PPTX file.')
       return
     }
     setError('')
     setStep('loading')
     try {
-      const text = await extractPdfText(file)
+      const text = await extractText(file)
+      if (!text || text.trim().length < 50) throw new Error('Could not extract text from file.')
       await runAIExtraction(text)
     } catch (err) {
-      setError(`PDF error: ${err.message}`)
+      setError(`File error: ${err.message}`)
       setStep('input')
     }
   }
@@ -205,10 +181,10 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
                     </svg>
                   </div>
                   <div style={{ textAlign: 'center' }}>
-                    <p style={{ fontWeight: 600, fontSize: 15, color: dragging ? '#3B61C4' : '#1A1A1A', margin: '0 0 4px' }}>{dragging ? 'Drop to upload' : 'Drop your PDF here'}</p>
-                    <p style={{ color: '#9B9B9B', fontSize: 13, margin: 0 }}>or click to browse. PDF files only.</p>
+                    <p style={{ fontWeight: 600, fontSize: 15, color: dragging ? '#3B61C4' : '#1A1A1A', margin: '0 0 4px' }}>{dragging ? 'Drop to upload' : 'Drop your syllabus here'}</p>
+                    <p style={{ color: '#9B9B9B', fontSize: 13, margin: 0 }}>or click to browse · PDF, DOCX, or PPTX</p>
                   </div>
-                  <input ref={fileRef} type="file" accept=".pdf,application/pdf" style={{ display: 'none' }} onChange={handleFileInput} />
+                  <input ref={fileRef} type="file" accept=".pdf,.docx,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document" style={{ display: 'none' }} onChange={handleFileInput} />
                 </div>
               )}
 
