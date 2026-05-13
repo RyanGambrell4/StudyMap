@@ -342,6 +342,14 @@ const ACTIVITY_COLORS = {
   'break':             '#22C55E',
 }
 
+const TAB_COLORS = {
+  recall:     '#A855F7',
+  flashcards: '#EC4899',
+  quiz:       '#F97316',
+  notes:      '#14B8A6',
+  ai:         '#3B82F6',
+}
+
 export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools, course, onShowPaywall, userId, learningStyle }) {
   const totalSec = session.duration * 60
   const isLongSession = session.duration > 45
@@ -824,9 +832,9 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
   // ─── RENDER ─────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#F7F6F3' }}>
+    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ background: `linear-gradient(180deg, ${dot}0d 0%, #F7F6F3 28%)` }}>
       {/* Top accent line */}
-      <div className="h-0.5 w-full shrink-0" style={{ backgroundColor: dot }} />
+      <div className="h-1 w-full shrink-0" style={{ background: `linear-gradient(90deg, ${dot}, ${dot}88)` }} />
 
       {/* ── Pomodoro break banner ── */}
       {breakBanner && !breakOverlay && (
@@ -859,53 +867,72 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
       {/* ── Session complete screen ── */}
       {showComplete && (
-        <div className="absolute inset-0 z-[105] flex flex-col items-center justify-center px-6 overflow-y-auto py-10" style={{ backgroundColor: '#F7F6F3' }}>
-          <div className="w-full max-w-sm">
-            {/* Check mark */}
-            <div className="flex items-center justify-center mb-8">
-              <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke={dot} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M5 13l4 4L19 7" />
-              </svg>
-            </div>
-
-            <h2 className="text-2xl font-bold text-center mb-2" style={{ color: '#1A1A1A' }}>Session Complete</h2>
-            <p className="text-center text-sm mb-8 leading-relaxed" style={{ color: '#9B9B9B' }}>{encourageMsg}</p>
-
-            {/* Stats inline row */}
-            <div className="flex items-center justify-center gap-8 mb-8" style={{ borderTop: '1px solid rgba(0,0,0,0.07)', borderBottom: '1px solid rgba(0,0,0,0.07)', padding: '16px 0' }}>
-              <div className="text-center">
-                <p className="text-xl font-bold font-mono" style={{ color: '#1A1A1A' }}>{fmt(Math.max(elapsed, 1))}</p>
-                <p className="text-xs mt-0.5" style={{ color: '#9B9B9B' }}>Time studied</p>
-              </div>
-              <div style={{ width: 1, height: 32, backgroundColor: 'rgba(0,0,0,0.07)' }} />
-              <div className="text-center">
-                <p className="text-xl font-bold font-mono" style={{ color: '#1A1A1A' }}>{tabsVisited.size}</p>
-                <p className="text-xs mt-0.5" style={{ color: '#9B9B9B' }}>Activities used</p>
+        <div className="absolute inset-0 z-[105] flex flex-col overflow-y-auto" style={{ background: `linear-gradient(160deg, ${dot}18 0%, #F7F6F3 50%)` }}>
+          {/* Hero header */}
+          <div className="flex flex-col items-center pt-14 pb-10 px-6 shrink-0">
+            {/* Glowing check circle */}
+            <div className="relative mb-6">
+              <div className="absolute inset-0 rounded-full" style={{ backgroundColor: dot, opacity: 0.2, transform: 'scale(2)', filter: 'blur(16px)' }} />
+              <div className="relative w-20 h-20 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${dot}, ${dot}bb)`, boxShadow: `0 8px 32px ${dot}55` }}>
+                <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 13l4 4L19 7" />
+                </svg>
               </div>
             </div>
+            <h2 className="text-3xl font-bold text-center mb-2" style={{ color: '#1A1A1A' }}>Session Complete</h2>
+            <p className="text-center text-sm leading-relaxed max-w-xs" style={{ color: '#6B6B6B' }}>{encourageMsg}</p>
+          </div>
 
-            {/* Activities used — simple list, no card */}
-            <div className="mb-8">
+          <div className="px-6 pb-12 max-w-sm w-full mx-auto">
+            {/* Colored stat cards */}
+            <div className="flex gap-3 mb-5">
+              <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: `linear-gradient(135deg, ${dot}22, ${dot}08)`, border: `1px solid ${dot}35` }}>
+                <p className="text-2xl font-bold font-mono" style={{ color: dot }}>{fmt(Math.max(elapsed, 1))}</p>
+                <p className="text-xs mt-1" style={{ color: '#6B6B6B' }}>Time studied</p>
+              </div>
+              <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(99,102,241,0.05))', border: '1px solid rgba(99,102,241,0.28)' }}>
+                <p className="text-2xl font-bold font-mono" style={{ color: '#6366f1' }}>{tabsVisited.size}</p>
+                <p className="text-xs mt-1" style={{ color: '#6B6B6B' }}>Activities used</p>
+              </div>
+            </div>
+
+            {/* Activity chips */}
+            <div className="flex flex-wrap gap-2 mb-6">
               {[
-                { id: 'recall', label: 'Active Recall' },
-                { id: 'flashcards', label: 'Flashcards' },
-                { id: 'quiz', label: 'Quick Quiz' },
-                { id: 'notes', label: 'Notes' },
-              ].map(({ id, label }) => (
-                <div key={id} className="flex items-center gap-2.5 py-1.5">
-                  <div className="w-4 h-4 rounded-full flex items-center justify-center shrink-0" style={{ backgroundColor: tabsVisited.has(id) ? dot : 'rgba(0,0,0,0.07)' }}>
-                    {tabsVisited.has(id) && (
-                      <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                { id: 'recall',     label: 'Active Recall', color: '#A855F7' },
+                { id: 'flashcards', label: 'Flashcards',    color: '#EC4899' },
+                { id: 'quiz',       label: 'Quick Quiz',    color: '#F97316' },
+                { id: 'notes',      label: 'Notes',         color: '#14B8A6' },
+              ].map(({ id, label, color }) => {
+                const done = tabsVisited.has(id)
+                return (
+                  <div key={id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                    style={done
+                      ? { backgroundColor: `${color}18`, border: `1px solid ${color}45`, color }
+                      : { backgroundColor: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', color: '#C0C0C0' }}>
+                    {done && (
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M5 13l4 4L19 7" />
                       </svg>
                     )}
+                    {label}
                   </div>
-                  <span className="text-sm" style={{ color: tabsVisited.has(id) ? '#1A1A1A' : '#C0C0C0' }}>{label}</span>
-                </div>
-              ))}
+                )
+              })}
             </div>
 
+            {/* Buttons */}
             <div className="flex flex-col gap-2.5">
+              <button onClick={handleBackToDashboard} className="w-full py-3.5 rounded-2xl font-bold text-white text-sm"
+                style={{ background: `linear-gradient(135deg, ${dot}, ${dot}bb)`, boxShadow: `0 4px 18px ${dot}45` }}>
+                Back to Dashboard
+              </button>
+              {nextSession && (
+                <button onClick={handleStartNext} className="w-full py-3 rounded-2xl font-semibold text-sm"
+                  style={{ backgroundColor: `${dot}14`, border: `1px solid ${dot}35`, color: dot }}>
+                  Start Next: {nextSession.courseName} →
+                </button>
+              )}
               {hasNotes && (
                 <button
                   onClick={handleDownloadPDF}
@@ -919,14 +946,6 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                   {pdfDownloading ? 'Generating PDF…' : 'Download Session Notes'}
                 </button>
               )}
-              {nextSession && (
-                <button onClick={handleStartNext} className="w-full py-3.5 rounded-2xl font-bold text-white text-sm" style={{ backgroundColor: dot }}>
-                  Start Next: {nextSession.courseName}
-                </button>
-              )}
-              <button onClick={handleBackToDashboard} className="w-full py-3 rounded-xl text-sm font-medium transition-colors" style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B' }}>
-                Back to Dashboard
-              </button>
             </div>
           </div>
         </div>
@@ -989,7 +1008,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
         )}
 
         {/* ── Timer + controls (hero section) ── */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6 min-h-0" style={{ minHeight: 160, overflow: 'hidden' }}>
+        <div className="flex-1 flex flex-col items-center justify-center px-6 min-h-0" style={{ minHeight: 160, overflow: 'hidden', background: `radial-gradient(ellipse at 50% 40%, ${dot}0e 0%, transparent 68%)` }}>
           {finished ? (
             <div className="flex flex-col items-center gap-3">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke={dot} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -1008,7 +1027,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                   letterSpacing: '-0.03em',
                   lineHeight: 1,
                   color: running ? '#1A1A1A' : '#C0C0C0',
-                  transition: 'color 0.3s',
+                  textShadow: running ? `0 0 80px ${dot}35` : 'none',
+                  transition: 'color 0.3s, text-shadow 0.3s',
                   userSelect: 'none',
                   tabularNums: true,
                 }}
@@ -1068,7 +1088,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 {/* Finish / Mark complete */}
                 <button
                   onClick={handleMarkComplete}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 16px', borderRadius: 10, backgroundColor: '#1A1A1A', color: '#FFFFFF', fontSize: 13, fontWeight: 600, cursor: 'pointer', lineHeight: 1 }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 16px', borderRadius: 10, background: `linear-gradient(135deg, ${dot}, ${dot}bb)`, color: '#FFFFFF', fontSize: 13, fontWeight: 600, cursor: 'pointer', lineHeight: 1, boxShadow: `0 2px 14px ${dot}45` }}
                 >
                   <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" /></svg>
                   <span>{elapsed > 0 ? `Finish (${fmt(elapsed)})` : 'Finish block'}</span>
@@ -1522,6 +1542,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
             {SESSION_TABS.map(({ id, label, num }) => {
               const isActive = activeTab === id
               const wasVisited = tabsVisited.has(id)
+              const tabColor = TAB_COLORS[id] ?? dot
               return (
                 <button
                   key={id}
@@ -1531,25 +1552,25 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     minWidth: 80,
                     padding: '10px 8px 8px',
                     border: 'none',
-                    borderTop: isActive ? `2px solid ${dot}` : '2px solid transparent',
-                    backgroundColor: 'transparent',
+                    borderTop: isActive ? `2px solid ${tabColor}` : '2px solid transparent',
+                    backgroundColor: isActive ? `${tabColor}12` : 'transparent',
                     cursor: 'pointer',
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
                     gap: 2,
-                    transition: 'color 0.15s',
-                    color: isActive ? dot : wasVisited && !isActive ? '#6B6B6B' : '#C0C0C0',
+                    transition: 'all 0.15s',
+                    color: isActive ? tabColor : wasVisited && !isActive ? '#6B6B6B' : '#C0C0C0',
                   }}
                 >
-                  <span style={{ fontSize: 12, fontWeight: isActive ? 600 : 400, whiteSpace: 'nowrap' }}>
+                  <span style={{ fontSize: 12, fontWeight: isActive ? 700 : 400, whiteSpace: 'nowrap' }}>
                     {label}
                     {wasVisited && !isActive && (
-                      <span style={{ display: 'inline-block', width: 4, height: 4, borderRadius: '50%', backgroundColor: dot, marginLeft: 4, verticalAlign: 'middle', marginBottom: 1, opacity: 0.6 }} />
+                      <span style={{ display: 'inline-block', width: 4, height: 4, borderRadius: '50%', backgroundColor: tabColor, marginLeft: 4, verticalAlign: 'middle', marginBottom: 1, opacity: 0.7 }} />
                     )}
                   </span>
-                  <span style={{ fontSize: 10, color: isActive ? dot : '#C0C0C0', fontFamily: 'ui-monospace, monospace' }}>
-                    {isActive ? 'Hide ↑' : num}
+                  <span style={{ fontSize: 10, color: isActive ? tabColor : '#C0C0C0', fontFamily: 'ui-monospace, monospace' }}>
+                    {isActive ? '▲ hide' : num}
                   </span>
                 </button>
               )
