@@ -32,7 +32,7 @@ import GradeHubView from './GradeHubView'
 import AccountView from './AccountView'
 
 // ─── TutorView ────────────────────────────────────────────────────────────────
-function TutorView({ courses, userId, onShowPaywall }) {
+function TutorView({ courses, userId, onShowPaywall, learningStyle }) {
   const [selectedCourse, setSelectedCourse] = useState(courses.length > 0 ? 0 : -1)
   const course = courses[selectedCourse] ?? null
 
@@ -762,11 +762,19 @@ export default function OutputView({
     setBlueprintSession(null)
   }, [blueprintSession])
   const handleBlueprintExit = useCallback(() => { setBlueprintSession(null); setActiveBlueprint(null) }, [])
-  const handleFocusComplete = useCallback((id) => {
+  const handleFocusComplete = useCallback((id, elapsed) => {
     setCompletedIds(prev => new Set([...prev, id]))
     setFocusSession(sess => {
       if (sess) {
-        const record = { id: sess.id, dateStr: sess.dateStr, courseId: sess.courseId, courseName: sess.courseName, duration: sess.duration }
+        const record = {
+          id: sess.id,
+          dateStr: sess.dateStr,
+          courseId: sess.courseId,
+          courseName: sess.courseName,
+          sessionType: sess.sessionType ?? null,
+          duration: sess.duration,
+          elapsedSeconds: (typeof elapsed === 'number' && elapsed > 0) ? elapsed : null,
+        }
         setCompletedSessionLog(prev => {
           const filtered = prev.filter(s => s.id !== record.id)
           return [...filtered, record].slice(-500)
@@ -1375,6 +1383,7 @@ export default function OutputView({
             courses={courses}
             userId={userId}
             onShowPaywall={onShowPaywall}
+            learningStyle={learningStyle}
           />
         )}
 

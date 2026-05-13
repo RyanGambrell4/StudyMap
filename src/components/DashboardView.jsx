@@ -172,16 +172,21 @@ export default function DashboardView({
   const [upNextHovered, setUpNextHovered] = useState(false)
   const [startBtnHovered, setStartBtnHovered] = useState(false)
 
-  // Celebration
+  // Celebration + streak
   const allCompleteKey = todayStr + (allComplete ? '-done' : '')
   const firedRef = useRef(null)
   useEffect(() => {
     if (allComplete && firedRef.current !== allCompleteKey) {
       firedRef.current = allCompleteKey
       celebrate('big')
-      recordCompletion(todayStr)
     }
   }, [allComplete, allCompleteKey])
+
+  // Update streak whenever any of today's sessions become completed (handles FocusMode + manual toggle)
+  useEffect(() => {
+    const hasCompletedToday = todaySessions.some(s => completedIds.has(s.id))
+    if (hasCompletedToday) recordCompletion(todayStr)
+  }, [completedIds])
 
   const handleToggle = (id) => {
     if (!completedIds.has(id)) celebrate('light')

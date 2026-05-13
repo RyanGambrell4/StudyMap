@@ -44,6 +44,12 @@ function getSemesterLabel() {
   return `Fall ${y}`
 }
 
+// Use actual elapsed minutes when available, otherwise fall back to planned duration (minutes)
+function sessionMinutes(s) {
+  if (s.elapsedSeconds != null && s.elapsedSeconds > 0) return s.elapsedSeconds / 60
+  return s.duration ?? 0
+}
+
 // ── Sparkline ─────────────────────────────────────────────────────────────────
 function Sparkline({ data, color, w = 100, h = 38 }) {
   if (!data || data.length < 2) return <svg width={w} height={h} />
@@ -328,7 +334,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
     const lwe = addDays(ws, -1)
     let total = 0, thisW = 0, lastW = 0
     completedSessions.forEach(s => {
-      const m = s.duration ?? 0
+      const m = sessionMinutes(s)
       total += m
       if (s.dateStr >= ws  && s.dateStr <= todayStr) thisW += m
       if (s.dateStr >= lws && s.dateStr <= lwe)       lastW += m
@@ -341,14 +347,14 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
     const total = allSessions.length || 1
     const compRate = completedSessions.length / total
     const avgDur = completedSessions.length
-      ? completedSessions.reduce((s, x) => s + (x.duration ?? 0), 0) / completedSessions.length : 0
+      ? completedSessions.reduce((s, x) => s + sessionMinutes(x), 0) / completedSessions.length : 0
     const streakBonus = Math.min(1, streak / 14)
     return Math.min(100, Math.round(compRate * 40 + Math.min(1, avgDur / 60) * 35 + streakBonus * 25))
   }, [allSessions, completedSessions, streak])
 
   const sessionCount = completedSessions.length
   const avgDuration  = sessionCount
-    ? Math.round(completedSessions.reduce((s, x) => s + (x.duration ?? 0), 0) / sessionCount) : 0
+    ? Math.round(completedSessions.reduce((s, x) => s + sessionMinutes(x), 0) / sessionCount) : 0
 
   // ── Sparklines (8 weeks) ─────────────────────────────────────────────────────
   const sparklines = useMemo(() => {
@@ -358,10 +364,10 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
       const wEnd   = addDays(wStart, 6)
       const ws = completedSessions.filter(s => s.dateStr >= wStart && s.dateStr <= wEnd)
       const wa = allSessions.filter(s => s.dateStr >= wStart && s.dateStr <= wEnd)
-      const wH = ws.reduce((s, x) => s + (x.duration ?? 0), 0) / 60
+      const wH = ws.reduce((s, x) => s + sessionMinutes(x), 0) / 60
       const daysWithSessions = new Set(ws.map(s => s.dateStr)).size
       const compRate = wa.length ? ws.length / wa.length : 0
-      const avgD = ws.length ? ws.reduce((s, x) => s + (x.duration ?? 0), 0) / ws.length : 0
+      const avgD = ws.length ? ws.reduce((s, x) => s + sessionMinutes(x), 0) / ws.length : 0
       hoursArr.push(wH)
       sessionsArr.push(ws.length)
       streakArr.push(daysWithSessions)
@@ -381,7 +387,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
       const wEnd = addDays(cur, 6)
       const h = completedSessions
         .filter(s => s.dateStr >= cur && s.dateStr <= wEnd)
-        .reduce((s, x) => s + (x.duration ?? 0), 0) / 60
+        .reduce((s, x) => s + sessionMinutes(x), 0) / 60
       weeks.push({ label: `W${wIdx}`, hours: h })
       cur = addDays(cur, 7)
       wIdx++
@@ -397,7 +403,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
   const courseHours = useMemo(() => {
     const map = new Map()
     periodSessions.forEach(s => {
-      map.set(s.courseId, (map.get(s.courseId) ?? 0) + (s.duration ?? 0) / 60)
+      map.set(s.courseId, (map.get(s.courseId) ?? 0) + sessionMinutes(s) / 60)
     })
     const total = [...map.values()].reduce((a, b) => a + b, 0) || 1
     return courses

@@ -124,6 +124,7 @@ export default function App() {
         setSchedule(plan.schedule ?? { hoursPerWeek: 15, preferredTime: 'Morning' })
         setLearningStyle(plan.learningStyle ?? null)
         setYearLevel(plan.yearLevel ?? '1st Year')
+        setSchoolType(plan.schoolType ?? null)
         setAssignments(plan.assignments ?? [])
         setInitialCompletedIds(new Set(plan.completedIds ?? []))
         setShowOutput(true)
@@ -171,6 +172,7 @@ export default function App() {
       schedule,
       learningStyle,
       yearLevel,
+      schoolType,
       completedIds: [...completedIds],
       assignments: resolvedAssignments,
       savedAt: Date.now(),
@@ -190,6 +192,7 @@ export default function App() {
       schedule,
       learningStyle,
       yearLevel,
+      schoolType,
       completedIds: latestPlanRef.current.completedIds,
       assignments: latestPlanRef.current.assignments,
       savedAt: Date.now(),
@@ -204,6 +207,7 @@ export default function App() {
       schedule,
       learningStyle,
       yearLevel,
+      schoolType,
       completedIds: latestPlanRef.current.completedIds,
       assignments: latestPlanRef.current.assignments,
       savedAt: Date.now(),
@@ -218,6 +222,7 @@ export default function App() {
       schedule,
       learningStyle,
       yearLevel,
+      schoolType,
       completedIds: latestPlanRef.current.completedIds,
       assignments: latestPlanRef.current.assignments,
       savedAt: Date.now(),
