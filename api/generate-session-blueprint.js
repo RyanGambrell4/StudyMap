@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { courseName, sessionType, durationMinutes, examDate, targetGrade, uploadedTopics, studentFocus } = req.body
+  const { courseName, sessionType, durationMinutes, examDate, targetGrade, uploadedTopics, studentFocus, professorEmphasis, struggles, learningStyle } = req.body
   if (!courseName || !durationMinutes) return res.status(400).json({ error: 'Missing required fields' })
 
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|Reading Comprehension|FAR|AUD|REG|MBE|MEE|MPT|Verbal Reasoning|Quantitative Reasoning|Analytical Writing|Quantitative|Data Insights/i
@@ -41,6 +41,8 @@ Total duration: ${durationMinutes} minutes
 Days until exam: ${daysUntilExam}
 Target score: ${targetGrade || 'Top score'}
 Focus area: ${studentFocus || 'High-yield content for this section'}
+${professorEmphasis ? `Professor-emphasized topics (highest priority): ${professorEmphasis}` : ''}
+${struggles?.length ? `Student struggles with: ${struggles.join(', ')} — allocate extra drill time here` : ''}
 
 Session type definitions and how to structure each:
 - Content Review: systematic content pass through key concepts, notes, and mnemonics
@@ -84,6 +86,9 @@ Days until exam: ${daysUntilExam}
 Target grade: ${targetGrade || 'B'}
 Available study materials/topics: ${uploadedTopics || 'General course material'}
 Student wants to focus on: ${studentFocus || 'Most important exam topics'}
+${professorEmphasis ? `Professor emphasizes: ${professorEmphasis}. Weight blocks toward these topics.` : ''}
+${struggles?.length ? `Student struggles with: ${struggles.join(', ')}. Prioritize these in practice blocks.` : ''}
+${learningStyle === 'visual' ? 'Learning style: visual — include concept-mapping and diagram-review blocks.' : learningStyle === 'practice' ? 'Learning style: practice-based — weight blocks toward active recall and practice problems.' : learningStyle === 'reading' ? 'Learning style: reading/writing — include structured note-review and summary blocks.' : ''}
 
 Design a structured study session broken into specific timed blocks. Each block should have a clear purpose that builds toward the student's goal for this session. Return ONLY this JSON:
 

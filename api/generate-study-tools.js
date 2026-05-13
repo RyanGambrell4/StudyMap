@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   const gate = isPredict ? await verifyAuth(req) : await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { text, mode, courseName, sessionType, topic, images } = req.body;
+  const { text, mode, courseName, sessionType, topic, images, professorEmphasis, struggles, learningStyle } = req.body;
   const safeImages = Array.isArray(images) ? images.slice(0, 6).filter(i => i?.data && i?.media_type) : []
 
   // ── quick-quiz mode (replaces the old generate-quick-quiz endpoint) ──────────
@@ -35,9 +35,12 @@ export default async function handler(req, res) {
       ? `The student also uploaded ${safeImages.length} image(s) (attached) — treat them as authoritative source material.\n\n`
       : ''
 
+    const emphasisLine = professorEmphasis ? `Professor emphasizes these topics (prioritize these in questions): ${professorEmphasis}\n\n` : ''
+    const struggleLine = struggles?.length ? `Student struggles with: ${struggles.join(', ')} — include at least one question testing each struggle area.\n\n` : ''
+
     const prompt = `You are making a quiz for a student studying ${courseName}${sessionType ? ` (${sessionType} session)` : ''}.
 
-${scopeLine}${sourceLine}${imageLine}Generate exactly 5 multiple choice questions.
+${emphasisLine}${struggleLine}${scopeLine}${sourceLine}${imageLine}Generate exactly 5 multiple choice questions.
 
 ${hasTopic ? 'EVERY question must directly test the topic above. Do not drift to other material. If a source was provided, the questions must come from content that is inside the source AND inside the topic.' : ''}
 ${hasText || hasImages ? 'Only quiz on material that is actually present in the source. Do not invent facts.' : ''}
@@ -208,9 +211,19 @@ Rules:
     ? `The student also uploaded ${safeImages.length} image(s), attached — use them as source material.\n\n`
     : ''
 
+  const emphasisFc = professorEmphasis ? `Professor emphasizes these high-priority topics — weight at least 40% of cards toward them: ${professorEmphasis}\n\n` : ''
+  const struggleFc = struggles?.length ? `Student struggles with: ${struggles.join(', ')} — make sure these are well-represented in the cards.\n\n` : ''
+  const styleFc = learningStyle === 'visual'
+    ? 'This student is a visual learner — use analogy-based cards, spatial relationships, and "what would this look like" prompts where helpful.\n\n'
+    : learningStyle === 'practice'
+    ? 'This student is practice-based — favor scenario and application cards over pure definition recall.\n\n'
+    : learningStyle === 'reading'
+    ? 'This student learns through reading/writing — include cards that test organized summaries and written explanations.\n\n'
+    : ''
+
   const fcPrompt = `You are an expert study coach building flashcards + a quiz.
 
-${scopeFc}${sourceFc}${imagesFc}Generate exactly this JSON structure with no extra text:
+${emphasisFc}${struggleFc}${styleFc}${scopeFc}${sourceFc}${imagesFc}Generate exactly this JSON structure with no extra text:
 {
   "flashcards": [
     {"front": "clear question about a key concept", "back": "concise answer — a few words or 1 short sentence", "topic": "topic name"}

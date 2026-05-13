@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import imageCompression from 'browser-image-compression'
 import { extractText } from '../utils/extractText'
-import { getCachedStudyTools, saveStudyTools } from '../lib/db'
+import { getCachedStudyTools, getCachedCoachPlan, saveStudyTools } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
 
@@ -168,7 +168,7 @@ function QuizQuestion({ question, onAnswer }) {
 }
 
 // ── Main view ─────────────────────────────────────────────────────────────────
-export default function StudyToolsView({ courses, userId, onShowPaywall, onNavigateToCoach }) {
+export default function StudyToolsView({ courses, userId, onShowPaywall, onNavigateToCoach, learningStyle }) {
   const fileInputRef = useRef(null)
   const scanInputRef = useRef(null)
   const [dragging, setDragging] = useState(false)
@@ -304,12 +304,22 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     setIsGenerating(true)
     setGenerateError('')
     setLoadingMessage('Our AI is reading your notes and generating study materials…')
+    const activeCourse = selectedCourse !== null ? courses[selectedCourse] : null
+    const activePlan = activeCourse?.id ? getCachedCoachPlan(activeCourse.id) : null
+    const fcEmphasis = activePlan?.formData?.emphasisTopics ?? activePlan?.formData?.topics?.join(', ') ?? null
+    const fcStruggles = activePlan?.struggles ?? []
     try {
       const token = await getAccessToken()
       const response = await fetch('/api/generate-study-tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ text: activeText }),
+        body: JSON.stringify({
+          text: activeText,
+          courseName: activeCourse?.name ?? null,
+          professorEmphasis: fcEmphasis || null,
+          struggles: fcStruggles.length ? fcStruggles : null,
+          learningStyle: learningStyle ?? null,
+        }),
       })
       if (!response.ok) throw new Error(`API returned ${response.status}`)
       const data = await response.json()
@@ -387,6 +397,9 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
     const course = drillCourse !== null ? courses[drillCourse] : null
     const courseName = course?.name ?? 'General'
+    const drillPlan = course?.id ? getCachedCoachPlan(course.id) : null
+    const drillEmphasis = drillPlan?.formData?.emphasisTopics ?? drillPlan?.formData?.topics?.join(', ') ?? null
+    const drillStruggles = drillPlan?.struggles ?? []
     setDrillGenerating(true)
     setDrillError('')
     setDrillQuiz([])
@@ -398,7 +411,14 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       const res = await fetch('/api/generate-study-tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ mode: 'quick-quiz', courseName, topic: drillTopic.trim() }),
+        body: JSON.stringify({
+          mode: 'quick-quiz',
+          courseName,
+          topic: drillTopic.trim(),
+          professorEmphasis: drillEmphasis || null,
+          struggles: drillStruggles.length ? drillStruggles : null,
+          learningStyle: learningStyle ?? null,
+        }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Generation failed')

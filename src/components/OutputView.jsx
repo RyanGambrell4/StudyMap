@@ -83,6 +83,7 @@ function TutorView({ courses, userId, onShowPaywall }) {
             examDate={course.examDate ?? null}
             targetGrade={course.targetGrade ?? null}
             userId={userId}
+            learningStyle={learningStyle}
             onShowPaywall={onShowPaywall}
           />
         </div>
@@ -938,6 +939,7 @@ export default function OutputView({
           onStartSession={handleBlueprintStart}
           onExit={handleBlueprintExit}
           onShowPaywall={onShowPaywall}
+          learningStyle={learningStyle}
         />
       )}
       {focusSession && (
@@ -952,6 +954,7 @@ export default function OutputView({
           course={courses[focusSession.courseId] ?? null}
           onShowPaywall={onShowPaywall}
           userId={userId}
+          learningStyle={learningStyle}
         />
       )}
 
@@ -1302,6 +1305,7 @@ export default function OutputView({
             courses={courses}
             userId={userId}
             onShowPaywall={onShowPaywall}
+            learningStyle={learningStyle}
             onNavigateToCoach={() => { if (getActivePlan() === 'free') { onShowPaywall?.('coach'); return } setActiveSection('coach') }}
           />
         )}
@@ -1314,6 +1318,7 @@ export default function OutputView({
             onShowPaywall={onShowPaywall}
             googleEvents={googleEvents}
             preferredTime={schedule.preferredTime}
+            learningStyle={learningStyle}
             onStartFocus={handleStartFocus}
             onNavigateToCourses={() => setActiveSection('courses')}
             onPushToSchedule={incoming => {

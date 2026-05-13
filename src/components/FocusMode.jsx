@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import {
   getCachedStudyTools,
   getCachedNotes,
+  getCachedCoachPlan,
   saveNotes as dbSaveNotes,
   appendSessionRecall,
 } from '../lib/db'
@@ -157,7 +158,7 @@ const ACTIVITY_COLORS = {
   'break':             '#22C55E',
 }
 
-export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools, course, onShowPaywall, userId }) {
+export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools, course, onShowPaywall, userId, learningStyle }) {
   const totalSec = session.duration * 60
   const isLongSession = session.duration > 45
   const todayStr = new Date().toISOString().split('T')[0]
@@ -433,6 +434,9 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setQuizLoading(true); setQuizError(''); setQuizQuestions(null)
     setQuizAnswers([]); setQuizIdx(0); setQuizSelected(null); setQuizConfirmed(false); setQuizDone(false)
+    const savedPlan = getCachedCoachPlan(session.courseId)
+    const professorEmphasis = savedPlan?.formData?.emphasisTopics ?? savedPlan?.formData?.topics?.join(', ') ?? null
+    const planStruggles = savedPlan?.struggles ?? []
     try {
       const token = await getAccessToken()
       const res = await fetch('/api/generate-study-tools', {
@@ -451,6 +455,9 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
             studyTools?.text?.slice(0, 3000),
           ].filter(Boolean).join('\n\n') || '',
           images: quizSourceImages.map(img => ({ media_type: img.media_type, data: img.data })),
+          professorEmphasis: professorEmphasis || null,
+          struggles: planStruggles.length ? planStruggles : null,
+          learningStyle: learningStyle ?? null,
         }),
       })
       if (!res.ok) {
@@ -502,6 +509,9 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       return
     }
     setFcGenerating(true); setFcGenerateError('')
+    const savedPlanFc = getCachedCoachPlan(session.courseId)
+    const fcProfessorEmphasis = savedPlanFc?.formData?.emphasisTopics ?? savedPlanFc?.formData?.topics?.join(', ') ?? null
+    const fcStruggles = savedPlanFc?.struggles ?? []
     try {
       const token = await getAccessToken()
       const res = await fetch('/api/generate-study-tools', {
@@ -512,6 +522,9 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
           topic,
           images: fcSourceImages.map(img => ({ media_type: img.media_type, data: img.data })),
           creative: true,
+          professorEmphasis: fcProfessorEmphasis || null,
+          struggles: fcStruggles.length ? fcStruggles : null,
+          learningStyle: learningStyle ?? null,
         }),
       })
       const data = await res.json()

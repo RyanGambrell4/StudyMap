@@ -26,7 +26,7 @@ const EXAM_SESSION_TYPES = [
   'Active Recall Drill',
 ]
 
-export default function BlueprintScreen({ session, course, onStartSession, onExit, onShowPaywall }) {
+export default function BlueprintScreen({ session, course, onStartSession, onExit, onShowPaywall, learningStyle }) {
   const [focus, setFocus] = useState('')
   const [blueprint, setBlueprint] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -82,6 +82,10 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
     setLoading(true)
     setError('')
     setBlueprint(null)
+    const courseId = session.courseId
+    const savedPlan = getCachedCoachPlan(courseId)
+    const professorEmphasis = savedPlan?.formData?.emphasisTopics ?? savedPlan?.formData?.topics?.join(', ') ?? null
+    const struggles = savedPlan?.struggles ?? []
     try {
       const token = await getAccessToken()
       const res = await fetch('/api/generate-session-blueprint', {
@@ -96,6 +100,9 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
           targetScore: isExamMode ? (course?.targetScore ?? null) : null,
           uploadedTopics: studyTools?.text ? studyTools.text.slice(0, 500) : null,
           studentFocus: focus.trim() || null,
+          professorEmphasis: professorEmphasis || null,
+          struggles: struggles.length ? struggles : null,
+          learningStyle: learningStyle ?? null,
         }),
       })
       const data = await res.json()

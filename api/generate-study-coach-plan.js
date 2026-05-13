@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { courseName, goal, emphasisTopics, importantDates, daysPerWeek, sessionMinutes, calendarEvents, timePreference, struggles, gradeGap, weakAreas, courseMaterials } = req.body
+  const { courseName, goal, emphasisTopics, importantDates, daysPerWeek, sessionMinutes, calendarEvents, timePreference, struggles, gradeGap, weakAreas, courseMaterials, learningStyle, strengths } = req.body
   if (!courseName || !goal) return res.status(400).json({ error: 'Missing required fields' })
 
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|Reading Comprehension|FAR|AUD|REG|MBE|MEE|MPT|Verbal Reasoning|Quantitative Reasoning|Analytical Writing|Quantitative|Data Insights/i
@@ -63,7 +63,7 @@ Today's date: ${todayStr}
 Exam date / prep timeline:
 ${datesStr}
 ${calendarStr ? `\nBlocked times (never schedule over these):\n${calendarStr}\nPreferred study window: ${pref.hours}\n` : `Preferred study window: ${pref.hours}`}
-${struggles?.length ? `\nWeak areas requiring extra reps: ${struggles.join(', ')}\n` : ''}
+${struggles?.length ? `\nWeak areas requiring extra reps: ${struggles.join(', ')}\n` : ''}${strengths ? `\nStrong areas (student already has solid foundation — spend less time here): ${strengths}\n` : ''}${learningStyle ? `\nLearning style: ${learningStyle}. Design session activities to match — e.g. visual learners benefit from concept maps and diagrams; practice-based learners need active recall and worked problems; reading/writing learners need structured note-taking and written summaries.\n` : ''}
 
 Structure the plan across FOUR phases in order:
 1. Content Foundation — master the core content systematically. Session types: Content Review, Active Recall Drill
@@ -123,7 +123,7 @@ CRITICAL: Never schedule study sessions during the following blocked time slots.
 Blocked time slots:
 ${calendarStr}
 ` : `The student prefers studying in the ${pref.label} (${pref.hours}). Schedule sessions in that window whenever possible.`}
-${courseMaterials ? `\nThe student has provided the following course material for context:\n${courseMaterials.slice(0, 8000)}\n` : ''}${struggles?.length ? `\nPreviously identified struggle areas — allocate MORE sessions and deeper coverage to these: ${struggles.join(', ')}\n` : ''}${gradeGap != null && gradeGap < 0 ? `\nGRADE ALERT: Student is ${Math.abs(gradeGap).toFixed(1)} points below their target grade. ${weakAreas?.length ? `Weak areas: ${weakAreas.join(', ')}. ` : ''}Significantly increase session intensity and prioritize recovery for these topics.\n` : ''}Build a focused, realistic study plan starting from today. Generate enough weeks to cover all important dates, with the right session count per week (${daysPerWeek || 3} sessions/week).
+${courseMaterials ? `\nThe student has provided the following course material for context:\n${courseMaterials.slice(0, 8000)}\n` : ''}${struggles?.length ? `\nPreviously identified struggle areas — allocate MORE sessions and deeper coverage to these: ${struggles.join(', ')}\n` : ''}${gradeGap != null && gradeGap < 0 ? `\nGRADE ALERT: Student is ${Math.abs(gradeGap).toFixed(1)} points below their target grade. ${weakAreas?.length ? `Weak areas: ${weakAreas.join(', ')}. ` : ''}Significantly increase session intensity and prioritize recovery for these topics.\n` : ''}${strengths ? `\nAreas the student is already solid on: ${strengths}. These need less dedicated time — a single review session is enough.\n` : ''}${learningStyle ? `\nLearning style: ${learningStyle}. Let this shape session type recommendations — visual learners: concept maps and diagrams; practice-based: active recall drills and problem sets; reading/writing: structured note summaries.\n` : ''}Build a focused, realistic study plan starting from today. Generate enough weeks to cover all important dates, with the right session count per week (${daysPerWeek || 3} sessions/week).
 
 Return ONLY this JSON:
 

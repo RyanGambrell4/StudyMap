@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { messages, courseName, examDate, targetGrade, coachPlan, struggles } = req.body
+  const { messages, courseName, examDate, targetGrade, coachPlan, struggles, professorEmphasis, strengths, learningStyle } = req.body
   if (!messages?.length || !courseName) return res.status(400).json({ error: 'Missing required fields' })
 
   let planContext = ''
@@ -22,9 +22,20 @@ export default async function handler(req, res) {
 
   const strugglesStr = struggles?.length ? struggles.join(', ') : null
 
+  const learningStyleHint = learningStyle === 'visual'
+    ? 'This student is a visual learner — use diagrams described in text, analogies, and structured visual breakdowns.'
+    : learningStyle === 'reading'
+    ? 'This student learns through reading & writing — use clear written explanations, bullet-point summaries, and structured notes.'
+    : learningStyle === 'practice'
+    ? 'This student is practice-based — lead with worked examples, practice questions, and active recall drills.'
+    : null
+
   const systemPrompt = `You are a focused study tutor for ${courseName}. The student has an exam on ${examDate ?? 'an upcoming date'} and their goal is ${targetGrade ?? 'to do well'}.
 ${planContext ? `Their current study plan covers:\n${planContext}` : ''}
-${strugglesStr ? `Topics they have previously struggled with: ${strugglesStr}` : ''}
+${strugglesStr ? `Topics they have previously struggled with (spend extra time here): ${strugglesStr}` : ''}
+${professorEmphasis ? `Professor emphasizes these topics (high exam priority): ${professorEmphasis}` : ''}
+${strengths ? `Areas they are already solid on (brief review only): ${strengths}` : ''}
+${learningStyleHint ?? ''}
 Your job: help them understand course material clearly and efficiently. Be concise and direct. Use examples. If they paste notes, identify key concepts. Generate practice questions when asked.
 IMPORTANT: If the student expresses difficulty, confusion, or asks for more help on a specific topic, identify that topic clearly so it can be flagged in their study plan.
 

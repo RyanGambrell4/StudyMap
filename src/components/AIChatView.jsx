@@ -3,7 +3,7 @@ import { getCachedCoachPlan, saveCoachPlanStruggles } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
 import { getActivePlan, canUseAI, incrementAIQuery } from '../lib/subscription'
 
-export default function AIChatView({ courseId, courseName, examDate, targetGrade, userId, onShowPaywall }) {
+export default function AIChatView({ courseId, courseName, examDate, targetGrade, userId, learningStyle, onShowPaywall }) {
   const isFree = getActivePlan() === 'free'
 
   const [messages, setMessages] = useState([])
@@ -13,6 +13,8 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
   const [flagBanner, setFlagBanner] = useState(null)
   const [struggles, setStruggles] = useState([])
   const [coachPlan, setCoachPlan] = useState(null)
+  const [professorEmphasis, setProfessorEmphasis] = useState(null)
+  const [strengths, setStrengths] = useState(null)
 
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
@@ -27,9 +29,13 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
     if (cached) {
       setCoachPlan(cached.plan ?? null)
       setStruggles(cached.struggles ?? [])
+      setProfessorEmphasis(cached.formData?.emphasisTopics ?? cached.formData?.topics?.join(', ') ?? null)
+      setStrengths(cached.formData?.strengths ?? null)
     } else {
       setCoachPlan(null)
       setStruggles([])
+      setProfessorEmphasis(null)
+      setStrengths(null)
     }
   }, [courseId])
 
@@ -64,6 +70,9 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
           targetGrade: targetGrade ?? null,
           coachPlan,
           struggles: struggles.length ? struggles : null,
+          professorEmphasis: professorEmphasis ?? null,
+          strengths: strengths ?? null,
+          learningStyle: learningStyle ?? null,
         }),
       })
       const data = await res.json()

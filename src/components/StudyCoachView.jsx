@@ -859,12 +859,13 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule }) {
+export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle }) {
   const [step, setStep] = useState(1)
+  const defaultStyle = learningStyle ? [learningStyle] : []
   const [form, setForm] = useState({
     courseIdx: courses.length > 0 ? 0 : -1,
     goal: '', topics: [], strengths: '', struggles: '',
-    dates: [], materials: [], daysPerWeek: 3, sessionLen: 60, style: [],
+    dates: [], materials: [], daysPerWeek: 3, sessionLen: 60, style: defaultStyle,
   })
   const [plan, setPlan] = useState(null)
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
