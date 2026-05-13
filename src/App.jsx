@@ -234,8 +234,50 @@ export default function App() {
   // ── Render ─────────────────────────────────────────────────────────────────
   if (session === undefined || (session && !dbReady)) {
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0f1e' }}>
-        <div className="w-8 h-8 rounded-full border-4 border-slate-800 border-t-indigo-500 animate-spin" />
+      <div style={{
+        minHeight: '100vh', display: 'flex', flexDirection: 'column',
+        alignItems: 'center', justifyContent: 'center',
+        backgroundColor: '#F7F6F3', gap: 24,
+      }}>
+        <style>{`
+          @keyframes se-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.85)} }
+          @keyframes se-bar { 0%{transform:translateX(-100%)} 100%{transform:translateX(400%)} }
+          @keyframes se-fadein { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+          .se-dot { width:8px;height:8px;border-radius:50%;background:#3B61C4;animation:se-pulse 1.2s ease-in-out infinite; }
+          .se-dot:nth-child(2){animation-delay:0.2s;background:#5577d4;}
+          .se-dot:nth-child(3){animation-delay:0.4s;background:#E8531A;}
+        `}</style>
+        <div style={{ animation: 'se-fadein 0.5s ease forwards', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
+          <div style={{ position: 'relative' }}>
+            <div style={{
+              width: 64, height: 64, borderRadius: 18,
+              background: 'linear-gradient(135deg, #eef1fb 0%, #dce3f7 100%)',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 4px 24px rgba(59,97,196,0.15)',
+            }}>
+              <img src="/favicon.png" alt="StudyEdge" style={{ width: 40, height: 40, objectFit: 'contain' }} />
+            </div>
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 22, fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.3px' }}>StudyEdge AI</div>
+            <div style={{ fontSize: 13, color: '#888', marginTop: 4 }}>Setting up your study system…</div>
+          </div>
+          <div style={{ display: 'flex', gap: 8, marginTop: 4 }}>
+            <div className="se-dot" />
+            <div className="se-dot" />
+            <div className="se-dot" />
+          </div>
+          <div style={{
+            width: 180, height: 3, borderRadius: 99,
+            background: '#e8e7e3', overflow: 'hidden', marginTop: 4,
+          }}>
+            <div style={{
+              width: '40%', height: '100%', borderRadius: 99,
+              background: 'linear-gradient(90deg, #3B61C4, #E8531A)',
+              animation: 'se-bar 1.6s ease-in-out infinite',
+            }} />
+          </div>
+        </div>
       </div>
     )
   }
