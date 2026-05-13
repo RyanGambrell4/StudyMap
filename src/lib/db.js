@@ -178,6 +178,32 @@ export async function removeCompletedSession(id) {
   await _upsert({ completed_sessions: updated })
 }
 
+// ── Exam context (stored inside coach_plans to avoid new DB column) ───────────
+
+export function getCachedExamContext() {
+  return _cache?.coach_plans?.__exam_context ?? null
+}
+
+export async function saveExamContext(context) {
+  const existing = _cache?.coach_plans ?? {}
+  const updated = { ...existing, __exam_context: context }
+  if (_cache) _cache.coach_plans = updated
+  await _upsert({ coach_plans: updated })
+}
+
+// ── Practice scores (stored inside study_tools to avoid new DB column) ────────
+
+export function getCachedPracticeScores() {
+  return _cache?.study_tools?.__practice_scores ?? []
+}
+
+export async function savePracticeScores(scores) {
+  const existing = _cache?.study_tools ?? {}
+  const updated = { ...existing, __practice_scores: scores }
+  if (_cache) _cache.study_tools = updated
+  await _upsert({ study_tools: updated })
+}
+
 export async function appendSessionRecall(entry) {
   const existing = _cache?.session_recalls ?? []
   const updated = [...existing, entry].slice(-50)

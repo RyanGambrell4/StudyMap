@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, Fragment } from 'react'
 import { clean } from '../utils/strings'
 import { toDateStr, addDays, daysBetween } from '../utils/dateUtils'
+import { getCachedPracticeScores, savePracticeScores } from '../lib/db'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
@@ -173,7 +174,6 @@ function MilestoneIcon({ type, earned }) {
 }
 
 const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
-const SCORE_KEY = 'studyedge_practice_scores'
 
 // ── Score projection helper ───────────────────────────────────────────────────
 function getProjection(entries, target, examDate, todayStr) {
@@ -243,16 +243,12 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
   const isExamMode = courses.some(c => EXAM_PATTERN.test(c.name))
 
   // ── Practice scores (exam mode) ──────────────────────────────────────────────
-  const [practiceScores, setPracticeScores] = useState(() => {
-    try { return JSON.parse(localStorage.getItem(SCORE_KEY) ?? '[]') } catch { return [] }
-  })
+  const [practiceScores, setPracticeScores] = useState(() => getCachedPracticeScores())
   const [showScoreForm, setShowScoreForm] = useState(false)
   const [scoreForm, setScoreForm] = useState({ date: todayStr, sectionName: '', score: '', notes: '', isOfficial: false })
   const [scoreFormErr, setScoreFormErr] = useState('')
 
-  useEffect(() => {
-    try { localStorage.setItem(SCORE_KEY, JSON.stringify(practiceScores)) } catch {}
-  }, [practiceScores])
+  useEffect(() => { savePracticeScores(practiceScores) }, [practiceScores])
 
   const examSections = useMemo(() => courses.filter(c => EXAM_PATTERN.test(c.name)).map(c => c.name), [courses])
 

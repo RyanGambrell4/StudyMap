@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { canAddCourse, getActivePlan, getPlanLimits } from '../lib/subscription'
 import { clean } from '../utils/strings'
+import { saveExamContext } from '../lib/db'
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const D = {
@@ -777,7 +778,7 @@ function ExamSetupModal({ courseCount, onClose, onAdd, onOpenStudyCoach }) {
       const courseId = Date.now().toString(36) + Math.random().toString(36).slice(2, 5) + i
       onAdd({ id: courseId, name: sName, code: '', examDate: testDate, difficulty: 'Hard', targetGrade: 'Pass/Fail', color: { name: 'custom', dot: COURSE_COLORS[i % COURSE_COLORS.length] } })
     })
-    try { localStorage.setItem('studyedge_exam_context', JSON.stringify({ exam, testDate, targetScore, currentScore, hoursPerDay, daysPerWeek, weakness })) } catch {}
+    saveExamContext({ exam, testDate, targetScore, currentScore, hoursPerDay, daysPerWeek, weakness })
     setDone(true)
   }
 

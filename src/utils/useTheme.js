@@ -1,7 +1,7 @@
-// Dark mode is permanent — no toggle
-document.documentElement.classList.add('dark')
+// App is light mode — remove any stale dark class
+document.documentElement.classList.remove('dark')
 try { localStorage.removeItem('studyedge_theme') } catch {}
 
 export function useTheme() {
-  return { theme: 'dark', toggleTheme: () => {}, isDark: true }
+  return { theme: 'light', toggleTheme: () => {}, isDark: false }
 }

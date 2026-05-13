@@ -413,7 +413,7 @@ export default function OutputView({
   const [syllabusModalCourse, setSyllabusModalCourse] = useState(null)
   const [syllabusInitialFile, setSyllabusInitialFile] = useState(null)
 
-  const [viewMode, setViewMode] = useState(() => localStorage.getItem('studyedge_view_mode') ?? localStorage.getItem('studymap_view_mode') ?? 'week')
+  const [viewMode, setViewMode] = useState(() => localStorage.getItem('studyedge_view_mode') ?? 'week')
   const todayStr = new Date().toISOString().split('T')[0]
   const todayMonthStr = todayStr.slice(0, 7)
   const [activeDayStr, setActiveDayStr] = useState(todayStr)
@@ -429,7 +429,7 @@ export default function OutputView({
   const [fixConflictsLoading, setFixConflictsLoading] = useState(false)
   const [rescheduleResults, setRescheduleResults] = useState(null)
   const [sessionTimeOverrides, setSessionTimeOverrides] = useState(() => {
-    try { return JSON.parse(localStorage.getItem('studyedge_session_time_overrides') ?? localStorage.getItem('studymap_session_time_overrides') ?? '{}') } catch { return {} }
+    try { return JSON.parse(localStorage.getItem('studyedge_session_time_overrides') ?? '{}') } catch { return {} }
   })
 
   useEffect(() => {
@@ -1316,6 +1316,13 @@ export default function OutputView({
             preferredTime={schedule.preferredTime}
             onStartFocus={handleStartFocus}
             onNavigateToCourses={() => setActiveSection('courses')}
+            onPushToSchedule={incoming => {
+              setManualSessions(prev => {
+                const courseId = incoming[0]?.courseId
+                const filtered = prev.filter(s => !s.fromCoachPlan || s.courseId !== courseId)
+                return [...filtered, ...incoming]
+              })
+            }}
           />
         )}
 

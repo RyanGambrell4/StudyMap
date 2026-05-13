@@ -594,7 +594,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
         courseName: session.courseName, dateStr: todayStr, sessionType: session.sessionType,
         recallText, concepts: notesConcepts, main: notesMain, summary: notesSummary,
       })
-    } catch (e) { console.error('PDF error:', e) }
+    } catch { /* PDF generation failed — ignore */ }
     finally { setPdfDownloading(false) }
   }
 

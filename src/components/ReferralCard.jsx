@@ -23,6 +23,10 @@ export default function ReferralCard() {
     navigator.clipboard.writeText(link).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
+    }).catch(() => {
+      // Clipboard denied — select the link text so user can copy manually
+      const el = document.querySelector('[data-referral-link]')
+      if (el) { const range = document.createRange(); range.selectNode(el); window.getSelection()?.removeAllRanges(); window.getSelection()?.addRange(range) }
     })
   }
 
@@ -49,7 +53,7 @@ export default function ReferralCard() {
           flex: 1, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)',
           borderRadius: 8, padding: '9px 12px', fontSize: 12, color: '#9B9B9B',
           overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
-        }}>
+        }} data-referral-link>
           {link}
         </div>
         <button
