@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { getActivePlan, getCachedSubscription } from '../lib/subscription'
+import { getActivePlan, getCachedSubscription, initSubscription } from '../lib/subscription'
+import { supabase } from '../lib/supabase'
 import OnboardingTour from './OnboardingTour'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -122,6 +123,23 @@ export default function AppShell({
   const initials = userEmail ? userEmail.split('@')[0].slice(0, 2).toUpperCase() : 'U'
   const displayName = userEmail?.split('@')[0] ?? 'Account'
 
+  const handleCancelTrialFromSettings = async () => {
+    setSettingsOpen(false)
+    if (!confirm("Cancel your free trial? You'll lose Pro access immediately and won't be charged.")) return
+    try {
+      const { data: { user } } = await supabase.auth.getUser()
+      const res = await fetch('/api/cancel-trial', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: user.id }),
+      })
+      if (!res.ok) throw new Error('Failed')
+      initSubscription(user.id, { plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null })
+    } catch {
+      alert('Something went wrong. Please try again or contact support@getstudyedge.com.')
+    }
+  }
+
   const SETTINGS_ITEMS = [
     {
       label: 'Import Syllabus',
@@ -138,6 +156,12 @@ export default function AppShell({
       onClick: () => { setSettingsOpen(false); onEditPlan?.() },
       icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z',
     },
+    ...(isTrialing ? [{
+      label: 'Cancel Trial',
+      onClick: handleCancelTrialFromSettings,
+      icon: 'M6 18L18 6M6 6l12 12',
+      danger: true,
+    }] : []),
   ]
 
   return (
@@ -253,15 +277,15 @@ export default function AppShell({
                 padding: '6px 0',
                 zIndex: 100,
               }}>
-                {SETTINGS_ITEMS.map(({ label, onClick, icon }) => (
+                {SETTINGS_ITEMS.map(({ label, onClick, icon, danger }) => (
                   <button
                     key={label}
                     onClick={onClick}
-                    style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '9px 14px', width: '100%', background: 'none', border: 'none', color: TEXT, fontSize: 13, fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '9px 14px', width: '100%', background: 'none', border: 'none', color: danger ? '#9B9B9B' : TEXT, fontSize: 13, fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}
                     onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
                     onMouseLeave={e => e.currentTarget.style.background = 'none'}
                   >
-                    <svg style={{ width: 14, height: 14, color: MUTED, flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg style={{ width: 14, height: 14, color: danger ? '#9B9B9B' : MUTED, flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={icon} />
                     </svg>
                     {label}

@@ -115,14 +115,15 @@ export default function AccountView({
                 onClick={handleCancelTrial}
                 disabled={canceling}
                 style={{
-                  marginBottom: 10, padding: '8px 14px',
-                  background: 'none', border: '1px solid rgba(0,0,0,0.15)',
-                  borderRadius: 8, fontSize: 12, fontWeight: 600,
-                  color: '#9B9B9B', cursor: canceling ? 'not-allowed' : 'pointer',
-                  opacity: canceling ? 0.6 : 1,
+                  marginBottom: 10, padding: 0,
+                  background: 'none', border: 'none',
+                  fontSize: 12, color: '#BBBBBB',
+                  cursor: canceling ? 'not-allowed' : 'pointer',
+                  textDecoration: 'underline', textUnderlineOffset: 2,
+                  opacity: canceling ? 0.5 : 1,
                 }}
               >
-                {canceling ? 'Canceling…' : 'Cancel trial'}
+                {canceling ? 'Canceling…' : 'Cancel free trial'}
               </button>
             ) : (
               <p style={{ marginBottom: 10, fontSize: 12, color: '#059669', fontWeight: 600 }}>
