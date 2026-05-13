@@ -11,13 +11,13 @@
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
     :root {
-      --bg: #080D1A;
-      --surface: #0D1425;
-      --border: rgba(255,255,255,0.07);
-      --text1: #ffffff;
-      --text2: rgba(255,255,255,0.7);
-      --text3: rgba(255,255,255,0.4);
-      --accent: #7C3AED;
+      --bg: #F7F6F3;
+      --surface: #FFFFFF;
+      --border: rgba(0,0,0,0.08);
+      --text1: #1A1A1A;
+      --text2: #444444;
+      --text3: #9B9B9B;
+      --accent: #3B61C4;
     }
     body {
       font-family: 'Inter', system-ui, sans-serif;
@@ -28,7 +28,7 @@
     }
     nav {
       position: sticky; top: 0; z-index: 50;
-      background: rgba(8,13,26,0.95);
+      background: rgba(255,255,255,0.95);
       backdrop-filter: blur(12px);
       border-bottom: 1px solid var(--border);
       padding: 18px 40px;
@@ -69,10 +69,10 @@
       gap: 6px;
     }
     li { list-style: disc; }
-    a { color: #a78bfa; }
+    a { color: var(--accent); }
     .highlight {
-      background: rgba(124,58,237,0.08);
-      border: 1px solid rgba(124,58,237,0.2);
+      background: rgba(59,97,196,0.06);
+      border: 1px solid rgba(59,97,196,0.18);
       border-radius: 10px;
       padding: 18px 22px;
       margin: 20px 0;
