@@ -444,91 +444,112 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       {/* ── Hub screen ── */}
       {mode === 'hub' && (
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-2">Study Tools</h1>
-          <p className="text-[#6B6B6B] text-sm mb-8">Choose how you want to study.</p>
-          <div className="divide-y divide-[#E5E5E5] border border-[#E5E5E5] rounded-xl overflow-hidden bg-white">
+          <h1 className="text-2xl font-bold text-slate-900 mb-1">Study Tools</h1>
+          <p className="text-[#6B6B6B] text-sm mb-6">Choose how you want to study.</p>
 
-            {/* Flashcards row */}
+          <div className="grid grid-cols-1 gap-3">
+
+            {/* Flashcards */}
             <button
               onClick={() => setMode('upload')}
-              className="w-full text-left bg-white hover:bg-slate-50 px-5 py-4 transition-colors flex items-center gap-4 group"
+              className="w-full text-left rounded-2xl px-5 py-4 transition-all flex items-center gap-4 group"
+              style={{ background: 'linear-gradient(135deg, #fdf2f8, #fff)', border: '1px solid #f9a8d4' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #fce7f3, #fdf2f8)'; e.currentTarget.style.borderColor = '#ec4899' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #fdf2f8, #fff)'; e.currentTarget.style.borderColor = '#f9a8d4' }}
             >
-              <svg className="w-5 h-5 text-[#9B9B9B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', boxShadow: '0 4px 12px rgba(236,72,153,0.35)' }}>
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-base font-semibold text-slate-900">Flashcards</span>
+                  <span className="text-base font-bold" style={{ color: '#be185d' }}>Flashcards</span>
                   {flashcards.length > 0 && (
-                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#F0EFEC] text-[#6B6B6B] border border-[#E5E5E5]">
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(236,72,153,0.12)', color: '#ec4899', border: '1px solid rgba(236,72,153,0.25)' }}>
                       {flashcards.length} ready
                     </span>
                   )}
                 </div>
-                <p className="text-[#6B6B6B] text-sm mt-0.5">Upload your notes and get AI-generated flashcards.</p>
+                <p className="text-sm mt-0.5" style={{ color: '#9d174d' }}>Upload your notes and get AI-generated flashcards.</p>
               </div>
-              <svg className="w-4 h-4 text-[#9B9B9B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 shrink-0" style={{ color: '#ec4899' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
 
-            {/* Quizzes row */}
+            {/* Quizzes */}
             <button
-              onClick={() => { setMode('upload') }}
-              className="w-full text-left bg-white hover:bg-slate-50 px-5 py-4 transition-colors flex items-center gap-4 group"
+              onClick={() => setMode('upload')}
+              className="w-full text-left rounded-2xl px-5 py-4 transition-all flex items-center gap-4 group"
+              style={{ background: 'linear-gradient(135deg, #fff7ed, #fff)', border: '1px solid #fdba74' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #ffedd5, #fff7ed)'; e.currentTarget.style.borderColor = '#f97316' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #fff7ed, #fff)'; e.currentTarget.style.borderColor = '#fdba74' }}
             >
-              <svg className="w-5 h-5 text-[#9B9B9B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', boxShadow: '0 4px 12px rgba(249,115,22,0.35)' }}>
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-base font-semibold text-slate-900">Quizzes</span>
+                  <span className="text-base font-bold" style={{ color: '#c2410c' }}>Quizzes</span>
                   {quiz.length > 0 && (
-                    <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#F0EFEC] text-[#6B6B6B] border border-[#E5E5E5]">
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(249,115,22,0.12)', color: '#f97316', border: '1px solid rgba(249,115,22,0.25)' }}>
                       {quiz.length} ready
                     </span>
                   )}
                 </div>
-                <p className="text-[#6B6B6B] text-sm mt-0.5">Multiple choice, true/false, and fill-in-the-blank questions.</p>
+                <p className="text-sm mt-0.5" style={{ color: '#9a3412' }}>Multiple choice, true/false, and fill-in-the-blank questions.</p>
               </div>
-              <svg className="w-4 h-4 text-[#9B9B9B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 shrink-0" style={{ color: '#f97316' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
 
-            {/* Topic Drill row */}
+            {/* Topic Drill */}
             <button
               onClick={() => { setDrillQuiz([]); setDrillAnswers([]); setDrillDone(false); setDrillQuestionIdx(0); setDrillError(''); setMode('drill') }}
-              className="w-full text-left bg-white hover:bg-slate-50 px-5 py-4 transition-colors flex items-center gap-4 group"
+              className="w-full text-left rounded-2xl px-5 py-4 transition-all flex items-center gap-4 group"
+              style={{ background: 'linear-gradient(135deg, #faf5ff, #fff)', border: '1px solid #d8b4fe' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #f3e8ff, #faf5ff)'; e.currentTarget.style.borderColor = '#a855f7' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #faf5ff, #fff)'; e.currentTarget.style.borderColor = '#d8b4fe' }}
             >
-              <svg className="w-5 h-5 text-[#9B9B9B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #a855f7, #9333ea)', boxShadow: '0 4px 12px rgba(168,85,247,0.35)' }}>
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-base font-semibold text-slate-900">Topic Drill</span>
-                  <span className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-[#F0EFEC] text-[#6B6B6B] border border-[#E5E5E5]">No upload needed</span>
+                  <span className="text-base font-bold" style={{ color: '#7e22ce' }}>Topic Drill</span>
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(168,85,247,0.12)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.25)' }}>No upload needed</span>
                 </div>
-                <p className="text-[#6B6B6B] text-sm mt-0.5">Type any topic and get 5 practice questions instantly.</p>
+                <p className="text-sm mt-0.5" style={{ color: '#6b21a8' }}>Type any topic and get 5 practice questions instantly.</p>
               </div>
-              <svg className="w-4 h-4 text-[#9B9B9B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 shrink-0" style={{ color: '#a855f7' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
 
-            {/* Study Coach row */}
+            {/* Study Coach */}
             <button
               onClick={() => onNavigateToCoach?.()}
-              className="w-full text-left bg-white hover:bg-slate-50 px-5 py-4 transition-colors flex items-center gap-4 group"
+              className="w-full text-left rounded-2xl px-5 py-4 transition-all flex items-center gap-4 group"
+              style={{ background: 'linear-gradient(135deg, #eff6ff, #fff)', border: '1px solid #93c5fd' }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #dbeafe, #eff6ff)'; e.currentTarget.style.borderColor = '#3b82f6' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #eff6ff, #fff)'; e.currentTarget.style.borderColor = '#93c5fd' }}
             >
-              <svg className="w-5 h-5 text-[#9B9B9B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-              </svg>
-              <div className="flex-1 min-w-0">
-                <span className="text-base font-semibold text-slate-900">Study Coach</span>
-                <p className="text-[#6B6B6B] text-sm mt-0.5">Personalized AI study plan for your schedule and exams.</p>
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)', boxShadow: '0 4px 12px rgba(59,130,246,0.35)' }}>
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
               </div>
-              <svg className="w-4 h-4 text-[#9B9B9B] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="flex-1 min-w-0">
+                <span className="text-base font-bold" style={{ color: '#1d4ed8' }}>Study Coach</span>
+                <p className="text-sm mt-0.5" style={{ color: '#1e40af' }}>Personalized AI study plan for your schedule and exams.</p>
+              </div>
+              <svg className="w-4 h-4 shrink-0" style={{ color: '#3b82f6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -548,7 +569,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               </svg>
               Back
             </button>
-            <h1 className="text-lg font-semibold text-slate-900">Upload Material</h1>
+            <h1 className="text-lg font-bold text-slate-900">Upload Material</h1>
           </div>
           {/* Course selector — always visible at top */}
           {courses.length > 0 && (
@@ -573,13 +594,12 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             onDragOver={e => { e.preventDefault(); setDragging(true) }}
             onDragLeave={() => setDragging(false)}
             onClick={() => fileInputRef.current?.click()}
-            className={`border-2 border-dashed rounded-2xl p-10 flex flex-col items-center gap-4 cursor-pointer transition-all ${
-              dragging
-                ? 'border-[#3B61C4] bg-blue-50'
-                : uploadedFile
-                  ? 'border-[#E5E5E5] bg-slate-50'
-                  : 'border-[#E5E5E5] bg-white hover:border-[#3B61C4] hover:bg-blue-50/30'
-            }`}
+            className="border-2 border-dashed rounded-2xl p-10 flex flex-col items-center gap-4 cursor-pointer transition-all"
+            style={dragging
+              ? { borderColor: '#3b82f6', background: 'linear-gradient(135deg, #eff6ff, #dbeafe)' }
+              : uploadedFile && hasText
+                ? { borderColor: '#86efac', background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)' }
+                : { borderColor: '#c4b5fd', background: 'linear-gradient(135deg, #faf5ff, #f5f3ff)' }}
           >
             <input
               ref={fileInputRef}
@@ -588,40 +608,43 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               className="hidden"
               onChange={e => handleFile(e.target.files?.[0])}
             />
-            <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${
-              uploadedFile ? 'bg-[#F0EFEC] border border-[#E5E5E5]' : 'bg-[#F0EFEC] border border-[#E5E5E5]'
-            }`}>
+            <div className="w-14 h-14 rounded-2xl flex items-center justify-center"
+              style={isExtracting
+                ? { background: 'linear-gradient(135deg, #3b82f6, #2563eb)', boxShadow: '0 4px 14px rgba(59,130,246,0.4)' }
+                : uploadedFile && hasText
+                  ? { background: 'linear-gradient(135deg, #22c55e, #16a34a)', boxShadow: '0 4px 14px rgba(34,197,94,0.4)' }
+                  : { background: 'linear-gradient(135deg, #a855f7, #9333ea)', boxShadow: '0 4px 14px rgba(168,85,247,0.4)' }}>
               {isExtracting ? (
-                <svg className="w-6 h-6 text-[#3B61C4] animate-spin" fill="none" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-white animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
                 </svg>
-              ) : uploadedFile ? (
-                <svg className="w-6 h-6 text-[#3B61C4]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              ) : uploadedFile && hasText ? (
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                 </svg>
               ) : (
-                <svg className="w-6 h-6 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
                 </svg>
               )}
             </div>
             {isExtracting ? (
               <div className="text-center">
-                <p className="text-[#3B61C4] font-medium">Extracting text…</p>
+                <p className="font-semibold" style={{ color: '#2563eb' }}>Extracting text…</p>
                 <p className="text-slate-500 text-xs mt-1">This may take a moment</p>
               </div>
-            ) : uploadedFile ? (
+            ) : uploadedFile && hasText ? (
               <div className="text-center">
-                <p className="text-slate-800 font-semibold truncate max-w-xs">{uploadedFile.name}</p>
-                <p className="text-slate-500 text-xs mt-1">
-                  {hasText ? `${extractedText.split(/\s+/).filter(Boolean).length.toLocaleString()} words extracted` : 'Click to replace'}
+                <p className="font-bold truncate max-w-xs" style={{ color: '#15803d' }}>{uploadedFile.name}</p>
+                <p className="text-xs mt-1" style={{ color: '#16a34a' }}>
+                  {extractedText.split(/\s+/).filter(Boolean).length.toLocaleString()} words extracted · click to replace
                 </p>
               </div>
             ) : (
               <div className="text-center">
-                <p className="text-slate-700 font-medium">Drop your file here or click to browse</p>
-                <p className="text-slate-500 text-xs mt-1">PDF, .docx, or .pptx</p>
+                <p className="font-semibold" style={{ color: '#7e22ce' }}>Drop your file here or click to browse</p>
+                <p className="text-xs mt-1" style={{ color: '#9333ea' }}>PDF, .docx, or .pptx</p>
               </div>
             )}
           </div>
@@ -739,7 +762,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             <div className="flex gap-3">
               <button
                 onClick={handleGenerateFlashcards}
-                className="flex-1 bg-[#3B61C4] hover:bg-[#2d4fa8] text-white font-semibold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
+                className="flex-1 text-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
+                style={{ background: 'linear-gradient(135deg, #a855f7, #ec4899)', boxShadow: '0 4px 16px rgba(168,85,247,0.4)' }}
               >
                 Generate with AI
               </button>
