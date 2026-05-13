@@ -53,7 +53,7 @@ export default function AccountView({
       const res = await fetch('/api/cancel-trial', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId: user.id }),
+        body: JSON.stringify({ action: 'cancel-trial', userId: user.id }),
       })
       if (!res.ok) throw new Error('Failed')
       initSubscription(user.id, { plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null })

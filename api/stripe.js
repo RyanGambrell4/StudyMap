@@ -422,7 +422,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ received: true })
   }
 
-  // ── Checkout session path ──────────────────────────────────────────────────
+  // ── Checkout / cancel-trial path ──────────────────────────────────────────
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() ?? 'unknown'
   if (checkoutRateLimit(ip)) {
     return res.status(429).json({ error: 'Too many requests. Please try again later.' })
@@ -433,6 +433,42 @@ export default async function handler(req, res) {
     body = JSON.parse(rawBody.toString())
   } catch {
     return res.status(400).json({ error: 'Invalid JSON' })
+  }
+
+  // ── Cancel trial path ──────────────────────────────────────────────────────
+  if (body.action === 'cancel-trial') {
+    const { userId } = body
+    if (!userId) return res.status(400).json({ error: 'Missing userId' })
+
+    const { data, error: dbErr } = await supabaseAdmin
+      .from('user_data')
+      .select('subscription')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (dbErr || !data) return res.status(404).json({ error: 'User not found' })
+
+    const sub = data.subscription
+    if (sub?.status !== 'trialing') {
+      return res.status(400).json({ error: 'No active trial to cancel' })
+    }
+
+    const stripeSubId = sub?.stripeSubId
+    if (!stripeSubId) return res.status(400).json({ error: 'No Stripe subscription found' })
+
+    try {
+      await stripe.subscriptions.cancel(stripeSubId)
+    } catch (stripeErr) {
+      console.error('[cancel-trial] Stripe error:', stripeErr)
+      return res.status(500).json({ error: 'Failed to cancel with Stripe' })
+    }
+
+    const updated = { ...sub, plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null }
+    await supabaseAdmin
+      .from('user_data')
+      .upsert({ user_id: userId, subscription: updated, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
+
+    return res.status(200).json({ success: true })
   }
 
   const { plan, billingPeriod, userEmail, userId, trial } = body
