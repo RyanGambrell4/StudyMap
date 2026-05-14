@@ -383,7 +383,7 @@ export default function DashboardView({
 
   // ── Main ─────────────────────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: '100vh', background: D.bg, overflowY: 'auto' }}>
+    <div style={{ minHeight: '100vh', background: D.bg, overflowY: 'auto', overflowX: 'hidden' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
         @keyframes dash-pulse { 0%,100%{opacity:0.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.3)} }
@@ -400,6 +400,9 @@ export default function DashboardView({
           .dash-quick-actions { order: 10 !important; }
           .dash-brief-row { flex-wrap: wrap !important; gap: 10px !important; }
           .dash-brief-btns { flex-shrink: 0 !important; align-self: flex-start !important; }
+          .dash-banner-wrap { padding: 10px 16px 4px !important; }
+          .dash-banner-inner { flex-wrap: wrap !important; gap: 10px !important; }
+          .dash-banner-inner button { white-space: normal !important; }
         }
       `}</style>
 
@@ -438,7 +441,7 @@ export default function DashboardView({
         const accentColor = phaseColors[phase]
         const hoursPerDay = d > 0 ? Math.max(2, Math.min(10, Math.round(300 / d))) : 8
         return (
-          <div style={{ padding: '12px 32px 4px' }}>
+          <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
             <div style={{
               background: D.bgCard,
               border: `1px solid ${accentColor}30`,
@@ -447,7 +450,7 @@ export default function DashboardView({
               boxShadow: `0 2px 12px ${accentColor}12`,
               padding: '14px 18px',
             }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+              <div className="dash-banner-inner" style={{ display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 5, flexShrink: 0 }}>
                   <span style={{ fontSize: 30, fontWeight: 800, letterSpacing: '-0.04em', color: accentColor, lineHeight: 1 }}>{d}</span>
                   <span style={{ fontSize: 12, color: D.textMuted, fontWeight: 500 }}>days</span>
@@ -480,8 +483,8 @@ export default function DashboardView({
 
       {/* ── Pro trial banner ── */}
       {showTrialCard && (
-        <div style={{ padding: '12px 32px 4px' }}>
-          <div style={{
+        <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
+          <div className="dash-banner-inner" style={{
             background: `linear-gradient(135deg, rgba(232,83,26,0.04) 0%, rgba(59,97,196,0.04) 100%)`,
             border: `1px solid rgba(232,83,26,0.2)`,
             borderLeft: `4px solid ${D.accent}`,
