@@ -398,6 +398,8 @@ export default function DashboardView({
           .dash-up-next-btns { flex-wrap: wrap !important; gap: 8px !important; }
           .dash-pomodoro { display: none !important; }
           .dash-quick-actions { order: 10 !important; }
+          .dash-brief-row { flex-wrap: wrap !important; gap: 10px !important; }
+          .dash-brief-btns { flex-shrink: 0 !important; align-self: flex-start !important; }
         }
       `}</style>
 
@@ -681,12 +683,12 @@ export default function DashboardView({
               background: `linear-gradient(135deg, rgba(232,83,26,0.03) 0%, #ffffff 50%)`,
             }}
           >
-            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
+            <div className="dash-brief-row" style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>
               <div style={{ flex: 1, minWidth: 0 }}>
                 <div style={{ marginBottom: 8 }}><Label color={D.accent}>Today's brief</Label></div>
                 <p style={{ margin: 0, fontSize: 15, lineHeight: 1.65, color: D.text, fontWeight: 400 }}>{aiMessage}</p>
               </div>
-              <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'flex-start', paddingTop: 2 }}>
+              <div className="dash-brief-btns" style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'flex-start', paddingTop: 2 }}>
                 <button onClick={() => typeof onNavigateToCalendar === 'function' && onNavigateToCalendar()} style={{ fontSize: 12, fontWeight: 600, color: D.text, padding: '7px 13px', borderRadius: 7, border: `1px solid ${D.borderStrong}`, background: 'none', cursor: 'pointer' }}>
                   View schedule
                 </button>

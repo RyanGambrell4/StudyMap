@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 export default function AuthScreen({ initialMode, onBack }) {
+  const isMobile = window.innerWidth <= 767
   const [mode, setMode] = useState(() =>
     initialMode || (new URLSearchParams(window.location.search).get('signup') === '1' ? 'signup' : 'login')
   )
@@ -113,9 +114,7 @@ export default function AuthScreen({ initialMode, onBack }) {
 
     return (
       <div style={{ minHeight: '100vh', display: 'flex' }}>
-        <style>{`@media (max-width: 767px) { .auth-left-panel { display: none !important; } }`}</style>
-        {/* Left panel */}
-        <LeftPanel />
+        {!isMobile && <LeftPanel />}
 
         {/* Right panel */}
         <div style={{
@@ -196,8 +195,7 @@ export default function AuthScreen({ initialMode, onBack }) {
 
   return (
     <div style={{ minHeight: '100vh', display: 'flex' }}>
-      {/* Left panel */}
-      <LeftPanel />
+      {!isMobile && <LeftPanel />}
 
       {/* Right panel */}
       <div style={{
@@ -206,13 +204,8 @@ export default function AuthScreen({ initialMode, onBack }) {
       }}>
         <div style={{ width: '100%', maxWidth: 400 }}>
 
-          {/* Mobile logo (shown only on small screens via CSS) */}
-          <style>{`
-            @media (max-width: 767px) {
-              .auth-left-panel { display: none !important; }
-              .auth-mobile-logo { display: flex !important; }
-            }
-          `}</style>
+          {/* Mobile logo */}
+          <style>{`@media (max-width: 767px) { .auth-mobile-logo { display: flex !important; } }`}</style>
           <div className="auth-mobile-logo" style={{ display: 'none', alignItems: 'center', gap: 10, marginBottom: 32, justifyContent: 'center' }}>
             <img src="/favicon.png" alt="StudyEdge AI" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain' }} />
             <span style={{ fontWeight: 700, fontSize: 18, color: '#1A1A1A' }}>StudyEdge AI</span>

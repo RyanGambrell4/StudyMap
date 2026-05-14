@@ -143,12 +143,19 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
         position: 'fixed', inset: 0,
         background: 'rgba(0,0,0,0.45)',
         backdropFilter: 'blur(8px)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        zIndex: 1000, padding: '24px',
+        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
+        zIndex: 1000, padding: '16px',
+        overflowY: 'auto',
       }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >
-      <div style={{
+      <style>{`
+        @media (max-width: 600px) {
+          .pw-modal { padding: 20px 16px !important; border-radius: 16px !important; }
+          .pw-cards { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
+      <div className="pw-modal" style={{
         background: '#fff',
         border: '1px solid rgba(0,0,0,0.08)',
         borderRadius: '22px',
@@ -156,6 +163,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
         maxWidth: '600px',
         width: '100%',
         boxShadow: '0 24px 64px rgba(0,0,0,0.12)',
+        margin: 'auto',
       }}>
 
         {/* ── Header ── */}
@@ -265,7 +273,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
         </div>
 
         {/* ── Plan cards ── */}
-        <div style={{ display: 'grid', gridTemplateColumns: visiblePlanIds.length === 1 ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '18px' }}>
+        <div className="pw-cards" style={{ display: 'grid', gridTemplateColumns: visiblePlanIds.length === 1 ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '18px' }}>
           {Object.entries(PLANS).filter(([planId]) => visiblePlanIds.includes(planId)).map(([planId, plan], i) => (
             <div
               key={planId}
