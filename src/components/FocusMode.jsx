@@ -40,103 +40,159 @@ function appendRecall(courseId, courseName, sessionType, text) {
 }
 
 function generatePDF({ courseName, dateStr, sessionType, recallText, concepts, main, summary }) {
-  // ── Helpers ────────────────────────────────────────────────────────────────
   const esc = (t) => String(t ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
 
-  // ── Content parser ─────────────────────────────────────────────────────────
+  // ── Enhanced parser ────────────────────────────────────────────────────────
   function parseBlocks(text) {
     if (!text?.trim()) return []
     const lines = text.split('\n')
     const out = []
     let tableRows = []
-
-    const flushTable = () => {
-      if (tableRows.length > 0) { out.push({ type: 'table', rows: [...tableRows] }); tableRows = [] }
-    }
-
+    const flushTable = () => { if (tableRows.length) { out.push({ type: 'table', rows: [...tableRows] }); tableRows = [] } }
     for (const raw of lines) {
       const line = raw.trim()
       if (!line) { flushTable(); continue }
-
-      // Table row
       if (line.split('|').length >= 3 && line.includes('|')) {
-        if (/^[\|\-\s:]+$/.test(line)) continue // separator
-        tableRows.push(line.split('|').map(c => c.trim()).filter(Boolean))
-        continue
+        if (/^[\|\-\s:]+$/.test(line)) continue
+        tableRows.push(line.split('|').map(c => c.trim()).filter(Boolean)); continue
       }
       flushTable()
-
+      // Callout patterns
+      const calloutMatch = line.match(/^(Note|Important|Example|Warning|Remember|Key|Tip|Caution|Definition):\s*(.+)/i)
+      if (calloutMatch) { out.push({ type: 'callout', kind: calloutMatch[1].toLowerCase(), text: calloutMatch[2] }); continue }
+      // Arrow notation → key insight
+      if (/^[→➜]\s+/.test(line)) { out.push({ type: 'arrow', text: line.replace(/^[→➜]\s+/, '') }); continue }
       // Bullet
       if (/^[-•*·]\s+/.test(line)) { out.push({ type: 'bullet', text: line.replace(/^[-•*·]\s+/, '') }); continue }
-      // Numbered list
-      if (/^\d+[\.\)]\s+/.test(line)) { out.push({ type: 'bullet', text: line.replace(/^\d+[\.\)]\s+/, '') }); continue }
-      // Markdown heading
+      // Numbered step
+      if (/^\d+[\.\)]\s+/.test(line)) { out.push({ type: 'step', num: parseInt(line), text: line.replace(/^\d+[\.\)]\s+/, '') }); continue }
+      // Heading
       if (/^#{1,3}\s/.test(line)) { out.push({ type: 'heading', text: line.replace(/^#+\s+/, '') }); continue }
-      // Section heading: short, ends in colon, no sentence structure
-      if (line.endsWith(':') && line.length < 70 && !line.slice(0,-1).includes('.') && !line.includes('(')) {
-        out.push({ type: 'heading', text: line.slice(0,-1) }); continue
-      }
-      // ALL CAPS heading
-      if (line === line.toUpperCase() && /[A-Z]{2}/.test(line) && line.length > 2 && line.length < 60 && !/\d/.test(line)) {
-        out.push({ type: 'heading', text: line }); continue
-      }
-      // Formula / equation
-      if (/[=÷×±√∑∫∂∆→⟶]/.test(line) || (/\s=\s/.test(line) && line.length < 120)) {
-        out.push({ type: 'formula', text: line }); continue
-      }
-      // Key term definition: "Term: definition" with short term (≤6 words)
+      if (line.endsWith(':') && line.length < 70 && !line.slice(0,-1).includes('.') && !line.includes('(')) { out.push({ type: 'heading', text: line.slice(0,-1) }); continue }
+      if (line === line.toUpperCase() && /[A-Z]{2}/.test(line) && line.length > 2 && line.length < 60 && !/\d/.test(line)) { out.push({ type: 'heading', text: line }); continue }
+      // Formula
+      if (/[=÷×±√∑∫∂∆⟶]/.test(line) || (/\s=\s/.test(line) && line.length < 120)) { out.push({ type: 'formula', text: line }); continue }
+      // Key-term definition
       const defMatch = line.match(/^([A-Z][^:\.]{1,45}):\s+(.{8,})$/)
-      if (defMatch && defMatch[1].split(' ').length <= 6) {
-        out.push({ type: 'definition', term: defMatch[1], def: defMatch[2] }); continue
-      }
+      if (defMatch && defMatch[1].split(' ').length <= 6) { out.push({ type: 'definition', term: defMatch[1], def: defMatch[2] }); continue }
       out.push({ type: 'para', text: line })
     }
     flushTable()
     return out
   }
 
+  // ── Callout boxes ─────────────────────────────────────────────────────────
+  const CALLOUT = {
+    important:  { bg:'#fef2f2', border:'#fca5a5', accent:'#ef4444', icon:'⚠️', label:'Important' },
+    warning:    { bg:'#fef3c7', border:'#fcd34d', accent:'#f59e0b', icon:'⚡', label:'Warning' },
+    note:       { bg:'#eff6ff', border:'#93c5fd', accent:'#3b82f6', icon:'📝', label:'Note' },
+    example:    { bg:'#f0fdf4', border:'#86efac', accent:'#16a34a', icon:'✅', label:'Example' },
+    key:        { bg:'#faf5ff', border:'#d8b4fe', accent:'#a855f7', icon:'🔑', label:'Key Point' },
+    remember:   { bg:'#fff7ed', border:'#fdba74', accent:'#f97316', icon:'💡', label:'Remember' },
+    tip:        { bg:'#f0fdf4', border:'#6ee7b7', accent:'#059669', icon:'💡', label:'Tip' },
+    definition: { bg:'#eef2ff', border:'#a5b4fc', accent:'#6366f1', icon:'📖', label:'Definition' },
+    caution:    { bg:'#fefce8', border:'#fde68a', accent:'#ca8a04', icon:'⚠️', label:'Caution' },
+  }
+  function renderCallout(kind, text) {
+    const s = CALLOUT[kind] ?? CALLOUT.note
+    return `<div class="callout" style="background:${s.bg};border-color:${s.border};border-left-color:${s.accent}"><div class="callout-hdr" style="color:${s.accent}">${s.icon} <span class="callout-label">${s.label}</span></div><div class="callout-txt">${esc(text)}</div></div>`
+  }
+
+  // ── Process flow (3+ numbered steps) ──────────────────────────────────────
+  function renderProcessFlow(steps) {
+    if (steps.length < 3) return steps.map(s => `<div class="step-row"><span class="step-num">${s.num}</span><span class="step-txt">${esc(s.text)}</span></div>`).join('')
+    return `<div class="flow-wrap"><div class="flow-label">Process</div><div class="flow">${steps.map((s,i) => `<div class="flow-item"><div class="flow-n">${i+1}</div><div class="flow-t">${esc(s.text)}</div></div>${i<steps.length-1?'<div class="flow-arr">→</div>':''}`).join('')}</div></div>`
+  }
+
+  // ── Table renderer ────────────────────────────────────────────────────────
   function renderTable(rows) {
     if (!rows.length) return ''
     const [header, ...body] = rows
-    return `<div class="tbl-wrap"><table>
-      <thead><tr>${header.map(h => `<th>${esc(h)}</th>`).join('')}</tr></thead>
-      <tbody>${body.map(row => `<tr>${row.map(c => `<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody>
-    </table></div>`
+    return `<div class="tbl-wrap"><table><thead><tr>${header.map(h=>`<th>${esc(h)}</th>`).join('')}</tr></thead><tbody>${body.map((row,ri)=>`<tr class="${ri%2===1?'odd':''}">${row.map(c=>`<td>${esc(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`
   }
 
+  // ── Block renderer ────────────────────────────────────────────────────────
   function renderBlocks(blocks) {
     let html = '', inList = false
+    const steps = blocks.filter(b => b.type === 'step')
+    const useFlow = steps.length >= 3
     for (const b of blocks) {
+      if (b.type === 'step' && useFlow) continue // handled as flow at end
       if (b.type === 'bullet') {
         if (!inList) { html += '<ul class="blist">'; inList = true }
         html += `<li><span class="bdot"></span><span>${esc(b.text)}</span></li>`
       } else {
         if (inList) { html += '</ul>'; inList = false }
-        if      (b.type === 'heading')    html += `<div class="nh"><div class="nhbar"></div><span>${esc(b.text)}</span></div>`
-        else if (b.type === 'definition') html += `<div class="defrow"><span class="deft">${esc(b.term)}</span><span class="defb">${esc(b.def)}</span></div>`
-        else if (b.type === 'formula')    html += `<div class="formula">${esc(b.text)}</div>`
-        else if (b.type === 'table')      html += renderTable(b.rows)
-        else                              html += `<p class="np">${esc(b.text)}</p>`
+        if (b.type === 'heading')    html += `<div class="nh"><div class="nhbar"></div><span>${esc(b.text)}</span></div>`
+        else if (b.type === 'callout')   html += renderCallout(b.kind, b.text)
+        else if (b.type === 'arrow')     html += `<div class="arrow-row"><span class="arr-sym">→</span><span>${esc(b.text)}</span></div>`
+        else if (b.type === 'step')      html += `<div class="step-row"><span class="step-num">${b.num}</span><span class="step-txt">${esc(b.text)}</span></div>`
+        else if (b.type === 'definition')html += `<div class="defrow"><span class="deft">${esc(b.term)}</span><span class="defb">${esc(b.def)}</span></div>`
+        else if (b.type === 'formula')   html += `<div class="formula">${esc(b.text)}</div>`
+        else if (b.type === 'table')     html += renderTable(b.rows)
+        else                             html += `<p class="np">${esc(b.text)}</p>`
       }
     }
     if (inList) html += '</ul>'
+    if (useFlow) html += renderProcessFlow(steps)
     return html
   }
 
-  function parseConcepts(text) {
-    if (!text?.trim()) return []
-    return text.split('\n').map(l => l.trim().replace(/^[-•*\d\.\)]+\s*/, '')).filter(l => l.length > 2).slice(0, 12)
+  // ── Cornell layout (when 2+ headings detected in notes) ───────────────────
+  function renderCornell(blocks) {
+    const headings = blocks.filter(b => b.type === 'heading')
+    if (headings.length < 2) return `<div class="ncard">${renderBlocks(blocks)}</div>`
+    const cues = headings.map(h => `<div class="cue-q">?&ensp;${esc(h.text)}</div>`).join('')
+    return `<div class="cornell"><div class="cue-col"><div class="cue-hdr">CUES / QUESTIONS</div>${cues}</div><div class="note-col">${renderBlocks(blocks)}</div></div><div class="cornell-sum"><div class="cs-hdr">SUMMARY (in your own words)</div><div class="cs-lines">${'<div class="cs-line"></div>'.repeat(4)}</div></div>`
   }
 
-  // ── Parse ──────────────────────────────────────────────────────────────────
+  // ── SVG bar chart from concepts ────────────────────────────────────────────
+  function renderConceptChart(list) {
+    if (list.length < 3) return ''
+    const COLS = ['#3B61C4','#A855F7','#EC4899','#F97316','#14B8A6','#22C55E','#EAB308','#EF4444','#6366F1','#0EA5E9']
+    const items = list.slice(0, 10)
+    const bw = Math.floor(460 / items.length) - 4
+    const maxH = 72
+    const bars = items.map((c, i) => {
+      const h = Math.round(maxH * (0.45 + 0.55 * (items.length - i) / items.length))
+      const x = 14 + i * (bw + 4)
+      const label = c.length > 11 ? c.slice(0, 11) + '…' : c
+      const col = COLS[i % COLS.length]
+      return `<g><rect x="${x}" y="${90-h}" width="${bw}" height="${h}" rx="4" fill="${col}" opacity="0.88"/><text x="${x+bw/2}" y="106" text-anchor="middle" font-size="7.5" fill="#6b7280" font-family="system-ui,sans-serif">${esc(label)}</text></g>`
+    }).join('')
+    return `<div class="chart-wrap"><div class="chart-ttl">📊 Concepts Covered This Session</div><svg width="490" height="118" viewBox="0 0 490 118" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="6" x2="10" y2="90" stroke="#e5e7eb" stroke-width="1"/><line x1="10" y1="90" x2="485" y2="90" stroke="#e5e7eb" stroke-width="1"/>${bars}</svg></div>`
+  }
+
+  // ── Concept cards (color-coded, visual) ────────────────────────────────────
+  const CONCEPT_COLORS = [
+    { top:'#3B61C4', bg:'#eef2ff', num:'#3B61C4' },
+    { top:'#A855F7', bg:'#faf5ff', num:'#A855F7' },
+    { top:'#EC4899', bg:'#fdf2f8', num:'#EC4899' },
+    { top:'#F97316', bg:'#fff7ed', num:'#F97316' },
+    { top:'#14B8A6', bg:'#f0fdfa', num:'#14B8A6' },
+    { top:'#22C55E', bg:'#f0fdf4', num:'#22C55E' },
+  ]
+  function renderConceptCards(list) {
+    return list.map((c, i) => {
+      const col = CONCEPT_COLORS[i % CONCEPT_COLORS.length]
+      return `<div class="ccard" style="border-top-color:${col.top};background:${col.bg}"><div class="cnum" style="color:${col.num}">Concept ${String(i+1).padStart(2,'0')}</div><div class="ctxt">${esc(c)}</div></div>`
+    }).join('')
+  }
+
+  // ── Self-assessment checklist ──────────────────────────────────────────────
+  function renderChecklist(list) {
+    if (!list.length) return ''
+    return `<div class="check-wrap"><div class="check-ttl">✏️ Self-Test — Can you explain each of these without looking?</div><div class="check-grid">${list.map(c=>`<div class="check-item"><span class="check-box"></span><span>${esc(c)}</span></div>`).join('')}</div></div>`
+  }
+
+  // ── Parse all content ──────────────────────────────────────────────────────
   const mainBlocks    = parseBlocks(main)
   const recallBlocks  = parseBlocks(recallText)
   const summaryBlocks = parseBlocks(summary)
-  const conceptList   = parseConcepts(concepts)
+  const conceptList   = (concepts ?? '').split('\n').map(l => l.trim().replace(/^[-•*\d\.\)]+\s*/, '')).filter(l => l.length > 2).slice(0, 12)
 
-  const prettyDate = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
-    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric',
-  })
+  const prettyDate = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday:'long', year:'numeric', month:'long', day:'numeric' })
+  const hasRichNotes = mainBlocks.filter(b => b.type === 'heading').length >= 2
 
   // ── HTML ───────────────────────────────────────────────────────────────────
   const html = `<!DOCTYPE html>
@@ -146,81 +202,135 @@ function generatePDF({ courseName, dateStr, sessionType, recallText, concepts, m
 <title>StudyEdge AI · ${esc(courseName)}</title>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F7F6F3;color:#1A1A1A;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F4F5F7;color:#1A1A1A;-webkit-print-color-adjust:exact;print-color-adjust:exact;font-size:14px}
 
-/* Header */
-.hdr{background:linear-gradient(135deg,#162d6b 0%,#3B61C4 55%,#4f7cd4 100%);color:#fff;padding:40px 52px 36px;position:relative;overflow:hidden}
-.hdr::before{content:'';position:absolute;right:-80px;top:-80px;width:300px;height:300px;border-radius:50%;background:rgba(255,255,255,0.05)}
-.hdr::after{content:'';position:absolute;left:40%;bottom:-100px;width:220px;height:220px;border-radius:50%;background:rgba(255,255,255,0.04)}
-.brand{font-size:10px;letter-spacing:3.5px;text-transform:uppercase;opacity:.6;margin-bottom:14px;font-weight:600}
-.course{font-size:40px;font-weight:800;letter-spacing:-1.5px;line-height:1.05;margin-bottom:6px}
-.sub{font-size:15px;opacity:.7;margin-bottom:20px;font-weight:400}
+/* ── Header ── */
+.hdr{background:linear-gradient(135deg,#0f1f4e 0%,#1e3a8a 45%,#3B61C4 80%,#5b7fd4 100%);color:#fff;padding:44px 56px 38px;position:relative;overflow:hidden}
+.hdr::before{content:'';position:absolute;right:-60px;top:-60px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,0.05)}
+.hdr::after{content:'';position:absolute;left:42%;bottom:-90px;width:200px;height:200px;border-radius:50%;background:rgba(255,255,255,0.04)}
+.brand{font-size:9.5px;letter-spacing:4px;text-transform:uppercase;opacity:.55;margin-bottom:12px;font-weight:700}
+.course{font-size:38px;font-weight:800;letter-spacing:-1.5px;line-height:1.06;margin-bottom:6px}
+.sub{font-size:14.5px;opacity:.65;margin-bottom:22px;font-weight:400}
 .badges{display:flex;gap:8px;flex-wrap:wrap}
-.badge{background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.22);padding:5px 14px;border-radius:20px;font-size:11.5px;font-weight:500}
-.badge.orange{background:rgba(232,83,26,0.75);border-color:rgba(232,83,26,0.4)}
+.badge{background:rgba(255,255,255,0.13);border:1px solid rgba(255,255,255,0.2);padding:5px 13px;border-radius:20px;font-size:11px;font-weight:500}
+.badge.org{background:rgba(249,115,22,0.7);border-color:rgba(249,115,22,0.35)}
+.badge.grn{background:rgba(34,197,94,0.55);border-color:rgba(34,197,94,0.3)}
 
-/* Layout */
-.body{max-width:800px;margin:0 auto;padding:40px 52px 56px}
+/* ── Body layout ── */
+.body{max-width:820px;margin:0 auto;padding:40px 52px 60px}
 
-/* Section wrapper */
-.sec{margin-bottom:36px}
+/* ── Section ── */
+.sec{margin-bottom:38px}
 .sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:16px}
-.sec-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
-.sec-label{font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase}
-.sec-rule{flex:1;height:1px;opacity:.18}
+.sec-icon{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.sec-label{font-size:10.5px;font-weight:800;letter-spacing:2.2px;text-transform:uppercase}
+.sec-rule{flex:1;height:1px;opacity:.15}
 
-/* Recall */
-.recall-card{background:linear-gradient(135deg,#fff8f2,#fffaf6);border:1.5px solid #fcd4b0;border-radius:14px;padding:24px 28px}
+/* ── Active Recall ── */
+.recall-card{background:linear-gradient(135deg,#fff8f1,#fffbf7);border:1.5px solid #fed7aa;border-radius:14px;padding:24px 28px}
 
-/* Concept grid */
-.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
-.ccard{background:#fff;border:1px solid rgba(59,97,196,0.14);border-top:3px solid #3B61C4;border-radius:10px;padding:14px 16px;box-shadow:0 2px 8px rgba(0,0,0,0.04)}
-.cnum{font-size:9.5px;font-weight:700;color:#3B61C4;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px}
-.ctxt{font-size:13px;line-height:1.55;color:#2d2d2d}
+/* ── Concept cards ── */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:13px}
+.ccard{border:1px solid rgba(0,0,0,0.06);border-top:4px solid #3B61C4;border-radius:12px;padding:16px 18px;box-shadow:0 2px 10px rgba(0,0,0,0.05)}
+.cnum{font-size:9px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;margin-bottom:6px}
+.ctxt{font-size:13.5px;line-height:1.6;color:#1f2937;font-weight:500}
 
-/* Notes card */
-.ncard{background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:14px;padding:28px 32px;box-shadow:0 2px 14px rgba(0,0,0,0.04)}
-.np{font-size:14px;line-height:1.85;color:#2d2d2d;margin-bottom:12px}
-.nh{display:flex;align-items:center;gap:10px;margin:22px 0 10px}
-.nhbar{width:4px;height:18px;background:#3B61C4;border-radius:2px;flex-shrink:0}
-.nh span{font-size:15px;font-weight:700;color:#1a1a1a}
-.blist{list-style:none;margin:8px 0 14px;padding:0}
-.blist li{display:flex;align-items:flex-start;gap:10px;margin-bottom:8px;font-size:14px;line-height:1.65;color:#2d2d2d}
-.bdot{width:7px;height:7px;border-radius:50%;background:#3B61C4;flex-shrink:0;margin-top:8px}
-.defrow{display:flex;gap:14px;padding:10px 14px;background:#eef2ff;border-radius:8px;margin:6px 0;align-items:flex-start}
-.deft{font-weight:700;font-size:13px;color:#3B61C4;white-space:nowrap;min-width:110px;flex-shrink:0;padding-top:1px}
-.defb{font-size:13px;color:#374151;line-height:1.55}
-.formula{font-family:'Courier New',monospace;font-size:14px;background:#1e293b;color:#7dd3fc;padding:13px 20px;border-radius:9px;margin:12px 0;letter-spacing:.5px;word-break:break-all}
+/* ── Notes card / Cornell ── */
+.ncard{background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:14px;padding:30px 34px;box-shadow:0 2px 16px rgba(0,0,0,0.04)}
+.cornell{display:grid;grid-template-columns:200px 1fr;gap:0;background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:14px;overflow:hidden;box-shadow:0 2px 16px rgba(0,0,0,0.04)}
+.cue-col{background:linear-gradient(180deg,#1e3a8a,#3B61C4);padding:24px 18px;color:#fff}
+.cue-hdr{font-size:8px;font-weight:800;letter-spacing:2px;text-transform:uppercase;opacity:.6;margin-bottom:16px;border-bottom:1px solid rgba(255,255,255,0.2);padding-bottom:8px}
+.cue-q{font-size:11.5px;line-height:1.55;color:rgba(255,255,255,0.88);margin-bottom:12px;padding-left:4px;border-left:2px solid rgba(255,255,255,0.4);padding:6px 8px;border-radius:2px}
+.note-col{padding:28px 30px}
+.cornell-sum{background:#f8faff;border:1px solid rgba(59,97,196,0.15);border-radius:0 0 14px 14px;border-top:2px dashed rgba(59,97,196,0.25);padding:16px 24px}
+.cs-hdr{font-size:8.5px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#3B61C4;margin-bottom:12px}
+.cs-line{height:22px;border-bottom:1px solid #e5e7eb;margin-bottom:4px}
 
-/* Table */
-.tbl-wrap{border-radius:10px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.09);margin:14px 0}
+/* ── Dot jots / bullets ── */
+.np{font-size:14px;line-height:1.9;color:#1f2937;margin-bottom:10px}
+.nh{display:flex;align-items:center;gap:10px;margin:24px 0 10px}
+.nhbar{width:4px;height:20px;background:#3B61C4;border-radius:3px;flex-shrink:0}
+.nh span{font-size:15.5px;font-weight:700;color:#111827}
+.blist{list-style:none;margin:6px 0 14px;padding:0}
+.blist li{display:flex;align-items:flex-start;gap:11px;margin-bottom:9px;font-size:13.5px;line-height:1.7;color:#1f2937}
+.bdot{width:8px;height:8px;border-radius:50%;background:#3B61C4;flex-shrink:0;margin-top:7px}
+
+/* ── Callout boxes ── */
+.callout{border:1.5px solid;border-left:5px solid;border-radius:10px;padding:13px 17px;margin:12px 0}
+.callout-hdr{font-size:11px;font-weight:800;letter-spacing:.8px;margin-bottom:5px;display:flex;align-items:center;gap:6px}
+.callout-label{text-transform:uppercase;letter-spacing:1.2px}
+.callout-txt{font-size:13px;line-height:1.65;color:#374151}
+
+/* ── Arrow rows ── */
+.arrow-row{display:flex;align-items:flex-start;gap:10px;padding:8px 12px;background:#f0f9ff;border-radius:8px;margin:6px 0;border-left:3px solid #0ea5e9}
+.arr-sym{color:#0ea5e9;font-weight:800;font-size:15px;flex-shrink:0;margin-top:1px}
+
+/* ── Step / process flow ── */
+.step-row{display:flex;align-items:flex-start;gap:10px;margin:6px 0}
+.step-num{width:24px;height:24px;border-radius:50%;background:#3B61C4;color:#fff;font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.step-txt{font-size:13.5px;line-height:1.65;color:#1f2937;padding-top:3px}
+.flow-wrap{background:#f8faff;border:1px solid rgba(59,97,196,0.15);border-radius:12px;padding:18px 20px;margin:14px 0}
+.flow-label{font-size:9px;font-weight:800;letter-spacing:2px;text-transform:uppercase;color:#3B61C4;margin-bottom:14px}
+.flow{display:flex;align-items:flex-start;flex-wrap:wrap;gap:6px}
+.flow-item{flex:1;min-width:80px;background:#fff;border:1px solid rgba(59,97,196,0.2);border-radius:10px;padding:12px;text-align:center}
+.flow-n{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,#3B61C4,#5b7fd4);color:#fff;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;margin:0 auto 8px}
+.flow-t{font-size:11.5px;line-height:1.5;color:#1f2937;font-weight:500}
+.flow-arr{font-size:20px;color:#9ca3af;align-self:center;margin:0 2px;padding-top:4px}
+
+/* ── Key term definitions ── */
+.defrow{display:flex;gap:14px;padding:10px 14px;background:#eef2ff;border-left:4px solid #6366f1;border-radius:0 8px 8px 0;margin:7px 0;align-items:flex-start}
+.deft{font-weight:800;font-size:13px;color:#4f46e5;white-space:nowrap;min-width:115px;flex-shrink:0;padding-top:1px}
+.defb{font-size:13px;color:#374151;line-height:1.6}
+
+/* ── Formula ── */
+.formula{font-family:'Courier New',monospace;font-size:13.5px;background:#0f172a;color:#7dd3fc;padding:14px 22px;border-radius:10px;margin:12px 0;letter-spacing:.5px;word-break:break-all;border-left:4px solid #0ea5e9}
+
+/* ── Table ── */
+.tbl-wrap{border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.08);margin:14px 0}
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:#3B61C4;color:#fff;padding:11px 16px;text-align:left;font-weight:600;font-size:12px;letter-spacing:.3px}
-td{padding:10px 16px;border-bottom:1px solid #f0f0f0;color:#374151}
+th{background:linear-gradient(135deg,#1e3a8a,#3B61C4);color:#fff;padding:12px 16px;text-align:left;font-weight:700;font-size:11.5px;letter-spacing:.4px}
+td{padding:10px 16px;border-bottom:1px solid #f3f4f6;color:#374151;line-height:1.55}
 tr:last-child td{border-bottom:none}
-tr:nth-child(even) td{background:#f9fafb}
+tr.odd td{background:#f9fafb}
 
-/* Summary */
-.sum-card{background:linear-gradient(135deg,#eef2ff,#e8eeff);border:1.5px solid rgba(59,97,196,0.22);border-radius:14px;padding:24px 28px}
+/* ── SVG chart ── */
+.chart-wrap{background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:12px;padding:18px 20px;margin-bottom:14px}
+.chart-ttl{font-size:11px;font-weight:700;color:#374151;margin-bottom:10px}
 
-/* Tips */
-.tips{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:28px}
-.tip{background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:10px;padding:15px 16px}
-.tipn{font-size:9.5px;font-weight:700;color:#E8531A;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:5px}
-.tipt{font-size:12px;line-height:1.55;color:#4b5563}
+/* ── Concept bar chart mini-legend ── */
+.concept-legend{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.cl-item{display:flex;align-items:center;gap:4px;font-size:9.5px;color:#6b7280}
+.cl-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
 
-/* Footer */
-.footer{text-align:center;padding:28px 52px;border-top:1px solid rgba(0,0,0,0.07);margin-top:8px}
-.ftop{font-size:13.5px;font-weight:700;color:#3B61C4;margin-bottom:4px}
-.fsub{font-size:11px;color:#9B9B9B}
+/* ── Summary ── */
+.sum-card{background:linear-gradient(135deg,#eef2ff,#e8eeff);border:1.5px solid rgba(59,97,196,0.22);border-radius:14px;padding:26px 30px}
+
+/* ── Self-test checklist ── */
+.check-wrap{background:#fff;border:1.5px solid #d1fae5;border-radius:14px;padding:22px 26px;margin-top:14px}
+.check-ttl{font-size:12px;font-weight:800;color:#065f46;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.check-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.check-item{display:flex;align-items:flex-start;gap:9px;font-size:12.5px;color:#1f2937;line-height:1.5}
+.check-box{width:14px;height:14px;border:2px solid #6ee7b7;border-radius:3px;flex-shrink:0;margin-top:1px}
+
+/* ── Study tips ── */
+.tips{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:30px}
+.tip{background:#fff;border:1px solid rgba(0,0,0,0.07);border-radius:12px;padding:16px 17px;border-top:3px solid}
+.tipn{font-size:9px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:6px}
+.tipt{font-size:12px;line-height:1.6;color:#4b5563}
+
+/* ── Footer ── */
+.footer{text-align:center;padding:28px 52px;border-top:1px solid rgba(0,0,0,0.07);margin-top:10px}
+.ftop{font-size:13px;font-weight:800;color:#3B61C4;margin-bottom:4px;letter-spacing:.3px}
+.fsub{font-size:10.5px;color:#9B9B9B}
 
 @page{margin:0;size:A4}
 @media print{
   body{background:#fff}
-  .hdr,.recall-card,.sum-card,.formula,th,.nhbar,.bdot,.badge.orange,.ccard{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
+  .hdr,.recall-card,.sum-card,.callout,.formula,.flow-wrap,.cornell,.check-wrap,th,.nhbar,.bdot,.badge,.ccard,.tip,.defrow,.tbl-wrap,.ncard{-webkit-print-color-adjust:exact!important;print-color-adjust:exact!important}
   .sec{break-inside:avoid}
-  .cgrid,.tips{break-inside:avoid}
-  .ncard,.ccard,.tip{box-shadow:none!important}
+  .cgrid,.tips,.check-grid,.flow,.cornell{break-inside:avoid}
+  .ncard,.ccard,.tip,.callout,.chart-wrap{box-shadow:none!important}
+  .cornell{break-inside:avoid}
 }
 </style>
 </head>
@@ -232,8 +342,8 @@ tr:nth-child(even) td{background:#f9fafb}
   <div class="sub">${esc(sessionType || 'Study Session')}</div>
   <div class="badges">
     <span class="badge">${esc(prettyDate)}</span>
-    <span class="badge orange">${esc(sessionType || 'Study Session')}</span>
-    ${conceptList.length ? `<span class="badge">${conceptList.length} concept${conceptList.length !== 1 ? 's' : ''} covered</span>` : ''}
+    <span class="badge org">${esc(sessionType || 'Study Session')}</span>
+    ${conceptList.length ? `<span class="badge grn">${conceptList.length} concept${conceptList.length !== 1 ? 's' : ''} covered</span>` : ''}
   </div>
 </div>
 
@@ -242,67 +352,58 @@ tr:nth-child(even) td{background:#f9fafb}
 ${recallText?.trim() ? `
 <div class="sec">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(232,83,26,0.1)">✍️</div>
-    <div class="sec-label" style="color:#E8531A">Active Recall</div>
-    <div class="sec-rule" style="background:#E8531A"></div>
+    <div class="sec-icon" style="background:rgba(249,115,22,0.1)">✍️</div>
+    <div class="sec-label" style="color:#f97316">Active Recall</div>
+    <div class="sec-rule" style="background:#f97316"></div>
   </div>
-  <div class="recall-card">
-    ${renderBlocks(recallBlocks) || `<p class="np">${esc(recallText.trim())}</p>`}
-  </div>
+  <div class="recall-card">${renderBlocks(recallBlocks) || `<p class="np">${esc(recallText.trim())}</p>`}</div>
 </div>` : ''}
 
 ${conceptList.length ? `
 <div class="sec">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(59,97,196,0.1);color:#3B61C4;font-size:16px">◈</div>
+    <div class="sec-icon" style="background:rgba(59,97,196,0.1);color:#3B61C4;font-size:15px">◈</div>
     <div class="sec-label" style="color:#3B61C4">Key Concepts</div>
     <div class="sec-rule" style="background:#3B61C4"></div>
   </div>
-  <div class="cgrid">
-    ${conceptList.map((c, i) => `
-      <div class="ccard">
-        <div class="cnum">Concept ${String(i+1).padStart(2,'0')}</div>
-        <div class="ctxt">${esc(c)}</div>
-      </div>`).join('')}
-  </div>
+  <div class="cgrid">${renderConceptCards(conceptList)}</div>
+  ${renderConceptChart(conceptList)}
 </div>` : ''}
 
 ${main?.trim() ? `
 <div class="sec">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(0,0,0,0.06);font-size:16px">≡</div>
-    <div class="sec-label" style="color:#6B6B6B">Session Notes</div>
-    <div class="sec-rule" style="background:#1A1A1A"></div>
+    <div class="sec-icon" style="background:rgba(0,0,0,0.06);font-size:15px">≡</div>
+    <div class="sec-label" style="color:#374151">Session Notes</div>
+    <div class="sec-rule" style="background:#374151"></div>
   </div>
-  <div class="ncard">
-    ${renderBlocks(mainBlocks)}
-  </div>
+  ${hasRichNotes ? renderCornell(mainBlocks) : `<div class="ncard">${renderBlocks(mainBlocks)}</div>`}
 </div>` : ''}
 
+${conceptList.length ? renderChecklist(conceptList) : ''}
+
 ${summary?.trim() ? `
-<div class="sec">
+<div class="sec" style="margin-top:28px">
   <div class="sec-hdr">
     <div class="sec-icon" style="background:rgba(59,97,196,0.1);color:#3B61C4">★</div>
     <div class="sec-label" style="color:#3B61C4">Summary &amp; Takeaways</div>
     <div class="sec-rule" style="background:#3B61C4"></div>
   </div>
-  <div class="sum-card">
-    ${renderBlocks(summaryBlocks) || `<p class="np">${esc(summary.trim())}</p>`}
-  </div>
+  <div class="sum-card">${renderBlocks(summaryBlocks) || `<p class="np">${esc(summary.trim())}</p>`}</div>
 </div>` : ''}
 
 <div class="tips">
-  <div class="tip">
-    <div class="tipn">Tip 01 · Spaced Repetition</div>
-    <div class="tipt">Review these notes again in 24 hours, then 3 days, then 1 week to move them into long-term memory.</div>
+  <div class="tip" style="border-top-color:#3B61C4">
+    <div class="tipn" style="color:#3B61C4">⏱ Spaced Repetition</div>
+    <div class="tipt">Review again in 24 h, then 3 days, then 1 week to lock these concepts into long-term memory.</div>
   </div>
-  <div class="tip">
-    <div class="tipn">Tip 02 · Active Recall</div>
-    <div class="tipt">Cover your notes and try to retrieve the key points from scratch — struggling is how memory forms.</div>
+  <div class="tip" style="border-top-color:#a855f7">
+    <div class="tipn" style="color:#a855f7">🧠 Active Recall</div>
+    <div class="tipt">Cover the notes and retrieve key points from scratch — the struggle IS the learning.</div>
   </div>
-  <div class="tip">
-    <div class="tipn">Tip 03 · Teach It</div>
-    <div class="tipt">Explain these concepts aloud as if teaching someone. If you can't explain it simply, study it again.</div>
+  <div class="tip" style="border-top-color:#f97316">
+    <div class="tipn" style="color:#f97316">🗣 Teach It</div>
+    <div class="tipt">Explain each concept aloud as if teaching someone. If you stumble, that's your gap to close.</div>
   </div>
 </div>
 
@@ -317,7 +418,7 @@ ${summary?.trim() ? `
 </body>
 </html>`
 
-  const win = window.open('', '_blank', 'width=960,height=800')
+  const win = window.open('', '_blank', 'width=1000,height=860')
   if (!win) {
     alert('Allow pop-ups for StudyEdge AI to export your notes.')
     return
