@@ -136,8 +136,12 @@ export default function CalendarDayView({
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           userId,
-          title: `Study: ${session.courseName}`,
-          description: `${session.sessionType} · ${session.duration} min`,
+          title: session.fromCoachPlan
+            ? `${session.courseName} — Study Plan · Session ${session.planSessionNum} of ${session.planTotalSessions}`
+            : `Study: ${session.courseName}`,
+          description: session.fromCoachPlan
+            ? `${session.sessionType} · ${session.duration} min · StudyEdge AI Plan`
+            : `${session.sessionType} · ${session.duration} min`,
           startDateTime: startISO,
           endDateTime: endISO,
           date: startISO ? undefined : (session.dateStr || dayStr),

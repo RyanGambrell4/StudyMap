@@ -996,33 +996,81 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     const courseId = course.id ?? form.courseIdx
     saveCoachPlan(courseId, plan, { ...form, sessionMinutes: form.sessionLen, importantDates: form.dates })
 
-    // Convert AI plan sessions into actual calendar sessions
     const sessionLen = form.sessionLen || 60
+
+    // Time slot windows per preference (minutes since midnight)
+    const PREF_SLOTS = {
+      Morning:   [8 * 60, 10 * 60 + 30],
+      Afternoon: [13 * 60, 15 * 60 + 30],
+      Evening:   [18 * 60, 20 * 60],
+    }
+    const slots = PREF_SLOTS[preferredTime] ?? PREF_SLOTS.Morning
+
+    const minsToTime = mins => {
+      const h24 = Math.floor(mins / 60), m = mins % 60
+      return `${h24 % 12 || 12}:${String(m).padStart(2, '0')} ${h24 >= 12 ? 'PM' : 'AM'}`
+    }
+
+    // Build a lookup of Google Calendar busy blocks by date
+    const gcalByDate = {}
+    googleEvents.forEach(e => {
+      if (!e.start?.includes('T')) return
+      const day = e.start.split('T')[0]
+      if (!gcalByDate[day]) gcalByDate[day] = []
+      const parse = iso => { const dt = new Date(iso); return dt.getHours() * 60 + dt.getMinutes() }
+      gcalByDate[day].push({ startMin: parse(e.start), endMin: parse(e.end || e.start) })
+    })
+
+    // Count total sessions across all weeks for labelling
+    const totalSessions = (plan.weeklyFocus || []).reduce((sum, w) => sum + (w.sessions?.length || 0), 0)
+    let sessionNum = 0
+
     const calSessions = []
     const dayOffsets = [0, 1, 2, 3, 4, 5] // Mon–Sat
+    const sessionsPerDay = {} // how many sessions already placed on each date
+
     ;(plan.weeklyFocus || []).forEach((week, wi) => {
       const { startDate } = weekDateRange(wi)
-      const weekSessions = week.sessions || []
-      weekSessions.forEach((sess, si) => {
+      ;(week.sessions || []).forEach((sess, si) => {
+        sessionNum++
         const offset = dayOffsets[si % dayOffsets.length]
         const d = new Date(startDate)
         d.setDate(d.getDate() + offset)
-        const dateStr = d.toISOString().split('T')[0]
-        const label = sess.sessionLabel
-          ? `${sess.sessionLabel} · ${sess.focusArea || ''}`.slice(0, 45)
-          : (sess.focusArea || 'Study Session').slice(0, 45)
+        const dateKey = d.toISOString().split('T')[0]
+
+        // Pick start time based on how many sessions are already on this day
+        const dayIdx = sessionsPerDay[dateKey] ?? 0
+        sessionsPerDay[dateKey] = dayIdx + 1
+        let startMin = dayIdx < slots.length
+          ? slots[dayIdx]
+          : slots[slots.length - 1] + (dayIdx - slots.length + 1) * (sessionLen + 30)
+
+        // Nudge past any overlapping Google Calendar event
+        const blocks = (gcalByDate[dateKey] || []).sort((a, b) => a.startMin - b.startMin)
+        for (const block of blocks) {
+          if (startMin < block.endMin && startMin + sessionLen > block.startMin) {
+            startMin = block.endMin + 15
+          }
+        }
+
+        const dur = sess.duration || sessionLen
+        const focusSuffix = sess.focusArea ? ` · ${sess.focusArea}`.slice(0, 32) : ''
+        const label = `Session ${sessionNum} of ${totalSessions}${focusSuffix}`
+
         calSessions.push({
           id: `coach-${courseId}-w${wi}-s${si}-${Date.now()}`,
-          dateStr,
+          dateStr: dateKey,
           courseId: form.courseIdx,
           courseName: course.name,
           color: course.color,
           sessionType: label,
-          duration: sess.duration || sessionLen,
-          startTime: null,
-          endTime: null,
+          duration: dur,
+          startTime: minsToTime(startMin),
+          endTime: minsToTime(startMin + dur),
           isManual: true,
           fromCoachPlan: true,
+          planSessionNum: sessionNum,
+          planTotalSessions: totalSessions,
         })
       })
     })
