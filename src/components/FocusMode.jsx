@@ -850,7 +850,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
       {/* ── Break overlay ── */}
       {breakOverlay && (
-        <div className="absolute inset-0 z-[110] flex flex-col items-center justify-center" style={{ backgroundColor: '#F7F6F3' }}>
+        <div className="absolute inset-0 z-[110] flex flex-col items-center justify-center" style={{ backgroundColor: '#F7F6F3', isolation: 'isolate' }}>
           <div className="text-center">
             <div className="relative flex items-center justify-center mb-10">
               <div className="w-36 h-36 rounded-full" style={{ backgroundColor: dot, opacity: 0.08, animation: 'breathe 4s ease-in-out infinite' }} />
@@ -867,7 +867,9 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
       {/* ── Session complete screen ── */}
       {showComplete && (
-        <div className="absolute inset-0 z-[105] flex flex-col overflow-y-auto" style={{ background: `linear-gradient(160deg, ${dot}18 0%, #F7F6F3 50%)` }}>
+        <div className="absolute inset-0 z-[105] flex flex-col overflow-y-auto" style={{ backgroundColor: '#F7F6F3' }}>
+          {/* Tinted gradient overlay — separate element so base bg stays fully opaque */}
+          <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(160deg, ${dot}28 0%, transparent 55%)` }} />
           {/* Hero header */}
           <div className="flex flex-col items-center pt-14 pb-10 px-6 shrink-0">
             {/* Glowing check circle */}
