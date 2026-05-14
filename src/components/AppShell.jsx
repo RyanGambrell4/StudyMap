@@ -355,7 +355,7 @@ export default function AppShell({
       {/* ── Main content ── */}
       <main
         className="lg:pt-14 pb-24 lg:pb-0 min-h-screen"
-        style={{ overflowX: 'hidden', minWidth: 0, width: '100%' }}
+        style={{ minWidth: 0, width: '100%', maxWidth: '100vw' }}
       >
         {showTrialBanner && (
           <div style={{

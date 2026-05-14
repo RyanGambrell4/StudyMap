@@ -383,14 +383,14 @@ export default function DashboardView({
 
   // ── Main ─────────────────────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: '100vh', background: D.bg, overflowY: 'auto', overflowX: 'hidden' }}>
+    <div style={{ minHeight: '100vh', background: D.bg, overflowY: 'auto' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
         @keyframes dash-pulse { 0%,100%{opacity:0.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.3)} }
         @media (max-width: 767px) {
           .dash-header { padding: 20px 16px 6px !important; }
-          .dash-grid { grid-template-columns: 1fr !important; padding: 12px 16px 48px !important; gap: 12px !important; }
-          .dash-grid > * { grid-column: auto !important; }
+          .dash-grid { grid-template-columns: 1fr !important; padding: 12px 16px 90px !important; gap: 12px !important; }
+          .dash-grid > * { grid-column: auto !important; min-width: 0 !important; max-width: 100% !important; overflow: hidden !important; }
           .dash-course-row { grid-template-columns: 4px 1fr !important; gap: 10px !important; }
           .dash-course-meta { display: none !important; }
           .dash-radar-row { grid-template-columns: 3px 1fr auto !important; gap: 10px !important; }

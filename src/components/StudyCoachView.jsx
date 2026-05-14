@@ -34,7 +34,7 @@ const SC_STYLE = `
   @media (max-width:768px) { .sc-grid { grid-template-columns:1fr !important; } .sc-rail { position:static !important; top:auto !important; } }
   @media (max-width:640px) {
     .sc-header-pad { padding:16px 14px 12px !important; }
-    .sc-page-pad { padding:14px 14px 60px !important; }
+    .sc-page-pad { padding:14px 14px 90px !important; }
     .sc-stepper { gap:3px !important; padding:4px !important; }
     .sc-step-btn { padding:8px 8px !important; min-width:0 !important; }
     .sc-step-label { display:none !important; }
