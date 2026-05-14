@@ -50,8 +50,8 @@ const NAV_ITEMS = [
   },
 ]
 
-// Mobile: first 5 items
-const MOBILE_NAV = NAV_ITEMS.slice(0, 5)
+// Mobile nav: dashboard, calendar, coach, grades, progress
+const MOBILE_NAV = ['dashboard', 'calendar', 'coach', 'grades', 'progress'].map(id => NAV_ITEMS.find(n => n.id === id))
 
 const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
 
