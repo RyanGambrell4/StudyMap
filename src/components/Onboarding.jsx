@@ -141,7 +141,14 @@ function SplashScreen({ onNext }) {
         </p>
 
         {/* Feature cards */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 36 }}>
+        <style>{`@media (max-width: 480px) {
+          .ob-splash-grid { grid-template-columns: 1fr !important; }
+          .ob-time-grid   { grid-template-columns: 1fr !important; }
+          .ob-plan-grid   { grid-template-columns: 1fr !important; }
+          .ob-school-grid { grid-template-columns: 1fr !important; }
+          .ob-school-grid [style*="span 2"] { grid-column: span 1 !important; }
+        }`}</style>
+        <div className="ob-splash-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 36 }}>
           {SPLASH_CARDS.map(card => (
             <div
               key={card.label}
@@ -364,7 +371,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           We'll personalize your study plan for your level and workload.
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
+        <div className="ob-school-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
           {SCHOOL_OPTIONS.map(({ key, label, desc }) => (
             <OptionCard
               key={key}
@@ -459,7 +466,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           We'll schedule your sessions when your focus is at its peak.
         </p>
 
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
+        <div className="ob-time-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
           {TIME_OPTIONS.map(({ value, label, desc }) => (
             <OptionCard
               key={value}
@@ -497,7 +504,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         </p>
 
         {/* Free vs Pro */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
+        <div className="ob-plan-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
           {/* Free */}
           <div style={{
             backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.08)',

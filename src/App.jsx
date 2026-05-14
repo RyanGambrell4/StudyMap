@@ -299,7 +299,9 @@ export default function App() {
     // away before Supabase has a chance to exchange the code for a session.
     const hasOAuthCode = !!sp.get('code')
     const hasOAuthHash = typeof window !== 'undefined' && window.location.hash.includes('access_token')
-    const inOAuthCallback = hasOAuthCode || hasOAuthHash
+    // Supabase email confirmation uses token_hash + type params (not OAuth code)
+    const hasEmailToken = !!sp.get('token_hash')
+    const inOAuthCallback = hasOAuthCode || hasOAuthHash || hasEmailToken
 
     // Detect an existing Supabase session in localStorage. When the Supabase
     // client is still booting (before getSession resolves), `session` is

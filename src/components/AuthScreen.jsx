@@ -113,6 +113,7 @@ export default function AuthScreen({ initialMode, onBack }) {
 
     return (
       <div style={{ minHeight: '100vh', display: 'flex' }}>
+        <style>{`@media (max-width: 767px) { .auth-left-panel { display: none !important; } }`}</style>
         {/* Left panel */}
         <LeftPanel />
 
