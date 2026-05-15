@@ -50,7 +50,7 @@ export default function AccountView({
     setCanceling(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
-      const res = await fetch('/api/cancel-trial', {
+      const res = await fetch('/api/stripe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ action: 'cancel-trial', userId: user.id }),
