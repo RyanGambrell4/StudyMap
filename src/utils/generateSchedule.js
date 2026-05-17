@@ -202,7 +202,7 @@ export function generateSchedule(courses, schedule, learningStyle, yearLevel = '
   const weeks = []
   let current = new Date(today)
   const dow = current.getDay()
-  current = addDays(current, dow === 0 ? 1 : -(dow - 1))
+  current = addDays(current, dow === 0 ? -6 : -(dow - 1))
 
   while (current < scheduleEnd) {
     const week = { startDate: new Date(current), days: [] }
