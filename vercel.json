@@ -15,27 +15,31 @@
   ],
   "crons": [
     {
-      "path": "/api/crons?job=re-engage",
+      "path": "/api/re-engage",
       "schedule": "0 10 * * *"
     },
     {
-      "path": "/api/crons?job=weekly-recap",
+      "path": "/api/weekly-recap",
       "schedule": "0 10 * * 0"
     },
     {
-      "path": "/api/crons?job=exam-countdown",
+      "path": "/api/weekly-digest",
+      "schedule": "0 10 * * 0"
+    },
+    {
+      "path": "/api/exam-countdown",
       "schedule": "0 11 * * *"
     },
     {
-      "path": "/api/crons?job=day14-upgrade",
+      "path": "/api/day14-upgrade",
       "schedule": "0 11 * * *"
     },
     {
-      "path": "/api/crons?job=day1-tips",
+      "path": "/api/day1-tips",
       "schedule": "0 11 * * *"
     },
     {
-      "path": "/api/crons?job=day7-milestone",
+      "path": "/api/day7-milestone",
       "schedule": "0 11 * * *"
     }
   ],
@@ -44,7 +48,6 @@
     { "source": "/api/cancel-trial", "destination": "/api/stripe" },
     { "source": "/api/google-calendar-events", "destination": "/api/google-calendar" },
     { "source": "/api/add-to-google-calendar", "destination": "/api/google-calendar?action=add" },
-    { "source": "/api/welcome-email", "destination": "/api/crons?job=welcome-email" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
     { "source": "/app", "destination": "/app.html" },
