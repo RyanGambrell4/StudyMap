@@ -380,6 +380,7 @@ function TrackTab({ course, gradeData, dot, onSave }) {
   const components  = gradeData?.components ?? []
   const targetGrade = gradeData?.targetGrade ?? 85
   const [defenseMode, setDefenseMode] = useState(false)
+  const [entryMode, setEntryMode] = useState('pct') // 'pct' | 'pts'
 
   const [localGrades, setLocalGrades] = useState(() => {
     const m = {}
@@ -391,18 +392,54 @@ function TrackTab({ course, gradeData, dot, onSave }) {
     components.forEach(c => { m[c.id] = c.graded ?? false })
     return m
   })
+  const [ptsEarned, setPtsEarned] = useState(() => {
+    const m = {}
+    components.forEach(c => { m[c.id] = c.ptsEarned !== undefined ? String(c.ptsEarned) : '' })
+    return m
+  })
+  const [ptsPossible, setPtsPossible] = useState(() => {
+    const m = {}
+    components.forEach(c => { m[c.id] = c.ptsPossible !== undefined ? String(c.ptsPossible) : '' })
+    return m
+  })
 
   const saveTimer = useRef(null)
-  const autoSave = useCallback((grades, graded) => {
+  const autoSave = useCallback((grades, graded, earned, possible) => {
     if (saveTimer.current) clearTimeout(saveTimer.current)
     saveTimer.current = setTimeout(() => {
-      const updated = components.map(c => ({ ...c, grade: graded[c.id] && grades[c.id] !== '' ? parseFloat(grades[c.id]) : null, graded: graded[c.id] && grades[c.id] !== '' }))
+      const updated = components.map(c => ({
+        ...c,
+        grade: graded[c.id] && grades[c.id] !== '' ? parseFloat(grades[c.id]) : null,
+        graded: graded[c.id] && grades[c.id] !== '',
+        ptsEarned: earned[c.id] !== '' ? parseFloat(earned[c.id]) : undefined,
+        ptsPossible: possible[c.id] !== '' ? parseFloat(possible[c.id]) : undefined,
+      }))
       onSave({ ...gradeData, components: updated })
     }, 600)
   }, [components, gradeData, onSave])
 
-  const setGrade     = (id, val) => { const g = { ...localGrades, [id]: val }; setLocalGrades(g); autoSave(g, localGraded) }
-  const toggleGraded = (id)      => { const g = { ...localGraded, [id]: !localGraded[id] }; setLocalGraded(g); autoSave(localGrades, g) }
+  const setGrade     = (id, val) => { const g = { ...localGrades, [id]: val }; setLocalGrades(g); autoSave(g, localGraded, ptsEarned, ptsPossible) }
+  const toggleGraded = (id)      => { const g = { ...localGraded, [id]: !localGraded[id] }; setLocalGraded(g); autoSave(localGrades, g, ptsEarned, ptsPossible) }
+
+  const setPtsEntry = (id, field, val) => {
+    const e = field === 'earned'   ? { ...ptsEarned,   [id]: val } : ptsEarned
+    const p = field === 'possible' ? { ...ptsPossible, [id]: val } : ptsPossible
+    if (field === 'earned')   setPtsEarned(e)
+    if (field === 'possible') setPtsPossible(p)
+    // Derive pct grade when both fields filled
+    const earned   = parseFloat(field === 'earned'   ? val : ptsEarned[id])
+    const possible = parseFloat(field === 'possible' ? val : ptsPossible[id])
+    if (!isNaN(earned) && !isNaN(possible) && possible > 0) {
+      const pct = (earned / possible * 100).toFixed(2)
+      const g = { ...localGrades, [id]: pct }
+      const graded = { ...localGraded, [id]: true }
+      setLocalGrades(g)
+      setLocalGraded(graded)
+      autoSave(g, graded, e, p)
+    } else {
+      autoSave(localGrades, localGraded, e, p)
+    }
+  }
 
   const liveComponents = useMemo(() =>
     components.map(c => ({ ...c, grade: localGraded[c.id] && localGrades[c.id] !== '' ? parseFloat(localGrades[c.id]) : null, graded: localGraded[c.id] && localGrades[c.id] !== '' })),
@@ -482,24 +519,59 @@ function TrackTab({ course, gradeData, dot, onSave }) {
 
       {/* Breakdown */}
       <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
-        <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 14 }}>Grade breakdown</div>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase' }}>Grade breakdown</div>
+          <div style={{ display: 'flex', gap: 2, padding: 3, borderRadius: 8, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}` }}>
+            {[{ id: 'pct', label: '%' }, { id: 'pts', label: 'pts' }].map(m => (
+              <button key={m.id} onClick={() => setEntryMode(m.id)} style={{ padding: '4px 10px', borderRadius: 6, fontSize: 11.5, fontWeight: 600, cursor: 'pointer', background: entryMode === m.id ? '#FFFFFF' : 'transparent', color: entryMode === m.id ? D.text : D.muted, boxShadow: entryMode === m.id ? '0 1px 3px rgba(0,0,0,0.1)' : 'none', border: 'none', transition: 'all 0.12s' }}>
+                {m.label}
+              </button>
+            ))}
+          </div>
+        </div>
         {liveComponents.map((c, i) => {
           const contrib = c.graded && c.grade !== null ? (c.grade * c.weight / (totalWeight || 100)) : null
+          const gradeVal = localGrades[c.id] !== '' && !isNaN(parseFloat(localGrades[c.id])) ? parseFloat(localGrades[c.id]) : null
+          const weightPct = totalWeight > 0 ? (c.weight / totalWeight) * 100 : 0
           return (
-            <div key={c.id} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 14, alignItems: 'center', padding: '14px 0', borderBottom: i < liveComponents.length - 1 ? `1px solid ${D.border}` : 'none' }}>
-              <div>
-                <div style={{ fontSize: 13.5, fontWeight: 500, color: D.text }}>{c.component}</div>
-                <div style={{ fontSize: 11.5, color: D.dim, marginTop: 2 }}>
-                  <span style={{ fontFamily: 'inherit' }}>{c.weight}%</span> weight
-                  {contrib != null && <> · contributes <span style={{ color: D.indigo, fontFamily: 'inherit' }}>{contrib.toFixed(1)}%</span> to final</>}
+            <div key={c.id} style={{ padding: '14px 0', borderBottom: i < liveComponents.length - 1 ? `1px solid ${D.border}` : 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 500, color: D.text }}>{c.component}</div>
+                  <div style={{ fontSize: 11.5, color: D.dim, marginTop: 2 }}>
+                    <span style={{ fontFamily: 'inherit' }}>{c.weight}%</span> of grade
+                    {contrib != null && <> · adds <span style={{ color: D.indigo, fontFamily: 'inherit' }}>{contrib.toFixed(1)}%</span> to total</>}
+                  </div>
                 </div>
+                <button onClick={() => toggleGraded(c.id)} style={{ padding: '5px 11px', borderRadius: 999, fontSize: 11, fontWeight: 600, cursor: 'pointer', flexShrink: 0, background: localGraded[c.id] ? 'rgba(59,97,196,0.08)' : 'rgba(0,0,0,0.04)', border: localGraded[c.id] ? '1px solid rgba(59,97,196,0.25)' : `1px solid ${D.border}`, color: localGraded[c.id] ? D.indigo : D.muted, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                  {localGraded[c.id] && <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.indigo }} />}
+                  {localGraded[c.id] ? 'Graded' : 'Pending'}
+                </button>
+                {entryMode === 'pct' ? (
+                  <div style={{ position: 'relative', flexShrink: 0 }}>
+                    <input type="number" value={localGrades[c.id]} onChange={e => setGrade(c.id, e.target.value)} placeholder="--" className="gh-input"
+                      style={{ width: 66, textAlign: 'center', color: gradeVal != null ? letterColor(letterGrade(gradeVal)) : D.dim, fontWeight: gradeVal != null ? 700 : 400 }} />
+                    <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: D.dim, pointerEvents: 'none' }}>%</span>
+                  </div>
+                ) : (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+                    <input type="number" value={ptsEarned[c.id] ?? ''} onChange={e => setPtsEntry(c.id, 'earned', e.target.value)} placeholder="--" className="gh-input"
+                      style={{ width: 50, textAlign: 'center', color: gradeVal != null ? letterColor(letterGrade(gradeVal)) : D.dim, fontWeight: gradeVal != null ? 700 : 400 }} />
+                    <span style={{ fontSize: 12, color: D.dim }}>/</span>
+                    <input type="number" value={ptsPossible[c.id] ?? ''} onChange={e => setPtsEntry(c.id, 'possible', e.target.value)} placeholder="--" className="gh-input"
+                      style={{ width: 50, textAlign: 'center', color: D.muted }} />
+                  </div>
+                )}
               </div>
-              <button onClick={() => toggleGraded(c.id)} style={{ padding: '5px 11px', borderRadius: 999, fontSize: 11, fontWeight: 600, cursor: 'pointer', background: localGraded[c.id] ? 'rgba(59,97,196,0.08)' : 'rgba(0,0,0,0.04)', border: localGraded[c.id] ? '1px solid rgba(59,97,196,0.25)' : `1px solid ${D.border}`, color: localGraded[c.id] ? D.indigo : D.muted, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                {localGraded[c.id] && <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.indigo }} />}
-                {localGraded[c.id] ? 'Graded' : 'Pending'}
-              </button>
-              <input type="number" value={localGrades[c.id]} onChange={e => setGrade(c.id, e.target.value)} placeholder="-" className="gh-input"
-                style={{ width: 66, textAlign: 'center', color: c.grade != null ? letterColor(letterGrade(parseFloat(localGrades[c.id]))) : D.dim }} />
+              {/* Weight bar */}
+              <div style={{ height: 3, borderRadius: 2, background: 'rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', borderRadius: 2, width: `${weightPct}%`, background: localGraded[c.id] && gradeVal != null ? letterColor(letterGrade(gradeVal)) : D.border, transition: 'width 0.3s, background 0.3s' }} />
+              </div>
+              {entryMode === 'pts' && gradeVal != null && (
+                <div style={{ fontSize: 11, color: D.dim, marginTop: 4, fontFamily: 'inherit' }}>
+                  = <span style={{ fontWeight: 600, color: letterColor(letterGrade(gradeVal)) }}>{gradeVal.toFixed(1)}%</span>
+                </div>
+              )}
             </div>
           )
         })}

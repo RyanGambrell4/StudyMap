@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from './lib/supabase'
-import { initUserData, clearUserData, savePlan, refreshSubscription } from './lib/db'
+import { initUserData, clearUserData, savePlan, refreshSubscription, saveEmailDigest } from './lib/db'
 import { getActivePlan, canAddCourse, createCheckoutSession } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
 import { initAnalytics, identifyUser, resetUser, track } from './lib/analytics'
@@ -153,7 +153,7 @@ export default function App() {
     window.location.href = '/'
   }
 
-  const handleOnboardingComplete = ({ yearLevel: yl, learningStyle: ls, preferredTime, schoolType: st }) => {
+  const handleOnboardingComplete = ({ yearLevel: yl, learningStyle: ls, preferredTime, schoolType: st, emailDigest }) => {
     setYearLevel(yl)
     setLearningStyle(ls)
     setSchoolType(st ?? null)
@@ -161,7 +161,14 @@ export default function App() {
     setCourses([])
     setInitialCompletedIds(new Set())
     setShowOutput(true)
-    track('onboarding_completed', { yearLevel: yl, learningStyle: ls, preferredTime })
+    // Persist email digest preference so the weekly cron can read it
+    if (emailDigest) {
+      localStorage.setItem('studyedge_email_digest', '1')
+    } else {
+      localStorage.removeItem('studyedge_email_digest')
+    }
+    saveEmailDigest(!!emailDigest)
+    track('onboarding_completed', { yearLevel: yl, learningStyle: ls, preferredTime, emailDigest: !!emailDigest })
   }
 
   const handleSavePlan = (completedIds, updatedAssignments) => {

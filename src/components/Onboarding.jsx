@@ -348,6 +348,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   const [yearLevel, setYearLevel]           = useState(null)
   const [learningStyle, setLearningStyle]   = useState(null)
   const [preferredTime, setPreferredTime]   = useState(null)
+  const [emailDigest, setEmailDigest]       = useState(true)
 
   const goTo = (next, dir = 1) => {
     setAnimDir(dir)
@@ -545,12 +546,35 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           </div>
         </div>
 
+        {/* Email digest opt-in — pre-checked */}
+        <label style={{
+          display: 'flex', alignItems: 'flex-start', gap: 10,
+          cursor: 'pointer', marginBottom: 20,
+          padding: '12px 14px',
+          background: emailDigest ? 'rgba(59,97,196,0.04)' : '#F7F6F3',
+          border: `1px solid ${emailDigest ? 'rgba(59,97,196,0.18)' : 'rgba(0,0,0,0.07)'}`,
+          borderRadius: 10,
+          transition: 'background 0.15s, border-color 0.15s',
+        }}>
+          <input
+            type="checkbox"
+            checked={emailDigest}
+            onChange={e => setEmailDigest(e.target.checked)}
+            style={{ marginTop: 1, accentColor: '#3B61C4', width: 15, height: 15, flexShrink: 0, cursor: 'pointer' }}
+          />
+          <span style={{ fontSize: 13, color: '#4B4B4B', lineHeight: 1.45 }}>
+            <strong style={{ color: '#1A1A1A' }}>Send me a weekly study digest</strong>
+            <br />
+            A Sunday summary of your progress and the week ahead. Unsubscribe any time.
+          </span>
+        </label>
+
         <button
           onClick={async () => {
             const result = await createCheckoutSession('pro', 'monthly', userEmail, userId, { trial: true })
             if (!result) return
             if (result.alreadySubscribed) {
-              onComplete({ yearLevel, learningStyle, preferredTime, schoolType })
+              onComplete({ yearLevel, learningStyle, preferredTime, schoolType, emailDigest })
               return
             }
             window.location.href = result
@@ -569,7 +593,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         </button>
 
         <button
-          onClick={() => onComplete({ yearLevel, learningStyle, preferredTime, schoolType })}
+          onClick={() => onComplete({ yearLevel, learningStyle, preferredTime, schoolType, emailDigest })}
           style={{
             width: '100%', padding: '10px', backgroundColor: 'transparent', border: 'none',
             color: '#9B9B9B', fontSize: '0.88rem', cursor: 'pointer', fontFamily: 'inherit',

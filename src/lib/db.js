@@ -210,3 +210,8 @@ export async function appendSessionRecall(entry) {
   if (_cache) _cache.session_recalls = updated
   await _upsert({ session_recalls: updated })
 }
+
+export async function saveEmailDigest(enabled) {
+  if (_cache) _cache.email_digest = enabled
+  await _upsert({ email_digest: enabled })
+}

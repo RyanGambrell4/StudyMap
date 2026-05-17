@@ -7,7 +7,8 @@ import {
   appendSessionRecall,
 } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
+import { sliderToRecall } from '../utils/adaptationEngine'
 import { useCelebration } from '../utils/useCelebration'
 import { extractText } from '../utils/extractText'
 import AIChatView from './AIChatView'
@@ -447,6 +448,7 @@ const TAB_COLORS = {
   recall:     '#A855F7',
   flashcards: '#EC4899',
   quiz:       '#F97316',
+  practice:   '#059669',
   notes:      '#14B8A6',
   ai:         '#3B82F6',
 }
@@ -492,6 +494,34 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   }, [showComplete])
   const [pdfDownloading, setPdfDownloading] = useState(false)
 
+  // ── Recall check (post-session rating) ──
+  const [showRecallSheet, setShowRecallSheet] = useState(false)
+  const [recallSlider, setRecallSlider] = useState(50)
+  const [recallSubmitted, setRecallSubmitted] = useState(false)
+  const [recallData, setRecallData] = useState(null) // { score, label } once submitted
+
+  useEffect(() => {
+    if (!showComplete) return
+    const t = setTimeout(() => setShowRecallSheet(true), 900)
+    return () => clearTimeout(t)
+  }, [showComplete])
+
+  const handleRecallSubmit = () => {
+    const { score, label } = sliderToRecall(recallSlider)
+    const data = { score, label }
+    setRecallData(data)
+    setRecallSubmitted(true)
+    setShowRecallSheet(false)
+    // Pass recall data upstream when session completes
+    onComplete(session.id, elapsed, data)
+  }
+
+  const handleRecallSkip = () => {
+    setRecallSubmitted(true)
+    setShowRecallSheet(false)
+    onComplete(session.id, elapsed, null)
+  }
+
   // ── Pomodoro ──
   const BREAK_INTERVAL = 25 * 60
   const BREAK_DURATION = 5 * 60
@@ -524,6 +554,18 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const [fcFlipped, setFcFlipped] = useState(false)
   const [fcKnown, setFcKnown] = useState(new Set())
   const [fcAnswerState, setFcAnswerState] = useState(null) // 'correct' | 'wrong' | null
+
+  // ── Practice (mid-session: 3 MCQ + 1 short answer) ──
+  const [practiceQuestions, setPracticeQuestions] = useState(null)
+  const [practiceLoading, setPracticeLoading] = useState(false)
+  const [practiceError, setPracticeError] = useState('')
+  const [practiceIdx, setPracticeIdx] = useState(0)
+  const [practiceAnswers, setPracticeAnswers] = useState([])
+  const [practiceSelected, setPracticeSelected] = useState(null)
+  const [practiceConfirmed, setPracticeConfirmed] = useState(false)
+  const [practicePhase, setPracticePhase] = useState('mcq') // 'mcq' | 'short' | 'done'
+  const [practiceShortAnswer, setPracticeShortAnswer] = useState('')
+  const [practiceScoreSet, setPracticeScoreSet] = useState(false)
 
   // ── Quick Quiz ──
   const [quizQuestions, setQuizQuestions] = useState(null)
@@ -715,8 +757,15 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     setBlockRemaining(nextBlock.duration * 60)
     setRunning(true)
   }
-  const handleBackToDashboard = () => onComplete(session.id, elapsed)
-  const handleStartNext = () => { if (nextSession && onStartNext) onStartNext(session.id, elapsed, nextSession); else onComplete(session.id, elapsed) }
+  // If recall was already submitted via the sheet, onComplete was already called —
+  // these buttons are only reachable if the sheet was skipped or dismissed.
+  const handleBackToDashboard = () => {
+    if (!recallSubmitted) onComplete(session.id, elapsed, null)
+  }
+  const handleStartNext = () => {
+    if (!recallSubmitted) onComplete(session.id, elapsed, null)
+    if (nextSession && onStartNext) onStartNext(session.id, elapsed, nextSession)
+  }
 
   const handleCheckYourself = () => {
     if (recallText.trim()) appendRecall(session.courseId, session.courseName, session.sessionType, recallText)
@@ -781,6 +830,78 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   }
 
   const resetQuiz = () => { setQuizQuestions(null); setQuizDone(false); setQuizAnswers([]); setQuizIdx(0); setQuizSelected(null); setQuizConfirmed(false) }
+
+  const handleGeneratePractice = async () => {
+    if (!canUseAI()) { onShowPaywall?.('ai'); return }
+    setPracticeLoading(true); setPracticeError(''); setPracticeQuestions(null)
+    setPracticeAnswers([]); setPracticeIdx(0); setPracticeSelected(null)
+    setPracticeConfirmed(false); setPracticePhase('mcq'); setPracticeShortAnswer('')
+    const savedPlan = getCachedCoachPlan(session.courseId)
+    const emphasis = savedPlan?.formData?.emphasisTopics ?? savedPlan?.formData?.topics?.join(', ') ?? null
+    const struggles = savedPlan?.struggles ?? []
+    try {
+      const token = await getAccessToken()
+      const res = await fetch('/api/generate-study-tools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          mode: 'quick-quiz',
+          courseName: session.courseName,
+          sessionType: session.sessionType,
+          topic: quizTopic.trim() || session.sessionType,
+          text: [
+            notesConcepts && `Key concepts:\n${notesConcepts}`,
+            notesMain && `Notes:\n${notesMain}`,
+            studyTools?.text?.slice(0, 3000),
+          ].filter(Boolean).join('\n\n') || '',
+          images: [],
+          professorEmphasis: emphasis || null,
+          struggles: struggles.length ? struggles : null,
+          learningStyle: learningStyle ?? null,
+        }),
+      })
+      if (!res.ok) {
+        let msg = 'Failed to generate practice questions'
+        try { const d = await res.json(); msg = d.error ?? msg } catch {}
+        throw new Error(msg)
+      }
+      const data = await res.json()
+      // Limit to 3 MCQ for the practice tab
+      setPracticeQuestions((data.questions ?? []).slice(0, 3))
+      incrementAIQuery()
+    } catch (e) { setPracticeError(e.message) }
+    finally { setPracticeLoading(false) }
+  }
+
+  const handlePracticeConfirm = () => {
+    if (practiceSelected === null) return
+    const q = practiceQuestions[practiceIdx]
+    const correct = practiceSelected === q.answer
+    setPracticeAnswers(prev => [...prev, { correct }])
+    setPracticeConfirmed(true)
+  }
+
+  const handlePracticeNext = () => {
+    if (practiceIdx + 1 >= (practiceQuestions?.length ?? 0)) {
+      setPracticePhase('short')
+    } else {
+      setPracticeIdx(i => i + 1)
+      setPracticeSelected(null)
+      setPracticeConfirmed(false)
+    }
+  }
+
+  const handlePracticeFinish = () => {
+    const correct = practiceAnswers.filter(a => a.correct).length
+    const total = practiceQuestions?.length ?? 3
+    // Auto-set recall slider based on practice score (if not yet submitted)
+    if (!practiceScoreSet) {
+      const score = Math.round((correct / total) * 100)
+      setRecallSlider(score)
+      setPracticeScoreSet(true)
+    }
+    setPracticePhase('done')
+  }
 
   const handleGenerateFlashcards = async () => {
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
@@ -927,8 +1048,9 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     { id: 'recall',     label: 'Active Recall', num: 1 },
     { id: 'flashcards', label: 'Flashcards',    num: 2 },
     { id: 'quiz',       label: 'Quick Quiz',    num: 3 },
-    { id: 'notes',      label: 'Notes',         num: 4 },
-    { id: 'ai',         label: 'Ask AI',        num: 5 },
+    { id: 'practice',   label: 'Practice',      num: 4 },
+    { id: 'notes',      label: 'Notes',         num: 5 },
+    { id: 'ai',         label: 'Ask AI',        num: 6 },
   ]
 
   // ─── RENDER ─────────────────────────────────────────────────────────────────
@@ -969,6 +1091,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
       {/* ── Session complete screen ── */}
       {showComplete && (
+        <>
         <div className="absolute inset-0 z-[105] flex flex-col overflow-y-auto" style={{ backgroundColor: '#F7F6F3' }}>
           {/* Tinted gradient overlay — separate element so base bg stays fully opaque */}
           <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(160deg, ${dot}28 0%, transparent 55%)` }} />
@@ -1025,34 +1148,186 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               })}
             </div>
 
-            {/* Buttons */}
-            <div className="flex flex-col gap-2.5">
-              <button onClick={handleBackToDashboard} className="w-full py-3.5 rounded-2xl font-bold text-white text-sm"
-                style={{ background: `linear-gradient(135deg, ${dot}, ${dot}bb)`, boxShadow: `0 4px 18px ${dot}45` }}>
-                Back to Dashboard
-              </button>
-              {nextSession && (
-                <button onClick={handleStartNext} className="w-full py-3 rounded-2xl font-semibold text-sm"
-                  style={{ backgroundColor: `${dot}14`, border: `1px solid ${dot}35`, color: dot }}>
-                  Start Next: {nextSession.courseName} →
+            {/* Buttons — hidden while recall sheet is open */}
+            {!showRecallSheet && (
+              <div className="flex flex-col gap-2.5">
+                <button onClick={handleBackToDashboard} className="w-full py-3.5 rounded-2xl font-bold text-white text-sm"
+                  style={{ background: `linear-gradient(135deg, ${dot}, ${dot}bb)`, boxShadow: `0 4px 18px ${dot}45` }}>
+                  Back to Dashboard
                 </button>
-              )}
-              {hasNotes && (
+                {nextSession && (
+                  <button onClick={handleStartNext} className="w-full py-3 rounded-2xl font-semibold text-sm"
+                    style={{ backgroundColor: `${dot}14`, border: `1px solid ${dot}35`, color: dot }}>
+                    Start Next: {nextSession.courseName} →
+                  </button>
+                )}
+                {hasNotes && (
+                  <button
+                    onClick={handleDownloadPDF}
+                    disabled={pdfDownloading}
+                    className="w-full py-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
+                    style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B' }}
+                  >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    {pdfDownloading ? 'Generating PDF…' : 'Download Session Notes'}
+                  </button>
+                )}
+              </div>
+            )}
+
+            {/* Recall submitted confirmation */}
+            {recallSubmitted && recallData && (
+              <div className="flex items-center justify-center gap-2 pt-2 pb-1"
+                style={{ color: '#9B9B9B', fontSize: 12 }}>
+                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                </svg>
+                Recall rated: {recallData.label}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* ── Recall bottom sheet ── */}
+        {showRecallSheet && (
+          <div
+            className="absolute inset-x-0 bottom-0 z-[110]"
+            style={{ animation: 'recall-slide-up 0.38s cubic-bezier(0.34,1.2,0.64,1) forwards' }}
+          >
+            <style>{`
+              @keyframes recall-slide-up {
+                from { transform: translateY(100%); opacity: 0.6; }
+                to   { transform: translateY(0);    opacity: 1; }
+              }
+            `}</style>
+            <div style={{
+              background: '#FFFFFF',
+              borderTopLeftRadius: 24,
+              borderTopRightRadius: 24,
+              boxShadow: '0 -8px 40px rgba(0,0,0,0.14)',
+              padding: '20px 24px 40px',
+              border: '1px solid rgba(0,0,0,0.07)',
+              borderBottom: 'none',
+            }}>
+              {/* Drag handle */}
+              <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.10)', margin: '0 auto 20px' }} />
+
+              {/* Color top accent */}
+              <div style={{
+                width: 42, height: 42, borderRadius: 12,
+                background: `${dot}14`, border: `1px solid ${dot}28`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                marginBottom: 14,
+              }}>
+                <svg width="20" height="20" fill="none" stroke={dot} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M12 2a3 3 0 013 3 3 3 0 013 3v3a3 3 0 01-3 3v2a3 3 0 01-3 3 3 3 0 01-3-3V5a3 3 0 013-3z" />
+                  <path d="M9 5a3 3 0 00-3 3 3 3 0 00-3 3v3a3 3 0 003 3v2a3 3 0 003 3" />
+                </svg>
+              </div>
+
+              <p style={{ fontSize: 16, fontWeight: 700, color: '#111111', margin: '0 0 4px', letterSpacing: -0.2 }}>
+                How well did you retain this?
+              </p>
+              <p style={{ fontSize: 13, color: '#9B9B9B', margin: '0 0 24px' }}>
+                Your rating helps us adapt your plan.
+              </p>
+
+              {/* Slider */}
+              <div style={{ marginBottom: 12 }}>
+                <style>{`
+                  .recall-slider {
+                    -webkit-appearance: none;
+                    appearance: none;
+                    width: 100%;
+                    height: 6px;
+                    border-radius: 3px;
+                    background: linear-gradient(90deg, ${dot} ${recallSlider}%, rgba(0,0,0,0.10) ${recallSlider}%);
+                    outline: none;
+                    cursor: pointer;
+                  }
+                  .recall-slider::-webkit-slider-thumb {
+                    -webkit-appearance: none;
+                    appearance: none;
+                    width: 26px;
+                    height: 26px;
+                    border-radius: 50%;
+                    background: #FFFFFF;
+                    border: 2.5px solid ${dot};
+                    box-shadow: 0 2px 10px ${dot}50;
+                    cursor: pointer;
+                    transition: transform 0.1s;
+                  }
+                  .recall-slider::-webkit-slider-thumb:active {
+                    transform: scale(1.15);
+                  }
+                  .recall-slider::-moz-range-thumb {
+                    width: 26px;
+                    height: 26px;
+                    border-radius: 50%;
+                    background: #FFFFFF;
+                    border: 2.5px solid ${dot};
+                    box-shadow: 0 2px 10px ${dot}50;
+                    cursor: pointer;
+                  }
+                `}</style>
+                <input
+                  type="range"
+                  className="recall-slider"
+                  min="0"
+                  max="100"
+                  value={recallSlider}
+                  onChange={e => setRecallSlider(Number(e.target.value))}
+                />
+              </div>
+
+              {/* Slider labels + current label */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 20 }}>
+                <span style={{ fontSize: 11, color: '#9B9B9B', fontWeight: 500 }}>Forgot it</span>
+                <span style={{ fontSize: 13, fontWeight: 700, color: dot }}>
+                  {sliderToRecall(recallSlider).label}
+                </span>
+                <span style={{ fontSize: 11, color: '#9B9B9B', fontWeight: 500 }}>Nailed it</span>
+              </div>
+
+              {/* Action buttons */}
+              <div style={{ display: 'flex', gap: 10 }}>
                 <button
-                  onClick={handleDownloadPDF}
-                  disabled={pdfDownloading}
-                  className="w-full py-3 rounded-xl text-sm font-medium transition-colors flex items-center justify-center gap-2"
-                  style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B' }}
+                  onClick={handleRecallSkip}
+                  style={{
+                    flex: 1, padding: '11px 0',
+                    background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.09)',
+                    borderRadius: 12, fontSize: 13, fontWeight: 600,
+                    color: '#9B9B9B', cursor: 'pointer', fontFamily: 'inherit',
+                  }}
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                  </svg>
-                  {pdfDownloading ? 'Generating PDF…' : 'Download Session Notes'}
+                  Skip
                 </button>
+                <button
+                  onClick={handleRecallSubmit}
+                  style={{
+                    flex: 3, padding: '11px 0',
+                    background: dot, border: 'none',
+                    borderRadius: 12, fontSize: 14, fontWeight: 700,
+                    color: '#FFFFFF', cursor: 'pointer', fontFamily: 'inherit',
+                    boxShadow: `0 4px 14px ${dot}45`,
+                  }}
+                >
+                  Rate session
+                </button>
+              </div>
+
+              {/* Paywall hint for free users */}
+              {getActivePlan() === 'free' && (
+                <p style={{ fontSize: 11.5, color: '#C0C0C0', textAlign: 'center', marginTop: 14 }}>
+                  Upgrade to let your plan adapt based on this rating.
+                </p>
               )}
             </div>
           </div>
-        </div>
+        )}
+        </>
       )}
 
       {/* ── Main session layout ── */}
@@ -1582,6 +1857,159 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                       style={{ backgroundColor: quizConfirmed || quizSelected ? dot : 'rgba(0,0,0,0.08)' }}
                     >
                       {quizConfirmed ? (quizIdx + 1 >= quizQuestions.length ? 'See Results' : 'Next Question →') : 'Check Answer'}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* ── Practice ── */}
+            {activeTab === 'practice' && (
+              <>
+                {practiceLoading ? (
+                  <div className="flex flex-col items-center justify-center py-16 gap-3">
+                    <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: TAB_COLORS.practice, borderTopColor: 'transparent' }} />
+                    <p className="text-sm font-medium" style={{ color: '#9B9B9B' }}>Generating practice questions...</p>
+                  </div>
+                ) : practiceError ? (
+                  <div className="flex flex-col items-center justify-center py-14 gap-4">
+                    <p className="text-sm text-center" style={{ color: '#9B9B9B' }}>{practiceError}</p>
+                    <button
+                      onClick={handleGeneratePractice}
+                      className="px-5 py-2.5 rounded-xl text-sm font-semibold text-white"
+                      style={{ backgroundColor: TAB_COLORS.practice }}
+                    >Try again</button>
+                  </div>
+                ) : !practiceQuestions || practiceQuestions.length === 0 ? (
+                  <div className="flex flex-col items-center justify-center py-14 gap-5 px-4">
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style={{ backgroundColor: `${TAB_COLORS.practice}15` }}>
+                      <span>🧩</span>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-semibold text-sm mb-1" style={{ color: '#1A1A1A' }}>Test your understanding</p>
+                      <p className="text-xs leading-relaxed" style={{ color: '#9B9B9B' }}>3 multiple choice questions + 1 short answer, built from your study material.</p>
+                    </div>
+                    <button
+                      onClick={handleGeneratePractice}
+                      className="w-full py-3.5 rounded-xl text-sm font-bold text-white"
+                      style={{ backgroundColor: TAB_COLORS.practice }}
+                    >Start practice</button>
+                  </div>
+                ) : practicePhase === 'done' ? (
+                  <div className="flex flex-col items-center justify-center py-12 gap-5 px-4">
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style={{ backgroundColor: `${TAB_COLORS.practice}15` }}>
+                      <span>{practiceAnswers.filter(Boolean).length >= 2 ? '🎯' : '📖'}</span>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-bold text-lg mb-1" style={{ color: '#1A1A1A' }}>
+                        {practiceAnswers.filter(Boolean).length}/3 correct
+                      </p>
+                      <p className="text-xs leading-relaxed" style={{ color: '#9B9B9B' }}>
+                        {practiceAnswers.filter(Boolean).length === 3
+                          ? 'Perfect score. Your recall rating has been updated.'
+                          : practiceAnswers.filter(Boolean).length >= 2
+                          ? 'Good work. Review the ones you missed.'
+                          : 'Keep studying. Your recall slider reflects your score.'}
+                      </p>
+                    </div>
+                    {practiceScoreSet && (
+                      <div className="w-full rounded-xl px-4 py-3 flex items-center gap-2" style={{ backgroundColor: `${TAB_COLORS.practice}10`, border: `1px solid ${TAB_COLORS.practice}25` }}>
+                        <span className="text-xs">✓</span>
+                        <p className="text-xs font-medium" style={{ color: TAB_COLORS.practice }}>Recall slider auto-set from your score</p>
+                      </div>
+                    )}
+                    <button
+                      onClick={() => {
+                        setPracticeQuestions([])
+                        setPracticeIdx(0)
+                        setPracticeAnswers([])
+                        setPracticeSelected(null)
+                        setPracticeConfirmed(false)
+                        setPracticePhase('mcq')
+                        setPracticeShortAnswer('')
+                        setPracticeScoreSet(false)
+                      }}
+                      className="w-full py-3 rounded-xl text-sm font-semibold"
+                      style={{ backgroundColor: 'rgba(0,0,0,0.05)', color: '#1A1A1A' }}
+                    >Try again</button>
+                  </div>
+                ) : practicePhase === 'short' ? (
+                  <div className="flex flex-col gap-4">
+                    <div className="rounded-2xl px-4 py-4" style={{ backgroundColor: `${TAB_COLORS.practice}08`, border: `1px solid ${TAB_COLORS.practice}20` }}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white" style={{ backgroundColor: TAB_COLORS.practice }}>Short answer</span>
+                      </div>
+                      <p className="text-sm font-medium leading-relaxed" style={{ color: '#1A1A1A' }}>
+                        {practiceQuestions[3]?.question || `Explain in your own words: what is the key concept from today's session?`}
+                      </p>
+                    </div>
+                    <textarea
+                      value={practiceShortAnswer}
+                      onChange={e => setPracticeShortAnswer(e.target.value)}
+                      placeholder="Write your answer here..."
+                      rows={5}
+                      className="w-full rounded-xl px-4 py-3 text-sm resize-none outline-none"
+                      style={{ border: '1.5px solid rgba(0,0,0,0.1)', backgroundColor: '#FAFAFA', color: '#1A1A1A', lineHeight: 1.6 }}
+                    />
+                    <button
+                      onClick={handlePracticeFinish}
+                      disabled={practiceShortAnswer.trim().length < 10}
+                      className="w-full py-3.5 rounded-xl text-sm font-bold text-white disabled:opacity-30 transition-all"
+                      style={{ backgroundColor: TAB_COLORS.practice }}
+                    >Submit answer</button>
+                  </div>
+                ) : (
+                  <div className="flex flex-col gap-4">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-xs font-semibold" style={{ color: '#9B9B9B' }}>
+                        Question {practiceIdx + 1} of 3
+                      </p>
+                      <div className="flex gap-1">
+                        {[0, 1, 2].map(i => (
+                          <div key={i} className="w-2 h-2 rounded-full transition-all" style={{ backgroundColor: i < practiceIdx ? TAB_COLORS.practice : i === practiceIdx ? TAB_COLORS.practice : 'rgba(0,0,0,0.12)', opacity: i < practiceIdx ? 1 : i === practiceIdx ? 1 : 0.4 }} />
+                        ))}
+                      </div>
+                    </div>
+                    <div className="rounded-2xl px-4 py-4" style={{ backgroundColor: `${TAB_COLORS.practice}08`, border: `1px solid ${TAB_COLORS.practice}20` }}>
+                      <p className="text-sm font-medium leading-relaxed" style={{ color: '#1A1A1A' }}>
+                        {practiceQuestions[practiceIdx]?.question}
+                      </p>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      {(practiceQuestions[practiceIdx]?.options || []).map((opt, i) => {
+                        const isSelected = practiceSelected === i
+                        const isCorrect = practiceConfirmed && i === practiceQuestions[practiceIdx]?.correctIndex
+                        const isWrong = practiceConfirmed && isSelected && i !== practiceQuestions[practiceIdx]?.correctIndex
+                        return (
+                          <button
+                            key={i}
+                            onClick={() => !practiceConfirmed && setPracticeSelected(i)}
+                            className="w-full text-left px-4 py-3.5 rounded-xl text-sm transition-all"
+                            style={{
+                              border: isCorrect ? `1.5px solid ${TAB_COLORS.practice}` : isWrong ? '1.5px solid #EF4444' : isSelected ? `1.5px solid ${TAB_COLORS.practice}` : '1.5px solid rgba(0,0,0,0.08)',
+                              backgroundColor: isCorrect ? `${TAB_COLORS.practice}12` : isWrong ? '#FEF2F2' : isSelected ? `${TAB_COLORS.practice}08` : '#FAFAFA',
+                              color: '#1A1A1A',
+                              fontWeight: isSelected || isCorrect ? 600 : 400,
+                            }}
+                          >
+                            <span className="text-xs mr-2 opacity-50">{String.fromCharCode(65 + i)}.</span>
+                            {opt}
+                          </button>
+                        )
+                      })}
+                    </div>
+                    {practiceConfirmed && practiceQuestions[practiceIdx]?.explanation && (
+                      <div className="rounded-xl px-4 py-3" style={{ backgroundColor: `${TAB_COLORS.practice}08`, border: `1px solid ${TAB_COLORS.practice}20` }}>
+                        <p className="text-xs leading-relaxed italic" style={{ color: '#9B9B9B' }}>{practiceQuestions[practiceIdx].explanation}</p>
+                      </div>
+                    )}
+                    <button
+                      onClick={practiceConfirmed ? handlePracticeNext : handlePracticeConfirm}
+                      disabled={!practiceConfirmed && practiceSelected === null}
+                      className="w-full py-3.5 rounded-xl text-sm font-bold text-white disabled:opacity-30 transition-all"
+                      style={{ backgroundColor: practiceConfirmed || practiceSelected !== null ? TAB_COLORS.practice : 'rgba(0,0,0,0.08)' }}
+                    >
+                      {practiceConfirmed ? (practiceIdx + 1 >= 3 ? 'Short answer' : 'Next') : 'Check answer'}
                     </button>
                   </div>
                 )}

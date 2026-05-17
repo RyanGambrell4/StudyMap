@@ -11,6 +11,8 @@ import {
   saveCompletedSession,
   removeCompletedSession,
 } from '../lib/db'
+import { runAdaptation } from '../utils/adaptationEngine'
+import AdaptModal from './AdaptModal'
 import FocusMode from './FocusMode'
 import BlueprintScreen from './BlueprintScreen'
 import SyllabusUploadModal from './SyllabusUploadModal'
@@ -342,6 +344,11 @@ export default function OutputView({
   const [blueprintSession, setBlueprintSession] = useState(null) // session waiting for blueprint
   const [activeBlueprint, setActiveBlueprint] = useState(null)  // chosen blueprint (or null = skip)
   const [activeSection, setActiveSection] = useState('dashboard')
+  // ── Adaptive plan state ──────────────────────────────────────────────────────
+  const [pendingAdaptation, setPendingAdaptation] = useState(null) // { injectedSession, reason, dayName }
+  const [pendingPaywallAdaptation, setPendingPaywallAdaptation] = useState(null) // free user teaser
+  const [showAdaptModal, setShowAdaptModal] = useState(false)
+  const [showPaywallAdaptModal, setShowPaywallAdaptModal] = useState(false)
   const [showFirstQueryNudge, setShowFirstQueryNudge] = useState(false)
 
   // ── First-query nudge listener ────────────────────────────────────────────────
@@ -762,7 +769,7 @@ export default function OutputView({
     setBlueprintSession(null)
   }, [blueprintSession])
   const handleBlueprintExit = useCallback(() => { setBlueprintSession(null); setActiveBlueprint(null) }, [])
-  const handleFocusComplete = useCallback((id, elapsed) => {
+  const handleFocusComplete = useCallback((id, elapsed, recallData) => {
     setCompletedIds(prev => new Set([...prev, id]))
     setFocusSession(sess => {
       if (sess) {
@@ -780,11 +787,29 @@ export default function OutputView({
           return [...filtered, record].slice(-500)
         })
         saveCompletedSession(record)
+
+        // Run adaptation engine if recall data was provided
+        if (recallData?.score !== undefined) {
+          const todayStr = new Date().toISOString().split('T')[0]
+          const result = runAdaptation(sess, recallData.score, courses, getCachedManualSessions(), todayStr)
+          if (result) {
+            if (getActivePlan() !== 'free') {
+              // Paid: inject the session and show the adapt modal
+              setManualSessions(prev => [...prev, result.injectedSession])
+              setPendingAdaptation(result)
+              setShowAdaptModal(true)
+            } else {
+              // Free: show the paywall teaser with what would have changed
+              setPendingPaywallAdaptation(result)
+              setShowPaywallAdaptModal(true)
+            }
+          }
+        }
       }
       return null
     })
     setActiveBlueprint(null)
-  }, [])
+  }, [courses])
   const handleFocusStartNext = useCallback((id, _elapsed, nextSess) => {
     setCompletedIds(prev => new Set([...prev, id]))
     setBlueprintSession(nextSess)
@@ -1003,6 +1028,93 @@ export default function OutputView({
         <ShareCardModal courses={courses} stats={stats} onClose={() => setShowShareCard(false)} />
       )}
 
+      {/* ── Adapt modal (paid users) ── */}
+      {showAdaptModal && pendingAdaptation && (
+        <AdaptModal
+          adaptation={pendingAdaptation}
+          onAccept={() => { setShowAdaptModal(false) }}
+          onEdit={(sess) => {
+            setShowAdaptModal(false)
+            setAddSessionDayStr(sess.dateStr)
+          }}
+          onDismiss={() => {
+            setManualSessions(prev => prev.filter(s => s.id !== pendingAdaptation.injectedSession.id))
+            setPendingAdaptation(null)
+            setShowAdaptModal(false)
+          }}
+        />
+      )}
+
+      {/* ── Paywall adaptation teaser (free users) ── */}
+      {showPaywallAdaptModal && pendingPaywallAdaptation && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 500,
+          background: 'rgba(0,0,0,0.38)', backdropFilter: 'blur(6px)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20,
+        }}>
+          <div style={{
+            background: '#FFFFFF', borderRadius: 22, width: '100%', maxWidth: 380,
+            boxShadow: '0 24px 64px rgba(0,0,0,0.14)', overflow: 'hidden',
+          }}>
+            <div style={{ height: 4, background: 'linear-gradient(90deg, #3B61C4, #6B8AE8)' }} />
+            <div style={{ padding: '28px 24px 24px' }}>
+              <div style={{
+                width: 48, height: 48, borderRadius: 12,
+                background: 'rgba(59,97,196,0.10)', border: '1px solid rgba(59,97,196,0.20)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 16,
+              }}>
+                <svg width="22" height="22" fill="none" stroke="#3B61C4" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" />
+                </svg>
+              </div>
+              <h3 style={{ margin: '0 0 8px', fontSize: 17, fontWeight: 700, color: '#111111', letterSpacing: -0.3 }}>
+                Your plan would have updated
+              </h3>
+              <p style={{ margin: '0 0 20px', fontSize: 14, color: '#6B6B6B', lineHeight: 1.55 }}>
+                {pendingPaywallAdaptation.reason} Upgrade to let your plan actually adapt.
+              </p>
+              <div style={{
+                borderRadius: 12, border: '1px solid rgba(59,97,196,0.20)',
+                background: 'rgba(59,97,196,0.04)', padding: '12px 16px',
+                marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12,
+              }}>
+                <div style={{ width: 3, height: 36, borderRadius: 2, background: '#3B61C4', flexShrink: 0 }} />
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#3B61C4', marginBottom: 2 }}>Would have added</div>
+                  <div style={{ fontSize: 13, fontWeight: 600, color: '#111111' }}>
+                    {pendingPaywallAdaptation.injectedSession.courseName} &middot; Review &middot; {pendingPaywallAdaptation.dayName}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => { setShowPaywallAdaptModal(false); onShowPaywall?.('adapt') }}
+                style={{
+                  width: '100%', padding: '12px 0',
+                  background: '#3B61C4', color: '#fff',
+                  border: 'none', borderRadius: 11,
+                  fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                  marginBottom: 10, fontFamily: 'inherit',
+                  boxShadow: '0 4px 14px rgba(59,97,196,0.35)',
+                }}
+              >
+                Upgrade for $9/month
+              </button>
+              <button
+                onClick={() => { setShowPaywallAdaptModal(false); setPendingPaywallAdaptation(null) }}
+                style={{
+                  width: '100%', padding: '10px 0',
+                  background: 'transparent', border: 'none',
+                  fontSize: 13, fontWeight: 600, color: '#9B9B9B',
+                  cursor: 'pointer', fontFamily: 'inherit',
+                }}
+              >
+                Maybe later
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {gcalToast && (
         <div style={{
           position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)',
@@ -1084,6 +1196,8 @@ export default function OutputView({
             coachPlans={coachPlans}
             onOpenStudyCoach={handleOpenStudyCoach}
             schoolType={schoolType}
+            pendingAdaptation={pendingAdaptation}
+            onShowAdaptModal={() => setShowAdaptModal(true)}
           />
         )}
 

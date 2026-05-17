@@ -151,6 +151,8 @@ export default function DashboardView({
   coachPlans,
   onOpenStudyCoach,
   schoolType,
+  pendingAdaptation,
+  onShowAdaptModal,
 }) {
   const plan = getActivePlan()
   const aiUsed = getAIQueriesUsed()
@@ -745,7 +747,30 @@ export default function DashboardView({
         </Card>
 
         {/* ── THIS WEEK (span 6) ── */}
-        <Card glowColor={onPace ? D.green : D.amber} style={{ gridColumn: 'span 6', padding: 20 }} onClick={onNavigateToProgress}>
+        <Card
+          glowColor={onPace ? D.green : D.amber}
+          style={{ gridColumn: 'span 6', padding: 20, position: 'relative' }}
+          onClick={pendingAdaptation ? onShowAdaptModal : onNavigateToProgress}
+        >
+          {/* Adaptation badge — pulsing blue dot */}
+          {pendingAdaptation && (
+            <div style={{
+              position: 'absolute', top: 14, right: 14,
+              display: 'flex', alignItems: 'center', gap: 6,
+              background: `${D.blue}10`, border: `1px solid ${D.blue}30`,
+              borderRadius: 999, padding: '3px 10px 3px 6px',
+              cursor: 'pointer',
+            }}>
+              <span style={{
+                width: 7, height: 7, borderRadius: '50%',
+                background: D.blue, display: 'inline-block',
+                animation: 'dash-pulse 1.8s ease-in-out infinite',
+              }} />
+              <span style={{ fontSize: 11, fontWeight: 700, color: D.blue, letterSpacing: '0.02em' }}>
+                Plan updated
+              </span>
+            </div>
+          )}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
             <Label color={onPace ? D.green : D.amber}>This week</Label>
             <span style={{
