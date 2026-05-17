@@ -560,7 +560,7 @@ export default function CalendarDayView({
               </div>
               {onAddSession && (
                 <button
-                  onClick={onAddSession}
+                  onClick={() => onAddSession(dayStr)}
                   style={{
                     pointerEvents: 'auto',
                     marginTop: 4,
