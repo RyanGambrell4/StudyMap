@@ -1,0 +1,364 @@
+import { useState, useEffect, useRef } from 'react'
+import { getAccessToken } from '../lib/supabase'
+import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
+
+const D = {
+  bg: '#F7F6F3', bgCard: '#FFFFFF',
+  border: 'rgba(0,0,0,0.07)', borderStrong: 'rgba(0,0,0,0.12)',
+  text: '#111111', textMuted: '#6B6B6B', textDim: '#9B9B9B',
+  accent: '#E8531A', green: '#16A34A', amber: '#D97706', red: '#DC2626', blue: '#3B61C4',
+}
+
+const DIFFICULTY_COLOR = { easy: '#16A34A', medium: '#D97706', hard: '#DC2626' }
+
+const BURST_LIMIT_KEY = 'studyedge_burst_uses'
+
+function getBurstUses() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(BURST_LIMIT_KEY) ?? '{}')
+    const now = new Date()
+    const monthKey = `${now.getFullYear()}-${now.getMonth()}`
+    return { count: raw[monthKey] ?? 0, monthKey }
+  } catch { return { count: 0, monthKey: '' } }
+}
+
+function incrementBurstUse() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(BURST_LIMIT_KEY) ?? '{}')
+    const now = new Date()
+    const monthKey = `${now.getFullYear()}-${now.getMonth()}`
+    raw[monthKey] = (raw[monthKey] ?? 0) + 1
+    localStorage.setItem(BURST_LIMIT_KEY, JSON.stringify(raw))
+  } catch {}
+}
+
+const QUESTION_TIME = 10 // seconds per question
+
+export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpenCheatSheet }) {
+  const plan = getActivePlan()
+  const isPro = plan !== 'free'
+  const { count: burstUsed, monthKey } = getBurstUses()
+  const atLimit = !isPro && burstUsed >= 3
+
+  const [courseIdx, setCourseIdx] = useState(0)
+  const [topic, setTopic] = useState('')
+  const [step, setStep] = useState('setup') // 'setup' | 'loading' | 'quiz' | 'done'
+  const [questions, setQuestions] = useState(null)
+  const [qIdx, setQIdx] = useState(0)
+  const [selected, setSelected] = useState(null)
+  const [confirmed, setConfirmed] = useState(false)
+  const [answers, setAnswers] = useState([]) // { correct, difficulty }
+  const [streak, setStreak] = useState(0)
+  const [maxStreak, setMaxStreak] = useState(0)
+  const [timeLeft, setTimeLeft] = useState(QUESTION_TIME)
+  const [flash, setFlash] = useState(null) // 'correct' | 'wrong'
+  const [error, setError] = useState('')
+  const intervalRef = useRef(null)
+
+  const course = courses[courseIdx] ?? null
+  const COURSE_COLORS = ['#3B82F6','#8B5CF6','#059669','#D97706','#EC4899','#0891B2']
+  const courseColor = course?.color?.dot ?? COURSE_COLORS[courseIdx % COURSE_COLORS.length]
+
+  useEffect(() => {
+    if (step !== 'quiz' || confirmed) return
+    setTimeLeft(QUESTION_TIME)
+    intervalRef.current = setInterval(() => {
+      setTimeLeft(t => {
+        if (t <= 1) {
+          clearInterval(intervalRef.current)
+          handleConfirm(null) // time out = wrong
+          return 0
+        }
+        return t - 1
+      })
+    }, 1000)
+    return () => clearInterval(intervalRef.current)
+  }, [qIdx, step, confirmed])
+
+  async function startQuiz() {
+    if (atLimit) { onShowPaywall?.('study-hacks'); return }
+    if (!canUseAI()) { onShowPaywall?.('ai'); return }
+    setStep('loading')
+    setError('')
+
+    let retries = 0
+    while (retries < 2) {
+      try {
+        const token = await getAccessToken()
+        const res = await fetch('/api/quiz-burst', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ courseName: course?.name ?? 'unknown', topic: topic.trim() || undefined }),
+        })
+        const data = await res.json()
+        if (!res.ok) throw new Error(data.error ?? 'Failed')
+        incrementAIQuery()
+        incrementBurstUse()
+        setQuestions(data.questions)
+        setQIdx(0)
+        setAnswers([])
+        setStreak(0)
+        setMaxStreak(0)
+        setSelected(null)
+        setConfirmed(false)
+        setStep('quiz')
+        return
+      } catch (e) {
+        retries++
+        if (retries >= 2) {
+          setError(e.message || 'Something went wrong. Please try again.')
+          setStep('setup')
+        }
+      }
+    }
+  }
+
+  function handleConfirm(opt) {
+    if (confirmed) return
+    clearInterval(intervalRef.current)
+    setSelected(opt)
+    setConfirmed(true)
+
+    const q = questions[qIdx]
+    const isCorrect = opt !== null && opt === q.answer
+    setFlash(isCorrect ? 'correct' : 'wrong')
+    setTimeout(() => setFlash(null), 600)
+
+    const newStreak = isCorrect ? streak + 1 : 0
+    setStreak(newStreak)
+    setMaxStreak(prev => Math.max(prev, newStreak))
+    setAnswers(prev => [...prev, { correct: isCorrect, difficulty: q.difficulty }])
+
+    setTimeout(() => {
+      if (qIdx + 1 >= questions.length) {
+        setStep('done')
+      } else {
+        setQIdx(i => i + 1)
+        setSelected(null)
+        setConfirmed(false)
+      }
+    }, 1200)
+  }
+
+  const score = answers.filter(a => a.correct).length
+  const weakTopics = questions?.filter((_, i) => answers[i] && !answers[i].correct).map(q => q.question.slice(0, 40)).slice(0, 2) ?? []
+  const q = questions?.[qIdx]
+  const timePct = timeLeft / QUESTION_TIME
+
+  return (
+    <div style={{
+      position: 'fixed', inset: 0, zIndex: 400,
+      background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
+      display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
+    }}>
+      <div style={{
+        background: D.bgCard, borderRadius: 20, width: '100%', maxWidth: 520,
+        maxHeight: '92vh', display: 'flex', flexDirection: 'column',
+        boxShadow: '0 24px 64px rgba(0,0,0,0.14)', border: `1px solid ${D.border}`,
+        overflow: 'hidden',
+        transition: 'background 0.2s ease',
+        background: flash === 'correct' ? 'rgba(22,163,74,0.04)' : flash === 'wrong' ? 'rgba(220,38,38,0.04)' : D.bgCard,
+      }}>
+        <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes bar-in{from{width:0}}`}</style>
+
+        {/* Header */}
+        <div style={{ padding: '16px 20px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+          <div style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(232,83,26,0.10)', border: '1px solid rgba(232,83,26,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="16" height="16" fill="none" stroke={D.accent} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>
+            </svg>
+          </div>
+          <div style={{ flex: 1 }}>
+            <div style={{ fontSize: 15, fontWeight: 700, color: D.text }}>Quick Quiz Burst</div>
+            {step === 'quiz' && questions && (
+              <div style={{ fontSize: 11.5, color: D.textMuted, marginTop: 1 }}>
+                Question {qIdx + 1} of {questions.length}
+              </div>
+            )}
+          </div>
+          {/* Streak */}
+          {step === 'quiz' && streak > 0 && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'rgba(249,115,22,0.10)', border: '1px solid rgba(249,115,22,0.25)', borderRadius: 999, padding: '4px 10px' }}>
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#F97316" strokeWidth="1.75"><path d="M12 2s4 4 4 8a4 4 0 11-8 0c0-1 .5-2 1-3-1 2-4 4-4 8a7 7 0 1014 0c0-6-7-13-7-13z"/></svg>
+              <span style={{ fontSize: 12, fontWeight: 800, color: '#F97316' }}>{streak}</span>
+            </div>
+          )}
+          {step !== 'quiz' && (
+            <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 7, border: `1px solid ${D.border}`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: D.textDim, fontSize: 17, lineHeight: 1 }}>x</button>
+          )}
+        </div>
+
+        {/* Setup */}
+        {step === 'setup' && (
+          <div style={{ padding: 24, overflowY: 'auto' }}>
+            {courses.length > 0 && (
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>Course</div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {courses.map((c, i) => {
+                    const dot = c.color?.dot ?? COURSE_COLORS[i % COURSE_COLORS.length]
+                    const active = courseIdx === i
+                    return (
+                      <button key={i} onClick={() => setCourseIdx(i)} style={{ display: 'flex', alignItems: 'center', gap: 7, padding: '7px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600, border: `1px solid ${active ? `${dot}50` : D.border}`, background: active ? `${dot}12` : 'none', color: active ? dot : D.textMuted, cursor: 'pointer' }}>
+                        <span style={{ width: 7, height: 7, borderRadius: '50%', background: dot }} />
+                        {c.name}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            <div style={{ marginBottom: 24 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Focus topic (optional)</div>
+              <input value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. Cell signaling, Chapter 4, Mitosis" style={{ width: '100%', boxSizing: 'border-box', padding: '11px 14px', borderRadius: 10, border: `1px solid ${D.borderStrong}`, fontSize: 14, color: D.text, background: D.bg, outline: 'none', fontFamily: 'inherit' }} />
+            </div>
+
+            {error && <div style={{ fontSize: 13, color: D.red, marginBottom: 16, padding: '10px 14px', background: 'rgba(220,38,38,0.06)', borderRadius: 8 }}>{error}</div>}
+
+            {atLimit && (
+              <div style={{ fontSize: 13, color: D.amber, marginBottom: 16, padding: '10px 14px', background: 'rgba(217,119,6,0.08)', borderRadius: 8, border: '1px solid rgba(217,119,6,0.20)' }}>
+                You have used your 3 free Bursts this month. Upgrade for unlimited.
+              </div>
+            )}
+
+            <button
+              onClick={startQuiz}
+              disabled={atLimit}
+              style={{ width: '100%', padding: '13px', background: atLimit ? D.textDim : D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: atLimit ? 'default' : 'pointer', fontFamily: 'inherit', boxShadow: atLimit ? 'none' : `0 3px 12px rgba(232,83,26,0.35)` }}
+            >
+              {atLimit ? 'Upgrade to continue' : 'Start burst'}
+            </button>
+
+            {!isPro && !atLimit && (
+              <div style={{ textAlign: 'center', fontSize: 12, color: D.textDim, marginTop: 12 }}>
+                {3 - burstUsed} of 3 free Bursts remaining this month
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Loading */}
+        {step === 'loading' && (
+          <div style={{ padding: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
+            <div style={{ width: 44, height: 44, borderRadius: '50%', border: `3px solid rgba(232,83,26,0.2)`, borderTopColor: D.accent, animation: 'spin 0.8s linear infinite' }} />
+            <div style={{ fontSize: 14, fontWeight: 600, color: D.textMuted }}>Generating your quiz...</div>
+          </div>
+        )}
+
+        {/* Quiz */}
+        {step === 'quiz' && q && (
+          <div style={{ padding: 20, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 16 }}>
+            {/* Timer bar */}
+            <div style={{ height: 5, background: 'rgba(0,0,0,0.07)', borderRadius: 3, overflow: 'hidden' }}>
+              <div style={{
+                width: `${timePct * 100}%`, height: '100%', borderRadius: 3,
+                background: timePct > 0.5 ? D.green : timePct > 0.25 ? D.amber : D.red,
+                transition: 'width 1s linear, background 0.5s ease',
+              }} />
+            </div>
+
+            {/* Question */}
+            <div style={{ padding: '16px', background: D.bg, borderRadius: 12, border: `1px solid ${D.border}` }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+                <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.05em', padding: '2px 7px', borderRadius: 999, color: DIFFICULTY_COLOR[q.difficulty] ?? D.blue, background: `${DIFFICULTY_COLOR[q.difficulty] ?? D.blue}12`, border: `1px solid ${DIFFICULTY_COLOR[q.difficulty] ?? D.blue}25` }}>
+                  {q.difficulty}
+                </span>
+                <span style={{ fontSize: 12, color: D.textDim, marginLeft: 'auto', fontWeight: 600, fontVariantNumeric: 'tabular-nums' }}>{timeLeft}s</span>
+              </div>
+              <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: D.text, lineHeight: 1.5 }}>{q.question}</p>
+            </div>
+
+            {/* Options */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {q.options.map((opt, i) => {
+                const isSelected = selected === opt
+                const isCorrect = opt === q.answer
+                const showRight = confirmed && isCorrect
+                const showWrong = confirmed && isSelected && !isCorrect
+                return (
+                  <button
+                    key={i}
+                    onClick={() => !confirmed && handleConfirm(opt)}
+                    disabled={confirmed}
+                    style={{
+                      padding: '12px 16px', borderRadius: 10, textAlign: 'left',
+                      fontSize: 14, fontWeight: showRight ? 700 : 500, lineHeight: 1.4,
+                      border: `1.5px solid ${showRight ? D.green : showWrong ? D.red : isSelected ? D.blue : D.border}`,
+                      background: showRight ? 'rgba(22,163,74,0.08)' : showWrong ? 'rgba(220,38,38,0.08)' : isSelected ? 'rgba(59,97,196,0.06)' : D.bgCard,
+                      color: showRight ? D.green : showWrong ? D.red : isSelected ? D.blue : D.text,
+                      cursor: confirmed ? 'default' : 'pointer',
+                      transition: 'all 0.15s',
+                      fontFamily: 'inherit',
+                    }}
+                  >
+                    {opt}
+                    {showRight && ' ✓'}
+                    {showWrong && ' ✕'}
+                  </button>
+                )
+              })}
+            </div>
+
+            {confirmed && q.explanation && (
+              <div style={{ padding: '12px 14px', background: 'rgba(59,97,196,0.05)', borderRadius: 10, border: '1px solid rgba(59,97,196,0.15)', fontSize: 13, color: D.textMuted, lineHeight: 1.5 }}>
+                {q.explanation}
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Done */}
+        {step === 'done' && (
+          <div style={{ padding: 24, overflowY: 'auto' }}>
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <div style={{ fontSize: 48, fontWeight: 900, color: score >= 4 ? D.green : score >= 3 ? D.amber : D.red, letterSpacing: -2, lineHeight: 1 }}>
+                {score}/5
+              </div>
+              <div style={{ fontSize: 14, color: D.textMuted, marginTop: 8 }}>
+                {score === 5 ? 'Perfect score.' : score >= 4 ? 'Strong performance.' : score >= 3 ? 'Decent run, a few gaps to close.' : 'Worth a deeper review.'}
+              </div>
+              {maxStreak > 1 && (
+                <div style={{ fontSize: 12, color: '#F97316', marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><path d="M12 2s4 4 4 8a4 4 0 11-8 0c0-1 .5-2 1-3-1 2-4 4-4 8a7 7 0 1014 0c0-6-7-13-7-13z"/></svg>
+                  Best streak: {maxStreak}
+                </div>
+              )}
+            </div>
+
+            {weakTopics.length > 0 && (
+              <div style={{ padding: '14px 16px', background: 'rgba(220,38,38,0.04)', borderRadius: 10, border: '1px solid rgba(220,38,38,0.12)', marginBottom: 20 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: D.red, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Questions you missed</div>
+                {questions.filter((_, i) => answers[i] && !answers[i].correct).map((q, i) => (
+                  <div key={i} style={{ fontSize: 12.5, color: D.textMuted, padding: '4px 0', borderTop: i > 0 ? `1px solid rgba(220,38,38,0.10)` : 'none', lineHeight: 1.4 }}>
+                    {q.question}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <button
+                onClick={() => { setStep('setup'); setQuestions(null); setAnswers([]); setStreak(0); setMaxStreak(0) }}
+                style={{ padding: '12px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Go again
+              </button>
+              {onOpenCheatSheet && (
+                <button
+                  onClick={() => { onClose(); onOpenCheatSheet?.() }}
+                  style={{ padding: '12px', background: 'none', border: `1.5px solid rgba(59,97,196,0.30)`, borderRadius: 10, color: D.blue, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  Study these topics (Cheat Sheet)
+                </button>
+              )}
+              <button onClick={onClose} style={{ padding: '10px', background: 'none', border: 'none', color: D.textDim, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+                Done
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}

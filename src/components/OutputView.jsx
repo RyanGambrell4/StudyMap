@@ -32,6 +32,10 @@ import StudyCoachView from './StudyCoachView'
 import AIChatView from './AIChatView'
 import GradeHubView from './GradeHubView'
 import AccountView from './AccountView'
+import CheatSheetModal from './CheatSheetModal'
+import BrainDumpModal from './BrainDumpModal'
+import ExamRescueModal from './ExamRescueModal'
+import QuickQuizBurst from './QuickQuizBurst'
 
 // ─── TutorView ────────────────────────────────────────────────────────────────
 function TutorView({ courses, userId, onShowPaywall, learningStyle }) {
@@ -350,6 +354,10 @@ export default function OutputView({
   const [showAdaptModal, setShowAdaptModal] = useState(false)
   const [showPaywallAdaptModal, setShowPaywallAdaptModal] = useState(false)
   const [showFirstQueryNudge, setShowFirstQueryNudge] = useState(false)
+  const [showCheatSheet, setShowCheatSheet] = useState(false)
+  const [showBrainDump, setShowBrainDump] = useState(false)
+  const [showExamRescue, setShowExamRescue] = useState(false)
+  const [showQuizBurst, setShowQuizBurst] = useState(false)
 
   // ── First-query nudge listener ────────────────────────────────────────────────
   useEffect(() => {
@@ -1198,6 +1206,10 @@ export default function OutputView({
             schoolType={schoolType}
             pendingAdaptation={pendingAdaptation}
             onShowAdaptModal={() => setShowAdaptModal(true)}
+            onOpenCheatSheet={() => setShowCheatSheet(true)}
+            onOpenBrainDump={() => setShowBrainDump(true)}
+            onOpenExamRescue={() => setShowExamRescue(true)}
+            onOpenQuizBurst={() => setShowQuizBurst(true)}
           />
         )}
 
@@ -1429,6 +1441,10 @@ export default function OutputView({
             onShowPaywall={onShowPaywall}
             learningStyle={learningStyle}
             onNavigateToCoach={() => { if (getActivePlan() === 'free') { onShowPaywall?.('coach'); return } setActiveSection('coach') }}
+            onOpenCheatSheet={() => setShowCheatSheet(true)}
+            onOpenBrainDump={() => setShowBrainDump(true)}
+            onOpenExamRescue={() => setShowExamRescue(true)}
+            onOpenQuizBurst={() => setShowQuizBurst(true)}
           />
         )}
 
@@ -1521,6 +1537,40 @@ export default function OutputView({
         </div>
 
       </AppShell>
+
+      {showCheatSheet && (
+        <CheatSheetModal
+          courses={courses}
+          userId={userId}
+          onClose={() => setShowCheatSheet(false)}
+          onShowPaywall={onShowPaywall}
+        />
+      )}
+      {showBrainDump && (
+        <BrainDumpModal
+          courses={courses}
+          userId={userId}
+          onClose={() => setShowBrainDump(false)}
+          onShowPaywall={onShowPaywall}
+        />
+      )}
+      {showExamRescue && (
+        <ExamRescueModal
+          courses={courses}
+          userId={userId}
+          onClose={() => setShowExamRescue(false)}
+          onShowPaywall={onShowPaywall}
+        />
+      )}
+      {showQuizBurst && (
+        <QuickQuizBurst
+          courses={courses}
+          userId={userId}
+          onClose={() => setShowQuizBurst(false)}
+          onShowPaywall={onShowPaywall}
+          onOpenCheatSheet={() => { setShowQuizBurst(false); setShowCheatSheet(true) }}
+        />
+      )}
     </>
   )
 }

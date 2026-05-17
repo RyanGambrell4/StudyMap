@@ -1,4 +1,5 @@
 import { useMemo, useEffect, useRef, useState } from 'react'
+import ReadinessPill, { computeReadiness } from './ReadinessPill'
 import ReferralCard from './ReferralCard'
 import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
@@ -153,6 +154,10 @@ export default function DashboardView({
   schoolType,
   pendingAdaptation,
   onShowAdaptModal,
+  onOpenCheatSheet,
+  onOpenBrainDump,
+  onOpenExamRescue,
+  onOpenQuizBurst,
 }) {
   const plan = getActivePlan()
   const aiUsed = getAIQueriesUsed()
@@ -651,19 +656,44 @@ export default function DashboardView({
         </div>
 
         {/* ── QUICK ACTIONS (span 4) ── */}
-        <Card glowColor={D.blue} onClick={() => typeof onNavigateToTools === 'function' && onNavigateToTools()} style={{ gridColumn: 'span 4', padding: '20px 16px', display: 'flex', flexDirection: 'column' }}>
-          <div style={{ padding: '0 4px', marginBottom: 16 }}>
+        <Card glowColor={D.blue} style={{ gridColumn: 'span 4', padding: '20px 16px', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '0 4px', marginBottom: 12 }}>
             <Label color={D.blue}>Quick actions</Label>
           </div>
           {[
-            { icon: <IcoBrain />, color: D.blue,    label: 'Study Coach',       sub: 'AI-powered weekly plan',  onClick: () => typeof onOpenStudyCoach === 'function' && onOpenStudyCoach(0) },
-            { icon: <IcoGrad />, color: D.green,    label: 'Grade Hub',         sub: 'Track grades and targets', onClick: () => typeof onNavigateToGrades === 'function' && onNavigateToGrades(0) },
-            { icon: <IcoCards />, color: '#8B5CF6', label: 'Review flashcards', sub: 'Test your knowledge',     onClick: () => typeof onNavigateToTools === 'function' && onNavigateToTools() },
+            { icon: <IcoBrain />, color: D.blue,    label: 'Study Coach',    sub: 'AI-powered weekly plan',   onClick: () => typeof onOpenStudyCoach === 'function' && onOpenStudyCoach(0) },
+            { icon: <IcoGrad />,  color: D.green,   label: 'Grade Hub',      sub: 'Track grades and targets', onClick: () => typeof onNavigateToGrades === 'function' && onNavigateToGrades(0) },
+            { icon: <IcoCards />, color: '#8B5CF6', label: 'Flashcards',     sub: 'Test your knowledge',      onClick: () => typeof onNavigateToTools === 'function' && onNavigateToTools() },
           ].map((a, i) => (
             <button
               key={a.label}
               onClick={a.onClick}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '11px 8px', borderRadius: 10, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', width: '100%', transition: 'background 0.12s', borderBottom: i < 2 ? `1px solid ${D.border}` : 'none' }}
+              style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 8px', borderRadius: 10, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', width: '100%', transition: 'background 0.12s', borderBottom: i < 2 ? `1px solid ${D.border}` : 'none' }}
+              onMouseEnter={e => { e.currentTarget.style.background = `${a.color}08` }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
+            >
+              <IconPill color={a.color}>{a.icon}</IconPill>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>{a.label}</div>
+                <div style={{ fontSize: 11.5, color: D.textDim, marginTop: 1 }}>{a.sub}</div>
+              </div>
+              <span style={{ color: D.textDim }}><IcoChevron /></span>
+            </button>
+          ))}
+          <div style={{ margin: '10px 8px 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ flex: 1, height: 1, background: D.border }} />
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', color: D.textDim, textTransform: 'uppercase' }}>Study Hacks</span>
+            <div style={{ flex: 1, height: 1, background: D.border }} />
+          </div>
+          {[
+            { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>, color: '#8B5CF6', label: 'Brain Dump',    sub: 'Score a 10-min write',    onClick: () => typeof onOpenBrainDump === 'function' && onOpenBrainDump() },
+            { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,   color: D.red,     label: 'Exam Rescue',  sub: 'Crisis study plan',       onClick: () => typeof onOpenExamRescue === 'function' && onOpenExamRescue() },
+            { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>,                color: D.amber,   label: 'Quiz Burst',   sub: '5 questions, 10s each',   onClick: () => typeof onOpenQuizBurst === 'function' && onOpenQuizBurst() },
+          ].map((a, i) => (
+            <button
+              key={a.label}
+              onClick={e => { e.stopPropagation(); a.onClick() }}
+              style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 8px', borderRadius: 10, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', width: '100%', transition: 'background 0.12s', borderBottom: i < 2 ? `1px solid ${D.border}` : 'none' }}
               onMouseEnter={e => { e.currentTarget.style.background = `${a.color}08` }}
               onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
             >
@@ -719,11 +749,12 @@ export default function DashboardView({
             })() : null
             const dueNext = dueNextPerCourse[idx] ?? null
 
+            const readiness = computeReadiness(course, last, todayStr)
             return (
               <div
                 key={idx}
                 className="dash-course-row"
-                style={{ display: 'grid', gridTemplateColumns: '5px 1fr 180px 80px', gap: 16, alignItems: 'center', padding: '11px 20px', borderTop: `1px solid ${D.border}`, transition: 'background 0.12s' }}
+                style={{ display: 'grid', gridTemplateColumns: '5px 1fr 140px 90px', gap: 12, alignItems: 'center', padding: '11px 20px', borderTop: `1px solid ${D.border}`, transition: 'background 0.12s' }}
                 onMouseEnter={e => { e.currentTarget.style.background = `${color}07` }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
               >
@@ -740,7 +771,9 @@ export default function DashboardView({
                   </div>
                   <span style={{ fontSize: 11.5, color, fontWeight: 600, width: 30, textAlign: 'right', flexShrink: 0 }}>{prog.pct}%</span>
                 </div>
-                <div className="dash-course-meta" style={{ fontSize: 11.5, color: D.textDim, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{dueNext ?? ''}</div>
+                <div className="dash-course-meta" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                  <ReadinessPill status={readiness} />
+                </div>
               </div>
             )
           })}

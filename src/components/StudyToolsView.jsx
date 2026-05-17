@@ -168,7 +168,7 @@ function QuizQuestion({ question, onAnswer }) {
 }
 
 // ── Main view ─────────────────────────────────────────────────────────────────
-export default function StudyToolsView({ courses, userId, onShowPaywall, onNavigateToCoach, learningStyle }) {
+export default function StudyToolsView({ courses, userId, onShowPaywall, onNavigateToCoach, learningStyle, onOpenCheatSheet, onOpenBrainDump, onOpenExamRescue, onOpenQuizBurst }) {
   const fileInputRef = useRef(null)
   const scanInputRef = useRef(null)
   const [dragging, setDragging] = useState(false)
@@ -446,6 +446,38 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
         <div>
           <h1 className="text-2xl font-bold text-slate-900 mb-1">Study Tools</h1>
           <p className="text-[#6B6B6B] text-sm mb-6">Choose how you want to study.</p>
+
+          {/* ── Study Hacks ── */}
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
+              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#6B6B6B' }}>Study Hacks</span>
+              <div style={{ flex: 1, height: 1, background: 'rgba(0,0,0,0.07)' }} />
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+              {[
+                { label: 'AI Cheat Sheet', sub: 'What to study next', color: '#3B61C4', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>, onClick: onOpenCheatSheet },
+                { label: 'Brain Dump',     sub: 'Score your recall',  color: '#8B5CF6', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3a3 3 0 00-3 3 3 3 0 00-3 3v3a3 3 0 003 3v2a3 3 0 003 3 3 3 0 003-3V3z"/><path d="M15 3a3 3 0 013 3 3 3 0 013 3v3a3 3 0 01-3 3v2a3 3 0 01-3 3 3 3 0 01-3-3V3z"/></svg>, onClick: onOpenBrainDump },
+                { label: 'Exam Rescue',   sub: 'Crisis study plan',  color: '#DC2626', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, onClick: onOpenExamRescue },
+                { label: 'Quiz Burst',    sub: '5 questions, 10s',   color: '#D97706', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>, onClick: onOpenQuizBurst },
+              ].map(({ label, sub, color, icon, onClick }) => (
+                <button
+                  key={label}
+                  onClick={onClick}
+                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10, padding: '16px', borderRadius: 16, background: `linear-gradient(135deg, ${color}08, #fff)`, border: `1px solid ${color}25`, cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = `linear-gradient(135deg, ${color}14, ${color}05)`; e.currentTarget.style.borderColor = `${color}50` }}
+                  onMouseLeave={e => { e.currentTarget.style.background = `linear-gradient(135deg, ${color}08, #fff)`; e.currentTarget.style.borderColor = `${color}25` }}
+                >
+                  <div style={{ width: 38, height: 38, borderRadius: 10, background: `linear-gradient(135deg, ${color}, ${color}cc)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: `0 4px 12px ${color}40` }}>
+                    {icon}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 700, color: '#111111' }}>{label}</div>
+                    <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 2 }}>{sub}</div>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
 
           <div className="grid grid-cols-1 gap-3">
 
