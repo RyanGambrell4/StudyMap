@@ -350,7 +350,7 @@ export default function DashboardView({
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
   const isExamMode = schoolType === 'exam' || courses.some(c => EXAM_PATTERN.test(c.name))
 
-  const sessionColor = displaySession ? (displaySession.color?.dot ?? courseColor(displaySession.courseId ?? 0)) : D.border
+  const sessionColor = displaySession ? (displaySession.color?.dot ?? courseColor(displaySession.courseId ?? 0)) : D.blue
 
   // ── Empty state ──────────────────────────────────────────────────────────────
   if (courses.length === 0) {
@@ -541,19 +541,19 @@ export default function DashboardView({
         <div
           onMouseEnter={() => setUpNextHovered(true)}
           onMouseLeave={() => setUpNextHovered(false)}
-          onClick={() => displaySession && typeof onNavigateToCalendar === 'function' && onNavigateToCalendar(displaySession.dateStr)}
+          onClick={() => typeof onNavigateToCalendar === 'function' && onNavigateToCalendar(displaySession?.dateStr ?? todayStr)}
           style={{
             gridColumn: 'span 8',
             background: displaySession
               ? `linear-gradient(135deg, ${sessionColor}08 0%, #ffffff 55%)`
               : D.bgCard,
-            border: `1px solid ${upNextHovered ? `${sessionColor}40` : displaySession ? `${sessionColor}20` : D.border}`,
+            border: `1px solid ${upNextHovered ? `${sessionColor}40` : `${sessionColor}18`}`,
             borderRadius: 14,
             display: 'flex', overflow: 'hidden',
-            cursor: displaySession ? 'pointer' : 'default',
+            cursor: 'pointer',
             boxShadow: upNextHovered
-              ? `0 8px 30px ${sessionColor}18, 0 2px 8px rgba(0,0,0,0.06)`
-              : displaySession ? `0 2px 10px ${sessionColor}10` : '0 1px 3px rgba(0,0,0,0.07)',
+              ? `0 8px 30px ${sessionColor}25, 0 2px 8px rgba(0,0,0,0.06)`
+              : `0 1px 3px rgba(0,0,0,0.07)`,
             transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
           }}
         >
@@ -638,7 +638,7 @@ export default function DashboardView({
                 ) : (
                   <>
                     <p style={{ color: D.textMuted, fontSize: 14, marginBottom: 0 }}>No sessions scheduled for today.</p>
-                    <button onClick={() => typeof onAddSession === 'function' && onAddSession()} style={{ marginTop: 12, background: 'none', color: D.blue, fontSize: 13, fontWeight: 600, padding: 0, border: 'none', cursor: 'pointer' }}>
+                    <button onClick={(e) => { e.stopPropagation(); typeof onAddSession === 'function' && onAddSession(todayStr) }} style={{ marginTop: 12, background: 'none', color: D.blue, fontSize: 13, fontWeight: 600, padding: 0, border: 'none', cursor: 'pointer' }}>
                       Add a session
                     </button>
                   </>
@@ -649,7 +649,7 @@ export default function DashboardView({
         </div>
 
         {/* ── QUICK ACTIONS (span 4) ── */}
-        <Card glowColor={D.blue} style={{ gridColumn: 'span 4', padding: '20px 16px', display: 'flex', flexDirection: 'column' }}>
+        <Card glowColor={D.blue} onClick={() => typeof onNavigateToTools === 'function' && onNavigateToTools()} style={{ gridColumn: 'span 4', padding: '20px 16px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '0 4px', marginBottom: 16 }}>
             <Label color={D.blue}>Quick actions</Label>
           </div>
