@@ -878,7 +878,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const handlePracticeConfirm = () => {
     if (practiceSelected === null) return
     const q = practiceQuestions[practiceIdx]
-    const correct = practiceSelected === q.answer
+    const correct = q.options[practiceSelected] === q.answer
     setPracticeAnswers(prev => [...prev, { correct }])
     setPracticeConfirmed(true)
   }
@@ -1886,8 +1886,12 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                   </div>
                 ) : !practiceQuestions || practiceQuestions.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-14 gap-5 px-4">
-                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center text-2xl" style={{ backgroundColor: `${TAB_COLORS.practice}15` }}>
-                      <span>🧩</span>
+                    <div className="w-14 h-14 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${TAB_COLORS.practice}15` }}>
+                      <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={TAB_COLORS.practice} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/>
+                        <rect x="9" y="3" width="6" height="4" rx="1"/>
+                        <path d="M9 12l2 2 4-4"/>
+                      </svg>
                     </div>
                     <div className="text-center">
                       <p className="font-semibold text-sm mb-1" style={{ color: '#1A1A1A' }}>Test your understanding</p>
@@ -1982,17 +1986,17 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     <div className="flex flex-col gap-2">
                       {(practiceQuestions[practiceIdx]?.options || []).map((opt, i) => {
                         const isSelected = practiceSelected === i
-                        const isCorrect = practiceConfirmed && i === practiceQuestions[practiceIdx]?.correctIndex
-                        const isWrong = practiceConfirmed && isSelected && i !== practiceQuestions[practiceIdx]?.correctIndex
+                        const isCorrect = practiceConfirmed && opt === practiceQuestions[practiceIdx]?.answer
+                        const isWrong = practiceConfirmed && isSelected && opt !== practiceQuestions[practiceIdx]?.answer
                         return (
                           <button
                             key={i}
                             onClick={() => !practiceConfirmed && setPracticeSelected(i)}
                             className="w-full text-left px-4 py-3.5 rounded-xl text-sm transition-all"
                             style={{
-                              border: isCorrect ? `1.5px solid ${TAB_COLORS.practice}` : isWrong ? '1.5px solid #EF4444' : isSelected ? `1.5px solid ${TAB_COLORS.practice}` : '1.5px solid rgba(0,0,0,0.08)',
-                              backgroundColor: isCorrect ? `${TAB_COLORS.practice}12` : isWrong ? '#FEF2F2' : isSelected ? `${TAB_COLORS.practice}08` : '#FAFAFA',
-                              color: '#1A1A1A',
+                              border: isCorrect ? '1.5px solid #16A34A' : isWrong ? '1.5px solid #DC2626' : isSelected ? `1.5px solid ${TAB_COLORS.practice}` : '1.5px solid rgba(0,0,0,0.08)',
+                              backgroundColor: isCorrect ? '#F0FDF4' : isWrong ? '#FEF2F2' : isSelected ? `${TAB_COLORS.practice}08` : '#FAFAFA',
+                              color: isCorrect ? '#16A34A' : isWrong ? '#DC2626' : '#1A1A1A',
                               fontWeight: isSelected || isCorrect ? 600 : 400,
                             }}
                           >
