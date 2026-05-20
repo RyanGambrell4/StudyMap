@@ -102,11 +102,30 @@ function TutorView({ courses, userId, onShowPaywall, learningStyle }) {
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 const TARGET_THRESHOLDS = { A: 80, B: 70, C: 60, 'Pass/Fail': 50 }
 
+function minsToAmPm(mins) {
+  const h = Math.floor(mins / 60) % 24
+  const m = mins % 60
+  return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`
+}
+
+function amPmToMins(str) {
+  if (!str) return null
+  const m = str.match(/(\d+):(\d+)\s*(AM|PM)/i)
+  if (!m) return null
+  let h = parseInt(m[1])
+  const min = parseInt(m[2])
+  if (m[3].toUpperCase() === 'PM' && h !== 12) h += 12
+  if (m[3].toUpperCase() === 'AM' && h === 12) h = 0
+  return h * 60 + min
+}
+
+const PREF_START_MIN = { Morning: 8 * 60, Afternoon: 13 * 60, Evening: 18 * 60 }
+
 function addDays(date, n) {
   const d = new Date(date); d.setDate(d.getDate() + n); return d
 }
 
-function buildRecoverySessions(courses, recoveryIdxSet, sessionMinutes) {
+function buildRecoverySessions(courses, recoveryIdxSet, sessionMinutes, preferredTime = 'Evening') {
   const sessions = []
   const today = new Date(); today.setHours(0, 0, 0, 0)
   recoveryIdxSet.forEach(idx => {
@@ -131,8 +150,8 @@ function buildRecoverySessions(courses, recoveryIdxSet, sessionMinutes) {
         duration: sessionMinutes,
         daysUntilExam: Math.round((examDate - current) / 86400000),
         isRecovery: true,
-        startTime: null,
-        endTime: null,
+        startTime: minsToAmPm(PREF_START_MIN[preferredTime] ?? 18 * 60),
+        endTime: minsToAmPm((PREF_START_MIN[preferredTime] ?? 18 * 60) + sessionMinutes),
       })
       current = new Date(current); current.setDate(current.getDate() + 7)
     }
@@ -443,6 +462,7 @@ export default function OutputView({
   const [googleEvents, setGoogleEvents] = useState([])
   const [gcalConnected, setGcalConnected] = useState(false)
   const [gcalToast, setGcalToast] = useState(null) // 'connected' | 'error' | null
+  const [scheduleToast, setScheduleToast] = useState(null) // string | null
   const [fixConflictsLoading, setFixConflictsLoading] = useState(false)
   const [rescheduleResults, setRescheduleResults] = useState(null)
   const [sessionTimeOverrides, setSessionTimeOverrides] = useState(() => {
@@ -566,8 +586,8 @@ export default function OutputView({
   }, [assignments, courses])
 
   const recoverySessions = useMemo(
-    () => buildRecoverySessions(courses, recoveryCoursesIdx, sessionMinutes ?? 60),
-    [courses, recoveryCoursesIdx, sessionMinutes]
+    () => buildRecoverySessions(courses, recoveryCoursesIdx, sessionMinutes ?? 60, schedule?.preferredTime),
+    [courses, recoveryCoursesIdx, sessionMinutes, schedule]
   )
 
   // ── merged weeks ──
@@ -888,9 +908,43 @@ export default function OutputView({
     setSyllabusModalCourse(null)
   }
 
-  const handleAddManualSession = session => {
-    track('session_added', { courseId: session.courseId, courseName: session.courseName, sessionType: session.sessionType })
-    setManualSessions(prev => [...prev, session])
+  const handleAddManualSession = rawSession => {
+    let s = { ...rawSession }
+
+    // Assign a default start time if none provided
+    const prefStart = PREF_START_MIN[schedule?.preferredTime] ?? 18 * 60
+    if (!s.startTime) {
+      s.startTime = minsToAmPm(prefStart)
+      s.endTime = minsToAmPm(prefStart + s.duration)
+    }
+
+    // Overlap detection: find all timed sessions on this date
+    const existingTimed = allSessions
+      .filter(ex => ex.dateStr === s.dateStr && ex.startTime)
+      .map(ex => ({
+        startMin: amPmToMins(ex.startTime) ?? 0,
+        endMin: amPmToMins(ex.endTime) ?? (amPmToMins(ex.startTime) ?? 0) + (ex.duration ?? 60),
+      }))
+      .sort((a, b) => a.startMin - b.startMin)
+
+    let curStart = amPmToMins(s.startTime) ?? prefStart
+    let shifted = false
+    for (const ex of existingTimed) {
+      if (curStart < ex.endMin && curStart + s.duration > ex.startMin) {
+        curStart = ex.endMin + 15
+        shifted = true
+      }
+    }
+
+    if (shifted) {
+      s.startTime = minsToAmPm(curStart)
+      s.endTime = minsToAmPm(curStart + s.duration)
+      setScheduleToast(`Session moved to ${s.startTime} to avoid overlap`)
+      setTimeout(() => setScheduleToast(null), 5000)
+    }
+
+    track('session_added', { courseId: s.courseId, courseName: s.courseName, sessionType: s.sessionType })
+    setManualSessions(prev => [...prev, s])
     setAddSessionDayStr(null)
   }
 
@@ -1139,6 +1193,18 @@ export default function OutputView({
           backdropFilter: 'blur(8px)',
         }}>
           {gcalToast === 'connected' ? '✓ Google Calendar connected' : '✕ Google Calendar connection failed'}
+        </div>
+      )}
+
+      {scheduleToast && (
+        <div style={{
+          position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)',
+          zIndex: 9999, pointerEvents: 'none',
+          padding: '10px 20px', borderRadius: 12, fontSize: '0.875rem', fontWeight: 600,
+          background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)',
+          color: '#D97706', backdropFilter: 'blur(8px)', whiteSpace: 'nowrap',
+        }}>
+          ⚠ {scheduleToast}
         </div>
       )}
 

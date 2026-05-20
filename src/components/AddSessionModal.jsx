@@ -9,6 +9,7 @@ function toAmPm(h, m) {
 
 export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }) {
   const [mode, setMode] = useState('session') // 'session' | 'event'
+  const [selectedDate, setSelectedDate] = useState(dateStr)
   const [courseIdx, setCourseIdx] = useState(0)
   const [sessionType, setSessionType] = useState('Custom Study')
   const [eventTitle, setEventTitle] = useState('')
@@ -16,11 +17,8 @@ export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }
   const [startTime, setStartTime] = useState('')
   const [error, setError] = useState('')
 
-  const dateLabel = new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', {
-    weekday: 'long', month: 'long', day: 'numeric',
-  })
-
   const handleSave = () => {
+    if (!selectedDate) { setError('Please select a date'); return }
     const dur = parseInt(duration)
     if (!dur || dur < 5) { setError('Duration must be at least 5 minutes'); return }
 
@@ -37,8 +35,8 @@ export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }
       if (!title) { setError('Give your event a name'); return }
 
       onConfirm({
-        id: `event-${dateStr}-${Date.now()}`,
-        dateStr,
+        id: `event-${selectedDate}-${Date.now()}`,
+        dateStr: selectedDate,
         courseId: null,
         courseName: title,
         color: { dot: '#64748b', bg: 'rgba(100,116,139,0.15)', border: 'rgba(100,116,139,0.3)' },
@@ -54,8 +52,8 @@ export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }
 
     const course = courses[courseIdx]
     onConfirm({
-      id: `manual-${dateStr}-${Date.now()}`,
-      dateStr,
+      id: `manual-${selectedDate}-${Date.now()}`,
+      dateStr: selectedDate,
       courseId: courseIdx,
       courseName: course.name,
       color: course.color,
@@ -74,10 +72,7 @@ export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }
     <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(6px)' }}>
       <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 20, width: '100%', maxWidth: 360, boxShadow: '0 16px 48px rgba(0,0,0,0.12)', padding: 20 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-          <div>
-            <h3 style={{ color: '#1A1A1A', fontWeight: 700, fontSize: 15, margin: 0 }}>{mode === 'event' ? 'Add Event' : 'Add Session'}</h3>
-            <p style={{ color: '#9B9B9B', fontSize: 12, margin: '2px 0 0' }}>{dateLabel}</p>
-          </div>
+          <h3 style={{ color: '#1A1A1A', fontWeight: 700, fontSize: 15, margin: 0 }}>{mode === 'event' ? 'Add Event' : 'Add Session'}</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', padding: 4 }}>
             <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -99,6 +94,17 @@ export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div>
+            <label style={labelStyle}>Date</label>
+            <input
+              type="date"
+              value={selectedDate}
+              min={new Date().toISOString().split('T')[0]}
+              onChange={e => { setSelectedDate(e.target.value); setError('') }}
+              style={inputStyle}
+            />
+          </div>
+
           {mode === 'event' ? (
             <div>
               <label style={labelStyle}>Event name</label>
