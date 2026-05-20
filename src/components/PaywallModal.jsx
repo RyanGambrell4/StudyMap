@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { createCheckoutSession } from '../lib/subscription'
+import { track } from '../lib/analytics'
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -124,6 +125,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   }, [onClose])
 
   const handleSelectPlan = async (planId, opts = {}) => {
+    track('upgrade_clicked', { planId, billingPeriod, trigger, trial: !!opts.trial })
     setLoading(planId)
     const url = await createCheckoutSession(planId, billingPeriod, userEmail, userId, opts)
     setLoading(null)

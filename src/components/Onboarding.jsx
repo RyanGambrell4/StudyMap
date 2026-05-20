@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { createCheckoutSession } from '../lib/subscription'
+import { track } from '../lib/analytics'
 
 // ── Options ───────────────────────────────────────────────────────────────────
 const STYLE_OPTIONS = [
@@ -351,6 +351,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   const [emailDigest, setEmailDigest]       = useState(true)
 
   const goTo = (next, dir = 1) => {
+    if (dir > 0) track('onboarding_step', { from: step, to: next })
     setAnimDir(dir)
     setAnimKey(k => k + 1)
     setStep(next)
@@ -459,7 +460,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   if (step === 4) return (
     <Page>
       <StepWrap animKey={animKey} dir={animDir}>
-        <ProgressBar current={3} total={4} />
+        <ProgressBar current={3} total={3} />
         <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.03em', marginBottom: 6, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
           When do you do your best work?
         </h2>
@@ -486,123 +487,8 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
         <div style={{ display: 'flex', gap: 10 }}>
           <BackBtn onClick={() => goTo(3, -1)} />
-          <ContinueBtn onClick={() => goTo(5)} disabled={!preferredTime} label="Continue" />
+          <ContinueBtn onClick={() => onComplete({ yearLevel, learningStyle, preferredTime, schoolType, emailDigest: true })} disabled={!preferredTime} label="Start studying free" />
         </div>
-      </StepWrap>
-    </Page>
-  )
-
-  // ── Step 5: Plan upsell ──────────────────────────────────────────────────────
-  if (step === 5) return (
-    <Page>
-      <StepWrap animKey={animKey} dir={animDir}>
-        <ProgressBar current={4} total={4} />
-        <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.03em', marginBottom: 6, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-          Your plan is ready.
-        </h2>
-        <p style={{ color: '#6B6B6B', fontSize: '0.95rem', marginBottom: 24, lineHeight: 1.5 }}>
-          Try Pro free for 7 days. Your card is charged after the trial — cancel before day 7 and you won't pay a thing.
-        </p>
-
-        {/* Free vs Pro */}
-        <div className="ob-plan-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 24 }}>
-          {/* Free */}
-          <div style={{
-            backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.08)',
-            borderRadius: 14, padding: '18px 16px',
-            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
-          }}>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
-              Free
-            </div>
-            {['1 course', '10 AI actions/month', 'Session Blueprint', 'Focus Mode'].map(f => (
-              <div key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" strokeWidth="2.5"><path d="M6 6l12 12M18 6l-12 12"/></svg>
-                <span style={{ fontSize: '0.82rem', color: '#9B9B9B' }}>{f}</span>
-              </div>
-            ))}
-          </div>
-
-          {/* Pro */}
-          <div style={{
-            backgroundColor: 'rgba(59,97,196,0.05)', border: '1.5px solid rgba(59,97,196,0.25)',
-            borderRadius: 14, padding: '18px 16px',
-            boxShadow: '0 0 0 3px rgba(59,97,196,0.05)',
-          }}>
-            <div style={{ fontSize: '0.72rem', fontWeight: 700, color: '#3B61C4', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 12 }}>
-              Pro ✦
-            </div>
-            {[
-              'AI Study Coach for every course',
-              'Session Blueprints before every session',
-              'AI Flashcards, Quizzes & Grade tracking',
-              'Your full semester, fully planned',
-            ].map(f => (
-              <div key={f} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, marginBottom: 8 }}>
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="3" style={{ marginTop: 2, flexShrink: 0 }}><polyline points="5 12 10 17 20 7"/></svg>
-                <span style={{ fontSize: '0.82rem', color: '#1A1A1A', lineHeight: 1.4 }}>{f}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Email digest opt-in — pre-checked */}
-        <label style={{
-          display: 'flex', alignItems: 'flex-start', gap: 10,
-          cursor: 'pointer', marginBottom: 20,
-          padding: '12px 14px',
-          background: emailDigest ? 'rgba(59,97,196,0.04)' : '#F7F6F3',
-          border: `1px solid ${emailDigest ? 'rgba(59,97,196,0.18)' : 'rgba(0,0,0,0.07)'}`,
-          borderRadius: 10,
-          transition: 'background 0.15s, border-color 0.15s',
-        }}>
-          <input
-            type="checkbox"
-            checked={emailDigest}
-            onChange={e => setEmailDigest(e.target.checked)}
-            style={{ marginTop: 1, accentColor: '#3B61C4', width: 15, height: 15, flexShrink: 0, cursor: 'pointer' }}
-          />
-          <span style={{ fontSize: 13, color: '#4B4B4B', lineHeight: 1.45 }}>
-            <strong style={{ color: '#1A1A1A' }}>Send me a weekly study digest</strong>
-            <br />
-            A Sunday summary of your progress and the week ahead. Unsubscribe any time.
-          </span>
-        </label>
-
-        <button
-          onClick={async () => {
-            const result = await createCheckoutSession('pro', 'monthly', userEmail, userId, { trial: true })
-            if (!result) return
-            if (result.alreadySubscribed) {
-              onComplete({ yearLevel, learningStyle, preferredTime, schoolType, emailDigest })
-              return
-            }
-            window.location.href = result
-          }}
-          style={{
-            width: '100%', padding: '14px', marginBottom: 10,
-            backgroundColor: '#3B61C4', border: 'none',
-            borderRadius: 12, color: '#fff',
-            fontSize: '0.97rem', fontWeight: 700, cursor: 'pointer', letterSpacing: '-0.2px',
-            fontFamily: 'inherit',
-          }}
-          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#2D4FA8'}
-          onMouseLeave={e => e.currentTarget.style.backgroundColor = '#3B61C4'}
-        >
-          Start 7-day free trial →
-        </button>
-
-        <button
-          onClick={() => onComplete({ yearLevel, learningStyle, preferredTime, schoolType, emailDigest })}
-          style={{
-            width: '100%', padding: '10px', backgroundColor: 'transparent', border: 'none',
-            color: '#9B9B9B', fontSize: '0.88rem', cursor: 'pointer', fontFamily: 'inherit',
-          }}
-          onMouseEnter={e => e.currentTarget.style.color = '#6B6B6B'}
-          onMouseLeave={e => e.currentTarget.style.color = '#9B9B9B'}
-        >
-          Continue with free plan
-        </button>
       </StepWrap>
     </Page>
   )

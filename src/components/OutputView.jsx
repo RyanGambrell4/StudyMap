@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
+import { track } from '../lib/analytics'
 import { generateSchedule } from '../utils/generateSchedule'
 import { clean } from '../utils/strings'
 import {
@@ -768,6 +769,7 @@ export default function OutputView({
       onShowPaywall?.('blueprint')
       return
     }
+    track('session_started', { courseId: s.courseId, courseName: s.courseName, sessionType: s.sessionType, duration: s.duration })
     setBlueprintSession(s)
     setActiveBlueprint(null)
   }, [onShowPaywall])
@@ -789,12 +791,14 @@ export default function OutputView({
           sessionType: sess.sessionType ?? null,
           duration: sess.duration,
           elapsedSeconds: (typeof elapsed === 'number' && elapsed > 0) ? elapsed : null,
+          recallScore: recallData?.score ?? null,
         }
         setCompletedSessionLog(prev => {
           const filtered = prev.filter(s => s.id !== record.id)
           return [...filtered, record].slice(-500)
         })
         saveCompletedSession(record)
+        track('session_completed', { courseId: sess.courseId, courseName: sess.courseName, sessionType: sess.sessionType, elapsedSeconds: record.elapsedSeconds, recallScore: recallData?.score ?? null })
 
         // Run adaptation engine if recall data was provided
         if (recallData?.score !== undefined) {
@@ -885,6 +889,7 @@ export default function OutputView({
   }
 
   const handleAddManualSession = session => {
+    track('session_added', { courseId: session.courseId, courseName: session.courseName, sessionType: session.sessionType })
     setManualSessions(prev => [...prev, session])
     setAddSessionDayStr(null)
   }
@@ -1206,10 +1211,11 @@ export default function OutputView({
             schoolType={schoolType}
             pendingAdaptation={pendingAdaptation}
             onShowAdaptModal={() => setShowAdaptModal(true)}
-            onOpenCheatSheet={() => setShowCheatSheet(true)}
-            onOpenBrainDump={() => setShowBrainDump(true)}
-            onOpenExamRescue={() => setShowExamRescue(true)}
-            onOpenQuizBurst={() => setShowQuizBurst(true)}
+            onOpenCheatSheet={() => { track('feature_opened', { feature: 'cheat_sheet' }); setShowCheatSheet(true) }}
+            onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump' }); setShowBrainDump(true) }}
+            onOpenExamRescue={() => { track('feature_opened', { feature: 'exam_rescue' }); setShowExamRescue(true) }}
+            onOpenQuizBurst={() => { track('feature_opened', { feature: 'quiz_burst' }); setShowQuizBurst(true) }}
+            completedSessions={completedSessionLog}
           />
         )}
 

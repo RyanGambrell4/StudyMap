@@ -158,6 +158,7 @@ export default function DashboardView({
   onOpenBrainDump,
   onOpenExamRescue,
   onOpenQuizBurst,
+  completedSessions,
 }) {
   const plan = getActivePlan()
   const aiUsed = getAIQueriesUsed()
@@ -267,6 +268,26 @@ export default function DashboardView({
     })
     return map
   }, [courses, allSessions, completedIds, todayStr])
+
+  const hoursPerCourse = useMemo(() => {
+    const map = {}
+    courses.forEach((_, idx) => {
+      const done = (completedSessions ?? []).filter(s => s.courseId === idx)
+      const mins = done.reduce((a, s) => a + (s.duration ?? 0), 0)
+      map[idx] = Math.round(mins / 60 * 10) / 10
+    })
+    return map
+  }, [courses, completedSessions])
+
+  const avgRecallPerCourse = useMemo(() => {
+    const map = {}
+    courses.forEach((_, idx) => {
+      const scored = (completedSessions ?? []).filter(s => s.courseId === idx && s.recallScore != null)
+      if (!scored.length) { map[idx] = null; return }
+      map[idx] = Math.round(scored.reduce((a, s) => a + s.recallScore, 0) / scored.length)
+    })
+    return map
+  }, [courses, completedSessions])
 
   const dueNextPerCourse = useMemo(() => {
     const map = {}
@@ -544,13 +565,13 @@ export default function DashboardView({
           </div>
         )}
 
-        {/* ── UP NEXT TODAY (span 8) ── */}
+        {/* ── UP NEXT TODAY (span 7) ── */}
         <div
           onMouseEnter={() => setUpNextHovered(true)}
           onMouseLeave={() => setUpNextHovered(false)}
           onClick={() => typeof onNavigateToCalendar === 'function' && onNavigateToCalendar(displaySession?.dateStr ?? todayStr)}
           style={{
-            gridColumn: 'span 8',
+            gridColumn: 'span 7',
             background: displaySession
               ? `linear-gradient(135deg, ${sessionColor}08 0%, #ffffff 55%)`
               : D.bgCard,
@@ -634,7 +655,7 @@ export default function DashboardView({
                 </div>
               </>
             ) : (
-              <div style={{ paddingTop: 8 }}>
+              <div style={{ paddingTop: 4 }}>
                 {isExamMode && allSessions.length === 0 ? (
                   <>
                     <p style={{ color: D.textMuted, fontSize: 14, marginBottom: 12, lineHeight: 1.6 }}>Head to Study Coach to build your full prep schedule.</p>
@@ -644,10 +665,45 @@ export default function DashboardView({
                   </>
                 ) : (
                   <>
-                    <p style={{ color: D.textMuted, fontSize: 14, marginBottom: 0 }}>No sessions scheduled for today.</p>
-                    <button onClick={(e) => { e.stopPropagation(); typeof onAddSession === 'function' && onAddSession(todayStr) }} style={{ marginTop: 12, background: 'none', color: D.blue, fontSize: 13, fontWeight: 600, padding: 0, border: 'none', cursor: 'pointer' }}>
-                      Add a session
-                    </button>
+                    {/* Next upcoming session preview */}
+                    {nextSession && nextSession.dateStr > todayStr ? (
+                      <div style={{ marginBottom: 20, padding: '14px 16px', background: 'rgba(0,0,0,0.02)', borderRadius: 10, border: `1px solid ${D.border}` }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: D.textDim, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 6 }}>Coming up</div>
+                        <div style={{ fontSize: 15, fontWeight: 600, color: D.text }}>{nextSession.sessionType ?? 'Study Session'}</div>
+                        <div style={{ fontSize: 12, color: D.textMuted, marginTop: 3 }}>
+                          <span style={{ color: nextSession.color?.dot ?? D.blue, fontWeight: 600 }}>{clean(nextSession.courseName)}</span>
+                          {' · '}
+                          {(() => { const d = daysBetween(todayStr, nextSession.dateStr); return d === 1 ? 'Tomorrow' : `In ${d} days` })()}
+                          {nextSession.duration ? ` · ${nextSession.duration} min` : ''}
+                        </div>
+                      </div>
+                    ) : (
+                      <p style={{ color: D.textMuted, fontSize: 14, marginBottom: 16, lineHeight: 1.6 }}>
+                        No sessions scheduled today. A free day — use it well.
+                      </p>
+                    )}
+
+                    {/* Quick study actions */}
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
+                      <button
+                        onClick={e => { e.stopPropagation(); onOpenBrainDump?.() }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: '#8B5CF6', background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)', cursor: 'pointer' }}
+                      >
+                        Brain Dump
+                      </button>
+                      <button
+                        onClick={e => { e.stopPropagation(); onOpenQuizBurst?.() }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: D.amber, background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.2)', cursor: 'pointer' }}
+                      >
+                        Quiz Burst
+                      </button>
+                      <button
+                        onClick={(e) => { e.stopPropagation(); typeof onAddSession === 'function' && onAddSession(todayStr) }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: D.blue, background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)', cursor: 'pointer' }}
+                      >
+                        + Add session
+                      </button>
+                    </div>
                   </>
                 )}
               </div>
@@ -655,8 +711,8 @@ export default function DashboardView({
           </div>
         </div>
 
-        {/* ── QUICK ACTIONS (span 4) ── */}
-        <Card glowColor={D.blue} style={{ gridColumn: 'span 4', padding: '20px 16px', display: 'flex', flexDirection: 'column' }}>
+        {/* ── QUICK ACTIONS (span 5) ── */}
+        <Card glowColor={D.blue} style={{ gridColumn: 'span 5', padding: '20px 16px', display: 'flex', flexDirection: 'column' }}>
           <div style={{ padding: '0 4px', marginBottom: 12 }}>
             <Label color={D.blue}>Quick actions</Label>
           </div>
@@ -685,26 +741,31 @@ export default function DashboardView({
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', color: D.textDim, textTransform: 'uppercase' }}>Study Hacks</span>
             <div style={{ flex: 1, height: 1, background: D.border }} />
           </div>
-          {[
-            { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>, color: '#8B5CF6', label: 'Brain Dump',    sub: 'Score a 10-min write',    onClick: () => typeof onOpenBrainDump === 'function' && onOpenBrainDump() },
-            { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,   color: D.red,     label: 'Exam Rescue',  sub: 'Crisis study plan',       onClick: () => typeof onOpenExamRescue === 'function' && onOpenExamRescue() },
-            { icon: <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>,                color: D.amber,   label: 'Quiz Burst',   sub: '5 questions, 10s each',   onClick: () => typeof onOpenQuizBurst === 'function' && onOpenQuizBurst() },
-          ].map((a, i) => (
-            <button
-              key={a.label}
-              onClick={e => { e.stopPropagation(); a.onClick() }}
-              style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 8px', borderRadius: 10, textAlign: 'left', background: 'none', border: 'none', cursor: 'pointer', width: '100%', transition: 'background 0.12s', borderBottom: i < 2 ? `1px solid ${D.border}` : 'none' }}
-              onMouseEnter={e => { e.currentTarget.style.background = `${a.color}08` }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
-            >
-              <IconPill color={a.color}>{a.icon}</IconPill>
-              <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>{a.label}</div>
-                <div style={{ fontSize: 11.5, color: D.textDim, marginTop: 1 }}>{a.sub}</div>
-              </div>
-              <span style={{ color: D.textDim }}><IcoChevron /></span>
-            </button>
-          ))}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, padding: '0 4px' }}>
+            {[
+              { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>, color: '#8B5CF6', label: 'Brain Dump',  onClick: () => typeof onOpenBrainDump === 'function' && onOpenBrainDump() },
+              { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, color: D.red,     label: 'Rescue Plan', onClick: () => typeof onOpenExamRescue === 'function' && onOpenExamRescue() },
+              { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>,               color: D.amber,   label: 'Quiz Burst',  onClick: () => typeof onOpenQuizBurst === 'function' && onOpenQuizBurst() },
+            ].map(a => (
+              <button
+                key={a.label}
+                onClick={e => { e.stopPropagation(); a.onClick() }}
+                style={{
+                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6,
+                  padding: '10px 6px', borderRadius: 10, textAlign: 'center',
+                  background: `${a.color}08`, border: `1px solid ${a.color}18`,
+                  cursor: 'pointer', width: '100%', transition: 'background 0.12s, border-color 0.12s',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = `${a.color}15`; e.currentTarget.style.borderColor = `${a.color}35` }}
+                onMouseLeave={e => { e.currentTarget.style.background = `${a.color}08`; e.currentTarget.style.borderColor = `${a.color}18` }}
+              >
+                <div style={{ width: 30, height: 30, borderRadius: 8, background: `${a.color}15`, border: `1px solid ${a.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: a.color }}>
+                  {a.icon}
+                </div>
+                <div style={{ fontSize: 11, fontWeight: 600, color: D.text, lineHeight: 1.3 }}>{a.label}</div>
+              </button>
+            ))}
+          </div>
         </Card>
 
         {/* ── TODAY'S BRIEF (span 12) ── */}
@@ -737,24 +798,28 @@ export default function DashboardView({
         <Card glowColor={D.blue} style={{ gridColumn: 'span 6', padding: '20px 0' }} onClick={onNavigateToCourses}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', marginBottom: 14 }}>
             <Label color={D.blue}>{isExamMode ? 'Sections' : 'Courses'}</Label>
-            <span style={{ fontSize: 12, color: D.blue, fontWeight: 600, cursor: 'pointer', opacity: 0.7 }}>View all</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+              <span style={{ fontSize: 11, color: D.textDim, fontWeight: 500 }}>Hrs · Recall</span>
+              <span style={{ fontSize: 12, color: D.blue, fontWeight: 600, cursor: 'pointer', opacity: 0.7 }}>View all</span>
+            </div>
           </div>
           {courses.map((course, idx) => {
             const color = course.color?.dot ?? courseColor(idx)
-            const prog = progressPerCourse[idx] ?? { pct: 0 }
             const last = lastSessionPerCourse[idx]
             const lastLabel = last ? (() => {
               const d = daysBetween(last.dateStr, todayStr)
               return d === 0 ? 'today' : d === 1 ? 'yesterday' : `${d}d ago`
             })() : null
-            const dueNext = dueNextPerCourse[idx] ?? null
-
+            const hrs = hoursPerCourse[idx] ?? 0
+            const recall = avgRecallPerCourse[idx]
             const readiness = computeReadiness(course, last, todayStr)
+            const ctaLabel = readiness === 'at-risk' ? 'Rescue Plan' : readiness === 'needs-work' ? 'Brain Dump' : null
+            const ctaFn = readiness === 'at-risk' ? onOpenExamRescue : onOpenBrainDump
             return (
               <div
                 key={idx}
                 className="dash-course-row"
-                style={{ display: 'grid', gridTemplateColumns: '5px 1fr 140px 90px', gap: 12, alignItems: 'center', padding: '11px 20px', borderTop: `1px solid ${D.border}`, transition: 'background 0.12s' }}
+                style={{ display: 'grid', gridTemplateColumns: '5px 1fr 130px 110px', gap: 12, alignItems: 'center', padding: '11px 20px', borderTop: `1px solid ${D.border}`, transition: 'background 0.12s' }}
                 onMouseEnter={e => { e.currentTarget.style.background = `${color}07` }}
                 onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
               >
@@ -762,17 +827,25 @@ export default function DashboardView({
                 <div>
                   <div style={{ fontSize: 13.5, fontWeight: 600, color: D.text }}>{clean(course.name)}</div>
                   <div style={{ fontSize: 11.5, color: D.textDim, marginTop: 2 }}>
-                    {lastLabel ? `Last session ${lastLabel}` : 'No sessions yet'}
+                    {lastLabel ? `Last studied ${lastLabel}` : 'No sessions yet'}
                   </div>
                 </div>
-                <div className="dash-course-meta" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <div style={{ flex: 1, height: 4, background: '#EEECE8', borderRadius: 2, overflow: 'hidden' }}>
-                    <div style={{ width: `${prog.pct}%`, height: '100%', background: `linear-gradient(90deg, ${color}cc, ${color})`, borderRadius: 2, transition: 'width 0.4s ease' }} />
-                  </div>
-                  <span style={{ fontSize: 11.5, color, fontWeight: 600, width: 30, textAlign: 'right', flexShrink: 0 }}>{prog.pct}%</span>
+                <div className="dash-course-meta" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: D.text }}>{hrs > 0 ? `${hrs}h` : '—'}</span>
+                  <span style={{ fontSize: 11, color: D.textDim }}>
+                    {recall != null ? `${recall}% recall` : 'no sessions'}
+                  </span>
                 </div>
-                <div className="dash-course-meta" style={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <div className="dash-course-meta" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 5 }}>
                   <ReadinessPill status={readiness} />
+                  {ctaLabel && (
+                    <button
+                      onClick={e => { e.stopPropagation(); ctaFn?.() }}
+                      style={{ fontSize: 10.5, fontWeight: 700, color: readiness === 'at-risk' ? D.red : D.amber, background: 'none', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}
+                    >
+                      {ctaLabel} →
+                    </button>
+                  )}
                 </div>
               </div>
             )

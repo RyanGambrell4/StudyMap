@@ -1098,11 +1098,11 @@ export default function CoursesView({
 
       <div className="cv-page-pad" style={{ padding: '24px 32px 48px' }}>
         {courses.length === 0 && (
-          <div style={{ padding: '16px 20px', borderRadius: 12, background: 'rgba(251,191,36,0.08)', border: '1px solid rgba(251,191,36,0.25)', display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 22 }}>
-            <svg style={{ width: 20, height: 20, color: D.amber, flexShrink: 0, marginTop: 2 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+          <div style={{ padding: '16px 20px', borderRadius: 12, background: 'rgba(59,97,196,0.04)', border: '1px solid rgba(59,97,196,0.12)', display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 22 }}>
+            <svg style={{ width: 20, height: 20, color: D.blue, flexShrink: 0, marginTop: 2 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
             <div>
-              <p style={{ margin: 0, color: D.amber, fontWeight: 700, fontSize: 14 }}>{isExamMode ? 'Add your exam sections to get started' : 'Courses are required to use StudyEdge AI'}</p>
-              <p style={{ margin: '4px 0 0', color: `${D.amber}99`, fontSize: 12 }}>{isExamMode ? 'Use the exam preset or add sections manually below.' : 'Add each course you\'re taking this semester. Then import your syllabi to unlock your study schedule, deadlines, and AI tools.'}</p>
+              <p style={{ margin: 0, color: D.blue, fontWeight: 700, fontSize: 14 }}>{isExamMode ? 'Add your first exam section to get started' : 'Add your first course to get started'}</p>
+              <p style={{ margin: '4px 0 0', color: D.textMuted, fontSize: 12 }}>{isExamMode ? 'Use the exam preset or add sections manually below.' : 'Add each course you\'re taking this semester — then import your syllabi to unlock your schedule, deadlines, and AI tools.'}</p>
             </div>
           </div>
         )}

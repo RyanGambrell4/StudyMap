@@ -32,13 +32,14 @@ export default function PrepBlastScreen({ session, course, onDismiss, userId }) 
   const [blast, setBlast] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(false)
+  const [retryCount, setRetryCount] = useState(0)
 
   useEffect(() => {
     const mode = selectMode(session, course, isPro)
     const coachPlan = getCachedCoachPlan(session.courseId)
     const coachFocus = coachPlan?.phases?.[0]?.focus ?? coachPlan?.weeklyFocus ?? null
 
-    async function fetchBlast() {
+    async function fetchBlast(attempt = 0) {
       if (!canUseAI()) { setLoading(false); setBlast(null); return }
       try {
         const token = await getAccessToken()
@@ -56,25 +57,27 @@ export default function PrepBlastScreen({ session, course, onDismiss, userId }) 
         if (!res.ok) throw new Error(data.error)
         incrementAIQuery()
         setBlast(data)
+        setError(false)
       } catch (e) {
         console.error('[prep-blast]', e)
+        if (attempt < 2) {
+          await new Promise(r => setTimeout(r, (attempt + 1) * 1200))
+          return fetchBlast(attempt + 1)
+        }
         setError(true)
       } finally {
         setLoading(false)
       }
     }
 
+    setLoading(true)
+    setError(false)
     fetchBlast()
-  }, [])
+  }, [retryCount])
 
   const mode = blast?.mode ?? 'weakness'
   const cfg = MODE_CONFIG[mode] ?? MODE_CONFIG.weakness
   const courseColor = course?.color?.dot ?? D.blue
-
-  // If error or no AI quota, skip gracefully
-  if (!loading && (error || !blast)) {
-    return null // render nothing, let FocusMode show
-  }
 
   return (
     <div style={{
@@ -89,6 +92,34 @@ export default function PrepBlastScreen({ session, course, onDismiss, userId }) 
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
           <div style={{ width: 40, height: 40, borderRadius: '50%', border: `3px solid ${courseColor}30`, borderTopColor: courseColor, animation: 'spin 0.8s linear infinite' }} />
           <div style={{ fontSize: 14, color: D.textMuted, fontWeight: 500 }}>Preparing your session...</div>
+        </div>
+      ) : error ? (
+        <div style={{ width: '100%', maxWidth: 380, textAlign: 'center' }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 20 }}>⚠</div>
+          <p style={{ fontSize: 15, fontWeight: 600, color: D.text, margin: '0 0 6px' }}>Couldn't load your prep brief</p>
+          <p style={{ fontSize: 13, color: D.textMuted, margin: '0 0 24px', lineHeight: 1.55 }}>There was a problem reaching the AI. You can retry or skip straight to your session.</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <button
+              onClick={() => { setRetryCount(c => c + 1) }}
+              style={{ padding: '12px', background: courseColor, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              Try again
+            </button>
+            <button
+              onClick={onDismiss}
+              style={{ padding: '12px', background: 'none', border: `1px solid ${D.border}`, borderRadius: 10, color: D.textMuted, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              Skip, start session
+            </button>
+          </div>
+        </div>
+      ) : !blast ? (
+        // No AI quota — skip gracefully with a start button
+        <div style={{ width: '100%', maxWidth: 380, textAlign: 'center' }}>
+          <p style={{ fontSize: 15, color: D.textMuted, margin: '0 0 20px', lineHeight: 1.55 }}>Ready to study {session.courseName}?</p>
+          <button onClick={onDismiss} style={{ width: '100%', padding: '14px', background: courseColor, border: 'none', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+            Start session
+          </button>
         </div>
       ) : (
         <div style={{ width: '100%', maxWidth: 440, animation: 'blast-in 0.4s ease' }}>
