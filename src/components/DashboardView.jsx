@@ -180,6 +180,27 @@ export default function DashboardView({
   const [upNextHovered, setUpNextHovered] = useState(false)
   const [startBtnHovered, setStartBtnHovered] = useState(false)
 
+  // ── This-week performance stats (for dashboard nudge) ─────────────────────
+  const weekPerf = useMemo(() => {
+    const sessions = completedSessions ?? []
+    const d = new Date(todayStr + 'T12:00:00')
+    const dow = d.getDay()
+    const wsDate = new Date(d)
+    wsDate.setDate(d.getDate() - (dow === 0 ? 6 : dow - 1))
+    const ws = wsDate.toISOString().slice(0, 10)
+    let weekMins = 0
+    sessions.forEach(s => {
+      if (s.dateStr >= ws) {
+        weekMins += s.elapsedSeconds > 0 ? s.elapsedSeconds / 60 : (s.duration ?? 0)
+      }
+    })
+    const withRecall = sessions.filter(s => s.recallScore != null)
+    const avgRecall = withRecall.length
+      ? Math.round(withRecall.reduce((a, s) => a + s.recallScore, 0) / withRecall.length)
+      : null
+    return { weekHours: (weekMins / 60).toFixed(1), avgRecall }
+  }, [completedSessions, todayStr])
+
   // Celebration + streak
   const allCompleteKey = todayStr + (allComplete ? '-done' : '')
   const firedRef = useRef(null)
@@ -766,6 +787,28 @@ export default function DashboardView({
               </button>
             ))}
           </div>
+
+          {/* ── This-week performance strip ── */}
+          <button
+            onClick={() => typeof onNavigateToProgress === 'function' && onNavigateToProgress()}
+            style={{
+              marginTop: 12, padding: '10px 10px', borderRadius: 10,
+              background: 'rgba(59,97,196,0.04)', border: '1px solid rgba(59,97,196,0.10)',
+              display: 'flex', alignItems: 'center', gap: 10, width: '100%', cursor: 'pointer',
+              textAlign: 'left',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,97,196,0.08)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(59,97,196,0.04)' }}
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            <div style={{ flex: 1, fontSize: 12, color: '#6B6B6B' }}>
+              <span style={{ fontWeight: 600, color: '#1A1A1A' }}>{weekPerf.weekHours}h</span> this week
+              {weekPerf.avgRecall != null && (
+                <> · <span style={{ fontWeight: 600, color: '#1A1A1A' }}>{weekPerf.avgRecall}%</span> recall</>
+              )}
+            </div>
+            <span style={{ fontSize: 11, fontWeight: 600, color: '#3B61C4' }}>Progress →</span>
+          </button>
         </Card>
 
         {/* ── TODAY'S BRIEF (span 12) ── */}

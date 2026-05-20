@@ -1533,6 +1533,10 @@ export default function OutputView({
             googleCalendarConnected={gcalConnected}
             onConnectGoogleCalendar={handleConnectGoogleCalendar}
             onShowPaywall={onShowPaywall}
+            onShowProgress={() => setActiveSection('progress')}
+            completedSessions={completedSessionLog}
+            courses={courses}
+            todayStr={todayStr}
           />
         )}
 

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { getActivePlan, getCachedSubscription, initSubscription } from '../lib/subscription'
 import { supabase } from '../lib/supabase'
 import ReferralCard from './ReferralCard'
@@ -21,6 +21,18 @@ const PLAN_INFO = {
   },
 }
 
+function sessionMinutes(s) {
+  if (s.elapsedSeconds != null && s.elapsedSeconds > 0) return s.elapsedSeconds / 60
+  return s.duration ?? 0
+}
+
+function getMonWeekStart(dateStr) {
+  const d = new Date(dateStr + 'T12:00:00')
+  const dow = d.getDay()
+  d.setDate(d.getDate() - (dow === 0 ? 6 : dow - 1))
+  return d.toISOString().slice(0, 10)
+}
+
 export default function AccountView({
   userEmail,
   onSignOut,
@@ -29,6 +41,10 @@ export default function AccountView({
   googleCalendarConnected,
   onConnectGoogleCalendar,
   onShowPaywall,
+  onShowProgress,
+  completedSessions = [],
+  courses = [],
+  todayStr,
 }) {
   const plan = getActivePlan()
   const sub = getCachedSubscription()
@@ -44,6 +60,39 @@ export default function AccountView({
 
   const [canceling, setCanceling] = useState(false)
   const [canceled, setCanceled] = useState(false)
+
+  // ── Progress stats ────────────────────────────────────────────────────────────
+  const progressStats = useMemo(() => {
+    const ws = getMonWeekStart(todayStr ?? new Date().toISOString().slice(0, 10))
+    let totalMins = 0, weekMins = 0
+    completedSessions.forEach(s => {
+      const m = sessionMinutes(s)
+      totalMins += m
+      if (s.dateStr >= ws) weekMins += m
+    })
+    const withRecall = completedSessions.filter(s => s.recallScore != null)
+    const avgRecall = withRecall.length
+      ? Math.round(withRecall.reduce((a, s) => a + s.recallScore, 0) / withRecall.length)
+      : null
+    // streak
+    const datesSet = new Set(completedSessions.map(s => s.dateStr))
+    let streak = 0
+    const d = new Date((todayStr ?? new Date().toISOString().slice(0, 10)) + 'T12:00:00')
+    if (!datesSet.has(todayStr)) d.setDate(d.getDate() - 1)
+    while (streak < 999) {
+      const k = d.toISOString().slice(0, 10)
+      if (!datesSet.has(k)) break
+      streak++
+      d.setDate(d.getDate() - 1)
+    }
+    return {
+      totalHours: (totalMins / 60).toFixed(1),
+      weekHours: (weekMins / 60).toFixed(1),
+      sessions: completedSessions.length,
+      avgRecall,
+      streak,
+    }
+  }, [completedSessions, todayStr])
 
   const handleCancelTrial = async () => {
     if (!confirm('Cancel your free trial? You\'ll lose Pro access immediately and won\'t be charged.')) return
@@ -89,6 +138,38 @@ export default function AccountView({
             )}
           </p>
         </div>
+      </div>
+
+      {/* Progress & Results */}
+      <div style={{ marginBottom: 32, paddingBottom: 32, borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Progress & Results</p>
+          {onShowProgress && (
+            <button
+              onClick={onShowProgress}
+              style={{ padding: 0, background: 'none', border: 'none', fontSize: 12, color: '#3B61C4', fontWeight: 600, cursor: 'pointer' }}
+            >
+              Full analytics →
+            </button>
+          )}
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+          {[
+            { label: 'This week', value: `${progressStats.weekHours}h`, sub: `${progressStats.totalHours}h total` },
+            { label: 'Sessions', value: progressStats.sessions, sub: 'completed' },
+            { label: 'Study streak', value: `${progressStats.streak}d`, sub: progressStats.streak === 0 ? 'Start today' : 'in a row' },
+            { label: 'Avg recall', value: progressStats.avgRecall != null ? `${progressStats.avgRecall}%` : '—', sub: progressStats.avgRecall != null ? 'across sessions' : 'No data yet' },
+          ].map(({ label, value, sub }) => (
+            <div key={label} style={{ background: '#F7F6F3', borderRadius: 12, padding: '14px 16px' }}>
+              <p style={{ margin: '0 0 4px', fontSize: 10, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</p>
+              <p style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 800, color: '#1A1A1A', letterSpacing: '-0.02em' }}>{value}</p>
+              <p style={{ margin: 0, fontSize: 11, color: '#9B9B9B' }}>{sub}</p>
+            </div>
+          ))}
+        </div>
+        {completedSessions.length === 0 && (
+          <p style={{ margin: 0, fontSize: 12, color: '#C0C0C0', textAlign: 'center' }}>Complete your first study session to see stats here.</p>
+        )}
       </div>
 
       {/* Plan */}
