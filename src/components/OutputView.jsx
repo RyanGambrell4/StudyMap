@@ -1160,6 +1160,10 @@ export default function OutputView({
         googleCalendarConnected={gcalConnected}
         onConnectGoogleCalendar={handleConnectGoogleCalendar}
         courses={courses}
+        onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump' }); setShowBrainDump(true) }}
+        onOpenQuizBurst={() => { track('feature_opened', { feature: 'quiz_burst' }); setShowQuizBurst(true) }}
+        onOpenExamRescue={() => { track('feature_opened', { feature: 'exam_rescue' }); setShowExamRescue(true) }}
+        onNavigateToTools={() => setActiveSection('tools')}
       >
 
         {/* Recovery alerts */}
