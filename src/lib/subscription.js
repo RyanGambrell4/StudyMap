@@ -10,9 +10,9 @@ import { track } from './analytics'
 // ── Plan limits ───────────────────────────────────────────────────────────────
 
 export const PLAN_LIMITS = {
-  free:      { courses: 1,        aiQueries: 10 },
-  pro:       { courses: 5,        aiQueries: 75 },
-  unlimited: { courses: Infinity, aiQueries: Infinity },
+  free:      { courses: 2,        aiQueries: 1,        aiResetPeriod: 'day'   },
+  pro:       { courses: 5,        aiQueries: 75,       aiResetPeriod: 'month' },
+  unlimited: { courses: Infinity, aiQueries: Infinity, aiResetPeriod: 'month' },
 }
 
 // ── In-memory cache ───────────────────────────────────────────────────────────
@@ -72,17 +72,29 @@ function isNewMonth(isoString) {
   return now.getMonth() !== then.getMonth() || now.getFullYear() !== then.getFullYear()
 }
 
+function isNewDay(isoString) {
+  if (!isoString) return true
+  const now = new Date()
+  const then = new Date(isoString)
+  return now.toDateString() !== then.toDateString()
+}
+
+function isPeriodReset(isoString) {
+  const { aiResetPeriod } = getPlanLimits()
+  return aiResetPeriod === 'day' ? isNewDay(isoString) : isNewMonth(isoString)
+}
+
 export function canUseAI() {
   const sub = getCachedSubscription()
   const { aiQueries } = getPlanLimits()
   if (aiQueries === Infinity) return true
-  if (isNewMonth(sub?.aiQueriesResetAt)) return true
+  if (isPeriodReset(sub?.aiQueriesResetAt)) return true
   return (sub?.aiQueriesUsed ?? 0) < aiQueries
 }
 
 export function getAIQueriesUsed() {
   const sub = getCachedSubscription()
-  if (isNewMonth(sub?.aiQueriesResetAt)) return 0
+  if (isPeriodReset(sub?.aiQueriesResetAt)) return 0
   return sub?.aiQueriesUsed ?? 0
 }
 
@@ -98,12 +110,12 @@ export function getAIQueriesLimit() {
 export function incrementAIQuery() {
   if (!_sub) return
   const now = new Date()
-  const newMonth = isNewMonth(_sub?.aiQueriesResetAt)
-  const newCount = newMonth ? 1 : (_sub?.aiQueriesUsed ?? 0) + 1
+  const newPeriod = isPeriodReset(_sub?.aiQueriesResetAt)
+  const newCount = newPeriod ? 1 : (_sub?.aiQueriesUsed ?? 0) + 1
   _sub = {
     ..._sub,
     aiQueriesUsed: newCount,
-    aiQueriesResetAt: newMonth ? now.toISOString() : (_sub?.aiQueriesResetAt ?? now.toISOString()),
+    aiQueriesResetAt: newPeriod ? now.toISOString() : (_sub?.aiQueriesResetAt ?? now.toISOString()),
   }
   window.dispatchEvent(new CustomEvent('studyedge:ai-query-used', { detail: { count: newCount } }))
   const limit = getPlanLimits().aiQueries

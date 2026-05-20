@@ -134,7 +134,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
           </div>
           <div>
             <p className="text-slate-900 dark:text-white font-bold text-lg mb-1">AI Tutor</p>
-            <p className="text-slate-500 text-sm max-w-[260px] leading-relaxed">AI Tutor is available on Pro and Unlimited plans</p>
+            <p className="text-slate-500 text-sm max-w-[260px] leading-relaxed">You've used today's free AI message. Upgrade for unlimited access.</p>
           </div>
           <button
             onClick={() => onShowPaywall?.('ai')}

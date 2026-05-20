@@ -35,14 +35,15 @@ function Pricing(){
 
   const tiers = [
     {
-      name:'Free', planKey:null, sub:'Try the system. No credit card.',
+      name:'Free', planKey:null, sub:'Try everything once. No credit card.',
       cta:'Start for free', primary:false, plan:null,
       feats:[
-        [true,'1 course · schedule, coach & flashcards'],
-        [true,'10 AI actions/month'],
-        [true,'Session Blueprint · AI-planned session structure'],
+        [true,'2 courses · full schedule & planner'],
+        [true,'1 AI message / day'],
+        [true,'Session Blueprint · 1 free use'],
+        [true,'Focus Mode · 1 free use'],
+        [true,'Coach Plan · 1 free use'],
         [true,'Syllabus import · deadlines pulled automatically'],
-        [true,'Focus Mode · timer with streak tracking'],
       ]
     },
     {

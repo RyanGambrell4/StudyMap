@@ -66,32 +66,37 @@ const LIMIT_MESSAGES = {
   courses: {
     tag: 'Course limit reached',
     title: 'You\'re out of course slots.',
-    body: 'Free plan holds 1 course. Pro gives you 5, enough for a full semester with room to spare.',
+    body: 'Free plan includes 2 courses. Pro gives you 5 — enough for a full semester with room to spare.',
   },
   ai: {
-    tag: 'Boost limit reached',
-    title: 'You\'ve used all 10 study boosts.',
-    body: 'Pro gets 75 boosts a month. That\'s enough to build a plan, run blueprints, and coach every session for the entire semester.',
+    tag: 'Daily AI limit reached',
+    title: 'You\'ve used today\'s free AI message.',
+    body: 'Unlock unlimited AI Tutor sessions — ask anything, anytime, for every course all semester.',
   },
   coach: {
-    tag: 'Pro feature',
-    title: 'Study Coach is a Pro feature.',
-    body: 'Get a personalized 8-week AI study plan built around your deadlines, courses, and learning style. Upgrade to unlock it.',
+    tag: 'Free use limit reached',
+    title: 'You\'ve used your free Coach Plan.',
+    body: 'Regenerate your study plan anytime as your struggles and deadlines change. Upgrade to unlock unlimited coach plans.',
   },
   blueprint: {
-    tag: 'Pro feature',
-    title: 'Session Blueprints are a Pro feature.',
-    body: 'Your session plan is built and ready to go. Upgrade to access it and every blueprint you generate from here on.',
+    tag: 'Free use limit reached',
+    title: 'You\'ve used your free Session Blueprint.',
+    body: 'Get a minute-by-minute session structure every time you sit down to study. Upgrade to unlock unlimited blueprints.',
   },
   focus: {
-    tag: 'Pro feature',
-    title: 'Focus sessions are a Pro feature.',
+    tag: 'Free use limit reached',
+    title: 'You\'ve used your free Focus Mode session.',
     body: 'Start a timed study session with your blueprint loaded. Upgrade to unlock focused, distraction-free study mode.',
   },
   tools: {
     tag: 'Pro feature',
     title: 'Study Tools are a Pro feature.',
     body: 'Flashcards, practice quizzes, and AI-generated study materials from your own course content. Upgrade to unlock.',
+  },
+  grade_recovery: {
+    tag: 'Pro feature',
+    title: 'Grade Recovery is a Pro feature.',
+    body: 'Grade Recovery calculates exactly how many points you need and builds a targeted rescue plan. Upgrade to unlock it.',
   },
 }
 

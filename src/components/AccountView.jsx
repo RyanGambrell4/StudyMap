@@ -6,7 +6,7 @@ import ReferralCard from './ReferralCard'
 const PLAN_INFO = {
   free: {
     label: 'Free',
-    features: ['Calendar & study planner', 'AI study plan (1 course)', 'Basic progress tracking'],
+    features: ['Calendar & study planner (2 courses)', '1 AI message / day', 'Basic progress tracking'],
     color: '#64748b',
   },
   pro: {
