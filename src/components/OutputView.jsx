@@ -39,7 +39,7 @@ import ExamRescueModal from './ExamRescueModal'
 import QuickQuizBurst from './QuickQuizBurst'
 
 // ─── TutorView ────────────────────────────────────────────────────────────────
-function TutorView({ courses, userId, onShowPaywall, learningStyle }) {
+function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateToCoach }) {
   const [selectedCourse, setSelectedCourse] = useState(courses.length > 0 ? 0 : -1)
   const course = courses[selectedCourse] ?? null
 
@@ -92,6 +92,7 @@ function TutorView({ courses, userId, onShowPaywall, learningStyle }) {
             userId={userId}
             learningStyle={learningStyle}
             onShowPaywall={onShowPaywall}
+            onNavigateToCoach={onNavigateToCoach}
           />
         </div>
       )}
@@ -359,7 +360,7 @@ export default function OutputView({
     () => generateSchedule(courses, schedule, learningStyle, yearLevel),
     [courses, schedule, learningStyle, yearLevel]
   )
-  const { weeks, stats, sessionMinutes } = result
+  const { weeks, stats, sessionMinutes, examConflicts = [] } = result
 
   // ── state ──
   const [completedIds, setCompletedIds] = useState(() => initialCompletedIds ?? new Set())
@@ -823,7 +824,7 @@ export default function OutputView({
         // Run adaptation engine if recall data was provided
         if (recallData?.score !== undefined) {
           const todayStr = new Date().toISOString().split('T')[0]
-          const result = runAdaptation(sess, recallData.score, courses, getCachedManualSessions(), todayStr)
+          const result = runAdaptation(sess, recallData.score, courses, getCachedManualSessions(), todayStr, schedule?.preferredTime)
           if (result) {
             if (getActivePlan() !== 'free') {
               // Paid: inject the session and show the adapt modal
@@ -1276,6 +1277,8 @@ export default function OutputView({
             onNavigateToTutor={() => setActiveSection('tutor')}
             onNavigateToTools={() => setActiveSection('tools')}
             onShowPaywall={onShowPaywall}
+            recoveryCoursesIdx={recoveryCoursesIdx}
+            examConflicts={examConflicts}
             coachPlans={coachPlans}
             onOpenStudyCoach={handleOpenStudyCoach}
             schoolType={schoolType}
@@ -1292,6 +1295,43 @@ export default function OutputView({
         {/* ── Calendar ── */}
         {activeSection === 'calendar' && (
           <div className="px-4 py-6 max-w-7xl mx-auto">
+            {/* Recovery banner */}
+            {recoveryCoursesIdx.size > 0 && (
+              <div style={{
+                marginBottom: 16, padding: '12px 16px', borderRadius: 12,
+                background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.2)',
+                display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 15 }}>⚠️</span>
+                  <div>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#DC2626' }}>Grade Recovery Mode — </span>
+                    <span style={{ fontSize: 13, color: '#6B6B6B' }}>
+                      Extra weekly sessions added for {[...recoveryCoursesIdx].map(i => courses[i]?.name).filter(Boolean).join(', ')} to help close the gap.
+                    </span>
+                  </div>
+                </div>
+                <button onClick={() => setActiveSection('grades')} style={{ fontSize: 12, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                  View grades →
+                </button>
+              </div>
+            )}
+            {/* Exam conflict banner */}
+            {examConflicts.length > 0 && (
+              <div style={{
+                marginBottom: 16, padding: '12px 16px', borderRadius: 12,
+                background: 'rgba(217,119,6,0.07)', border: '1px solid rgba(217,119,6,0.25)',
+                display: 'flex', flexDirection: 'column', gap: 6,
+              }}>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#D97706' }}>⚡ Exam Cluster Detected</div>
+                {examConflicts.map((c, i) => (
+                  <div key={i} style={{ fontSize: 12.5, color: '#6B6B6B' }}>
+                    <strong style={{ color: '#1A1A1A' }}>{c.courseA}</strong> and <strong style={{ color: '#1A1A1A' }}>{c.courseB}</strong> exams are only <strong>{c.gapDays} day{c.gapDays !== 1 ? 's' : ''}</strong> apart — front-load {c.courseA} prep now to avoid a crunch.
+                  </div>
+                ))}
+              </div>
+            )}
+
             {/* View controls */}
             <div className="flex items-center justify-between mb-6">
               {/* Month navigation — only shown in month view; day/week views have their own nav */}
@@ -1590,6 +1630,7 @@ export default function OutputView({
             userId={userId}
             onShowPaywall={onShowPaywall}
             learningStyle={learningStyle}
+            onNavigateToCoach={() => setActiveSection('coach')}
           />
         )}
 

@@ -1097,15 +1097,48 @@ export default function CoursesView({
       </div>
 
       <div className="cv-page-pad" style={{ padding: '24px 32px 48px' }}>
-        {courses.length === 0 && (
-          <div style={{ padding: '16px 20px', borderRadius: 12, background: 'rgba(59,97,196,0.04)', border: '1px solid rgba(59,97,196,0.12)', display: 'flex', gap: 14, alignItems: 'flex-start', marginBottom: 22 }}>
-            <svg style={{ width: 20, height: 20, color: D.blue, flexShrink: 0, marginTop: 2 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-            <div>
-              <p style={{ margin: 0, color: D.blue, fontWeight: 700, fontSize: 14 }}>{isExamMode ? 'Add your first exam section to get started' : 'Add your first course to get started'}</p>
-              <p style={{ margin: '4px 0 0', color: D.textMuted, fontSize: 12 }}>{isExamMode ? 'Use the exam preset or add sections manually below.' : 'Add each course you\'re taking this semester — then import your syllabi to unlock your schedule, deadlines, and AI tools.'}</p>
+        {courses.length === 0 && !isExamMode && (() => {
+          const TEMPLATES = [
+            { name: 'Biology', difficulty: 'Hard', targetGrade: 'A', dot: '#16A34A' },
+            { name: 'Chemistry', difficulty: 'Hard', targetGrade: 'A', dot: '#0891B2' },
+            { name: 'Psychology', difficulty: 'Medium', targetGrade: 'A', dot: '#7C3AED' },
+            { name: 'Economics', difficulty: 'Medium', targetGrade: 'A', dot: '#3B61C4' },
+            { name: 'Calculus', difficulty: 'Hard', targetGrade: 'B', dot: '#DC2626' },
+            { name: 'English', difficulty: 'Easy', targetGrade: 'A', dot: '#D97706' },
+            { name: 'History', difficulty: 'Medium', targetGrade: 'A', dot: '#92400E' },
+            { name: 'Physics', difficulty: 'Hard', targetGrade: 'B', dot: '#4F46E5' },
+          ]
+          return (
+            <div style={{ marginBottom: 28 }}>
+              <div style={{ marginBottom: 14 }}>
+                <p style={{ margin: '0 0 4px', color: D.text, fontWeight: 700, fontSize: 15 }}>Add your courses to get started</p>
+                <p style={{ margin: 0, color: D.textMuted, fontSize: 13 }}>Pick from common courses below, or click <strong>Add Course</strong> to set up your own.</p>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10 }}>
+                {TEMPLATES.map(t => (
+                  <button
+                    key={t.name}
+                    onClick={() => {
+                      const id = Date.now().toString(36) + Math.random().toString(36).slice(2, 5)
+                      handleAddCourse({ id, name: t.name, code: '', examDate: '', difficulty: t.difficulty, targetGrade: t.targetGrade, color: { name: 'custom', dot: t.dot } })
+                    }}
+                    style={{
+                      display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '11px 14px', borderRadius: 10, border: `1px solid ${t.dot}30`,
+                      background: `${t.dot}08`, cursor: 'pointer', textAlign: 'left',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <span style={{ width: 10, height: 10, borderRadius: '50%', background: t.dot, flexShrink: 0 }} />
+                    <span style={{ fontSize: 13, fontWeight: 600, color: D.text }}>{t.name}</span>
+                    <span style={{ marginLeft: 'auto', fontSize: 11, color: D.textMuted }}>{t.difficulty}</span>
+                  </button>
+                ))}
+              </div>
+              <p style={{ margin: '12px 0 0', fontSize: 12, color: D.textMuted }}>You can edit the exam date, target grade, and difficulty after adding.</p>
             </div>
-          </div>
-        )}
+          )
+        })()}
 
         {isExamMode && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', background: 'rgba(0,0,0,0.03)', border: '1px solid rgba(99,102,241,0.18)', borderRadius: 12, marginBottom: 16 }}>

@@ -3,7 +3,7 @@ import { getCachedCoachPlan, saveCoachPlanStruggles } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
 import { getActivePlan, canUseAI, incrementAIQuery } from '../lib/subscription'
 
-export default function AIChatView({ courseId, courseName, examDate, targetGrade, userId, learningStyle, onShowPaywall }) {
+export default function AIChatView({ courseId, courseName, examDate, targetGrade, userId, learningStyle, onShowPaywall, onNavigateToCoach }) {
   const isFree = getActivePlan() === 'free'
 
   const [messages, setMessages] = useState([])
@@ -152,16 +152,24 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
 
       {/* Flag banner */}
       {flagBanner && (
-        <div className="mx-4 mt-3 shrink-0 flex items-center gap-2.5 bg-indigo-50 dark:bg-indigo-950/50 border border-indigo-200 dark:border-indigo-800/60 rounded-xl px-4 py-2.5 text-sm">
-          <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
-          <span className="text-indigo-700 dark:text-indigo-300 font-medium flex-1">
-            '<span className="font-bold">{flagBanner}</span>' added to your study plan focus areas
+        <div style={{ margin: '12px 16px 0', flexShrink: 0, padding: '12px 14px', borderRadius: 12, background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.25)', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <svg style={{ width: 16, height: 16, color: '#7C3AED', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+          <span style={{ flex: 1, fontSize: 13, color: '#4C1D95', fontWeight: 500, minWidth: 0 }}>
+            <strong style={{ color: '#7C3AED' }}>{flagBanner}</strong> flagged as a struggle — added to your coach plan focus areas.
           </span>
-          <button onClick={() => setFlagBanner(null)} className="text-indigo-400 hover:text-indigo-600 transition-colors shrink-0">
-            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-            </svg>
-          </button>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+            {onNavigateToCoach && (
+              <button
+                onClick={() => { setFlagBanner(null); onNavigateToCoach() }}
+                style={{ fontSize: 12, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 8, padding: '5px 11px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                Rebuild coach plan →
+              </button>
+            )}
+            <button onClick={() => setFlagBanner(null)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', padding: 2, display: 'flex' }}>
+              <svg style={{ width: 14, height: 14 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
         </div>
       )}
 

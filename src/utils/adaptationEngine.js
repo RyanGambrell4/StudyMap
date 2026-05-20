@@ -4,9 +4,10 @@
  * Rule engine: reads a recall score (0.0 to 1.0) after a Focus Mode session
  * and decides whether to inject a review session into the student's plan.
  *
- * Rules (thresholds never shown to students — only plain-language reasons):
- *   score <= 0.30  =>  struggling. Inject a review session within 24-48h.
- *   score >  0.30  =>  no action for V1 (spaced-repetition push-out is roadmap).
+ * Rules:
+ *   score <= 0.40  =>  struggling badly. Inject tomorrow.
+ *   score <= 0.60  =>  fuzzy. Inject in 2 days.
+ *   score >  0.60  =>  no action needed.
  */
 
 function skipSunday(dateStr) {
@@ -25,16 +26,32 @@ function dayName(dateStr) {
   return new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'long' })
 }
 
+function minsToAmPm(mins) {
+  const h = Math.floor(mins / 60) % 24
+  const m = mins % 60
+  return `${h % 12 || 12}:${String(m).padStart(2, '0')} ${h >= 12 ? 'PM' : 'AM'}`
+}
+
+// Pick a review session type that makes sense given the original
+function reviewSessionType(original) {
+  if (!original || original === 'Custom Study') return 'Active Recall'
+  if (/quiz|test|practice|exam/i.test(original)) return 'Practice Quiz'
+  if (/flash/i.test(original)) return 'Flashcard Drill'
+  if (/read|note|text/i.test(original)) return 'Re-read & Highlight'
+  return 'Active Recall'
+}
+
 /**
- * @param {object} session       - The completed session object
- * @param {number} recallScore   - Float 0.0 to 1.0 from the slider
- * @param {Array}  courses       - Full courses array
+ * @param {object} session        - The completed session object
+ * @param {number} recallScore    - Float 0.0 to 1.0 from the slider
+ * @param {Array}  courses        - Full courses array
  * @param {Array}  manualSessions - Existing manual sessions (to avoid duplicates)
- * @param {string} todayStr      - ISO date string YYYY-MM-DD
+ * @param {string} todayStr       - ISO date string YYYY-MM-DD
+ * @param {string} preferredTime  - 'Morning' | 'Afternoon' | 'Evening'
  * @returns {{ injectedSession, reason, dayName: string } | null}
  */
-export function runAdaptation(session, recallScore, courses, manualSessions, todayStr) {
-  if (recallScore > 0.30) return null
+export function runAdaptation(session, recallScore, courses, manualSessions, todayStr, preferredTime = 'Evening') {
+  if (recallScore > 0.60) return null
 
   const course = courses[session.courseId]
   if (!course) return null
@@ -47,8 +64,8 @@ export function runAdaptation(session, recallScore, courses, manualSessions, tod
     if (daysToExam <= 2) return null
   }
 
-  // Very low score (<=15%) = inject tomorrow, otherwise in 2 days
-  const daysOut = recallScore <= 0.15 ? 1 : 2
+  // Bad score = tomorrow, fuzzy = 2 days out
+  const daysOut = recallScore <= 0.40 ? 1 : 2
   const rawDate = addDays(todayStr, daysOut)
   const injectDate = skipSunday(rawDate)
 
@@ -58,27 +75,31 @@ export function runAdaptation(session, recallScore, courses, manualSessions, tod
   )
   if (alreadyExists) return null
 
-  const dur = Math.round((session.duration ?? 45) * 0.9)
+  // Assign a real start time based on preferred study time
+  const PREF_START = { Morning: 8 * 60, Afternoon: 13 * 60, Evening: 18 * 60 }
+  const startMin = PREF_START[preferredTime] ?? 18 * 60
+  const dur = Math.round((session.duration ?? 45) * 0.75) // shorter focused review
+
   const injected = {
     id: `adaptive-${session.courseId}-${injectDate}-${Date.now()}`,
     dateStr: injectDate,
     courseId: session.courseId,
     courseName: session.courseName,
     color: session.color,
-    sessionType: 'Review',
+    sessionType: reviewSessionType(session.sessionType),
     duration: dur,
     isManual: true,
     isAdaptive: true,
-    startTime: null,
-    endTime: null,
+    startTime: minsToAmPm(startMin),
+    endTime: minsToAmPm(startMin + dur),
   }
 
-  const difficulty = recallScore <= 0.15 ? 'difficult' : 'tricky'
+  const difficulty = recallScore <= 0.40 ? 'difficult' : 'a bit fuzzy'
   const what = session.sessionType && session.sessionType !== 'Custom Study'
     ? session.sessionType
     : 'that material'
 
-  const reason = `You found ${what} ${difficulty}, so we added a ${dur}-min review on ${dayName(injectDate)}.`
+  const reason = `You found ${what} ${difficulty} — we added a ${dur}-min ${injected.sessionType} on ${dayName(injectDate)} to lock it in.`
 
   return { injectedSession: injected, reason, dayName: dayName(injectDate) }
 }

@@ -236,6 +236,28 @@ export function generateSchedule(courses, schedule, learningStyle, yearLevel = '
     .filter(c => c.examDateObj >= today)
     .sort((a, b) => a.examDateObj - b.examDateObj)[0]
 
+  // ── Exam conflict detection ──────────────────────────────────────────────────
+  // Flag any two courses whose exams are within 7 days of each other
+  const examConflicts = []
+  const upcoming = parsedCourses
+    .filter(c => c.examDateObj >= today)
+    .sort((a, b) => a.examDateObj - b.examDateObj)
+
+  for (let i = 0; i < upcoming.length; i++) {
+    for (let j = i + 1; j < upcoming.length; j++) {
+      const gap = daysBetween(upcoming[i].examDateObj, upcoming[j].examDateObj)
+      if (gap <= 7) {
+        examConflicts.push({
+          courseA: upcoming[i].name,
+          courseB: upcoming[j].name,
+          examDateA: dateStr(upcoming[i].examDateObj),
+          examDateB: dateStr(upcoming[j].examDateObj),
+          gapDays: gap,
+        })
+      }
+    }
+  }
+
   return {
     weeks,
     stats: {
@@ -247,6 +269,7 @@ export function generateSchedule(courses, schedule, learningStyle, yearLevel = '
         : null,
     },
     sessionMinutes,
+    examConflicts,
   }
 }
 

@@ -1488,6 +1488,33 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
             <div style={{ fontSize: 11, color: D.dim }}>{doneCount}/{totalSessions} done</div>
           </div>
         </div>
+
+        {/* Apply to Calendar CTA */}
+        <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+          <div style={{ fontSize: 12.5, color: D.muted, lineHeight: 1.4 }}>
+            {pushed
+              ? <span style={{ color: D.mint, fontWeight: 600 }}>✓ All {totalSessions} sessions added to your calendar with real times</span>
+              : <span>Push all <strong style={{ color: D.text }}>{totalSessions} sessions</strong> to your calendar as timed study blocks</span>
+            }
+          </div>
+          {onPushToSchedule && (
+            <button
+              onClick={handlePushToSchedule}
+              disabled={pushed}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 7,
+                padding: '9px 18px', borderRadius: 10, border: 'none', cursor: pushed ? 'default' : 'pointer',
+                fontWeight: 700, fontSize: 13,
+                background: pushed ? 'rgba(22,163,74,0.1)' : D.accent,
+                color: pushed ? D.mint : '#fff',
+                transition: 'all 0.15s', flexShrink: 0,
+              }}
+            >
+              <Icon name={pushed ? 'check' : 'calendar'} size={14} color={pushed ? D.mint : '#fff'} stroke={2.5} />
+              {pushed ? 'Applied to Calendar' : 'Apply to Calendar'}
+            </button>
+          )}
+        </div>
       </div>
 
 

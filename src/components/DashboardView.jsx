@@ -159,6 +159,7 @@ export default function DashboardView({
   onOpenExamRescue,
   onOpenQuizBurst,
   completedSessions,
+  recoveryCoursesIdx = new Set(),
 }) {
   const plan = getActivePlan()
   const aiUsed = getAIQueriesUsed()
@@ -529,6 +530,31 @@ export default function DashboardView({
           </div>
         )
       })()}
+
+      {/* ── Grade Recovery banner ── */}
+      {recoveryCoursesIdx.size > 0 && (
+        <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
+          <div style={{
+            background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.18)',
+            borderLeft: '4px solid #DC2626', borderRadius: 10, padding: '13px 18px',
+            display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+          }}>
+            <span style={{ fontSize: 18 }}>⚠️</span>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#DC2626', marginBottom: 2 }}>Grade Recovery Mode Active</div>
+              <div style={{ fontSize: 12.5, color: D.muted }}>
+                Extra weekly sessions scheduled for <strong>{[...recoveryCoursesIdx].map(i => courses[i]?.name).filter(Boolean).join(', ')}</strong> — your grades are below target and we're helping close the gap.
+              </div>
+            </div>
+            <button
+              onClick={() => onNavigateToGrades?.()}
+              style={{ fontSize: 12, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 8, padding: '7px 14px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+            >
+              View grades →
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* ── Pro trial banner ── */}
       {showTrialCard && (
