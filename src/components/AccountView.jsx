@@ -53,6 +53,24 @@ function getMonWeekStart(dateStr) {
   return d.toISOString().slice(0, 10)
 }
 
+const card = {
+  background: '#FFFFFF',
+  border: '1px solid rgba(0,0,0,0.07)',
+  borderRadius: 14,
+  padding: '20px 24px',
+  marginBottom: 12,
+  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+}
+
+const sectionLabel = {
+  margin: '0 0 14px',
+  fontSize: 11,
+  fontWeight: 700,
+  color: '#9B9B9B',
+  textTransform: 'uppercase',
+  letterSpacing: '0.06em',
+}
+
 export default function AccountView({
   userEmail,
   onSignOut,
@@ -130,35 +148,37 @@ export default function AccountView({
   }
 
   return (
-    <div style={{ padding: '40px 24px', maxWidth: 560, margin: '0 auto' }}>
-      <h1 style={{ fontSize: 28, fontWeight: 700, color: '#1A1A1A', marginBottom: 32 }}>Account</h1>
+    <div style={{ padding: '24px 20px', maxWidth: 560, margin: '0 auto', background: '#F7F6F3', minHeight: '100%' }}>
+      <h1 style={{ fontSize: 28, fontWeight: 700, color: '#111111', marginBottom: 20 }}>Account</h1>
 
-      {/* Profile */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 32, paddingBottom: 32, borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
-        <div style={{
-          width: 44, height: 44, borderRadius: 12, background: '#3B61C4',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          color: '#fff', fontSize: 15, fontWeight: 800, flexShrink: 0,
-        }}>
-          {initials}
-        </div>
-        <div>
-          <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>{userEmail ?? 'User'}</p>
-          <p style={{ margin: 0, fontSize: 12, color: planInfo.color, fontWeight: 600, marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
-            {planInfo.label}
-            {trialActive && (
-              <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4, backgroundColor: 'rgba(59,97,196,0.10)', color: '#3B61C4' }}>
-                FREE TRIAL
-              </span>
-            )}
-          </p>
+      {/* Profile card */}
+      <div style={card}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{
+            width: 46, height: 46, borderRadius: 12, background: '#3B61C4',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            color: '#fff', fontSize: 15, fontWeight: 800, flexShrink: 0,
+          }}>
+            {initials}
+          </div>
+          <div>
+            <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#111111' }}>{userEmail ?? 'User'}</p>
+            <p style={{ margin: '3px 0 0', fontSize: 12, color: planInfo.color, fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+              {planInfo.label}
+              {trialActive && (
+                <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4, backgroundColor: 'rgba(59,97,196,0.10)', color: '#3B61C4' }}>
+                  FREE TRIAL
+                </span>
+              )}
+            </p>
+          </div>
         </div>
       </div>
 
-      {/* Progress & Results */}
-      <div style={{ marginBottom: 32, paddingBottom: 32, borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+      {/* Progress & Results card */}
+      <div style={card}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Progress & Results</p>
+          <p style={sectionLabel}>Progress &amp; Results</p>
           {onShowProgress && (
             <button
               onClick={onShowProgress}
@@ -168,30 +188,31 @@ export default function AccountView({
             </button>
           )}
         </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 14 }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           {[
             { label: 'This week', value: `${progressStats.weekHours}h`, sub: `${progressStats.totalHours}h total` },
             { label: 'Sessions', value: progressStats.sessions, sub: 'completed' },
             { label: 'Study streak', value: `${progressStats.streak}d`, sub: progressStats.streak === 0 ? 'Start today' : 'in a row' },
             { label: 'Avg recall', value: progressStats.avgRecall != null ? `${progressStats.avgRecall}%` : '—', sub: progressStats.avgRecall != null ? 'across sessions' : 'No data yet' },
           ].map(({ label, value, sub }) => (
-            <div key={label} style={{ background: '#F7F6F3', borderRadius: 12, padding: '14px 16px' }}>
-              <p style={{ margin: '0 0 4px', fontSize: 10, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</p>
-              <p style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 800, color: '#1A1A1A', letterSpacing: '-0.02em' }}>{value}</p>
+            <div key={label} style={{ background: '#F7F6F3', borderRadius: 10, padding: '12px 14px' }}>
+              <p style={{ margin: '0 0 3px', fontSize: 10, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</p>
+              <p style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 800, color: '#111111', letterSpacing: '-0.02em' }}>{value}</p>
               <p style={{ margin: 0, fontSize: 11, color: '#9B9B9B' }}>{sub}</p>
             </div>
           ))}
         </div>
         {completedSessions.length === 0 && (
-          <p style={{ margin: 0, fontSize: 12, color: '#C0C0C0', textAlign: 'center' }}>Complete your first study session to see stats here.</p>
+          <p style={{ margin: '12px 0 0', fontSize: 12, color: '#C0C0C0', textAlign: 'center' }}>Complete your first study session to see stats here.</p>
         )}
       </div>
 
-      {/* Plan */}
-      <div style={{ marginBottom: 32, paddingBottom: 32, borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
-        <p style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Current Plan</p>
+      {/* Current Plan card */}
+      <div style={card}>
+        <p style={sectionLabel}>Current Plan</p>
+
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
-          <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#1A1A1A' }}>{planInfo.label}</p>
+          <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#111111' }}>{planInfo.label}</p>
           {trialActive && (
             <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6, backgroundColor: 'rgba(59,97,196,0.08)', color: '#3B61C4', border: '1px solid rgba(59,97,196,0.20)' }}>
               Free Trial
@@ -204,11 +225,10 @@ export default function AccountView({
           <>
             <p style={{ margin: '0 0 10px', fontSize: 12, color: '#6B6B6B', lineHeight: 1.5 }}>
               {trialDaysLeft !== null && trialDaysLeft > 0
-                ? <>You have <strong style={{ color: '#1A1A1A' }}>{trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''} left</strong> in your free trial. Upgrade before it ends to keep full access.</>
+                ? <>You have <strong style={{ color: '#111111' }}>{trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''} left</strong> in your free trial. Upgrade before it ends to keep full access.</>
                 : <>Your trial has ended. Upgrade to keep full Pro access.</>
               }
             </p>
-            {/* Trial days progress bar */}
             {trialDaysLeft !== null && (
               <div style={{ marginBottom: 12 }}>
                 <div style={{ height: 6, borderRadius: 3, background: 'rgba(0,0,0,0.07)', overflow: 'hidden' }}>
@@ -226,7 +246,7 @@ export default function AccountView({
               </div>
             )}
             {!canceled ? (
-              <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
                 <button
                   onClick={() => onShowPaywall?.('ai')}
                   style={{
@@ -254,14 +274,14 @@ export default function AccountView({
                 </button>
               </div>
             ) : (
-              <p style={{ marginBottom: 10, fontSize: 12, color: '#059669', fontWeight: 600 }}>
+              <p style={{ marginBottom: 14, fontSize: 12, color: '#059669', fontWeight: 600 }}>
                 Trial canceled. Your free access has ended.
               </p>
             )}
           </>
         )}
 
-        <ul style={{ margin: '0 0 16px', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
+        <ul style={{ margin: '0 0 16px', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 7 }}>
           {planInfo.features.map(f => (
             <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#6B6B6B' }}>
               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={planInfo.color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -278,10 +298,10 @@ export default function AccountView({
             background: 'linear-gradient(135deg, #e8f4fd, #f0f9f4)',
             border: '1.5px solid rgba(59,130,246,0.2)',
             borderRadius: 12, padding: '16px',
-            marginBottom: 12,
+            marginBottom: 4,
             textAlign: 'center',
           }}>
-            <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>
+            <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: '#111111' }}>
               Start your 7-day free trial — no card required
             </p>
             <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>
@@ -327,30 +347,37 @@ export default function AccountView({
           </button>
         )}
         {plan === 'unlimited' && (
-          <p style={{ fontSize: 13, color: '#9B9B9B' }}>You're on the best plan. Thank you!</p>
+          <p style={{ fontSize: 13, color: '#9B9B9B', margin: 0 }}>You're on the best plan. Thank you!</p>
         )}
       </div>
 
-      {/* Referral */}
-      <div style={{ marginBottom: 32, paddingBottom: 32, borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+      {/* Referral card */}
+      <div style={card}>
         <ReferralCard />
       </div>
 
-      {/* Settings */}
-      <div style={{ marginBottom: 32, paddingBottom: 32, borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
-        <p style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Settings</p>
+      {/* Settings card */}
+      <div style={card}>
+        <p style={sectionLabel}>Settings</p>
         <div style={{ display: 'flex', flexDirection: 'column' }}>
           {onConnectGoogleCalendar && (
             <button
               onClick={googleCalendarConnected ? undefined : onConnectGoogleCalendar}
-              style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 0', borderBottom: '1px solid rgba(0,0,0,0.07)', background: 'none', border: 'none', borderBottom: '1px solid rgba(0,0,0,0.07)', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 14,
+                padding: '12px 0',
+                borderBottom: '1px solid rgba(0,0,0,0.06)',
+                background: 'none', border: 'none',
+                borderBottom: '1px solid rgba(0,0,0,0.06)',
+                cursor: 'pointer', textAlign: 'left', width: '100%',
+              }}
             >
               <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <div style={{ flex: 1 }}>
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>Google Calendar</p>
-                <p style={{ margin: 0, fontSize: 12, color: '#9B9B9B', marginTop: 2 }}>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#111111' }}>Google Calendar</p>
+                <p style={{ margin: '2px 0 0', fontSize: 12, color: '#9B9B9B' }}>
                   {googleCalendarConnected ? 'Connected — syncing your schedule' : 'Connect to sync your schedule'}
                 </p>
               </div>
@@ -362,50 +389,68 @@ export default function AccountView({
           )}
           <button
             onClick={onImportSyllabus}
-            style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 0', background: 'none', border: 'none', borderBottom: '1px solid rgba(0,0,0,0.07)', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 14,
+              padding: '12px 0',
+              background: 'none', border: 'none',
+              borderBottom: '1px solid rgba(0,0,0,0.06)',
+              cursor: 'pointer', textAlign: 'left', width: '100%',
+            }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#8B5CF6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
             </svg>
             <div style={{ flex: 1 }}>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>Import Syllabus</p>
-              <p style={{ margin: 0, fontSize: 12, color: '#9B9B9B', marginTop: 2 }}>Add exams and deadlines from a course document</p>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#111111' }}>Import Syllabus</p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: '#9B9B9B' }}>Add exams and deadlines from a course document</p>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
           </button>
           <button
             onClick={onEditPlan}
-            style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 0', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%' }}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 14,
+              padding: '12px 0',
+              background: 'none', border: 'none',
+              cursor: 'pointer', textAlign: 'left', width: '100%',
+            }}
           >
             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F59E0B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
             </svg>
             <div style={{ flex: 1 }}>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>Edit Study Plan</p>
-              <p style={{ margin: 0, fontSize: 12, color: '#9B9B9B', marginTop: 2 }}>Modify your courses and schedule settings</p>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#111111' }}>Edit Study Plan</p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: '#9B9B9B' }}>Modify your courses and schedule settings</p>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
           </button>
         </div>
       </div>
 
-      {/* Sign out */}
-      {onSignOut && (
-        <button
-          onClick={onSignOut}
-          style={{ width: '100%', padding: '11px', background: 'none', border: '1px solid rgba(239,68,68,0.25)', borderRadius: 10, color: '#EF4444', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}
-        >
-          Sign Out
-        </button>
-      )}
-
-      <div style={{ textAlign: 'center', marginTop: 16 }}>
-        <a
-          href={`mailto:support@getstudyedge.com?subject=Delete%20my%20account&body=Please%20delete%20my%20account%20and%20all%20associated%20data.%0A%0AEmail%3A%20${encodeURIComponent(userEmail ?? '')}`}
-          style={{ fontSize: 12, color: '#C0C0C0', textDecoration: 'underline', textUnderlineOffset: 2 }}
-        >
-          Delete account &amp; data
-        </a>
+      {/* Sign out + delete account card */}
+      <div style={{ ...card, marginBottom: 8 }}>
+        {onSignOut && (
+          <button
+            onClick={onSignOut}
+            style={{
+              width: '100%', padding: '11px',
+              background: 'none', border: '1px solid rgba(239,68,68,0.25)',
+              borderRadius: 10, color: '#EF4444',
+              fontSize: 14, fontWeight: 600, cursor: 'pointer',
+              marginBottom: 14,
+            }}
+          >
+            Sign Out
+          </button>
+        )}
+        <div style={{ textAlign: 'center' }}>
+          <a
+            href={`mailto:support@getstudyedge.com?subject=Delete%20my%20account&body=Please%20delete%20my%20account%20and%20all%20associated%20data.%0A%0AEmail%3A%20${encodeURIComponent(userEmail ?? '')}`}
+            style={{ fontSize: 12, color: '#C0C0C0', textDecoration: 'underline', textUnderlineOffset: 2 }}
+          >
+            Delete account &amp; data
+          </a>
+        </div>
       </div>
     </div>
   )

@@ -85,15 +85,15 @@ function generatePDF({ courseName, dateStr, sessionType, recallText, concepts, m
 
   // ── Callout boxes ─────────────────────────────────────────────────────────
   const CALLOUT = {
-    important:  { bg:'#fef2f2', border:'#fca5a5', accent:'#ef4444', icon:'⚠️', label:'Important' },
-    warning:    { bg:'#fef3c7', border:'#fcd34d', accent:'#f59e0b', icon:'⚡', label:'Warning' },
-    note:       { bg:'#eff6ff', border:'#93c5fd', accent:'#3b82f6', icon:'📝', label:'Note' },
-    example:    { bg:'#f0fdf4', border:'#86efac', accent:'#16a34a', icon:'✅', label:'Example' },
-    key:        { bg:'#faf5ff', border:'#d8b4fe', accent:'#a855f7', icon:'🔑', label:'Key Point' },
-    remember:   { bg:'#fff7ed', border:'#fdba74', accent:'#f97316', icon:'💡', label:'Remember' },
-    tip:        { bg:'#f0fdf4', border:'#6ee7b7', accent:'#059669', icon:'💡', label:'Tip' },
-    definition: { bg:'#eef2ff', border:'#a5b4fc', accent:'#6366f1', icon:'📖', label:'Definition' },
-    caution:    { bg:'#fefce8', border:'#fde68a', accent:'#ca8a04', icon:'⚠️', label:'Caution' },
+    important:  { bg:'#fef2f2', border:'#fca5a5', accent:'#ef4444', icon:'!', label:'Important' },
+    warning:    { bg:'#fef3c7', border:'#fcd34d', accent:'#f59e0b', icon:'!', label:'Warning' },
+    note:       { bg:'#eff6ff', border:'#93c5fd', accent:'#3b82f6', icon:'i', label:'Note' },
+    example:    { bg:'#f0fdf4', border:'#86efac', accent:'#16a34a', icon:'→', label:'Example' },
+    key:        { bg:'#faf5ff', border:'#d8b4fe', accent:'#a855f7', icon:'◆', label:'Key Point' },
+    remember:   { bg:'#fff7ed', border:'#fdba74', accent:'#f97316', icon:'★', label:'Remember' },
+    tip:        { bg:'#f0fdf4', border:'#6ee7b7', accent:'#059669', icon:'★', label:'Tip' },
+    definition: { bg:'#eef2ff', border:'#a5b4fc', accent:'#6366f1', icon:'≡', label:'Definition' },
+    caution:    { bg:'#fefce8', border:'#fde68a', accent:'#ca8a04', icon:'!', label:'Caution' },
   }
   function renderCallout(kind, text) {
     const s = CALLOUT[kind] ?? CALLOUT.note
@@ -1938,8 +1938,16 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                   </div>
                 ) : practicePhase === 'done' ? (
                   <div className="flex flex-col items-center justify-center py-12 gap-5 px-4">
-                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl" style={{ backgroundColor: `${TAB_COLORS.practice}15` }}>
-                      <span>{practiceAnswers.filter(Boolean).length >= 2 ? '🎯' : '📖'}</span>
+                    <div className="w-16 h-16 rounded-2xl flex items-center justify-center" style={{ backgroundColor: `${TAB_COLORS.practice}15` }}>
+                      {practiceAnswers.filter(Boolean).length >= 2 ? (
+                        <svg width="28" height="28" fill="none" stroke={TAB_COLORS.practice} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                          <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
+                        </svg>
+                      ) : (
+                        <svg width="28" height="28" fill="none" stroke={TAB_COLORS.practice} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                          <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                        </svg>
+                      )}
                     </div>
                     <div className="text-center">
                       <p className="font-bold text-lg mb-1" style={{ color: '#1A1A1A' }}>

@@ -539,7 +539,9 @@ export default function DashboardView({
             borderLeft: '4px solid #DC2626', borderRadius: 10, padding: '13px 18px',
             display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
           }}>
-            <span style={{ fontSize: 18 }}>⚠️</span>
+            <svg width="18" height="18" fill="none" stroke="#DC2626" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+              <path d="M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.41 0zM12 9v4M12 17h.01"/>
+            </svg>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#DC2626', marginBottom: 2 }}>Grade Recovery Mode Active</div>
               <div style={{ fontSize: 12.5, color: D.muted }}>

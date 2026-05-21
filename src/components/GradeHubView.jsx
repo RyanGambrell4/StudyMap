@@ -30,7 +30,7 @@ const D = {
 }
 
 const PATH_COLORS = [D.sky, D.violet, D.orange]
-const PATH_ICONS  = ['↗', '⚡', '🛡']
+const PATH_ICONS  = ['↗', '↑', '◈']
 
 function uid() { return Math.random().toString(36).slice(2, 10) }
 const clamp = (v, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, v))
@@ -482,8 +482,11 @@ function TrackTab({ course, gradeData, dot, onSave }) {
               ✕ Target no longer reachable
             </div>
           ) : needed.needed !== null && needed.needed > 90 ? (
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 999, background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', color: D.orange, fontSize: 13, fontWeight: 600 }}>
-              ⚡ Possible but tough, need {needed.needed.toFixed(0)}%+ avg
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 999, background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', color: D.orange, fontSize: 13, fontWeight: 600 }}>
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+                <path d="M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.41 0zM12 9v4M12 17h.01"/>
+              </svg>
+              Possible but tough, need {needed.needed.toFixed(0)}%+ avg
             </div>
           ) : (
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: D.mint, fontSize: 13, fontWeight: 600 }}>

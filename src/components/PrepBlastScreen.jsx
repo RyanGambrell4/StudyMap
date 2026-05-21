@@ -95,7 +95,11 @@ export default function PrepBlastScreen({ session, course, onDismiss, userId }) 
         </div>
       ) : error ? (
         <div style={{ width: '100%', maxWidth: 380, textAlign: 'center' }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px', fontSize: 20 }}>⚠</div>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+            <svg width="20" height="20" fill="none" stroke="#DC2626" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.41 0zM12 9v4M12 17h.01"/>
+            </svg>
+          </div>
           <p style={{ fontSize: 15, fontWeight: 600, color: D.text, margin: '0 0 6px' }}>Couldn't load your prep brief</p>
           <p style={{ fontSize: 13, color: D.textMuted, margin: '0 0 24px', lineHeight: 1.55 }}>There was a problem reaching the AI. You can retry or skip straight to your session.</p>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>

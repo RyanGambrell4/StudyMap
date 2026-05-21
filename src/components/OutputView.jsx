@@ -994,7 +994,11 @@ export default function OutputView({
             borderRadius: 20, padding: '36px 32px', maxWidth: 420, width: '100%', textAlign: 'center',
             boxShadow: '0 24px 64px rgba(0,0,0,0.12)',
           }}>
-            <div style={{ fontSize: 36, marginBottom: 12 }}>⚡</div>
+            <div style={{ width:56, height:56, borderRadius:14, background:'rgba(59,97,196,0.08)', border:'1px solid rgba(59,97,196,0.15)', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 16px' }}>
+              <svg width="24" height="24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+              </svg>
+            </div>
             <h2 style={{ color: '#1A1A1A', fontSize: 22, fontWeight: 800, letterSpacing: '-0.5px', marginBottom: 8 }}>
               You just used your first AI boost.
             </h2>
@@ -1200,8 +1204,12 @@ export default function OutputView({
           padding: '10px 20px', borderRadius: 12, fontSize: '0.875rem', fontWeight: 600,
           background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)',
           color: '#D97706', backdropFilter: 'blur(8px)', whiteSpace: 'nowrap',
+          display: 'flex', alignItems: 'center', gap: 6,
         }}>
-          ⚠ {scheduleToast}
+          <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+            <path d="M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.41 0zM12 9v4M12 17h.01"/>
+          </svg>
+          {scheduleToast}
         </div>
       )}
 
@@ -1229,7 +1237,9 @@ export default function OutputView({
           <div className="px-6 pt-6 space-y-2 max-w-4xl mx-auto">
             {recoveryAlerts.map((name, i) => (
               <div key={i} className="flex items-start gap-3 bg-amber-950/40 border border-amber-800/40 rounded-xl px-4 py-3">
-                <span className="text-amber-400 text-lg leading-none mt-0.5">⚠</span>
+                <svg className="w-4 h-4 text-amber-400 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.41 0zM12 9v4M12 17h.01"/>
+                </svg>
                 <p className="flex-1 text-amber-300 text-sm">Recovery sessions added for <span className="font-semibold text-amber-200">{name}</span> based on your grade.</p>
                 <button onClick={() => setRecoveryAlerts(prev => prev.filter((_, j) => j !== i))} className="text-amber-700 hover:text-amber-400 transition-colors shrink-0">
                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1294,7 +1304,9 @@ export default function OutputView({
                 display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
               }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                  <span style={{ fontSize: 15 }}>⚠️</span>
+                  <svg width="15" height="15" fill="none" stroke="#DC2626" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
+                    <path d="M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.41 0zM12 9v4M12 17h.01"/>
+                  </svg>
                   <div>
                     <span style={{ fontSize: 13, fontWeight: 700, color: '#DC2626' }}>Grade Recovery Mode — </span>
                     <span style={{ fontSize: 13, color: '#6B6B6B' }}>
@@ -1314,7 +1326,12 @@ export default function OutputView({
                 background: 'rgba(217,119,6,0.07)', border: '1px solid rgba(217,119,6,0.25)',
                 display: 'flex', flexDirection: 'column', gap: 6,
               }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#D97706' }}>⚡ Exam Cluster Detected</div>
+                <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:13, fontWeight:700, color:'#D97706' }}>
+                  <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.41 0zM12 9v4M12 17h.01"/>
+                  </svg>
+                  Exam Cluster Detected
+                </div>
                 {examConflicts.map((c, i) => (
                   <div key={i} style={{ fontSize: 12.5, color: '#6B6B6B' }}>
                     <strong style={{ color: '#1A1A1A' }}>{c.courseA}</strong> and <strong style={{ color: '#1A1A1A' }}>{c.courseB}</strong> exams are only <strong>{c.gapDays} day{c.gapDays !== 1 ? 's' : ''}</strong> apart — front-load {c.courseA} prep now to avoid a crunch.
