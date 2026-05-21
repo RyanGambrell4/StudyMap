@@ -1,268 +1,523 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Free AI Tutor for College Students (2026) | StudyEdge AI</title>
-  <meta name="description" content="Ask your AI tutor anything from your courses. StudyEdge AI knows your syllabus, explains concepts, and gives course-specific answers — free to start." />
-  <link rel="canonical" href="https://getstudyedge.com/ai-tutor" />
-  <link rel="icon" type="image/png" href="/favicon.png" />
+<meta charset="utf-8" />
+<title>AI Tutor for College Students — Get Explanations, Get Quizzed | StudyEdge AI</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="canonical" href="https://getstudyedge.com/ai-tutor" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<meta name="description" content="StudyEdge AI's AI tutor explains any concept clearly, quizzes you after, flags what you're struggling with, and connects to your study plan. Free to start. No credit card." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://getstudyedge.com/ai-tutor" />
+<meta property="og:title" content="AI Tutor for College Students | StudyEdge AI" />
+<meta property="og:description" content="An AI tutor that explains any concept, quizzes you back, flags your struggles, and connects to your study plan — not just a chatbot. Free to start." />
+<meta property="og:image" content="https://getstudyedge.com/hero-landing.png" />
+<meta property="og:image:alt" content="StudyEdge AI tutor explaining a concept and quizzing a student" />
+<meta property="og:site_name" content="StudyEdge AI" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:site" content="@getstudyedge" />
+<meta name="twitter:title" content="AI Tutor for College Students | StudyEdge AI" />
+<meta name="twitter:description" content="An AI tutor that explains concepts clearly, quizzes you after, and connects to your actual study plan. Free to start." />
+<meta name="twitter:image" content="https://getstudyedge.com/hero-landing.png" />
+<meta name="robots" content="index, follow" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/seo.css" />
 
-  <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://getstudyedge.com/ai-tutor" />
-  <meta property="og:title" content="AI Tutor for College Students | StudyEdge AI" />
-  <meta property="og:description" content="AI Tutor that knows your courses and syllabus. Ask anything, get course-specific answers, and flag difficult topics that feed back into your study plan." />
-  <meta property="og:image" content="https://getstudyedge.com/hero-landing.png" />
-  <meta property="og:site_name" content="StudyEdge AI" />
-  <meta property="og:locale" content="en_US" />
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "StudyEdge AI — AI Tutor",
+  "url": "https://getstudyedge.com/ai-tutor",
+  "logo": "https://getstudyedge.com/favicon.png",
+  "description": "AI tutor for college students that explains concepts clearly, quizzes students after explanations, flags struggle points, and integrates with a personalized study plan.",
+  "applicationCategory": "EducationApplication",
+  "operatingSystem": "Web",
+  "offers": [
+    { "@type": "Offer", "name": "Free", "price": "0", "priceCurrency": "USD" },
+    { "@type": "Offer", "name": "Pro", "price": "12.99", "priceCurrency": "USD" }
+  ]
+}
+</script>
 
-  <meta name="twitter:card" content="summary_large_image" />
-  <meta name="twitter:site" content="@getstudyedge" />
-  <meta name="twitter:title" content="AI Tutor for College Students | StudyEdge AI" />
-  <meta name="twitter:description" content="AI Tutor that knows your college courses. Ask anything, get course-specific answers, built into your study sessions." />
-  <meta name="twitter:image" content="https://getstudyedge.com/hero-landing.png" />
-
-  <meta name="keywords" content="AI tutor for college students, AI tutor app, online AI tutor, college AI tutor, AI homework help, AI tutor free, course-specific AI tutor, AI study tutor, AI teaching assistant college" />
-  <meta name="robots" content="index, follow" />
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "SoftwareApplication",
-    "name": "StudyEdge AI Tutor",
-    "url": "https://getstudyedge.com/ai-tutor",
-    "applicationCategory": "EducationApplication",
-    "operatingSystem": "Web",
-    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
-    "description": "Course-aware AI tutor for college students. Ask questions about any topic in your courses, get clear explanations, and flag difficult concepts that feed back into your personalized study plan."
-  }
-  </script>
-
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "FAQPage",
-    "mainEntity": [
-      {
-        "@type": "Question",
-        "name": "How is StudyEdge AI's AI tutor different from ChatGPT?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "ChatGPT is a general assistant. StudyEdge AI's AI Tutor is scoped to your specific courses — it knows your course name, subject, and exam timeline. When you ask a question, it gives a course-specific answer. Difficult topics you flag automatically feed back into your study plan and session blueprints."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "What can I ask the AI tutor?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "You can ask anything related to your courses: concept explanations, practice problems, why something works the way it does, how two ideas connect, what's likely on the exam, and more. The tutor gives clear explanations and can follow up if you're still confused."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Is the AI tutor free?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. StudyEdge AI includes 10 free AI interactions per month with no credit card required. Pro plans ($12.99/month) give you 75 AI interactions and access to the tutor across up to 5 courses."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Does the AI tutor work for STEM subjects?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. The AI Tutor handles math, engineering, chemistry, biology, physics, computer science, and more. It can walk through problem-solving steps, explain formulas, and clarify confusing concepts for technical courses."
-        }
-      },
-      {
-        "@type": "Question",
-        "name": "Can the AI tutor help me prepare for an exam?",
-        "acceptedAnswer": {
-          "@type": "Answer",
-          "text": "Yes. You can ask the AI tutor to quiz you on topics, explain what you're likely to see on an exam, or walk through practice problems. Difficult topics you identify get flagged in your study plan so future sessions spend more time on them."
-        }
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How is the AI tutor different from ChatGPT?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "ChatGPT gives you an explanation and stops there. The StudyEdge AI tutor explains the concept, then immediately quizzes you on what it just taught, flags the topics you got wrong, and feeds those gaps back into your study plan. The goal is retention, not just answers."
       }
-    ]
-  }
-  </script>
+    },
+    {
+      "@type": "Question",
+      "name": "Does the AI tutor know my specific course?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. When you're inside StudyEdge AI, the tutor knows which courses you're enrolled in, what topics you've been studying, and where your exam dates are. Explanations and examples are tuned to your course context, not generic textbook content."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can the AI tutor quiz me?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes — and this is one of the main differences from other AI tools. After explaining a concept, the tutor automatically switches to quiz mode: it asks you questions, evaluates your answers, and tells you specifically where your understanding breaks down."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is the AI tutor free?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes. StudyEdge AI is free to start with no credit card required. The free plan includes full access to the AI tutor for 1 course. Pro ($12.99/month) unlocks up to 6 courses and unlimited AI tutor sessions."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What subjects does the AI tutor cover?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "The tutor covers any college-level subject: biology, chemistry, physics, math, economics, psychology, history, nursing, computer science, law, and more. It's not limited to a specific curriculum or grade level."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Does the AI tutor replace going to office hours?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "It covers most of what you go to office hours for — working through a concept you're stuck on, getting a different explanation, testing your understanding. The difference is it's available at any hour, it never has a queue, and it remembers what you've struggled with before. For highly specific exam strategy or professor-specific insight, office hours still have their place."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the AI tutor connect to my study plan?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When you struggle with a concept in a tutor session, it gets flagged and fed into your AI Study Coach plan. Your next study session will automatically include a review of that concept. Nothing falls through the cracks — the tutor and the plan are the same system."
+      }
+    }
+  ]
+}
+</script>
 
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      { "@type": "ListItem", "position": 1, "name": "StudyEdge AI", "item": "https://getstudyedge.com/" },
-      { "@type": "ListItem", "position": 2, "name": "AI Tutor", "item": "https://getstudyedge.com/ai-tutor" }
-    ]
-  }
-  </script>
-
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif; background: #080914; color: #e6e9f2; line-height: 1.6; }
-    body { min-height: 100vh; }
-    a { color: #6366f1; text-decoration: none; }
-    a:hover { text-decoration: underline; }
-    nav { display: flex; align-items: center; justify-content: space-between; padding: 18px 32px; border-bottom: 1px solid rgba(255,255,255,0.07); max-width: 1100px; margin: 0 auto; }
-    .logo { display: flex; align-items: center; gap: 10px; font-size: 18px; font-weight: 700; color: #e6e9f2; text-decoration: none; }
-    .logo img { width: 28px; height: 28px; }
-    .nav-cta { background: #6366f1; color: #fff; padding: 9px 20px; border-radius: 10px; font-size: 14px; font-weight: 600; }
-    .nav-cta:hover { background: #5254cc; text-decoration: none; }
-    .hero { max-width: 780px; margin: 80px auto 60px; padding: 0 24px; text-align: center; }
-    .badge { display: inline-block; background: rgba(167,139,250,0.12); color: #c4b5fd; font-size: 12px; font-weight: 600; padding: 5px 14px; border-radius: 20px; border: 1px solid rgba(167,139,250,0.25); margin-bottom: 24px; letter-spacing: 0.05em; text-transform: uppercase; }
-    h1 { font-size: clamp(32px, 5vw, 54px); font-weight: 800; line-height: 1.15; color: #fff; margin-bottom: 20px; }
-    h1 span { color: #a78bfa; }
-    .hero p { font-size: 18px; color: #94a3b8; max-width: 580px; margin: 0 auto 36px; }
-    .cta-group { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
-    .btn-primary { background: #6366f1; color: #fff; padding: 14px 28px; border-radius: 12px; font-size: 16px; font-weight: 700; display: inline-block; }
-    .btn-primary:hover { background: #5254cc; text-decoration: none; }
-    .btn-ghost { background: rgba(255,255,255,0.06); color: #e6e9f2; padding: 14px 28px; border-radius: 12px; font-size: 16px; font-weight: 600; border: 1px solid rgba(255,255,255,0.1); display: inline-block; }
-    .btn-ghost:hover { background: rgba(255,255,255,0.1); text-decoration: none; }
-    .section { max-width: 900px; margin: 0 auto 80px; padding: 0 24px; }
-    h2 { font-size: clamp(24px, 3.5vw, 36px); font-weight: 800; color: #fff; margin-bottom: 12px; }
-    h3 { font-size: 18px; font-weight: 700; color: #e2e8f0; margin-bottom: 8px; }
-    p { color: #94a3b8; margin-bottom: 16px; }
-    .examples { display: grid; gap: 12px; margin-top: 32px; }
-    .example { background: rgba(167,139,250,0.07); border: 1px solid rgba(167,139,250,0.18); border-radius: 14px; padding: 18px 22px; display: flex; gap: 14px; align-items: flex-start; }
-    .example-q { font-size: 13px; font-weight: 700; color: #c4b5fd; min-width: 22px; }
-    .example-text { font-size: 14px; color: #cbd5e1; }
-    .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 36px; }
-    .feature-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 22px; }
-    .feature-card h3 { font-size: 15px; margin-bottom: 6px; }
-    .feature-card p { font-size: 14px; margin: 0; }
-    .faq { margin-top: 36px; display: grid; gap: 16px; }
-    .faq-item { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 22px; }
-    .faq-item h3 { font-size: 16px; color: #e2e8f0; margin-bottom: 8px; }
-    .faq-item p { font-size: 14px; margin: 0; }
-    .cta-block { background: linear-gradient(135deg, rgba(167,139,250,0.1), rgba(99,102,241,0.1)); border: 1px solid rgba(167,139,250,0.2); border-radius: 20px; padding: 56px 32px; text-align: center; max-width: 700px; margin: 0 auto 80px; }
-    .cta-block h2 { margin-bottom: 12px; }
-    .cta-block p { margin-bottom: 28px; }
-    .links-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px; margin-top: 24px; }
-    .link-card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 16px 20px; font-size: 14px; color: #94a3b8; }
-    .link-card a { color: #a5b4fc; font-weight: 600; display: block; margin-bottom: 4px; }
-    footer { border-top: 1px solid rgba(255,255,255,0.07); padding: 32px 24px; text-align: center; color: #475569; font-size: 14px; max-width: 900px; margin: 0 auto; }
-    footer a { color: #64748b; margin: 0 10px; }
-    footer a:hover { color: #94a3b8; }
-  </style>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://getstudyedge.com/" },
+    { "@type": "ListItem", "position": 2, "name": "AI Tutor", "item": "https://getstudyedge.com/ai-tutor" }
+  ]
+}
+</script>
 </head>
 <body>
 
-<header>
-  <nav>
-    <a class="logo" href="/"><img src="/favicon.png" alt="StudyEdge AI logo" />StudyEdge AI</a>
-    <a class="nav-cta" href="/app?signup=1">Get Started Free</a>
+<!-- NAV -->
+<header class="site-header">
+  <nav class="site-nav">
+    <a href="/" class="nav-logo">
+      <img src="/favicon.png" alt="StudyEdge AI" />
+      StudyEdge AI
+    </a>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+    </div>
+    <a href="/app?signup=1&plan=pro&billing=monthly&trial=1" class="nav-cta">Try Free</a>
   </nav>
 </header>
 
-<main>
-  <div class="hero">
-    <div class="badge">AI Tutor</div>
-    <h1>An <span>AI tutor</span> that actually knows your courses</h1>
-    <p>StudyEdge AI's AI Tutor is scoped to your actual courses — not a generic chatbot. Ask anything, get a clear explanation, and flag what's confusing so your study plan focuses on the right things. Free for college students.</p>
-    <div class="cta-group">
-      <a class="btn-primary" href="/app?signup=1">Ask Your AI Tutor Free</a>
-      <a class="btn-ghost" href="/">See all features</a>
+<!-- HERO -->
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow eyebrow-purple">&#127891; AI Tutor for College Students</div>
+    <h1>An <span class="grad-purple">AI tutor</span> that explains it, then quizzes you on it</h1>
+    <p class="hero-sub">Getting an explanation isn't the same as understanding something. The StudyEdge AI tutor explains any concept clearly, immediately quizzes you back, and flags what you're still shaky on — connected to your actual study plan. Free to start.</p>
+    <div class="cta-row">
+      <a href="/app?signup=1&plan=pro&billing=monthly&trial=1" class="btn btn-primary btn-lg">Try the AI Tutor Free</a>
+      <a href="#how-it-works" class="btn btn-ghost btn-lg">See how it works</a>
+    </div>
+    <div class="stats-strip">
+      <div class="stat">
+        <div class="stat-num">40,000+</div>
+        <div class="stat-label">students using StudyEdge</div>
+      </div>
+      <div class="stats-divider"></div>
+      <div class="stat">
+        <div class="stat-num">24/7</div>
+        <div class="stat-label">always available</div>
+      </div>
+      <div class="stats-divider"></div>
+      <div class="stat">
+        <div class="stat-num">Any subject</div>
+        <div class="stat-label">STEM, nursing, law, econ</div>
+      </div>
+      <div class="stats-divider"></div>
+      <div class="stat">
+        <div class="stat-num">4.8&#9733;</div>
+        <div class="stat-label">average rating</div>
+      </div>
     </div>
   </div>
+</section>
 
-  <div class="section">
-    <h2>Ask anything from your courses</h2>
-    <p>The AI Tutor is always available and never judges a question. Here's what students ask:</p>
-    <div class="examples">
-      <div class="example"><div class="example-q">Q</div><div class="example-text">"Can you explain the Krebs cycle like I've never seen it before?"</div></div>
-      <div class="example"><div class="example-q">Q</div><div class="example-text">"What's the difference between correlation and causation and why does it matter for my stats final?"</div></div>
-      <div class="example"><div class="example-q">Q</div><div class="example-text">"Walk me through how to integrate by parts — I keep getting the wrong answer."</div></div>
-      <div class="example"><div class="example-q">Q</div><div class="example-text">"What are the main themes in The Great Gatsby I should know for my essay?"</div></div>
-      <div class="example"><div class="example-q">Q</div><div class="example-text">"I have an Organic Chemistry exam in 4 days. What are the highest yield topics?"</div></div>
+<!-- PROOF STRIP -->
+<div class="proof-strip">
+  <div class="container">
+    <div class="proof-inner">
+      <div class="proof-item"><span class="proof-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</span> "Actually understood enzyme kinetics at 2am before my biochem exam"</div>
+      <div class="proof-item">&#127979; Works for any college course</div>
+      <div class="proof-item">&#128221; Quizzes you after every explanation</div>
+      <div class="proof-item">&#128274; No credit card required</div>
     </div>
   </div>
+</div>
 
-  <div class="section">
-    <h2>What makes this AI tutor different</h2>
-    <div class="features-grid">
-      <div class="feature-card">
-        <h3>Course-aware answers</h3>
-        <p>The tutor knows your course name, subject, and exam timeline — so answers are tailored to your material, not generic internet explanations.</p>
+<!-- FEATURES -->
+<section class="section" id="features">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-kicker">What you get</div>
+      <h2 class="section-title">More than an explanation — an AI that teaches</h2>
+      <p class="section-sub">The difference between asking a question and actually learning the answer is practice. The tutor does both.</p>
+    </div>
+    <div class="card-grid">
+
+      <div class="card">
+        <div class="card-icon" style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+        </div>
+        <h3>Instant answers on any topic</h3>
+        <p>Ask anything about your course — how SN2 mechanisms work, what caused the 2008 financial crisis, how to interpret a confidence interval. The tutor answers immediately in plain English, with examples that actually relate to your course level.</p>
       </div>
-      <div class="feature-card">
-        <h3>Flags hard topics for your study plan</h3>
-        <p>Concepts you struggle with in the tutor automatically get flagged and weighted heavier in future session plans. One system, fully connected.</p>
+
+      <div class="card">
+        <div class="card-icon" style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        </div>
+        <h3>Explains concepts step-by-step</h3>
+        <p>Long-form walls of text don't teach. The tutor breaks every concept into steps, uses concrete examples, checks your understanding at each stage, and adjusts the explanation if you signal you're still lost. It's closer to a conversation than a search result.</p>
       </div>
-      <div class="feature-card">
+
+      <div class="card">
+        <div class="card-icon" style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        </div>
+        <h3>Quizzes you back</h3>
+        <p>After explaining a concept, the tutor doesn't just stop — it asks you questions. This forces you to retrieve the information rather than just recognize it, which is what actually builds long-term retention. Most AI tools skip this entirely.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon" style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20V2H6.5A2.5 2.5 0 0 0 4 4.5z"/><path d="M8 7h8M8 11h5"/></svg>
+        </div>
+        <h3>Knows your course context</h3>
+        <p>When you're inside StudyEdge AI, the tutor knows which courses you're enrolled in, what topics you've been covering, and where your exams are. Explanations are calibrated to your actual course — not a generic overview that could apply to any class.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon" style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12h4l3-9 4 18 3-9h4"/></svg>
+        </div>
+        <h3>Flags what you're struggling with</h3>
+        <p>Concepts you consistently miss in quiz mode get flagged automatically. Your AI Study Coach plan picks these up and adds review sessions before your next exam. You don't have to track your weak spots manually — the system does it.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-icon" style="background:rgba(167,139,250,0.1);border:1px solid rgba(167,139,250,0.2);">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        </div>
         <h3>Available 24/7</h3>
-        <p>No scheduling, no waiting. Ask a question at 2am the night before an exam and get a clear answer instantly.</p>
+        <p>Office hours are two days a week. Your exam is tomorrow. The AI tutor is available at midnight before your bio final, at 6am before your econ midterm, or at any point between when you realize you don't actually understand something and when you need to.</p>
       </div>
-      <div class="feature-card">
-        <h3>Works for any subject</h3>
-        <p>STEM, humanities, social sciences, pre-law, pre-med — the AI Tutor handles any college-level topic without breaking a sweat.</p>
+
+    </div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="section" id="how-it-works">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-kicker">How it works</div>
+      <h2 class="section-title">From confusion to understood — in one session</h2>
+      <p class="section-sub">The tutor is built around a simple loop: explain, quiz, flag, reinforce. Every session follows it.</p>
+    </div>
+    <div class="steps">
+
+      <div class="step">
+        <div class="step-num step-num-purple">1</div>
+        <div>
+          <h3>Ask anything about your course</h3>
+          <p>Type your question in plain language — "I don't understand how buffers work in chemistry" or "can you walk me through the difference between correlation and causation." No specific formatting required. The tutor figures out what you need.</p>
+        </div>
       </div>
-      <div class="feature-card">
-        <h3>Not a homework machine</h3>
-        <p>StudyEdge AI's tutor explains how to think through problems, not just gives answers. The goal is understanding — so you actually remember it on exam day.</p>
+
+      <div class="step">
+        <div class="step-num step-num-purple">2</div>
+        <div>
+          <h3>AI explains clearly with examples</h3>
+          <p>You get a step-by-step explanation with concrete examples — not a Wikipedia paragraph. If you're in a chem course, the examples come from chem. If you're studying econ, the analogies are economic. The tutor uses your course context to make the explanation land.</p>
+        </div>
       </div>
-      <div class="feature-card">
-        <h3>Integrated with your sessions</h3>
-        <p>Ask the tutor mid-session without leaving the app. Your study timer keeps running while you get the answer you need.</p>
+
+      <div class="step">
+        <div class="step-num step-num-purple">3</div>
+        <div>
+          <h3>AI quizzes you on what it just taught</h3>
+          <p>Once the explanation is done, the tutor flips to quiz mode. It asks you questions about exactly what it just covered. You answer, it evaluates, and it tells you where your understanding breaks down — before you find out on the actual exam.</p>
+        </div>
+      </div>
+
+      <div class="step">
+        <div class="step-num step-num-purple">4</div>
+        <div>
+          <h3>Struggle flagged and added to your coach plan</h3>
+          <p>Anything you got wrong or flagged as unclear gets logged. Your AI Study Coach plan automatically includes a review of those concepts in an upcoming session. The tutor and the study plan are the same system — nothing falls through the cracks.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<!-- PROSE -->
+<section class="section">
+  <div class="container">
+    <div class="prose">
+      <h2>The difference between asking ChatGPT a question and actually learning — why a study-integrated AI tutor is different</h2>
+
+      <p>When you ask ChatGPT "how does Krebs cycle work," you get an answer. A detailed one, probably. Maybe even a decent one. But here's the thing: reading an explanation and understanding something well enough to answer an exam question about it are two completely different cognitive tasks. Reading is passive. Exams test active recall — your ability to retrieve and apply information without seeing it in front of you first.</p>
+
+      <p>ChatGPT gives you the explanation and stops there. You feel like you understand it because the explanation made sense as you read it. Then you close the tab, go into your exam two days later, and realize you can't actually reconstruct the concept from memory. This isn't a ChatGPT problem specifically — it's what happens whenever learning stops at the explanation stage.</p>
+
+      <h3>What actually builds retention</h3>
+
+      <p>Decades of learning science research points to the same techniques: active recall (retrieving information from memory, not recognizing it on a page), spaced repetition (revisiting material at increasing intervals), and interleaving (mixing concepts rather than blocking them). The issue is that none of these happen automatically when you read an explanation — they require deliberate practice. Most students don't do this because it's harder and less comfortable than re-reading.</p>
+
+      <p>The StudyEdge AI tutor bakes this in automatically. After every explanation, you get quizzed. After every quiz, anything you got wrong gets flagged for review. Your study plan knows to bring those concepts back in upcoming sessions at the right spacing. You don't have to remember to do any of this — the system handles the meta-work of deciding what to revisit and when.</p>
+
+      <h3>The course-context problem with generic AI tools</h3>
+
+      <p>Another issue with using a generic AI for studying is that it doesn't know your course. Ask ChatGPT about enzyme kinetics and it gives you a textbook-level answer. But if you're in a second-year biochem course and your professor tests kinetics specifically through Michaelis-Menten graphs, what you actually need is an explanation that connects to that framing — and practice questions that look like what your professor writes. The StudyEdge AI tutor knows which courses you're in, what you've been studying, and where your exam is. It uses that context to make explanations and examples more relevant to what you'll actually be tested on.</p>
+
+      <h3>Why office hours can't fill this gap for most students</h3>
+
+      <p>Office hours are valuable. But they're 2 hours a week, shared between 30 students, and most students are too intimidated (or too behind) to show up until it's too late. The bigger issue is that office hours require you to know what you don't know — which is actually one of the hardest parts of studying. The AI tutor surfaces gaps you didn't know you had by testing you on concepts you thought you understood. That's a fundamentally different kind of help.</p>
+    </div>
+  </div>
+</section>
+
+<!-- COMPARISON TABLE -->
+<section class="section" id="compare">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-kicker">How we compare</div>
+      <h2 class="section-title">StudyEdge AI vs other AI tutor options</h2>
+      <p class="section-sub">How the StudyEdge AI tutor compares to the tools students actually use when they're stuck.</p>
+    </div>
+    <div class="compare-wrap">
+      <table class="compare-table">
+        <thead>
+          <tr>
+            <th>Feature</th>
+            <th>ChatGPT</th>
+            <th>Khanmigo</th>
+            <th>Chegg</th>
+            <th>StudyEdge AI</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Knows your specific course</td>
+            <td class="cross">—</td>
+            <td class="cross">—</td>
+            <td class="cross">—</td>
+            <td class="check">&#10003;</td>
+          </tr>
+          <tr>
+            <td>Quizzes you after explaining</td>
+            <td class="cross">—</td>
+            <td class="cross">—</td>
+            <td class="cross">—</td>
+            <td class="check">&#10003;</td>
+          </tr>
+          <tr>
+            <td>Flags struggles to study plan</td>
+            <td class="cross">—</td>
+            <td class="cross">—</td>
+            <td class="cross">—</td>
+            <td class="check">&#10003;</td>
+          </tr>
+          <tr>
+            <td>Works for any college subject</td>
+            <td class="check">&#10003;</td>
+            <td class="cross">K&#8211;12 focus</td>
+            <td class="check">&#10003;</td>
+            <td class="check">&#10003;</td>
+          </tr>
+          <tr>
+            <td>Integrated into your schedule</td>
+            <td class="cross">—</td>
+            <td class="cross">—</td>
+            <td class="cross">—</td>
+            <td class="check">&#10003;</td>
+          </tr>
+          <tr>
+            <td>Free to start</td>
+            <td class="check">&#10003;</td>
+            <td class="cross">Paid plan</td>
+            <td class="cross">Paid plan</td>
+            <td class="check">&#10003;</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="section">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-kicker">Student results</div>
+      <h2 class="section-title">What students actually say</h2>
+      <p class="section-sub">Real students, specific situations — not marketing copy.</p>
+    </div>
+    <div class="testimonials-grid">
+      <div class="testimonial">
+        <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testimonial-quote">"I was stuck on enzyme kinetics at 2am before my biochem exam. Spent 20 minutes with the AI tutor and actually understood it. Passed."</p>
+        <div class="testimonial-author">Dana R. &mdash; 2nd year, Pre-Med</div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testimonial-quote">"ChatGPT just gives you walls of text. This actually quizzes you after it explains something. Way more useful for actually studying."</p>
+        <div class="testimonial-author">Marcus L. &mdash; 3rd year, Computer Science</div>
+      </div>
+      <div class="testimonial">
+        <div class="testimonial-stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+        <p class="testimonial-quote">"I use it like office hours but at midnight. It knows exactly what I'm studying and gives examples that actually apply to my exam topics."</p>
+        <div class="testimonial-author">Aisha K. &mdash; 1st year, Economics</div>
       </div>
     </div>
   </div>
+</section>
 
-  <div class="section">
-    <h2>How StudyEdge AI compares to ChatGPT and other AI tutors</h2>
-    <p>ChatGPT is a general-purpose assistant — it'll answer anything but knows nothing about your courses, your exam in two weeks, or the topics your professor emphasized. Khanmigo is built for K–12.</p>
-    <p>StudyEdge AI's AI Tutor is scoped to your courses, connected to your study plan, and integrated into the same app that builds your schedule, runs your sessions, and tracks your grades. When you flag a topic as confusing, it feeds directly into your next session's blueprint. That's not a chatbot — it's a system.</p>
-  </div>
-
-  <div class="section">
-    <h2>Frequently asked questions</h2>
-    <div class="faq">
+<!-- FAQ -->
+<section class="section" id="faq">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-kicker">FAQ</div>
+      <h2 class="section-title">Common questions</h2>
+    </div>
+    <div class="faq-list">
       <div class="faq-item">
-        <h3>How is StudyEdge AI's AI tutor different from ChatGPT?</h3>
-        <p>ChatGPT is a general assistant. StudyEdge AI's AI Tutor is scoped to your specific courses and connected to your study plan. Topics you flag as confusing automatically get prioritized in future session blueprints.</p>
+        <div class="faq-q">How is the AI tutor different from ChatGPT?</div>
+        <div class="faq-a">ChatGPT gives you an explanation and stops. The StudyEdge AI tutor explains the concept, immediately quizzes you on what it just taught, flags what you got wrong, and feeds those gaps into your study plan. The goal is retention, not just an answer — and that requires the quiz step most people skip.</div>
       </div>
       <div class="faq-item">
-        <h3>What can I ask?</h3>
-        <p>Anything related to your courses — concept explanations, practice problems, how two ideas connect, what's likely on the exam, step-by-step walkthroughs, and more.</p>
+        <div class="faq-q">Does it know my specific course?</div>
+        <div class="faq-a">Yes. When you're inside StudyEdge AI, the tutor knows which courses you're enrolled in, what topics you've been studying, and when your exams are. Explanations and examples are calibrated to your course context — not a generic overview that could apply to any class anywhere.</div>
       </div>
       <div class="faq-item">
-        <h3>Is it free?</h3>
-        <p>Yes. 10 free AI interactions per month, no credit card required. Pro ($12.99/month) gives 75 interactions and access across up to 5 courses.</p>
+        <div class="faq-q">Can it quiz me?</div>
+        <div class="faq-a">Yes — and this is one of the main things that separates it from every other AI tool. After explaining a concept, the tutor automatically switches to quiz mode. It asks you questions, evaluates your answers, and tells you specifically where your understanding breaks down before you find out on the actual exam.</div>
       </div>
       <div class="faq-item">
-        <h3>Does it work for STEM?</h3>
-        <p>Yes — math, engineering, chemistry, biology, physics, CS, and more. It walks through problem-solving steps, explains formulas, and clarifies technical concepts.</p>
+        <div class="faq-q">Is it free?</div>
+        <div class="faq-a">Yes. StudyEdge AI is free to start with no credit card required. The free plan includes full access to the AI tutor for 1 course. Pro ($12.99/month) unlocks up to 6 courses and unlimited AI tutor sessions with full study plan integration.</div>
       </div>
       <div class="faq-item">
-        <h3>Can it help me prepare for an exam?</h3>
-        <p>Yes. Ask it to quiz you on topics, explain what's likely on your exam, or walk through practice problems. Hard topics get flagged in your study plan automatically.</p>
+        <div class="faq-q">What subjects does it cover?</div>
+        <div class="faq-a">Any college-level subject: biology, chemistry, organic chemistry, biochemistry, physics, math, statistics, economics, psychology, history, nursing, computer science, political science, law, and more. It's not built around a specific curriculum — it works with what you're actually studying.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">Does it replace going to office hours?</div>
+        <div class="faq-a">It covers most of what you go to office hours for — working through a concept you're stuck on, getting a different explanation, testing your understanding. It's available at any hour, has no queue, and remembers what you've struggled with before. For professor-specific exam strategy or highly specialized feedback on your written work, office hours still have a place.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How does it connect to my study plan?</div>
+        <div class="faq-a">When you struggle with a concept in a tutor session, it gets flagged and fed into your AI Study Coach plan. Your next scheduled study session automatically includes a review of that concept. The tutor and the plan are the same system — which means nothing you're confused about gets forgotten.</div>
       </div>
     </div>
   </div>
+</section>
 
-  <div class="section">
-    <h2>More from StudyEdge AI</h2>
-    <div class="links-grid">
-      <div class="link-card"><a href="/ai-study-coach">AI Study Coach</a>Week-by-week plan for every course</div>
-      <div class="link-card"><a href="/study-schedule-generator">Study Schedule Generator</a>Auto-build your weekly schedule</div>
-      <div class="link-card"><a href="/ai-flashcard-maker">AI Flashcard Maker</a>Generate flashcards from any topic</div>
-      <div class="link-card"><a href="/grade-calculator-college">Grade Calculator</a>See your projected grade instantly</div>
-      <div class="link-card"><a href="/active-recall-app">Active Recall</a>Evidence-based recall in every session</div>
+<!-- RELATED -->
+<section class="section-sm">
+  <div class="container">
+    <div class="section-head">
+      <div class="section-kicker">Explore more</div>
+      <h2 class="section-title">More tools inside StudyEdge AI</h2>
+    </div>
+    <div class="related-grid">
+      <a href="/ai-study-coach" class="related-card">
+        <span class="related-title">AI Study Coach</span>
+        <span class="related-desc">Week-by-week study plans and session blueprints for every course.</span>
+      </a>
+      <a href="/study-schedule-generator" class="related-card">
+        <span class="related-title">Study Schedule Generator</span>
+        <span class="related-desc">Build a personalized weekly schedule from your courses and exam dates.</span>
+      </a>
+      <a href="/ai-flashcard-maker" class="related-card">
+        <span class="related-title">AI Flashcard Maker</span>
+        <span class="related-desc">Generate flashcards from your notes with spaced repetition built in.</span>
+      </a>
+      <a href="/active-recall-app" class="related-card">
+        <span class="related-title">Active Recall App</span>
+        <span class="related-desc">Practice active recall with AI-generated questions from your material.</span>
+      </a>
+      <a href="/grade-calculator-college" class="related-card">
+        <span class="related-title">Grade Calculator</span>
+        <span class="related-desc">See exactly what you need on the final to hit your target grade.</span>
+      </a>
+      <a href="/how-to-make-a-study-schedule" class="related-card">
+        <span class="related-title">How to Make a Study Schedule</span>
+        <span class="related-desc">The method behind effective study schedules and how to stick to one.</span>
+      </a>
     </div>
   </div>
+</section>
 
-  <div class="cta-block">
-    <h2>Ask your AI tutor free</h2>
-    <p>No credit card. Add your courses and start asking questions in under two minutes.</p>
-    <a class="btn-primary" href="/app?signup=1">Get Started Free</a>
+<!-- FINAL CTA -->
+<section class="section">
+  <div class="container">
+    <div class="cta-block">
+      <h2>Get unstuck — at any hour, on any topic</h2>
+      <p>The AI tutor explains any concept clearly, quizzes you back, and connects to your study plan. Free to start, no credit card required.</p>
+      <div class="cta-row">
+        <a href="/app?signup=1&plan=pro&billing=monthly&trial=1" class="btn btn-primary btn-lg">Try the AI Tutor Free</a>
+      </div>
+      <p class="cta-fine">Free for 1 course &middot; No credit card &middot; Cancel anytime</p>
+    </div>
   </div>
-</main>
+</section>
 
-<footer>
-  <p>© 2026 StudyEdge AI · <a href="/">Home</a> · <a href="/ai-study-coach">Study Coach</a> · <a href="/study-schedule-generator">Study Schedule</a> · <a href="/ai-flashcard-maker">Flashcards</a> · <a href="/grade-calculator-college">Grade Calculator</a> · <a href="/active-recall-app">Active Recall</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></p>
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <a href="/study-schedule-generator">Study Schedule</a>
+    <a href="/ai-tutor">AI Tutor</a>
+    <a href="/ai-flashcard-maker">Flashcards</a>
+    <a href="/grade-calculator-college">Grade Calculator</a>
+    <a href="/active-recall-app">Active Recall</a>
+    <a href="/blog">Blog</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
+  </div>
+  <p class="footer-copy">&copy; 2026 StudyEdge AI &middot; getstudyedge.com</p>
 </footer>
-<script type="application/ld+json">
-{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://getstudyedge.com/"},{"@type":"ListItem","position":2,"name":"AI Tutor","item":"https://getstudyedge.com/ai-tutor"}]}
-</script>
+
 </body>
 </html>
