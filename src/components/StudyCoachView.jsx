@@ -4,7 +4,7 @@ import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan } from '../lib/db'
 import { extractText } from '../utils/extractText'
 import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { getCurrentGrade, letterGrade, TARGET_OPTIONS } from '../utils/gradeCalc'
 
 // ── DB helpers ────────────────────────────────────────────────────────────────
@@ -932,6 +932,8 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   const handleBuild = async () => {
     const course = courses[form.courseIdx]
     if (!course) return
+    const { allowed: coachAllowed } = canUseFeature('coachPlan')
+    if (!coachAllowed) { onShowPaywall?.('coach'); return }
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
 
     setLoading(true)
@@ -980,6 +982,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       const courseId = course.id ?? form.courseIdx
       saveCoachPlan(courseId, data, { ...form, sessionMinutes: form.sessionLen, importantDates: form.dates, emphasisTopics: form.topics?.join(', ') })
       await incrementAIQuery()
+      await incrementFeatureUsage('coachPlan')
       setStep(3)
       setUiMode('viewing')
     } catch (e) {

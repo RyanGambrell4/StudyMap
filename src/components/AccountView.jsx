@@ -1,22 +1,42 @@
 import { useState, useMemo } from 'react'
-import { getActivePlan, getCachedSubscription, initSubscription } from '../lib/subscription'
+import { getActivePlan, getCachedSubscription, initSubscription, isTrialActive, hasUsedTrial, getTrialDaysRemaining } from '../lib/subscription'
 import { supabase } from '../lib/supabase'
 import ReferralCard from './ReferralCard'
 
 const PLAN_INFO = {
   free: {
     label: 'Free',
-    features: ['Calendar & study planner (2 courses)', '1 AI message / day', 'Basic progress tracking'],
+    features: [
+      '1 course (full schedule & planner)',
+      '2 AI messages / day',
+      'Session Blueprint · 1 free/day',
+      'Brain Dump, Quiz Burst, Exam Rescue · 2 free/week',
+      'Focus Mode · 60 min/day free',
+      'Coach Plan · 1 free total',
+    ],
     color: '#64748b',
   },
   pro: {
     label: 'Pro',
-    features: ['Everything in Free', 'Unlimited AI Study Coach', 'Grade Hub & grade tracking', 'AI Tutor chat', 'Flashcards & quizzes'],
+    features: [
+      '5 courses · full semester planned',
+      '75 AI actions/month',
+      'AI Study Coach · rebuild anytime',
+      'Unlimited blueprints & focus sessions',
+      'Unlimited brain training',
+      'Grade Hub · all courses',
+    ],
     color: '#3B61C4',
   },
   unlimited: {
     label: 'Unlimited',
-    features: ['Everything in Pro', 'Priority AI responses', 'Advanced analytics', 'Early access to new features'],
+    features: [
+      'Everything in Pro',
+      'Unlimited AI actions',
+      'Priority AI responses',
+      'Advanced analytics',
+      'Early access to new features',
+    ],
     color: '#059669',
   },
 }
@@ -47,14 +67,9 @@ export default function AccountView({
   todayStr,
 }) {
   const plan = getActivePlan()
-  const sub = getCachedSubscription()
-  const isTrialing = sub?.status === 'trialing'
-  const trialEndsAt = isTrialing && sub?.currentPeriodEnd
-    ? new Date(sub.currentPeriodEnd)
-    : null
-  const trialDaysLeft = trialEndsAt
-    ? Math.max(0, Math.ceil((trialEndsAt - Date.now()) / 86400000))
-    : null
+  const trialActive = isTrialActive()
+  const trialUsed = hasUsedTrial()
+  const trialDaysLeft = getTrialDaysRemaining()
   const planInfo = PLAN_INFO[plan] ?? PLAN_INFO.free
   const initials = userEmail ? userEmail.split('@')[0].slice(0, 2).toUpperCase() : 'U'
 
@@ -95,7 +110,7 @@ export default function AccountView({
   }, [completedSessions, todayStr])
 
   const handleCancelTrial = async () => {
-    if (!confirm('Cancel your free trial? You\'ll lose Pro access immediately and won\'t be charged.')) return
+    if (!confirm('Cancel your free trial? You\'ll lose Pro access immediately.')) return
     setCanceling(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
@@ -131,7 +146,7 @@ export default function AccountView({
           <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#1A1A1A' }}>{userEmail ?? 'User'}</p>
           <p style={{ margin: 0, fontSize: 12, color: planInfo.color, fontWeight: 600, marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
             {planInfo.label}
-            {isTrialing && (
+            {trialActive && (
               <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 4, backgroundColor: 'rgba(59,97,196,0.10)', color: '#3B61C4' }}>
                 FREE TRIAL
               </span>
@@ -177,42 +192,75 @@ export default function AccountView({
         <p style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Current Plan</p>
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
           <p style={{ margin: 0, fontSize: 16, fontWeight: 700, color: '#1A1A1A' }}>{planInfo.label}</p>
-          {isTrialing && (
+          {trialActive && (
             <span style={{ fontSize: 11, fontWeight: 700, padding: '2px 8px', borderRadius: 6, backgroundColor: 'rgba(59,97,196,0.08)', color: '#3B61C4', border: '1px solid rgba(59,97,196,0.20)' }}>
               Free Trial
             </span>
           )}
         </div>
-        {isTrialing && (
+
+        {/* Trial progress display */}
+        {trialActive && (
           <>
             <p style={{ margin: '0 0 10px', fontSize: 12, color: '#6B6B6B', lineHeight: 1.5 }}>
               {trialDaysLeft !== null && trialDaysLeft > 0
-                ? <>Your free trial ends in <strong style={{ color: '#1A1A1A' }}>{trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''}</strong>. You won't be charged until then.</>
-                : <>Your free trial has ended. You now have full Pro access.</>
+                ? <>You have <strong style={{ color: '#1A1A1A' }}>{trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''} left</strong> in your free trial. Upgrade before it ends to keep full access.</>
+                : <>Your trial has ended. Upgrade to keep full Pro access.</>
               }
             </p>
+            {/* Trial days progress bar */}
+            {trialDaysLeft !== null && (
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ height: 6, borderRadius: 3, background: 'rgba(0,0,0,0.07)', overflow: 'hidden' }}>
+                  <div style={{
+                    height: '100%',
+                    borderRadius: 3,
+                    background: trialDaysLeft <= 2 ? '#EF4444' : '#3B61C4',
+                    width: `${Math.min(100, ((7 - trialDaysLeft) / 7) * 100)}%`,
+                    transition: 'width 0.3s',
+                  }} />
+                </div>
+                <p style={{ margin: '4px 0 0', fontSize: 11, color: '#9B9B9B' }}>
+                  {7 - trialDaysLeft} of 7 days used
+                </p>
+              </div>
+            )}
             {!canceled ? (
-              <button
-                onClick={handleCancelTrial}
-                disabled={canceling}
-                style={{
-                  marginBottom: 10, padding: 0,
-                  background: 'none', border: 'none',
-                  fontSize: 12, color: '#BBBBBB',
-                  cursor: canceling ? 'not-allowed' : 'pointer',
-                  textDecoration: 'underline', textUnderlineOffset: 2,
-                  opacity: canceling ? 0.5 : 1,
-                }}
-              >
-                {canceling ? 'Canceling…' : 'Cancel free trial'}
-              </button>
+              <div style={{ display: 'flex', gap: 8, marginBottom: 10, flexWrap: 'wrap' }}>
+                <button
+                  onClick={() => onShowPaywall?.('ai')}
+                  style={{
+                    flex: 1, padding: '10px',
+                    background: '#3B61C4', border: 'none', borderRadius: 10,
+                    color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                    minWidth: 140,
+                  }}
+                >
+                  Upgrade to Pro →
+                </button>
+                <button
+                  onClick={handleCancelTrial}
+                  disabled={canceling}
+                  style={{
+                    padding: '10px 14px',
+                    background: 'none', border: '1px solid rgba(0,0,0,0.10)',
+                    borderRadius: 10,
+                    fontSize: 12, color: '#BBBBBB',
+                    cursor: canceling ? 'not-allowed' : 'pointer',
+                    opacity: canceling ? 0.5 : 1,
+                  }}
+                >
+                  {canceling ? 'Canceling…' : 'Cancel trial'}
+                </button>
+              </div>
             ) : (
               <p style={{ marginBottom: 10, fontSize: 12, color: '#059669', fontWeight: 600 }}>
-                ✓ Trial canceled. You won't be charged.
+                Trial canceled. Your free access has ended.
               </p>
             )}
           </>
         )}
+
         <ul style={{ margin: '0 0 16px', padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 6 }}>
           {planInfo.features.map(f => (
             <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: '#6B6B6B' }}>
@@ -223,7 +271,38 @@ export default function AccountView({
             </li>
           ))}
         </ul>
-        {plan === 'free' && (
+
+        {/* Free trial CTA — only when plan is free and trial never used */}
+        {plan === 'free' && !trialUsed && !trialActive && (
+          <div style={{
+            background: 'linear-gradient(135deg, #e8f4fd, #f0f9f4)',
+            border: '1.5px solid rgba(59,130,246,0.2)',
+            borderRadius: 12, padding: '16px',
+            marginBottom: 12,
+            textAlign: 'center',
+          }}>
+            <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>
+              Start your 7-day free trial — no card required
+            </p>
+            <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>
+              Full Pro access. Cancel anytime. Zero payment info needed.
+            </p>
+            <button
+              onClick={() => onShowPaywall?.('trial')}
+              style={{
+                width: '100%', padding: '11px',
+                background: 'linear-gradient(135deg, #3B82F6, #10B981)',
+                border: 'none', borderRadius: 10,
+                color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              Start Free Trial →
+            </button>
+          </div>
+        )}
+
+        {/* Paid upgrade CTAs */}
+        {plan === 'free' && (trialUsed || trialActive) && !trialActive && (
           <button
             onClick={() => onShowPaywall?.('courses')}
             style={{
@@ -232,10 +311,10 @@ export default function AccountView({
               fontSize: 14, fontWeight: 700, cursor: 'pointer',
             }}
           >
-            Start free trial →
+            Upgrade to Pro →
           </button>
         )}
-        {plan === 'pro' && (
+        {plan === 'pro' && !trialActive && (
           <button
             onClick={onShowPaywall}
             style={{

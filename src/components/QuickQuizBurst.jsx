@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
@@ -11,34 +11,11 @@ const D = {
 
 const DIFFICULTY_COLOR = { easy: '#16A34A', medium: '#D97706', hard: '#DC2626' }
 
-const BURST_LIMIT_KEY = 'studyedge_burst_uses'
-
-function getBurstUses() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(BURST_LIMIT_KEY) ?? '{}')
-    const now = new Date()
-    const monthKey = `${now.getFullYear()}-${now.getMonth()}`
-    return { count: raw[monthKey] ?? 0, monthKey }
-  } catch { return { count: 0, monthKey: '' } }
-}
-
-function incrementBurstUse() {
-  try {
-    const raw = JSON.parse(localStorage.getItem(BURST_LIMIT_KEY) ?? '{}')
-    const now = new Date()
-    const monthKey = `${now.getFullYear()}-${now.getMonth()}`
-    raw[monthKey] = (raw[monthKey] ?? 0) + 1
-    localStorage.setItem(BURST_LIMIT_KEY, JSON.stringify(raw))
-  } catch {}
-}
-
 const QUESTION_TIME = 10 // seconds per question
 
 export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpenCheatSheet }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
-  const { count: burstUsed, monthKey } = getBurstUses()
-  const atLimit = !isPro && burstUsed >= 3
 
   const [courseIdx, setCourseIdx] = useState(0)
   const [topic, setTopic] = useState('')
@@ -76,7 +53,8 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
   }, [qIdx, step, confirmed])
 
   async function startQuiz() {
-    if (atLimit) { onShowPaywall?.('study-hacks'); return }
+    const { allowed: canQuiz } = canUseFeature('quizBurst')
+    if (!canQuiz) { onShowPaywall?.('quizBurst'); return }
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setStep('loading')
     setError('')
@@ -93,7 +71,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
         const data = await res.json()
         if (!res.ok) throw new Error(data.error ?? 'Failed')
         incrementAIQuery()
-        incrementBurstUse()
+        incrementFeatureUsage('quizBurst')
         setQuestions(data.questions)
         setQIdx(0)
         setAnswers([])
@@ -216,25 +194,46 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
 
             {error && <div style={{ fontSize: 13, color: D.red, marginBottom: 16, padding: '10px 14px', background: 'rgba(220,38,38,0.06)', borderRadius: 8 }}>{error}</div>}
 
-            {atLimit && (
-              <div style={{ fontSize: 13, color: D.amber, marginBottom: 16, padding: '10px 14px', background: 'rgba(217,119,6,0.08)', borderRadius: 8, border: '1px solid rgba(217,119,6,0.20)' }}>
-                You have used your 3 free Bursts this month. Upgrade for unlimited.
-              </div>
+            {!isPro && (() => {
+              const { allowed: canQuiz, remaining } = canUseFeature('quizBurst')
+              return !canQuiz ? (
+                <div style={{ fontSize: 13, color: D.amber, marginBottom: 16, padding: '10px 14px', background: 'rgba(217,119,6,0.08)', borderRadius: 8, border: '1px solid rgba(217,119,6,0.20)' }}>
+                  You've used your 2 free Quiz Bursts this week. Resets next Monday.
+                </div>
+              ) : null
+            })()}
+
+            {!isPro && (() => {
+              const { allowed: canQuiz, remaining } = canUseFeature('quizBurst')
+              return (
+                <button
+                  onClick={startQuiz}
+                  disabled={!canQuiz}
+                  style={{ width: '100%', padding: '13px', background: !canQuiz ? D.textDim : D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: !canQuiz ? 'default' : 'pointer', fontFamily: 'inherit', boxShadow: !canQuiz ? 'none' : `0 3px 12px rgba(232,83,26,0.35)` }}
+                >
+                  {!canQuiz ? 'Upgrade to continue' : 'Start burst'}
+                </button>
+              )
+            })()}
+
+            {isPro && (
+              <button
+                onClick={startQuiz}
+                style={{ width: '100%', padding: '13px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 3px 12px rgba(232,83,26,0.35)` }}
+              >
+                Start burst
+              </button>
             )}
 
-            <button
-              onClick={startQuiz}
-              disabled={atLimit}
-              style={{ width: '100%', padding: '13px', background: atLimit ? D.textDim : D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: atLimit ? 'default' : 'pointer', fontFamily: 'inherit', boxShadow: atLimit ? 'none' : `0 3px 12px rgba(232,83,26,0.35)` }}
-            >
-              {atLimit ? 'Upgrade to continue' : 'Start burst'}
-            </button>
-
-            {!isPro && !atLimit && (
-              <div style={{ textAlign: 'center', fontSize: 12, color: D.textDim, marginTop: 12 }}>
-                {3 - burstUsed} of 3 free Bursts remaining this month
-              </div>
-            )}
+            {!isPro && (() => {
+              const { remaining } = canUseFeature('quizBurst')
+              return remaining !== null && remaining > 0 ? (
+                <div style={{ textAlign: 'center', fontSize: 12, color: D.textDim, marginTop: 12 }}>
+                  {2 - remaining} of 2 quiz bursts used this week
+                  {' · '}<button onClick={() => onShowPaywall?.('quizBurst')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button>
+                </div>
+              ) : null
+            })()}
           </div>
         )}
 

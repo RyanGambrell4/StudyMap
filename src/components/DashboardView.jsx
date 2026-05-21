@@ -4,7 +4,7 @@ import ReferralCard from './ReferralCard'
 import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
-import { getActivePlan, getAIQueriesUsed } from '../lib/subscription'
+import { getActivePlan, getAIQueriesUsed, isTrialActive, hasUsedTrial, getTrialDaysRemaining } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import { daysBetween, formatShortDate } from '../utils/dateUtils'
 
@@ -170,7 +170,7 @@ export default function DashboardView({
   const [trialCardDismissed, setTrialCardDismissed] = useState(
     () => localStorage.getItem('studyedge_trial_card_dismissed') === '1'
   )
-  const showTrialCard = plan === 'free' && !trialCardDismissed
+  const showTrialCard = plan === 'free' && !hasUsedTrial() && !trialCardDismissed
   const { currentStreak, recordCompletion } = useStreak()
   const celebrate = useCelebration()
   const streak = currentStreak
@@ -465,7 +465,7 @@ export default function DashboardView({
             borderRadius: 999, padding: '5px 14px', marginBottom: 14,
           }}>
             <span style={{ fontSize: 12, color: D.amber, fontWeight: 600 }}>
-              {10 - aiUsed} study boost{(10 - aiUsed) !== 1 ? 's' : ''} left this month
+              {Math.max(0, 2 - aiUsed)} AI message{Math.max(0, 2 - aiUsed) !== 1 ? 's' : ''} left today
             </span>
             <button onClick={() => onShowPaywall?.('ai')} style={{ fontSize: 12, fontWeight: 700, color: D.accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Upgrade</button>
             <button onClick={() => { sessionStorage.setItem('studyedge_ai_chip_dismissed', '1'); setAiChipDismissed(true) }} style={{ fontSize: 16, color: D.textDim, background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', lineHeight: 1 }} aria-label="Dismiss">×</button>
@@ -557,32 +557,63 @@ export default function DashboardView({
       )}
 
       {/* ── Pro trial banner ── */}
-      {showTrialCard && (
+      {isTrialActive() ? (
         <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
           <div className="dash-banner-inner" style={{
-            background: `linear-gradient(135deg, rgba(232,83,26,0.04) 0%, rgba(59,97,196,0.04) 100%)`,
-            border: `1px solid rgba(232,83,26,0.2)`,
-            borderLeft: `4px solid ${D.accent}`,
+            background: `linear-gradient(135deg, rgba(59,97,196,0.04) 0%, rgba(59,97,196,0.08) 100%)`,
+            border: `1px solid rgba(59,97,196,0.2)`,
+            borderLeft: `4px solid ${D.blue}`,
             borderRadius: 10,
-            boxShadow: `0 2px 12px rgba(232,83,26,0.07)`,
+            boxShadow: `0 2px 12px rgba(59,97,196,0.07)`,
             padding: '14px 18px',
             display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
           }}>
             <div style={{ flex: 1, minWidth: 200 }}>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>Try Pro free for 7 days</p>
-              <p style={{ margin: '2px 0 0', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
-                5 courses, 75 AI boosts, Study Coach, Session Blueprints. Cancel before day 7, pay nothing.
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>
+                Your free trial is active — {getTrialDaysRemaining()} day{getTrialDaysRemaining() !== 1 ? 's' : ''} remaining
               </p>
+              <div style={{ marginTop: 6, height: 4, background: 'rgba(59,97,196,0.15)', borderRadius: 999, overflow: 'hidden', maxWidth: 280 }}>
+                <div style={{ height: '100%', borderRadius: 999, background: D.blue, width: `${Math.round(((7 - getTrialDaysRemaining()) / 7) * 100)}%`, transition: 'width 0.4s ease' }} />
+              </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-              <button onClick={() => onShowPaywall?.('courses')} style={{ background: D.accent, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                Start free trial
+              <button onClick={() => onShowPaywall?.('upgrade')} style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                Upgrade to Pro →
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : showTrialCard ? (
+        <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
+          <div className="dash-banner-inner" style={{
+            background: '#FFFFFF',
+            border: `1px solid rgba(59,97,196,0.2)`,
+            borderLeft: `4px solid ${D.blue}`,
+            borderRadius: 10,
+            boxShadow: `0 2px 12px rgba(59,97,196,0.07)`,
+            padding: '16px 18px',
+            display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap',
+          }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>7 days of full Pro. No card required.</p>
+              <p style={{ margin: '3px 0 8px', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
+                Try 5 courses, 75 AI actions/month, unlimited blueprints and focus sessions — free for 7 days.
+              </p>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                {['✓ 5 courses', '✓ 75 AI actions/month', '✓ Unlimited everything'].map(f => (
+                  <span key={f} style={{ fontSize: 11, fontWeight: 600, color: D.blue }}>{f}</span>
+                ))}
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+              <button onClick={() => onShowPaywall?.('trial')} style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                Start Free Trial →
               </button>
               <button onClick={() => { localStorage.setItem('studyedge_trial_card_dismissed', '1'); setTrialCardDismissed(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: D.textDim, fontSize: 20, lineHeight: 1, padding: '0 4px', flexShrink: 0 }} aria-label="Dismiss">×</button>
             </div>
           </div>
         </div>
-      )}
+      ) : null}
 
       {/* ── Grid ── */}
       <div className="dash-grid" style={{ padding: '20px 32px 48px', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>

@@ -1,10 +1,11 @@
 import { useState, useEffect, useRef } from 'react'
 import { getCachedCoachPlan, saveCoachPlanStruggles } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
-import { getActivePlan, canUseAI, incrementAIQuery } from '../lib/subscription'
+import { getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial, incrementAIQuery } from '../lib/subscription'
 
 export default function AIChatView({ courseId, courseName, examDate, targetGrade, userId, learningStyle, onShowPaywall, onNavigateToCoach }) {
-  const isFree = getActivePlan() === 'free'
+  const plan = getActivePlan()
+  const isFree = plan === 'free'
 
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -47,7 +48,8 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
     const text = input.trim()
     if (!text || loading) return
 
-    if (!canUseAI()) {
+    const { allowed } = canUseFeature('aiTutor')
+    if (!allowed) {
       onShowPaywall?.('ai')
       return
     }
@@ -103,48 +105,6 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       e.preventDefault()
       sendMessage()
     }
-  }
-
-  if (isFree) {
-    return (
-      <div className="flex flex-col items-center justify-center px-6 py-12 text-center relative h-full overflow-hidden">
-        {/* Blurred mock chat */}
-        <div className="absolute inset-0 pointer-events-none select-none" aria-hidden>
-          <div className="p-5 space-y-3 opacity-25 blur-sm">
-            {[
-              { role: 'user', content: 'Can you explain supply and demand curves?' },
-              { role: 'assistant', content: 'Sure! Supply and demand curves show the relationship between price and quantity in a market. When price rises, demand typically falls while supply increases...' },
-              { role: 'user', content: "I keep confusing elasticity with slope, can you help?" },
-              { role: 'assistant', content: "Great question. This trips up a lot of students. Slope is a geometric property of the curve, while elasticity measures responsiveness as a percentage change..." },
-            ].map((m, i) => (
-              <div key={i} className={`flex ${m.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                <div className={`max-w-xs px-4 py-2.5 rounded-2xl text-sm ${m.role === 'user' ? 'bg-indigo-600 text-white' : 'bg-slate-200 dark:bg-slate-700 text-slate-900 dark:text-slate-100'}`}>
-                  {m.content}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="relative z-10 flex flex-col items-center gap-4">
-          <div className="w-16 h-16 rounded-2xl bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 flex items-center justify-center">
-            <svg className="w-7 h-7 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-            </svg>
-          </div>
-          <div>
-            <p className="text-slate-900 dark:text-white font-bold text-lg mb-1">AI Tutor</p>
-            <p className="text-slate-500 text-sm max-w-[260px] leading-relaxed">You've used today's free AI message. Upgrade for unlimited access.</p>
-          </div>
-          <button
-            onClick={() => onShowPaywall?.('ai')}
-            className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm px-6 py-3 rounded-xl transition-colors"
-          >
-            Upgrade to unlock
-          </button>
-        </div>
-      </div>
-    )
   }
 
   return (
@@ -221,7 +181,14 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       )}
 
       {/* Input */}
-      <div className="px-4 pb-4 pt-2 shrink-0 border-t border-slate-100 dark:border-slate-800 flex items-end gap-2">
+      <div className="px-4 pb-4 pt-2 shrink-0 border-t border-slate-100 dark:border-slate-800">
+      {isFree && (() => { const { remaining } = canUseFeature('aiTutor'); return remaining !== null && (
+        <p className="text-xs text-slate-400 dark:text-slate-500 mb-1.5">
+          {2 - remaining} of 2 AI messages used today
+          {remaining === 0 && <> · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600 dark:hover:text-slate-300">{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>}
+        </p>
+      )})()}
+      <div className="flex items-end gap-2">
         <textarea
           ref={inputRef}
           value={input}
@@ -242,6 +209,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
           </svg>
         </button>
+      </div>
       </div>
 
     </div>

@@ -1,7 +1,10 @@
 /**
- * subscription.js — Stripe subscription layer for StudyEdge AI
+ * subscription.js — Trial & subscription layer for StudyEdge AI
  *
- * Tracks plan, limits, and study boost usage in memory (mirrored to Supabase).
+ * 3-tier model:
+ *  Free     → permanent, capped per feature
+ *  Trial    → 7-day full Pro, no card required, one-time per account
+ *  Pro      → Stripe paid, 5 courses, 75 AI actions/month
  */
 
 import { supabase } from './supabase'
@@ -9,8 +12,32 @@ import { track } from './analytics'
 
 // ── Plan limits ───────────────────────────────────────────────────────────────
 
+export const FREE_LIMITS = {
+  courses:             1,
+  aiTutor:             { count: 2,  period: 'day'   },
+  blueprint:           { count: 1,  period: 'day'   },
+  coachPlan:           { count: 1,  period: 'total' },
+  focusMode:           { minutes: 60, period: 'day' },
+  brainDump:           { count: 2,  period: 'week'  },
+  quizBurst:           { count: 2,  period: 'week'  },
+  examRescue:          { count: 2,  period: 'week'  },
+  flashcardDecks:      2,
+  flashcardCardsPerDeck: 20,
+}
+
+export const PRO_LIMITS = {
+  courses:             5,
+  aiActions:           { count: 75, period: 'month' },
+  focusMode:           { minutes: Infinity, period: null },
+  flashcardDecks:      Infinity,
+  flashcardCardsPerDeck: Infinity,
+}
+
+export const TRIAL_LIMITS = PRO_LIMITS
+
+// Legacy — kept for backwards compatibility
 export const PLAN_LIMITS = {
-  free:      { courses: 2,        aiQueries: 1,        aiResetPeriod: 'day'   },
+  free:      { courses: 1,        aiQueries: 2,        aiResetPeriod: 'day'   },
   pro:       { courses: 5,        aiQueries: 75,       aiResetPeriod: 'month' },
   unlimited: { courses: Infinity, aiQueries: Infinity, aiResetPeriod: 'month' },
 }
@@ -29,6 +56,9 @@ const DEFAULT_SUB = {
   stripeCustomerId: null,
   billingPeriod: null,
   currentPeriodEnd: null,
+  trial_activated: false,
+  trial_start_date: null,
+  feature_usage: {},
 }
 
 // ── Init / clear ──────────────────────────────────────────────────────────────
@@ -49,11 +79,72 @@ export function getCachedSubscription() {
   return _sub ?? { ...DEFAULT_SUB }
 }
 
+// ── Trial helpers ─────────────────────────────────────────────────────────────
+
+export function isTrialActive() {
+  const sub = getCachedSubscription()
+  if (!sub?.trial_activated || !sub?.trial_start_date) return false
+  const start = new Date(sub.trial_start_date)
+  const diffMs = Date.now() - start.getTime()
+  return diffMs < 7 * 24 * 60 * 60 * 1000
+}
+
+export function hasUsedTrial() {
+  return !!(getCachedSubscription()?.trial_activated)
+}
+
+export function getTrialDaysRemaining() {
+  const sub = getCachedSubscription()
+  if (!sub?.trial_activated || !sub?.trial_start_date) return 0
+  const start = new Date(sub.trial_start_date)
+  const elapsed = (Date.now() - start.getTime()) / (1000 * 60 * 60 * 24)
+  return Math.max(0, Math.ceil(7 - elapsed))
+}
+
+export async function activateTrial() {
+  if (!_uid) return false
+  if (hasUsedTrial()) return false
+
+  const now = new Date().toISOString()
+  const updated = {
+    ...(getCachedSubscription() ?? {}),
+    trial_activated: true,
+    trial_start_date: now,
+    status: 'trialing',
+  }
+
+  const { error } = await supabase
+    .from('user_data')
+    .upsert({ user_id: _uid, subscription: updated, updated_at: now }, { onConflict: 'user_id' })
+
+  if (error) {
+    console.error('[subscription] activateTrial error:', error)
+    return false
+  }
+
+  _sub = updated
+  track('trial_activated', {})
+  window.dispatchEvent(new CustomEvent('studyedge:trial-activated'))
+  return true
+}
+
+// ── Plan resolution ───────────────────────────────────────────────────────────
+
 export function getActivePlan() {
   const sub = getCachedSubscription()
-  const activeStatuses = ['active', 'trialing', 'past_due']
-  if (!activeStatuses.includes(sub?.status)) return 'free'
-  return sub?.plan ?? 'free'
+
+  // Stripe paid subscription
+  const paidStatuses = ['active', 'past_due']
+  if (paidStatuses.includes(sub?.status) && sub?.plan === 'unlimited') return 'unlimited'
+  if (paidStatuses.includes(sub?.status) && sub?.plan === 'pro') return 'pro'
+
+  // No-card trial (7 days)
+  if (isTrialActive()) return 'pro'
+
+  // Stripe trialing (legacy — card required old flow)
+  if (sub?.status === 'trialing' && sub?.plan) return sub.plan
+
+  return 'free'
 }
 
 export function getPlanLimits() {
@@ -61,8 +152,29 @@ export function getPlanLimits() {
 }
 
 export function canAddCourse(currentCount) {
-  const { courses } = getPlanLimits()
-  return currentCount < courses
+  const plan = getActivePlan()
+  if (plan === 'unlimited') return true
+  if (plan === 'pro') return currentCount < PRO_LIMITS.courses
+  return currentCount < FREE_LIMITS.courses
+}
+
+// ── Period helpers ────────────────────────────────────────────────────────────
+
+function isNewDay(isoString) {
+  if (!isoString) return true
+  return new Date().toDateString() !== new Date(isoString).toDateString()
+}
+
+function isNewWeek(isoString) {
+  if (!isoString) return true
+  const getMonday = (d) => {
+    const copy = new Date(d)
+    const day = copy.getDay()
+    copy.setDate(copy.getDate() - (day === 0 ? 6 : day - 1))
+    copy.setHours(0, 0, 0, 0)
+    return copy.getTime()
+  }
+  return getMonday(new Date()) !== getMonday(new Date(isoString))
 }
 
 function isNewMonth(isoString) {
@@ -72,53 +184,140 @@ function isNewMonth(isoString) {
   return now.getMonth() !== then.getMonth() || now.getFullYear() !== then.getFullYear()
 }
 
-function isNewDay(isoString) {
-  if (!isoString) return true
-  const now = new Date()
-  const then = new Date(isoString)
-  return now.toDateString() !== then.toDateString()
+// ── Per-feature usage ─────────────────────────────────────────────────────────
+
+export function getFeatureUsage(featureName) {
+  const sub = getCachedSubscription()
+  return sub?.feature_usage?.[featureName] ?? { count: 0, resetAt: null }
 }
 
-function isPeriodReset(isoString) {
-  const { aiResetPeriod } = getPlanLimits()
-  return aiResetPeriod === 'day' ? isNewDay(isoString) : isNewMonth(isoString)
+/**
+ * canUseFeature(name) → { allowed: bool, remaining: number|null, resetIn: string|null }
+ *
+ * For pro/trial/unlimited: always allowed (returns remaining: null).
+ * For free: checks per-feature caps with period reset logic.
+ */
+export function canUseFeature(featureName) {
+  const plan = getActivePlan()
+
+  if (plan === 'pro' || plan === 'unlimited') {
+    return { allowed: true, remaining: null, resetIn: null }
+  }
+
+  const limit = FREE_LIMITS[featureName]
+  if (!limit) return { allowed: true, remaining: null, resetIn: null }
+
+  const { count: max, period, minutes } = typeof limit === 'object'
+    ? limit
+    : { count: limit, period: null, minutes: undefined }
+
+  // Focus mode is handled separately via minutesUsed
+  if (minutes !== undefined) {
+    return { allowed: true, remaining: minutes, resetIn: period === 'day' ? 'tomorrow' : null }
+  }
+
+  const usage = getFeatureUsage(featureName)
+
+  let hasReset = false
+  if (period === 'day')   hasReset = isNewDay(usage.resetAt)
+  if (period === 'week')  hasReset = isNewWeek(usage.resetAt)
+  if (period === 'month') hasReset = isNewMonth(usage.resetAt)
+  if (period === 'total') hasReset = false
+
+  const currentCount = hasReset ? 0 : (usage.count ?? 0)
+  const allowed = currentCount < max
+  const remaining = Math.max(0, max - currentCount)
+
+  const resetLabels = { day: 'tomorrow', week: 'next Monday', month: 'next month', total: null }
+  const resetIn = period ? resetLabels[period] ?? null : null
+
+  return { allowed, remaining, resetIn }
 }
+
+export function getFocusMinutesUsed() {
+  const usage = getFeatureUsage('focusMode')
+  if (isNewDay(usage.resetAt)) return 0
+  return usage.count ?? 0 // stored as minutes
+}
+
+export function canUseFocusMinutes(additionalMinutes = 1) {
+  const plan = getActivePlan()
+  if (plan === 'pro' || plan === 'unlimited') return true
+  const used = getFocusMinutesUsed()
+  return used + additionalMinutes <= FREE_LIMITS.focusMode.minutes
+}
+
+export async function incrementFeatureUsage(featureName, amount = 1) {
+  if (!_sub) return
+
+  const plan = getActivePlan()
+  // For pro/trial: don't track per-feature (AI pool tracked server-side)
+  if (plan !== 'free') return
+
+  const usage = getFeatureUsage(featureName)
+  const limit = FREE_LIMITS[featureName]
+  const period = typeof limit === 'object' ? limit.period : null
+
+  let hasReset = false
+  if (period === 'day')   hasReset = isNewDay(usage.resetAt)
+  if (period === 'week')  hasReset = isNewWeek(usage.resetAt)
+  if (period === 'month') hasReset = isNewMonth(usage.resetAt)
+
+  const now = new Date().toISOString()
+  const newCount = hasReset ? amount : (usage.count ?? 0) + amount
+
+  const updatedUsage = {
+    ...(_sub.feature_usage ?? {}),
+    [featureName]: {
+      count: newCount,
+      resetAt: hasReset || !usage.resetAt ? now : usage.resetAt,
+    },
+  }
+
+  _sub = { ..._sub, feature_usage: updatedUsage }
+
+  if (_uid) {
+    const snapshot = { ..._sub }
+    supabase
+      .from('user_data')
+      .upsert({ user_id: _uid, subscription: snapshot, updated_at: now }, { onConflict: 'user_id' })
+      .then(({ error }) => {
+        if (error) console.error('[subscription] incrementFeatureUsage error:', error)
+      })
+  }
+}
+
+// ── AI helpers (backwards-compat wrappers) ────────────────────────────────────
 
 export function canUseAI() {
-  const sub = getCachedSubscription()
-  const { aiQueries } = getPlanLimits()
-  if (aiQueries === Infinity) return true
-  if (isPeriodReset(sub?.aiQueriesResetAt)) return true
-  return (sub?.aiQueriesUsed ?? 0) < aiQueries
+  return canUseFeature('aiTutor').allowed
 }
 
 export function getAIQueriesUsed() {
-  const sub = getCachedSubscription()
-  if (isPeriodReset(sub?.aiQueriesResetAt)) return 0
-  return sub?.aiQueriesUsed ?? 0
+  const usage = getFeatureUsage('aiTutor')
+  if (isNewDay(usage.resetAt)) return 0
+  return usage.count ?? (_sub?.aiQueriesUsed ?? 0)
 }
 
 export function getAIQueriesLimit() {
-  return getPlanLimits().aiQueries
+  const plan = getActivePlan()
+  if (plan === 'pro' || plan === 'unlimited') return PRO_LIMITS.aiActions.count
+  return FREE_LIMITS.aiTutor.count
 }
 
-// ── AI query increment ────────────────────────────────────────────────────────
-// Server-side enforcement (api/*.js + lib/server/usage.js) is the source of
-// truth. This helper just bumps the local cache so the UI updates immediately
-// after an AI call. The server has already written the real count.
-
 export function incrementAIQuery() {
+  incrementFeatureUsage('aiTutor')
+
   if (!_sub) return
-  const now = new Date()
-  const newPeriod = isPeriodReset(_sub?.aiQueriesResetAt)
-  const newCount = newPeriod ? 1 : (_sub?.aiQueriesUsed ?? 0) + 1
-  _sub = {
-    ..._sub,
-    aiQueriesUsed: newCount,
-    aiQueriesResetAt: newPeriod ? now.toISOString() : (_sub?.aiQueriesResetAt ?? now.toISOString()),
-  }
+  const now = new Date().toISOString()
+  const usage = getFeatureUsage('aiTutor')
+  const newCount = usage.count ?? 0
+
+  _sub = { ..._sub, aiQueriesUsed: newCount, aiQueriesResetAt: now }
+
   window.dispatchEvent(new CustomEvent('studyedge:ai-query-used', { detail: { count: newCount } }))
-  const limit = getPlanLimits().aiQueries
+
+  const limit = getAIQueriesLimit()
   if (limit !== Infinity && newCount >= limit) {
     track('ai_limit_reached', { plan: getActivePlan(), count: newCount })
   }
@@ -137,7 +336,6 @@ export async function createCheckoutSession(plan, billingPeriod, userEmail, user
 
     const data = await res.json()
 
-    // User already has an active subscription — no need to go through checkout again
     if (res.status === 409 && data.alreadySubscribed) {
       console.warn('[subscription] User already subscribed — skipping checkout')
       return { alreadySubscribed: true }

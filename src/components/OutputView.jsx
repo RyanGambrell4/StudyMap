@@ -438,13 +438,9 @@ export default function OutputView({
   }, [activeSection, courses])
 
   const handleOpenStudyCoach = useCallback((idx) => {
-    if (getActivePlan() === 'free') {
-      onShowPaywall?.('coach')
-      return
-    }
     setCoachCourseIdx(idx ?? 0)
     setActiveSection('coach')
-  }, [onShowPaywall])
+  }, [])
 
   const [syllabusEvents, setSyllabusEvents] = useState(() => getCachedSyllabusEvents() ?? [])
   const [syllabusModalCourse, setSyllabusModalCourse] = useState(null)
@@ -1211,13 +1207,7 @@ export default function OutputView({
 
       <AppShell
         activeSection={activeSection}
-        setActiveSection={section => {
-          if (section === 'coach' && getActivePlan() === 'free') {
-            onShowPaywall?.('coach')
-            return
-          }
-          setActiveSection(section)
-        }}
+        setActiveSection={setActiveSection}
         onImportSyllabus={() => setSyllabusModalCourse(-1)}
         onShare={() => setShowShareCard(true)}
         onEditPlan={onEditPlan}
@@ -1231,6 +1221,7 @@ export default function OutputView({
         onOpenQuizBurst={() => { track('feature_opened', { feature: 'quiz_burst' }); setShowQuizBurst(true) }}
         onOpenExamRescue={() => { track('feature_opened', { feature: 'exam_rescue' }); setShowExamRescue(true) }}
         onNavigateToTools={() => setActiveSection('tools')}
+        onOpenPaywall={onShowPaywall}
       >
 
         {/* Recovery alerts */}

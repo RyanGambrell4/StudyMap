@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { createCheckoutSession } from '../lib/subscription'
+import { createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive } from '../lib/subscription'
 import { track } from '../lib/analytics'
 
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -27,12 +27,12 @@ const PLANS = {
     },
     features: [
       '5 courses',
-      '75 study boosts / month',
-      'AI study plans',
+      '75 AI actions/month',
+      'AI Study Coach',
+      'Unlimited blueprints',
+      'Unlimited focus sessions',
+      'Unlimited brain training',
       'Flashcards & quizzes',
-      'Focus sessions',
-      'Study Coach',
-      'Session Blueprints',
     ],
   },
   unlimited: {
@@ -51,7 +51,7 @@ const PLANS = {
     },
     features: [
       'Unlimited courses',
-      'Unlimited study boosts',
+      'Unlimited AI actions',
       'AI study plans',
       'Flashcards & quizzes',
       'Focus sessions',
@@ -65,28 +65,43 @@ const PLANS = {
 const LIMIT_MESSAGES = {
   courses: {
     tag: 'Course limit reached',
-    title: 'You\'re out of course slots.',
-    body: 'Free plan includes 2 courses. Pro gives you 5 — enough for a full semester with room to spare.',
+    title: 'You\'ve reached your 1-course free limit.',
+    body: 'Pro lets you manage up to 5 courses — your full semester in one place.',
   },
   ai: {
     tag: 'Daily AI limit reached',
-    title: 'You\'ve used today\'s free AI message.',
-    body: 'Unlock unlimited AI Tutor sessions — ask anything, anytime, for every course all semester.',
+    title: 'You\'ve used today\'s 2 free AI messages.',
+    body: 'Pro gives you 75 AI actions/month — ask anything, anytime, for every course.',
   },
   coach: {
     tag: 'Free use limit reached',
-    title: 'You\'ve used your free Coach Plan.',
-    body: 'Regenerate your study plan anytime as your struggles and deadlines change. Upgrade to unlock unlimited coach plans.',
+    title: 'You\'ve used your free coach plan.',
+    body: 'Pro lets you regenerate your plan anytime as exams shift and life happens.',
   },
   blueprint: {
     tag: 'Free use limit reached',
-    title: 'You\'ve used your free Session Blueprint.',
-    body: 'Get a minute-by-minute session structure every time you sit down to study. Upgrade to unlock unlimited blueprints.',
+    title: 'One free Session Blueprint per day.',
+    body: 'Pro gives you unlimited blueprints — a full plan for every single session.',
   },
   focus: {
     tag: 'Free use limit reached',
-    title: 'You\'ve used your free Focus Mode session.',
-    body: 'Start a timed study session with your blueprint loaded. Upgrade to unlock focused, distraction-free study mode.',
+    title: 'You\'ve used your 60-min free Focus time today.',
+    body: 'Pro unlocks unlimited Focus sessions — study as long as you need.',
+  },
+  brainDump: {
+    tag: 'Free use limit reached',
+    title: 'You\'ve used your 2 free Brain Dumps this week.',
+    body: 'Pro gives you unlimited Brain Dumps — test your retention anytime.',
+  },
+  quizBurst: {
+    tag: 'Free use limit reached',
+    title: 'You\'ve used your 2 free Quiz Bursts this week.',
+    body: 'Pro gives you unlimited Quiz Bursts — test your knowledge anytime.',
+  },
+  examRescue: {
+    tag: 'Free use limit reached',
+    title: 'You\'ve used your 2 free Exam Rescues this week.',
+    body: 'Pro gives you unlimited Exam Rescues — build a rescue plan for any exam.',
   },
   tools: {
     tag: 'Pro feature',
@@ -108,10 +123,16 @@ const TESTIMONIALS = [
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function PaywallModal({ trigger, onClose, userEmail, userId, currentPlan = 'free' }) {
+export default function PaywallModal({ trigger, onClose, userEmail, userId, currentPlan = 'free', onTrialActivated }) {
   const [billingPeriod, setBillingPeriod] = useState('yearly')
   const [loading, setLoading] = useState(null)
   const [testimonialIdx, setTestimonialIdx] = useState(0)
+  const [trialLoading, setTrialLoading] = useState(false)
+  const [trialError, setTrialError] = useState(null)
+
+  const trialUsed = hasUsedTrial()
+  const trialActive = isTrialActive()
+  const showTrialCard = currentPlan === 'free' && !trialUsed && !trialActive
 
   const msg = LIMIT_MESSAGES[trigger] ?? LIMIT_MESSAGES.ai
   const visiblePlanIds = currentPlan === 'pro' ? ['unlimited'] : Object.keys(PLANS)
@@ -129,18 +150,39 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     return () => window.removeEventListener('keydown', handler)
   }, [onClose])
 
-  const handleSelectPlan = async (planId, opts = {}) => {
-    track('upgrade_clicked', { planId, billingPeriod, trigger, trial: !!opts.trial })
+  const handleStartTrial = async () => {
+    track('trial_start_clicked', { trigger })
+    setTrialLoading(true)
+    setTrialError(null)
+    try {
+      const success = await activateTrial()
+      if (success) {
+        track('trial_activated', { trigger })
+        if (onTrialActivated) {
+          onTrialActivated()
+        } else {
+          onClose()
+        }
+      } else {
+        setTrialError('Could not activate trial. Please try again.')
+      }
+    } catch {
+      setTrialError('Something went wrong. Please try again.')
+    } finally {
+      setTrialLoading(false)
+    }
+  }
+
+  const handleSelectPlan = async (planId) => {
+    track('upgrade_clicked', { planId, billingPeriod, trigger })
     setLoading(planId)
-    const url = await createCheckoutSession(planId, billingPeriod, userEmail, userId, opts)
+    const url = await createCheckoutSession(planId, billingPeriod, userEmail, userId)
     setLoading(null)
     if (!url) { alert('Something went wrong. Please try again.'); return }
-    // Already subscribed — close the paywall, no redirect needed
     if (url?.alreadySubscribed) { onClose(); return }
     window.location.href = url
   }
 
-  const isProMonthly = billingPeriod === 'monthly'
   const isAnnual = billingPeriod === 'yearly'
   const t = TESTIMONIALS[testimonialIdx]
 
@@ -241,6 +283,70 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
           </div>
         </div>
 
+        {/* ── Free Trial Card (shown when trial not yet used) ── */}
+        {showTrialCard && (
+          <div style={{
+            background: 'linear-gradient(135deg, #e8f4fd, #f0f9f4)',
+            border: '1.5px solid rgba(59,130,246,0.25)',
+            borderRadius: '16px',
+            padding: '22px 20px',
+            marginBottom: '16px',
+            textAlign: 'center',
+          }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: '6px',
+              background: 'rgba(16,185,129,0.10)', border: '1px solid rgba(16,185,129,0.25)',
+              borderRadius: '999px', padding: '3px 10px',
+              fontSize: '0.68rem', fontWeight: 800, color: '#059669',
+              textTransform: 'uppercase', letterSpacing: '0.5px',
+              marginBottom: '10px',
+            }}>
+              No card required
+            </div>
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 6px', letterSpacing: '-0.3px' }}>
+              7 days of full Pro. No card required.
+            </h3>
+            <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 16px', lineHeight: 1.5 }}>
+              Unlock every Pro feature instantly. No payment info needed.
+            </p>
+            {trialError && (
+              <p style={{ fontSize: '0.78rem', color: '#EF4444', margin: '0 0 10px' }}>{trialError}</p>
+            )}
+            <button
+              onClick={handleStartTrial}
+              disabled={trialLoading}
+              style={{
+                width: '100%', padding: '13px',
+                background: 'linear-gradient(135deg, #3B82F6, #10B981)',
+                border: 'none', borderRadius: '10px',
+                color: '#fff', fontFamily: 'inherit',
+                fontSize: '0.95rem', fontWeight: 800,
+                cursor: trialLoading ? 'not-allowed' : 'pointer',
+                opacity: trialLoading ? 0.75 : 1,
+                letterSpacing: '-0.2px',
+                transition: 'opacity 0.15s',
+              }}
+              onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.opacity = '0.88' }}
+              onMouseLeave={e => { e.currentTarget.style.opacity = trialLoading ? '0.75' : '1' }}
+            >
+              {trialLoading ? 'Activating…' : 'Start My Free Trial →'}
+            </button>
+            <p style={{ margin: '10px 0 0', fontSize: '0.72rem', color: '#9B9B9B' }}>
+              No credit card &nbsp;·&nbsp; Full Pro access &nbsp;·&nbsp; 7 calendar days
+            </p>
+          </div>
+        )}
+
+        {/* ── "Or choose a plan" divider when trial card is shown ── */}
+        {showTrialCard && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(0,0,0,0.07)' }} />
+            <span style={{ fontSize: '0.72rem', color: '#C0C0C0', fontWeight: 600, whiteSpace: 'nowrap' }}>
+              or choose a paid plan
+            </span>
+            <div style={{ flex: 1, height: '1px', background: 'rgba(0,0,0,0.07)' }} />
+          </div>
+        )}
 
         {/* ── Billing period toggle ── */}
         <div style={{
@@ -311,15 +417,6 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                   <div style={{ fontSize: '0.75rem', fontWeight: 700, color: plan.color, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     {plan.name}
                   </div>
-                  {planId === 'pro' && isProMonthly && (
-                    <div style={{
-                      fontSize: '0.62rem', fontWeight: 800, color: '#34d399',
-                      background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)',
-                      borderRadius: '999px', padding: '2px 8px', letterSpacing: '0.3px', textTransform: 'uppercase',
-                    }}>
-                      7-day free trial
-                    </div>
-                  )}
                 </div>
                 <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#1A1A1A', letterSpacing: '-0.5px' }}>
                   {plan.prices[billingPeriod]}
@@ -327,11 +424,6 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 {plan.subPrices?.[billingPeriod] && (
                   <div style={{ fontSize: '0.7rem', color: '#34d399', marginTop: '3px', fontWeight: 600 }}>
                     {plan.subPrices[billingPeriod]}
-                  </div>
-                )}
-                {planId === 'pro' && isProMonthly && (
-                  <div style={{ fontSize: '0.7rem', color: '#64748b', marginTop: '3px' }}>
-                    Card required · cancel before day 7, pay nothing
                   </div>
                 )}
               </div>
@@ -350,7 +442,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
 
               {/* CTA */}
               <button
-                onClick={() => handleSelectPlan(planId, planId === 'pro' && isProMonthly ? { trial: true } : {})}
+                onClick={() => handleSelectPlan(planId)}
                 disabled={loading === planId}
                 style={{
                   width: '100%', padding: '12px',
@@ -368,11 +460,9 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               >
                 {loading === planId
                   ? 'Loading...'
-                  : planId === 'pro' && isProMonthly
-                    ? 'Start free trial · 7 days →'
-                    : planId === 'pro' && isAnnual
-                      ? 'Get Pro Annual · best value →'
-                      : `Get ${plan.name} →`}
+                  : planId === 'pro' && isAnnual
+                    ? 'Get Pro Annual · best value →'
+                    : `Get ${plan.name} →`}
               </button>
             </div>
           ))}

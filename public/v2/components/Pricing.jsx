@@ -20,16 +20,16 @@ function Pricing(){
 
   // What's actually billed (shown as sub-label)
   const billedSub = (planKey) => {
-    if (bill === 'monthly') return 'Billed monthly · 7-day free trial';
-    if (bill === 'semester') return `Billed $${PRICE_TABLE[planKey].semester.toFixed(2)}/semester · 7-day free trial`;
-    return `Billed $${PRICE_TABLE[planKey].yearly.toFixed(2)}/year · 7-day free trial`;
+    if (bill === 'monthly') return 'Billed monthly · cancel anytime';
+    if (bill === 'semester') return `Billed $${PRICE_TABLE[planKey].semester.toFixed(2)}/semester · cancel anytime`;
+    return `Billed $${PRICE_TABLE[planKey].yearly.toFixed(2)}/year · cancel anytime`;
   };
 
   const displayPrice = (planKey) => MONTHLY_EQUIV[planKey][bill];
 
   const goSignup = (plan)=>{
     const qs = new URLSearchParams({ signup: '1' });
-    if (plan) { qs.set('plan', plan); qs.set('billing', bill); qs.set('trial', '1'); }
+    if (plan) { qs.set('plan', plan); qs.set('billing', bill); }
     window.location.href = '/app?' + qs.toString();
   };
 
@@ -38,17 +38,17 @@ function Pricing(){
       name:'Free', planKey:null, sub:'Try everything once. No credit card.',
       cta:'Start for free', primary:false, plan:null,
       feats:[
-        [true,'2 courses · full schedule & planner'],
-        [true,'1 AI message / day'],
-        [true,'Session Blueprint · 1 free use'],
-        [true,'Focus Mode · 1 free use'],
-        [true,'Coach Plan · 1 free use'],
-        [true,'Syllabus import · deadlines pulled automatically'],
+        [true,'1 course · full schedule & planner'],
+        [true,'2 AI messages / day'],
+        [true,'Session Blueprint · 1 free per day'],
+        [true,'Brain Dump, Quiz Burst, Exam Rescue · 2 free/week'],
+        [true,'Focus Mode · 60 min/day free'],
+        [true,'Coach Plan · 1 free total'],
       ]
     },
     {
       name:'Pro', planKey:'pro',
-      cta:'Get Pro', primary:true, popular:true, plan:'pro',
+      cta:'Get Pro →', primary:true, popular:true, plan:'pro',
       feats:[
         [true,'5 courses · your full semester planned'],
         [true,'75 AI actions/month · enough for daily use'],
@@ -101,7 +101,7 @@ function Pricing(){
                   color:'#34d399', background:'rgba(52,211,153,0.1)', border:'1px solid rgba(52,211,153,0.3)',
                   borderRadius:6, padding:'3px 8px', marginBottom:8,
                 }}>
-                  TRY FREE · 7 DAYS
+                  7-DAY FREE TRIAL · NO CARD
                 </div>
               )}
               <div className="tier-name">{t.name}</div>
@@ -195,13 +195,13 @@ function FinalCTA(){
           <div className="cta-grid"/>
           <div className="cta-inner">
             <h2 className="section-title" style={{maxWidth:820,margin:'0 auto'}}>You already know you need a<br/><span className="grad-text">better system.</span></h2>
-            <p className="section-sub" style={{margin:'22px auto 32px',maxWidth:560}}>Try Pro free for 7 days. Your card is only charged after the trial ends — cancel before day 7 and you won't pay a thing.</p>
+            <p className="section-sub" style={{margin:'22px auto 32px',maxWidth:560}}>Start free · explore Pro with a 7-day trial inside the app — no card needed.</p>
             <div className="cta-btns">
-              <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1&plan=pro&billing=monthly&trial=1'}>Start Free Trial →</button>
+              <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Start Free Trial →</button>
             </div>
             <div className="cta-foot">
-              <span>✓ 7-day free Pro trial</span>
-              <span>✓ Cancel before day 7, pay nothing</span>
+              <span>✓ Free to start</span>
+              <span>✓ 7-day Pro trial in-app · no card</span>
               <span>✓ Full Pro access instantly</span>
             </div>
           </div>

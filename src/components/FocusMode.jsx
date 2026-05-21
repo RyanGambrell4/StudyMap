@@ -7,7 +7,7 @@ import {
   appendSessionRecall,
 } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, getFocusMinutesUsed, incrementFeatureUsage } from '../lib/subscription'
 import { sliderToRecall } from '../utils/adaptationEngine'
 import { useCelebration } from '../utils/useCelebration'
 import { extractText } from '../utils/extractText'
@@ -458,6 +458,10 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const totalSec = session.duration * 60
   const isLongSession = session.duration > 45
   const todayStr = new Date().toISOString().split('T')[0]
+  const plan = getActivePlan()
+  const isFree = plan === 'free'
+  const focusMinutesAlreadyUsed = isFree ? getFocusMinutesUsed() : 0
+  const focusMinutesAllowed = isFree ? Math.max(0, 60 - focusMinutesAlreadyUsed) : Infinity
 
   // ── Blueprint blocks ──
   const blocks = blueprint?.blocks ?? null
@@ -514,6 +518,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     setRecallData(data)
     setRecallSubmitted(true)
     setShowRecallSheet(false)
+    const elapsedMinutes = Math.max(1, Math.round((totalSec - remaining) / 60))
+    if (isFree) incrementFeatureUsage('focusMode', elapsedMinutes)
     // Pass recall data upstream when session completes
     onComplete(session.id, elapsed, data)
   }
@@ -521,6 +527,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const handleRecallSkip = () => {
     setRecallSubmitted(true)
     setShowRecallSheet(false)
+    const elapsedMinutes = Math.max(1, Math.round((totalSec - remaining) / 60))
+    if (isFree) incrementFeatureUsage('focusMode', elapsedMinutes)
     onComplete(session.id, elapsed, null)
   }
 
@@ -626,6 +634,26 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       if (r.current) { r.current.style.height = 'auto'; r.current.style.height = r.current.scrollHeight + 'px' }
     })
   }, [notesConcepts, notesMain, notesSummary])
+
+  // ── Free-user focus cap: gate at session start ──
+  useEffect(() => {
+    if (!isFree) return
+    if (focusMinutesAlreadyUsed >= 60) {
+      onShowPaywall?.('focus')
+      onExit?.()
+    }
+  }, [])
+
+  // ── Free-user focus cap: end session when limit reached mid-session ──
+  useEffect(() => {
+    if (!isFree || finished) return
+    const elapsedMinutes = Math.floor((totalSec - remaining) / 60)
+    if (elapsedMinutes >= focusMinutesAllowed && focusMinutesAllowed > 0) {
+      clearInterval(intervalRef.current)
+      setRunning(false)
+      setFinished(true)
+    }
+  }, [remaining])
 
   // ── Timer countdown ──
   useEffect(() => {
@@ -1355,6 +1383,11 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
             <span style={{ fontSize: 12, color: '#9B9B9B', fontFamily: 'ui-monospace, monospace' }}>
               {fmt(elapsed)} <span style={{ color: '#C0C0C0' }}>/ {String(session.duration).padStart(2,'0')}:00</span>
             </span>
+            {isFree && focusMinutesAllowed < Infinity && (
+              <span style={{ fontSize: 11, color: '#C0C0C0' }}>
+                {Math.max(0, focusMinutesAllowed - Math.floor((totalSec - remaining) / 60))} min left today
+              </span>
+            )}
             <button onClick={onExit} className="text-xs transition-colors" style={{ color: '#9B9B9B' }}>Exit</button>
           </div>
         </div>

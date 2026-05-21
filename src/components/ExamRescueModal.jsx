@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { daysBetween } from '../utils/dateUtils'
 
 const D = {
@@ -51,7 +51,8 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
   }
 
   async function generateTopics() {
-    if (!canUseAI()) { onShowPaywall?.('ai'); return }
+    const { allowed: canRescue } = canUseFeature('examRescue')
+    if (!canRescue) { onShowPaywall?.('examRescue'); return }
     setLoading(true)
     setError('')
 
@@ -72,6 +73,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
         const data = await res.json()
         if (!res.ok) throw new Error(data.error ?? 'Failed')
         incrementAIQuery()
+        incrementFeatureUsage('examRescue')
         setTopics(data.topics)
         setStep('topics')
         setLoading(false)
@@ -211,11 +213,17 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
               ) : 'Build my rescue plan'}
             </button>
 
-            {!isPro && (
-              <div style={{ textAlign: 'center', fontSize: 12, color: D.textDim, marginTop: 12 }}>
-                Free: top topic and 1h schedule. <button onClick={() => onShowPaywall?.('study-hacks')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>Upgrade for the full plan</button>
-              </div>
-            )}
+            {!isPro && (() => {
+              const { remaining } = canUseFeature('examRescue')
+              return (
+                <div style={{ textAlign: 'center', fontSize: 12, color: D.textDim, marginTop: 12 }}>
+                  {remaining !== null && remaining > 0
+                    ? <>{2 - remaining} of 2 rescue plans used this week · <button onClick={() => onShowPaywall?.('study-hacks')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>Upgrade for the full plan</button></>
+                    : <>{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'} for unlimited rescue plans · <button onClick={() => onShowPaywall?.('examRescue')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>Unlock now</button></>
+                  }
+                </div>
+              )
+            })()}
           </div>
         )}
 

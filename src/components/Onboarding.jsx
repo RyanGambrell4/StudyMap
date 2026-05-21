@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { track } from '../lib/analytics'
+import { activateTrial, hasUsedTrial } from '../lib/subscription'
 
 // ── Options ───────────────────────────────────────────────────────────────────
 const STYLE_OPTIONS = [
@@ -487,10 +488,86 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
         <div style={{ display: 'flex', gap: 10 }}>
           <BackBtn onClick={() => goTo(3, -1)} />
-          <ContinueBtn onClick={() => onComplete({ yearLevel, learningStyle, preferredTime, schoolType, emailDigest: true })} disabled={!preferredTime} label="Start studying free" />
+          <ContinueBtn onClick={() => { if (!hasUsedTrial()) { goTo(5) } else { onComplete({ yearLevel, learningStyle, preferredTime, schoolType, emailDigest: true }) } }} disabled={!preferredTime} label="Continue" />
         </div>
       </StepWrap>
     </Page>
+  )
+
+  // ── Step 5: Trial offer ───────────────────────────────────────────────────────
+  const profileData = { yearLevel, learningStyle, preferredTime, schoolType, emailDigest: true }
+  if (step === 5) return (
+    <div style={{ minHeight: '100vh', background: '#F7F6F3', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
+      <div style={{ maxWidth: 460, width: '100%' }}>
+        {/* Badge */}
+        <div style={{ textAlign: 'center', marginBottom: 28 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)', borderRadius: 999, padding: '6px 16px', fontSize: 12, fontWeight: 700, color: '#3B61C4', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+            <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
+            </svg>
+            Limited time · no card required
+          </div>
+        </div>
+
+        {/* Headline */}
+        <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#111111', letterSpacing: '-0.04em', textAlign: 'center', marginBottom: 10, lineHeight: 1.15 }}>
+          7 days of full Pro.<br />No card required.
+        </h1>
+        <p style={{ color: '#6B6B6B', fontSize: '0.95rem', textAlign: 'center', marginBottom: 32, lineHeight: 1.6 }}>
+          You've set up your plan. Try everything — no limits — free for 7 days. No credit card. No commitment.
+        </p>
+
+        {/* Feature list */}
+        <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, padding: '20px 24px', marginBottom: 24 }}>
+          {[
+            ['5 courses', 'Your full semester, all in one place'],
+            ['75 AI actions/month', 'AI tutor, coach plans, blueprints, quizzes'],
+            ['Unlimited focus sessions', 'Study as long as you need'],
+            ['Rebuild plans anytime', 'As exams shift and life happens'],
+          ].map(([title, desc]) => (
+            <div key={title} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
+              <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(59,97,196,0.1)', border: '1px solid rgba(59,97,196,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                <svg width="10" height="10" fill="none" stroke="#3B61C4" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#111111' }}>{title}</div>
+                <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 1 }}>{desc}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Primary CTA */}
+        <button
+          onClick={async () => {
+            track('trial_cta_clicked', { source: 'onboarding' })
+            await activateTrial()
+            onComplete(profileData)
+          }}
+          style={{ width: '100%', padding: '15px', background: '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.01em', marginBottom: 10 }}
+          onMouseEnter={e => e.currentTarget.style.background = '#2d4fa3'}
+          onMouseLeave={e => e.currentTarget.style.background = '#3B61C4'}
+        >
+          Start My Free Trial — 7 Days Free →
+        </button>
+
+        {/* Secondary */}
+        <button
+          onClick={() => onComplete(profileData)}
+          style={{ width: '100%', padding: '13px', background: 'transparent', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 12, color: '#6B6B6B', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.22)'; e.currentTarget.style.color = '#111' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)'; e.currentTarget.style.color = '#6B6B6B' }}
+        >
+          I'll try the free plan first
+        </button>
+
+        <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.72rem', marginTop: 16 }}>
+          No credit card · trial ends after 7 days · downgrade to free automatically
+        </p>
+      </div>
+    </div>
   )
 
   return null

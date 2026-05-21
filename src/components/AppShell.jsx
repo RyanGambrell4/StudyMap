@@ -1,6 +1,5 @@
 import { useState, useCallback, useEffect, useRef } from 'react'
-import { getActivePlan, getCachedSubscription, initSubscription } from '../lib/subscription'
-import { supabase } from '../lib/supabase'
+import { getActivePlan, isTrialActive, hasUsedTrial, getTrialDaysRemaining } from '../lib/subscription'
 import OnboardingTour from './OnboardingTour'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -32,6 +31,7 @@ export default function AppShell({
   onOpenQuizBurst,
   onOpenExamRescue,
   onNavigateToTools,
+  onOpenPaywall,
   children,
 }) {
   const isExamMode = Array.isArray(courses) && courses.some(c => EXAM_PATTERN.test(c.name))
@@ -70,45 +70,24 @@ export default function AppShell({
 
   const plan      = getActivePlan()
   const planLabel = plan === 'unlimited' ? 'Unlimited' : plan === 'pro' ? 'Pro' : 'Free'
-  const sub        = getCachedSubscription()
-  const isTrialing = sub?.status === 'trialing'
+  const isTrialing = isTrialActive()
+  const daysLeft = isTrialing ? getTrialDaysRemaining() : null
   const [trialBannerDismissed, setTrialBannerDismissed] = useState(
     () => sessionStorage.getItem('studyedge_trial_banner_dismissed') === '1'
   )
-  const daysLeft = isTrialing && sub?.currentPeriodEnd
-    ? Math.max(0, Math.ceil((new Date(sub.currentPeriodEnd) - new Date()) / (1000 * 60 * 60 * 24)))
-    : null
   const trialMsg = daysLeft !== null && daysLeft <= 2
-    ? "Your trial ends tomorrow — don't lose access to your courses and AI tools."
+    ? "Your trial ends tomorrow — upgrade to keep all your courses and AI tools."
     : daysLeft !== null
-      ? `Your Pro trial ends in ${daysLeft} day${daysLeft !== 1 ? 's' : ''} — keep access to everything.`
+      ? `Your free trial ends in ${daysLeft} day${daysLeft !== 1 ? 's' : ''} — upgrade to keep Pro access.`
       : null
   const showTrialBanner = isTrialing && trialMsg && !trialBannerDismissed
   const initials    = userEmail ? userEmail.split('@')[0].slice(0, 2).toUpperCase() : 'U'
   const displayName = userEmail?.split('@')[0] ?? 'Account'
 
-  const handleCancelTrialFromSettings = async () => {
-    setSettingsOpen(false)
-    if (!confirm("Cancel your free trial? You'll lose Pro access immediately and won't be charged.")) return
-    try {
-      const { data: { user } } = await supabase.auth.getUser()
-      const res = await fetch('/api/stripe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'cancel-trial', userId: user.id }),
-      })
-      if (!res.ok) throw new Error('Failed')
-      initSubscription(user.id, { plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null })
-    } catch {
-      alert('Something went wrong. Please try again or contact support@getstudyedge.com.')
-    }
-  }
-
   const SETTINGS_ITEMS = [
     { label: 'Import Syllabus', onClick: () => { setSettingsOpen(false); onImportSyllabus?.() }, icon: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
     { label: 'Share Plan',      onClick: () => { setSettingsOpen(false); onShare?.() },          icon: 'M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z' },
     { label: 'Edit Plan',       onClick: () => { setSettingsOpen(false); onEditPlan?.() },       icon: 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z' },
-    ...(isTrialing ? [{ label: 'Cancel Trial', onClick: handleCancelTrialFromSettings, icon: 'M6 18L18 6M6 6l12 12', danger: true }] : []),
   ]
 
   // Shared icon button style
@@ -369,8 +348,30 @@ export default function AppShell({
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
             <div style={{ width: 32, height: 32, borderRadius: '50%', background: ACCENT, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{initials}</div>
-            {plan !== 'free' && <span style={{ fontSize: 11, fontWeight: 700, color: plan === 'unlimited' ? '#16A34A' : ACCENT }}>{planLabel}</span>}
-            {plan === 'free' && <span style={{ fontSize: 11, fontWeight: 700, color: ACCENT }}>Upgrade</span>}
+            {isTrialing ? (
+              <button
+                onClick={(e) => { e.stopPropagation(); onOpenPaywall?.('trial') }}
+                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, background: daysLeft <= 1 ? '#FFF7ED' : '#F0FDF4', border: `1px solid ${daysLeft <= 1 ? '#FED7AA' : '#BBF7D0'}`, cursor: 'pointer' }}
+              >
+                <svg style={{ width: 10, height: 10, color: daysLeft <= 1 ? '#D97706' : '#16A34A', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span style={{ fontSize: 11, fontWeight: 700, color: daysLeft <= 1 ? '#D97706' : '#16A34A', whiteSpace: 'nowrap' }}>
+                  Trial · {daysLeft}d left
+                </span>
+              </button>
+            ) : plan === 'free' && !hasUsedTrial() ? (
+              <button
+                onClick={(e) => { e.stopPropagation(); onOpenPaywall?.('nav-trial') }}
+                style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ACCENT, border: 'none', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                Start Free Trial
+              </button>
+            ) : plan !== 'free' ? (
+              <span style={{ fontSize: 11, fontWeight: 700, color: plan === 'unlimited' ? '#16A34A' : ACCENT }}>{planLabel}</span>
+            ) : (
+              <span style={{ fontSize: 11, fontWeight: 700, color: ACCENT }}>Upgrade</span>
+            )}
           </button>
         </div>
       </header>
