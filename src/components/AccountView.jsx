@@ -59,7 +59,7 @@ const card = {
   borderRadius: 14,
   padding: '20px 24px',
   marginBottom: 12,
-  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+  boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
 }
 
 const sectionLabel = {
@@ -152,12 +152,14 @@ export default function AccountView({
       <h1 style={{ fontSize: 28, fontWeight: 700, color: '#111111', marginBottom: 20 }}>Account</h1>
 
       {/* Profile card */}
-      <div style={card}>
+      <div style={{ ...card, background: 'linear-gradient(135deg, #f0f4ff 0%, #ffffff 60%)', border: '1px solid rgba(59,97,196,0.15)', boxShadow: '0 2px 12px rgba(59,97,196,0.10)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
-            width: 46, height: 46, borderRadius: 12, background: '#3B61C4',
+            width: 46, height: 46, borderRadius: 12,
+            background: 'linear-gradient(135deg, #4f76d9, #3B61C4)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             color: '#fff', fontSize: 15, fontWeight: 800, flexShrink: 0,
+            boxShadow: '0 3px 10px rgba(59,97,196,0.35)',
           }}>
             {initials}
           </div>
@@ -176,7 +178,7 @@ export default function AccountView({
       </div>
 
       {/* Progress & Results card */}
-      <div style={card}>
+      <div style={{ ...card, borderTop: '3px solid #3B61C4', boxShadow: '0 2px 12px rgba(59,97,196,0.08)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
           <p style={sectionLabel}>Progress &amp; Results</p>
           {onShowProgress && (
@@ -190,14 +192,14 @@ export default function AccountView({
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           {[
-            { label: 'This week', value: `${progressStats.weekHours}h`, sub: `${progressStats.totalHours}h total` },
-            { label: 'Sessions', value: progressStats.sessions, sub: 'completed' },
-            { label: 'Study streak', value: `${progressStats.streak}d`, sub: progressStats.streak === 0 ? 'Start today' : 'in a row' },
-            { label: 'Avg recall', value: progressStats.avgRecall != null ? `${progressStats.avgRecall}%` : '—', sub: progressStats.avgRecall != null ? 'across sessions' : 'No data yet' },
-          ].map(({ label, value, sub }) => (
-            <div key={label} style={{ background: '#F7F6F3', borderRadius: 10, padding: '12px 14px' }}>
-              <p style={{ margin: '0 0 3px', fontSize: 10, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</p>
-              <p style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 800, color: '#111111', letterSpacing: '-0.02em' }}>{value}</p>
+            { label: 'This week', value: `${progressStats.weekHours}h`, sub: `${progressStats.totalHours}h total`, color: '#3B61C4', bg: 'rgba(59,97,196,0.06)', glow: 'rgba(59,97,196,0.12)' },
+            { label: 'Sessions', value: progressStats.sessions, sub: 'completed', color: '#8B5CF6', bg: 'rgba(139,92,246,0.06)', glow: 'rgba(139,92,246,0.12)' },
+            { label: 'Study streak', value: `${progressStats.streak}d`, sub: progressStats.streak === 0 ? 'Start today' : 'in a row', color: '#F59E0B', bg: 'rgba(245,158,11,0.06)', glow: 'rgba(245,158,11,0.12)' },
+            { label: 'Avg recall', value: progressStats.avgRecall != null ? `${progressStats.avgRecall}%` : '—', sub: progressStats.avgRecall != null ? 'across sessions' : 'No data yet', color: '#059669', bg: 'rgba(5,150,105,0.06)', glow: 'rgba(5,150,105,0.12)' },
+          ].map(({ label, value, sub, color, bg, glow }) => (
+            <div key={label} style={{ background: bg, borderRadius: 10, padding: '12px 14px', border: `1px solid ${glow}` }}>
+              <p style={{ margin: '0 0 3px', fontSize: 10, fontWeight: 700, color, opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</p>
+              <p style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 800, color, letterSpacing: '-0.02em' }}>{value}</p>
               <p style={{ margin: 0, fontSize: 11, color: '#9B9B9B' }}>{sub}</p>
             </div>
           ))}
@@ -208,7 +210,7 @@ export default function AccountView({
       </div>
 
       {/* Current Plan card */}
-      <div style={card}>
+      <div style={{ ...card, border: `1px solid ${planInfo.color}30`, boxShadow: `0 2px 16px ${planInfo.color}18, 0 1px 4px rgba(0,0,0,0.06)`, background: `linear-gradient(160deg, ${planInfo.color}08 0%, #ffffff 40%)` }}>
         <p style={sectionLabel}>Current Plan</p>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
@@ -352,7 +354,7 @@ export default function AccountView({
       </div>
 
       {/* Referral card */}
-      <div style={card}>
+      <div style={{ ...card, borderTop: '3px solid #F59E0B', boxShadow: '0 2px 12px rgba(245,158,11,0.10)' }}>
         <ReferralCard />
       </div>
 
