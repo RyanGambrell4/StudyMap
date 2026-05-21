@@ -388,6 +388,15 @@ export default function AppShell({
 
       <OnboardingTour onReady={handleTourReady} />
 
+      {/* ── Mobile hub backdrop ── */}
+      {mobileHub && (
+        <div
+          onClick={() => setMobileHub(null)}
+          className="lg:hidden"
+          style={{ position: 'fixed', inset: 0, zIndex: 39, background: 'rgba(0,0,0,0.25)' }}
+        />
+      )}
+
       {/* ── Mobile bottom bar ── */}
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40" style={{ background: '#FFFFFF', borderTop: `1px solid ${BORDER}`, paddingBottom: 'env(safe-area-inset-bottom)' }}>
 

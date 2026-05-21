@@ -1089,9 +1089,12 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   }
 
   const handleViewPlan = (idx) => {
+    const course = courses[idx]
+    const saved = loadCoachPlan(course?.id ?? idx)
+    if (saved?.plan) setPlan(saved.plan)
     setForm(f => ({ ...f, courseIdx: idx }))
+    setStep(3)
     setUiMode('viewing')
-    // useEffect will load the saved plan and setStep(3)
   }
 
   const handleNewPlan = () => {
