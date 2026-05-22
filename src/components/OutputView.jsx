@@ -1591,6 +1591,7 @@ export default function OutputView({
             onStartFocus={handleStartFocus}
             onNavigateToCourses={() => setActiveSection('courses')}
             completedSessions={completedSessionLog}
+            scheduledSessions={manualSessions}
             onPushToSchedule={incoming => {
               setManualSessions(prev => {
                 const courseId = incoming[0]?.courseId

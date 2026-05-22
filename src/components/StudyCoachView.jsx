@@ -861,7 +861,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle, completedSessions = [] }) {
+export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle, completedSessions = [], scheduledSessions = [] }) {
   const [step, setStep] = useState(1)
   const defaultStyle = learningStyle ? [learningStyle] : []
   const [form, setForm] = useState({
@@ -1014,81 +1014,144 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     saveCoachPlan(courseId, plan, { ...form, sessionMinutes: form.sessionLen, importantDates: form.dates })
 
     const sessionLen = form.sessionLen || 60
+    const daysPerWeek = form.daysPerWeek || 3
+    const MIN_BREAK = 30      // minutes break required between any two study sessions
+    const MAX_STUDY_PER_DAY = 2 // max study sessions per day across all plans
 
-    // Time slot windows per preference (minutes since midnight)
-    const PREF_SLOTS = {
-      Morning:   [8 * 60, 10 * 60 + 30],
-      Afternoon: [13 * 60, 15 * 60 + 30],
-      Evening:   [18 * 60, 20 * 60],
+    // Time windows in minutes since midnight
+    const TIME_WINDOWS = {
+      Morning:   { start: 8 * 60,  end: 12 * 60 },
+      Afternoon: { start: 13 * 60, end: 18 * 60 },
+      Evening:   { start: 18 * 60, end: 22 * 60 },
     }
-    const slots = PREF_SLOTS[preferredTime] ?? PREF_SLOTS.Morning
+    const preferred = TIME_WINDOWS[preferredTime] ?? TIME_WINDOWS.Morning
+    const windowOrder = [preferred, ...Object.values(TIME_WINDOWS).filter(w => w !== preferred)]
 
     const minsToTime = mins => {
       const h24 = Math.floor(mins / 60), m = mins % 60
       return `${h24 % 12 || 12}:${String(m).padStart(2, '0')} ${h24 >= 12 ? 'PM' : 'AM'}`
     }
 
-    // Build a lookup of Google Calendar busy blocks by date
-    const gcalByDate = {}
+    const parseTimeStr = t => {
+      const match = t?.match(/(\d+):(\d+)\s*(AM|PM)/i)
+      if (!match) return null
+      let h = parseInt(match[1]), m = parseInt(match[2])
+      if (match[3].toUpperCase() === 'PM' && h !== 12) h += 12
+      if (match[3].toUpperCase() === 'AM' && h === 12) h = 0
+      return h * 60 + m
+    }
+
+    // Build busy map: gcal events (no break needed) + existing study sessions (MIN_BREAK needed)
+    const busyByDate = {}  // dateKey -> [{startMin, endMin, isStudy}]
+    const studyCountByDate = {}  // dateKey -> count of study sessions already there
+
+    const addBusy = (dateKey, startMin, endMin, isStudy = false) => {
+      if (!busyByDate[dateKey]) busyByDate[dateKey] = []
+      busyByDate[dateKey].push({ startMin, endMin, isStudy })
+    }
+
     googleEvents.forEach(e => {
       if (!e.start?.includes('T')) return
-      const day = e.start.split('T')[0]
-      if (!gcalByDate[day]) gcalByDate[day] = []
+      const dateKey = e.start.split('T')[0]
       const parse = iso => { const dt = new Date(iso); return dt.getHours() * 60 + dt.getMinutes() }
-      gcalByDate[day].push({ startMin: parse(e.start), endMin: parse(e.end || e.start) })
+      addBusy(dateKey, parse(e.start), e.end ? parse(e.end) : parse(e.start) + 60, false)
     })
 
-    // Count total sessions across all weeks for labelling
+    ;(scheduledSessions || []).forEach(s => {
+      if (!s.dateStr || !s.startTime || !s.fromCoachPlan) return
+      const startMin = parseTimeStr(s.startTime)
+      if (startMin === null) return
+      const dur = s.duration || sessionLen
+      addBusy(s.dateStr, startMin, startMin + dur, true)
+      studyCountByDate[s.dateStr] = (studyCountByDate[s.dateStr] || 0) + 1
+    })
+
+    // Find the first available slot on a date across all windows
+    const findSlot = (dateKey) => {
+      const busy = [...(busyByDate[dateKey] || [])].sort((a, b) => a.startMin - b.startMin)
+      for (const window of windowOrder) {
+        let s = window.start
+        while (s + sessionLen <= window.end) {
+          const e = s + sessionLen
+          const conflict = busy.find(b => {
+            const afterBreak = b.isStudy ? MIN_BREAK : 0
+            return s < b.endMin + afterBreak && e > b.startMin
+          })
+          if (!conflict) return s
+          const afterBreak = conflict.isStudy ? MIN_BREAK : 0
+          s = conflict.endMin + afterBreak
+        }
+      }
+      return null
+    }
+
+    // Spread sessions across days: prefer Mon/Wed/Fri, then Tue/Thu, then Sat/Sun
+    const SPREAD_ORDER = [0, 2, 4, 1, 3, 5, 6]
+
     const totalSessions = (plan.weeklyFocus || []).reduce((sum, w) => sum + (w.sessions?.length || 0), 0)
     let sessionNum = 0
-
     const calSessions = []
-    const dayOffsets = [0, 1, 2, 3, 4, 5] // Mon–Sat
-    const sessionsPerDay = {} // how many sessions already placed on each date
 
     ;(plan.weeklyFocus || []).forEach((week, wi) => {
       const { startDate } = weekDateRange(wi)
-      ;(week.sessions || []).forEach((sess, si) => {
-        sessionNum++
-        const offset = dayOffsets[si % dayOffsets.length]
+      const weekSessions = week.sessions || []
+      if (!weekSessions.length) return
+
+      // Choose target days for this week: pick `daysPerWeek` spread days that aren't already at max
+      const targetDays = []
+      for (const offset of SPREAD_ORDER) {
+        if (targetDays.length >= Math.max(daysPerWeek, weekSessions.length)) break
         const d = new Date(startDate)
         d.setDate(d.getDate() + offset)
         const dateKey = d.toISOString().split('T')[0]
-
-        // Pick start time based on how many sessions are already on this day
-        const dayIdx = sessionsPerDay[dateKey] ?? 0
-        sessionsPerDay[dateKey] = dayIdx + 1
-        let startMin = dayIdx < slots.length
-          ? slots[dayIdx]
-          : slots[slots.length - 1] + (dayIdx - slots.length + 1) * (sessionLen + 30)
-
-        // Nudge past any overlapping Google Calendar event
-        const blocks = (gcalByDate[dateKey] || []).sort((a, b) => a.startMin - b.startMin)
-        for (const block of blocks) {
-          if (startMin < block.endMin && startMin + sessionLen > block.startMin) {
-            startMin = block.endMin + 15
-          }
+        if ((studyCountByDate[dateKey] || 0) < MAX_STUDY_PER_DAY) targetDays.push(dateKey)
+      }
+      // Fallback: add any remaining days if we ran out of options
+      if (targetDays.length < weekSessions.length) {
+        for (let offset = 0; offset <= 6; offset++) {
+          if (targetDays.length >= weekSessions.length) break
+          const d = new Date(startDate)
+          d.setDate(d.getDate() + offset)
+          const dateKey = d.toISOString().split('T')[0]
+          if (!targetDays.includes(dateKey)) targetDays.push(dateKey)
         }
+      }
 
-        const dur = sess.duration || sessionLen
-        const focusSuffix = sess.focusArea ? ` · ${sess.focusArea}`.slice(0, 32) : ''
-        const label = `Session ${sessionNum} of ${totalSessions}${focusSuffix}`
-
-        calSessions.push({
-          id: `coach-${courseId}-w${wi}-s${si}-${Date.now()}`,
-          dateStr: dateKey,
-          courseId: form.courseIdx,
-          courseName: course.name,
-          color: course.color,
-          sessionType: label,
-          duration: dur,
-          startTime: minsToTime(startMin),
-          endTime: minsToTime(startMin + dur),
-          isManual: true,
-          fromCoachPlan: true,
-          planSessionNum: sessionNum,
-          planTotalSessions: totalSessions,
+      weekSessions.forEach((sess, si) => {
+        sessionNum++
+        // Try the target days in order, then any day in the week
+        const fallbackDays = SPREAD_ORDER.map(o => {
+          const d = new Date(startDate); d.setDate(d.getDate() + o); return d.toISOString().split('T')[0]
         })
+        const candidates = [...new Set([...targetDays, ...fallbackDays])]
+
+        for (const dateKey of candidates) {
+          if ((studyCountByDate[dateKey] || 0) >= MAX_STUDY_PER_DAY) continue
+          const startMin = findSlot(dateKey)
+          if (startMin === null) continue
+
+          const dur = sess.duration || sessionLen
+          addBusy(dateKey, startMin, startMin + dur, true)
+          studyCountByDate[dateKey] = (studyCountByDate[dateKey] || 0) + 1
+
+          const focusSuffix = sess.focusArea ? ` · ${sess.focusArea}`.slice(0, 32) : ''
+          calSessions.push({
+            id: `coach-${courseId}-w${wi}-s${si}-${Date.now()}`,
+            dateStr: dateKey,
+            courseId: form.courseIdx,
+            courseName: course.name,
+            color: course.color,
+            sessionType: `Session ${sessionNum} of ${totalSessions}${focusSuffix}`,
+            duration: dur,
+            startTime: minsToTime(startMin),
+            endTime: minsToTime(startMin + dur),
+            isManual: true,
+            fromCoachPlan: true,
+            planSessionNum: sessionNum,
+            planTotalSessions: totalSessions,
+          })
+          break
+        }
       })
     })
 
