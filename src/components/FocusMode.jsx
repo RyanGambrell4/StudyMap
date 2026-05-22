@@ -565,6 +565,11 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const [fcKnown, setFcKnown] = useState(new Set())
   const [fcAnswerState, setFcAnswerState] = useState(null) // 'correct' | 'wrong' | null
 
+  // ── YouTube suggestions ──
+  const [ytVideos, setYtVideos] = useState([])
+  const [ytLoading, setYtLoading] = useState(false)
+  const [ytExpanded, setYtExpanded] = useState(false)
+
   // ── Practice (mid-session: 3 MCQ + 1 short answer) ──
   const [practiceQuestions, setPracticeQuestions] = useState(null)
   const [practiceLoading, setPracticeLoading] = useState(false)
@@ -698,6 +703,16 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     return () => clearTimeout(blockAdvanceRef.current)
   }, [blockRemaining])
 
+  // ── YouTube suggestions: fetch when block changes ──
+  useEffect(() => {
+    if (!currentBlock) return
+    const topic = currentBlock.title ?? session.focusArea
+    setYtVideos([])
+    setYtExpanded(false)
+    // Pre-fetch so results are ready when user expands
+    fetchYouTubeSuggestions(topic)
+  }, [blockIdx])
+
   // ── Auto-show complete ──
   useEffect(() => {
     if (finished) { const t = setTimeout(() => setShowComplete(true), 1200); return () => clearTimeout(t) }
@@ -800,6 +815,24 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const handleCheckYourself = () => {
     if (recallText.trim()) appendRecall(session.courseId, session.courseName, session.sessionType, recallText)
     setRecallSaved(true); setShowRecallCards(true); setRcIdx(0); setRcFlipped(false)
+  }
+
+  const fetchYouTubeSuggestions = async (topic) => {
+    if (!topic) return
+    setYtLoading(true)
+    try {
+      const res = await fetch('/api/youtube-suggestions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic, courseName: currentBlock?.course ?? session.courseName }),
+      })
+      const data = await res.json()
+      setYtVideos(data.videos ?? [])
+    } catch {
+      setYtVideos([])
+    } finally {
+      setYtLoading(false)
+    }
   }
 
   const handleGenerateQuiz = async () => {
@@ -1464,6 +1497,69 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 <p style={{ fontSize: 13, color: '#6B6B6B', marginTop: 18, textAlign: 'center', maxWidth: 420, lineHeight: 1.65 }}>
                   {currentBlock.instruction}
                 </p>
+              )}
+
+              {/* YouTube suggestions — collapsed by default */}
+              {!finished && (
+                <div style={{ marginTop: 12, borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.07)', width: '100%', maxWidth: 420 }}>
+                  <button
+                    onClick={() => {
+                      setYtExpanded(e => !e)
+                      if (!ytExpanded && ytVideos.length === 0) {
+                        const topic = currentBlock?.title ?? session.focusArea
+                        fetchYouTubeSuggestions(topic)
+                      }
+                    }}
+                    style={{
+                      width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                      padding: '10px 14px', background: 'rgba(255,255,255,0.7)', border: 'none',
+                      cursor: 'pointer', fontSize: 13, fontWeight: 600, color: '#3B61C4',
+                    }}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="#EF4444"><path d="M23 7s-.3-2-1.2-2.8c-1.1-1.2-2.4-1.2-3-1.3C16.6 2.8 12 2.8 12 2.8s-4.6 0-6.8.1C4.6 3 3.3 3 2.2 4.2 1.3 5 1 7 1 7S.7 9.1.7 11.3v2c0 2.1.3 4.3.3 4.3s.3 2 1.2 2.8c1.1 1.2 2.6 1.2 3.3 1.2C7.4 21.8 12 22 12 22s4.6 0 6.8-.4c.6-.1 1.9-.1 3-1.3.9-.8 1.2-2.8 1.2-2.8s.3-2.1.3-4.3v-2C23.3 9.1 23 7 23 7zM9.7 15.5V8.4l6.6 3.6-6.6 3.5z"/></svg>
+                      Watch a video on this topic
+                    </span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d={ytExpanded ? 'M18 15l-6-6-6 6' : 'M6 9l6 6 6-6'} />
+                    </svg>
+                  </button>
+
+                  {ytExpanded && (
+                    <div style={{ background: '#fff', padding: '12px 14px' }}>
+                      {ytLoading ? (
+                        <p style={{ margin: 0, fontSize: 12, color: '#9B9B9B', textAlign: 'center' }}>Finding videos…</p>
+                      ) : ytVideos.length === 0 ? (
+                        <p style={{ margin: 0, fontSize: 12, color: '#9B9B9B', textAlign: 'center' }}>No videos found for this topic.</p>
+                      ) : (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                          {ytVideos.map(v => (
+                            <a
+                              key={v.id}
+                              href={v.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              style={{
+                                display: 'flex', alignItems: 'center', gap: 10,
+                                padding: '8px 10px', borderRadius: 8,
+                                background: 'rgba(0,0,0,0.03)', textDecoration: 'none',
+                                border: '1px solid rgba(0,0,0,0.06)',
+                              }}
+                            >
+                              {v.thumbnail && (
+                                <img src={v.thumbnail} alt="" style={{ width: 56, height: 36, borderRadius: 4, objectFit: 'cover', flexShrink: 0 }} />
+                              )}
+                              <div style={{ minWidth: 0 }}>
+                                <p style={{ margin: 0, fontSize: 12, fontWeight: 600, color: '#111', lineHeight: 1.3, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{v.title}</p>
+                                <p style={{ margin: '2px 0 0', fontSize: 11, color: '#9B9B9B' }}>{v.channel}</p>
+                              </div>
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
               )}
 
               {/* Block transition */}

@@ -1,4 +1,5 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { tracedCall } from '../lib/server/langfuse.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -48,20 +49,26 @@ Rules:
 - No em dashes in any field`
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 800,
-        messages: [{ role: 'user', content: prompt }],
-      }),
+    const data = await tracedCall({
+      name: 'brain-dump-score',
+      userId: gate.userId,
+      model: 'claude-haiku-4-5-20251001',
+      input: { messages: [{ role: 'user', content: prompt }] },
+      maxTokens: 800,
+      call: () => fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 800,
+          messages: [{ role: 'user', content: prompt }],
+        }),
+      }).then(r => r.json()),
     })
-    const data = await response.json()
     const content = data.content?.[0]?.text
     if (!content) throw new Error('Empty AI response')
     const first = content.indexOf('{')

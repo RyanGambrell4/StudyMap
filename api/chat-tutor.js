@@ -1,4 +1,5 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { tracedCall } from '../lib/server/langfuse.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -47,25 +48,53 @@ Respond with ONLY valid JSON in this exact format:
 flaggedTopic must be a short topic name (2-5 words max, e.g. "supply elasticity") ONLY when the student clearly expresses struggle or confusion. Otherwise null. Do not wrap in markdown.`
 
   const recentMessages = messages.slice(-10)
+  const latestUserMessage = recentMessages.filter(m => m.role === 'user').slice(-1)[0]?.content ?? ''
+
+  // Try Wolfram Alpha for math/science/calculation queries
+  let wolframContext = ''
+  const mathPattern = /\b(solve|calculate|compute|integral|derivative|equation|factor|simplify|convert|what is \d|how many|square root|log|sin|cos|tan|percent|probability)\b/i
+  if (mathPattern.test(latestUserMessage)) {
+    try {
+      const wolfRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://getstudyedge.com'}/api/wolfram`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: latestUserMessage }),
+      })
+      const wolfData = await wolfRes.json()
+      if (wolfData.available && wolfData.answer) {
+        wolframContext = `\n\n[Wolfram Alpha computed result for this query: "${wolfData.answer}". Use this as ground truth for the calculation.]\n`
+      }
+    } catch {
+      // Wolfram unavailable — proceed without it
+    }
+  }
+
+  const effectiveSystemPrompt = systemPrompt + wolframContext
 
   try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 1024,
-        system: systemPrompt,
-        messages: recentMessages,
-      }),
+    const data = await tracedCall({
+      name: 'chat-tutor',
+      userId: gate.userId,
+      model: 'claude-haiku-4-5-20251001',
+      input: { messages: recentMessages, system: effectiveSystemPrompt },
+      maxTokens: 1024,
+      call: () => fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 1024,
+          system: effectiveSystemPrompt,
+          messages: recentMessages,
+        }),
+      }).then(r => r.json()),
     })
 
-    const data = await response.json()
-    if (!response.ok) throw new Error(data.error?.message ?? `Anthropic API error ${response.status}`)
+    if (data.error) throw new Error(data.error?.message ?? 'Anthropic API error')
 
     const content = data.content?.[0]?.text
     if (!content) throw new Error('Empty response from AI')

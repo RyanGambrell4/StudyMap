@@ -1,4 +1,5 @@
 import { Resend } from 'resend'
+import { upsertContact, triggerEvent } from '../lib/server/loops.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -12,7 +13,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid JSON' })
   }
 
-  const { email } = body
+  const { email, userId } = body
   if (!email) return res.status(400).json({ error: 'Missing email' })
 
   if (!process.env.RESEND_API_KEY) {
@@ -93,6 +94,13 @@ export default async function handler(req, res) {
 </body>
 </html>`,
     })
+
+    // Loops.so — create contact and fire signup event for automated sequences
+    await Promise.allSettled([
+      upsertContact({ email, userId, plan: 'free', trialActive: false }),
+      triggerEvent({ email, eventName: 'signup', properties: { userId } }),
+    ])
+
     return res.status(200).json({ ok: true })
   } catch (err) {
     console.error('[welcome-email] Failed to send:', err)

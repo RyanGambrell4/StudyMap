@@ -15,6 +15,7 @@
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { onTrialEndingSoon, onUpgraded, onChurned } from '../lib/server/loops.js'
 
 // Disable Vercel's default body parsing — required for Stripe signature verification
 export const config = {
@@ -283,7 +284,13 @@ export default async function handler(req, res) {
       if (userId) {
         const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
         const email = authUser?.user?.email
-        if (email) await sendTrialExpiryEmail(email)
+        if (email) {
+          await sendTrialExpiryEmail(email)
+          // Loops.so — fire trial_ending_soon automation
+          await Promise.allSettled([
+            onTrialEndingSoon({ email, userId, daysLeft: 3 }),
+          ])
+        }
       }
       return res.status(200).json({ received: true })
     }
@@ -411,7 +418,31 @@ export default async function handler(req, res) {
           // Fetch user email from Supabase Auth
           const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
           const email = authUser?.user?.email
-          if (email) await sendWinBackEmail(email)
+          if (email) {
+            await sendWinBackEmail(email)
+            // Loops.so — fire churned automation
+            await Promise.allSettled([
+              onChurned({ email, userId }),
+            ])
+          }
+        }
+
+        // ── Loops.so — fire upgraded_to_pro on active (non-trial) activation ─
+        if (sub.status === 'active' && (
+          event.type === 'customer.subscription.created' ||
+          event.type === 'customer.subscription.updated'
+        )) {
+          try {
+            const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
+            const email = authUser?.user?.email
+            if (email) {
+              await Promise.allSettled([
+                onUpgraded({ email, userId, plan: planInfo.plan, billingPeriod: planInfo.billingPeriod }),
+              ])
+            }
+          } catch (loopsErr) {
+            console.error('[stripe webhook] Loops upgrade trigger failed (non-fatal):', loopsErr)
+          }
         }
       } catch (err) {
         console.error('[stripe webhook] DB error:', err)

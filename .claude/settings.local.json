@@ -40,7 +40,12 @@
       "Bash(PATH=\"/usr/local/bin:$PATH\" npm run build)",
       "Bash(/Users/ryangambrell/Desktop/StudyMap/src/utils/useTheme.js:*)",
       "Bash(sed -n '33,38p' /Users/ryangambrell/Desktop/StudyMap/src/components/AccountView.jsx)",
-      "Bash(sed -n '106,136p' /Users/ryangambrell/Desktop/StudyMap/src/components/AccountView.jsx)"
+      "Bash(sed -n '106,136p' /Users/ryangambrell/Desktop/StudyMap/src/components/AccountView.jsx)",
+      "mcp__02cf278a-fb7d-46d0-88e3-73bdbab27fde__list_deployments",
+      "mcp__02cf278a-fb7d-46d0-88e3-73bdbab27fde__get_deployment_build_logs",
+      "mcp__02cf278a-fb7d-46d0-88e3-73bdbab27fde__get_deployment",
+      "Bash(npx vite:*)",
+      "Bash(find /Users/ryangambrell/Desktop/StudyMap/src -type f \\\\\\(-name App.jsx -o -name *.css -o -name index.jsx \\\\\\))"
     ]
   }
 }

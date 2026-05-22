@@ -1,4 +1,5 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { tracedCall } from '../lib/server/langfuse.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -20,20 +21,7 @@ export default async function handler(req, res) {
     ? Math.max(0, Math.round((new Date(examDate + 'T12:00:00') - new Date(todayStr + 'T12:00:00')) / 86400000))
     : 30
 
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'x-api-key': process.env.ANTHROPIC_API_KEY,
-        'anthropic-version': '2023-06-01',
-        'content-type': 'application/json',
-      },
-      body: JSON.stringify({
-        model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2000,
-        messages: [{
-          role: 'user',
-          content: isExamMode ? `You are an elite professional exam prep coach designing a high-intensity study session for a licensing or admissions exam. Every block must be purposeful and exam-focused.
+  const userContent = isExamMode ? `You are an elite professional exam prep coach designing a high-intensity study session for a licensing or admissions exam. Every block must be purposeful and exam-focused.
 
 Section: ${courseName}
 Session type: ${sessionType || 'Content Review'}
@@ -115,12 +103,32 @@ Rules:
 - Middle blocks should alternate between review and active-recall or practice
 - If exam is less than 7 days away, weight heavily toward practice and recall
 - Make instructions specific to the course and session type, not generic
-- Include a 5-min break block if session is over 50 minutes, placed after the halfway point`,
-        }],
-      }),
+- Include a 5-min break block if session is over 50 minutes, placed after the halfway point`
+
+  const messages = [{ role: 'user', content: userContent }]
+
+  try {
+    const data = await tracedCall({
+      name: 'session-blueprint',
+      userId: gate.userId,
+      model: 'claude-haiku-4-5-20251001',
+      input: { messages },
+      maxTokens: 2000,
+      call: () => fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'x-api-key': process.env.ANTHROPIC_API_KEY,
+          'anthropic-version': '2023-06-01',
+          'content-type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 2000,
+          messages,
+        }),
+      }).then(r => r.json()),
     })
 
-    const data = await response.json()
     const content = data.content?.[0]?.text
     if (!content) throw new Error(data.error?.message ?? 'Empty AI response')
     const first = content.indexOf('{')
