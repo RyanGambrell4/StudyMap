@@ -93,6 +93,10 @@ export default function AccountView({
 
   const [canceling, setCanceling] = useState(false)
   const [canceled, setCanceled] = useState(false)
+  const [smsPhone, setSmsPhone] = useState('')
+  const [smsEnabled, setSmsEnabled] = useState(false)
+  const [smsSaving, setSmsSaving] = useState(false)
+  const [smsEdit, setSmsEdit] = useState(false)
 
   // ── Progress stats ────────────────────────────────────────────────────────────
   const progressStats = useMemo(() => {
@@ -145,6 +149,24 @@ export default function AccountView({
     } finally {
       setCanceling(false)
     }
+  }
+
+  const handleSaveSms = async () => {
+    setSmsSaving(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/sms-opt-in', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ phone: smsPhone, enabled: true }),
+      })
+      if (res.ok) { setSmsEnabled(true); setSmsEdit(false) }
+      else { const d = await res.json(); alert(d.error ?? 'Failed to save') }
+    } catch { alert('Something went wrong') }
+    finally { setSmsSaving(false) }
   }
 
   return (
@@ -389,6 +411,43 @@ export default function AccountView({
               }
             </button>
           )}
+          <div style={{ padding: '12px 0', borderBottom: '1px solid rgba(0,0,0,0.06)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07A19.5 19.5 0 013.07 9.81a19.79 19.79 0 01-3.07-8.67A2 2 0 012 .96h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L6.09 8.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"/>
+              </svg>
+              <div style={{ flex: 1 }}>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#111111' }}>Exam SMS Reminders</p>
+                <p style={{ margin: '2px 0 0', fontSize: 12, color: '#9B9B9B' }}>
+                  {smsEnabled ? `Texts sent to ${smsPhone}` : 'Get a text the day before exams'}
+                </p>
+              </div>
+              <button
+                onClick={() => setSmsEdit(e => !e)}
+                style={{ fontSize: 11, fontWeight: 700, color: '#3B61C4', background: 'none', border: 'none', cursor: 'pointer' }}
+              >
+                {smsEnabled ? 'Edit' : 'Set up'}
+              </button>
+            </div>
+            {smsEdit && (
+              <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+                <input
+                  type="tel"
+                  placeholder="+1XXXXXXXXXX"
+                  value={smsPhone}
+                  onChange={e => setSmsPhone(e.target.value)}
+                  style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13 }}
+                />
+                <button
+                  onClick={handleSaveSms}
+                  disabled={smsSaving}
+                  style={{ padding: '8px 14px', background: '#3B61C4', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+                >
+                  {smsSaving ? 'Saving…' : 'Save'}
+                </button>
+              </div>
+            )}
+          </div>
           <button
             onClick={onImportSyllabus}
             style={{

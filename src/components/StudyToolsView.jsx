@@ -5,6 +5,7 @@ import { getCachedStudyTools, getCachedCoachPlan, saveStudyTools } from '../lib/
 import { sm2, sortCardsByDue, getDueCards } from '../lib/sm2'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
+import { findSimilarCards } from '../lib/embeddings'
 
 function loadSaved() {
   return getCachedStudyTools()
@@ -204,6 +205,10 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
   const [questionIdx, setQuestionIdx] = useState(0)
   const [answers, setAnswers] = useState([]) // array of booleans
   const [quizDone, setQuizDone] = useState(false)
+
+  // Card search state
+  const [cardSearch, setCardSearch] = useState('')
+  const [searchResults, setSearchResults] = useState(null)
 
   // Topic Drill state
   const [drillTopic, setDrillTopic] = useState('')
@@ -453,6 +458,13 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     } finally {
       setDrillGenerating(false)
     }
+  }
+
+  async function handleCardSearch(query) {
+    setCardSearch(query)
+    if (!query.trim()) { setSearchResults(null); return }
+    const results = await findSimilarCards(query, flashcards)
+    setSearchResults(results)
   }
 
   const activeText = extractedText || pastedText
@@ -890,6 +902,46 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               <span className="text-amber-400 font-medium">{almostSet.size} almost</span>
               <span className="text-red-400 font-medium">{reviewSet.size} reviewing</span>
             </div>
+          </div>
+
+          {/* Card search */}
+          <div style={{ marginBottom: 12 }}>
+            <input
+              placeholder="Search cards..."
+              value={cardSearch}
+              onChange={e => handleCardSearch(e.target.value)}
+              style={{
+                width: '100%', padding: '8px 12px', borderRadius: 8,
+                border: '1px solid rgba(0,0,0,0.1)', fontSize: 13,
+                background: '#F7F6F3', boxSizing: 'border-box',
+              }}
+            />
+            {searchResults !== null && (
+              <div style={{ marginTop: 8 }}>
+                {searchResults.length === 0 ? (
+                  <p style={{ fontSize: 12, color: '#9B9B9B', textAlign: 'center', padding: '8px 0' }}>No similar cards found</p>
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {searchResults.map((card, i) => (
+                      <button
+                        key={i}
+                        onClick={() => {
+                          const idx = flashcards.indexOf(card)
+                          if (idx !== -1) { setCardIdx(idx); setFlipped(false); setCardSearch(''); setSearchResults(null) }
+                        }}
+                        style={{
+                          textAlign: 'left', padding: '8px 12px', borderRadius: 8,
+                          border: '1px solid rgba(59,97,196,0.2)', background: 'rgba(59,97,196,0.05)',
+                          cursor: 'pointer', fontSize: 13, color: '#1e293b',
+                        }}
+                      >
+                        {card.front}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Progress bar */}

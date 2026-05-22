@@ -297,6 +297,35 @@ Hard rules:
       })
     }
 
+    // Semantic deduplication via OpenAI embeddings
+    const openaiKey = process.env.OPENAI_API_KEY
+    if (openaiKey && parsed.flashcards?.length > 3) {
+      try {
+        const texts = parsed.flashcards.map(c => c.front ?? c.question ?? '')
+        const embRes = await fetch('https://api.openai.com/v1/embeddings', {
+          method: 'POST',
+          headers: { 'Authorization': `Bearer ${openaiKey}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ model: 'text-embedding-3-small', input: texts }),
+        })
+        if (embRes.ok) {
+          const embData = await embRes.json()
+          const embeddings = embData.data.map(d => d.embedding)
+
+          // Greedy dedup at 0.90 similarity threshold
+          const cosineSim = (a, b) => {
+            let dot = 0, nA = 0, nB = 0
+            for (let i = 0; i < a.length; i++) { dot += a[i]*b[i]; nA += a[i]*a[i]; nB += b[i]*b[i] }
+            return dot / (Math.sqrt(nA) * Math.sqrt(nB))
+          }
+          const kept = [0]
+          for (let i = 1; i < parsed.flashcards.length; i++) {
+            if (!kept.some(k => cosineSim(embeddings[i], embeddings[k]) >= 0.90)) kept.push(i)
+          }
+          parsed.flashcards = kept.map(i => parsed.flashcards[i])
+        }
+      } catch { /* fail open */ }
+    }
+
     res.status(200).json(parsed);
   } catch (error) {
     console.error('API error:', error);

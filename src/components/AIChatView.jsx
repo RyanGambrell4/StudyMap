@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { getCachedCoachPlan, saveCoachPlanStruggles } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
 import { getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial, incrementAIQuery } from '../lib/subscription'
+import { transcribeAudio, createRecorder } from '../lib/deepgram'
 
 export default function AIChatView({ courseId, courseName, examDate, targetGrade, userId, learningStyle, onShowPaywall, onNavigateToCoach }) {
   const plan = getActivePlan()
@@ -16,6 +17,9 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
   const [coachPlan, setCoachPlan] = useState(null)
   const [professorEmphasis, setProfessorEmphasis] = useState(null)
   const [strengths, setStrengths] = useState(null)
+
+  const [recording, setRecording] = useState(false)
+  const [recorderRef] = useState(() => ({ current: null }))
 
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
@@ -151,6 +155,32 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
     }
   }
 
+  const handleMicToggle = async () => {
+    if (recording) {
+      recorderRef.current?.stop()
+      setRecording(false)
+      return
+    }
+
+    try {
+      setRecording(true)
+      const recorder = createRecorder(async (blob) => {
+        try {
+          const transcript = await transcribeAudio(blob)
+          if (transcript) {
+            setInput(prev => prev ? prev + ' ' + transcript : transcript)
+          }
+        } catch {
+          // transcription failed silently
+        }
+      })
+      recorderRef.current = recorder
+      await recorder.start()
+    } catch {
+      setRecording(false)
+    }
+  }
+
   const handleKeyDown = e => {
     if (e.key === 'Enter' && !e.shiftKey) {
       e.preventDefault()
@@ -251,6 +281,25 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
           style={{ maxHeight: 120 }}
           onInput={e => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px' }}
         />
+        <button
+          onClick={handleMicToggle}
+          title={recording ? 'Stop recording' : 'Voice input'}
+          style={{
+            width: 36, height: 36, borderRadius: 10, border: 'none',
+            background: recording ? 'rgba(239,68,68,0.1)' : 'rgba(59,97,196,0.08)',
+            color: recording ? '#EF4444' : '#3B61C4',
+            cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+            flexShrink: 0,
+            animation: recording ? 'pulse 1s infinite' : 'none',
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            {recording
+              ? <><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></>
+              : <><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></>
+            }
+          </svg>
+        </button>
         <button
           onClick={sendMessage}
           disabled={!input.trim() || loading}

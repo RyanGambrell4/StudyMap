@@ -1,5 +1,6 @@
 import { Resend } from 'resend'
 import { upsertContact, triggerEvent } from '../lib/server/loops.js'
+import { logUserEvent } from '../lib/server/axiom.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 
@@ -100,6 +101,8 @@ export default async function handler(req, res) {
       upsertContact({ email, userId, plan: 'free', trialActive: false }),
       triggerEvent({ email, eventName: 'signup', properties: { userId } }),
     ])
+
+    logUserEvent({ event: 'signup', userId, plan: 'free' })
 
     return res.status(200).json({ ok: true })
   } catch (err) {

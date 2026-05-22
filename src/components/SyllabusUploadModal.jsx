@@ -3,6 +3,21 @@ import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
 import { extractText } from '../utils/extractText'
 
+async function extractEventsFromURL(url, courseName) {
+  const token = await getAccessToken()
+  const res = await fetch('/api/scrape-syllabus', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+    body: JSON.stringify({ url, courseName }),
+  })
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}))
+    throw new Error(err.error ?? `API error ${res.status}`)
+  }
+  const data = await res.json()
+  return data.events ?? []
+}
+
 const EVENT_TYPES = ['Exam', 'Quiz', 'Midterm', 'Final Exam', 'Assignment', 'Project', 'Lab', 'Reading', 'Other']
 const NEUTRAL_COLOR = { dot: '#64748b' }
 
@@ -32,6 +47,7 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
   const [activeTab, setActiveTab] = useState('pdf')
   const [step, setStep] = useState('input')   // 'input' | 'loading' | 'review'
   const [pastedText, setPastedText] = useState('')
+  const [syllabusUrl, setSyllabusUrl] = useState('')
   const [items, setItems] = useState([])
   const [error, setError] = useState('')
   const [dragging, setDragging] = useState(false)
@@ -111,6 +127,37 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
     runAIExtraction(pastedText)
   }
 
+  const handleScrapeUrl = async () => {
+    if (!syllabusUrl.trim()) { setError('Enter a URL first.'); return }
+    try { new URL(syllabusUrl) } catch { setError('Please enter a valid URL.'); return }
+    if (!canUseAI()) { onShowPaywall?.('ai'); return }
+    setStep('loading')
+    setError('')
+    try {
+      const courseName = selectedCourseIdx !== null ? courses[selectedCourseIdx]?.name : undefined
+      const events = await extractEventsFromURL(syllabusUrl, courseName)
+      incrementAIQuery()
+      if (!events.length) {
+        setError('No events found on that page. Try uploading the PDF instead.')
+        setStep('input')
+        return
+      }
+      const mapped = events.map((e, i) => ({
+        id: `ai-${Date.now()}-${i}`,
+        name: e.name ?? 'Untitled',
+        date: e.date ?? '',
+        type: EVENT_TYPES.includes(e.type) ? e.type : 'Other',
+        weight: e.weight ?? null,
+        notes: e.notes ?? null,
+      }))
+      setItems(mapped)
+      setStep('review')
+    } catch (err) {
+      setError(err.message ?? 'Scraping failed. Try uploading the PDF instead.')
+      setStep('input')
+    }
+  }
+
   const update = (id, field, value) =>
     setItems(prev => prev.map(it => it.id === id ? { ...it, [field]: value } : it))
 
@@ -156,7 +203,7 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
                 <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '10px 14px', marginBottom: 16, color: '#dc2626', fontSize: 13 }}>{error}</div>
               )}
               <div style={{ display: 'flex', gap: 4, marginBottom: 20, background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: 4 }}>
-                {[['pdf', 'Upload PDF'], ['paste', 'Paste Text']].map(([tab, label]) => (
+                {[['pdf', 'Upload PDF'], ['paste', 'Paste Text'], ['url', 'Import from URL']].map(([tab, label]) => (
                   <button
                     key={tab}
                     onClick={() => { setActiveTab(tab); setError('') }}
@@ -198,6 +245,21 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
                     autoFocus
                     style={{ ...inputStyle, minHeight: 320, resize: 'none', padding: '12px 14px' }}
                   />
+                </div>
+              )}
+
+              {activeTab === 'url' && (
+                <div>
+                  <p style={{ color: '#6B6B6B', fontSize: 13, margin: '0 0 12px' }}>Paste a link to your syllabus page and we'll extract the dates automatically.</p>
+                  <input
+                    type="url"
+                    placeholder="https://university.edu/syllabus..."
+                    value={syllabusUrl}
+                    onChange={e => { setSyllabusUrl(e.target.value); setError('') }}
+                    autoFocus
+                    style={{ ...inputStyle, padding: '9px 12px' }}
+                  />
+                  <p style={{ color: '#9B9B9B', fontSize: 12, margin: '8px 0 0' }}>Works best with publicly accessible HTML syllabus pages. For protected pages or PDFs, use Upload instead.</p>
                 </div>
               )}
             </div>
@@ -261,6 +323,11 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
                 <>
                   <button onClick={onClose} style={{ padding: '10px 16px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
                   <button onClick={handlePasteConfirm} style={{ flex: 1, padding: '10px', background: '#3B61C4', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Extract Events</button>
+                </>
+              ) : step === 'input' && activeTab === 'url' ? (
+                <>
+                  <button onClick={onClose} style={{ padding: '10px 16px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+                  <button onClick={handleScrapeUrl} disabled={!syllabusUrl.trim()} style={{ flex: 1, padding: '10px', background: '#3B61C4', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: syllabusUrl.trim() ? 'pointer' : 'not-allowed', opacity: syllabusUrl.trim() ? 1 : 0.5 }}>Import from URL</button>
                 </>
               ) : (
                 <button onClick={onClose} style={{ flex: 1, padding: '10px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>

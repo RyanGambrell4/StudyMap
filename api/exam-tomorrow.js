@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { sendExamReminderSMS } from '../lib/server/twilio.js'
 
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -19,7 +20,7 @@ export default async function handler(req, res) {
 
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
-    .select('user_id, plan, syllabus_events, subscription')
+    .select('user_id, plan, syllabus_events, subscription, sms_phone, sms_enabled')
     .limit(2000)
 
   if (error) {
@@ -147,6 +148,12 @@ export default async function handler(req, res) {
 </body>
 </html>`,
       })
+
+      // Also send SMS if user has opted in
+      if (row.sms_enabled && row.sms_phone) {
+        await sendExamReminderSMS(row.sms_phone, exam.title ?? 'Your exam', isToday)
+      }
+
       sent++
     } catch (err) {
       console.error(`[exam-tomorrow] Error for user ${row.user_id}:`, err)

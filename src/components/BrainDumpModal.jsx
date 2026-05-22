@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
+import { transcribeAudio, createRecorder } from '../lib/deepgram'
 
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
@@ -60,6 +61,8 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
+  const [bdRecording, setBdRecording] = useState(false)
+  const [bdRecorderRef] = useState(() => ({ current: null }))
   const intervalRef = useRef(null)
   const textareaRef = useRef(null)
 
@@ -83,6 +86,32 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall }) {
     }, 1000)
     return () => clearInterval(intervalRef.current)
   }, [running])
+
+  const handleBdMicToggle = async () => {
+    if (bdRecording) {
+      bdRecorderRef.current?.stop()
+      setBdRecording(false)
+      return
+    }
+
+    try {
+      setBdRecording(true)
+      const recorder = createRecorder(async (blob) => {
+        try {
+          const transcript = await transcribeAudio(blob)
+          if (transcript) {
+            setText(prev => prev ? prev + ' ' + transcript : transcript)
+          }
+        } catch {
+          // transcription failed silently
+        }
+      })
+      bdRecorderRef.current = recorder
+      await recorder.start()
+    } catch {
+      setBdRecording(false)
+    }
+  }
 
   function startTimer() {
     setTimeLeft(timerDuration)
@@ -272,6 +301,24 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall }) {
             />
 
             <div style={{ display: 'flex', gap: 10 }}>
+              <button
+                onClick={handleBdMicToggle}
+                title={bdRecording ? 'Stop recording' : 'Voice input'}
+                style={{
+                  width: 44, height: 44, borderRadius: 10, border: 'none', flexShrink: 0,
+                  background: bdRecording ? 'rgba(239,68,68,0.1)' : 'rgba(139,92,246,0.08)',
+                  color: bdRecording ? '#EF4444' : '#8B5CF6',
+                  cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  animation: bdRecording ? 'pulse 1s infinite' : 'none',
+                }}
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  {bdRecording
+                    ? <><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></>
+                    : <><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></>
+                  }
+                </svg>
+              </button>
               <button onClick={handleSubmit} disabled={!text.trim()} style={{
                 flex: 1, padding: '12px',
                 background: text.trim() ? '#8B5CF6' : D.textDim,

@@ -1,4 +1,5 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { logAiCall } from '../lib/server/axiom.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -72,6 +73,8 @@ Only include this line when the student is clearly struggling. Otherwise omit it
   res.setHeader('Connection', 'keep-alive')
   res.setHeader('X-Accel-Buffering', 'no')
 
+  const t0 = Date.now()
+
   try {
     const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -131,6 +134,13 @@ Only include this line when the student is clearly struggling. Otherwise omit it
         }
       }
     }
+
+    logAiCall({
+      endpoint: 'chat-tutor',
+      userId: gate.userId,
+      plan: gate.plan,
+      latencyMs: Date.now() - t0,
+    })
 
     res.end()
   } catch (error) {

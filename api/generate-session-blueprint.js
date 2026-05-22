@@ -1,5 +1,6 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
 import { tracedCall } from '../lib/server/langfuse.js'
+import { logAiCall } from '../lib/server/axiom.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -123,6 +124,8 @@ Rules:
 
   const messages = [{ role: 'user', content: [{ type: 'text', text: userContent, cache_control: { type: 'ephemeral' } }] }]
 
+  const t0 = Date.now()
+
   try {
     const data = await tracedCall({
       name: 'session-blueprint',
@@ -144,6 +147,18 @@ Rules:
           messages,
         }),
       }).then(r => r.json()),
+    })
+
+    logAiCall({
+      endpoint: 'session-blueprint',
+      userId: gate.userId,
+      plan: gate.plan,
+      latencyMs: Date.now() - t0,
+      tokens: {
+        input: data.usage?.input_tokens,
+        output: data.usage?.output_tokens,
+        total: (data.usage?.input_tokens ?? 0) + (data.usage?.output_tokens ?? 0),
+      },
     })
 
     const content = data.content?.[0]?.text
