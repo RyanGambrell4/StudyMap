@@ -14,556 +14,175 @@
     position: relative;
   }
 
-  /* Background gradient orbs */
-  .bg-orb-1 {
-    position: absolute;
-    top: -80px; left: -60px;
-    width: 500px; height: 500px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(99,102,241,0.18) 0%, transparent 70%);
-    filter: blur(40px);
-  }
-  .bg-orb-2 {
-    position: absolute;
-    bottom: -100px; right: 200px;
-    width: 400px; height: 400px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(139,92,246,0.12) 0%, transparent 70%);
-    filter: blur(60px);
-  }
+  /* Grid background */
   .bg-grid {
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
-    background-size: 40px 40px;
+      linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+    background-size: 44px 44px;
   }
 
-  /* Layout */
-  .container {
+  /* Glow orbs */
+  .glow-1 {
+    position: absolute;
+    top: -120px; left: 50%;
+    transform: translateX(-50%);
+    width: 900px; height: 600px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(99,102,241,0.22) 0%, transparent 65%);
+    filter: blur(60px);
+  }
+  .glow-2 {
+    position: absolute;
+    bottom: -100px; right: 0;
+    width: 500px; height: 400px;
+    border-radius: 50%;
+    background: radial-gradient(ellipse, rgba(139,92,246,0.12) 0%, transparent 70%);
+    filter: blur(80px);
+  }
+
+  /* Vignette edges */
+  .vignette {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(to right, rgba(8,13,26,0.85) 0%, transparent 20%, transparent 80%, rgba(8,13,26,0.85) 100%),
+      linear-gradient(to bottom, rgba(8,13,26,0.5) 0%, transparent 15%, transparent 85%, rgba(8,13,26,0.5) 100%);
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Center content */
+  .center {
     position: relative;
-    width: 1200px;
-    height: 630px;
-    display: flex;
-    align-items: center;
-    padding: 0 64px;
-    gap: 48px;
-  }
-
-  /* Left column */
-  .left {
-    flex: 0 0 auto;
-    width: 520px;
+    z-index: 3;
+    width: 100%;
+    height: 100%;
     display: flex;
     flex-direction: column;
-    gap: 0;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    padding: 0 80px;
   }
 
   .brand-row {
     display: flex;
     align-items: center;
     gap: 10px;
-    margin-bottom: 28px;
+    margin-bottom: 32px;
   }
   .brand-logo {
-    width: 32px; height: 32px;
-    border-radius: 8px;
+    width: 34px; height: 34px;
+    border-radius: 9px;
     background: linear-gradient(135deg, #6366f1, #4f46e5);
     display: flex; align-items: center; justify-content: center;
-    font-size: 14px; font-weight: 900; color: #fff;
-    box-shadow: 0 0 16px rgba(99,102,241,0.5);
+    font-size: 15px; font-weight: 900; color: #fff;
+    box-shadow: 0 0 20px rgba(99,102,241,0.55);
   }
   .brand-name {
-    font-size: 13px;
-    font-weight: 700;
-    color: rgba(226,232,240,0.7);
-    letter-spacing: 0.02em;
+    font-size: 14px; font-weight: 700;
+    color: rgba(226,232,240,0.75);
+    letter-spacing: 0.01em;
   }
-  .brand-sep {
-    color: rgba(226,232,240,0.25);
-    margin: 0 2px;
-  }
+  .brand-sep { color: rgba(226,232,240,0.2); }
   .brand-url {
-    font-size: 13px;
-    color: rgba(226,232,240,0.35);
-    font-weight: 500;
+    font-size: 14px; color: rgba(226,232,240,0.35); font-weight: 500;
   }
 
   .headline {
-    font-size: 58px;
+    font-size: 82px;
     font-weight: 900;
-    line-height: 1.05;
-    letter-spacing: -2px;
+    line-height: 1.0;
+    letter-spacing: -3px;
     color: #fff;
-    margin-bottom: 18px;
+    margin-bottom: 22px;
   }
-  .headline .accent {
+  .headline .line2 {
     background: linear-gradient(135deg, #a5b4fc 0%, #818cf8 50%, #6366f1 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
+    display: block;
   }
 
   .subhead {
-    font-size: 16px;
-    color: rgba(226,232,240,0.45);
-    line-height: 1.65;
+    font-size: 20px;
+    color: rgba(226,232,240,0.48);
+    line-height: 1.55;
     font-weight: 400;
-    max-width: 420px;
-    margin-bottom: 28px;
+    max-width: 640px;
+    margin-bottom: 36px;
   }
 
-  .social-proof {
+  .pills {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
-    background: rgba(99,102,241,0.06);
-    border: 1px solid rgba(99,102,241,0.15);
-    border-radius: 10px;
-    width: fit-content;
+    gap: 12px;
+    flex-wrap: wrap;
+    justify-content: center;
   }
-  .social-dot {
+  .pill {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 9px 18px;
+    background: rgba(99,102,241,0.08);
+    border: 1px solid rgba(99,102,241,0.18);
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 600;
+    color: rgba(226,232,240,0.65);
+  }
+  .pill-dot {
     width: 7px; height: 7px;
     border-radius: 50%;
+  }
+  .pill.live .pill-dot {
     background: #6ee7b7;
     box-shadow: 0 0 8px #6ee7b7;
   }
-  .social-text {
-    font-size: 13px;
-    color: rgba(226,232,240,0.55);
-    font-weight: 500;
-  }
-  .social-text strong {
-    color: rgba(226,232,240,0.85);
-    font-weight: 700;
-  }
-
-  /* Right column — browser mockup */
-  .right {
-    flex: 1;
-    position: relative;
-    height: 580px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-
-  .browser {
-    width: 520px;
-    height: 400px;
-    border-radius: 12px;
-    background: #0F1629;
-    border: 1px solid rgba(255,255,255,0.09);
-    box-shadow: 0 40px 100px rgba(0,0,0,0.7), 0 0 60px rgba(99,102,241,0.2);
-    overflow: hidden;
-    position: relative;
-  }
-  .browser-chrome {
-    height: 34px;
-    background: #141C35;
-    border-bottom: 1px solid rgba(255,255,255,0.06);
-    display: flex;
-    align-items: center;
-    padding: 0 14px;
-    gap: 6px;
-  }
-  .chrome-dot {
-    width: 9px; height: 9px;
-    border-radius: 50%;
-  }
-  .chrome-bar {
-    flex: 1;
-    height: 20px;
-    margin-left: 10px;
-    background: rgba(255,255,255,0.04);
-    border-radius: 5px;
-    border: 1px solid rgba(255,255,255,0.06);
-    display: flex;
-    align-items: center;
-    padding: 0 10px;
-    gap: 6px;
-  }
-  .chrome-bar-dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: rgba(99,102,241,0.6);
-  }
-  .chrome-bar-text {
-    font-size: 9px;
-    color: rgba(255,255,255,0.2);
-    font-weight: 500;
-  }
-
-  /* App content inside browser */
-  .app-content {
-    padding: 16px;
-    display: grid;
-    grid-template-columns: 130px 1fr;
-    gap: 12px;
-    height: calc(100% - 34px);
-  }
-
-  /* Sidebar */
-  .sidebar {
-    background: rgba(255,255,255,0.02);
-    border-radius: 8px;
-    border: 1px solid rgba(255,255,255,0.05);
-    padding: 12px 10px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  .sidebar-logo {
-    width: 24px; height: 24px;
-    border-radius: 5px;
-    background: linear-gradient(135deg, #6366f1, #4f46e5);
-    margin-bottom: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 900; color: #fff;
-  }
-  .nav-item {
-    height: 22px;
-    border-radius: 5px;
-    background: rgba(255,255,255,0.03);
-    margin-bottom: 2px;
-    display: flex;
-    align-items: center;
-    padding: 0 8px;
-    gap: 6px;
-  }
-  .nav-item.active {
-    background: rgba(99,102,241,0.15);
-    border: 1px solid rgba(99,102,241,0.2);
-  }
-  .nav-dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: rgba(255,255,255,0.15);
-    flex-shrink: 0;
-  }
-  .nav-item.active .nav-dot { background: #818cf8; }
-  .nav-bar {
-    flex: 1;
-    height: 5px;
-    border-radius: 3px;
-    background: rgba(255,255,255,0.06);
-  }
-  .nav-item.active .nav-bar { background: rgba(99,102,241,0.4); }
-
-  /* Main area */
-  .main-area {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    overflow: hidden;
-  }
-
-  /* Stat cards row */
-  .stat-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr 1fr;
-    gap: 8px;
-  }
-  .stat-card {
-    background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.06);
-    border-radius: 7px;
-    padding: 10px;
-  }
-  .stat-label {
-    font-size: 7.5px;
-    color: rgba(255,255,255,0.3);
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    margin-bottom: 4px;
-  }
-  .stat-value {
-    font-size: 16px;
-    font-weight: 800;
-    color: #fff;
-    line-height: 1;
-  }
-  .stat-sub {
-    font-size: 7px;
-    color: rgba(255,255,255,0.25);
-    margin-top: 2px;
-  }
-  .stat-card.purple .stat-value { color: #a5b4fc; }
-  .stat-card.green .stat-value { color: #6ee7b7; }
-
-  /* Course list */
-  .course-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-  .course-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 8px 10px;
-    background: rgba(255,255,255,0.02);
-    border: 1px solid rgba(255,255,255,0.05);
-    border-radius: 7px;
-  }
-  .course-dot {
-    width: 7px; height: 7px;
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  .course-name {
-    font-size: 9px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.7);
-    flex: 1;
-  }
-  .course-grade {
-    font-size: 9px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.4);
-  }
-  .course-bar-outer {
-    width: 50px;
-    height: 3px;
-    border-radius: 2px;
-    background: rgba(255,255,255,0.06);
-    overflow: hidden;
-  }
-  .course-bar-inner {
-    height: 100%;
-    border-radius: 2px;
-  }
-
-  /* Floating cards */
-  .float-card {
-    position: absolute;
-    background: #141C35;
-    border: 1px solid rgba(255,255,255,0.1);
-    border-radius: 10px;
-    padding: 12px 16px;
-    box-shadow: 0 12px 40px rgba(0,0,0,0.5);
-    backdrop-filter: blur(12px);
-  }
-  .float-grade {
-    top: 30px;
-    right: -20px;
-    width: 150px;
-  }
-  .float-streak {
-    bottom: 60px;
-    right: -10px;
-    width: 160px;
-  }
-  .float-title {
-    font-size: 9px;
-    font-weight: 700;
-    color: rgba(255,255,255,0.35);
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    margin-bottom: 6px;
-  }
-  .float-value {
-    font-size: 22px;
-    font-weight: 900;
-    color: #fff;
-    line-height: 1;
-  }
-  .float-sub {
-    font-size: 9px;
-    color: rgba(255,255,255,0.3);
-    margin-top: 3px;
-  }
-  .float-grade .float-value { color: #6ee7b7; }
-  .float-streak .float-value { color: #fbbf24; }
-
-  .progress-bar {
-    width: 100%;
-    height: 4px;
-    background: rgba(255,255,255,0.07);
-    border-radius: 3px;
-    margin-top: 6px;
-    overflow: hidden;
-  }
-  .progress-fill {
-    height: 100%;
-    border-radius: 3px;
-    background: linear-gradient(90deg, #6ee7b7, #34d399);
-  }
-
-  /* Bottom bar */
-  .bottom-bar {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 28px;
-    background: rgba(255,255,255,0.015);
-    border-top: 1px solid rgba(255,255,255,0.04);
-    display: flex;
-    align-items: center;
-    padding: 0 16px;
-    gap: 12px;
-  }
-  .bb-pill {
-    display: flex; align-items: center; gap: 5px;
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 99px;
-    padding: 3px 10px;
-    font-size: 8px;
-    font-weight: 600;
-    color: rgba(255,255,255,0.35);
-  }
-  .bb-dot { width: 4px; height: 4px; border-radius: 50%; }
+  .pill.stat .pill-dot { background: #6366f1; }
+  .pill.streak .pill-dot { background: #fbbf24; }
 </style>
 </head>
 <body>
-  <div class="bg-orb-1"></div>
-  <div class="bg-orb-2"></div>
   <div class="bg-grid"></div>
+  <div class="glow-1"></div>
+  <div class="glow-2"></div>
+  <div class="vignette"></div>
 
-  <div class="container">
-    <!-- LEFT CONTENT -->
-    <div class="left">
-      <div class="brand-row">
-        <div class="brand-logo">S</div>
-        <span class="brand-name">StudyEdge AI</span>
-        <span class="brand-sep">·</span>
-        <span class="brand-url">getstudyedge.com</span>
-      </div>
-
-      <h1 class="headline">
-        While others cram.<br>
-        <span class="accent">You execute.</span>
-      </h1>
-
-      <p class="subhead">
-        AI builds your study system, coaches every session, and targets where your grades actually need help.
-      </p>
-
-      <div class="social-proof">
-        <div class="social-dot"></div>
-        <span class="social-text">
-          Built for serious students &nbsp;·&nbsp; <strong>9.6h studied this week</strong>
-        </span>
-      </div>
+  <div class="center">
+    <div class="brand-row">
+      <div class="brand-logo">S</div>
+      <span class="brand-name">StudyEdge AI</span>
+      <span class="brand-sep">&nbsp;·&nbsp;</span>
+      <span class="brand-url">getstudyedge.com</span>
     </div>
 
-    <!-- RIGHT: BROWSER MOCKUP -->
-    <div class="right">
-      <div class="browser">
-        <!-- Chrome bar -->
-        <div class="browser-chrome">
-          <div class="chrome-dot" style="background:#ff5f57"></div>
-          <div class="chrome-dot" style="background:#febc2e"></div>
-          <div class="chrome-dot" style="background:#28c840"></div>
-          <div class="chrome-bar">
-            <div class="chrome-bar-dot"></div>
-            <span class="chrome-bar-text">app.getstudyedge.com</span>
-          </div>
-        </div>
+    <h1 class="headline">
+      While others cram.<br>
+      <span class="line2">You execute.</span>
+    </h1>
 
-        <!-- App content -->
-        <div class="app-content">
-          <!-- Sidebar -->
-          <div class="sidebar">
-            <div class="sidebar-logo">S</div>
-            <div class="nav-item active">
-              <div class="nav-dot"></div>
-              <div class="nav-bar"></div>
-            </div>
-            <div class="nav-item">
-              <div class="nav-dot"></div>
-              <div class="nav-bar"></div>
-            </div>
-            <div class="nav-item">
-              <div class="nav-dot"></div>
-              <div class="nav-bar"></div>
-            </div>
-            <div class="nav-item">
-              <div class="nav-dot"></div>
-              <div class="nav-bar"></div>
-            </div>
-            <div class="nav-item">
-              <div class="nav-dot"></div>
-              <div class="nav-bar"></div>
-            </div>
-          </div>
+    <p class="subhead">
+      AI that builds your study schedule, coaches every session,<br>
+      and tracks your grades — every course, all semester.
+    </p>
 
-          <!-- Main area -->
-          <div class="main-area">
-            <!-- Stats -->
-            <div class="stat-row">
-              <div class="stat-card purple">
-                <div class="stat-label">GPA Target</div>
-                <div class="stat-value">3.7</div>
-                <div class="stat-sub">On track ↑</div>
-              </div>
-              <div class="stat-card">
-                <div class="stat-label">Sessions</div>
-                <div class="stat-value">24</div>
-                <div class="stat-sub">This semester</div>
-              </div>
-              <div class="stat-card green">
-                <div class="stat-label">Hours</div>
-                <div class="stat-value">9.6</div>
-                <div class="stat-sub">This week</div>
-              </div>
-            </div>
-
-            <!-- Course list -->
-            <div class="course-list">
-              <div class="course-row">
-                <div class="course-dot" style="background:#6366f1"></div>
-                <div class="course-name">Organic Chemistry</div>
-                <div class="course-grade">87%</div>
-                <div class="course-bar-outer"><div class="course-bar-inner" style="width:87%;background:#6366f1"></div></div>
-              </div>
-              <div class="course-row">
-                <div class="course-dot" style="background:#10b981"></div>
-                <div class="course-name">Calculus III</div>
-                <div class="course-grade">92%</div>
-                <div class="course-bar-outer"><div class="course-bar-inner" style="width:92%;background:#10b981"></div></div>
-              </div>
-              <div class="course-row">
-                <div class="course-dot" style="background:#f59e0b"></div>
-                <div class="course-name">Micro Economics</div>
-                <div class="course-grade">78%</div>
-                <div class="course-bar-outer"><div class="course-bar-inner" style="width:78%;background:#f59e0b"></div></div>
-              </div>
-              <div class="course-row">
-                <div class="course-dot" style="background:#ec4899"></div>
-                <div class="course-name">U.S. History</div>
-                <div class="course-grade">95%</div>
-                <div class="course-bar-outer"><div class="course-bar-inner" style="width:95%;background:#ec4899"></div></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Bottom bar -->
-        <div class="bottom-bar">
-          <div class="bb-pill"><div class="bb-dot" style="background:#6ee7b7"></div> AI Coach Active</div>
-          <div class="bb-pill"><div class="bb-dot" style="background:#6366f1"></div> Study Plan Ready</div>
-          <div class="bb-pill"><div class="bb-dot" style="background:#fbbf24"></div> Exam in 6 days</div>
-        </div>
+    <div class="pills">
+      <div class="pill live">
+        <div class="pill-dot"></div>
+        Built for serious students
       </div>
-
-      <!-- Floating Grade card -->
-      <div class="float-card float-grade">
-        <div class="float-title">Grade Hub</div>
-        <div class="float-value">A−</div>
-        <div class="float-sub">Organic Chemistry</div>
-        <div class="progress-bar">
-          <div class="progress-fill" style="width:87%"></div>
-        </div>
+      <div class="pill stat">
+        <div class="pill-dot"></div>
+        Study Coach · Grade Hub · Flashcards
       </div>
-
-      <!-- Floating Streak card -->
-      <div class="float-card float-streak">
-        <div class="float-title">Study Streak</div>
-        <div class="float-value">🔥 14</div>
-        <div class="float-sub">days in a row · keep it up</div>
+      <div class="pill streak">
+        <div class="pill-dot"></div>
+        9.6h studied this week
       </div>
     </div>
   </div>
