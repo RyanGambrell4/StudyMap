@@ -5,15 +5,15 @@ import { getCachedCoachPlan } from '../lib/db'
 
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
-  border: 'rgba(0,0,0,0.07)',
-  text: '#111111', textMuted: '#6B6B6B', textDim: '#9B9B9B',
-  accent: '#E8531A', green: '#16A34A', amber: '#D97706', blue: '#3B61C4',
+  border: 'rgba(0,0,0,0.07)', borderStrong: 'rgba(0,0,0,0.12)',
+  text: '#111111', muted: '#6B6B6B', dim: '#9B9B9B',
+  accent: '#3B61C4', green: '#16A34A', amber: '#D97706', red: '#DC2626',
 }
 
 const MODE_CONFIG = {
-  weakness:       { color: '#8B5CF6', icon: '↓', label: 'Weak areas' },
-  'exam-topics':  { color: '#DC2626', icon: '★', label: 'Exam focus' },
-  'focus-question': { color: '#3B61C4', icon: '?', label: 'Focus question' },
+  weakness:         { color: '#8B5CF6', label: 'Weak areas',     desc: 'Focus on closing these gaps' },
+  'exam-topics':    { color: '#DC2626', label: 'Exam focus',     desc: 'Most likely on your exam' },
+  'focus-question': { color: '#3B61C4', label: 'Focus question', desc: 'Answer this before you finish' },
 }
 
 function selectMode(session, course, isPro) {
@@ -77,124 +77,133 @@ export default function PrepBlastScreen({ session, course, onDismiss, userId }) 
 
   const mode = blast?.mode ?? 'weakness'
   const cfg = MODE_CONFIG[mode] ?? MODE_CONFIG.weakness
-  const courseColor = course?.color?.dot ?? D.blue
+  const courseColor = course?.color?.dot ?? D.accent
 
   return (
     <div style={{
       position: 'fixed', inset: 0, zIndex: 100,
-      background: '#F7F6F3',
+      background: D.bg,
       display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-      padding: 24,
+      padding: '24px 20px',
     }}>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes blast-in{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg) } }
+        @keyframes pb-in { from { opacity: 0; transform: translateY(10px) } to { opacity: 1; transform: translateY(0) } }
+      `}</style>
 
       {loading ? (
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
-          <div style={{ width: 40, height: 40, borderRadius: '50%', border: `3px solid ${courseColor}30`, borderTopColor: courseColor, animation: 'spin 0.8s linear infinite' }} />
-          <div style={{ fontSize: 14, color: D.textMuted, fontWeight: 500 }}>Preparing your session...</div>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
+          <div style={{ width: 28, height: 28, borderRadius: '50%', border: `2.5px solid ${courseColor}25`, borderTopColor: courseColor, animation: 'spin 0.75s linear infinite' }} />
+          <div style={{ fontSize: 13, color: D.muted, fontWeight: 500 }}>Preparing session brief...</div>
         </div>
+
       ) : error ? (
-        <div style={{ width: '100%', maxWidth: 380, textAlign: 'center' }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-            <svg width="20" height="20" fill="none" stroke="#DC2626" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.41 0zM12 9v4M12 17h.01"/>
-            </svg>
-          </div>
-          <p style={{ fontSize: 15, fontWeight: 600, color: D.text, margin: '0 0 6px' }}>Couldn't load your prep brief</p>
-          <p style={{ fontSize: 13, color: D.textMuted, margin: '0 0 24px', lineHeight: 1.55 }}>There was a problem reaching the AI. You can retry or skip straight to your session.</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-            <button
-              onClick={() => { setRetryCount(c => c + 1) }}
-              style={{ padding: '12px', background: courseColor, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
-            >
-              Try again
+        <div style={{ width: '100%', maxWidth: 400, background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 16, padding: '28px 24px' }}>
+          <div style={{ fontSize: 15, fontWeight: 700, color: D.text, marginBottom: 6 }}>Couldn't load session brief</div>
+          <p style={{ fontSize: 13, color: D.muted, lineHeight: 1.6, margin: '0 0 20px' }}>Something went wrong reaching the AI. You can retry or go straight into your session.</p>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button onClick={() => setRetryCount(c => c + 1)} style={{ flex: 1, padding: '11px', background: courseColor, border: 'none', borderRadius: 10, color: '#fff', fontSize: 13.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+              Retry
             </button>
-            <button
-              onClick={onDismiss}
-              style={{ padding: '12px', background: 'none', border: `1px solid ${D.border}`, borderRadius: 10, color: D.textMuted, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-            >
-              Skip, start session
+            <button onClick={onDismiss} style={{ flex: 1, padding: '11px', background: 'none', border: `1px solid ${D.borderStrong}`, borderRadius: 10, color: D.muted, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}>
+              Skip
             </button>
           </div>
         </div>
+
       ) : !blast ? (
-        // No AI quota — skip gracefully with a start button
-        <div style={{ width: '100%', maxWidth: 380, textAlign: 'center' }}>
-          <p style={{ fontSize: 15, color: D.textMuted, margin: '0 0 20px', lineHeight: 1.55 }}>Ready to study {session.courseName}?</p>
-          <button onClick={onDismiss} style={{ width: '100%', padding: '14px', background: courseColor, border: 'none', borderRadius: 12, color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
+        <div style={{ width: '100%', maxWidth: 400, background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 16, padding: '28px 24px', textAlign: 'center' }}>
+          <p style={{ fontSize: 14, color: D.muted, margin: '0 0 20px', lineHeight: 1.6 }}>Ready to study {session.courseName}?</p>
+          <button onClick={onDismiss} style={{ width: '100%', padding: '13px', background: courseColor, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
             Start session
           </button>
         </div>
-      ) : (
-        <div style={{ width: '100%', maxWidth: 440, animation: 'blast-in 0.4s ease' }}>
-          {/* Course label */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 28, justifyContent: 'center' }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: courseColor, flexShrink: 0 }} />
-            <span style={{ fontSize: 12, fontWeight: 600, color: D.textMuted }}>{session.courseName}</span>
-            <span style={{ fontSize: 12, color: D.textDim }}>·</span>
-            <span style={{ fontSize: 12, color: D.textDim }}>{session.sessionType ?? 'Study Session'}</span>
-          </div>
 
-          {/* Mode pill */}
-          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+      ) : (
+        <div style={{ width: '100%', maxWidth: 460, animation: 'pb-in 0.35s ease' }}>
+
+          {/* Header */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 7 }}>
+              <span style={{ width: 7, height: 7, borderRadius: '50%', background: courseColor, flexShrink: 0 }} />
+              <span style={{ fontSize: 12.5, fontWeight: 600, color: D.text }}>{session.courseName}</span>
+              <span style={{ fontSize: 12, color: D.dim }}>·</span>
+              <span style={{ fontSize: 12, color: D.muted }}>{session.sessionType ?? 'Study Session'}</span>
+            </div>
             <span style={{
-              fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase',
-              padding: '4px 12px', borderRadius: 999,
-              color: cfg.color, background: `${cfg.color}12`, border: `1px solid ${cfg.color}25`,
-              display: 'flex', alignItems: 'center', gap: 6,
+              fontSize: 10.5, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+              padding: '3px 9px', borderRadius: 5,
+              color: cfg.color, background: `${cfg.color}10`, border: `1px solid ${cfg.color}20`,
             }}>
-              <span style={{ fontSize: 12 }}>{cfg.icon}</span>
               {cfg.label}
             </span>
           </div>
 
-          {/* Headline */}
-          <h2 style={{ fontSize: 22, fontWeight: 700, color: D.text, textAlign: 'center', letterSpacing: -0.5, margin: '0 0 20px', lineHeight: 1.25 }}>
-            {blast.headline}
-          </h2>
+          {/* Main card */}
+          <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, overflow: 'hidden', marginBottom: 12 }}>
 
-          {/* Content */}
-          <div style={{ background: D.bgCard, borderRadius: 16, border: `1px solid ${D.border}`, boxShadow: '0 2px 16px rgba(0,0,0,0.06)', padding: '20px 24px', marginBottom: 24 }}>
-            {mode === 'focus-question' ? (
-              <>
-                <p style={{ fontSize: 16, fontWeight: 600, color: D.text, lineHeight: 1.55, margin: '0 0 14px' }}>{blast.question}</p>
-                {blast.why && <p style={{ fontSize: 13, color: D.textMuted, lineHeight: 1.55, margin: 0, padding: '12px 0 0', borderTop: `1px solid ${D.border}` }}>{blast.why}</p>}
-              </>
-            ) : (
-              <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {(blast.points ?? []).map((point, i) => (
-                  <li key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                    <span style={{ width: 20, height: 20, borderRadius: 6, background: `${cfg.color}12`, border: `1px solid ${cfg.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 10, fontWeight: 800, color: cfg.color, flexShrink: 0, marginTop: 1 }}>
-                      {i + 1}
-                    </span>
-                    <span style={{ fontSize: 14, color: D.text, lineHeight: 1.5, fontWeight: 500 }}>{point}</span>
-                  </li>
-                ))}
-              </ul>
+            {/* Card header */}
+            <div style={{ padding: '16px 20px 14px', borderBottom: `1px solid ${D.border}` }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: D.muted, marginBottom: 4 }}>
+                {cfg.desc}
+              </div>
+              <div style={{ fontSize: 18, fontWeight: 700, color: D.text, letterSpacing: -0.3, lineHeight: 1.25 }}>
+                {blast.headline}
+              </div>
+            </div>
+
+            {/* Content */}
+            <div style={{ padding: '14px 20px' }}>
+              {mode === 'focus-question' ? (
+                <div>
+                  <p style={{ fontSize: 14.5, fontWeight: 600, color: D.text, lineHeight: 1.55, margin: '0 0 12px' }}>{blast.question}</p>
+                  {blast.why && (
+                    <p style={{ fontSize: 12.5, color: D.muted, lineHeight: 1.6, margin: 0, paddingTop: 12, borderTop: `1px solid ${D.border}` }}>
+                      {blast.why}
+                    </p>
+                  )}
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {(blast.points ?? []).map((point, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                      <span style={{
+                        width: 20, height: 20, borderRadius: 5, flexShrink: 0, marginTop: 1,
+                        background: `${cfg.color}10`, border: `1px solid ${cfg.color}18`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        fontSize: 10, fontWeight: 800, color: cfg.color,
+                      }}>{i + 1}</span>
+                      <span style={{ fontSize: 13.5, color: D.text, lineHeight: 1.5, fontWeight: 450 }}>{point}</span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Action prompt footer */}
+            {blast.actionPrompt && (
+              <div style={{ padding: '12px 20px', borderTop: `1px solid ${D.border}`, background: 'rgba(0,0,0,0.015)' }}>
+                <p style={{ fontSize: 12, color: D.muted, lineHeight: 1.55, margin: 0, fontStyle: 'italic' }}>
+                  {blast.actionPrompt}
+                </p>
+              </div>
             )}
           </div>
 
-          {/* Action prompt */}
-          {blast.actionPrompt && (
-            <p style={{ fontSize: 13, color: D.textMuted, textAlign: 'center', lineHeight: 1.55, margin: '0 0 24px' }}>
-              {blast.actionPrompt}
-            </p>
-          )}
-
-          {/* Dismiss */}
+          {/* CTA */}
           <button
             onClick={onDismiss}
             style={{
-              width: '100%', padding: '14px',
-              background: courseColor, border: 'none', borderRadius: 12,
-              color: '#fff', fontSize: 15, fontWeight: 700,
+              width: '100%', padding: '13px 20px',
+              background: courseColor, border: 'none', borderRadius: 11,
+              color: '#fff', fontSize: 14, fontWeight: 700,
               cursor: 'pointer', fontFamily: 'inherit',
-              boxShadow: `0 4px 16px ${courseColor}40`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+              letterSpacing: -0.1,
             }}
           >
             Got it, start session
-            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M6 4l14 8-14 8V4z"/></svg>
+            <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
           </button>
         </div>
       )}
