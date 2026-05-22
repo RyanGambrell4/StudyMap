@@ -621,6 +621,8 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
     )
   }
 
+  if (!plan) return null
+
   return (
     <div className="sc-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: 24, alignItems: 'flex-start' }}>
       <div>
@@ -1613,14 +1615,14 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
 
 
       {/* Priority topics */}
-      {plan.priorityTopics?.length > 0 && (
+      {plan?.priorityTopics?.length > 0 && (
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '16px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>What You'll Master: Your {plan.priorityTopics.length} Topic{plan.priorityTopics.length !== 1 ? 's' : ''}</span>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>What You'll Master: Your {plan.priorityTopics?.length} Topic{plan.priorityTopics?.length !== 1 ? 's' : ''}</span>
             {struggles && <span className="sc-topic-struggles-hint" style={{ fontSize: 11, color: D.dim }}>From your list, nothing added</span>}
           </div>
           <div className="sc-topics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
-            {plan.priorityTopics.map((topic, i) => {
+            {plan.priorityTopics?.map((topic, i) => {
               const isStruggle = struggles && topic.toLowerCase().split(' ').some(w => w.length > 4 && struggles.toLowerCase().includes(w))
               return (
                 <div key={i} style={{ background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
