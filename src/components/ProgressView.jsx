@@ -1,7 +1,8 @@
 import { useMemo, useState, useEffect, Fragment } from 'react'
 import { clean } from '../utils/strings'
 import { toDateStr, addDays, daysBetween } from '../utils/dateUtils'
-import { getCachedPracticeScores, savePracticeScores } from '../lib/db'
+import { getCachedPracticeScores, savePracticeScores, getCachedSessionRecalls, getCachedStudyTools } from '../lib/db'
+import { getDueCards } from '../lib/sm2'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
@@ -445,6 +446,38 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
   }, [allSessions, completedSessions, completedIds, courses, todayStr])
 
   const bloomAvg = Math.round(bloomValues.reduce((a, b) => a + b, 0) / bloomValues.length)
+
+  // ── Recall scores over time ───────────────────────────────────────────────────
+  const sessionRecalls = useMemo(() => getCachedSessionRecalls(), [])
+
+  const recallChartData = useMemo(() => {
+    if (sessionRecalls.length < 2) return null
+    const sorted = [...sessionRecalls]
+      .filter(r => r.score != null)
+      .sort((a, b) => (a.date ?? '').localeCompare(b.date ?? ''))
+      .slice(-20) // last 20 entries
+    if (sorted.length < 2) return null
+    return {
+      scores: sorted.map(r => Math.round(r.score * 100)),
+      labels: sorted.map(r => r.date ? r.date.slice(5) : ''),
+      avg: Math.round(sorted.reduce((s, r) => s + r.score * 100, 0) / sorted.length),
+      latest: Math.round(sorted[sorted.length - 1].score * 100),
+      trend: sorted.length >= 2
+        ? sorted[sorted.length - 1].score - sorted[sorted.length - 2].score
+        : 0,
+    }
+  }, [sessionRecalls])
+
+  // ── SM-2 flashcard stats ──────────────────────────────────────────────────────
+  const flashcardStats = useMemo(() => {
+    const tools = getCachedStudyTools()
+    const cards = tools?.flashcards ?? []
+    if (!cards.length) return null
+    const due = getDueCards(cards).length
+    const mastered = cards.filter(c => (c.easeFactor ?? 2.5) >= 2.8 && (c.repetitions ?? 0) >= 3).length
+    const struggling = cards.filter(c => (c.easeFactor ?? 2.5) < 2.0).length
+    return { total: cards.length, due, mastered, struggling }
+  }, [])
 
   // ── Standout moments ──────────────────────────────────────────────────────────
   const standoutMoments = useMemo(() => {
@@ -1084,6 +1117,90 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
           ))}
         </div>
       </div>
+
+      {/* ── Recall Score Over Time ── */}
+      {(recallChartData || flashcardStats) && (
+        <div className="pv-2col" style={{ gridTemplateColumns: recallChartData && flashcardStats ? '3fr 2fr' : '1fr', marginTop: 0 }}>
+
+          {recallChartData && (
+            <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '22px 26px' }}>
+              <div style={{ marginBottom: 12 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 4 }}>RECALL SCORE OVER TIME</div>
+                <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
+                  <span style={{ fontSize: 28, fontWeight: 800, color: D.purple, letterSpacing: '-0.02em' }}>{recallChartData.latest}%</span>
+                  <span style={{ fontSize: 12, fontWeight: 600, color: recallChartData.trend >= 0 ? D.green : D.amber }}>
+                    {recallChartData.trend >= 0 ? '↑' : '↓'} {Math.round(Math.abs(recallChartData.trend * 100))}% vs prev
+                  </span>
+                  <span style={{ fontSize: 12, color: D.textDim, marginLeft: 4 }}>avg {recallChartData.avg}%</span>
+                </div>
+              </div>
+              {/* Mini bar chart */}
+              <div style={{ display: 'flex', alignItems: 'flex-end', gap: 3, height: 80, paddingBottom: 18, position: 'relative' }}>
+                {recallChartData.scores.map((score, i) => {
+                  const h = Math.max(4, (score / 100) * 62)
+                  const isLast = i === recallChartData.scores.length - 1
+                  return (
+                    <div key={i} style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                      <div style={{
+                        width: '100%', height: h, borderRadius: 3,
+                        background: isLast
+                          ? D.purple
+                          : score >= 80 ? `${D.green}60` : score >= 60 ? `${D.amber}60` : `${D.pink}50`,
+                      }} />
+                      {(i === 0 || isLast || i % 4 === 0) && (
+                        <span style={{ fontSize: 8, color: D.textDim, position: 'absolute', bottom: 0, whiteSpace: 'nowrap' }}>
+                          {recallChartData.labels[i]}
+                        </span>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 4 }}>
+                {[['>=80%', 'Solid', D.green], ['60-79%', 'OK', D.amber], ['<60%', 'Needs work', D.pink]].map(([range, label, color]) => (
+                  <div key={range} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: D.textDim }}>
+                    <div style={{ width: 8, height: 8, borderRadius: 2, background: `${color}70` }} />
+                    {range} — {label}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {flashcardStats && (
+            <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '22px 26px' }}>
+              <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 16 }}>FLASHCARD MASTERY</div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                {[
+                  { label: 'Due today', value: flashcardStats.due, color: flashcardStats.due > 0 ? '#EF4444' : D.green, sub: flashcardStats.due > 0 ? 'Review now' : 'All caught up!' },
+                  { label: 'Mastered', value: flashcardStats.mastered, color: D.green, sub: `of ${flashcardStats.total} total` },
+                  { label: 'Struggling', value: flashcardStats.struggling, color: flashcardStats.struggling > 0 ? D.amber : D.green, sub: 'Low ease factor' },
+                ].map(({ label, value, color, sub }) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: 10, background: `${color}08`, border: `1px solid ${color}20` }}>
+                    <div>
+                      <div style={{ fontSize: 12.5, fontWeight: 600, color: D.text }}>{label}</div>
+                      <div style={{ fontSize: 11, color: D.textDim, marginTop: 1 }}>{sub}</div>
+                    </div>
+                    <span style={{ fontSize: 26, fontWeight: 800, color, letterSpacing: '-0.02em' }}>{value}</span>
+                  </div>
+                ))}
+              </div>
+              {/* Mastery bar */}
+              {flashcardStats.total > 0 && (
+                <div style={{ marginTop: 16 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 5 }}>
+                    <span style={{ fontSize: 11, color: D.textMuted }}>Mastery progress</span>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: D.green }}>{Math.round((flashcardStats.mastered / flashcardStats.total) * 100)}%</span>
+                  </div>
+                  <div style={{ height: 6, borderRadius: 3, background: 'rgba(0,0,0,0.07)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', width: `${(flashcardStats.mastered / flashcardStats.total) * 100}%`, background: `linear-gradient(90deg, ${D.green}, #4ade80)`, borderRadius: 3, transition: 'width 0.4s' }} />
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* ── AI Insights ── */}
       {aiInsights.length > 0 && (

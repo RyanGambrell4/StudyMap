@@ -1,4 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { getCachedCoachPlan, saveCoachPlanStruggles } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
 import { getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial, incrementAIQuery } from '../lib/subscription'
@@ -231,12 +233,33 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
 
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[82%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
+            <div className={`max-w-[82%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
               msg.role === 'user'
-                ? 'bg-indigo-600 text-white rounded-br-md'
+                ? 'bg-indigo-600 text-white rounded-br-md whitespace-pre-wrap'
                 : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-md'
             }`}>
-              {msg.content}
+              {msg.role === 'user' ? msg.content : (
+                <ReactMarkdown
+                  remarkPlugins={[remarkGfm]}
+                  components={{
+                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                    ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-0.5">{children}</ul>,
+                    ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-0.5">{children}</ol>,
+                    li: ({ children }) => <li className="leading-relaxed">{children}</li>,
+                    h1: ({ children }) => <h1 className="text-base font-bold mb-1 mt-2">{children}</h1>,
+                    h2: ({ children }) => <h2 className="text-sm font-bold mb-1 mt-2">{children}</h2>,
+                    h3: ({ children }) => <h3 className="text-sm font-semibold mb-1 mt-1">{children}</h3>,
+                    code: ({ inline, children }) => inline
+                      ? <code className="bg-slate-100 dark:bg-slate-700 px-1 py-0.5 rounded text-xs font-mono">{children}</code>
+                      : <pre className="bg-slate-100 dark:bg-slate-700 rounded-lg px-3 py-2 my-2 overflow-x-auto text-xs font-mono whitespace-pre">{children}</pre>,
+                    blockquote: ({ children }) => <blockquote className="border-l-2 border-indigo-400 pl-3 italic text-slate-600 dark:text-slate-400 my-1">{children}</blockquote>,
+                    strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                    hr: () => <hr className="border-slate-200 dark:border-slate-600 my-2" />,
+                  }}
+                >
+                  {msg.content}
+                </ReactMarkdown>
+              )}
             </div>
           </div>
         ))}

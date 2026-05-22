@@ -206,6 +206,11 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
   const [answers, setAnswers] = useState([]) // array of booleans
   const [quizDone, setQuizDone] = useState(false)
 
+  // Test mode (timed)
+  const [testMode, setTestMode] = useState(false)
+  const [timeLeft, setTimeLeft] = useState(0)
+  const timerRef = useRef(null)
+
   // Card search state
   const [cardSearch, setCardSearch] = useState('')
   const [searchResults, setSearchResults] = useState(null)
@@ -231,6 +236,23 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       if (saved.fileLabel) setUploadedFile({ name: saved.fileLabel })
     }
   }, [])
+
+  // Timer effect — runs only in test mode during quiz
+  useEffect(() => {
+    if (mode === 'quiz' && testMode && !quizDone && timeLeft > 0) {
+      timerRef.current = setInterval(() => {
+        setTimeLeft(t => {
+          if (t <= 1) {
+            clearInterval(timerRef.current)
+            setQuizDone(true)
+            return 0
+          }
+          return t - 1
+        })
+      }, 1000)
+    }
+    return () => clearInterval(timerRef.current)
+  }, [mode, testMode, quizDone])
 
   async function handleFile(file) {
     if (!file) return
@@ -358,10 +380,13 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     }
   }
 
-  function handleGenerateQuiz() {
+  function handleGenerateQuiz(timed = false) {
     setQuestionIdx(0)
     setAnswers([])
     setQuizDone(false)
+    setTestMode(timed)
+    if (timed) setTimeLeft(quiz.length * 45) // 45s per question
+    clearInterval(timerRef.current)
     setMode('quiz')
   }
 
@@ -413,6 +438,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     setQuestionIdx(0)
     setAnswers([])
     setQuizDone(false)
+    if (testMode) setTimeLeft(shuffled.length * 45)
+    clearInterval(timerRef.current)
   }
 
   function handleBack() {
@@ -833,13 +860,21 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               >
                 Generate with AI
               </button>
-              {flashcards.length > 0 && (
-                <button
-                  onClick={handleGenerateQuiz}
-                  className="flex-1 bg-white hover:bg-slate-50 border border-[#E5E5E5] text-slate-700 font-semibold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
-                >
-                  Take Quiz
-                </button>
+              {quiz.length > 0 && (
+                <div className="flex flex-col gap-1.5">
+                  <button
+                    onClick={() => handleGenerateQuiz(false)}
+                    className="bg-white hover:bg-slate-50 border border-[#E5E5E5] text-slate-700 font-semibold py-2 px-4 rounded-xl text-xs transition-colors"
+                  >
+                    Quiz
+                  </button>
+                  <button
+                    onClick={() => handleGenerateQuiz(true)}
+                    className="bg-white hover:bg-slate-50 border border-amber-300 text-amber-600 font-semibold py-2 px-4 rounded-xl text-xs transition-colors"
+                  >
+                    ⏱ Timed
+                  </button>
+                </div>
               )}
             </div>
           )}
@@ -860,7 +895,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 </button>
                 {quiz.length > 0 && (
                   <button
-                    onClick={handleGenerateQuiz}
+                    onClick={() => handleGenerateQuiz(false)}
                     className="flex items-center gap-2 text-sm text-[#6B6B6B] hover:text-slate-900 border border-[#E5E5E5] hover:border-slate-400 px-3 py-2 rounded-xl transition-all"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1003,7 +1038,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               Previous
             </button>
             <button
-              onClick={handleGenerateQuiz}
+              onClick={() => handleGenerateQuiz(false)}
               className="text-xs text-[#3B61C4] hover:text-[#2d4fa8] transition-colors"
             >
               Take quiz instead →
@@ -1033,7 +1068,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                   Restart deck
                 </button>
                 <button
-                  onClick={handleGenerateQuiz}
+                  onClick={() => handleGenerateQuiz(false)}
                   className="text-sm text-white bg-[#3B61C4] hover:bg-[#2d4fa8] px-4 py-1.5 rounded-lg transition-colors font-medium"
                 >
                   Take quiz
@@ -1218,7 +1253,20 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               Back
             </button>
             {!quizDone && (
-              <span className="text-xs text-slate-500">Question {questionIdx + 1} of {quiz.length}</span>
+              <div className="flex items-center gap-3">
+                <span className="text-xs text-slate-500">Question {questionIdx + 1} of {quiz.length}</span>
+                {testMode && (
+                  <span style={{
+                    fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
+                    background: timeLeft <= 30 ? 'rgba(239,68,68,0.1)' : 'rgba(59,97,196,0.1)',
+                    color: timeLeft <= 30 ? '#ef4444' : '#3B61C4',
+                    border: `1px solid ${timeLeft <= 30 ? 'rgba(239,68,68,0.3)' : 'rgba(59,97,196,0.25)'}`,
+                    fontVariantNumeric: 'tabular-nums',
+                  }}>
+                    ⏱ {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+                  </span>
+                )}
+              </div>
             )}
           </div>
 
@@ -1240,7 +1288,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             </>
           ) : (
             /* Score summary */
-            <div className="space-y-6">
+            <div className="space-y-5">
               <div className="bg-white border border-[#E5E5E5] rounded-2xl p-8 text-center">
                 <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-bold"
                   style={{
@@ -1255,25 +1303,51 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                   {score >= quiz.length * 0.8 ? 'Excellent work!' : score >= quiz.length * 0.6 ? 'Good effort!' : 'Keep studying!'}
                 </h2>
                 <p className="text-slate-400 text-sm">
-                  You got {score} out of {quiz.length} questions correct ({Math.round((score / quiz.length) * 100)}%)
+                  {Math.round((score / quiz.length) * 100)}% correct
+                  {testMode && timeLeft === 0 && answers.length < quiz.length ? ' · time expired' : ''}
                 </p>
               </div>
 
-              {/* Per-question breakdown */}
-              <div className="space-y-2">
-                {quiz.map((q, i) => (
-                  <div key={i} className={`flex items-start gap-3 px-4 py-3 rounded-xl border text-sm ${
-                    answers[i] ? 'bg-emerald-900/20 border-emerald-800/40' : 'bg-red-900/20 border-red-800/40'
-                  }`}>
-                    <span className={`shrink-0 font-bold ${answers[i] ? 'text-emerald-400' : 'text-red-400'}`}>
-                      {answers[i] ? '✓' : '✗'}
-                    </span>
-                    <span className={`truncate ${answers[i] ? 'text-emerald-300' : 'text-red-300'}`}>
-                      {q.question.slice(0, 80)}{q.question.length > 80 ? '…' : ''}
-                    </span>
+              {/* Weak areas — only show if any wrong */}
+              {answers.some(a => !a) && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#ef4444' }}>Weak Areas</span>
+                    <div style={{ flex: 1, height: 1, background: 'rgba(239,68,68,0.2)' }} />
                   </div>
-                ))}
-              </div>
+                  <div className="space-y-2.5">
+                    {quiz.map((q, i) => !answers[i] && (
+                      <div key={i} style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, padding: '12px 14px' }}>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', marginBottom: 4 }}>{q.question}</p>
+                        <p style={{ fontSize: 12, color: '#16a34a', fontWeight: 500 }}>
+                          ✓ {typeof q.answer === 'boolean' ? (q.answer ? 'True' : 'False') : q.answer}
+                        </p>
+                        {q.explanation && (
+                          <p style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 4 }}>{q.explanation}</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Correct — collapsed list */}
+              {answers.some(a => a) && (
+                <div>
+                  <div className="flex items-center gap-2 mb-3">
+                    <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#16a34a' }}>Got Right ({answers.filter(Boolean).length})</span>
+                    <div style={{ flex: 1, height: 1, background: 'rgba(22,163,74,0.2)' }} />
+                  </div>
+                  <div className="space-y-1.5">
+                    {quiz.map((q, i) => answers[i] && (
+                      <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 12px', borderRadius: 10, background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.15)' }}>
+                        <span style={{ color: '#10b981', fontWeight: 700, flexShrink: 0, fontSize: 13 }}>✓</span>
+                        <span style={{ fontSize: 12.5, color: '#334155' }}>{q.question.slice(0, 90)}{q.question.length > 90 ? '…' : ''}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               <div className="flex gap-3">
                 <button

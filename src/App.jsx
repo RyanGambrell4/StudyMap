@@ -5,6 +5,7 @@ import { getActivePlan, canAddCourse, createCheckoutSession } from './lib/subscr
 import { useTheme } from './utils/useTheme'
 import { initAnalytics, identifyUser, resetUser, track } from './lib/analytics'
 import { captureReferralParam, getStoredReferrer, clearStoredReferrer } from './lib/referral'
+import SharedPlanView from './components/SharedPlanView'
 import AuthScreen from './components/AuthScreen'
 import LandingPage from './components/LandingPage'
 import Onboarding from './components/Onboarding'
@@ -241,6 +242,11 @@ export default function App() {
     setInitialCompletedIds(null)
     setAssignments([])
     setShowOutput(false)
+  }
+
+  // ── Shared plan (public, no auth) ─────────────────────────────────────────
+  if (window.location.pathname === '/shared-plan') {
+    return <SharedPlanView />
   }
 
   // ── Render ─────────────────────────────────────────────────────────────────

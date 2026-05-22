@@ -1,5 +1,7 @@
-import { useState, useCallback, useEffect, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { getActivePlan, isTrialActive, hasUsedTrial, getTrialDaysRemaining } from '../lib/subscription'
+import { getCachedStudyTools } from '../lib/db'
+import { getDueCards } from '../lib/sm2'
 import OnboardingTour from './OnboardingTour'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -70,6 +72,12 @@ export default function AppShell({
 
   const plan      = getActivePlan()
   const planLabel = plan === 'unlimited' ? 'Unlimited' : plan === 'pro' ? 'Pro' : 'Free'
+
+  const dueCount = useMemo(() => {
+    const saved = getCachedStudyTools()
+    if (!saved?.flashcards?.length) return 0
+    return getDueCards(saved.flashcards).length
+  }, [])
   const isTrialing = isTrialActive()
   const daysLeft = isTrialing ? getTrialDaysRemaining() : null
   const [trialBannerDismissed, setTrialBannerDismissed] = useState(
@@ -192,6 +200,7 @@ export default function AppShell({
 
                 {/* Track Grades */}
                 <button
+                  id="tour-nav-grades"
                   onClick={() => { setOpenHub(null); setActiveSection('grades') }}
                   style={{ display: 'flex', alignItems: 'flex-start', gap: 12, width: '100%', padding: '12px 14px', borderRadius: 10, background: 'none', border: '1px solid rgba(22,163,74,0.15)', cursor: 'pointer', textAlign: 'left', marginBottom: 10 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(22,163,74,0.05)'}
@@ -242,6 +251,14 @@ export default function AppShell({
               onMouseLeave={e => { if (!isBrainActive) e.currentTarget.style.color = MUTED }}
             >
               Brain Training
+              {dueCount > 0 && (
+                <span style={{
+                  fontSize: 10, fontWeight: 800, padding: '1px 6px', borderRadius: 999,
+                  background: '#EF4444', color: '#fff', lineHeight: 1.5, marginLeft: 2,
+                }}>
+                  {dueCount}
+                </span>
+              )}
               <svg style={{ width: 10, height: 10, opacity: 0.45 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
               </svg>
@@ -285,6 +302,11 @@ export default function AppShell({
                     <rect x="2" y="3" width="7" height="7" rx="1"/><rect x="15" y="3" width="7" height="7" rx="1"/><rect x="2" y="14" width="7" height="7" rx="1"/><path d="M15 17.5h7M18.5 14v7"/>
                   </svg>
                   <span style={{ fontSize: 12, color: MUTED, fontWeight: 500, flex: 1 }}>Flashcards &amp; Quizzes</span>
+                  {dueCount > 0 && (
+                    <span style={{ fontSize: 10, fontWeight: 800, padding: '1px 6px', borderRadius: 999, background: '#EF4444', color: '#fff', lineHeight: 1.5 }}>
+                      {dueCount} due
+                    </span>
+                  )}
                   <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
                   </svg>
@@ -447,6 +469,11 @@ export default function AppShell({
                   style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '10px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
                   <span style={{ fontSize: 12.5, fontWeight: 500, color: MUTED, flex: 1 }}>Flashcards &amp; Quizzes</span>
+                  {dueCount > 0 && (
+                    <span style={{ fontSize: 10, fontWeight: 800, padding: '1px 6px', borderRadius: 999, background: '#EF4444', color: '#fff', lineHeight: 1.5, marginRight: 4 }}>
+                      {dueCount} due
+                    </span>
+                  )}
                   <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
                 </button>
               </div>
@@ -482,10 +509,15 @@ export default function AppShell({
           </button>
           {/* Brain Training */}
           <button onClick={() => setMobileHub(h => h === 'brainTraining' ? null : 'brainTraining')}
-            style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '10px 0', background: 'transparent', border: 'none', cursor: 'pointer' }}>
-            <svg style={{ width: 18, height: 18, color: (isBrainActive || mobileHub === 'brainTraining') ? ACCENT : MUTED }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={(isBrainActive || mobileHub === 'brainTraining') ? 2.5 : 2} d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" />
-            </svg>
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '10px 0', background: 'transparent', border: 'none', cursor: 'pointer', position: 'relative' }}>
+            <div style={{ position: 'relative' }}>
+              <svg style={{ width: 18, height: 18, color: (isBrainActive || mobileHub === 'brainTraining') ? ACCENT : MUTED }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={(isBrainActive || mobileHub === 'brainTraining') ? 2.5 : 2} d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" />
+              </svg>
+              {dueCount > 0 && (
+                <span style={{ position: 'absolute', top: -3, right: -5, width: 8, height: 8, borderRadius: '50%', background: '#EF4444', border: '1.5px solid #fff', display: 'block' }} />
+              )}
+            </div>
             <span style={{ fontSize: 9, fontWeight: 500, color: (isBrainActive || mobileHub === 'brainTraining') ? ACCENT : MUTED }}>Training</span>
           </button>
           {/* Account */}

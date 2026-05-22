@@ -1294,7 +1294,30 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
   const validDates = (form?.dates || []).filter(d => d.date && d.label)
   const techniquesList = form?.style?.length ? form.style : ['Active recall', 'Reading + notes']
   const [exportOpen, setExportOpen] = useState(false)
+  const [shareOpen, setShareOpen] = useState(false)
+  const [shareCopied, setShareCopied] = useState(false)
   const toggleCheck = (wi, si) => setChecked(prev => ({ ...prev, [`${wi}-${si}`]: !prev[`${wi}-${si}`] }))
+
+  const shareLink = (() => {
+    try {
+      const payload = JSON.stringify({
+        courseName: course?.name ?? 'Course',
+        goal: form?.goal ?? '',
+        weeks: plan.weeklyFocus?.map(w => ({ week: w.week, theme: w.theme, sessions: w.sessions?.length ?? 0 })) ?? [],
+        topics: plan.priorityTopics?.slice(0, 8) ?? [],
+      })
+      const b64 = btoa(encodeURIComponent(payload))
+      return `${window.location.origin}/shared-plan#${b64}`
+    } catch { return null }
+  })()
+
+  function handleCopyShareLink() {
+    if (!shareLink) return
+    navigator.clipboard.writeText(shareLink).then(() => {
+      setShareCopied(true)
+      setTimeout(() => setShareCopied(false), 2500)
+    }).catch(() => {})
+  }
 
   const buildPlanText = () => {
     const lines = []
@@ -1515,25 +1538,94 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
               : <span>Push all <strong style={{ color: D.text }}>{totalSessions} sessions</strong> to your calendar as timed study blocks</span>
             }
           </div>
-          {onPushToSchedule && (
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
             <button
-              onClick={handlePushToSchedule}
-              disabled={pushed}
+              onClick={() => setShareOpen(true)}
               style={{
-                display: 'flex', alignItems: 'center', gap: 7,
-                padding: '9px 18px', borderRadius: 10, border: 'none', cursor: pushed ? 'default' : 'pointer',
-                fontWeight: 700, fontSize: 13,
-                background: pushed ? 'rgba(22,163,74,0.1)' : D.accent,
-                color: pushed ? D.mint : '#fff',
-                transition: 'all 0.15s', flexShrink: 0,
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '9px 14px', borderRadius: 10, cursor: 'pointer',
+                fontWeight: 600, fontSize: 13,
+                background: 'rgba(59,97,196,0.08)', color: '#3B61C4',
+                border: '1px solid rgba(59,97,196,0.25)', transition: 'all 0.15s',
               }}
             >
-              <Icon name={pushed ? 'check' : 'calendar'} size={14} color={pushed ? D.mint : '#fff'} stroke={2.5} />
-              {pushed ? 'Applied to Calendar' : 'Apply to Calendar'}
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+              </svg>
+              Share plan
             </button>
-          )}
+            {onPushToSchedule && (
+              <button
+                onClick={handlePushToSchedule}
+                disabled={pushed}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 7,
+                  padding: '9px 18px', borderRadius: 10, border: 'none', cursor: pushed ? 'default' : 'pointer',
+                  fontWeight: 700, fontSize: 13,
+                  background: pushed ? 'rgba(22,163,74,0.1)' : D.accent,
+                  color: pushed ? D.mint : '#fff',
+                  transition: 'all 0.15s',
+                }}
+              >
+                <Icon name={pushed ? 'check' : 'calendar'} size={14} color={pushed ? D.mint : '#fff'} stroke={2.5} />
+                {pushed ? 'Applied to Calendar' : 'Apply to Calendar'}
+              </button>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Share modal */}
+      {shareOpen && (
+        <div
+          onClick={() => setShareOpen(false)}
+          style={{ position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
+        >
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 18, padding: '28px 28px 24px', maxWidth: 440, width: '100%', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+              <div>
+                <div style={{ fontSize: 16, fontWeight: 700, color: '#111' }}>Share your study plan</div>
+                <div style={{ fontSize: 12.5, color: '#6B6B6B', marginTop: 3 }}>Anyone with this link can view a read-only snapshot.</div>
+              </div>
+              <button onClick={() => setShareOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', fontSize: 20, lineHeight: 1 }}>×</button>
+            </div>
+            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+              <div style={{ flex: 1, background: '#F7F6F3', border: '1px solid #E5E5E5', borderRadius: 10, padding: '10px 12px', fontSize: 12, color: '#6B6B6B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {shareLink}
+              </div>
+              <button
+                onClick={handleCopyShareLink}
+                style={{
+                  flexShrink: 0, padding: '10px 16px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                  fontWeight: 700, fontSize: 13,
+                  background: shareCopied ? 'rgba(5,150,105,0.1)' : '#3B61C4',
+                  color: shareCopied ? '#059669' : '#fff',
+                  transition: 'all 0.15s',
+                }}
+              >
+                {shareCopied ? '✓ Copied!' : 'Copy'}
+              </button>
+            </div>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <a
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my ${course?.name || 'study'} plan on StudyEdge AI — ${shareLink}`)}`}
+                target="_blank" rel="noopener noreferrer"
+                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 12px', borderRadius: 10, border: '1px solid #E5E5E5', fontSize: 12.5, fontWeight: 600, color: '#374151', textDecoration: 'none', background: '#fff' }}
+              >
+                Share on X
+              </a>
+              <a
+                href={`https://wa.me/?text=${encodeURIComponent(`Here's my ${course?.name || ''} study plan — built with StudyEdge AI: ${shareLink}`)}`}
+                target="_blank" rel="noopener noreferrer"
+                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 12px', borderRadius: 10, border: '1px solid #E5E5E5', fontSize: 12.5, fontWeight: 600, color: '#374151', textDecoration: 'none', background: '#fff' }}
+              >
+                Share on WhatsApp
+              </a>
+            </div>
+          </div>
+        </div>
+      )}
 
 
 

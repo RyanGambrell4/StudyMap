@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
+import { useMemo, useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react'
 import { track } from '../lib/analytics'
 import { generateSchedule } from '../utils/generateSchedule'
 import { clean } from '../utils/strings'
@@ -26,13 +26,13 @@ import DashboardView from './DashboardView'
 import { useSessionReminders } from '../utils/useSessionReminders'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
-import CoursesView from './CoursesView'
-import ProgressView from './ProgressView'
-import StudyToolsView from './StudyToolsView'
-import StudyCoachView from './StudyCoachView'
-import AIChatView from './AIChatView'
-import GradeHubView from './GradeHubView'
-import AccountView from './AccountView'
+const CoursesView    = lazy(() => import('./CoursesView'))
+const ProgressView   = lazy(() => import('./ProgressView'))
+const StudyToolsView = lazy(() => import('./StudyToolsView'))
+const StudyCoachView = lazy(() => import('./StudyCoachView'))
+const AIChatView     = lazy(() => import('./AIChatView'))
+const GradeHubView   = lazy(() => import('./GradeHubView'))
+const AccountView    = lazy(() => import('./AccountView'))
 import CheatSheetModal from './CheatSheetModal'
 import BrainDumpModal from './BrainDumpModal'
 import ExamRescueModal from './ExamRescueModal'
@@ -1527,6 +1527,12 @@ export default function OutputView({
           </div>
         )}
 
+        <Suspense fallback={
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200 }}>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', border: '3px solid #e2e8f0', borderTopColor: '#6366f1', animation: 'spin 0.7s linear infinite' }} />
+          </div>
+        }>
+
         {/* ── Courses ── */}
         {activeSection === 'courses' && (
           <CoursesView
@@ -1660,6 +1666,8 @@ export default function OutputView({
             todayStr={todayStr}
           />
         )}
+
+        </Suspense>
 
         {/* Print header */}
         <div className="hidden print:block p-8 border-b border-gray-200">

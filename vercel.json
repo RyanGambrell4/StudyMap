@@ -55,6 +55,7 @@
     { "source": "/api/add-to-google-calendar", "destination": "/api/google-calendar?action=add" },
     { "source": "/privacy", "destination": "/privacy.html" },
     { "source": "/terms", "destination": "/terms.html" },
+    { "source": "/shared-plan", "destination": "/app.html" },
     { "source": "/app", "destination": "/app.html" },
     { "source": "/app/(.*)", "destination": "/app.html" },
     { "source": "/signup", "destination": "/signup.html" },

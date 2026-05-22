@@ -652,10 +652,8 @@ export default function DashboardView({
           onClick={() => typeof onNavigateToCalendar === 'function' && onNavigateToCalendar(displaySession?.dateStr ?? todayStr)}
           style={{
             gridColumn: 'span 7',
-            background: displaySession
-              ? `linear-gradient(135deg, ${sessionColor}08 0%, #ffffff 55%)`
-              : D.bgCard,
-            border: `1px solid ${upNextHovered ? `${sessionColor}40` : `${sessionColor}18`}`,
+            background: `linear-gradient(135deg, ${sessionColor}12 0%, #ffffff 60%)`,
+            border: `1px solid ${upNextHovered ? `${sessionColor}50` : `${sessionColor}28`}`,
             borderRadius: 14,
             display: 'flex', overflow: 'hidden',
             cursor: 'pointer',
@@ -666,7 +664,7 @@ export default function DashboardView({
           }}
         >
           {/* Color bar */}
-          <div style={{ width: 5, background: displaySession ? sessionColor : D.border, flexShrink: 0 }} />
+          <div style={{ width: 5, background: sessionColor, flexShrink: 0 }} />
 
           <div style={{ flex: 1, padding: 24, display: 'flex', flexDirection: 'column' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
@@ -747,7 +745,7 @@ export default function DashboardView({
                   <>
                     {/* Next upcoming session preview */}
                     {nextSession && nextSession.dateStr > todayStr ? (
-                      <div style={{ marginBottom: 20, padding: '14px 16px', background: 'rgba(0,0,0,0.02)', borderRadius: 10, border: `1px solid ${D.border}` }}>
+                      <div style={{ marginBottom: 20, padding: '14px 16px', background: `${nextSession.color?.dot ?? D.blue}10`, borderRadius: 10, border: `1px solid ${nextSession.color?.dot ?? D.blue}30` }}>
                         <div style={{ fontSize: 11, fontWeight: 700, color: D.textDim, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 6 }}>Coming up</div>
                         <div style={{ fontSize: 15, fontWeight: 600, color: D.text }}>{nextSession.sessionType ?? 'Study Session'}</div>
                         <div style={{ fontSize: 12, color: D.textMuted, marginTop: 3 }}>

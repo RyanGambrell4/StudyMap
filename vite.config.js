@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
+import { VitePWA } from 'vite-plugin-pwa'
 
 // Manually load .env file into process.env
 const envPath = path.resolve(process.cwd(), '.env')
@@ -385,7 +386,39 @@ Return ONLY the JSON array with no other text. Example:
 }
 
 export default defineConfig({
-  plugins: [react(), apiDevPlugin()],
+  plugins: [
+    react(),
+    apiDevPlugin(),
+    VitePWA({
+      registerType: 'autoUpdate',
+      injectRegister: 'null', // we inject manually via app.html registerSW.js
+      includeAssets: ['favicon.png'],
+      // Re-use the existing public/manifest.json without overwriting it
+      manifest: {
+        name: 'StudyEdge AI',
+        short_name: 'StudyEdge AI',
+        description: 'The complete AI study system for college students.',
+        start_url: '/app',
+        scope: '/',
+        display: 'standalone',
+        background_color: '#ffffff',
+        theme_color: '#6366f1',
+        icons: [{ src: '/favicon.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }],
+      },
+      workbox: {
+        globPatterns: ['assets/**/*.{js,css}', 'app.html'],
+        navigateFallback: '/app.html',
+        navigateFallbackDenylist: [/^\/api\//, /^\/login/, /^\/signup/, /^\/$/, /^\/blog/, /^\/privacy/, /^\/terms/],
+        runtimeCaching: [
+          {
+            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
+            handler: 'CacheFirst',
+            options: { cacheName: 'google-fonts', expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 } },
+          },
+        ],
+      },
+    }),
+  ],
   resolve: {
     alias: {
       '@': path.resolve(process.cwd(), 'src'),

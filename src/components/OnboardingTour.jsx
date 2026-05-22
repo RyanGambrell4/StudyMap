@@ -117,75 +117,55 @@ export default function OnboardingTour({ onReady }) {
       {
         popover: {
           title: 'Welcome to StudyEdge AI',
-          description: "Let's show you around in 60 seconds.",
+          description: "Let's show you around in 60 seconds. You can skip this any time.",
           showButtons: ['next', 'close'],
         },
       },
-      // Step 2: Courses
-      {
-        element: '#tour-nav-courses',
-        popover: {
-          title: 'Start With Your Courses',
-          description: 'Add your courses, exam dates, and target grades. Everything else in the app builds from this list.',
-          side: 'right',
-          align: 'center',
-        },
-      },
-      // Step 3: Dashboard
+      // Step 2: Dashboard
       {
         element: '#tour-nav-dashboard',
         popover: {
           title: 'Your Daily Dashboard',
-          description: 'See what\'s up next today, track your streak, and get an AI-generated study brief every morning.',
-          side: 'right',
-          align: 'center',
+          description: "See what's up next today, track your streak, and get an AI-generated study brief every morning.",
+          side: 'bottom',
+          align: 'start',
         },
       },
-      // Step 4: Calendar
+      // Step 3: Calendar / Schedule
       {
         element: '#tour-nav-calendar',
         popover: {
           title: 'Your Study Schedule',
-          description: 'Your sessions are auto-scheduled around your courses and deadlines. You can also add sessions manually.',
-          side: 'right',
-          align: 'center',
+          description: 'Your sessions are auto-scheduled around your courses and deadlines. Add sessions manually or let the AI fill your week.',
+          side: 'bottom',
+          align: 'start',
         },
       },
-      // Step 5: Study Coach
+      // Step 4: Strategy hub (Study Coach, Grades, AI Tutor)
       {
         element: '#tour-nav-coach',
         popover: {
-          title: 'AI Study Coach',
-          description: 'Generate a full week-by-week study plan for any course. Set your goal, exam date, and let the AI build it.',
-          side: 'right',
-          align: 'center',
+          title: 'Strategy Hub',
+          description: 'Hover here to access the AI Study Coach, Grade Tracker, and AI Tutor. Generate a full week-by-week study plan, track your grades, or get help on any topic.',
+          side: 'bottom',
+          align: 'start',
         },
       },
-      // Step 6: Study Tools
+      // Step 5: Brain Training hub
       {
         element: '#tour-nav-tools',
         popover: {
-          title: 'Flashcards & Quizzes',
-          description: 'Upload your notes or slides and instantly generate flashcards and quizzes to test yourself.',
-          side: 'right',
-          align: 'center',
+          title: 'Brain Training Hub',
+          description: 'Hover here for Flashcards, Quizzes, Brain Dump, Quiz Burst, and Exam Rescue. Upload your notes and instantly generate study materials.',
+          side: 'bottom',
+          align: 'start',
         },
       },
-      // Step 7: Grades
-      {
-        element: '#tour-nav-grades',
-        popover: {
-          title: 'Grade Hub',
-          description: 'Track your grades, see where you stand, and get a plan to hit your target grade.',
-          side: 'right',
-          align: 'center',
-        },
-      },
-      // Step 8: Done (centered)
+      // Step 6: Done (centered)
       {
         popover: {
           title: "You're all set.",
-          description: 'Start by adding your first course. It takes 30 seconds.',
+          description: 'Start by adding your first course — press the + Course button on the dashboard. It takes 30 seconds.',
           showButtons: ['previous', 'next'],
           nextBtnText: "Let's go",
         },
