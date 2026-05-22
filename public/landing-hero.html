@@ -1,0 +1,1456 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>StudyEdge · Landing Hero</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:           #060614;
+    --bg-frost:     #0d1117;
+    --accent:       #6366F1;
+    --accent-dark:  #4F46E5;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: #fff;
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* ─── Hero wrapper ─── */
+
+  .hero {
+    position: relative;
+    width: 100%;
+    /* Maintains 16:5 ratio */
+    aspect-ratio: 16 / 5;
+    overflow: hidden;
+    background: var(--bg);
+    isolation: isolate;
+    /* Internal layout uses a fixed 1920-wide coordinate space,
+       scaled down via transform to fill the container. */
+  }
+
+  /* Scale the inner 1920-wide stage to fill the hero's actual width */
+  .hero__stage {
+    position: absolute;
+    inset: 0;
+    width: 1920px;
+    height: 600px;
+    transform-origin: top left;
+  }
+
+  /* ─── Background layers ─── */
+
+  /* Frosted zone behind the mockup */
+  .bg-frost {
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      900px 480px at 72% 55%,
+      #0d1117 0%,
+      rgba(13, 17, 23, 0.55) 35%,
+      rgba(13, 17, 23, 0) 70%
+    );
+    z-index: 0;
+  }
+
+  /* Soft indigo ambient glow */
+  .bg-glow {
+    position: absolute;
+    left: 58%;
+    top: 30%;
+    width: 1200px;
+    height: 800px;
+    transform: translate(-50%, -50%);
+    background: radial-gradient(
+      closest-side,
+      rgba(99, 102, 241, 0.18),
+      rgba(99, 102, 241, 0.05) 45%,
+      rgba(99, 102, 241, 0) 75%
+    );
+    filter: blur(6px);
+    z-index: 0;
+  }
+
+  /* Subtle dot grid (masked to the right half) */
+  .bg-grid {
+    position: absolute;
+    inset: 0;
+    background-image: radial-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+    background-size: 28px 28px;
+    mask-image: radial-gradient(ellipse 1000px 500px at 65% 50%, rgba(0, 0, 0, 0.55), transparent 70%);
+    z-index: 0;
+  }
+
+  /* Vignette — top + edges */
+  .bg-vignette {
+    position: absolute;
+    inset: 0;
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0) 30%, rgba(0, 0, 0, 0) 70%, rgba(0, 0, 0, 0.4) 100%),
+      radial-gradient(ellipse at center, rgba(0, 0, 0, 0) 60%, rgba(0, 0, 0, 0.5) 100%);
+    z-index: 5;
+    pointer-events: none;
+  }
+
+  /* ─── Left copy ─── */
+
+  .copy {
+    position: absolute;
+    left: 100px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 4;
+    width: 640px;
+  }
+
+  /* Brand chip */
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 12px 6px 8px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: rgba(255, 255, 255, 0.025);
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 500;
+    letter-spacing: 0.01em;
+    color: rgba(255, 255, 255, 0.78);
+    margin-bottom: 28px;
+    backdrop-filter: blur(8px);
+  }
+
+  .brand__mark {
+    width: 22px;
+    height: 22px;
+    border-radius: 6px;
+    background: linear-gradient(135deg, #6366F1, #4F46E5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+    font-size: 12px;
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.45);
+    flex-shrink: 0;
+  }
+
+  .brand__sep {
+    width: 1px;
+    height: 12px;
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .brand__domain {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 12px;
+  }
+
+  /* Headline */
+  .headline {
+    font-size: 70px;
+    line-height: 0.98;
+    letter-spacing: -0.035em;
+    font-weight: 600;
+    margin: 0 0 22px;
+    color: #fff;
+    text-wrap: balance;
+  }
+
+  .headline__serif {
+    font-family: 'Instrument Serif', serif;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    background: linear-gradient(180deg, #ffffff 0%, #c7c8ff 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .headline__period {
+    color: #6366F1;
+    -webkit-text-fill-color: #6366F1;
+  }
+
+  /* Sub-headline */
+  .subline {
+    font-size: 19px;
+    line-height: 1.5;
+    color: rgba(226, 232, 240, 0.62);
+    margin: 0 0 28px;
+    max-width: 520px;
+    font-weight: 400;
+    letter-spacing: -0.005em;
+  }
+
+  /* Social proof row */
+  .social-proof {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    color: rgba(255, 255, 255, 0.55);
+    font-weight: 500;
+    letter-spacing: -0.005em;
+  }
+
+  .social-proof__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #6366F1;
+    box-shadow: 0 0 12px #6366F1;
+    flex-shrink: 0;
+  }
+
+  .social-proof__stat {
+    color: #fff;
+    font-weight: 600;
+  }
+
+  /* ─── Mockup (browser chrome + dashboard) ─── */
+
+  .mockup-wrap {
+    position: absolute;
+    right: -30px;
+    top: 10px;
+    z-index: 3;
+    perspective: 2400px;
+    perspective-origin: 50% 50%;
+    width: 940px;
+    height: 580px;
+  }
+
+  .mockup {
+    width: 940px;
+    height: 580px;
+    transform: rotateX(4deg) rotateY(-7deg) rotateZ(0.3deg);
+    transform-origin: 50% 50%;
+    transform-style: preserve-3d;
+    box-shadow:
+      0 50px 100px rgba(0, 0, 0, 0.65),
+      0 25px 50px rgba(0, 0, 0, 0.45),
+      0 0 80px rgba(99, 102, 241, 0.10),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
+    border-radius: 12px;
+    overflow: hidden;
+    background: #1c1c1e;
+  }
+
+  /* Browser chrome bar */
+  .chrome {
+    height: 34px;
+    background: #1c1c1e;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 12px;
+  }
+
+  .chrome__traffic-lights {
+    display: flex;
+    gap: 6px;
+  }
+
+  .chrome__traffic-lights span {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+
+  .chrome__traffic-lights span:nth-child(1) { background: #ff5f57; }
+  .chrome__traffic-lights span:nth-child(2) { background: #febc2e; }
+  .chrome__traffic-lights span:nth-child(3) { background: #28c840; }
+
+  .chrome__address {
+    flex: 1;
+    max-width: 380px;
+    margin: 0 auto;
+    background: #2a2a2d;
+    border-radius: 7px;
+    padding: 6px 12px;
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.55);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    letter-spacing: -0.005em;
+  }
+
+  .chrome__lock {
+    width: 10px;
+    height: 10px;
+    opacity: 0.6;
+    flex-shrink: 0;
+  }
+
+  .chrome__url-highlight {
+    color: #fff;
+    font-weight: 500;
+  }
+
+  /* ─── Dashboard app interior ─── */
+
+  .app {
+    height: calc(580px - 34px);
+    background: #F5F4EF;
+    color: #0F172A;
+    padding: 20px 26px 0;
+    overflow: hidden;
+    font-size: 12.5px;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  .app__date {
+    color: #6366F1;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+  }
+
+  .app__heading {
+    font-family: 'Instrument Serif', serif;
+    font-weight: 400;
+    font-size: 30px;
+    line-height: 1.02;
+    margin: 0 0 6px;
+    letter-spacing: -0.01em;
+    color: #0F172A;
+  }
+
+  .app__heading .period { color: #6366F1; }
+
+  .app__subheading {
+    color: #64748B;
+    font-size: 12px;
+    margin-bottom: 16px;
+    letter-spacing: -0.005em;
+  }
+
+  /* 2-column grid for Up Next + Quick Actions */
+  .app__grid-top {
+    display: grid;
+    grid-template-columns: 1.45fr 1fr;
+    gap: 14px;
+    margin-bottom: 14px;
+  }
+
+  /* Cards */
+  .card {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 14px 16px;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.03);
+  }
+
+  .card-label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 10px;
+  }
+
+  .card-label::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .card-label--orange { color: #EA580C; }
+  .card-label--indigo { color: #4F46E5; }
+  .card-label--green  { color: #16A34A; }
+
+  /* ─── Up Next card ─── */
+
+  .upnext {
+    position: relative;
+    overflow: hidden;
+    min-height: 170px;
+  }
+
+  .upnext::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(254, 215, 170, 0.45) 0%, rgba(255, 255, 255, 0) 55%);
+    pointer-events: none;
+  }
+
+  .upnext__content {
+    position: relative;
+    z-index: 1;
+  }
+
+  .upnext__course {
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #EA580C;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+    white-space: nowrap;
+  }
+
+  .upnext__course .time {
+    color: #94A3B8;
+    font-weight: 400;
+  }
+
+  .upnext__title {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    color: #0F172A;
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+    white-space: nowrap;
+  }
+
+  .upnext__title .duration {
+    font-size: 12px;
+    color: #94A3B8;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  .upnext__start-btn {
+    margin-top: 14px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #EA580C;
+    color: #fff;
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-weight: 600;
+    font-size: 12.5px;
+    box-shadow: 0 6px 16px rgba(234, 88, 12, 0.28);
+    letter-spacing: -0.005em;
+    font-family: inherit;
+    cursor: pointer;
+    border: none;
+  }
+
+  /* Triangle play icon */
+  .upnext__start-btn::before {
+    content: '';
+    display: block;
+    width: 0;
+    height: 0;
+    border-left: 7px solid #fff;
+    border-top: 5px solid transparent;
+    border-bottom: 5px solid transparent;
+  }
+
+  .upnext__meta {
+    margin-top: 14px;
+    display: flex;
+    gap: 18px;
+    align-items: center;
+    font-size: 12px;
+    color: #64748B;
+  }
+
+  .upnext__meta-item {
+    padding-right: 18px;
+    border-right: 1px solid #E5E7EB;
+  }
+
+  .upnext__meta-item:last-child {
+    border: 0;
+    padding-right: 0;
+  }
+
+  .upnext__ai-hint {
+    margin-top: 10px;
+    font-size: 11px;
+    color: #94A3B8;
+  }
+
+  /* ─── Quick Actions card ─── */
+
+  .qa-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 9px 4px;
+    border-bottom: 1px solid #F1F5F9;
+  }
+
+  .qa-row:last-of-type { border-bottom: 0; }
+
+  .qa-row__left {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+  }
+
+  .qa-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 13px;
+  }
+
+  .qa-icon--indigo { background: #EEF2FF; color: #4F46E5; }
+  .qa-icon--green  { background: #ECFDF5; color: #059669; }
+  .qa-icon--purple { background: #F3E8FF; color: #7C3AED; }
+
+  .qa-row__title {
+    font-weight: 600;
+    font-size: 13.5px;
+    color: #0F172A;
+  }
+
+  .qa-row__desc {
+    font-size: 11.5px;
+    color: #94A3B8;
+    margin-top: 1px;
+  }
+
+  .qa-row__arrow {
+    color: #CBD5E1;
+    font-size: 14px;
+  }
+
+  /* Study Hacks grid */
+  .study-hacks {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #F1F5F9;
+  }
+
+  .study-hacks__label {
+    grid-column: 1 / -1;
+    font-size: 9.5px;
+    font-weight: 700;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: #94A3B8;
+    text-align: center;
+    margin-bottom: 2px;
+  }
+
+  .hack-chip {
+    border: 1px solid #F1F5F9;
+    border-radius: 10px;
+    padding: 10px 8px;
+    text-align: center;
+    background: #FAFAFC;
+  }
+
+  .hack-chip--purple { background: #F5F3FF; border-color: #EDE9FE; }
+  .hack-chip--red    { background: #FEF2F2; border-color: #FEE2E2; }
+  .hack-chip--orange { background: #FFF7ED; border-color: #FED7AA; }
+
+  .hack-chip__icon {
+    width: 26px;
+    height: 26px;
+    border-radius: 7px;
+    background: #fff;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 6px;
+    font-size: 12px;
+  }
+
+  .hack-chip__name {
+    font-size: 11.5px;
+    font-weight: 600;
+    color: #0F172A;
+  }
+
+  .qa-footer {
+    margin-top: 10px;
+    padding: 9px 12px;
+    background: #F8FAFC;
+    border-radius: 9px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: #64748B;
+  }
+
+  .qa-footer__stat { color: #0F172A; font-weight: 600; }
+  .qa-footer__link { color: #6366F1; font-weight: 600; }
+
+  /* ─── Today's Brief banner ─── */
+
+  .brief {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 12px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 18px;
+    font-size: 13px;
+  }
+
+  .brief__label {
+    font-size: 10.5px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #EA580C;
+    margin-bottom: 4px;
+  }
+
+  .brief__label::before { content: '● '; }
+
+  .brief__text {
+    color: #0F172A;
+    font-weight: 500;
+  }
+
+  .brief__cta {
+    background: #fff;
+    border: 1px solid #E5E7EB;
+    border-radius: 7px;
+    padding: 5px 10px;
+    font-size: 11.5px;
+    font-weight: 500;
+    color: #0F172A;
+    white-space: nowrap;
+    font-family: inherit;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  /* ─── Bottom row: Courses + This Week ─── */
+
+  .app__grid-bottom {
+    display: grid;
+    grid-template-columns: 1.25fr 1fr;
+    gap: 18px;
+  }
+
+  /* Courses card */
+  .courses-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+
+  .courses-head__right {
+    font-size: 11px;
+    color: #94A3B8;
+  }
+
+  .courses-head__link {
+    color: #4F46E5;
+    font-weight: 500;
+    margin-left: 8px;
+  }
+
+  .course-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: 14px;
+    align-items: center;
+    padding: 8px 0;
+    border-top: 1px solid #F1F5F9;
+  }
+
+  .course-row:first-of-type {
+    border-top: 0;
+    padding-top: 4px;
+  }
+
+  .course-row__name-group {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+  }
+
+  .course-row__bar {
+    width: 3px;
+    height: 26px;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .course-row__name {
+    font-weight: 600;
+    font-size: 13px;
+    color: #0F172A;
+  }
+
+  .course-row__last {
+    font-size: 11px;
+    color: #94A3B8;
+    margin-top: 1px;
+  }
+
+  .course-row__hours {
+    font-weight: 600;
+    font-size: 13px;
+    color: #0F172A;
+    text-align: right;
+  }
+
+  .course-row__sessions {
+    font-size: 11px;
+    color: #94A3B8;
+    margin-top: 1px;
+    text-align: right;
+  }
+
+  .status-pill {
+    background: #FFEDD5;
+    color: #C2410C;
+    border-radius: 999px;
+    padding: 3px 9px;
+    font-size: 10.5px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .status-pill--priority { background: #FEE2E2; color: #B91C1C; }
+
+  .course-row__action {
+    color: #EA580C;
+    font-size: 10.5px;
+    font-weight: 500;
+    margin-top: 3px;
+    text-align: right;
+  }
+
+  /* This Week card */
+  .this-week-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .pill-pace {
+    background: #ECFDF5;
+    color: #059669;
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pill-pace::before { content: '✓'; font-weight: 700; }
+
+  .stat-row {
+    display: grid;
+    grid-template-columns: 28px 1fr auto auto;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 0;
+    border-top: 1px solid #F1F5F9;
+    font-size: 13px;
+  }
+
+  .stat-row:first-of-type {
+    border-top: 0;
+    padding-top: 6px;
+  }
+
+  .stat-row__icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #F8FAFC;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #64748B;
+    font-size: 13px;
+  }
+
+  .stat-row__label { color: #475569; font-size: 13px; }
+
+  .stat-row__value {
+    font-weight: 700;
+    font-size: 18px;
+    color: #0F172A;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-row__value .unit {
+    font-size: 11px;
+    color: #94A3B8;
+    font-weight: 500;
+    margin-left: 3px;
+  }
+
+  .stat-delta {
+    background: #ECFDF5;
+    color: #059669;
+    border-radius: 6px;
+    padding: 2px 6px;
+    font-size: 10.5px;
+    font-weight: 600;
+  }
+
+  .weekly-goal {
+    margin-top: 8px;
+    padding-top: 12px;
+    border-top: 1px solid #F1F5F9;
+  }
+
+  .weekly-goal__head {
+    display: flex;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: #64748B;
+    margin-bottom: 6px;
+  }
+
+  .weekly-goal__current { color: #0F172A; font-weight: 600; }
+
+  .weekly-goal__track {
+    height: 6px;
+    background: #F1F5F9;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .weekly-goal__fill {
+    width: 96%;
+    height: 100%;
+    background: linear-gradient(90deg, #22C55E, #16A34A);
+    border-radius: 4px;
+  }
+
+  /* ─── Floating overlay cards ─── */
+
+  .float-card {
+    position: absolute;
+    z-index: 6;
+    background: #fff;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow:
+      0 30px 60px rgba(0, 0, 0, 0.55),
+      0 15px 30px rgba(0, 0, 0, 0.35),
+      0 0 0 1px rgba(255, 255, 255, 0.06);
+    color: #0F172A;
+    overflow: hidden;
+  }
+
+  /* Grade Hub floating card */
+  .float-card--grades {
+    width: 290px;
+    right: 700px;
+    bottom: 24px;
+    transform: rotate(-2deg);
+    padding: 16px 18px 14px;
+  }
+
+  .float-card__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 14px;
+  }
+
+  .float-card__title {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #4F46E5;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .float-card__title::before {
+    content: '';
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+  }
+
+  .float-card__badge {
+    font-size: 10.5px;
+    color: #16A34A;
+    font-weight: 600;
+    background: #ECFDF5;
+    padding: 3px 8px;
+    border-radius: 999px;
+  }
+
+  .grade-row {
+    display: grid;
+    grid-template-columns: 12px 1fr auto auto;
+    gap: 10px;
+    align-items: center;
+    padding: 9px 0;
+    border-top: 1px solid #F1F5F9;
+  }
+
+  .grade-row:first-of-type { border-top: 0; padding-top: 2px; }
+
+  .grade-row__dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+  }
+
+  .grade-row__name {
+    font-size: 13px;
+    font-weight: 600;
+    color: #0F172A;
+    letter-spacing: -0.005em;
+  }
+
+  .grade-row__pct {
+    font-size: 12.5px;
+    color: #64748B;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .grade-row__letter {
+    font-size: 13px;
+    font-weight: 800;
+    width: 30px;
+    text-align: right;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .grade-row__letter--a  { color: #16A34A; }
+  .grade-row__letter--am { color: #22C55E; }
+  .grade-row__letter--bp { color: #4F46E5; }
+  .grade-row__letter--b  { color: #64748B; }
+
+  .gpa-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-top: 10px;
+    padding-top: 12px;
+    border-top: 1px solid #F1F5F9;
+  }
+
+  .gpa-row__label {
+    font-size: 11px;
+    color: #94A3B8;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 600;
+  }
+
+  .gpa-row__value {
+    font-family: 'Instrument Serif', serif;
+    font-size: 28px;
+    line-height: 1;
+    color: #0F172A;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+  }
+
+  /* Streak floating widget */
+  .float-card--streak {
+    width: 270px;
+    right: 110px;
+    bottom: 12px;
+    transform: rotate(2deg);
+    padding: 14px 16px;
+  }
+
+  .streak__top {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+
+  .streak__flame-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 11px;
+    background: linear-gradient(135deg, #FB923C, #EF4444);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 6px 14px rgba(251, 146, 60, 0.4);
+    flex-shrink: 0;
+  }
+
+  .streak__count {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+    color: #0F172A;
+    line-height: 1;
+  }
+
+  .streak__count .unit {
+    font-size: 13px;
+    font-weight: 500;
+    color: #64748B;
+    margin-left: 4px;
+    letter-spacing: 0;
+  }
+
+  .streak__sub {
+    font-size: 11.5px;
+    color: #64748B;
+    margin-top: 4px;
+    letter-spacing: -0.005em;
+  }
+
+  /* Sparkline bar chart */
+  .sparkline {
+    display: flex;
+    align-items: flex-end;
+    gap: 4px;
+    height: 32px;
+    margin-bottom: 8px;
+  }
+
+  .sparkline__bar {
+    flex: 1;
+    background: linear-gradient(180deg, #6366F1, #4F46E5);
+    border-radius: 2px;
+    opacity: 0.9;
+  }
+
+  .sparkline__bar--dim {
+    background: #E2E8F0;
+    opacity: 1;
+  }
+
+  .streak__hours {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 11.5px;
+    color: #64748B;
+    padding-top: 8px;
+    border-top: 1px solid #F1F5F9;
+  }
+
+  .streak__hours strong {
+    color: #0F172A;
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+</style>
+</head>
+<body>
+
+<section class="hero" aria-label="StudyEdge landing hero">
+  <div class="hero__stage" id="js-stage">
+
+    <!-- Background layers -->
+    <div class="bg-frost" aria-hidden="true"></div>
+    <div class="bg-glow"  aria-hidden="true"></div>
+    <div class="bg-grid"  aria-hidden="true"></div>
+
+    <!-- Left copy -->
+    <div class="copy">
+      <div class="brand" aria-label="StudyEdge AI — getstudyedge.com">
+        <span class="brand__mark" aria-hidden="true">S</span>
+        <span>StudyEdge AI</span>
+        <span class="brand__sep" aria-hidden="true"></span>
+        <span class="brand__domain">getstudyedge.com</span>
+      </div>
+
+      <h1 class="headline">
+        While others cram.<br>
+        <span class="headline__serif">You execute</span><span class="headline__period">.</span>
+      </h1>
+
+      <p class="subline">
+        Your AI study system — plans, coaches, tracks, and tells you exactly where to focus. Every course. All semester.
+      </p>
+
+      <div class="social-proof">
+        <span class="social-proof__dot" aria-hidden="true"></span>
+        <span>Built for serious students &nbsp;·&nbsp; <span class="social-proof__stat">9.6h studied this week</span></span>
+      </div>
+    </div>
+
+    <!-- Mockup: browser chrome + dashboard -->
+    <div class="mockup-wrap" aria-hidden="true">
+      <div class="mockup">
+
+        <!-- Browser chrome -->
+        <div class="chrome">
+          <div class="chrome__traffic-lights">
+            <span></span><span></span><span></span>
+          </div>
+          <div class="chrome__address">
+            <!-- Lock icon -->
+            <svg class="chrome__lock" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M4 7V5a4 4 0 1 1 8 0v2M3.5 7h9a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z" stroke="currentColor" stroke-width="1.2"/>
+            </svg>
+            <span>app.getstudyedge.com<span class="chrome__url-highlight">/dashboard</span></span>
+          </div>
+          <div style="width: 60px;"></div>
+        </div>
+
+        <!-- Dashboard interior -->
+        <div class="app">
+          <div class="app__date">FRIDAY, MAY 22</div>
+          <h2 class="app__heading">Good morning<span class="period">.</span></h2>
+          <p class="app__subheading">9 sessions on the schedule. Linear Algebra exam in 3 days.</p>
+
+          <!-- Top grid: Up Next + Quick Actions -->
+          <div class="app__grid-top">
+
+            <!-- Up Next Today -->
+            <div class="card upnext">
+              <div class="upnext__content">
+                <div class="card-label card-label--orange">UP NEXT TODAY</div>
+                <div class="upnext__course">
+                  Organic Chemistry <span class="time">· 9:00 AM → 10:00 AM</span>
+                </div>
+                <div class="upnext__title">
+                  Practice <span class="duration">60 min</span>
+                </div>
+                <button class="upnext__start-btn">Start session</button>
+                <div class="upnext__meta">
+                  <span class="upnext__meta-item">Mark done</span>
+                  <span class="upnext__meta-item">Skip</span>
+                  <span class="upnext__meta-item">Pomodoro · 25 + 5</span>
+                </div>
+                <div class="upnext__ai-hint">AI-structured session blocks · recall checkpoints</div>
+              </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="card">
+              <div class="card-label card-label--indigo">QUICK ACTIONS</div>
+
+              <div class="qa-row">
+                <div class="qa-row__left">
+                  <div class="qa-icon qa-icon--indigo" aria-hidden="true">◫</div>
+                  <div>
+                    <div class="qa-row__title">Study Coach</div>
+                    <div class="qa-row__desc">AI-powered weekly plan</div>
+                  </div>
+                </div>
+                <span class="qa-row__arrow" aria-hidden="true">›</span>
+              </div>
+
+              <div class="qa-row">
+                <div class="qa-row__left">
+                  <div class="qa-icon qa-icon--green" aria-hidden="true">◎</div>
+                  <div>
+                    <div class="qa-row__title">Grade Hub</div>
+                    <div class="qa-row__desc">Track grades and targets</div>
+                  </div>
+                </div>
+                <span class="qa-row__arrow" aria-hidden="true">›</span>
+              </div>
+
+              <div class="qa-row">
+                <div class="qa-row__left">
+                  <div class="qa-icon qa-icon--purple" aria-hidden="true">▤</div>
+                  <div>
+                    <div class="qa-row__title">Flashcards</div>
+                    <div class="qa-row__desc">Test your knowledge</div>
+                  </div>
+                </div>
+                <span class="qa-row__arrow" aria-hidden="true">›</span>
+              </div>
+
+              <!-- Study Hacks -->
+              <div class="study-hacks">
+                <div class="study-hacks__label">STUDY HACKS</div>
+                <div class="hack-chip hack-chip--purple">
+                  <div class="hack-chip__icon" style="color: #7C3AED;">◫</div>
+                  <div class="hack-chip__name">Brain Dump</div>
+                </div>
+                <div class="hack-chip hack-chip--red">
+                  <div class="hack-chip__icon" style="color: #EF4444;">◈</div>
+                  <div class="hack-chip__name">Rescue Plan</div>
+                </div>
+                <div class="hack-chip hack-chip--orange">
+                  <div class="hack-chip__icon" style="color: #EA580C;">⚡</div>
+                  <div class="hack-chip__name">Quiz Burst</div>
+                </div>
+              </div>
+
+              <div class="qa-footer">
+                <div><span class="qa-footer__stat">9.7h</span> this week · <span class="qa-footer__stat">78%</span> recall</div>
+                <div class="qa-footer__link">Progress →</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Today's Brief -->
+          <div class="brief">
+            <div>
+              <div class="brief__label">TODAY'S BRIEF</div>
+              <div class="brief__text">Linear Algebra exam in 3 days. Add focused review sessions this week to stay on track.</div>
+            </div>
+            <button class="brief__cta">View schedule</button>
+          </div>
+
+          <!-- Bottom grid: Courses + This Week -->
+          <div class="app__grid-bottom">
+
+            <!-- Courses -->
+            <div class="card">
+              <div class="courses-head">
+                <div class="card-label card-label--indigo">COURSES</div>
+                <div class="courses-head__right">
+                  Hrs · Recall <span class="courses-head__link">View all</span>
+                </div>
+              </div>
+
+              <div class="course-row">
+                <div class="course-row__name-group">
+                  <div class="course-row__bar" style="background: #22C55E;"></div>
+                  <div>
+                    <div class="course-row__name">Cell Biology</div>
+                    <div class="course-row__last">Last studied today</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="course-row__hours">7.2h</div>
+                  <div class="course-row__sessions">12 sessions</div>
+                </div>
+                <div>
+                  <div class="status-pill">On track</div>
+                  <div class="course-row__action">88.5% · A</div>
+                </div>
+              </div>
+
+              <div class="course-row">
+                <div class="course-row__name-group">
+                  <div class="course-row__bar" style="background: #F97316;"></div>
+                  <div>
+                    <div class="course-row__name">Organic Chemistry</div>
+                    <div class="course-row__last">Last studied today</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="course-row__hours">2.0h</div>
+                  <div class="course-row__sessions">4 sessions</div>
+                </div>
+                <div>
+                  <div class="status-pill">Needs Work</div>
+                  <div class="course-row__action">Brain Dump →</div>
+                </div>
+              </div>
+
+              <div class="course-row">
+                <div class="course-row__name-group">
+                  <div class="course-row__bar" style="background: #A855F7;"></div>
+                  <div>
+                    <div class="course-row__name">Cognitive Psychology</div>
+                    <div class="course-row__last">Last studied yesterday</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="course-row__hours">2.2h</div>
+                  <div class="course-row__sessions">5 sessions</div>
+                </div>
+                <div>
+                  <div class="status-pill">Needs Work</div>
+                  <div class="course-row__action">Brain Dump →</div>
+                </div>
+              </div>
+
+              <div class="course-row">
+                <div class="course-row__name-group">
+                  <div class="course-row__bar" style="background: #3B82F6;"></div>
+                  <div>
+                    <div class="course-row__name">Linear Algebra</div>
+                    <div class="course-row__last">Last studied today · exam in 3 days</div>
+                  </div>
+                </div>
+                <div>
+                  <div class="course-row__hours">3.6h</div>
+                  <div class="course-row__sessions">8 sessions</div>
+                </div>
+                <div>
+                  <div class="status-pill status-pill--priority">Priority</div>
+                  <div class="course-row__action">Rescue Plan →</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- This Week -->
+            <div class="card">
+              <div class="this-week-head">
+                <div class="card-label card-label--green">THIS WEEK</div>
+                <div class="pill-pace">On pace</div>
+              </div>
+
+              <div class="stat-row">
+                <div class="stat-row__icon" style="background: #FFF7ED; color: #EA580C;">◉</div>
+                <div class="stat-row__label">Study streak</div>
+                <div class="stat-row__value">14<span class="unit">days</span></div>
+                <div class="stat-delta">↑ +3</div>
+              </div>
+
+              <div class="stat-row">
+                <div class="stat-row__icon">◷</div>
+                <div class="stat-row__label">Hours studied</div>
+                <div class="stat-row__value">9.6<span class="unit">hrs</span></div>
+                <div class="stat-delta">↑ +1.4</div>
+              </div>
+
+              <div class="stat-row">
+                <div class="stat-row__icon" style="background: #ECFDF5; color: #16A34A;">✓</div>
+                <div class="stat-row__label">Sessions done</div>
+                <div class="stat-row__value">8</div>
+                <div class="stat-delta">↑ +2</div>
+              </div>
+
+              <div class="weekly-goal">
+                <div class="weekly-goal__head">
+                  <span>Weekly goal</span>
+                  <span class="weekly-goal__current">9.6 of 10h</span>
+                </div>
+                <div class="weekly-goal__track">
+                  <div class="weekly-goal__fill"></div>
+                </div>
+              </div>
+            </div>
+
+          </div><!-- /app__grid-bottom -->
+        </div><!-- /app -->
+      </div><!-- /mockup -->
+    </div><!-- /mockup-wrap -->
+
+    <!-- Floating card: Grade Hub -->
+    <aside class="float-card float-card--grades" aria-label="Grade Hub preview">
+      <div class="float-card__header">
+        <div class="float-card__title">Grade Hub</div>
+        <div class="float-card__badge">3.78 GPA</div>
+      </div>
+
+      <div class="grade-row">
+        <div class="grade-row__dot" style="background: #22C55E;"></div>
+        <div class="grade-row__name">Cell Biology</div>
+        <div class="grade-row__pct">88.5%</div>
+        <div class="grade-row__letter grade-row__letter--a">A</div>
+      </div>
+      <div class="grade-row">
+        <div class="grade-row__dot" style="background: #3B82F6;"></div>
+        <div class="grade-row__name">Linear Algebra</div>
+        <div class="grade-row__pct">90.2%</div>
+        <div class="grade-row__letter grade-row__letter--am">A−</div>
+      </div>
+      <div class="grade-row">
+        <div class="grade-row__dot" style="background: #F97316;"></div>
+        <div class="grade-row__name">Organic Chem</div>
+        <div class="grade-row__pct">86.4%</div>
+        <div class="grade-row__letter grade-row__letter--bp">B+</div>
+      </div>
+      <div class="grade-row">
+        <div class="grade-row__dot" style="background: #A855F7;"></div>
+        <div class="grade-row__name">Cognitive Psyc</div>
+        <div class="grade-row__pct">82.0%</div>
+        <div class="grade-row__letter grade-row__letter--b">B</div>
+      </div>
+
+      <div class="gpa-row">
+        <div class="gpa-row__label">Cumulative GPA</div>
+        <div class="gpa-row__value">3.78</div>
+      </div>
+    </aside>
+
+    <!-- Floating card: Streak widget -->
+    <aside class="float-card float-card--streak" aria-label="Study streak widget">
+      <div class="streak__top">
+        <div class="streak__flame-icon" aria-hidden="true">🔥</div>
+        <div>
+          <div class="streak__count">14<span class="unit">day streak</span></div>
+          <div class="streak__sub">Longest this semester</div>
+        </div>
+      </div>
+
+      <!-- Sparkline (14 bars; last two are dimmed/future) -->
+      <div class="sparkline" aria-hidden="true">
+        <div class="sparkline__bar" style="height: 30%;"></div>
+        <div class="sparkline__bar" style="height: 45%;"></div>
+        <div class="sparkline__bar" style="height: 38%;"></div>
+        <div class="sparkline__bar" style="height: 60%;"></div>
+        <div class="sparkline__bar" style="height: 55%;"></div>
+        <div class="sparkline__bar" style="height: 72%;"></div>
+        <div class="sparkline__bar" style="height: 68%;"></div>
+        <div class="sparkline__bar" style="height: 80%;"></div>
+        <div class="sparkline__bar" style="height: 75%;"></div>
+        <div class="sparkline__bar" style="height: 88%;"></div>
+        <div class="sparkline__bar" style="height: 92%;"></div>
+        <div class="sparkline__bar" style="height: 96%;"></div>
+        <div class="sparkline__bar sparkline__bar--dim" style="height: 60%;"></div>
+        <div class="sparkline__bar sparkline__bar--dim" style="height: 60%;"></div>
+      </div>
+
+      <div class="streak__hours">
+        <span>Hours this week</span>
+        <strong>9.6 hrs</strong>
+      </div>
+    </aside>
+
+    <!-- Edge vignette overlay -->
+    <div class="bg-vignette" aria-hidden="true"></div>
+
+  </div><!-- /hero__stage -->
+</section><!-- /hero -->
+
+<script>
+  // Scale the fixed 1920×600 stage to fill the hero container's actual width.
+  // This preserves pixel-perfect layout while the hero itself can be any size.
+  (function () {
+    var stage = document.getElementById('js-stage');
+    var STAGE_W = 1920;
+
+    function scale() {
+      var heroW = stage.parentElement.offsetWidth;
+      var s = heroW / STAGE_W;
+      stage.style.transform = 'scale(' + s + ')';
+    }
+
+    var ro = new ResizeObserver(scale);
+    ro.observe(stage.parentElement);
+    scale();
+  })();
+</script>
+</body>
+</html>

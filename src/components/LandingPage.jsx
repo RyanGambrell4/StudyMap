@@ -40,6 +40,21 @@ export default function LandingPage({ onGetStarted }) {
     return () => window.removeEventListener('scroll', handleScroll)
   }, [])
 
+  const heroStageRef = useRef(null)
+  useEffect(() => {
+    const stage = heroStageRef.current
+    if (!stage) return
+    const STAGE_W = 1920
+    const scale = () => {
+      const w = stage.parentElement.offsetWidth
+      stage.style.transform = `scale(${w / STAGE_W})`
+    }
+    const ro = new ResizeObserver(scale)
+    ro.observe(stage.parentElement)
+    scale()
+    return () => ro.disconnect()
+  }, [])
+
   const goTrial = () => window.location.href = '/app?signup=1&plan=pro&billing=monthly&trial=1'
 
   return (
@@ -126,120 +141,373 @@ export default function LandingPage({ onGetStarted }) {
       </nav>
 
       {/* ── Hero Section ── */}
-      <section style={{
-        paddingTop: '140px', paddingBottom: '80px',
-        textAlign: 'center', position: 'relative', overflow: 'hidden',
+      <section aria-label="StudyEdge landing hero" style={{
+        position: 'relative', width: '100%', aspectRatio: '16/5',
+        overflow: 'hidden', background: '#060614', isolation: 'isolate',
       }}>
-        {/* Background glow */}
-        <div style={{
-          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: 900, height: 600, borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(91,110,245,0.12) 0%, transparent 65%)',
-          filter: 'blur(60px)', pointerEvents: 'none',
-        }} />
-
-        {/* Badge */}
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.22)',
-          borderRadius: 999, padding: '6px 16px', marginBottom: 28, fontSize: 13, fontWeight: 600,
-          color: '#a5b4fc',
+        {/* 1920×600 stage — scaled to fill container width */}
+        <div ref={heroStageRef} style={{
+          position: 'absolute', inset: 0,
+          width: 1920, height: 600,
+          transformOrigin: 'top left',
         }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#6366f1' }} />
-          AI-powered study planner for students
-        </div>
 
-        {/* Headline */}
-        <h1 style={{
-          fontSize: 'clamp(36px, 5vw, 64px)', fontWeight: 900, lineHeight: 1.08,
-          letterSpacing: '-1.5px', color: '#fff', maxWidth: 760,
-          margin: '0 auto 20px', position: 'relative',
-        }}>
-          Stop surviving your courses.{' '}
-          <span style={{ background: 'linear-gradient(135deg, #a5b4fc, #818cf8)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', filter: 'drop-shadow(0 0 18px rgba(129,140,248,0.7))' }}>Start owning them.</span>
-        </h1>
+          {/* Background: frost */}
+          <div aria-hidden="true" style={{
+            position: 'absolute', inset: 0,
+            background: 'radial-gradient(900px 480px at 72% 55%, #0d1117 0%, rgba(13,17,23,0.55) 35%, rgba(13,17,23,0) 70%)',
+            zIndex: 0,
+          }} />
+          {/* Background: glow */}
+          <div aria-hidden="true" style={{
+            position: 'absolute', left: '58%', top: '30%',
+            width: 1200, height: 800,
+            transform: 'translate(-50%,-50%)',
+            background: 'radial-gradient(closest-side, rgba(99,102,241,0.18), rgba(99,102,241,0.05) 45%, rgba(99,102,241,0) 75%)',
+            filter: 'blur(6px)', zIndex: 0,
+          }} />
+          {/* Background: dot grid */}
+          <div aria-hidden="true" style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'radial-gradient(rgba(255,255,255,0.035) 1px, transparent 1px)',
+            backgroundSize: '28px 28px',
+            WebkitMaskImage: 'radial-gradient(ellipse 1000px 500px at 65% 50%, rgba(0,0,0,0.55), transparent 70%)',
+            maskImage: 'radial-gradient(ellipse 1000px 500px at 65% 50%, rgba(0,0,0,0.55), transparent 70%)',
+            zIndex: 0,
+          }} />
 
-        {/* Subheadline */}
-        <p style={{
-          fontSize: 'clamp(16px, 2vw, 19px)', color: 'rgba(226,232,240,0.55)',
-          maxWidth: 520, margin: '0 auto 40px', lineHeight: 1.6, fontWeight: 400,
-        }}>
-          StudyEdge AI builds your study system across every course, coaches every session, and shifts your focus to wherever your grades actually need help. One app. All semester.
-        </p>
+          {/* Left copy */}
+          <div style={{
+            position: 'absolute', left: 100, top: '50%', transform: 'translateY(-50%)',
+            zIndex: 4, width: 640,
+          }}>
+            {/* Brand chip */}
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 10,
+              padding: '6px 12px 6px 8px',
+              border: '1px solid rgba(255,255,255,0.08)',
+              background: 'rgba(255,255,255,0.025)',
+              borderRadius: 999, fontSize: 13, fontWeight: 500,
+              letterSpacing: '0.01em', color: 'rgba(255,255,255,0.78)',
+              marginBottom: 28, backdropFilter: 'blur(8px)',
+            }}>
+              <span style={{
+                width: 22, height: 22, borderRadius: 6,
+                background: 'linear-gradient(135deg, #6366F1, #4F46E5)',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                fontWeight: 800, fontSize: 12, color: '#fff',
+                boxShadow: '0 4px 12px rgba(99,102,241,0.45)', flexShrink: 0,
+              }}>S</span>
+              <span>StudyEdge AI</span>
+              <span style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.1)' }} />
+              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>getstudyedge.com</span>
+            </div>
 
-        {/* CTA Buttons */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-          <button
-            onClick={goTrial}
-            style={{
-              background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-              border: 'none', color: '#fff', borderRadius: 12, padding: '15px 36px',
-              fontSize: 17, fontWeight: 700, cursor: 'pointer',
-              boxShadow: '0 0 30px rgba(99,102,241,0.35), 0 4px 20px rgba(0,0,0,0.3)',
-              transition: 'all 0.2s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 45px rgba(99,102,241,0.55), 0 4px 20px rgba(0,0,0,0.3)'}
-            onMouseLeave={e => e.currentTarget.style.boxShadow = '0 0 30px rgba(99,102,241,0.35), 0 4px 20px rgba(0,0,0,0.3)'}
-          >
-            Start Studying Free
-          </button>
-          <span style={{ fontSize: 12, color: 'rgba(226,232,240,0.30)' }}>
-            Card charged after trial · Cancel anytime before day 7
-          </span>
-          <button
-            onClick={() => onGetStarted('signup')}
-            style={{ background: 'none', border: 'none', color: 'rgba(226,232,240,0.35)', fontSize: 13, cursor: 'pointer', textDecoration: 'underline', padding: 0 }}
-          >
-            or start free, no card required
-          </button>
-        </div>
+            {/* Headline */}
+            <h1 style={{
+              fontSize: 70, lineHeight: 0.98, letterSpacing: '-0.035em',
+              fontWeight: 600, margin: '0 0 22px', color: '#fff',
+            }}>
+              While others cram.<br />
+              <span style={{
+                fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
+                fontWeight: 400, letterSpacing: '-0.02em',
+                background: 'linear-gradient(180deg, #ffffff 0%, #c7c8ff 100%)',
+                WebkitBackgroundClip: 'text', backgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+              }}>You execute</span><span style={{ color: '#6366F1' }}>.</span>
+            </h1>
 
-        {/* Social proof row */}
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          gap: 10, marginTop: 28,
-        }}>
-          {/* Avatar stack */}
-          <div style={{ display: 'flex' }}>
-            {['#6366f1','#8b5cf6','#ec4899','#f59e0b','#10b981'].map((c, i) => (
-              <div key={i} style={{
-                width: 26, height: 26, borderRadius: '50%',
-                background: c, border: '2px solid #060614',
-                marginLeft: i === 0 ? 0 : -8,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 10, fontWeight: 700, color: '#fff',
+            {/* Subline */}
+            <p style={{
+              fontSize: 19, lineHeight: 1.5, color: 'rgba(226,232,240,0.62)',
+              margin: '0 0 28px', maxWidth: 520, fontWeight: 400, letterSpacing: '-0.005em',
+            }}>
+              Your AI study system — plans, coaches, tracks, and tells you exactly where to focus. Every course. All semester.
+            </p>
+
+            {/* Social proof */}
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: 10,
+              fontSize: 14, color: 'rgba(255,255,255,0.55)', fontWeight: 500, letterSpacing: '-0.005em',
+            }}>
+              <span style={{
+                width: 6, height: 6, borderRadius: '50%', background: '#6366F1',
+                boxShadow: '0 0 12px #6366F1', flexShrink: 0,
+              }} />
+              <span>Built for serious students &nbsp;·&nbsp; <strong style={{ color: '#fff', fontWeight: 600 }}>9.6h studied this week</strong></span>
+            </div>
+          </div>
+
+          {/* Mockup */}
+          <div style={{
+            position: 'absolute', right: -30, top: 10, zIndex: 3,
+            perspective: 2400, perspectiveOrigin: '50% 50%',
+            width: 940, height: 580,
+          }}>
+            <div style={{
+              width: 940, height: 580,
+              transform: 'rotateX(4deg) rotateY(-7deg) rotateZ(0.3deg)',
+              transformOrigin: '50% 50%', transformStyle: 'preserve-3d',
+              boxShadow: '0 50px 100px rgba(0,0,0,0.65), 0 25px 50px rgba(0,0,0,0.45), 0 0 80px rgba(99,102,241,0.10), 0 0 0 1px rgba(255,255,255,0.06)',
+              borderRadius: 12, overflow: 'hidden', background: '#1c1c1e',
+            }}>
+              {/* Browser chrome */}
+              <div style={{
+                height: 34, background: '#1c1c1e',
+                borderBottom: '1px solid rgba(255,255,255,0.06)',
+                display: 'flex', alignItems: 'center', padding: '0 12px', gap: 12,
               }}>
-                {['R','M','J','A','S'][i]}
+                <div style={{ display: 'flex', gap: 6 }}>
+                  {['#ff5f57','#febc2e','#28c840'].map(c => (
+                    <span key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />
+                  ))}
+                </div>
+                <div style={{
+                  flex: 1, maxWidth: 380, margin: '0 auto',
+                  background: '#2a2a2d', borderRadius: 7, padding: '6px 12px',
+                  fontSize: 12, color: 'rgba(255,255,255,0.55)',
+                  display: 'flex', alignItems: 'center', gap: 8, letterSpacing: '-0.005em',
+                }}>
+                  <svg style={{ width: 10, height: 10, opacity: 0.6, flexShrink: 0 }} viewBox="0 0 16 16" fill="none">
+                    <path d="M4 7V5a4 4 0 1 1 8 0v2M3.5 7h9a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-9a1 1 0 0 1-1-1V8a1 1 0 0 1 1-1Z" stroke="currentColor" strokeWidth="1.2"/>
+                  </svg>
+                  <span>app.getstudyedge.com<strong style={{ color: '#fff', fontWeight: 500 }}>/dashboard</strong></span>
+                </div>
+                <div style={{ width: 60 }} />
+              </div>
+
+              {/* App interior */}
+              <div style={{
+                height: 546, background: '#F5F4EF', color: '#0F172A',
+                padding: '20px 26px 0', overflow: 'hidden', fontSize: 12.5,
+                fontFamily: "'Inter', system-ui, sans-serif",
+              }}>
+                <div style={{ color: '#6366F1', fontSize: 10, fontWeight: 600, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>FRIDAY, MAY 22</div>
+                <h2 style={{ fontFamily: "'Instrument Serif', serif", fontWeight: 400, fontSize: 30, lineHeight: 1.02, margin: '0 0 6px', letterSpacing: '-0.01em', color: '#0F172A' }}>
+                  Good morning<span style={{ color: '#6366F1' }}>.</span>
+                </h2>
+                <p style={{ color: '#64748B', fontSize: 12, marginBottom: 16, letterSpacing: '-0.005em' }}>9 sessions on the schedule. Linear Algebra exam in 3 days.</p>
+
+                {/* Top grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1.45fr 1fr', gap: 14, marginBottom: 14 }}>
+                  {/* Up Next */}
+                  <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, padding: '14px 16px', boxShadow: '0 1px 2px rgba(15,23,42,0.03)', position: 'relative', overflow: 'hidden', minHeight: 170 }}>
+                    <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(254,215,170,0.45) 0%, rgba(255,255,255,0) 55%)', pointerEvents: 'none' }} />
+                    <div style={{ position: 'relative', zIndex: 1 }}>
+                      <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#EA580C', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'currentColor' }} /> UP NEXT TODAY
+                      </div>
+                      <div style={{ fontSize: 11.5, fontWeight: 500, color: '#EA580C', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, whiteSpace: 'nowrap' }}>
+                        Organic Chemistry <span style={{ color: '#94A3B8', fontWeight: 400 }}>· 9:00 AM → 10:00 AM</span>
+                      </div>
+                      <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', color: '#0F172A', display: 'flex', alignItems: 'baseline', gap: 8, whiteSpace: 'nowrap' }}>
+                        Practice <span style={{ fontSize: 12, color: '#94A3B8', fontWeight: 400, letterSpacing: 0 }}>60 min</span>
+                      </div>
+                      <button style={{ marginTop: 14, display: 'inline-flex', alignItems: 'center', gap: 8, background: '#EA580C', color: '#fff', borderRadius: 8, padding: '8px 12px', fontWeight: 600, fontSize: 12.5, boxShadow: '0 6px 16px rgba(234,88,12,0.28)', letterSpacing: '-0.005em', fontFamily: 'inherit', cursor: 'pointer', border: 'none' }}>
+                        <span style={{ display: 'block', width: 0, height: 0, borderLeft: '7px solid #fff', borderTop: '5px solid transparent', borderBottom: '5px solid transparent' }} />
+                        Start session
+                      </button>
+                      <div style={{ marginTop: 14, display: 'flex', gap: 18, alignItems: 'center', fontSize: 12, color: '#64748B' }}>
+                        {['Mark done','Skip','Pomodoro · 25 + 5'].map((t, i, a) => (
+                          <span key={t} style={i < a.length - 1 ? { paddingRight: 18, borderRight: '1px solid #E5E7EB' } : {}}>{t}</span>
+                        ))}
+                      </div>
+                      <div style={{ marginTop: 10, fontSize: 11, color: '#94A3B8' }}>AI-structured session blocks · recall checkpoints</div>
+                    </div>
+                  </div>
+
+                  {/* Quick Actions */}
+                  <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, padding: '14px 16px', boxShadow: '0 1px 2px rgba(15,23,42,0.03)' }}>
+                    <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#4F46E5', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
+                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'currentColor' }} /> QUICK ACTIONS
+                    </div>
+                    {[
+                      { icon: '◫', bg: '#EEF2FF', color: '#4F46E5', title: 'Study Coach', desc: 'AI-powered weekly plan' },
+                      { icon: '◎', bg: '#ECFDF5', color: '#059669', title: 'Grade Hub', desc: 'Track grades and targets' },
+                      { icon: '▤', bg: '#F3E8FF', color: '#7C3AED', title: 'Flashcards', desc: 'Test your knowledge' },
+                    ].map(({ icon, bg, color, title, desc }) => (
+                      <div key={title} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '9px 4px', borderBottom: '1px solid #F1F5F9' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 11 }}>
+                          <div style={{ width: 28, height: 28, borderRadius: 7, background: bg, color, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13 }}>{icon}</div>
+                          <div>
+                            <div style={{ fontWeight: 600, fontSize: 13.5, color: '#0F172A' }}>{title}</div>
+                            <div style={{ fontSize: 11.5, color: '#94A3B8', marginTop: 1 }}>{desc}</div>
+                          </div>
+                        </div>
+                        <span style={{ color: '#CBD5E1', fontSize: 14 }}>›</span>
+                      </div>
+                    ))}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginTop: 12, paddingTop: 12, borderTop: '1px solid #F1F5F9' }}>
+                      <div style={{ gridColumn: '1/-1', fontSize: 9.5, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: '#94A3B8', textAlign: 'center', marginBottom: 2 }}>STUDY HACKS</div>
+                      {[
+                        { bg: '#F5F3FF', border: '#EDE9FE', icon: '◫', color: '#7C3AED', name: 'Brain Dump' },
+                        { bg: '#FEF2F2', border: '#FEE2E2', icon: '◈', color: '#EF4444', name: 'Rescue Plan' },
+                        { bg: '#FFF7ED', border: '#FED7AA', icon: '⚡', color: '#EA580C', name: 'Quiz Burst' },
+                      ].map(({ bg, border, icon, color, name }) => (
+                        <div key={name} style={{ background: bg, border: `1px solid ${border}`, borderRadius: 10, padding: '10px 8px', textAlign: 'center' }}>
+                          <div style={{ width: 26, height: 26, borderRadius: 7, background: '#fff', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 6, fontSize: 12, color }}>{icon}</div>
+                          <div style={{ fontSize: 11.5, fontWeight: 600, color: '#0F172A' }}>{name}</div>
+                        </div>
+                      ))}
+                    </div>
+                    <div style={{ marginTop: 10, padding: '9px 12px', background: '#F8FAFC', borderRadius: 9, display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11.5, color: '#64748B' }}>
+                      <div><strong style={{ color: '#0F172A' }}>9.7h</strong> this week · <strong style={{ color: '#0F172A' }}>78%</strong> recall</div>
+                      <div style={{ color: '#6366F1', fontWeight: 600 }}>Progress →</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Brief */}
+                <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, padding: '12px 18px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, fontSize: 13 }}>
+                  <div>
+                    <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#EA580C', marginBottom: 4 }}>● TODAY'S BRIEF</div>
+                    <div style={{ color: '#0F172A', fontWeight: 500 }}>Linear Algebra exam in 3 days. Add focused review sessions this week to stay on track.</div>
+                  </div>
+                  <button style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 7, padding: '5px 10px', fontSize: 11.5, fontWeight: 500, color: '#0F172A', whiteSpace: 'nowrap', fontFamily: 'inherit', cursor: 'pointer', flexShrink: 0 }}>View schedule</button>
+                </div>
+
+                {/* Bottom grid */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1.25fr 1fr', gap: 18 }}>
+                  {/* Courses */}
+                  <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, padding: '14px 16px', boxShadow: '0 1px 2px rgba(15,23,42,0.03)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4 }}>
+                      <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#4F46E5', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'currentColor' }} /> COURSES
+                      </div>
+                      <div style={{ fontSize: 11, color: '#94A3B8' }}>Hrs · Recall <span style={{ color: '#4F46E5', fontWeight: 500, marginLeft: 8 }}>View all</span></div>
+                    </div>
+                    {[
+                      { name: 'Cell Biology', last: 'Last studied today', hours: '7.2h', sessions: '12 sessions', status: 'On track', action: '88.5% · A', bar: '#22C55E', pillBg: '#FFEDD5', pillColor: '#C2410C' },
+                      { name: 'Organic Chemistry', last: 'Last studied today', hours: '2.0h', sessions: '4 sessions', status: 'Needs Work', action: 'Brain Dump →', bar: '#F97316', pillBg: '#FFEDD5', pillColor: '#C2410C' },
+                      { name: 'Cognitive Psychology', last: 'Last studied yesterday', hours: '2.2h', sessions: '5 sessions', status: 'Needs Work', action: 'Brain Dump →', bar: '#A855F7', pillBg: '#FFEDD5', pillColor: '#C2410C' },
+                      { name: 'Linear Algebra', last: 'Last studied today · exam in 3 days', hours: '3.6h', sessions: '8 sessions', status: 'Priority', action: 'Rescue Plan →', bar: '#3B82F6', pillBg: '#FEE2E2', pillColor: '#B91C1C' },
+                    ].map(({ name, last, hours, sessions, status, action, bar, pillBg, pillColor }, i) => (
+                      <div key={name} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 14, alignItems: 'center', padding: i === 0 ? '4px 0 8px' : '8px 0', borderTop: i === 0 ? 'none' : '1px solid #F1F5F9' }}>
+                        <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                          <div style={{ width: 3, height: 26, borderRadius: 2, background: bar, flexShrink: 0 }} />
+                          <div>
+                            <div style={{ fontWeight: 600, fontSize: 13, color: '#0F172A' }}>{name}</div>
+                            <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 1 }}>{last}</div>
+                          </div>
+                        </div>
+                        <div>
+                          <div style={{ fontWeight: 600, fontSize: 13, color: '#0F172A', textAlign: 'right' }}>{hours}</div>
+                          <div style={{ fontSize: 11, color: '#94A3B8', marginTop: 1, textAlign: 'right' }}>{sessions}</div>
+                        </div>
+                        <div>
+                          <div style={{ background: pillBg, color: pillColor, borderRadius: 999, padding: '3px 9px', fontSize: 10.5, fontWeight: 600, whiteSpace: 'nowrap' }}>{status}</div>
+                          <div style={{ color: '#EA580C', fontSize: 10.5, fontWeight: 500, marginTop: 3, textAlign: 'right' }}>{action}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {/* This Week */}
+                  <div style={{ background: '#fff', border: '1px solid #E5E7EB', borderRadius: 12, padding: '14px 16px', boxShadow: '0 1px 2px rgba(15,23,42,0.03)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#16A34A', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'currentColor' }} /> THIS WEEK
+                      </div>
+                      <div style={{ background: '#ECFDF5', color: '#059669', borderRadius: 999, padding: '4px 10px', fontSize: 11, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6 }}>✓ On pace</div>
+                    </div>
+                    {[
+                      { bg: '#FFF7ED', color: '#EA580C', icon: '◉', label: 'Study streak', value: '14', unit: 'days', delta: '↑ +3' },
+                      { bg: '#F8FAFC', color: '#64748B', icon: '◷', label: 'Hours studied', value: '9.6', unit: 'hrs', delta: '↑ +1.4' },
+                      { bg: '#ECFDF5', color: '#16A34A', icon: '✓', label: 'Sessions done', value: '8', unit: '', delta: '↑ +2' },
+                    ].map(({ bg, color, icon, label, value, unit, delta }, i) => (
+                      <div key={label} style={{ display: 'grid', gridTemplateColumns: '28px 1fr auto auto', gap: 12, alignItems: 'center', padding: i === 0 ? '6px 0 10px' : '10px 0', borderTop: i === 0 ? 'none' : '1px solid #F1F5F9', fontSize: 13 }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, background: bg, display: 'flex', alignItems: 'center', justifyContent: 'center', color, fontSize: 13 }}>{icon}</div>
+                        <div style={{ color: '#475569', fontSize: 13 }}>{label}</div>
+                        <div style={{ fontWeight: 700, fontSize: 18, color: '#0F172A', letterSpacing: '-0.02em' }}>{value}{unit && <span style={{ fontSize: 11, color: '#94A3B8', fontWeight: 500, marginLeft: 3 }}>{unit}</span>}</div>
+                        <div style={{ background: '#ECFDF5', color: '#059669', borderRadius: 6, padding: '2px 6px', fontSize: 10.5, fontWeight: 600 }}>{delta}</div>
+                      </div>
+                    ))}
+                    <div style={{ marginTop: 8, paddingTop: 12, borderTop: '1px solid #F1F5F9' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, color: '#64748B', marginBottom: 6 }}>
+                        <span>Weekly goal</span>
+                        <span style={{ color: '#0F172A', fontWeight: 600 }}>9.6 of 10h</span>
+                      </div>
+                      <div style={{ height: 6, background: '#F1F5F9', borderRadius: 4, overflow: 'hidden' }}>
+                        <div style={{ width: '96%', height: '100%', background: 'linear-gradient(90deg, #22C55E, #16A34A)', borderRadius: 4 }} />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Floating card: Grade Hub */}
+          <div style={{
+            position: 'absolute', zIndex: 6,
+            background: '#fff', borderRadius: 16,
+            border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: '0 30px 60px rgba(0,0,0,0.55), 0 15px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06)',
+            color: '#0F172A', overflow: 'hidden',
+            width: 290, right: 700, bottom: 24, transform: 'rotate(-2deg)',
+            padding: '16px 18px 14px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#4F46E5', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'currentColor' }} /> Grade Hub
+              </div>
+              <div style={{ fontSize: 10.5, color: '#16A34A', fontWeight: 600, background: '#ECFDF5', padding: '3px 8px', borderRadius: 999 }}>3.78 GPA</div>
+            </div>
+            {[
+              { dot: '#22C55E', name: 'Cell Biology',    pct: '88.5%', letter: 'A',  lc: '#16A34A' },
+              { dot: '#3B82F6', name: 'Linear Algebra',  pct: '90.2%', letter: 'A−', lc: '#22C55E' },
+              { dot: '#F97316', name: 'Organic Chem',    pct: '86.4%', letter: 'B+', lc: '#4F46E5' },
+              { dot: '#A855F7', name: 'Cognitive Psyc',  pct: '82.0%', letter: 'B',  lc: '#64748B' },
+            ].map(({ dot, name, pct, letter, lc }, i) => (
+              <div key={name} style={{ display: 'grid', gridTemplateColumns: '12px 1fr auto auto', gap: 10, alignItems: 'center', padding: i === 0 ? '2px 0 9px' : '9px 0', borderTop: i === 0 ? 'none' : '1px solid #F1F5F9' }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', background: dot }} />
+                <div style={{ fontSize: 13, fontWeight: 600, color: '#0F172A', letterSpacing: '-0.005em' }}>{name}</div>
+                <div style={{ fontSize: 12.5, color: '#64748B', fontVariantNumeric: 'tabular-nums' }}>{pct}</div>
+                <div style={{ fontSize: 13, fontWeight: 800, width: 30, textAlign: 'right', letterSpacing: '-0.02em', color: lc }}>{letter}</div>
               </div>
             ))}
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: 10, paddingTop: 12, borderTop: '1px solid #F1F5F9' }}>
+              <div style={{ fontSize: 11, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', fontWeight: 600 }}>Cumulative GPA</div>
+              <div style={{ fontFamily: "'Instrument Serif', serif", fontSize: 28, lineHeight: 1, color: '#0F172A', fontVariantNumeric: 'tabular-nums', letterSpacing: '-0.02em' }}>3.78</div>
+            </div>
           </div>
-          <span style={{ fontSize: 13, color: 'rgba(226,232,240,0.40)', fontWeight: 500 }}>
-            Joined by <strong style={{ color: 'rgba(226,232,240,0.65)' }}>2,000+ students</strong> this semester
-          </span>
-        </div>
 
-        {/* Hero Image */}
-        <div style={{
-          maxWidth: 1400, margin: '60px auto 0', padding: '0 24px', position: 'relative',
-        }}>
-          {/* Glow behind image */}
+          {/* Floating card: Streak */}
           <div style={{
-            position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-            width: '110%', height: '110%',
-            background: 'radial-gradient(ellipse, rgba(91,110,245,0.18) 0%, transparent 60%)',
-            filter: 'blur(60px)', pointerEvents: 'none',
+            position: 'absolute', zIndex: 6,
+            background: '#fff', borderRadius: 16,
+            border: '1px solid rgba(255,255,255,0.08)',
+            boxShadow: '0 30px 60px rgba(0,0,0,0.55), 0 15px 30px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.06)',
+            color: '#0F172A', overflow: 'hidden',
+            width: 270, right: 110, bottom: 12, transform: 'rotate(2deg)',
+            padding: '14px 16px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+              <div style={{ width: 38, height: 38, borderRadius: 11, background: 'linear-gradient(135deg, #FB923C, #EF4444)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, boxShadow: '0 6px 14px rgba(251,146,60,0.4)', flexShrink: 0 }}>🔥</div>
+              <div>
+                <div style={{ fontSize: 28, fontWeight: 700, letterSpacing: '-0.025em', color: '#0F172A', lineHeight: 1 }}>
+                  14<span style={{ fontSize: 13, fontWeight: 500, color: '#64748B', marginLeft: 4, letterSpacing: 0 }}>day streak</span>
+                </div>
+                <div style={{ fontSize: 11.5, color: '#64748B', marginTop: 4, letterSpacing: '-0.005em' }}>Longest this semester</div>
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 32, marginBottom: 8 }}>
+              {[30,45,38,60,55,72,68,80,75,88,92,96,60,60].map((h, i) => (
+                <div key={i} style={{ flex: 1, height: `${h}%`, background: i >= 12 ? '#E2E8F0' : 'linear-gradient(180deg, #6366F1, #4F46E5)', borderRadius: 2, opacity: i >= 12 ? 1 : 0.9 }} />
+              ))}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11.5, color: '#64748B', paddingTop: 8, borderTop: '1px solid #F1F5F9' }}>
+              <span>Hours this week</span>
+              <strong style={{ color: '#0F172A', fontSize: 13, fontWeight: 700, letterSpacing: '-0.01em' }}>9.6 hrs</strong>
+            </div>
+          </div>
+
+          {/* Vignette */}
+          <div aria-hidden="true" style={{
+            position: 'absolute', inset: 0, zIndex: 5, pointerEvents: 'none',
+            background: 'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.4) 100%), radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.5) 100%)',
           }} />
-          <img
-            src="/ss-main-screen.png"
-            alt="StudyEdge AI app: dashboard, AI study planner, flashcards, focus mode, and study coach"
-            style={{
-              display: 'block', width: '100%', borderRadius: 16, position: 'relative',
-              border: '1px solid rgba(255,255,255,0.08)',
-              boxShadow: '0 0 100px rgba(91,110,245,0.3), 0 60px 120px rgba(0,0,0,0.6)',
-              transform: 'perspective(1200px) rotateX(5deg)',
-              transformOrigin: 'top center',
-            }}
-          />
         </div>
       </section>
 
