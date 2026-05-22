@@ -1004,7 +1004,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
           learningStyle: learningStyle ?? null,
         }),
       })
-      const data = await res.json()
+      let data
+      try { data = await res.json() } catch { throw new Error('Server error — please try again') }
       if (!res.ok) throw new Error(data.error ?? 'Failed to generate flashcards')
       setInSessionFlashcards(data.flashcards ?? [])
       incrementAIQuery()

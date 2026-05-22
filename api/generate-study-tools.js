@@ -1,6 +1,7 @@
 import { verifyAndCheckAiUsage, verifyAuth } from '../lib/server/usage.js'
 
 export default async function handler(req, res) {
+  try {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
@@ -329,7 +330,12 @@ Hard rules:
     res.status(200).json(parsed);
   } catch (error) {
     console.error('API error:', error);
-    console.error(error)
     res.status(500).json({ error: error.message ?? 'Internal server error' });
+  }
+
+  } catch (err) {
+    // Top-level catch: ensures unexpected throws (auth, imports, etc.) always return JSON
+    console.error('Unhandled error in generate-study-tools:', err)
+    if (!res.headersSent) res.status(500).json({ error: 'Something went wrong. Please try again.' })
   }
 }
