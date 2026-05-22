@@ -2,6 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import imageCompression from 'browser-image-compression'
 import { extractText } from '../utils/extractText'
 import { getCachedStudyTools, getCachedCoachPlan, saveStudyTools } from '../lib/db'
+import { sm2, sortCardsByDue, getDueCards } from '../lib/sm2'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
 
@@ -218,7 +219,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
   useEffect(() => {
     const saved = loadSaved()
     if (saved?.flashcards?.length) {
-      setFlashcards(saved.flashcards)
+      setFlashcards(sortCardsByDue(saved.flashcards))
       setQuiz(saved.quiz ?? [])
       setExtractedText(saved.text ?? '')
       setSelectedCourse(saved.courseIdx ?? null)
@@ -324,7 +325,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       if (!response.ok) throw new Error(`API returned ${response.status}`)
       const data = await response.json()
       if (!data.flashcards?.length) throw new Error('No flashcards returned')
-      const cards = data.flashcards
+      const cards = sortCardsByDue(data.flashcards)
       const q = data.quiz ?? []
       setFlashcards(cards)
       setQuiz(q)
@@ -364,6 +365,27 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     setKnownSet(prev => { const s = new Set(prev); if (rating === 'know') s.add(cardIdx); else s.delete(cardIdx); return s })
     setAlmostSet(prev => { const s = new Set(prev); if (rating === 'almost') s.add(cardIdx); else s.delete(cardIdx); return s })
     setReviewSet(prev => { const s = new Set(prev); if (rating === 'review') s.add(cardIdx); else s.delete(cardIdx); return s })
+    setFlipped(false)
+    setTimeout(() => {
+      if (cardIdx < flashcards.length - 1) setCardIdx(i => i + 1)
+    }, 150)
+  }
+
+  function handleRate(quality) {
+    const currentCard = flashcards[cardIdx]
+    const updated = sm2(currentCard, quality)
+    const updatedCards = flashcards.map((c, i) =>
+      i === cardIdx ? { ...c, ...updated } : c
+    )
+    setFlashcards(updatedCards)
+    // Persist to Supabase (fire-and-forget)
+    saveStudyTools({
+      flashcards: updatedCards,
+      quiz,
+      text: activeText,
+      courseIdx: selectedCourse,
+      fileLabel: uploadedFile?.name ?? (pastedText ? 'Pasted notes' : ''),
+    })
     setFlipped(false)
     setTimeout(() => {
       if (cardIdx < flashcards.length - 1) setCardIdx(i => i + 1)
@@ -846,12 +868,23 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
         <div className="space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <button onClick={handleBack} className="flex items-center gap-2 text-[#6B6B6B] hover:text-slate-900 text-sm transition-colors">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-              </svg>
-              Back
-            </button>
+            <div className="flex items-center gap-2">
+              <button onClick={handleBack} className="flex items-center gap-2 text-[#6B6B6B] hover:text-slate-900 text-sm transition-colors">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                </svg>
+                Back
+              </button>
+              {getDueCards(flashcards).length > 0 && (
+                <span style={{
+                  fontSize: 11, fontWeight: 700, padding: '2px 8px',
+                  background: 'rgba(59,97,196,0.1)', color: '#3B61C4',
+                  borderRadius: 999, marginLeft: 4,
+                }}>
+                  {getDueCards(flashcards).length} due
+                </span>
+              )}
+            </div>
             <div className="flex items-center gap-3 text-xs">
               <span className="text-emerald-400 font-medium">{knownSet.size} know it</span>
               <span className="text-amber-400 font-medium">{almostSet.size} almost</span>
@@ -880,27 +913,28 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             onFlip={() => setFlipped(v => !v)}
           />
 
-          {/* Rating buttons (visible after flip) */}
+          {/* SM-2 rating buttons (visible after flip) */}
           {flipped && (
-            <div className="flex gap-2.5">
-              <button
-                onClick={() => handleFlashcardRate('review')}
-                className="flex-1 py-3 rounded-xl border border-red-500/30 bg-red-900/20 text-red-400 hover:bg-red-900/40 text-sm font-medium transition-all"
-              >
-                Need to Review
-              </button>
-              <button
-                onClick={() => handleFlashcardRate('almost')}
-                className="flex-1 py-3 rounded-xl border border-amber-500/30 bg-amber-900/20 text-amber-400 hover:bg-amber-900/40 text-sm font-medium transition-all"
-              >
-                Almost
-              </button>
-              <button
-                onClick={() => handleFlashcardRate('know')}
-                className="flex-1 py-3 rounded-xl border border-emerald-500/30 bg-emerald-900/20 text-emerald-400 hover:bg-emerald-900/40 text-sm font-medium transition-all"
-              >
-                Got It!
-              </button>
+            <div style={{ display: 'flex', gap: 8, justifyContent: 'center', marginTop: 16 }}>
+              {[
+                { label: 'Again', quality: 0, color: '#EF4444', bg: 'rgba(239,68,68,0.08)' },
+                { label: 'Hard',  quality: 2, color: '#F59E0B', bg: 'rgba(245,158,11,0.08)' },
+                { label: 'Good',  quality: 4, color: '#3B61C4', bg: 'rgba(59,97,196,0.08)'  },
+                { label: 'Easy',  quality: 5, color: '#059669', bg: 'rgba(5,150,105,0.08)'  },
+              ].map(({ label, quality, color, bg }) => (
+                <button
+                  key={label}
+                  onClick={() => handleRate(quality)}
+                  style={{
+                    flex: 1, padding: '10px 8px',
+                    background: bg, border: `1px solid ${color}30`,
+                    borderRadius: 10, color, fontSize: 13, fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  {label}
+                </button>
+              ))}
             </div>
           )}
 

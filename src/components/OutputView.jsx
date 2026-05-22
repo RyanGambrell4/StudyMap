@@ -1041,6 +1041,7 @@ export default function OutputView({
           onExit={handleBlueprintExit}
           onShowPaywall={onShowPaywall}
           learningStyle={learningStyle}
+          completedSessions={completedSessionLog}
         />
       )}
       {focusSession && (
@@ -1583,6 +1584,7 @@ export default function OutputView({
             learningStyle={learningStyle}
             onStartFocus={handleStartFocus}
             onNavigateToCourses={() => setActiveSection('courses')}
+            completedSessions={completedSessionLog}
             onPushToSchedule={incoming => {
               setManualSessions(prev => {
                 const courseId = incoming[0]?.courseId

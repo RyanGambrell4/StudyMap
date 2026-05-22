@@ -1,5 +1,4 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
-import { tracedCall } from '../lib/server/langfuse.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -38,14 +37,10 @@ ${professorEmphasis ? `Professor emphasizes these topics (high exam priority): $
 ${strengths ? `Areas they are already solid on (brief review only): ${strengths}` : ''}
 ${learningStyleHint ?? ''}
 Your job: help them understand course material clearly and efficiently. Be concise and direct. Use examples. If they paste notes, identify key concepts. Generate practice questions when asked.
-IMPORTANT: If the student expresses difficulty, confusion, or asks for more help on a specific topic, identify that topic clearly so it can be flagged in their study plan.
 
-Respond with ONLY valid JSON in this exact format:
-{
-  "reply": "your full response as a string",
-  "flaggedTopic": "short topic name if student is clearly struggling, otherwise null"
-}
-flaggedTopic must be a short topic name (2-5 words max, e.g. "supply elasticity") ONLY when the student clearly expresses struggle or confusion. Otherwise null. Do not wrap in markdown.`
+Respond in plain text. If the student clearly expresses struggle or confusion about a specific topic, append exactly this on the very last line of your response (nothing after it):
+[FLAGGED_TOPIC:topic name in 2-5 words]
+Only include this line when the student is clearly struggling. Otherwise omit it entirely.`
 
   const recentMessages = messages.slice(-10)
   const latestUserMessage = recentMessages.filter(m => m.role === 'user').slice(-1)[0]?.content ?? ''
@@ -71,46 +66,76 @@ flaggedTopic must be a short topic name (2-5 words max, e.g. "supply elasticity"
 
   const effectiveSystemPrompt = systemPrompt + wolframContext
 
+  // Set SSE headers
+  res.setHeader('Content-Type', 'text/event-stream')
+  res.setHeader('Cache-Control', 'no-cache')
+  res.setHeader('Connection', 'keep-alive')
+  res.setHeader('X-Accel-Buffering', 'no')
+
   try {
-    const data = await tracedCall({
-      name: 'chat-tutor',
-      userId: gate.userId,
-      model: 'claude-haiku-4-5-20251001',
-      input: { messages: recentMessages, system: effectiveSystemPrompt },
-      maxTokens: 1024,
-      call: () => fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'x-api-key': process.env.ANTHROPIC_API_KEY,
-          'anthropic-version': '2023-06-01',
-          'content-type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'claude-haiku-4-5-20251001',
-          max_tokens: 1024,
-          system: effectiveSystemPrompt,
-          messages: recentMessages,
-        }),
-      }).then(r => r.json()),
+    const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'x-api-key': process.env.ANTHROPIC_API_KEY,
+        'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'prompt-caching-2024-07-31',
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 1024,
+        stream: true,
+        system: [{ type: 'text', text: effectiveSystemPrompt, cache_control: { type: 'ephemeral' } }],
+        messages: recentMessages,
+      }),
     })
 
-    if (data.error) throw new Error(data.error?.message ?? 'Anthropic API error')
-
-    const content = data.content?.[0]?.text
-    if (!content) throw new Error('Empty response from AI')
-
-    const first = content.indexOf('{')
-    const last = content.lastIndexOf('}')
-    if (first === -1 || last === -1) {
-      return res.status(200).json({ reply: content, flaggedTopic: null })
+    if (!anthropicRes.ok) {
+      res.write(`data: ${JSON.stringify({ error: 'AI unavailable' })}\n\n`)
+      res.end()
+      return
     }
-    const parsed = JSON.parse(content.slice(first, last + 1))
-    res.status(200).json({
-      reply: parsed.reply ?? content,
-      flaggedTopic: parsed.flaggedTopic ?? null,
-    })
+
+    const reader = anthropicRes.body.getReader()
+    const decoder = new TextDecoder()
+    let fullText = ''
+
+    while (true) {
+      const { done, value } = await reader.read()
+      if (done) break
+
+      const chunk = decoder.decode(value, { stream: true })
+      const lines = chunk.split('\n')
+
+      for (const line of lines) {
+        if (line.startsWith('data: ')) {
+          const data = line.slice(6)
+          if (data === '[DONE]') continue
+          try {
+            const parsed = JSON.parse(data)
+            if (parsed.type === 'content_block_delta' && parsed.delta?.type === 'text_delta') {
+              fullText += parsed.delta.text
+              res.write(`data: ${JSON.stringify({ text: parsed.delta.text })}\n\n`)
+            } else if (parsed.type === 'message_stop') {
+              // Extract optional [FLAGGED_TOPIC:...] marker from end of plain text response
+              let reply = fullText.trim()
+              let flaggedTopic = null
+              const flagMatch = reply.match(/\[FLAGGED_TOPIC:([^\]]+)\]\s*$/)
+              if (flagMatch) {
+                flaggedTopic = flagMatch[1].trim()
+                reply = reply.slice(0, flagMatch.index).trim()
+              }
+              res.write(`data: ${JSON.stringify({ done: true, reply, flaggedTopic })}\n\n`)
+            }
+          } catch {}
+        }
+      }
+    }
+
+    res.end()
   } catch (error) {
     console.error('Chat tutor error:', error)
-    res.status(500).json({ error: error.message ?? 'Internal server error' })
+    res.write(`data: ${JSON.stringify({ error: error.message ?? 'Internal server error' })}\n\n`)
+    res.end()
   }
 }

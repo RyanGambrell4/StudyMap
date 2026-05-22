@@ -45,7 +45,8 @@
       "mcp__02cf278a-fb7d-46d0-88e3-73bdbab27fde__get_deployment_build_logs",
       "mcp__02cf278a-fb7d-46d0-88e3-73bdbab27fde__get_deployment",
       "Bash(npx vite:*)",
-      "Bash(find /Users/ryangambrell/Desktop/StudyMap/src -type f \\\\\\(-name App.jsx -o -name *.css -o -name index.jsx \\\\\\))"
+      "Bash(find /Users/ryangambrell/Desktop/StudyMap/src -type f \\\\\\(-name App.jsx -o -name *.css -o -name index.jsx \\\\\\))",
+      "mcp__02cf278a-fb7d-46d0-88e3-73bdbab27fde__deploy_to_vercel"
     ]
   }
 }

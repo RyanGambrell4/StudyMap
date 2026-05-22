@@ -22,6 +22,7 @@ export default async function handler(req, res) {
       headers: {
         'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'prompt-caching-2024-07-31',
         'content-type': 'application/json',
       },
       body: JSON.stringify({
@@ -42,6 +43,7 @@ export default async function handler(req, res) {
               {
                 type: 'text',
                 text: 'Extract and clean up all the text from these handwritten notes. Format it as clear, readable study notes with headers and bullet points. Preserve all the information but make it well-organized and easy to read.',
+                cache_control: { type: 'ephemeral' },
               },
             ],
           },

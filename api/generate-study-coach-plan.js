@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { courseName, goal, emphasisTopics, importantDates, daysPerWeek, sessionMinutes, calendarEvents, timePreference, struggles, gradeGap, weakAreas, courseMaterials, learningStyle, strengths } = req.body
+  const { courseName, goal, emphasisTopics, importantDates, daysPerWeek, sessionMinutes, calendarEvents, timePreference, struggles, gradeGap, weakAreas, courseMaterials, learningStyle, strengths, courseRecallScores } = req.body
   if (!courseName || !goal) return res.status(400).json({ error: 'Missing required fields' })
 
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|Reading Comprehension|FAR|AUD|REG|MBE|MEE|MPT|Verbal Reasoning|Quantitative Reasoning|Analytical Writing|Quantitative|Data Insights/i
@@ -39,12 +39,22 @@ export default async function handler(req, res) {
       }).join('\n')
     : null
 
+  const recallInstruction = (() => {
+    if (!courseRecallScores) return ''
+    const entries = Object.entries(courseRecallScores)
+      .filter(([_, score]) => score !== null)
+      .map(([course, score]) => `${course}: ${score}% avg recall`)
+    if (!entries.length) return ''
+    return `\n\nRecall scores by course (lower = needs more study time): ${entries.join(', ')}. Allocate proportionally more sessions to lower-scoring courses.`
+  })()
+
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'prompt-caching-2024-07-31',
         'content-type': 'application/json',
       },
       body: JSON.stringify({
@@ -52,7 +62,7 @@ export default async function handler(req, res) {
         max_tokens: 8000,
         messages: [{
           role: 'user',
-          content: isExamMode ? `You are an elite professional exam prep coach. Build a phase-based study plan for a student preparing for a high-stakes licensing or admissions exam.
+          content: [{ type: 'text', cache_control: { type: 'ephemeral' }, text: isExamMode ? `You are an elite professional exam prep coach. Build a phase-based study plan for a student preparing for a high-stakes licensing or admissions exam.
 
 Section: ${courseName}
 Target score / goal: ${goal}
@@ -63,7 +73,7 @@ Today's date: ${todayStr}
 Exam date / prep timeline:
 ${datesStr}
 ${calendarStr ? `\nBlocked times (never schedule over these):\n${calendarStr}\nPreferred study window: ${pref.hours}\n` : `Preferred study window: ${pref.hours}`}
-${struggles?.length ? `\nWeak areas requiring extra reps: ${struggles.join(', ')}\n` : ''}${strengths ? `\nStrong areas (student already has solid foundation — spend less time here): ${strengths}\n` : ''}${learningStyle ? `\nLearning style: ${learningStyle}. Design session activities to match — e.g. visual learners benefit from concept maps and diagrams; practice-based learners need active recall and worked problems; reading/writing learners need structured note-taking and written summaries.\n` : ''}
+${struggles?.length ? `\nWeak areas requiring extra reps: ${struggles.join(', ')}\n` : ''}${strengths ? `\nStrong areas (student already has solid foundation — spend less time here): ${strengths}\n` : ''}${learningStyle ? `\nLearning style: ${learningStyle}. Design session activities to match — e.g. visual learners benefit from concept maps and diagrams; practice-based learners need active recall and worked problems; reading/writing learners need structured note-taking and written summaries.\n` : ''}${recallInstruction}
 
 Structure the plan across FOUR phases in order:
 1. Content Foundation — master the core content systematically. Session types: Content Review, Active Recall Drill
@@ -123,7 +133,7 @@ CRITICAL: Never schedule study sessions during the following blocked time slots.
 Blocked time slots:
 ${calendarStr}
 ` : `The student prefers studying in the ${pref.label} (${pref.hours}). Schedule sessions in that window whenever possible.`}
-${courseMaterials ? `\nThe student has provided the following course material for context:\n${courseMaterials.slice(0, 8000)}\n` : ''}${struggles?.length ? `\nPreviously identified struggle areas — allocate MORE sessions and deeper coverage to these: ${struggles.join(', ')}\n` : ''}${gradeGap != null && gradeGap < 0 ? `\nGRADE ALERT: Student is ${Math.abs(gradeGap).toFixed(1)} points below their target grade. ${weakAreas?.length ? `Weak areas: ${weakAreas.join(', ')}. ` : ''}Significantly increase session intensity and prioritize recovery for these topics.\n` : ''}${strengths ? `\nAreas the student is already solid on: ${strengths}. These need less dedicated time — a single review session is enough.\n` : ''}${learningStyle ? `\nLearning style: ${learningStyle}. Let this shape session type recommendations — visual learners: concept maps and diagrams; practice-based: active recall drills and problem sets; reading/writing: structured note summaries.\n` : ''}Build a focused, realistic study plan starting from today. Generate enough weeks to cover all important dates, with the right session count per week (${daysPerWeek || 3} sessions/week).
+${courseMaterials ? `\nThe student has provided the following course material for context:\n${courseMaterials.slice(0, 8000)}\n` : ''}${struggles?.length ? `\nPreviously identified struggle areas — allocate MORE sessions and deeper coverage to these: ${struggles.join(', ')}\n` : ''}${gradeGap != null && gradeGap < 0 ? `\nGRADE ALERT: Student is ${Math.abs(gradeGap).toFixed(1)} points below their target grade. ${weakAreas?.length ? `Weak areas: ${weakAreas.join(', ')}. ` : ''}Significantly increase session intensity and prioritize recovery for these topics.\n` : ''}${strengths ? `\nAreas the student is already solid on: ${strengths}. These need less dedicated time — a single review session is enough.\n` : ''}${learningStyle ? `\nLearning style: ${learningStyle}. Let this shape session type recommendations — visual learners: concept maps and diagrams; practice-based: active recall drills and problem sets; reading/writing: structured note summaries.\n` : ''}${recallInstruction}Build a focused, realistic study plan starting from today. Generate enough weeks to cover all important dates, with the right session count per week (${daysPerWeek || 3} sessions/week).
 
 Return ONLY this JSON:
 
@@ -161,7 +171,7 @@ Rules:
 - If there are important dates, weight the weeks before them appropriately (ramp up intensity)
 - Generate enough weeks to cover all listed dates plus 1 week before the last one
 - CRITICAL: Keep response compact — short strings only, no verbose explanations`,
-        }],
+        }] }],
       }),
     })
 

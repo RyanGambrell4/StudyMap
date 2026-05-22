@@ -67,9 +67,9 @@ Rules:
             type: 'image',
             source: { type: 'base64', media_type: img.media_type, data: img.data },
           })),
-          { type: 'text', text: prompt },
+          { type: 'text', text: prompt, cache_control: { type: 'ephemeral' } },
         ]
-      : prompt
+      : [{ type: 'text', text: prompt, cache_control: { type: 'ephemeral' } }]
 
     try {
       const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -77,6 +77,7 @@ Rules:
         headers: {
           'x-api-key': process.env.ANTHROPIC_API_KEY,
           'anthropic-version': '2023-06-01',
+          'anthropic-beta': 'prompt-caching-2024-07-31',
           'content-type': 'application/json',
         },
         body: JSON.stringify({
@@ -139,6 +140,7 @@ Rules:
         headers: {
           'x-api-key': process.env.ANTHROPIC_API_KEY,
           'anthropic-version': '2023-06-01',
+          'anthropic-beta': 'prompt-caching-2024-07-31',
           'content-type': 'application/json',
         },
         body: JSON.stringify({
@@ -146,7 +148,7 @@ Rules:
           max_tokens: 1000,
           messages: [{
             role: 'user',
-            content: `Analyze this student's grade data for ${courseName} and predict their final grade.
+            content: [{ type: 'text', cache_control: { type: 'ephemeral' }, text: `Analyze this student's grade data for ${courseName} and predict their final grade.
 
 Target grade: ${targetGrade} (threshold: ${threshold}%)
 Current weighted average on graded work: ${currentAvg !== null ? currentAvg.toFixed(1) + '%' : 'no grades yet'}
@@ -175,8 +177,7 @@ Rules:
 - status: on-track if predictedGrade >= ${threshold}, at-risk if within 10 points below, needs-recovery if more than 10 below
 - keyFactors: 2-3 items, max 10 words each, explain current trajectory
 - recommendations: 2-3 specific actionable steps, max 12 words each
-- weakAreas: component names where earned grade < 70%, or empty array`,
-          }],
+- weakAreas: component names where earned grade < 70%, or empty array` }],
         }),
       })
       const data = await response.json()
@@ -256,9 +257,9 @@ Hard rules:
           type: 'image',
           source: { type: 'base64', media_type: img.media_type, data: img.data },
         })),
-        { type: 'text', text: fcPrompt },
+        { type: 'text', text: fcPrompt, cache_control: { type: 'ephemeral' } },
       ]
-    : fcPrompt
+    : [{ type: 'text', text: fcPrompt, cache_control: { type: 'ephemeral' } }]
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -266,6 +267,7 @@ Hard rules:
       headers: {
         'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'prompt-caching-2024-07-31',
         'content-type': 'application/json',
       },
       body: JSON.stringify({

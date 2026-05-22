@@ -31,6 +31,10 @@
       "schedule": "0 11 * * *"
     },
     {
+      "path": "/api/exam-tomorrow",
+      "schedule": "0 18 * * *"
+    },
+    {
       "path": "/api/day14-upgrade",
       "schedule": "0 11 * * *"
     },

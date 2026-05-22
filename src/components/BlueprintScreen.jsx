@@ -26,7 +26,7 @@ const EXAM_SESSION_TYPES = [
   'Active Recall Drill',
 ]
 
-export default function BlueprintScreen({ session, course, onStartSession, onExit, onShowPaywall, learningStyle }) {
+export default function BlueprintScreen({ session, course, onStartSession, onExit, onShowPaywall, learningStyle, completedSessions }) {
   const [focus, setFocus] = useState('')
   const [blueprint, setBlueprint] = useState(null)
   const [loading, setLoading] = useState(false)
@@ -86,6 +86,15 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
     const savedPlan = getCachedCoachPlan(courseId)
     const professorEmphasis = savedPlan?.formData?.emphasisTopics ?? savedPlan?.formData?.topics?.join(', ') ?? null
     const struggles = savedPlan?.struggles ?? []
+
+    const courseSessions = (completedSessions ?? []).filter(s => s.courseName === session.courseName)
+    const recallHistory = courseSessions
+      .filter(s => s.recallScore != null)
+      .slice(-10)
+      .map(s => ({ score: s.recallScore, date: s.dateStr }))
+    const weakTopics = []  // Populated when topic-level recall is tracked
+    const completedCount = courseSessions.length
+
     try {
       const token = await getAccessToken()
       const res = await fetch('/api/generate-session-blueprint', {
@@ -103,6 +112,9 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
           professorEmphasis: professorEmphasis || null,
           struggles: struggles.length ? struggles : null,
           learningStyle: learningStyle ?? null,
+          recallHistory: recallHistory.length ? recallHistory : null,
+          weakTopics: weakTopics.length ? weakTopics : null,
+          completedCount,
         }),
       })
       const data = await res.json()

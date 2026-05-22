@@ -22,6 +22,7 @@ export default async function handler(req, res) {
       headers: {
         'x-api-key': process.env.ANTHROPIC_API_KEY,
         'anthropic-version': '2023-06-01',
+        'anthropic-beta': 'prompt-caching-2024-07-31',
         'content-type': 'application/json',
       },
       body: JSON.stringify({
@@ -29,7 +30,7 @@ export default async function handler(req, res) {
         max_tokens: 4000,
         messages: [{
           role: 'user',
-          content: `Extract all academic deadlines and important dates from this course syllabus.
+          content: [{ type: 'text', cache_control: { type: 'ephemeral' }, text: `Extract all academic deadlines and important dates from this course syllabus.
 
 Today is ${currentMonth} ${currentYear}. Use ${currentYear} for any dates that don't specify a year (or the next calendar year if the month has already passed this year).
 
@@ -52,8 +53,7 @@ For each item return:
 }
 
 Return ONLY the JSON array with no other text, markdown, or explanation.
-Example: [{"name":"Midterm Exam","date":"${currentYear}-03-12","type":"Midterm","weight":25,"notes":"In class, closed book"}]`
-        }]
+Example: [{"name":"Midterm Exam","date":"${currentYear}-03-12","type":"Midterm","weight":25,"notes":"In class, closed book"}]` }]
       })
     })
 

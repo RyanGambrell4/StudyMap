@@ -60,6 +60,9 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
     setLoading(true)
     setError('')
 
+    // Add empty assistant message that will be filled in during streaming
+    setMessages([...newMessages, { role: 'assistant', content: '' }])
+
     try {
       const token = await getAccessToken()
       const res = await fetch('/api/chat-tutor', {
@@ -77,22 +80,70 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
           learningStyle: learningStyle ?? null,
         }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Failed to get response')
 
-      setMessages(prev => [...prev, { role: 'assistant', content: data.reply }])
+      if (!res.ok) {
+        const err = await res.json()
+        setMessages([...newMessages, { role: 'assistant', content: err.error ?? 'Something went wrong.' }])
+        return
+      }
+
+      const reader = res.body.getReader()
+      const decoder = new TextDecoder()
+      let fullText = ''
+      let finalReply = null
+      let finalFlaggedTopic = null
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value, { stream: true })
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6))
+              if (data.error) {
+                setMessages([...newMessages, { role: 'assistant', content: data.error }])
+                return
+              }
+              if (data.text) {
+                fullText += data.text
+                setMessages(prev => {
+                  const updated = [...prev]
+                  updated[updated.length - 1] = { role: 'assistant', content: fullText }
+                  return updated
+                })
+              }
+              if (data.done) {
+                finalReply = data.reply ?? fullText
+                finalFlaggedTopic = data.flaggedTopic ?? null
+                // Replace streaming text with the cleaned parsed reply
+                setMessages(prev => {
+                  const updated = [...prev]
+                  updated[updated.length - 1] = { role: 'assistant', content: finalReply }
+                  return updated
+                })
+              }
+            } catch {}
+          }
+        }
+      }
+
       await incrementAIQuery()
 
-      if (data.flaggedTopic) {
-        const updatedStruggles = struggles.includes(data.flaggedTopic)
+      if (finalFlaggedTopic) {
+        const updatedStruggles = struggles.includes(finalFlaggedTopic)
           ? struggles
-          : [...struggles, data.flaggedTopic]
+          : [...struggles, finalFlaggedTopic]
         setStruggles(updatedStruggles)
         await saveCoachPlanStruggles(courseId, updatedStruggles)
-        setFlagBanner(data.flaggedTopic)
+        setFlagBanner(finalFlaggedTopic)
         setTimeout(() => setFlagBanner(null), 5000)
       }
     } catch (e) {
+      setMessages([...newMessages, { role: 'assistant', content: 'Connection error. Please try again.' }])
       setError(e.message)
     } finally {
       setLoading(false)

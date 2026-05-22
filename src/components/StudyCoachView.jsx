@@ -859,7 +859,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle }) {
+export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle, completedSessions = [] }) {
   const [step, setStep] = useState(1)
   const defaultStyle = learningStyle ? [learningStyle] : []
   const [form, setForm] = useState({
@@ -944,6 +944,17 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     try {
       const token = await getAccessToken()
       const validDates = (form.dates || []).filter(d => d.label.trim() && d.date)
+
+      const courseRecallScores = {}
+      courses.forEach(c => {
+        const recalls = completedSessions
+          .filter(s => s.courseName === c.name && s.recallScore != null)
+          .map(s => s.recallScore * 100)
+        courseRecallScores[c.name] = recalls.length
+          ? Math.round(recalls.reduce((a, b) => a + b, 0) / recalls.length)
+          : null
+      })
+
       const res = await fetch('/api/generate-study-coach-plan', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -974,6 +985,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
             const weak = comps.filter(c => c.graded && c.grade !== null && c.grade < 70).map(c => c.component)
             return weak.length ? weak : null
           })(),
+          courseRecallScores,
         }),
       })
       const data = await res.json()

@@ -19,7 +19,7 @@ export default async function handler(req, res) {
 
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
-    .select('user_id, completed_sessions, study_tools, subscription')
+    .select('user_id, completed_sessions, study_tools, subscription, syllabus_events')
     .limit(1000)
 
   if (error) {
@@ -42,6 +42,18 @@ export default async function handler(req, res) {
     const sub = row.subscription ?? {}
     const plan = activeStatuses.includes(sub.status) ? (sub.plan ?? 'free') : 'free'
     if (weekSessions.length === 0 && streak === 0) { skipped++; continue }
+
+    // Compute this week's upcoming exams (next 7 days)
+    const todayStr = now.toISOString().slice(0, 10)
+    const weekAheadStr = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
+    const upcomingExams = (row.syllabus_events ?? [])
+      .filter(e => {
+        const isExam = e.type === 'exam' || /exam|midterm|final|test/i.test(e.title ?? '')
+        const dateStr = e.date ?? e.dateStr ?? ''
+        return isExam && dateStr >= todayStr && dateStr <= weekAheadStr
+      })
+      .sort((a, b) => (a.date ?? a.dateStr ?? '').localeCompare(b.date ?? b.dateStr ?? ''))
+      .slice(0, 3)
 
     let email
     try {
@@ -108,6 +120,21 @@ export default async function handler(req, res) {
           <table cellpadding="0" cellspacing="0" style="width:100%;">
             ${highlights.map(h => `<tr><td style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span style="font-size:13px;color:#CBD5E1;">✓ ${h}</span></td></tr>`).join('')}
             ${weekSessions.length > 3 ? `<tr><td style="padding:8px 0;font-size:12px;color:#475569;">+${weekSessions.length - 3} more sessions</td></tr>` : ''}
+          </table>
+        </td></tr>` : ''}
+        ${upcomingExams.length > 0 ? `<tr><td style="padding-bottom:20px;">
+          <p style="margin:0 0 10px;font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.8px;">Exams this week</p>
+          <table cellpadding="0" cellspacing="0" style="width:100%;background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.2);border-radius:12px;padding:4px 0;">
+            ${upcomingExams.map(e => {
+              const dateStr = e.date ?? e.dateStr ?? ''
+              const label = dateStr ? new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : ''
+              return `<tr>
+                <td style="padding:10px 16px;border-bottom:1px solid rgba(249,115,22,0.1);">
+                  <span style="font-size:14px;font-weight:700;color:#fed7aa;">${e.title ?? 'Exam'}</span>
+                  ${label ? `<span style="font-size:12px;color:#9a3412;margin-left:8px;">${label}</span>` : ''}
+                </td>
+              </tr>`
+            }).join('')}
           </table>
         </td></tr>` : ''}
         <tr><td style="padding-bottom:${isFreePlan ? '20px' : '32px'};">
