@@ -1555,23 +1555,6 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
               </svg>
               Share plan
             </button>
-            {onPushToSchedule && (
-              <button
-                onClick={handlePushToSchedule}
-                disabled={pushed}
-                style={{
-                  display: 'flex', alignItems: 'center', gap: 7,
-                  padding: '9px 18px', borderRadius: 10, border: 'none', cursor: pushed ? 'default' : 'pointer',
-                  fontWeight: 700, fontSize: 13,
-                  background: pushed ? 'rgba(22,163,74,0.1)' : D.accent,
-                  color: pushed ? D.mint : '#fff',
-                  transition: 'all 0.15s',
-                }}
-              >
-                <Icon name={pushed ? 'check' : 'calendar'} size={14} color={pushed ? D.mint : '#fff'} stroke={2.5} />
-                {pushed ? 'Applied to Calendar' : 'Apply to Calendar'}
-              </button>
-            )}
           </div>
         </div>
       </div>
