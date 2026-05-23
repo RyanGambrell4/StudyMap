@@ -58,6 +58,12 @@ function daysTo(dateStr) {
   return Math.round((new Date(dateStr + 'T12:00:00') - new Date(new Date().toISOString().split('T')[0] + 'T12:00:00')) / 86400000)
 }
 
+// Returns the minimum numeric threshold for a given letter grade
+function letterMinThreshold(ltr) {
+  const map = { 'A+': 90, 'A': 85, 'A-': 80, 'B+': 77, 'B': 73, 'B-': 70, 'C+': 67, 'C': 63, 'C-': 60, 'D+': 55, 'D': 50, 'F': 0 }
+  return map[ltr] ?? 0
+}
+
 function computeGPA(courses) {
   const pts = { 'A+': 4.0, 'A': 4.0, 'A-': 3.7, 'B+': 3.3, 'B': 3.0, 'B-': 2.7, 'C+': 2.3, 'C': 2.0, 'C-': 1.7, 'D+': 1.3, 'D': 1.0, 'F': 0.0 }
   const vals = courses.map(c => {
@@ -448,13 +454,15 @@ function TrackTab({ course, gradeData, dot, onSave }) {
 
   const currentGrade = getCurrentGrade(liveComponents)
   const needed       = getNeededOnRemaining(liveComponents, targetGrade)
-  const defense      = defenseMode ? getDefenseFloor(liveComponents, currentGrade) : null
+  const ltr          = letterGrade(currentGrade)
+  const lc           = letterColor(ltr)
+  // Defense: compute minimum floor to protect the current LETTER GRADE boundary, not the exact percentage
+  const defenseThreshold = letterMinThreshold(ltr)
+  const defense      = defenseMode ? getDefenseFloor(liveComponents, defenseThreshold) : null
   const gradedWeight = liveComponents.filter(c => c.graded).reduce((s, c) => s + c.weight, 0)
   const totalWeight  = liveComponents.reduce((s, c) => s + c.weight, 0)
   const pctGraded    = totalWeight > 0 ? (gradedWeight / totalWeight) * 100 : 0
   const targetLabel  = TARGET_OPTIONS.find(o => o.value === targetGrade)?.label ?? 'A'
-  const ltr          = letterGrade(currentGrade)
-  const lc           = letterColor(ltr)
 
   if (!components.length) return (
     <div style={{ padding: '40px 0', textAlign: 'center' }}>
@@ -510,11 +518,34 @@ function TrackTab({ course, gradeData, dot, onSave }) {
             <IcoShield /> Grade Defense Mode {defenseMode ? 'ON' : 'OFF'}
           </button>
           {defenseMode && defense && (
-            <div style={{ marginTop: 10, padding: 12, borderRadius: 10, background: `rgba(251,191,36,0.08)`, border: `1px solid ${D.amber}30` }}>
-              {defense.impossible
-                ? <p style={{ fontSize: 12.5, color: D.amber }}>Score is already locked in. No remaining work can change it.</p>
-                : <p style={{ fontSize: 12.5, color: D.amber }}>To keep your <span style={{ fontFamily: 'inherit', fontWeight: 700 }}>{currentGrade?.toFixed(1)}%</span>, score at least <span style={{ fontFamily: 'inherit', fontWeight: 700, fontSize: 16 }}>{defense.floor?.toFixed(1)}%</span> on all remaining work.</p>
-              }
+            <div style={{ marginTop: 10, padding: 14, borderRadius: 10, background: `rgba(251,191,36,0.08)`, border: `1px solid ${D.amber}30` }}>
+              {defense.impossible ? (
+                <p style={{ fontSize: 12.5, color: D.amber, margin: 0 }}>
+                  Your {ltr} is already out of reach — the graded scores bring you below the {ltr} threshold regardless of remaining work. Consider adjusting your target.
+                </p>
+              ) : defense.rawFloor <= 0 ? (
+                <p style={{ fontSize: 12.5, color: D.amber, margin: 0 }}>
+                  Your <span style={{ fontWeight: 700 }}>{ltr}</span> is safe — even if you scored 0% on all remaining work, your current grades keep you in {ltr} territory. Your buffer is {Math.abs(defense.rawFloor?.toFixed(0))} points.
+                </p>
+              ) : (
+                <>
+                  <p style={{ fontSize: 12.5, color: D.amber, margin: '0 0 8px' }}>
+                    To protect your <span style={{ fontWeight: 700 }}>{ltr}</span>, score at least{' '}
+                    <span style={{ fontFamily: 'inherit', fontWeight: 800, fontSize: 15 }}>{defense.floor?.toFixed(1)}%</span>{' '}
+                    on remaining work — that's the floor to stay above the {ltr} grade boundary ({defenseThreshold}%).
+                  </p>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <div style={{ flex: 1, padding: '8px 10px', borderRadius: 8, background: 'rgba(251,191,36,0.12)', border: `1px solid ${D.amber}25`, textAlign: 'center' }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: D.amber, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Min to keep {ltr}</div>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: D.amber, fontFamily: 'inherit' }}>{defense.floor?.toFixed(1)}%</div>
+                    </div>
+                    <div style={{ flex: 1, padding: '8px 10px', borderRadius: 8, background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, textAlign: 'center' }}>
+                      <div style={{ fontSize: 10, fontWeight: 700, color: D.dim, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Buffer above floor</div>
+                      <div style={{ fontSize: 18, fontWeight: 800, color: D.text, fontFamily: 'inherit' }}>{Math.max(0, currentGrade - defenseThreshold).toFixed(1)}pt</div>
+                    </div>
+                  </div>
+                </>
+              )}
             </div>
           )}
         </div>
