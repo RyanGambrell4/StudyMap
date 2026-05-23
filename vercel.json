@@ -73,10 +73,25 @@
     { "source": "/best-study-app-for-students", "destination": "/best-study-app-for-students.html" },
     { "source": "/anki-alternative", "destination": "/anki-alternative.html" },
     { "source": "/studyedge-ai", "destination": "/studyedge-ai.html" },
+    { "source": "/study-planner-for-college-students", "destination": "/study-planner-for-college-students.html" },
+    { "source": "/gpa-calculator", "destination": "/gpa-calculator.html" },
+    { "source": "/how-to-study-for-finals", "destination": "/how-to-study-for-finals.html" },
+    { "source": "/pre-med-study-guide", "destination": "/pre-med-study-guide.html" },
+    { "source": "/grade-calculator", "destination": "/grade-calculator.html" },
+    { "source": "/study-schedule-template", "destination": "/study-schedule-template.html" },
     { "source": "/blog", "destination": "/blog/index.html" },
     { "source": "/blog/how-to-study-for-finals-week", "destination": "/blog/how-to-study-for-finals-week.html" },
     { "source": "/blog/active-recall-study-technique", "destination": "/blog/active-recall-study-technique.html" },
     { "source": "/blog/how-to-improve-your-grades-in-college", "destination": "/blog/how-to-improve-your-grades-in-college.html" },
-    { "source": "/blog/best-study-techniques-science", "destination": "/blog/best-study-techniques-science.html" }
+    { "source": "/blog/best-study-techniques-science", "destination": "/blog/best-study-techniques-science.html" },
+    { "source": "/blog/how-to-study-for-organic-chemistry", "destination": "/blog/how-to-study-for-organic-chemistry.html" },
+    { "source": "/blog/how-to-raise-your-gpa-after-a-bad-semester", "destination": "/blog/how-to-raise-your-gpa-after-a-bad-semester.html" },
+    { "source": "/blog/best-study-schedule-for-college-students", "destination": "/blog/best-study-schedule-for-college-students.html" },
+    { "source": "/blog/how-to-get-an-a-in-any-class", "destination": "/blog/how-to-get-an-a-in-any-class.html" },
+    { "source": "/blog/mcat-study-schedule-6-months", "destination": "/blog/mcat-study-schedule-6-months.html" },
+    { "source": "/blog/how-to-stop-procrastinating-when-studying", "destination": "/blog/how-to-stop-procrastinating-when-studying.html" },
+    { "source": "/blog/how-to-study-with-adhd-in-college", "destination": "/blog/how-to-study-with-adhd-in-college.html" },
+    { "source": "/blog/what-gpa-do-you-need-for-medical-school", "destination": "/blog/what-gpa-do-you-need-for-medical-school.html" },
+    { "source": "/blog/how-to-balance-a-heavy-course-load", "destination": "/blog/how-to-balance-a-heavy-course-load.html" }
   ]
 }

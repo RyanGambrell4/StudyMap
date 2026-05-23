@@ -4,7 +4,7 @@
   <!-- Landing page (highest priority) -->
   <url>
     <loc>https://getstudyedge.com/</loc>
-    <lastmod>2026-05-20</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -12,12 +12,12 @@
   <!-- Brand disambiguation page -->
   <url>
     <loc>https://getstudyedge.com/studyedge-ai</loc>
-    <lastmod>2026-05-20</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.95</priority>
   </url>
 
-  <!-- SEO landing pages -->
+  <!-- Core feature / product landing pages -->
   <url>
     <loc>https://getstudyedge.com/study-schedule-generator</loc>
     <lastmod>2026-05-20</lastmod>
@@ -95,6 +95,49 @@
     <priority>0.9</priority>
   </url>
 
+  <!-- High-intent SEO landing pages (added 2026-05-23) -->
+  <url>
+    <loc>https://getstudyedge.com/study-planner-for-college-students</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://getstudyedge.com/gpa-calculator</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://getstudyedge.com/how-to-study-for-finals</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://getstudyedge.com/pre-med-study-guide</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://getstudyedge.com/grade-calculator</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <url>
+    <loc>https://getstudyedge.com/study-schedule-template</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
   <url>
     <loc>https://getstudyedge.com/about</loc>
     <lastmod>2026-05-20</lastmod>
@@ -109,7 +152,6 @@
     <priority>0.7</priority>
   </url>
 
-  <!-- Privacy Policy -->
   <url>
     <loc>https://getstudyedge.com/privacy</loc>
     <lastmod>2026-05-20</lastmod>
@@ -117,7 +159,6 @@
     <priority>0.3</priority>
   </url>
 
-  <!-- Terms of Service -->
   <url>
     <loc>https://getstudyedge.com/terms</loc>
     <lastmod>2026-05-20</lastmod>
@@ -128,7 +169,7 @@
   <!-- Blog -->
   <url>
     <loc>https://getstudyedge.com/blog</loc>
-    <lastmod>2026-05-20</lastmod>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -157,6 +198,70 @@
   <url>
     <loc>https://getstudyedge.com/blog/best-study-techniques-science</loc>
     <lastmod>2026-05-20</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- New blog posts (added 2026-05-23) -->
+  <url>
+    <loc>https://getstudyedge.com/blog/how-to-study-for-organic-chemistry</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://getstudyedge.com/blog/how-to-raise-your-gpa-after-a-bad-semester</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://getstudyedge.com/blog/best-study-schedule-for-college-students</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://getstudyedge.com/blog/how-to-get-an-a-in-any-class</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://getstudyedge.com/blog/mcat-study-schedule-6-months</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://getstudyedge.com/blog/how-to-stop-procrastinating-when-studying</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://getstudyedge.com/blog/how-to-study-with-adhd-in-college</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://getstudyedge.com/blog/what-gpa-do-you-need-for-medical-school</loc>
+    <lastmod>2026-05-23</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <url>
+    <loc>https://getstudyedge.com/blog/how-to-balance-a-heavy-course-load</loc>
+    <lastmod>2026-05-23</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
