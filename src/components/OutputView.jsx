@@ -11,6 +11,7 @@ import {
   getCachedCompletedSessions,
   saveCompletedSession,
   removeCompletedSession,
+  getCachedAllNotes,
 } from '../lib/db'
 import { runAdaptation } from '../utils/adaptationEngine'
 import AdaptModal from './AdaptModal'
@@ -454,6 +455,9 @@ export default function OutputView({
   const [currentMonthStr, setCurrentMonthStr] = useState(todayMonthStr)
   const [manualSessions, setManualSessions] = useState(() => getCachedManualSessions() ?? [])
   const [addSessionDayStr, setAddSessionDayStr] = useState(null)
+  const [restDays, setRestDays] = useState(() => {
+    try { return JSON.parse(localStorage.getItem('studyedge_rest_days') ?? '[]') } catch { return [] }
+  })
 
   // ── Google Calendar & Notion Calendar ────────────────────────────────────────
   const [googleEvents, setGoogleEvents] = useState([])
@@ -509,6 +513,34 @@ export default function OutputView({
       delete next[sessionId]
       return next
     })
+  }, [])
+
+  const handleToggleRestDay = useCallback((dateStr) => {
+    setRestDays(prev =>
+      prev.includes(dateStr) ? prev.filter(d => d !== dateStr) : [...prev, dateStr]
+    )
+  }, [])
+
+  const handleBulkRescheduleWeek = useCallback((mondayStr, sessionIds) => {
+    // Push every session in the week forward 7 days
+    setSessionTimeOverrides(prev => {
+      const next = { ...prev }
+      sessionIds.forEach(id => {
+        const existing = next[id]
+        if (existing) {
+          const d = new Date(existing.dateStr + 'T12:00:00')
+          d.setDate(d.getDate() + 7)
+          next[id] = { ...existing, dateStr: d.toISOString().split('T')[0] }
+        }
+      })
+      return next
+    })
+    setManualSessions(prev => prev.map(s => {
+      if (!sessionIds.includes(s.id)) return s
+      const d = new Date(s.dateStr + 'T12:00:00')
+      d.setDate(d.getDate() + 7)
+      return { ...s, dateStr: d.toISOString().split('T')[0] }
+    }))
   }, [])
 
   const handleSessionMove = useCallback((sessionId, newDateStr, newStartTime, newEndTime) => {
@@ -576,6 +608,7 @@ export default function OutputView({
   useEffect(() => { saveManualSessions(manualSessions) }, [manualSessions])
   useEffect(() => { localStorage.setItem('studyedge_view_mode', viewMode) }, [viewMode])
   useEffect(() => { localStorage.setItem('studyedge_session_time_overrides', JSON.stringify(sessionTimeOverrides)) }, [sessionTimeOverrides])
+  useEffect(() => { localStorage.setItem('studyedge_rest_days', JSON.stringify(restDays)) }, [restDays])
 
   // ── recovery ──
   const recoveryCoursesIdx = useMemo(() => {
@@ -1532,6 +1565,11 @@ export default function OutputView({
                 conflictMap={conflictMap}
                 onSessionMove={handleSessionMove}
                 onDeleteSession={handleDeleteSession}
+                sessionNotes={getCachedAllNotes()}
+                examDates={courses.filter(c => c.examDate).map(c => ({ dateStr: c.examDate, courseName: c.name, color: c.color }))}
+                restDays={restDays}
+                onToggleRestDay={handleToggleRestDay}
+                onBulkRescheduleWeek={handleBulkRescheduleWeek}
               />
             )}
           </div>
@@ -1602,6 +1640,7 @@ export default function OutputView({
             onNavigateToCourses={() => setActiveSection('courses')}
             completedSessions={completedSessionLog}
             scheduledSessions={manualSessions}
+            restDays={restDays}
             onPushToSchedule={incoming => {
               setManualSessions(prev => {
                 const courseId = incoming[0]?.courseId

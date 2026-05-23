@@ -95,6 +95,10 @@ export function getCachedNotes(courseId, dateStr) {
   return _cache?.session_notes?.[key] ?? null
 }
 
+export function getCachedAllNotes() {
+  return _cache?.session_notes ?? {}
+}
+
 // ── Writes (async, updates cache + Supabase) ──────────────────────────────────
 
 async function _upsert(fields) {

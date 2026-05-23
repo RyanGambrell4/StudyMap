@@ -872,7 +872,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle, completedSessions = [], scheduledSessions = [] }) {
+export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle, completedSessions = [], scheduledSessions = [], restDays = [] }) {
   const [step, setStep] = useState(1)
   const defaultStyle = learningStyle ? [learningStyle] : []
   const [form, setForm] = useState({
@@ -1112,14 +1112,14 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       const weekSessions = week.sessions || []
       if (!weekSessions.length) return
 
-      // Choose target days for this week: pick `daysPerWeek` spread days that aren't already at max
+      // Choose target days for this week: pick `daysPerWeek` spread days that aren't already at max and not rest days
       const targetDays = []
       for (const offset of SPREAD_ORDER) {
         if (targetDays.length >= Math.max(daysPerWeek, weekSessions.length)) break
         const d = new Date(startDate)
         d.setDate(d.getDate() + offset)
         const dateKey = d.toISOString().split('T')[0]
-        if ((studyCountByDate[dateKey] || 0) < MAX_STUDY_PER_DAY) targetDays.push(dateKey)
+        if ((studyCountByDate[dateKey] || 0) < MAX_STUDY_PER_DAY && !restDays.includes(dateKey)) targetDays.push(dateKey)
       }
       // Fallback: add any remaining days if we ran out of options
       if (targetDays.length < weekSessions.length) {

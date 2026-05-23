@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useRef } from 'react'
+import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import { clean } from '../utils/strings'
 
 const HOUR_HEIGHT = 56
@@ -17,6 +17,7 @@ function theme_vars(dark) {
     gcalText:     dark ? '#93c5fd'                  : '#1d4ed8',
     sessionAlpha: dark ? '16'                       : '30',
     subtitleText: dark ? '#4B5563'                  : '#6b7280',
+    restDayBg:    dark ? 'rgba(255,255,255,0.02)'   : 'rgba(0,0,0,0.03)',
   }
 }
 
@@ -68,6 +69,27 @@ function addDays(dateStr, n) {
   return d.toISOString().split('T')[0]
 }
 
+// Returns plain event handler objects (not a hook) — safe to call inside render
+function makeSwipeHandlers(onSwipeRight, onSwipeLeft, threshold = 60) {
+  let startX = null, startY = null
+  return {
+    onTouchStart: e => {
+      startX = e.touches[0].clientX
+      startY = e.touches[0].clientY
+    },
+    onTouchEnd: e => {
+      if (startX === null) return
+      const dx = e.changedTouches[0].clientX - startX
+      const dy = e.changedTouches[0].clientY - startY
+      if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > threshold) {
+        if (dx > 0) onSwipeRight?.()
+        else onSwipeLeft?.()
+      }
+      startX = null
+    },
+  }
+}
+
 export default function CalendarWeekView({
   activeDayStr,
   allDaysMap,
@@ -82,6 +104,11 @@ export default function CalendarWeekView({
   conflictMap = new Map(),
   onSessionMove,
   onDeleteSession,
+  sessionNotes = {},      // { courseId_dateStr: { concepts, ... } }
+  examDates = [],         // [{ dateStr, courseName, color }]
+  restDays = [],          // [dateStr, ...]
+  onToggleRestDay,
+  onBulkRescheduleWeek,
   theme = 'dark',
 }) {
   const tv = theme_vars(theme === 'dark')
@@ -96,13 +123,38 @@ export default function CalendarWeekView({
   }, [])
 
   const [hoveredSessionId, setHoveredSessionId] = useState(null)
+  const [selectedSessionId, setSelectedSessionId] = useState(null)
+  const [mobileActionSheet, setMobileActionSheet] = useState(null) // { session }
+
+  // Keyboard delete
+  useEffect(() => {
+    const onKey = e => {
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedSessionId && onDeleteSession) {
+        // Don't fire if user is typing in an input
+        if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return
+        onDeleteSession(selectedSessionId)
+        setSelectedSessionId(null)
+      }
+      if (e.key === 'Escape') setSelectedSessionId(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [selectedSessionId, onDeleteSession])
+
+  // Deselect on outside click
+  useEffect(() => {
+    const onDown = e => {
+      if (!e.target.closest('[data-session]')) setSelectedSessionId(null)
+    }
+    window.addEventListener('pointerdown', onDown)
+    return () => window.removeEventListener('pointerdown', onDown)
+  }, [])
 
   // ── Drag state ──────────────────────────────────────────────────────────────
-  const dragRef     = useRef(null)   // mutable drag info — no re-renders
-  const colDivRefs  = useRef([])     // DOM refs for each day column
-  const columnsRef  = useRef([])     // mirrors `columns` for use in effect
+  const dragRef     = useRef(null)
+  const colDivRefs  = useRef([])
+  const columnsRef  = useRef([])
   const [ghost, setGhost] = useState(null)
-  // ghost: { colIdx, startMin, endMin, color, courseName, sessionId }
 
   const todayStr  = new Date().toISOString().split('T')[0]
   const mondayStr = getWeekMonday(activeDayStr)
@@ -167,8 +219,40 @@ export default function CalendarWeekView({
     [weekDays, syllabusEventsByDate, googleByDate, classBlocksByDate]
   )
 
-  // Keep columnsRef in sync
   useEffect(() => { columnsRef.current = columns }, [columns])
+
+  // Density per day: number of study sessions
+  const densityByDate = useMemo(() => {
+    const map = {}
+    columns.forEach(col => {
+      map[col.dateStr] = col.timed.filter(e => e._type === 'session').length
+    })
+    return map
+  }, [columns])
+
+  const maxDensity = useMemo(() => Math.max(1, ...Object.values(densityByDate)), [densityByDate])
+
+  // Exam countdown map: dateStr -> [{ courseName, daysAway, color }]
+  const examByDate = useMemo(() => {
+    const map = {}
+    const today = new Date(todayStr + 'T12:00:00')
+    examDates.forEach(({ dateStr, courseName, color }) => {
+      if (!dateStr) return
+      const examD = new Date(dateStr + 'T12:00:00')
+      const daysAway = Math.round((examD - today) / 86400000)
+      if (daysAway < 0 || daysAway > 30) return
+      if (!map[dateStr]) map[dateStr] = []
+      map[dateStr].push({ courseName, daysAway, color })
+    })
+    return map
+  }, [examDates, todayStr])
+
+  // Week sessions for bulk reschedule
+  const weekSessionIds = useMemo(() => {
+    const ids = []
+    columns.forEach(col => col.timed.filter(e => e._type === 'session').forEach(e => ids.push(e.id)))
+    return ids
+  }, [columns])
 
   const hasAnyAllDay = columns.some(c => c.allDay.length > 0)
   const todayColIdx  = columns.findIndex(c => c.dateStr === todayStr)
@@ -257,7 +341,6 @@ export default function CalendarWeekView({
       if (!drag.didMove) return
 
       if (drag.type === 'move') {
-        // Determine hovered column from clientX
         let targetCol = null
         for (let i = 0; i < colDivRefs.current.length; i++) {
           const el = colDivRefs.current[i]
@@ -350,6 +433,20 @@ export default function CalendarWeekView({
               Add session
             </button>
           )}
+          {/* Bulk reschedule — push whole week forward */}
+          {onBulkRescheduleWeek && weekSessionIds.length > 0 && (
+            <button
+              onClick={() => onBulkRescheduleWeek(mondayStr, weekSessionIds)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+              style={{ color: '#9B6B1A', border: '1px solid rgba(217,119,6,0.25)', backgroundColor: 'rgba(217,119,6,0.06)' }}
+              title="Push all sessions this week forward by 7 days"
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+              </svg>
+              Reschedule week
+            </button>
+          )}
         </div>
         <button onClick={onNextWeek}
           className="flex items-center gap-1.5 transition-colors text-sm"
@@ -366,25 +463,83 @@ export default function CalendarWeekView({
       <div className="flex" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
         <div className="w-12 shrink-0" />
         {columns.map((col, i) => {
-          const isToday = col.dateStr === todayStr
-          const dayNum  = col.dateStr ? parseInt(col.dateStr.split('-')[2]) : null
+          const isToday   = col.dateStr === todayStr
+          const isRest    = restDays.includes(col.dateStr)
+          const dayNum    = col.dateStr ? parseInt(col.dateStr.split('-')[2]) : null
+          const density   = densityByDate[col.dateStr] ?? 0
+          const exams     = examByDate[col.dateStr] ?? []
+          // Color-coded density bar: green → amber → red
+          const ratio     = density / maxDensity
+          const barColor  = ratio === 0 ? 'transparent'
+            : ratio < 0.4 ? '#34d399'
+            : ratio < 0.75 ? '#f59e0b'
+            : '#ef4444'
+
           return (
             <div key={i}
-              className="flex-1 flex flex-col items-center py-2 group cursor-pointer"
-              style={{ borderLeft: `1px solid ${tv.gridLine}` }}
-              onClick={() => onAddSession && onAddSession(col.dateStr)}
+              className="flex-1 flex flex-col items-center py-2"
+              style={{ borderLeft: `1px solid ${tv.gridLine}`, position: 'relative' }}
             >
               <span className="text-[10px] font-medium uppercase tracking-widest mb-1"
-                style={{ color: isToday ? '#818CF8' : '#4B5563' }}>
+                style={{ color: isToday ? '#818CF8' : isRest ? '#6B7280' : '#4B5563' }}>
                 {DAY_LABELS[i]}
               </span>
-              <div className="w-7 h-7 flex items-center justify-center rounded-full text-[13px] font-medium transition-colors"
+              <div
+                className="w-7 h-7 flex items-center justify-center rounded-full text-[13px] font-medium transition-colors cursor-pointer"
                 style={isToday
                   ? { background: '#4F46E5', color: 'white' }
+                  : isRest
+                  ? { background: 'rgba(107,114,128,0.15)', color: '#9CA3AF', textDecoration: 'line-through' }
                   : { color: '#6B7280' }}
+                onClick={() => onAddSession && onAddSession(col.dateStr)}
               >
                 {dayNum}
               </div>
+
+              {/* Density bar */}
+              <div style={{ width: '80%', height: 3, borderRadius: 2, background: 'rgba(128,128,128,0.12)', marginTop: 4, overflow: 'hidden' }}>
+                <div style={{ width: `${ratio * 100}%`, height: '100%', background: barColor, borderRadius: 2, transition: 'width 0.3s' }} />
+              </div>
+
+              {/* Exam countdown chips */}
+              {exams.map((ex, ei) => (
+                <div key={ei} style={{
+                  marginTop: 3,
+                  padding: '1px 6px',
+                  borderRadius: 99,
+                  fontSize: 9,
+                  fontWeight: 700,
+                  letterSpacing: '0.02em',
+                  background: `${ex.color?.dot ?? '#8B5CF6'}22`,
+                  color: ex.color?.dot ?? '#8B5CF6',
+                  border: `1px solid ${ex.color?.dot ?? '#8B5CF6'}44`,
+                  whiteSpace: 'nowrap',
+                  maxWidth: '90%',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                }}>
+                  {ex.daysAway === 0 ? `${ex.courseName} exam today` : `${ex.courseName} — ${ex.daysAway}d`}
+                </div>
+              ))}
+
+              {/* Rest day toggle */}
+              {onToggleRestDay && (
+                <button
+                  onClick={() => onToggleRestDay(col.dateStr)}
+                  title={isRest ? 'Remove rest day' : 'Mark as rest day'}
+                  style={{
+                    position: 'absolute', top: 4, right: 4,
+                    width: 14, height: 14, borderRadius: '50%',
+                    background: isRest ? 'rgba(107,114,128,0.3)' : 'transparent',
+                    border: `1px solid ${isRest ? '#6B7280' : 'transparent'}`,
+                    cursor: 'pointer', fontSize: 8, color: '#9CA3AF',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    padding: 0,
+                  }}
+                >
+                  {isRest ? '✕' : '—'}
+                </button>
+              )}
             </div>
           )
         })}
@@ -441,178 +596,279 @@ export default function CalendarWeekView({
         </div>
 
         {/* Day columns */}
-        {columns.map((col, colIdx) => (
-          <div
-            key={colIdx}
-            ref={el => colDivRefs.current[colIdx] = el}
-            className="flex-1 relative min-w-0"
-            style={{ borderLeft: `1px solid ${tv.gridLine}`, height: TOTAL_HOURS * HOUR_HEIGHT, cursor: 'default' }}
-            onClick={e => {
-              if (e.target !== e.currentTarget) return
-              onAddSession?.(col.dateStr)
-            }}
-          >
-            {/* Hour lines */}
-            {Array.from({ length: TOTAL_HOURS - 1 }, (_, i) => (
-              <div key={i} className="absolute left-0 right-0 pointer-events-none"
-                style={{ top: (i + 1) * HOUR_HEIGHT, height: 1, background: tv.gridLine }} />
-            ))}
-            {/* Half-hour lines */}
-            {Array.from({ length: TOTAL_HOURS }, (_, i) => (
-              <div key={`h${i}`} className="absolute left-0 right-0 pointer-events-none"
-                style={{ top: i * HOUR_HEIGHT + HOUR_HEIGHT / 2, height: 1, background: tv.gridLineHalf }} />
-            ))}
-
-            {/* Red current-time line */}
-            {showRedLine && colIdx === todayColIdx && (
-              <div className="absolute left-0 right-0 z-20 pointer-events-none" style={{ top: nowPx }}>
-                {colIdx === 0 && (
-                  <div className="absolute bg-red-500 rounded-full"
-                    style={{ width: 8, height: 8, top: -3.5, left: -1 }} />
-                )}
-                <div className="w-full" style={{ height: 1.5, background: 'rgba(239,68,68,0.75)' }} />
-              </div>
-            )}
-
-            {/* Ghost block (drag preview) */}
-            {ghost && ghost.colIdx === colIdx && (() => {
-              const topMin = ghost.startMin - START_HOUR * 60
-              if (topMin < 0 || topMin > TOTAL_HOURS * 60) return null
-              const top    = (topMin / 60) * HOUR_HEIGHT
-              const height = Math.max(((ghost.endMin - ghost.startMin) / 60) * HOUR_HEIGHT, 20)
-              return (
-                <div className="absolute inset-x-0.5 rounded overflow-hidden pointer-events-none z-30"
-                  style={{
-                    top,
-                    height,
-                    background: `${ghost.color.dot}28`,
-                    border: `1.5px dashed ${ghost.color.dot}`,
-                    boxShadow: `0 4px 16px ${ghost.color.dot}30`,
-                  }}
-                >
-                  <div className="px-1.5 py-0.5">
-                    <p className="text-[10px] font-medium leading-tight truncate" style={{ color: ghost.color.dot }}>
-                      {ghost.courseName}
-                    </p>
-                    {height > 28 && (
-                      <p className="text-[9px] leading-tight opacity-70" style={{ color: ghost.color.dot }}>
-                        {minutesToTimeStr(ghost.startMin)} – {minutesToTimeStr(ghost.endMin)}
-                      </p>
-                    )}
-                  </div>
+        {columns.map((col, colIdx) => {
+          const isRest = restDays.includes(col.dateStr)
+          return (
+            <div
+              key={colIdx}
+              ref={el => colDivRefs.current[colIdx] = el}
+              className="flex-1 relative min-w-0"
+              style={{
+                borderLeft: `1px solid ${tv.gridLine}`,
+                height: TOTAL_HOURS * HOUR_HEIGHT,
+                cursor: 'default',
+                background: isRest ? tv.restDayBg : undefined,
+              }}
+              onClick={e => {
+                if (e.target !== e.currentTarget) return
+                onAddSession?.(col.dateStr)
+              }}
+            >
+              {/* Rest day overlay label */}
+              {isRest && (
+                <div style={{
+                  position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  pointerEvents: 'none', zIndex: 1,
+                }}>
+                  <span style={{ fontSize: 10, color: '#4B5563', fontWeight: 600, letterSpacing: '0.08em', transform: 'rotate(-90deg)', whiteSpace: 'nowrap', opacity: 0.4 }}>REST DAY</span>
                 </div>
-              )
-            })()}
+              )}
 
-            {/* Timed events */}
-            {col.timed.map((ev, j) => {
-              const topMin = ev.startMin - START_HOUR * 60
-              if (topMin < 0 || topMin > TOTAL_HOURS * 60) return null
-              const top    = (topMin / 60) * HOUR_HEIGHT
-              const height = Math.max(((ev.endMin - ev.startMin) / 60) * HOUR_HEIGHT, 20)
+              {/* Hour lines */}
+              {Array.from({ length: TOTAL_HOURS - 1 }, (_, i) => (
+                <div key={i} className="absolute left-0 right-0 pointer-events-none"
+                  style={{ top: (i + 1) * HOUR_HEIGHT, height: 1, background: tv.gridLine }} />
+              ))}
+              {/* Half-hour lines */}
+              {Array.from({ length: TOTAL_HOURS }, (_, i) => (
+                <div key={`h${i}`} className="absolute left-0 right-0 pointer-events-none"
+                  style={{ top: i * HOUR_HEIGHT + HOUR_HEIGHT / 2, height: 1, background: tv.gridLineHalf }} />
+              ))}
 
-              if (ev._type === 'class') {
+              {/* Red current-time line */}
+              {showRedLine && colIdx === todayColIdx && (
+                <div className="absolute left-0 right-0 z-20 pointer-events-none" style={{ top: nowPx }}>
+                  {colIdx === 0 && (
+                    <div className="absolute bg-red-500 rounded-full"
+                      style={{ width: 8, height: 8, top: -3.5, left: -1 }} />
+                  )}
+                  <div className="w-full" style={{ height: 1.5, background: 'rgba(239,68,68,0.75)' }} />
+                </div>
+              )}
+
+              {/* Ghost block (drag preview) */}
+              {ghost && ghost.colIdx === colIdx && (() => {
+                const topMin = ghost.startMin - START_HOUR * 60
+                if (topMin < 0 || topMin > TOTAL_HOURS * 60) return null
+                const top    = (topMin / 60) * HOUR_HEIGHT
+                const height = Math.max(((ghost.endMin - ghost.startMin) / 60) * HOUR_HEIGHT, 20)
                 return (
-                  <div key={ev.id}
-                    className="absolute inset-x-0.5 rounded overflow-hidden pointer-events-none z-10"
+                  <div className="absolute inset-x-0.5 rounded overflow-hidden pointer-events-none z-30"
                     style={{
-                      top, height,
-                      background: `${ev.color.dot}14`,
-                      borderLeft: `2px solid ${ev.color.dot}`,
-                      backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 4px, ${ev.color.dot}12 4px, ${ev.color.dot}12 8px)`,
+                      top,
+                      height,
+                      background: `${ghost.color.dot}28`,
+                      border: `1.5px dashed ${ghost.color.dot}`,
+                      boxShadow: `0 4px 16px ${ghost.color.dot}30`,
                     }}
                   >
                     <div className="px-1.5 py-0.5">
-                      <p className="text-[9px] font-bold leading-tight truncate uppercase tracking-wider" style={{ color: ev.color.dot, opacity: 0.85 }}>CLASS</p>
-                      {height > 28 && <p className="text-[9px] leading-tight truncate" style={{ color: ev.color.dot, opacity: 0.6 }}>{ev.courseName}</p>}
+                      <p className="text-[10px] font-medium leading-tight truncate" style={{ color: ghost.color.dot }}>
+                        {ghost.courseName}
+                      </p>
+                      {height > 28 && (
+                        <p className="text-[9px] leading-tight opacity-70" style={{ color: ghost.color.dot }}>
+                          {minutesToTimeStr(ghost.startMin)} – {minutesToTimeStr(ghost.endMin)}
+                        </p>
+                      )}
                     </div>
                   </div>
                 )
-              }
+              })()}
 
-              if (ev._type === 'gcal') {
+              {/* Timed events */}
+              {col.timed.map((ev, j) => {
+                const topMin = ev.startMin - START_HOUR * 60
+                if (topMin < 0 || topMin > TOTAL_HOURS * 60) return null
+                const top    = (topMin / 60) * HOUR_HEIGHT
+                const height = Math.max(((ev.endMin - ev.startMin) / 60) * HOUR_HEIGHT, 20)
+
+                if (ev._type === 'class') {
+                  return (
+                    <div key={ev.id}
+                      className="absolute inset-x-0.5 rounded overflow-hidden pointer-events-none z-10"
+                      style={{
+                        top, height,
+                        background: `${ev.color.dot}14`,
+                        borderLeft: `2px solid ${ev.color.dot}`,
+                        backgroundImage: `repeating-linear-gradient(45deg, transparent, transparent 4px, ${ev.color.dot}12 4px, ${ev.color.dot}12 8px)`,
+                      }}
+                    >
+                      <div className="px-1.5 py-0.5">
+                        <p className="text-[9px] font-bold leading-tight truncate uppercase tracking-wider" style={{ color: ev.color.dot, opacity: 0.85 }}>CLASS</p>
+                        {height > 28 && <p className="text-[9px] leading-tight truncate" style={{ color: ev.color.dot, opacity: 0.6 }}>{ev.courseName}</p>}
+                      </div>
+                    </div>
+                  )
+                }
+
+                if (ev._type === 'gcal') {
+                  return (
+                    <div key={`gcal-${j}`}
+                      className="absolute inset-x-0.5 rounded overflow-hidden"
+                      style={{ top, height, background: tv.gcalBg, borderLeft: `2px solid ${GCAL_BORDER}` }}
+                    >
+                      <div className="px-1.5 py-0.5">
+                        <p className="text-[10px] font-medium leading-tight truncate" style={{ color: tv.gcalText }}>{clean(ev.title)}</p>
+                      </div>
+                    </div>
+                  )
+                }
+
+                // session
+                const done         = completedIds.has(ev.id)
+                const conflictWith = conflictMap.get(ev.id)
+                const isDragging   = ghost?.sessionId === ev.id
+                const isHovered    = hoveredSessionId === ev.id
+                const isSelected   = selectedSessionId === ev.id
+
+                // Session notes preview — look up first line of concepts
+                const noteKey  = ev.courseId ? `${ev.courseId}_${col.dateStr}` : null
+                const noteText = noteKey ? (sessionNotes[noteKey]?.concepts ?? '') : ''
+                const notePreview = noteText ? noteText.split('\n')[0].slice(0, 40) : null
+
+                // Swipe handlers for mobile complete
+                const swipeHandlers = makeSwipeHandlers(
+                  () => onToggle?.(ev.id),
+                  () => setMobileActionSheet({ session: ev }),
+                )
+
                 return (
-                  <div key={`gcal-${j}`}
-                    className="absolute inset-x-0.5 rounded overflow-hidden"
-                    style={{ top, height, background: tv.gcalBg, borderLeft: `2px solid ${GCAL_BORDER}` }}
+                  <div key={ev.id ?? j}
+                    data-session={ev.id}
+                    className="absolute inset-x-0.5 rounded overflow-hidden select-none"
+                    style={{
+                      top,
+                      height,
+                      background: `${ev.color.dot}${tv.sessionAlpha}`,
+                      borderLeft: `2px solid ${conflictWith ? '#f59e0b' : isSelected ? ev.color.dot : ev.color.dot}`,
+                      outline: isSelected ? `2px solid ${ev.color.dot}` : 'none',
+                      outlineOffset: 1,
+                      opacity: isDragging ? 0.25 : done ? 0.38 : 1,
+                      cursor: isDragging ? 'grabbing' : 'grab',
+                      touchAction: 'pan-y',
+                      transition: 'outline 0.1s',
+                    }}
+                    onPointerDown={e => {
+                      // On pointer devices only (not touch), handle drag
+                      if (e.pointerType !== 'touch') handleSessionPointerDown(e, ev, colIdx)
+                    }}
+                    onTouchStart={e => {
+                      swipeHandlers.onTouchStart(e)
+                      setSelectedSessionId(ev.id)
+                    }}
+                    onTouchEnd={swipeHandlers.onTouchEnd}
+                    onClick={e => {
+                      if (e.pointerType !== 'touch') setSelectedSessionId(ev.id)
+                    }}
+                    onMouseEnter={() => setHoveredSessionId(ev.id)}
+                    onMouseLeave={() => setHoveredSessionId(null)}
+                    title={conflictWith ? `Conflicts with ${conflictWith}. Drag to reschedule.` : 'Click to select · Delete key to remove · Drag to move'}
                   >
                     <div className="px-1.5 py-0.5">
-                      <p className="text-[10px] font-medium leading-tight truncate" style={{ color: tv.gcalText }}>{clean(ev.title)}</p>
-                    </div>
-                  </div>
-                )
-              }
-
-              // session
-              const done         = completedIds.has(ev.id)
-              const conflictWith = conflictMap.get(ev.id)
-              const isDragging   = ghost?.sessionId === ev.id
-
-              const isHovered = hoveredSessionId === ev.id
-
-              return (
-                <div key={ev.id ?? j}
-                  className="absolute inset-x-0.5 rounded overflow-hidden select-none"
-                  style={{
-                    top,
-                    height,
-                    background: `${ev.color.dot}${tv.sessionAlpha}`,
-                    borderLeft: `2px solid ${conflictWith ? '#f59e0b' : ev.color.dot}`,
-                    opacity: isDragging ? 0.25 : done ? 0.38 : 1,
-                    cursor: isDragging ? 'grabbing' : 'grab',
-                    touchAction: 'none',
-                  }}
-                  onPointerDown={e => handleSessionPointerDown(e, ev, colIdx)}
-                  onMouseEnter={() => setHoveredSessionId(ev.id)}
-                  onMouseLeave={() => setHoveredSessionId(null)}
-                  title={conflictWith ? `Conflicts with ${conflictWith}. Drag to reschedule.` : undefined}
-                >
-                  <div className="px-1.5 py-0.5">
-                    <div className="flex items-center gap-0.5">
-                      {conflictWith && (
-                        <svg className="w-2 h-2 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                        </svg>
+                      <div className="flex items-center gap-0.5">
+                        {conflictWith && (
+                          <svg className="w-2 h-2 shrink-0 text-amber-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                          </svg>
+                        )}
+                        <p className={`text-[10px] font-medium leading-tight truncate ${done ? 'line-through' : ''}`}
+                          style={{ color: conflictWith ? '#fbbf24' : ev.color.dot }}>
+                          {ev.courseName}
+                        </p>
+                      </div>
+                      {height > 30 && (
+                        <p className="text-[9px] leading-tight truncate" style={{ color: tv.subtitleText }}>{ev.sessionType}</p>
                       )}
-                      <p className={`text-[10px] font-medium leading-tight truncate ${done ? 'line-through' : ''}`}
-                        style={{ color: conflictWith ? '#fbbf24' : ev.color.dot }}>
-                        {ev.courseName}
-                      </p>
+                      {/* Notes preview */}
+                      {notePreview && height > 46 && (
+                        <p className="text-[8px] leading-tight truncate mt-0.5" style={{ color: ev.color.dot, opacity: 0.55 }}>
+                          📝 {notePreview}
+                        </p>
+                      )}
                     </div>
-                    {height > 30 && (
-                      <p className="text-[9px] leading-tight truncate" style={{ color: tv.subtitleText }}>{ev.sessionType}</p>
+
+                    {/* Delete button — desktop hover */}
+                    {(isHovered || isSelected) && onDeleteSession && (
+                      <button
+                        style={{ position: 'absolute', top: 2, right: 2, width: 14, height: 14, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, zIndex: 10 }}
+                        onPointerDown={e => { e.stopPropagation(); e.preventDefault() }}
+                        onClick={e => { e.stopPropagation(); onDeleteSession(ev.id); setSelectedSessionId(null) }}
+                        title="Delete session"
+                      >
+                        <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                          <path d="M1 1l6 6M7 1L1 7" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                        </svg>
+                      </button>
+                    )}
+
+                    {/* Resize handle */}
+                    {!isDragging && (
+                      <div
+                        className="absolute bottom-0 left-0 right-0 flex items-center justify-center"
+                        style={{ height: 10, cursor: 'ns-resize' }}
+                        onPointerDown={e => handleResizePointerDown(e, ev, colIdx)}
+                      >
+                        <div style={{ width: 20, height: 2, borderRadius: 1, background: ev.color.dot, opacity: 0.35 }} />
+                      </div>
                     )}
                   </div>
-
-                  {/* Delete button */}
-                  {isHovered && onDeleteSession && (
-                    <button
-                      style={{ position: 'absolute', top: 2, right: 2, width: 14, height: 14, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, zIndex: 10 }}
-                      onPointerDown={e => { e.stopPropagation(); e.preventDefault() }}
-                      onClick={e => { e.stopPropagation(); onDeleteSession(ev.id) }}
-                    >
-                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
-                        <path d="M1 1l6 6M7 1L1 7" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                      </svg>
-                    </button>
-                  )}
-
-                  {/* Resize handle */}
-                  {!isDragging && (
-                    <div
-                      className="absolute bottom-0 left-0 right-0 flex items-center justify-center"
-                      style={{ height: 10, cursor: 'ns-resize' }}
-                      onPointerDown={e => handleResizePointerDown(e, ev, colIdx)}
-                    >
-                      <div style={{ width: 20, height: 2, borderRadius: 1, background: ev.color.dot, opacity: 0.35 }} />
-                    </div>
-                  )}
-                </div>
-              )
-            })}
-          </div>
-        ))}
+                )
+              })}
+            </div>
+          )
+        })}
       </div>
+
+      {/* ── Mobile action sheet ── */}
+      {mobileActionSheet && (
+        <div
+          style={{ position: 'fixed', inset: 0, zIndex: 9999, background: 'rgba(0,0,0,0.5)' }}
+          onClick={() => setMobileActionSheet(null)}
+        >
+          <div
+            style={{
+              position: 'absolute', bottom: 0, left: 0, right: 0,
+              background: '#1a1a2e', borderRadius: '16px 16px 0 0',
+              padding: '16px 16px 32px',
+            }}
+            onClick={e => e.stopPropagation()}
+          >
+            <div style={{ width: 36, height: 4, borderRadius: 2, background: '#374151', margin: '0 auto 16px' }} />
+            <p style={{ fontSize: 13, fontWeight: 700, color: mobileActionSheet.session.color?.dot ?? '#fff', marginBottom: 4 }}>
+              {mobileActionSheet.session.courseName}
+            </p>
+            <p style={{ fontSize: 11, color: '#6B7280', marginBottom: 16 }}>{mobileActionSheet.session.sessionType}</p>
+            <button
+              style={{ width: '100%', padding: '14px', background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 10, color: '#34d399', fontSize: 14, fontWeight: 600, marginBottom: 8, cursor: 'pointer' }}
+              onClick={() => { onToggle?.(mobileActionSheet.session.id); setMobileActionSheet(null) }}
+            >
+              {completedIds.has(mobileActionSheet.session.id) ? 'Mark incomplete' : 'Mark complete'}
+            </button>
+            {onDeleteSession && (
+              <button
+                style={{ width: '100%', padding: '14px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, color: '#ef4444', fontSize: 14, fontWeight: 600, marginBottom: 8, cursor: 'pointer' }}
+                onClick={() => { onDeleteSession(mobileActionSheet.session.id); setMobileActionSheet(null) }}
+              >
+                Delete session
+              </button>
+            )}
+            <button
+              style={{ width: '100%', padding: '14px', background: 'transparent', border: 'none', color: '#6B7280', fontSize: 14, cursor: 'pointer' }}
+              onClick={() => setMobileActionSheet(null)}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Keyboard hint when session selected */}
+      {selectedSessionId && (
+        <div style={{ position: 'fixed', bottom: 16, left: '50%', transform: 'translateX(-50%)', background: 'rgba(0,0,0,0.75)', color: '#ccc', fontSize: 11, padding: '6px 12px', borderRadius: 8, pointerEvents: 'none', zIndex: 9998 }}>
+          Press <kbd style={{ background: 'rgba(255,255,255,0.1)', padding: '1px 5px', borderRadius: 3, fontFamily: 'monospace' }}>Delete</kbd> to remove · <kbd style={{ background: 'rgba(255,255,255,0.1)', padding: '1px 5px', borderRadius: 3, fontFamily: 'monospace' }}>Esc</kbd> to deselect
+        </div>
+      )}
     </div>
   )
 }
