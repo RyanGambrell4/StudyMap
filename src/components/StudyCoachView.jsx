@@ -430,6 +430,17 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
           </FieldBlock>
         </div>
 
+        {/* Include weekends */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: 10, background: form.includeWeekends ? 'rgba(59,97,196,0.08)' : 'rgba(0,0,0,0.02)', border: `1px solid ${form.includeWeekends ? '#3B61C4' : D.border}`, cursor: 'pointer' }} onClick={() => update('includeWeekends', !form.includeWeekends)}>
+          <div>
+            <div style={{ fontSize: 13, fontWeight: 600, color: form.includeWeekends ? '#3B61C4' : D.text }}>Include weekends</div>
+            <div style={{ fontSize: 11.5, color: D.muted, marginTop: 2 }}>Schedule sessions on Saturday &amp; Sunday too</div>
+          </div>
+          <div style={{ width: 38, height: 22, borderRadius: 11, background: form.includeWeekends ? '#3B61C4' : D.border, position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
+            <div style={{ position: 'absolute', top: 3, left: form.includeWeekends ? 19 : 3, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
+          </div>
+        </div>
+
         {/* Learning style */}
         <FieldBlock icon="lightbulb" color={D.mint} label="How you learn best" hint="Pick any that apply. I'll lean into them.">
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
@@ -867,7 +878,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   const [form, setForm] = useState({
     courseIdx: courses.length > 0 ? 0 : -1,
     goal: '', topics: [], strengths: '', struggles: '',
-    dates: [], materials: [], daysPerWeek: 3, sessionLen: 60, style: defaultStyle,
+    dates: [], materials: [], daysPerWeek: 3, sessionLen: 60, style: defaultStyle, includeWeekends: false,
   })
   const [plan, setPlan] = useState(null)
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
@@ -966,6 +977,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
           emphasisTopics: form.topics?.length ? form.topics.join(', ') : null,
           importantDates: validDates.length ? validDates : null,
           daysPerWeek: form.daysPerWeek || 3,
+          includeWeekends: form.includeWeekends || false,
           sessionMinutes: form.sessionLen || 60,
           calendarEvents: googleEvents.length ? googleEvents : null,
           timePreference: preferredTime,
@@ -1085,8 +1097,11 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       return null
     }
 
-    // Spread sessions across days: prefer Mon/Wed/Fri, then Tue/Thu, then Sat/Sun
-    const SPREAD_ORDER = [0, 2, 4, 1, 3, 5, 6]
+    // Spread sessions across days
+    // includeWeekends: interleave Sat/Sun with weekdays so they're picked early
+    const SPREAD_ORDER = form.includeWeekends
+      ? [0, 5, 2, 6, 4, 1, 3]   // Mon, Sat, Wed, Sun, Fri, Tue, Thu
+      : [0, 2, 4, 1, 3, 5, 6]   // Mon, Wed, Fri, Tue, Thu, Sat, Sun
 
     const totalSessions = (plan.weeklyFocus || []).reduce((sum, w) => sum + (w.sessions?.length || 0), 0)
     let sessionNum = 0

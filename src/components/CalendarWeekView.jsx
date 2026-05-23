@@ -81,6 +81,7 @@ export default function CalendarWeekView({
   googleEvents = [],
   conflictMap = new Map(),
   onSessionMove,
+  onDeleteSession,
   theme = 'dark',
 }) {
   const tv = theme_vars(theme === 'dark')
@@ -93,6 +94,8 @@ export default function CalendarWeekView({
     const id = setInterval(update, 30000)
     return () => clearInterval(id)
   }, [])
+
+  const [hoveredSessionId, setHoveredSessionId] = useState(null)
 
   // ── Drag state ──────────────────────────────────────────────────────────────
   const dragRef     = useRef(null)   // mutable drag info — no re-renders
@@ -545,6 +548,8 @@ export default function CalendarWeekView({
               const conflictWith = conflictMap.get(ev.id)
               const isDragging   = ghost?.sessionId === ev.id
 
+              const isHovered = hoveredSessionId === ev.id
+
               return (
                 <div key={ev.id ?? j}
                   className="absolute inset-x-0.5 rounded overflow-hidden select-none"
@@ -558,6 +563,8 @@ export default function CalendarWeekView({
                     touchAction: 'none',
                   }}
                   onPointerDown={e => handleSessionPointerDown(e, ev, colIdx)}
+                  onMouseEnter={() => setHoveredSessionId(ev.id)}
+                  onMouseLeave={() => setHoveredSessionId(null)}
                   title={conflictWith ? `Conflicts with ${conflictWith}. Drag to reschedule.` : undefined}
                 >
                   <div className="px-1.5 py-0.5">
@@ -576,6 +583,19 @@ export default function CalendarWeekView({
                       <p className="text-[9px] leading-tight truncate" style={{ color: tv.subtitleText }}>{ev.sessionType}</p>
                     )}
                   </div>
+
+                  {/* Delete button */}
+                  {isHovered && onDeleteSession && (
+                    <button
+                      style={{ position: 'absolute', top: 2, right: 2, width: 14, height: 14, borderRadius: '50%', background: 'rgba(0,0,0,0.45)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, zIndex: 10 }}
+                      onPointerDown={e => { e.stopPropagation(); e.preventDefault() }}
+                      onClick={e => { e.stopPropagation(); onDeleteSession(ev.id) }}
+                    >
+                      <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
+                        <path d="M1 1l6 6M7 1L1 7" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                      </svg>
+                    </button>
+                  )}
 
                   {/* Resize handle */}
                   {!isDragging && (

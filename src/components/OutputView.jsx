@@ -502,6 +502,15 @@ export default function OutputView({
     window.location.href = `/api/google-auth?userId=${encodeURIComponent(userId)}`
   }
 
+  const handleDeleteSession = useCallback((sessionId) => {
+    setManualSessions(prev => prev.filter(s => s.id !== sessionId))
+    setSessionTimeOverrides(prev => {
+      const next = { ...prev }
+      delete next[sessionId]
+      return next
+    })
+  }, [])
+
   const handleSessionMove = useCallback((sessionId, newDateStr, newStartTime, newEndTime) => {
     setSessionTimeOverrides(prev => ({
       ...prev,
@@ -1522,6 +1531,7 @@ export default function OutputView({
                 googleEvents={googleEvents}
                 conflictMap={conflictMap}
                 onSessionMove={handleSessionMove}
+                onDeleteSession={handleDeleteSession}
               />
             )}
           </div>
