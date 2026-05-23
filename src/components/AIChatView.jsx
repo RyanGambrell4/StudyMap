@@ -225,8 +225,8 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             </div>
-            <p className="text-slate-500 dark:text-slate-400 text-sm max-w-xs leading-relaxed">
-              Ask me anything about <span className="font-semibold text-slate-700 dark:text-slate-300">{courseName}</span>. I can explain concepts, quiz you, or work through practice problems. If you're struggling with a topic, tell me and I'll update your study plan.
+            <p className="text-slate-500 text-sm max-w-xs leading-relaxed">
+              Ask me anything about <span className="font-semibold text-slate-700">{courseName}</span>. I can explain concepts, quiz you, or work through practice problems. If you're struggling with a topic, tell me and I'll update your study plan.
             </p>
           </div>
         )}
@@ -236,7 +236,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
             <div className={`max-w-[82%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
               msg.role === 'user'
                 ? 'bg-indigo-600 text-white rounded-br-md whitespace-pre-wrap'
-                : 'bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-800 dark:text-slate-200 rounded-bl-md'
+                : 'bg-white border border-slate-200 text-slate-800 rounded-bl-md'
             }`}>
               {msg.role === 'user' ? msg.content : (
                 <ReactMarkdown
@@ -250,11 +250,11 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
                     h2: ({ children }) => <h2 className="text-sm font-bold mb-1 mt-2">{children}</h2>,
                     h3: ({ children }) => <h3 className="text-sm font-semibold mb-1 mt-1">{children}</h3>,
                     code: ({ inline, children }) => inline
-                      ? <code className="bg-slate-100 dark:bg-slate-700 px-1 py-0.5 rounded text-xs font-mono">{children}</code>
-                      : <pre className="bg-slate-100 dark:bg-slate-700 rounded-lg px-3 py-2 my-2 overflow-x-auto text-xs font-mono whitespace-pre">{children}</pre>,
-                    blockquote: ({ children }) => <blockquote className="border-l-2 border-indigo-400 pl-3 italic text-slate-600 dark:text-slate-400 my-1">{children}</blockquote>,
+                      ? <code className="bg-slate-100 px-1 py-0.5 rounded text-xs font-mono">{children}</code>
+                      : <pre className="bg-slate-100 rounded-lg px-3 py-2 my-2 overflow-x-auto text-xs font-mono whitespace-pre">{children}</pre>,
+                    blockquote: ({ children }) => <blockquote className="border-l-2 border-indigo-400 pl-3 italic text-slate-600 my-1">{children}</blockquote>,
                     strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-                    hr: () => <hr className="border-slate-200 dark:border-slate-600 my-2" />,
+                    hr: () => <hr className="border-slate-200 my-2" />,
                   }}
                 >
                   {msg.content}
@@ -266,7 +266,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
 
         {loading && (
           <div className="flex justify-start">
-            <div className="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5">
+            <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5">
               {[0, 1, 2].map(i => (
                 <span key={i} className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
               ))}
@@ -279,17 +279,17 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
 
       {/* Error */}
       {error && (
-        <div className="mx-4 mb-2 shrink-0 px-3 py-2 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-800/40 rounded-xl text-red-600 dark:text-red-400 text-xs">
+        <div className="mx-4 mb-2 shrink-0 px-3 py-2 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs">
           {error}
         </div>
       )}
 
       {/* Input */}
-      <div className="px-4 pb-4 pt-2 shrink-0 border-t border-slate-100 dark:border-slate-800">
+      <div className="px-4 pb-4 pt-2 shrink-0 border-t border-slate-100">
       {isFree && (() => { const { remaining } = canUseFeature('aiTutor'); return remaining !== null && (
-        <p className="text-xs text-slate-400 dark:text-slate-500 mb-1.5">
+        <p className="text-xs text-slate-400 mb-1.5">
           {2 - remaining} of 2 AI messages used today
-          {remaining === 0 && <> · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600 dark:hover:text-slate-300">{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>}
+          {remaining === 0 && <> · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>}
         </p>
       )})()}
       <div className="flex items-end gap-2">
@@ -300,7 +300,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
           onKeyDown={handleKeyDown}
           placeholder={`Ask about ${courseName}…`}
           rows={1}
-          className="flex-1 bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-slate-800 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-600 focus:outline-none focus:border-indigo-400 dark:focus:border-indigo-500/60 text-sm resize-none leading-relaxed"
+          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-400 text-sm resize-none leading-relaxed"
           style={{ maxHeight: 120 }}
           onInput={e => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px' }}
         />

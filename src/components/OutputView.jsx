@@ -49,7 +49,7 @@ function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateTo
     <div className="flex flex-col h-full min-h-0 max-w-3xl mx-auto w-full px-4 py-6">
       {/* Header + course selector */}
       <div className="mb-4 shrink-0">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-1">AI Tutor</h1>
+        <h1 className="text-2xl font-bold text-slate-900 mb-1">AI Tutor</h1>
         <p className="text-slate-500 text-sm mb-4">Ask questions, get explanations, and flag difficult topics that feed back into your study plan.</p>
         {courses.length > 1 && (
           <div className="flex flex-wrap gap-2">
@@ -80,9 +80,9 @@ function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateTo
 
       {/* Chat */}
       {course && (
-        <div className="flex-1 min-h-0 bg-white dark:bg-slate-800/40 border border-slate-200 dark:border-slate-700/40 rounded-2xl overflow-hidden flex flex-col">
-          <div className="px-4 py-3 border-b border-slate-100 dark:border-slate-700/50 shrink-0">
-            <p className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+        <div className="flex-1 min-h-0 bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col">
+          <div className="px-4 py-3 border-b border-slate-100 shrink-0">
+            <p className="text-sm font-semibold text-slate-700">
               AI Tutor · <span style={{ color: course.color?.dot ?? '#6366f1' }}>{clean(course.name)}</span>
             </p>
           </div>
@@ -177,10 +177,10 @@ function SessionBlock({ session, completed, onToggle }) {
       onClick={() => onToggle(session.id)}
     >
       {session.startTime && (
-        <div className="text-slate-500 dark:text-slate-500 text-[9px] font-medium mb-0.5">{session.startTime}</div>
+        <div className="text-slate-500 text-[9px] font-medium mb-0.5">{session.startTime}</div>
       )}
       <div className={`font-semibold truncate ${completed ? 'line-through' : ''}`} style={{ color: session.color.dot }}>{session.courseName}</div>
-      <div className="text-slate-500 dark:text-slate-500 text-[10px]">{session.isRecovery ? '↑ Recovery' : session.sessionType}</div>
+      <div className="text-slate-500 text-[10px]">{session.isRecovery ? '↑ Recovery' : session.sessionType}</div>
     </div>
   )
 }
@@ -201,7 +201,7 @@ function SyllabusEventBlock({ event }) {
 // ─── DayCell ──────────────────────────────────────────────────────────────────
 function DayCell({ day, completedIds, onToggle, syllabusEventsForDay, onAddSession, isLast }) {
   return (
-    <div className={`min-h-[110px] px-1.5 pb-2 group ${!isLast ? 'border-r border-slate-700/30 dark:border-slate-700/30' : ''} ${day.isPast ? 'opacity-60' : ''}`}>
+    <div className={`min-h-[110px] px-1.5 pb-2 group ${!isLast ? 'border-r border-slate-200' : ''} ${day.isPast ? 'opacity-60' : ''}`}>
       {/* Day header */}
       <div className="flex flex-col items-center mb-2 pt-1">
         <span className={`text-[10px] font-medium uppercase tracking-widest mb-1 ${day.isSunday ? 'text-slate-600' : 'text-slate-500'}`}>{day.dayName}</span>
