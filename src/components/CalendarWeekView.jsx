@@ -829,32 +829,34 @@ export default function CalendarWeekView({
           <div
             style={{
               position: 'absolute', bottom: 0, left: 0, right: 0,
-              background: '#1a1a2e', borderRadius: '16px 16px 0 0',
-              padding: '16px 16px 32px',
+              background: '#FFFFFF', borderRadius: '20px 20px 0 0',
+              padding: '12px 16px 36px',
+              boxShadow: '0 -8px 40px rgba(0,0,0,0.12)',
+              border: '1px solid rgba(0,0,0,0.07)',
             }}
             onClick={e => e.stopPropagation()}
           >
-            <div style={{ width: 36, height: 4, borderRadius: 2, background: '#374151', margin: '0 auto 16px' }} />
-            <p style={{ fontSize: 13, fontWeight: 700, color: mobileActionSheet.session.color?.dot ?? '#fff', marginBottom: 4 }}>
+            <div style={{ width: 36, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.12)', margin: '0 auto 16px' }} />
+            <p style={{ fontSize: 13.5, fontWeight: 700, color: mobileActionSheet.session.color?.dot ?? '#111111', marginBottom: 2 }}>
               {mobileActionSheet.session.courseName}
             </p>
-            <p style={{ fontSize: 11, color: '#6B7280', marginBottom: 16 }}>{mobileActionSheet.session.sessionType}</p>
+            <p style={{ fontSize: 11.5, color: '#9B9B9B', marginBottom: 20, fontWeight: 500 }}>{mobileActionSheet.session.sessionType}</p>
             <button
-              style={{ width: '100%', padding: '14px', background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 10, color: '#34d399', fontSize: 14, fontWeight: 600, marginBottom: 8, cursor: 'pointer' }}
+              style={{ width: '100%', padding: '14px', background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.2)', borderRadius: 12, color: '#16A34A', fontSize: 14, fontWeight: 600, marginBottom: 8, cursor: 'pointer' }}
               onClick={() => { onToggle?.(mobileActionSheet.session.id); setMobileActionSheet(null) }}
             >
-              {completedIds.has(mobileActionSheet.session.id) ? 'Mark incomplete' : 'Mark complete'}
+              {completedIds.has(mobileActionSheet.session.id) ? 'Mark incomplete' : 'Mark complete ✓'}
             </button>
             {onDeleteSession && (
               <button
-                style={{ width: '100%', padding: '14px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 10, color: '#ef4444', fontSize: 14, fontWeight: 600, marginBottom: 8, cursor: 'pointer' }}
+                style={{ width: '100%', padding: '14px', background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', borderRadius: 12, color: '#DC2626', fontSize: 14, fontWeight: 600, marginBottom: 8, cursor: 'pointer' }}
                 onClick={() => { onDeleteSession(mobileActionSheet.session.id); setMobileActionSheet(null) }}
               >
                 Delete session
               </button>
             )}
             <button
-              style={{ width: '100%', padding: '14px', background: 'transparent', border: 'none', color: '#6B7280', fontSize: 14, cursor: 'pointer' }}
+              style={{ width: '100%', padding: '14px', background: 'transparent', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, color: '#6B6B6B', fontSize: 14, fontWeight: 500, cursor: 'pointer' }}
               onClick={() => setMobileActionSheet(null)}
             >
               Cancel

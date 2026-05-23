@@ -38,6 +38,7 @@ import CheatSheetModal from './CheatSheetModal'
 import BrainDumpModal from './BrainDumpModal'
 import ExamRescueModal from './ExamRescueModal'
 import QuickQuizBurst from './QuickQuizBurst'
+import SessionRatingModal from './SessionRatingModal'
 
 // ─── TutorView ────────────────────────────────────────────────────────────────
 function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateToCoach }) {
@@ -380,6 +381,7 @@ export default function OutputView({
   const [showBrainDump, setShowBrainDump] = useState(false)
   const [showExamRescue, setShowExamRescue] = useState(false)
   const [showQuizBurst, setShowQuizBurst] = useState(false)
+  const [ratingSession, setRatingSession] = useState(null) // session to rate after completion
 
   // ── First-query nudge listener ────────────────────────────────────────────────
   useEffect(() => {
@@ -905,11 +907,43 @@ export default function OutputView({
             return [...filtered, record].slice(-500)
           })
           saveCompletedSession(record)
+          // Show session rating modal after a short delay
+          setTimeout(() => setRatingSession(sess), 300)
         }
       }
       return n
     })
   }, [allSessions])
+
+  const handleRatingSave = useCallback(async (rating, hardNotes) => {
+    if (!ratingSession) return
+    const sess = ratingSession
+    setRatingSession(null)
+    // Update completed session record with rating + hard_notes
+    const record = {
+      id: sess.id,
+      dateStr: sess.dateStr,
+      courseId: sess.courseId,
+      courseName: sess.courseName,
+      duration: sess.duration,
+      rating,
+      hard_notes: hardNotes || null,
+    }
+    saveCompletedSession(record)
+    // Background AI rebuild of remaining sessions for this course
+    if (hardNotes) {
+      try {
+        const { getAccessToken } = await import('../lib/supabase')
+        const token = await getAccessToken()
+        // Fire and forget — no UI change
+        fetch('/api/generate-study-coach-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ courseId: sess.courseId, triggerReason: 'session_rating', hardNotes }),
+        }).catch(() => {})
+      } catch (_) {}
+    }
+  }, [ratingSession])
 
   const handleLogGrade = () => {
     const score = parseFloat(gradeInput)
@@ -1137,6 +1171,15 @@ export default function OutputView({
 
       {showShareCard && (
         <ShareCardModal courses={courses} stats={stats} onClose={() => setShowShareCard(false)} />
+      )}
+
+      {/* ── Session rating modal ── */}
+      {ratingSession && (
+        <SessionRatingModal
+          session={ratingSession}
+          onSave={handleRatingSave}
+          onSkip={() => setRatingSession(null)}
+        />
       )}
 
       {/* ── Adapt modal (paid users) ── */}

@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import { jsPDF } from 'jspdf'
-import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan } from '../lib/db'
+import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan, saveCoachPlanStruggles } from '../lib/db'
 import { extractText } from '../utils/extractText'
 import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
@@ -609,7 +609,7 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
 }
 
 // ── Step 3: Plan ──────────────────────────────────────────────────────────────
-function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error, onStartFocus }) {
+function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error, onStartFocus, struggles, onSaveStruggles }) {
   const course = courses[form.courseIdx]
   const color = course?.color?.dot || D.accent
   const sessionLen = form.sessionLen || 60
@@ -637,6 +637,15 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
   return (
     <div className="sc-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: 24, alignItems: 'flex-start' }}>
       <div>
+        {onSaveStruggles && (
+          <StruggleTracker
+            struggles={struggles ?? []}
+            courseId={course?.id ?? form.courseIdx}
+            courseName={course?.name ?? ''}
+            dot={color}
+            onSave={onSaveStruggles}
+          />
+        )}
         <PlanView plan={plan} course={course} dot={color} pushed={pushed} onPush={onPush} onReset={onRefine} form={form} />
       </div>
       {/* Right rail */}
@@ -1328,11 +1337,151 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
               onRefine={() => { setPlan(null); setError(''); setStep(1); setUiMode('building') }}
               error={error}
               onStartFocus={onStartFocus}
+              struggles={cachedStruggles}
+              onSaveStruggles={(updated) => {
+                setCachedStruggles(updated)
+                const courseId = courses[form.courseIdx]?.id ?? form.courseIdx
+                saveCoachPlanStruggles(courseId, updated)
+              }}
             />
           )}
         </div>
       )}
     </>
+  )
+}
+
+// ── Struggle Tracker ──────────────────────────────────────────────────────────
+function uid8() { return Math.random().toString(36).slice(2, 10) }
+
+function StruggleTracker({ struggles, courseId, courseName, dot, onSave }) {
+  const [open, setOpen] = useState(false)
+  const [showResolved, setShowResolved] = useState(false)
+  const [text, setText] = useState('')
+
+  const active   = struggles.filter(s => !s.resolved)
+  const resolved = struggles.filter(s => s.resolved)
+
+  const handleAdd = () => {
+    const t = text.trim()
+    if (!t) return
+    const newStruggle = { id: uid8(), text: t, courseId, createdAt: Date.now(), resolved: false }
+    onSave([newStruggle, ...struggles])
+    setText('')
+  }
+
+  const handleResolve = (id) => {
+    onSave(struggles.map(s => s.id === id ? { ...s, resolved: !s.resolved } : s))
+  }
+
+  const fmtDate = ts => {
+    const d = new Date(ts)
+    return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+  }
+
+  return (
+    <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, marginBottom: 20, overflow: 'hidden' }}>
+      {/* Header */}
+      <button
+        onClick={() => setOpen(v => !v)}
+        style={{ width: '100%', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: 10, cursor: 'pointer', background: 'none', border: 'none', textAlign: 'left' }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={active.length ? D.orange : D.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+          <path d="M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.41 0zM12 9v4M12 17h.01"/>
+        </svg>
+        <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, color: D.text }}>Struggle Tracker</span>
+        {active.length > 0 && (
+          <span style={{ fontSize: 11, fontWeight: 700, color: D.orange, background: 'rgba(232,83,26,0.1)', border: '1px solid rgba(232,83,26,0.2)', padding: '2px 8px', borderRadius: 999 }}>
+            {active.length} active
+          </span>
+        )}
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={D.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: open ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+          <path d="M6 9l6 6 6-6"/>
+        </svg>
+      </button>
+
+      {open && (
+        <div style={{ padding: '0 18px 18px', borderTop: `1px solid ${D.border}` }}>
+          {/* Input */}
+          <div style={{ display: 'flex', gap: 8, marginTop: 14, marginBottom: active.length ? 16 : 0 }}>
+            <input
+              type="text"
+              className="sc-input"
+              value={text}
+              onChange={e => setText(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleAdd()}
+              placeholder="e.g. Can't remember reaction mechanisms..."
+              style={{ flex: 1 }}
+            />
+            <button
+              onClick={handleAdd}
+              style={{ padding: '0 16px', borderRadius: 9, background: '#3B61C4', color: '#fff', fontSize: 13, fontWeight: 700, border: 'none', cursor: 'pointer', flexShrink: 0, whiteSpace: 'nowrap' }}
+            >
+              Log it
+            </button>
+          </div>
+
+          {/* Active struggles */}
+          {active.length > 0 && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {active.map(s => (
+                <div key={s.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', background: 'rgba(232,83,26,0.04)', border: '1px solid rgba(232,83,26,0.12)', borderRadius: 10 }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13.5, color: D.text, lineHeight: 1.4 }}>{s.text}</div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 }}>
+                      <span style={{ fontSize: 10.5, fontWeight: 600, color: '#fff', background: dot, padding: '2px 7px', borderRadius: 999 }}>{courseName}</span>
+                      <span style={{ fontSize: 10.5, color: D.dim }}>{fmtDate(s.createdAt)}</span>
+                    </div>
+                  </div>
+                  <button
+                    onClick={() => handleResolve(s.id)}
+                    style={{ flexShrink: 0, fontSize: 11.5, fontWeight: 600, color: D.mint, background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.2)', borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}
+                  >
+                    Resolved ✓
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {active.length === 0 && (
+            <div style={{ padding: '20px 0', textAlign: 'center', color: D.dim, fontSize: 13 }}>
+              No active struggles logged — great work! Add anything that felt hard or confusing.
+            </div>
+          )}
+
+          {/* Resolved toggle */}
+          {resolved.length > 0 && (
+            <div style={{ marginTop: 12 }}>
+              <button
+                onClick={() => setShowResolved(v => !v)}
+                style={{ fontSize: 12, color: D.muted, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 5 }}
+              >
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ transform: showResolved ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }}>
+                  <path d="M6 9l6 6 6-6"/>
+                </svg>
+                {showResolved ? 'Hide' : 'Show'} {resolved.length} resolved
+              </button>
+              {showResolved && (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 8 }}>
+                  {resolved.map(s => (
+                    <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: 'rgba(0,0,0,0.02)', border: `1px solid ${D.border}`, borderRadius: 9, opacity: 0.6 }}>
+                      <div style={{ flex: 1, fontSize: 13, color: D.muted, textDecoration: 'line-through' }}>{s.text}</div>
+                      <button
+                        onClick={() => handleResolve(s.id)}
+                        style={{ fontSize: 11, color: D.dim, background: 'none', border: 'none', cursor: 'pointer' }}
+                      >
+                        Reopen
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
   )
 }
 

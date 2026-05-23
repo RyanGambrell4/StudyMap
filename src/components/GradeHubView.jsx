@@ -917,6 +917,135 @@ function RightRail({ course, gradeData, onShowPaywall, userId, onSyncStudyPlan }
   )
 }
 
+// ── GPA What-If Banner ────────────────────────────────────────────────────────
+function WhatIfBanner({ currentGPA, projectedGPA }) {
+  const diff = projectedGPA !== null && currentGPA !== null ? (projectedGPA - currentGPA) : null
+  const up   = diff !== null && diff >= 0
+  return (
+    <div style={{
+      background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.2)',
+      borderRadius: 12, padding: '12px 16px', marginBottom: 20,
+      display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#D97706', flexShrink: 0 }} />
+        <span style={{ fontSize: 12.5, fontWeight: 700, color: '#D97706' }}>What-if mode</span>
+        <span style={{ fontSize: 12, color: '#9B9B9B', fontWeight: 500 }}>— changes here don't affect your real grades</span>
+      </div>
+      {currentGPA !== null && projectedGPA !== null && (
+        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 10.5, fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Current</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: '#111111', letterSpacing: -0.5 }}>{currentGPA}</div>
+          </div>
+          <div style={{ fontSize: 18, color: up ? '#16A34A' : '#DC2626', fontWeight: 700 }}>
+            {up ? '↑' : '↓'}
+          </div>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{ fontSize: 10.5, fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Projected</div>
+            <div style={{ fontSize: 18, fontWeight: 800, color: up ? '#16A34A' : '#DC2626', letterSpacing: -0.5 }}>{projectedGPA}</div>
+          </div>
+          {diff !== null && (
+            <div style={{
+              padding: '4px 10px', borderRadius: 999,
+              background: up ? 'rgba(22,163,74,0.1)' : 'rgba(220,38,38,0.08)',
+              border: `1px solid ${up ? 'rgba(22,163,74,0.25)' : 'rgba(220,38,38,0.2)'}`,
+              color: up ? '#16A34A' : '#DC2626',
+              fontSize: 13, fontWeight: 700,
+            }}>
+              {diff >= 0 ? '+' : ''}{diff.toFixed(2)}
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+// ── What-If Track Tab ─────────────────────────────────────────────────────────
+// Same as TrackTab but grade fields are always editable and changes stay local
+function WhatIfTrackTab({ course, gradeData, dot }) {
+  const components  = gradeData?.components ?? []
+  const targetGrade = gradeData?.targetGrade ?? 85
+
+  const [localGrades, setLocalGrades] = useState(() => {
+    const m = {}
+    components.forEach(c => { m[c.id] = c.grade !== null && c.grade !== undefined ? String(c.grade) : '' })
+    return m
+  })
+  const [localGraded, setLocalGraded] = useState(() => {
+    const m = {}
+    components.forEach(c => { m[c.id] = c.graded ?? false })
+    return m
+  })
+
+  const liveComponents = useMemo(() =>
+    components.map(c => ({ ...c, grade: localGraded[c.id] && localGrades[c.id] !== '' ? parseFloat(localGrades[c.id]) : null, graded: localGraded[c.id] && localGrades[c.id] !== '' })),
+    [components, localGrades, localGraded]
+  )
+
+  const currentGrade = getCurrentGrade(liveComponents)
+  const totalWeight  = liveComponents.reduce((s, c) => s + c.weight, 0)
+  const ltr          = letterGrade(currentGrade)
+  const lc           = letterColor(ltr)
+
+  if (!components.length) return (
+    <div style={{ padding: '40px 0', textAlign: 'center' }}>
+      <p style={{ color: D.muted, fontSize: 13 }}>Set up grade components in the Plan tab first.</p>
+    </div>
+  )
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 24 }}>
+        <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 8 }}>Projected grade</div>
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+          <span style={{ fontSize: 64, fontWeight: 800, letterSpacing: -2, lineHeight: 1, color: lc }}>
+            {currentGrade !== null ? currentGrade.toFixed(1) : '-'}
+          </span>
+          <span style={{ fontSize: 22, fontWeight: 500, color: D.muted }}>%</span>
+          <span style={{ fontSize: 28, fontWeight: 700, color: lc, marginLeft: 8 }}>{ltr}</span>
+        </div>
+      </div>
+
+      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
+        <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 14 }}>Adjust any grade</div>
+        {liveComponents.map((c, i) => {
+          const gradeVal = localGrades[c.id] !== '' && !isNaN(parseFloat(localGrades[c.id])) ? parseFloat(localGrades[c.id]) : null
+          const weightPct = totalWeight > 0 ? (c.weight / totalWeight) * 100 : 0
+          return (
+            <div key={c.id} style={{ padding: '14px 0', borderBottom: i < liveComponents.length - 1 ? `1px solid ${D.border}` : 'none' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+                <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ fontSize: 13.5, fontWeight: 500, color: D.text }}>{c.component}</div>
+                  <div style={{ fontSize: 11.5, color: D.dim, marginTop: 2 }}><span style={{ fontFamily: 'inherit' }}>{c.weight}%</span> of grade</div>
+                </div>
+                <div style={{ position: 'relative', flexShrink: 0 }}>
+                  <input
+                    type="number" min="0" max="100" step="0.1"
+                    value={localGrades[c.id]}
+                    onChange={e => {
+                      setLocalGrades(p => ({ ...p, [c.id]: e.target.value }))
+                      if (e.target.value !== '') setLocalGraded(p => ({ ...p, [c.id]: true }))
+                    }}
+                    placeholder="--"
+                    className="gh-input"
+                    style={{ width: 72, textAlign: 'center', color: gradeVal != null ? letterColor(letterGrade(gradeVal)) : D.dim, fontWeight: gradeVal != null ? 700 : 400, border: '1.5px solid rgba(217,119,6,0.4)' }}
+                  />
+                  <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: D.dim, pointerEvents: 'none' }}>%</span>
+                </div>
+              </div>
+              <div style={{ height: 3, borderRadius: 2, background: 'rgba(0,0,0,0.05)', overflow: 'hidden' }}>
+                <div style={{ height: '100%', borderRadius: 2, width: `${weightPct}%`, background: gradeVal != null ? letterColor(letterGrade(gradeVal)) : D.border, transition: 'width 0.3s, background 0.3s' }} />
+              </div>
+            </div>
+          )
+        })}
+      </div>
+    </div>
+  )
+}
+
 // ── Main ──────────────────────────────────────────────────────────────────────
 export default function GradeHubView({ courses, onEditCourse, userId, onShowPaywall, initialCourseIdx = 0, onSyncToCalendar }) {
   const plan = getActivePlan()
@@ -925,6 +1054,7 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
     Math.max(0, Math.min(initialCourseIdx, courses.length - 1))
   )
   const [activeTab, setActiveTab] = useState('plan')
+  const [whatIfMode, setWhatIfMode] = useState(false)
 
   useEffect(() => {
     const idx = Math.max(0, Math.min(initialCourseIdx, courses.length - 1))
@@ -943,6 +1073,12 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
   const gradeData = course?.gradeData ?? null
   const hasSetup  = !!(gradeData?.components?.length)
   const gpa       = computeGPA(courses)
+
+  // Reset what-if mode when switching courses
+  const handleSelectCourseWithReset = (idx) => {
+    setWhatIfMode(false)
+    handleSelectCourse(idx)
+  }
 
   const handleSelectCourse = idx => {
     setActiveCourseIdx(idx)
@@ -1011,14 +1147,34 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
           <span style={{ width: 4, height: 4, borderRadius: '50%', background: D.dim }} />
           <span style={{ fontSize: 11.5, color: D.dim }}>{getCurrentSemester()} · {courses.length} courses tracked</span>
         </div>
-        <h1 style={{ margin: 0, fontSize: 32, fontWeight: 700, letterSpacing: -0.8, color: D.text, display: 'flex', alignItems: 'center', gap: 12 }}>
-          Grade Hub
-          {gpa && (
-            <span style={{ fontSize: 13, fontWeight: 500, color: D.indigo, background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)', padding: '4px 10px', borderRadius: 999, verticalAlign: 'middle' }}>
-              GPA {gpa}
-            </span>
-          )}
-        </h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', rowGap: 10 }}>
+          <h1 style={{ margin: 0, fontSize: 32, fontWeight: 700, letterSpacing: -0.8, color: D.text, display: 'flex', alignItems: 'center', gap: 12 }}>
+            Grade Hub
+            {gpa && (
+              <span style={{ fontSize: 13, fontWeight: 500, color: D.indigo, background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)', padding: '4px 10px', borderRadius: 999, verticalAlign: 'middle' }}>
+                GPA {gpa}
+              </span>
+            )}
+          </h1>
+          <div style={{ marginLeft: 'auto' }}>
+            <button
+              onClick={() => setWhatIfMode(v => !v)}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                padding: '8px 16px', borderRadius: 10, cursor: 'pointer', fontWeight: 600, fontSize: 13,
+                background: whatIfMode ? 'rgba(217,119,6,0.1)' : 'rgba(0,0,0,0.04)',
+                border: whatIfMode ? '1.5px solid rgba(217,119,6,0.35)' : `1px solid ${D.border}`,
+                color: whatIfMode ? '#D97706' : D.muted,
+                transition: 'all 0.18s',
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M9 3v6l-5 9a2 2 0 002 3h12a2 2 0 002-3l-5-9V3M9 3h6M8 14h8"/>
+              </svg>
+              What-if {whatIfMode ? 'ON' : 'OFF'}
+            </button>
+          </div>
+        </div>
         <p style={{ margin: '6px 0 0', fontSize: 14, color: D.muted, maxWidth: 640 }}>
           Plan, track, and model every scenario for your final grade, one calculator per course.
         </p>
@@ -1028,9 +1184,17 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
         {/* Course pills */}
         <div className="gh-course-strip" style={{ display: 'flex', gap: 12, marginBottom: 20, overflowX: 'auto' }}>
           {courses.map((c, i) => (
-            <CourseCard key={i} course={c} active={activeCourseIdx === i} onClick={() => handleSelectCourse(i)} />
+            <CourseCard key={i} course={c} active={activeCourseIdx === i} onClick={() => handleSelectCourseWithReset(i)} />
           ))}
         </div>
+
+        {/* What-if mode banner */}
+        {whatIfMode && (
+          <WhatIfBanner
+            currentGPA={gpa}
+            projectedGPA={gpa}
+          />
+        )}
 
         {/* Course label + tabs */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
@@ -1044,7 +1208,9 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
           <Tabs active={activeTab} onChange={setActiveTab} />
         </div>
 
-        {hasSetup ? (
+        {whatIfMode && hasSetup ? (
+          <WhatIfTrackTab course={course} gradeData={gradeData} dot={dot} />
+        ) : hasSetup ? (
           <div className="gh-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 320px', gap: 20, alignItems: 'flex-start' }}>
             <div>
               {activeTab === 'plan'    && <PlanTab    course={course} gradeData={gradeData} dot={dot} onSave={handleSaveGradeData} />}
