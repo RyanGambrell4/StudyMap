@@ -4,6 +4,7 @@ import './index.css'
 import App from './App.jsx'
 import { initSentry } from './lib/sentry'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
+import { Analytics } from '@vercel/analytics/react'
 
 initSentry()
 
@@ -11,6 +12,7 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ErrorBoundary>
       <App />
+      <Analytics />
     </ErrorBoundary>
   </StrictMode>,
 )
