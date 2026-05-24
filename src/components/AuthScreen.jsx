@@ -56,7 +56,7 @@ export default function AuthScreen({ initialMode, onBack }) {
       provider: 'google',
       options: { redirectTo },
     })
-    if (error) setError(error.message)
+    if (error) setError('Something went wrong. Please try again.')
   }
 
   const handleSubmit = async (e) => {
@@ -91,7 +91,16 @@ export default function AuthScreen({ initialMode, onBack }) {
         setSuccess('Password reset email sent. Check your inbox.')
       }
     } catch (err) {
-      setError(err.message)
+      console.error('Auth error:', err.message)
+      if (err.message?.toLowerCase().includes('invalid login credentials')) {
+        setError('Incorrect email or password.')
+      } else if (err.message?.toLowerCase().includes('email')) {
+        setError('Please check your email and try again.')
+      } else if (err.message?.toLowerCase().includes('password')) {
+        setError('Password must be at least 6 characters.')
+      } else {
+        setError('Something went wrong. Please try again.')
+      }
     } finally {
       setLoading(false)
     }
