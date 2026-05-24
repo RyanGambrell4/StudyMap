@@ -1,6 +1,66 @@
 # StudyEdge AI — Living Context
 _Last updated by: Landing Page Agent on 2026-05-24 (Run 1 — hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
 
+## Landing Page Agent — Runs 2–6 (2026-05-24, visual polish pass)
+_Driven by user request "make it much more professional and visually appealing." Five sequential commits, build verified clean after each. All on `main`._
+
+### Run 2 — Atmospheric depth (`60b9e34`)
+- Fixed full-page noise grain overlay (0.04 opacity, mix-blend overlay) for tactile texture.
+- Per-section radial color washes via `.se-section` / `.se-wash` recipe: How It Works → indigo + violet, Features → teal + indigo, Testimonials → rose + amber, Bottom CTA → big brand-blue center.
+- Dot-grid overlay extended from hero-only into How It Works (masked to a soft ellipse).
+- New `.se-horizon` hairline + 240px soft-glow band between every section. Sections no longer abruptly start/stop.
+- Reusable atmospheric CSS in the central `<style>` block so future sections opt in with a single class.
+
+### Run 3 — Animated hero mockup (`7dec3a9`)
+- `se-pulse-glow` on Start session button (2.6s ambient pulse).
+- `se-pulse-dot` on UP NEXT TODAY indicator (1.6s).
+- `se-row` stagger on the dashboard course list (4 rows, 120ms apart starting at 0.35s).
+- Grade Hub floating card rows stagger in (100ms, starting 0.5s).
+- Streak floating card's 14-bar weekly chart grows from baseline with 50ms per-bar stagger.
+- Weekly goal bar fills 0 → 96% over 1.4s.
+- All animations gated by `prefers-reduced-motion`.
+
+### Run 4 — Trust strip + capability stat band (`dbc332d`)
+- New "Built for serious students across" program strip between hero and How It Works horizon: Pre-Med · STEM · Engineering · Liberal Arts · MCAT/LSAT/GRE · Grad Programs. Brand-blue glowing dot separators. No fabricated universities.
+- Capability stat band (4-col glass card with per-cell radial halos + gradient-clipped serif numerals): `4` (problems no other app solves together), `60s` (setup), `∞` (sessions with minute-by-minute plans), `1` (grade target — backwards from exam). Numbers tied to defensibly-true product claims, not user counts.
+
+### Run 5 — Bottom CTA full-bleed redesign (`efdc31a`)
+- Section padding lifted to 140/160px so the CTA reads as an arrival, not a footnote.
+- 4-layer wash composition + dot-grid + vertical gradient band so the section reads as a darker chamber than the rest of the page.
+- Glass trust pill above headline: `No credit card · 7-day free trial · Cancel anytime`.
+- New headline: `Stop studying harder. / Study what actually moves your grade.` Italic serif accent on line 2. Clamp 40 → 78px.
+- Two CTAs side by side: primary `Start your free 7-day trial →` (still routes through `goTrial`) + secondary `See how it works`.
+- Closer line: "Built for the GPA grinder, the comeback kid, and the high-achiever optimizing for an A." Lifts the positioning language from the spec into the final beat.
+- All blocks staggered via the `data-reveal` system.
+
+### Run 6 — Features grid: primary tier + outcome-led copy (`f670fe5`)
+- Section gets a `What's inside` mint eyebrow pill + new italic-serif split headline (`Everything that decides your grade. / Built into one app.`).
+- Session Planner promoted to a **full-width primary-tier card** spanning the grid. Glass surface, two halos (indigo top-left, violet bottom-right), two-column internal layout — copy + outcome bullets left, richer `60 min · 5 blocks` blueprint mockup right. `The differentiator` label pill.
+- The remaining 5 cards rewritten with eyebrow + outcome-led titles:
+  - Study Coach → `A tutor for every course, on demand.` (eyebrow: When you're stuck)
+  - Flashcards → `Flashcards that only quiz what you're forgetting.` (Skip what you already know)
+  - Focus Mode → `One screen. Your plan. Nothing else.` (Lock in for an hour)
+  - Schedule → `See your week before you've thought about it.` (Your week, decided)
+  - Dashboard → `Every session updates the grade you'll get.` (Watch the grade move)
+- `FeatureCard` component upgrade: accent-tinted gradient mockup bg replaces flat `rgba(0,0,0,0.25)`; top-right soft halo per card; hover lift + accent-tinted shadow; optional `eyebrow` prop; larger icon tile with colored shadow.
+
+### Guardrails honored throughout
+- Dark theme preserved.
+- Pricing untouched.
+- `goTrial()` destination unchanged.
+- "No credit card required" appears at every trial CTA.
+- Real testimonials only — none fabricated.
+
+### Next-run backlog (priority order)
+1. **Sticky bottom bar** still uses off-brand indigo (`#1e1b4b → #312e81`). Re-skin with glass + brand `#3B61C4` accent.
+2. **Testimonials** still flat — varying card sizes + a large editorial pull-quote would make the 6 quotes feel like overwhelming evidence.
+3. **FAQ section** still missing — addresses "Is it free?", "What if my syllabus isn't here?", "How is this different from Notion?", "MCAT/LSAT support?".
+4. **Live state increments in hero** — the mockup is now animated but each value is static once it settles. A 4–8s tick on "9.6 hrs this week" / streak day could give the hero a heartbeat.
+5. **Mobile audit at 390px** — newer additions (stat band, primary-tier card) flex-wrap correctly but the hero stage is fixed 1920×600 scaled — needs a Playwright sweep.
+6. **Footer is bare** — 1 email link. Could carry a small site-map (Pricing · FAQ · Blog · Contact) + social + last-updated copyright.
+
+---
+
 ## Landing Page Agent — Run 1 (2026-05-24)
 _Driven by `LANDING_AGENT_SPEC.md`. Single CRO-focused pass: hero CTA + new "How It Works" section. All changes in `src/components/LandingPage.jsx`. Build verified clean. Commit `e876c18` pushed to main; Vercel will auto-deploy._
 
