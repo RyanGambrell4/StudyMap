@@ -101,7 +101,37 @@ export default function LandingPage({ onGetStarted }) {
         @media (prefers-reduced-motion: reduce) {
           [data-reveal] { opacity: 1; transform: none; transition: none; }
         }
+        /* Atmospheric layer — sits behind content, above page bg */
+        .se-section { position: relative; overflow: hidden; isolation: isolate; }
+        .se-section > * { position: relative; z-index: 1; }
+        .se-wash, .se-grid { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+        .se-grid {
+          background-image: radial-gradient(rgba(255,255,255,0.04) 1px, transparent 1px);
+          background-size: 28px 28px;
+          -webkit-mask-image: radial-gradient(ellipse 80% 65% at 50% 30%, rgba(0,0,0,0.6), transparent 75%);
+          mask-image: radial-gradient(ellipse 80% 65% at 50% 30%, rgba(0,0,0,0.6), transparent 75%);
+        }
+        .se-horizon {
+          height: 1px; width: 100%; margin: 0;
+          background: linear-gradient(90deg, transparent 0%, rgba(99,102,241,0.0) 15%, rgba(99,102,241,0.45) 50%, rgba(99,102,241,0.0) 85%, transparent 100%);
+          position: relative;
+        }
+        .se-horizon::after {
+          content: ''; position: absolute; left: 50%; top: -120px;
+          transform: translateX(-50%);
+          width: 600px; height: 240px; pointer-events: none;
+          background: radial-gradient(ellipse at center bottom, rgba(99,102,241,0.18), transparent 70%);
+          filter: blur(8px);
+        }
       `}</style>
+
+      {/* Fixed full-page noise grain — pointer-events:none, opacity 0.035, sits above bg/below text */}
+      <div aria-hidden="true" style={{
+        position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', opacity: 0.04,
+        mixBlendMode: 'overlay',
+        backgroundImage: `url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='220' height='220'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>")`,
+        backgroundSize: '220px 220px',
+      }} />
 
       {/* ── Sticky bottom trial bar ── */}
       {!stickyDismissed && scrollY > 300 && (
@@ -614,10 +644,24 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
+      {/* Hero → How It Works horizon */}
+      <div className="se-horizon" />
+
       {/* ── How It Works ── */}
-      <section id="how-it-works" style={{
-        maxWidth: 1120, margin: '0 auto', padding: '110px 24px 40px',
-      }}>
+      <section
+        id="how-it-works"
+        className="se-section"
+        style={{
+          maxWidth: 1120, margin: '0 auto', padding: '110px 24px 40px',
+        }}
+      >
+        {/* Atmospheric washes */}
+        <div aria-hidden="true" className="se-wash" style={{
+          background:
+            'radial-gradient(700px 480px at 15% 12%, rgba(99,102,241,0.13), transparent 65%),' +
+            'radial-gradient(620px 440px at 92% 80%, rgba(124,92,252,0.12), transparent 60%)',
+        }} />
+        <div aria-hidden="true" className="se-grid" />
         <div data-reveal style={{ textAlign: 'center', marginBottom: 64 }}>
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -928,10 +972,19 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
+      {/* How It Works → Features horizon */}
+      <div className="se-horizon" style={{ marginTop: 40 }} />
+
       {/* ── Features Grid ── */}
-      <section style={{
+      <section className="se-section" style={{
         maxWidth: 1000, margin: '0 auto', padding: '80px 24px 100px',
       }}>
+        {/* Atmospheric washes */}
+        <div aria-hidden="true" className="se-wash" style={{
+          background:
+            'radial-gradient(720px 500px at 85% 8%, rgba(45,212,191,0.10), transparent 60%),' +
+            'radial-gradient(620px 460px at 8% 95%, rgba(99,102,241,0.12), transparent 60%)',
+        }} />
         <div style={{ textAlign: 'center', marginBottom: 56 }}>
           <h2 style={{
             fontSize: 'clamp(26px, 3.5vw, 40px)', fontWeight: 800,
@@ -1103,8 +1156,16 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
+      {/* Features → Testimonials horizon */}
+      <div className="se-horizon" />
+
       {/* ── Testimonials ── */}
-      <section style={{ maxWidth: 1000, margin: '0 auto', padding: '0 24px 100px' }}>
+      <section className="se-section" style={{ maxWidth: 1000, margin: '0 auto', padding: '90px 24px 100px' }}>
+        <div aria-hidden="true" className="se-wash" style={{
+          background:
+            'radial-gradient(700px 460px at 12% 15%, rgba(244,114,182,0.10), transparent 60%),' +
+            'radial-gradient(680px 460px at 95% 85%, rgba(251,191,36,0.08), transparent 60%)',
+        }} />
         <div style={{ textAlign: 'center', marginBottom: 48 }}>
           <h2 style={{
             fontSize: 'clamp(24px, 3vw, 36px)', fontWeight: 800,
@@ -1198,11 +1259,18 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
+      {/* Testimonials → Bottom CTA horizon */}
+      <div className="se-horizon" />
+
       {/* ── Bottom CTA ── */}
-      <section style={{
+      <section className="se-section" style={{
         textAlign: 'center', padding: '60px 24px 100px',
-        position: 'relative',
       }}>
+        <div aria-hidden="true" className="se-wash" style={{
+          background:
+            'radial-gradient(900px 540px at 50% 50%, rgba(99,102,241,0.16), transparent 65%),' +
+            'radial-gradient(600px 460px at 50% 100%, rgba(79,70,229,0.12), transparent 60%)',
+        }} />
         <div style={{
           position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
           width: 600, height: 400, borderRadius: '50%',
