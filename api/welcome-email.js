@@ -49,8 +49,7 @@ export default async function handler(req, res) {
         <tr><td style="padding-bottom:24px;">
           <p style="margin:0 0 14px;font-size:15px;color:#94A3B8;line-height:1.7;">
             Your account is set up and ready. Before you dive in, here's one thing worth knowing:
-            you can try <strong style="color:#c7d2fe;">Pro free for 7 days</strong> — no commitment,
-            card only charged after the trial ends.
+            you can try <strong style="color:#c7d2fe;">Pro free for 7 days</strong> — no credit card required.
           </p>
           <p style="margin:0 0 14px;font-size:15px;color:#94A3B8;line-height:1.7;">Here's what Pro unlocks:</p>
           <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:20px;">
@@ -78,7 +77,7 @@ export default async function handler(req, res) {
           </a>
         </td></tr>
         <tr><td style="padding-bottom:32px;text-align:center;">
-          <span style="font-size:12px;color:#334155;">Card charged after trial. Cancel before day 7, pay nothing.</span>
+          <span style="font-size:12px;color:#334155;">No credit card required. Cancel anytime.</span>
         </td></tr>
 
         <tr><td style="border-top:1px solid rgba(255,255,255,0.07);padding-top:24px;">

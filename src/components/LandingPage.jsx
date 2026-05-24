@@ -72,7 +72,7 @@ export default function LandingPage({ onGetStarted }) {
           flexWrap: 'wrap',
         }}>
           <span style={{ fontSize: 14, color: '#c7d2fe', fontWeight: 500 }}>
-            ✦ Try Pro free for 7 days — card charged after trial, cancel anytime before.
+            ✦ Try Pro free for 7 days — no credit card required.
           </span>
           <button
             onClick={goTrial}

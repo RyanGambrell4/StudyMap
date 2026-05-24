@@ -15,7 +15,7 @@ export default function AuthScreen({ initialMode, onBack }) {
     if (!plan) return null
     const planLabel = plan === 'pro' ? 'Pro' : 'Unlimited'
     const billingLabel = billing === 'yearly' ? 'yearly' : billing === 'semester' ? 'per semester' : 'monthly'
-    if (trial === '1') return { text: `7-day free trial · ${planLabel}`, sub: `Full access included. Card charged ${billingLabel} after trial ends. Cancel anytime.` }
+    if (trial === '1') return { text: `7-day free trial · ${planLabel}`, sub: `Full access included. No credit card required. Cancel anytime.` }
     return { text: `${planLabel} plan`, sub: `Billed ${billingLabel}. Cancel anytime.` }
   })()
 
