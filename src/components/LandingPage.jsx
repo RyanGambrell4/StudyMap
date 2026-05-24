@@ -668,8 +668,102 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
+      {/* ── Trust strip: program/category coverage ── */}
+      <section className="se-section" style={{
+        maxWidth: 1100, margin: '0 auto', padding: '56px 24px 28px',
+      }}>
+        <div data-reveal style={{ textAlign: 'center' }}>
+          <div style={{
+            fontSize: 11, fontWeight: 600, letterSpacing: '0.22em',
+            color: 'rgba(199,210,254,0.5)', textTransform: 'uppercase',
+            marginBottom: 22,
+          }}>
+            Built for serious students across
+          </div>
+          <div style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            gap: 16, flexWrap: 'wrap',
+            fontSize: 14.5, fontWeight: 600, color: 'rgba(226,232,240,0.62)',
+            letterSpacing: '-0.005em',
+          }}>
+            {[
+              'Pre-Med',
+              'STEM',
+              'Engineering',
+              'Liberal Arts',
+              'MCAT · LSAT · GRE',
+              'Grad Programs',
+            ].map((tag, i, arr) => (
+              <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', gap: 16 }}>
+                <span>{tag}</span>
+                {i < arr.length - 1 && (
+                  <span aria-hidden="true" style={{
+                    width: 4, height: 4, borderRadius: '50%',
+                    background: 'rgba(99,102,241,0.55)',
+                    boxShadow: '0 0 8px rgba(99,102,241,0.6)',
+                  }} />
+                )}
+              </span>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Capability stat band ── */}
+      <section className="se-section" style={{
+        maxWidth: 1100, margin: '0 auto', padding: '8px 24px 12px',
+      }}>
+        <div data-reveal style={{
+          display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015))',
+          border: '1px solid rgba(255,255,255,0.07)',
+          borderRadius: 18, overflow: 'hidden',
+          boxShadow: '0 30px 80px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)',
+        }}>
+          {[
+            { big: '4', sub: 'problems no other app solves together', accent: '#818cf8' },
+            { big: '60s', sub: 'setup, then your plan is live', accent: '#c4b5fd' },
+            { big: '∞', sub: 'sessions, each with a minute-by-minute plan', accent: '#5eead4' },
+            { big: '1', sub: 'grade target — calculated backwards from the exam', accent: '#86efac' },
+          ].map((s, i, arr) => (
+            <div key={i} style={{
+              padding: '30px 24px 28px', textAlign: 'center',
+              borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
+              borderBottom: 'none',
+              position: 'relative',
+            }}>
+              {/* Soft accent glow per stat */}
+              <div aria-hidden="true" style={{
+                position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
+                width: 220, height: 80, pointerEvents: 'none',
+                background: `radial-gradient(closest-side, ${s.accent}22, transparent 70%)`,
+              }} />
+              <div style={{ position: 'relative' }}>
+                <div style={{
+                  fontFamily: "'Instrument Serif', serif",
+                  fontSize: 56, fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 0.95,
+                  background: `linear-gradient(180deg, #ffffff 0%, ${s.accent} 110%)`,
+                  WebkitBackgroundClip: 'text', backgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  marginBottom: 12,
+                }}>
+                  {s.big}
+                </div>
+                <div style={{
+                  fontSize: 13.5, color: 'rgba(226,232,240,0.6)',
+                  lineHeight: 1.5, letterSpacing: '-0.005em',
+                  maxWidth: 220, margin: '0 auto',
+                }}>
+                  {s.sub}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Hero → How It Works horizon */}
-      <div className="se-horizon" />
+      <div className="se-horizon" style={{ marginTop: 70 }} />
 
       {/* ── How It Works ── */}
       <section
