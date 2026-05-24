@@ -1,28 +1,57 @@
 import { useState, useEffect, useRef } from 'react'
 
-function FeatureCard({ color, icon, title, desc, children }) {
+function FeatureCard({ color, icon, eyebrow, title, desc, children }) {
   return (
     <div style={{
-      background: 'rgba(255,255,255,0.025)', border: '1px solid rgba(255,255,255,0.06)',
-      borderRadius: 14, overflow: 'hidden', transition: 'all 0.2s',
+      position: 'relative',
+      background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015))',
+      border: '1px solid rgba(255,255,255,0.07)',
+      borderRadius: 16, overflow: 'hidden',
+      transition: 'border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease',
     }}
-      onMouseEnter={e => e.currentTarget.style.border = `1px solid ${color}44`}
-      onMouseLeave={e => e.currentTarget.style.border = '1px solid rgba(255,255,255,0.06)'}
+      onMouseEnter={e => {
+        e.currentTarget.style.borderColor = `${color}55`
+        e.currentTarget.style.transform = 'translateY(-2px)'
+        e.currentTarget.style.boxShadow = `0 18px 40px rgba(0,0,0,0.35), 0 0 0 1px ${color}22`
+      }}
+      onMouseLeave={e => {
+        e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
+        e.currentTarget.style.transform = 'translateY(0)'
+        e.currentTarget.style.boxShadow = 'none'
+      }}
     >
-      <div style={{ background: 'rgba(0,0,0,0.25)', borderBottom: '1px solid rgba(255,255,255,0.05)', minHeight: 200 }}>
+      {/* Soft accent halo, top-right */}
+      <div aria-hidden="true" style={{
+        position: 'absolute', top: -40, right: -40,
+        width: 200, height: 200, borderRadius: '50%',
+        background: `radial-gradient(closest-side, ${color}1f, transparent 70%)`,
+        pointerEvents: 'none',
+      }} />
+      <div style={{
+        background: `linear-gradient(160deg, ${color}10 0%, rgba(0,0,0,0.30) 60%, rgba(0,0,0,0.32) 100%)`,
+        borderBottom: '1px solid rgba(255,255,255,0.05)',
+        minHeight: 200, position: 'relative',
+      }}>
         {children}
       </div>
-      <div style={{ padding: '20px 24px 28px' }}>
+      <div style={{ padding: '20px 24px 28px', position: 'relative' }}>
         <div style={{
-          width: 36, height: 36, borderRadius: 9,
-          background: `${color}18`, border: `1px solid ${color}30`,
+          width: 36, height: 36, borderRadius: 10,
+          background: `${color}1c`, border: `1px solid ${color}33`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
-          fontSize: 16, marginBottom: 12,
+          fontSize: 16, marginBottom: 14,
+          boxShadow: `0 6px 18px ${color}22`,
         }}>
           {icon}
         </div>
-        <h3 style={{ fontSize: 15, fontWeight: 700, color: '#fff', marginBottom: 6 }}>{title}</h3>
-        <p style={{ fontSize: 13, color: 'rgba(226,232,240,0.45)', lineHeight: 1.6 }}>{desc}</p>
+        {eyebrow && (
+          <div style={{
+            fontSize: 10.5, fontWeight: 700, letterSpacing: '0.14em',
+            textTransform: 'uppercase', color: color, marginBottom: 8, opacity: 0.85,
+          }}>{eyebrow}</div>
+        )}
+        <h3 style={{ fontSize: 16, fontWeight: 700, color: '#fff', marginBottom: 8, letterSpacing: '-0.015em' }}>{title}</h3>
+        <p style={{ fontSize: 13.5, color: 'rgba(226,232,240,0.55)', lineHeight: 1.6, letterSpacing: '-0.005em' }}>{desc}</p>
       </div>
     </div>
   )
@@ -1103,15 +1132,37 @@ export default function LandingPage({ onGetStarted }) {
             'radial-gradient(720px 500px at 85% 8%, rgba(45,212,191,0.10), transparent 60%),' +
             'radial-gradient(620px 460px at 8% 95%, rgba(99,102,241,0.12), transparent 60%)',
         }} />
-        <div style={{ textAlign: 'center', marginBottom: 56 }}>
-          <h2 style={{
-            fontSize: 'clamp(26px, 3.5vw, 40px)', fontWeight: 800,
-            color: '#fff', letterSpacing: '-0.8px', marginBottom: 12,
+        <div data-reveal style={{ textAlign: 'center', marginBottom: 56 }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            fontSize: 11.5, fontWeight: 600, letterSpacing: '0.18em',
+            color: 'rgba(94,234,212,0.85)', textTransform: 'uppercase',
+            padding: '6px 14px', borderRadius: 999,
+            background: 'rgba(45,212,191,0.10)',
+            border: '1px solid rgba(45,212,191,0.22)',
+            marginBottom: 22,
           }}>
-            Everything you need to ace your classes
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2dd4bf', boxShadow: '0 0 10px #2dd4bf' }} />
+            What's inside
+          </div>
+          <h2 style={{
+            fontSize: 'clamp(30px, 4.2vw, 50px)', fontWeight: 700,
+            color: '#fff', letterSpacing: '-0.035em', lineHeight: 1.04, marginBottom: 16,
+          }}>
+            Everything that decides your grade.<br/>
+            <span style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontStyle: 'italic', fontWeight: 400, letterSpacing: '-0.02em',
+              background: 'linear-gradient(180deg, #ffffff 0%, #c7c8ff 100%)',
+              WebkitBackgroundClip: 'text', backgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>Built into one app.</span>
           </h2>
-          <p style={{ fontSize: 16, color: 'rgba(226,232,240,0.45)', maxWidth: 480, margin: '0 auto' }}>
-            Built by students, for students. Every feature is designed to help you study less and learn more.
+          <p style={{
+            fontSize: 16.5, color: 'rgba(226,232,240,0.55)',
+            maxWidth: 580, margin: '0 auto', lineHeight: 1.6, letterSpacing: '-0.005em',
+          }}>
+            Plan, execute, recall, track — each one wired to your actual courses, syllabus, and exam dates. Not another flashcard app.
           </p>
         </div>
 
@@ -1120,34 +1171,130 @@ export default function LandingPage({ onGetStarted }) {
           gap: 16,
         }}>
 
-          {/* ── 1. AI Session Planner ── */}
-          <FeatureCard color="#6366f1" icon={<svg width="16" height="16" viewBox="0 0 20 20" fill="#6366f1"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd"/></svg>} title="AI Session Planner" desc="AI breaks every study session into timed steps: warm-up, deep review, active recall, and more. No guessing what to do next.">
-            <div style={{ padding: '16px 16px 8px', fontFamily: 'inherit' }}>
-              <div style={{ fontSize: 10, fontWeight: 700, color: '#6366f1', letterSpacing: 1, marginBottom: 8 }}>SESSION PLAN READY</div>
-              <div style={{ fontSize: 13, fontWeight: 700, color: '#fff', marginBottom: 10, lineHeight: 1.3 }}>Memory & Encoding: Active Recall</div>
-              <div style={{ display: 'flex', gap: 3, marginBottom: 10, borderRadius: 4, overflow: 'hidden', height: 8 }}>
-                <div style={{ flex: 1, background: '#a78bfa' }} />
-                <div style={{ flex: 2, background: '#6366f1' }} />
-                <div style={{ flex: 1.5, background: '#818cf8' }} />
-                <div style={{ flex: 0.8, background: '#22c55e' }} />
-                <div style={{ flex: 1.2, background: '#a78bfa' }} />
-              </div>
-              <div style={{ display: 'flex', gap: 6, marginBottom: 12, flexWrap: 'wrap' }}>
-                {['Active Recall','Review','Break','Summary'].map((t,i) => (
-                  <span key={i} style={{ fontSize: 10, padding: '3px 8px', borderRadius: 99, background: ['#a78bfa22','#6366f122','#22c55e22','#2dd4bf22'][i], color: ['#a78bfa','#818cf8','#22c55e','#2dd4bf'][i], border: `1px solid ${['#a78bfa44','#6366f144','#22c55e44','#2dd4bf44'][i]}` }}>{t}</span>
-                ))}
-              </div>
-              {[['5 min','Warm-Up Recall','#a78bfa'],['20 min','Core Concepts Deep Dive','#6366f1'],['15 min','Active Recall Sprint','#818cf8']].map(([time,label,color],i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '7px 10px', background: 'rgba(255,255,255,0.04)', borderRadius: 8, marginBottom: 5, borderLeft: `2px solid ${color}` }}>
-                  <span style={{ fontSize: 10, fontWeight: 700, color, minWidth: 36 }}>{time}</span>
-                  <span style={{ fontSize: 11, color: 'rgba(226,232,240,0.7)' }}>{label}</span>
+          {/* ── PRIMARY TIER: Session Blueprint — the differentiator (full-width) ── */}
+          <div data-reveal style={{
+            gridColumn: '1 / -1',
+            position: 'relative',
+            background: 'linear-gradient(160deg, rgba(99,102,241,0.10) 0%, rgba(255,255,255,0.03) 55%, rgba(255,255,255,0.015) 100%)',
+            border: '1px solid rgba(99,102,241,0.22)',
+            borderRadius: 22, overflow: 'hidden',
+            boxShadow: '0 30px 80px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.05)',
+            backdropFilter: 'blur(10px)',
+            marginBottom: 4,
+          }}>
+            <div aria-hidden="true" style={{
+              position: 'absolute', top: -140, left: -60,
+              width: 540, height: 380, borderRadius: '50%',
+              background: 'radial-gradient(closest-side, rgba(99,102,241,0.22), transparent 70%)',
+              pointerEvents: 'none',
+            }} />
+            <div aria-hidden="true" style={{
+              position: 'absolute', bottom: -120, right: -80,
+              width: 480, height: 340, borderRadius: '50%',
+              background: 'radial-gradient(closest-side, rgba(124,92,252,0.18), transparent 70%)',
+              pointerEvents: 'none',
+            }} />
+            <div style={{
+              position: 'relative',
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 0,
+            }}>
+              {/* Left: copy */}
+              <div style={{ padding: '40px 32px 40px 40px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 7,
+                  fontSize: 10.5, fontWeight: 700, letterSpacing: '0.2em',
+                  color: '#a5b4fc', textTransform: 'uppercase',
+                  padding: '5px 11px', borderRadius: 999,
+                  background: 'rgba(99,102,241,0.15)',
+                  border: '1px solid rgba(99,102,241,0.30)',
+                  marginBottom: 20, alignSelf: 'flex-start',
+                }}>
+                  <span style={{ width: 4, height: 4, borderRadius: '50%', background: '#818cf8', boxShadow: '0 0 8px #818cf8' }} />
+                  The differentiator
                 </div>
-              ))}
+                <div style={{
+                  width: 46, height: 46, borderRadius: 13,
+                  background: 'rgba(99,102,241,0.18)',
+                  border: '1px solid rgba(99,102,241,0.35)',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  marginBottom: 18,
+                  boxShadow: '0 10px 28px rgba(99,102,241,0.30)',
+                }}>
+                  <svg width="22" height="22" viewBox="0 0 20 20" fill="#a5b4fc"><path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd"/></svg>
+                </div>
+                <h3 style={{
+                  fontSize: 'clamp(24px, 2.6vw, 32px)', fontWeight: 700,
+                  color: '#fff', letterSpacing: '-0.025em', lineHeight: 1.08, margin: '0 0 12px',
+                }}>
+                  Sit down knowing exactly what to do.
+                </h3>
+                <p style={{
+                  fontSize: 15, color: 'rgba(226,232,240,0.65)',
+                  lineHeight: 1.6, margin: '0 0 20px', letterSpacing: '-0.005em',
+                }}>
+                  Every session gets a <strong style={{ color: '#fff', fontWeight: 600 }}>minute-by-minute blueprint</strong> — warm-up, deep dive, active recall, mixed quiz. No staring at a syllabus trying to decide where to start.
+                </p>
+                <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 10 }}>
+                  {[
+                    'Built backwards from your exam date',
+                    'Adjusts when you miss a session',
+                    'Scores you on what you actually retained',
+                  ].map((t) => (
+                    <li key={t} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: 13.5, color: 'rgba(226,232,240,0.75)', letterSpacing: '-0.005em' }}>
+                      <span style={{
+                        width: 18, height: 18, borderRadius: '50%',
+                        background: 'rgba(99,102,241,0.18)',
+                        border: '1px solid rgba(99,102,241,0.4)',
+                        display: 'inline-flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                      }}>
+                        <svg width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                          <path d="M2 5.2l2 2 4-4.4" stroke="#a5b4fc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </span>
+                      {t}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              {/* Right: blueprint mockup */}
+              <div style={{ padding: '40px 40px 40px 8px', display: 'flex', alignItems: 'center' }}>
+                <div style={{
+                  width: '100%', borderRadius: 14, padding: '20px 22px 16px',
+                  background: 'linear-gradient(160deg, rgba(99,102,241,0.08) 0%, rgba(0,0,0,0.35) 70%)',
+                  border: '1px solid rgba(255,255,255,0.06)',
+                  boxShadow: '0 14px 36px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.04)',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <div style={{ fontSize: 10.5, fontWeight: 700, color: '#a5b4fc', letterSpacing: '0.16em' }}>SESSION PLAN READY</div>
+                    <div style={{ fontSize: 10.5, color: 'rgba(226,232,240,0.5)', fontVariantNumeric: 'tabular-nums' }}>60 min · 5 blocks</div>
+                  </div>
+                  <div style={{ fontSize: 14.5, fontWeight: 700, color: '#fff', marginBottom: 4, letterSpacing: '-0.005em' }}>Memory & Encoding · Active Recall</div>
+                  <div style={{ fontSize: 11.5, color: 'rgba(226,232,240,0.5)', marginBottom: 14 }}>Aimed at 88% on the midterm</div>
+                  <div style={{ display: 'flex', gap: 3, marginBottom: 12, borderRadius: 4, overflow: 'hidden', height: 8 }}>
+                    <div style={{ flex: 1, background: '#a78bfa' }} />
+                    <div style={{ flex: 2, background: '#6366f1' }} />
+                    <div style={{ flex: 1.5, background: '#818cf8' }} />
+                    <div style={{ flex: 0.8, background: '#22c55e' }} />
+                    <div style={{ flex: 1.2, background: '#a78bfa' }} />
+                  </div>
+                  <div style={{ display: 'flex', gap: 6, marginBottom: 14, flexWrap: 'wrap' }}>
+                    {['Active Recall','Review','Break','Summary'].map((t,i) => (
+                      <span key={i} style={{ fontSize: 10.5, padding: '3px 9px', borderRadius: 99, background: ['#a78bfa22','#6366f122','#22c55e22','#2dd4bf22'][i], color: ['#a78bfa','#818cf8','#22c55e','#2dd4bf'][i], border: `1px solid ${['#a78bfa44','#6366f144','#22c55e44','#2dd4bf44'][i]}`, fontWeight: 600 }}>{t}</span>
+                    ))}
+                  </div>
+                  {[['5 min','Warm-Up Recall','#a78bfa'],['20 min','Core Concepts Deep Dive','#6366f1'],['15 min','Active Recall Sprint · 12 problems','#818cf8'],['20 min','Mixed-topic quiz · weighted','#a78bfa']].map(([time,label,color],i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 11px', background: 'rgba(255,255,255,0.04)', borderRadius: 9, marginBottom: 5, borderLeft: `2px solid ${color}` }}>
+                      <span style={{ fontSize: 10.5, fontWeight: 700, color, minWidth: 38 }}>{time}</span>
+                      <span style={{ fontSize: 11.5, color: 'rgba(226,232,240,0.78)', letterSpacing: '-0.005em' }}>{label}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
-          </FeatureCard>
+          </div>
 
           {/* ── 2. AI Study Coach ── */}
-          <FeatureCard color="#7c5cfc" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>} title="AI Study Coach" desc="Ask questions, get explanations, quiz yourself. Like having a tutor available 24/7 for every course.">
+          <FeatureCard color="#7c5cfc" eyebrow="When you're stuck" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#7c5cfc" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>} title="A tutor for every course, on demand." desc="Ask. Get an answer that knows your syllabus, grade weights, and what you've struggled with. No more re-Googling the same concept twice.">
             <div style={{ padding: '16px 16px 8px' }}>
               <div style={{ fontSize: 10, fontWeight: 700, color: '#7c5cfc', letterSpacing: 1, marginBottom: 10 }}>YOUR WEEK-BY-WEEK PLAN</div>
               {[
@@ -1174,7 +1321,7 @@ export default function LandingPage({ onGetStarted }) {
           </FeatureCard>
 
           {/* ── 3. Smart Flashcards ── */}
-          <FeatureCard color="#22c55e" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>} title="Smart Flashcards" desc="AI generates flashcards from your course material. Rate difficulty and focus on what you actually need to review.">
+          <FeatureCard color="#22c55e" eyebrow="Skip what you already know" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#22c55e" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><path d="M2 10h20"/></svg>} title="Flashcards that only quiz what you're forgetting." desc="Generated from your notes, scored on recall, and re-served on the day they're about to slip. The cards you know stop showing up.">
             <div style={{ padding: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10, fontSize: 10, color: 'rgba(226,232,240,0.4)' }}>
                 <span>Card 3 of 15</span><span>23% covered</span>
@@ -1193,7 +1340,7 @@ export default function LandingPage({ onGetStarted }) {
           </FeatureCard>
 
           {/* ── 4. Focus Mode ── */}
-          <FeatureCard color="#f97316" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>} title="Focus Mode" desc="Distraction-free study timer with session tracking. See your streak grow as you build consistent habits.">
+          <FeatureCard color="#f97316" eyebrow="Lock in for an hour" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f97316" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>} title="One screen. Your plan. Nothing else." desc="Distraction-free deep work, timed blocks, recall checkpoints, and a streak that doesn't survive a skip. Built to keep you in the seat.">
             <div style={{ padding: '16px', textAlign: 'center' }}>
               <div style={{ fontSize: 10, color: 'rgba(226,232,240,0.35)', marginBottom: 12 }}>60 min session</div>
               <div style={{ position: 'relative', width: 100, height: 100, margin: '0 auto 14px' }}>
@@ -1217,7 +1364,7 @@ export default function LandingPage({ onGetStarted }) {
           </FeatureCard>
 
           {/* ── 5. Study Schedule ── */}
-          <FeatureCard color="#2dd4bf" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>} title="Study Schedule" desc="See your entire week planned out, every session, every course, organized by time and priority.">
+          <FeatureCard color="#2dd4bf" eyebrow="Your week, decided" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>} title="See your week before you've thought about it." desc="Every session, every course, slotted into the hours you actually have free. Miss one and the rest rebalance — no rebuilding the calendar.">
             <div style={{ padding: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
                 {['Mon','Tue','Wed','Thu','Fri'].map((d,i) => (
@@ -1241,7 +1388,7 @@ export default function LandingPage({ onGetStarted }) {
           </FeatureCard>
 
           {/* ── 6. Progress Dashboard ── */}
-          <FeatureCard color="#a78bfa" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>} title="Progress Dashboard" desc="Track your streaks, sessions completed, hours studied. Stay motivated with real data on your progress.">
+          <FeatureCard color="#a78bfa" eyebrow="Watch the grade move" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>} title="Every session updates the grade you'll get." desc="Hours, streak, recall, sessions done — and your projected exam score, recalculated after every session. The only feedback loop that means anything.">
             <div style={{ padding: '16px' }}>
               <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
                 <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '10px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.07)' }}>
