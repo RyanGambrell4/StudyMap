@@ -367,51 +367,23 @@ export default function App() {
   // ── Email verification gate ──────────────────────────────────────────────
   if (!session.user.email_confirmed_at) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#F7F6F3' }}>
-        <div className="max-w-md w-full text-center space-y-6">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center">
-            <svg className="w-8 h-8" style={{ color: '#3B61C4' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-            </svg>
-          </div>
-          <h1 className="text-2xl font-bold" style={{ color: '#111111' }}>Check your email</h1>
-          <p className="text-sm leading-relaxed" style={{ color: '#6B6B6B' }}>
-            We sent a confirmation link to{' '}
-            <span className="font-medium" style={{ color: '#111111' }}>{session.user.email}</span>.
-            <br />Click the link to verify your account and get started.
-          </p>
-          <button
-            disabled={resendState === 'sending'}
-            onClick={async () => {
-              setResendState('sending')
-              try {
-                const { error } = await supabase.auth.resend({ type: 'signup', email: session.user.email })
-                if (error) throw error
-                setResendState('sent')
-                setTimeout(() => setResendState(''), 5000)
-              } catch {
-                setResendState('error')
-                setTimeout(() => setResendState(''), 5000)
-              }
-            }}
-            className="text-sm font-medium transition-colors disabled:opacity-50"
-            style={{ color: resendState === 'sent' ? '#16A34A' : resendState === 'error' ? '#DC2626' : '#3B61C4' }}
-          >
-            {resendState === 'sending' ? 'Sending…' : resendState === 'sent' ? '✓ Email resent — check your inbox' : resendState === 'error' ? 'Failed to resend — try again' : 'Resend confirmation email'}
-          </button>
-          <div className="pt-2">
-            <button
-              onClick={handleSignOut}
-              className="text-xs transition-colors"
-              style={{ color: '#9B9B9B' }}
-              onMouseEnter={(e) => e.currentTarget.style.color = '#6B6B6B'}
-              onMouseLeave={(e) => e.currentTarget.style.color = '#9B9B9B'}
-            >
-              Sign out
-            </button>
-          </div>
-        </div>
-      </div>
+      <EmailVerificationGate
+        email={session.user.email}
+        resendState={resendState}
+        onResend={async () => {
+          setResendState('sending')
+          try {
+            const { error } = await supabase.auth.resend({ type: 'signup', email: session.user.email })
+            if (error) throw error
+            setResendState('sent')
+            setTimeout(() => setResendState(''), 5000)
+          } catch {
+            setResendState('error')
+            setTimeout(() => setResendState(''), 5000)
+          }
+        }}
+        onSignOut={handleSignOut}
+      />
     )
   }
 
@@ -544,5 +516,94 @@ export default function App() {
         </div>
       )}
     </>
+  )
+}
+
+// Auto-polls every 5s for email confirmation. When confirmed, refreshSession
+// triggers onAuthStateChange which re-renders the app past this gate.
+function EmailVerificationGate({ email, resendState, onResend, onSignOut }) {
+  useEffect(() => {
+    let cancelled = false
+    const interval = setInterval(async () => {
+      if (cancelled) return
+      try { await supabase.auth.refreshSession() } catch {}
+    }, 5000)
+    return () => { cancelled = true; clearInterval(interval) }
+  }, [])
+
+  const PREVIEWS = [
+    'AI Study Coach',
+    'Session Blueprints',
+    'Focus sessions + streak tracking',
+  ]
+
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#F7F6F3' }}>
+      <style>{`@keyframes pulse-ring-app { 0%,100% { box-shadow: 0 0 0 0 rgba(59,97,196,0.4) } 50% { box-shadow: 0 0 0 8px rgba(59,97,196,0) } }`}</style>
+      <div className="max-w-md w-full text-center space-y-5">
+        <div
+          className="w-16 h-16 mx-auto rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center"
+          style={{ animation: 'pulse-ring-app 1.8s ease-in-out infinite' }}
+        >
+          <svg className="w-8 h-8" style={{ color: '#3B61C4' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+        </div>
+        <div>
+          <h1 className="text-2xl font-bold" style={{ color: '#111111' }}>One click to unlock your study plan</h1>
+          <p className="text-sm leading-relaxed mt-2" style={{ color: '#6B6B6B' }}>
+            We sent a confirmation link to{' '}
+            <span className="font-medium" style={{ color: '#111111' }}>{email}</span>.
+          </p>
+        </div>
+
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 7,
+          background: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.15)',
+          borderRadius: 999, padding: '5px 12px',
+          fontSize: 12, color: '#3B61C4', fontWeight: 600,
+        }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3B61C4', animation: 'pulse-ring-app 1.4s ease-in-out infinite' }} />
+          Checking automatically — no need to refresh
+        </div>
+
+        <div style={{
+          backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)',
+          borderRadius: 12, padding: '14px 18px', textAlign: 'left',
+        }}>
+          <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+            What unlocks once you verify
+          </p>
+          {PREVIEWS.map(item => (
+            <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 0' }}>
+              <svg width="12" height="12" fill="none" stroke="#3B61C4" strokeWidth="3" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+              <span style={{ fontSize: 13, color: '#1A1A1A', fontWeight: 500 }}>{item}</span>
+            </div>
+          ))}
+        </div>
+
+        <button
+          disabled={resendState === 'sending'}
+          onClick={onResend}
+          className="text-sm font-medium transition-colors disabled:opacity-50"
+          style={{ color: resendState === 'sent' ? '#16A34A' : resendState === 'error' ? '#DC2626' : '#3B61C4' }}
+        >
+          {resendState === 'sending' ? 'Sending…' : resendState === 'sent' ? '✓ Email resent — check your inbox' : resendState === 'error' ? 'Failed to resend — try again' : 'Resend confirmation email'}
+        </button>
+        <div className="pt-1">
+          <button
+            onClick={onSignOut}
+            className="text-xs transition-colors"
+            style={{ color: '#9B9B9B' }}
+            onMouseEnter={(e) => e.currentTarget.style.color = '#6B6B6B'}
+            onMouseLeave={(e) => e.currentTarget.style.color = '#9B9B9B'}
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    </div>
   )
 }

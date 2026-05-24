@@ -64,54 +64,54 @@ const PLANS = {
 
 const LIMIT_MESSAGES = {
   courses: {
-    tag: 'Course limit reached',
-    title: 'You\'ve reached your 1-course free limit.',
-    body: 'Pro lets you manage up to 5 courses — your full semester in one place.',
+    tag: 'Manage your full semester',
+    title: 'Add up to 5 courses with Pro.',
+    body: 'Stop juggling apps. Your full semester — every course, every exam — planned in one place.',
   },
   ai: {
-    tag: 'Daily AI limit reached',
-    title: 'You\'ve used today\'s 2 free AI messages.',
-    body: 'Pro gives you 75 AI actions/month — ask anything, anytime, for every course.',
+    tag: 'Unlock unlimited AI tutoring',
+    title: 'Get AI help anytime, for every course.',
+    body: 'Pro gives you 75 AI actions/month — your always-on tutor for every concept you\'re stuck on.',
   },
   coach: {
-    tag: 'Free use limit reached',
-    title: 'You\'ve used your free coach plan.',
-    body: 'Pro lets you regenerate your plan anytime as exams shift and life happens.',
+    tag: 'Replan as life happens',
+    title: 'Rebuild your study plan anytime.',
+    body: 'Exams shift. Life happens. Pro lets you regenerate your coach plan whenever your schedule changes.',
   },
   blueprint: {
-    tag: 'Free use limit reached',
-    title: 'One free Session Blueprint per day.',
-    body: 'Pro gives you unlimited blueprints — a full plan for every single session.',
+    tag: 'A plan for every session',
+    title: 'Unlock unlimited Session Blueprints.',
+    body: 'A full breakdown before every study block — what to learn, in what order, with practice prompts ready to go.',
   },
   focus: {
-    tag: 'Free use limit reached',
-    title: 'You\'ve used your 60-min free Focus time today.',
-    body: 'Pro unlocks unlimited Focus sessions — study as long as you need.',
+    tag: 'Study without a timer cap',
+    title: 'Unlock unlimited Focus sessions.',
+    body: 'Lock in for as long as you need. Pro removes the 60-min cap so you can finish what you started.',
   },
   brainDump: {
-    tag: 'Free use limit reached',
-    title: 'You\'ve used your 2 free Brain Dumps this week.',
-    body: 'Pro gives you unlimited Brain Dumps — test your retention anytime.',
+    tag: 'Train recall on every topic',
+    title: 'Unlock unlimited Brain Dumps.',
+    body: 'Recall practice is the #1 evidence-based study technique. Pro lets you brain dump anything, anytime.',
   },
   quizBurst: {
-    tag: 'Free use limit reached',
-    title: 'You\'ve used your 2 free Quiz Bursts this week.',
-    body: 'Pro gives you unlimited Quiz Bursts — test your knowledge anytime.',
+    tag: 'Test yourself anytime',
+    title: 'Unlock unlimited Quiz Bursts.',
+    body: 'Quick mastery checks for any topic — Pro lets you generate them on demand, all semester.',
   },
   examRescue: {
-    tag: 'Free use limit reached',
-    title: 'You\'ve used your 2 free Exam Rescues this week.',
-    body: 'Pro gives you unlimited Exam Rescues — build a rescue plan for any exam.',
+    tag: 'Behind on an exam? Rebound fast',
+    title: 'Unlock unlimited Exam Rescues.',
+    body: 'Pro builds a targeted rescue plan for any exam — figure out exactly what to study and when.',
   },
   tools: {
-    tag: 'Pro feature',
-    title: 'Study Tools are a Pro feature.',
-    body: 'Flashcards, practice quizzes, and AI-generated study materials from your own course content. Upgrade to unlock.',
+    tag: 'Your AI-built study materials',
+    title: 'Unlock Flashcards, quizzes, and more.',
+    body: 'Pro auto-generates flashcards and practice quizzes from your own course content — no manual setup.',
   },
   grade_recovery: {
-    tag: 'Pro feature',
-    title: 'Grade Recovery is a Pro feature.',
-    body: 'Grade Recovery calculates exactly how many points you need and builds a targeted rescue plan. Upgrade to unlock it.',
+    tag: 'Hit the grade you need',
+    title: 'Unlock Grade Recovery.',
+    body: 'See exactly how many points you need to hit your target, then get a study plan built to get you there.',
   },
 }
 
@@ -305,10 +305,10 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               No card required
             </div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 6px', letterSpacing: '-0.3px' }}>
-              7 days of full Pro. No card required.
+              Try every Pro feature free for 7 days.
             </h3>
             <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 16px', lineHeight: 1.5 }}>
-              Unlock every Pro feature instantly. No payment info needed.
+              Full access. No credit card. Cancel anytime.
             </p>
             {trialError && (
               <p style={{ fontSize: '0.78rem', color: '#EF4444', margin: '0 0 10px' }}>{trialError}</p>
@@ -330,7 +330,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.opacity = '0.88' }}
               onMouseLeave={e => { e.currentTarget.style.opacity = trialLoading ? '0.75' : '1' }}
             >
-              {trialLoading ? 'Activating…' : 'Start My Free Trial →'}
+              {trialLoading ? 'Activating…' : 'Start free 7-day trial →'}
             </button>
             <p style={{ margin: '10px 0 0', fontSize: '0.72rem', color: '#9B9B9B' }}>
               No credit card &nbsp;·&nbsp; Full Pro access &nbsp;·&nbsp; 7 calendar days

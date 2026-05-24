@@ -1,5 +1,30 @@
 # StudyEdge AI — Living Context
-_Last updated by: UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+
+## Onboarding & Paywall Conversion Pass — 2026-05-24
+_Driven by `ONBOARDING_AGENT_SPEC.md`. Spec referenced four `Step*.jsx` files as the active onboarding; the real onboarding flow lives in `Onboarding.jsx` (the `Step*.jsx` files were dead code from an earlier architecture)._
+
+### What changed
+| File | Change |
+|------|--------|
+| `src/components/Onboarding.jsx` | Removed the learning-style step (was step 3 of 3). Flow is now 2 questions: school+year, then preferred study time. ProgressBar `total` dropped from 3 → 2. Splash headline rewritten to "You're 60 seconds from your first AI study plan." Step 2 retitled "What are you studying for?" Step 4 retitled "When do you focus best?" Trial CTA on step 4 changed to "Build my plan". Trial-offer headline tightened to "Try every Pro feature. Free for 7 days." `learningStyle` state removed; `onComplete` still passes `learningStyle: null` so downstream readers don't break. |
+| `src/components/DashboardView.jsx` | Empty state (courses.length === 0) made celebratory + momentum-driven: green "You're set up" pill, new headline "Add your hardest course. We'll do the rest.", a "What unlocks next" preview list (3 items), prominent primary CTA with shadow. Exam-mode variant retained. |
+| `src/components/AuthScreen.jsx` | Post-signup confirmation screen extracted to new `ConfirmationPending` component. **Auto-polls Supabase every 5s** via `supabase.auth.refreshSession()` so users don't need to manually refresh once they click the link. New "Checking automatically — no need to refresh" status pill, animated pulse-ring on icon, and a value-stack preview card ("What unlocks once you verify") with AI Study Coach, Session Blueprints, Focus Mode + streaks. Resend button kept but de-emphasized (outline). |
+| `src/App.jsx` | Email verification gate (rendered when `!session.user.email_confirmed_at`) extracted to new `EmailVerificationGate` component with the same 5s auto-poll + value-stack treatment as AuthScreen. |
+| `src/components/PaywallModal.jsx` | All `LIMIT_MESSAGES` rewritten from "you hit a wall" framing to outcome-focused ("Unlock unlimited X", "A plan for every session", etc.). Trial card headline changed to "Try every Pro feature free for 7 days." Trial CTA label changed to "Start free 7-day trial →" (was "Start My Free Trial →"). |
+| `src/components/Step{Courses,Assignments,LearningStyle,Schedule}.jsx` | _Initially deleted as dead code, then restored by an out-of-band commit (`e46e989 fix: restore onboarding step files deleted by UI agent`). Left in place._ The real onboarding still lives in `Onboarding.jsx`; these files remain unused. Recommend revisiting whether to keep, refactor for re-use, or formally retire. |
+
+### Spec items not implemented (and why)
+- **"Add progress bar to all 4 onboarding steps"** — already present in `Onboarding.jsx` via the `ProgressBar` component; only updated `total` from 3 → 2 to reflect the shortened flow.
+- **"Fix post-onboarding landing — redirect to Study Coach"** — Study Coach requires an existing course to plan against. With 0 courses there's nothing to coach, so the spec's literal direction would land users on an even more confusing dead-end. Instead, made the Dashboard empty state itself a strong, celebratory "Add your hardest course →" CTA with a value preview.
+- **`Step*.jsx` rewrites** — those files were dead code; they were deleted rather than rewritten. The spec's analysis of those files (line counts, problems) was based on an outdated architecture.
+- **Paywall trigger audit** — existing per-feature triggers (`canUseAI`, `canAddCourse`, `canRescue`, focus 60-min cap, etc.) already fire at high-intent moments. Only the copy was sharpened; the trigger points were left untouched.
+
+### Open questions for next agent
+- The `learningStyle` field is still threaded through `handleOnboardingComplete` → `savePlan` → DB schema. We pass `null` now, but consumers (`BlueprintScreen`, `StudyCoachView`, `FocusMode`, `AIChatView`) all still accept it as a prop. A follow-up could either (a) drop the field entirely from the schema + props, or (b) re-collect it later once the user has been in the product (post-first-session "we noticed you're using flashcards a lot — is this your style?"). Option (b) is likely higher conversion.
+- The auto-poll on email confirmation uses `supabase.auth.refreshSession()` every 5s — fine for the wait period, but if a user leaves the tab open for an hour we'll have made 720 calls. Could add a max-poll-attempts limit (e.g. stop polling after 5 min and show a "Refresh" button) if Supabase rate limits become an issue.
+
+
 
 ## App Status
 - Current version: 3270167 (after first UI/SEO pass; pending: light-theme refactor commits)

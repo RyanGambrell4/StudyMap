@@ -401,3 +401,141 @@ function LeftPanel() {
     </div>
   )
 }
+
+// ── Confirmation pending: auto-polls for verified status every 5s ─────────────
+function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onSignIn, onBack, isMobile }) {
+  const [pollCount, setPollCount] = useState(0)
+
+  // Auto-poll: every 5s, refresh the user. When email_confirmed_at is set,
+  // onAuthStateChange in App.jsx fires SIGNED_IN and the gate falls away.
+  useEffect(() => {
+    let cancelled = false
+    const tick = async () => {
+      if (cancelled) return
+      try {
+        await supabase.auth.refreshSession()
+        const { data } = await supabase.auth.getUser()
+        if (data?.user?.email_confirmed_at) {
+          // Force a session refresh so onAuthStateChange picks up confirmation
+          await supabase.auth.refreshSession()
+        }
+      } catch {}
+      if (!cancelled) setPollCount(c => c + 1)
+    }
+    const interval = setInterval(tick, 5000)
+    return () => { cancelled = true; clearInterval(interval) }
+  }, [])
+
+  const VALUE_PROPS = [
+    { title: 'AI Study Coach', body: 'Builds your week-by-week plan for every course' },
+    { title: 'Session Blueprints', body: 'A specific plan before every study block' },
+    { title: 'Focus Mode', body: 'Timed sessions that lock you in and track streaks' },
+  ]
+
+  return (
+    <div style={{ minHeight: '100vh', display: 'flex' }}>
+      {!isMobile && <LeftPanel />}
+
+      <div style={{
+        flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
+        backgroundColor: '#F7F6F3', padding: '40px 24px',
+      }}>
+        <div style={{ width: '100%', maxWidth: 420 }}>
+          <style>{`@keyframes pulse-ring { 0%,100% { box-shadow: 0 0 0 0 rgba(59,97,196,0.4) } 50% { box-shadow: 0 0 0 8px rgba(59,97,196,0) } }`}</style>
+
+          {/* Mobile logo */}
+          <div style={{ display: isMobile ? 'flex' : 'none', alignItems: 'center', gap: 10, marginBottom: 28, justifyContent: 'center' }}>
+            <img src="/favicon.png" alt="StudyEdge AI" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain' }} />
+            <span style={{ fontWeight: 700, fontSize: 18, color: '#1A1A1A' }}>StudyEdge AI</span>
+          </div>
+
+          {/* Live pulse icon */}
+          <div style={{
+            width: 56, height: 56, borderRadius: 16, backgroundColor: 'rgba(59,97,196,0.1)',
+            border: '1px solid rgba(59,97,196,0.2)', display: 'flex', alignItems: 'center',
+            justifyContent: 'center', marginBottom: 20,
+            animation: 'pulse-ring 1.8s ease-in-out infinite',
+          }}>
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+            </svg>
+          </div>
+
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>One click to unlock your study plan</h1>
+          <p style={{ fontSize: 14, color: '#6B6B6B', margin: '0 0 4px', lineHeight: 1.5 }}>We sent a confirmation link to</p>
+          <p style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 14px', wordBreak: 'break-all' }}>{email}</p>
+
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 7,
+            background: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.15)',
+            borderRadius: 999, padding: '5px 12px',
+            fontSize: 12, color: '#3B61C4', fontWeight: 600,
+            marginBottom: 18,
+          }}>
+            <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3B61C4', animation: 'pulse-ring 1.4s ease-in-out infinite' }} />
+            Checking automatically — no need to refresh
+          </div>
+
+          <div style={{
+            backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12,
+            padding: '16px 18px', marginBottom: 18,
+          }}>
+            <p style={{ margin: '0 0 12px', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              What unlocks once you verify
+            </p>
+            {VALUE_PROPS.map(v => (
+              <div key={v.title} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 10 }}>
+                <div style={{ width: 18, height: 18, borderRadius: '50%', background: 'rgba(59,97,196,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
+                  <svg width="10" height="10" fill="none" stroke="#3B61C4" strokeWidth="3" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <div>
+                  <div style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A' }}>{v.title}</div>
+                  <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 1 }}>{v.body}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          <p style={{ fontSize: 12, color: '#9B9B9B', margin: '0 0 14px', lineHeight: 1.5 }}>
+            Email not there yet? Check Spam or Promotions and search for "StudyEdge AI".
+          </p>
+
+          <button
+            onClick={onResend}
+            disabled={resendStatus === 'sending'}
+            style={{
+              width: '100%', padding: '12px', borderRadius: 12,
+              backgroundColor: '#fff', color: '#3B61C4',
+              border: '1px solid rgba(59,97,196,0.3)', fontSize: 14, fontWeight: 600,
+              cursor: resendStatus === 'sending' ? 'default' : 'pointer',
+              opacity: resendStatus === 'sending' ? 0.6 : 1,
+              marginBottom: 14,
+            }}
+          >
+            {resendStatus === 'sending' ? 'Resending…' : resendStatus === 'sent' ? 'Email resent ✓' : resendStatus === 'error' ? 'Try again' : 'Resend confirmation email'}
+          </button>
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, textAlign: 'center' }}>
+            <button onClick={onSignIn} style={{ background: 'none', border: 'none', fontSize: 13, color: '#6B6B6B', cursor: 'pointer' }}>
+              Already verified? <span style={{ color: '#3B61C4', fontWeight: 600 }}>Sign in</span>
+            </button>
+            <button onClick={onSwitchEmail} style={{ background: 'none', border: 'none', fontSize: 12, color: '#9B9B9B', cursor: 'pointer' }}>
+              Use a different email
+            </button>
+          </div>
+
+          {onBack && (
+            <button onClick={onBack} style={{ display: 'block', width: '100%', marginTop: 14, background: 'none', border: 'none', fontSize: 12, color: '#9B9B9B', cursor: 'pointer', textAlign: 'center' }}>
+              ← Back to home
+            </button>
+          )}
+
+          {/* Hidden tick render so pollCount triggers re-render */}
+          <span style={{ display: 'none' }}>{pollCount}</span>
+        </div>
+      </div>
+    </div>
+  )
+}

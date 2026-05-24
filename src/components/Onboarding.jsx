@@ -3,24 +3,6 @@ import { track } from '../lib/analytics'
 import { activateTrial, hasUsedTrial } from '../lib/subscription'
 
 // ── Options ───────────────────────────────────────────────────────────────────
-const STYLE_OPTIONS = [
-  {
-    value: 'visual',
-    label: 'Visual',
-    desc: 'You think in diagrams. Color-coding, flowcharts, and mind maps make complex ideas click. If you can see it, you can learn it.',
-  },
-  {
-    value: 'reading',
-    label: 'Reading & Writing',
-    desc: 'You process through text. Rewriting notes, summarizing chapters, and annotating readings are how ideas stick for you.',
-  },
-  {
-    value: 'practice',
-    label: 'Practice-Based',
-    desc: 'You learn by doing. Flashcards, past exams, and problem sets are your best tools. Repetition and reps build your mastery.',
-  },
-]
-
 const TIME_ICONS = {
   Morning: (
     <svg style={{ width: '1.75rem', height: '1.75rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,13 +114,13 @@ function SplashScreen({ onNext }) {
           marginBottom: 16,
           fontFamily: "'Cormorant Garamond', Georgia, serif",
         }}>
-          Your study plan,<br />
-          <em style={{ fontStyle: 'italic', color: '#3B61C4' }}>built around your goals.</em>
+          You're 60 seconds from<br />
+          <em style={{ fontStyle: 'italic', color: '#3B61C4' }}>your first AI study plan.</em>
         </h1>
 
         {/* Subtext */}
         <p style={{ color: '#6B6B6B', fontSize: '1rem', lineHeight: 1.6, marginBottom: 40 }}>
-          Tell us what you're studying. We'll build your plan around your timeline and goals.
+          Two quick questions. Then we'll build the rest around you.
         </p>
 
         {/* Feature cards */}
@@ -347,9 +329,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
   const [schoolType, setSchoolType]         = useState(null)
   const [yearLevel, setYearLevel]           = useState(null)
-  const [learningStyle, setLearningStyle]   = useState(null)
   const [preferredTime, setPreferredTime]   = useState(null)
-  const [emailDigest, setEmailDigest]       = useState(true)
 
   const goTo = (next, dir = 1) => {
     if (dir > 0) track('onboarding_step', { from: step, to: next })
@@ -366,12 +346,12 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   if (step === 2) return (
     <Page>
       <StepWrap animKey={animKey} dir={animDir}>
-        <ProgressBar current={1} total={3} />
+        <ProgressBar current={1} total={2} />
         <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.03em', marginBottom: 6, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-          Where are you studying?
+          What are you studying for?
         </h2>
         <p style={{ color: '#6B6B6B', fontSize: '0.95rem', marginBottom: 24, lineHeight: 1.5 }}>
-          We'll personalize your study plan for your level and workload.
+          We tune your sessions to your workload — high school finals look nothing like the bar exam.
         </p>
 
         <div className="ob-school-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
@@ -409,50 +389,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           </div>
         )}
 
-        <ContinueBtn onClick={() => goTo(3)} disabled={!yearLevel} />
-      </StepWrap>
-    </Page>
-  )
-
-  // ── Step 3: Learning style ───────────────────────────────────────────────────
-  const STYLE_ACCENTS = { visual: '#3B61C4', reading: '#8b5cf6', practice: '#059669' }
-
-  if (step === 3) return (
-    <Page>
-      <StepWrap animKey={animKey} dir={animDir}>
-        <ProgressBar current={2} total={3} />
-        <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.03em', marginBottom: 6, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-          How do you learn best?
-        </h2>
-        <p style={{ color: '#6B6B6B', fontSize: '0.95rem', marginBottom: 24, lineHeight: 1.5 }}>
-          Pick the style that sounds most like you, and we'll build sessions around it.
-        </p>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 24 }}>
-          {STYLE_OPTIONS.map(({ value, label, desc }) => (
-            <OptionCard
-              key={value}
-              selected={learningStyle === value}
-              onClick={() => setLearningStyle(value)}
-              style={{ padding: 0, width: '100%', display: 'flex', overflow: 'hidden' }}
-            >
-              <div style={{
-                width: 4, flexShrink: 0,
-                backgroundColor: learningStyle === value ? STYLE_ACCENTS[value] : 'rgba(0,0,0,0.06)',
-                transition: 'background 0.2s',
-              }} />
-              <div style={{ padding: '16px 18px 16px 16px', flex: 1 }}>
-                <p style={{ color: '#1A1A1A', fontSize: '0.95rem', fontWeight: 700, marginBottom: 5, letterSpacing: '-0.2px' }}>{label}</p>
-                <p style={{ color: '#6B6B6B', fontSize: '0.82rem', lineHeight: 1.55 }}>{desc}</p>
-              </div>
-            </OptionCard>
-          ))}
-        </div>
-
-        <div style={{ display: 'flex', gap: 10 }}>
-          <BackBtn onClick={() => goTo(2, -1)} />
-          <ContinueBtn onClick={() => goTo(4)} disabled={!learningStyle} />
-        </div>
+        <ContinueBtn onClick={() => goTo(4)} disabled={!yearLevel} />
       </StepWrap>
     </Page>
   )
@@ -461,12 +398,12 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   if (step === 4) return (
     <Page>
       <StepWrap animKey={animKey} dir={animDir}>
-        <ProgressBar current={3} total={3} />
+        <ProgressBar current={2} total={2} />
         <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.03em', marginBottom: 6, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-          When do you do your best work?
+          When do you focus best?
         </h2>
         <p style={{ color: '#6B6B6B', fontSize: '0.95rem', marginBottom: 24, lineHeight: 1.5 }}>
-          We'll schedule your sessions when your focus is at its peak.
+          We'll stack your sessions when your brain is sharpest — not when life is loudest.
         </p>
 
         <div className="ob-time-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
@@ -487,15 +424,15 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         </div>
 
         <div style={{ display: 'flex', gap: 10 }}>
-          <BackBtn onClick={() => goTo(3, -1)} />
-          <ContinueBtn onClick={() => { if (!hasUsedTrial()) { goTo(5) } else { onComplete({ yearLevel, learningStyle, preferredTime, schoolType, emailDigest: true }) } }} disabled={!preferredTime} label="Continue" />
+          <BackBtn onClick={() => goTo(2, -1)} />
+          <ContinueBtn onClick={() => { if (!hasUsedTrial()) { goTo(5) } else { onComplete({ yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true }) } }} disabled={!preferredTime} label="Build my plan" />
         </div>
       </StepWrap>
     </Page>
   )
 
   // ── Step 5: Trial offer ───────────────────────────────────────────────────────
-  const profileData = { yearLevel, learningStyle, preferredTime, schoolType, emailDigest: true }
+  const profileData = { yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true }
   if (step === 5) return (
     <div style={{ minHeight: '100vh', background: '#F7F6F3', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
       <div style={{ maxWidth: 460, width: '100%' }}>
@@ -511,10 +448,10 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
         {/* Headline */}
         <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#111111', letterSpacing: '-0.04em', textAlign: 'center', marginBottom: 10, lineHeight: 1.15 }}>
-          7 days of full Pro.<br />No card required.
+          Try every Pro feature.<br />Free for 7 days.
         </h1>
         <p style={{ color: '#6B6B6B', fontSize: '0.95rem', textAlign: 'center', marginBottom: 32, lineHeight: 1.6 }}>
-          You've set up your plan. Try everything — no limits — free for 7 days. No credit card. No commitment.
+          See your full study plan, AI coach, and focus sessions in action — before you pay a cent.
         </p>
 
         {/* Feature list */}
