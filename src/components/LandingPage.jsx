@@ -1380,46 +1380,127 @@ export default function LandingPage({ onGetStarted }) {
       {/* Testimonials → Bottom CTA horizon */}
       <div className="se-horizon" />
 
-      {/* ── Bottom CTA ── */}
+      {/* ── Bottom CTA (full-bleed arrival moment) ── */}
       <section className="se-section" style={{
-        textAlign: 'center', padding: '60px 24px 100px',
+        textAlign: 'center', padding: '140px 24px 160px',
+        background: 'linear-gradient(180deg, transparent 0%, rgba(8,8,28,0.5) 30%, rgba(12,12,38,0.65) 70%, transparent 100%)',
       }}>
+        {/* Layered washes */}
         <div aria-hidden="true" className="se-wash" style={{
           background:
-            'radial-gradient(900px 540px at 50% 50%, rgba(99,102,241,0.16), transparent 65%),' +
-            'radial-gradient(600px 460px at 50% 100%, rgba(79,70,229,0.12), transparent 60%)',
+            'radial-gradient(1100px 640px at 50% 45%, rgba(99,102,241,0.22), transparent 65%),' +
+            'radial-gradient(800px 540px at 50% 100%, rgba(79,70,229,0.18), transparent 60%),' +
+            'radial-gradient(500px 360px at 18% 30%, rgba(124,92,252,0.10), transparent 60%),' +
+            'radial-gradient(500px 360px at 82% 70%, rgba(45,212,191,0.06), transparent 60%)',
         }} />
-        <div style={{
-          position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)',
-          width: 600, height: 400, borderRadius: '50%',
-          background: 'radial-gradient(ellipse, rgba(91,110,245,0.10) 0%, transparent 65%)',
-          filter: 'blur(60px)', pointerEvents: 'none',
-        }} />
-        <h2 style={{
-          fontSize: 'clamp(26px, 3.5vw, 38px)', fontWeight: 800,
-          color: '#fff', letterSpacing: '-0.6px', marginBottom: 14, position: 'relative',
+        <div aria-hidden="true" className="se-grid" />
+
+        {/* Trust strip directly above headline */}
+        <div data-reveal style={{
+          display: 'inline-flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+          justifyContent: 'center',
+          padding: '8px 16px',
+          background: 'rgba(255,255,255,0.04)',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 999,
+          fontSize: 12.5, color: 'rgba(226,232,240,0.7)',
+          letterSpacing: '-0.005em', marginBottom: 32,
+          backdropFilter: 'blur(8px)',
         }}>
-          Ready to study smarter?
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            No credit card
+          </span>
+          <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
+          <span>7-day free trial</span>
+          <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
+          <span>Cancel anytime</span>
+        </div>
+
+        <h2 data-reveal data-reveal-delay="1" style={{
+          fontSize: 'clamp(40px, 6.5vw, 78px)', fontWeight: 700,
+          color: '#fff', letterSpacing: '-0.04em', lineHeight: 0.98,
+          marginBottom: 18, position: 'relative',
+          maxWidth: 820, marginLeft: 'auto', marginRight: 'auto',
+        }}>
+          Stop studying harder.<br />
+          <span style={{
+            fontFamily: "'Instrument Serif', serif",
+            fontStyle: 'italic', fontWeight: 400, letterSpacing: '-0.03em',
+            background: 'linear-gradient(180deg, #ffffff 0%, #c7c8ff 100%)',
+            WebkitBackgroundClip: 'text', backgroundClip: 'text',
+            WebkitTextFillColor: 'transparent',
+          }}>Study what actually moves your grade</span><span style={{ color: '#6366F1' }}>.</span>
         </h2>
-        <p style={{
-          fontSize: 16, color: 'rgba(226,232,240,0.45)', marginBottom: 32, position: 'relative',
+        <p data-reveal data-reveal-delay="2" style={{
+          fontSize: 17.5, color: 'rgba(226,232,240,0.55)',
+          marginBottom: 40, lineHeight: 1.55, letterSpacing: '-0.005em',
+          maxWidth: 580, marginLeft: 'auto', marginRight: 'auto',
         }}>
-          Join thousands of students already using StudyEdge AI to crush their classes.
+          Your AI study system builds the plan, scores every session, and tells you exactly what to study next — for every course, all semester.
         </p>
-        <button
-          onClick={() => onGetStarted('signup')}
-          style={{
-            background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-            border: 'none', color: '#fff', borderRadius: 12, padding: '14px 36px',
-            fontSize: 16, fontWeight: 700, cursor: 'pointer', position: 'relative',
-            boxShadow: '0 0 30px rgba(99,102,241,0.35), 0 4px 20px rgba(0,0,0,0.3)',
-            transition: 'all 0.2s',
-          }}
-          onMouseEnter={e => e.target.style.boxShadow = '0 0 45px rgba(99,102,241,0.55), 0 4px 20px rgba(0,0,0,0.3)'}
-          onMouseLeave={e => e.target.style.boxShadow = '0 0 30px rgba(99,102,241,0.35), 0 4px 20px rgba(0,0,0,0.3)'}
-        >
-          Get Started Free →
-        </button>
+        <div data-reveal data-reveal-delay="3" style={{
+          display: 'inline-flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+          justifyContent: 'center', position: 'relative',
+        }}>
+          <button
+            onClick={goTrial}
+            style={{
+              background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+              border: 'none', color: '#fff', borderRadius: 14,
+              padding: '16px 32px', fontSize: 16, fontWeight: 700, cursor: 'pointer',
+              boxShadow: '0 18px 48px rgba(99,102,241,0.45), 0 0 0 1px rgba(255,255,255,0.08) inset',
+              letterSpacing: '-0.01em', transition: 'transform 0.15s ease, box-shadow 0.2s ease',
+              display: 'inline-flex', alignItems: 'center', gap: 10,
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)'
+              e.currentTarget.style.boxShadow = '0 22px 60px rgba(99,102,241,0.6), 0 0 0 1px rgba(255,255,255,0.1) inset'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 18px 48px rgba(99,102,241,0.45), 0 0 0 1px rgba(255,255,255,0.08) inset'
+            }}
+          >
+            Start your free 7-day trial
+            <svg width="15" height="15" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <button
+            onClick={scrollToHow}
+            style={{
+              background: 'rgba(255,255,255,0.04)',
+              border: '1px solid rgba(255,255,255,0.14)',
+              color: '#e2e8f0', borderRadius: 14,
+              padding: '15px 26px', fontSize: 15.5, fontWeight: 600, cursor: 'pointer',
+              letterSpacing: '-0.01em',
+              transition: 'border-color 0.2s ease, background 0.2s ease',
+              display: 'inline-flex', alignItems: 'center', gap: 8,
+              backdropFilter: 'blur(8px)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.3)'
+              e.currentTarget.style.background = 'rgba(255,255,255,0.07)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.borderColor = 'rgba(255,255,255,0.14)'
+              e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+            }}
+          >
+            See how it works
+          </button>
+        </div>
+
+        {/* Subtle closer line */}
+        <div data-reveal data-reveal-delay="3" style={{
+          marginTop: 28, fontSize: 13, color: 'rgba(226,232,240,0.4)',
+          letterSpacing: '-0.005em',
+        }}>
+          Built for the GPA grinder, the comeback kid, and the high-achiever optimizing for an A.
+        </div>
       </section>
 
       {/* ── Footer ── */}
