@@ -57,9 +57,51 @@ export default function LandingPage({ onGetStarted }) {
 
   const goTrial = () => window.location.href = '/app?signup=1&plan=pro&billing=monthly&trial=1'
 
+  const scrollToHow = () => {
+    document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
+
+  // Scroll-triggered reveals — any element with [data-reveal] fades up on enter.
+  // Sibling stagger via [data-reveal-delay="1|2|3"].
+  const revealRoot = useRef(null)
+  useEffect(() => {
+    const els = revealRoot.current?.querySelectorAll('[data-reveal]')
+    if (!els || !els.length) return
+    const io = new IntersectionObserver(
+      (entries) => entries.forEach((e) => {
+        if (e.isIntersecting) {
+          e.target.classList.add('is-revealed')
+          io.unobserve(e.target)
+        }
+      }),
+      { threshold: 0.15, rootMargin: '0px 0px -60px 0px' }
+    )
+    els.forEach((el) => io.observe(el))
+    return () => io.disconnect()
+  }, [])
+
+  // ─────────────────────────────────────────────────────────────────────
+  // Headline A/B variants — current default is "While others cram. You execute."
+  // Documented alternates for future tests (do not silently swap — A/B in code/cms):
+  //   B: "Built to raise your GPA."        — outcome-led, specific to the result
+  //   C: "Your AI study system. Your next A." — system + outcome, two-beat
+  //   D: "Stop studying harder. Study what matters." — contrast-led, problem-first
+  // Default kept for now; revisit once we have data from any of the three.
+  // ─────────────────────────────────────────────────────────────────────
+
   return (
     /* intentionally dark — marketing landing page; the app shell itself is light-themed */
-    <div style={{ backgroundColor: '#060614', color: '#e2e8f0', minHeight: '100vh', fontFamily: "'Inter', -apple-system, sans-serif" }}>
+    <div ref={revealRoot} style={{ backgroundColor: '#060614', color: '#e2e8f0', minHeight: '100vh', fontFamily: "'Inter', -apple-system, sans-serif" }}>
+      <style>{`
+        [data-reveal] { opacity: 0; transform: translateY(18px); transition: opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1); }
+        [data-reveal].is-revealed { opacity: 1; transform: translateY(0); }
+        [data-reveal][data-reveal-delay="1"] { transition-delay: 0.08s; }
+        [data-reveal][data-reveal-delay="2"] { transition-delay: 0.16s; }
+        [data-reveal][data-reveal-delay="3"] { transition-delay: 0.24s; }
+        @media (prefers-reduced-motion: reduce) {
+          [data-reveal] { opacity: 1; transform: none; transition: none; }
+        }
+      `}</style>
 
       {/* ── Sticky bottom trial bar ── */}
       {!stickyDismissed && scrollY > 300 && (
@@ -226,6 +268,66 @@ export default function LandingPage({ onGetStarted }) {
             }}>
               Your AI study system — plans, coaches, tracks, and tells you exactly where to focus. Every course. All semester.
             </p>
+
+            {/* Primary CTAs */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14, flexWrap: 'wrap',
+            }}>
+              <button
+                onClick={goTrial}
+                style={{
+                  background: 'linear-gradient(135deg, #6366F1, #4F46E5)',
+                  border: 'none', color: '#fff', borderRadius: 12,
+                  padding: '14px 26px', fontSize: 15.5, fontWeight: 700, cursor: 'pointer',
+                  boxShadow: '0 10px 30px rgba(99,102,241,0.35), 0 0 0 1px rgba(255,255,255,0.06) inset',
+                  letterSpacing: '-0.01em', transition: 'transform 0.15s ease, box-shadow 0.2s ease',
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.transform = 'translateY(-1px)'
+                  e.currentTarget.style.boxShadow = '0 14px 38px rgba(99,102,241,0.5), 0 0 0 1px rgba(255,255,255,0.08) inset'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)'
+                  e.currentTarget.style.boxShadow = '0 10px 30px rgba(99,102,241,0.35), 0 0 0 1px rgba(255,255,255,0.06) inset'
+                }}
+              >
+                Start free 7-day trial
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                  <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              <button
+                onClick={scrollToHow}
+                style={{
+                  background: 'rgba(255,255,255,0.04)',
+                  border: '1px solid rgba(255,255,255,0.12)',
+                  color: '#e2e8f0', borderRadius: 12,
+                  padding: '13px 22px', fontSize: 15, fontWeight: 600, cursor: 'pointer',
+                  letterSpacing: '-0.01em', transition: 'border-color 0.2s ease, background 0.2s ease',
+                  display: 'inline-flex', alignItems: 'center', gap: 8,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.28)'
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.07)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'
+                  e.currentTarget.style.background = 'rgba(255,255,255,0.04)'
+                }}
+              >
+                See how it works
+              </button>
+            </div>
+            <div style={{
+              fontSize: 12.5, color: 'rgba(226,232,240,0.45)', letterSpacing: '-0.005em',
+              marginBottom: 24, display: 'inline-flex', alignItems: 'center', gap: 6,
+            }}>
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                <path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              No credit card required · Cancel anytime
+            </div>
 
             {/* Social proof */}
             <div style={{
@@ -509,6 +611,320 @@ export default function LandingPage({ onGetStarted }) {
             position: 'absolute', inset: 0, zIndex: 5, pointerEvents: 'none',
             background: 'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.4) 100%), radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.5) 100%)',
           }} />
+        </div>
+      </section>
+
+      {/* ── How It Works ── */}
+      <section id="how-it-works" style={{
+        maxWidth: 1120, margin: '0 auto', padding: '110px 24px 40px',
+      }}>
+        <div data-reveal style={{ textAlign: 'center', marginBottom: 64 }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            fontSize: 11.5, fontWeight: 600, letterSpacing: '0.18em',
+            color: 'rgba(199,210,254,0.85)', textTransform: 'uppercase',
+            padding: '6px 14px', borderRadius: 999,
+            background: 'rgba(99,102,241,0.10)',
+            border: '1px solid rgba(99,102,241,0.22)',
+            marginBottom: 22,
+          }}>
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#6366F1', boxShadow: '0 0 10px #6366F1' }} />
+            How it works
+          </div>
+          <h2 style={{
+            fontSize: 'clamp(30px, 4.2vw, 50px)', fontWeight: 700,
+            color: '#fff', letterSpacing: '-0.035em', lineHeight: 1.04, margin: '0 0 16px',
+          }}>
+            From your syllabus to your next A.<br />
+            <span style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontStyle: 'italic', fontWeight: 400, letterSpacing: '-0.02em',
+              background: 'linear-gradient(180deg, #ffffff 0%, #c7c8ff 100%)',
+              WebkitBackgroundClip: 'text', backgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>In three steps.</span>
+          </h2>
+          <p style={{
+            fontSize: 16.5, color: 'rgba(226,232,240,0.55)',
+            maxWidth: 560, margin: '0 auto', lineHeight: 1.6, letterSpacing: '-0.005em',
+          }}>
+            Most students open their notes and start reading. StudyEdge tells you exactly what to study, when, and for how long — and then scores you on what you actually retained.
+          </p>
+        </div>
+
+        <div style={{
+          display: 'grid', gap: 20,
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+        }}>
+          {[
+            {
+              num: '01',
+              title: 'Add your courses',
+              copy: 'Drop your syllabus, paste your class list, or pick from common courses. We pull exam dates, weights, and assignments — automatically.',
+              accent: '#6366F1',
+              accentSoft: 'rgba(99,102,241,0.10)',
+              mockup: (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <div style={{ fontSize: 9.5, fontWeight: 700, color: '#818cf8', letterSpacing: '0.12em' }}>YOUR COURSES</div>
+                    <div style={{ fontSize: 10, color: 'rgba(226,232,240,0.4)' }}>4 added</div>
+                  </div>
+                  {[
+                    { name: 'Organic Chemistry', sub: 'Midterm in 12 days', color: '#F97316', done: true },
+                    { name: 'Linear Algebra', sub: 'Exam in 3 days', color: '#3B82F6', done: true },
+                    { name: 'Cognitive Psychology', sub: 'Paper due Friday', color: '#A855F7', done: true },
+                  ].map((c) => (
+                    <div key={c.name} style={{
+                      display: 'flex', alignItems: 'center', gap: 10,
+                      padding: '9px 11px', marginBottom: 6,
+                      background: 'rgba(255,255,255,0.04)',
+                      border: '1px solid rgba(255,255,255,0.06)',
+                      borderRadius: 9, fontSize: 12,
+                    }}>
+                      <span style={{ width: 3, height: 22, borderRadius: 2, background: c.color, flexShrink: 0 }} />
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ color: '#fff', fontWeight: 600, fontSize: 12, letterSpacing: '-0.005em', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{c.name}</div>
+                        <div style={{ color: 'rgba(226,232,240,0.4)', fontSize: 10.5, marginTop: 1 }}>{c.sub}</div>
+                      </div>
+                      <span style={{
+                        width: 16, height: 16, borderRadius: '50%',
+                        background: 'rgba(34,197,94,0.18)', border: '1px solid rgba(34,197,94,0.35)',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+                      }}>
+                        <svg width="9" height="9" viewBox="0 0 10 10" fill="none" aria-hidden="true">
+                          <path d="M2 5.2l2 2 4-4.4" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+                        </svg>
+                      </span>
+                    </div>
+                  ))}
+                  <div style={{
+                    display: 'flex', alignItems: 'center', gap: 10,
+                    padding: '9px 11px',
+                    background: 'rgba(99,102,241,0.08)',
+                    border: '1px dashed rgba(99,102,241,0.35)',
+                    borderRadius: 9, fontSize: 12, color: '#a5b4fc',
+                  }}>
+                    <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                      <path d="M7 3v8M3 7h8" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                    </svg>
+                    <span style={{ fontWeight: 600 }}>Cell Biology</span>
+                    <span style={{ marginLeft: 'auto', fontSize: 10.5, color: 'rgba(165,180,252,0.7)' }}>Parsing syllabus…</span>
+                  </div>
+                </div>
+              ),
+            },
+            {
+              num: '02',
+              title: 'AI builds your plan',
+              copy: 'Every week gets a strategy. Every session gets a minute-by-minute blueprint. Every grade gets a target score — backwards from the exam date.',
+              accent: '#7c5cfc',
+              accentSoft: 'rgba(124,92,252,0.10)',
+              mockup: (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                    <div style={{ fontSize: 9.5, fontWeight: 700, color: '#c4b5fd', letterSpacing: '0.12em' }}>SESSION BLUEPRINT</div>
+                    <div style={{ fontSize: 10, color: 'rgba(226,232,240,0.4)' }}>60 min · 5 blocks</div>
+                  </div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#fff', marginBottom: 4, letterSpacing: '-0.005em' }}>Organic Chem — Stereochem</div>
+                  <div style={{ fontSize: 10.5, color: 'rgba(226,232,240,0.45)', marginBottom: 12 }}>To hit 88% on the midterm</div>
+                  <div style={{ display: 'flex', gap: 3, height: 8, borderRadius: 4, overflow: 'hidden', marginBottom: 12 }}>
+                    {[
+                      { flex: 0.8, color: '#a78bfa' },
+                      { flex: 2.2, color: '#7c5cfc' },
+                      { flex: 1.6, color: '#a5b4fc' },
+                      { flex: 0.6, color: '#22c55e' },
+                      { flex: 1.4, color: '#a78bfa' },
+                    ].map((s, i) => <div key={i} style={{ flex: s.flex, background: s.color }} />)}
+                  </div>
+                  {[
+                    { time: '5m', label: 'Warm-up recall', color: '#a78bfa' },
+                    { time: '20m', label: 'R/S configuration deep dive', color: '#7c5cfc' },
+                    { time: '15m', label: 'Active recall sprint · 12 problems', color: '#a5b4fc' },
+                    { time: '20m', label: 'Mixed-topic quiz · weighted', color: '#a78bfa' },
+                  ].map((b, i) => (
+                    <div key={i} style={{
+                      display: 'flex', alignItems: 'center', gap: 9,
+                      padding: '6.5px 10px', marginBottom: 4,
+                      background: 'rgba(255,255,255,0.035)',
+                      borderRadius: 8, borderLeft: `2px solid ${b.color}`,
+                      fontSize: 11.5,
+                    }}>
+                      <span style={{ color: b.color, fontWeight: 700, minWidth: 30, fontSize: 10.5, letterSpacing: '-0.01em' }}>{b.time}</span>
+                      <span style={{ color: 'rgba(226,232,240,0.7)' }}>{b.label}</span>
+                    </div>
+                  ))}
+                </div>
+              ),
+            },
+            {
+              num: '03',
+              title: 'Execute every session',
+              copy: 'Hit start. Follow the plan. Get scored on recall. Watch your grade target move in real time — and know exactly what to study next.',
+              accent: '#22c55e',
+              accentSoft: 'rgba(34,197,94,0.10)',
+              mockup: (
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                    <div style={{ fontSize: 9.5, fontWeight: 700, color: '#86efac', letterSpacing: '0.12em' }}>SESSION ACTIVE</div>
+                    <div style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 5,
+                      fontSize: 10, fontWeight: 700, color: '#22c55e',
+                      padding: '3px 8px', background: 'rgba(34,197,94,0.12)',
+                      border: '1px solid rgba(34,197,94,0.25)', borderRadius: 999,
+                    }}>
+                      <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />
+                      LIVE
+                    </div>
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+                    <div style={{ position: 'relative', width: 78, height: 78, flexShrink: 0 }}>
+                      <svg width="78" height="78" viewBox="0 0 100 100" aria-hidden="true">
+                        <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="7" />
+                        <circle cx="50" cy="50" r="44" fill="none" stroke="#22c55e" strokeWidth="7"
+                          strokeDasharray="276" strokeDashoffset="86" strokeLinecap="round"
+                          transform="rotate(-90 50 50)" />
+                      </svg>
+                      <div style={{ position: 'absolute', inset: 0, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                        <div style={{ fontSize: 17, fontWeight: 800, color: '#fff', letterSpacing: '-0.04em' }}>42:18</div>
+                        <div style={{ fontSize: 8.5, color: '#22c55e', fontWeight: 700, letterSpacing: '0.06em' }}>RECALL</div>
+                      </div>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontSize: 11.5, fontWeight: 700, color: '#fff', marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>R/S Configuration Sprint</div>
+                      <div style={{ fontSize: 10.5, color: 'rgba(226,232,240,0.45)', marginBottom: 8 }}>Block 3 of 5</div>
+                      <div style={{ display: 'flex', gap: 3 }}>
+                        {[1,1,0.6,0,0].map((on, i) => (
+                          <div key={i} style={{ flex: 1, height: 5, borderRadius: 2, background: on === 1 ? '#22c55e' : on > 0 ? 'rgba(34,197,94,0.45)' : 'rgba(255,255,255,0.07)' }} />
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div style={{
+                    padding: '10px 12px', borderRadius: 9,
+                    background: 'rgba(34,197,94,0.07)',
+                    border: '1px solid rgba(34,197,94,0.22)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    fontSize: 11.5,
+                  }}>
+                    <div>
+                      <div style={{ color: '#86efac', fontWeight: 700, fontSize: 10, letterSpacing: '0.1em', marginBottom: 2 }}>GRADE TARGET</div>
+                      <div style={{ color: '#fff', fontWeight: 600, letterSpacing: '-0.01em' }}>78.3% on midterm → keep <span style={{ color: '#22c55e' }}>B+</span></div>
+                    </div>
+                    <div style={{
+                      fontSize: 18, fontWeight: 800, color: '#22c55e', letterSpacing: '-0.02em',
+                      fontVariantNumeric: 'tabular-nums',
+                    }}>
+                      88.5%
+                    </div>
+                  </div>
+                </div>
+              ),
+            },
+          ].map((step, i) => (
+            <div
+              key={step.num}
+              data-reveal
+              data-reveal-delay={String(i + 1)}
+              style={{
+                position: 'relative',
+                background: 'rgba(255,255,255,0.025)',
+                border: '1px solid rgba(255,255,255,0.07)',
+                borderRadius: 18, padding: '28px 26px 26px',
+                overflow: 'hidden',
+                transition: 'border-color 0.25s ease, transform 0.25s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = `${step.accent}55`
+                e.currentTarget.style.transform = 'translateY(-2px)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }}
+            >
+              {/* Soft accent glow */}
+              <div aria-hidden="true" style={{
+                position: 'absolute', top: -40, right: -40,
+                width: 180, height: 180, borderRadius: '50%',
+                background: `radial-gradient(closest-side, ${step.accent}22, transparent 70%)`,
+                pointerEvents: 'none',
+              }} />
+              <div style={{ position: 'relative' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 14 }}>
+                  <div style={{
+                    fontFamily: "'Instrument Serif', serif",
+                    fontSize: 44, fontWeight: 400, lineHeight: 0.9,
+                    color: step.accent, letterSpacing: '-0.04em',
+                    fontVariantNumeric: 'tabular-nums',
+                  }}>
+                    {step.num}
+                  </div>
+                  <div style={{
+                    height: 1, flex: 1,
+                    background: `linear-gradient(90deg, ${step.accent}55, transparent)`,
+                  }} />
+                </div>
+                <h3 style={{
+                  fontSize: 20, fontWeight: 700, color: '#fff',
+                  letterSpacing: '-0.02em', margin: '0 0 10px',
+                }}>
+                  {step.title}
+                </h3>
+                <p style={{
+                  fontSize: 14.5, color: 'rgba(226,232,240,0.6)',
+                  lineHeight: 1.6, margin: '0 0 22px', letterSpacing: '-0.005em',
+                }}>
+                  {step.copy}
+                </p>
+                <div style={{
+                  background: 'rgba(0,0,0,0.28)',
+                  border: '1px solid rgba(255,255,255,0.05)',
+                  borderRadius: 12, padding: 14,
+                }}>
+                  {step.mockup}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Inline CTA below 3-step */}
+        <div data-reveal style={{
+          marginTop: 48, textAlign: 'center',
+        }}>
+          <button
+            onClick={goTrial}
+            style={{
+              background: 'linear-gradient(135deg, #6366F1, #4F46E5)',
+              border: 'none', color: '#fff', borderRadius: 12,
+              padding: '14px 30px', fontSize: 15.5, fontWeight: 700, cursor: 'pointer',
+              boxShadow: '0 10px 30px rgba(99,102,241,0.35), 0 0 0 1px rgba(255,255,255,0.06) inset',
+              letterSpacing: '-0.01em', display: 'inline-flex', alignItems: 'center', gap: 8,
+              transition: 'transform 0.15s ease, box-shadow 0.2s ease',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-1px)'
+              e.currentTarget.style.boxShadow = '0 14px 38px rgba(99,102,241,0.5), 0 0 0 1px rgba(255,255,255,0.08) inset'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)'
+              e.currentTarget.style.boxShadow = '0 10px 30px rgba(99,102,241,0.35), 0 0 0 1px rgba(255,255,255,0.06) inset'
+            }}
+          >
+            Try all three free for 7 days
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
+          <div style={{
+            marginTop: 12, fontSize: 12.5, color: 'rgba(226,232,240,0.4)',
+            display: 'inline-flex', alignItems: 'center', gap: 6, justifyContent: 'center',
+          }}>
+            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+              <path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+            No credit card required · Cancel anytime
+          </div>
         </div>
       </section>
 
