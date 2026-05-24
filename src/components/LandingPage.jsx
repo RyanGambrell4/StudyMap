@@ -123,6 +123,30 @@ export default function LandingPage({ onGetStarted }) {
           background: radial-gradient(ellipse at center bottom, rgba(99,102,241,0.18), transparent 70%);
           filter: blur(8px);
         }
+        /* Hero mockup live animations */
+        @keyframes se-row-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes se-grow-w { from { width: 0%; } }
+        @keyframes se-grow-h { from { transform: scaleY(0); } to { transform: scaleY(1); } }
+        @keyframes se-pulse-glow {
+          0%, 100% { box-shadow: 0 6px 16px rgba(234,88,12,0.28); }
+          50% { box-shadow: 0 8px 26px rgba(234,88,12,0.55), 0 0 0 4px rgba(234,88,12,0.10); }
+        }
+        @keyframes se-pulse-dot {
+          0%, 100% { transform: scale(1); opacity: 1; }
+          50% { transform: scale(1.35); opacity: 0.6; }
+        }
+        @keyframes se-shimmer {
+          0% { background-position: -200% 0; }
+          100% { background-position: 200% 0; }
+        }
+        .se-row { animation: se-row-in 0.55s cubic-bezier(0.22,1,0.36,1) both; }
+        .se-bar-fill { animation: se-grow-w 1.4s cubic-bezier(0.22,1,0.36,1) both; animation-delay: 0.6s; }
+        .se-bar-grow { transform-origin: bottom center; animation: se-grow-h 0.8s cubic-bezier(0.22,1,0.36,1) both; }
+        .se-pulse { animation: se-pulse-glow 2.6s ease-in-out infinite; }
+        .se-pulse-dot { animation: se-pulse-dot 1.6s ease-in-out infinite; }
+        @media (prefers-reduced-motion: reduce) {
+          .se-row, .se-bar-fill, .se-bar-grow, .se-pulse, .se-pulse-dot { animation: none !important; }
+        }
       `}</style>
 
       {/* Fixed full-page noise grain — pointer-events:none, opacity 0.035, sits above bg/below text */}
@@ -429,7 +453,7 @@ export default function LandingPage({ onGetStarted }) {
                     <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(135deg, rgba(254,215,170,0.45) 0%, rgba(255,255,255,0) 55%)', pointerEvents: 'none' }} />
                     <div style={{ position: 'relative', zIndex: 1 }}>
                       <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', color: '#EA580C', display: 'inline-flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-                        <span style={{ width: 5, height: 5, borderRadius: '50%', background: 'currentColor' }} /> UP NEXT TODAY
+                        <span className="se-pulse-dot" style={{ width: 5, height: 5, borderRadius: '50%', background: 'currentColor', display: 'inline-block' }} /> UP NEXT TODAY
                       </div>
                       <div style={{ fontSize: 11.5, fontWeight: 500, color: '#EA580C', display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6, whiteSpace: 'nowrap' }}>
                         Organic Chemistry <span style={{ color: '#94A3B8', fontWeight: 400 }}>· 9:00 AM → 10:00 AM</span>
@@ -437,7 +461,7 @@ export default function LandingPage({ onGetStarted }) {
                       <div style={{ fontSize: 22, fontWeight: 700, letterSpacing: '-0.02em', color: '#0F172A', display: 'flex', alignItems: 'baseline', gap: 8, whiteSpace: 'nowrap' }}>
                         Practice <span style={{ fontSize: 12, color: '#94A3B8', fontWeight: 400, letterSpacing: 0 }}>60 min</span>
                       </div>
-                      <button style={{ marginTop: 14, display: 'inline-flex', alignItems: 'center', gap: 8, background: '#EA580C', color: '#fff', borderRadius: 8, padding: '8px 12px', fontWeight: 600, fontSize: 12.5, boxShadow: '0 6px 16px rgba(234,88,12,0.28)', letterSpacing: '-0.005em', fontFamily: 'inherit', cursor: 'pointer', border: 'none' }}>
+                      <button className="se-pulse" style={{ marginTop: 14, display: 'inline-flex', alignItems: 'center', gap: 8, background: '#EA580C', color: '#fff', borderRadius: 8, padding: '8px 12px', fontWeight: 600, fontSize: 12.5, boxShadow: '0 6px 16px rgba(234,88,12,0.28)', letterSpacing: '-0.005em', fontFamily: 'inherit', cursor: 'pointer', border: 'none' }}>
                         <span style={{ display: 'block', width: 0, height: 0, borderLeft: '7px solid #fff', borderTop: '5px solid transparent', borderBottom: '5px solid transparent' }} />
                         Start session
                       </button>
@@ -516,7 +540,7 @@ export default function LandingPage({ onGetStarted }) {
                       { name: 'Cognitive Psychology', last: 'Last studied yesterday', hours: '2.2h', sessions: '5 sessions', status: 'Needs Work', action: 'Brain Dump →', bar: '#A855F7', pillBg: '#FFEDD5', pillColor: '#C2410C' },
                       { name: 'Linear Algebra', last: 'Last studied today · exam in 3 days', hours: '3.6h', sessions: '8 sessions', status: 'Priority', action: 'Rescue Plan →', bar: '#3B82F6', pillBg: '#FEE2E2', pillColor: '#B91C1C' },
                     ].map(({ name, last, hours, sessions, status, action, bar, pillBg, pillColor }, i) => (
-                      <div key={name} style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 14, alignItems: 'center', padding: i === 0 ? '4px 0 8px' : '8px 0', borderTop: i === 0 ? 'none' : '1px solid #F1F5F9' }}>
+                      <div key={name} className="se-row" style={{ display: 'grid', gridTemplateColumns: '1fr auto auto', gap: 14, alignItems: 'center', padding: i === 0 ? '4px 0 8px' : '8px 0', borderTop: i === 0 ? 'none' : '1px solid #F1F5F9', animationDelay: `${0.35 + i * 0.12}s` }}>
                         <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
                           <div style={{ width: 3, height: 26, borderRadius: 2, background: bar, flexShrink: 0 }} />
                           <div>
@@ -562,7 +586,7 @@ export default function LandingPage({ onGetStarted }) {
                         <span style={{ color: '#0F172A', fontWeight: 600 }}>9.6 of 10h</span>
                       </div>
                       <div style={{ height: 6, background: '#F1F5F9', borderRadius: 4, overflow: 'hidden' }}>
-                        <div style={{ width: '96%', height: '100%', background: 'linear-gradient(90deg, #22C55E, #16A34A)', borderRadius: 4 }} />
+                        <div className="se-bar-fill" style={{ width: '96%', height: '100%', background: 'linear-gradient(90deg, #22C55E, #16A34A)', borderRadius: 4 }} />
                       </div>
                     </div>
                   </div>
@@ -593,7 +617,7 @@ export default function LandingPage({ onGetStarted }) {
               { dot: '#F97316', name: 'Organic Chem',    pct: '86.4%', letter: 'B+', lc: '#4F46E5' },
               { dot: '#A855F7', name: 'Cognitive Psyc',  pct: '82.0%', letter: 'B',  lc: '#64748B' },
             ].map(({ dot, name, pct, letter, lc }, i) => (
-              <div key={name} style={{ display: 'grid', gridTemplateColumns: '12px 1fr auto auto', gap: 10, alignItems: 'center', padding: i === 0 ? '2px 0 9px' : '9px 0', borderTop: i === 0 ? 'none' : '1px solid #F1F5F9' }}>
+              <div key={name} className="se-row" style={{ display: 'grid', gridTemplateColumns: '12px 1fr auto auto', gap: 10, alignItems: 'center', padding: i === 0 ? '2px 0 9px' : '9px 0', borderTop: i === 0 ? 'none' : '1px solid #F1F5F9', animationDelay: `${0.5 + i * 0.1}s` }}>
                 <div style={{ width: 8, height: 8, borderRadius: '50%', background: dot }} />
                 <div style={{ fontSize: 13, fontWeight: 600, color: '#0F172A', letterSpacing: '-0.005em' }}>{name}</div>
                 <div style={{ fontSize: 12.5, color: '#64748B', fontVariantNumeric: 'tabular-nums' }}>{pct}</div>
@@ -627,7 +651,7 @@ export default function LandingPage({ onGetStarted }) {
             </div>
             <div style={{ display: 'flex', alignItems: 'flex-end', gap: 4, height: 32, marginBottom: 8 }}>
               {[30,45,38,60,55,72,68,80,75,88,92,96,60,60].map((h, i) => (
-                <div key={i} style={{ flex: 1, height: `${h}%`, background: i >= 12 ? '#E2E8F0' : 'linear-gradient(180deg, #6366F1, #4F46E5)', borderRadius: 2, opacity: i >= 12 ? 1 : 0.9 }} />
+                <div key={i} className="se-bar-grow" style={{ flex: 1, height: `${h}%`, background: i >= 12 ? '#E2E8F0' : 'linear-gradient(180deg, #6366F1, #4F46E5)', borderRadius: 2, opacity: i >= 12 ? 1 : 0.9, animationDelay: `${0.7 + i * 0.05}s` }} />
               ))}
             </div>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: 11.5, color: '#64748B', paddingTop: 8, borderTop: '1px solid #F1F5F9' }}>
