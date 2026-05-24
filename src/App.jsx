@@ -345,10 +345,10 @@ export default function App() {
     // hold with a spinner. onAuthStateChange will fire and we'll render.
     if (inOAuthCallback || hasStoredSession) {
       return (
-        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0f1e' }}>
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F7F6F3' }}>
           <div className="text-center space-y-4">
-            <div className="w-8 h-8 mx-auto rounded-full border-4 border-slate-800 border-t-indigo-500 animate-spin" />
-            <p className="text-slate-400 text-sm">Signing you in…</p>
+            <div className="w-8 h-8 mx-auto rounded-full animate-spin" style={{ border: '3px solid rgba(0,0,0,0.08)', borderTopColor: '#3B61C4' }} />
+            <p className="text-sm" style={{ color: '#6B6B6B' }}>Signing you in…</p>
           </div>
         </div>
       )
@@ -357,8 +357,8 @@ export default function App() {
     // No auth intent — send them to the real landing page
     window.location.href = '/'
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#0a0f1e' }}>
-        <div className="w-8 h-8 rounded-full border-4 border-slate-800 border-t-indigo-500 animate-spin" />
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F7F6F3' }}>
+        <div className="w-8 h-8 rounded-full animate-spin" style={{ border: '3px solid rgba(0,0,0,0.08)', borderTopColor: '#3B61C4' }} />
       </div>
     )
   }
@@ -366,17 +366,17 @@ export default function App() {
   // ── Email verification gate ──────────────────────────────────────────────
   if (!session.user.email_confirmed_at) {
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#0a0f1e' }}>
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#F7F6F3' }}>
         <div className="max-w-md w-full text-center space-y-6">
-          <div className="w-16 h-16 mx-auto rounded-2xl bg-indigo-500/15 border border-indigo-500/30 flex items-center justify-center">
-            <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div className="w-16 h-16 mx-auto rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center">
+            <svg className="w-8 h-8" style={{ color: '#3B61C4' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
             </svg>
           </div>
-          <h1 className="text-2xl font-bold text-white">Check your email</h1>
-          <p className="text-slate-400 text-sm leading-relaxed">
+          <h1 className="text-2xl font-bold" style={{ color: '#111111' }}>Check your email</h1>
+          <p className="text-sm leading-relaxed" style={{ color: '#6B6B6B' }}>
             We sent a confirmation link to{' '}
-            <span className="text-white font-medium">{session.user.email}</span>.
+            <span className="font-medium" style={{ color: '#111111' }}>{session.user.email}</span>.
             <br />Click the link to verify your account and get started.
           </p>
           <button
@@ -394,14 +394,17 @@ export default function App() {
               }
             }}
             className="text-sm font-medium transition-colors disabled:opacity-50"
-            style={{ color: resendState === 'sent' ? '#4ade80' : resendState === 'error' ? '#f87171' : '#818cf8' }}
+            style={{ color: resendState === 'sent' ? '#16A34A' : resendState === 'error' ? '#DC2626' : '#3B61C4' }}
           >
             {resendState === 'sending' ? 'Sending…' : resendState === 'sent' ? '✓ Email resent — check your inbox' : resendState === 'error' ? 'Failed to resend — try again' : 'Resend confirmation email'}
           </button>
           <div className="pt-2">
             <button
               onClick={handleSignOut}
-              className="text-xs text-slate-500 hover:text-slate-400 transition-colors"
+              className="text-xs transition-colors"
+              style={{ color: '#9B9B9B' }}
+              onMouseEnter={(e) => e.currentTarget.style.color = '#6B6B6B'}
+              onMouseLeave={(e) => e.currentTarget.style.color = '#9B9B9B'}
             >
               Sign out
             </button>
@@ -427,39 +430,39 @@ export default function App() {
       }
     }
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#0a0f1e' }}>
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#F7F6F3' }}>
         <div className="w-full max-w-sm">
           <div className="flex items-center justify-center gap-2.5 mb-10">
             <img src="/favicon.png" alt="StudyEdge AI" className="w-9 h-9 rounded-xl" style={{ objectFit: 'contain' }} />
-            <span className="text-white font-bold text-xl tracking-tight">StudyEdge AI</span>
+            <span className="font-bold text-xl tracking-tight" style={{ color: '#111111' }}>StudyEdge AI</span>
           </div>
-          <div className="rounded-2xl p-7" style={{ backgroundColor: '#111827', border: '1px solid #1e293b' }}>
-            <h1 className="text-white font-bold text-xl mb-1">Set a new password</h1>
-            <p className="text-slate-500 text-sm mb-6">Choose a strong password for your account.</p>
+          <div className="rounded-2xl p-7" style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+            <h1 className="font-bold text-xl mb-1" style={{ color: '#111111' }}>Set a new password</h1>
+            <p className="text-sm mb-6" style={{ color: '#6B6B6B' }}>Choose a strong password for your account.</p>
             {pwState === 'success' ? (
-              <div className="rounded-xl px-4 py-4 text-center text-emerald-300 text-sm font-medium" style={{ backgroundColor: '#052e16', border: '1px solid #14532d' }}>
+              <div className="rounded-xl px-4 py-4 text-center text-sm font-medium" style={{ backgroundColor: '#ECFDF5', border: '1px solid #A7F3D0', color: '#047857' }}>
                 ✓ Password updated! Taking you to the app…
               </div>
             ) : (
               <form onSubmit={handlePasswordUpdate} className="space-y-4">
                 <div>
-                  <label className="block text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">New password</label>
+                  <label className="block text-xs uppercase tracking-widest font-bold mb-1.5" style={{ color: '#9B9B9B' }}>New password</label>
                   <input type="password" value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Min. 8 characters" required minLength={8}
-                    className="w-full rounded-xl px-4 py-3 text-slate-200 placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 text-sm"
-                    style={{ backgroundColor: '#0d1424', border: '1px solid #1e293b' }} />
+                    className="w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 text-sm"
+                    style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', color: '#111111' }} />
                 </div>
                 <div>
-                  <label className="block text-xs text-slate-500 uppercase tracking-widest font-bold mb-1.5">Confirm password</label>
+                  <label className="block text-xs uppercase tracking-widest font-bold mb-1.5" style={{ color: '#9B9B9B' }}>Confirm password</label>
                   <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Repeat password" required minLength={8}
-                    className="w-full rounded-xl px-4 py-3 text-slate-200 placeholder-slate-700 focus:outline-none focus:ring-2 focus:ring-indigo-500/40 text-sm"
-                    style={{ backgroundColor: '#0d1424', border: '1px solid #1e293b' }} />
+                    className="w-full rounded-xl px-4 py-3 focus:outline-none focus:ring-2 text-sm"
+                    style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', color: '#111111' }} />
                 </div>
                 {pwError && (
-                  <div className="rounded-xl px-4 py-3 text-red-300 text-sm" style={{ backgroundColor: '#450a0a', border: '1px solid #7f1d1d' }}>{pwError}</div>
+                  <div className="rounded-xl px-4 py-3 text-sm" style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA', color: '#B91C1C' }}>{pwError}</div>
                 )}
                 <button type="submit" disabled={pwState === 'loading'}
                   className="w-full py-3.5 rounded-xl font-bold text-white text-sm transition-all disabled:opacity-50"
-                  style={{ background: 'linear-gradient(135deg, #6366f1, #4f46e5)', boxShadow: '0 0 24px #6366f130' }}>
+                  style={{ backgroundColor: '#3B61C4', boxShadow: '0 4px 16px rgba(59,97,196,0.25)' }}>
                   {pwState === 'loading' ? 'Updating…' : 'Update password'}
                 </button>
               </form>
@@ -527,15 +530,15 @@ export default function App() {
       {checkoutSuccess && (
         <div style={{
           position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
-          background: '#111827', border: '1px solid #22c55e', borderRadius: 12,
+          background: '#FFFFFF', border: '1px solid #A7F3D0', borderRadius: 12,
           padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12,
-          boxShadow: '0 8px 32px rgba(0,0,0,0.5)', zIndex: 9999, whiteSpace: 'nowrap',
+          boxShadow: '0 8px 32px rgba(0,0,0,0.10)', zIndex: 9999, whiteSpace: 'nowrap',
         }}>
           <span style={{ fontSize: 18 }}>🎉</span>
-          <span style={{ color: '#f1f5f9', fontSize: 14, fontWeight: 600 }}>You're on the plan, welcome!</span>
+          <span style={{ color: '#047857', fontSize: 14, fontWeight: 600 }}>You're on the plan, welcome!</span>
           <button
             onClick={() => setCheckoutSuccess(false)}
-            style={{ marginLeft: 8, background: 'none', border: 'none', color: '#64748b', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}
+            style={{ marginLeft: 8, background: 'none', border: 'none', color: '#9B9B9B', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}
           >×</button>
         </div>
       )}

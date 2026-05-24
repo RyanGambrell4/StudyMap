@@ -285,7 +285,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .defb{font-size:13px;color:#374151;line-height:1.6}
 
 /* ── Formula ── */
-.formula{font-family:'Courier New',monospace;font-size:13.5px;background:#0f172a;color:#7dd3fc;padding:14px 22px;border-radius:10px;margin:12px 0;letter-spacing:.5px;word-break:break-all;border-left:4px solid #0ea5e9}
+.formula{font-family:'Courier New',monospace;font-size:13.5px;background:#F0EFEC;color:#111111;padding:14px 22px;border-radius:10px;margin:12px 0;letter-spacing:.5px;word-break:break-all;border-left:4px solid #3B61C4}
 
 /* ── Table ── */
 .tbl-wrap{border-radius:12px;overflow:hidden;box-shadow:0 0 0 1px rgba(0,0,0,0.08);margin:14px 0}

@@ -58,6 +58,7 @@ export default function LandingPage({ onGetStarted }) {
   const goTrial = () => window.location.href = '/app?signup=1&plan=pro&billing=monthly&trial=1'
 
   return (
+    /* intentionally dark — marketing landing page; the app shell itself is light-themed */
     <div style={{ backgroundColor: '#060614', color: '#e2e8f0', minHeight: '100vh', fontFamily: "'Inter', -apple-system, sans-serif" }}>
 
       {/* ── Sticky bottom trial bar ── */}

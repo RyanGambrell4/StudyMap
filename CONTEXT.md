@@ -1,17 +1,18 @@
 # StudyEdge AI — Living Context
-_Last updated by: SEO Agent on 2026-05-23 (SEO layers); UI Consistency Agent on 2026-05-23 (design system)_
+_Last updated by: UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
 
 ## App Status
-- Current version: 85ea0a2 (pre-agent run)
+- Current version: 3270167 (after first UI/SEO pass; pending: light-theme refactor commits)
 - Last QA run: not yet run
-- Known open bugs: see "Dark Mode Violations Flagged" below
-- Recently fixed (this run): `dark:` Tailwind variants purged from AIChatView, GradePredictorView, OutputView
+- Known open bugs: none from UI consistency pass
+- Recently fixed: all 8 dark-UI hotspots converted to light theme (StudyNowCard, TodayFocus, FocusMode formula block, OnboardingTour, App.jsx auth/recovery/toast, all 4 onboarding Step files); LandingPage marked intentional-dark
 
 ## Design System Status
 - `src/tokens.js`: created (Phase 1 complete)
-- `dark:` Tailwind variants in src/**: 0 remaining (was 47 across 3 files)
-- Components migrated to T tokens: 0 / 47 (tokens.js exists but not yet wired into JSX)
-- Hardcoded dark hex / dark utility violations flagged for human review: 11 files (see below)
+- `dark:` Tailwind variants in src/**: 0 remaining (was 47)
+- `bg-slate-800` / `bg-slate-900` / `bg-gray-900` in src/**: 0 remaining
+- Hardcoded dark backgrounds in user-facing surfaces: 0 remaining (only intentional-dark exceptions left: ShareCardModal share card, LandingPage marketing page)
+- Components migrated to `T.*` token references: 0 (tokens.js values are inlined as hex literals in components for now; mechanical migration deferred — better as a per-view refactor)
 
 ### Phase 2a — Auto-fixed (committed)
 | File | Change |
@@ -20,28 +21,30 @@ _Last updated by: SEO Agent on 2026-05-23 (SEO layers); UI Consistency Agent on 
 | src/components/GradePredictorView.jsx | Same. Removed `dark:bg-slate-800/40`, `dark:hover:bg-red-900/20`, `dark:bg-amber-950/30`, etc. |
 | src/components/OutputView.jsx | Removed `dark:` variants. Also replaced bogus `border-slate-700/30` (a dark border that was showing in light mode) with `border-slate-200`. |
 
-### Phase 2b — Flagged for human review (NOT auto-fixed)
+### Phase 2b — All 8 flagged surfaces fixed (committed)
 
-These elements use hardcoded dark backgrounds (not `dark:` Tailwind variants) and represent intentional dark UI designs. Purging them mechanically would break the visual design. Each needs a real light-theme redesign decision.
+| File | What changed |
+|------|--------------|
+| src/components/StudyNowCard.jsx | Full rewrite. Card is now `#FFFFFF` with `rgba(0,0,0,0.07)` border + soft card shadow. Tinted radial color bleed at 8% opacity instead of 10% on dark. Heading text → `text-slate-900`, body → `text-slate-600`, separator → `text-slate-300`. Empty state moved to `bg-emerald-50/border-emerald-200/text-emerald-700`. CTA button keeps the per-course accent color (deliberate). |
+| src/components/TodayFocus.jsx | Same treatment as StudyNowCard. |
+| src/components/FocusMode.jsx | `.formula` code block: dark `#0f172a`/`#7dd3fc` → light `#F0EFEC` (T.bgEl) with `#111111` text and `#3B61C4` left border. |
+| src/components/OnboardingTour.jsx | Driver.js popover restyled: `#FFFFFF` bg, `rgba(0,0,0,0.07)` border, `#111111` title, `#6B6B6B` body, modal shadow. Prev button neutral outline; next button uses `#3B61C4` accent. Arrows updated to point to the white background. |
+| src/components/LandingPage.jsx | Marked `/* intentionally dark — marketing landing page */`. The whole page (`#060614` bg, `rgba(255,255,255,*)` borders) is a cohesive dark marketing surface; the two flagged gradients are inseparable from that design. Per spec escape hatch, opted to label rather than rewrite an 800-line marketing page on autopilot. The app shell itself is fully light. |
+| src/App.jsx | Email verification gate + password recovery screen + checkout success toast all converted from `#0a0f1e`/`#111827`/`#0d1424` to `#F7F6F3` page bg + `#FFFFFF` cards with `rgba(0,0,0,0.07)` borders. Inputs `bg-white`, text `#111111`, placeholder `#9B9B9B`. Submit button uses `#3B61C4` accent. Success states `bg-emerald-50/border-emerald-200/text-emerald-700`; error states `bg-red-50/border-red-200/text-red-700`. Two OAuth-callback spinners on lines 348/360 also converted. |
+| src/components/StepCourses.jsx | Full light-theme rewrite. All `bg-slate-800/50` cards → `bg-white` with shadow. Exam preset chooser, year selector, course list cards, add-course form, syllabus-import drawer, primary CTA all in light system. Inputs `bg-white` with `border-slate-200`. Primary CTA `#3B61C4`. |
+| src/components/StepSchedule.jsx | Same. Hours slider track uses `#E5E7EB` (was `#334155`), fill uses `#3B61C4` accent. Time-of-day chips use `border-indigo-500/bg-indigo-50/text-indigo-700` for selected, `border-slate-200/text-slate-600` otherwise. Difficulty pills converted to light variants. |
+| src/components/StepAssignments.jsx | Same. Weight-progress bar uses `bg-slate-100` track; assignment cards `bg-white` with shadow. Add-form inputs all `bg-white`. Skip button `bg-slate-100`. |
+| src/components/StepLearningStyle.jsx | Same. Each style card is `bg-white` until selected, then takes its color tint (`bg-indigo-50/bg-emerald-50/bg-orange-50`) with matching tag colors. Check radio uses the style's accent for the filled state. |
 
-| File | Lines | What | Why flagged |
-|------|-------|------|-------------|
-| src/App.jsx | 436, 449, 455, 530 | Password reset screen + an inline success card all built on `#111827` / `#0d1424` with `#1e293b` borders, `text-white` headings | Whole screen designed dark. Needs a real light-theme redesign of the unauthenticated/reset flow. |
-| src/components/OnboardingTour.jsx | 15-44 | Tour tooltip background `#111827` with matching arrow borders (`!important` CSS injection) | Tooltips are a legit pattern that often is dark on light pages, but spec says light-only. Decide: light bubble vs. mark with `/* intentionally dark */`. |
-| src/components/LandingPage.jsx | 67, 158 | `linear-gradient(90deg, #1e1b4b, #312e81)` and `radial-gradient(... #0d1117 ...)` decorative gradients | Looks like deliberate brand/marketing visuals. Either rebrand or mark intentional. |
-| src/components/StepCourses.jsx | throughout | `bg-slate-800/50`, `border-slate-700/60`, `text-white` on cards, inputs, buttons | Onboarding step designed dark end-to-end. Needs full light-theme pass. |
-| src/components/StepSchedule.jsx | throughout | Same | Same |
-| src/components/StepAssignments.jsx | throughout | Same | Same |
-| src/components/StepLearningStyle.jsx | throughout | Same | Same |
-| src/components/StudyNowCard.jsx | 26, 43, 66 | `bg-slate-800/50`, `text-white` "next session" card | Card on dashboard. Stands out dark on `#F7F6F3` bg. Recommend light card with accent header. |
-| src/components/TodayFocus.jsx | 27, 46, 60 | `bg-slate-800/40`, `text-white` "today focus" card | Same. Possibly duplicates StudyNowCard — consolidate? |
-| src/components/FocusMode.jsx | 238-314 | CSS template strings for note rendering. Most are dark text (`#1f2937`) on light = OK. Line 288 is a true dark code block (`#0f172a` bg + `#7dd3fc` text) for formula display | Formula dark block could stay if labeled intentional (code-editor aesthetic), or convert to light. |
-| src/components/StudyToolsView.jsx | 970, 1321 | `color: '#1e293b'` (text color, not bg) | Actually fine — dark text on light is correct. False positive. Leaving as-is. |
-| src/components/BlueprintScreen.jsx | 240, 324 | `text-white` on buttons with colored backgrounds (`backgroundColor: dot`) | OK — `text-white` on intentionally colored buttons. Not a dark-mode bug. False positive. |
-| src/components/CalendarDayView.jsx | 359 | `text-white` on filled SVG checkmark | OK — icon color on colored bg. False positive. |
+False positives explicitly cleared (not bugs):
+- `src/components/StudyToolsView.jsx:970, 1321` — `color: '#1e293b'` is dark text on light bg. Correct.
+- `src/components/BlueprintScreen.jsx:240, 324` — `text-white` on intentionally colored buttons. Correct.
+- `src/components/CalendarDayView.jsx:359` — `text-white` SVG checkmark on filled bg. Correct.
+- `src/components/FocusMode.jsx:255` — `color:#111827` for note heading text. Correct.
+- `src/components/OutputView.jsx:256` — ShareCardModal gradient. Explicitly excluded by spec (intentionally dark for the share-card screenshot aesthetic).
 
-### Phase 3 — Visual audit (skipped this run)
-Per user direction, skipping screenshot/Playwright audit. Run with `--worktree "Run UI agent Phase 3"` to execute later.
+### Phase 3 — Visual audit (still deferred)
+Run with `--worktree "Run UI agent Phase 3"` for Playwright screenshots at 1440px and 390px.
 
 ## SEO Status
 
@@ -85,12 +88,10 @@ Living at `/blog/<slug>`. Article #6 ("Study Tips for Finals Week") was already 
 2. **Did NOT add a Supabase preconnect hint** to `index.html`. Would require committing the Supabase project URL (pulled from env). Easy to add by hand once decided: `<link rel="preconnect" href="https://<project>.supabase.co">`.
 
 ## Open Questions for Developer
-1. **Onboarding flow (StepCourses/StepSchedule/StepAssignments/StepLearningStyle)** — was it intentionally designed dark, or is the dark styling drift from an older theme? If intentional, mark each with `/* intentionally dark */`. If not, this is the largest single redesign needed.
-2. **App.jsx password reset screen** — same question. Whole screen is dark.
-3. **TodayFocus vs StudyNowCard** — appear to be near-duplicate dashboard cards. Should one be removed?
-4. **LandingPage gradients** — decorative dark gradients on marketing surface. Mark intentional or rework?
-5. **OnboardingTour tooltips** — dark tooltips are a common UX pattern. Spec says light-only. Confirm direction.
-6. **`src/tokens.js` adoption** — file exists but no components consume it yet. Should next pass migrate components from raw hex/Tailwind to `T.bg`, `T.bgCard`, etc.? Risky to do mechanically — better as a per-view refactor during other work.
+1. **TodayFocus vs StudyNowCard** — appear to be near-duplicate dashboard cards. Should one be removed?
+2. **LandingPage** — marked intentional-dark for now. If you want the marketing page rebuilt light to match the app shell, that is a separate, larger redesign (800+ lines, all branding visuals would need to be re-derived). Flag if you want it.
+3. **`src/tokens.js` adoption** — file exists but no components consume it yet. Hex literals were inlined directly in this pass. Next pass: migrate components from raw hex/Tailwind to `T.bg`, `T.bgCard`, etc. Better as a per-view refactor during other work, not a mechanical sweep.
+4. **Visual QA** — none of these changes have been verified in a running browser. Spin up dev and walk: onboarding (all 4 steps), auth/reset, dashboard cards, focus mode notes with a formula, tour overlay.
 7. **Astro blog migration to `blog.getstudyedge.com`** — current run kept the existing static-HTML blog in `public/blog/`. If you want the subdomain split (separate analytics, MDX authoring), this requires a new repo, Vercel project, and DNS records — flag if/when to do it.
 8. **Google Search Console connection** — required for Layer 4 keyword intelligence (monthly ranking checks).
 9. **Twilio iMessage notification** — `scripts/notify.js` and Twilio env vars not yet set up; SEO run did not notify.

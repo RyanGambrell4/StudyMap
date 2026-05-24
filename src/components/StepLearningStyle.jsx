@@ -10,7 +10,7 @@ const STYLES = [
       </svg>
     ),
     tags: ['Diagrams', 'Color-coding', 'Mind maps', 'Flashcards'],
-    color: { border: 'border-indigo-500', bg: 'bg-indigo-500/10', icon: 'text-indigo-400 bg-indigo-500/15', tag: 'bg-indigo-500/15 text-indigo-300', check: 'bg-indigo-500' },
+    color: { border: 'border-indigo-500', bg: 'bg-indigo-50', icon: 'text-indigo-600 bg-indigo-100', tag: 'bg-indigo-100 text-indigo-700', check: 'bg-indigo-600' },
   },
   {
     id: 'reader',
@@ -22,7 +22,7 @@ const STYLES = [
       </svg>
     ),
     tags: ['Notes', 'Summaries', 'Re-reading', 'Outlines'],
-    color: { border: 'border-emerald-500', bg: 'bg-emerald-500/10', icon: 'text-emerald-400 bg-emerald-500/15', tag: 'bg-emerald-500/15 text-emerald-300', check: 'bg-emerald-500' },
+    color: { border: 'border-emerald-500', bg: 'bg-emerald-50', icon: 'text-emerald-600 bg-emerald-100', tag: 'bg-emerald-100 text-emerald-700', check: 'bg-emerald-600' },
   },
   {
     id: 'practice',
@@ -34,7 +34,7 @@ const STYLES = [
       </svg>
     ),
     tags: ['Past papers', 'Quizzes', 'Flashcards', 'Problem sets'],
-    color: { border: 'border-orange-500', bg: 'bg-orange-500/10', icon: 'text-orange-400 bg-orange-500/15', tag: 'bg-orange-500/15 text-orange-300', check: 'bg-orange-500' },
+    color: { border: 'border-orange-500', bg: 'bg-orange-50', icon: 'text-orange-600 bg-orange-100', tag: 'bg-orange-100 text-orange-700', check: 'bg-orange-600' },
   },
 ]
 
@@ -42,8 +42,8 @@ export default function StepLearningStyle({ learningStyle, setLearningStyle, onN
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
       <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-white mb-2">How Do You Learn Best?</h2>
-        <p className="text-slate-400">We'll tailor your session types to match your style</p>
+        <h2 className="text-3xl font-bold text-slate-900 mb-2">How Do You Learn Best?</h2>
+        <p className="text-slate-600">We'll tailor your session types to match your style</p>
       </div>
 
       <div className="space-y-3 mb-8">
@@ -57,18 +57,19 @@ export default function StepLearningStyle({ learningStyle, setLearningStyle, onN
               className={`w-full text-left p-5 rounded-2xl border transition-all duration-150 ${
                 selected
                   ? `${c.border} ${c.bg}`
-                  : 'border-slate-700/60 bg-slate-800/40 hover:border-slate-600 hover:bg-slate-800/70'
+                  : 'bg-white hover:bg-slate-50'
               }`}
+              style={selected ? undefined : { border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
             >
               <div className="flex items-start gap-4">
-                <div className={`p-3 rounded-xl shrink-0 transition-colors ${selected ? c.icon : 'bg-slate-700/60 text-slate-400'}`}>
+                <div className={`p-3 rounded-xl shrink-0 transition-colors ${selected ? c.icon : 'bg-slate-100 text-slate-500'}`}>
                   {style.icon}
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between mb-1.5">
-                    <h3 className={`font-bold text-lg ${selected ? 'text-white' : 'text-slate-200'}`}>{style.title}</h3>
+                    <h3 className={`font-bold text-lg ${selected ? 'text-slate-900' : 'text-slate-800'}`}>{style.title}</h3>
                     <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center shrink-0 ml-2 transition-all ${
-                      selected ? `${c.check} border-transparent` : 'border-slate-600'
+                      selected ? `${c.check} border-transparent` : 'border-slate-300'
                     }`}>
                       {selected && (
                         <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -77,12 +78,12 @@ export default function StepLearningStyle({ learningStyle, setLearningStyle, onN
                       )}
                     </div>
                   </div>
-                  <p className={`text-sm mb-3 ${selected ? 'text-slate-300' : 'text-slate-500'}`}>{style.description}</p>
+                  <p className={`text-sm mb-3 ${selected ? 'text-slate-700' : 'text-slate-600'}`}>{style.description}</p>
                   <div className="flex flex-wrap gap-2">
                     {style.tags.map(tag => (
                       <span
                         key={tag}
-                        className={`text-xs font-medium px-2.5 py-1 rounded-full transition-colors ${selected ? c.tag : 'bg-slate-700/60 text-slate-500'}`}
+                        className={`text-xs font-medium px-2.5 py-1 rounded-full transition-colors ${selected ? c.tag : 'bg-slate-100 text-slate-600'}`}
                       >
                         {tag}
                       </span>
@@ -95,11 +96,11 @@ export default function StepLearningStyle({ learningStyle, setLearningStyle, onN
         })}
       </div>
 
-      {/* Navigation */}
       <div className="flex gap-3">
         <button
           onClick={onBack}
-          className="px-6 bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-300 font-semibold py-4 rounded-xl transition-colors flex items-center gap-2"
+          className="px-6 bg-white hover:bg-slate-50 text-slate-700 font-semibold py-4 rounded-xl transition-colors flex items-center gap-2"
+          style={{ border: '1px solid rgba(0,0,0,0.07)' }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 17l-5-5m0 0l5-5m-5 5h12" />
@@ -109,7 +110,8 @@ export default function StepLearningStyle({ learningStyle, setLearningStyle, onN
         <button
           onClick={onNext}
           disabled={!learningStyle}
-          className="flex-1 bg-indigo-600 hover:bg-indigo-500 disabled:opacity-30 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-colors flex items-center justify-center gap-2 text-lg"
+          className="flex-1 disabled:opacity-30 disabled:cursor-not-allowed text-white font-semibold py-4 rounded-xl transition-colors flex items-center justify-center gap-2 text-lg"
+          style={{ backgroundColor: '#3B61C4', boxShadow: learningStyle ? '0 4px 16px rgba(59,97,196,0.25)' : 'none' }}
         >
           Generate My Study Plan
           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,7 +120,7 @@ export default function StepLearningStyle({ learningStyle, setLearningStyle, onN
         </button>
       </div>
       {!learningStyle && (
-        <p className="text-center text-sm text-slate-600 mt-2">Select a learning style to continue</p>
+        <p className="text-center text-sm text-slate-500 mt-2">Select a learning style to continue</p>
       )}
     </div>
   )
