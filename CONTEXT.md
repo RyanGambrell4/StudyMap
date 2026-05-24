@@ -1,5 +1,53 @@
 # StudyEdge AI — Living Context
-_Last updated by: Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: Landing Page Agent on 2026-05-24 (Run 1 — hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+
+## Landing Page Agent — Run 1 (2026-05-24)
+_Driven by `LANDING_AGENT_SPEC.md`. Single CRO-focused pass: hero CTA + new "How It Works" section. All changes in `src/components/LandingPage.jsx`. Build verified clean. Commit `e876c18` pushed to main; Vercel will auto-deploy._
+
+### What changed
+| File | Line refs (post-edit) | Change |
+|------|----------------------|--------|
+| `src/components/LandingPage.jsx` | ~58–90 | New `scrollToHow()` helper + `revealRoot` ref + `IntersectionObserver` useEffect that toggles `.is-revealed` on any `[data-reveal]` element. Stagger via `[data-reveal-delay="1\|2\|3"]`. Respects `prefers-reduced-motion`. |
+| `src/components/LandingPage.jsx` | ~92–99 | A/B headline variant block in a code comment. Three documented alternates to the current "While others cram. You execute.": **B** outcome-led, **C** system + outcome, **D** problem-first. Default kept live; switch is a one-line edit when ready for a real test. |
+| `src/components/LandingPage.jsx` | ~102–112 | Inline `<style>` block with `[data-reveal]` keyframes + reduced-motion override. Lives inside the dark-themed marketing root only. |
+| `src/components/LandingPage.jsx` | ~257–316 | **Hero CTA row** added between subline and social-proof line. Primary `Start free 7-day trial →` (gradient `#6366F1 → #4F46E5`, hover lift + boosted glow) routes through existing `goTrial()` (still hits `/app?signup=1&plan=pro&billing=monthly&trial=1` — guardrail preserved). Secondary `See how it works` is a ghost button that smooth-scrolls to `#how-it-works`. `No credit card required · Cancel anytime` microcopy directly below with a green check (matches "No credit card required" guardrail). |
+| `src/components/LandingPage.jsx` | ~533–839 | **New "How It Works" section** inserted between hero close and Features Grid open. Editorial label pill (`HOW IT WORKS` with brand-blue dot) → italic-serif split headline (`From your syllabus to your next A. In three steps.`) → outcome-led subhead → 3-card grid (auto-fit, min 300px). Each card has: large Instrument Serif step number (`01`/`02`/`03`) in step accent color, gradient hairline, title, body, and a real-feel mini-mockup. Hover lifts card 2px + tints border to step accent. Inline trial CTA below the grid with the same "no credit card" microcopy. |
+| `src/components/LandingPage.jsx` | step 01 mockup | "Your Courses" list — 3 courses with status pills + checked add states, plus a dashed "Parsing syllabus…" row showing real-time syllabus ingestion. |
+| `src/components/LandingPage.jsx` | step 02 mockup | "Session Blueprint" preview — block ratio bar + 4 timed segments (Warm-up · Deep dive · Active recall sprint · Mixed-topic quiz) tied to a "to hit 88% on the midterm" target. |
+| `src/components/LandingPage.jsx` | step 03 mockup | "Session active" panel — recall ring at 42:18, 5-block progress strip, "Grade target → keep B+" callout with live `88.5%` readout in brand-green. |
+
+### CRO rationale
+Audit found two compounding leaks:
+1. **Hero had no primary CTA inside the hero viewport** — only the brand chip + headline + subline + social-proof line. To convert, a visitor had to scan back up to the fixed nav. Above-the-fold CTAs added directly under the value prop.
+2. **No "How It Works" section** — spec flagged this as the single missing piece most likely to reduce drop-off. Three steps with real mini-mockups bridge "I don't know what this is" → "I want to try it" without requiring trust in copy alone.
+
+### A/B headline variants documented (not switched)
+- **B:** `Built to raise your GPA.` — outcome-led, specific.
+- **C:** `Your AI study system. Your next A.` — system + outcome, two-beat.
+- **D:** `Stop studying harder. Study what matters.` — contrast/problem-first.
+Default stays `While others cram. You execute.` until real data lands.
+
+### Guardrails honored
+- Dark theme preserved (page bg still `#060614`, all new surfaces use `rgba(255,255,255,*)` borders/cards).
+- Pricing structure not touched.
+- `goTrial()` destination unchanged: `/app?signup=1&plan=pro&billing=monthly&trial=1`.
+- `No credit card required` appears under both new CTAs.
+
+### Current open weaknesses (next-run backlog, priority order)
+1. **Features Grid — emoji-free but still feels low-budget.** Six cards have decent SVGs and styled previews, but the section is visually flat and copy leads with features not outcomes (spec §"Features Grid" weakness). Rewrite copy to lead with the student outcome; consider a "primary feature, then supporting features" hierarchy instead of a uniform 2×3 grid.
+2. **Sticky bottom bar uses indigo gradients off-brand from `#3B61C4`.** Currently `linear-gradient(90deg, #1e1b4b, #312e81)` with `#6366f1` text. Could tighten to the brand accent system.
+3. **No stats / social-proof strip** between How It Works and Features. Spec calls this out as a high-priority add (defensible numbers only — sessions planned, course coverage, etc.).
+4. **No FAQ section** addressing "Is it free?", "What if my syllabus isn't here?", "How is this different from Notion?", "Does this work for MCAT/LSAT?".
+5. **Testimonials section is flat.** Six quotes in a uniform 3-col grid. Editorial treatment (varying card sizes, large pull-quote, course-logo strip) would make 6 testimonials feel like overwhelming evidence rather than a checklist.
+6. **Hero mockup is static.** Spec calls for "simulate real usage — plan items appear one by one, a timer ticks, a grade updates." Reveal infrastructure now exists (`[data-reveal]`); next run can layer a `setInterval`-driven hero animation on top.
+7. **Mobile audit not run.** New CTAs flex-wrap and the 3-step grid auto-fits, but the hero stage uses a fixed `1920×600` scaled transform — at 390px viewport the hero copy compresses and the mockup tilts may overlap the CTA row. Needs a Playwright sweep at 390px.
+8. **Bottom CTA section is unchanged** — still ends on "Join thousands of students already using StudyEdge AI". Could mirror the same "no credit card required" microcopy + outcome framing for consistency.
+
+### Next-run priority
+**Reconcile features-grid copy to lead with outcomes, OR add a stats/social-proof strip + FAQ block.** Whichever the next operator judges higher-leverage given current traffic data. Both are explicitly flagged in `LANDING_AGENT_SPEC.md` §"Missing sections".
+
+---
+
 
 ## Onboarding & Paywall Conversion Pass — 2026-05-24
 _Driven by `ONBOARDING_AGENT_SPEC.md`. Spec referenced four `Step*.jsx` files as the active onboarding; the real onboarding flow lives in `Onboarding.jsx` (the `Step*.jsx` files were dead code from an earlier architecture)._
