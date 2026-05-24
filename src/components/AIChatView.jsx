@@ -195,16 +195,16 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
 
       {/* Flag banner */}
       {flagBanner && (
-        <div style={{ margin: '12px 16px 0', flexShrink: 0, padding: '12px 14px', borderRadius: 12, background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.25)', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-          <svg style={{ width: 16, height: 16, color: '#7C3AED', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
-          <span style={{ flex: 1, fontSize: 13, color: '#4C1D95', fontWeight: 500, minWidth: 0 }}>
-            <strong style={{ color: '#7C3AED' }}>{flagBanner}</strong> flagged as a struggle — added to your coach plan focus areas.
+        <div style={{ margin: '12px 16px 0', flexShrink: 0, padding: '12px 14px', borderRadius: 12, background: 'rgba(217,119,6,0.07)', border: '1px solid rgba(217,119,6,0.25)', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
+          <svg style={{ width: 16, height: 16, color: '#D97706', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
+          <span style={{ flex: 1, fontSize: 13, color: '#92400E', fontWeight: 500, minWidth: 0 }}>
+            <strong style={{ color: '#B45309' }}>{flagBanner}</strong> flagged as a struggle — added to your coach plan focus areas.
           </span>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
             {onNavigateToCoach && (
               <button
                 onClick={() => { setFlagBanner(null); onNavigateToCoach() }}
-                style={{ fontSize: 12, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.12)', border: '1px solid rgba(124,58,237,0.3)', borderRadius: 8, padding: '5px 11px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+                style={{ fontSize: 12, fontWeight: 700, color: '#B45309', background: 'rgba(217,119,6,0.12)', border: '1px solid rgba(217,119,6,0.3)', borderRadius: 8, padding: '5px 11px', cursor: 'pointer', whiteSpace: 'nowrap' }}
               >
                 Rebuild coach plan →
               </button>
@@ -220,8 +220,8 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.length === 0 && (
           <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-center py-8">
-            <div className="w-12 h-12 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 flex items-center justify-center mb-4">
-              <svg className="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'rgba(59,97,196,0.1)', border: '1px solid rgba(59,97,196,0.2)' }}>
+              <svg className="w-5 h-5" style={{ color: '#3B61C4' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             </div>
@@ -233,11 +233,14 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
 
         {messages.map((msg, i) => (
           <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-            <div className={`max-w-[82%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-              msg.role === 'user'
-                ? 'bg-indigo-600 text-white rounded-br-md whitespace-pre-wrap'
-                : 'bg-white border border-slate-200 text-slate-800 rounded-bl-md'
-            }`}>
+            <div
+              className={`max-w-[82%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
+                msg.role === 'user'
+                  ? 'text-white rounded-br-md whitespace-pre-wrap'
+                  : 'bg-white border border-slate-200 text-slate-800 rounded-bl-md'
+              }`}
+              style={msg.role === 'user' ? { backgroundColor: '#3B61C4' } : undefined}
+            >
               {msg.role === 'user' ? msg.content : (
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
@@ -252,7 +255,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
                     code: ({ inline, children }) => inline
                       ? <code className="bg-slate-100 px-1 py-0.5 rounded text-xs font-mono">{children}</code>
                       : <pre className="bg-slate-100 rounded-lg px-3 py-2 my-2 overflow-x-auto text-xs font-mono whitespace-pre">{children}</pre>,
-                    blockquote: ({ children }) => <blockquote className="border-l-2 border-indigo-400 pl-3 italic text-slate-600 my-1">{children}</blockquote>,
+                    blockquote: ({ children }) => <blockquote className="border-l-2 pl-3 italic text-slate-600 my-1" style={{ borderColor: '#3B61C4' }}>{children}</blockquote>,
                     strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
                     hr: () => <hr className="border-slate-200 my-2" />,
                   }}
@@ -300,8 +303,10 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
           onKeyDown={handleKeyDown}
           placeholder={`Ask about ${courseName}…`}
           rows={1}
-          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none focus:border-indigo-400 text-sm resize-none leading-relaxed"
+          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none text-sm resize-none leading-relaxed"
           style={{ maxHeight: 120 }}
+          onFocus={e => { e.target.style.borderColor = '#3B61C4'; e.target.style.boxShadow = '0 0 0 3px rgba(59,97,196,0.15)' }}
+          onBlur={e => { e.target.style.borderColor = ''; e.target.style.boxShadow = '' }}
           onInput={e => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px' }}
         />
         <button
@@ -326,7 +331,10 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
         <button
           onClick={sendMessage}
           disabled={!input.trim() || loading}
-          className="w-10 h-10 shrink-0 flex items-center justify-center rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-40 text-white transition-colors"
+          className="w-10 h-10 shrink-0 flex items-center justify-center rounded-xl disabled:opacity-40 text-white transition-colors"
+          style={{ backgroundColor: '#3B61C4' }}
+          onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#3155b3' }}
+          onMouseLeave={e => { if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#3B61C4' }}
         >
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />

@@ -481,16 +481,16 @@ export default function CalendarWeekView({
               style={{ borderLeft: `1px solid ${tv.gridLine}`, position: 'relative' }}
             >
               <span className="text-[10px] font-medium uppercase tracking-widest mb-1"
-                style={{ color: isToday ? '#818CF8' : isRest ? '#6B7280' : '#4B5563' }}>
+                style={{ color: isToday ? '#3B61C4' : isRest ? '#9B9B9B' : '#6B6B6B' }}>
                 {DAY_LABELS[i]}
               </span>
               <div
                 className="w-7 h-7 flex items-center justify-center rounded-full text-[13px] font-medium transition-colors cursor-pointer"
                 style={isToday
-                  ? { background: '#4F46E5', color: 'white' }
+                  ? { background: '#3B61C4', color: 'white' }
                   : isRest
                   ? { background: 'rgba(107,114,128,0.15)', color: '#9CA3AF', textDecoration: 'line-through' }
-                  : { color: '#6B7280' }}
+                  : { color: '#6B6B6B' }}
                 onClick={() => onAddSession && onAddSession(col.dateStr)}
               >
                 {dayNum}
@@ -537,7 +537,11 @@ export default function CalendarWeekView({
                     padding: 0,
                   }}
                 >
-                  {isRest ? '✕' : '—'}
+                  {isRest ? (
+                    <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                  ) : (
+                    <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12" /></svg>
+                  )}
                 </button>
               )}
             </div>
@@ -549,7 +553,7 @@ export default function CalendarWeekView({
       {hasAnyAllDay && (
         <div className="flex" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
           <div className="w-12 shrink-0 flex items-start justify-end pt-1.5 pr-2">
-            <span className="text-[9px] font-medium uppercase tracking-wide" style={{ color: '#374151' }}>All day</span>
+            <span className="text-[11px] font-medium uppercase tracking-wide" style={{ color: '#6B6B6B' }}>All day</span>
           </div>
           {columns.map((col, i) => (
             <div key={i}
@@ -588,7 +592,7 @@ export default function CalendarWeekView({
           {Array.from({ length: TOTAL_HOURS }, (_, i) => i > 0 && (
             <div key={i}
               className="absolute right-2 text-[10px]"
-              style={{ top: i * HOUR_HEIGHT - 6, color: '#374151' }}
+              style={{ top: i * HOUR_HEIGHT - 6, color: '#6B6B6B' }}
             >
               {fmtHour(START_HOUR + i)}
             </div>
@@ -773,7 +777,7 @@ export default function CalendarWeekView({
                           </svg>
                         )}
                         <p className={`text-[10px] font-medium leading-tight truncate ${done ? 'line-through' : ''}`}
-                          style={{ color: conflictWith ? '#fbbf24' : ev.color.dot }}>
+                          style={{ color: conflictWith ? '#D97706' : ev.color.dot }}>
                           {ev.courseName}
                         </p>
                       </div>

@@ -965,8 +965,13 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
               <span style={{ fontSize: 28, fontWeight: 800, color: D.text, letterSpacing: '-0.02em' }}>{thisWeekHours.toFixed(1)}h</span>
               {lastWeekHours > 0 && (
-                <span style={{ fontSize: 12, fontWeight: 600, color: thisWeekHours >= lastWeekHours ? D.green : D.amber }}>
-                  {thisWeekHours >= lastWeekHours ? '↑' : '↓'} {Math.abs(Math.round((thisWeekHours - lastWeekHours) * 10) / 10)}h vs last week
+                <span style={{ fontSize: 12, fontWeight: 600, color: thisWeekHours >= lastWeekHours ? D.green : D.amber, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                  <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                    {thisWeekHours >= lastWeekHours
+                      ? <><line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" /></>
+                      : <><line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" /></>}
+                  </svg>
+                  {Math.abs(Math.round((thisWeekHours - lastWeekHours) * 10) / 10)}h vs last week
                 </span>
               )}
             </div>
@@ -1128,8 +1133,13 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                 <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 4 }}>RECALL SCORE OVER TIME</div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 10 }}>
                   <span style={{ fontSize: 28, fontWeight: 800, color: D.purple, letterSpacing: '-0.02em' }}>{recallChartData.latest}%</span>
-                  <span style={{ fontSize: 12, fontWeight: 600, color: recallChartData.trend >= 0 ? D.green : D.amber }}>
-                    {recallChartData.trend >= 0 ? '↑' : '↓'} {Math.round(Math.abs(recallChartData.trend * 100))}% vs prev
+                  <span style={{ fontSize: 12, fontWeight: 600, color: recallChartData.trend >= 0 ? D.green : D.amber, display: 'inline-flex', alignItems: 'center', gap: 3 }}>
+                    <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                      {recallChartData.trend >= 0
+                        ? <><line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" /></>
+                        : <><line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" /></>}
+                    </svg>
+                    {Math.round(Math.abs(recallChartData.trend * 100))}% vs prev
                   </span>
                   <span style={{ fontSize: 12, color: D.textDim, marginLeft: 4 }}>avg {recallChartData.avg}%</span>
                 </div>

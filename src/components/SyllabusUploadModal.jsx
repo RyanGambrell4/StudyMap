@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
+import Spinner from './ui/spinner'
 import { extractText } from '../utils/extractText'
 
 async function extractEventsFromURL(url, courseName) {
@@ -267,7 +268,7 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
 
           {step === 'loading' && (
             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: '80px 24px', gap: 16 }}>
-              <div style={{ width: 36, height: 36, borderRadius: '50%', border: '3px solid rgba(59,97,196,0.2)', borderTopColor: '#3B61C4', animation: 'spin 0.8s linear infinite' }} />
+              <Spinner size="lg" />
               <div style={{ textAlign: 'center' }}>
                 <p style={{ color: '#3B61C4', fontWeight: 600, fontSize: 14, margin: '0 0 4px' }}>AI is reading your syllabus…</p>
                 <p style={{ color: '#9B9B9B', fontSize: 12, margin: 0 }}>Extracting deadlines, exams, and assignments</p>

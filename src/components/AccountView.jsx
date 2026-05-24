@@ -174,14 +174,13 @@ export default function AccountView({
       <h1 style={{ fontSize: 28, fontWeight: 700, color: '#111111', marginBottom: 20 }}>Account</h1>
 
       {/* Profile card */}
-      <div style={{ ...card, background: 'linear-gradient(135deg, #f0f4ff 0%, #ffffff 60%)', border: '1px solid rgba(59,97,196,0.15)', boxShadow: '0 2px 12px rgba(59,97,196,0.10)' }}>
+      <div style={{ ...card, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
           <div style={{
             width: 46, height: 46, borderRadius: 12,
-            background: 'linear-gradient(135deg, #4f76d9, #3B61C4)',
+            background: '#3B61C4',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            color: '#fff', fontSize: 15, fontWeight: 800, flexShrink: 0,
-            boxShadow: '0 3px 10px rgba(59,97,196,0.35)',
+            color: '#fff', fontSize: 15, fontWeight: 700, flexShrink: 0,
           }}>
             {initials}
           </div>
@@ -200,7 +199,7 @@ export default function AccountView({
       </div>
 
       {/* Progress & Results card */}
-      <div style={{ ...card, borderTop: '3px solid #3B61C4', boxShadow: '0 2px 12px rgba(59,97,196,0.08)' }}>
+      <div style={{ ...card, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
           <p style={sectionLabel}>Progress &amp; Results</p>
           {onShowProgress && (
@@ -214,25 +213,25 @@ export default function AccountView({
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           {[
-            { label: 'This week', value: `${progressStats.weekHours}h`, sub: `${progressStats.totalHours}h total`, color: '#3B61C4', bg: 'rgba(59,97,196,0.06)', glow: 'rgba(59,97,196,0.12)' },
-            { label: 'Sessions', value: progressStats.sessions, sub: 'completed', color: '#8B5CF6', bg: 'rgba(139,92,246,0.06)', glow: 'rgba(139,92,246,0.12)' },
-            { label: 'Study streak', value: `${progressStats.streak}d`, sub: progressStats.streak === 0 ? 'Start today' : 'in a row', color: '#F59E0B', bg: 'rgba(245,158,11,0.06)', glow: 'rgba(245,158,11,0.12)' },
-            { label: 'Avg recall', value: progressStats.avgRecall != null ? `${progressStats.avgRecall}%` : '—', sub: progressStats.avgRecall != null ? 'across sessions' : 'No data yet', color: '#059669', bg: 'rgba(5,150,105,0.06)', glow: 'rgba(5,150,105,0.12)' },
-          ].map(({ label, value, sub, color, bg, glow }) => (
-            <div key={label} style={{ background: bg, borderRadius: 10, padding: '12px 14px', border: `1px solid ${glow}` }}>
-              <p style={{ margin: '0 0 3px', fontSize: 10, fontWeight: 700, color, opacity: 0.7, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{label}</p>
-              <p style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 800, color, letterSpacing: '-0.02em' }}>{value}</p>
-              <p style={{ margin: 0, fontSize: 11, color: '#9B9B9B' }}>{sub}</p>
+            { label: 'This week', value: `${progressStats.weekHours}h`, sub: `${progressStats.totalHours}h total`, primary: true },
+            { label: 'Sessions', value: progressStats.sessions, sub: 'completed' },
+            { label: 'Study streak', value: `${progressStats.streak}d`, sub: progressStats.streak === 0 ? 'Start today' : 'in a row' },
+            { label: 'Avg recall', value: progressStats.avgRecall != null ? `${progressStats.avgRecall}%` : '—', sub: progressStats.avgRecall != null ? 'across sessions' : 'No data yet' },
+          ].map(({ label, value, sub, primary }) => (
+            <div key={label} style={{ background: '#F7F6F3', borderRadius: 10, padding: '12px 14px', border: '1px solid rgba(0,0,0,0.07)' }}>
+              <p style={{ margin: '0 0 3px', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{label}</p>
+              <p style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 700, color: primary ? '#3B61C4' : '#111111', letterSpacing: '-0.02em' }}>{value}</p>
+              <p style={{ margin: 0, fontSize: 11, color: '#6B6B6B' }}>{sub}</p>
             </div>
           ))}
         </div>
         {completedSessions.length === 0 && (
-          <p style={{ margin: '12px 0 0', fontSize: 12, color: '#C0C0C0', textAlign: 'center' }}>Complete your first study session to see stats here.</p>
+          <p style={{ margin: '12px 0 0', fontSize: 12, color: '#9B9B9B', textAlign: 'center' }}>Complete your first study session to see stats here.</p>
         )}
       </div>
 
       {/* Current Plan card */}
-      <div style={{ ...card, border: `1px solid ${planInfo.color}30`, boxShadow: `0 2px 16px ${planInfo.color}18, 0 1px 4px rgba(0,0,0,0.06)`, background: `linear-gradient(160deg, ${planInfo.color}08 0%, #ffffff 40%)` }}>
+      <div style={{ ...card, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
         <p style={sectionLabel}>Current Plan</p>
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
@@ -259,7 +258,7 @@ export default function AccountView({
                   <div style={{
                     height: '100%',
                     borderRadius: 3,
-                    background: trialDaysLeft <= 2 ? '#EF4444' : '#3B61C4',
+                    background: trialDaysLeft <= 2 ? '#DC2626' : '#3B61C4',
                     width: `${Math.min(100, ((7 - trialDaysLeft) / 7) * 100)}%`,
                     transition: 'width 0.3s',
                   }} />
@@ -289,7 +288,7 @@ export default function AccountView({
                     padding: '10px 14px',
                     background: 'none', border: '1px solid rgba(0,0,0,0.10)',
                     borderRadius: 10,
-                    fontSize: 12, color: '#BBBBBB',
+                    fontSize: 12, color: '#9B9B9B',
                     cursor: canceling ? 'not-allowed' : 'pointer',
                     opacity: canceling ? 0.5 : 1,
                   }}
@@ -319,8 +318,8 @@ export default function AccountView({
         {/* Free trial CTA — only when plan is free and trial never used */}
         {plan === 'free' && !trialUsed && !trialActive && (
           <div style={{
-            background: 'linear-gradient(135deg, #e8f4fd, #f0f9f4)',
-            border: '1.5px solid rgba(59,130,246,0.2)',
+            background: '#F0EFEC',
+            border: '1px solid rgba(0,0,0,0.07)',
             borderRadius: 12, padding: '16px',
             marginBottom: 4,
             textAlign: 'center',
@@ -335,9 +334,9 @@ export default function AccountView({
               onClick={() => onShowPaywall?.('trial')}
               style={{
                 width: '100%', padding: '11px',
-                background: 'linear-gradient(135deg, #3B82F6, #10B981)',
+                background: '#3B61C4',
                 border: 'none', borderRadius: 10,
-                color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
               }}
             >
               Start Free Trial →
@@ -376,7 +375,7 @@ export default function AccountView({
       </div>
 
       {/* Referral card */}
-      <div style={{ ...card, borderTop: '3px solid #F59E0B', boxShadow: '0 2px 12px rgba(245,158,11,0.10)' }}>
+      <div style={{ ...card, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
         <ReferralCard />
       </div>
 
@@ -390,13 +389,12 @@ export default function AccountView({
               style={{
                 display: 'flex', alignItems: 'center', gap: 14,
                 padding: '12px 0',
-                borderBottom: '1px solid rgba(0,0,0,0.06)',
                 background: 'none', border: 'none',
                 borderBottom: '1px solid rgba(0,0,0,0.06)',
                 cursor: 'pointer', textAlign: 'left', width: '100%',
               }}
             >
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <div style={{ flex: 1 }}>
@@ -407,7 +405,7 @@ export default function AccountView({
               </div>
               {googleCalendarConnected
                 ? <span style={{ fontSize: 11, fontWeight: 700, color: '#059669', background: 'rgba(5,150,105,0.08)', padding: '3px 10px', borderRadius: 999 }}>Connected</span>
-                : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
+                : <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
               }
             </button>
           )}
@@ -465,7 +463,7 @@ export default function AccountView({
               <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#111111' }}>Import Syllabus</p>
               <p style={{ margin: '2px 0 0', fontSize: 12, color: '#9B9B9B' }}>Add exams and deadlines from a course document</p>
             </div>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
           </button>
           <button
             onClick={onEditPlan}
@@ -483,7 +481,7 @@ export default function AccountView({
               <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#111111' }}>Edit Study Plan</p>
               <p style={{ margin: '2px 0 0', fontSize: 12, color: '#9B9B9B' }}>Modify your courses and schedule settings</p>
             </div>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#C0C0C0" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
           </button>
         </div>
       </div>
@@ -496,7 +494,7 @@ export default function AccountView({
             style={{
               width: '100%', padding: '11px',
               background: 'none', border: '1px solid rgba(239,68,68,0.25)',
-              borderRadius: 10, color: '#EF4444',
+              borderRadius: 10, color: '#DC2626',
               fontSize: 14, fontWeight: 600, cursor: 'pointer',
               marginBottom: 14,
             }}
@@ -507,7 +505,7 @@ export default function AccountView({
         <div style={{ textAlign: 'center' }}>
           <a
             href={`mailto:support@getstudyedge.com?subject=Delete%20my%20account&body=Please%20delete%20my%20account%20and%20all%20associated%20data.%0A%0AEmail%3A%20${encodeURIComponent(userEmail ?? '')}`}
-            style={{ fontSize: 12, color: '#C0C0C0', textDecoration: 'underline', textUnderlineOffset: 2 }}
+            style={{ fontSize: 12, color: '#9B9B9B', textDecoration: 'underline', textUnderlineOffset: 2 }}
           >
             Delete account &amp; data
           </a>

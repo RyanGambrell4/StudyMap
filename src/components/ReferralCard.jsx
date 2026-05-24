@@ -67,7 +67,7 @@ export default function ReferralCard() {
             fontSize: 13, fontWeight: 700, cursor: 'pointer', transition: 'all 0.15s', whiteSpace: 'nowrap',
           }}
         >
-          {copied ? '✓ Copied!' : 'Copy link'}
+          {copied ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>Copied!</span>) : 'Copy link'}
         </button>
       </div>
 

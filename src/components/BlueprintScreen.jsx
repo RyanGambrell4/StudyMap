@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Spinner from './ui/spinner'
 import { getCachedCoachPlan, saveCoachPlan, getCachedStudyTools } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
@@ -224,14 +225,8 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
 
               {loading ? (
                 <div className="flex flex-col items-center gap-4 py-12">
-                  <div className="relative">
-                    <div className="w-12 h-12 rounded-full border-4" style={{ borderColor: 'rgba(0,0,0,0.08)' }} />
-                    <div
-                      className="absolute inset-0 w-12 h-12 rounded-full border-4 border-transparent border-t-current animate-spin"
-                      style={{ color: dot }}
-                    />
-                  </div>
-                  <p className="font-medium" style={{ color: '#1A1A1A' }}>Building your session blueprint…</p>
+                  <Spinner size="lg" color={dot} track={`${dot}20`} />
+                  <p className="font-medium" style={{ color: '#111111' }}>Building your session blueprint…</p>
                   <p className="text-xs text-center max-w-xs" style={{ color: '#9B9B9B' }}>Designing structured intervals for {session.courseName}</p>
                 </div>
               ) : (

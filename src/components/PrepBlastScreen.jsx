@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import Spinner from './ui/spinner'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
 import { getCachedCoachPlan } from '../lib/db'
@@ -93,7 +94,7 @@ export default function PrepBlastScreen({ session, course, onDismiss, userId }) 
 
       {loading ? (
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12 }}>
-          <div style={{ width: 28, height: 28, borderRadius: '50%', border: `2.5px solid ${courseColor}25`, borderTopColor: courseColor, animation: 'spin 0.75s linear infinite' }} />
+          <Spinner size="md" color={courseColor} track={`${courseColor}25`} />
           <div style={{ fontSize: 13, color: D.muted, fontWeight: 500 }}>Preparing session brief...</div>
         </div>
 

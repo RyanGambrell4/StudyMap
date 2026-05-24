@@ -1,6 +1,7 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
 import { canAddCourse, getActivePlan, getPlanLimits } from '../lib/subscription'
 import { clean } from '../utils/strings'
+import EmptyState from './ui/empty-state'
 import { saveExamContext } from '../lib/db'
 
 // ── Design tokens ────────────────────────────────────────────────────────────
@@ -1155,7 +1156,7 @@ export default function CoursesView({
               onClick={applySharedExamDate}
               style={{ padding: '5px 14px', borderRadius: 7, fontSize: 12, fontWeight: 600, background: examDateSaved ? 'rgba(52,211,153,0.15)' : `${D.accent}18`, color: examDateSaved ? D.mint : D.accent, border: `1px solid ${examDateSaved ? 'rgba(52,211,153,0.3)' : `${D.accent}30`}`, cursor: 'pointer' }}
             >
-              {examDateSaved ? '✓ Saved' : `Apply to all ${examSectionIndices.length} sections`}
+              {examDateSaved ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>Saved</span>) : `Apply to all ${examSectionIndices.length} sections`}
             </button>
           </div>
         )}
@@ -1225,8 +1226,12 @@ export default function CoursesView({
             )
           })}
           {filtered.length === 0 && search && (
-            <div style={{ padding: 40, textAlign: 'center', background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14 }}>
-              <div style={{ fontSize: 14, color: D.muted }}>No courses match "{search}"</div>
+            <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14 }}>
+              <EmptyState
+                icon={(<svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>)}
+                headline={`No courses match "${search}"`}
+                sub="Try a different keyword or clear the search."
+              />
             </div>
           )}
         </div>

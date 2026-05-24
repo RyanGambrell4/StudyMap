@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
+import Spinner from './ui/spinner'
 import { jsPDF } from 'jspdf'
 import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan, saveCoachPlanStruggles } from '../lib/db'
 import { extractText } from '../utils/extractText'
@@ -218,7 +219,7 @@ function FileDropZone({ files, onChange, onExtract, loading }) {
       >
         {loading ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: D.muted, fontSize: 13 }}>
-            <div style={{ width: 16, height: 16, borderRadius: '50%', border: `2px solid ${D.accent}`, borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+            <Spinner size="sm" color={D.accent} track="transparent" />
             Extracting text…
           </div>
         ) : (
@@ -448,8 +449,9 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
               const list = form.style || []
               const active = list.includes(t)
               return (
-                <button key={t} onClick={() => update('style', active ? list.filter(x => x !== t) : [...list, t])} style={{ padding: '7px 12px', borderRadius: 999, fontSize: 12, cursor: 'pointer', background: active ? 'rgba(52,211,153,0.15)' : 'rgba(0,0,0,0.03)', border: `1px solid ${active ? 'rgba(52,211,153,0.4)' : D.border}`, color: active ? D.mint : D.muted, fontWeight: active ? 600 : 500 }}>
-                  {active && '✓ '}{t}
+                <button key={t} onClick={() => update('style', active ? list.filter(x => x !== t) : [...list, t])} style={{ padding: '7px 12px', borderRadius: 999, fontSize: 12, cursor: 'pointer', background: active ? 'rgba(22,163,74,0.1)' : 'rgba(0,0,0,0.03)', border: `1px solid ${active ? 'rgba(22,163,74,0.25)' : D.border}`, color: active ? D.mint : D.muted, fontWeight: active ? 600 : 500, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                  {active && (<svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>)}
+                  {t}
                 </button>
               )
             })}
@@ -594,7 +596,7 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
           <button onClick={onBuild} disabled={loading} style={{ flex: 1, padding: '14px 20px', borderRadius: 11, background: '#3B61C4', color: '#fff', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, border: 'none' }}>
             {loading ? (
               <>
-                <div style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', animation: 'spin 0.8s linear infinite' }} />
+                <Spinner size="sm" color="#fff" track="rgba(255,255,255,0.3)" />
                 Building your plan…
               </>
             ) : (
@@ -1816,7 +1818,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
                   transition: 'all 0.15s',
                 }}
               >
-                {shareCopied ? '✓ Copied!' : 'Copy'}
+                {shareCopied ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>Copied!</span>) : 'Copy'}
               </button>
             </div>
             <div style={{ display: 'flex', gap: 8 }}>

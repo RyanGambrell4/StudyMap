@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Spinner from './ui/spinner'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
 
@@ -203,7 +204,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall }) {
             >
               {loading ? (
                 <>
-                  <span style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', display: 'inline-block', animation: 'spin 0.8s linear infinite' }} />
+                  <Spinner size="xs" color="#fff" track="rgba(255,255,255,0.3)" />
                   Generating your cheat sheet...
                 </>
               ) : 'Generate cheat sheet'}

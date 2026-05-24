@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { transcribeAudio, createRecorder } from '../lib/deepgram'
+import Spinner from './ui/spinner'
 
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
@@ -335,7 +336,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall }) {
         {/* Scoring state */}
         {step === 'scoring' && (
           <div style={{ padding: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <div style={{ width: 48, height: 48, borderRadius: '50%', border: `3px solid rgba(139,92,246,0.2)`, borderTopColor: '#8B5CF6', animation: 'spin 0.8s linear infinite' }} />
+            <Spinner size="lg" />
             <div style={{ fontSize: 15, fontWeight: 600, color: D.textMuted }}>Scoring your brain dump...</div>
             <div style={{ fontSize: 13, color: D.textDim }}>Analyzing {text.trim().split(/\s+/).length} words</div>
           </div>

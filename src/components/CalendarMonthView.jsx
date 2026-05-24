@@ -1,4 +1,5 @@
 import { useMemo } from 'react'
+import EmptyState from './ui/empty-state'
 import { clean } from '../utils/strings'
 
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
@@ -226,7 +227,7 @@ export default function CalendarMonthView({
                       style={{
                         height: 18,
                         background: conflictWith ? 'rgba(245,158,11,0.12)' : `${ev.color.dot}${tv.sessionAlpha}`,
-                        color: conflictWith ? '#fbbf24' : ev.color.dot,
+                        color: conflictWith ? '#D97706' : ev.color.dot,
                         border: conflictWith ? '1px solid rgba(245,158,11,0.35)' : 'none',
                         opacity: done ? 0.45 : 1,
                       }}
@@ -295,7 +296,12 @@ export default function CalendarMonthView({
           </div>
 
           {(!expandedDay?.sessions?.length && !expandedSyllabus.length && !(googleEventsByDate[expandedDayStr]?.length)) ? (
-            <p className="text-[12px]" style={{ color: '#374151' }}>No sessions or events scheduled.</p>
+            <EmptyState
+              compact
+              icon={(<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>)}
+              headline="Nothing scheduled"
+              sub="No sessions or events on this day."
+            />
           ) : (
             <div className="space-y-1.5">
               {(googleEventsByDate[expandedDayStr] ?? []).map(e => (
@@ -318,7 +324,9 @@ export default function CalendarMonthView({
                     <p className="text-[12px] font-medium truncate" style={{ color: s.color.dot }}>{s.courseName}</p>
                     <p className="text-[10px] text-slate-600">{s.sessionType} · {s.duration}m{s.startTime ? ` · ${s.startTime}` : ''}</p>
                   </div>
-                  {completedIds.has(s.id) && <span className="text-emerald-500 text-[10px] shrink-0">✓</span>}
+                  {completedIds.has(s.id) && (
+                    <svg className="text-emerald-600 shrink-0" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                  )}
                 </div>
               ))}
               {expandedSyllabus.map(e => (

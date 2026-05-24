@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Spinner from './ui/spinner'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { daysBetween } from '../utils/dateUtils'
@@ -209,7 +210,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
               style={{ width: '100%', padding: '13px', background: loading ? D.textDim : D.red, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
             >
               {loading ? (
-                <><span style={{ width: 14, height: 14, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', display: 'inline-block', animation: 'spin 0.8s linear infinite' }} />Building rescue plan...</>
+                <><Spinner size="xs" color="#fff" track="rgba(255,255,255,0.3)" />Building rescue plan...</>
               ) : 'Build my rescue plan'}
             </button>
 
@@ -284,7 +285,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
 
                 {scheduleLoading && (
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 0' }}>
-                    <span style={{ width: 16, height: 16, borderRadius: '50%', border: '2px solid rgba(59,97,196,0.2)', borderTopColor: D.blue, display: 'inline-block', animation: 'spin 0.8s linear infinite' }} />
+                    <Spinner size="sm" color={D.blue} />
                     <span style={{ fontSize: 13, color: D.textMuted }}>Building your schedule...</span>
                   </div>
                 )}

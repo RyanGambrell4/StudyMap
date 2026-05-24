@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
+import Spinner from './ui/spinner'
 import {
   getCachedStudyTools,
   getCachedNotes,
@@ -445,13 +446,15 @@ const ACTIVITY_COLORS = {
   'break':             '#22C55E',
 }
 
+// All tabs share the brand accent — semantic state (success / warn) lives in copy,
+// not in the tab color itself. Keeps the screen tonally calm across switches.
 const TAB_COLORS = {
-  recall:     '#A855F7',
-  flashcards: '#EC4899',
-  quiz:       '#F97316',
-  practice:   '#059669',
-  notes:      '#14B8A6',
-  ai:         '#3B82F6',
+  recall:     '#3B61C4',
+  flashcards: '#3B61C4',
+  quiz:       '#3B61C4',
+  practice:   '#3B61C4',
+  notes:      '#3B61C4',
+  ai:         '#3B61C4',
 }
 
 export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools, course, onShowPaywall, userId, learningStyle }) {
@@ -1179,12 +1182,12 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
           <div className="px-6 pb-12 max-w-sm w-full mx-auto">
             {/* Colored stat cards */}
             <div className="flex gap-3 mb-5">
-              <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: `linear-gradient(135deg, ${dot}22, ${dot}08)`, border: `1px solid ${dot}35` }}>
-                <p className="text-2xl font-bold font-mono" style={{ color: dot }}>{fmt(Math.max(elapsed, 1))}</p>
+              <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                <p className="text-2xl font-bold font-mono" style={{ color: '#111111' }}>{fmt(Math.max(elapsed, 1))}</p>
                 <p className="text-xs mt-1" style={{ color: '#6B6B6B' }}>Time studied</p>
               </div>
-              <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: 'linear-gradient(135deg, rgba(99,102,241,0.18), rgba(99,102,241,0.05))', border: '1px solid rgba(99,102,241,0.28)' }}>
-                <p className="text-2xl font-bold font-mono" style={{ color: '#6366f1' }}>{tabsVisited.size}</p>
+              <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                <p className="text-2xl font-bold font-mono" style={{ color: '#3B61C4' }}>{tabsVisited.size}</p>
                 <p className="text-xs mt-1" style={{ color: '#6B6B6B' }}>Activities used</p>
               </div>
             </div>
@@ -1192,19 +1195,19 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
             {/* Activity chips */}
             <div className="flex flex-wrap gap-2 mb-6">
               {[
-                { id: 'recall',     label: 'Active Recall', color: '#A855F7' },
-                { id: 'flashcards', label: 'Flashcards',    color: '#EC4899' },
-                { id: 'quiz',       label: 'Quick Quiz',    color: '#F97316' },
-                { id: 'notes',      label: 'Notes',         color: '#14B8A6' },
-              ].map(({ id, label, color }) => {
+                { id: 'recall',     label: 'Active Recall' },
+                { id: 'flashcards', label: 'Flashcards' },
+                { id: 'quiz',       label: 'Quick Quiz' },
+                { id: 'notes',      label: 'Notes' },
+              ].map(({ id, label }) => {
                 const done = tabsVisited.has(id)
                 return (
                   <div key={id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
                     style={done
-                      ? { backgroundColor: `${color}18`, border: `1px solid ${color}45`, color }
-                      : { backgroundColor: 'rgba(0,0,0,0.04)', border: '1px solid rgba(0,0,0,0.08)', color: '#C0C0C0' }}>
+                      ? { backgroundColor: 'rgba(22,163,74,0.1)', border: '1px solid rgba(22,163,74,0.2)', color: '#16A34A' }
+                      : { backgroundColor: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', color: '#9B9B9B' }}>
                     {done && (
-                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                         <path d="M5 13l4 4L19 7" />
                       </svg>
                     )}
@@ -1804,7 +1807,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                           : { backgroundColor: '#FFFFFF', borderColor: 'rgba(0,0,0,0.10)', color: '#6B6B6B' }
                         }
                       >
-                        {fcKnown.has(fcIdx) ? '✓ Mastered' : 'Mark as Mastered'}
+                        {fcKnown.has(fcIdx) ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}><svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>Mastered</span>) : 'Mark as Mastered'}
                       </button>
                       <button
                         onClick={() => setFcKnown(prev => { const n = new Set(prev); n.delete(fcIdx); return n })}
@@ -1870,7 +1873,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               <>
                 {quizLoading ? (
                   <div className="flex flex-col items-center gap-3 py-14">
-                    <div className="w-8 h-8 border-4 rounded-full animate-spin" style={{ borderColor: `${dot}20`, borderTopColor: dot }} />
+                    <Spinner size="md" />
                     <p className="text-sm" style={{ color: '#9B9B9B' }}>Generating your quiz…</p>
                   </div>
                 ) : quizError ? (
@@ -1936,7 +1939,11 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                       {quizAnswers.map((a, i) => (
                         <div key={i} className="rounded-xl p-3.5 border" style={a.correct ? { backgroundColor: '#F0FDF4', borderColor: '#86EFAC' } : { backgroundColor: '#FEF2F2', borderColor: '#FCA5A5' }}>
                           <div className="flex items-start gap-2 mb-1">
-                            <span className="text-xs font-bold shrink-0 mt-0.5" style={{ color: a.correct ? '#16A34A' : '#DC2626' }}>{a.correct ? '✓' : '✗'}</span>
+                            <svg className="shrink-0 mt-0.5" width="14" height="14" fill="none" stroke={a.correct ? '#16A34A' : '#DC2626'} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                              {a.correct
+                                ? <polyline points="20 6 9 17 4 12" />
+                                : <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>}
+                            </svg>
                             <p className="text-sm leading-relaxed" style={{ color: '#1A1A1A' }}>{a.question.question}</p>
                           </div>
                           {!a.correct && <p className="text-xs ml-4 mt-1" style={{ color: '#6B6B6B' }}>Correct: {a.question.answer}</p>}
@@ -2002,7 +2009,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               <>
                 {practiceLoading ? (
                   <div className="flex flex-col items-center justify-center py-16 gap-3">
-                    <div className="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style={{ borderColor: TAB_COLORS.practice, borderTopColor: 'transparent' }} />
+                    <Spinner size="md" />
                     <p className="text-sm font-medium" style={{ color: '#9B9B9B' }}>Generating practice questions...</p>
                   </div>
                 ) : practiceError ? (
@@ -2060,7 +2067,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     </div>
                     {practiceScoreSet && (
                       <div className="w-full rounded-xl px-4 py-3 flex items-center gap-2" style={{ backgroundColor: `${TAB_COLORS.practice}10`, border: `1px solid ${TAB_COLORS.practice}25` }}>
-                        <span className="text-xs">✓</span>
+                        <svg width="13" height="13" fill="none" stroke={TAB_COLORS.practice} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12" /></svg>
                         <p className="text-xs font-medium" style={{ color: TAB_COLORS.practice }}>Recall slider auto-set from your score</p>
                       </div>
                     )}

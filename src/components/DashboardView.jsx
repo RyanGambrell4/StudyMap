@@ -404,28 +404,69 @@ export default function DashboardView({
 
   // ── Empty state ──────────────────────────────────────────────────────────────
   if (courses.length === 0) {
+    const previews = isExamMode
+      ? [
+          'Section-by-section blueprints',
+          'Score tracker with target gap',
+          'Focus sessions that build endurance',
+        ]
+      : [
+          'Weekly plan built around your exams',
+          'Session blueprints for every study block',
+          'Grade tracker that catches drops early',
+        ]
     return (
       <div style={{ minHeight: '100vh', background: D.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div style={{ maxWidth: 400, width: '100%', textAlign: 'center' }}>
-          <div style={{ width: 56, height: 56, borderRadius: 14, background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-            <svg width="26" height="26" fill="none" stroke={D.blue} viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+        <div style={{ maxWidth: 440, width: '100%', textAlign: 'center' }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)',
+            borderRadius: 999, padding: '4px 12px',
+            fontSize: 11, fontWeight: 800, color: '#059669',
+            textTransform: 'uppercase', letterSpacing: '0.5px',
+            marginBottom: 18,
+          }}>
+            <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
             </svg>
+            You're set up
           </div>
-          <h2 style={{ color: D.text, fontSize: 20, fontWeight: 600, letterSpacing: -0.3, margin: '0 0 8px' }}>
-            {isExamMode ? 'Your prep plan is ready to build.' : 'Your study plan is ready to build.'}
+          <h2 style={{ color: D.text, fontSize: 24, fontWeight: 700, letterSpacing: -0.4, margin: '0 0 10px', lineHeight: 1.2 }}>
+            {isExamMode ? 'Add your first section. We\'ll do the rest.' : 'Add your hardest course. We\'ll do the rest.'}
           </h2>
-          <p style={{ color: D.textMuted, fontSize: 14, lineHeight: 1.65, margin: '0 0 24px' }}>
+          <p style={{ color: D.textMuted, fontSize: 14, lineHeight: 1.65, margin: '0 0 22px' }}>
             {isExamMode
-              ? 'Add your first exam section to unlock your personalized prep schedule, session blueprints, and score tracker.'
-              : 'Add your first course to unlock your personalized study schedule, session blueprints, and grade tracker.'}
+              ? 'Tell us what you\'re prepping for — your sections, your test date — and we\'ll build the full prep plan in under a minute.'
+              : 'Drop in one course with its exam date. Your AI plan will fill in the sessions, the order, and the recovery work automatically.'}
           </p>
+          <div style={{
+            background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)',
+            borderRadius: 14, padding: '14px 18px', marginBottom: 18,
+            textAlign: 'left',
+          }}>
+            <p style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
+              What unlocks next
+            </p>
+            {previews.map(item => (
+              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0' }}>
+                <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(59,97,196,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  <svg width="9" height="9" fill="none" stroke={D.blue} strokeWidth="3" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <span style={{ fontSize: 13, color: D.text, fontWeight: 500 }}>{item}</span>
+              </div>
+            ))}
+          </div>
           <button
             onClick={onNavigateToCourses}
-            style={{ background: D.blue, color: '#fff', fontSize: 14, fontWeight: 600, padding: '11px 24px', borderRadius: 8, border: 'none', cursor: 'pointer' }}
+            style={{ background: D.blue, color: '#fff', fontSize: 15, fontWeight: 700, padding: '13px 28px', borderRadius: 12, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(59,97,196,0.25)' }}
           >
-            {isExamMode ? 'Add your first section' : 'Add your first course'}
+            {isExamMode ? 'Add your first section →' : 'Add your first course →'}
           </button>
+          <p style={{ margin: '12px 0 0', fontSize: 12, color: '#9B9B9B' }}>
+            Takes about a minute. You can always add more later.
+          </p>
         </div>
       </div>
     )
@@ -602,8 +643,11 @@ export default function DashboardView({
                 Try 5 courses, 75 AI actions/month, unlimited blueprints and focus sessions — free for 7 days.
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                {['✓ 5 courses', '✓ 75 AI actions/month', '✓ Unlimited everything'].map(f => (
-                  <span key={f} style={{ fontSize: 11, fontWeight: 600, color: D.blue }}>{f}</span>
+                {['5 courses', '75 AI actions/month', 'Unlimited everything'].map(f => (
+                  <span key={f} style={{ fontSize: 11, fontWeight: 600, color: D.blue, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                    {f}
+                  </span>
                 ))}
               </div>
             </div>
@@ -985,7 +1029,7 @@ export default function DashboardView({
               border: `1px solid ${onPace ? 'rgba(22,163,74,0.25)' : 'rgba(217,119,6,0.25)'}`,
               padding: '3px 10px', borderRadius: 999, letterSpacing: '0.04em',
             }}>
-              {onPace ? '✓ On pace' : '↓ Behind'}
+              {onPace ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>On pace</span>) : (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" /></svg>Behind</span>)}
             </span>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
@@ -1114,15 +1158,15 @@ export default function DashboardView({
               onClick={() => typeof onOpenStudyCoach === 'function' && onOpenStudyCoach(0)}
               style={{
                 flex: 1, padding: '10px 14px',
-                background: `linear-gradient(135deg, ${D.blue}, #5B7FD4)`,
-                border: 'none', borderRadius: 9,
-                fontSize: 13, fontWeight: 700, color: '#fff',
+                background: '#3B61C4',
+                border: 'none', borderRadius: 10,
+                fontSize: 13, fontWeight: 600, color: '#fff',
                 display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
                 cursor: 'pointer', fontFamily: 'inherit',
-                boxShadow: `0 3px 12px rgba(59,97,196,0.30)`,
+                transition: 'background-color 0.15s ease',
               }}
-              onMouseEnter={e => { e.currentTarget.style.boxShadow = `0 5px 20px rgba(59,97,196,0.45)`; e.currentTarget.style.transform = 'translateY(-1px)' }}
-              onMouseLeave={e => { e.currentTarget.style.boxShadow = `0 3px 12px rgba(59,97,196,0.30)`; e.currentTarget.style.transform = 'none' }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#3155b3' }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#3B61C4' }}
             >
               <IcoStar /> Build my plan
             </button>

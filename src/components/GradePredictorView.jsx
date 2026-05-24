@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import Spinner from './ui/spinner'
 import { getAccessToken } from '../lib/supabase'
 import { clean } from '../utils/strings'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
@@ -263,7 +264,7 @@ export default function GradePredictorView({ courses, onEditCourse, userId, onSh
           >
             {loading ? (
               <span className="flex items-center justify-center gap-2">
-                <div className="w-4 h-4 rounded-full border-2 border-white/30 border-t-white animate-spin" />
+                <Spinner size="xs" color="#fff" track="rgba(255,255,255,0.3)" />
                 Predicting...
               </span>
             ) : 'Predict My Grade'}

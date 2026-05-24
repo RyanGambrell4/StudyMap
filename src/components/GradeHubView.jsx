@@ -1,4 +1,6 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
+import Spinner from './ui/spinner'
+import EmptyState from './ui/empty-state'
 import { getActivePlan, canUseAI, incrementAIQuery } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
@@ -21,7 +23,6 @@ const D = {
   accent:    '#3B61C4',
   glow:      'rgba(59,97,196,0.2)',
   indigo:    '#3B61C4',
-  violet:    '#111111',
   mint:      '#16A34A',
   orange:    '#E8531A',
   sky:       '#2563EB',
@@ -29,8 +30,15 @@ const D = {
   amber:     '#D97706',
 }
 
-const PATH_COLORS = [D.sky, D.violet, D.orange]
-const PATH_ICONS  = ['↗', '↑', '◈']
+const PATH_COLORS = [D.sky, D.mint, D.orange]
+const PATH_ICONS = [
+  // Steady — gentle climb
+  <svg key="steady" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7" /><path d="M9 7h8v8" /></svg>,
+  // Strong — vertical arrow
+  <svg key="strong" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5" /><path d="M5 12l7-7 7 7" /></svg>,
+  // Aggressive — lightning
+  <svg key="aggressive" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" /></svg>,
+]
 
 function uid() { return Math.random().toString(36).slice(2, 10) }
 const clamp = (v, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, v))
@@ -191,7 +199,7 @@ function PathCard({ color, icon, title, desc, rows }) {
   return (
     <div style={{ padding: 14, borderRadius: 11, background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, borderTop: `2px solid ${color}`, minWidth: 0, width: '100%' }}>
       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <div style={{ width: 24, height: 24, borderRadius: 6, background: `${color}18`, color, display: 'grid', placeItems: 'center', fontSize: 13 }}>{icon}</div>
+        <div style={{ width: 24, height: 24, borderRadius: 6, background: `${color}18`, color, display: 'grid', placeItems: 'center' }}>{icon}</div>
         <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>{title}</div>
       </div>
       <div style={{ fontSize: 11.5, color: D.muted, marginBottom: 12, lineHeight: 1.4 }}>{desc}</div>
@@ -343,7 +351,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
           {neededInfo.bufferPts > 0 && !neededInfo.impossible && (
             <div style={{ padding: 12, borderRadius: 10, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.25)', position: 'relative' }}>
               <div style={{ fontSize: 12.5, color: D.text, marginBottom: 8, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
-                You have a <span style={{ color: D.violet, fontWeight: 700, fontFamily: 'inherit' }}>{neededInfo.bufferPts.toFixed(1)}-point</span> buffer on remaining work. Spend it wisely.
+                You have a <span style={{ color: D.mint, fontWeight: 700, fontFamily: 'inherit' }}>{neededInfo.bufferPts.toFixed(1)}-point</span> buffer on remaining work. Spend it wisely.
               </div>
               <div style={{ height: 5, background: 'rgba(0,0,0,0.04)', borderRadius: 3, overflow: 'hidden' }}>
                 <div style={{ width: `${Math.min(100, neededInfo.bufferPts)}%`, height: '100%', background: D.accent }} />
@@ -465,9 +473,11 @@ function TrackTab({ course, gradeData, dot, onSave }) {
   const targetLabel  = TARGET_OPTIONS.find(o => o.value === targetGrade)?.label ?? 'A'
 
   if (!components.length) return (
-    <div style={{ padding: '40px 0', textAlign: 'center' }}>
-      <p style={{ color: D.muted, fontSize: 13 }}>Set up your grade components in the Plan tab first.</p>
-    </div>
+    <EmptyState
+      icon={(<svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>)}
+      headline="No grade components yet"
+      sub="Set up your grade components in the Plan tab to see this view."
+    />
   )
 
   return (
@@ -680,9 +690,11 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
   }
 
   if (!components.length) return (
-    <div style={{ padding: '40px 0', textAlign: 'center' }}>
-      <p style={{ color: D.muted, fontSize: 13 }}>Set up your grade components in the Plan tab first.</p>
-    </div>
+    <EmptyState
+      icon={(<svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" /></svg>)}
+      headline="No grade components yet"
+      sub="Set up your grade components in the Plan tab to see this view."
+    />
   )
 
   return (
@@ -761,7 +773,7 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
           <div style={{ display: 'flex', gap: 6 }}>
             <input className="gh-input-text" type="text" placeholder="Scenario name…" value={saveName} onChange={e => setSaveName(e.target.value)} onKeyDown={e => e.key === 'Enter' && handleSaveScenario()} autoFocus style={{ flex: 1, minWidth: 0 }} />
             <button onClick={handleSaveScenario} style={{ padding: '8px 14px', background: '#3B61C4', borderRadius: 8, color: '#fff', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}>Save</button>
-            <button onClick={() => setShowSaveInput(false)} style={{ padding: '8px 12px', border: `1px solid ${D.border}`, borderRadius: 8, color: D.muted, cursor: 'pointer' }}>✕</button>
+            <button onClick={() => setShowSaveInput(false)} style={{ padding: '8px', border: `1px solid ${D.border}`, borderRadius: 8, color: D.muted, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} aria-label="Cancel"><svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg></button>
           </div>
         )}
       </div>
@@ -791,7 +803,7 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
                       ) : (
                         <button onClick={() => { setEditingName(sc.name); setNameInput(sc.name) }} style={{ fontSize: 13, fontWeight: 600, color: D.text, cursor: 'pointer', textAlign: 'left' }}>{sc.name}</button>
                       )}
-                      <button onClick={() => deleteScenario(sc.name)} style={{ color: D.dim, cursor: 'pointer', fontSize: 12 }}>✕</button>
+                      <button onClick={() => deleteScenario(sc.name)} style={{ color: D.dim, cursor: 'pointer', display: 'flex', alignItems: 'center' }} aria-label="Delete scenario"><svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg></button>
                     </div>
                     <div style={{ fontSize: 22, fontWeight: 800, color: slc, fontFamily: 'inherit' }}>{proj?.toFixed(1)}%</div>
                     <div style={{ fontSize: 12, fontWeight: 600, color: slc, marginTop: 2 }}>{sltr}</div>
@@ -915,7 +927,7 @@ function RightRail({ course, gradeData, onShowPaywall, userId, onSyncStudyPlan }
 
         <button onClick={handleRunPredictor} disabled={aiLoading || !components.length} style={{ width: '100%', padding: '10px 14px', background: '#3B61C4', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, cursor: 'pointer', opacity: aiLoading ? 0.7 : 1 }}>
           {aiLoading
-            ? <><div style={{ width: 12, height: 12, borderRadius: '50%', border: '2px solid rgba(255,255,255,0.3)', borderTopColor: '#fff', animation: 'spin 0.8s linear infinite' }} /> Analyzing…</>
+            ? <><Spinner size="xs" color="#fff" track="rgba(255,255,255,0.3)" style={{ width: 12, height: 12 }} /> Analyzing…</>
             : <>Run prediction</>}
         </button>
 
@@ -969,8 +981,12 @@ function WhatIfBanner({ currentGPA, projectedGPA }) {
             <div style={{ fontSize: 10.5, fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Current</div>
             <div style={{ fontSize: 18, fontWeight: 800, color: '#111111', letterSpacing: -0.5 }}>{currentGPA}</div>
           </div>
-          <div style={{ fontSize: 18, color: up ? '#16A34A' : '#DC2626', fontWeight: 700 }}>
-            {up ? '↑' : '↓'}
+          <div style={{ display: 'flex', alignItems: 'center', color: up ? '#16A34A' : '#DC2626' }}>
+            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              {up
+                ? <><line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" /></>
+                : <><line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" /></>}
+            </svg>
           </div>
           <div style={{ textAlign: 'center' }}>
             <div style={{ fontSize: 10.5, fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Projected</div>

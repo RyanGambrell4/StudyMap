@@ -8,6 +8,7 @@ import { captureReferralParam, getStoredReferrer, clearStoredReferrer } from './
 import SharedPlanView from './components/SharedPlanView'
 import AuthScreen from './components/AuthScreen'
 import LandingPage from './components/LandingPage'
+import Spinner from './components/ui/spinner'
 import Onboarding from './components/Onboarding'
 import OutputView from './components/OutputView'
 import PaywallModal from './components/PaywallModal'
@@ -347,7 +348,7 @@ export default function App() {
       return (
         <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F7F6F3' }}>
           <div className="text-center space-y-4">
-            <div className="w-8 h-8 mx-auto rounded-full animate-spin" style={{ border: '3px solid rgba(0,0,0,0.08)', borderTopColor: '#3B61C4' }} />
+            <Spinner size="md" className="mx-auto" />
             <p className="text-sm" style={{ color: '#6B6B6B' }}>Signing you in…</p>
           </div>
         </div>
@@ -358,7 +359,7 @@ export default function App() {
     window.location.href = '/'
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F7F6F3' }}>
-        <div className="w-8 h-8 rounded-full animate-spin" style={{ border: '3px solid rgba(0,0,0,0.08)', borderTopColor: '#3B61C4' }} />
+        <Spinner size="md" />
       </div>
     )
   }
@@ -483,7 +484,7 @@ export default function App() {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F6F3' }}>
         <div style={{ textAlign: 'center' }}>
-          <div style={{ width: 32, height: 32, margin: '0 auto 12px', borderRadius: '50%', border: '3px solid rgba(0,0,0,0.08)', borderTopColor: '#3B61C4', animation: 'spin 0.8s linear infinite' }} />
+          <Spinner size="md" style={{ display: 'block', margin: '0 auto 12px' }} />
           <p style={{ color: '#6B6B6B', fontSize: 14 }}>Redirecting to checkout…</p>
         </div>
       </div>

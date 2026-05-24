@@ -1,4 +1,5 @@
 import { useMemo, useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react'
+import Spinner from './ui/spinner'
 import { track } from '../lib/analytics'
 import { generateSchedule } from '../utils/generateSchedule'
 import { clean } from '../utils/strings'
@@ -1279,7 +1280,14 @@ export default function OutputView({
           color: gcalToast === 'connected' ? '#34d399' : '#f87171',
           backdropFilter: 'blur(8px)',
         }}>
-          {gcalToast === 'connected' ? '✓ Google Calendar connected' : '✕ Google Calendar connection failed'}
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              {gcalToast === 'connected'
+                ? <polyline points="20 6 9 17 4 12" />
+                : <><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></>}
+            </svg>
+            {gcalToast === 'connected' ? 'Google Calendar connected' : 'Google Calendar connection failed'}
+          </span>
         </div>
       )}
 
@@ -1471,10 +1479,10 @@ export default function OutputView({
                 <button
                   onClick={handleFixConflicts}
                   disabled={fixConflictsLoading}
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-amber-300 border border-amber-500/40 bg-amber-900/20 hover:bg-amber-900/40 transition-colors disabled:opacity-60"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-amber-700 border border-amber-200 bg-amber-50 hover:bg-amber-100 transition-colors disabled:opacity-60"
                 >
                   {fixConflictsLoading ? (
-                    <div className="w-3 h-3 rounded-full border border-amber-400 border-t-transparent animate-spin" />
+                    <Spinner size="xs" color="#D97706" track="rgba(217,119,6,0.2)" style={{ width: 12, height: 12 }} />
                   ) : (
                     <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
@@ -1538,7 +1546,7 @@ export default function OutputView({
                                   : 'bg-amber-900/40 text-amber-300 border border-amber-600/50 hover:bg-amber-900/70'
                               }`}
                             >
-                              {applied ? '✓ Applied' : 'Apply'}
+                              {applied ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>Applied</span>) : 'Apply'}
                             </button>
                           </div>
                         )
@@ -1620,7 +1628,7 @@ export default function OutputView({
 
         <Suspense fallback={
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: 200 }}>
-            <div style={{ width: 28, height: 28, borderRadius: '50%', border: '3px solid #e2e8f0', borderTopColor: '#6366f1', animation: 'spin 0.7s linear infinite' }} />
+            <Spinner size="md" />
           </div>
         }>
 

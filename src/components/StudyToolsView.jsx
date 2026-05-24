@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
+import Spinner from './ui/spinner'
 import imageCompression from 'browser-image-compression'
 import { extractText } from '../utils/extractText'
 import { getCachedStudyTools, getCachedCoachPlan, saveStudyTools } from '../lib/db'
@@ -92,8 +93,12 @@ function QuizQuestion({ question, onAnswer }) {
               >
                 <span className="text-slate-500 mr-2">{String.fromCharCode(65 + i)}.</span>
                 {opt}
-                {showRight && <span className="ml-2 text-emerald-400">✓</span>}
-                {showWrong && <span className="ml-2 text-red-400">✗</span>}
+                {showRight && (
+                  <svg className="inline-block ml-2 w-4 h-4 text-emerald-600 align-text-bottom" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="M5 13l4 4L19 7" /></svg>
+                )}
+                {showWrong && (
+                  <svg className="inline-block ml-2 w-4 h-4 text-red-600 align-text-bottom" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="M6 18L18 6M6 6l12 12" /></svg>
+                )}
               </button>
             )
           })}
@@ -153,14 +158,22 @@ function QuizQuestion({ question, onAnswer }) {
             </button>
           )}
           {revealed && (
-            <div className={`px-4 py-3 rounded-xl border text-sm font-medium ${
+            <div className={`px-4 py-3 rounded-xl border text-sm font-medium flex items-center gap-2 ${
               fillInput.trim().toLowerCase() === question.answer.toLowerCase()
-                ? 'bg-emerald-900/40 border-emerald-500/60 text-emerald-300'
-                : 'bg-red-900/30 border-red-500/40 text-red-300'
+                ? 'bg-emerald-50 border-emerald-200 text-emerald-700'
+                : 'bg-red-50 border-red-200 text-red-700'
             }`}>
-              {fillInput.trim().toLowerCase() === question.answer.toLowerCase()
-                ? '✓ Correct!'
-                : `✗ The answer was: ${question.answer}`}
+              {fillInput.trim().toLowerCase() === question.answer.toLowerCase() ? (
+                <>
+                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="M5 13l4 4L19 7" /></svg>
+                  Correct!
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="M6 18L18 6M6 6l12 12" /></svg>
+                  The answer was: {question.answer}
+                </>
+              )}
             </div>
           )}
         </div>
@@ -545,28 +558,28 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             {/* Flashcards */}
             <button
               onClick={() => setMode('upload')}
-              className="w-full text-left rounded-2xl px-5 py-4 transition-all flex items-center gap-4 group"
-              style={{ background: 'linear-gradient(135deg, #fdf2f8, #fff)', border: '1px solid #f9a8d4' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #fce7f3, #fdf2f8)'; e.currentTarget.style.borderColor = '#ec4899' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #fdf2f8, #fff)'; e.currentTarget.style.borderColor = '#f9a8d4' }}
+              className="w-full text-left rounded-2xl px-5 py-4 transition-colors flex items-center gap-4 group"
+              style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)' }}
             >
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #ec4899, #db2777)', boxShadow: '0 4px 12px rgba(236,72,153,0.35)' }}>
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(59,97,196,0.1)' }}>
+                <svg className="w-5 h-5" style={{ color: '#3B61C4' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-base font-bold" style={{ color: '#be185d' }}>Flashcards</span>
+                  <span className="text-base font-semibold text-slate-900">Flashcards</span>
                   {flashcards.length > 0 && (
-                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(236,72,153,0.12)', color: '#ec4899', border: '1px solid rgba(236,72,153,0.25)' }}>
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(59,97,196,0.1)', color: '#3B61C4', border: '1px solid rgba(59,97,196,0.2)' }}>
                       {flashcards.length} ready
                     </span>
                   )}
                 </div>
-                <p className="text-sm mt-0.5" style={{ color: '#9d174d' }}>Upload your notes and get AI-generated flashcards.</p>
+                <p className="text-sm mt-0.5 text-slate-600">Upload your notes and get AI-generated flashcards.</p>
               </div>
-              <svg className="w-4 h-4 shrink-0" style={{ color: '#ec4899' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -574,28 +587,28 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             {/* Quizzes */}
             <button
               onClick={() => setMode('upload')}
-              className="w-full text-left rounded-2xl px-5 py-4 transition-all flex items-center gap-4 group"
-              style={{ background: 'linear-gradient(135deg, #fff7ed, #fff)', border: '1px solid #fdba74' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #ffedd5, #fff7ed)'; e.currentTarget.style.borderColor = '#f97316' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #fff7ed, #fff)'; e.currentTarget.style.borderColor = '#fdba74' }}
+              className="w-full text-left rounded-2xl px-5 py-4 transition-colors flex items-center gap-4 group"
+              style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)' }}
             >
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #f97316, #ea580c)', boxShadow: '0 4px 12px rgba(249,115,22,0.35)' }}>
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(217,119,6,0.1)' }}>
+                <svg className="w-5 h-5" style={{ color: '#D97706' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-base font-bold" style={{ color: '#c2410c' }}>Quizzes</span>
+                  <span className="text-base font-semibold text-slate-900">Quizzes</span>
                   {quiz.length > 0 && (
-                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(249,115,22,0.12)', color: '#f97316', border: '1px solid rgba(249,115,22,0.25)' }}>
+                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(217,119,6,0.1)', color: '#D97706', border: '1px solid rgba(217,119,6,0.2)' }}>
                       {quiz.length} ready
                     </span>
                   )}
                 </div>
-                <p className="text-sm mt-0.5" style={{ color: '#9a3412' }}>Multiple choice, true/false, and fill-in-the-blank questions.</p>
+                <p className="text-sm mt-0.5 text-slate-600">Multiple choice, true/false, and fill-in-the-blank questions.</p>
               </div>
-              <svg className="w-4 h-4 shrink-0" style={{ color: '#f97316' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -603,24 +616,24 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             {/* Topic Drill */}
             <button
               onClick={() => { setDrillQuiz([]); setDrillAnswers([]); setDrillDone(false); setDrillQuestionIdx(0); setDrillError(''); setMode('drill') }}
-              className="w-full text-left rounded-2xl px-5 py-4 transition-all flex items-center gap-4 group"
-              style={{ background: 'linear-gradient(135deg, #faf5ff, #fff)', border: '1px solid #d8b4fe' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #f3e8ff, #faf5ff)'; e.currentTarget.style.borderColor = '#a855f7' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #faf5ff, #fff)'; e.currentTarget.style.borderColor = '#d8b4fe' }}
+              className="w-full text-left rounded-2xl px-5 py-4 transition-colors flex items-center gap-4 group"
+              style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)' }}
             >
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #a855f7, #9333ea)', boxShadow: '0 4px 12px rgba(168,85,247,0.35)' }}>
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(22,163,74,0.1)' }}>
+                <svg className="w-5 h-5" style={{ color: '#16A34A' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-base font-bold" style={{ color: '#7e22ce' }}>Topic Drill</span>
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(168,85,247,0.12)', color: '#a855f7', border: '1px solid rgba(168,85,247,0.25)' }}>No upload needed</span>
+                  <span className="text-base font-semibold text-slate-900">Topic Drill</span>
+                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(22,163,74,0.1)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>No upload needed</span>
                 </div>
-                <p className="text-sm mt-0.5" style={{ color: '#6b21a8' }}>Type any topic and get 5 practice questions instantly.</p>
+                <p className="text-sm mt-0.5 text-slate-600">Type any topic and get 5 practice questions instantly.</p>
               </div>
-              <svg className="w-4 h-4 shrink-0" style={{ color: '#a855f7' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -628,21 +641,21 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             {/* Study Coach */}
             <button
               onClick={() => onNavigateToCoach?.()}
-              className="w-full text-left rounded-2xl px-5 py-4 transition-all flex items-center gap-4 group"
-              style={{ background: 'linear-gradient(135deg, #eff6ff, #fff)', border: '1px solid #93c5fd' }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #dbeafe, #eff6ff)'; e.currentTarget.style.borderColor = '#3b82f6' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'linear-gradient(135deg, #eff6ff, #fff)'; e.currentTarget.style.borderColor = '#93c5fd' }}
+              className="w-full text-left rounded-2xl px-5 py-4 transition-colors flex items-center gap-4 group"
+              style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
+              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)' }}
+              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)' }}
             >
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'linear-gradient(135deg, #3b82f6, #2563eb)', boxShadow: '0 4px 12px rgba(59,130,246,0.35)' }}>
-                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(59,97,196,0.1)' }}>
+                <svg className="w-5 h-5" style={{ color: '#3B61C4' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
                 </svg>
               </div>
               <div className="flex-1 min-w-0">
-                <span className="text-base font-bold" style={{ color: '#1d4ed8' }}>Study Coach</span>
-                <p className="text-sm mt-0.5" style={{ color: '#1e40af' }}>Personalized AI study plan for your schedule and exams.</p>
+                <span className="text-base font-semibold text-slate-900">Study Coach</span>
+                <p className="text-sm mt-0.5 text-slate-600">Personalized AI study plan for your schedule and exams.</p>
               </div>
-              <svg className="w-4 h-4 shrink-0" style={{ color: '#3b82f6' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <svg className="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
               </svg>
             </button>
@@ -777,7 +790,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               )}
             </button>
             {scanError && (
-              <p className="text-red-400 text-xs mt-2">{scanError}</p>
+              <p className="text-red-600 text-xs mt-2">{scanError}</p>
             )}
           </div>
 
@@ -838,11 +851,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
           {/* Loading state */}
           {isGenerating && (
-            <div className="bg-white border border-[#E5E5E5] rounded-2xl px-6 py-8 flex flex-col items-center gap-4">
-              <svg className="w-8 h-8 text-[#3B61C4] animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
+            <div className="bg-white rounded-2xl px-6 py-8 flex flex-col items-center gap-4" style={{ border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+              <Spinner size="md" />
               <div className="text-center">
                 <p className="text-slate-800 font-semibold">{loadingMessage}</p>
                 <p className="text-[#6B6B6B] text-xs mt-1">This usually takes 5–10 seconds</p>
@@ -933,9 +943,9 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               )}
             </div>
             <div className="flex items-center gap-3 text-xs">
-              <span className="text-emerald-400 font-medium">{knownSet.size} know it</span>
-              <span className="text-amber-400 font-medium">{almostSet.size} almost</span>
-              <span className="text-red-400 font-medium">{reviewSet.size} reviewing</span>
+              <span className="text-emerald-600 font-medium">{knownSet.size} know it</span>
+              <span className="text-amber-600 font-medium">{almostSet.size} almost</span>
+              <span className="text-red-600 font-medium">{reviewSet.size} reviewing</span>
             </div>
           </div>
 
@@ -1140,11 +1150,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
           {/* Loading */}
           {drillGenerating && (
-            <div className="bg-white border border-[#E5E5E5] rounded-2xl px-6 py-8 flex flex-col items-center gap-4">
-              <svg className="w-8 h-8 text-[#3B61C4] animate-spin" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-              </svg>
+            <div className="bg-white rounded-2xl px-6 py-8 flex flex-col items-center gap-4" style={{ border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+              <Spinner size="md" />
               <div className="text-center">
                 <p className="text-slate-800 font-semibold">Generating questions on "{drillTopic}"…</p>
                 <p className="text-[#6B6B6B] text-xs mt-1">This usually takes 5–10 seconds</p>
@@ -1190,12 +1197,12 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 const pct = Math.round((s / t) * 100)
                 return (
                   <>
-                    <div className="bg-white border border-[#E5E5E5] rounded-2xl p-8 text-center">
+                    <div className="bg-white rounded-2xl p-8 text-center" style={{ border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                       <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-bold"
                         style={{
-                          background: pct >= 80 ? 'rgba(16,185,129,0.15)' : pct >= 60 ? 'rgba(245,158,11,0.15)' : 'rgba(239,68,68,0.15)',
-                          border: `2px solid ${pct >= 80 ? '#10b981' : pct >= 60 ? '#f59e0b' : '#ef4444'}`,
-                          color: pct >= 80 ? '#10b981' : pct >= 60 ? '#f59e0b' : '#ef4444',
+                          background: pct >= 80 ? 'rgba(22,163,74,0.1)' : pct >= 60 ? 'rgba(217,119,6,0.1)' : 'rgba(220,38,38,0.1)',
+                          border: `2px solid ${pct >= 80 ? '#16A34A' : pct >= 60 ? '#D97706' : '#DC2626'}`,
+                          color: pct >= 80 ? '#16A34A' : pct >= 60 ? '#D97706' : '#DC2626',
                         }}
                       >
                         {s}/{t}
@@ -1203,17 +1210,17 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                       <h2 className="text-slate-900 text-xl font-bold mb-1">
                         {pct >= 80 ? 'Solid understanding!' : pct >= 60 ? 'Getting there!' : 'Needs more work!'}
                       </h2>
-                      <p className="text-slate-400 text-sm">{pct}% on <span className="text-amber-300">{drillTopic}</span></p>
+                      <p className="text-slate-600 text-sm">{pct}% on <span className="font-semibold text-slate-900">{drillTopic}</span></p>
                     </div>
                     <div className="space-y-2">
                       {drillQuiz.map((q, i) => (
                         <div key={i} className={`flex items-start gap-3 px-4 py-3 rounded-xl border text-sm ${
-                          drillAnswers[i] ? 'bg-emerald-900/20 border-emerald-800/40' : 'bg-red-900/20 border-red-800/40'
+                          drillAnswers[i] ? 'bg-emerald-50 border-emerald-200' : 'bg-red-50 border-red-200'
                         }`}>
-                          <span className={`shrink-0 font-bold ${drillAnswers[i] ? 'text-emerald-400' : 'text-red-400'}`}>
-                            {drillAnswers[i] ? '✓' : '✗'}
-                          </span>
-                          <span className={`${drillAnswers[i] ? 'text-emerald-300' : 'text-red-300'}`}>
+                          <svg className={`shrink-0 w-4 h-4 mt-0.5 ${drillAnswers[i] ? 'text-emerald-600' : 'text-red-600'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d={drillAnswers[i] ? 'M5 13l4 4L19 7' : 'M6 18L18 6M6 6l12 12'} />
+                          </svg>
+                          <span className={drillAnswers[i] ? 'text-emerald-800' : 'text-red-800'}>
                             {q.question.slice(0, 80)}{q.question.length > 80 ? '…' : ''}
                           </span>
                         </div>
@@ -1341,7 +1348,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                   <div className="space-y-1.5">
                     {quiz.map((q, i) => answers[i] && (
                       <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 8, padding: '8px 12px', borderRadius: 10, background: 'rgba(16,185,129,0.05)', border: '1px solid rgba(16,185,129,0.15)' }}>
-                        <span style={{ color: '#10b981', fontWeight: 700, flexShrink: 0, fontSize: 13 }}>✓</span>
+                        <svg width="14" height="14" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12" /></svg>
                         <span style={{ fontSize: 12.5, color: '#334155' }}>{q.question.slice(0, 90)}{q.question.length > 90 ? '…' : ''}</span>
                       </div>
                     ))}

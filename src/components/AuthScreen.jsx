@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 
 export default function AuthScreen({ initialMode, onBack }) {
@@ -122,83 +122,7 @@ export default function AuthScreen({ initialMode, onBack }) {
     }
 
     return (
-      <div style={{ minHeight: '100vh', display: 'flex' }}>
-        {!isMobile && <LeftPanel />}
-
-        {/* Right panel */}
-        <div style={{
-          flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          backgroundColor: '#F7F6F3', padding: '40px 24px',
-        }}>
-          <div style={{ width: '100%', maxWidth: 400 }}>
-            {/* Mobile logo */}
-            <div style={{ display: 'none', alignItems: 'center', gap: 10, marginBottom: 32, justifyContent: 'center' }}
-              className="mobile-logo">
-              <img src="/favicon.png" alt="StudyEdge AI" style={{ width: 32, height: 32, borderRadius: 8, objectFit: 'contain' }} />
-              <span style={{ fontWeight: 700, fontSize: 18, color: '#1A1A1A' }}>StudyEdge AI</span>
-            </div>
-
-            {/* Icon */}
-            <div style={{
-              width: 56, height: 56, borderRadius: 16, backgroundColor: 'rgba(59,97,196,0.1)',
-              border: '1px solid rgba(59,97,196,0.2)', display: 'flex', alignItems: 'center',
-              justifyContent: 'center', marginBottom: 20,
-            }}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-              </svg>
-            </div>
-
-            <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>Check your inbox</h1>
-            <p style={{ fontSize: 14, color: '#6B6B6B', margin: '0 0 4px', lineHeight: 1.5 }}>We sent a confirmation link to</p>
-            <p style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 16px', wordBreak: 'break-all' }}>{signupPendingEmail}</p>
-            <p style={{ fontSize: 13, color: '#6B6B6B', margin: '0 0 20px', lineHeight: 1.6 }}>
-              Click the link in that email to verify your account and finish signing up. The email may take up to a minute to arrive.
-            </p>
-
-            <div style={{
-              backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12,
-              padding: '12px 16px', marginBottom: 20, fontSize: 13, color: '#6B6B6B', lineHeight: 1.6,
-            }}>
-              <strong style={{ color: '#1A1A1A' }}>Can't find it?</strong> Check your Spam or Promotions folder, and search for "StudyEdge AI".
-            </div>
-
-            <button
-              onClick={handleResend}
-              disabled={resendStatus === 'sending'}
-              style={{
-                width: '100%', padding: '12px', borderRadius: 12, border: 'none',
-                backgroundColor: '#3B61C4', color: '#fff', fontSize: 14, fontWeight: 600,
-                cursor: resendStatus === 'sending' ? 'default' : 'pointer', opacity: resendStatus === 'sending' ? 0.6 : 1,
-                marginBottom: 16,
-              }}
-            >
-              {resendStatus === 'sending' ? 'Resending…' : resendStatus === 'sent' ? '✓ Email resent' : resendStatus === 'error' ? 'Try again' : 'Resend confirmation email'}
-            </button>
-
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, textAlign: 'center' }}>
-              <button
-                onClick={() => { setSignupPendingEmail(''); setMode('login'); setError(''); setSuccess('') }}
-                style={{ background: 'none', border: 'none', fontSize: 14, color: '#6B6B6B', cursor: 'pointer' }}
-              >
-                Already verified? <span style={{ color: '#3B61C4', fontWeight: 600 }}>Sign in</span>
-              </button>
-              <button
-                onClick={() => { setSignupPendingEmail(''); setError(''); setSuccess('') }}
-                style={{ background: 'none', border: 'none', fontSize: 13, color: '#9B9B9B', cursor: 'pointer' }}
-              >
-                Use a different email
-              </button>
-            </div>
-
-            {onBack && (
-              <button onClick={onBack} style={{ display: 'block', width: '100%', marginTop: 16, background: 'none', border: 'none', fontSize: 13, color: '#9B9B9B', cursor: 'pointer', textAlign: 'center' }}>
-                ← Back to home
-              </button>
-            )}
-          </div>
-        </div>
-      </div>
+      <ConfirmationPending email={signupPendingEmail} onResend={handleResend} resendStatus={resendStatus} onSwitchEmail={() => { setSignupPendingEmail(''); setError(''); setSuccess('') }} onSignIn={() => { setSignupPendingEmail(''); setMode('login'); setError(''); setSuccess('') }} onBack={onBack} isMobile={isMobile} />
     )
   }
 

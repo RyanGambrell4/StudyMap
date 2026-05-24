@@ -1,4 +1,6 @@
 import { useMemo, useState, useEffect, useRef } from 'react'
+import Spinner from './ui/spinner'
+import EmptyState from './ui/empty-state'
 import { getAccessToken } from '../lib/supabase'
 import { clean } from '../utils/strings'
 
@@ -13,12 +15,12 @@ function theme_vars(dark) {
   return {
     gridLine:     dark ? 'rgba(255,255,255,0.055)' : 'rgba(0,0,0,0.08)',
     gridLineHalf: dark ? 'rgba(255,255,255,0.025)' : 'rgba(0,0,0,0.04)',
-    gcalBg:       dark ? 'rgba(59,130,246,0.1)'    : 'rgba(59,130,246,0.12)',
-    gcalText:     dark ? '#93c5fd'                  : '#1d4ed8',
+    gcalBg:       dark ? 'rgba(59,97,196,0.1)'     : 'rgba(59,97,196,0.1)',
+    gcalText:     dark ? '#93c5fd'                  : '#3B61C4',
     sessionAlpha: dark ? '16'                       : '30',
-    emptyText:    dark ? '#374151'                  : '#9ca3af',
-    subtitleText: dark ? '#64748B'                  : '#6b7280',
-    timeText:     dark ? '#374151'                  : '#9ca3af',
+    emptyText:    dark ? '#374151'                  : '#9B9B9B',
+    subtitleText: dark ? '#64748B'                  : '#6B6B6B',
+    timeText:     dark ? '#374151'                  : '#9B9B9B',
   }
 }
 
@@ -347,13 +349,13 @@ export default function CalendarDayView({
                 className="flex items-center justify-between px-2 py-0.5 rounded text-[11px]"
                 style={ev.isSyllabus
                   ? { background: `${ev.color.dot}15`, color: ev.color.dot }
-                  : { background: `${ev.color.dot}18`, color: '#f1f5f9' }}
+                  : { background: `${ev.color.dot}18`, color: ev.color.dot }}
               >
                 <span className="truncate">{ev.isSyllabus ? ev.name : ev.courseName}</span>
                 {!ev.isSyllabus && (
                   <button onClick={() => onToggle(ev.id)} className="ml-2 shrink-0">
                     <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors ${
-                      completedIds.has(ev.id) ? 'bg-emerald-500 border-emerald-500' : 'border-slate-600 hover:border-slate-400'
+                      completedIds.has(ev.id) ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 hover:border-slate-500'
                     }`}>
                       {completedIds.has(ev.id) && (
                         <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
@@ -377,7 +379,7 @@ export default function CalendarDayView({
             <div
               key={i}
               className="absolute right-2 text-[10px] font-normal"
-              style={{ top: i * HOUR_HEIGHT - 6, color: '#4B5563' }}
+              style={{ top: i * HOUR_HEIGHT - 6, color: '#6B6B6B' }}
             >
               {fmtHour(START_HOUR + i)}
             </div>
@@ -477,7 +479,7 @@ export default function CalendarDayView({
                         </svg>
                       )}
                       <p className={`text-[11px] font-medium leading-tight truncate ${done ? 'line-through' : ''}`}
-                        style={{ color: conflictWith ? '#fbbf24' : s.color.dot }}>
+                        style={{ color: conflictWith ? '#D97706' : s.color.dot }}>
                         {s.courseName}
                       </p>
                     </div>
@@ -504,7 +506,7 @@ export default function CalendarDayView({
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                         </svg>
                       ) : adding ? (
-                        <div className="w-3 h-3 rounded-full border border-slate-500 border-t-slate-300 animate-spin" />
+                        <Spinner size="xs" />
                       ) : (
                         <svg className="w-3 h-3" fill="none" stroke="#64748B" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
@@ -550,33 +552,32 @@ export default function CalendarDayView({
           {/* Empty state */}
           {timedBlocks.length === 0 && allDayBlocks.length === 0 &&
             timedGoogleBlocks.length === 0 && allDayGoogleBlocks.length === 0 && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-3" style={{ pointerEvents: 'none' }}>
-              <svg style={{ width: 32, height: 32, color: tv.timeText, opacity: 0.5 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
-              <div style={{ textAlign: 'center' }}>
-                <p style={{ color: tv.subtitleText, fontSize: 14, fontWeight: 600, margin: 0 }}>No sessions scheduled</p>
-                <p style={{ color: tv.timeText, fontSize: 12, marginTop: 4 }}>This day is free. Enjoy it or add a session.</p>
-              </div>
-              {onAddSession && (
-                <button
-                  onClick={() => onAddSession(dayStr)}
-                  style={{
-                    pointerEvents: 'auto',
-                    marginTop: 4,
-                    padding: '7px 16px',
-                    borderRadius: 8,
-                    border: '1px solid rgba(59,97,196,0.25)',
-                    background: 'rgba(59,97,196,0.06)',
-                    color: '#3B61C4',
-                    fontSize: 13,
-                    fontWeight: 600,
-                    cursor: 'pointer',
-                  }}
-                >
-                  + Add session
-                </button>
-              )}
+            <div className="absolute inset-0 flex items-center justify-center" style={{ pointerEvents: 'none' }}>
+              <EmptyState
+                icon={(
+                  <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+                )}
+                headline="No sessions scheduled"
+                sub="This day is free. Enjoy it or add a session."
+                action={onAddSession && (
+                  <button
+                    onClick={() => onAddSession(dayStr)}
+                    style={{
+                      pointerEvents: 'auto',
+                      padding: '8px 16px',
+                      borderRadius: 8,
+                      border: '1px solid rgba(59,97,196,0.25)',
+                      background: 'rgba(59,97,196,0.06)',
+                      color: '#3B61C4',
+                      fontSize: 13,
+                      fontWeight: 600,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    + Add session
+                  </button>
+                )}
+              />
             </div>
           )}
         </div>

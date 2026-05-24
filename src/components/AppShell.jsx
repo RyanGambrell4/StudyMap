@@ -354,7 +354,12 @@ export default function AppShell({
                     <svg style={{ width: 14, height: 14, color: googleCalendarConnected ? '#16A34A' : MUTED, flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    {googleCalendarConnected ? '✓ Calendar Connected' : 'Connect Google Cal'}
+                    {googleCalendarConnected ? (
+                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+                        <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                        Calendar Connected
+                      </span>
+                    ) : 'Connect Google Cal'}
                   </button>
                 )}
               </div>

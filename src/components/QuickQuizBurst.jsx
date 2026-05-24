@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
+import Spinner from './ui/spinner'
 
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
@@ -240,7 +241,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
         {/* Loading */}
         {step === 'loading' && (
           <div style={{ padding: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 44, height: 44, borderRadius: '50%', border: `3px solid rgba(232,83,26,0.2)`, borderTopColor: D.accent, animation: 'spin 0.8s linear infinite' }} />
+            <Spinner size="lg" />
             <div style={{ fontSize: 14, fontWeight: 600, color: D.textMuted }}>Generating your quiz...</div>
           </div>
         )}
