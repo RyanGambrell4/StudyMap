@@ -90,10 +90,11 @@ Rules:
       const data = await response.json()
       const content = data.content?.[0]?.text
       if (!content) throw new Error(data.error?.message ?? 'Empty AI response')
-      const first = content.indexOf('[')
-      const last = content.lastIndexOf(']')
+      const strippedQ = content.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '')
+      const first = strippedQ.indexOf('[')
+      const last = strippedQ.lastIndexOf(']')
       if (first === -1 || last === -1 || last <= first) throw new Error('AI returned malformed quiz — please try again')
-      const questions = JSON.parse(content.slice(first, last + 1))
+      const questions = JSON.parse(strippedQ.slice(first, last + 1))
 
       const LABELS = ['A', 'B', 'C', 'D']
       const shuffled = questions.map(q => {
@@ -281,10 +282,11 @@ Hard rules:
     const data = await response.json();
     const content = data.content?.[0]?.text
     if (!content) throw new Error(data.error?.message ?? 'Empty AI response')
-    const firstBrace = content.indexOf('{')
-    const lastBrace = content.lastIndexOf('}')
-    const cleaned = content.slice(firstBrace, lastBrace + 1)
-    const parsed = JSON.parse(cleaned)
+    const stripped = content.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '')
+    const firstBrace = stripped.indexOf('{')
+    const lastBrace = stripped.lastIndexOf('}')
+    if (firstBrace === -1 || lastBrace <= firstBrace) throw new Error('Malformed AI response — please try again')
+    const parsed = JSON.parse(stripped.slice(firstBrace, lastBrace + 1))
 
     // Shuffle quiz options so correct answer is evenly distributed across positions
     if (parsed.quiz) {
