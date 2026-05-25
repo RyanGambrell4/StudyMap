@@ -362,8 +362,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           learningStyle: learningStyle ?? null,
         }),
       })
-      if (!response.ok) throw new Error(`API returned ${response.status}`)
       const data = await response.json()
+      if (!response.ok) throw new Error(data.error ?? `API returned ${response.status}`)
       if (!data.flashcards?.length) throw new Error('No flashcards returned')
       const cards = sortCardsByDue(data.flashcards)
       const q = data.quiz ?? []
@@ -386,7 +386,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       await incrementAIQuery()
     } catch (err) {
       console.error('Generation error:', err)
-      setGenerateError('Failed to generate study materials. Please check your API key and try again.')
+      setGenerateError(err.message ?? 'Failed to generate study materials. Please try again.')
     } finally {
       setIsGenerating(false)
       setLoadingMessage('')
