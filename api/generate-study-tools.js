@@ -180,8 +180,9 @@ Rules:
 - keyFactors: 2-3 items, max 10 words each, explain current trajectory
 - recommendations: 2-3 specific actionable steps, max 12 words each
 - weakAreas: component names where earned grade < 70%, or empty array` }],
-        }),
-      })
+        }],
+      }),
+    })
       const data = await response.json()
       const content = data.content?.[0]?.text
       if (!content) throw new Error(data.error?.message ?? 'Empty AI response')
