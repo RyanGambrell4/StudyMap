@@ -447,7 +447,7 @@ export default function App() {
   }
 
   // ── Paid plan checkout redirect ──────────────────────────────────────────
-  if (checkoutIntent && getActivePlan() === 'free') {
+  if (checkoutIntent && !checkoutIntent.trial && getActivePlan() === 'free') {
     window.history.replaceState({}, '', window.location.pathname)
     createCheckoutSession(checkoutIntent.plan, checkoutIntent.billing, session.user.email, session.user.id, { trial: checkoutIntent.trial }).then(result => {
       if (!result || result.alreadySubscribed) return
