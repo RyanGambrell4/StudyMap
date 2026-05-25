@@ -288,7 +288,11 @@ Hard rules:
       throw new Error('AI service returned an unexpected response. Please try again.')
     }
     const content = data.content?.[0]?.text
-    if (!content) throw new Error(data.error?.message ?? 'Empty AI response')
+    if (!content) {
+      console.error('[generate-study-tools] No content. Full Anthropic response:', JSON.stringify(data).slice(0, 500))
+      throw new Error(data.error?.message ?? 'Empty AI response')
+    }
+    console.log('[generate-study-tools] AI content preview:', content.slice(0, 300))
     const stripped = content.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '')
     const firstBrace = stripped.indexOf('{')
     const lastBrace = stripped.lastIndexOf('}')
