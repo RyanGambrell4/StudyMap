@@ -279,7 +279,14 @@ Hard rules:
       })
     });
 
-    const data = await response.json();
+    const rawText = await response.text()
+    let data
+    try {
+      data = JSON.parse(rawText)
+    } catch (e) {
+      console.error('[generate-study-tools] Anthropic returned non-JSON:', rawText.slice(0, 500))
+      throw new Error('AI service returned an unexpected response. Please try again.')
+    }
     const content = data.content?.[0]?.text
     if (!content) throw new Error(data.error?.message ?? 'Empty AI response')
     const stripped = content.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '')
