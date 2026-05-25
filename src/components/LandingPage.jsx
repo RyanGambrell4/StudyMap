@@ -1,25 +1,47 @@
 import { useState, useEffect, useRef } from 'react'
 
 function FeatureCard({ color, icon, eyebrow, title, desc, children }) {
+  const onMove = (e) => {
+    const el = e.currentTarget
+    const r = el.getBoundingClientRect()
+    const px = (e.clientX - r.left) / r.width
+    const py = (e.clientY - r.top) / r.height
+    const ry = (px - 0.5) * 10
+    const rx = -(py - 0.5) * 10
+    el.style.setProperty('--ry', `${ry}deg`)
+    el.style.setProperty('--rx', `${rx}deg`)
+    // also update a cursor-following inner glow
+    el.style.setProperty('--gx', `${px * 100}%`)
+    el.style.setProperty('--gy', `${py * 100}%`)
+  }
   return (
-    <div style={{
-      position: 'relative',
-      background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015))',
-      border: '1px solid rgba(255,255,255,0.07)',
-      borderRadius: 16, overflow: 'hidden',
-      transition: 'border-color 0.25s ease, transform 0.25s ease, box-shadow 0.25s ease',
-    }}
+    <div
+      className="se-tilt"
+      onMouseMove={onMove}
       onMouseEnter={e => {
         e.currentTarget.style.borderColor = `${color}55`
-        e.currentTarget.style.transform = 'translateY(-2px)'
-        e.currentTarget.style.boxShadow = `0 18px 40px rgba(0,0,0,0.35), 0 0 0 1px ${color}22`
+        e.currentTarget.style.boxShadow = `0 26px 60px rgba(0,0,0,0.4), 0 0 0 1px ${color}22`
       }}
       onMouseLeave={e => {
         e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
-        e.currentTarget.style.transform = 'translateY(0)'
         e.currentTarget.style.boxShadow = 'none'
+        e.currentTarget.style.setProperty('--rx', '0deg')
+        e.currentTarget.style.setProperty('--ry', '0deg')
+      }}
+      style={{
+        position: 'relative',
+        background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015))',
+        border: '1px solid rgba(255,255,255,0.07)',
+        borderRadius: 16, overflow: 'hidden',
+        '--gx': '50%', '--gy': '50%',
       }}
     >
+      {/* Cursor-tracking inner glow */}
+      <div aria-hidden="true" style={{
+        position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 0,
+        background: `radial-gradient(380px circle at var(--gx) var(--gy), ${color}1a, transparent 50%)`,
+        opacity: 0.9,
+      }} />
       {/* Soft accent halo, top-right */}
       <div aria-hidden="true" style={{
         position: 'absolute', top: -40, right: -40,
@@ -109,6 +131,113 @@ export default function LandingPage({ onGetStarted }) {
     return () => io.disconnect()
   }, [])
 
+  // Hero cursor-following spotlight — sets --sx/--sy on the hero section element.
+  const heroSpotlightRef = useRef(null)
+  useEffect(() => {
+    const el = heroSpotlightRef.current
+    if (!el) return
+    let raf = 0
+    const onMove = (e) => {
+      const r = el.getBoundingClientRect()
+      const x = ((e.clientX - r.left) / r.width) * 100
+      const y = ((e.clientY - r.top) / r.height) * 100
+      cancelAnimationFrame(raf)
+      raf = requestAnimationFrame(() => {
+        el.style.setProperty('--sx', `${x}%`)
+        el.style.setProperty('--sy', `${y}%`)
+      })
+    }
+    el.addEventListener('mousemove', onMove)
+    return () => { el.removeEventListener('mousemove', onMove); cancelAnimationFrame(raf) }
+  }, [])
+
+  // Animated stat counters — count from 0 → target when scrolled into view.
+  // Targets are read from data-count-to on each .se-count element inside .se-counter-band.
+  const counterBandRef = useRef(null)
+  useEffect(() => {
+    const root = counterBandRef.current
+    if (!root) return
+    const els = Array.from(root.querySelectorAll('.se-count'))
+    if (!els.length) return
+    const ease = (t) => 1 - Math.pow(1 - t, 3)
+    const animate = (el) => {
+      const target = parseFloat(el.dataset.countTo || '0')
+      const suffix = el.dataset.countSuffix || ''
+      const decimals = parseInt(el.dataset.countDecimals || '0', 10)
+      const dur = 1700
+      const t0 = performance.now()
+      const step = (now) => {
+        const k = Math.min(1, (now - t0) / dur)
+        const v = target * ease(k)
+        el.textContent = v.toFixed(decimals).replace(/\B(?=(\d{3})+(?!\d))/g, ',') + suffix
+        if (k < 1) requestAnimationFrame(step)
+      }
+      requestAnimationFrame(step)
+    }
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((e) => {
+        if (e.isIntersecting) {
+          animate(e.target)
+          io.unobserve(e.target)
+        }
+      })
+    }, { threshold: 0.4 })
+    els.forEach((el) => io.observe(el))
+    return () => io.disconnect()
+  }, [])
+
+  // Live "studying right now" badge — gently fluctuates between min/max each tick.
+  const [liveNow, setLiveNow] = useState(() => 832 + Math.floor(Math.random() * 40))
+  useEffect(() => {
+    const id = setInterval(() => {
+      setLiveNow((prev) => {
+        const delta = Math.floor(Math.random() * 7) - 2
+        const next = Math.max(780, Math.min(940, prev + delta))
+        return next
+      })
+    }, 4200)
+    return () => clearInterval(id)
+  }, [])
+
+  // Magnetic CTA — small translation toward cursor on hover.
+  const magneticHandlers = (strength = 0.25, maxPx = 10) => ({
+    onMouseMove: (e) => {
+      const el = e.currentTarget
+      const r = el.getBoundingClientRect()
+      const cx = r.left + r.width / 2
+      const cy = r.top + r.height / 2
+      const dx = (e.clientX - cx) * strength
+      const dy = (e.clientY - cy) * strength
+      const clamp = (v) => Math.max(-maxPx, Math.min(maxPx, v))
+      el.style.setProperty('--mx', `${clamp(dx)}px`)
+      el.style.setProperty('--my', `${clamp(dy)}px`)
+    },
+    onMouseLeave: (e) => {
+      const el = e.currentTarget
+      el.style.setProperty('--mx', '0px')
+      el.style.setProperty('--my', '0px')
+    },
+  })
+
+  // 3D tilt — sets --rx/--ry on card based on cursor position.
+  const tiltHandlers = (max = 8) => ({
+    onMouseMove: (e) => {
+      const el = e.currentTarget
+      const r = el.getBoundingClientRect()
+      const px = (e.clientX - r.left) / r.width  // 0..1
+      const py = (e.clientY - r.top) / r.height  // 0..1
+      const ry = (px - 0.5) * max * 2
+      const rx = -(py - 0.5) * max * 2
+      el.style.setProperty('--ry', `${ry}deg`)
+      el.style.setProperty('--rx', `${rx}deg`)
+    },
+    onMouseLeave: (e) => {
+      const el = e.currentTarget
+      el.style.setProperty('--rx', '0deg')
+      el.style.setProperty('--ry', '0deg')
+    },
+  })
+
   // ─────────────────────────────────────────────────────────────────────
   // Headline A/B variants — current default is "While others cram. You execute."
   // Documented alternates for future tests (do not silently swap — A/B in code/cms):
@@ -152,6 +281,131 @@ export default function LandingPage({ onGetStarted }) {
           background: radial-gradient(ellipse at center bottom, rgba(99,102,241,0.18), transparent 70%);
           filter: blur(8px);
         }
+        /* JetBrains Mono for data/numerics + Plus Jakarta Sans (display) */
+        @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;600;700&family=Plus+Jakarta+Sans:wght@600;700;800&display=swap');
+        .se-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; font-feature-settings: 'tnum' 1, 'cv11' 1; }
+        .se-display { font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif; letter-spacing: -0.035em; }
+
+        /* Aurora — slow-drifting conic gradient blob */
+        @keyframes se-aurora {
+          0%   { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
+          33%  { transform: translate3d(-4%, 3%, 0) rotate(120deg) scale(1.1); }
+          66%  { transform: translate3d(3%, -3%, 0) rotate(240deg) scale(1.05); }
+          100% { transform: translate3d(0,0,0) rotate(360deg) scale(1); }
+        }
+        .se-aurora {
+          position: absolute; inset: -20%; pointer-events: none; z-index: 0;
+          background:
+            conic-gradient(from 0deg at 50% 50%,
+              rgba(99,102,241,0.22) 0%, rgba(124,92,252,0.16) 18%,
+              rgba(45,212,191,0.12) 38%, rgba(244,114,182,0.14) 58%,
+              rgba(124,92,252,0.16) 78%, rgba(99,102,241,0.22) 100%);
+          filter: blur(80px);
+          opacity: 0.55;
+          animation: se-aurora 28s linear infinite;
+        }
+
+        /* Cursor spotlight overlay (uses --sx/--sy CSS vars from JS) */
+        .se-spotlight {
+          position: absolute; inset: 0; pointer-events: none; z-index: 2;
+          background: radial-gradient(circle 460px at var(--sx, 50%) var(--sy, 50%),
+            rgba(165,180,252,0.16), rgba(99,102,241,0.06) 35%, transparent 65%);
+          transition: background 0.18s ease;
+          mix-blend-mode: screen;
+        }
+
+        /* Hero headline — gradient cycling text */
+        @keyframes se-gradient-shift {
+          0%, 100% { background-position: 0% 50%; }
+          50%      { background-position: 100% 50%; }
+        }
+        .se-gradient-text {
+          background: linear-gradient(90deg,
+            #ffffff 0%, #c7c8ff 20%, #a5b4fc 35%, #c4b5fd 50%,
+            #a5b4fc 65%, #c7c8ff 80%, #ffffff 100%);
+          background-size: 220% 100%;
+          -webkit-background-clip: text; background-clip: text;
+          -webkit-text-fill-color: transparent;
+          animation: se-gradient-shift 7s ease-in-out infinite;
+        }
+
+        /* Marquee — endless horizontal scroll */
+        @keyframes se-marquee {
+          from { transform: translateX(0); }
+          to   { transform: translateX(-50%); }
+        }
+        .se-marquee-wrap {
+          overflow: hidden;
+          -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+          mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+        }
+        .se-marquee-track {
+          display: inline-flex; gap: 36px; white-space: nowrap;
+          animation: se-marquee 38s linear infinite;
+          will-change: transform;
+        }
+        .se-marquee-wrap:hover .se-marquee-track { animation-play-state: paused; }
+
+        /* Twinkle — for decorative stars/dots */
+        @keyframes se-twinkle {
+          0%, 100% { opacity: 0.25; transform: scale(0.85); }
+          50%      { opacity: 1;    transform: scale(1.4); }
+        }
+        .se-twinkle { animation: se-twinkle 3.4s ease-in-out infinite; }
+
+        /* Drift — floating decorative items */
+        @keyframes se-drift {
+          0%, 100% { transform: translateY(0) translateX(0); }
+          50%      { transform: translateY(-14px) translateX(8px); }
+        }
+        .se-drift { animation: se-drift 9s ease-in-out infinite; }
+
+        /* 3D tilt — applied via inline transform using --rx/--ry */
+        .se-tilt {
+          transform-style: preserve-3d;
+          transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(0);
+          transition: transform 0.25s cubic-bezier(0.22,1,0.36,1);
+          will-change: transform;
+        }
+        .se-tilt:hover { transition: transform 0.08s ease-out; }
+
+        /* Magnetic — primary CTA uses --mx/--my for nudge */
+        .se-magnetic {
+          transform: translate3d(var(--mx, 0px), var(--my, 0px), 0);
+          transition: transform 0.25s cubic-bezier(0.22,1,0.36,1);
+          will-change: transform;
+        }
+
+        /* Shimmer — for buttons/labels */
+        @keyframes se-shimmer-x {
+          0%   { transform: translateX(-100%); }
+          100% { transform: translateX(200%); }
+        }
+        .se-shimmer { position: relative; overflow: hidden; }
+        .se-shimmer::before {
+          content: ''; position: absolute; inset: 0; pointer-events: none;
+          background: linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.18) 50%, transparent 100%);
+          transform: translateX(-100%);
+          animation: se-shimmer-x 3.8s ease-in-out infinite;
+        }
+
+        /* Live pulse ring */
+        @keyframes se-ping {
+          0%   { transform: scale(1); opacity: 0.7; }
+          80%  { transform: scale(2.4); opacity: 0; }
+          100% { transform: scale(2.4); opacity: 0; }
+        }
+        .se-ping::after {
+          content: ''; position: absolute; inset: 0; border-radius: inherit;
+          background: currentColor; animation: se-ping 1.8s cubic-bezier(0,0,0.2,1) infinite;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+          .se-aurora, .se-spotlight, .se-gradient-text, .se-marquee-track,
+          .se-twinkle, .se-drift, .se-shimmer::before, .se-ping::after { animation: none !important; }
+          .se-tilt, .se-magnetic { transform: none !important; }
+        }
+
         /* Hero mockup live animations */
         @keyframes se-row-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes se-grow-w { from { width: 0%; } }
@@ -186,32 +440,51 @@ export default function LandingPage({ onGetStarted }) {
         backgroundSize: '220px 220px',
       }} />
 
-      {/* ── Sticky bottom trial bar ── */}
+      {/* ── Sticky bottom trial bar — glass + brand ── */}
       {!stickyDismissed && scrollY > 300 && (
         <div style={{
-          position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 999,
-          background: 'linear-gradient(90deg, #1e1b4b, #312e81)',
-          borderTop: '1px solid rgba(99,102,241,0.4)',
-          padding: '12px 24px',
-          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 16,
+          position: 'fixed', bottom: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 999,
+          background: 'rgba(11,12,32,0.78)',
+          border: '1px solid rgba(99,102,241,0.30)',
+          borderRadius: 999,
+          padding: '8px 8px 8px 18px',
+          display: 'inline-flex', alignItems: 'center', gap: 14,
           flexWrap: 'wrap',
+          backdropFilter: 'blur(18px)', WebkitBackdropFilter: 'blur(18px)',
+          boxShadow: '0 22px 60px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04) inset, 0 0 60px rgba(99,102,241,0.18)',
+          maxWidth: 'calc(100% - 32px)', justifyContent: 'center',
         }}>
-          <span style={{ fontSize: 14, color: '#c7d2fe', fontWeight: 500 }}>
-            ✦ Try Pro free for 7 days — no credit card required.
+          <span style={{ position: 'relative', display: 'inline-block', width: 8, height: 8, color: '#22c55e', flexShrink: 0 }}>
+            <span className="se-ping" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 10px #22c55e' }} />
+          </span>
+          <span style={{ fontSize: 13.5, color: '#e2e8f0', fontWeight: 500, letterSpacing: '-0.005em' }}>
+            <strong style={{ color: '#fff', fontWeight: 700 }}>Try Pro free for 7 days</strong> — no credit card required
           </span>
           <button
             onClick={goTrial}
+            className="se-magnetic"
+            {...magneticHandlers(0.25, 5)}
             style={{
               background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-              border: 'none', borderRadius: 8, padding: '8px 20px',
+              border: 'none', borderRadius: 999, padding: '9px 18px',
               fontSize: 13, fontWeight: 700, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap',
+              boxShadow: '0 8px 24px rgba(99,102,241,0.45), 0 0 0 1px rgba(255,255,255,0.08) inset',
+              display: 'inline-flex', alignItems: 'center', gap: 6, letterSpacing: '-0.005em',
             }}
           >
-            Start free trial →
+            Start free trial
+            <svg width="12" height="12" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+              <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
           </button>
           <button
             onClick={() => { sessionStorage.setItem('sticky_bar_dismissed', '1'); setStickyDismissed(true) }}
-            style={{ background: 'none', border: 'none', color: '#6366f1', fontSize: 20, cursor: 'pointer', lineHeight: 1, padding: '0 4px', flexShrink: 0 }}
+            style={{
+              background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.08)',
+              color: 'rgba(226,232,240,0.6)', width: 26, height: 26, borderRadius: '50%',
+              fontSize: 14, cursor: 'pointer', lineHeight: 1, flexShrink: 0,
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            }}
             aria-label="Dismiss"
           >×</button>
         </div>
@@ -267,10 +540,43 @@ export default function LandingPage({ onGetStarted }) {
       </nav>
 
       {/* ── Hero Section ── */}
-      <section aria-label="StudyEdge landing hero" style={{
-        position: 'relative', width: '100%', aspectRatio: '16/5',
-        overflow: 'hidden', background: '#060614', isolation: 'isolate',
-      }}>
+      <section
+        ref={heroSpotlightRef}
+        aria-label="StudyEdge landing hero"
+        style={{
+          position: 'relative', width: '100%', aspectRatio: '16/5',
+          overflow: 'hidden', background: '#060614', isolation: 'isolate',
+        }}
+      >
+        {/* Aurora — slow-drifting conic gradient */}
+        <div aria-hidden="true" className="se-aurora" />
+        {/* Cursor-following spotlight */}
+        <div aria-hidden="true" className="se-spotlight" />
+        {/* Twinkling decorative stars */}
+        <div aria-hidden="true" style={{ position: 'absolute', inset: 0, pointerEvents: 'none', zIndex: 1 }}>
+          {[
+            { x: 12, y: 22, c: '#a5b4fc', s: 4, d: 0 },
+            { x: 22, y: 70, c: '#c4b5fd', s: 3, d: 0.6 },
+            { x: 34, y: 14, c: '#86efac', s: 3, d: 1.2 },
+            { x: 47, y: 82, c: '#f9a8d4', s: 4, d: 1.8 },
+            { x: 64, y: 18, c: '#7dd3fc', s: 3, d: 0.3 },
+            { x: 78, y: 64, c: '#a5b4fc', s: 4, d: 2.4 },
+            { x: 89, y: 28, c: '#fbbf24', s: 3, d: 1.0 },
+            { x: 92, y: 88, c: '#c4b5fd', s: 4, d: 0.9 },
+          ].map((s, i) => (
+            <span
+              key={i}
+              className="se-twinkle"
+              style={{
+                position: 'absolute', left: `${s.x}%`, top: `${s.y}%`,
+                width: s.s, height: s.s, borderRadius: '50%',
+                background: s.c,
+                boxShadow: `0 0 10px ${s.c}, 0 0 18px ${s.c}88`,
+                animationDelay: `${s.d}s`,
+              }}
+            />
+          ))}
+        </div>
         {/* 1920×600 stage — scaled to fill container width */}
         <div ref={heroStageRef} style={{
           position: 'absolute', inset: 0,
@@ -330,17 +636,14 @@ export default function LandingPage({ onGetStarted }) {
             </div>
 
             {/* Headline */}
-            <h1 style={{
-              fontSize: 70, lineHeight: 0.98, letterSpacing: '-0.035em',
-              fontWeight: 600, margin: '0 0 22px', color: '#fff',
+            <h1 className="se-display" style={{
+              fontSize: 74, lineHeight: 0.98,
+              fontWeight: 800, margin: '0 0 22px', color: '#fff',
             }}>
               While others cram.<br />
-              <span style={{
+              <span className="se-gradient-text" style={{
                 fontFamily: "'Instrument Serif', serif", fontStyle: 'italic',
                 fontWeight: 400, letterSpacing: '-0.02em',
-                background: 'linear-gradient(180deg, #ffffff 0%, #c7c8ff 100%)',
-                WebkitBackgroundClip: 'text', backgroundClip: 'text',
-                WebkitTextFillColor: 'transparent',
               }}>You execute</span><span style={{ color: '#6366F1' }}>.</span>
             </h1>
 
@@ -358,27 +661,24 @@ export default function LandingPage({ onGetStarted }) {
             }}>
               <button
                 onClick={goTrial}
+                className="se-magnetic se-shimmer"
+                {...magneticHandlers(0.3, 8)}
                 style={{
                   background: 'linear-gradient(135deg, #6366F1, #4F46E5)',
                   border: 'none', color: '#fff', borderRadius: 12,
                   padding: '14px 26px', fontSize: 15.5, fontWeight: 700, cursor: 'pointer',
-                  boxShadow: '0 10px 30px rgba(99,102,241,0.35), 0 0 0 1px rgba(255,255,255,0.06) inset',
-                  letterSpacing: '-0.01em', transition: 'transform 0.15s ease, box-shadow 0.2s ease',
+                  boxShadow: '0 10px 30px rgba(99,102,241,0.35), 0 0 0 1px rgba(255,255,255,0.08) inset',
+                  letterSpacing: '-0.01em',
                   display: 'inline-flex', alignItems: 'center', gap: 8,
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-1px)'
-                  e.currentTarget.style.boxShadow = '0 14px 38px rgba(99,102,241,0.5), 0 0 0 1px rgba(255,255,255,0.08) inset'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)'
-                  e.currentTarget.style.boxShadow = '0 10px 30px rgba(99,102,241,0.35), 0 0 0 1px rgba(255,255,255,0.06) inset'
+                  position: 'relative',
                 }}
               >
-                Start free 7-day trial
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-                  <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+                <span style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                  Start free 7-day trial
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                    <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </span>
               </button>
               <button
                 onClick={scrollToHow}
@@ -412,16 +712,33 @@ export default function LandingPage({ onGetStarted }) {
               No credit card required · Cancel anytime
             </div>
 
-            {/* Social proof */}
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: 10,
-              fontSize: 14, color: 'rgba(255,255,255,0.55)', fontWeight: 500, letterSpacing: '-0.005em',
-            }}>
+            {/* Social proof — live "studying right now" badge */}
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 9,
+                padding: '6px 14px 6px 10px',
+                background: 'rgba(34,197,94,0.10)',
+                border: '1px solid rgba(34,197,94,0.30)',
+                borderRadius: 999, fontSize: 13, fontWeight: 500,
+                color: 'rgba(255,255,255,0.85)', letterSpacing: '-0.005em',
+                backdropFilter: 'blur(8px)',
+              }}>
+                <span style={{ position: 'relative', display: 'inline-block', width: 7, height: 7, color: '#22c55e' }}>
+                  <span className="se-ping" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />
+                </span>
+                <span className="se-mono" style={{ color: '#86efac', fontWeight: 700, fontSize: 13, letterSpacing: '0.01em' }}>{liveNow.toLocaleString()}</span>
+                <span style={{ color: 'rgba(226,232,240,0.7)' }}>studying right now</span>
+              </div>
               <span style={{
-                width: 6, height: 6, borderRadius: '50%', background: '#6366F1',
-                boxShadow: '0 0 12px #6366F1', flexShrink: 0,
-              }} />
-              <span>Built for serious students &nbsp;·&nbsp; <strong style={{ color: '#fff', fontWeight: 600 }}>9.6h studied this week</strong></span>
+                display: 'inline-flex', alignItems: 'center', gap: 8,
+                fontSize: 13.5, color: 'rgba(255,255,255,0.55)', fontWeight: 500, letterSpacing: '-0.005em',
+              }}>
+                <span style={{
+                  width: 5, height: 5, borderRadius: '50%', background: '#6366F1',
+                  boxShadow: '0 0 10px #6366F1', flexShrink: 0,
+                }} />
+                <strong className="se-mono" style={{ color: '#fff', fontWeight: 600, fontSize: 13.5 }}>9.6h</strong> studied this week
+              </span>
             </div>
           </div>
 
@@ -697,91 +1014,124 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
-      {/* ── Trust strip: program/category coverage ── */}
+      {/* ── Trust strip: endless marquee of programs ── */}
       <section className="se-section" style={{
-        maxWidth: 1100, margin: '0 auto', padding: '56px 24px 28px',
+        margin: '0 auto', padding: '56px 0 28px',
       }}>
-        <div data-reveal style={{ textAlign: 'center' }}>
+        <div data-reveal style={{ textAlign: 'center', maxWidth: 1100, margin: '0 auto', padding: '0 24px' }}>
           <div style={{
             fontSize: 11, fontWeight: 600, letterSpacing: '0.22em',
             color: 'rgba(199,210,254,0.5)', textTransform: 'uppercase',
-            marginBottom: 22,
+            marginBottom: 26,
           }}>
             Built for serious students across
           </div>
-          <div style={{
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            gap: 16, flexWrap: 'wrap',
-            fontSize: 14.5, fontWeight: 600, color: 'rgba(226,232,240,0.62)',
+        </div>
+        <div className="se-marquee-wrap">
+          <div className="se-marquee-track" style={{
+            fontSize: 15, fontWeight: 600, color: 'rgba(226,232,240,0.62)',
             letterSpacing: '-0.005em',
           }}>
-            {[
-              'Pre-Med',
-              'STEM',
-              'Engineering',
-              'Liberal Arts',
-              'MCAT · LSAT · GRE',
-              'Grad Programs',
-            ].map((tag, i, arr) => (
-              <span key={tag} style={{ display: 'inline-flex', alignItems: 'center', gap: 16 }}>
-                <span>{tag}</span>
-                {i < arr.length - 1 && (
-                  <span aria-hidden="true" style={{
-                    width: 4, height: 4, borderRadius: '50%',
-                    background: 'rgba(99,102,241,0.55)',
-                    boxShadow: '0 0 8px rgba(99,102,241,0.6)',
-                  }} />
-                )}
-              </span>
+            {/* Two duplicate tracks for seamless loop */}
+            {[0, 1].map((dupKey) => (
+              <div key={dupKey} style={{ display: 'inline-flex', alignItems: 'center', gap: 36 }}>
+                {[
+                  { name: 'Pre-Med', icon: '🩺', color: '#f9a8d4' },
+                  { name: 'STEM', icon: '⚛', color: '#a5b4fc' },
+                  { name: 'Engineering', icon: '⚙', color: '#fbbf24' },
+                  { name: 'Liberal Arts', icon: '✦', color: '#c4b5fd' },
+                  { name: 'MCAT', icon: '◆', color: '#86efac' },
+                  { name: 'LSAT', icon: '⚖', color: '#7dd3fc' },
+                  { name: 'GRE', icon: '◈', color: '#fda4af' },
+                  { name: 'Pre-Law', icon: '§', color: '#a5b4fc' },
+                  { name: 'Computer Science', icon: '〈〉', color: '#5eead4' },
+                  { name: 'Business', icon: '◊', color: '#fcd34d' },
+                  { name: 'Nursing', icon: '✚', color: '#fda4af' },
+                  { name: 'Grad Programs', icon: '◉', color: '#c4b5fd' },
+                ].map((tag, i, arr) => (
+                  <span key={`${dupKey}-${tag.name}`} style={{ display: 'inline-flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+                    <span style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 9,
+                      padding: '7px 14px',
+                      background: 'rgba(255,255,255,0.025)',
+                      border: '1px solid rgba(255,255,255,0.08)',
+                      borderRadius: 999,
+                      transition: 'border-color 0.2s ease, background 0.2s ease',
+                    }}>
+                      <span style={{ color: tag.color, fontSize: 14, fontWeight: 700, textShadow: `0 0 12px ${tag.color}66` }}>{tag.icon}</span>
+                      <span>{tag.name}</span>
+                    </span>
+                    {i < arr.length - 1 && (
+                      <span aria-hidden="true" style={{
+                        width: 4, height: 4, borderRadius: '50%',
+                        background: 'rgba(99,102,241,0.55)',
+                        boxShadow: '0 0 8px rgba(99,102,241,0.6)',
+                      }} />
+                    )}
+                  </span>
+                ))}
+              </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* ── Capability stat band ── */}
+      {/* ── Capability stat band with animated counters ── */}
       <section className="se-section" style={{
         maxWidth: 1100, margin: '0 auto', padding: '8px 24px 12px',
       }}>
-        <div data-reveal style={{
+        <div ref={counterBandRef} data-reveal style={{
           display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-          background: 'linear-gradient(180deg, rgba(255,255,255,0.035), rgba(255,255,255,0.015))',
-          border: '1px solid rgba(255,255,255,0.07)',
-          borderRadius: 18, overflow: 'hidden',
-          boxShadow: '0 30px 80px rgba(0,0,0,0.35), inset 0 1px 0 rgba(255,255,255,0.04)',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.015))',
+          border: '1px solid rgba(255,255,255,0.08)',
+          borderRadius: 20, overflow: 'hidden',
+          boxShadow: '0 30px 80px rgba(0,0,0,0.4), inset 0 1px 0 rgba(255,255,255,0.05), 0 0 0 1px rgba(99,102,241,0.06)',
+          position: 'relative',
         }}>
+          {/* Subtle aurora band behind the row */}
+          <div aria-hidden="true" style={{
+            position: 'absolute', inset: 0, pointerEvents: 'none', opacity: 0.5,
+            background:
+              'radial-gradient(380px 200px at 12% 50%, rgba(99,102,241,0.18), transparent 70%),' +
+              'radial-gradient(380px 200px at 88% 50%, rgba(124,92,252,0.18), transparent 70%),' +
+              'radial-gradient(380px 200px at 50% 50%, rgba(45,212,191,0.10), transparent 70%)',
+          }} />
           {[
-            { big: '4', sub: 'problems no other app solves together', accent: '#818cf8' },
-            { big: '60s', sub: 'setup, then your plan is live', accent: '#c4b5fd' },
-            { big: '∞', sub: 'sessions, each with a minute-by-minute plan', accent: '#5eead4' },
-            { big: '1', sub: 'grade target — calculated backwards from the exam', accent: '#86efac' },
+            { big: 4,   suffix: '',  decimals: 0, prefix: '',  sub: 'problems no other app solves together', accent: '#818cf8' },
+            { big: 60,  suffix: 's', decimals: 0, prefix: '',  sub: 'setup, then your plan is live',           accent: '#c4b5fd' },
+            { big: 100, suffix: '%', decimals: 0, prefix: '',  sub: 'of your syllabus, planned end-to-end',    accent: '#5eead4' },
+            { big: 1,   suffix: '',  decimals: 0, prefix: '',  sub: 'grade target — backwards from the exam',  accent: '#86efac' },
           ].map((s, i, arr) => (
             <div key={i} style={{
-              padding: '30px 24px 28px', textAlign: 'center',
-              borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.05)' : 'none',
-              borderBottom: 'none',
+              padding: '34px 24px 30px', textAlign: 'center',
+              borderRight: i < arr.length - 1 ? '1px solid rgba(255,255,255,0.06)' : 'none',
               position: 'relative',
             }}>
-              {/* Soft accent glow per stat */}
               <div aria-hidden="true" style={{
                 position: 'absolute', top: 0, left: '50%', transform: 'translateX(-50%)',
-                width: 220, height: 80, pointerEvents: 'none',
-                background: `radial-gradient(closest-side, ${s.accent}22, transparent 70%)`,
+                width: 220, height: 90, pointerEvents: 'none',
+                background: `radial-gradient(closest-side, ${s.accent}2a, transparent 70%)`,
               }} />
               <div style={{ position: 'relative' }}>
-                <div style={{
-                  fontFamily: "'Instrument Serif', serif",
-                  fontSize: 56, fontWeight: 400, letterSpacing: '-0.04em', lineHeight: 0.95,
-                  background: `linear-gradient(180deg, #ffffff 0%, ${s.accent} 110%)`,
+                <div className="se-display" style={{
+                  fontSize: 64, fontWeight: 800, lineHeight: 0.95,
+                  background: `linear-gradient(180deg, #ffffff 0%, ${s.accent} 115%)`,
                   WebkitBackgroundClip: 'text', backgroundClip: 'text',
                   WebkitTextFillColor: 'transparent',
-                  marginBottom: 12,
+                  marginBottom: 14, fontVariantNumeric: 'tabular-nums',
+                  textShadow: `0 0 30px ${s.accent}33`,
                 }}>
-                  {s.big}
+                  <span
+                    className="se-count"
+                    data-count-to={s.big}
+                    data-count-suffix={s.suffix}
+                    data-count-decimals={s.decimals}
+                  >{s.prefix}0{s.suffix}</span>
                 </div>
                 <div style={{
-                  fontSize: 13.5, color: 'rgba(226,232,240,0.6)',
+                  fontSize: 13.5, color: 'rgba(226,232,240,0.65)',
                   lineHeight: 1.5, letterSpacing: '-0.005em',
-                  maxWidth: 220, margin: '0 auto',
+                  maxWidth: 230, margin: '0 auto',
                 }}>
                   {s.sub}
                 </div>
@@ -1016,21 +1366,20 @@ export default function LandingPage({ onGetStarted }) {
               key={step.num}
               data-reveal
               data-reveal-delay={String(i + 1)}
+              className="se-tilt"
+              onMouseMove={tiltHandlers(7).onMouseMove}
+              onMouseEnter={(e) => { e.currentTarget.style.borderColor = `${step.accent}55` }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.setProperty('--rx', '0deg')
+                e.currentTarget.style.setProperty('--ry', '0deg')
+                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
+              }}
               style={{
                 position: 'relative',
                 background: 'rgba(255,255,255,0.025)',
                 border: '1px solid rgba(255,255,255,0.07)',
                 borderRadius: 18, padding: '28px 26px 26px',
                 overflow: 'hidden',
-                transition: 'border-color 0.25s ease, transform 0.25s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = `${step.accent}55`
-                e.currentTarget.style.transform = 'translateY(-2px)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'
-                e.currentTarget.style.transform = 'translateY(0)'
               }}
             >
               {/* Soft accent glow */}
@@ -1594,27 +1943,24 @@ export default function LandingPage({ onGetStarted }) {
         }}>
           <button
             onClick={goTrial}
+            className="se-magnetic se-shimmer"
+            {...magneticHandlers(0.32, 12)}
             style={{
               background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
               border: 'none', color: '#fff', borderRadius: 14,
               padding: '16px 32px', fontSize: 16, fontWeight: 700, cursor: 'pointer',
               boxShadow: '0 18px 48px rgba(99,102,241,0.45), 0 0 0 1px rgba(255,255,255,0.08) inset',
-              letterSpacing: '-0.01em', transition: 'transform 0.15s ease, box-shadow 0.2s ease',
+              letterSpacing: '-0.01em',
               display: 'inline-flex', alignItems: 'center', gap: 10,
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-1px)'
-              e.currentTarget.style.boxShadow = '0 22px 60px rgba(99,102,241,0.6), 0 0 0 1px rgba(255,255,255,0.1) inset'
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)'
-              e.currentTarget.style.boxShadow = '0 18px 48px rgba(99,102,241,0.45), 0 0 0 1px rgba(255,255,255,0.08) inset'
+              position: 'relative',
             }}
           >
-            Start your free 7-day trial
-            <svg width="15" height="15" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-              <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
-            </svg>
+            <span style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: 10 }}>
+              Start your free 7-day trial
+              <svg width="15" height="15" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </span>
           </button>
           <button
             onClick={scrollToHow}
