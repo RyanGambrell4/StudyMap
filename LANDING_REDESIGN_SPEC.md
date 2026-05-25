@@ -1,420 +1,423 @@
 # StudyEdge AI — Landing Page Full Redesign Spec
-_Built from deep interview — May 2026_
+_May 2026 — Full ground-up rewrite_
 
 ---
 
-## Context
+## Tech Stack & Constraints
 
-**File to rewrite:** `src/components/LandingPage.jsx` (currently 837 lines, dark-themed)
-**Repo:** `/Users/ryangambrell/Desktop/StudyMap`
-**Deploy:** Push to `main` → Vercel auto-deploys to `getstudyedge.com`
-**App design system:** bg `#F7F6F3`, card `#FFFFFF`, border `rgba(0,0,0,0.07)`, accent `#3B61C4`, text `#111111`, muted `#6B6B6B`
+- **File:** `src/components/LandingPage.jsx` — single React component, complete rewrite
+- **Framework:** React + Vite, no Next.js
+- **Prop contract:** component accepts `{ onGetStarted }` — must be preserved
+- **CTA destination:** `goTrial()` = navigate to `/app?signup=1&plan=pro&billing=monthly&trial=1`
+- **"Log in" link:** navigates to `/app`
+- **Build check:** `npm run build` must pass with zero errors before commit
+- **No new npm packages** unless absolutely necessary and justifiable
+- **Animation:** Use CSS keyframes + `IntersectionObserver` for scroll reveals. Framer Motion acceptable if already in package.json.
+- **Assets:** Real screenshots at `/public/ss-*.png` — use inside app mockups
 
 ---
 
-## The Single Most Important Instruction
+## Visual Foundation
 
-This is a **full rewrite**, not a polish pass. The current dark page gets replaced entirely with a light, cinematic, premium design. The goal is a page that looks like it belongs next to Framer.com and Linear.app — but light-themed to match the app.
-
----
-
-## Design Foundation
-
-### Theme
-- **Light-themed throughout** — no dark sections except optional subtle gradient accents
-- Page background: `#F7F6F3` (app bg color)
-- Card surfaces: `#FFFFFF`
-- Borders: `rgba(0,0,0,0.07)`
-- Primary text: `#111111`
-- Muted text: `#6B6B6B`
-- Accent: `#3B61C4` (brand blue — buttons, highlights, links)
-- Gradient moments: soft blue washes (`rgba(59,97,196,0.06)` to `transparent`) on section backgrounds, hero glow, section dividers
+### Color Palette
+```
+Page bg:          #060614
+Section alt bg:   #07091a
+Card bg:          rgba(255,255,255,0.04)
+Card border:      1px solid rgba(255,255,255,0.08)
+Accent blue:      #3B61C4
+Accent indigo:    #6366f1
+Gradient:         linear-gradient(135deg, #3B61C4, #6366f1)
+Text primary:     #e2e8f0
+Text muted:       rgba(226,232,240,0.6)
+Text dim:         rgba(226,232,240,0.35)
+Glow:             rgba(99,102,241,0.15)
+```
 
 ### Typography
-- **Sharp & editorial** — tight letter-spacing, heavy weight
-- Headlines: `font-weight: 800`, `letter-spacing: -0.035em`, large sizes (clamp 48–96px for hero)
-- Section labels above headlines: `font-size: 11px`, `letter-spacing: 0.12em`, `text-transform: uppercase`, color `#3B61C4`
-- Body: 15–16px, `line-height: 1.7`, color `#6B6B6B`
-- Font stack: `'Plus Jakarta Sans', 'Inter', system-ui, sans-serif` (already loaded)
-- Mono for code/data moments: `'JetBrains Mono'` (already loaded)
+```
+Font:             Inter (load via Google Fonts or system fallback)
+Headline:         font-weight 800, letter-spacing -0.03em to -0.04em
+Subheadline:      font-weight 600, letter-spacing -0.02em
+Body:             font-size 15-16px, line-height 1.7, font-weight 400
+Section label:    font-size 11px, letter-spacing 0.1em, UPPERCASE, muted color
+Button:           font-weight 700, letter-spacing -0.01em
+```
 
-### Color Usage
-- Blue `#3B61C4`: CTA buttons, section label chips, active states, key data highlights
-- Gradient washes: `linear-gradient(135deg, rgba(59,97,196,0.05) 0%, transparent 60%)` — use on hero bg, bento card hovers, section backgrounds
-- Semantic: `#16A34A` green (success/grade up), `#D97706` amber (warning/streak), `#DC2626` red (urgent)
-- No dark backgrounds anywhere — not even in feature cards
-
-### Animations
-Full cinematic treatment. Every section reveals on scroll. Use `IntersectionObserver` with `data-reveal` attributes (infrastructure already exists in current page — preserve and expand it).
-
-**Required animations:**
-- Hero: stagger-in for headline words (each word fades up 80ms apart)
-- Hero mockup: screenshot fades in with a subtle upward drift
-- Bento grid: cards reveal with 60ms stagger per card
-- Stat counters: count up from 0 when they enter viewport
-- Testimonial cards: stagger-in from bottom
-- CTA sections: fade + scale from 0.97
-- Hover on all cards: `transform: translateY(-3px)`, `box-shadow` lift
-- All animations gated by `prefers-reduced-motion` media query
+### Animation System
+All section content reveals on scroll entry via IntersectionObserver:
+```css
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(24px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.reveal { opacity: 0; }
+.reveal.visible { animation: fadeUp 0.5s ease forwards; }
+```
+Stagger children with `animation-delay: 0.1s` increments.
 
 ---
 
-## Available Assets (use these — they're real screenshots)
+## Section 1 — Nav
 
-```
-/public/ss-hero.png           — Main dashboard overview
-/public/ss-main.png           — Dashboard with schedule
-/public/ss-coach.png          — Study Coach / plan view
-/public/ss-blueprint.png      — Session blueprint
-/public/ss-flashcard.png      — Flashcard UI
-/public/ss-focus.png          — Focus mode
-/public/ss-calendar.png       — Calendar view
-/public/ss-progress.png       — Progress / grade view
-/public/ss-study-plan.png     — Study plan
-/public/ss-courses.png        — Course setup
-/public/lp-grade-predictor.png
-/public/lp-daily-view.png
-/public/lp-ai-tutor.png
-/public/logo.png              — App logo
-/public/og-hero-v1.png        — OG image (1200×630)
+**Layout:** Fixed top, full-width, blur backdrop on scroll (add `.scrolled` class after 50px scroll).
+
+**Left:** Logo — "StudyEdge AI" in `#e2e8f0`, font-weight 700, 17px.
+
+**Right:** "Log in" (ghost text link, `rgba(226,232,240,0.7)`, goes to `/app`) + "Start free" (gradient button, `background: linear-gradient(135deg, #3B61C4, #6366f1)`, border-radius 8px, padding `8px 18px`, font-size 14px).
+
+**Scrolled state:**
+```css
+background: rgba(6,6,20,0.85);
+backdrop-filter: blur(20px);
+border-bottom: 1px solid rgba(255,255,255,0.06);
 ```
 
-Use real screenshots in feature cards and hero. Do not use stock imagery or placeholder blobs.
+**Mobile:** Show logo + "Start free" only. Hide "Log in" to save space.
 
 ---
 
-## Page Architecture (CRO-ordered)
+## Section 2 — Hero
 
+**Layout:** Full viewport height (`min-height: 100vh`), two columns on desktop (55% left / 45% right), single column stacked on mobile.
+
+**Background:** `#060614` with radial glow centered-right:
+```css
+background: radial-gradient(ellipse 80% 60% at 70% 40%, rgba(99,102,241,0.12) 0%, transparent 70%);
 ```
-1. Nav
-2. Hero (split screen)
-3. Stats strip
-4. How It Works (3 steps)
-5. Features Bento Grid
-6. Testimonials (card wall)
-7. Pricing (full table)
-8. FAQ
-9. Final CTA
-10. Footer
+
+### Left Column
+
+**Section label:** `THE AI STUDY SYSTEM` — 11px, muted, letter-spacing 0.1em, with 20px gradient left border.
+
+**Headline:**
+```
+While others cram.
+You execute.
+```
+Font size: `clamp(42px, 6vw, 72px)`. Weight 800. Letter-spacing -0.04em. Color `#e2e8f0`.
+
+**A/B variant (code comment only — do not render):**
+```
+// ALT: "Know exactly what to study. Every session. All semester."
+// Reasoning: more outcome-specific, less metaphorical — test against current
+```
+
+**Subline:**
+```
+StudyEdge builds your schedule, plans every session minute by minute,
+and shows you the exact grade you need on every remaining assignment.
+One app. Every course. All semester.
+```
+Font-size 16px. Color `rgba(226,232,240,0.65)`. Line-height 1.7. Max-width 440px.
+
+**CTA group:**
+- Primary: "Start free 7-day trial →" — gradient bg, border-radius 10px, padding `14px 28px`, font-size 15px, weight 700. Calls `onGetStarted('signup')`.
+- Microcopy: "No credit card required · Cancel anytime" — 12px, muted.
+- Secondary: "Log in →" — 14px, `rgba(226,232,240,0.55)`.
+
+**Floating stat chips** (absolutely positioned around mockup, animate in with delay):
+- "GPA 3.84 ↑"
+- "🔥 12-day streak"
+- "2h 15m studied today"
+
+Chip style: `background: rgba(255,255,255,0.06)`, border `1px solid rgba(255,255,255,0.12)`, border-radius 10px, padding `8px 14px`, font-size 13px, backdrop-blur.
+
+### Right Column — App Mockup
+
+Browser-style frame:
+```css
+background: rgba(255,255,255,0.03);
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 16px;
+box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(99,102,241,0.2);
+```
+
+Use best available screenshot from `/public/ss-*.png` (prefer dashboard/grade hub view). Display as `<img>` with `object-fit: cover`.
+
+**Mobile:** Mockup stacks below headline, max-width 340px, centered. Floating chips hidden.
+
+---
+
+## Section 3 — Trust Strip
+
+**Layout:** Horizontal band. `background: rgba(255,255,255,0.02)`. Border top/bottom `1px solid rgba(255,255,255,0.05)`. Padding `20px 0`.
+
+**Left label:** "Built for serious students —" (muted, 13px, static)
+
+**Right:** Infinite CSS marquee scrolling left:
+```
+Pre-Med · STEM · Engineering · Computer Science · Liberal Arts · Psychology · MCAT · LSAT · GRE · Grad School · Nursing · Law · MBA · Biochemistry · Physics
+```
+Separators `·` in `#3B61C4`. Duplicate content for seamless loop.
+
+```css
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to   { transform: translateX(-50%); }
+}
+.marquee-track { animation: marquee 20s linear infinite; white-space: nowrap; }
 ```
 
 ---
 
-## Section Specs
+## Section 4 — Stats Band
 
-### 1. Nav
-**Style:** Clean top bar, full-width. Transparent at top, transforms to `background: rgba(247,246,243,0.92)` with `backdrop-filter: blur(16px)` and `border-bottom: 1px solid rgba(0,0,0,0.07)` on scroll.
+**Layout:** 4 columns desktop, 2×2 grid mobile. Padding `80px 0`.
 
-**Layout:** Logo + wordmark left → `Blog` `Features` `Pricing` links center → `Sign in` (ghost) + `Start free →` (blue pill) right
+**Each stat:** Large animated number + descriptor line.
 
-**Logo:** `<img src="/logo.png" />` (32px) + "StudyEdge AI" wordmark in `#111111`, `font-weight: 700`
+Stats:
+1. `10,000+` — "study sessions planned"
+2. `60s` — "from signup to first plan"
+3. `4` — "problems solved in one app"
+4. `∞` — "courses supported"
 
-**CTA button:** `background: #3B61C4`, `color: #fff`, `border-radius: 999px`, `padding: 9px 22px`, `font-size: 14px`, `font-weight: 700`
+Number style: `font-size: clamp(40px, 5vw, 64px)`, weight 800, gradient text:
+```css
+background: linear-gradient(135deg, #e2e8f0, #6366f1);
+-webkit-background-clip: text;
+-webkit-text-fill-color: transparent;
+```
+
+Count-up: trigger on IntersectionObserver entry, increment from 0 over 1.5s with ease-out.
 
 ---
 
-### 2. Hero
-**Layout:** Split screen. Left 50%: copy + CTAs. Right 50%: app screenshot.
+## Section 5 — How It Works
 
-**Left side:**
-- Label chip: `STUDYEDGE AI` in blue uppercase chip
-- Headline (clamp 52–88px, weight 800, letter-spacing -0.035em):
-  ```
-  While others cram.
-  You execute.
-  ```
-  Each word animates in with 80ms stagger (fade up from Y+20px)
-- Subline (16px, color `#6B6B6B`, max-width 480px):
-  `The AI study system that builds your schedule, plans every session, and tracks your grades — every course, all semester.`
-- Student type strip (12px chips): `Built for Pre-Med · STEM · Liberal Arts · MCAT/LSAT · Grad Programs`
-- Primary CTA: Large blue button `Start free — no credit card required →` (full-width on mobile)
-- Secondary: `Sign in` ghost link underneath
-- Trust micro-copy: `Free to start · 7-day Pro trial included · No card required`
+**Section label:** `HOW IT WORKS`
+**Headline:** "From zero to a full study plan in 60 seconds."
 
-**Right side:**
-- Display `ss-hero.png` or `ss-main.png` — the current hero mockup image
-- Convert to light theme: apply `filter: brightness(1.02) saturate(0.95)` if the image looks dark
-- Wrap in a subtle rounded container: `border-radius: 16px`, `box-shadow: 0 24px 80px rgba(0,0,0,0.12)`, `overflow: hidden`
-- Animate in: fade + translateY(-12px) over 0.6s, delayed 0.3s after headline
-- Two floating stat chips anchored to the image (absolute positioned):
-  - Bottom-left: `📅 14-day streak` chip in white card with green dot
-  - Bottom-right: `GPA 3.78 ↑` chip in white card with blue accent
+**3 steps, horizontal on desktop, vertical on mobile:**
+
+```
+01 Add your courses        02 AI builds your plan     03 Execute every session
+Tell StudyEdge your        Based on exam dates,       Open your session plan.
+courses, exam dates,       grade weights, and         StudyEdge tells you exactly
+and available hours        your schedule, AI          what to do and for how long.
+per week.                  builds your full           Focus mode, coach, and
+                           semester plan.             recall scoring built in.
+```
+
+Step number chip: gradient text, monospace, small. Connector lines between steps (desktop): `1px dashed rgba(255,255,255,0.1)`. Cards: transparent, no heavy borders — spacious.
+
+---
+
+## Section 6 — Features (Alternating Rows)
+
+4 full-width alternating rows. Each: 50% text / 50% visual. `120px` gap between rows.
+
+### Row 1 — Session Planner (text left, visual right)
+**Label:** `SESSION PLANNER`
+**Headline:** "A minute-by-minute plan for every study session."
+**Body:** "Most students open their notes and start reading. StudyEdge tells you exactly what to review, in what order, for how long — based on your exam in 4 days and your weakest topics."
+**Bullets:** Built from syllabus and grade weights · Adapts to time available · Covers every course
+
+### Row 2 — Grade Hub (text right, visual left)
+**Label:** `GRADE HUB`
+**Headline:** "See the exact score you need. On every assignment."
+**Body:** "Grade Hub reverse-engineers your GPA target. Tell it your goal grade — it calculates the minimum score needed on every remaining quiz, exam, and project."
+**Bullets:** Live grade tracking · Reverse-calculated minimums · See which assignments matter most
+
+### Row 3 — AI Study Coach (text left, visual right)
+**Label:** `AI STUDY COACH`
+**Headline:** "An AI that knows your courses, grades, and schedule."
+**Body:** "Unlike ChatGPT, StudyEdge's coach has full context — it knows you have an orgo exam in 6 days, that you're weakest on stereochemistry, and that you only have 90 minutes tonight."
+**Bullets:** Course-aware answers · Flashcards from weak topics · Recall score tracking
+
+### Row 4 — Focus Mode (text right, visual left)
+**Label:** `FOCUS MODE`
+**Headline:** "Lock in. Timer running. No distractions."
+**Body:** "Built-in Pomodoro timer, ambient sound, and session progress bar. StudyEdge keeps you on task — and when the session ends, it logs your streak automatically."
+**Bullets:** Pomodoro + custom timer modes · Ambient focus sounds · Automatic streak tracking
+
+**Visuals:** Use `/public/ss-*.png` screenshots where available. Fall back to CSS-built styled mockups that resemble the actual UI.
+
+---
+
+## Section 7 — Testimonials
+
+**Section label:** `SOCIAL PROOF`
+**Headline:** "From students who stopped cramming."
+
+**3 cards, horizontal grid desktop, stack mobile.**
+
+Card style:
+```css
+background: rgba(255,255,255,0.03);
+border: 1px solid rgba(255,255,255,0.08);
+border-radius: 16px;
+padding: 32px;
+position: relative;
+```
+
+Large opening quote mark:
+```css
+content: '"';
+font-size: 80px;
+color: rgba(99,102,241,0.3);
+position: absolute;
+top: 16px; left: 24px;
+font-family: Georgia, serif;
+```
+
+Quote text: 15px, `rgba(226,232,240,0.8)`, padding-top 40px to clear quote mark.
+Attribution: Name bold `#e2e8f0` + Major muted. Avatar: gradient circle with initials (no photos).
+
+**Use only the 3 existing real quotes.** Do not fabricate. Make 3 feel weighty through layout and design.
+
+---
+
+## Section 8 — Comparison
+
+**Headline:** "Everything you need. Nothing you don't."
+**Layout:** 3-column table. Centered, max-width 800px.
+
+Columns: StudyEdge AI | Generic Study Apps | Blank Productivity Tools
+
+StudyEdge column: gradient header bg, brand blue border highlight.
+
+Rows:
+```
+Feature                           StudyEdge   Generic   Blank
+AI-generated study schedule          ✓           ✗         ✗
+Session-by-session plans             ✓           ✗         ✗
+Grade reverse-engineering            ✓           ✗         ✗
+AI coach (course-aware)              ✓           ✗         ✗
+Built-in focus mode                  ✓           ~         ✗
+Flashcards & quizzes                 ✓           ✓         ✗
+Works for every course type          ✓           ~         ✓
+```
+
+`✓` in `#34d399`. `✗` in `rgba(226,232,240,0.2)`. `~` as muted dash.
+
+---
+
+## Section 9 — FAQ
+
+**Layout:** Accordion. Max-width 680px, centered. Smooth CSS `max-height` transition on open/close.
+
+**6 questions:**
+
+1. **Is it actually free to start?**
+   Yes. The free plan includes 10 AI study boosts per month, one course, and the full Grade Hub. No credit card required.
+
+2. **What if my syllabus isn't on there?**
+   You enter your course name, topics, and exam dates manually — or paste your syllabus. StudyEdge builds your plan from what you give it.
+
+3. **How is this different from Notion or a planner app?**
+   Notion gives you a blank page. StudyEdge gives you a complete, AI-generated study schedule, session plans, and grade calculations in 60 seconds. You don't build anything.
+
+4. **Does it work for professional exams like MCAT or LSAT?**
+   Yes. StudyEdge supports any exam-based studying including MCAT, LSAT, GRE, CPA, bar exam, and more.
+
+5. **What happens when I run out of AI boosts?**
+   Free users get 10 AI boosts per month — they reset automatically. Pro users get 75. Upgrade anytime from within the app.
+
+6. **Can I cancel anytime?**
+   Yes. Cancel from your account settings, no questions asked. If you cancel before day 7 of your trial, you pay nothing.
+
+Accordion style:
+```css
+.faq-item { border-bottom: 1px solid rgba(255,255,255,0.07); }
+.faq-question { padding: 20px 0; cursor: pointer; font-weight: 600; color: #e2e8f0; display: flex; justify-content: space-between; }
+.faq-answer { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; color: rgba(226,232,240,0.65); font-size: 15px; line-height: 1.7; }
+.faq-item.open .faq-answer { max-height: 200px; padding-bottom: 20px; }
+```
+
+---
+
+## Section 10 — Bottom CTA
+
+**Layout:** Full-bleed. Padding `160px 0`. Centered.
 
 **Background:**
-- Base: `#F7F6F3`
-- Radial gradient glow behind the image: `radial-gradient(ellipse 60% 50% at 70% 50%, rgba(59,97,196,0.08) 0%, transparent 70%)`
-- Subtle dot grid overlay at 5% opacity (existing pattern is fine)
-
-**Below hero fold:** a thin horizontal divider with `overflow: hidden` marquee of student type tags scrolling slowly left. `Pre-Med · Organic Chemistry · Finals Week · GPA 3.8 → 3.9 · MCAT 2026 · Linear Algebra · Study Coach ·` etc. Color `#9B9B9B`, font-size 12px.
-
----
-
-### 3. Stats Strip
-Horizontal band, `background: #FFFFFF`, `border-top: 1px solid rgba(0,0,0,0.07)`, `border-bottom: 1px solid rgba(0,0,0,0.07)`. Padding 48px 0.
-
-4 stats in a row (center-aligned, equal width):
-
-| Stat | Label |
-|---|---|
-| `4+` | Study sessions planned per user |
-| `68s` | Avg time to first plan generated |
-| `≈ 1` | GPA point improvement reported |
-| `1` | App for scheduling, coaching, and grades |
-
-**Styling:** Giant gradient-clipped serif numeral (clamp 56–80px, `background: linear-gradient(135deg, #3B61C4, #6B8FE8)`, `-webkit-background-clip: text`, `color: transparent`). Label underneath in `#6B6B6B`, 13px.
-
-**Animation:** Numbers count up from 0 when they enter viewport.
-
-**Important:** Only use defensibly-true stats. The above are directional and honest. Do not fabricate large user counts.
-
----
-
-### 4. How It Works
-**Label:** `HOW IT WORKS`
-**Headline:** `From signup to your first plan in 68 seconds.`
-**Subline:** `Tell us your courses. We build the schedule. You execute.`
-
-3-step horizontal layout (stack on mobile):
-
-**Step 1 — Add your courses**
-- Icon: graduation cap SVG
-- Visual: `ss-courses.png` in a rounded card
-- Copy: "Add your courses, exam dates, and how many hours you have. Takes 2 minutes."
-
-**Step 2 — AI builds your plan**
-- Icon: sparkle/AI SVG
-- Visual: `ss-coach.png` or `ss-study-plan.png`
-- Copy: "StudyEdge builds a week-by-week schedule optimized around your exam dates and grade weights."
-
-**Step 3 — Execute every session**
-- Icon: lightning bolt SVG
-- Visual: `ss-blueprint.png`
-- Copy: "Open the app each day. Your session is planned minute-by-minute. The AI tracks your progress and adapts."
-
-**CTA below:** `Start building your plan →` blue button, centered.
-
-**Connecting line:** A subtle dashed line connecting the 3 steps horizontally on desktop.
-
----
-
-### 5. Features Bento Grid
-**Label:** `FEATURES`
-**Headline:** `Everything a serious student needs. Nothing they don't.`
-
-CSS grid layout — asymmetric bento. On desktop: a 12-column grid with cards spanning different widths.
-
-**Layout:**
-```
-[  AI Study Coach — 7 cols  ] [ Focus Mode — 5 cols ]
-[ Session Blueprint — 5 cols ] [ Grade Hub — 7 cols  ]
-[     Smart Flashcards + Quiz — 12 cols (wide)       ]
+```css
+background: linear-gradient(180deg, #060614 0%, rgba(59,97,196,0.08) 40%, #060614 100%);
 ```
 
-**Each card:**
-- `background: #FFFFFF`
-- `border: 1px solid rgba(0,0,0,0.07)`
-- `border-radius: 20px`
-- `overflow: hidden`
-- Top half: real app screenshot (`object-fit: cover`, `height: 200–280px` depending on card size)
-- Bottom half: padding 24px
-  - Label chip (colored per feature)
-  - Headline (outcome-led, 17–20px, weight 700, `#111111`)
-  - 2-line description (`#6B6B6B`, 14px)
-- Hover: `transform: translateY(-4px)`, `box-shadow: 0 16px 48px rgba(0,0,0,0.10)`, transition 0.25s
-
-**Feature cards (outcome-led copy):**
-
-1. **AI Study Coach** — screenshot: `ss-coach.png`
-   - Chip: blue `STUDY COACH`
-   - Headline: `A tutor for every course, on demand.`
-   - Desc: `Generates a personalized week-by-week plan based on your exam dates, grade weights, and struggle topics.`
-
-2. **Focus Mode** — screenshot: `ss-focus.png`
-   - Chip: green `FOCUS MODE`
-   - Headline: `Lock in. The AI runs the session.`
-   - Desc: `Pomodoro-style sessions with a built-in blueprint. No more opening your notes and staring.`
-
-3. **Session Blueprint** — screenshot: `ss-blueprint.png`
-   - Chip: amber `SESSION BLUEPRINT`
-   - Headline: `Every minute of every session, planned.`
-   - Desc: `Before each session, the AI generates a minute-by-minute agenda based on what you need to cover.`
-
-4. **Grade Hub** — screenshot: `ss-progress.png`
-   - Chip: blue `GRADE HUB`
-   - Headline: `Know exactly what score you need.`
-   - Desc: `Enter your grade weights and current scores. Grade Hub reverse-engineers the number you need on every remaining assignment.`
-
-5. **Smart Flashcards + Quiz** — screenshot: `ss-flashcard.png` (wide card)
-   - Chip: purple `FLASHCARDS & QUIZ`
-   - Headline: `Flashcards that only quiz what you're forgetting.`
-   - Desc: `Upload your notes. The AI builds a flashcard deck and quiz calibrated to your weak spots — not generic trivia.`
-
-**Inline CTA below grid:** `Start free — no credit card required →`
-
----
-
-### 6. Testimonials (Card Wall)
-**Label:** `WHAT STUDENTS SAY`
-**Headline:** `Built for students who are serious about their grades.`
-
-A CSS grid of testimonial cards — 3 columns on desktop, 1 on mobile. Cards have slightly different heights for an organic feel.
-
-**Card style:**
-- `background: #FFFFFF`
-- `border: 1px solid rgba(0,0,0,0.07)`
-- `border-radius: 16px`
-- `padding: 24px`
-- Large opening quote mark in `#3B61C4` at 40px
-- Quote text: 15px, `#111111`, `line-height: 1.6`
-- Author: 13px, `font-weight: 600`, `#111111` + course/year in `#6B6B6B`
-- Stagger-reveal animation: each card delays 60ms
-
-**Use existing testimonials only.** Do not fabricate quotes. If only 3 exist, display them at a larger size rather than padding with fake ones.
-
-**Inline CTA below:** `Join them — start free →`
-
----
-
-### 7. Pricing (Full Table)
-**Label:** `PRICING`
-**Headline:** `Free to start. Pro when you're serious.`
-**Subline:** `No credit card required to begin. Upgrade when you're ready.`
-
-3-column card layout: Free / Pro / Unlimited
-
-**Card structure:**
-- Plan name (18px, weight 700)
-- Price (clamp 36–48px, weight 800, letter-spacing -0.03em) + `/month` in muted
-- 1-line positioning statement
-- Feature list with checkmarks
-- CTA button
-
-**Free card:**
-- `background: #FFFFFF`, standard border
-- Price: `$0`
-- Tagline: `Everything you need to get started.`
-- Features: 1 course, 10 AI boosts/month, Basic scheduling, Grade tracking
-- CTA: `Get started free` (ghost/outline button)
-
-**Pro card (featured):**
-- `background: #3B61C4`, `color: #FFFFFF`, larger, slightly elevated with shadow
-- Price: `$X/mo` (use actual price)
-- Badge: `MOST POPULAR` chip at top right
-- Tagline: `For students who want real results.`
-- Features: 5 courses, 75 AI boosts/month, AI Study Coach, Session Blueprints, Flashcards & Quiz, Grade Hub, Focus Mode
-- CTA: `Start 7-day free trial →` (white button, blue text)
-- Microcopy: `No credit card required`
-
-**Unlimited card:**
-- `background: #FFFFFF`, standard border
-- Price: `$X/mo`
-- Tagline: `No limits. Everything, forever.`
-- Features: Unlimited courses, Unlimited AI boosts, Everything in Pro
-- CTA: `Start free →` (blue button)
-
----
-
-### 8. FAQ
-**Label:** `FAQ`
-**Headline:** `Common questions.`
-
-Accordion-style. Each question expands on click. 6 questions:
-
-1. **Is it really free to start?** — Yes. Free plan includes 1 course and 10 AI boosts per month. No card required.
-2. **How is this different from Notion or Google Calendar?** — Unlike blank tools where you build everything yourself, StudyEdge AI knows your course structure, grade weights, exam dates, and study history — and uses all of it to tell you exactly what to do right now.
-3. **What if my syllabus isn't uploaded anywhere?** — You can paste text, upload a PDF, or just add your topics manually. The AI adapts to however much information you give it.
-4. **Does it work for professional exams like MCAT, LSAT, CPA?** — Yes. StudyEdge has presets for MCAT, LSAT, GRE, GMAT, CPA, and Bar Exam with the correct section structure built in.
-5. **Will the AI actually know my course material?** — You upload your notes or syllabus and the AI uses your actual content — not generic study tips — to build flashcards, quizzes, and session plans.
-6. **Can I cancel anytime?** — Yes. Cancel from your account settings at any time. No hidden fees.
-
-**Accordion animation:** Height transition 0.3s ease, chevron rotates 180deg on open.
-
----
-
-### 9. Final CTA Section
-Full-bleed section. `background: linear-gradient(135deg, #3B61C4 0%, #2d4fa8 100%)`. `padding: 120px 0`.
-
-**Headline** (white, clamp 40–72px, weight 800, letter-spacing -0.03em):
+**Headline:**
 ```
-Stop studying harder.
-Study what actually moves your grade.
+The semester is already moving.
+Start executing.
+```
+Font-size: `clamp(36px, 5vw, 60px)`. Weight 800. Letter-spacing -0.03em.
+
+**Subline:** "Your personalized study plan is 60 seconds away. No credit card required." — 16px, muted.
+
+**CTA buttons:**
+- Primary: "Start free 7-day trial →" — gradient, padding `16px 36px`, font-size 16px. Calls `onGetStarted('signup')`.
+- Secondary: "Log in" — ghost/text style.
+
+**Microcopy:** "Free plan available · No card required · Cancel before day 7, pay nothing" — 12px, dim.
+
+---
+
+## Footer
+
+**Layout:** 4-column grid desktop, 2-column mobile. `border-top: 1px solid rgba(255,255,255,0.07)`. Padding `60px 0 40px`.
+
+Col 1: Logo + 1-line description + copyright
+Col 2: Product (Features, Pricing, How it works)
+Col 3: Support (Contact, FAQ)
+Col 4: Legal (Privacy, Terms)
+
+Text: 13px, `rgba(226,232,240,0.45)`. Links → `rgba(226,232,240,0.7)` on hover.
+
+---
+
+## Sticky Bottom Trial Bar
+
+Appears after 300px scroll, fixed bottom, z-index 998.
+
+```css
+position: fixed; bottom: 0; left: 0; right: 0;
+background: rgba(6,6,20,0.92);
+backdrop-filter: blur(20px);
+border-top: 1px solid rgba(255,255,255,0.08);
+padding: 12px 24px;
+display: flex; align-items: center; justify-content: space-between;
 ```
 
-**Subline** (white at 70% opacity, 18px): `Free to start. Your first plan in 68 seconds.`
-
-**CTA button:** White background, `#3B61C4` text. `border-radius: 999px`. `padding: 16px 40px`. `font-size: 17px`, `font-weight: 700`. `Start free →`
-
-**Microcopy:** `No credit card required · Cancel anytime` in white at 50% opacity, 13px.
-
-**Background decoration:** Subtle radial gradient lighter spot behind the headline.
+**Left:** "Join thousands of students studying smarter." — 14px, muted
+**Right:** "Start free — No card required" — small gradient button. Calls `onGetStarted('signup')`.
 
 ---
 
-### 10. Footer
-4-column layout + a final CTA row at the very top of the footer.
+## Mobile Breakpoints
 
-**Top row (CTA):**
-- Headline: `Ready to start?` + blue `Start free →` button
-- This is the absolute last conversion moment before the legal links
+At `max-width: 768px`:
+- Hero: single column, mockup below headline (max-width 340px), floating chips hidden
+- Stats: 2×2 grid
+- Features: single column, visual above text
+- Comparison: horizontal scroll or simplified 2-col (StudyEdge vs others combined)
+- Footer: 2-column grid
+- Nav: logo + "Start free" only
 
-**4 columns:**
-1. **StudyEdge AI** — Logo + tagline + social icons (Twitter/X, Instagram)
-2. **Product** — Features, How it works, Pricing, Blog (blog.getstudyedge.com)
-3. **Resources** — How to study for finals, GPA calculator, Study schedule, MCAT prep (link to blog articles)
-4. **Company** — About, Privacy, Terms, Contact (support@getstudyedge.com)
-
-**Bottom bar:** `© 2026 StudyEdge AI. All rights reserved.` — 12px, `#9B9B9B`
-
----
-
-## Mobile Rules (equal priority to desktop)
-
-- Hero: stack vertically. Copy on top, screenshot below (max-height 340px, `object-fit: cover`, rounded corners)
-- Floating stat chips: hide on mobile to avoid clutter
-- Bento grid: single column, all cards full-width
-- Stats strip: 2×2 grid on mobile
-- How It Works: vertical stack with a vertical connecting line on the left
-- Pricing: vertical stack, Pro card appears first
-- Nav: hamburger menu with slide-down drawer on mobile
-- All font sizes: clamp properly — never below 14px for body, never below 32px for hero headline on mobile
-- Touch targets: minimum 44×44px
+At `max-width: 390px`:
+- Hero headline: font-size 36px minimum
+- All section padding: reduce by ~30%
+- Primary CTA buttons: full width
 
 ---
 
-## Technical Requirements
+## Implementation Order
 
-**Libraries allowed (install freely):**
-- `framer-motion` — for scroll animations and stagger effects
-- `gsap` — if needed for complex timeline animations
-- Pure CSS for simple transitions
-
-**Preserve:**
-- `onGetStarted` prop (called on all CTAs)
-- `goTrial()` must navigate to `/app?signup=1&plan=pro&billing=monthly&trial=1`
-- Sticky bottom bar (reskin to light theme — white background, blue text, not dark purple)
-- `prefers-reduced-motion` gating on all animations
-
-**Do not preserve:**
-- The dark color scheme
-- Any `rgba(255,255,255,0.x)` dark-mode card backgrounds
-- The current hero stage scaling system (replace with simpler split-screen layout)
-
----
-
-## Completion Checklist
-
-- [ ] All sections built and responsive at 390px and 1440px
-- [ ] All animations gated by `prefers-reduced-motion`
-- [ ] Real screenshots used in hero and all feature cards
-- [ ] `npm run build` passes with no errors
-- [ ] `git commit -m "landing: full redesign — light theme, cinematic, premium"`
-- [ ] `git push` → Vercel auto-deploys
-- [ ] `CONTEXT.md` updated with redesign completion + any open items
-
----
-
-## Invocation
-
-```bash
-claude "Read LANDING_REDESIGN_SPEC.md completely. Then fully rewrite src/components/LandingPage.jsx from scratch according to the spec. This is a complete replacement — not a patch. Build all 10 sections, make it responsive, animate everything, use real screenshots from /public/ss-*.png. Verify npm run build passes. Commit and push."
-```
+1. Global CSS (vars, reset, font import, animation classes, scrollbar)
+2. Nav + scroll behavior
+3. Hero (structure → content → animations → chips)
+4. Sticky trial bar
+5. Trust strip + marquee
+6. Stats band + count-up animation
+7. How It Works
+8. Features (all 4 rows)
+9. Testimonials
+10. Comparison table
+11. FAQ accordion
+12. Bottom CTA
+13. Footer
+14. Full mobile pass (390px + 768px)
+15. Animation polish (scroll reveals, hover states, counter triggers)
+16. `npm run build` — zero errors required
+17. Commit and push
