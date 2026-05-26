@@ -1349,6 +1349,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
           )}
         </div>
       )}
+
     </>
   )
 }

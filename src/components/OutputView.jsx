@@ -32,6 +32,7 @@ const CoursesView    = lazy(() => import('./CoursesView'))
 const ProgressView   = lazy(() => import('./ProgressView'))
 const StudyToolsView = lazy(() => import('./StudyToolsView'))
 const StudyCoachView = lazy(() => import('./StudyCoachView'))
+const PracticeExamView = lazy(() => import('./PracticeExamView'))
 const AIChatView     = lazy(() => import('./AIChatView'))
 const GradeHubView   = lazy(() => import('./GradeHubView'))
 const AccountView    = lazy(() => import('./AccountView'))
@@ -1738,6 +1739,14 @@ export default function OutputView({
             }}
           />
           )
+        )}
+
+        {/* ── Practice Exam ── */}
+        {activeSection === 'practice' && (
+          <PracticeExamView
+            courses={courses}
+            onShowPaywall={onShowPaywall}
+          />
         )}
 
         {/* ── AI Tutor ── */}

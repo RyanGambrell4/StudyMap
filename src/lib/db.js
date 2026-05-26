@@ -159,6 +159,23 @@ export async function saveCoachPlanStruggles(courseId, struggles) {
   await _upsert({ coach_plans: updated })
 }
 
+export function getCachedPracticeExams(courseId) {
+  return _cache?.coach_plans?.[courseId]?.practice_exams ?? []
+}
+
+export async function savePracticeExam(courseId, exam) {
+  const existing = _cache?.coach_plans ?? {}
+  const prev = existing[courseId] ?? {}
+  const prevExams = Array.isArray(prev.practice_exams) ? prev.practice_exams : []
+  const trimmed = [exam, ...prevExams].slice(0, 20) // keep most recent 20
+  const updated = {
+    ...existing,
+    [courseId]: { ...prev, practice_exams: trimmed },
+  }
+  if (_cache) _cache.coach_plans = updated
+  await _upsert({ coach_plans: updated })
+}
+
 export async function saveNotes(courseId, dateStr, notes) {
   const key = `${courseId}_${dateStr}`
   const existing = _cache?.session_notes ?? {}
