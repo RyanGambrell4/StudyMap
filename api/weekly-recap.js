@@ -43,7 +43,6 @@ export default async function handler(req, res) {
     const plan = activeStatuses.includes(sub.status) ? (sub.plan ?? 'free') : 'free'
     if (weekSessions.length === 0 && streak === 0) { skipped++; continue }
 
-    // Compute this week's upcoming exams (next 7 days)
     const todayStr = now.toISOString().slice(0, 10)
     const weekAheadStr = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
     const upcomingExams = (row.syllabus_events ?? [])
@@ -64,7 +63,7 @@ export default async function handler(req, res) {
 
     const highlights = weekSessions.slice(0, 3).map(s => s.course ?? s.title ?? 'Study session')
     const totalMins = weekSessions.reduce((sum, s) => sum + (Number(s.duration) || 0), 0)
-    const hoursStr = totalMins >= 60 ? `${Math.floor(totalMins / 60)}h ${totalMins % 60}m` : totalMins > 0 ? `${totalMins}m` : null
+    const hoursStr = totalMins >= 60 ? `${Math.floor(totalMins / 60)}h ${totalMins % 60}m` : totalMins > 0 ? `${totalMins}m` : '—'
     const sessionWord = weekSessions.length === 1 ? 'session' : 'sessions'
     const streakLine = streak >= 2 ? `${streak}-day streak — keep it going.` : null
     const motiveLine = weekSessions.length >= 5
@@ -82,88 +81,95 @@ export default async function handler(req, res) {
           ? `Your week: ${weekSessions.length} ${sessionWord} completed${streak >= 2 ? ` · ${streak}-day streak` : ''}`
           : 'Your weekly study recap',
         html: `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background:#080D1A;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#080D1A;padding:40px 0;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#0D1425;border-radius:16px;border:1px solid rgba(255,255,255,0.07);padding:40px 48px;max-width:560px;">
-        <tr><td style="padding-bottom:24px;">
-          <span style="font-size:17px;font-weight:700;color:#F1F5F9;">StudyEdge AI</span>
-          <span style="font-size:12px;color:#334155;margin-left:10px;">Weekly Recap</span>
-        </td></tr>
-        <tr><td style="padding-bottom:20px;">
-          <h1 style="margin:0;font-size:22px;font-weight:800;color:#F1F5F9;letter-spacing:-0.6px;line-height:1.3;">
-            ${weekSessions.length > 0 ? `You completed ${weekSessions.length} study ${sessionWord} this week.` : "Your study plan is ready for the week ahead."}
-          </h1>
-        </td></tr>
-        <tr><td style="padding-bottom:24px;">
-          <table cellpadding="0" cellspacing="0" style="width:100%;border-radius:12px;background:rgba(99,102,241,0.08);border:1px solid rgba(99,102,241,0.15);">
-            <tr>
-              <td style="padding:16px 20px;text-align:center;border-right:1px solid rgba(99,102,241,0.15);">
-                <div style="font-size:28px;font-weight:900;color:#c7d2fe;">${weekSessions.length}</div>
-                <div style="font-size:11px;color:#475569;margin-top:2px;">sessions</div>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your weekly study recap</title></head>
+<body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
+      <tr><td style="padding-bottom:20px;text-align:center;">
+        <span style="display:inline-block;width:28px;height:28px;border-radius:8px;background:#3B61C4;vertical-align:middle;margin-right:8px;"></span>
+        <span style="font-size:15px;font-weight:700;color:#111111;vertical-align:middle;">StudyEdge</span>
+      </td></tr>
+      <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
+        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Weekly Recap</p>
+        <h1 style="margin:0 0 20px;font-size:22px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">
+          ${weekSessions.length > 0 ? `You completed ${weekSessions.length} study ${sessionWord} this week.` : "Your study plan is ready for the week ahead."}
+        </h1>
+
+        <table width="100%" cellpadding="0" cellspacing="0" style="margin-bottom:22px;">
+          <tr>
+            <td style="text-align:center;padding:16px 12px;background:#F7F6F3;border-radius:12px;" width="33%">
+              <div style="font-size:22px;font-weight:800;color:#111111;">${weekSessions.length}</div>
+              <div style="font-size:11px;color:#9B9B9B;margin-top:4px;">sessions</div>
+            </td>
+            <td width="8px"></td>
+            <td style="text-align:center;padding:16px 12px;background:#F7F6F3;border-radius:12px;" width="33%">
+              <div style="font-size:22px;font-weight:800;color:#111111;">${streak}</div>
+              <div style="font-size:11px;color:#9B9B9B;margin-top:4px;">day streak</div>
+            </td>
+            <td width="8px"></td>
+            <td style="text-align:center;padding:16px 12px;background:#F7F6F3;border-radius:12px;" width="33%">
+              <div style="font-size:22px;font-weight:800;color:#111111;">${hoursStr}</div>
+              <div style="font-size:11px;color:#9B9B9B;margin-top:4px;">studied</div>
+            </td>
+          </tr>
+        </table>
+
+        ${highlights.length > 0 ? `
+        <p style="margin:0 0 10px;font-size:11px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">This week's sessions</p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:18px;">
+          ${highlights.map(h => `<tr><td style="padding:9px 0;border-bottom:1px solid #F0EDE8;font-size:14px;color:#111111;"><span style="color:#3B61C4;margin-right:8px;">✓</span>${h}</td></tr>`).join('')}
+          ${weekSessions.length > 3 ? `<tr><td style="padding:9px 0;font-size:12px;color:#9B9B9B;">+${weekSessions.length - 3} more</td></tr>` : ''}
+        </table>` : ''}
+
+        ${upcomingExams.length > 0 ? `
+        <p style="margin:0 0 10px;font-size:11px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Exams this week</p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:18px;background:#FFF5E6;border:1px solid #F4DDB6;border-radius:10px;">
+          ${upcomingExams.map((e, i) => {
+            const dateStr = e.date ?? e.dateStr ?? ''
+            const label = dateStr ? new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : ''
+            return `<tr>
+              <td style="padding:11px 14px;${i < upcomingExams.length - 1 ? 'border-bottom:1px solid #F4DDB6;' : ''}">
+                <span style="font-size:14px;font-weight:600;color:#7A4B0A;">${e.title ?? 'Exam'}</span>
+                ${label ? `<span style="font-size:12px;color:#9C6E2A;margin-left:8px;">${label}</span>` : ''}
               </td>
-              <td style="padding:16px 20px;text-align:center;border-right:1px solid rgba(99,102,241,0.15);">
-                <div style="font-size:28px;font-weight:900;color:#c7d2fe;">${streak}</div>
-                <div style="font-size:11px;color:#475569;margin-top:2px;">day streak</div>
-              </td>
-              <td style="padding:16px 20px;text-align:center;">
-                <div style="font-size:28px;font-weight:900;color:#c7d2fe;">${hoursStr ?? '—'}</div>
-                <div style="font-size:11px;color:#475569;margin-top:2px;">studied</div>
-              </td>
-            </tr>
-          </table>
-        </td></tr>
-        ${highlights.length > 0 ? `<tr><td style="padding-bottom:20px;">
-          <p style="margin:0 0 10px;font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.8px;">This week's sessions</p>
-          <table cellpadding="0" cellspacing="0" style="width:100%;">
-            ${highlights.map(h => `<tr><td style="padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05);"><span style="font-size:13px;color:#CBD5E1;">✓ ${h}</span></td></tr>`).join('')}
-            ${weekSessions.length > 3 ? `<tr><td style="padding:8px 0;font-size:12px;color:#475569;">+${weekSessions.length - 3} more sessions</td></tr>` : ''}
-          </table>
-        </td></tr>` : ''}
-        ${upcomingExams.length > 0 ? `<tr><td style="padding-bottom:20px;">
-          <p style="margin:0 0 10px;font-size:12px;font-weight:700;color:#475569;text-transform:uppercase;letter-spacing:0.8px;">Exams this week</p>
-          <table cellpadding="0" cellspacing="0" style="width:100%;background:rgba(249,115,22,0.07);border:1px solid rgba(249,115,22,0.2);border-radius:12px;padding:4px 0;">
-            ${upcomingExams.map(e => {
-              const dateStr = e.date ?? e.dateStr ?? ''
-              const label = dateStr ? new Date(dateStr + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' }) : ''
-              return `<tr>
-                <td style="padding:10px 16px;border-bottom:1px solid rgba(249,115,22,0.1);">
-                  <span style="font-size:14px;font-weight:700;color:#fed7aa;">${e.title ?? 'Exam'}</span>
-                  ${label ? `<span style="font-size:12px;color:#9a3412;margin-left:8px;">${label}</span>` : ''}
-                </td>
-              </tr>`
-            }).join('')}
-          </table>
-        </td></tr>` : ''}
-        <tr><td style="padding-bottom:${isFreePlan ? '20px' : '32px'};">
-          <p style="margin:0;font-size:15px;color:#94A3B8;line-height:1.7;">
-            ${motiveLine}${streakLine ? `<br/><br/><strong style="color:#fbbf24;">${streakLine}</strong>` : ''}
-          </p>
-        </td></tr>
-        ${isFreePlan ? `<tr><td style="padding-bottom:32px;">
-          <div style="background:linear-gradient(135deg,rgba(79,126,247,0.12),rgba(124,92,250,0.12));border:1px solid rgba(99,102,241,0.25);border-radius:12px;padding:18px 20px;">
-            <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#c7d2fe;">Want to study more effectively next week?</p>
-            <p style="margin:0 0 14px;font-size:13px;color:#475569;line-height:1.5;">Pro gives you 75 AI study boosts/month, 5 courses, Study Coach, and Session Blueprints. Try it free for 7 days.</p>
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1" style="display:inline-block;background:linear-gradient(135deg,#4F7EF7,#7C5CFA);color:#fff;font-size:13px;font-weight:700;text-decoration:none;border-radius:8px;padding:10px 22px;">Start 7-day free trial</a>
-          </div>
-        </td></tr>` : ''}
-        <tr><td style="padding-bottom:32px;text-align:center;">
-          <a href="https://getstudyedge.com/app" style="display:inline-block;background:rgba(99,102,241,0.15);border:1px solid rgba(99,102,241,0.3);color:#c7d2fe;font-size:14px;font-weight:700;text-decoration:none;border-radius:10px;padding:12px 28px;">Open my study plan</a>
-        </td></tr>
-        <tr><td style="border-top:1px solid rgba(255,255,255,0.07);padding-top:24px;">
-          <p style="margin:0;font-size:12px;color:#334155;line-height:1.6;">
-            Weekly recap from StudyEdge AI · Every Sunday<br/>
-            <a href="https://getstudyedge.com/app" style="color:#475569;">Open the app</a> ·
-            <a href="mailto:support@getstudyedge.com" style="color:#475569;">Contact support</a>
-          </p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`,
+            </tr>`
+          }).join('')}
+        </table>` : ''}
+
+        <p style="margin:0 0 20px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          ${motiveLine}${streakLine ? `<br><strong style="color:#111111;">${streakLine}</strong>` : ''}
+        </p>
+
+        ${isFreePlan ? `
+        <table cellpadding="0" cellspacing="0" style="width:100%;background:rgba(59,97,196,0.06);border:1px solid rgba(59,97,196,0.18);border-radius:12px;margin-bottom:22px;">
+          <tr><td style="padding:16px 18px;">
+            <div style="font-size:14px;font-weight:600;color:#111111;margin-bottom:4px;">Want to study more effectively next week?</div>
+            <div style="font-size:13px;color:#6B6B6B;line-height:1.55;margin-bottom:12px;">Pro gives you 75 AI boosts/month, 5 courses, Study Coach, and Session Blueprints. Try free for 7 days.</div>
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:9px 18px;">Start 7-day free trial</a>
+          </td></tr>
+        </table>` : ''}
+
+        <table cellpadding="0" cellspacing="0" style="width:100%;">
+          <tr><td align="center">
+            <a href="https://getstudyedge.com/app" style="display:inline-block;background:#111111;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Open my study plan</a>
+          </td></tr>
+        </table>
+      </td></tr>
+      <tr><td style="padding:24px 0 0;text-align:center;">
+        <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
+          Weekly recap from StudyEdge AI · Every Sunday<br>
+          <a href="https://getstudyedge.com/app" style="color:#9B9B9B;text-decoration:underline;">Open the app</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:support@getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
+        </p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`,
       })
       sent++
     } catch (err) {

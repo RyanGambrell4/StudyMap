@@ -68,6 +68,10 @@ export default async function handler(req, res) {
         7:  ['Do a full-length practice test or timed section today.', 'Focus only on high-yield topics. No new material.', 'Sleep and nutrition matter more than an extra hour of studying.'],
       }
       const tip = tips[daysLeft][Math.floor(Math.random() * 3)]
+      const isUrgent = daysLeft === 7
+      const pillBg = isUrgent ? '#FBE9D6' : '#FFF5E6'
+      const pillBorder = isUrgent ? '#F0B27A' : '#F4DDB6'
+      const pillText = isUrgent ? '#A0522D' : '#7A4B0A'
 
       try {
         await resend.emails.send({
@@ -75,59 +79,64 @@ export default async function handler(req, res) {
           to: email,
           subject: `${daysLeft} days to ${examName} — here's what to focus on`,
           html: `<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background:#080D1A;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#080D1A;padding:40px 0;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#0D1425;border-radius:16px;border:1px solid rgba(255,255,255,0.07);padding:40px 48px;max-width:560px;">
-        <tr><td style="padding-bottom:28px;"><span style="font-size:17px;font-weight:700;color:#F1F5F9;">StudyEdge AI</span></td></tr>
-        <tr><td style="padding-bottom:8px;">
-          <div style="display:inline-block;background:${daysLeft === 7 ? 'rgba(249,115,22,0.12)' : 'rgba(251,191,36,0.1)'};border:1px solid ${daysLeft === 7 ? 'rgba(249,115,22,0.3)' : 'rgba(251,191,36,0.25)'};border-radius:999px;padding:4px 14px;font-size:12px;font-weight:700;color:${daysLeft === 7 ? '#f97316' : '#fbbf24'};">
-            ${daysLeft} days to exam
-          </div>
-        </td></tr>
-        <tr><td style="padding-bottom:20px;">
-          <h1 style="margin:0;font-size:24px;font-weight:800;color:#F1F5F9;letter-spacing:-0.8px;line-height:1.3;">
-            ${daysLeft === 7 ? 'Final week.' : 'Two weeks out.'} Make it count.
-          </h1>
-        </td></tr>
-        <tr><td style="padding-bottom:24px;">
-          <p style="margin:0 0 16px;font-size:15px;color:#94A3B8;line-height:1.7;">
-            Your <strong style="color:#F1F5F9;">${examName}</strong> is in ${daysLeft} days.${targetScore}
-            Here's the most important thing to focus on right now:
-          </p>
-          <div style="background:rgba(99,102,241,0.08);border-left:3px solid #6366f1;border-radius:0 10px 10px 0;padding:14px 18px;margin-bottom:20px;">
-            <p style="margin:0;font-size:15px;color:#c7d2fe;font-weight:600;line-height:1.5;">${tip}</p>
-          </div>
-          <p style="margin:0;font-size:15px;color:#94A3B8;line-height:1.7;">
-            ${daysLeft === 7
-              ? "Don't cram new material. Your brain needs time to consolidate what it already knows. Trust your prep."
-              : "Two weeks is enough time to meaningfully move your score — but only if you're studying the right things."}
-          </p>
-        </td></tr>
-        <tr><td style="padding-bottom:32px;text-align:center;">
-          <a href="https://getstudyedge.com/app" style="display:inline-block;background:linear-gradient(135deg,#4F7EF7,#7C5CFA);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;">Open my study plan</a>
-        </td></tr>
-        ${isFreePlan ? `<tr><td style="padding-bottom:32px;">
-          <div style="background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.2);border-radius:12px;padding:16px 18px;">
-            <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#c7d2fe;">Get a session blueprint for every remaining day</p>
-            <p style="margin:0 0 12px;font-size:12px;color:#475569;line-height:1.5;">Pro gives you AI-built session plans, Study Coach, and 75 boosts/month. Try free for 7 days.</p>
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1" style="font-size:13px;font-weight:700;color:#818cf8;text-decoration:none;">Start 7-day free trial</a>
-          </div>
-        </td></tr>` : ''}
-        <tr><td style="border-top:1px solid rgba(255,255,255,0.07);padding-top:24px;">
-          <p style="margin:0;font-size:12px;color:#334155;line-height:1.6;">
-            Sent because your exam is coming up · StudyEdge AI<br/>
-            <a href="https://getstudyedge.com/app" style="color:#475569;">Open the app</a> ·
-            <a href="mailto:support@getstudyedge.com" style="color:#475569;">Contact support</a>
-          </p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`,
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${daysLeft} days to ${examName}</title></head>
+<body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
+      <tr><td style="padding-bottom:20px;text-align:center;">
+        <span style="display:inline-block;width:28px;height:28px;border-radius:8px;background:#3B61C4;vertical-align:middle;margin-right:8px;"></span>
+        <span style="font-size:15px;font-weight:700;color:#111111;vertical-align:middle;">StudyEdge</span>
+      </td></tr>
+      <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
+        <table cellpadding="0" cellspacing="0" style="margin-bottom:14px;">
+          <tr><td style="background:${pillBg};border:1px solid ${pillBorder};border-radius:999px;padding:5px 14px;">
+            <span style="font-size:12px;font-weight:700;color:${pillText};letter-spacing:0.02em;">${daysLeft} days to exam</span>
+          </td></tr>
+        </table>
+        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">
+          ${isUrgent ? 'Final week.' : 'Two weeks out.'} Make it count.
+        </h1>
+        <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          Your <strong style="color:#111111;">${examName}</strong> is in ${daysLeft} days.${targetScore}
+          The most important thing to focus on right now:
+        </p>
+        <div style="background:#F7F6F3;border-left:3px solid #3B61C4;border-radius:0 10px 10px 0;padding:14px 18px;margin-bottom:20px;">
+          <p style="margin:0;font-size:15px;color:#111111;font-weight:500;line-height:1.55;">${tip}</p>
+        </div>
+        <p style="margin:0 0 24px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          ${isUrgent
+            ? "Don't cram new material. Your brain needs time to consolidate. Trust your prep."
+            : "Two weeks is enough time to meaningfully move your score — but only if you're studying the right things."}
+        </p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;">
+          <tr><td align="center">
+            <a href="https://getstudyedge.com/app" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Open my study plan</a>
+          </td></tr>
+        </table>
+        ${isFreePlan ? `
+        <table cellpadding="0" cellspacing="0" style="width:100%;background:rgba(59,97,196,0.06);border:1px solid rgba(59,97,196,0.18);border-radius:12px;margin-top:22px;">
+          <tr><td style="padding:16px 18px;">
+            <div style="font-size:14px;font-weight:600;color:#111111;margin-bottom:4px;">Get a session blueprint for every remaining day</div>
+            <div style="font-size:13px;color:#6B6B6B;line-height:1.55;margin-bottom:10px;">Pro gives you AI-built session plans, Study Coach, and 75 boosts/month. Try free for 7 days.</div>
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1" style="font-size:13px;font-weight:600;color:#3B61C4;text-decoration:none;">Start 7-day free trial →</a>
+          </td></tr>
+        </table>` : ''}
+      </td></tr>
+      <tr><td style="padding:24px 0 0;text-align:center;">
+        <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
+          Sent because your exam is coming up · StudyEdge AI<br>
+          <a href="https://getstudyedge.com/app" style="color:#9B9B9B;text-decoration:underline;">Open the app</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:support@getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
+        </p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`,
         })
         sent++
       } catch (err) {

@@ -40,7 +40,6 @@ export default async function handler(req, res) {
 
   for (const row of rows ?? []) {
     try {
-      // Resolve email — prefer subscription.email, fall back to auth lookup
       let email = row.subscription?.email
       if (!email) {
         try {
@@ -59,7 +58,6 @@ export default async function handler(req, res) {
 
       if (upcomingExams.length === 0) { skipped++; continue }
 
-      // Sort so earliest exam comes first
       upcomingExams.sort((a, b) => {
         const da = a.date ?? a.dateStr ?? ''
         const db = b.date ?? b.dateStr ?? ''
@@ -68,88 +66,88 @@ export default async function handler(req, res) {
 
       const exam = upcomingExams[0]
       const examDate = exam.date ?? exam.dateStr
-      const isToday = examDate === tomorrowStr  // "tomorrow" from user perspective (cron runs at 6pm)
+      const isToday = examDate === tomorrowStr
       const examTitle = exam.title ?? 'Your exam'
 
-      // Gather course names for context
       const courseNames = (row.plan?.courses ?? []).map(c => c.name).filter(Boolean)
       const courseLine = courseNames.length
-        ? `<p style="margin:0 0 16px;font-size:13px;color:#475569;">Your courses: ${courseNames.slice(0, 3).join(', ')}</p>`
+        ? `<p style="margin:0 0 14px;font-size:13px;color:#9B9B9B;">Your courses: ${courseNames.slice(0, 3).join(', ')}</p>`
         : ''
+
+      const pillBg = isToday ? '#FBE9D6' : '#FFF5E6'
+      const pillBorder = isToday ? '#F0B27A' : '#F4DDB6'
+      const pillText = isToday ? '#A0522D' : '#7A4B0A'
 
       await resend.emails.send({
         from: 'StudyEdge AI <support@getstudyedge.com>',
         to: email,
         subject: `${examTitle} is ${isToday ? 'tomorrow' : 'in 2 days'} — final prep time`,
-        html: `
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background:#080D1A;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#080D1A;padding:40px 0;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#0D1425;border-radius:16px;border:1px solid rgba(255,255,255,0.07);padding:40px 48px;max-width:560px;">
-        <tr><td style="padding-bottom:28px;">
-          <span style="font-size:17px;font-weight:700;color:#F1F5F9;letter-spacing:-0.3px;">StudyEdge AI</span>
-        </td></tr>
-        <tr><td style="padding-bottom:10px;">
-          <div style="display:inline-block;background:${isToday ? 'rgba(249,115,22,0.12)' : 'rgba(251,191,36,0.1)'};border:1px solid ${isToday ? 'rgba(249,115,22,0.3)' : 'rgba(251,191,36,0.25)'};border-radius:999px;padding:4px 14px;font-size:12px;font-weight:700;color:${isToday ? '#f97316' : '#fbbf24'};">
-            ${isToday ? 'TOMORROW' : 'IN 2 DAYS'}
-          </div>
-        </td></tr>
-        <tr><td style="padding-bottom:20px;">
-          <h1 style="margin:0;font-size:24px;font-weight:800;color:#F1F5F9;letter-spacing:-0.8px;line-height:1.3;">
-            ${examTitle} is ${isToday ? 'tomorrow' : 'in 2 days'}. Lock in.
-          </h1>
-        </td></tr>
-        <tr><td style="padding-bottom:24px;">
-          <p style="margin:0 0 16px;font-size:15px;color:#94A3B8;line-height:1.7;">
-            Here's what to focus on in your final session${isToday ? ' tonight' : ' over the next 48 hours'}:
+        html: `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${examTitle} — final prep</title></head>
+<body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
+      <tr><td style="padding-bottom:20px;text-align:center;">
+        <span style="display:inline-block;width:28px;height:28px;border-radius:8px;background:#3B61C4;vertical-align:middle;margin-right:8px;"></span>
+        <span style="font-size:15px;font-weight:700;color:#111111;vertical-align:middle;">StudyEdge</span>
+      </td></tr>
+      <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
+        <table cellpadding="0" cellspacing="0" style="margin-bottom:14px;">
+          <tr><td style="background:${pillBg};border:1px solid ${pillBorder};border-radius:999px;padding:5px 14px;">
+            <span style="font-size:12px;font-weight:700;color:${pillText};letter-spacing:0.04em;">${isToday ? 'TOMORROW' : 'IN 2 DAYS'}</span>
+          </td></tr>
+        </table>
+        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">
+          ${examTitle} is ${isToday ? 'tomorrow' : 'in 2 days'}. Lock in.
+        </h1>
+        <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          Here's what to focus on in your final session${isToday ? ' tonight' : ' over the next 48 hours'}:
+        </p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:18px;">
+          ${[
+            'Review your weakest recall topics first — not your strongest',
+            'Run a quick Quiz Burst to test yourself under pressure',
+            'Use Exam Rescue for a last-minute strategy rundown',
+            isToday ? 'Stop studying by 10pm — sleep is your final edge' : 'Do a full practice run tomorrow morning',
+          ].map(tip => `
+          <tr>
+            <td style="padding:10px 0;border-bottom:1px solid #F0EDE8;">
+              <span style="color:#3B61C4;font-weight:600;margin-right:10px;">→</span>
+              <span style="font-size:14px;color:#111111;">${tip}</span>
+            </td>
+          </tr>`).join('')}
+        </table>
+        ${courseLine}
+        <div style="background:#F7F6F3;border-left:3px solid #3B61C4;border-radius:0 10px 10px 0;padding:14px 18px;margin-bottom:24px;">
+          <p style="margin:0;font-size:14px;color:#111111;line-height:1.6;">
+            ${isToday
+              ? "Don't cram new material tonight. Your brain needs to consolidate. Trust your prep."
+              : "Two days is enough time to meaningfully sharpen your recall — but only if you're focused on the right things."}
           </p>
-          <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:20px;">
-            ${[
-              'Review your weakest recall topics first — not your strongest',
-              'Run a quick Quiz Burst to test yourself under pressure',
-              'Use Exam Rescue for a last-minute strategy rundown',
-              isToday ? 'Stop studying by 10pm — sleep is your final edge' : 'Do a full practice run tomorrow morning',
-            ].map(tip => `
-            <tr>
-              <td style="padding:9px 0;border-bottom:1px solid rgba(255,255,255,0.05);">
-                <span style="color:#6366f1;font-size:13px;margin-right:10px;">→</span>
-                <span style="font-size:14px;color:#CBD5E1;">${tip}</span>
-              </td>
-            </tr>`).join('')}
-          </table>
-          ${courseLine}
-          <div style="background:rgba(99,102,241,0.08);border-left:3px solid #6366f1;border-radius:0 10px 10px 0;padding:14px 18px;">
-            <p style="margin:0;font-size:14px;color:#c7d2fe;line-height:1.6;">
-              ${isToday
-                ? "Don't cram new material tonight. Your brain needs to consolidate what it already knows. Trust your prep."
-                : "Two days is enough time to meaningfully sharpen your recall — but only if you're focused on the right things."}
-            </p>
-          </div>
-        </td></tr>
-        <tr><td style="padding-bottom:32px;text-align:center;">
-          <a href="https://getstudyedge.com/app"
-             style="display:inline-block;background:linear-gradient(135deg,#4F7EF7,#7C5CFA);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;letter-spacing:-0.2px;">
-            Open StudyEdge →
-          </a>
-        </td></tr>
-        <tr><td style="border-top:1px solid rgba(255,255,255,0.07);padding-top:24px;">
-          <p style="margin:0;font-size:12px;color:#334155;line-height:1.6;">
-            Sent because your exam is coming up · StudyEdge AI<br/>
-            <a href="https://getstudyedge.com/app" style="color:#475569;">Open the app</a> ·
-            <a href="mailto:support@getstudyedge.com" style="color:#475569;">Contact support</a>
-          </p>
-        </td></tr>
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`,
+        </div>
+        <table cellpadding="0" cellspacing="0" style="width:100%;">
+          <tr><td align="center">
+            <a href="https://getstudyedge.com/app" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Open StudyEdge</a>
+          </td></tr>
+        </table>
+      </td></tr>
+      <tr><td style="padding:24px 0 0;text-align:center;">
+        <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
+          Sent because your exam is coming up · StudyEdge AI<br>
+          <a href="https://getstudyedge.com/app" style="color:#9B9B9B;text-decoration:underline;">Open the app</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:support@getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
+        </p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`,
       })
 
-      // Also send SMS if user has opted in
       if (row.sms_enabled && row.sms_phone) {
         await sendExamReminderSMS(row.sms_phone, exam.title ?? 'Your exam', isToday)
       }

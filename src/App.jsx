@@ -83,6 +83,15 @@ export default function App() {
       if (_event === 'SIGNED_IN' && session?.user) {
         identifyUser(session.user.id, { email: session.user.email })
         track('user_signed_in')
+        // Welcome email — fire once per user via localStorage flag (server idempotency too)
+        const welcomeKey = `studyedge_welcome_sent_${session.user.id}`
+        if (!localStorage.getItem(welcomeKey)) {
+          fetch('/api/welcome-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: session.user.email, userId: session.user.id }),
+          }).then(() => localStorage.setItem(welcomeKey, '1')).catch(() => {})
+        }
         // Save referral — fire-and-forget, won't overwrite if already set
         const referrer = getStoredReferrer()
         if (referrer && referrer !== session.user.id) {
@@ -171,6 +180,23 @@ export default function App() {
     }
     saveEmailDigest(!!emailDigest)
     track('onboarding_completed', { yearLevel: yl, learningStyle: ls, preferredTime, emailDigest: !!emailDigest })
+    // Post-onboarding email — fire once per user
+    if (session?.user?.email) {
+      const key = `studyedge_onboarding_email_${session.user.id}`
+      if (!localStorage.getItem(key)) {
+        fetch('/api/onboarding-complete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: session.user.email,
+            firstName: session.user.user_metadata?.name,
+            yearLevel: yl,
+            learningStyle: ls,
+            preferredTime,
+          }),
+        }).then(() => localStorage.setItem(key, '1')).catch(() => {})
+      }
+    }
   }
 
   const handleSavePlan = (completedIds, updatedAssignments) => {
@@ -195,6 +221,7 @@ export default function App() {
       return
     }
     const newCourses = [...courses, course]
+    const isFirstCourse = courses.length === 0
     setCourses(newCourses)
     savePlan({
       courses: newCourses,
@@ -206,6 +233,21 @@ export default function App() {
       assignments: latestPlanRef.current.assignments,
       savedAt: Date.now(),
     })
+    // First-plan email — only when user goes from zero courses to one
+    if (isFirstCourse && session?.user?.email) {
+      const key = `studyedge_first_plan_email_${session.user.id}`
+      if (!localStorage.getItem(key)) {
+        fetch('/api/first-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            email: session.user.email,
+            firstName: session.user.user_metadata?.name,
+            courses: newCourses.map(c => c.name).filter(Boolean),
+          }),
+        }).then(() => localStorage.setItem(key, '1')).catch(() => {})
+      }
+    }
   }
 
   const handleEditCourse = (idx, updatedCourse) => {

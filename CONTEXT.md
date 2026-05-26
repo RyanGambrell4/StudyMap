@@ -480,3 +480,51 @@ StudyEdge AI solves 4 things no other app solves together:
 2. What to study
 3. How to stay locked in
 4. How to actually improve your grades
+
+---
+
+## Email System Agent — Run Notes (2026-05-26)
+
+### What changed
+- All transactional/cron email HTML templates converted from dark theme (`#080D1A`) to light theme matching `weekly-digest.js`: page `#F7F6F3`, card `#FFFFFF`, primary text `#111111`, muted `#6B6B6B`/`#9B9B9B`, accent `#3B61C4`, system font.
+- Files rewritten: `welcome-email.js`, `day1-tips.js`, `day7-milestone.js`, `day14-upgrade.js`, `weekly-recap.js`, `exam-countdown.js`, `exam-tomorrow.js`, `re-engage.js`. `weekly-digest.js` was already light and unchanged.
+- Subject lines kept under 50 chars where possible. CTA copy specific. Signed "— The StudyEdge AI team".
+- Welcome-email was orphaned (never invoked from signup flow). Wired it into `App.jsx` `SIGNED_IN` handler, fired once per `user.id` via localStorage flag (server idempotency still recommended).
+- Three new sequences added (per spec):
+  - `api/onboarding-complete.js` — fires from `handleOnboardingComplete` in `App.jsx`. Shows the user their captured profile + first next action.
+  - `api/first-plan.js` — fires from `handleAddCourse` only when going from 0 → 1 course. Includes course names in body.
+  - `api/streak-broken.js` — daily cron at 17:00 UTC. Reads `study_tools._streak` and `completed_sessions` from `user_data`. Only fires if previous streak ≥ 3 days, user didn't study today or yesterday, and not emailed in last 4 days. Throttled via `last_emailed_at`.
+- `vercel.json` cron list updated to include `/api/streak-broken`.
+
+### Critical env vars NOT in `.env` — required in Vercel
+- `RESEND_API_KEY` — required for every Resend email. Without it all senders return `{ ok: true, skipped: true }` and silently no-op. **This is the #1 reason no emails are firing.** Set in Vercel → Project → Settings → Environment Variables (Production + Preview).
+- `LOOPS_API_KEY` — required for Loops.so contact sync and event triggers (welcome-email also fires Loops events). Lifecycle automations defined inside Loops dashboard.
+- `CRON_SECRET` — recommended. All cron endpoints check `Authorization: Bearer <secret>`. Without it, cron endpoints are publicly callable.
+- `SUPABASE_SERVICE_KEY` — already present in `.env` locally; verify it's also set in Vercel for the cron jobs that use `supabase.auth.admin.listUsers` and admin queries.
+
+### Supabase confirmation email — known broken
+The QA agent reported "Error sending confirmation email" on real-email signup. Supabase Auth uses its built-in SMTP by default, which has aggressive sender limits and frequently fails on shared/default sender. Fix:
+1. Supabase Dashboard → Authentication → Settings → SMTP — configure custom SMTP. Easiest: point it at Resend SMTP using credentials from Resend dashboard.
+2. Supabase Dashboard → Authentication → Email Templates — customize confirmation + reset templates to match brand (otherwise users see generic Supabase HTML).
+3. Verify domain `getstudyedge.com` is verified in Resend (Domains tab) before using its SMTP.
+
+### Deliverability checklist (DNS for `getstudyedge.com`) — needs verification
+- [ ] **SPF** record: include Resend's sending IPs — `v=spf1 include:_spf.resend.com ~all` (or merge with existing SPF).
+- [ ] **DKIM**: TXT record from Resend → Domains → `getstudyedge.com`. Required for inbox placement.
+- [ ] **DMARC**: `v=DMARC1; p=none; rua=mailto:support@getstudyedge.com` to start. Move to `p=quarantine` after a week of clean reports.
+- [ ] Resend → Domains → `getstudyedge.com` must be verified.
+- [ ] Sender `support@getstudyedge.com` must be active in Resend.
+- All of the above can only be verified by logging into Resend + DNS host — the agent cannot do this without dashboard access.
+
+### What couldn't be fixed without dashboard access
+- Cannot verify Resend domain/DKIM status — needs Resend login.
+- Cannot configure Supabase SMTP/templates — needs Supabase dashboard.
+- Cannot set Vercel env vars from this agent run — must be done in Vercel project settings UI.
+- Cannot send test emails to confirm rendering — needs a Resend key configured.
+
+### Open questions for the developer
+1. Is Resend already configured in Vercel env? If yes, what's blocking? If no, this is the unblock.
+2. Is `getstudyedge.com` verified in Resend? (Check Resend → Domains.)
+3. Should we move Supabase confirmation to Resend SMTP, or keep Supabase's built-in?
+4. The dead `api/crons.js` consolidated handler still has dark-themed templates. Cron routes in `vercel.json` point to the standalone files now, not this — recommend deleting `api/crons.js` after confirming nothing else imports it.
+5. Streak-broken email reads `study_tools._streak` — confirm that's where the client writes the streak object. If schema differs, the dedupe heuristic needs updating.
