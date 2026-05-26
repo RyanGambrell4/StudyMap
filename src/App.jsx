@@ -83,13 +83,21 @@ export default function App() {
       if (_event === 'SIGNED_IN' && session?.user) {
         identifyUser(session.user.id, { email: session.user.email })
         track('user_signed_in')
-        // Welcome email — fire once per user via localStorage flag (server idempotency too)
+        // Welcome email — only on actual signup, not every login.
+        // Fresh signups have created_at within ~minutes of now AND have not received it before (localStorage flag).
         const welcomeKey = `studyedge_welcome_sent_${session.user.id}`
-        if (!localStorage.getItem(welcomeKey)) {
+        const createdAt = session.user.created_at ? new Date(session.user.created_at).getTime() : 0
+        const isFreshSignup = createdAt && Date.now() - createdAt < 10 * 60 * 1000 // 10 minutes
+        if (isFreshSignup && !localStorage.getItem(welcomeKey)) {
           fetch('/api/welcome-email', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ email: session.user.email, userId: session.user.id }),
+            body: JSON.stringify({
+              email: session.user.email,
+              userId: session.user.id,
+              firstName: session.user.user_metadata?.name,
+              createdAt: session.user.created_at,
+            }),
           }).then(() => localStorage.setItem(welcomeKey, '1')).catch(() => {})
         }
         // Save referral — fire-and-forget, won't overwrite if already set
