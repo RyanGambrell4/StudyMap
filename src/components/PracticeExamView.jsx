@@ -1,75 +1,42 @@
 import { useState } from 'react'
 import { getCachedPracticeExams, savePracticeExam } from '../lib/db'
-import PracticeExamModal from './PracticeExamModal'
+import PracticeExamSetup from './PracticeExamSetup'
 import PracticeExamScreen from './PracticeExamScreen'
 import PracticeExamResults from './PracticeExamResults'
 
 const D = {
   bg: '#F7F6F3',
-  bgCard: '#FFFFFF',
-  border: 'rgba(0,0,0,0.07)',
   text: '#1A1A1A',
   muted: '#6B6B6B',
   dim: '#9B9B9B',
   accent: '#3B61C4',
-  mint: '#16A34A',
-  amber: '#D97706',
-  red: '#DC2626',
-}
-
-function fmtDate(ts) {
-  return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
-}
-
-function scoreColor(score) {
-  if (score === null || score === undefined) return D.dim
-  if (score >= 70) return D.mint
-  if (score >= 50) return D.amber
-  return D.red
-}
-
-function ScoreRing({ score }) {
-  if (score === null || score === undefined) return null
-  const color = scoreColor(score)
-  const r = 18
-  const circ = 2 * Math.PI * r
-  const dash = (score / 100) * circ
-  return (
-    <div style={{ position: 'relative', width: 48, height: 48, flexShrink: 0 }}>
-      <svg width="48" height="48" style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx="24" cy="24" r={r} fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="3" />
-        <circle cx="24" cy="24" r={r} fill="none" stroke={color} strokeWidth="3"
-          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" />
-      </svg>
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        <span style={{ fontSize: 11, fontWeight: 800, color, letterSpacing: '-0.02em' }}>{score}%</span>
-      </div>
-    </div>
-  )
+  border: 'rgba(0,0,0,0.07)',
 }
 
 export default function PracticeExamView({ courses = [], onShowPaywall }) {
-  const [examPhase, setExamPhase] = useState('idle')
+  const [subview, setSubview] = useState('landing') // 'landing' | 'setup' | 'taking' | 'results'
   const [examCourse, setExamCourse] = useState(null)
   const [examQuestions, setExamQuestions] = useState([])
   const [examAnswers, setExamAnswers] = useState([])
   const [examTimeMs, setExamTimeMs] = useState(0)
   const [examTimerMinutes, setExamTimerMinutes] = useState(null)
+  const [questionTimings, setQuestionTimings] = useState([])
   const [refreshKey, setRefreshKey] = useState(0)
+  // eslint-disable-next-line no-unused-vars
+  const _bust = refreshKey
 
-  const openExam = (course) => { setExamCourse(course); setExamPhase('configure') }
-
-  const handleStart = ({ questions, timerMinutes }) => {
+  const handleStart = ({ questions, courseName, courseId, timerMinutes }) => {
     setExamQuestions(questions)
     setExamAnswers(questions.map(() => ''))
     setExamTimerMinutes(timerMinutes ?? null)
-    setExamPhase('taking')
+    setSubview('taking')
   }
 
-  const handleSubmit = ({ answers, timeMs }) => {
+  const handleSubmit = ({ answers, timeMs, questionTimings: timings }) => {
     setExamAnswers(answers)
     setExamTimeMs(timeMs)
-    setExamPhase('results')
+    setQuestionTimings(timings ?? [])
+    setSubview('results')
     try {
       const courseId = examCourse?.id ?? null
       if (courseId !== null) {
@@ -92,152 +59,138 @@ export default function PracticeExamView({ courses = [], onShowPaywall }) {
     } catch (e) { console.error('savePracticeExam failed', e) }
   }
 
-  const handleRetake = () => { setExamAnswers(examQuestions.map(() => '')); setExamTimeMs(0); setExamPhase('taking') }
-
-  const handleReplay = (course, exam) => {
-    setExamCourse(course)
-    setExamQuestions(exam.questions)
-    setExamAnswers(exam.answers ?? exam.questions.map(() => ''))
-    setExamTimeMs(exam.timeMs ?? 0)
-    setExamPhase('results')
+  const handleRetake = () => {
+    setExamAnswers(examQuestions.map(() => ''))
+    setExamTimeMs(0)
+    setQuestionTimings([])
+    setSubview('taking')
   }
 
-  const closeExam = () => {
-    setExamPhase('idle'); setExamCourse(null)
-    setExamQuestions([]); setExamAnswers([])
-    setExamTimeMs(0); setExamTimerMinutes(null)
+  const closeToLanding = () => {
+    setSubview('landing')
+    setExamCourse(null)
+    setExamQuestions([])
+    setExamAnswers([])
+    setExamTimeMs(0)
+    setExamTimerMinutes(null)
+    setQuestionTimings([])
   }
 
-  const parseName = (name) => {
-    const idx = name.indexOf(':')
-    if (idx > 0) return { code: name.slice(0, idx).trim(), title: name.slice(idx + 1).trim() }
-    return { code: null, title: name }
+  // ── Overlays (full-screen, rendered above everything) ──────────────────────
+  if (subview === 'taking') {
+    return (
+      <PracticeExamScreen
+        questions={examQuestions}
+        courseName={examCourse?.name ?? null}
+        timerMinutes={examTimerMinutes}
+        onSubmit={handleSubmit}
+        onExit={closeToLanding}
+      />
+    )
   }
 
-  // eslint-disable-next-line no-unused-vars
-  const _bust = refreshKey
+  if (subview === 'results') {
+    return (
+      <PracticeExamResults
+        questions={examQuestions}
+        answers={examAnswers}
+        timeMs={examTimeMs}
+        questionTimings={questionTimings}
+        courseName={examCourse?.name ?? null}
+        onRetake={handleRetake}
+        onClose={closeToLanding}
+      />
+    )
+  }
 
+  if (subview === 'setup') {
+    return (
+      <PracticeExamSetup
+        courses={courses}
+        onBack={() => setSubview('landing')}
+        onStart={(payload) => {
+          setExamCourse(payload.course)
+          handleStart(payload)
+        }}
+        onShowPaywall={onShowPaywall}
+      />
+    )
+  }
+
+  // ── Landing page ───────────────────────────────────────────────────────────
   return (
-    <div style={{ padding: '28px 32px 56px', overflowX: 'hidden', maxWidth: '100vw' }}>
+    <div style={{ minHeight: '100%', background: D.bg, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '48px 24px 80px' }}>
+      <div style={{ width: '100%', maxWidth: 640 }}>
 
-      {/* Header */}
-      <div style={{ marginBottom: 28, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16 }}>
-        <div>
-          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: D.dim, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Strategy</p>
-          <h1 style={{ margin: '3px 0 6px', fontSize: 24, fontWeight: 800, color: D.text, letterSpacing: '-0.02em' }}>Practice Exams</h1>
-          <p style={{ margin: 0, fontSize: 13.5, color: D.muted, lineHeight: 1.5, maxWidth: 520 }}>
-            Upload a past exam or notes — we extract verbatim questions first, then AI builds the rest.
+        {/* Label */}
+        <p style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 700, color: D.dim, textTransform: 'uppercase', letterSpacing: '0.09em' }}>Strategy</p>
+
+        {/* Hero card */}
+        <div style={{ background: '#fff', borderRadius: 20, padding: '40px 40px 36px', boxShadow: '0 2px 16px rgba(0,0,0,0.07)', border: `1px solid ${D.border}`, marginBottom: 16 }}>
+          <h1 style={{ margin: '0 0 12px', fontSize: 30, fontWeight: 800, color: D.text, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+            Simulate your real exam.
+          </h1>
+          <p style={{ margin: '0 0 28px', fontSize: 15, color: D.muted, lineHeight: 1.6, maxWidth: 520 }}>
+            See where you stand before it counts. Upload a past exam, paste your notes, or describe what's on it — we build a realistic look-alike with verbatim questions from your materials first, then AI fills the rest using your course data.
           </p>
-        </div>
-        {courses.length > 0 && (
-          <div style={{ flexShrink: 0, padding: '6px 12px', background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 10 }}>
-            <span style={{ fontSize: 12, fontWeight: 600, color: D.muted }}>{courses.length} course{courses.length !== 1 ? 's' : ''}</span>
-          </div>
-        )}
-      </div>
 
-      {/* Empty state */}
-      {courses.length === 0 && (
-        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 16, padding: '48px 32px', textAlign: 'center' }}>
-          <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(59,97,196,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-            <svg width="22" height="22" fill="none" stroke={D.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-            </svg>
-          </div>
-          <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: D.text }}>No courses yet</p>
-          <p style={{ margin: '6px 0 0', fontSize: 13, color: D.muted }}>Add a course first, then come back to generate practice exams.</p>
-        </div>
-      )}
-
-      {/* Course grid */}
-      {courses.length > 0 && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14 }}>
-          {courses.map((course, idx) => {
-            const { code, title } = parseName(course.name)
-            const dot = course.color?.dot || D.accent
-            const exams = getCachedPracticeExams(course.id ?? idx)
-            const lastExam = exams[0]
-            const bestScore = exams.reduce((best, ex) => {
-              if (ex.score === null || ex.score === undefined) return best
-              return best === null ? ex.score : Math.max(best, ex.score)
-            }, null)
-
-            return (
-              <div
-                key={course.id ?? idx}
-                style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 16, padding: '20px', display: 'flex', flexDirection: 'column', gap: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}
-              >
-                {/* Card header */}
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: exams.length > 0 ? 16 : 20 }}>
-                  <div style={{ minWidth: 0, flex: 1 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 5 }}>
-                      <div style={{ width: 7, height: 7, borderRadius: '50%', background: dot, flexShrink: 0 }} />
-                      <span style={{ fontSize: 10.5, fontWeight: 700, color: D.dim, textTransform: 'uppercase', letterSpacing: '0.07em' }}>{code || title}</span>
-                    </div>
-                    {code && (
-                      <div style={{ fontSize: 15, fontWeight: 700, color: D.text, lineHeight: 1.3, wordBreak: 'break-word' }}>{title}</div>
-                    )}
-                  </div>
-                  <ScoreRing score={bestScore} />
-                </div>
-
-                {/* Exam history */}
-                {exams.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 16 }}>
-                    {exams.slice(0, 3).map((ex) => (
-                      <button
-                        key={ex.id}
-                        onClick={() => handleReplay(course, ex)}
-                        style={{ display: 'flex', alignItems: 'center', gap: 0, padding: '7px 10px', borderRadius: 9, border: `1px solid ${D.border}`, background: '#FAFAF8', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'background 0.12s' }}
-                        onMouseEnter={e => e.currentTarget.style.background = '#F3F2EF'}
-                        onMouseLeave={e => e.currentTarget.style.background = '#FAFAF8'}
-                      >
-                        <span style={{ fontSize: 12, color: D.muted, flex: 1 }}>{fmtDate(ex.takenAt)}</span>
-                        <span style={{ fontSize: 12, color: D.dim, marginRight: 10 }}>{ex.questions?.length ?? '—'}Q</span>
-                        <span style={{ fontSize: 12, fontWeight: 700, color: scoreColor(ex.score), minWidth: 32, textAlign: 'right' }}>
-                          {ex.score !== null && ex.score !== undefined ? `${ex.score}%` : '—'}
-                        </span>
-                        <svg width="12" height="12" fill="none" stroke={D.dim} strokeWidth="2" viewBox="0 0 24 24" style={{ marginLeft: 6, flexShrink: 0 }}>
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
-                        </svg>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div style={{ flex: 1, marginBottom: 16, padding: '14px', borderRadius: 10, background: '#FAFAF8', border: `1px dashed rgba(0,0,0,0.1)`, textAlign: 'center' }}>
-                    <p style={{ margin: 0, fontSize: 12.5, color: D.dim, lineHeight: 1.5 }}>No exams yet</p>
-                    <p style={{ margin: '2px 0 0', fontSize: 11.5, color: 'rgba(0,0,0,0.28)', lineHeight: 1.4 }}>Upload notes or a past exam to get started</p>
-                  </div>
-                )}
-
-                {/* CTA */}
-                <button
-                  onClick={() => openExam(course)}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '10px 16px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', transition: 'opacity 0.12s' }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-                  onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-                >
-                  <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
-                  </svg>
-                  {exams.length > 0 ? 'New Exam' : 'Take Practice Exam'}
-                </button>
+          {/* Feature badges */}
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}>
+            {[
+              { icon: '📋', label: 'Verbatim questions first' },
+              { icon: '⏱', label: 'Optional timer' },
+              { icon: '📊', label: 'Weak area analysis' },
+              { icon: '🎯', label: 'Personalized to your course' },
+            ].map(({ icon, label }) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', background: D.bg, border: `1px solid ${D.border}`, borderRadius: 999, fontSize: 12.5, fontWeight: 500, color: D.muted }}>
+                <span>{icon}</span>
+                <span>{label}</span>
               </div>
-            )
-          })}
-        </div>
-      )}
+            ))}
+          </div>
 
-      {/* Overlays */}
-      {examPhase === 'configure' && (
-        <PracticeExamModal course={examCourse} onStart={handleStart} onClose={closeExam} onShowPaywall={onShowPaywall} />
-      )}
-      {examPhase === 'taking' && (
-        <PracticeExamScreen questions={examQuestions} courseName={examCourse?.name ?? null} timerMinutes={examTimerMinutes} onSubmit={handleSubmit} onExit={closeExam} />
-      )}
-      {examPhase === 'results' && (
-        <PracticeExamResults questions={examQuestions} answers={examAnswers} timeMs={examTimeMs} courseName={examCourse?.name ?? null} onRetake={handleRetake} onClose={closeExam} />
-      )}
+          {courses.length === 0 ? (
+            /* Empty state */
+            <div style={{ padding: '20px', background: '#FAFAF8', border: `1px dashed rgba(0,0,0,0.12)`, borderRadius: 12, textAlign: 'center' }}>
+              <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 600, color: D.text }}>No courses set up yet</p>
+              <p style={{ margin: 0, fontSize: 13, color: D.muted }}>Add a course first, then come back to generate a practice exam.</p>
+            </div>
+          ) : (
+            <button
+              onClick={() => setSubview('setup')}
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '14px 24px', background: D.accent, border: 'none', borderRadius: 12, color: '#fff', fontWeight: 700, fontSize: 15, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em', transition: 'opacity 0.15s' }}
+              onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
+              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+            >
+              Start Practice Exam
+              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+            </button>
+          )}
+        </div>
+
+        {/* How it works */}
+        <div style={{ background: '#fff', borderRadius: 16, padding: '24px 28px', boxShadow: '0 1px 6px rgba(0,0,0,0.05)', border: `1px solid ${D.border}` }}>
+          <p style={{ margin: '0 0 16px', fontSize: 11, fontWeight: 700, color: D.dim, textTransform: 'uppercase', letterSpacing: '0.07em' }}>How it works</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+            {[
+              { n: '1', title: 'Pick your course', desc: 'Select the course you\'re preparing for.' },
+              { n: '2', title: 'Give us your material', desc: 'Upload a past exam, paste notes, or describe what topics and format to expect.' },
+              { n: '3', title: 'Take the exam', desc: 'We generate a realistic test. Submit when done to see your score and weak areas.' },
+            ].map(({ n, title, desc }) => (
+              <div key={n} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+                <div style={{ width: 26, height: 26, borderRadius: 8, background: 'rgba(59,97,196,0.1)', color: D.accent, fontSize: 12, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>{n}</div>
+                <div>
+                  <p style={{ margin: '0 0 2px', fontSize: 13.5, fontWeight: 700, color: D.text }}>{title}</p>
+                  <p style={{ margin: 0, fontSize: 12.5, color: D.muted, lineHeight: 1.5 }}>{desc}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+      </div>
     </div>
   )
 }

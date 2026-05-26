@@ -11,24 +11,36 @@ export default async function handler(req, res) {
     const gate = await verifyAndCheckAiUsage(req)
     if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-    const { text, courseName, examLength, context } = req.body ?? {}
+    const { text, description, courseName, examLength, context, personalization } = req.body ?? {}
     const length = Math.max(MIN_LEN, Math.min(MAX_LEN, Number(examLength) || 10))
 
     const hasText = typeof text === 'string' && text.trim().length >= 50
-    if (!hasText) return res.status(400).json({ error: 'Provide source material (notes, past exam, slides). Need at least 50 characters of text.' })
+    const hasDescription = typeof description === 'string' && description.trim().length >= 30
+    if (!hasText && !hasDescription) {
+      return res.status(400).json({ error: 'Provide source material — upload a file, paste notes, or describe your exam (at least a few sentences).' })
+    }
 
-    const source = text.slice(0, MAX_SOURCE_CHARS)
-    const contextLine = context && typeof context === 'string' && context.trim().length
-      ? `Additional instructions from the student:\n"${context.trim()}"\n\n`
+    const source = hasText ? text.slice(0, MAX_SOURCE_CHARS) : null
+    const desc = hasDescription ? description.trim().slice(0, 3000) : null
+    const courseLine = courseName ? `Course: ${courseName}\n` : ''
+    const personalizationLine = personalization && typeof personalization === 'string' && personalization.trim().length
+      ? `\nStudent personalization data:\n${personalization.trim()}\n`
       : ''
-    const courseLine = courseName ? `Course: ${courseName}\n\n` : ''
+    const contextLine = context && typeof context === 'string' && context.trim().length
+      ? `\nAdditional instructions: "${context.trim()}"\n`
+      : ''
+
+    const sourceSection = [
+      source ? `Source material (past exams, notes, or slides):\n"""\n${source}\n"""` : null,
+      desc ? `Student's description of their exam:\n"""\n${desc}\n"""` : null,
+    ].filter(Boolean).join('\n\n')
 
     const prompt = `You are an expert exam designer building a realistic practice exam.
 
-${courseLine}${contextLine}Source material the student uploaded (past exams, notes, or slides):
-"""
-${source}
-"""
+${courseLine}${personalizationLine}${contextLine}
+${sourceSection}
+
+Use ALL provided context equally — treat uploaded source material and the student's description as equal-weight inputs. Use the personalization data to skew questions toward weak areas and align with the student's course content.
 
 Build a practice exam of exactly ${length} questions.
 

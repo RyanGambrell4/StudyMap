@@ -23,7 +23,13 @@ function gradeShort(question, given) {
   return null
 }
 
-export default function PracticeExamResults({ questions, answers, timeMs, courseName, onRetake, onClose }) {
+function fmtMs2(ms) {
+  const s = Math.round(ms / 1000)
+  if (s < 60) return `${s}s`
+  return `${Math.floor(s / 60)}m ${(s % 60).toString().padStart(2, '0')}s`
+}
+
+export default function PracticeExamResults({ questions, answers, timeMs, questionTimings = [], courseName, onRetake, onClose }) {
   const graded = useMemo(() => questions.map((q, i) => {
     const given = answers[i] ?? ''
     const correct = q.type === 'multiple_choice' ? gradeMc(q, given) : gradeShort(q, given)
@@ -107,6 +113,32 @@ export default function PracticeExamResults({ questions, answers, timeMs, course
           </div>
         )}
 
+        {/* Time breakdown */}
+        {questionTimings.length > 0 && (() => {
+          const sorted = [...questionTimings].sort((a, b) => b.timeMs - a.timeMs)
+          const slowest = sorted.slice(0, 3).filter(t => t.timeMs > 0)
+          const avg = questionTimings.length ? Math.round(questionTimings.reduce((s, t) => s + t.timeMs, 0) / questionTimings.length) : 0
+          if (!slowest.length) return null
+          return (
+            <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: 18 }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Time breakdown</p>
+                <span style={{ fontSize: 12, color: '#6B6B6B' }}>Avg {fmtMs2(avg)} per question</span>
+              </div>
+              <p style={{ margin: '0 0 10px', fontSize: 12, color: '#9B9B9B' }}>Slowest questions — likely areas of uncertainty</p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {slowest.map((t, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: '#FAFAF8', borderRadius: 10, border: '1px solid rgba(0,0,0,0.06)' }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', minWidth: 28 }}>#{sorted.indexOf(t) + 1}</span>
+                    <span style={{ fontSize: 13, color: '#1A1A1A', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.topic}</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#D97706', flexShrink: 0 }}>{fmtMs2(t.timeMs)}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
+
         {/* Per-question breakdown */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
           {graded.map(({ q, given, correct }, i) => {
@@ -144,7 +176,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, course
 
         {/* Actions */}
         <div style={{ display: 'flex', gap: 10, marginTop: 24, justifyContent: 'flex-end' }}>
-          <button onClick={onClose} style={{ padding: '12px 18px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, color: '#1A1A1A', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Back to course</button>
+          <button onClick={onClose} style={{ padding: '12px 18px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, color: '#1A1A1A', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Back to Practice Exams</button>
           <button onClick={onRetake} style={{ padding: '12px 22px', background: '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Retake</button>
         </div>
       </div>

@@ -7,7 +7,7 @@ function fmtTime(seconds) {
   return `${m}:${s.toString().padStart(2, '0')}`
 }
 
-// onSubmit({ answers, timeMs }): hand off to results
+// onSubmit({ answers, timeMs, questionTimings }): hand off to results
 // onExit(): bail without submitting
 export default function PracticeExamScreen({ questions, courseName, timerMinutes, onSubmit, onExit }) {
   const [idx, setIdx] = useState(0)
@@ -16,18 +16,30 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
   const [secondsLeft, setSecondsLeft] = useState(timerMinutes ? timerMinutes * 60 : null)
   const startedAt = useRef(Date.now())
   const submittedRef = useRef(false)
+  // Per-question timing
+  const questionStartRef = useRef(Date.now())
+  const timingsRef = useRef(questions.map(() => 0)) // accumulated ms per question
 
   const total = questions.length
   const current = questions[idx]
   const answered = answers.filter(a => a && a.trim().length).length
   const allAnswered = answered === total
 
+  const recordCurrentQuestionTime = () => {
+    const elapsed = Date.now() - questionStartRef.current
+    timingsRef.current = timingsRef.current.map((t, i) => i === idx ? t + elapsed : t)
+    questionStartRef.current = Date.now()
+  }
+
   const finalize = (override) => {
     if (submittedRef.current) return
     submittedRef.current = true
+    recordCurrentQuestionTime()
+    const questionTimings = questions.map((q, i) => ({ id: q.id ?? `q${i + 1}`, topic: q.topic ?? 'General', question: q.question, timeMs: timingsRef.current[i] ?? 0 }))
     onSubmit({
       answers: override ?? answers,
       timeMs: Date.now() - startedAt.current,
+      questionTimings,
     })
   }
 
@@ -40,15 +52,21 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [secondsLeft])
 
+  const navigateTo = (newIdx) => {
+    recordCurrentQuestionTime()
+    setIdx(newIdx)
+  }
+
   // Keyboard nav
   useEffect(() => {
     const h = (e) => {
       if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return
-      if (e.key === 'ArrowRight' && idx < total - 1) setIdx(idx + 1)
-      if (e.key === 'ArrowLeft' && idx > 0) setIdx(idx - 1)
+      if (e.key === 'ArrowRight' && idx < total - 1) navigateTo(idx + 1)
+      if (e.key === 'ArrowLeft' && idx > 0) navigateTo(idx - 1)
     }
     window.addEventListener('keydown', h)
     return () => window.removeEventListener('keydown', h)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [idx, total])
 
   const setAnswer = (val) => {
@@ -155,7 +173,7 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
               return (
                 <button
                   key={i}
-                  onClick={() => setIdx(i)}
+                  onClick={() => navigateTo(i)}
                   title={`Question ${i + 1}${isAnswered ? ' (answered)' : ''}`}
                   style={{
                     width: 28,
@@ -178,14 +196,14 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
 
           <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
             <button
-              onClick={() => setIdx(i => Math.max(0, i - 1))}
+              onClick={() => navigateTo(Math.max(0, idx - 1))}
               disabled={idx === 0}
               style={{ padding: '10px 16px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: idx === 0 ? '#9B9B9B' : '#1A1A1A', fontWeight: 600, fontSize: 13, cursor: idx === 0 ? 'not-allowed' : 'pointer' }}
             >Previous</button>
 
             {idx < total - 1 ? (
               <button
-                onClick={() => setIdx(i => Math.min(total - 1, i + 1))}
+                onClick={() => navigateTo(Math.min(total - 1, idx + 1))}
                 style={{ padding: '10px 16px', background: '#1A1A1A', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
               >Next →</button>
             ) : (

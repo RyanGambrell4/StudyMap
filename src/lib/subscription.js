@@ -17,6 +17,7 @@ export const FREE_LIMITS = {
   aiTutor:             { count: 2,  period: 'day'   },
   blueprint:           { count: 1,  period: 'day'   },
   coachPlan:           { count: 1,  period: 'total' },
+  practiceExam:        { count: 1,  period: 'total' },
   focusMode:           { minutes: 60, period: 'day' },
   brainDump:           { count: 2,  period: 'week'  },
   quizBurst:           { count: 2,  period: 'week'  },
