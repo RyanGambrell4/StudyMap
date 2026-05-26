@@ -8,7 +8,6 @@ const D = {
   bg: '#F7F6F3',
   bgCard: '#FFFFFF',
   border: 'rgba(0,0,0,0.07)',
-  borderStrong: 'rgba(0,0,0,0.12)',
   text: '#1A1A1A',
   muted: '#6B6B6B',
   dim: '#9B9B9B',
@@ -19,31 +18,46 @@ const D = {
 }
 
 function fmtDate(ts) {
-  const d = new Date(ts)
-  return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+  return new Date(ts).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
 }
 
 function scoreColor(score) {
-  if (score === null || score === undefined) return D.muted
+  if (score === null || score === undefined) return D.dim
   if (score >= 70) return D.mint
   if (score >= 50) return D.amber
   return D.red
 }
 
+function ScoreRing({ score }) {
+  if (score === null || score === undefined) return null
+  const color = scoreColor(score)
+  const r = 18
+  const circ = 2 * Math.PI * r
+  const dash = (score / 100) * circ
+  return (
+    <div style={{ position: 'relative', width: 48, height: 48, flexShrink: 0 }}>
+      <svg width="48" height="48" style={{ transform: 'rotate(-90deg)' }}>
+        <circle cx="24" cy="24" r={r} fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="3" />
+        <circle cx="24" cy="24" r={r} fill="none" stroke={color} strokeWidth="3"
+          strokeDasharray={`${dash} ${circ}`} strokeLinecap="round" />
+      </svg>
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <span style={{ fontSize: 11, fontWeight: 800, color, letterSpacing: '-0.02em' }}>{score}%</span>
+      </div>
+    </div>
+  )
+}
+
 export default function PracticeExamView({ courses = [], onShowPaywall }) {
-  const [examPhase, setExamPhase] = useState('idle') // 'idle' | 'configure' | 'taking' | 'results'
+  const [examPhase, setExamPhase] = useState('idle')
   const [examCourse, setExamCourse] = useState(null)
   const [examQuestions, setExamQuestions] = useState([])
   const [examAnswers, setExamAnswers] = useState([])
   const [examTimeMs, setExamTimeMs] = useState(0)
   const [examTimerMinutes, setExamTimerMinutes] = useState(null)
-  // refresh counter to force re-render of the history list after saving
   const [refreshKey, setRefreshKey] = useState(0)
 
-  const openExam = (course) => {
-    setExamCourse(course)
-    setExamPhase('configure')
-  }
+  const openExam = (course) => { setExamCourse(course); setExamPhase('configure') }
 
   const handleStart = ({ questions, timerMinutes }) => {
     setExamQuestions(questions)
@@ -78,11 +92,7 @@ export default function PracticeExamView({ courses = [], onShowPaywall }) {
     } catch (e) { console.error('savePracticeExam failed', e) }
   }
 
-  const handleRetake = () => {
-    setExamAnswers(examQuestions.map(() => ''))
-    setExamTimeMs(0)
-    setExamPhase('taking')
-  }
+  const handleRetake = () => { setExamAnswers(examQuestions.map(() => '')); setExamTimeMs(0); setExamPhase('taking') }
 
   const handleReplay = (course, exam) => {
     setExamCourse(course)
@@ -93,12 +103,9 @@ export default function PracticeExamView({ courses = [], onShowPaywall }) {
   }
 
   const closeExam = () => {
-    setExamPhase('idle')
-    setExamCourse(null)
-    setExamQuestions([])
-    setExamAnswers([])
-    setExamTimeMs(0)
-    setExamTimerMinutes(null)
+    setExamPhase('idle'); setExamCourse(null)
+    setExamQuestions([]); setExamAnswers([])
+    setExamTimeMs(0); setExamTimerMinutes(null)
   }
 
   const parseName = (name) => {
@@ -107,79 +114,113 @@ export default function PracticeExamView({ courses = [], onShowPaywall }) {
     return { code: null, title: name }
   }
 
-  // Pull recent exams once per render. refreshKey ensures we re-read after a save.
   // eslint-disable-next-line no-unused-vars
   const _bust = refreshKey
 
   return (
-    <div className="sc-page-pad" style={{ padding: '24px 32px 48px', overflowX: 'hidden', maxWidth: '100vw' }}>
+    <div style={{ padding: '28px 32px 56px', overflowX: 'hidden', maxWidth: '100vw' }}>
 
       {/* Header */}
-      <div style={{ marginBottom: 24 }}>
-        <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: D.dim, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Strategy</p>
-        <h1 style={{ margin: '4px 0 0', fontSize: 26, fontWeight: 800, color: D.text, letterSpacing: '-0.01em' }}>Practice Exams</h1>
-        <p style={{ margin: '6px 0 0', fontSize: 14, color: D.muted, lineHeight: 1.5, maxWidth: 640 }}>
-          Drop in a past exam, notes, or slides and we'll build a realistic look-alike practice test. Verbatim questions from your materials come first; AI generates the rest to match the style.
-        </p>
+      <div style={{ marginBottom: 28, display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', gap: 16 }}>
+        <div>
+          <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: D.dim, textTransform: 'uppercase', letterSpacing: '0.08em' }}>Strategy</p>
+          <h1 style={{ margin: '3px 0 6px', fontSize: 24, fontWeight: 800, color: D.text, letterSpacing: '-0.02em' }}>Practice Exams</h1>
+          <p style={{ margin: 0, fontSize: 13.5, color: D.muted, lineHeight: 1.5, maxWidth: 520 }}>
+            Upload a past exam or notes — we extract verbatim questions first, then AI builds the rest.
+          </p>
+        </div>
+        {courses.length > 0 && (
+          <div style={{ flexShrink: 0, padding: '6px 12px', background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 10 }}>
+            <span style={{ fontSize: 12, fontWeight: 600, color: D.muted }}>{courses.length} course{courses.length !== 1 ? 's' : ''}</span>
+          </div>
+        )}
       </div>
 
-      {/* No courses yet */}
+      {/* Empty state */}
       {courses.length === 0 && (
-        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 16, padding: 32, textAlign: 'center' }}>
-          <p style={{ margin: 0, fontSize: 15, color: D.muted }}>Add a course first — then come back here to generate a practice exam for it.</p>
+        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 16, padding: '48px 32px', textAlign: 'center' }}>
+          <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(59,97,196,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+            <svg width="22" height="22" fill="none" stroke={D.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+            </svg>
+          </div>
+          <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: D.text }}>No courses yet</p>
+          <p style={{ margin: '6px 0 0', fontSize: 13, color: D.muted }}>Add a course first, then come back to generate practice exams.</p>
         </div>
       )}
 
       {/* Course grid */}
       {courses.length > 0 && (
-        <div className="sc-plans-cards">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))', gap: 14 }}>
           {courses.map((course, idx) => {
             const { code, title } = parseName(course.name)
             const dot = course.color?.dot || D.accent
             const exams = getCachedPracticeExams(course.id ?? idx)
             const lastExam = exams[0]
+            const bestScore = exams.reduce((best, ex) => {
+              if (ex.score === null || ex.score === undefined) return best
+              return best === null ? ex.score : Math.max(best, ex.score)
+            }, null)
+
             return (
-              <div key={course.id ?? idx} style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 14 }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
-                  <div style={{ minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                      <div style={{ width: 8, height: 8, borderRadius: '50%', background: dot, flexShrink: 0 }} />
-                      <span style={{ fontSize: 11, fontWeight: 600, color: D.muted, textTransform: 'uppercase', letterSpacing: '0.06em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{code || title}</span>
+              <div
+                key={course.id ?? idx}
+                style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 16, padding: '20px', display: 'flex', flexDirection: 'column', gap: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.03)' }}
+              >
+                {/* Card header */}
+                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: exams.length > 0 ? 16 : 20 }}>
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 5 }}>
+                      <div style={{ width: 7, height: 7, borderRadius: '50%', background: dot, flexShrink: 0 }} />
+                      <span style={{ fontSize: 10.5, fontWeight: 700, color: D.dim, textTransform: 'uppercase', letterSpacing: '0.07em' }}>{code || title}</span>
                     </div>
-                    <div style={{ fontSize: 16, fontWeight: 700, color: D.text, lineHeight: 1.3, wordBreak: 'break-word' }}>{code ? title : ''}</div>
+                    {code && (
+                      <div style={{ fontSize: 15, fontWeight: 700, color: D.text, lineHeight: 1.3, wordBreak: 'break-word' }}>{title}</div>
+                    )}
                   </div>
-                  {lastExam && lastExam.score !== null && lastExam.score !== undefined && (
-                    <div style={{ flexShrink: 0, padding: '4px 10px', borderRadius: 999, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}` }}>
-                      <span style={{ fontSize: 11, fontWeight: 700, color: scoreColor(lastExam.score) }}>Last: {lastExam.score}%</span>
-                    </div>
-                  )}
+                  <ScoreRing score={bestScore} />
                 </div>
 
+                {/* Exam history */}
                 {exams.length > 0 ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 16 }}>
                     {exams.slice(0, 3).map((ex) => (
                       <button
                         key={ex.id}
                         onClick={() => handleReplay(course, ex)}
-                        style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, padding: '8px 10px', borderRadius: 10, border: `1px solid ${D.border}`, background: '#FAFAF8', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 0, padding: '7px 10px', borderRadius: 9, border: `1px solid ${D.border}`, background: '#FAFAF8', cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', transition: 'background 0.12s' }}
+                        onMouseEnter={e => e.currentTarget.style.background = '#F3F2EF'}
+                        onMouseLeave={e => e.currentTarget.style.background = '#FAFAF8'}
                       >
-                        <span style={{ fontSize: 12.5, color: D.muted }}>{fmtDate(ex.takenAt)}</span>
-                        <span style={{ fontSize: 12.5, color: D.dim }}>{ex.questions?.length ?? '—'} Qs</span>
-                        <span style={{ fontSize: 12.5, fontWeight: 700, color: scoreColor(ex.score) }}>{ex.score !== null && ex.score !== undefined ? `${ex.score}%` : '—'}</span>
+                        <span style={{ fontSize: 12, color: D.muted, flex: 1 }}>{fmtDate(ex.takenAt)}</span>
+                        <span style={{ fontSize: 12, color: D.dim, marginRight: 10 }}>{ex.questions?.length ?? '—'}Q</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: scoreColor(ex.score), minWidth: 32, textAlign: 'right' }}>
+                          {ex.score !== null && ex.score !== undefined ? `${ex.score}%` : '—'}
+                        </span>
+                        <svg width="12" height="12" fill="none" stroke={D.dim} strokeWidth="2" viewBox="0 0 24 24" style={{ marginLeft: 6, flexShrink: 0 }}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
                       </button>
                     ))}
                   </div>
                 ) : (
-                  <p style={{ fontSize: 12.5, color: D.dim, lineHeight: 1.55, margin: 0, fontStyle: 'italic' }}>
-                    No practice exams yet. Drop a past exam or your notes and we'll build one.
-                  </p>
+                  <div style={{ flex: 1, marginBottom: 16, padding: '14px', borderRadius: 10, background: '#FAFAF8', border: `1px dashed rgba(0,0,0,0.1)`, textAlign: 'center' }}>
+                    <p style={{ margin: 0, fontSize: 12.5, color: D.dim, lineHeight: 1.5 }}>No exams yet</p>
+                    <p style={{ margin: '2px 0 0', fontSize: 11.5, color: 'rgba(0,0,0,0.28)', lineHeight: 1.4 }}>Upload notes or a past exam to get started</p>
+                  </div>
                 )}
 
+                {/* CTA */}
                 <button
                   onClick={() => openExam(course)}
-                  style={{ marginTop: 'auto', padding: '10px 14px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, padding: '10px 16px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', transition: 'opacity 0.12s' }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
+                  onMouseLeave={e => e.currentTarget.style.opacity = '1'}
                 >
-                  {exams.length > 0 ? 'New Practice Exam' : 'Take Practice Exam'}
+                  <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 4v16m8-8H4"/>
+                  </svg>
+                  {exams.length > 0 ? 'New Exam' : 'Take Practice Exam'}
                 </button>
               </div>
             )
@@ -189,31 +230,13 @@ export default function PracticeExamView({ courses = [], onShowPaywall }) {
 
       {/* Overlays */}
       {examPhase === 'configure' && (
-        <PracticeExamModal
-          course={examCourse}
-          onStart={handleStart}
-          onClose={closeExam}
-          onShowPaywall={onShowPaywall}
-        />
+        <PracticeExamModal course={examCourse} onStart={handleStart} onClose={closeExam} onShowPaywall={onShowPaywall} />
       )}
       {examPhase === 'taking' && (
-        <PracticeExamScreen
-          questions={examQuestions}
-          courseName={examCourse?.name ?? null}
-          timerMinutes={examTimerMinutes}
-          onSubmit={handleSubmit}
-          onExit={closeExam}
-        />
+        <PracticeExamScreen questions={examQuestions} courseName={examCourse?.name ?? null} timerMinutes={examTimerMinutes} onSubmit={handleSubmit} onExit={closeExam} />
       )}
       {examPhase === 'results' && (
-        <PracticeExamResults
-          questions={examQuestions}
-          answers={examAnswers}
-          timeMs={examTimeMs}
-          courseName={examCourse?.name ?? null}
-          onRetake={handleRetake}
-          onClose={closeExam}
-        />
+        <PracticeExamResults questions={examQuestions} answers={examAnswers} timeMs={examTimeMs} courseName={examCourse?.name ?? null} onRetake={handleRetake} onClose={closeExam} />
       )}
     </div>
   )
