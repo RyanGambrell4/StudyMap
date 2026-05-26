@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -28,6 +29,8 @@ export default async function handler(req, res) {
   let sent = 0
   for (const user of newUsers) {
     if (!user.email) continue
+    const gate = await canSendUserEmail(user.id, { priority: 'normal' })
+    if (!gate.ok) continue
     try {
       await resend.emails.send({
         from: 'StudyEdge AI <support@mail.getstudyedge.com>',
@@ -84,6 +87,7 @@ export default async function handler(req, res) {
 </table>
 </body></html>`,
       })
+      await recordUserEmail(user.id)
       sent++
     } catch (err) {
       console.error(`[day1-tips] Failed to send to ${user.email}:`, err)

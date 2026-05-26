@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -135,6 +136,9 @@ export default async function handler(req, res) {
     } catch { /* skip */ }
     if (!authUser?.email) { results.skipped++; continue }
 
+    const gate = await canSendUserEmail(row.user_id, { priority: 'normal' })
+    if (!gate.ok) { results.skipped++; continue }
+
     try {
       const manual    = Array.isArray(row.manual_sessions) ? row.manual_sessions : []
       const completed = Array.isArray(row.completed_sessions) ? row.completed_sessions : []
@@ -192,7 +196,7 @@ export default async function handler(req, res) {
       })
 
       if (sendErr) results.errors.push({ userId: row.user_id, error: sendErr.message })
-      else results.sent++
+      else { await recordUserEmail(row.user_id); results.sent++ }
     } catch (err) {
       results.errors.push({ userId: row.user_id, error: String(err?.message ?? err) })
       results.skipped++

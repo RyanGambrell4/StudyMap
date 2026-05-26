@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -19,7 +20,7 @@ export default async function handler(req, res) {
 
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
-    .select('user_id, completed_sessions, study_tools, subscription, syllabus_events')
+    .select('user_id, completed_sessions, study_tools, subscription, syllabus_events, email_digest')
     .limit(1000)
 
   if (error) {
@@ -32,6 +33,9 @@ export default async function handler(req, res) {
   let sent = 0, skipped = 0
 
   for (const row of rows ?? []) {
+    // Sunday dedupe: opt-in digest subscribers get weekly-digest instead (richer content).
+    if (row.email_digest) { skipped++; continue }
+
     const allSessions = Array.isArray(row.completed_sessions) ? row.completed_sessions : []
     const weekSessions = allSessions.filter(s => {
       const d = new Date(s.completedAt ?? s.date ?? s.timestamp ?? 0)
@@ -42,6 +46,9 @@ export default async function handler(req, res) {
     const sub = row.subscription ?? {}
     const plan = activeStatuses.includes(sub.status) ? (sub.plan ?? 'free') : 'free'
     if (weekSessions.length === 0 && streak === 0) { skipped++; continue }
+
+    const gate = await canSendUserEmail(row.user_id, { priority: 'normal' })
+    if (!gate.ok) { skipped++; continue }
 
     const todayStr = now.toISOString().slice(0, 10)
     const weekAheadStr = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000).toISOString().slice(0, 10)
@@ -171,6 +178,7 @@ export default async function handler(req, res) {
 </table>
 </body></html>`,
       })
+      await recordUserEmail(row.user_id)
       sent++
     } catch (err) {
       console.error(`[weekly-recap] Failed to send to ${email}:`, err)

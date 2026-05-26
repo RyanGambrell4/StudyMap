@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -39,10 +40,9 @@ export default async function handler(req, res) {
         : 999
       if (daysSinceSession < 3) { skipped++; continue }
 
-      if (row.last_emailed_at) {
-        const daysSinceEmail = Math.floor((now - new Date(row.last_emailed_at).getTime()) / 86400000)
-        if (daysSinceEmail < 2) { skipped++; continue }
-      }
+      // Rate-limit: low priority (>= 5 days since last email)
+      const gate = await canSendUserEmail(row.user_id, { priority: 'low' })
+      if (!gate.ok) { skipped++; continue }
 
       let email
       try {
@@ -138,11 +138,7 @@ export default async function handler(req, res) {
 </body></html>`,
       })
 
-      await supabaseAdmin
-        .from('user_data')
-        .update({ last_emailed_at: new Date().toISOString() })
-        .eq('user_id', row.user_id)
-
+      await recordUserEmail(row.user_id)
       sent++
     } catch (err) {
       console.error(`[re-engage] Error for user ${row.user_id}:`, err)

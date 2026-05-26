@@ -528,3 +528,34 @@ The QA agent reported "Error sending confirmation email" on real-email signup. S
 3. Should we move Supabase confirmation to Resend SMTP, or keep Supabase's built-in?
 4. The dead `api/crons.js` consolidated handler still has dark-themed templates. Cron routes in `vercel.json` point to the standalone files now, not this — recommend deleting `api/crons.js` after confirming nothing else imports it.
 5. Streak-broken email reads `study_tools._streak` — confirm that's where the client writes the streak object. If schema differs, the dedupe heuristic needs updating.
+
+---
+
+## Email Rate-Limiting Policy (2026-05-26)
+
+To protect domain reputation and avoid spam complaints, all cron-driven emails go through `lib/server/emailGuard.js`. The guard reads `user_data.last_emailed_at` and applies these gaps:
+
+| Priority | Min gap since last email | Used by |
+|---|---|---|
+| `critical` | 0 (always sends) | `exam-tomorrow` |
+| `normal` | 48 hours | `weekly-recap`, `weekly-digest`, `exam-countdown`, `day1-tips`, `day7-milestone`, `day14-upgrade` |
+| `low` | 5 days | `re-engage`, `streak-broken` |
+
+Every successful send calls `recordUserEmail(userId)` to bump `last_emailed_at`. `exam-tomorrow` is critical (never throttled) but it still records, so re-engage and streak-broken back off for 48h after an exam reminder — users get space when it matters.
+
+**Sunday dedupe:** `weekly-recap` skips users with `email_digest = true` — those users get the richer digest instead. No more double-email Sundays.
+
+**Exam-countdown collapsing:** Previously, a user with N courses with exams in the 14/7-day window got N emails. Now it sends one email per user per cron run (most-urgent first). `exam-tomorrow` still catches secondary exams at 1-2 days out.
+
+**Realistic worst-case per week:** 3 emails — Sunday digest/recap, mid-week re-engage OR streak-broken, plus exam-tomorrow when relevant. Down from ~10 emails/week.
+
+---
+
+## Supabase Auth Email Setup (2026-05-26)
+
+Confirmation/reset emails fail because Supabase's built-in SMTP has a 4 emails/hour shared cap. Fix: route Supabase Auth through Resend SMTP. Full step-by-step in `docs/supabase-email-templates.md`, including the branded HTML to paste into Supabase → Authentication → Email Templates.
+
+The `AuthScreen` confirmation-pending screen was also tightened:
+- Added an "Open Gmail/Outlook/iCloud Mail" button that deep-links to the user's webmail provider based on their email domain
+- Resend button now has a 60s cooldown (matches Supabase's per-email rate limit) and surfaces "Too many tries" vs generic "Failed" states
+- Existing auto-polling (every 5s for `email_confirmed_at`) preserved

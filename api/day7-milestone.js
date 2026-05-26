@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -40,6 +41,9 @@ export default async function handler(req, res) {
     const sessionCount = Array.isArray(row?.completed_sessions) ? row.completed_sessions.length : 0
     const courseCount = Array.isArray(row?.courses) ? row.courses.length : 0
     if (plan !== 'free') { skipped++; continue }
+
+    const gate = await canSendUserEmail(user.id, { priority: 'normal' })
+    if (!gate.ok) { skipped++; continue }
 
     const hasActivity = sessionCount > 0 || courseCount > 0
     const activityLine = hasActivity
@@ -108,6 +112,7 @@ export default async function handler(req, res) {
 </table>
 </body></html>`,
       })
+      await recordUserEmail(user.id)
       sent++
     } catch (err) {
       console.error(`[day7-milestone] Failed to send to ${user.email}:`, err)

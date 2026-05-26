@@ -112,12 +112,24 @@ export default function AuthScreen({ initialMode, onBack }) {
       setResendStatus('sending')
       try {
         const { error: resendErr } = await supabase.auth.resend({ type: 'signup', email: signupPendingEmail })
-        if (resendErr) throw resendErr
+        if (resendErr) {
+          const msg = (resendErr.message ?? '').toLowerCase()
+          if (msg.includes('rate') || msg.includes('limit') || msg.includes('seconds')) {
+            setResendStatus('ratelimited')
+          } else {
+            setResendStatus('error')
+          }
+          setTimeout(() => setResendStatus('cooldown'), 4000)
+          return
+        }
         setResendStatus('sent')
-        setTimeout(() => setResendStatus(''), 4000)
+        // 60s cooldown — Supabase's own rate limit is 1 every 60s anyway
+        setTimeout(() => setResendStatus('cooldown'), 4000)
+        setTimeout(() => setResendStatus(''), 64000)
       } catch {
         setResendStatus('error')
-        setTimeout(() => setResendStatus(''), 4000)
+        setTimeout(() => setResendStatus('cooldown'), 4000)
+        setTimeout(() => setResendStatus(''), 64000)
       }
     }
 
@@ -498,23 +510,64 @@ function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onS
             ))}
           </div>
 
+          {/* Open inbox shortcut — deep-link to the user's webmail provider */}
+          {(() => {
+            const domain = (email?.split('@')[1] ?? '').toLowerCase()
+            const inboxUrl =
+              domain === 'gmail.com' || domain === 'googlemail.com' ? 'https://mail.google.com/' :
+              domain === 'outlook.com' || domain === 'hotmail.com' || domain === 'live.com' || domain === 'msn.com' ? 'https://outlook.live.com/mail/' :
+              domain === 'yahoo.com' || domain === 'ymail.com' ? 'https://mail.yahoo.com/' :
+              domain === 'icloud.com' || domain === 'me.com' || domain === 'mac.com' ? 'https://www.icloud.com/mail' :
+              null
+            const inboxName =
+              domain === 'gmail.com' || domain === 'googlemail.com' ? 'Gmail' :
+              inboxUrl?.includes('outlook') ? 'Outlook' :
+              inboxUrl?.includes('yahoo') ? 'Yahoo Mail' :
+              inboxUrl?.includes('icloud') ? 'iCloud Mail' :
+              null
+            return inboxUrl ? (
+              <a
+                href={inboxUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  width: '100%', padding: '12px', borderRadius: 12,
+                  backgroundColor: '#3B61C4', color: '#fff',
+                  fontSize: 14, fontWeight: 600, textDecoration: 'none',
+                  marginBottom: 12, boxSizing: 'border-box',
+                }}
+              >
+                Open {inboxName}
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M7 17L17 7M9 7h8v8" />
+                </svg>
+              </a>
+            ) : null
+          })()}
+
           <p style={{ fontSize: 12, color: '#9B9B9B', margin: '0 0 14px', lineHeight: 1.5 }}>
             Email not there yet? Check Spam or Promotions and search for "StudyEdge AI".
           </p>
 
           <button
             onClick={onResend}
-            disabled={resendStatus === 'sending'}
+            disabled={resendStatus === 'sending' || resendStatus === 'cooldown'}
             style={{
               width: '100%', padding: '12px', borderRadius: 12,
               backgroundColor: '#fff', color: '#3B61C4',
               border: '1px solid rgba(59,97,196,0.3)', fontSize: 14, fontWeight: 600,
-              cursor: resendStatus === 'sending' ? 'default' : 'pointer',
-              opacity: resendStatus === 'sending' ? 0.6 : 1,
+              cursor: (resendStatus === 'sending' || resendStatus === 'cooldown') ? 'default' : 'pointer',
+              opacity: (resendStatus === 'sending' || resendStatus === 'cooldown') ? 0.55 : 1,
               marginBottom: 14,
             }}
           >
-            {resendStatus === 'sending' ? 'Resending…' : resendStatus === 'sent' ? 'Email resent ✓' : resendStatus === 'error' ? 'Try again' : 'Resend confirmation email'}
+            {resendStatus === 'sending' ? 'Resending…'
+              : resendStatus === 'sent' ? 'Email resent ✓'
+              : resendStatus === 'cooldown' ? 'Wait a moment before resending'
+              : resendStatus === 'ratelimited' ? 'Too many tries — try again in a minute'
+              : resendStatus === 'error' ? 'Resend failed — try again'
+              : 'Resend confirmation email'}
           </button>
 
           <div style={{ display: 'flex', flexDirection: 'column', gap: 8, textAlign: 'center' }}>

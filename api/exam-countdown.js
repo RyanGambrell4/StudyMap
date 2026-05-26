@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -53,12 +54,22 @@ export default async function handler(req, res) {
     } catch { /* skip */ }
     if (!email) { skipped++; continue }
 
+    const gate = await canSendUserEmail(row.user_id, { priority: 'normal' })
+    if (!gate.ok) { skipped++; continue }
+
     const activeStatuses = ['active', 'trialing', 'past_due']
     const sub = row.subscription ?? {}
     const plan = activeStatuses.includes(sub.status) ? (sub.plan ?? 'free') : 'free'
     const isFreePlan = plan === 'free'
 
-    for (const course of matches) {
+    // Send ONE email per user — most-urgent exam first (7d before 14d). The 48h
+    // throttle means secondary exams won't get their own dedicated email here;
+    // exam-tomorrow (critical, unthrottled) will catch them at 1-2 days out.
+    matches.sort((a, b) => (a.examDate === target7 ? 0 : 1) - (b.examDate === target7 ? 0 : 1))
+    const matchesToSend = matches.slice(0, 1)
+
+    let userSent = false
+    for (const course of matchesToSend) {
       const daysLeft = course.examDate === target14 ? 14 : 7
       const examName = course.name ?? 'your exam'
       const targetScore = course.targetScore ? ` Your target: ${course.targetScore}.` : ''
@@ -138,11 +149,13 @@ export default async function handler(req, res) {
 </table>
 </body></html>`,
         })
+        userSent = true
         sent++
       } catch (err) {
         console.error(`[exam-countdown] Failed to send to ${email}:`, err)
       }
     }
+    if (userSent) await recordUserEmail(row.user_id)
   }
 
   console.log(`[exam-countdown] Sent ${sent}, skipped ${skipped}`)

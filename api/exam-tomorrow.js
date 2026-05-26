@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { sendExamReminderSMS } from '../lib/server/twilio.js'
+import { recordUserEmail } from '../lib/server/emailGuard.js'
 
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -152,6 +153,9 @@ export default async function handler(req, res) {
         await sendExamReminderSMS(row.sms_phone, exam.title ?? 'Your exam', isToday)
       }
 
+      // Record so non-critical emails (re-engage, streak-broken, weekly) skip
+      // this user for the next 48h — they're heads-down for the exam.
+      await recordUserEmail(row.user_id)
       sent++
     } catch (err) {
       console.error(`[exam-tomorrow] Error for user ${row.user_id}:`, err)
