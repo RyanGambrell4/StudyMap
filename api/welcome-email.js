@@ -24,7 +24,7 @@ export default async function handler(req, res) {
 
   try {
     await resend.emails.send({
-      from: 'StudyEdge AI <support@getstudyedge.com>',
+      from: 'StudyEdge AI <support@mail.getstudyedge.com>',
       to: email,
       subject: "You're in — here's what Pro adds (free for 7 days)",
       html: `<!DOCTYPE html>
@@ -79,7 +79,7 @@ export default async function handler(req, res) {
           You're receiving this because you just created a StudyEdge AI account.<br>
           <a href="https://getstudyedge.com/app" style="color:#9B9B9B;text-decoration:underline;">Open the app</a>
           &nbsp;·&nbsp;
-          <a href="mailto:support@getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
+          <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
         </p>
         <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
       </td></tr>

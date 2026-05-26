@@ -55,7 +55,7 @@ export default async function handler(req, res) {
       if (!email) { skipped++; continue }
 
       await resend.emails.send({
-        from: 'StudyEdge AI <support@getstudyedge.com>',
+        from: 'StudyEdge AI <support@mail.getstudyedge.com>',
         to: email,
         subject: `Your ${previousStreak}-day streak ended — here's how to restart`,
         html: `<!DOCTYPE html>
@@ -105,7 +105,7 @@ export default async function handler(req, res) {
           Sent because your study streak ended.<br>
           <a href="https://getstudyedge.com/app" style="color:#9B9B9B;text-decoration:underline;">Open the app</a>
           &nbsp;·&nbsp;
-          <a href="mailto:support@getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
+          <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
         </p>
         <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
       </td></tr>
