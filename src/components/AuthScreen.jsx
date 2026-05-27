@@ -14,8 +14,12 @@ export default function AuthScreen({ initialMode, onBack }) {
     const trial = sp.get('trial')
     if (!plan) return null
     const planLabel = plan === 'pro' ? 'Pro' : 'Unlimited'
-    const billingLabel = billing === 'yearly' ? 'yearly' : billing === 'semester' ? 'per semester' : 'monthly'
-    if (trial === '1') return { text: `7-day free trial · ${planLabel}`, sub: `Full access included. No credit card required. Cancel anytime.` }
+    const billingLabel =
+      billing === 'yearly' ? 'annually' :
+      billing === 'weekly' ? 'weekly' :
+      billing === 'semester' ? 'per semester' :
+      'monthly'
+    if (trial === '1') return { text: `3-day free trial · ${planLabel}`, sub: `Full access included. No credit card required. Cancel anytime.` }
     return { text: `${planLabel} plan`, sub: `Billed ${billingLabel}. Cancel anytime.` }
   })()
 
@@ -48,7 +52,7 @@ export default function AuthScreen({ initialMode, onBack }) {
     const billing = src.get('billing')
     const trial = src.get('trial')
     if (plan === 'pro' || plan === 'unlimited') preserve.set('plan', plan)
-    if (['monthly', 'semester', 'yearly'].includes(billing)) preserve.set('billing', billing)
+    if (['weekly', 'monthly', 'yearly', 'semester'].includes(billing)) preserve.set('billing', billing)
     if (trial === '1') preserve.set('trial', '1')
     const qs = preserve.toString()
     const redirectTo = `${window.location.origin}/app${qs ? '?' + qs : ''}`
@@ -72,7 +76,7 @@ export default function AuthScreen({ initialMode, onBack }) {
         const billing = src.get('billing')
         const trial = src.get('trial')
         if (plan === 'pro' || plan === 'unlimited') preserve.set('plan', plan)
-        if (['monthly', 'semester', 'yearly'].includes(billing)) preserve.set('billing', billing)
+        if (['weekly', 'monthly', 'yearly', 'semester'].includes(billing)) preserve.set('billing', billing)
         if (trial === '1') preserve.set('trial', '1')
         const qs = preserve.toString()
         const emailRedirectTo = `${window.location.origin}/app${qs ? '?' + qs : ''}`

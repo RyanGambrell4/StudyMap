@@ -55,7 +55,7 @@ Confirm your StudyEdge AI account
         <p style="margin:0 0 6px;font-size:11.5px;font-weight:600;letter-spacing:0.08em;color:#3B61C4;text-transform:uppercase;">Confirm your email</p>
         <h1 style="margin:0 0 14px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">One quick tap to finish signup.</h1>
         <p style="margin:0 0 22px;font-size:15.5px;color:#444444;line-height:1.65;">
-          Hit the button below to verify <strong style="color:#111111;">{{ .Email }}</strong>. After that you're in — your study plan and 7-day Pro trial are ready.
+          Hit the button below to verify <strong style="color:#111111;">{{ .Email }}</strong>. After that you're in — your study plan and 3-day Pro trial are ready.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:10px;">

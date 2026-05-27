@@ -2,34 +2,33 @@
 const { useState: p1, useEffect: p2 } = React;
 
 function Pricing(){
-  const [bill, setBill] = p1('monthly');
+  const [bill, setBill] = p1('weekly');
 
   // Actual charge amounts (match Stripe price IDs)
   const PRICE_TABLE = {
-    pro:       { monthly: 12.99, semester: 39.99, yearly: 84.99 },
-    unlimited: { monthly: 19.99, semester: 59.99, yearly: 119.99 },
+    pro:       { weekly: 2.99, monthly: 9.99,  yearly: 69.99  },
+    unlimited: { weekly: 4.99, monthly: 14.99, yearly: 119.99 },
   };
 
-  // For semester/yearly show per-month equivalent so the number looks smaller
-  const MONTHLY_EQUIV = {
-    pro:       { monthly: 12.99, semester: (39.99/5), yearly: (84.99/12) },
-    unlimited: { monthly: 19.99, semester: (59.99/5), yearly: (119.99/12) },
-  };
-
-  const SAVE_LABEL = { monthly: null, semester: 'Save 23%', yearly: 'Save 45%' };
+  const SAVE_LABEL = { weekly: null, monthly: null, yearly: 'Save 55%' };
 
   // What's actually billed (shown as sub-label)
   const billedSub = (planKey) => {
-    if (bill === 'monthly') return 'Billed monthly · cancel anytime';
-    if (bill === 'semester') return `Billed $${PRICE_TABLE[planKey].semester.toFixed(2)}/semester · cancel anytime`;
+    if (bill === 'weekly')  return 'Billed weekly · cancel anytime';
+    if (bill === 'monthly') return `Billed $${PRICE_TABLE[planKey].monthly.toFixed(2)}/month · cancel anytime`;
     return `Billed $${PRICE_TABLE[planKey].yearly.toFixed(2)}/year · cancel anytime`;
   };
 
-  const displayPrice = (planKey) => MONTHLY_EQUIV[planKey][bill];
+  const displayPrice = (planKey) => PRICE_TABLE[planKey][bill];
+  const unitLabel = bill === 'weekly' ? '/wk' : bill === 'monthly' ? '/mo' : '/yr';
 
   const goSignup = (plan)=>{
     const qs = new URLSearchParams({ signup: '1' });
-    if (plan) { qs.set('plan', plan); qs.set('billing', bill); }
+    if (plan) {
+      qs.set('plan', plan);
+      qs.set('billing', bill);
+      if (plan === 'pro') qs.set('trial', '1');
+    }
     window.location.href = '/app?' + qs.toString();
   };
 
@@ -51,7 +50,7 @@ function Pricing(){
       cta:'Get Pro →', primary:true, popular:true, plan:'pro',
       feats:[
         [true,'5 courses · your full semester planned'],
-        [true,'75 AI actions/month · enough for daily use'],
+        [true,'100 AI actions/month · enough for daily use'],
         [true,'AI Study Coach · week-by-week exam plan'],
         [true,'Session Blueprints · minute-by-minute structure'],
         [true,'AI Flashcards & Quizzes from your material'],
@@ -64,9 +63,11 @@ function Pricing(){
       name:'Unlimited', planKey:'unlimited',
       cta:'Get Unlimited', primary:false, plan:'unlimited',
       feats:[
+        [true,'Everything in Pro'],
         [true,'Unlimited courses · every class, all year'],
         [true,'Unlimited AI · no monthly cap, ever'],
-        [true,'Everything in Pro, zero restrictions'],
+        [true,'AI Tutor with session memory'],
+        [true,'Advanced exam analytics + predicted score'],
         [true,'Priority support'],
       ]
     }
@@ -81,9 +82,9 @@ function Pricing(){
         </div>
         <div className="bill-toggle">
           {[
+            {k:'weekly',l:'Weekly'},
             {k:'monthly',l:'Monthly'},
-            {k:'semester',l:'Semester', save:'Save 23%'},
-            {k:'yearly',l:'Yearly', save:'Save 45%'},
+            {k:'yearly',l:'Annual', save:'Save 55%'},
           ].map(o=>(
             <button key={o.k} className={`bt ${bill===o.k?'active':''}`} onClick={()=>setBill(o.k)}>
               {o.l}
@@ -101,22 +102,18 @@ function Pricing(){
                   color:'#34d399', background:'rgba(52,211,153,0.1)', border:'1px solid rgba(52,211,153,0.3)',
                   borderRadius:6, padding:'3px 8px', marginBottom:8,
                 }}>
-                  7-DAY FREE TRIAL · NO CARD
+                  3-DAY FREE TRIAL · NO CARD
                 </div>
               )}
               <div className="tier-name">{t.name}</div>
               <div className="tier-price">
                 <span className="dollar">{t.planKey ? '$' : ''}</span>
                 <span className="amt">{t.planKey ? displayPrice(t.planKey).toFixed(2) : '0'}</span>
-                <span className="per">{t.planKey ? '/mo' : '/forever'}</span>
+                <span className="per">{t.planKey ? unitLabel : '/forever'}</span>
               </div>
-              {t.planKey && bill !== 'monthly' && (
+              {t.planKey && bill === 'yearly' && (
                 <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:2,flexWrap:'wrap'}}>
-                  <span style={{fontSize:12,color:'var(--text-muted)',textDecoration:'line-through'}}>${PRICE_TABLE[t.planKey].monthly.toFixed(2)}/mo</span>
                   <span style={{fontSize:11,fontWeight:700,color:'#34d399',background:'rgba(52,211,153,0.12)',border:'1px solid rgba(52,211,153,0.25)',borderRadius:20,padding:'2px 8px'}}>{SAVE_LABEL[bill]}</span>
-                  {t.planKey === 'pro' && bill === 'yearly' && (
-                    <span style={{fontSize:11,fontWeight:600,color:'var(--text-muted)'}}>· Save $48/year</span>
-                  )}
                 </div>
               )}
               <div className="tier-sub">{t.planKey ? billedSub(t.planKey) : 'Try the system. No credit card.'}</div>
@@ -132,7 +129,7 @@ function Pricing(){
               <button className={`btn ${t.primary?'btn-primary':'btn-ghost'} tier-cta`} onClick={()=>goSignup(t.plan)}>{t.cta}</button>
               {t.primary && (
                 <p style={{textAlign:'center',fontSize:11,color:'var(--text-muted)',marginTop:8,marginBottom:0}}>
-                  ✓ 7-day free trial · cancel anytime
+                  ✓ 3-day free trial · cancel anytime
                 </p>
               )}
             </div>
@@ -195,13 +192,13 @@ function FinalCTA(){
           <div className="cta-grid"/>
           <div className="cta-inner">
             <h2 className="section-title" style={{maxWidth:820,margin:'0 auto'}}>You already know you need a<br/><span className="grad-text">better system.</span></h2>
-            <p className="section-sub" style={{margin:'22px auto 32px',maxWidth:560}}>Start free · explore Pro with a 7-day trial inside the app — no card needed.</p>
+            <p className="section-sub" style={{margin:'22px auto 32px',maxWidth:560}}>Start free · explore Pro with a 3-day trial inside the app — no card needed.</p>
             <div className="cta-btns">
-              <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1'}>Start Free Trial →</button>
+              <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1&plan=pro&billing=weekly&trial=1'}>Start Free Trial →</button>
             </div>
             <div className="cta-foot">
               <span>✓ Free to start</span>
-              <span>✓ 7-day Pro trial in-app · no card</span>
+              <span>✓ 3-day Pro trial in-app · no card</span>
               <span>✓ Full Pro access instantly</span>
             </div>
           </div>

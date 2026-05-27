@@ -5,32 +5,36 @@ import { track } from '../lib/analytics'
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const BILLING_PERIODS = [
-  { id: 'monthly',  label: 'Monthly',  badge: null,        best: false },
-  { id: 'semester', label: 'Semester', badge: 'Save 23%',  best: false },
-  { id: 'yearly',   label: 'Annual',   badge: 'Save 45%',  best: true  },
+  { id: 'weekly',  label: 'Weekly',  badge: null,        best: false },
+  { id: 'monthly', label: 'Monthly', badge: null,        best: false },
+  { id: 'yearly',  label: 'Annual',  badge: 'Save 55%',  best: true  },
 ]
 
+// Plan tier → billing period → display price.
+// Source of truth for Pro: weekly $2.99 / monthly $9.99 / annual $69.99.
+// Unlimited: weekly $4.99 / monthly $14.99 / annual $119.99.
 const PLANS = {
   pro: {
     name: 'Pro',
     color: '#7C5CFA',
     gradient: 'linear-gradient(135deg, #4F7EF7, #7C5CFA)',
     prices: {
-      monthly:  '$12.99/mo',
-      semester: '$39.99/semester',
-      yearly:   '$84.99/yr',
+      weekly:  '$2.99/wk',
+      monthly: '$9.99/mo',
+      yearly:  '$69.99/yr',
     },
     subPrices: {
-      monthly:  null,
-      semester: '$13.33/mo equivalent',
-      yearly:   '$7.08/mo · billed annually',
+      weekly:  'Less than a coffee · billed weekly',
+      monthly: 'Billed monthly · $2.31/wk equivalent',
+      yearly:  'Billed annually · $1.35/wk equivalent',
     },
+    annualSavingsBadge: 'Save 55%',
     features: [
       '5 courses',
-      '75 AI actions/month',
+      '100 AI actions/month',
       'AI Study Coach',
-      'Unlimited blueprints',
-      'Unlimited focus sessions',
+      'Unlimited Session Blueprints',
+      'Unlimited Focus sessions',
       'Unlimited brain training',
       'Flashcards & quizzes',
     ],
@@ -40,27 +44,30 @@ const PLANS = {
     color: '#34D399',
     gradient: null,
     prices: {
-      monthly:  '$19.99/mo',
-      semester: '$59.99/semester',
-      yearly:   '$119.99/yr',
+      weekly:  '$4.99/wk',
+      monthly: '$14.99/mo',
+      yearly:  '$119.99/yr',
     },
     subPrices: {
-      monthly:  null,
-      semester: '$20.00/mo equivalent',
-      yearly:   '$10.00/mo · billed annually',
+      weekly:  'Billed weekly',
+      monthly: 'Billed monthly · $3.46/wk equivalent',
+      yearly:  'Billed annually · $2.31/wk equivalent',
     },
+    annualSavingsBadge: 'Save 53%',
     features: [
+      'Everything in Pro',
       'Unlimited courses',
       'Unlimited AI actions',
-      'AI study plans',
-      'Flashcards & quizzes',
-      'Focus sessions',
-      'Study Coach',
-      'Session Blueprints',
+      'AI Tutor with session memory',
+      'Advanced Practice Exam analytics',
+      'Predicted exam score',
       'Priority support',
     ],
   },
 }
+
+// Triggers that require Unlimited specifically (vs Pro).
+const UNLIMITED_ONLY_TRIGGERS = new Set(['tutorMemory', 'practiceExamAnalytics', 'unlimited'])
 
 const LIMIT_MESSAGES = {
   courses: {
@@ -69,9 +76,19 @@ const LIMIT_MESSAGES = {
     body: 'Stop juggling apps. Your full semester — every course, every exam — planned in one place.',
   },
   ai: {
-    tag: 'Unlock unlimited AI tutoring',
+    tag: 'Unlock AI tutoring',
     title: 'Get AI help anytime, for every course.',
-    body: 'Pro gives you 75 AI actions/month — your always-on tutor for every concept you\'re stuck on.',
+    body: 'Pro gives you 100 AI actions/month — your always-on tutor for every concept you\'re stuck on.',
+  },
+  tutorMemory: {
+    tag: 'Unlimited only · Tutor memory',
+    title: 'AI Tutor with full session memory.',
+    body: 'Your tutor remembers everything from your conversation — no more re-explaining context every message. Available on Unlimited.',
+  },
+  practiceExamAnalytics: {
+    tag: 'Unlimited only · Advanced analytics',
+    title: 'See your trend. Predict your real score.',
+    body: 'Unlimited unlocks score trend graphs across all your practice exams plus an AI-predicted real exam score.',
   },
   coach: {
     tag: 'Replan as life happens',
@@ -124,7 +141,7 @@ const TESTIMONIALS = [
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function PaywallModal({ trigger, onClose, userEmail, userId, currentPlan = 'free', onTrialActivated }) {
-  const [billingPeriod, setBillingPeriod] = useState('yearly')
+  const [billingPeriod, setBillingPeriod] = useState('weekly')
   const [loading, setLoading] = useState(null)
   const [testimonialIdx, setTestimonialIdx] = useState(0)
   const [trialLoading, setTrialLoading] = useState(false)
@@ -132,7 +149,11 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
 
   const trialUsed = hasUsedTrial()
   const trialActive = isTrialActive()
-  const showTrialCard = currentPlan === 'free' && !trialUsed && !trialActive
+  const isUnlimitedTrigger = UNLIMITED_ONLY_TRIGGERS.has(trigger)
+
+  // Trial card only shows for free users, never for Unlimited-only triggers
+  // (the trial unlocks Pro features, not Unlimited features).
+  const showTrialCard = currentPlan === 'free' && !trialUsed && !trialActive && !isUnlimitedTrigger
 
   const msg = LIMIT_MESSAGES[trigger] ?? LIMIT_MESSAGES.ai
   const visiblePlanIds = currentPlan === 'pro' ? ['unlimited'] : Object.keys(PLANS)
@@ -232,10 +253,10 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               {msg.tag}
             </div>
             <h2 style={{ fontSize: '1.3rem', fontWeight: 800, letterSpacing: '-0.4px', color: '#1A1A1A', margin: '0 0 6px' }}>
-              {msg.title}
+              {isUnlimitedTrigger ? msg.title : 'Unlock everything for less than a coffee'}
             </h2>
             <p style={{ color: '#6B6B6B', fontSize: '0.875rem', lineHeight: 1.55, margin: 0, maxWidth: 420 }}>
-              {msg.body}
+              {isUnlimitedTrigger ? msg.body : '$2.99/week · Cancel anytime'}
             </p>
           </div>
           <button
@@ -305,7 +326,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               No card required
             </div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 6px', letterSpacing: '-0.3px' }}>
-              Try every Pro feature free for 7 days.
+              Try every Pro feature free for 3 days.
             </h3>
             <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 16px', lineHeight: 1.5 }}>
               Full access. No credit card. Cancel anytime.
@@ -330,10 +351,10 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.opacity = '0.88' }}
               onMouseLeave={e => { e.currentTarget.style.opacity = trialLoading ? '0.75' : '1' }}
             >
-              {trialLoading ? 'Activating…' : 'Start free 7-day trial →'}
+              {trialLoading ? 'Activating…' : 'Start free 3-day trial →'}
             </button>
             <p style={{ margin: '10px 0 0', fontSize: '0.72rem', color: '#9B9B9B' }}>
-              No credit card &nbsp;·&nbsp; Full Pro access &nbsp;·&nbsp; 7 calendar days
+              No credit card &nbsp;·&nbsp; Full Pro access &nbsp;·&nbsp; 3 calendar days
             </p>
           </div>
         )}
@@ -388,27 +409,35 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
 
         {/* ── Plan cards ── */}
         <div className="pw-cards" style={{ display: 'grid', gridTemplateColumns: visiblePlanIds.length === 1 ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '18px' }}>
-          {Object.entries(PLANS).filter(([planId]) => visiblePlanIds.includes(planId)).map(([planId, plan], i) => (
+          {Object.entries(PLANS).filter(([planId]) => visiblePlanIds.includes(planId)).map(([planId, plan]) => {
+            // Highlight Unlimited card when trigger requires it; otherwise Pro is primary.
+            const isPrimary = isUnlimitedTrigger ? planId === 'unlimited' : planId === 'pro'
+            const primaryColor = planId === 'pro' ? '#3B61C4' : '#059669'
+            const primaryBorder = planId === 'pro' ? 'rgba(59,97,196,0.3)' : 'rgba(5,150,105,0.3)'
+            return (
             <div
               key={planId}
               style={{
                 background: '#fff',
-                border: i === 0 ? '1.5px solid rgba(59,97,196,0.3)' : '1.5px solid rgba(5,150,105,0.3)',
+                border: `1.5px solid ${primaryBorder}`,
                 borderRadius: '16px', padding: '20px',
                 display: 'flex', flexDirection: 'column', gap: '14px',
                 position: 'relative', overflow: 'hidden',
+                boxShadow: isPrimary ? '0 8px 24px rgba(0,0,0,0.06)' : 'none',
               }}
             >
-              {/* Most popular badge (Pro only when showing both) */}
-              {planId === 'pro' && visiblePlanIds.length > 1 && (
+              {/* Most popular / Required badge */}
+              {isPrimary && visiblePlanIds.length > 1 && (
                 <div style={{
                   position: 'absolute', top: 12, right: 12,
                   fontSize: '0.62rem', fontWeight: 800, color: '#fff',
-                  background: 'linear-gradient(135deg, #4F7EF7, #7C5CFA)',
+                  background: planId === 'pro'
+                    ? 'linear-gradient(135deg, #4F7EF7, #7C5CFA)'
+                    : 'linear-gradient(135deg, #10B981, #059669)',
                   borderRadius: '999px', padding: '3px 9px',
                   textTransform: 'uppercase', letterSpacing: '0.4px',
                 }}>
-                  Most popular
+                  {isUnlimitedTrigger ? 'Required' : 'Most popular'}
                 </div>
               )}
 
@@ -418,13 +447,27 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                   <div style={{ fontSize: '0.75rem', fontWeight: 700, color: plan.color, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     {plan.name}
                   </div>
+                  {isAnnual && plan.annualSavingsBadge && (
+                    <span style={{
+                      fontSize: '0.62rem', fontWeight: 800, color: '#059669',
+                      background: 'rgba(5,150,105,0.10)', border: '1px solid rgba(5,150,105,0.25)',
+                      borderRadius: '999px', padding: '2px 7px', letterSpacing: '0.3px',
+                    }}>
+                      {plan.annualSavingsBadge}
+                    </span>
+                  )}
                 </div>
                 <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#1A1A1A', letterSpacing: '-0.5px' }}>
                   {plan.prices[billingPeriod]}
                 </div>
                 {plan.subPrices?.[billingPeriod] && (
-                  <div style={{ fontSize: '0.7rem', color: '#34d399', marginTop: '3px', fontWeight: 600 }}>
+                  <div style={{ fontSize: '0.7rem', color: '#6B6B6B', marginTop: '3px', fontWeight: 600 }}>
                     {plan.subPrices[billingPeriod]}
+                  </div>
+                )}
+                {planId === 'pro' && (
+                  <div style={{ fontSize: '0.68rem', color: '#059669', marginTop: '4px', fontWeight: 700 }}>
+                    3-day free trial · No card needed
                   </div>
                 )}
               </div>
@@ -447,26 +490,23 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 disabled={loading === planId}
                 style={{
                   width: '100%', padding: '12px',
-                  background: i === 0 ? '#3B61C4' : 'rgba(5,150,105,0.08)',
-                  border: i === 0 ? 'none' : '1px solid rgba(5,150,105,0.3)',
+                  background: isPrimary ? primaryColor : 'rgba(0,0,0,0.04)',
+                  border: isPrimary ? 'none' : '1px solid rgba(0,0,0,0.10)',
                   borderRadius: '10px',
-                  color: i === 0 ? 'white' : '#059669',
+                  color: isPrimary ? 'white' : '#1A1A1A',
                   fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 700,
                   cursor: loading === planId ? 'not-allowed' : 'pointer',
                   opacity: loading === planId ? 0.7 : 1,
                   transition: 'opacity 0.15s',
                 }}
-                onMouseEnter={e => { if (loading !== planId) e.currentTarget.style.opacity = '0.85' }}
+                onMouseEnter={e => { if (loading !== planId) e.currentTarget.style.opacity = '0.88' }}
                 onMouseLeave={e => { e.currentTarget.style.opacity = loading === planId ? '0.7' : '1' }}
               >
-                {loading === planId
-                  ? 'Loading...'
-                  : planId === 'pro' && isAnnual
-                    ? 'Get Pro Annual · best value →'
-                    : `Get ${plan.name} →`}
+                {loading === planId ? 'Loading...' : `Get ${plan.name} →`}
               </button>
             </div>
-          ))}
+            )
+          })}
         </div>
 
         {/* ── Footer ── */}

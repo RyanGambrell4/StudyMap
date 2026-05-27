@@ -20,7 +20,7 @@ const PLAN_INFO = {
     label: 'Pro',
     features: [
       '5 courses · full semester planned',
-      '75 AI actions/month',
+      '100 AI actions/month',
       'AI Study Coach · rebuild anytime',
       'Unlimited blueprints & focus sessions',
       'Unlimited brain training',
@@ -259,12 +259,12 @@ export default function AccountView({
                     height: '100%',
                     borderRadius: 3,
                     background: trialDaysLeft <= 2 ? '#DC2626' : '#3B61C4',
-                    width: `${Math.min(100, ((7 - trialDaysLeft) / 7) * 100)}%`,
+                    width: `${Math.min(100, ((3 - trialDaysLeft) / 3) * 100)}%`,
                     transition: 'width 0.3s',
                   }} />
                 </div>
                 <p style={{ margin: '4px 0 0', fontSize: 11, color: '#9B9B9B' }}>
-                  {7 - trialDaysLeft} of 7 days used
+                  {3 - trialDaysLeft} of 3 days used
                 </p>
               </div>
             )}
@@ -325,7 +325,7 @@ export default function AccountView({
             textAlign: 'center',
           }}>
             <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: '#111111' }}>
-              Start your 7-day free trial — no card required
+              Start your 3-day free trial — no card required
             </p>
             <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>
               Full Pro access. Cancel anytime. Zero payment info needed.

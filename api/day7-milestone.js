@@ -77,7 +77,7 @@ export default async function handler(req, res) {
           ${[
             ['AI Study Coach', 'Builds a full multi-week study plan around your exam dates'],
             ['Session Blueprints', 'Minute-by-minute plan for every study session'],
-            ['75 AI boosts / month', 'Free gives you 10. Pro is enough for daily use all semester.'],
+            ['100 AI boosts / month', 'Free gives you 10. Pro is enough for daily use all semester.'],
             ['5 courses', 'Add your full course load, not just one'],
           ].map(([feat, desc]) => `
           <tr>
@@ -88,14 +88,14 @@ export default async function handler(req, res) {
           </tr>`).join('')}
         </table>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro is <strong style="color:#111111;">$7.08/mo</strong> on the annual plan — less than a textbook chapter.
+          Pro starts at <strong style="color:#111111;">$2.99/week</strong> — less than a coffee. Try it free for 3 days, no card needed.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=yearly" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Upgrade to Pro — $7.08/mo</a>
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Try Pro free for 3 days</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">Billed $84.99/yr · Cancel anytime</span>
+            <span style="font-size:12px;color:#9B9B9B;">$2.99/wk after trial · Cancel anytime</span>
           </td></tr>
         </table>
       </td></tr>

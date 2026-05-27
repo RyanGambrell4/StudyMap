@@ -39,8 +39,8 @@ export default async function handler(req, res) {
       from: 'StudyEdge AI <support@mail.getstudyedge.com>',
       to: email,
       subject: greetingName
-        ? `${greetingName}, you're in — Pro is free for 7 days`
-        : "You're in — Pro is free for 7 days",
+        ? `${greetingName}, you're in — Pro is free for 3 days`
+        : "You're in — Pro is free for 3 days",
       html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Welcome to StudyEdge</title></head>
@@ -58,13 +58,13 @@ export default async function handler(req, res) {
           ${headline}
         </h1>
         <p style="margin:0 0 22px;font-size:15.5px;color:#444444;line-height:1.65;">
-          You're set up. Before you start, try <strong style="color:#111111;">Pro free for 7 days</strong> — no credit card, cancel anytime.
+          You're set up. Before you start, try <strong style="color:#111111;">Pro free for 3 days</strong> — no credit card, cancel anytime. $2.99/wk after.
         </p>
         <p style="margin:0 0 14px;font-size:11.5px;font-weight:600;letter-spacing:0.08em;color:#9B9B9B;text-transform:uppercase;">What Pro unlocks</p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:28px;">
           ${[
             ['5 courses', 'Free gives you 1'],
-            ['75 AI study boosts / month', 'Free gives you 10'],
+            ['100 AI study boosts / month', 'Free gives you 10'],
             ['AI Study Coach', 'Personalized multi-week plans'],
             ['Session Blueprints', 'Minute-by-minute session plans'],
             ['Flashcards and quizzes', 'Built into every session'],
@@ -87,9 +87,9 @@ export default async function handler(req, res) {
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:10px;">
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1"
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1"
                style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none;border-radius:12px;padding:14px 34px;box-shadow:0 1px 2px rgba(59,97,196,0.18);">
-              Start my free 7-day trial
+              Start my free 3-day trial
             </a>
           </td></tr>
           <tr><td align="center">

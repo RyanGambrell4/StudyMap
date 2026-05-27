@@ -4,15 +4,22 @@
   <!-- Landing page (highest priority) -->
   <url>
     <loc>https://getstudyedge.com/</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-05-27</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
 
-  <!-- Brand disambiguation page -->
+  <!-- Brand disambiguation pages -->
   <url>
     <loc>https://getstudyedge.com/studyedge-ai</loc>
-    <lastmod>2026-05-23</lastmod>
+    <lastmod>2026-05-27</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
+  <url>
+    <loc>https://getstudyedge.com/not-affiliated-with-study-edge</loc>
+    <lastmod>2026-05-27</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.95</priority>
   </url>

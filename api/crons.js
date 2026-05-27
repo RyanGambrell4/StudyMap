@@ -44,7 +44,7 @@ async function handleWelcomeEmail(req, res) {
     await resend.emails.send({
       from: 'StudyEdge AI <support@getstudyedge.com>',
       to: email,
-      subject: "You're in — here's what Pro adds (free for 7 days)",
+      subject: "You're in — here's what Pro adds (free for 3 days)",
       html: `
 <!DOCTYPE html>
 <html>
@@ -67,14 +67,14 @@ async function handleWelcomeEmail(req, res) {
         <tr><td style="padding-bottom:24px;">
           <p style="margin:0 0 14px;font-size:15px;color:#94A3B8;line-height:1.7;">
             Your account is set up and ready. Before you dive in, here's one thing worth knowing:
-            you can try <strong style="color:#c7d2fe;">Pro free for 7 days</strong> — no commitment,
-            no credit card required.
+            you can try <strong style="color:#c7d2fe;">Pro free for 3 days</strong> — $2.99/wk after,
+            no credit card required to start.
           </p>
           <p style="margin:0 0 14px;font-size:15px;color:#94A3B8;line-height:1.7;">Here's what Pro unlocks:</p>
           <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:20px;">
             ${[
               ['5 courses', 'Free gives you 1'],
-              ['75 AI study boosts/month', 'Free gives you 10'],
+              ['100 AI study boosts/month', 'Free gives you 10'],
               ['AI Study Coach', 'Personalized study plans'],
               ['Session Blueprints', 'Minute-by-minute session plans'],
               ['Flashcards & quizzes', 'Built into every session'],
@@ -90,9 +90,9 @@ async function handleWelcomeEmail(req, res) {
         </td></tr>
 
         <tr><td style="padding-bottom:16px;text-align:center;">
-          <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1"
+          <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1"
              style="display:inline-block;background:linear-gradient(135deg,#4F7EF7,#7C5CFA);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;letter-spacing:-0.2px;">
-            Start my free 7-day trial →
+            Start my free 3-day trial →
           </a>
         </td></tr>
         <tr><td style="padding-bottom:32px;text-align:center;">
@@ -382,10 +382,10 @@ async function handleWeeklyRecap(req, res) {
         <tr><td style="padding-bottom:32px;">
           <div style="background:linear-gradient(135deg,rgba(79,126,247,0.12),rgba(124,92,250,0.12));border:1px solid rgba(99,102,241,0.25);border-radius:12px;padding:18px 20px;">
             <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#c7d2fe;">✦ Want to study more effectively next week?</p>
-            <p style="margin:0 0 14px;font-size:13px;color:#475569;line-height:1.5;">Pro gives you 75 AI study boosts/month, 5 courses, Study Coach, and Session Blueprints. Try it free for 7 days.</p>
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1"
+            <p style="margin:0 0 14px;font-size:13px;color:#475569;line-height:1.5;">Pro gives you 100 AI study boosts/month, 5 courses, Study Coach, and Session Blueprints. $2.99/week — try free for 3 days, no card needed.</p>
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1"
                style="display:inline-block;background:linear-gradient(135deg,#4F7EF7,#7C5CFA);color:#fff;font-size:13px;font-weight:700;text-decoration:none;border-radius:8px;padding:10px 22px;">
-              Start 7-day free trial →
+              Start 3-day free trial →
             </a>
           </div>
         </td></tr>` : ''}
@@ -546,10 +546,10 @@ async function handleExamCountdown(req, res) {
         <tr><td style="padding-bottom:32px;">
           <div style="background:rgba(99,102,241,0.07);border:1px solid rgba(99,102,241,0.2);border-radius:12px;padding:16px 18px;">
             <p style="margin:0 0 8px;font-size:13px;font-weight:700;color:#c7d2fe;">Get a session blueprint for every remaining day</p>
-            <p style="margin:0 0 12px;font-size:12px;color:#475569;line-height:1.5;">Pro gives you AI-built session plans, Study Coach, and 75 boosts/month. Try free for 7 days.</p>
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1"
+            <p style="margin:0 0 12px;font-size:12px;color:#475569;line-height:1.5;">Pro gives you AI-built session plans, Study Coach, and 100 boosts/month — $2.99/wk. Try free for 3 days.</p>
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1"
                style="font-size:13px;font-weight:700;color:#818cf8;text-decoration:none;">
-              Start 7-day free trial →
+              Start 3-day free trial →
             </a>
           </div>
         </td></tr>` : ''}
@@ -664,7 +664,7 @@ async function handleDay14Upgrade(req, res) {
           <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
             ${[
               ['5 courses', 'Track every class, not just one'],
-              ['75 AI boosts / month', '7× more than free — enough for daily use'],
+              ['100 AI boosts / month', '10× more than free — enough for daily use'],
               ['AI Study Coach', '8-week personalized plan built around your deadlines'],
               ['Session Blueprints', 'Know exactly what to study in every session'],
               ['Focus sessions', 'Timed, distraction-free study with your plan loaded'],
@@ -679,9 +679,9 @@ async function handleDay14Upgrade(req, res) {
         </td></tr>
 
         <tr><td style="padding-bottom:12px;text-align:center;">
-          <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1"
+          <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1"
              style="display:inline-block;background:linear-gradient(135deg,#4F7EF7,#7C5CFA);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 36px;letter-spacing:-0.2px;">
-            Try Pro free for 7 days →
+            Try Pro free for 3 days →
           </a>
         </td></tr>
         <tr><td style="padding-bottom:32px;text-align:center;">
@@ -904,7 +904,7 @@ async function handleDay7Milestone(req, res) {
             ${[
               ['AI Study Coach', 'Builds a full multi-week study plan around your courses and exam dates'],
               ['Session Blueprints', 'Minute-by-minute plan for every study session — no more winging it'],
-              ['75 AI boosts/month', 'Free gives you 10 — Pro gives you enough for daily use all semester'],
+              ['100 AI boosts/month', 'Free gives you 10 — Pro gives you enough for daily use all semester'],
               ['5 courses', 'Add your full course load, not just one'],
             ].map(([feat, desc]) => `
             <tr>
@@ -917,18 +917,18 @@ async function handleDay7Milestone(req, res) {
           </table>
 
           <p style="margin:0;font-size:15px;color:#94A3B8;line-height:1.7;">
-            Pro is <strong style="color:#c7d2fe;">$7.08/mo</strong> on the annual plan — less than a textbook chapter, for tools that actually help you use it.
+            Pro starts at <strong style="color:#c7d2fe;">$2.99/week</strong> — less than a coffee, for tools that actually help you study. Try free for 3 days, no card.
           </p>
         </td></tr>
 
         <tr><td style="padding-bottom:12px;text-align:center;">
-          <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=yearly"
+          <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1"
              style="display:inline-block;background:linear-gradient(135deg,#4F7EF7,#7C5CFA);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 36px;letter-spacing:-0.2px;">
-            Upgrade to Pro — $7.08/mo →
+            Try Pro free for 3 days →
           </a>
         </td></tr>
         <tr><td style="padding-bottom:32px;text-align:center;">
-          <span style="font-size:12px;color:#334155;">Billed $84.99/yr · Cancel anytime</span>
+          <span style="font-size:12px;color:#334155;">From $2.99/wk · Cancel anytime</span>
         </td></tr>
 
         <tr><td style="border-top:1px solid rgba(255,255,255,0.07);padding-top:24px;">

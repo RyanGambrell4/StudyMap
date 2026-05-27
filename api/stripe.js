@@ -43,20 +43,37 @@ const supabaseAdmin = createClient(
   process.env.SUPABASE_SERVICE_KEY
 )
 
+// ── Stripe price IDs ──────────────────────────────────────────────────────────
+// 6 new price IDs (Pro/Unlimited × Weekly/Monthly/Annual). Created manually in
+// the Stripe dashboard — env vars override the placeholder strings below.
+//
+// Legacy semester/old-monthly IDs are intentionally NOT in the lookup map.
+// Existing subscribers on those prices are still resolved correctly via
+// PRICE_TO_PLAN (grandfathered) but no new checkout sessions can target them.
 const PRICE_IDS = {
   pro: {
-    monthly:  'price_1TMEqQKCY4pCgrHv5F0n5XSz',
-    semester: 'price_1TMaQxKCY4pCgrHvB2uE3ZhB',
-    yearly:   'price_1TMEqPKCY4pCgrHvbhffsA2M',
+    weekly:  process.env.STRIPE_PRICE_PRO_WEEKLY  || 'price_pro_weekly',
+    monthly: process.env.STRIPE_PRICE_PRO_MONTHLY || 'price_pro_monthly',
+    yearly:  process.env.STRIPE_PRICE_PRO_ANNUAL  || 'price_pro_annual',
   },
   unlimited: {
-    monthly:  'price_1TMEqPKCY4pCgrHv65bsDflq',
-    semester: 'price_1TMaOgKCY4pCgrHvPXqOb30f',
-    yearly:   'price_1TMEqPKCY4pCgrHvymo8ytBO',
+    weekly:  process.env.STRIPE_PRICE_UNLIMITED_WEEKLY  || 'price_unlimited_weekly',
+    monthly: process.env.STRIPE_PRICE_UNLIMITED_MONTHLY || 'price_unlimited_monthly',
+    yearly:  process.env.STRIPE_PRICE_UNLIMITED_ANNUAL  || 'price_unlimited_annual',
   },
 }
 
 const PRICE_TO_PLAN = {
+  // New price IDs (env-driven, with placeholder fallbacks for local dev)
+  [PRICE_IDS.pro.weekly]:        { plan: 'pro',       billingPeriod: 'weekly'  },
+  [PRICE_IDS.pro.monthly]:       { plan: 'pro',       billingPeriod: 'monthly' },
+  [PRICE_IDS.pro.yearly]:        { plan: 'pro',       billingPeriod: 'yearly'  },
+  [PRICE_IDS.unlimited.weekly]:  { plan: 'unlimited', billingPeriod: 'weekly'  },
+  [PRICE_IDS.unlimited.monthly]: { plan: 'unlimited', billingPeriod: 'monthly' },
+  [PRICE_IDS.unlimited.yearly]:  { plan: 'unlimited', billingPeriod: 'yearly'  },
+
+  // Grandfathered: existing subscribers on legacy price IDs still resolve.
+  // These prices are archived in Stripe — no new checkout sessions target them.
   'price_1TMEqQKCY4pCgrHv5F0n5XSz': { plan: 'pro',       billingPeriod: 'monthly'  },
   'price_1TMaQxKCY4pCgrHvB2uE3ZhB': { plan: 'pro',       billingPeriod: 'semester' },
   'price_1TMEqPKCY4pCgrHvbhffsA2M': { plan: 'pro',       billingPeriod: 'yearly'   },
@@ -104,7 +121,7 @@ async function sendWinBackEmail(toEmail) {
           <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:20px;">
             ${[
               '5 courses (drops to 1)',
-              '75 study boosts/month (drops to 10)',
+              '100 study boosts/month (drops to 10)',
               'AI-generated study plans',
               'Session Blueprints & Study Coach',
               'Flashcards & quizzes',
@@ -121,7 +138,7 @@ async function sendWinBackEmail(toEmail) {
 
         <!-- CTA -->
         <tr><td style="padding-bottom:32px;text-align:center;">
-          <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1"
+          <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1"
              style="display:inline-block;background:linear-gradient(135deg,#4F7EF7,#7C5CFA);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;letter-spacing:-0.2px;">
             Reactivate Pro →
           </a>
@@ -154,7 +171,7 @@ async function sendTrialExpiryEmail(toEmail) {
     await resend.emails.send({
       from: 'StudyEdge AI <support@getstudyedge.com>',
       to: toEmail,
-      subject: 'Your free trial ends in 3 days — keep your Pro access',
+      subject: 'Your free trial ends tomorrow — keep your Pro access',
       html: `
 <!DOCTYPE html>
 <html>
@@ -172,7 +189,7 @@ async function sendTrialExpiryEmail(toEmail) {
         <!-- Urgency badge -->
         <tr><td style="padding-bottom:16px;">
           <div style="display:inline-block;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);border-radius:999px;padding:4px 14px;font-size:12px;font-weight:700;color:#fbbf24;letter-spacing:0.3px;">
-            ⏱ 3 DAYS LEFT
+            ⏱ TRIAL ENDING SOON
           </div>
         </td></tr>
 
@@ -186,13 +203,13 @@ async function sendTrialExpiryEmail(toEmail) {
         <!-- Body -->
         <tr><td style="padding-bottom:24px;">
           <p style="margin:0 0 14px;font-size:15px;color:#94A3B8;line-height:1.7;">
-            Your 7-day free trial expires in <strong style="color:#fbbf24;">3 days</strong>. After that, your account
-            drops to the Free plan and you'll lose access to everything below.
+            Your 3-day free trial is wrapping up. After it ends, your account drops to
+            the Free plan and you'll lose access to everything below.
           </p>
           <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:20px;">
             ${[
               ['5 courses', 'Free drops you to 1'],
-              ['75 AI study boosts/month', 'Free gives you 10'],
+              ['100 AI study boosts/month', 'Free gives you 10'],
               ['AI Study Coach', 'Personalized study plans'],
               ['Session Blueprints', 'Minute-by-minute session plans'],
               ['Flashcards & quizzes', 'Built into every session'],
@@ -206,9 +223,8 @@ async function sendTrialExpiryEmail(toEmail) {
             </tr>`).join('')}
           </table>
           <p style="margin:0;font-size:15px;color:#94A3B8;line-height:1.7;">
-            If you want to keep going — do nothing. Your card on file will be charged
-            <strong style="color:#c7d2fe;">$12.99</strong> when the trial ends and you'll stay on Pro.
-            If you want to cancel, you can do it any time before the trial ends.
+            Keep going for <strong style="color:#c7d2fe;">$2.99/week</strong> — less than a coffee.
+            Cancel anytime from your account.
           </p>
         </td></tr>
 
@@ -220,7 +236,7 @@ async function sendTrialExpiryEmail(toEmail) {
           </a>
         </td></tr>
         <tr><td style="padding-bottom:32px;text-align:center;">
-          <span style="font-size:12px;color:#334155;">Cancel before day 7 and you won't be charged.</span>
+          <span style="font-size:12px;color:#334155;">Cancel before the trial ends and you won't be charged.</span>
         </td></tr>
 
         <!-- Footer -->
@@ -351,7 +367,7 @@ export default async function handler(req, res) {
 
         // ── Referral reward ───────────────────────────────────────────────────
         // Fire when a referred user's subscription becomes active (trial→paid or direct).
-        // Applies a $12.99 Stripe credit to both the new subscriber and their referrer.
+        // Applies a $9.99 Stripe credit to both the new subscriber and their referrer.
         if (
           sub.status === 'active' &&
           mergedSub.referredBy &&
@@ -368,7 +384,7 @@ export default async function handler(req, res) {
             const referrerCustomerId = referrerRow?.subscription?.stripeCustomerId
             const newCustomerId = sub.customer
 
-            const CREDIT_CENTS = 1299 // $12.99 — 1 month Pro
+            const CREDIT_CENTS = 999 // $9.99 — 1 month Pro at new pricing
 
             if (referrerCustomerId) {
               await stripe.customers.createBalanceTransaction(referrerCustomerId, {
@@ -502,20 +518,25 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true })
   }
 
-  const { plan, billingPeriod, userEmail, userId, trial } = body
+  const { plan, billingPeriod: rawBillingPeriod, userEmail, userId, trial } = body
+
+  // Normalize billing period aliases: 'annual' → 'yearly'.
+  const billingPeriod = rawBillingPeriod === 'annual' ? 'yearly' : rawBillingPeriod
+
   const priceId = PRICE_IDS[plan]?.[billingPeriod]
 
   if (!priceId) {
     return res.status(400).json({ error: 'Invalid plan or billing period' })
   }
 
-  // Only allow trials on Pro monthly (the FinalCTA "Get Started Free" offer).
-  const wantsTrial = !!trial && plan === 'pro' && billingPeriod === 'monthly'
+  // Trial available on Pro only — all three billing periods (weekly/monthly/yearly).
+  // 3-day no-card trial.
+  const wantsTrial = !!trial && plan === 'pro'
 
   const subscriptionData = {
     metadata: { user_id: userId },
     ...(wantsTrial && {
-      trial_period_days: 7,
+      trial_period_days: 3,
       trial_settings: { end_behavior: { missing_payment_method: 'cancel' } },
     }),
   }

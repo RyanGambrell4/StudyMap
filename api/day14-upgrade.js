@@ -75,7 +75,7 @@ export default async function handler(req, res) {
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
             ['5 courses', 'Track every class, not just one'],
-            ['75 AI boosts / month', '7x more than free — enough for daily use'],
+            ['100 AI boosts / month', '10x more than free — enough for daily use'],
             ['AI Study Coach', '8-week personalized plan built around your deadlines'],
             ['Session Blueprints', 'Know exactly what to study in every session'],
             ['Focus sessions', 'Timed, distraction-free study with your plan loaded'],
@@ -89,10 +89,10 @@ export default async function handler(req, res) {
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Try Pro free for 7 days</a>
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Try Pro free for 3 days</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">Cancel before day 7 and you won't be charged.</span>
+            <span style="font-size:12px;color:#9B9B9B;">$2.99/week after trial · Cancel anytime.</span>
           </td></tr>
         </table>
       </td></tr>

@@ -4,7 +4,7 @@
  * Flow:
  *   1. User visits /signup?ref=REFERRER_USER_ID → captureReferralParam() stores it
  *   2. After signup/login → saveReferredBy() writes it to user_data.subscription
- *   3. On Stripe subscription activation → webhook applies $12.99 credit to both users
+ *   3. On Stripe subscription activation → webhook applies $9.99 credit to both users
  */
 
 const STORAGE_KEY = 'studyedge_referrer'

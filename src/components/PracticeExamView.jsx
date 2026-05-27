@@ -96,6 +96,7 @@ export default function PracticeExamView({ courses = [], onShowPaywall }) {
         answers={examAnswers}
         timeMs={examTimeMs}
         questionTimings={questionTimings}
+        courseId={examCourse?.id ?? null}
         courseName={examCourse?.name ?? null}
         onRetake={handleRetake}
         onClose={closeToLanding}

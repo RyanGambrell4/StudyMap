@@ -139,16 +139,16 @@
       {
         "@type": "Offer",
         "name": "Pro",
-        "price": "12.99",
+        "price": "2.99",
         "priceCurrency": "USD",
-        "description": "Pro plan — 5 courses, 75 AI study boosts/month, smart calendar, push notifications."
+        "description": "Pro plan — $2.99/week (also $9.99/month or $69.99/year). 5 courses, 100 AI study boosts/month, AI Study Coach, Session Blueprints, smart calendar. 3-day free trial, no card needed."
       },
       {
         "@type": "Offer",
         "name": "Unlimited",
-        "price": "19.99",
+        "price": "4.99",
         "priceCurrency": "USD",
-        "description": "Unlimited courses, unlimited AI study boosts, priority support."
+        "description": "Unlimited plan — $4.99/week (also $14.99/month or $119.99/year). Unlimited courses and AI actions, AI Tutor with session memory, advanced practice exam analytics, predicted exam score."
       }
     ],
     "featureList": [
@@ -172,8 +172,12 @@
     "@type": "Organization",
     "@id": "https://getstudyedge.com/#organization",
     "name": "StudyEdge AI",
-    "alternateName": ["StudyEdge AI", "getstudyedge", "getstudyedge.com"],
+    "legalName": "StudyEdge AI",
+    "alternateName": ["StudyEdge AI", "getstudyedge", "getstudyedge.com", "Get StudyEdge"],
     "url": "https://getstudyedge.com/",
+    "identifier": [
+      { "@type": "PropertyValue", "propertyID": "domain", "value": "getstudyedge.com" }
+    ],
     "logo": {
       "@type": "ImageObject",
       "url": "https://getstudyedge.com/favicon.png",
@@ -187,9 +191,23 @@
       "https://www.linkedin.com/company/getstudyedge/",
       "https://www.producthunt.com/posts/studyedge"
     ],
-    "description": "StudyEdge AI (getstudyedge.com) is an AI-powered study planner for college and university students. Not affiliated with studyedge.com.",
-    "disambiguatingDescription": "StudyEdge AI is the AI study planner at getstudyedge.com — not affiliated with Study Edge (studyedge.com), which is a separate human tutoring company. StudyEdge AI uses artificial intelligence to build personalized study schedules, plan sessions, and coach students with flashcards, quizzes, and active recall.",
+    "brand": {
+      "@type": "Brand",
+      "name": "StudyEdge AI",
+      "url": "https://getstudyedge.com/",
+      "logo": "https://getstudyedge.com/favicon.png"
+    },
+    "description": "StudyEdge AI (getstudyedge.com) is an AI-powered study planner app for college and university students. Not affiliated with Study Edge (studyedge.com), a separate human tutoring company.",
+    "disambiguatingDescription": "StudyEdge AI is the AI study planner app at getstudyedge.com. It is a completely separate company from Study Edge (studyedge.com), a Florida-based human tutoring service founded in 2014. StudyEdge AI is an AI software product — it has no tutors, no in-person classes, and no affiliation, partnership, ownership, or business relationship of any kind with Study Edge or studyedge.com.",
     "foundingDate": "2025",
+    "knowsAbout": [
+      "AI study planning",
+      "Spaced repetition",
+      "Active recall",
+      "AI flashcards",
+      "Study schedule generation",
+      "College exam preparation"
+    ],
     "contactPoint": {
       "@type": "ContactPoint",
       "email": "support@getstudyedge.com",
@@ -198,6 +216,7 @@
     }
   }
   </script>
+
 
   <!-- WebPage schema: ties homepage to the Organization entity -->
   <script type="application/ld+json">
@@ -241,7 +260,7 @@
         "name": "Is StudyEdge AI free?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. StudyEdge AI has a free plan that includes 2 courses, 1 AI message per day, and one free use of key features like Session Blueprints, Focus Mode, and the AI Coach — no credit card required. Pro plan is $12.99/month with a 7-day free trial."
+          "text": "Yes. StudyEdge AI has a free plan that includes 1 course, 2 AI tutor actions per day, and one free use of key features like Session Blueprints, Focus Mode, and the AI Coach — no credit card required. Pro plan starts at $2.99/week (also available monthly at $9.99 or annually at $69.99) with a 3-day free trial, no credit card needed."
         }
       },
       {
@@ -265,7 +284,7 @@
         "name": "Can I cancel anytime?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Paid plans can be cancelled at any time and all new Pro subscriptions come with a 7-day free trial."
+          "text": "Yes. Paid plans can be cancelled at any time and all new Pro subscriptions come with a 3-day free trial, no credit card required."
         }
       },
       {
@@ -703,6 +722,17 @@
     .footer-socials a { color: var(--dim); transition: color 0.15s; }
     .footer-socials a:hover { color: var(--muted); }
     .footer-copy { font-size: 13px; color: var(--dim); }
+    .footer-disclaimer {
+      flex-basis: 100%;
+      font-size: 12px;
+      color: var(--dim);
+      line-height: 1.6;
+      padding-top: 18px;
+      margin-top: 6px;
+      border-top: 1px solid var(--border);
+    }
+    .footer-disclaimer a { color: var(--muted); text-decoration: underline; }
+    .footer-disclaimer a:hover { color: var(--text); }
 
     /* Animations */
     .fade-up { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
@@ -796,8 +826,8 @@
           <h2>StudyEdge AI pricing: The full system, free to start.</h2>
           <dl>
             <dt>Free</dt><dd>$0 forever. 1 course, 10 AI actions/month. No credit card required.</dd>
-            <dt>Pro</dt><dd>$12.99/month. 5 courses, 75 AI actions/month, 7-day free trial.</dd>
-            <dt>Unlimited</dt><dd>$19.99/month. Unlimited courses and AI actions. Cancel anytime.</dd>
+            <dt>Pro</dt><dd>From $2.99/week (also $9.99/mo or $69.99/yr). 5 courses, 100 AI actions/month, 3-day free trial, no card needed.</dd>
+            <dt>Unlimited</dt><dd>From $4.99/week (also $14.99/mo or $119.99/yr). Unlimited courses and AI actions, AI Tutor memory, advanced exam analytics. Cancel anytime.</dd>
           </dl>
         </section>
         <section id="brand">
@@ -809,9 +839,11 @@
         </section>
         <footer>
           <p>© 2026 StudyEdge AI (getstudyedge.com). Built by students, for students.</p>
+          <p><strong>Disclaimer:</strong> StudyEdge AI is an AI study planner app at getstudyedge.com. It is <strong>not affiliated with, endorsed by, or connected to Study Edge</strong> at studyedge.com — a separate Florida-based human tutoring company. The two companies are unrelated. <a href="/not-affiliated-with-study-edge">Learn more</a>.</p>
           <a href="/login">Log In</a>
           <a href="/app?signup=1">Sign Up Free</a>
           <a href="/about">About</a>
+          <a href="/not-affiliated-with-study-edge">Not Study Edge tutoring</a>
           <a href="/privacy">Privacy Policy</a>
           <a href="/terms">Terms of Service</a>
           <a href="mailto:support@getstudyedge.com">Contact StudyEdge AI Support</a>
@@ -1739,33 +1771,34 @@
     }
 
     function Pricing() {
-      const [bill, setBill] = useState('monthly');
+      const [bill, setBill] = useState('weekly');
 
       const PRICE_TABLE = {
-        pro:       { monthly: 12.99, semester: 39.99, yearly: 84.99 },
-        unlimited: { monthly: 19.99, semester: 59.99, yearly: 119.99 },
-      };
-      const MONTHLY_EQUIV = {
-        pro:       { monthly: 12.99, semester: (39.99/5), yearly: (84.99/12) },
-        unlimited: { monthly: 19.99, semester: (59.99/5), yearly: (119.99/12) },
+        pro:       { weekly: 2.99, monthly: 9.99,  yearly: 69.99  },
+        unlimited: { weekly: 4.99, monthly: 14.99, yearly: 119.99 },
       };
 
       const billedSub = (planKey) => {
         if (planKey === 'pro') {
-          if (bill === 'monthly') return 'Billed monthly · 7-day free trial, no card';
-          if (bill === 'semester') return 'Billed $' + PRICE_TABLE[planKey].semester.toFixed(2) + '/semester · 7-day free trial';
-          return 'Billed $' + PRICE_TABLE[planKey].yearly.toFixed(2) + '/year · 7-day free trial';
+          if (bill === 'weekly')  return 'Billed weekly · 3-day free trial, no card';
+          if (bill === 'monthly') return 'Billed $' + PRICE_TABLE[planKey].monthly.toFixed(2) + '/month · 3-day free trial';
+          return 'Billed $' + PRICE_TABLE[planKey].yearly.toFixed(2) + '/year · 3-day free trial';
         }
-        if (bill === 'monthly') return 'Billed monthly · cancel anytime';
-        if (bill === 'semester') return 'Billed $' + PRICE_TABLE[planKey].semester.toFixed(2) + '/semester · cancel anytime';
+        if (bill === 'weekly')  return 'Billed weekly · cancel anytime';
+        if (bill === 'monthly') return 'Billed $' + PRICE_TABLE[planKey].monthly.toFixed(2) + '/month · cancel anytime';
         return 'Billed $' + PRICE_TABLE[planKey].yearly.toFixed(2) + '/year · cancel anytime';
       };
 
-      const displayPrice = (planKey) => MONTHLY_EQUIV[planKey][bill];
+      const displayPrice = (planKey) => PRICE_TABLE[planKey][bill];
+      const unitLabel = bill === 'weekly' ? '/wk' : bill === 'monthly' ? '/mo' : '/yr';
 
       const goSignup = (plan) => {
         const qs = new URLSearchParams({ signup: '1' });
-        if (plan) { qs.set('plan', plan); qs.set('billing', bill); qs.set('trial', '1'); }
+        if (plan) {
+          qs.set('plan', plan);
+          qs.set('billing', bill);
+          if (plan === 'pro') qs.set('trial', '1');
+        }
         window.location.href = '/app?' + qs.toString();
       };
 
@@ -1774,14 +1807,14 @@
           <div className="pricing-section">
             <p className="section-label">Pricing</p>
             <h2 className="section-h2 fade-up">
-              The full system,<br />
+              Less than a coffee,<br />
               <em>free to start.</em>
             </h2>
             <div className="billing-toggle">
               {[
+                {k: 'weekly',  l: 'Weekly',  save: null},
                 {k: 'monthly', l: 'Monthly', save: null},
-                {k: 'semester', l: 'Semester', save: 'Save 23%'},
-                {k: 'yearly', l: 'Yearly', save: 'Save 45%'},
+                {k: 'yearly',  l: 'Annual',  save: 'Save 55%'},
               ].map(b => (
                 <button
                   key={b.k}
@@ -1802,7 +1835,7 @@
                 <div className="pricing-hr" />
                 <ul className="pricing-features">
                   <li className="pf"><span className="pf-dot" /><span>1 course</span></li>
-                  <li className="pf"><span className="pf-dot" /><span>10 AI actions per month</span></li>
+                  <li className="pf"><span className="pf-dot" /><span>2 AI tutor actions per day</span></li>
                   <li className="pf"><span className="pf-dot" /><span>Session Blueprint</span></li>
                   <li className="pf"><span className="pf-dot" /><span>Focus Mode timer</span></li>
                   <li className="pf"><span className="pf-dot" /><span>Syllabus import</span></li>
@@ -1814,13 +1847,13 @@
                 <div className="pricing-badge">Most popular</div>
                 <div className="pricing-tier">Pro</div>
                 <div className="pricing-price">
-                  ${displayPrice('pro').toFixed(2)}<sub>/mo</sub>
+                  ${displayPrice('pro').toFixed(2)}<sub>{unitLabel}</sub>
                 </div>
                 <div className="pricing-billing">{billedSub('pro')}</div>
                 <div className="pricing-hr" />
                 <ul className="pricing-features">
                   <li className="pf em"><span className="pf-dot" /><span>5 courses</span></li>
-                  <li className="pf em"><span className="pf-dot" /><span>75 AI actions per month</span></li>
+                  <li className="pf em"><span className="pf-dot" /><span>100 AI actions per month</span></li>
                   <li className="pf em"><span className="pf-dot" /><span>AI Study Coach</span></li>
                   <li className="pf em"><span className="pf-dot" /><span>Session Blueprints</span></li>
                   <li className="pf em"><span className="pf-dot" /><span>AI Flashcards and Quizzes</span></li>
@@ -1828,22 +1861,24 @@
                   <li className="pf em"><span className="pf-dot" /><span>Smart Calendar sync</span></li>
                   <li className="pf em"><span className="pf-dot" /><span>Syllabus import for all courses</span></li>
                 </ul>
-                <button className="btn btn-primary btn-block" style={{padding:'14px'}} onClick={() => goSignup('pro')}>Get Pro</button>
-                <p style={{textAlign:'center', fontSize:12, color:'var(--dim)', marginTop:10}}>7-day free trial, cancel anytime</p>
+                <button className="btn btn-primary btn-block" style={{padding:'14px'}} onClick={() => goSignup('pro')}>Start free trial</button>
+                <p style={{textAlign:'center', fontSize:12, color:'var(--dim)', marginTop:10}}>3-day free trial, no card needed</p>
               </div>
 
               <div className="pricing-cell">
                 <div className="pricing-tier">Unlimited</div>
                 <div className="pricing-price">
-                  ${displayPrice('unlimited').toFixed(2)}<sub>/mo</sub>
+                  ${displayPrice('unlimited').toFixed(2)}<sub>{unitLabel}</sub>
                 </div>
                 <div className="pricing-billing">{billedSub('unlimited')}</div>
                 <div className="pricing-hr" />
                 <ul className="pricing-features">
+                  <li className="pf em"><span className="pf-dot" /><span>Everything in Pro</span></li>
                   <li className="pf em"><span className="pf-dot" /><span>Unlimited courses</span></li>
                   <li className="pf em"><span className="pf-dot" /><span>Unlimited AI actions</span></li>
-                  <li className="pf em"><span className="pf-dot" /><span>Everything in Pro</span></li>
-                  <li className="pf em"><span className="pf-dot" /><span>Priority support</span></li>
+                  <li className="pf em"><span className="pf-dot" /><span>AI Tutor with session memory</span></li>
+                  <li className="pf em"><span className="pf-dot" /><span>Advanced exam analytics</span></li>
+                  <li className="pf em"><span className="pf-dot" /><span>Predicted exam score</span></li>
                 </ul>
                 <button className="btn btn-ghost btn-block" style={{padding:'14px'}} onClick={() => goSignup('unlimited')}>Get Unlimited</button>
                 <p style={{textAlign:'center', fontSize:12, color:'var(--dim)', marginTop:10}}>Cancel anytime</p>
@@ -1862,7 +1897,7 @@
             Your semester isn't going<br />to <em style={{color:'var(--accent)'}}>plan itself.</em>
           </h2>
           <p className="finalcta-sub">Free to start. No credit card. Takes three minutes to set up.</p>
-          <button className="btn btn-primary-lg" onClick={() => goTo('/app?signup=1&plan=pro&billing=monthly&trial=1')}>Start Free Trial</button>
+          <button className="btn btn-primary-lg" onClick={() => goTo('/app?signup=1&plan=pro&billing=weekly&trial=1')}>Start Free Trial</button>
         </div>
       );
     }
@@ -1894,6 +1929,10 @@
             </a>
           </div>
           <p className="footer-copy">2026 StudyEdge AI</p>
+          <p className="footer-disclaimer">
+            StudyEdge AI (getstudyedge.com) is an AI study planner app and is not affiliated with{' '}
+            <a href="/not-affiliated-with-study-edge">Study Edge (studyedge.com)</a>, a separate human tutoring company.
+          </p>
         </footer>
       );
     }

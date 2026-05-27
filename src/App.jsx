@@ -56,7 +56,7 @@ export default function App() {
     const billing = sp.get('billing')
     const trial = sp.get('trial') === '1'
     if (plan === 'pro' || plan === 'unlimited') {
-      return { plan, billing: ['monthly', 'semester', 'yearly'].includes(billing) ? billing : 'monthly', trial }
+      return { plan, billing: ['weekly', 'monthly', 'yearly', 'semester'].includes(billing) ? billing : 'weekly', trial }
     }
     return null
   })
@@ -66,6 +66,14 @@ export default function App() {
     setPaywallOpen(true)
     track('paywall_shown', { trigger })
   }, [])
+
+  // Any component can open the paywall by dispatching `studyedge:open-paywall`
+  // with `detail: { trigger: '...' }`. Used by PracticeExamResults upsell card.
+  useEffect(() => {
+    const handler = (e) => openPaywall(e.detail?.trigger ?? 'courses')
+    window.addEventListener('studyedge:open-paywall', handler)
+    return () => window.removeEventListener('studyedge:open-paywall', handler)
+  }, [openPaywall])
 
   // Tracks the latest completedIds/assignments so handleAddCourse can save immediately
   const latestPlanRef = useRef({ completedIds: [], assignments: [] })

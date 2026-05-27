@@ -1,4 +1,6 @@
 import { useMemo } from 'react'
+import { getActivePlan } from '../lib/subscription'
+import { getCachedPracticeExams } from '../lib/db'
 
 function fmtMs(ms) {
   const total = Math.round(ms / 1000)
@@ -29,7 +31,64 @@ function fmtMs2(ms) {
   return `${Math.floor(s / 60)}m ${(s % 60).toString().padStart(2, '0')}s`
 }
 
-export default function PracticeExamResults({ questions, answers, timeMs, questionTimings = [], courseName, onRetake, onClose }) {
+// Linear extrapolation from a series of scores → predicted next score.
+// Uses simple least-squares regression on (index, score) pairs. Clamped 0–100.
+function predictNextScore(scores) {
+  if (!scores || scores.length < 2) return null
+  const n = scores.length
+  const xs = scores.map((_, i) => i)
+  const meanX = xs.reduce((a, b) => a + b, 0) / n
+  const meanY = scores.reduce((a, b) => a + b, 0) / n
+  let num = 0, den = 0
+  for (let i = 0; i < n; i++) {
+    num += (xs[i] - meanX) * (scores[i] - meanY)
+    den += (xs[i] - meanX) ** 2
+  }
+  const slope = den === 0 ? 0 : num / den
+  const intercept = meanY - slope * meanX
+  const projected = intercept + slope * n
+  return Math.max(0, Math.min(100, Math.round(projected)))
+}
+
+function ScoreTrendChart({ scores, currentScore }) {
+  // Inline SVG line chart. Scores: array of numbers 0-100, oldest first.
+  // The newest dot is highlighted in brand color.
+  const W = 520, H = 140, PAD = 24
+  const n = scores.length
+  if (n < 1) return null
+  const minY = 0, maxY = 100
+  const x = (i) => PAD + (n === 1 ? (W - 2 * PAD) / 2 : (i * (W - 2 * PAD)) / (n - 1))
+  const y = (v) => H - PAD - ((v - minY) / (maxY - minY)) * (H - 2 * PAD)
+  const points = scores.map((s, i) => `${x(i)},${y(s)}`).join(' ')
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block' }} aria-label="Score trend">
+      {[0, 50, 100].map(v => (
+        <line key={v} x1={PAD} x2={W - PAD} y1={y(v)} y2={y(v)} stroke="rgba(0,0,0,0.07)" strokeDasharray="3 3" />
+      ))}
+      {[0, 50, 100].map(v => (
+        <text key={`l-${v}`} x={4} y={y(v) + 4} fontSize="10" fill="#9B9B9B" fontWeight="600">{v}</text>
+      ))}
+      {n > 1 && (
+        <polyline points={points} fill="none" stroke="#3B61C4" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
+      )}
+      {scores.map((s, i) => {
+        const isLast = i === n - 1
+        return (
+          <g key={i}>
+            <circle cx={x(i)} cy={y(s)} r={isLast ? 5 : 3.5} fill={isLast ? '#3B61C4' : '#fff'} stroke="#3B61C4" strokeWidth="2" />
+            {isLast && (
+              <text x={x(i)} y={y(s) - 12} textAnchor="middle" fontSize="11" fontWeight="700" fill="#1A1A1A">
+                {currentScore}%
+              </text>
+            )}
+          </g>
+        )
+      })}
+    </svg>
+  )
+}
+
+export default function PracticeExamResults({ questions, answers, timeMs, questionTimings = [], courseId, courseName, onRetake, onClose }) {
   const graded = useMemo(() => questions.map((q, i) => {
     const given = answers[i] ?? ''
     const correct = q.type === 'multiple_choice' ? gradeMc(q, given) : gradeShort(q, given)
@@ -58,6 +117,31 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
   }, [graded])
 
   const hasShortAnswer = graded.some(g => g.correct === null)
+
+  const plan = getActivePlan()
+  const isUnlimited = plan === 'unlimited'
+
+  // Pull cached score history for this course (Unlimited only — gated below).
+  // savePracticeExam saves before the results view renders, so the newest exam
+  // is already at index 0. We reverse for oldest→newest chart order.
+  const scoreHistory = useMemo(() => {
+    if (!isUnlimited || !courseId) return []
+    const exams = getCachedPracticeExams(courseId) ?? []
+    return [...exams]
+      .filter(e => typeof e?.score === 'number')
+      .sort((a, b) => (a.takenAt ?? 0) - (b.takenAt ?? 0))
+      .map(e => e.score)
+  }, [isUnlimited, courseId])
+
+  const predictedScore = useMemo(() => {
+    if (!isUnlimited || scoreHistory.length < 2) return null
+    return predictNextScore(scoreHistory)
+  }, [isUnlimited, scoreHistory])
+
+  const trendDelta = useMemo(() => {
+    if (scoreHistory.length < 2) return null
+    return scoreHistory[scoreHistory.length - 1] - scoreHistory[0]
+  }, [scoreHistory])
 
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#F7F6F3', overflowY: 'auto' }}>
@@ -97,6 +181,61 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
             </div>
           </div>
         </div>
+
+        {/* Advanced analytics (Unlimited only) */}
+        {isUnlimited && scoreHistory.length >= 2 && (
+          <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
+              <div>
+                <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Score trend · last {scoreHistory.length} exams</p>
+                {trendDelta !== null && (
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: trendDelta >= 0 ? '#16A34A' : '#DC2626', fontWeight: 600 }}>
+                    {trendDelta >= 0 ? '+' : ''}{trendDelta} pts since your first exam
+                  </p>
+                )}
+              </div>
+              <span style={{ fontSize: 10, fontWeight: 800, color: '#7C5CFA', background: 'rgba(124,92,250,0.08)', border: '1px solid rgba(124,92,250,0.20)', borderRadius: 999, padding: '3px 9px', letterSpacing: '0.5px' }}>
+                UNLIMITED
+              </span>
+            </div>
+            <ScoreTrendChart scores={scoreHistory} currentScore={score} />
+            {predictedScore !== null && (
+              <div style={{ marginTop: 14, padding: '14px 16px', background: 'rgba(124,92,250,0.06)', border: '1px solid rgba(124,92,250,0.18)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <div>
+                  <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#7C5CFA', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Predicted real exam score</p>
+                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6B6B6B' }}>Based on your trend across {scoreHistory.length} practice exams</p>
+                </div>
+                <p style={{ margin: 0, fontSize: 30, fontWeight: 800, color: '#7C5CFA', letterSpacing: '-0.02em' }}>{predictedScore}%</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Upsell card for Pro/Free */}
+        {!isUnlimited && (
+          <div style={{ background: 'linear-gradient(135deg, rgba(124,92,250,0.06), rgba(99,102,241,0.06))', border: '1px solid rgba(124,92,250,0.22)', borderRadius: 18, padding: 18, marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 240 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(124,92,250,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#7C5CFA" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
+                  <polyline points="16 7 22 7 22 13" />
+                </svg>
+              </div>
+              <div>
+                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>Unlock advanced exam analytics</p>
+                <p style={{ margin: '2px 0 0', fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.5 }}>
+                  See your score trend across every practice exam and get an AI-predicted real exam score. Available on Unlimited.
+                </p>
+              </div>
+            </div>
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'practiceExamAnalytics' } }))}
+              style={{ padding: '10px 16px', background: '#7C5CFA', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 13.5, cursor: 'pointer', whiteSpace: 'nowrap' }}
+            >
+              See plans →
+            </button>
+          </div>
+        )}
 
         {/* Weak topics */}
         {weakTopics.length > 0 && (

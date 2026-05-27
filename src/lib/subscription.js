@@ -2,10 +2,15 @@
  * subscription.js — Trial & subscription layer for StudyEdge AI
  *
  * 3-tier model:
- *  Free     → permanent, capped per feature
- *  Trial    → 7-day full Pro, no card required, one-time per account
- *  Pro      → Stripe paid, 5 courses, 75 AI actions/month
+ *  Free      → permanent, capped per feature
+ *  Trial     → 3-day full Pro, no card required, one-time per account
+ *  Pro       → Stripe paid (weekly/monthly/annual), 5 courses, 100 AI actions/month
+ *  Unlimited → Stripe paid (weekly/monthly/annual), unlimited everything + tutor memory & advanced analytics
  */
+
+// Trial duration: 3 days (was 7). Single source of truth for all trial checks.
+export const TRIAL_DURATION_MS = 3 * 24 * 60 * 60 * 1000
+export const TRIAL_DURATION_DAYS = 3
 
 import { supabase } from './supabase'
 import { track } from './analytics'
@@ -28,10 +33,20 @@ export const FREE_LIMITS = {
 
 export const PRO_LIMITS = {
   courses:             5,
-  aiActions:           { count: 75, period: 'month' },
+  aiActions:           { count: 100, period: 'month' },
   focusMode:           { minutes: Infinity, period: null },
   flashcardDecks:      Infinity,
   flashcardCardsPerDeck: Infinity,
+}
+
+export const UNLIMITED_LIMITS = {
+  courses:               Infinity,
+  aiActions:             { count: Infinity, period: 'month' },
+  focusMode:             { minutes: Infinity, period: null },
+  flashcardDecks:        Infinity,
+  flashcardCardsPerDeck: Infinity,
+  tutorMemory:           true,
+  practiceExamAnalytics: true,
 }
 
 export const TRIAL_LIMITS = PRO_LIMITS
@@ -39,8 +54,16 @@ export const TRIAL_LIMITS = PRO_LIMITS
 // Legacy — kept for backwards compatibility
 export const PLAN_LIMITS = {
   free:      { courses: 1,        aiQueries: 2,        aiResetPeriod: 'day'   },
-  pro:       { courses: 5,        aiQueries: 75,       aiResetPeriod: 'month' },
+  pro:       { courses: 5,        aiQueries: 100,      aiResetPeriod: 'month' },
   unlimited: { courses: Infinity, aiQueries: Infinity, aiResetPeriod: 'month' },
+}
+
+// Feature names that are gated to Unlimited only.
+const UNLIMITED_ONLY_FEATURES = new Set(['tutorMemory', 'practiceExamAnalytics'])
+
+export function canUseUnlimitedFeature(featureName) {
+  if (!UNLIMITED_ONLY_FEATURES.has(featureName)) return true
+  return getActivePlan() === 'unlimited'
 }
 
 // ── In-memory cache ───────────────────────────────────────────────────────────
@@ -87,7 +110,7 @@ export function isTrialActive() {
   if (!sub?.trial_activated || !sub?.trial_start_date) return false
   const start = new Date(sub.trial_start_date)
   const diffMs = Date.now() - start.getTime()
-  return diffMs < 7 * 24 * 60 * 60 * 1000
+  return diffMs < TRIAL_DURATION_MS
 }
 
 export function hasUsedTrial() {
@@ -99,7 +122,7 @@ export function getTrialDaysRemaining() {
   if (!sub?.trial_activated || !sub?.trial_start_date) return 0
   const start = new Date(sub.trial_start_date)
   const elapsed = (Date.now() - start.getTime()) / (1000 * 60 * 60 * 24)
-  return Math.max(0, Math.ceil(7 - elapsed))
+  return Math.max(0, Math.ceil(TRIAL_DURATION_DAYS - elapsed))
 }
 
 export async function activateTrial() {
@@ -139,7 +162,7 @@ export function getActivePlan() {
   if (paidStatuses.includes(sub?.status) && sub?.plan === 'unlimited') return 'unlimited'
   if (paidStatuses.includes(sub?.status) && sub?.plan === 'pro') return 'pro'
 
-  // No-card trial (7 days)
+  // No-card trial (3 days)
   if (isTrialActive()) return 'pro'
 
   // Stripe trialing (legacy — card required old flow)

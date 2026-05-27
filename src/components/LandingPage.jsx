@@ -106,7 +106,18 @@ export default function LandingPage({ onGetStarted }) {
     return () => ro.disconnect()
   }, [])
 
-  const goTrial = () => window.location.href = '/app?signup=1&plan=pro&billing=monthly&trial=1'
+  const goTrial = () => window.location.href = '/app?signup=1&plan=pro&billing=weekly&trial=1'
+
+  const [pricingPeriod, setPricingPeriod] = useState('weekly')
+  const goCheckout = (plan, period) => {
+    const trialParam = plan === 'pro' ? '&trial=1' : ''
+    window.location.href = `/app?signup=1&plan=${plan}&billing=${period}${trialParam}`
+  }
+  const goSignupFree = () => window.location.href = '/app?signup=1'
+
+  const scrollToPricing = () => {
+    document.getElementById('pricing')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 
   const scrollToHow = () => {
     document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
@@ -458,7 +469,7 @@ export default function LandingPage({ onGetStarted }) {
             <span className="se-ping" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 10px #22c55e' }} />
           </span>
           <span style={{ fontSize: 13.5, color: '#e2e8f0', fontWeight: 500, letterSpacing: '-0.005em' }}>
-            <strong style={{ color: '#fff', fontWeight: 700 }}>Try Pro free for 7 days</strong> — no credit card required
+            <strong style={{ color: '#fff', fontWeight: 700 }}>Try Pro free for 3 days</strong> — $2.99/wk after, cancel anytime
           </span>
           <button
             onClick={goTrial}
@@ -674,7 +685,7 @@ export default function LandingPage({ onGetStarted }) {
                 }}
               >
                 <span style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                  Start free 7-day trial
+                  Start free 3-day trial
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                     <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -1451,7 +1462,7 @@ export default function LandingPage({ onGetStarted }) {
               e.currentTarget.style.boxShadow = '0 10px 30px rgba(99,102,241,0.35), 0 0 0 1px rgba(255,255,255,0.06) inset'
             }}
           >
-            Try all three free for 7 days
+            Try all three free for 3 days
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -1876,6 +1887,239 @@ export default function LandingPage({ onGetStarted }) {
       {/* Testimonials → Bottom CTA horizon */}
       <div className="se-horizon" />
 
+      {/* ── Pricing ── */}
+      <section id="pricing" className="se-section" style={{
+        maxWidth: 1100, margin: '0 auto', padding: '90px 24px 100px',
+        position: 'relative',
+      }}>
+        <div aria-hidden="true" className="se-wash" style={{
+          background:
+            'radial-gradient(700px 460px at 50% 0%, rgba(99,102,241,0.10), transparent 60%)',
+        }} />
+        <div style={{ textAlign: 'center', marginBottom: 36 }}>
+          <h2 style={{
+            fontSize: 'clamp(28px, 4vw, 44px)', fontWeight: 800,
+            color: '#fff', letterSpacing: '-0.02em', marginBottom: 12,
+          }}>
+            Pick your plan. Cancel anytime.
+          </h2>
+          <p style={{ fontSize: 16, color: 'rgba(226,232,240,0.55)', maxWidth: 540, margin: '0 auto 28px', lineHeight: 1.55 }}>
+            Less than a coffee a week. Full access to the AI study system, your way.
+          </p>
+
+          {/* Billing toggle */}
+          <div role="tablist" aria-label="Billing period" style={{
+            display: 'inline-flex', gap: 4,
+            background: 'rgba(255,255,255,0.04)',
+            border: '1px solid rgba(255,255,255,0.10)',
+            borderRadius: 999, padding: 4,
+          }}>
+            {[
+              { id: 'weekly',  label: 'Weekly'  },
+              { id: 'monthly', label: 'Monthly' },
+              { id: 'yearly',  label: 'Annual'  },
+            ].map(p => {
+              const active = pricingPeriod === p.id
+              return (
+                <button
+                  key={p.id}
+                  role="tab"
+                  aria-selected={active}
+                  onClick={() => setPricingPeriod(p.id)}
+                  style={{
+                    padding: '8px 18px', borderRadius: 999, border: 'none', cursor: 'pointer',
+                    background: active ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'transparent',
+                    color: active ? '#fff' : 'rgba(226,232,240,0.65)',
+                    fontSize: 13.5, fontWeight: 700, letterSpacing: '-0.005em',
+                    boxShadow: active ? '0 6px 18px rgba(99,102,241,0.35)' : 'none',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  {p.label}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {(() => {
+          const pricing = {
+            free: { weekly: '$0', monthly: '$0', yearly: '$0', sub: 'Forever free' },
+            pro: {
+              weekly:  { price: '$2.99', unit: '/week',  sub: 'Billed weekly · less than a coffee' },
+              monthly: { price: '$9.99', unit: '/month', sub: 'Billed monthly' },
+              yearly:  { price: '$69.99', unit: '/year',  sub: 'Billed annually · ~$1.35/wk' },
+            },
+            unlimited: {
+              weekly:  { price: '$4.99',  unit: '/week',  sub: 'Billed weekly' },
+              monthly: { price: '$14.99', unit: '/month', sub: 'Billed monthly' },
+              yearly:  { price: '$119.99', unit: '/year', sub: 'Billed annually · ~$2.31/wk' },
+            },
+          }
+          const proP = pricing.pro[pricingPeriod]
+          const ultP = pricing.unlimited[pricingPeriod]
+          const annualBadge = (savings) => pricingPeriod === 'yearly' ? (
+            <span style={{
+              display: 'inline-block', marginLeft: 8,
+              fontSize: 11, fontWeight: 800, color: '#34d399',
+              background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.30)',
+              borderRadius: 999, padding: '2px 10px', letterSpacing: '0.2px',
+            }}>{savings}</span>
+          ) : null
+
+          return (
+            <div style={{
+              display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+              gap: 18, alignItems: 'stretch',
+            }}>
+
+              {/* Free */}
+              <div style={{
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(255,255,255,0.06)',
+                borderRadius: 18, padding: '28px 24px 24px',
+                display: 'flex', flexDirection: 'column', gap: 16,
+              }}>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: 'rgba(226,232,240,0.55)', marginBottom: 10 }}>Free</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                    <span style={{ fontSize: 36, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>$0</span>
+                    <span style={{ fontSize: 14, color: 'rgba(226,232,240,0.45)' }}>forever</span>
+                  </div>
+                  <p style={{ margin: '8px 0 0', fontSize: 13, color: 'rgba(226,232,240,0.50)' }}>Try the basics. No credit card.</p>
+                </div>
+                <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8, flex: 1, fontSize: 13.5, color: 'rgba(226,232,240,0.7)' }}>
+                  {['1 course', '2 AI tutor actions/day', '1 Coach Plan', '1 Practice Exam', '60 min Focus/day'].map(f => (
+                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="rgba(226,232,240,0.50)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button onClick={goSignupFree} style={{
+                  background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.12)',
+                  color: '#e2e8f0', borderRadius: 12, padding: '12px 18px',
+                  fontSize: 14, fontWeight: 700, cursor: 'pointer', letterSpacing: '-0.005em',
+                }}>
+                  Get started free
+                </button>
+              </div>
+
+              {/* Pro — featured */}
+              <div style={{
+                background: 'linear-gradient(180deg, rgba(99,102,241,0.08), rgba(99,102,241,0.02))',
+                border: '1.5px solid rgba(99,102,241,0.45)',
+                borderRadius: 18, padding: '28px 24px 24px',
+                display: 'flex', flexDirection: 'column', gap: 16,
+                boxShadow: '0 24px 64px rgba(99,102,241,0.20), 0 0 0 1px rgba(255,255,255,0.04) inset',
+                position: 'relative', transform: 'translateY(-6px)',
+              }}>
+                <div style={{
+                  position: 'absolute', top: -12, left: '50%', transform: 'translateX(-50%)',
+                  background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                  color: '#fff', fontSize: 11, fontWeight: 800, letterSpacing: '0.10em',
+                  textTransform: 'uppercase', padding: '5px 14px', borderRadius: 999,
+                  boxShadow: '0 8px 24px rgba(99,102,241,0.45)',
+                }}>
+                  Most popular
+                </div>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: '#c7d2fe', marginBottom: 10 }}>
+                    Pro {annualBadge('Save 55%')}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                    <span style={{ fontSize: 40, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>{proP.price}</span>
+                    <span style={{ fontSize: 15, color: 'rgba(226,232,240,0.55)' }}>{proP.unit}</span>
+                  </div>
+                  <p style={{ margin: '8px 0 0', fontSize: 13, color: 'rgba(226,232,240,0.55)' }}>{proP.sub}</p>
+                  <p style={{ margin: '6px 0 0', fontSize: 12.5, color: '#34d399', fontWeight: 700 }}>
+                    3-day free trial · No card needed
+                  </p>
+                </div>
+                <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8, flex: 1, fontSize: 13.5, color: 'rgba(226,232,240,0.85)' }}>
+                  {[
+                    '5 courses',
+                    '100 AI actions/month',
+                    'AI Study Coach',
+                    'Unlimited Session Blueprints',
+                    'Unlimited Focus sessions',
+                    'Flashcards & quizzes',
+                  ].map(f => (
+                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#a5b4fc" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button onClick={() => goCheckout('pro', pricingPeriod)} style={{
+                  background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
+                  border: 'none', color: '#fff', borderRadius: 12,
+                  padding: '14px 18px', fontSize: 15, fontWeight: 800, cursor: 'pointer',
+                  boxShadow: '0 14px 36px rgba(99,102,241,0.45), 0 0 0 1px rgba(255,255,255,0.08) inset',
+                  letterSpacing: '-0.005em',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                }}>
+                  Start free trial
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                    <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+
+              {/* Unlimited */}
+              <div style={{
+                background: 'rgba(255,255,255,0.02)',
+                border: '1px solid rgba(52,211,153,0.30)',
+                borderRadius: 18, padding: '28px 24px 24px',
+                display: 'flex', flexDirection: 'column', gap: 16,
+              }}>
+                <div>
+                  <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: '#34d399', marginBottom: 10 }}>
+                    Unlimited {annualBadge('Save 53%')}
+                  </div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
+                    <span style={{ fontSize: 36, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>{ultP.price}</span>
+                    <span style={{ fontSize: 14, color: 'rgba(226,232,240,0.45)' }}>{ultP.unit}</span>
+                  </div>
+                  <p style={{ margin: '8px 0 0', fontSize: 13, color: 'rgba(226,232,240,0.50)' }}>{ultP.sub}</p>
+                </div>
+                <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8, flex: 1, fontSize: 13.5, color: 'rgba(226,232,240,0.85)' }}>
+                  {[
+                    'Everything in Pro',
+                    'Unlimited courses',
+                    'Unlimited AI actions',
+                    'AI Tutor with session memory',
+                    'Advanced exam analytics',
+                    'Predicted exam score',
+                  ].map(f => (
+                    <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#34d399" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <button onClick={() => goCheckout('unlimited', pricingPeriod)} style={{
+                  background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.40)',
+                  color: '#34d399', borderRadius: 12,
+                  padding: '14px 18px', fontSize: 15, fontWeight: 800, cursor: 'pointer',
+                  letterSpacing: '-0.005em',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                }}>
+                  Get Unlimited
+                  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+                    <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+          )
+        })()}
+
+        <p style={{ textAlign: 'center', marginTop: 28, fontSize: 13, color: 'rgba(226,232,240,0.40)' }}>
+          Already a member? <button onClick={goSignupFree} style={{ background: 'none', border: 'none', color: '#c7d2fe', cursor: 'pointer', fontSize: 13, padding: 0, textDecoration: 'underline' }}>Sign in</button>
+        </p>
+      </section>
+
       {/* ── Bottom CTA (full-bleed arrival moment) ── */}
       <section className="se-section" style={{
         textAlign: 'center', padding: '140px 24px 160px',
@@ -1910,7 +2154,7 @@ export default function LandingPage({ onGetStarted }) {
             No credit card
           </span>
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
-          <span>7-day free trial</span>
+          <span>3-day free trial</span>
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
           <span>Cancel anytime</span>
         </div>
@@ -1956,7 +2200,7 @@ export default function LandingPage({ onGetStarted }) {
             }}
           >
             <span style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-              Start your free 7-day trial
+              Start your free 3-day trial
               <svg width="15" height="15" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                 <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>

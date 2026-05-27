@@ -448,7 +448,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
         {/* Headline */}
         <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#111111', letterSpacing: '-0.04em', textAlign: 'center', marginBottom: 10, lineHeight: 1.15 }}>
-          Try every Pro feature.<br />Free for 7 days.
+          Try every Pro feature.<br />Free for 3 days.
         </h1>
         <p style={{ color: '#6B6B6B', fontSize: '0.95rem', textAlign: 'center', marginBottom: 32, lineHeight: 1.6 }}>
           See your full study plan, AI coach, and focus sessions in action — before you pay a cent.
@@ -458,7 +458,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, padding: '20px 24px', marginBottom: 24 }}>
           {[
             ['5 courses', 'Your full semester, all in one place'],
-            ['75 AI actions/month', 'AI tutor, coach plans, blueprints, quizzes'],
+            ['100 AI actions/month', 'AI tutor, coach plans, blueprints, quizzes'],
             ['Unlimited focus sessions', 'Study as long as you need'],
             ['Rebuild plans anytime', 'As exams shift and life happens'],
           ].map(([title, desc]) => (
@@ -501,7 +501,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         </button>
 
         <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.72rem', marginTop: 16 }}>
-          No credit card · trial ends after 7 days · downgrade to free automatically
+          No credit card · trial ends after 3 days · downgrade to free automatically
         </p>
       </div>
     </div>

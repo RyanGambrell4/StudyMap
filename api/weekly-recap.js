@@ -153,8 +153,8 @@ export default async function handler(req, res) {
         <table cellpadding="0" cellspacing="0" style="width:100%;background:rgba(59,97,196,0.06);border:1px solid rgba(59,97,196,0.18);border-radius:12px;margin-bottom:22px;">
           <tr><td style="padding:16px 18px;">
             <div style="font-size:14px;font-weight:600;color:#111111;margin-bottom:4px;">Want to study more effectively next week?</div>
-            <div style="font-size:13px;color:#6B6B6B;line-height:1.55;margin-bottom:12px;">Pro gives you 75 AI boosts/month, 5 courses, Study Coach, and Session Blueprints. Try free for 7 days.</div>
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:9px 18px;">Start 7-day free trial</a>
+            <div style="font-size:13px;color:#6B6B6B;line-height:1.55;margin-bottom:12px;">Pro gives you 100 AI boosts/month, 5 courses, Study Coach, and Session Blueprints — $2.99/wk. Try free for 3 days.</div>
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:9px 18px;">Start 3-day free trial</a>
           </td></tr>
         </table>` : ''}
 
