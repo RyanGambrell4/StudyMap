@@ -1915,9 +1915,9 @@ export default function LandingPage({ onGetStarted }) {
             borderRadius: 999, padding: 4,
           }}>
             {[
-              { id: 'weekly',  label: 'Weekly'  },
-              { id: 'monthly', label: 'Monthly' },
-              { id: 'yearly',  label: 'Annual'  },
+              { id: 'weekly',  label: 'Weekly',  save: null      },
+              { id: 'monthly', label: 'Monthly', save: 'Save 17%' },
+              { id: 'yearly',  label: 'Annual',  save: 'Save 55%' },
             ].map(p => {
               const active = pricingPeriod === p.id
               return (
@@ -1933,9 +1933,19 @@ export default function LandingPage({ onGetStarted }) {
                     fontSize: 13.5, fontWeight: 700, letterSpacing: '-0.005em',
                     boxShadow: active ? '0 6px 18px rgba(99,102,241,0.35)' : 'none',
                     transition: 'all 0.15s ease',
+                    display: 'inline-flex', alignItems: 'center', gap: 6,
                   }}
                 >
                   {p.label}
+                  {p.save && (
+                    <span style={{
+                      fontSize: 11, fontWeight: 800,
+                      color: active ? '#a5f3d4' : '#34d399',
+                      letterSpacing: '0.005em',
+                    }}>
+                      {p.save}
+                    </span>
+                  )}
                 </button>
               )
             })}
@@ -1958,14 +1968,22 @@ export default function LandingPage({ onGetStarted }) {
           }
           const proP = pricing.pro[pricingPeriod]
           const ultP = pricing.unlimited[pricingPeriod]
-          const annualBadge = (savings) => pricingPeriod === 'yearly' ? (
-            <span style={{
-              display: 'inline-block', marginLeft: 8,
-              fontSize: 11, fontWeight: 800, color: '#34d399',
-              background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.30)',
-              borderRadius: 999, padding: '2px 10px', letterSpacing: '0.2px',
-            }}>{savings}</span>
-          ) : null
+          // Per-card savings badge — shows on monthly (vs weekly) and annual.
+          // Caller passes { monthly, annual } amounts.
+          const savingsBadge = (savings) => {
+            const val = pricingPeriod === 'yearly' ? savings?.annual
+                      : pricingPeriod === 'monthly' ? savings?.monthly
+                      : null
+            if (!val) return null
+            return (
+              <span style={{
+                display: 'inline-block', marginLeft: 8,
+                fontSize: 11, fontWeight: 800, color: '#34d399',
+                background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.30)',
+                borderRadius: 999, padding: '2px 10px', letterSpacing: '0.2px',
+              }}>{val}</span>
+            )
+          }
 
           return (
             <div style={{
@@ -2025,7 +2043,7 @@ export default function LandingPage({ onGetStarted }) {
                 </div>
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: '#c7d2fe', marginBottom: 10 }}>
-                    Pro {annualBadge('Save 55%')}
+                    Pro {savingsBadge({ monthly: 'Save 17%', annual: 'Save 55%' })}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
                     <span style={{ fontSize: 40, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>{proP.price}</span>
@@ -2075,7 +2093,7 @@ export default function LandingPage({ onGetStarted }) {
               }}>
                 <div>
                   <div style={{ fontSize: 12, fontWeight: 800, letterSpacing: '0.10em', textTransform: 'uppercase', color: '#34d399', marginBottom: 10 }}>
-                    Unlimited {annualBadge('Save 53%')}
+                    Unlimited {savingsBadge({ monthly: 'Save 25%', annual: 'Save 53%' })}
                   </div>
                   <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
                     <span style={{ fontSize: 36, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em' }}>{ultP.price}</span>

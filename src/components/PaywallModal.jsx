@@ -6,7 +6,7 @@ import { track } from '../lib/analytics'
 
 const BILLING_PERIODS = [
   { id: 'weekly',  label: 'Weekly',  badge: null,        best: false },
-  { id: 'monthly', label: 'Monthly', badge: null,        best: false },
+  { id: 'monthly', label: 'Monthly', badge: 'Save 17%',  best: false },
   { id: 'yearly',  label: 'Annual',  badge: 'Save 55%',  best: true  },
 ]
 
@@ -28,6 +28,7 @@ const PLANS = {
       monthly: 'Billed monthly · $2.31/wk equivalent',
       yearly:  'Billed annually · $1.35/wk equivalent',
     },
+    monthlySavingsBadge: 'Save 17%',
     annualSavingsBadge: 'Save 55%',
     features: [
       '5 courses',
@@ -53,6 +54,7 @@ const PLANS = {
       monthly: 'Billed monthly · $3.46/wk equivalent',
       yearly:  'Billed annually · $2.31/wk equivalent',
     },
+    monthlySavingsBadge: 'Save 25%',
     annualSavingsBadge: 'Save 53%',
     features: [
       'Everything in Pro',
@@ -447,15 +449,21 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                   <div style={{ fontSize: '0.75rem', fontWeight: 700, color: plan.color, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
                     {plan.name}
                   </div>
-                  {isAnnual && plan.annualSavingsBadge && (
-                    <span style={{
-                      fontSize: '0.62rem', fontWeight: 800, color: '#059669',
-                      background: 'rgba(5,150,105,0.10)', border: '1px solid rgba(5,150,105,0.25)',
-                      borderRadius: '999px', padding: '2px 7px', letterSpacing: '0.3px',
-                    }}>
-                      {plan.annualSavingsBadge}
-                    </span>
-                  )}
+                  {(() => {
+                    const savings = billingPeriod === 'yearly' ? plan.annualSavingsBadge
+                                  : billingPeriod === 'monthly' ? plan.monthlySavingsBadge
+                                  : null
+                    if (!savings) return null
+                    return (
+                      <span style={{
+                        fontSize: '0.62rem', fontWeight: 800, color: '#059669',
+                        background: 'rgba(5,150,105,0.10)', border: '1px solid rgba(5,150,105,0.25)',
+                        borderRadius: '999px', padding: '2px 7px', letterSpacing: '0.3px',
+                      }}>
+                        {savings}
+                      </span>
+                    )
+                  })()}
                 </div>
                 <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#1A1A1A', letterSpacing: '-0.5px' }}>
                   {plan.prices[billingPeriod]}

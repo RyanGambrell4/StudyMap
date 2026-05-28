@@ -10,7 +10,7 @@ function Pricing(){
     unlimited: { weekly: 4.99, monthly: 14.99, yearly: 119.99 },
   };
 
-  const SAVE_LABEL = { weekly: null, monthly: null, yearly: 'Save 55%' };
+  const SAVE_LABEL = { weekly: null, monthly: 'Save 17%', yearly: 'Save 55%' };
 
   // What's actually billed (shown as sub-label)
   const billedSub = (planKey) => {
@@ -83,7 +83,7 @@ function Pricing(){
         <div className="bill-toggle">
           {[
             {k:'weekly',l:'Weekly'},
-            {k:'monthly',l:'Monthly'},
+            {k:'monthly',l:'Monthly', save:'Save 17%'},
             {k:'yearly',l:'Annual', save:'Save 55%'},
           ].map(o=>(
             <button key={o.k} className={`bt ${bill===o.k?'active':''}`} onClick={()=>setBill(o.k)}>
@@ -111,7 +111,7 @@ function Pricing(){
                 <span className="amt">{t.planKey ? displayPrice(t.planKey).toFixed(2) : '0'}</span>
                 <span className="per">{t.planKey ? unitLabel : '/forever'}</span>
               </div>
-              {t.planKey && bill === 'yearly' && (
+              {t.planKey && SAVE_LABEL[bill] && (
                 <div style={{display:'flex',alignItems:'center',gap:8,marginBottom:2,flexWrap:'wrap'}}>
                   <span style={{fontSize:11,fontWeight:700,color:'#34d399',background:'rgba(52,211,153,0.12)',border:'1px solid rgba(52,211,153,0.25)',borderRadius:20,padding:'2px 8px'}}>{SAVE_LABEL[bill]}</span>
                 </div>
