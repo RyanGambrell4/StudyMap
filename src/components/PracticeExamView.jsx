@@ -120,75 +120,110 @@ export default function PracticeExamView({ courses = [], onShowPaywall }) {
 
   // ── Landing page ───────────────────────────────────────────────────────────
   return (
-    <div style={{ minHeight: '100%', background: D.bg, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '48px 24px 80px' }}>
-      <div style={{ width: '100%', maxWidth: 640 }}>
+    <div style={{ minHeight: '100%', background: D.bg, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '44px 24px 80px' }}>
+      <div style={{ width: '100%', maxWidth: 580 }}>
 
-        {/* Label */}
-        <p style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 700, color: D.dim, textTransform: 'uppercase', letterSpacing: '0.09em' }}>Strategy</p>
+        {/* Section label */}
+        <p style={{ margin: '0 0 16px', fontSize: 11, fontWeight: 700, color: D.dim, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Practice Exams</p>
 
-        {/* Hero card */}
-        <div style={{ background: '#fff', borderRadius: 20, padding: '40px 40px 36px', boxShadow: '0 2px 16px rgba(0,0,0,0.07)', border: `1px solid ${D.border}`, marginBottom: 16 }}>
-          <h1 style={{ margin: '0 0 12px', fontSize: 30, fontWeight: 800, color: D.text, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-            Simulate your real exam.
-          </h1>
-          <p style={{ margin: '0 0 28px', fontSize: 15, color: D.muted, lineHeight: 1.6, maxWidth: 520 }}>
-            See where you stand before it counts. Upload a past exam, paste your notes, or describe what's on it — we build a realistic look-alike with verbatim questions from your materials first, then AI fills the rest using your course data.
-          </p>
+        {/* Main card */}
+        <div style={{ background: '#fff', borderRadius: 20, border: `1px solid ${D.border}`, overflow: 'hidden', marginBottom: 12 }}>
 
-          {/* Feature badges */}
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 32 }}>
+          {/* Header */}
+          <div style={{ padding: '36px 36px 30px' }}>
+            <h1 style={{ margin: '0 0 10px', fontSize: 27, fontWeight: 800, color: D.text, letterSpacing: '-0.025em', lineHeight: 1.2 }}>
+              Test yourself before it counts.
+            </h1>
+            <p style={{ margin: 0, fontSize: 14.5, color: D.muted, lineHeight: 1.65, maxWidth: 460 }}>
+              Generate a realistic exam from your own material. Find out exactly where you stand and what to fix before the real thing.
+            </p>
+          </div>
+
+          {/* Features */}
+          <div style={{ borderTop: `1px solid ${D.border}`, padding: '24px 36px', display: 'flex', flexDirection: 'column', gap: 15 }}>
             {[
-              { icon: '📋', label: 'Verbatim questions first' },
-              { icon: '⏱', label: 'Optional timer' },
-              { icon: '📊', label: 'Weak area analysis' },
-              { icon: '🎯', label: 'Personalized to your course' },
+              {
+                icon: (
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                    <path d="M14 2v6h6M9 13h6M9 17h4"/>
+                  </svg>
+                ),
+                label: 'Pulls verbatim questions directly from your uploaded material',
+              },
+              {
+                icon: (
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="9"/>
+                    <path d="M12 7v5l3 3"/>
+                  </svg>
+                ),
+                label: 'Optional countdown timer with per-question time tracking',
+              },
+              {
+                icon: (
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M18 20V10M12 20V4M6 20v-6"/>
+                  </svg>
+                ),
+                label: 'Instant score with a breakdown of your weakest areas',
+              },
+              {
+                icon: (
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M12 2a9 9 0 1 0 9 9"/>
+                    <path d="M12 6v6l4 2"/>
+                    <path d="M17 2l5 5-5 5"/>
+                  </svg>
+                ),
+                label: 'Personalized using your course data, grades, and past exams',
+              },
             ].map(({ icon, label }) => (
-              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '6px 12px', background: D.bg, border: `1px solid ${D.border}`, borderRadius: 999, fontSize: 12.5, fontWeight: 500, color: D.muted }}>
-                <span>{icon}</span>
-                <span>{label}</span>
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                <div style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(59,97,196,0.07)', color: D.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                  {icon}
+                </div>
+                <span style={{ fontSize: 13.5, color: D.muted, lineHeight: 1.45 }}>{label}</span>
               </div>
             ))}
           </div>
 
-          {courses.length === 0 ? (
-            /* Empty state */
-            <div style={{ padding: '20px', background: '#FAFAF8', border: `1px dashed rgba(0,0,0,0.12)`, borderRadius: 12, textAlign: 'center' }}>
-              <p style={{ margin: '0 0 4px', fontSize: 14, fontWeight: 600, color: D.text }}>No courses set up yet</p>
-              <p style={{ margin: 0, fontSize: 13, color: D.muted }}>Add a course first, then come back to generate a practice exam.</p>
-            </div>
-          ) : (
-            <button
-              onClick={() => setSubview('setup')}
-              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '14px 24px', background: D.accent, border: 'none', borderRadius: 12, color: '#fff', fontWeight: 700, fontSize: 15, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em', transition: 'opacity 0.15s' }}
-              onMouseEnter={e => e.currentTarget.style.opacity = '0.88'}
-              onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-            >
-              Start Practice Exam
-              <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <path d="M5 12h14M12 5l7 7-7 7"/>
-              </svg>
-            </button>
-          )}
+          {/* CTA */}
+          <div style={{ borderTop: `1px solid ${D.border}`, padding: '24px 36px' }}>
+            {courses.length === 0 ? (
+              <div style={{ padding: '16px 20px', background: D.bg, borderRadius: 10, border: `1px dashed rgba(0,0,0,0.11)` }}>
+                <p style={{ margin: '0 0 3px', fontSize: 13.5, fontWeight: 600, color: D.text }}>No courses added yet</p>
+                <p style={{ margin: 0, fontSize: 13, color: D.muted }}>Add a course first, then come back to run a practice exam.</p>
+              </div>
+            ) : (
+              <button
+                onClick={() => setSubview('setup')}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '13px 24px', background: D.accent, border: 'none', borderRadius: 11, color: '#fff', fontWeight: 700, fontSize: 14.5, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em', transition: 'opacity 0.15s' }}
+                onMouseEnter={e => e.currentTarget.style.opacity = '0.87'}
+                onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+              >
+                Start Practice Exam
+                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <path d="M5 12h14M12 5l7 7-7 7"/>
+                </svg>
+              </button>
+            )}
+          </div>
         </div>
 
-        {/* How it works */}
-        <div style={{ background: '#fff', borderRadius: 16, padding: '24px 28px', boxShadow: '0 1px 6px rgba(0,0,0,0.05)', border: `1px solid ${D.border}` }}>
-          <p style={{ margin: '0 0 16px', fontSize: 11, fontWeight: 700, color: D.dim, textTransform: 'uppercase', letterSpacing: '0.07em' }}>How it works</p>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {[
-              { n: '1', title: 'Pick your course', desc: 'Select the course you\'re preparing for.' },
-              { n: '2', title: 'Give us your material', desc: 'Upload a past exam, paste notes, or describe what topics and format to expect.' },
-              { n: '3', title: 'Take the exam', desc: 'We generate a realistic test. Submit when done to see your score and weak areas.' },
-            ].map(({ n, title, desc }) => (
-              <div key={n} style={{ display: 'flex', gap: 14, alignItems: 'flex-start' }}>
-                <div style={{ width: 26, height: 26, borderRadius: 8, background: 'rgba(59,97,196,0.1)', color: D.accent, fontSize: 12, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>{n}</div>
-                <div>
-                  <p style={{ margin: '0 0 2px', fontSize: 13.5, fontWeight: 700, color: D.text }}>{title}</p>
-                  <p style={{ margin: 0, fontSize: 12.5, color: D.muted, lineHeight: 1.5 }}>{desc}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+        {/* Steps row */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 0, background: '#fff', borderRadius: 14, border: `1px solid ${D.border}`, overflow: 'hidden' }}>
+          {[
+            { n: '1', title: 'Pick a course', desc: 'Select the course you are preparing for.' },
+            { n: '2', title: 'Add your material', desc: 'Upload a past exam, paste notes, or describe the topics.' },
+            { n: '3', title: 'Review results', desc: 'See your score, mistakes, and where to focus next.' },
+          ].map(({ n, title, desc }, i) => (
+            <div key={n} style={{ padding: '20px 22px', borderLeft: i > 0 ? `1px solid ${D.border}` : 'none' }}>
+              <div style={{ fontSize: 11, fontWeight: 800, color: D.accent, letterSpacing: '0.04em', marginBottom: 6 }}>{n}</div>
+              <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: D.text, lineHeight: 1.3 }}>{title}</p>
+              <p style={{ margin: 0, fontSize: 12, color: D.muted, lineHeight: 1.5 }}>{desc}</p>
+            </div>
+          ))}
         </div>
 
       </div>
