@@ -10,7 +10,24 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { messages, courseName, examDate, targetGrade, coachPlan, struggles, professorEmphasis, strengths, learningStyle } = req.body
+  const {
+    messages,
+    courseName,
+    examDate,
+    targetGrade,
+    coachPlan,
+    struggles,
+    professorEmphasis,
+    strengths,
+    learningStyle,
+    preferredTime,
+    yearLevel,
+    firstName,
+    recentRecallAvg,
+    currentGradePct,
+    brainDumpGaps,
+    upcomingDeadlines,
+  } = req.body
   if (!messages?.length || !courseName) return res.status(400).json({ error: 'Missing required fields' })
 
   let planContext = ''
@@ -31,8 +48,36 @@ export default async function handler(req, res) {
     ? 'This student is practice-based — lead with worked examples, practice questions, and active recall drills.'
     : null
 
+  const personalLines = []
+  if (firstName && typeof firstName === 'string' && firstName.trim()) {
+    personalLines.push(`Student name: ${firstName.trim()}.`)
+  }
+  if (yearLevel && typeof yearLevel === 'string') {
+    personalLines.push(`Audience: ${yearLevel} student.`)
+  }
+  if (preferredTime && typeof preferredTime === 'string') {
+    personalLines.push(`Student studies best in the ${preferredTime}.`)
+  }
+  if (typeof recentRecallAvg === 'number' && Number.isFinite(recentRecallAvg)) {
+    if (recentRecallAvg < 3) {
+      personalLines.push(`Recent recall trend has been weak (${recentRecallAvg.toFixed(1)}/5). Slow down, repeat key ideas, check understanding more often.`)
+    } else if (recentRecallAvg >= 4) {
+      personalLines.push(`Recent recall has been strong (${recentRecallAvg.toFixed(1)}/5). Push deeper, ask harder follow-ups.`)
+    }
+  }
+  if (typeof currentGradePct === 'number' && Number.isFinite(currentGradePct)) {
+    personalLines.push(`Current grade in this course: ${currentGradePct.toFixed(0)}%.`)
+  }
+  if (Array.isArray(brainDumpGaps) && brainDumpGaps.length) {
+    personalLines.push(`Known gaps from their last brain dump: ${brainDumpGaps.join('; ')}. Lean into these.`)
+  }
+  if (Array.isArray(upcomingDeadlines) && upcomingDeadlines.length) {
+    personalLines.push(`Upcoming work: ${upcomingDeadlines.join('; ')}. Help them be ready for these.`)
+  }
+  const personalBlock = personalLines.length ? personalLines.join('\n') + '\n' : ''
+
   const systemPrompt = `You are a focused study tutor for ${courseName}. The student has an exam on ${examDate ?? 'an upcoming date'} and their goal is ${targetGrade ?? 'to do well'}.
-${planContext ? `Their current study plan covers:\n${planContext}` : ''}
+${personalBlock}${planContext ? `Their current study plan covers:\n${planContext}` : ''}
 ${strugglesStr ? `Topics they have previously struggled with (spend extra time here): ${strugglesStr}` : ''}
 ${professorEmphasis ? `Professor emphasizes these topics (high exam priority): ${professorEmphasis}` : ''}
 ${strengths ? `Areas they are already solid on (brief review only): ${strengths}` : ''}

@@ -6,16 +6,46 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { courseName, sessionType, mode, weakTopics, examTopics, coachFocus } = req.body
+  const {
+    courseName,
+    sessionType,
+    mode,
+    weakTopics,
+    examTopics,
+    coachFocus,
+    examDate,
+    daysUntilExam,
+    targetGrade,
+    learningStyle,
+    struggles,
+    professorEmphasis,
+  } = req.body
   if (!courseName) return res.status(400).json({ error: 'Missing courseName' })
+
+  // Compute days-until-exam if only examDate was provided.
+  let resolvedDays = typeof daysUntilExam === 'number' && Number.isFinite(daysUntilExam) ? daysUntilExam : null
+  if (resolvedDays === null && examDate) {
+    const todayStr = new Date().toISOString().split('T')[0]
+    resolvedDays = Math.max(0, Math.round((new Date(examDate + 'T12:00:00') - new Date(todayStr + 'T12:00:00')) / 86400000))
+  }
+
+  const personalLines = []
+  if (resolvedDays !== null) {
+    personalLines.push(`Exam in ${resolvedDays} days.${resolvedDays <= 3 ? ' TIGHT TIMELINE — focus only on highest-yield review.' : ''}`)
+  }
+  if (targetGrade) personalLines.push(`Target grade: ${targetGrade}.`)
+  if (learningStyle) personalLines.push(`Student learns best by: ${learningStyle}. Frame the 3 points accordingly.`)
+  if (Array.isArray(struggles) && struggles.length) personalLines.push(`Active struggle areas: ${struggles.join(', ')}.`)
+  if (professorEmphasis) personalLines.push(`Professor emphasizes: ${professorEmphasis}.`)
+  const personalBlock = personalLines.length ? `\n${personalLines.join('\n')}\n` : ''
 
   let prompt = ''
 
   if (mode === 'weakness') {
-    const struggles = weakTopics?.slice(0, 4) || []
+    const weakList = weakTopics?.slice(0, 4) || []
     prompt = `Generate a pre-session weakness review briefing for a student about to study ${courseName}${sessionType ? ` (${sessionType})` : ''}.
-
-Weak areas from recall history: ${struggles.length ? struggles.join(', ') : 'no specific weak areas identified yet, generate likely difficult topics'}
+${personalBlock}
+Weak areas from recall history: ${weakList.length ? weakList.join(', ') : 'no specific weak areas identified yet, generate likely difficult topics'}
 
 Return ONLY valid JSON:
 {
@@ -29,7 +59,7 @@ No em dashes. Points must be specific concepts, not generic advice.`
 
   } else if (mode === 'exam-topics') {
     prompt = `Generate a pre-session exam topic briefing for a student about to study ${courseName}.
-
+${personalBlock}
 Upcoming exam topics: ${examTopics?.join(', ') || 'not specified, use your knowledge of this course'}
 Coach plan focus: ${coachFocus || 'general review'}
 
@@ -45,7 +75,7 @@ No em dashes. Topics must be course-specific and concrete.`
 
   } else {
     prompt = `Generate a single sharp focus question to prime active recall for a student about to study ${courseName}${sessionType ? ` (${sessionType})` : ''}.
-
+${personalBlock}
 Session focus: ${coachFocus || 'general review'}
 
 Return ONLY valid JSON:

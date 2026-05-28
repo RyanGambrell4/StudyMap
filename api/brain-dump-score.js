@@ -7,15 +7,34 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { text, courseName, topic } = req.body
+  const { text, courseName, topic, targetGrade, examDate, daysUntilExam, learningStyle } = req.body
   if (!text || !courseName) return res.status(400).json({ error: 'Missing required fields' })
 
   const wordCount = text.trim().split(/\s+/).length
 
+  // Resolve days-until-exam from explicit field or computed from examDate.
+  let resolvedDays = typeof daysUntilExam === 'number' && Number.isFinite(daysUntilExam) ? daysUntilExam : null
+  if (resolvedDays === null && examDate) {
+    const todayStr = new Date().toISOString().split('T')[0]
+    resolvedDays = Math.max(0, Math.round((new Date(examDate + 'T12:00:00') - new Date(todayStr + 'T12:00:00')) / 86400000))
+  }
+
+  const personalLines = []
+  if (targetGrade) {
+    personalLines.push(`Target grade: ${targetGrade}.${String(targetGrade).toUpperCase() === 'A' ? ' Hold them to an A standard.' : ''}`)
+  }
+  if (resolvedDays !== null) {
+    personalLines.push(`Days until exam: ${resolvedDays}.${resolvedDays < 7 ? ' Be candid about gaps; this is exam week.' : ''}`)
+  }
+  if (learningStyle) {
+    personalLines.push(`Learning style: ${learningStyle}. Frame each gap description so it matches this style (e.g., visual = missing diagrams/structure, practice = missing applied examples, reading = missing written articulation).`)
+  }
+  const personalBlock = personalLines.length ? `\n${personalLines.join('\n')}\n` : ''
+
   const prompt = `You are an expert academic coach scoring a student's brain dump exercise.
 
 Course: ${courseName}
-Topic: ${topic || 'general course material'}
+Topic: ${topic || 'general course material'}${personalBlock}
 Student brain dump (${wordCount} words written under time pressure):
 ---
 ${text.slice(0, 3000)}

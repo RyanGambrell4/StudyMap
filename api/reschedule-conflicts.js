@@ -9,15 +9,24 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { conflictingSessions, googleEvents, timePreference } = req.body
+  const { conflictingSessions, googleEvents, timePreference, preferredTime } = req.body
   if (!conflictingSessions?.length) return res.status(400).json({ error: 'No conflicting sessions provided' })
+
+  // iOS now sends `preferredTime`. Older callers still send `timePreference`.
+  const effectivePref = preferredTime ?? timePreference
 
   const TIME_WINDOWS = {
     Morning:   '6am–12pm',
     Afternoon: '12pm–6pm',
     Evening:   '6pm–10pm',
   }
-  const prefWindow = TIME_WINDOWS[timePreference] ?? TIME_WINDOWS.Morning
+  const ANCHOR_TIMES = {
+    Morning:   '9:00 AM',
+    Afternoon: '1:00 PM',
+    Evening:   '6:00 PM',
+  }
+  const prefWindow = TIME_WINDOWS[effectivePref] ?? TIME_WINDOWS.Morning
+  const anchorTime = ANCHOR_TIMES[effectivePref] ?? ANCHOR_TIMES.Morning
 
   const sessionList = conflictingSessions.map(s =>
     `- id:${s.id} | ${s.dateStr}: ${s.courseName} (${s.sessionType}, ${s.duration}min) currently at ${s.startTime ?? 'unscheduled'}`
@@ -54,12 +63,13 @@ ${sessionList}
 All blocked times (Google Calendar events):
 ${blockedList}
 
-The student prefers studying in the ${timePreference ?? 'morning'} (${prefWindow}).
+The student prefers studying in the ${effectivePref ?? 'morning'} (${prefWindow}).
 
 For each conflicting session, suggest a new time slot on the SAME date that:
 1. Does not overlap with any blocked event above
-2. Prefers the ${timePreference ?? 'morning'} window (${prefWindow})
-3. Keeps the exact same duration
+2. Prefers the ${effectivePref ?? 'morning'} window (${prefWindow})
+3. Anchor the suggested start time at ${anchorTime} when the window is open; only deviate if that exact slot is blocked
+4. Keeps the exact same duration
 
 Return ONLY a JSON array, no other text:
 [

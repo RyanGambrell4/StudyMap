@@ -11,7 +11,24 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { courseName, sessionType, durationMinutes, examDate, targetGrade, uploadedTopics, studentFocus, professorEmphasis, struggles, learningStyle, recallHistory, weakTopics, completedCount } = req.body
+  const {
+    courseName,
+    sessionType,
+    durationMinutes,
+    examDate,
+    targetGrade,
+    uploadedTopics,
+    studentFocus,
+    professorEmphasis,
+    struggles,
+    learningStyle,
+    recallHistory,
+    weakTopics,
+    completedCount,
+    recentRecallAvg,
+    currentGradePct,
+    preferredTime,
+  } = req.body
   if (!courseName || !durationMinutes) return res.status(400).json({ error: 'Missing required fields' })
 
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|Reading Comprehension|FAR|AUD|REG|MBE|MEE|MPT|Verbal Reasoning|Quantitative Reasoning|Analytical Writing|Quantitative|Data Insights/i
@@ -38,6 +55,20 @@ export default async function handler(req, res) {
     ? `\nRecent average recall score: ${avgRecall}%. ${avgRecall < 50 ? 'This student is struggling — keep blocks shorter and increase active recall frequency.' : avgRecall < 70 ? 'Moderate retention — balance review with active recall.' : 'Strong retention — can handle deeper content and harder practice problems.'}`
     : ''
 
+  const recentRecallAvgNote = typeof recentRecallAvg === 'number' && Number.isFinite(recentRecallAvg)
+    ? `\nRecent recall avg: ${recentRecallAvg.toFixed(1)}/5. ${recentRecallAvg < 3 ? 'Shorten blocks, add a recall check every 8–10 minutes.' : recentRecallAvg >= 4 ? 'Allow deeper 25-min blocks before recall.' : ''}`
+    : ''
+
+  const currentGradeNote = typeof currentGradePct === 'number' && Number.isFinite(currentGradePct)
+    ? `\nCurrent course grade: ${currentGradePct.toFixed(0)}%. Calibrate intensity.`
+    : ''
+
+  const preferredTimeNote = preferredTime && typeof preferredTime === 'string'
+    ? `\nStudent is studying in the ${preferredTime}. ${preferredTime === 'Morning' ? 'Warm up with low-friction recall first.' : preferredTime === 'Evening' ? 'Front-load high-cognitive-load work before fatigue.' : ''}`
+    : ''
+
+  const personalContext = `${recentRecallAvgNote}${currentGradeNote}${preferredTimeNote}`
+
   const userContent = isExamMode ? `You are an elite professional exam prep coach designing a high-intensity study session for a licensing or admissions exam. Every block must be purposeful and exam-focused.
 
 Section: ${courseName}
@@ -47,7 +78,7 @@ Days until exam: ${daysUntilExam}
 Target score: ${targetGrade || 'Top score'}
 Focus area: ${studentFocus || 'High-yield content for this section'}
 ${professorEmphasis ? `Professor-emphasized topics (highest priority): ${professorEmphasis}` : ''}
-${struggles?.length ? `Student struggles with: ${struggles.join(', ')} — allocate extra drill time here` : ''}${experienceContext}${recallTrendNote}${recallContext}
+${struggles?.length ? `Student struggles with: ${struggles.join(', ')} — allocate extra drill time here` : ''}${experienceContext}${recallTrendNote}${personalContext}${recallContext}
 
 Session type definitions and how to structure each:
 - Content Review: systematic content pass through key concepts, notes, and mnemonics
@@ -93,7 +124,7 @@ Available study materials/topics: ${uploadedTopics || 'General course material'}
 Student wants to focus on: ${studentFocus || 'Most important exam topics'}
 ${professorEmphasis ? `Professor emphasizes: ${professorEmphasis}. Weight blocks toward these topics.` : ''}
 ${struggles?.length ? `Student struggles with: ${struggles.join(', ')}. Prioritize these in practice blocks.` : ''}
-${learningStyle === 'visual' ? 'Learning style: visual — include concept-mapping and diagram-review blocks.' : learningStyle === 'practice' ? 'Learning style: practice-based — weight blocks toward active recall and practice problems.' : learningStyle === 'reading' ? 'Learning style: reading/writing — include structured note-review and summary blocks.' : ''}${experienceContext}${recallTrendNote}${recallContext}
+${learningStyle === 'visual' ? 'Learning style: visual — include concept-mapping and diagram-review blocks.' : learningStyle === 'practice' ? 'Learning style: practice-based — weight blocks toward active recall and practice problems.' : learningStyle === 'reading' ? 'Learning style: reading/writing — include structured note-review and summary blocks.' : ''}${experienceContext}${recallTrendNote}${personalContext}${recallContext}
 
 Design a structured study session broken into specific timed blocks. Each block should have a clear purpose that builds toward the student's goal for this session. Return ONLY this JSON:
 

@@ -11,7 +11,19 @@ export default async function handler(req, res) {
     const gate = await verifyAndCheckAiUsage(req)
     if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-    const { text, description, courseName, examLength, context, personalization } = req.body ?? {}
+    const {
+      text,
+      description,
+      courseName,
+      examLength,
+      context,
+      personalization,
+      examDate,
+      targetGrade,
+      learningStyle,
+      struggles,
+      weakTopics,
+    } = req.body ?? {}
     const length = Math.max(MIN_LEN, Math.min(MAX_LEN, Number(examLength) || 10))
 
     const hasText = typeof text === 'string' && text.trim().length >= 50
@@ -30,6 +42,16 @@ export default async function handler(req, res) {
       ? `\nAdditional instructions: "${context.trim()}"\n`
       : ''
 
+    const personalFields = []
+    if (examDate) personalFields.push(`Exam date: ${examDate}.`)
+    if (targetGrade) personalFields.push(`Target grade: ${targetGrade}. Calibrate difficulty toward this bar.`)
+    if (learningStyle) personalFields.push(`Learning style: ${learningStyle}. Bias question framing accordingly (e.g., visual diagrams, applied scenarios, written breakdowns).`)
+    if (Array.isArray(struggles) && struggles.length) personalFields.push(`Active struggle areas: ${struggles.join(', ')}. Skew questions to drill these.`)
+    if (Array.isArray(weakTopics) && weakTopics.length) personalFields.push(`Low-recall weak topics: ${weakTopics.join(', ')}. Over-represent these in the generated questions.`)
+    const personalContextLine = personalFields.length
+      ? `\nPersonalization (top-level fields):\n${personalFields.join('\n')}\n`
+      : ''
+
     const sourceSection = [
       source ? `Source material (past exams, notes, or slides):\n"""\n${source}\n"""` : null,
       desc ? `Student's description of their exam:\n"""\n${desc}\n"""` : null,
@@ -37,7 +59,7 @@ export default async function handler(req, res) {
 
     const prompt = `You are an expert exam designer building a realistic practice exam.
 
-${courseLine}${personalizationLine}${contextLine}
+${courseLine}${personalizationLine}${personalContextLine}${contextLine}
 ${sourceSection}
 
 Use ALL provided context equally — treat uploaded source material and the student's description as equal-weight inputs. Use the personalization data to skew questions toward weak areas and align with the student's course content.

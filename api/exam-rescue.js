@@ -6,7 +6,19 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { courseName, currentGrade, hoursAvailable, step, topics, syllabusText, recallHistory, coachPlan } = req.body
+  const {
+    courseName,
+    currentGrade,
+    hoursAvailable,
+    step,
+    topics,
+    syllabusText,
+    recallHistory,
+    coachPlan,
+    targetGrade,
+    learningStyle,
+    struggles,
+  } = req.body
   if (!courseName) return res.status(400).json({ error: 'Missing courseName' })
 
   const contextParts = []
@@ -15,12 +27,18 @@ export default async function handler(req, res) {
   if (coachPlan) contextParts.push(`Study plan focus:\n${coachPlan.slice(0, 600)}`)
   const context = contextParts.join('\n\n') || 'No additional context provided.'
 
+  const personalLines = []
+  if (targetGrade) personalLines.push(`Target grade: ${targetGrade}.`)
+  if (learningStyle) personalLines.push(`Learning style: ${learningStyle}. Tailor topic framing to match.`)
+  if (Array.isArray(struggles) && struggles.length) personalLines.push(`Active struggle areas (prioritize): ${struggles.join(', ')}.`)
+  const personalBlock = personalLines.length ? `\n${personalLines.join('\n')}\n` : ''
+
   if (step === 'topics' || !step) {
     const prompt = `You are an expert academic coach helping a student prepare for an urgent exam.
 
 Course: ${courseName}
 Current grade: ${currentGrade || 'unknown'}
-Hours available: ${hoursAvailable || 3}
+Hours available: ${hoursAvailable || 3}${personalBlock}
 ${context}
 
 Generate 5 ranked topics ordered by (exam likelihood multiplied by current weakness). Prioritize what will move the grade most.
@@ -77,7 +95,7 @@ Rules:
     const startLabel = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
     const hours = Number(hoursAvailable) || 3
 
-    const prompt = `You are an expert academic coach. A student has ${hours} hours starting now (${startLabel}) to study for their ${courseName} exam.
+    const prompt = `You are an expert academic coach. A student has ${hours} hours starting now (${startLabel}) to study for their ${courseName} exam.${personalBlock}
 
 Topics to cover in priority order:
 ${(topics || []).map((t, i) => `${i + 1}. ${t.name} (${t.priority}, about ${t.estimatedMinutes} min)`).join('\n')}
