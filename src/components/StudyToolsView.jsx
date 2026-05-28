@@ -5,7 +5,7 @@ import { extractText } from '../utils/extractText'
 import { getCachedStudyTools, getCachedCoachPlan, saveStudyTools } from '../lib/db'
 import { sm2, sortCardsByDue, getDueCards } from '../lib/sm2'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
 import { findSimilarCards } from '../lib/embeddings'
 
 function loadSaved() {
@@ -516,153 +516,122 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     <div className="px-6 py-8 max-w-2xl mx-auto">
 
       {/* ── Hub screen ── */}
-      {mode === 'hub' && (
-        <div>
-          <h1 className="text-2xl font-bold text-slate-900 mb-1">Study Tools</h1>
-          <p className="text-[#6B6B6B] text-sm mb-6">Choose how you want to study.</p>
+      {mode === 'hub' && (() => {
+        const plan = getActivePlan()
+        const isPro = plan === 'pro' || plan === 'unlimited' || plan === 'trial'
+        const proGate = (fn) => isPro ? fn() : onShowPaywall?.('pro')
 
-          {/* ── Study Hacks ── */}
-          <div style={{ marginBottom: 24 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: '#6B6B6B' }}>Study Hacks</span>
-              <div style={{ flex: 1, height: 1, background: 'rgba(0,0,0,0.07)' }} />
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
-              {[
-                { label: 'AI Cheat Sheet', sub: 'What to study next', color: '#3B61C4', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>, onClick: onOpenCheatSheet },
-                { label: 'Brain Dump',     sub: 'Score your recall',  color: '#8B5CF6', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3a3 3 0 00-3 3 3 3 0 00-3 3v3a3 3 0 003 3v2a3 3 0 003 3 3 3 0 003-3V3z"/><path d="M15 3a3 3 0 013 3 3 3 0 013 3v3a3 3 0 01-3 3v2a3 3 0 01-3 3 3 3 0 01-3-3V3z"/></svg>, onClick: onOpenBrainDump },
-                { label: 'Exam Rescue',   sub: 'Crisis study plan',  color: '#DC2626', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, onClick: onOpenExamRescue },
-                { label: 'Quiz Burst',    sub: '5 questions, 10s',   color: '#D97706', icon: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>, onClick: onOpenQuizBurst },
-              ].map(({ label, sub, color, icon, onClick }) => (
+        const tools = [
+          {
+            label: 'AI Cheat Sheet',
+            desc: 'Instantly see what to focus on based on your weakest areas.',
+            color: '#3B61C4',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>,
+            onClick: () => proGate(() => onOpenCheatSheet?.()),
+            pro: !isPro,
+          },
+          {
+            label: 'Exam Rescue',
+            desc: 'Get a crisis study plan when your exam is hours away.',
+            color: '#DC2626',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+            onClick: () => proGate(() => onOpenExamRescue?.()),
+            pro: !isPro,
+          },
+          {
+            label: 'Brain Dump',
+            desc: 'Recall everything you know on a topic and score your memory.',
+            color: '#8B5CF6',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3a3 3 0 00-3 3 3 3 0 00-3 3v3a3 3 0 003 3v2a3 3 0 003 3 3 3 0 003-3V3z"/><path d="M15 3a3 3 0 013 3 3 3 0 013 3v3a3 3 0 01-3 3v2a3 3 0 01-3 3 3 3 0 01-3-3V3z"/></svg>,
+            onClick: () => onOpenBrainDump?.(),
+          },
+          {
+            label: 'Quiz Burst',
+            desc: '5 rapid-fire questions in 10 seconds to warm up your brain.',
+            color: '#D97706',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>,
+            onClick: () => onOpenQuizBurst?.(),
+          },
+          {
+            label: 'Flashcards',
+            desc: 'AI-generated cards from your notes with spaced repetition.',
+            color: '#3B61C4',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>,
+            onClick: () => setMode('upload'),
+            badge: flashcards.length > 0 ? `${flashcards.length} ready` : null,
+            badgeColor: '#3B61C4',
+          },
+          {
+            label: 'Quizzes',
+            desc: 'Multiple choice, true/false, and fill-in-the-blank questions.',
+            color: '#D97706',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>,
+            onClick: () => setMode('upload'),
+            badge: quiz.length > 0 ? `${quiz.length} ready` : null,
+            badgeColor: '#D97706',
+          },
+          {
+            label: 'Topic Drill',
+            desc: 'Type any topic and get 5 practice questions instantly.',
+            color: '#16A34A',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>,
+            onClick: () => { setDrillQuiz([]); setDrillAnswers([]); setDrillDone(false); setDrillQuestionIdx(0); setDrillError(''); setMode('drill') },
+            badge: 'No upload needed',
+            badgeColor: '#16A34A',
+          },
+          {
+            label: 'Study Coach',
+            desc: 'Personalized AI study plan built around your schedule and exams.',
+            color: '#0891B2',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>,
+            onClick: () => onNavigateToCoach?.(),
+          },
+        ]
+
+        return (
+          <div>
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: '#111111', margin: '0 0 4px', letterSpacing: '-0.02em' }}>Study Tools</h1>
+            <p style={{ fontSize: 13.5, color: '#6B6B6B', margin: '0 0 20px' }}>Everything you need to learn faster and remember more.</p>
+
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {tools.map(({ label, desc, color, icon, onClick, pro, badge, badgeColor }) => (
                 <button
                   key={label}
                   onClick={onClick}
-                  style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 10, padding: '16px', borderRadius: 16, background: `linear-gradient(135deg, ${color}08, #fff)`, border: `1px solid ${color}25`, cursor: 'pointer', textAlign: 'left', transition: 'all 0.15s' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = `linear-gradient(135deg, ${color}14, ${color}05)`; e.currentTarget.style.borderColor = `${color}50` }}
-                  onMouseLeave={e => { e.currentTarget.style.background = `linear-gradient(135deg, ${color}08, #fff)`; e.currentTarget.style.borderColor = `${color}25` }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 14, width: '100%', textAlign: 'left', padding: '14px 16px', borderRadius: 14, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', cursor: 'pointer', transition: 'border-color 0.15s', fontFamily: 'inherit' }}
+                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.14)' }}
+                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)' }}
                 >
-                  <div style={{ width: 38, height: 38, borderRadius: 10, background: `linear-gradient(135deg, ${color}, ${color}cc)`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', boxShadow: `0 4px 12px ${color}40` }}>
+                  <div style={{ width: 40, height: 40, borderRadius: 10, background: `${color}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, flexShrink: 0 }}>
                     {icon}
                   </div>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 700, color: '#111111' }}>{label}</div>
-                    <div style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 2 }}>{sub}</div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 2 }}>
+                      <span style={{ fontSize: 13.5, fontWeight: 700, color: '#111111' }}>{label}</span>
+                      {pro && (
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: 'rgba(59,97,196,0.1)', color: '#3B61C4', border: '1px solid rgba(59,97,196,0.2)', letterSpacing: '0.03em' }}>Pro</span>
+                      )}
+                      {badge && !pro && (
+                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: `${badgeColor}12`, color: badgeColor, border: `1px solid ${badgeColor}30`, letterSpacing: '0.02em' }}>{badge}</span>
+                      )}
+                    </div>
+                    <p style={{ margin: 0, fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.45 }}>{desc}</p>
                   </div>
+                  {pro ? (
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
+                    </svg>
+                  ) : (
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                      <path d="M9 5l7 7-7 7"/>
+                    </svg>
+                  )}
                 </button>
               ))}
             </div>
           </div>
-
-          <div className="grid grid-cols-1 gap-3">
-
-            {/* Flashcards */}
-            <button
-              onClick={() => setMode('upload')}
-              className="w-full text-left rounded-2xl px-5 py-4 transition-colors flex items-center gap-4 group"
-              style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)' }}
-            >
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(59,97,196,0.1)' }}>
-                <svg className="w-5 h-5" style={{ color: '#3B61C4' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-base font-semibold text-slate-900">Flashcards</span>
-                  {flashcards.length > 0 && (
-                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(59,97,196,0.1)', color: '#3B61C4', border: '1px solid rgba(59,97,196,0.2)' }}>
-                      {flashcards.length} ready
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm mt-0.5 text-slate-600">Upload your notes and get AI-generated flashcards.</p>
-              </div>
-              <svg className="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
-            {/* Quizzes */}
-            <button
-              onClick={() => setMode('upload')}
-              className="w-full text-left rounded-2xl px-5 py-4 transition-colors flex items-center gap-4 group"
-              style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)' }}
-            >
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(217,119,6,0.1)' }}>
-                <svg className="w-5 h-5" style={{ color: '#D97706' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-base font-semibold text-slate-900">Quizzes</span>
-                  {quiz.length > 0 && (
-                    <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(217,119,6,0.1)', color: '#D97706', border: '1px solid rgba(217,119,6,0.2)' }}>
-                      {quiz.length} ready
-                    </span>
-                  )}
-                </div>
-                <p className="text-sm mt-0.5 text-slate-600">Multiple choice, true/false, and fill-in-the-blank questions.</p>
-              </div>
-              <svg className="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
-            {/* Topic Drill */}
-            <button
-              onClick={() => { setDrillQuiz([]); setDrillAnswers([]); setDrillDone(false); setDrillQuestionIdx(0); setDrillError(''); setMode('drill') }}
-              className="w-full text-left rounded-2xl px-5 py-4 transition-colors flex items-center gap-4 group"
-              style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)' }}
-            >
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(22,163,74,0.1)' }}>
-                <svg className="w-5 h-5" style={{ color: '#16A34A' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <div className="flex items-center gap-2">
-                  <span className="text-base font-semibold text-slate-900">Topic Drill</span>
-                  <span className="text-[11px] font-semibold px-2 py-0.5 rounded-full" style={{ background: 'rgba(22,163,74,0.1)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.2)' }}>No upload needed</span>
-                </div>
-                <p className="text-sm mt-0.5 text-slate-600">Type any topic and get 5 practice questions instantly.</p>
-              </div>
-              <svg className="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
-            {/* Study Coach */}
-            <button
-              onClick={() => onNavigateToCoach?.()}
-              className="w-full text-left rounded-2xl px-5 py-4 transition-colors flex items-center gap-4 group"
-              style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)' }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)' }}
-            >
-              <div className="w-11 h-11 rounded-xl flex items-center justify-center shrink-0" style={{ background: 'rgba(59,97,196,0.1)' }}>
-                <svg className="w-5 h-5" style={{ color: '#3B61C4' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
-              </div>
-              <div className="flex-1 min-w-0">
-                <span className="text-base font-semibold text-slate-900">Study Coach</span>
-                <p className="text-sm mt-0.5 text-slate-600">Personalized AI study plan for your schedule and exams.</p>
-              </div>
-              <svg className="w-4 h-4 shrink-0 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </button>
-
-          </div>
-        </div>
-      )}
+        )
+      })()}
 
       {/* ── Upload section ── */}
       {mode === 'upload' && (

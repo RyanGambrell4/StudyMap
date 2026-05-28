@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { getCachedPracticeExams, savePracticeExam } from '../lib/db'
+import { getActivePlan } from '../lib/subscription'
 import PracticeExamSetup from './PracticeExamSetup'
 import PracticeExamScreen from './PracticeExamScreen'
 import PracticeExamResults from './PracticeExamResults'
@@ -197,7 +198,12 @@ export default function PracticeExamView({ courses = [], onShowPaywall }) {
               </div>
             ) : (
               <button
-                onClick={() => setSubview('setup')}
+                onClick={() => {
+                  const plan = getActivePlan()
+                  const isPro = plan === 'pro' || plan === 'unlimited' || plan === 'trial'
+                  if (!isPro) { onShowPaywall?.('pro'); return }
+                  setSubview('setup')
+                }}
                 style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '13px 24px', background: D.accent, border: 'none', borderRadius: 11, color: '#fff', fontWeight: 700, fontSize: 14.5, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em', transition: 'opacity 0.15s' }}
                 onMouseEnter={e => e.currentTarget.style.opacity = '0.87'}
                 onMouseLeave={e => e.currentTarget.style.opacity = '1'}
