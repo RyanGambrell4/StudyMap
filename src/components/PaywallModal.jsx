@@ -330,7 +330,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               Try every Pro feature free for 3 days.
             </h3>
             <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 16px', lineHeight: 1.5 }}>
-              Full access for 3 days, then $2.99/week. Cancel anytime from your account — we'll email you 24 hours before billing.
+              Full access for 3 days, then $2.99/week. Cancel anytime from your account before your trial ends.
             </p>
             {trialError && (
               <p style={{ fontSize: '0.78rem', color: '#EF4444', margin: '0 0 10px' }}>{trialError}</p>

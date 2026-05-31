@@ -611,14 +611,21 @@ export default async function handler(req, res) {
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
-      payment_method_types: ['card'],
+      // No explicit payment_method_types — Stripe auto-includes whatever's
+      // activated in the Dashboard (card, Link, Apple/Google Pay, Cash App Pay,
+      // etc.), so new methods turn on without a code change.
       line_items: [{ price: priceId, quantity: 1 }],
       customer_email: userEmail || undefined,
-      // For trials we must collect the card up front so billing starts after day 7
+      // For trials we must collect the card up front so billing starts after the trial ends.
       payment_method_collection: wantsTrial ? 'always' : undefined,
       subscription_data: subscriptionData,
       metadata: { user_id: userId, trial: wantsTrial ? '1' : '0' },
       allow_promotion_codes: true,
+      // Reassurance copy directly under the Start trial button — the moment of
+      // highest abandonment anxiety on the trial path.
+      custom_text: wantsTrial
+        ? { submit: { message: "Free for 3 days, then $2.99/week. Cancel anytime in your account before your trial ends — you won't be charged." } }
+        : undefined,
       success_url: 'https://getstudyedge.com/app?checkout=success',
       cancel_url: 'https://getstudyedge.com/app?checkout=cancelled',
     })
