@@ -14,3 +14,11 @@ The React Compiler is not enabled on this template because of its impact on dev 
 ## Expanding the ESLint configuration
 
 If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+
+## Supabase migrations
+
+SQL migrations live in [`migrations/`](./migrations). They are not run automatically — apply them manually via the Supabase dashboard SQL editor (Project → SQL Editor → New query → paste → Run).
+
+Pending migrations to run before shipping:
+
+- `migrations/20260528_ios_state.sql` — adds the `ios_state` table that backs the iOS write-through cross-device sync. **Must be run before the next iOS release** or the app will silently fall back to local-only storage.

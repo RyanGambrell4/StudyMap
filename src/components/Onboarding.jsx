@@ -2,6 +2,14 @@ import { useState } from 'react'
 import { track } from '../lib/analytics'
 import { activateTrial, hasUsedTrial } from '../lib/subscription'
 
+const STEP_NAMES = {
+  1: 'splash',
+  2: 'school_level',
+  3: 'year_level',
+  4: 'preferred_time',
+  5: 'trial_offer',
+}
+
 // ── Options ───────────────────────────────────────────────────────────────────
 const TIME_ICONS = {
   Morning: (
@@ -332,7 +340,15 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   const [preferredTime, setPreferredTime]   = useState(null)
 
   const goTo = (next, dir = 1) => {
-    if (dir > 0) track('onboarding_step', { from: step, to: next })
+    if (dir > 0) {
+      track('onboarding_step', {
+        from: step,
+        to: next,
+        step: next,
+        step_name: STEP_NAMES[next] ?? `step_${next}`,
+        from_step_name: STEP_NAMES[step] ?? `step_${step}`,
+      })
+    }
     setAnimDir(dir)
     setAnimKey(k => k + 1)
     setStep(next)

@@ -82,6 +82,30 @@ const PRICE_TO_PLAN = {
   'price_1TMEqPKCY4pCgrHvymo8ytBO': { plan: 'unlimited', billingPeriod: 'yearly'   },
 }
 
+// ── PostHog server-side capture ──────────────────────────────────────────────
+// Fires events from this server (e.g. checkout_success) so funnel data isn't
+// lost when the browser navigates away before posthog-js can flush.
+async function posthogCapture(event, distinctId, properties = {}) {
+  const key = process.env.POSTHOG_API_KEY || process.env.VITE_POSTHOG_KEY
+  if (!key || !distinctId) return
+  const host = process.env.POSTHOG_HOST || 'https://us.i.posthog.com'
+  try {
+    await fetch(`${host}/i/v0/e/`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        api_key: key,
+        event,
+        distinct_id: distinctId,
+        properties: { ...properties, $lib: 'server', source: 'stripe_webhook' },
+        timestamp: new Date().toISOString(),
+      }),
+    })
+  } catch (err) {
+    console.error('[posthog] capture failed (non-fatal):', err.message)
+  }
+}
+
 async function sendWinBackEmail(toEmail) {
   if (!process.env.RESEND_API_KEY) return
   try {
@@ -459,6 +483,26 @@ export default async function handler(req, res) {
           } catch (loopsErr) {
             console.error('[stripe webhook] Loops upgrade trigger failed (non-fatal):', loopsErr)
           }
+        }
+
+        // ── PostHog — fire checkout_success on first paid activation ─────────
+        // Only on `customer.subscription.created` so renewals don't double-count.
+        if (sub.status === 'active' && event.type === 'customer.subscription.created') {
+          await posthogCapture('checkout_success', userId, {
+            plan: planInfo.plan,
+            billing_period: planInfo.billingPeriod,
+            stripe_sub_id: sub.id,
+            stripe_customer_id: sub.customer,
+          })
+        }
+        // Also fire trial_activated on `trialing` so funnel reconciles with iOS StoreKit trials.
+        if (sub.status === 'trialing' && event.type === 'customer.subscription.created') {
+          await posthogCapture('trial_activated', userId, {
+            plan: planInfo.plan,
+            billing_period: planInfo.billingPeriod,
+            stripe_sub_id: sub.id,
+            source: 'stripe',
+          })
         }
       } catch (err) {
         console.error('[stripe webhook] DB error:', err)
