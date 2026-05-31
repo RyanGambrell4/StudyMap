@@ -99,7 +99,7 @@ export default function AuthScreen({ initialMode, onBack }) {
       if (err.message?.toLowerCase().includes('invalid login credentials')) {
         setError('Incorrect email or password.')
       } else if (err.message?.toLowerCase().includes('email')) {
-        setError('Please check your email and try again.')
+        setError("Couldn't create your account. Please try again, or use 'Continue with Google' above.")
       } else if (err.message?.toLowerCase().includes('password')) {
         setError('Password must be at least 6 characters.')
       } else {
