@@ -2269,8 +2269,10 @@ export default function LandingPage({ onGetStarted }) {
             <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(226,232,240,0.5)', marginBottom: 14 }}>Tools</div>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
               <li><a href="/gpa-calculator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>GPA Calculator</a></li>
+              <li><a href="/weighted-gpa-calculator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Weighted GPA Calculator</a></li>
+              <li><a href="/cumulative-gpa-calculator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Cumulative GPA Calculator</a></li>
+              <li><a href="/semester-gpa-calculator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Semester GPA Calculator</a></li>
               <li><a href="/grade-calculator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Grade Calculator</a></li>
-              <li><a href="/grade-calculator-college" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>College Grade Calculator</a></li>
               <li><a href="/study-schedule-generator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study Schedule Generator</a></li>
               <li><a href="/ai-flashcard-maker" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>AI Flashcard Maker</a></li>
             </ul>
@@ -2291,6 +2293,10 @@ export default function LandingPage({ onGetStarted }) {
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
               <li><a href="/quizlet-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Quizlet Alternative</a></li>
               <li><a href="/anki-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Anki Alternative</a></li>
+              <li><a href="/chegg-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Chegg Alternative</a></li>
+              <li><a href="/coursehero-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Course Hero Alternative</a></li>
+              <li><a href="/khan-academy-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Khan Academy Alternative</a></li>
+              <li><a href="/notion-for-studying" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Notion for Studying</a></li>
               <li><a href="/anki-vs-quizlet" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Anki vs Quizlet</a></li>
               <li><a href="/ai-tutor" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>AI Tutor</a></li>
               <li><a href="/ai-study-coach" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>AI Study Coach</a></li>
@@ -2303,8 +2309,14 @@ export default function LandingPage({ onGetStarted }) {
               <li><a href="/blog" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>All Articles</a></li>
               <li><a href="/blog/how-to-raise-your-gpa-after-a-bad-semester" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Raise Your GPA</a></li>
               <li><a href="/blog/how-to-get-an-a-in-any-class" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Get an A in Any Class</a></li>
+              <li><a href="/blog/how-to-study-for-calculus" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study for Calculus</a></li>
+              <li><a href="/blog/how-to-study-for-biology" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study for Biology</a></li>
+              <li><a href="/blog/how-to-study-for-organic-chemistry" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study for Organic Chem</a></li>
+              <li><a href="/blog/how-to-study-for-biochemistry" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study for Biochem</a></li>
+              <li><a href="/blog/how-to-study-for-anatomy-and-physiology" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study for A&amp;P</a></li>
+              <li><a href="/blog/how-to-study-for-physics" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study for Physics</a></li>
+              <li><a href="/blog/how-to-study-for-statistics" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study for Statistics</a></li>
               <li><a href="/blog/mcat-study-schedule-6-months" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>MCAT Study Schedule</a></li>
-              <li><a href="/blog/how-to-stop-procrastinating-when-studying" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Stop Procrastinating</a></li>
               <li><a href="/blog/how-to-study-with-adhd-in-college" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Studying with ADHD</a></li>
             </ul>
           </div>

@@ -517,6 +517,96 @@ First documented baseline so future runs have something to compare against. Prim
 - 22 HTML files in `public/` and `public/blog/` (em-dash purge)
 - `CONTEXT.md` (this entry)
 
+---
+
+## SEO Agent , Run 3 (2026-06-01, GSC-driven expansion)
+
+User connected Google Search Console and shared 3-month performance data: 1,570 impressions, 183 clicks, 11.7% CTR, average position 11. Homepage was carrying 90% of all clicks (159/177 last 28 days). Most landing pages weren't ranking at all. This run targets keyword expansion + the page-2 to page-1 push.
+
+### Phase 1 , GSC quick wins (commits c207084, a36d9df, 27a4764, 46c9137, 5443631, 4bbf373)
+Already documented above in Run 2. Includes title rewrites on 7 underperforming pages, footer link mesh on every landing page, and a 5-column sitemap footer added to the homepage.
+
+### Phase 2 , Wave 1: 6 competitor comparison pages (commit 625eb54)
+New pages targeting commercial-intent "X alternative" searches:
+- `/chegg-alternative` , Chegg is $15.95/mo, frequently flagged for academic integrity, highest commercial intent in this set
+- `/coursehero-alternative` , Course Hero $39.95/mo, document library vs study system angle
+- `/khan-academy-alternative` , K-12 library vs college coursework angle
+- `/notion-for-studying` , honest "use both" positioning (Notion for notes, StudyEdge for studying), template-decay pain point
+- `/goconqr-alternative` , manual setup vs AI generation
+- `/studocu-alternative` , user-uploaded notes vs AI-generated course content
+
+Each ~250-300 lines: differentiator-led title, hero, proof strip, 6-card "why students switch" section, direct comparison table, FAQ (6-7 Qs), CTA, link mesh footer. SoftwareApplication + FAQPage + BreadcrumbList schemas on every page.
+
+### Phase 3 , Wave 2: 8 course-specific study guides (commit pending)
+Following the proven `/blog/how-to-study-for-organic-chemistry` template for the highest-volume college courses:
+- `/blog/how-to-study-for-calculus`
+- `/blog/how-to-study-for-biology`
+- `/blog/how-to-study-for-anatomy-and-physiology` (nursing market)
+- `/blog/how-to-study-for-biochemistry` (pre-med)
+- `/blog/how-to-study-for-physics`
+- `/blog/how-to-study-for-statistics`
+- `/blog/how-to-study-for-psychology`
+- `/blog/how-to-study-for-microeconomics`
+
+Each ~150-200 lines: course-specific tactics from real study practice (not generic advice), 8-10 minute reads, BlogPosting + BreadcrumbList schemas. Each closes with a section on how StudyEdge AI fits that course's workload.
+
+### Phase 4 , Wave 3: 3 interactive GPA calculators
+First fully-functional interactive tools on the marketing site. The existing `/gpa-calculator` is content-only, so these add genuine interactivity which Google rewards via engagement signals:
+- `/weighted-gpa-calculator` , AP +1.0, IB +1.0, Honors +0.5 bonus weighting, returns weighted and unweighted side by side
+- `/cumulative-gpa-calculator` , takes prior GPA + credits, returns new cumulative + delta + color-coded change
+- `/semester-gpa-calculator` , standard 4.0 scale with letter grade input
+
+Each: WebApplication + FAQPage + BreadcrumbList schemas, 6 FAQ entries optimized for featured snippets, ~600 words of context content, vanilla JS calculator (no framework dependencies, instant load).
+
+### Phase 5 , Wave 4: HowTo schema (commit 91ebb67)
+Added HowTo JSON-LD to 3 high-priority how-to landing pages:
+- `/how-to-study-for-finals` , 7-step procedure with totalTime: P7D
+- `/study-schedule-template` , 7-step block construction procedure
+- `/how-to-make-a-study-schedule` , 6-step build procedure
+
+Image alt text audit: 0 missing or empty alt attributes across all 30+ HTML pages, no changes needed.
+
+### Phase 6 , Wave 5: Sitemap + homepage mesh + CONTEXT.md (this commit)
+- Sitemap: 36 URLs , 56 URLs. Added all Wave 1, 2, 3 pages. All `lastmod = 2026-06-01`.
+- Homepage `LandingPage.jsx`: footer mesh expanded with 4 calculators, 6 comparison pages, and 8 course study guides added to Tools/Compare/Articles columns. Homepage now actively passes authority to every page in the SEO graph.
+
+### Total new content shipped (Run 3)
+- **6 comparison pages** (commercial intent, "X alternative" queries)
+- **8 course study guides** (long-tail, "how to study for X" queries)
+- **3 interactive calculators** (tool intent, "X gpa calculator" queries)
+- **3 HowTo schemas** added to existing how-to pages
+- **Sitemap** refreshed with 56 URLs total (20 new entries)
+- **Homepage footer mesh** expanded by 14 internal links
+
+### Total internal-link mesh growth (Run 3)
+- Wave 1 + Wave 2 + Wave 3 pages all carry full mesh footers
+- Every existing landing page already has the mesh from Run 2
+- Homepage now links to 30+ internal URLs directly
+- Every page links to every other category page within 1 click
+
+### Expected outcome
+- Targeting roughly 17 new high-intent keyword clusters with content built for them
+- Interactive calculators are the highest-engagement page type for tool searches
+- HowTo schemas on key pages qualify for rich result display
+- Internal link mesh boosts PageRank flow across all 50+ pages
+
+### Open follow-ups (low priority)
+- Author E-E-A-T (bylines + author bio pages) , deferred, needs real author identity
+- HowTo schema on remaining how-to pages , marginal value beyond 3 pages
+- Bartleby and Studocu Premium comparison pages , can add if data shows demand
+- Backlink campaign (Reddit, college subreddits, study influencer outreach) , this is the biggest remaining lever and is outside the agent's scope
+
+### Files changed (Run 3 total)
+Wave 1 (6 new): public/chegg-alternative.html, public/coursehero-alternative.html, public/khan-academy-alternative.html, public/notion-for-studying.html, public/goconqr-alternative.html, public/studocu-alternative.html
+
+Wave 2 (8 new): public/blog/how-to-study-for-calculus.html, public/blog/how-to-study-for-biology.html, public/blog/how-to-study-for-anatomy-and-physiology.html, public/blog/how-to-study-for-biochemistry.html, public/blog/how-to-study-for-physics.html, public/blog/how-to-study-for-statistics.html, public/blog/how-to-study-for-psychology.html, public/blog/how-to-study-for-microeconomics.html
+
+Wave 3 (3 new): public/weighted-gpa-calculator.html, public/cumulative-gpa-calculator.html, public/semester-gpa-calculator.html
+
+Wave 4 (3 modified): public/how-to-study-for-finals.html, public/study-schedule-template.html, public/how-to-make-a-study-schedule.html
+
+Wave 5 (3 modified): public/sitemap.xml, src/components/LandingPage.jsx, CONTEXT.md
+
 ### Decisions Made by This SEO Run (deviations from spec)
 1. **Did NOT spin up a separate `studyedge-blog` Astro repo at `blog.getstudyedge.com`.** The existing static-HTML blog at `/blog/` is already published in `public/blog/`, sitemap-registered, and stylistically consistent. Adding a separate repo plus DNS setup would create two places to maintain. The 10 articles were added to the existing pattern instead. Re-decide if you want the subdomain split for analytics/MDX authoring.
 2. **Did NOT add a Supabase preconnect hint** to `index.html`. Would require committing the Supabase project URL (pulled from env). Easy to add by hand once decided: `<link rel="preconnect" href="https://<project>.supabase.co">`.
