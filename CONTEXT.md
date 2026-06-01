@@ -596,6 +596,75 @@ Image alt text audit: 0 missing or empty alt attributes across all 30+ HTML page
 - Bartleby and Studocu Premium comparison pages , can add if data shows demand
 - Backlink campaign (Reddit, college subreddits, study influencer outreach) , this is the biggest remaining lever and is outside the agent's scope
 
+---
+
+## SEO Agent , Run 4 (2026-06-01, programmatic scale + linkable assets)
+
+After Run 3 user asked "what else can we do to get more people on the site?" Recommended programmatic SEO at scale plus linkable assets. User agreed to all three categories. Run 4 shipped 33 new indexable pages plus 2 linkable assets.
+
+### Wave A , 15 'What GPA do you need for [X]' pages
+Generated programmatically with school-specific admissions data (not template swaps), each ~750-900 words of unique content. Real publicly-available admit data: middle-50 GPA range, accept rate, course-rigor notes.
+- 11 colleges: Harvard, Stanford, MIT, Princeton, Yale, Columbia, UCLA, UC Berkeley, NYU, USC, Duke
+- 4 programs: medical school, law school, dental school, MBA
+
+Each: WebPage + FAQPage + BreadcrumbList schemas, 5-6 FAQ entries, internal links to all 4 calculators, GPA recovery guide, and the app CTA.
+
+### Wave B , 10 'Best study app for [major]' major-specific pages
+Bottom-of-funnel, "which tool" intent. Major-specific workload framing, 6-card differentiation grid per page.
+- Nursing students, pre-med students, engineering students, business students, psychology students, computer science students, biology majors, chemistry majors, accounting students, law students
+
+Each: SoftwareApplication + BreadcrumbList schemas, ~700 words of major-specific content.
+
+### Wave C , 6 standardized test prep blog guides
+Top-of-funnel volume, "how to study for [test]" pattern. Test-specific structure tips, not generic study advice.
+- LSAT, GRE, GMAT, NCLEX, USMLE Step 1, SAT
+
+Each: 8-9 H2 sections of unique strategy content, BlogPosting + BreadcrumbList schemas.
+
+### Wave D , Linkable assets (the backlink magnet)
+- `/printable-study-schedule-template`: browser-printable weekly template. Print or save as PDF in 2 clicks. CreativeWork schema with explicit "feel free to share" language for tutors and college blogs.
+- `/embed-gpa-calculator` + `/embed/gpa-calculator.html`: one-line iframe widget other sites can drop in, with credit link back to StudyEdge AI. Widget noindexed; landing page indexed. Designed to earn organic backlinks from college success blogs, tutoring sites, and student resource pages.
+
+### Wave E , Conversion lift
+Calculator pages already had end-of-page CTAs from Wave 3 build. Skipped further conversion tuning in favor of getting the new pages discoverable. Next pass.
+
+### Wave F , Sitemap update (this commit)
+Sitemap: 54 URLs , 87 URLs. All 33 new indexable pages registered with `lastmod = 2026-06-01`. Embed widget (`/embed/gpa-calculator.html`) intentionally excluded (noindex).
+
+### Run 4 totals
+- 33 net-new indexable pages
+- 33 net-new target keyword clusters
+- 2 linkable backlink-magnet assets
+- Sitemap +33 URLs
+
+### Total since Run 1 (May 23 , 2026-06-01)
+- Indexable pages: ~50 , ~87 (87 in sitemap + about 5 additional)
+- Keyword clusters targeted: ~30 , ~100
+- Schema coverage: WebApplication, SoftwareApplication, FAQPage, BlogPosting, HowTo, BreadcrumbList, WebPage, CreativeWork on appropriate pages
+- Internal links: every new page carries the categorized 27+ link mesh footer
+
+### Open follow-ups (priority order)
+1. **Backlink campaign**: outreach to college success blogs, Reddit (r/college, r/premed, r/nursing), study influencer DMs. The embed widget and printable template were built to be linkable; now they need to actually get shared. Outside the agent's scope.
+2. **Submit refreshed sitemap to GSC**: in Search Console, force re-crawl. Sitemap has 33 new URLs Google needs to discover.
+3. **30-day GSC check-in**: after 30 days, pull rank data for the new pages, identify which are getting impressions, rewrite titles and descriptions on any high-impression / low-CTR pages. Same iteration cycle as Run 2 did on the original pages.
+4. **Backlink-friendly bottom-of-page CTAs on existing high-traffic pages**: add the printable template and embed widget callouts to the high-CTR `/ai-study-coach` and the homepage.
+5. **Programmatic round 2** (if Round 1 ranks): top 30 more schools, 10 more majors, more test prep guides (GMAT Focus deep-dive, AP exam prep series, MCAT subject-specific guides).
+
+### Files changed (Run 4 total)
+Wave A (15 new): public/what-gpa-do-you-need-for-{harvard,stanford,mit,princeton,yale,columbia,ucla,uc-berkeley,nyu,usc,duke,medical-school-admissions,law-school-admissions,dental-school-admissions,mba-programs}.html
+
+Wave B (10 new): public/best-study-app-for-{nursing,pre-med,engineering,business,psychology,computer-science}-students.html, public/best-study-app-for-{biology,chemistry}-majors.html, public/best-study-app-for-{accounting,law}-students.html
+
+Wave C (6 new): public/blog/how-to-study-for-{the-lsat,the-gre,the-gmat,the-nclex,usmle-step-1,the-sat}.html
+
+Wave D (3 new): public/printable-study-schedule-template.html, public/embed-gpa-calculator.html, public/embed/gpa-calculator.html
+
+Wave F (2 modified): public/sitemap.xml, CONTEXT.md
+
+---
+
+## SEO Agent , Run 3 file list (kept for reference)
+
 ### Files changed (Run 3 total)
 Wave 1 (6 new): public/chegg-alternative.html, public/coursehero-alternative.html, public/khan-academy-alternative.html, public/notion-for-studying.html, public/goconqr-alternative.html, public/studocu-alternative.html
 
