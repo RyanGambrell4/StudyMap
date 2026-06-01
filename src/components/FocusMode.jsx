@@ -1411,8 +1411,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
             <span className="shrink-0" style={{ color: 'rgba(0,0,0,0.18)', fontSize: 12 }}>·</span>
             <span className="text-xs shrink-0" style={{ color: '#9B9B9B' }}>{session.sessionType}</span>
           </div>
-          {/* Center: label */}
-          <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none">
+          {/* Center: label — hidden on mobile so it can't collide with the left course/session text */}
+          <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none hidden md:block">
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#C0C0C0' }}>Focus Session</span>
           </div>
           {/* Right: elapsed + exit */}
