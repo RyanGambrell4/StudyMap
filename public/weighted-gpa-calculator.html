@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weighted GPA Calculator (Free, Instant, with AP and Honors Bonus) | StudyEdge AI</title>
+  <meta name="description" content="Free weighted GPA calculator for high school and college students. Handles AP, IB, and honors course bonuses. Computes weighted and unweighted GPA in real time. No signup." />
+  <meta name="keywords" content="weighted gpa calculator, weighted gpa calculator AP, weighted gpa calculator honors, free weighted gpa calculator, high school gpa calculator weighted" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://getstudyedge.com/weighted-gpa-calculator" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://getstudyedge.com/weighted-gpa-calculator" />
+  <meta property="og:title" content="Weighted GPA Calculator | StudyEdge AI" />
+  <meta property="og:description" content="Free weighted GPA calculator for AP, IB, and honors classes. Real-time results, no signup." />
+  <meta property="og:image" content="https://getstudyedge.com/hero-landing.png" />
+  <meta property="og:site_name" content="StudyEdge AI" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Weighted GPA Calculator | StudyEdge AI" />
+  <meta name="twitter:description" content="Free weighted GPA calculator with AP and honors bonuses." />
+  <meta name="twitter:image" content="https://getstudyedge.com/hero-landing.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/seo.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Weighted GPA Calculator",
+    "applicationCategory": "EducationApplication",
+    "operatingSystem": "Web",
+    "url": "https://getstudyedge.com/weighted-gpa-calculator",
+    "description": "Free, real-time weighted GPA calculator that applies AP, IB, and honors bonus weighting and also returns an unweighted GPA on the same input.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do you calculate weighted GPA?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Weighted GPA adds a bonus to the grade points for higher-difficulty courses. The most common scale gives a +1.0 bonus for AP and IB classes (so an A is worth 5.0 instead of 4.0) and a +0.5 bonus for honors classes (an A is worth 4.5). To compute, multiply each course's weighted grade points by its credits, sum across all courses, then divide by total credits." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a good weighted GPA?",
+        "acceptedAnswer": { "@type": "Answer", "text": "For high school, a weighted GPA above 4.0 indicates honors or AP coursework with strong grades. Selective colleges typically see weighted GPAs in the 4.0 to 4.5 range from admitted students, and the most competitive schools see 4.5 to 5.0. For unweighted, a 3.7 or above is generally considered strong." }
+      },
+      {
+        "@type": "Question",
+        "name": "Do colleges use weighted or unweighted GPA?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Most colleges recalculate GPA on their own scale during admissions to standardize across high schools. Many use the unweighted GPA as the baseline and then look separately at course rigor (AP, IB, honors counts). A weighted GPA is useful for self-tracking and class rank but not always the number colleges focus on." }
+      },
+      {
+        "@type": "Question",
+        "name": "How are AP and IB classes weighted?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Most high schools weight AP and IB classes with a +1.0 bonus on the standard 4.0 scale, so an A is 5.0, a B is 4.0, and a C is 3.0. Some schools use +0.5 or other variations. Check your high school's official policy before relying on a generic calculator." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I use this for college?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Most colleges do not use weighted GPA; college coursework is computed on the standard 4.0 unweighted scale. This calculator can still be used by entering all courses as regular without an honors or AP bonus." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is this calculator free?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. No signup, no email required, no limits on number of courses. The full StudyEdge AI study system (planner, AI tutor, flashcards) has a free plan as well, with Pro from $2.99 a week." }
+      }
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://getstudyedge.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Weighted GPA Calculator", "item": "https://getstudyedge.com/weighted-gpa-calculator" }
+    ]
+  }
+  </script>
+
+  <style>
+    .calc-wrap { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 28px; max-width: 760px; margin: 0 auto; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .calc-row { display: grid; grid-template-columns: 2fr 1fr 1.2fr 0.8fr 40px; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .calc-row input, .calc-row select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font: inherit; background: #fff; color: var(--text); }
+    .calc-row button.remove { background: transparent; border: 1px solid var(--border); border-radius: 8px; height: 40px; cursor: pointer; color: var(--muted); }
+    .calc-row button.remove:hover { color: var(--text); border-color: var(--text); }
+    .calc-head { display: grid; grid-template-columns: 2fr 1fr 1.2fr 0.8fr 40px; gap: 10px; margin-bottom: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+    .calc-actions { display: flex; gap: 12px; margin-top: 16px; }
+    .calc-actions .btn-primary { padding: 12px 20px; }
+    .calc-result { margin-top: 24px; padding: 20px; background: #F0EFEC; border-radius: 12px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .calc-result .stat-block { text-align: center; }
+    .calc-result .stat-num { font-size: 36px; font-weight: 800; color: #3B61C4; letter-spacing: -0.02em; }
+    .calc-result .stat-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-top: 4px; }
+    @media (max-width: 640px) {
+      .calc-row, .calc-head { grid-template-columns: 1.5fr 0.8fr 1.2fr 0.7fr 32px; gap: 6px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-nav">
+    <a class="nav-logo" href="/">
+      <img src="/favicon.png" alt="StudyEdge AI" />
+      StudyEdge AI
+    </a>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/studyedge-ai#pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="nav-cta">Try Free</a>
+    </div>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow eyebrow-indigo">Weighted GPA Calculator</div>
+    <h1>Weighted GPA Calculator</h1>
+    <p class="hero-sub">Enter your courses, grades, credits, and course type. The calculator returns your weighted GPA (with AP and honors bonus) and unweighted GPA side by side, instantly. No signup.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 24px;">
+  <div class="container">
+    <div class="calc-wrap" id="calc-wrap">
+      <div class="calc-head">
+        <div>Course</div>
+        <div>Grade</div>
+        <div>Type</div>
+        <div>Credits</div>
+        <div></div>
+      </div>
+      <div id="calc-rows"></div>
+      <div class="calc-actions">
+        <button class="btn btn-primary" onclick="addRow()">+ Add Course</button>
+      </div>
+      <div class="calc-result" id="calc-result">
+        <div class="stat-block">
+          <div class="stat-num" id="weighted-gpa">0.00</div>
+          <div class="stat-label">Weighted GPA</div>
+        </div>
+        <div class="stat-block">
+          <div class="stat-num" id="unweighted-gpa">0.00</div>
+          <div class="stat-label">Unweighted GPA</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container" style="max-width: 760px;">
+    <h2>How weighted GPA works</h2>
+    <p>The standard unweighted GPA scale runs 0 to 4.0: A = 4.0, B = 3.0, C = 2.0, D = 1.0, F = 0.0. Weighted GPA adds a bonus for harder courses. The most common bonus: +1.0 for AP and IB (so an A in AP US History is 5.0), and +0.5 for honors (an A in Honors English is 4.5). This calculator uses that scale.</p>
+    <p>To compute, the calculator multiplies each course's weighted grade points by its credits, sums those across all courses, and divides by total credits. The unweighted column does the same with the standard 4.0 scale, ignoring AP and honors bonuses.</p>
+
+    <h2>What counts as a good weighted GPA</h2>
+    <p>For high school, anything above 4.0 means the student is taking honors or AP coursework and doing well in it. Selective colleges typically see admitted students with weighted GPAs in the 4.0 to 4.5 range, and the most competitive admit pools see 4.5 to 5.0. The unweighted GPA still matters: a 3.7 or higher is the threshold most admissions counselors use for "strong academic profile."</p>
+
+    <h2>Why colleges still look at unweighted</h2>
+    <p>Every high school weights differently. Some give +1.0 for AP, others give +0.5. Some have no honors track at all. Colleges recalculate on their own scales to compare students fairly. That is why the unweighted GPA is often what admissions officers see first. They look separately at course rigor: how many APs, how many honors, which subjects, did the student take the hardest available option.</p>
+
+    <h2>If you want a higher weighted GPA</h2>
+    <p>Three levers: take more AP or honors courses, do better in the ones you are already in, and stop dropping classes mid-semester (which often leaves a W on the transcript and pulls weighted GPA down through reduced credit counts). The order of leverage depends on where you are: if you have zero APs and a 3.5 unweighted, adding one AP next semester moves your weighted GPA more than going from a B+ to an A- in pre-calc.</p>
+
+    <h2>When to use this calculator</h2>
+    <p>Use it at the end of every semester to know exactly where you stand. Use it before signing up for next semester's classes to see what the GPA impact would be of taking one more AP versus a standard course. Use it before submitting college applications to confirm what your transcript actually says.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-block">
+      <h2>Calculate the grade. Build the system that gets you there.</h2>
+      <p>StudyEdge AI uses your real grades to build a weekly study plan that moves the courses where the GPA leverage is highest.</p>
+      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="btn btn-primary btn-lg">Try StudyEdge AI Free</a>
+      <p class="cta-fine">Free to start. No credit card required.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+<div class="footer-links">
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;margin-top:0;font-weight:700;">Tools</strong>
+<a href="/">Home</a>
+<a href="/gpa-calculator">GPA Calculator</a>
+<a href="/cumulative-gpa-calculator">Cumulative GPA Calculator</a>
+<a href="/semester-gpa-calculator">Semester GPA Calculator</a>
+<a href="/grade-calculator">Grade Calculator</a>
+<a href="/grade-calculator-college">College Grade Calculator</a>
+<a href="/study-schedule-generator">Study Schedule Generator</a>
+<a href="/ai-flashcard-maker">AI Flashcard Maker</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Guides</strong>
+<a href="/study-planner-for-college-students">Study Planner</a>
+<a href="/study-schedule-template">Schedule Template</a>
+<a href="/how-to-study-for-finals">How to Study for Finals</a>
+<a href="/pre-med-study-guide">Pre-Med Study Guide</a>
+<a href="/best-study-app-for-students">Best Study App</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Compare</strong>
+<a href="/quizlet-alternative">Quizlet Alternative</a>
+<a href="/anki-alternative">Anki Alternative</a>
+<a href="/chegg-alternative">Chegg Alternative</a>
+<a href="/coursehero-alternative">Course Hero Alternative</a>
+<a href="/khan-academy-alternative">Khan Academy Alternative</a>
+<a href="/notion-for-studying">Notion for Studying</a>
+<a href="/ai-tutor">AI Tutor</a>
+<a href="/ai-study-coach">AI Study Coach</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Articles</strong>
+<a href="/blog">All Articles</a>
+<a href="/blog/how-to-raise-your-gpa-after-a-bad-semester">Raise Your GPA</a>
+<a href="/blog/how-to-get-an-a-in-any-class">Get an A in Any Class</a>
+<a href="/blog/how-to-study-for-calculus">Study for Calculus</a>
+<a href="/blog/how-to-study-for-biology">Study for Biology</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Company</strong>
+<a href="/about">About</a>
+<a href="/privacy">Privacy</a>
+<a href="/terms">Terms</a>
+</div>
+<p class="footer-copy">&copy; 2026 StudyEdge AI</p>
+</footer>
+
+<script>
+  const GRADE_POINTS = {
+    'A+': 4.0, 'A': 4.0, 'A-': 3.7,
+    'B+': 3.3, 'B': 3.0, 'B-': 2.7,
+    'C+': 2.3, 'C': 2.0, 'C-': 1.7,
+    'D+': 1.3, 'D': 1.0, 'D-': 0.7,
+    'F': 0.0
+  };
+  const TYPE_BONUS = { regular: 0, honors: 0.5, ap: 1.0, ib: 1.0 };
+
+  let rowId = 0;
+
+  function addRow(name = '', grade = 'A', type = 'regular', credits = 1) {
+    const id = rowId++;
+    const div = document.createElement('div');
+    div.className = 'calc-row';
+    div.dataset.id = id;
+    div.innerHTML = `
+      <input type="text" placeholder="Course name" value="${name}" oninput="recompute()" />
+      <select onchange="recompute()">
+        ${Object.keys(GRADE_POINTS).map(g => `<option value="${g}" ${g===grade?'selected':''}>${g}</option>`).join('')}
+      </select>
+      <select onchange="recompute()">
+        <option value="regular" ${type==='regular'?'selected':''}>Regular</option>
+        <option value="honors" ${type==='honors'?'selected':''}>Honors (+0.5)</option>
+        <option value="ap" ${type==='ap'?'selected':''}>AP (+1.0)</option>
+        <option value="ib" ${type==='ib'?'selected':''}>IB (+1.0)</option>
+      </select>
+      <input type="number" step="0.5" min="0" value="${credits}" oninput="recompute()" />
+      <button class="remove" onclick="removeRow(${id})" aria-label="Remove course">&times;</button>
+    `;
+    document.getElementById('calc-rows').appendChild(div);
+    recompute();
+  }
+
+  function removeRow(id) {
+    const row = document.querySelector(`.calc-row[data-id="${id}"]`);
+    if (row) row.remove();
+    recompute();
+  }
+
+  function recompute() {
+    let totalWeighted = 0, totalUnweighted = 0, totalCredits = 0;
+    document.querySelectorAll('.calc-row').forEach(row => {
+      const inputs = row.querySelectorAll('input, select');
+      const grade = inputs[1].value;
+      const type = inputs[2].value;
+      const credits = parseFloat(inputs[3].value) || 0;
+      if (credits <= 0) return;
+      const base = GRADE_POINTS[grade] ?? 0;
+      const weighted = base + (base > 0 ? (TYPE_BONUS[type] || 0) : 0);
+      totalWeighted += weighted * credits;
+      totalUnweighted += base * credits;
+      totalCredits += credits;
+    });
+    const w = totalCredits > 0 ? (totalWeighted / totalCredits).toFixed(2) : '0.00';
+    const u = totalCredits > 0 ? (totalUnweighted / totalCredits).toFixed(2) : '0.00';
+    document.getElementById('weighted-gpa').textContent = w;
+    document.getElementById('unweighted-gpa').textContent = u;
+  }
+
+  // Seed three sample rows
+  addRow('English', 'A', 'honors', 1);
+  addRow('AP Biology', 'B+', 'ap', 1);
+  addRow('Pre-Calculus', 'A-', 'regular', 1);
+</script>
+
+</body>
+</html>

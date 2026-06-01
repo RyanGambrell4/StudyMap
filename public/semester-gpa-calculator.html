@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Semester GPA Calculator (Real-Time, No Signup) | StudyEdge AI</title>
+  <meta name="description" content="Free semester GPA calculator for college and high school. Enter your courses, grades, and credits for this term. Get your semester GPA instantly with letter grade conversion." />
+  <meta name="keywords" content="semester gpa calculator, term gpa calculator, college semester gpa, how to calculate semester gpa, free semester gpa" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://getstudyedge.com/semester-gpa-calculator" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://getstudyedge.com/semester-gpa-calculator" />
+  <meta property="og:title" content="Semester GPA Calculator | StudyEdge AI" />
+  <meta property="og:description" content="Free semester GPA calculator with letter grade input. Real-time results, no signup." />
+  <meta property="og:image" content="https://getstudyedge.com/hero-landing.png" />
+  <meta property="og:site_name" content="StudyEdge AI" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Semester GPA Calculator | StudyEdge AI" />
+  <meta name="twitter:description" content="Real-time semester GPA with letter grade input." />
+  <meta name="twitter:image" content="https://getstudyedge.com/hero-landing.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/seo.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "Semester GPA Calculator",
+    "applicationCategory": "EducationApplication",
+    "operatingSystem": "Web",
+    "url": "https://getstudyedge.com/semester-gpa-calculator",
+    "description": "Free, real-time semester GPA calculator. Letter grade input, credit weighting, instant result. No signup.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is semester GPA?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Semester GPA is the grade-point average across the courses you took in a single semester or term. It is computed as the sum of each course's grade points multiplied by its credits, divided by total credits for the semester. It differs from cumulative GPA, which averages across every semester ever taken." }
+      },
+      {
+        "@type": "Question",
+        "name": "How do you calculate semester GPA?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Convert each letter grade to grade points on the standard 4.0 scale (A = 4.0, B = 3.0, C = 2.0, D = 1.0, F = 0.0; plus and minus add or subtract 0.3 or 0.7). Multiply each by the course's credits. Sum, then divide by total credits. This calculator does it automatically as you type." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the difference between semester GPA and cumulative GPA?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Semester GPA only counts the current semester. Cumulative GPA averages across every semester you have completed. Your cumulative GPA moves less per semester as you accumulate credits, since each new semester is a smaller share of the total." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a good semester GPA?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Dean's list at most colleges starts at 3.5 for the semester. A 3.7 or above usually qualifies for higher honors lists. For students recovering from a tough semester, a clean 4.0 semester is the fastest way to move the cumulative GPA up." }
+      },
+      {
+        "@type": "Question",
+        "name": "Does this work for high school?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. The standard 4.0 scale applies in both. For high school students taking AP or honors classes with weighting, the weighted GPA calculator at /weighted-gpa-calculator handles the bonus points." }
+      },
+      {
+        "@type": "Question",
+        "name": "Is the calculator free?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. No signup, no email, no limits. The full StudyEdge AI study system with planner, AI tutor, and flashcards has a free plan as well, with Pro from $2.99 a week." }
+      }
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://getstudyedge.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Semester GPA Calculator", "item": "https://getstudyedge.com/semester-gpa-calculator" }
+    ]
+  }
+  </script>
+
+  <style>
+    .calc-wrap { background: #fff; border: 1px solid var(--border); border-radius: 14px; padding: 28px; max-width: 760px; margin: 0 auto; box-shadow: 0 1px 3px rgba(0,0,0,0.06); }
+    .calc-row { display: grid; grid-template-columns: 2fr 1fr 1fr 40px; gap: 10px; align-items: center; margin-bottom: 10px; }
+    .calc-row input, .calc-row select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font: inherit; }
+    .calc-row button.remove { background: transparent; border: 1px solid var(--border); border-radius: 8px; height: 40px; cursor: pointer; color: var(--muted); }
+    .calc-row button.remove:hover { color: var(--text); border-color: var(--text); }
+    .calc-head { display: grid; grid-template-columns: 2fr 1fr 1fr 40px; gap: 10px; margin-bottom: 8px; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
+    .calc-actions { display: flex; gap: 12px; margin-top: 16px; }
+    .calc-result { margin-top: 24px; padding: 24px; background: #F0EFEC; border-radius: 12px; text-align: center; }
+    .calc-result .stat-num { font-size: 48px; font-weight: 800; color: #3B61C4; letter-spacing: -0.02em; }
+    .calc-result .stat-label { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-top: 6px; }
+    .calc-result .stat-sub { font-size: 13px; color: var(--muted); margin-top: 10px; }
+    @media (max-width: 640px) {
+      .calc-row, .calc-head { grid-template-columns: 1.5fr 0.8fr 0.8fr 32px; gap: 6px; font-size: 13px; }
+    }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-nav">
+    <a class="nav-logo" href="/">
+      <img src="/favicon.png" alt="StudyEdge AI" />
+      StudyEdge AI
+    </a>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/studyedge-ai#pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="nav-cta">Try Free</a>
+    </div>
+  </nav>
+</header>
+
+<section class="hero">
+  <div class="container">
+    <div class="eyebrow eyebrow-purple">Semester GPA Calculator</div>
+    <h1>Semester GPA Calculator</h1>
+    <p class="hero-sub">Enter the courses you took this term, the letter grade for each, and the credits. Your semester GPA computes in real time. No signup, no limits, no ads.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top: 24px;">
+  <div class="container">
+    <div class="calc-wrap">
+      <div class="calc-head">
+        <div>Course</div>
+        <div>Grade</div>
+        <div>Credits</div>
+        <div></div>
+      </div>
+      <div id="calc-rows"></div>
+      <div class="calc-actions">
+        <button class="btn btn-primary" onclick="addRow()">+ Add Course</button>
+      </div>
+      <div class="calc-result">
+        <div class="stat-num" id="semester-gpa">0.00</div>
+        <div class="stat-label">Semester GPA</div>
+        <div class="stat-sub" id="semester-sub">0 credits total</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container" style="max-width: 760px;">
+    <h2>How semester GPA is computed</h2>
+    <p>Semester GPA uses the standard 4.0 scale. Each letter grade converts to grade points: A is 4.0, A-minus is 3.7, B-plus is 3.3, B is 3.0, and so on down to F at 0.0. For each course, multiply the grade points by the number of credits. Sum across all courses. Divide by total credits. That is your semester GPA.</p>
+    <p>Most colleges use this exact scale. Some use slight variations (A-plus counted as 4.0 in many schools, 4.3 in others). This calculator uses the most widely accepted version: A and A-plus both count as 4.0, since most schools cap the GPA at 4.0 for non-weighted calculations.</p>
+
+    <h2>Why semester GPA matters even when you have a strong cumulative</h2>
+    <p>Honors lists. Dean's list. Probation policies. Scholarship renewals. Many academic standing decisions are made on the semester GPA specifically, not the cumulative. A 3.4 cumulative student with a 3.7 fall semester probably makes Dean's List. The same 3.4 cumulative student with a 3.0 fall semester does not. Track this per term, not just at the end of the year.</p>
+
+    <h2>If you are recovering from a rough start</h2>
+    <p>Semester GPA recovery is the fastest GPA-recovery mechanism. A clean 4.0 semester pulls a low cumulative up faster than working through a couple of grade-replacement options. The math: if your cumulative is 2.7 with 30 credits and you post a 4.0 semester at 15 credits, your new cumulative is around 3.13. That is a 0.43 jump from a single semester.</p>
+
+    <h2>If you want a 3.5 to make Dean's List</h2>
+    <p>The exact courses you need to focus on depend on credits. If you have a 4-credit Chemistry, a 4-credit Calc II, a 3-credit English, and a 3-credit elective, those credit weights matter. A B-plus in the 4-credit Chem moves your semester GPA more than an A-minus in the 3-credit elective. Use the calculator to model scenarios: enter target grades and see whether the math reaches your threshold.</p>
+
+    <h2>For high school students using this</h2>
+    <p>This calculator uses the standard unweighted 4.0 scale, which is what most high schools use as a baseline. If your high school weights AP, IB, or honors courses with bonus points, switch to the weighted GPA calculator instead, which has the bonus built in.</p>
+
+    <h2>When you are planning next semester</h2>
+    <p>Run a forecast before registration. Plug in projected grades (based on past performance in similar courses) for each class you are considering. The calculator gives you a realistic semester GPA target. This is how upperclassmen avoid overloading a tough semester or undershooting an easy one.</p>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <div class="cta-block">
+      <h2>Calculate the GPA. Now build the system that hits it.</h2>
+      <p>StudyEdge AI takes your grades, exam dates, and target GPA and builds the weekly plan that gets you there.</p>
+      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="btn btn-primary btn-lg">Try StudyEdge AI Free</a>
+      <p class="cta-fine">Free to start. No credit card required.</p>
+    </div>
+  </div>
+</section>
+
+<footer class="site-footer">
+<div class="footer-links">
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;margin-top:0;font-weight:700;">Tools</strong>
+<a href="/">Home</a>
+<a href="/gpa-calculator">GPA Calculator</a>
+<a href="/weighted-gpa-calculator">Weighted GPA Calculator</a>
+<a href="/cumulative-gpa-calculator">Cumulative GPA Calculator</a>
+<a href="/grade-calculator">Grade Calculator</a>
+<a href="/grade-calculator-college">College Grade Calculator</a>
+<a href="/study-schedule-generator">Study Schedule Generator</a>
+<a href="/ai-flashcard-maker">AI Flashcard Maker</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Guides</strong>
+<a href="/study-planner-for-college-students">Study Planner</a>
+<a href="/study-schedule-template">Schedule Template</a>
+<a href="/how-to-study-for-finals">How to Study for Finals</a>
+<a href="/pre-med-study-guide">Pre-Med Study Guide</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Compare</strong>
+<a href="/quizlet-alternative">Quizlet Alternative</a>
+<a href="/anki-alternative">Anki Alternative</a>
+<a href="/chegg-alternative">Chegg Alternative</a>
+<a href="/coursehero-alternative">Course Hero Alternative</a>
+<a href="/khan-academy-alternative">Khan Academy Alternative</a>
+<a href="/notion-for-studying">Notion for Studying</a>
+<a href="/ai-tutor">AI Tutor</a>
+<a href="/ai-study-coach">AI Study Coach</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Articles</strong>
+<a href="/blog">All Articles</a>
+<a href="/blog/how-to-raise-your-gpa-after-a-bad-semester">Raise Your GPA</a>
+<a href="/blog/how-to-get-an-a-in-any-class">Get an A in Any Class</a>
+<a href="/blog/how-to-study-for-calculus">Study for Calculus</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Company</strong>
+<a href="/about">About</a>
+<a href="/privacy">Privacy</a>
+<a href="/terms">Terms</a>
+</div>
+<p class="footer-copy">&copy; 2026 StudyEdge AI</p>
+</footer>
+
+<script>
+  const GRADE_POINTS = {
+    'A+': 4.0, 'A': 4.0, 'A-': 3.7,
+    'B+': 3.3, 'B': 3.0, 'B-': 2.7,
+    'C+': 2.3, 'C': 2.0, 'C-': 1.7,
+    'D+': 1.3, 'D': 1.0, 'D-': 0.7,
+    'F': 0.0
+  };
+  let rowId = 0;
+
+  function addRow(name = '', grade = 'A', credits = 3) {
+    const id = rowId++;
+    const div = document.createElement('div');
+    div.className = 'calc-row';
+    div.dataset.id = id;
+    div.innerHTML = `
+      <input type="text" placeholder="Course name" value="${name}" oninput="recompute()" />
+      <select onchange="recompute()">
+        ${Object.keys(GRADE_POINTS).map(g => `<option value="${g}" ${g===grade?'selected':''}>${g}</option>`).join('')}
+      </select>
+      <input type="number" step="0.5" min="0" value="${credits}" oninput="recompute()" />
+      <button class="remove" onclick="removeRow(${id})" aria-label="Remove course">&times;</button>
+    `;
+    document.getElementById('calc-rows').appendChild(div);
+    recompute();
+  }
+
+  function removeRow(id) {
+    const row = document.querySelector(`.calc-row[data-id="${id}"]`);
+    if (row) row.remove();
+    recompute();
+  }
+
+  function recompute() {
+    let points = 0, credits = 0;
+    document.querySelectorAll('.calc-row').forEach(row => {
+      const inputs = row.querySelectorAll('input, select');
+      const grade = inputs[1].value;
+      const c = parseFloat(inputs[2].value) || 0;
+      if (c <= 0) return;
+      points += (GRADE_POINTS[grade] ?? 0) * c;
+      credits += c;
+    });
+    const gpa = credits > 0 ? (points / credits).toFixed(2) : '0.00';
+    document.getElementById('semester-gpa').textContent = gpa;
+    document.getElementById('semester-sub').textContent = `${credits} credit${credits === 1 ? '' : 's'} total`;
+  }
+
+  // Seed sample courses
+  addRow('Biology 101', 'A-', 4);
+  addRow('Calculus II', 'B+', 4);
+  addRow('English', 'A', 3);
+  addRow('History', 'B+', 3);
+  addRow('Elective', 'A', 2);
+</script>
+
+</body>
+</html>
