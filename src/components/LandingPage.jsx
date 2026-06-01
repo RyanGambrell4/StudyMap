@@ -2258,17 +2258,80 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
+      {/* ── Sitemap / internal link mesh (SEO) ── */}
+      <section style={{
+        borderTop: '1px solid rgba(255,255,255,0.06)',
+        padding: '56px 32px 32px',
+        background: 'rgba(255,255,255,0.015)',
+      }}>
+        <div style={{ maxWidth: 1200, margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: 32 }}>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(226,232,240,0.5)', marginBottom: 14 }}>Tools</div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <li><a href="/gpa-calculator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>GPA Calculator</a></li>
+              <li><a href="/grade-calculator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Grade Calculator</a></li>
+              <li><a href="/grade-calculator-college" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>College Grade Calculator</a></li>
+              <li><a href="/study-schedule-generator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study Schedule Generator</a></li>
+              <li><a href="/ai-flashcard-maker" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>AI Flashcard Maker</a></li>
+            </ul>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(226,232,240,0.5)', marginBottom: 14 }}>Guides</div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <li><a href="/study-planner-for-college-students" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study Planner for College</a></li>
+              <li><a href="/study-schedule-template" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study Schedule Template</a></li>
+              <li><a href="/how-to-make-a-study-schedule" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>How to Make a Schedule</a></li>
+              <li><a href="/how-to-study-for-finals" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>How to Study for Finals</a></li>
+              <li><a href="/pre-med-study-guide" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Pre-Med Study Guide</a></li>
+              <li><a href="/best-study-app-for-students" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Best Study App</a></li>
+            </ul>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(226,232,240,0.5)', marginBottom: 14 }}>Compare</div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <li><a href="/quizlet-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Quizlet Alternative</a></li>
+              <li><a href="/anki-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Anki Alternative</a></li>
+              <li><a href="/anki-vs-quizlet" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Anki vs Quizlet</a></li>
+              <li><a href="/ai-tutor" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>AI Tutor</a></li>
+              <li><a href="/ai-study-coach" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>AI Study Coach</a></li>
+              <li><a href="/active-recall-app" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Active Recall App</a></li>
+            </ul>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(226,232,240,0.5)', marginBottom: 14 }}>Articles</div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <li><a href="/blog" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>All Articles</a></li>
+              <li><a href="/blog/how-to-raise-your-gpa-after-a-bad-semester" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Raise Your GPA</a></li>
+              <li><a href="/blog/how-to-get-an-a-in-any-class" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Get an A in Any Class</a></li>
+              <li><a href="/blog/mcat-study-schedule-6-months" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>MCAT Study Schedule</a></li>
+              <li><a href="/blog/how-to-stop-procrastinating-when-studying" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Stop Procrastinating</a></li>
+              <li><a href="/blog/how-to-study-with-adhd-in-college" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Studying with ADHD</a></li>
+            </ul>
+          </div>
+          <div>
+            <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'rgba(226,232,240,0.5)', marginBottom: 14 }}>Company</div>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: 10 }}>
+              <li><a href="/about" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>About</a></li>
+              <li><a href="/studyedge-ai" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>StudyEdge AI</a></li>
+              <li><a href="/not-affiliated-with-study-edge" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Not Study Edge</a></li>
+              <li><a href="/privacy" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Privacy</a></li>
+              <li><a href="/terms" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Terms</a></li>
+              <li><a href="mailto:support@getstudyedge.com" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Contact</a></li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
       {/* ── Footer ── */}
       <footer style={{
         borderTop: '1px solid rgba(255,255,255,0.06)',
         padding: '24px 32px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        flexWrap: 'wrap', gap: 12,
         fontSize: 13, color: 'rgba(226,232,240,0.25)',
       }}>
         <span>© 2026 StudyEdge AI. All rights reserved.</span>
-        <div style={{ display: 'flex', gap: 20 }}>
-          <a href="mailto:support@getstudyedge.com" style={{ color: 'rgba(226,232,240,0.35)', textDecoration: 'none' }}>Contact</a>
-        </div>
+        <span style={{ fontSize: 12 }}>Not affiliated with <a href="/not-affiliated-with-study-edge" style={{ color: 'rgba(226,232,240,0.4)', textDecoration: 'underline' }}>Study Edge (studyedge.com)</a></span>
       </footer>
     </div>
   )
