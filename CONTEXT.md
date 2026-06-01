@@ -1,5 +1,5 @@
 # StudyEdge AI — Living Context
-_Last updated by: Landing Page Agent on 2026-05-24 (Run 1 — hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
 
 ## Landing Page Agent — Runs 2–6 (2026-05-24, visual polish pass)
 _Driven by user request "make it much more professional and visually appealing." Five sequential commits, build verified clean after each. All on `main`._
@@ -452,7 +452,70 @@ Living at `/blog/<slug>`. Article #6 ("Study Tips for Finals Week") was already 
 `public/blog/index.html` rebuilt to surface all 13 published articles (4 pre-existing + 9 new). Fixed prior broken card that double-linked to `how-to-study-for-finals-week`.
 
 ### Layer 4 — Keyword Intelligence
-- Status: deferred (intended to run monthly); not connected to Google Search Console yet — flagged below
+- Status: deferred (intended to run monthly); not connected to Google Search Console yet , flagged below
+
+---
+
+## SEO Agent — Run 2 (2026-06-01, quality + freshness pass)
+
+Second SEO run, focused on quality issues and stale signals rather than new content. All four layers re-audited; no new content was warranted because Layer 2 (6 pages) and Layer 3 (10 articles) are already complete from Run 1.
+
+### Layer 1 (this run)
+- **Sitemap rebuilt** with `lastmod = 2026-06-01` across all 36 URLs. Stale `2026-05-20` / `2026-05-23` dates were sending a "site is dormant" signal to crawlers. Fresh dates re-trigger recrawl on next ping.
+- **Removed `/login` from sitemap** (login pages should not be indexed; was previously pushing a low-quality URL into Google's index).
+- **`/login`** got `<meta name="robots" content="noindex, follow">` so it stays discoverable for outbound link equity but stops competing with brand pages in search.
+- **`/app.html`** (authenticated SPA shell, also served at `/app` via Capacitor + rewrites) got `<meta name="robots" content="noindex, nofollow">`. Previously had no robots directive at all, which meant Google could (and may have) indexed the dark app shell as if it were a marketing page.
+- **Added `/about`** to sitemap (was on disk, not registered).
+- **JSON-LD coverage verified.** All 6 spec landing pages carry Article schema, all 10 blog posts carry BlogPosting + BreadcrumbList. Brand disambiguation page carries WebPage + FAQPage. No new structured data was needed.
+
+### Layer 2 & 3 (this run, quality purge)
+- **Em-dash purge across 22 HTML files** (all `public/*.html` and `public/blog/*.html`). 490 instances replaced with commas to comply with the no-em-dash rule. Hand-checked samples on the brand disambiguation page, the two spec-named landing pages (`study-planner-for-college-students`, `study-schedule-template`), and three blog posts read cleanly. No sentences were broken.
+- **AI-slop scan**: the 5 files flagged by the initial regex (`leverage|utilize|delve into|game-changer|...`) were all false positives. "Highest-leverage", "GPA leverage", and "robs procrastination of its leverage" are valid noun/compound usages and stayed.
+- **No new pages written** in this run.
+
+### Layer 4 , Keyword baseline (this run)
+First documented baseline so future runs have something to compare against. Primary keyword target per page:
+
+**Money/intent pages (landing):**
+| URL | Primary keyword | Search intent |
+|---|---|---|
+| `/gpa-calculator` | "gpa calculator" | tool intent |
+| `/grade-calculator` | "what do I need on the final to get an A" | tool intent |
+| `/study-planner-for-college-students` | "study planner for college students" | tool intent |
+| `/study-schedule-template` | "study schedule template" | template intent |
+| `/how-to-study-for-finals` | "how to study for finals" | info to tool |
+| `/pre-med-study-guide` | "pre-med study guide" | high-LTV niche |
+| `/ai-flashcard-maker` | "ai flashcard maker" | tool intent |
+| `/quizlet-alternative` | "quizlet alternative" | comparison |
+| `/anki-alternative` | "anki alternative" | comparison |
+| `/anki-vs-quizlet` | "anki vs quizlet" | comparison |
+
+**Brand entity pages:**
+| URL | Job |
+|---|---|
+| `/studyedge-ai` | claim "StudyEdge AI" brand entity for Google Knowledge Graph |
+| `/not-affiliated-with-study-edge` | disambiguate from studyedge.com tutoring (Florida) |
+
+**Blog (informational, top-of-funnel):**
+10 articles covering organic chem, GPA recovery, college schedules, A-grades, MCAT, finals, procrastination, ADHD studying, pre-med GPA, and heavy course loads. Each ends in a CTA to the app.
+
+**Next monthly run should:**
+1. Pull GSC impressions/clicks per URL (requires GSC connection, flagged).
+2. For any page with > 100 impressions and < 2% CTR, rewrite the title tag and meta description.
+3. Pick 2 net-new keywords with high impression / no rank and write articles for them.
+4. Update internal linking, every blog post should link to 2 landing pages and vice versa.
+
+### Decisions made in this run
+1. **Did not spin up the Astro `studyedge-blog` repo at `blog.getstudyedge.com`.** Same rationale as Run 1: the existing static blog under `/blog` is already published, indexed (sitemap-registered), and ranking would be split across two surfaces. Flagged in Open Questions if you want the split later.
+2. **Did not add Lighthouse CI.** Out of scope for a quality pass; needs a CI workflow file and a perf budget agreement.
+3. **Did not regenerate any landing page content.** Quality bar after em-dash purge is high; rewriting risks regressing copy that already reads well.
+
+### Files changed this run
+- `public/sitemap.xml` (rewritten, fresh `lastmod`, removed `/login`, added `/about`)
+- `public/login.html` (robots: noindex)
+- `app.html` (robots: noindex, nofollow)
+- 22 HTML files in `public/` and `public/blog/` (em-dash purge)
+- `CONTEXT.md` (this entry)
 
 ### Decisions Made by This SEO Run (deviations from spec)
 1. **Did NOT spin up a separate `studyedge-blog` Astro repo at `blog.getstudyedge.com`.** The existing static-HTML blog at `/blog/` is already published in `public/blog/`, sitemap-registered, and stylistically consistent. Adding a separate repo plus DNS setup would create two places to maintain. The 10 articles were added to the existing pattern instead. Re-decide if you want the subdomain split for analytics/MDX authoring.
