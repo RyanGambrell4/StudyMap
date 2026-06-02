@@ -58,7 +58,7 @@ export default async function handler(req, res) {
           ${headline}
         </h1>
         <p style="margin:0 0 22px;font-size:15.5px;color:#444444;line-height:1.65;">
-          You're set up. Before you start, try <strong style="color:#111111;">Pro free for 3 days</strong> — no credit card, cancel anytime. $2.99/wk after.
+          You're set up. Before you start, try <strong style="color:#111111;">Pro free for 3 days</strong>. $2.99/wk after the trial. Cancel anytime from your account.
         </p>
         <p style="margin:0 0 14px;font-size:11.5px;font-weight:600;letter-spacing:0.08em;color:#9B9B9B;text-transform:uppercase;">What Pro unlocks</p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:28px;">
@@ -93,7 +93,7 @@ export default async function handler(req, res) {
             </a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12.5px;color:#9B9B9B;">No credit card required. Cancel anytime.</span>
+            <span style="font-size:12.5px;color:#9B9B9B;">$0 today, then $2.99/wk. Cancel anytime in your account.</span>
           </td></tr>
         </table>
       </td></tr>

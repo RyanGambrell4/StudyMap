@@ -24,7 +24,7 @@ Read `AGENTS_SPEC.md` before running any agent task. It contains the full app co
 
 ## Pricing (live source of truth: `PRICING_SPEC.md`)
 - Free / Pro / Unlimited tiers
-- Pro: $2.99/wk · $9.99/mo · $69.99/yr — 3-day free trial, no card required
+- Pro: $2.99/wk · $9.99/mo · $69.99/yr — 3-day free trial via Stripe Checkout (card required, auto-bills $2.99/wk after)
 - Unlimited: $4.99/wk · $14.99/mo · $119.99/yr — no trial
 - `getActivePlan()` returns `'free' | 'trial' | 'pro' | 'unlimited'`
 
@@ -83,8 +83,8 @@ Run the StudyEdge Email agent. Read EMAIL_AGENT_SPEC.md and AGENTS_SPEC.md first
 - Landing page lives in `src/components/LandingPage.jsx`
 - Landing page is INTENTIONALLY DARK (`#060614` bg) — do NOT convert to light theme
 - This is the exception to the light-only rule — landing page dark theme is by design
-- CTA `goTrial()` must always point to `/app?signup=1&plan=pro&billing=monthly&trial=1`
-- "No credit card required" must appear near every trial CTA
+- CTA `goTrial()` must always point to `/app?signup=1&plan=pro&billing=weekly&trial=1`
+- Trial CTAs must NOT say "no credit card required" — the trial goes through Stripe Checkout and collects a card. Use "3-day free trial · Cancel anytime" instead.
 **Invocation:**
 ```
 Run the StudyEdge Landing Page agent. Read LANDING_AGENT_SPEC.md and AGENTS_SPEC.md first. Audit the current landing page, identify the highest-priority improvement, implement it fully, verify it builds, commit, push. Update CONTEXT.md when done.

@@ -638,9 +638,9 @@ export default function DashboardView({
             display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap',
           }}>
             <div style={{ flex: 1, minWidth: 200 }}>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>3 days of full Pro. No card required.</p>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>3 days of full Pro. Cancel anytime.</p>
               <p style={{ margin: '3px 0 8px', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
-                Try 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions — free for 3 days. $2.99/wk after.
+                Try 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions, free for 3 days. $2.99/wk after.
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 {['5 courses', '100 AI actions/month', 'Unlimited everything'].map(f => (

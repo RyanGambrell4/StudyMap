@@ -19,7 +19,7 @@ export default function AuthScreen({ initialMode, onBack }) {
       billing === 'weekly' ? 'weekly' :
       billing === 'semester' ? 'per semester' :
       'monthly'
-    if (trial === '1') return { text: `3-day free trial · ${planLabel}`, sub: `Full access included. No credit card required. Cancel anytime.` }
+    if (trial === '1') return { text: `3-day free trial · ${planLabel}`, sub: `Full access included. $0 today, then $2.99/wk. Cancel anytime in your account.` }
     return { text: `${planLabel} plan`, sub: `Billed ${billingLabel}. Cancel anytime.` }
   })()
 
@@ -184,7 +184,7 @@ export default function AuthScreen({ initialMode, onBack }) {
               borderRadius: 12, padding: '10px 14px', marginBottom: 20, display: 'flex', alignItems: 'center', gap: 10,
             }}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round"><polyline points="5 12 10 17 20 7"/></svg>
-              <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: '#059669' }}>Free forever — no credit card required</p>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: '#059669' }}>Free forever, no credit card required</p>
             </div>
           )}
 

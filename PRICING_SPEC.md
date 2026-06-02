@@ -42,7 +42,7 @@ Four tiers: Free, Pro, Unlimited. Pro and Unlimited each have three billing peri
 - Unlimited Focus Mode
 - Unlimited flashcard decks and cards
 - All features except Unlimited-only (see below)
-- **3-day free trial, no credit card required**
+- **3-day free trial via Stripe Checkout (card required, auto-bills $2.99/wk after unless canceled)**
 - Billed weekly / monthly / annual depending on chosen period
 
 ### Unlimited
@@ -82,7 +82,7 @@ Each card has a **Weekly / Monthly / Annual** billing toggle. Default: Weekly se
 │                     │  │ ← default shown           │  │                     │
 │ • 1 course          │  │                           │  │ Everything in Pro + │
 │ • Limited AI        │  │ 3-day free trial          │  │ • Unlimited AI      │
-│ • Basic features    │  │ No credit card needed     │  │ • Tutor memory      │
+│ • Basic features    │  │ Card required, cancel any │  │ • Tutor memory      │
 │                     │  │                           │  │ • Exam analytics    │
 │ [Get started free]  │  │ [Start free trial →]      │  │ [Get Unlimited →]   │
 └─────────────────────┘  └──────────────────────────┘  └─────────────────────┘
@@ -125,7 +125,7 @@ Value-focused, not guilt-based. Lead with price, not with what they're missing.
 │                                              │
 │  ┌─────────────────────────────────────┐     │
 │  │  Pro — $2.99/week                   │     │
-│  │  3-day free trial, no card needed   │     │
+│  │  3-day free trial · card required   │     │
 │  │  [Start free trial]                 │     │
 │  └─────────────────────────────────────┘     │
 │                                              │

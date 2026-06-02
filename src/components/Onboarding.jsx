@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { track } from '../lib/analytics'
-import { activateTrial, hasUsedTrial } from '../lib/subscription'
+import { createCheckoutSession, hasUsedTrial } from '../lib/subscription'
 
 const STEP_NAMES = {
   1: 'splash',
@@ -188,7 +188,7 @@ function SplashScreen({ onNext }) {
         </button>
 
         <p style={{ color: '#9B9B9B', fontSize: '0.8rem' }}>
-          Free to start · No credit card required
+          Takes less than a minute
         </p>
 
       </div>
@@ -334,6 +334,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   const [step, setStep]       = useState(1)
   const [animKey, setAnimKey] = useState(0)
   const [animDir, setAnimDir] = useState(1)
+  const [trialLoading, setTrialLoading] = useState(false)
 
   const [schoolType, setSchoolType]         = useState(null)
   const [yearLevel, setYearLevel]           = useState(null)
@@ -458,7 +459,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
-            Limited time · no card required
+            3 days free · cancel anytime
           </div>
         </div>
 
@@ -467,7 +468,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           Try every Pro feature.<br />Free for 3 days.
         </h1>
         <p style={{ color: '#6B6B6B', fontSize: '0.95rem', textAlign: 'center', marginBottom: 32, lineHeight: 1.6 }}>
-          See your full study plan, AI coach, and focus sessions in action — before you pay a cent.
+          See your full study plan, AI coach, and focus sessions in action before you pay anything.
         </p>
 
         {/* Feature list */}
@@ -476,7 +477,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             ['5 courses', 'Your full semester, all in one place'],
             ['100 AI actions/month', 'AI tutor, coach plans, blueprints, quizzes'],
             ['Unlimited focus sessions', 'Study as long as you need'],
-            ['Rebuild plans anytime', 'As exams shift and life happens'],
+            ['Rebuild plans anytime', 'When exams shift and life happens'],
           ].map(([title, desc]) => (
             <div key={title} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
               <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(59,97,196,0.1)', border: '1px solid rgba(59,97,196,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
@@ -496,14 +497,21 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         <button
           onClick={async () => {
             track('trial_cta_clicked', { source: 'onboarding' })
-            await activateTrial()
+            setTrialLoading(true)
             onComplete(profileData)
+            const url = await createCheckoutSession('pro', 'weekly', userEmail, userId, { trial: true })
+            if (url && !url.alreadySubscribed) {
+              window.location.href = url
+            } else {
+              setTrialLoading(false)
+            }
           }}
-          style={{ width: '100%', padding: '15px', background: '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.01em', marginBottom: 10 }}
-          onMouseEnter={e => e.currentTarget.style.background = '#2d4fa3'}
-          onMouseLeave={e => e.currentTarget.style.background = '#3B61C4'}
+          disabled={trialLoading}
+          style={{ width: '100%', padding: '15px', background: '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: trialLoading ? 'not-allowed' : 'pointer', letterSpacing: '-0.01em', marginBottom: 10, opacity: trialLoading ? 0.7 : 1 }}
+          onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.background = '#2d4fa3' }}
+          onMouseLeave={e => { if (!trialLoading) e.currentTarget.style.background = '#3B61C4' }}
         >
-          Start My Free Trial — 7 Days Free →
+          {trialLoading ? 'Loading…' : 'Start my 3-day free trial →'}
         </button>
 
         {/* Secondary */}
@@ -517,7 +525,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         </button>
 
         <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.72rem', marginTop: 16 }}>
-          No credit card · trial ends after 3 days · downgrade to free automatically
+          Card required · $0 today · auto-bills $2.99/wk after trial unless canceled
         </p>
       </div>
     </div>

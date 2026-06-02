@@ -325,10 +325,10 @@ export default function AccountView({
             textAlign: 'center',
           }}>
             <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: '#111111' }}>
-              Start your 3-day free trial — no card required
+              Start your 3-day free trial
             </p>
             <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>
-              Full Pro access. Cancel anytime. Zero payment info needed.
+              Full Pro access for 3 days. $0 today, then $2.99/wk. Cancel anytime in your account.
             </p>
             <button
               onClick={() => onShowPaywall?.('trial')}

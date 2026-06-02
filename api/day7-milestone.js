@@ -88,7 +88,7 @@ export default async function handler(req, res) {
           </tr>`).join('')}
         </table>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro starts at <strong style="color:#111111;">$2.99/week</strong> — less than a coffee. Try it free for 3 days, no card needed.
+          Pro starts at <strong style="color:#111111;">$2.99/week</strong>, less than a coffee. Try it free for 3 days, cancel anytime in your account.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">

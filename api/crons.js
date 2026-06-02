@@ -67,8 +67,8 @@ async function handleWelcomeEmail(req, res) {
         <tr><td style="padding-bottom:24px;">
           <p style="margin:0 0 14px;font-size:15px;color:#94A3B8;line-height:1.7;">
             Your account is set up and ready. Before you dive in, here's one thing worth knowing:
-            you can try <strong style="color:#c7d2fe;">Pro free for 3 days</strong> — $2.99/wk after,
-            no credit card required to start.
+            you can try <strong style="color:#c7d2fe;">Pro free for 3 days</strong>. $2.99/wk after the trial,
+            cancel anytime in your account.
           </p>
           <p style="margin:0 0 14px;font-size:15px;color:#94A3B8;line-height:1.7;">Here's what Pro unlocks:</p>
           <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:20px;">
@@ -96,7 +96,7 @@ async function handleWelcomeEmail(req, res) {
           </a>
         </td></tr>
         <tr><td style="padding-bottom:32px;text-align:center;">
-          <span style="font-size:12px;color:#334155;">No credit card required. Cancel anytime.</span>
+          <span style="font-size:12px;color:#334155;">$0 today, then $2.99/wk after trial. Cancel anytime.</span>
         </td></tr>
 
         <tr><td style="border-top:1px solid rgba(255,255,255,0.07);padding-top:24px;">
@@ -382,7 +382,7 @@ async function handleWeeklyRecap(req, res) {
         <tr><td style="padding-bottom:32px;">
           <div style="background:linear-gradient(135deg,rgba(79,126,247,0.12),rgba(124,92,250,0.12));border:1px solid rgba(99,102,241,0.25);border-radius:12px;padding:18px 20px;">
             <p style="margin:0 0 6px;font-size:14px;font-weight:700;color:#c7d2fe;">✦ Want to study more effectively next week?</p>
-            <p style="margin:0 0 14px;font-size:13px;color:#475569;line-height:1.5;">Pro gives you 100 AI study boosts/month, 5 courses, Study Coach, and Session Blueprints. $2.99/week — try free for 3 days, no card needed.</p>
+            <p style="margin:0 0 14px;font-size:13px;color:#475569;line-height:1.5;">Pro gives you 100 AI study boosts/month, 5 courses, Study Coach, and Session Blueprints. $2.99/week, with a 3-day free trial. Cancel anytime.</p>
             <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1"
                style="display:inline-block;background:linear-gradient(135deg,#4F7EF7,#7C5CFA);color:#fff;font-size:13px;font-weight:700;text-decoration:none;border-radius:8px;padding:10px 22px;">
               Start 3-day free trial →
@@ -917,7 +917,7 @@ async function handleDay7Milestone(req, res) {
           </table>
 
           <p style="margin:0;font-size:15px;color:#94A3B8;line-height:1.7;">
-            Pro starts at <strong style="color:#c7d2fe;">$2.99/week</strong> — less than a coffee, for tools that actually help you study. Try free for 3 days, no card.
+            Pro starts at <strong style="color:#c7d2fe;">$2.99/week</strong>, less than a coffee, for tools that actually help you study. Try free for 3 days, cancel anytime.
           </p>
         </td></tr>
 

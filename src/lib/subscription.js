@@ -3,7 +3,7 @@
  *
  * 3-tier model:
  *  Free      → permanent, capped per feature
- *  Trial     → 3-day full Pro, no card required, one-time per account
+ *  Trial     → 3-day full Pro via Stripe Checkout (card required, auto-bills $2.99/wk after unless canceled)
  *  Pro       → Stripe paid (weekly/monthly/annual), 5 courses, 100 AI actions/month
  *  Unlimited → Stripe paid (weekly/monthly/annual), unlimited everything + tutor memory & advanced analytics
  */

@@ -178,7 +178,7 @@ export default function SharedPlanView() {
               boxShadow: '0 4px 16px rgba(99,102,241,0.3)',
             }}
           >
-            Start free — no card required
+            Get started free
           </a>
           <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 10 }}>
             Joined by 2,000+ students this semester
