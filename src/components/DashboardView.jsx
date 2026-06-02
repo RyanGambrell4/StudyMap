@@ -4,7 +4,7 @@ import ReferralCard from './ReferralCard'
 import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
-import { getActivePlan, getAIQueriesUsed, isTrialActive, hasUsedTrial, getTrialDaysRemaining } from '../lib/subscription'
+import { getActivePlan, getAIQueriesUsed, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import { daysBetween, formatShortDate } from '../utils/dateUtils'
 
@@ -149,6 +149,8 @@ export default function DashboardView({
   onNavigateToTutor,
   onNavigateToTools,
   onShowPaywall,
+  userEmail,
+  userId,
   coachPlans,
   onOpenStudyCoach,
   schoolType,
@@ -163,6 +165,23 @@ export default function DashboardView({
 }) {
   const plan = getActivePlan()
   const aiUsed = getAIQueriesUsed()
+  const [trialBannerLoading, setTrialBannerLoading] = useState(false)
+
+  const handleStartTrial = async () => {
+    if (trialBannerLoading) return
+    setTrialBannerLoading(true)
+    try {
+      const url = await createCheckoutSession('pro', 'weekly', userEmail, userId, { trial: true })
+      if (url && !url.alreadySubscribed) {
+        window.location.href = url
+      } else {
+        setTrialBannerLoading(false)
+        if (url?.alreadySubscribed) onShowPaywall?.('trial')
+      }
+    } catch {
+      setTrialBannerLoading(false)
+    }
+  }
   const [aiChipDismissed, setAiChipDismissed] = useState(
     () => sessionStorage.getItem('studyedge_ai_chip_dismissed') === '1'
   )
@@ -652,8 +671,12 @@ export default function DashboardView({
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-              <button onClick={() => onShowPaywall?.('trial')} style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                Start Free Trial →
+              <button
+                onClick={handleStartTrial}
+                disabled={trialBannerLoading}
+                style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
+              >
+                {trialBannerLoading ? 'Loading…' : 'Start Free Trial →'}
               </button>
               <button onClick={() => { localStorage.setItem('studyedge_trial_card_dismissed', '1'); setTrialCardDismissed(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: D.textDim, fontSize: 20, lineHeight: 1, padding: '0 4px', flexShrink: 0 }} aria-label="Dismiss">×</button>
             </div>

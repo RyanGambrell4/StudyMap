@@ -1373,6 +1373,8 @@ export default function OutputView({
             onNavigateToTutor={() => setActiveSection('tutor')}
             onNavigateToTools={() => setActiveSection('tools')}
             onShowPaywall={onShowPaywall}
+            userEmail={userEmail}
+            userId={userId}
             recoveryCoursesIdx={recoveryCoursesIdx}
             examConflicts={examConflicts}
             coachPlans={coachPlans}
@@ -1764,6 +1766,7 @@ export default function OutputView({
         {activeSection === 'account' && (
           <AccountView
             userEmail={userEmail}
+            userId={userId}
             onSignOut={onSignOut}
             onImportSyllabus={() => setSyllabusModalCourse(-1)}
             onEditPlan={onEditPlan}

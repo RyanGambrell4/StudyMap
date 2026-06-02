@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { getActivePlan, getCachedSubscription, initSubscription, isTrialActive, hasUsedTrial, getTrialDaysRemaining } from '../lib/subscription'
+import { getActivePlan, getCachedSubscription, initSubscription, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession } from '../lib/subscription'
 import { supabase } from '../lib/supabase'
 import ReferralCard from './ReferralCard'
 
@@ -73,6 +73,7 @@ const sectionLabel = {
 
 export default function AccountView({
   userEmail,
+  userId,
   onSignOut,
   onImportSyllabus,
   onEditPlan,
@@ -93,6 +94,23 @@ export default function AccountView({
 
   const [canceling, setCanceling] = useState(false)
   const [canceled, setCanceled] = useState(false)
+  const [trialStarting, setTrialStarting] = useState(false)
+
+  const handleStartTrial = async () => {
+    if (trialStarting) return
+    setTrialStarting(true)
+    try {
+      const url = await createCheckoutSession('pro', 'weekly', userEmail, userId, { trial: true })
+      if (url && !url.alreadySubscribed) {
+        window.location.href = url
+      } else {
+        setTrialStarting(false)
+        if (url?.alreadySubscribed) onShowPaywall?.('trial')
+      }
+    } catch {
+      setTrialStarting(false)
+    }
+  }
   const [smsPhone, setSmsPhone] = useState('')
   const [smsEnabled, setSmsEnabled] = useState(false)
   const [smsSaving, setSmsSaving] = useState(false)
@@ -331,15 +349,18 @@ export default function AccountView({
               Full Pro access for 3 days. $0 today, then $2.99/wk. Cancel anytime in your account.
             </p>
             <button
-              onClick={() => onShowPaywall?.('trial')}
+              onClick={handleStartTrial}
+              disabled={trialStarting}
               style={{
                 width: '100%', padding: '11px',
                 background: '#3B61C4',
                 border: 'none', borderRadius: 10,
-                color: '#fff', fontSize: 14, fontWeight: 600, cursor: 'pointer',
+                color: '#fff', fontSize: 14, fontWeight: 600,
+                cursor: trialStarting ? 'not-allowed' : 'pointer',
+                opacity: trialStarting ? 0.7 : 1,
               }}
             >
-              Start Free Trial →
+              {trialStarting ? 'Loading…' : 'Start Free Trial →'}
             </button>
           </div>
         )}
