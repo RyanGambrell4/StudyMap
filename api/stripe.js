@@ -595,8 +595,14 @@ export default async function handler(req, res) {
         .maybeSingle()
 
       const existingSub = existingUser?.subscription
-      if (existingSub?.status === 'active' || existingSub?.status === 'trialing') {
-        console.warn(`[stripe checkout] Blocked duplicate checkout for user ${userId} — already ${existingSub.status}`)
+      // Only block if the user already has a real Stripe-backed paid/trialing sub.
+      // Free users default to { plan: 'free', status: 'active' } so checking status
+      // alone was rejecting every signup; require an actual stripeSubId + paid plan.
+      const hasRealPaidSub = !!existingSub?.stripeSubId
+        && ['active', 'trialing', 'past_due'].includes(existingSub?.status)
+        && ['pro', 'unlimited'].includes(existingSub?.plan)
+      if (hasRealPaidSub) {
+        console.warn(`[stripe checkout] Blocked duplicate checkout for user ${userId} — already ${existingSub.status} on ${existingSub.plan}`)
         return res.status(409).json({
           error: 'You already have an active subscription.',
           alreadySubscribed: true,
