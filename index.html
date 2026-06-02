@@ -1780,7 +1780,7 @@
 
       const billedSub = (planKey) => {
         if (planKey === 'pro') {
-          if (bill === 'weekly')  return 'Billed weekly · 3-day free trial, no card';
+          if (bill === 'weekly')  return 'Billed weekly · 3-day free trial, cancel anytime';
           if (bill === 'monthly') return 'Billed $' + PRICE_TABLE[planKey].monthly.toFixed(2) + '/month · 3-day free trial';
           return 'Billed $' + PRICE_TABLE[planKey].yearly.toFixed(2) + '/year · 3-day free trial';
         }
@@ -1896,7 +1896,7 @@
           <h2 className="finalcta-h2">
             Your semester isn't going<br />to <em style={{color:'var(--accent)'}}>plan itself.</em>
           </h2>
-          <p className="finalcta-sub">Free to start. No credit card. Takes three minutes to set up.</p>
+          <p className="finalcta-sub">3-day free trial · Cancel anytime · Takes three minutes to set up.</p>
           <button className="btn btn-primary-lg" onClick={() => goTo('/app?signup=1&plan=pro&billing=weekly&trial=1')}>Start Free Trial</button>
         </div>
       );
