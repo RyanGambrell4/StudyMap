@@ -419,6 +419,17 @@ Tier-1 consistency/bug fixes + three structural primitives. All 28 touched files
 
 ## SEO Status
 
+### Run 5 — Brand compliance + Layer 1/4 hardening (2026-06-03)
+- Layer 1 (index.html):
+  - Upgraded JSON-LD schema from `SoftwareApplication` to `WebApplication` (more specific subtype) + added `browserRequirements`
+  - Added preconnect hints for Supabase (`https://vpmgamaspefwqywttdtj.supabase.co`) and PostHog (`https://us.i.posthog.com`)
+- Layer 2 brand compliance pass on all 6 landing pages:
+  - CTA fine-print "Free to start. No credit card required." → "3-day free trial. Cancel anytime." (Stripe collects a card; the old copy was incorrect)
+  - Footer em-dash `StudyEdge AI &mdash; getstudyedge.com` → comma
+  - `how-to-study-for-finals.html`: removed "leverage" usages (banned brand word — replaced with "payoff" and "highest-impact")
+- Layer 4: established keyword baseline in `SEO_KEYWORDS.md` (40+ keywords across 4 tiers — primary targets, long-tail blog, comparison/alternative, watch list). Next monthly run: pull GSC query report and update with impressions/clicks/position.
+- Open: Lighthouse Core Web Vitals audit still not run (no Lighthouse CI configured).
+
 ### Layer 1 — Technical SEO (complete)
 - `public/sitemap.xml`: updated with all new pages, 36 URLs total
 - `public/robots.txt`: present, allows all, points to sitemap, blocks `/app` and `/api/`
