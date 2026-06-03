@@ -504,8 +504,10 @@ export default function App() {
     )
   }
 
-  // ── Paid plan checkout redirect ──────────────────────────────────────────
-  if (checkoutIntent && !checkoutIntent.trial && getActivePlan() === 'free') {
+  // ── Stripe checkout redirect (paid plans AND 3-day free trial) ───────────
+  // Trial=1 still redirects to Stripe Checkout: the trial requires a card up
+  // front via `payment_method_collection: 'always'` and auto-bills after 3 days.
+  if (checkoutIntent && getActivePlan() === 'free') {
     window.history.replaceState({}, '', window.location.pathname)
     createCheckoutSession(checkoutIntent.plan, checkoutIntent.billing, session.user.email, session.user.id, { trial: checkoutIntent.trial }).then(result => {
       if (!result || result.alreadySubscribed) return
