@@ -17,6 +17,11 @@
   <meta property="og:image" content="https://getstudyedge.com/hero-landing.png" />
   <meta property="og:site_name" content="StudyEdge AI" />
 
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+
   <!-- JSON-LD: Organization (brand entity disambiguation) -->
   <script type="application/ld+json">
   {
@@ -82,7 +87,7 @@
         "name": "How much does StudyEdge AI cost?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "StudyEdge AI is free to start, no credit card required. Free users get 2 courses, 1 AI message per day, and 1 free use of key features including Session Blueprints, Focus Mode, and the AI Coach Plan. Pro plan starts at $2.99/week (also $9.99/month or $69.99/year) with a 3-day free trial, cancel anytime. Unlimited plan starts at $4.99/week (also $14.99/month or $119.99/year)."
+          "text": "StudyEdge AI is free to start, no credit card required for the free plan. Free users get 2 courses, 1 AI message per day, and 1 free use of key features including Session Blueprints, Focus Mode, and the AI Coach Plan. Pro plan starts at $2.99/week (also $9.99/month or $69.99/year) with a 3-day free trial, cancel anytime. Unlimited plan starts at $4.99/week (also $14.99/month or $119.99/year)."
         }
       },
       {
@@ -99,120 +104,285 @@
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #060614;
+      --bg-elev: rgba(255,255,255,0.03);
+      --border: rgba(255,255,255,0.07);
+      --border-strong: rgba(255,255,255,0.12);
+      --text: #e2e8f0;
+      --text-muted: rgba(226,232,240,0.62);
+      --text-dim: rgba(226,232,240,0.4);
+      --accent: #6366F1;
+      --accent-2: #3B61C4;
+      --accent-warm: #EA580C;
+      --accent-mint: #22c55e;
+    }
+    html { scroll-behavior: smooth; }
     body {
       font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      background: #080914;
-      color: #e2e8f0;
+      background: var(--bg);
+      color: var(--text);
       line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
     }
-    .container { max-width: 800px; margin: 0 auto; padding: 0 24px; }
-    header {
-      padding: 20px 0;
-      border-bottom: 1px solid rgba(255,255,255,0.06);
+
+    /* Ambient background glow */
+    .bg-fx {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(800px 500px at 15% -10%, rgba(99,102,241,0.18), transparent 60%),
+        radial-gradient(700px 480px at 100% 0%, rgba(234,88,12,0.10), transparent 65%),
+        radial-gradient(900px 600px at 50% 120%, rgba(59,97,196,0.14), transparent 60%);
     }
+
+    .container { max-width: 1080px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+    /* Nav */
+    header.site-nav {
+      position: sticky; top: 0; z-index: 50;
+      backdrop-filter: blur(14px) saturate(150%);
+      -webkit-backdrop-filter: blur(14px) saturate(150%);
+      background: rgba(6,6,20,0.65);
+      border-bottom: 1px solid var(--border);
+    }
+    .nav-inner { display: flex; align-items: center; justify-content: space-between; padding: 14px 0; }
     .logo { display: flex; align-items: center; gap: 10px; text-decoration: none; }
     .logo-mark {
-      width: 32px; height: 32px; border-radius: 8px;
-      background: #3B61C4; display: flex; align-items: center; justify-content: center;
+      width: 30px; height: 30px; border-radius: 8px;
+      background: linear-gradient(135deg, #3B61C4, #6366F1);
+      display: flex; align-items: center; justify-content: center;
       overflow: hidden;
+      box-shadow: 0 6px 18px rgba(99,102,241,0.35);
     }
-    .logo-mark img { width: 100%; height: 100%; object-fit: contain; }
-    .logo-name { font-size: 17px; font-weight: 700; color: #fff; }
-    nav { display: flex; align-items: center; justify-content: space-between; }
+    .logo-mark img { width: 70%; height: 70%; object-fit: contain; }
+    .logo-name { font-size: 16px; font-weight: 700; color: #fff; letter-spacing: -0.01em; }
     .nav-cta {
-      background: #3B61C4; color: #fff; font-weight: 600; font-size: 14px;
-      padding: 8px 18px; border-radius: 8px; text-decoration: none;
-      transition: opacity 0.15s;
+      background: linear-gradient(180deg, #4F75E8, #3B61C4);
+      color: #fff; font-weight: 600; font-size: 14px;
+      padding: 9px 18px; border-radius: 10px; text-decoration: none;
+      box-shadow: 0 8px 22px rgba(59,97,196,0.42), inset 0 1px 0 rgba(255,255,255,0.15);
+      transition: transform 0.15s, box-shadow 0.15s;
     }
-    .nav-cta:hover { opacity: 0.85; }
+    .nav-cta:hover { transform: translateY(-1px); box-shadow: 0 12px 28px rgba(59,97,196,0.5), inset 0 1px 0 rgba(255,255,255,0.18); }
 
-    main { padding: 64px 0 80px; }
-    .breadcrumb { font-size: 13px; color: rgba(226,232,240,0.4); margin-bottom: 32px; }
-    .breadcrumb a { color: rgba(226,232,240,0.4); text-decoration: none; }
-    .breadcrumb a:hover { color: rgba(226,232,240,0.7); }
+    /* Hero */
+    main { padding: 64px 0 80px; position: relative; z-index: 1; }
+    .breadcrumb { font-size: 12.5px; color: var(--text-dim); margin-bottom: 22px; letter-spacing: 0.01em; }
+    .breadcrumb a { color: var(--text-dim); text-decoration: none; }
+    .breadcrumb a:hover { color: var(--text-muted); }
 
-    h1 { font-size: 36px; font-weight: 800; letter-spacing: -0.5px; color: #fff; margin-bottom: 16px; line-height: 1.2; }
-    .subtitle { font-size: 18px; color: rgba(226,232,240,0.55); margin-bottom: 40px; line-height: 1.5; }
-
-    .notice-box {
-      background: rgba(59,97,196,0.1);
-      border: 1px solid rgba(59,97,196,0.3);
-      border-radius: 12px;
-      padding: 20px 24px;
-      margin-bottom: 48px;
+    .eyebrow {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(99,102,241,0.95);
+      background: rgba(99,102,241,0.10);
+      border: 1px solid rgba(99,102,241,0.22);
+      padding: 7px 12px; border-radius: 999px;
+      margin-bottom: 22px;
     }
-    .notice-box strong { color: #93c5fd; }
-    .notice-box p { font-size: 15px; color: rgba(226,232,240,0.75); line-height: 1.6; }
-
-    h2 { font-size: 24px; font-weight: 700; color: #fff; margin-bottom: 16px; margin-top: 48px; }
-    p { font-size: 16px; color: rgba(226,232,240,0.7); margin-bottom: 16px; line-height: 1.7; }
-
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 16px;
-      margin: 24px 0 48px;
+    .eyebrow::before {
+      content: ""; width: 7px; height: 7px; border-radius: 50%;
+      background: var(--accent-mint); box-shadow: 0 0 10px var(--accent-mint);
     }
-    .feature-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.07);
-      border-radius: 12px;
-      padding: 20px;
+
+    h1.hero {
+      font-size: clamp(38px, 5.4vw, 60px);
+      font-weight: 800; letter-spacing: -0.025em;
+      color: #fff; line-height: 1.05;
+      margin-bottom: 22px;
+      max-width: 880px;
     }
-    .feature-card h3 { font-size: 15px; font-weight: 700; color: #fff; margin-bottom: 6px; }
-    .feature-card p { font-size: 13px; color: rgba(226,232,240,0.5); margin: 0; }
+    h1.hero em {
+      font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400;
+      color: #c7c9ff;
+    }
+    .subtitle {
+      font-size: 19px; color: var(--text-muted);
+      max-width: 680px; line-height: 1.55;
+      margin-bottom: 36px;
+    }
+    .hero-ctas { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin-bottom: 14px; }
+    .btn-primary {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(180deg, #4F75E8, #3B61C4);
+      color: #fff; font-weight: 700; font-size: 15.5px;
+      padding: 14px 26px; border-radius: 12px; text-decoration: none;
+      box-shadow: 0 14px 36px rgba(59,97,196,0.45), inset 0 1px 0 rgba(255,255,255,0.18);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 18px 44px rgba(59,97,196,0.55), inset 0 1px 0 rgba(255,255,255,0.22); }
+    .btn-ghost {
+      display: inline-flex; align-items: center; gap: 8px;
+      color: var(--text); font-weight: 600; font-size: 14.5px;
+      padding: 13px 18px; border-radius: 12px; text-decoration: none;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid var(--border);
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,0.07); border-color: var(--border-strong); }
+    .cta-fine { font-size: 13px; color: var(--text-dim); margin-top: 4px; }
 
-    .faq-section { margin-top: 48px; }
-    .faq-item { border-bottom: 1px solid rgba(255,255,255,0.06); padding: 20px 0; }
-    .faq-item:first-child { border-top: 1px solid rgba(255,255,255,0.06); }
-    .faq-q { font-size: 16px; font-weight: 600; color: #fff; margin-bottom: 8px; }
-    .faq-a { font-size: 15px; color: rgba(226,232,240,0.6); line-height: 1.65; }
+    /* Hero image card */
+    .hero-shot {
+      margin-top: 56px;
+      border-radius: 18px;
+      overflow: hidden;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+      box-shadow: 0 40px 100px rgba(0,0,0,0.55), 0 0 0 1px rgba(255,255,255,0.04);
+      position: relative;
+    }
+    .hero-shot::before {
+      content: ""; position: absolute; inset: -1px; border-radius: 18px;
+      background: linear-gradient(180deg, rgba(99,102,241,0.25), transparent 35%);
+      pointer-events: none;
+    }
+    .hero-shot img { display: block; width: 100%; height: auto; }
 
-    .cta-section {
-      margin-top: 64px;
-      text-align: center;
-      background: rgba(59,97,196,0.08);
-      border: 1px solid rgba(59,97,196,0.2);
+    /* Disambiguation panel */
+    .disambig {
+      margin-top: 80px;
+      padding: 28px 32px;
+      background: linear-gradient(180deg, rgba(99,102,241,0.10), rgba(99,102,241,0.04));
+      border: 1px solid rgba(99,102,241,0.22);
       border-radius: 16px;
-      padding: 48px 32px;
+      display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: start;
     }
-    .cta-section h2 { margin-top: 0; font-size: 28px; }
-    .cta-btn {
-      display: inline-block;
-      background: #3B61C4;
-      color: #fff;
-      font-weight: 700;
-      font-size: 16px;
-      padding: 14px 32px;
-      border-radius: 10px;
-      text-decoration: none;
-      margin-top: 20px;
-      transition: opacity 0.15s;
+    .disambig-icon {
+      width: 44px; height: 44px; border-radius: 12px;
+      background: rgba(99,102,241,0.16);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 22px;
     }
-    .cta-btn:hover { opacity: 0.85; }
-    .cta-sub { font-size: 13px; color: rgba(226,232,240,0.35); margin-top: 12px; }
+    .disambig h2 { font-size: 17px; font-weight: 700; color: #fff; margin-bottom: 8px; letter-spacing: -0.01em; }
+    .disambig p { font-size: 14.5px; color: var(--text-muted); line-height: 1.65; }
+    .disambig a { color: #a5b4fc; text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px; }
+    .disambig strong { color: #c7d2fe; font-weight: 600; }
 
-    footer {
-      border-top: 1px solid rgba(255,255,255,0.06);
-      padding: 24px 0;
-      text-align: center;
-      font-size: 13px;
-      color: rgba(226,232,240,0.3);
+    /* Section heading */
+    .section-head { margin: 96px 0 32px; max-width: 720px; }
+    .section-eyebrow {
+      font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+      color: rgba(99,102,241,0.9); margin-bottom: 14px;
     }
-    footer a { color: rgba(226,232,240,0.4); text-decoration: none; }
-    footer a:hover { color: rgba(226,232,240,0.7); }
+    .section-title {
+      font-size: clamp(28px, 3.6vw, 40px); font-weight: 700; color: #fff;
+      letter-spacing: -0.02em; line-height: 1.1; margin-bottom: 14px;
+    }
+    .section-title em { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: #c7c9ff; }
+    .section-sub { font-size: 17px; color: var(--text-muted); line-height: 1.55; }
+
+    /* Feature rows with screenshots */
+    .feature-row {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center;
+      margin-bottom: 72px;
+    }
+    .feature-row.reverse .feature-text { order: 2; }
+    .feature-row.reverse .feature-shot { order: 1; }
+    .feature-text .ft-eyebrow {
+      display: inline-block;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+      color: var(--accent-warm);
+      background: rgba(234,88,12,0.10);
+      border: 1px solid rgba(234,88,12,0.22);
+      padding: 5px 11px; border-radius: 999px;
+      margin-bottom: 16px;
+    }
+    .feature-text.alt .ft-eyebrow { color: var(--accent); background: rgba(99,102,241,0.10); border-color: rgba(99,102,241,0.22); }
+    .feature-text.mint .ft-eyebrow { color: var(--accent-mint); background: rgba(34,197,94,0.10); border-color: rgba(34,197,94,0.22); }
+    .feature-text h3 { font-size: 28px; font-weight: 700; color: #fff; margin-bottom: 14px; letter-spacing: -0.02em; line-height: 1.18; }
+    .feature-text p { font-size: 16px; color: var(--text-muted); line-height: 1.65; margin-bottom: 12px; }
+    .feature-text ul { list-style: none; padding: 0; margin-top: 14px; }
+    .feature-text li {
+      font-size: 14.5px; color: var(--text-muted);
+      padding-left: 22px; position: relative; margin-bottom: 8px; line-height: 1.55;
+    }
+    .feature-text li::before {
+      content: ""; position: absolute; left: 0; top: 8px;
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+    }
+    .feature-shot {
+      border-radius: 14px; overflow: hidden;
+      border: 1px solid var(--border);
+      background: linear-gradient(180deg, rgba(255,255,255,0.04), rgba(255,255,255,0.01));
+      box-shadow: 0 30px 70px rgba(0,0,0,0.45);
+    }
+    .feature-shot img { display: block; width: 100%; height: auto; }
+
+    /* FAQ */
+    .faq-grid { display: grid; gap: 14px; margin-top: 24px; }
+    .faq-item {
+      background: var(--bg-elev);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 22px 24px;
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .faq-item:hover { border-color: var(--border-strong); background: rgba(255,255,255,0.05); }
+    .faq-q { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 10px; letter-spacing: -0.005em; }
+    .faq-a { font-size: 15px; color: var(--text-muted); line-height: 1.65; }
+
+    /* Final CTA */
+    .final-cta {
+      margin-top: 96px;
+      padding: 56px 40px;
+      border-radius: 22px;
+      background:
+        radial-gradient(600px 300px at 50% 0%, rgba(99,102,241,0.25), transparent 70%),
+        linear-gradient(180deg, rgba(99,102,241,0.10), rgba(59,97,196,0.05));
+      border: 1px solid rgba(99,102,241,0.25);
+      text-align: center;
+      position: relative; overflow: hidden;
+    }
+    .final-cta h2 {
+      font-size: clamp(28px, 4.2vw, 44px); font-weight: 700; color: #fff;
+      letter-spacing: -0.025em; line-height: 1.1; margin-bottom: 14px;
+    }
+    .final-cta h2 em { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: #c7c9ff; }
+    .final-cta p { font-size: 17px; color: var(--text-muted); max-width: 560px; margin: 0 auto 28px; line-height: 1.55; }
+    .final-cta .cta-fine { margin-top: 16px; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      margin-top: 80px;
+      padding: 40px 0;
+      font-size: 13px;
+      color: var(--text-dim);
+    }
+    footer a { color: var(--text-muted); text-decoration: none; }
+    footer a:hover { color: var(--text); }
+    .footer-row { display: flex; flex-wrap: wrap; gap: 14px 26px; align-items: baseline; }
+    .footer-group strong { color: var(--text-muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-right: 10px; }
+    .footer-bottom { margin-top: 24px; padding-top: 22px; border-top: 1px solid var(--border); font-size: 12.5px; line-height: 1.7; color: var(--text-dim); }
+    .footer-bottom a { color: var(--text-muted); }
+
+    /* Responsive */
+    @media (max-width: 880px) {
+      main { padding: 40px 0 56px; }
+      .feature-row { grid-template-columns: 1fr; gap: 28px; margin-bottom: 56px; }
+      .feature-row.reverse .feature-text { order: 0; }
+      .feature-row.reverse .feature-shot { order: 0; }
+      .disambig { grid-template-columns: 1fr; gap: 16px; padding: 22px; }
+      .final-cta { padding: 40px 24px; }
+      .hero-ctas { gap: 10px; }
+      .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
+    }
   </style>
 </head>
 <body>
 
-  <header>
+  <div class="bg-fx"></div>
+
+  <header class="site-nav">
     <div class="container">
-      <nav>
+      <nav class="nav-inner">
         <a href="/" class="logo">
           <div class="logo-mark"><img src="/favicon.png" alt="StudyEdge AI" /></div>
           <span class="logo-name">StudyEdge AI</span>
         </a>
-        <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="nav-cta">Try free for 3 days →</a>
+        <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="nav-cta">Try free for 3 days &rarr;</a>
       </nav>
     </div>
   </header>
@@ -221,66 +391,98 @@
     <div class="container">
 
       <div class="breadcrumb">
-        <a href="/">StudyEdge AI</a> › About StudyEdge AI
+        <a href="/">StudyEdge AI</a> &rsaquo; About
       </div>
 
-      <h1>StudyEdge AI, The AI Study Planner for College Students</h1>
+      <span class="eyebrow">The official StudyEdge AI</span>
+
+      <h1 class="hero">
+        The AI study planner <em>built</em> for college students.
+      </h1>
       <p class="subtitle">
-        StudyEdge AI (getstudyedge.com) automatically builds your study schedule, plans every session minute-by-minute, and coaches you through it with flashcards, quizzes, and an AI tutor.
+        StudyEdge AI (getstudyedge.com) auto-builds your weekly schedule around your real classes and exams, plans every session minute by minute, and runs the session with you. Flashcards, quizzes, active recall, and an AI tutor live inside the same app.
       </p>
 
-      <div class="notice-box">
-        <p><strong>Note:</strong> StudyEdge AI (<strong>getstudyedge.com</strong>) is not affiliated with Study Edge (<strong>studyedge.com</strong>), which is a separate human tutoring company. StudyEdge AI is an AI-powered study planning app, no human tutors, fully automated, available 24/7. <a href="/not-affiliated-with-study-edge" style="color:inherit;text-decoration:underline">Read the full clarification</a>.</p>
+      <div class="hero-ctas">
+        <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="btn-primary">Start free 3-day trial &rarr;</a>
+        <a href="/" class="btn-ghost">See the full landing page</a>
+      </div>
+      <p class="cta-fine">3-day free trial. Cancel anytime.</p>
+
+      <div class="hero-shot">
+        <img src="/hero-landing.png" alt="StudyEdge AI dashboard: weekly study schedule, session blueprint, and AI tutor inside one app." loading="eager" />
       </div>
 
-      <h2>What is StudyEdge AI?</h2>
-      <p>
-        StudyEdge AI is a complete AI study system designed for college and university students. Unlike traditional study planners that just show you what to study, StudyEdge AI builds the entire plan for you, and runs the session with you.
-      </p>
-      <p>
-        You add your courses and exam dates. StudyEdge AI automatically generates a week-by-week study schedule, builds a minute-by-minute blueprint for every session, and provides built-in AI flashcards, quizzes, active recall, and an AI tutor, all without switching apps.
-      </p>
-
-      <div class="feature-grid">
-        <div class="feature-card">
-          <h3>AI Study Schedule</h3>
-          <p>Your week planned automatically around your exams, deadlines, and available hours.</p>
-        </div>
-        <div class="feature-card">
-          <h3>Session Blueprints</h3>
-          <p>A minute-by-minute structure for every session before you sit down.</p>
-        </div>
-        <div class="feature-card">
-          <h3>AI Tutor</h3>
-          <p>Ask anything about your course material. Available 24/7 for any subject.</p>
-        </div>
-        <div class="feature-card">
-          <h3>Flashcards &amp; Quizzes</h3>
-          <p>AI-generated from your notes and syllabus. Built into every session.</p>
-        </div>
-        <div class="feature-card">
-          <h3>Grade Hub</h3>
-          <p>Track your grades and model exactly what you need to hit your target.</p>
-        </div>
-        <div class="feature-card">
-          <h3>AI Study Coach</h3>
-          <p>A personalized weekly study plan built around your struggles and deadlines.</p>
+      <div class="disambig">
+        <div class="disambig-icon" aria-hidden="true">i</div>
+        <div>
+          <h2>StudyEdge AI is not Study Edge (studyedge.com)</h2>
+          <p>
+            <strong>StudyEdge AI</strong> at <strong>getstudyedge.com</strong> is an AI-powered study planner app. It has no human tutors, no in-person classes, and no business relationship of any kind with <strong>Study Edge</strong> (studyedge.com), a separate human tutoring company. If you came here looking for the tutoring service, you are on the wrong site. <a href="/not-affiliated-with-study-edge">Read the full clarification.</a>
+          </p>
         </div>
       </div>
 
-      <h2>StudyEdge AI vs. Study Edge (studyedge.com)</h2>
-      <p>
-        If you found this page after searching for "StudyEdge AI" and landed on studyedge.com instead, that's a different company. Here's the difference:
-      </p>
-      <p>
-        <strong style="color:#fff;">StudyEdge AI</strong> (this site, getstudyedge.com) is a software application. It's an AI-powered study planner that automatically builds your schedule and coaches you using artificial intelligence. There are no human tutors. It works for any student, at any school, in any subject.
-      </p>
-      <p>
-        <strong style="color:#fff;">Study Edge</strong> (studyedge.com) is a human tutoring company with a team of study experts. The two companies have no affiliation, no common ownership, and no shared product.
-      </p>
+      <div class="section-head">
+        <div class="section-eyebrow">Inside the app</div>
+        <h2 class="section-title">A full study system, <em>not</em> a planner with a logo.</h2>
+        <p class="section-sub">Most "AI study apps" are wrappers on a chat box. StudyEdge AI builds the plan, runs the session, and tracks the result. One app for the whole semester.</p>
+      </div>
 
-      <h2>Frequently Asked Questions</h2>
-      <div class="faq-section">
+      <div class="feature-row">
+        <div class="feature-text">
+          <span class="ft-eyebrow">AI study schedule</span>
+          <h3>Your week, planned around your real life.</h3>
+          <p>Add your courses, exam dates, and the hours you are actually free. StudyEdge AI generates a week-by-week study schedule that holds up against deadlines, work shifts, and the days you have nothing left in the tank.</p>
+          <ul>
+            <li>Auto-rebalances when an exam moves or you miss a day</li>
+            <li>Prioritizes the courses with the biggest GPA payoff</li>
+            <li>Respects your free hours instead of pretending you have all day</li>
+          </ul>
+        </div>
+        <div class="feature-shot">
+          <img src="/lp-daily-view.png" alt="StudyEdge AI weekly study schedule view" loading="lazy" />
+        </div>
+      </div>
+
+      <div class="feature-row reverse">
+        <div class="feature-text alt">
+          <span class="ft-eyebrow">AI tutor</span>
+          <h3>An AI tutor that knows your syllabus.</h3>
+          <p>Upload notes, paste a problem set, ask anything. The AI Tutor answers in the context of your course material, not a generic chat box. It quizzes you, explains the steps, and walks back through where you slipped.</p>
+          <ul>
+            <li>Available 24/7 for any subject or course</li>
+            <li>Remembers context across the session</li>
+            <li>Quizzes you on the parts you skimmed</li>
+          </ul>
+        </div>
+        <div class="feature-shot">
+          <img src="/lp-ai-tutor.png" alt="StudyEdge AI tutor chat answering a course-specific question" loading="lazy" />
+        </div>
+      </div>
+
+      <div class="feature-row">
+        <div class="feature-text mint">
+          <span class="ft-eyebrow">Grade Hub</span>
+          <h3>See exactly what you need on the final.</h3>
+          <p>Enter your grades and weights. Grade Hub shows the score you need on the final to lock in the grade you actually want. No spreadsheets, no guessing, no "study harder."</p>
+          <ul>
+            <li>Live grade math as you log scores</li>
+            <li>Target-grade calculator built in</li>
+            <li>Connects back to the study schedule that gets you there</li>
+          </ul>
+        </div>
+        <div class="feature-shot">
+          <img src="/lp-grade-predictor.png" alt="StudyEdge AI Grade Hub showing target final score" loading="lazy" />
+        </div>
+      </div>
+
+      <div class="section-head">
+        <div class="section-eyebrow">Common questions</div>
+        <h2 class="section-title">Frequently asked.</h2>
+      </div>
+
+      <div class="faq-grid">
         <div class="faq-item">
           <div class="faq-q">Is StudyEdge AI the same as Study Edge (studyedge.com)?</div>
           <div class="faq-a">No. StudyEdge AI (getstudyedge.com) and Study Edge (studyedge.com) are completely separate, unaffiliated companies. StudyEdge AI is an AI study planning app. Study Edge is a human tutoring service. They have no connection.</div>
@@ -291,23 +493,23 @@
         </div>
         <div class="faq-item">
           <div class="faq-q">How much does StudyEdge AI cost?</div>
-          <div class="faq-a">Free to start, no credit card required. Free users get 2 courses and 1 AI message per day. Pro starts at $2.99/week (also $9.99/month or $69.99/year) with a 3-day free trial, cancel anytime. Unlimited starts at $4.99/week.</div>
+          <div class="faq-a">Free to start, no credit card required for the free plan. Free users get 2 courses and 1 AI message per day. Pro starts at $2.99/week (also $9.99/month or $69.99/year) with a 3-day free trial that requires a card and bills $2.99/week after. Unlimited starts at $4.99/week.</div>
         </div>
         <div class="faq-item">
           <div class="faq-q">Where can I find StudyEdge AI?</div>
-          <div class="faq-a">StudyEdge AI is at getstudyedge.com. You can follow the app on Instagram, TikTok, and X at @getstudyedge.</div>
+          <div class="faq-a">StudyEdge AI lives at getstudyedge.com. You can follow the app on Instagram, TikTok, and X at @getstudyedge.</div>
         </div>
         <div class="faq-item">
           <div class="faq-q">What makes StudyEdge AI different from other study apps?</div>
-          <div class="faq-a">StudyEdge AI is a complete system, not just a planner, not just flashcards, not just a timer. It builds your schedule, plans every session minute-by-minute, runs the session with you, and has AI flashcards, quizzes, active recall, grade tracking, and an AI tutor all in one place.</div>
+          <div class="faq-a">StudyEdge AI is a complete system, not just a planner, not just flashcards, not just a timer. It builds your schedule, plans every session minute by minute, runs the session with you, and has AI flashcards, quizzes, active recall, grade tracking, and an AI tutor all in one place.</div>
         </div>
       </div>
 
-      <div class="cta-section">
-        <h2>Try StudyEdge AI free for 3 days</h2>
-        <p style="color:rgba(226,232,240,0.55);font-size:16px;">The complete AI study system for college students. Free to start.</p>
-        <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="cta-btn">Start free trial →</a>
-        <p class="cta-sub">3-day free trial · cancel anytime · getstudyedge.com</p>
+      <div class="final-cta">
+        <h2>Try StudyEdge AI <em>free</em> for 3 days.</h2>
+        <p>The complete AI study system for college students. Card required to start the trial, cancel anytime before it ends.</p>
+        <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="btn-primary">Start free trial &rarr;</a>
+        <p class="cta-fine">3-day free trial. Cancel anytime. getstudyedge.com</p>
       </div>
 
     </div>
@@ -315,39 +517,49 @@
 
   <footer>
     <div class="container">
-      <p style="font-size:12px;color:rgba(226,232,240,0.55);line-height:1.9;max-width:880px;margin:0 auto 14px;">
-        <strong style="color:rgba(226,232,240,0.85);">Tools:</strong>
-        <a href="/gpa-calculator" style="color:inherit;">GPA Calculator</a> ·
-        <a href="/grade-calculator" style="color:inherit;">Grade Calculator</a> ·
-        <a href="/study-schedule-generator" style="color:inherit;">Study Schedule Generator</a> ·
-        <a href="/ai-flashcard-maker" style="color:inherit;">AI Flashcard Maker</a><br />
-        <strong style="color:rgba(226,232,240,0.85);">Guides:</strong>
-        <a href="/study-planner-for-college-students" style="color:inherit;">Study Planner</a> ·
-        <a href="/study-schedule-template" style="color:inherit;">Schedule Template</a> ·
-        <a href="/how-to-study-for-finals" style="color:inherit;">Study for Finals</a> ·
-        <a href="/pre-med-study-guide" style="color:inherit;">Pre-Med Guide</a> ·
-        <a href="/best-study-app-for-students" style="color:inherit;">Best Study App</a><br />
-        <strong style="color:rgba(226,232,240,0.85);">Compare:</strong>
-        <a href="/quizlet-alternative" style="color:inherit;">Quizlet Alternative</a> ·
-        <a href="/anki-alternative" style="color:inherit;">Anki Alternative</a> ·
-        <a href="/anki-vs-quizlet" style="color:inherit;">Anki vs Quizlet</a> ·
-        <a href="/ai-tutor" style="color:inherit;">AI Tutor</a> ·
-        <a href="/ai-study-coach" style="color:inherit;">AI Study Coach</a> ·
-        <a href="/active-recall-app" style="color:inherit;">Active Recall</a><br />
-        <strong style="color:rgba(226,232,240,0.85);">Articles:</strong>
-        <a href="/blog" style="color:inherit;">All Articles</a> ·
-        <a href="/blog/how-to-raise-your-gpa-after-a-bad-semester" style="color:inherit;">Raise Your GPA</a> ·
-        <a href="/blog/how-to-get-an-a-in-any-class" style="color:inherit;">Get an A</a> ·
-        <a href="/blog/mcat-study-schedule-6-months" style="color:inherit;">MCAT Schedule</a> ·
-        <a href="/blog/how-to-study-with-adhd-in-college" style="color:inherit;">Studying with ADHD</a>
-      </p>
-      <p>
-        © 2026 StudyEdge AI (getstudyedge.com). Not affiliated with <a href="/not-affiliated-with-study-edge">studyedge.com</a> ·
-        <a href="/about">About</a> ·
-        <a href="/privacy">Privacy</a> ·
-        <a href="/terms">Terms</a> ·
+      <div class="footer-row">
+        <div class="footer-group"><strong>Tools</strong>
+          <a href="/gpa-calculator">GPA Calculator</a> &middot;
+          <a href="/grade-calculator">Grade Calculator</a> &middot;
+          <a href="/study-schedule-generator">Schedule Generator</a> &middot;
+          <a href="/ai-flashcard-maker">AI Flashcard Maker</a>
+        </div>
+      </div>
+      <div class="footer-row" style="margin-top:10px;">
+        <div class="footer-group"><strong>Guides</strong>
+          <a href="/study-planner-for-college-students">Study Planner</a> &middot;
+          <a href="/study-schedule-template">Schedule Template</a> &middot;
+          <a href="/how-to-study-for-finals">Study for Finals</a> &middot;
+          <a href="/pre-med-study-guide">Pre-Med Guide</a> &middot;
+          <a href="/best-study-app-for-students">Best Study App</a>
+        </div>
+      </div>
+      <div class="footer-row" style="margin-top:10px;">
+        <div class="footer-group"><strong>Compare</strong>
+          <a href="/quizlet-alternative">Quizlet Alternative</a> &middot;
+          <a href="/anki-alternative">Anki Alternative</a> &middot;
+          <a href="/anki-vs-quizlet">Anki vs Quizlet</a> &middot;
+          <a href="/ai-tutor">AI Tutor</a> &middot;
+          <a href="/ai-study-coach">AI Study Coach</a> &middot;
+          <a href="/active-recall-app">Active Recall</a>
+        </div>
+      </div>
+      <div class="footer-row" style="margin-top:10px;">
+        <div class="footer-group"><strong>Articles</strong>
+          <a href="/blog">All Articles</a> &middot;
+          <a href="/blog/how-to-raise-your-gpa-after-a-bad-semester">Raise Your GPA</a> &middot;
+          <a href="/blog/how-to-get-an-a-in-any-class">Get an A</a> &middot;
+          <a href="/blog/mcat-study-schedule-6-months">MCAT Schedule</a> &middot;
+          <a href="/blog/how-to-study-with-adhd-in-college">Studying with ADHD</a>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        &copy; 2026 StudyEdge AI (getstudyedge.com). Not affiliated with <a href="/not-affiliated-with-study-edge">studyedge.com</a> &middot;
+        <a href="/about">About</a> &middot;
+        <a href="/privacy">Privacy</a> &middot;
+        <a href="/terms">Terms</a> &middot;
         <a href="mailto:support@getstudyedge.com">Contact</a>
-      </p>
+      </div>
     </div>
   </footer>
 
