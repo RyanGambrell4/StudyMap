@@ -25,7 +25,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/seo.css" />
 
   <script type="application/ld+json">
@@ -38,6 +38,92 @@
     "publisher": { "@type": "Organization", "name": "StudyEdge AI", "url": "https://getstudyedge.com" }
   }
   </script>
+
+  <style>
+    .blog-hero { padding: 88px 0 48px; text-align: center; }
+    .blog-hero h1 { font-size: clamp(40px, 6vw, 64px); font-weight: 800; line-height: 1.05; letter-spacing: -0.03em; color: var(--text); margin-bottom: 18px; }
+    .blog-hero h1 .italic { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--accent); }
+    .blog-hero .sub { font-size: 18px; color: var(--text-muted); max-width: 560px; margin: 0 auto; line-height: 1.6; }
+
+    .blog-grid-pretty {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 28px;
+      padding: 0;
+    }
+    .b-card {
+      display: flex; flex-direction: column;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+      transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+      text-decoration: none;
+      color: inherit;
+    }
+    .b-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 18px 40px rgba(0,0,0,0.10), 0 1px 3px rgba(0,0,0,0.06);
+      border-color: var(--border-h);
+      text-decoration: none;
+    }
+    .b-cover {
+      position: relative; aspect-ratio: 16 / 9; overflow: hidden;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .b-cover::before {
+      content: ""; position: absolute; inset: 0;
+      background:
+        radial-gradient(120% 90% at 100% 0%, rgba(255,255,255,0.18), transparent 50%),
+        radial-gradient(80% 80% at 0% 100%, rgba(0,0,0,0.18), transparent 60%);
+    }
+    .b-cover svg { position: relative; z-index: 1; width: 64px; height: 64px; color: rgba(255,255,255,0.96); filter: drop-shadow(0 4px 12px rgba(0,0,0,0.18)); }
+    .b-cover .b-overlay-tag {
+      position: absolute; left: 16px; top: 16px; z-index: 2;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+      color: #fff;
+      background: rgba(0,0,0,0.30);
+      backdrop-filter: blur(6px);
+      padding: 6px 10px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.20);
+    }
+
+    /* Category color systems */
+    .b-cover.cat-premed   { background: linear-gradient(135deg, #6366F1, #4F46E5); }
+    .b-cover.cat-gpa      { background: linear-gradient(135deg, #3B61C4, #1E40AF); }
+    .b-cover.cat-planning { background: linear-gradient(135deg, #0EA5E9, #0369A1); }
+    .b-cover.cat-exam     { background: linear-gradient(135deg, #EA580C, #C2410C); }
+    .b-cover.cat-focus    { background: linear-gradient(135deg, #14B8A6, #0F766E); }
+    .b-cover.cat-adhd     { background: linear-gradient(135deg, #A855F7, #7E22CE); }
+    .b-cover.cat-tech     { background: linear-gradient(135deg, #DB2777, #9D174D); }
+    .b-cover.cat-science  { background: linear-gradient(135deg, #059669, #065F46); }
+
+    .b-body { padding: 22px 22px 24px; display: flex; flex-direction: column; flex: 1; gap: 10px; }
+    .b-body h2 { font-size: 19px; font-weight: 700; line-height: 1.3; letter-spacing: -0.015em; color: var(--text); }
+    .b-body p { font-size: 14.5px; color: var(--text-muted); line-height: 1.6; flex: 1; }
+    .b-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 6px; padding-top: 14px; border-top: 1px solid var(--border); }
+    .b-meta { font-size: 12.5px; color: var(--text-dim); }
+    .b-read { font-size: 13.5px; font-weight: 600; color: var(--accent); }
+
+    .blog-cta {
+      margin: 64px 0 0; padding: 56px 40px;
+      background:
+        radial-gradient(800px 280px at 50% 0%, rgba(59,97,196,0.10), transparent 70%),
+        linear-gradient(180deg, #FFFFFF, #F4F5FB);
+      border: 1px solid var(--border);
+      border-radius: 22px; text-align: center;
+    }
+    .blog-cta h2 { font-size: clamp(26px, 3.4vw, 36px); font-weight: 700; color: var(--text); letter-spacing: -0.02em; line-height: 1.15; margin-bottom: 12px; }
+    .blog-cta h2 .italic { font-family: 'Instrument Serif', serif; font-style: italic; font-weight: 400; color: var(--accent); }
+    .blog-cta p { font-size: 16px; color: var(--text-muted); max-width: 560px; margin: 0 auto 24px; line-height: 1.55; }
+    .blog-cta .fine { font-size: 13px; color: var(--text-dim); margin-top: 12px; }
+
+    @media (max-width: 880px) {
+      .blog-hero { padding: 56px 0 32px; }
+      .blog-cta { padding: 40px 22px; }
+    }
+  </style>
 </head>
 <body>
 
@@ -49,140 +135,202 @@
     </a>
     <div class="nav-links">
       <a href="/#features">Features</a>
-      <a href="/studyedge-ai.html#pricing">Pricing</a>
+      <a href="/studyedge-ai">Pricing</a>
       <a href="/blog/">Blog</a>
-      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="nav-cta">Try Free</a>
     </div>
+    <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="nav-cta">Try Free</a>
   </nav>
 </header>
 
-<section class="hero" style="padding-bottom:48px;">
+<section class="blog-hero">
   <div class="container">
-    <div class="eyebrow eyebrow-indigo">&#128218; StudyEdge AI Blog</div>
-    <h1>Study <span class="grad-indigo">Smarter</span></h1>
-    <p class="hero-sub">Evidence-based guides on study techniques, exam prep, flashcards, and how to use AI to actually improve your grades, not just feel productive.</p>
+    <div class="eyebrow eyebrow-indigo">StudyEdge AI Blog</div>
+    <h1>Study <span class="italic">smarter</span>.</h1>
+    <p class="sub">Evidence-based guides on study techniques, exam prep, flashcards, and how to use AI to actually improve your grades, not just feel productive.</p>
   </div>
 </section>
 
+<!-- SVG icon definitions -->
+<svg width="0" height="0" style="position:absolute;pointer-events:none" aria-hidden="true">
+  <defs>
+    <symbol id="ic-premed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2v6a4 4 0 0 0 4 4v0a4 4 0 0 0 4-4V2"/><path d="M10 12v3a4 4 0 0 0 8 0v-2"/><circle cx="18" cy="11" r="2"/></symbol>
+    <symbol id="ic-gpa" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 10v6"/><path d="M2 10l10-5 10 5-10 5z"/><path d="M6 12v5a6 3 0 0 0 12 0v-5"/></symbol>
+    <symbol id="ic-planning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></symbol>
+    <symbol id="ic-exam" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M8 13h8M8 17h5"/></symbol>
+    <symbol id="ic-focus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+    <symbol id="ic-adhd" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a4 4 0 0 0-4 4 4 4 0 0 0-4 4 4 4 0 0 0 2 3.5A4 4 0 0 0 8 21a4 4 0 0 0 4-2 4 4 0 0 0 4 2 4 4 0 0 0 2-7.5A4 4 0 0 0 20 10a4 4 0 0 0-4-4 4 4 0 0 0-4-4z"/></symbol>
+    <symbol id="ic-tech" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></symbol>
+    <symbol id="ic-science" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3v6l-5 9a2 2 0 0 0 2 3h12a2 2 0 0 0 2-3l-5-9V3"/><path d="M8 3h8"/><path d="M7 16h10"/></symbol>
+  </defs>
+</svg>
+
 <section class="section" style="padding-top:0;">
   <div class="container">
-    <div class="blog-grid">
+    <div class="blog-grid-pretty">
 
-      <a href="/blog/how-to-study-for-organic-chemistry.html" class="blog-card">
-        <div class="blog-tag">Pre-Med</div>
-        <h2>How to Study for Organic Chemistry</h2>
-        <p>Orgo is not a memorization course. Here is how the students who get As actually study: patterns over flashcards, mechanisms by hand, problem-sets first.</p>
-        <div class="blog-meta">May 23, 2026 &middot; 10 min read</div>
-        <div class="blog-read-more">Read article &rarr;</div>
+      <a href="/blog/how-to-study-for-organic-chemistry.html" class="b-card">
+        <div class="b-cover cat-premed">
+          <span class="b-overlay-tag">Pre-Med</span>
+          <svg><use href="#ic-premed"/></svg>
+        </div>
+        <div class="b-body">
+          <h2>How to Study for Organic Chemistry</h2>
+          <p>Orgo is not a memorization course. Here is how the students who get As actually study: patterns over flashcards, mechanisms by hand, problem-sets first.</p>
+          <div class="b-foot"><span class="b-meta">May 23, 2026 &middot; 10 min</span><span class="b-read">Read &rarr;</span></div>
+        </div>
       </a>
 
-      <a href="/blog/how-to-raise-your-gpa-after-a-bad-semester.html" class="blog-card">
-        <div class="blog-tag">Grades &amp; GPA</div>
-        <h2>How to Raise Your GPA After a Bad Semester</h2>
-        <p>A realistic recovery plan: the grade math, the triage decisions, and the study system change that actually moves a GPA back to where you want it.</p>
-        <div class="blog-meta">May 23, 2026 &middot; 9 min read</div>
-        <div class="blog-read-more">Read article &rarr;</div>
+      <a href="/blog/how-to-raise-your-gpa-after-a-bad-semester.html" class="b-card">
+        <div class="b-cover cat-gpa">
+          <span class="b-overlay-tag">Grades &amp; GPA</span>
+          <svg><use href="#ic-gpa"/></svg>
+        </div>
+        <div class="b-body">
+          <h2>How to Raise Your GPA After a Bad Semester</h2>
+          <p>A realistic recovery plan: the grade math, the triage decisions, and the study system change that actually moves a GPA back to where you want it.</p>
+          <div class="b-foot"><span class="b-meta">May 23, 2026 &middot; 9 min</span><span class="b-read">Read &rarr;</span></div>
+        </div>
       </a>
 
-      <a href="/blog/best-study-schedule-for-college-students.html" class="blog-card">
-        <div class="blog-tag">Planning</div>
-        <h2>Best Study Schedule for College Students</h2>
-        <p>The seven blocks every weekly plan needs, the four mistakes that kill schedules by week two, and a Sunday rebuild ritual that keeps the plan alive.</p>
-        <div class="blog-meta">May 23, 2026 &middot; 8 min read</div>
-        <div class="blog-read-more">Read article &rarr;</div>
+      <a href="/blog/best-study-schedule-for-college-students.html" class="b-card">
+        <div class="b-cover cat-planning">
+          <span class="b-overlay-tag">Planning</span>
+          <svg><use href="#ic-planning"/></svg>
+        </div>
+        <div class="b-body">
+          <h2>Best Study Schedule for College Students</h2>
+          <p>The seven blocks every weekly plan needs, the four mistakes that kill schedules by week two, and a Sunday rebuild ritual that keeps the plan alive.</p>
+          <div class="b-foot"><span class="b-meta">May 23, 2026 &middot; 8 min</span><span class="b-read">Read &rarr;</span></div>
+        </div>
       </a>
 
-      <a href="/blog/how-to-get-an-a-in-any-class.html" class="blog-card">
-        <div class="blog-tag">Grades &amp; GPA</div>
-        <h2>How to Get an A in Any Class</h2>
-        <p>There is no motivational trick that produces As. There is a system: grade math, session blueprints, active recall, and a Sunday rebuild. Here it is, in the order to adopt it.</p>
-        <div class="blog-meta">May 23, 2026 &middot; 9 min read</div>
-        <div class="blog-read-more">Read article &rarr;</div>
+      <a href="/blog/how-to-get-an-a-in-any-class.html" class="b-card">
+        <div class="b-cover cat-gpa">
+          <span class="b-overlay-tag">Grades &amp; GPA</span>
+          <svg><use href="#ic-gpa"/></svg>
+        </div>
+        <div class="b-body">
+          <h2>How to Get an A in Any Class</h2>
+          <p>There is no motivational trick that produces As. There is a system: grade math, session blueprints, active recall, and a Sunday rebuild. Here it is, in the order to adopt it.</p>
+          <div class="b-foot"><span class="b-meta">May 23, 2026 &middot; 9 min</span><span class="b-read">Read &rarr;</span></div>
+        </div>
       </a>
 
-      <a href="/blog/mcat-study-schedule-6-months.html" class="blog-card">
-        <div class="blog-tag">Pre-Med</div>
-        <h2>MCAT Study Schedule: How to Plan 6 Months Out</h2>
-        <p>The three-phase plan that students scoring above 515 actually use: content review, question phase, and full-length tests, in the right order and at the right time.</p>
-        <div class="blog-meta">May 23, 2026 &middot; 12 min read</div>
-        <div class="blog-read-more">Read article &rarr;</div>
+      <a href="/blog/mcat-study-schedule-6-months.html" class="b-card">
+        <div class="b-cover cat-premed">
+          <span class="b-overlay-tag">Pre-Med</span>
+          <svg><use href="#ic-premed"/></svg>
+        </div>
+        <div class="b-body">
+          <h2>MCAT Study Schedule: How to Plan 6 Months Out</h2>
+          <p>The three-phase plan that students scoring above 515 actually use: content review, question phase, and full-length tests, in the right order and at the right time.</p>
+          <div class="b-foot"><span class="b-meta">May 23, 2026 &middot; 12 min</span><span class="b-read">Read &rarr;</span></div>
+        </div>
       </a>
 
-      <a href="/blog/how-to-study-for-finals-week.html" class="blog-card">
-        <div class="blog-tag">Exam Prep</div>
-        <h2>How to Study for Finals Week Without Burning Out</h2>
-        <p>The finals panic spiral is real but avoidable. Triage your exams, build a session plan for each one, and get through the week without destroying yourself.</p>
-        <div class="blog-meta">May 20, 2026 &middot; 9 min read</div>
-        <div class="blog-read-more">Read article &rarr;</div>
+      <a href="/blog/how-to-study-for-finals-week.html" class="b-card">
+        <div class="b-cover cat-exam">
+          <span class="b-overlay-tag">Exam Prep</span>
+          <svg><use href="#ic-exam"/></svg>
+        </div>
+        <div class="b-body">
+          <h2>How to Study for Finals Week Without Burning Out</h2>
+          <p>The finals panic spiral is real but avoidable. Triage your exams, build a session plan for each one, and get through the week without destroying yourself.</p>
+          <div class="b-foot"><span class="b-meta">May 20, 2026 &middot; 9 min</span><span class="b-read">Read &rarr;</span></div>
+        </div>
       </a>
 
-      <a href="/blog/how-to-stop-procrastinating-when-studying.html" class="blog-card">
-        <div class="blog-tag">Focus</div>
-        <h2>How to Stop Procrastinating When Studying</h2>
-        <p>Procrastination is the brain avoiding an unclear task. Make tasks small enough, specific enough, and pre-decided enough that not starting feels stranger than starting.</p>
-        <div class="blog-meta">May 23, 2026 &middot; 8 min read</div>
-        <div class="blog-read-more">Read article &rarr;</div>
+      <a href="/blog/how-to-stop-procrastinating-when-studying.html" class="b-card">
+        <div class="b-cover cat-focus">
+          <span class="b-overlay-tag">Focus</span>
+          <svg><use href="#ic-focus"/></svg>
+        </div>
+        <div class="b-body">
+          <h2>How to Stop Procrastinating When Studying</h2>
+          <p>Procrastination is the brain avoiding an unclear task. Make tasks small enough, specific enough, and pre-decided enough that not starting feels stranger than starting.</p>
+          <div class="b-foot"><span class="b-meta">May 23, 2026 &middot; 8 min</span><span class="b-read">Read &rarr;</span></div>
+        </div>
       </a>
 
-      <a href="/blog/how-to-study-with-adhd-in-college.html" class="blog-card">
-        <div class="blog-tag">ADHD</div>
-        <h2>How to Study With ADHD in College</h2>
-        <p>Standard study advice was written for non-ADHD brains. Here are the systems that fit ADHD: externalized memory, short sessions, body doubling, and removing decisions.</p>
-        <div class="blog-meta">May 23, 2026 &middot; 10 min read</div>
-        <div class="blog-read-more">Read article &rarr;</div>
+      <a href="/blog/how-to-study-with-adhd-in-college.html" class="b-card">
+        <div class="b-cover cat-adhd">
+          <span class="b-overlay-tag">ADHD</span>
+          <svg><use href="#ic-adhd"/></svg>
+        </div>
+        <div class="b-body">
+          <h2>How to Study With ADHD in College</h2>
+          <p>Standard study advice was written for non-ADHD brains. Here are the systems that fit ADHD: externalized memory, short sessions, body doubling, and removing decisions.</p>
+          <div class="b-foot"><span class="b-meta">May 23, 2026 &middot; 10 min</span><span class="b-read">Read &rarr;</span></div>
+        </div>
       </a>
 
-      <a href="/blog/what-gpa-do-you-need-for-medical-school.html" class="blog-card">
-        <div class="blog-tag">Pre-Med</div>
-        <h2>What GPA Do You Need for Medical School?</h2>
-        <p>The honest GPA numbers for MD and DO admissions, the BCPM math, what to do if you are below the median, and how GPA trades against the MCAT.</p>
-        <div class="blog-meta">May 23, 2026 &middot; 8 min read</div>
-        <div class="blog-read-more">Read article &rarr;</div>
+      <a href="/blog/what-gpa-do-you-need-for-medical-school.html" class="b-card">
+        <div class="b-cover cat-premed">
+          <span class="b-overlay-tag">Pre-Med</span>
+          <svg><use href="#ic-premed"/></svg>
+        </div>
+        <div class="b-body">
+          <h2>What GPA Do You Need for Medical School?</h2>
+          <p>The honest GPA numbers for MD and DO admissions, the BCPM math, what to do if you are below the median, and how GPA trades against the MCAT.</p>
+          <div class="b-foot"><span class="b-meta">May 23, 2026 &middot; 8 min</span><span class="b-read">Read &rarr;</span></div>
+        </div>
       </a>
 
-      <a href="/blog/how-to-balance-a-heavy-course-load.html" class="blog-card">
-        <div class="blog-tag">Planning</div>
-        <h2>How to Balance a Heavy Course Load</h2>
-        <p>Eighteen credits with two labs is survivable, but not on the habits that worked for 12 credits. Triage, batching, and a planner that does not collapse on a normal week.</p>
-        <div class="blog-meta">May 23, 2026 &middot; 9 min read</div>
-        <div class="blog-read-more">Read article &rarr;</div>
+      <a href="/blog/how-to-balance-a-heavy-course-load.html" class="b-card">
+        <div class="b-cover cat-planning">
+          <span class="b-overlay-tag">Planning</span>
+          <svg><use href="#ic-planning"/></svg>
+        </div>
+        <div class="b-body">
+          <h2>How to Balance a Heavy Course Load</h2>
+          <p>Eighteen credits with two labs is survivable, but not on the habits that worked for 12 credits. Triage, batching, and a planner that does not collapse on a normal week.</p>
+          <div class="b-foot"><span class="b-meta">May 23, 2026 &middot; 9 min</span><span class="b-read">Read &rarr;</span></div>
+        </div>
       </a>
 
-      <a href="/blog/active-recall-study-technique.html" class="blog-card">
-        <div class="blog-tag">Study Techniques</div>
-        <h2>Active Recall: The Study Technique That Actually Works</h2>
-        <p>Active recall outperforms re-reading and highlighting by 2-3x in controlled studies. Five specific ways to do it, and the common mistakes that kill its effectiveness.</p>
-        <div class="blog-meta">May 19, 2026 &middot; 8 min read</div>
-        <div class="blog-read-more">Read article &rarr;</div>
+      <a href="/blog/active-recall-study-technique.html" class="b-card">
+        <div class="b-cover cat-tech">
+          <span class="b-overlay-tag">Study Techniques</span>
+          <svg><use href="#ic-tech"/></svg>
+        </div>
+        <div class="b-body">
+          <h2>Active Recall: The Study Technique That Actually Works</h2>
+          <p>Active recall outperforms re-reading and highlighting by 2-3x in controlled studies. Five specific ways to do it, and the common mistakes that kill its effectiveness.</p>
+          <div class="b-foot"><span class="b-meta">May 19, 2026 &middot; 8 min</span><span class="b-read">Read &rarr;</span></div>
+        </div>
       </a>
 
-      <a href="/blog/how-to-improve-your-grades-in-college.html" class="blog-card">
-        <div class="blog-tag">Grades &amp; GPA</div>
-        <h2>How to Actually Improve Your Grades in College</h2>
-        <p>The answer isn't "study more." It's study differently. The real inputs that move grades: attendance myths, note timing, professor relationships, system over motivation.</p>
-        <div class="blog-meta">May 18, 2026 &middot; 7 min read</div>
-        <div class="blog-read-more">Read article &rarr;</div>
+      <a href="/blog/how-to-improve-your-grades-in-college.html" class="b-card">
+        <div class="b-cover cat-gpa">
+          <span class="b-overlay-tag">Grades &amp; GPA</span>
+          <svg><use href="#ic-gpa"/></svg>
+        </div>
+        <div class="b-body">
+          <h2>How to Actually Improve Your Grades in College</h2>
+          <p>The answer isn't "study more." It's study differently. The real inputs that move grades: attendance myths, note timing, professor relationships, system over motivation.</p>
+          <div class="b-foot"><span class="b-meta">May 18, 2026 &middot; 7 min</span><span class="b-read">Read &rarr;</span></div>
+        </div>
       </a>
 
-      <a href="/blog/best-study-techniques-science.html" class="blog-card">
-        <div class="blog-tag">Study Science</div>
-        <h2>The 5 Study Techniques That Actually Work (According to Research)</h2>
-        <p>Highlighting feels productive. Re-reading feels thorough. Neither works well. The five techniques cognitive science consistently validates, and how to use each one.</p>
-        <div class="blog-meta">May 17, 2026 &middot; 9 min read</div>
-        <div class="blog-read-more">Read article &rarr;</div>
+      <a href="/blog/best-study-techniques-science.html" class="b-card">
+        <div class="b-cover cat-science">
+          <span class="b-overlay-tag">Study Science</span>
+          <svg><use href="#ic-science"/></svg>
+        </div>
+        <div class="b-body">
+          <h2>The 5 Study Techniques That Actually Work (According to Research)</h2>
+          <p>Highlighting feels productive. Re-reading feels thorough. Neither works well. The five techniques cognitive science consistently validates, and how to use each one.</p>
+          <div class="b-foot"><span class="b-meta">May 17, 2026 &middot; 9 min</span><span class="b-read">Read &rarr;</span></div>
+        </div>
       </a>
 
     </div>
-  </div>
-</section>
 
-<section class="section" style="padding-top:0;">
-  <div class="container">
-    <div class="cta-block">
-      <h2>Put the techniques into practice</h2>
+    <div class="blog-cta">
+      <h2>Put the techniques <span class="italic">into</span> practice.</h2>
       <p>StudyEdge AI builds your study schedule, generates flashcards, and runs sessions with active recall built in, everything the research says works, in one place.</p>
-      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="btn btn-primary btn-lg">Try StudyEdge AI Free</a>
-      <p class="cta-fine">Free to start. No credit card required.</p>
+      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="btn btn-primary btn-lg">Start free 3-day trial</a>
+      <p class="fine">3-day free trial. Cancel anytime.</p>
     </div>
   </div>
 </section>
@@ -190,16 +338,16 @@
 <footer class="site-footer">
   <div class="footer-links">
     <a href="/">Home</a>
-    <a href="/study-schedule-generator.html">Study Schedule</a>
-    <a href="/ai-tutor.html">AI Tutor</a>
-    <a href="/ai-flashcard-maker.html">Flashcards</a>
-    <a href="/grade-calculator-college.html">Grade Calculator</a>
-    <a href="/active-recall-app.html">Active Recall</a>
+    <a href="/study-schedule-generator">Study Schedule</a>
+    <a href="/ai-tutor">AI Tutor</a>
+    <a href="/ai-flashcard-maker">Flashcards</a>
+    <a href="/grade-calculator-college">Grade Calculator</a>
+    <a href="/active-recall-app">Active Recall</a>
     <a href="/blog/">Blog</a>
-    <a href="/privacy.html">Privacy</a>
-    <a href="/terms.html">Terms</a>
+    <a href="/privacy">Privacy</a>
+    <a href="/terms">Terms</a>
   </div>
-  <p class="footer-copy">&copy; 2026 StudyEdge AI &mdash; getstudyedge.com</p>
+  <p class="footer-copy">&copy; 2026 StudyEdge AI, getstudyedge.com</p>
 </footer>
 
 </body>
