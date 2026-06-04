@@ -35,9 +35,15 @@ export default async function handler(req, res) {
   const isExamMode = EXAM_PATTERN.test(courseName)
 
   const todayStr = new Date().toISOString().split('T')[0]
-  const daysUntilExam = examDate
-    ? Math.max(0, Math.round((new Date(examDate + 'T12:00:00') - new Date(todayStr + 'T12:00:00')) / 86400000))
-    : 30
+  // Past exam dates are treated as "no exam scheduled" — never generate
+  // "Exam Day Ready" copy for an exam that has already happened.
+  const rawDaysUntilExam = examDate
+    ? Math.round((new Date(examDate + 'T12:00:00') - new Date(todayStr + 'T12:00:00')) / 86400000)
+    : null
+  const daysUntilExam = rawDaysUntilExam !== null && rawDaysUntilExam >= 0 ? rawDaysUntilExam : null
+  const examLine = daysUntilExam !== null
+    ? `Days until exam: ${daysUntilExam}`
+    : 'No exam scheduled — design a normal study session, do NOT use exam-day language.'
 
   const recallContext = weakTopics?.length
     ? `\n\nIMPORTANT — This student's weak areas (recall score < 60%): ${weakTopics.join(', ')}. Prioritize these topics and allocate more time to active recall and practice problems for them.`
@@ -74,7 +80,7 @@ export default async function handler(req, res) {
 Section: ${courseName}
 Session type: ${sessionType || 'Content Review'}
 Total duration: ${durationMinutes} minutes
-Days until exam: ${daysUntilExam}
+${examLine}
 Target score: ${targetGrade || 'Top score'}
 Focus area: ${studentFocus || 'High-yield content for this section'}
 ${professorEmphasis ? `Professor-emphasized topics (highest priority): ${professorEmphasis}` : ''}
@@ -118,7 +124,7 @@ Rules:
 Course: ${courseName}
 Session type: ${sessionType}
 Total duration: ${durationMinutes} minutes
-Days until exam: ${daysUntilExam}
+${examLine}
 Target grade: ${targetGrade || 'B'}
 Available study materials/topics: ${uploadedTopics || 'General course material'}
 Student wants to focus on: ${studentFocus || 'Most important exam topics'}

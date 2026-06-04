@@ -73,9 +73,19 @@ function letterMinThreshold(ltr) {
 }
 
 function computeGPA(courses) {
+  // Only count a course toward GPA when at least 50% of its weight has been
+  // graded. A single 95% on a 10%-weight quiz isn't a real course average yet
+  // and shouldn't bump the user to a fake "GPA 4.00".
   const pts = { 'A+': 4.0, 'A': 4.0, 'A-': 3.7, 'B+': 3.3, 'B': 3.0, 'B-': 2.7, 'C+': 2.3, 'C': 2.0, 'C-': 1.7, 'D+': 1.3, 'D': 1.0, 'F': 0.0 }
   const vals = courses.map(c => {
-    const g = getCurrentGrade(c.gradeData?.components ?? [])
+    const comps = c.gradeData?.components ?? []
+    if (!comps.length) return null
+    const totalWeight = comps.reduce((s, x) => s + (x.weight || 0), 0)
+    const gradedWeight = comps
+      .filter(x => x.graded && x.grade !== null && x.grade !== undefined)
+      .reduce((s, x) => s + (x.weight || 0), 0)
+    if (totalWeight === 0 || gradedWeight / totalWeight < 0.5) return null
+    const g = getCurrentGrade(comps)
     return g !== null ? (pts[letterGrade(g)] ?? null) : null
   }).filter(v => v !== null)
   if (!vals.length) return null

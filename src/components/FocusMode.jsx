@@ -13,7 +13,6 @@ import { sliderToRecall } from '../utils/adaptationEngine'
 import { useCelebration } from '../utils/useCelebration'
 import { extractText } from '../utils/extractText'
 import AIChatView from './AIChatView'
-import PrepBlastScreen from './PrepBlastScreen'
 
 function fmt(seconds) {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
@@ -507,7 +506,6 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const [recallSlider, setRecallSlider] = useState(50)
   const [recallSubmitted, setRecallSubmitted] = useState(false)
   const [recallData, setRecallData] = useState(null) // { score, label } once submitted
-  const [prepBlastDone, setPrepBlastDone] = useState(false)
 
   useEffect(() => {
     if (!showComplete) return
@@ -1121,8 +1119,6 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   ]
 
   // ─── RENDER ─────────────────────────────────────────────────────────────────
-  if (!prepBlastDone) return <PrepBlastScreen session={session} course={course} onDismiss={() => setPrepBlastDone(true)} userId={userId} />
-
   return (
     <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#F7F6F3' }}>
       <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(180deg, ${dot}22 0%, transparent 28%)`, zIndex: 0 }} />

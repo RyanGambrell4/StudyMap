@@ -65,9 +65,13 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
   const dot = session.color?.dot ?? '#6366F1'
 
   const todayStr = new Date().toISOString().split('T')[0]
-  const daysLeft = course?.examDate
-    ? Math.max(0, Math.round((new Date(course.examDate + 'T12:00:00') - new Date(todayStr + 'T12:00:00')) / 86400000))
+  // Past exam dates return null so we don't render a misleading "Exam today" badge
+  // or pass a stale date into the blueprint prompt.
+  const rawDaysLeft = course?.examDate
+    ? Math.round((new Date(course.examDate + 'T12:00:00') - new Date(todayStr + 'T12:00:00')) / 86400000)
     : null
+  const daysLeft = rawDaysLeft !== null && rawDaysLeft >= 0 ? rawDaysLeft : null
+  const upcomingExamDate = daysLeft !== null ? course.examDate : null
 
   const urgency = daysLeft !== null && daysLeft <= 3 ? 'red' : daysLeft !== null && daysLeft <= 7 ? 'amber' : null
 
@@ -105,7 +109,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
           courseName: session.courseName,
           sessionType,
           durationMinutes: session.duration,
-          examDate: course?.examDate ?? null,
+          examDate: upcomingExamDate,
           targetGrade: isExamMode ? null : (course?.targetGrade ?? 'B'),
           targetScore: isExamMode ? (course?.targetScore ?? null) : null,
           uploadedTopics: studyTools?.text ? studyTools.text.slice(0, 500) : null,

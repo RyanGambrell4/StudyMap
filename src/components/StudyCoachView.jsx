@@ -1160,7 +1160,15 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
           addBusy(dateKey, startMin, startMin + dur, true)
           studyCountByDate[dateKey] = (studyCountByDate[dateKey] || 0) + 1
 
-          const focusSuffix = sess.focusArea ? ` · ${sess.focusArea}`.slice(0, 32) : ''
+          // Truncate focusArea at a word boundary so the calendar row never
+          // ends mid-word (e.g. "Glycolysis: step-by-step enzy").
+          const truncateAtWord = (s, max) => {
+            if (!s || s.length <= max) return s
+            const cut = s.slice(0, max)
+            const lastSpace = cut.lastIndexOf(' ')
+            return (lastSpace > max * 0.5 ? cut.slice(0, lastSpace) : cut).replace(/[,:;\-—]+$/, '') + '…'
+          }
+          const focusSuffix = sess.focusArea ? ` · ${truncateAtWord(sess.focusArea, 28)}` : ''
           calSessions.push({
             id: `coach-${courseId}-w${wi}-s${si}-${Date.now()}`,
             dateStr: dateKey,

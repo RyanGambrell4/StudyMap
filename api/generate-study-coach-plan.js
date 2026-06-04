@@ -48,6 +48,34 @@ export default async function handler(req, res) {
     return `\n\nRecall scores by course (lower = needs more study time): ${entries.join(', ')}. Allocate proportionally more sessions to lower-scoring courses.`
   })()
 
+  // Anti-hallucination guardrail: when the student has given us NO topics and
+  // NO uploaded materials, the model has no real ground truth for what's in
+  // this specific course. Force generic, method-based session focus areas
+  // instead of inventing textbook chapter topics the student didn't enter.
+  const hasUserTopics = !!(emphasisTopics && emphasisTopics.trim())
+  const hasUserMaterials = !!(courseMaterials && courseMaterials.trim())
+  const ungroundedRule = (!hasUserTopics && !hasUserMaterials) ? `
+
+GROUNDING RULE (CRITICAL):
+The student did NOT provide any specific topics or upload course materials.
+You MUST NOT invent specific subject-matter topics, chapter names, or
+textbook concepts (e.g. for a course called "Cell Biology", do NOT write
+focusAreas like "Glycolysis", "Krebs cycle", "Cell signaling pathways",
+"DNA replication" — you are guessing at content the student never told you).
+
+Instead, every focusArea, keyTopic, and goal MUST describe a study METHOD
+or ACTIVITY that the student picks the topic for. Examples of good
+focusAreas when the student gave no topics:
+- "Pick this week's lecture material and active recall it"
+- "Practice problems from current chapter"
+- "Build flashcards from your notes"
+- "Concept map the most confusing lecture this week"
+- "Self-test on this week's syllabus section"
+priorityTopics in this case must be study-method labels too, not invented
+content (e.g. "Active recall", "Spaced repetition", "Practice problems").
+` : ''
+
+
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
@@ -133,7 +161,7 @@ CRITICAL: Never schedule study sessions during the following blocked time slots.
 Blocked time slots:
 ${calendarStr}
 ` : `The student prefers studying in the ${pref.label} (${pref.hours}). Schedule sessions in that window whenever possible.`}
-${courseMaterials ? `\nThe student has provided the following course material for context:\n${courseMaterials.slice(0, 8000)}\n` : ''}${struggles?.length ? `\nPreviously identified struggle areas — allocate MORE sessions and deeper coverage to these: ${struggles.join(', ')}\n` : ''}${gradeGap != null && gradeGap < 0 ? `\nGRADE ALERT: Student is ${Math.abs(gradeGap).toFixed(1)} points below their target grade. ${weakAreas?.length ? `Weak areas: ${weakAreas.join(', ')}. ` : ''}Significantly increase session intensity and prioritize recovery for these topics.\n` : ''}${strengths ? `\nAreas the student is already solid on: ${strengths}. These need less dedicated time — a single review session is enough.\n` : ''}${learningStyle ? `\nLearning style: ${learningStyle}. Let this shape session type recommendations — visual learners: concept maps and diagrams; practice-based: active recall drills and problem sets; reading/writing: structured note summaries.\n` : ''}${recallInstruction}Build a focused, realistic study plan starting from today. Generate enough weeks to cover all important dates, with the right session count per week (${daysPerWeek || 3} sessions/week).
+${courseMaterials ? `\nThe student has provided the following course material for context:\n${courseMaterials.slice(0, 8000)}\n` : ''}${struggles?.length ? `\nPreviously identified struggle areas — allocate MORE sessions and deeper coverage to these: ${struggles.join(', ')}\n` : ''}${gradeGap != null && gradeGap < 0 ? `\nGRADE ALERT: Student is ${Math.abs(gradeGap).toFixed(1)} points below their target grade. ${weakAreas?.length ? `Weak areas: ${weakAreas.join(', ')}. ` : ''}Significantly increase session intensity and prioritize recovery for these topics.\n` : ''}${strengths ? `\nAreas the student is already solid on: ${strengths}. These need less dedicated time — a single review session is enough.\n` : ''}${learningStyle ? `\nLearning style: ${learningStyle}. Let this shape session type recommendations — visual learners: concept maps and diagrams; practice-based: active recall drills and problem sets; reading/writing: structured note summaries.\n` : ''}${recallInstruction}${ungroundedRule}Build a focused, realistic study plan starting from today. Generate enough weeks to cover all important dates, with the right session count per week (${daysPerWeek || 3} sessions/week).
 
 Return ONLY this JSON:
 
@@ -164,8 +192,8 @@ Return ONLY this JSON:
 Rules:
 - Each week MUST include startDate (YYYY-MM-DD, the Monday) and endDate (YYYY-MM-DD, the Sunday)
 - Generate exactly ${daysPerWeek || 3} sessions per week
-- Make focusArea and keyTopics highly specific to the course content, not generic
-- Keep all string values SHORT — focusArea max 8 words, goal max 12 words, keyTopics max 4 words each, studyMethod max 8 words
+- Make focusArea and keyTopics highly specific to the course content, not generic — BUT only if the student gave you topics or materials. If they did not, follow the GROUNDING RULE above.
+- Keep all string values SHORT — focusArea max 5 words (it shows in a single calendar row), goal max 12 words, keyTopics max 4 words each, studyMethod max 8 words
 - warningZones: max 10 words each, 3 items only
 - priorityTopics: max 5 words each, 5 items only
 - If there are important dates, weight the weeks before them appropriately (ramp up intensity)
