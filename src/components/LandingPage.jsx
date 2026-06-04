@@ -520,6 +520,18 @@ export default function LandingPage({ onGetStarted }) {
           <span style={{ color: '#fff', fontWeight: 700, fontSize: 18, letterSpacing: '-0.3px' }}>StudyEdge AI</span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <a
+            href="/blog/"
+            style={{
+              color: 'rgba(226,232,240,0.78)', textDecoration: 'none',
+              fontSize: 14, fontWeight: 600, padding: '9px 14px',
+              borderRadius: 8, transition: 'color 0.2s',
+            }}
+            onMouseEnter={e => e.currentTarget.style.color = '#fff'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(226,232,240,0.78)'}
+          >
+            Blog
+          </a>
           <button
             onClick={() => onGetStarted('login')}
             style={{
