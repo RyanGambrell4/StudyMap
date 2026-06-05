@@ -18,6 +18,10 @@
   <meta name="keywords" content="StudyEdge AI login, studyedge login, getstudyedge login, StudyEdge AI sign in, studyedge ai app login" />
   <meta name="robots" content="noindex, follow" />
 
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
@@ -36,17 +40,51 @@
 
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    html { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #080914; color: #e6e9f2; }
-    body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; }
-    .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 20px; padding: 48px 40px; max-width: 420px; width: 100%; text-align: center; }
-    .logo { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 20px; font-weight: 700; color: #e6e9f2; margin-bottom: 28px; }
-    .logo img { width: 32px; height: 32px; border-radius: 8px; }
-    h1 { font-size: 24px; font-weight: 800; color: #fff; margin-bottom: 10px; }
-    p { color: #94a3b8; font-size: 15px; margin-bottom: 24px; line-height: 1.6; }
-    .btn { display: inline-block; background: #6366f1; color: #fff; padding: 13px 28px; border-radius: 12px; font-size: 15px; font-weight: 700; text-decoration: none; }
-    .btn:hover { background: #5254cc; }
-    .footer-note { margin-top: 20px; font-size: 13px; color: #475569; }
-    .footer-note a { color: #6366f1; text-decoration: none; }
+    :root {
+      --bg: #F7F6F3;
+      --bg1: #FFFFFF;
+      --text: #1A1A1A;
+      --muted: #6B6B6B;
+      --dim: #9B9B9B;
+      --border: rgba(0,0,0,0.07);
+      --accent: #3B61C4;
+      --accent-d: #2d4fa3;
+      --serif: 'Cormorant Garamond', Georgia, serif;
+      --sans: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    }
+    html { font-family: var(--sans); background: var(--bg); color: var(--text); -webkit-font-smoothing: antialiased; }
+    body { min-height: 100vh; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; position: relative; overflow: hidden; }
+    body::before {
+      content: ""; position: absolute; inset: 0; pointer-events: none; z-index: 0;
+      background:
+        radial-gradient(720px 380px at 20% 10%, rgba(59,97,196,0.10), transparent 65%),
+        radial-gradient(720px 380px at 80% 90%, rgba(168,162,158,0.12), transparent 65%);
+    }
+    .card {
+      position: relative; z-index: 1;
+      background: var(--bg1);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 48px 40px;
+      max-width: 440px; width: 100%; text-align: center;
+      box-shadow: 0 30px 70px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
+    }
+    .logo { display: flex; align-items: center; justify-content: center; gap: 10px; font-size: 17px; font-weight: 600; color: var(--text); margin-bottom: 30px; letter-spacing: -0.01em; }
+    .logo img { width: 28px; height: 28px; border-radius: 7px; }
+    h1 { font-family: var(--sans); font-size: 26px; font-weight: 700; color: var(--text); margin-bottom: 8px; letter-spacing: -0.02em; line-height: 1.15; }
+    h1 .italic { font-family: var(--serif); font-style: italic; font-weight: 500; color: var(--accent); }
+    p { color: var(--muted); font-size: 15px; margin-bottom: 24px; line-height: 1.6; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+      background: var(--accent); color: #fff;
+      padding: 14px 28px; border-radius: 12px;
+      font-family: var(--sans); font-size: 15px; font-weight: 600;
+      text-decoration: none; transition: background 0.15s, transform 0.15s;
+    }
+    .btn:hover { background: var(--accent-d); transform: translateY(-1px); }
+    .footer-note { margin-top: 24px; font-size: 13.5px; color: var(--dim); }
+    .footer-note a { color: var(--accent); text-decoration: none; font-weight: 500; }
+    .footer-note a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
@@ -57,7 +95,7 @@
       <img src="/favicon.png" alt="StudyEdge AI logo" />
       StudyEdge AI
     </div>
-    <h1>Log in to StudyEdge AI</h1>
+    <h1>Log in to <span class="italic">StudyEdge AI.</span></h1>
     <p>Access your AI study planner, session plans, flashcards, and grade tracker at <strong>getstudyedge.com</strong>.</p>
     <a class="btn" href="/app?login=1">Log In to StudyEdge AI</a>
     <p class="footer-note">Don't have an account? <a href="/app?signup=1">Sign up free</a>, no credit card required.</p>
