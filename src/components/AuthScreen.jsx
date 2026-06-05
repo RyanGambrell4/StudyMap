@@ -80,8 +80,19 @@ export default function AuthScreen({ initialMode, onBack }) {
         if (trial === '1') preserve.set('trial', '1')
         const qs = preserve.toString()
         const emailRedirectTo = `${window.location.origin}/app${qs ? '?' + qs : ''}`
-        const { error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo } })
+        const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo } })
         if (error) throw error
+        // Supabase silently returns success for already-registered emails to
+        // prevent email enumeration. The signal is data.user.identities === [].
+        // Without this check the user gets parked on ConfirmationPending forever
+        // because no confirmation email is sent for an already-confirmed account.
+        const alreadyRegistered = data?.user && (!data.user.identities || data.user.identities.length === 0)
+        if (alreadyRegistered) {
+          setMode('login')
+          setError('You already have an account with this email. Sign in below.')
+          setPassword('')
+          return
+        }
         setSignupPendingEmail(email)
         setPassword('')
       } else if (mode === 'login') {
