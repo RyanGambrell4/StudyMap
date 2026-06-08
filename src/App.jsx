@@ -107,11 +107,12 @@ export default function App() {
         setPasswordRecovery(true)
       }
       if (_event === 'SIGNED_IN' && session?.user) {
-        const createdAt = session.user.created_at ? new Date(session.user.created_at).toISOString() : null
-        const isFreshSignup = session.user.created_at && (Date.now() - new Date(session.user.created_at).getTime()) < 10 * 60 * 1000
+        const createdAtIso = session.user.created_at ? new Date(session.user.created_at).toISOString() : null
+        const createdAtMs = session.user.created_at ? new Date(session.user.created_at).getTime() : 0
+        const isFreshSignup = createdAtMs && Date.now() - createdAtMs < 10 * 60 * 1000 // 10 minutes
         identifyUser(session.user.id, {
           email: session.user.email,
-          signup_date: createdAt,
+          signup_date: createdAtIso,
           auth_provider: session.user.app_metadata?.provider ?? 'email',
           name: session.user.user_metadata?.name ?? null,
         })
@@ -121,8 +122,6 @@ export default function App() {
         // Welcome email — only on actual signup, not every login.
         // Fresh signups have created_at within ~minutes of now AND have not received it before (localStorage flag).
         const welcomeKey = `studyedge_welcome_sent_${session.user.id}`
-        const createdAt = session.user.created_at ? new Date(session.user.created_at).getTime() : 0
-        const isFreshSignup = createdAt && Date.now() - createdAt < 10 * 60 * 1000 // 10 minutes
         if (isFreshSignup && !localStorage.getItem(welcomeKey)) {
           fetch('/api/welcome-email', {
             method: 'POST',
