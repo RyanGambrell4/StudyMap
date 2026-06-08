@@ -1,5 +1,39 @@
 # StudyEdge AI — Living Context
-_Last updated by: SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+
+## SEO pass — 2026-06-08 (audit + quick wins)
+_Driven by user request "what can you do for my seo right now?" Five small commits, all on `main`._
+
+### 1. NCR copy sweep on public landing pages (`b8f0655`)
+- Every comparison page (anki, quizlet, chegg, coursehero, khan-academy, notion-for-studying, goconqr, studocu, anki-vs-quizlet), every `best-study-app-for-*` page, and `cumulative/semester/weighted-gpa-calculator` had a `Try StudyEdge AI Free` button that routes to `/app?signup=1&plan=pro&billing=weekly&trial=1` (Stripe Checkout trial flow, card required) paired with `Free to start. No credit card required.` fine print.
+- Replaced CTA fine print, proof-strip items, OG/Twitter descriptions, and chegg/coursehero hero subs with `Free plan available` (or `Free plan available. Pro from $2.99/week.` where Pro pricing was already in the line). 41 files, 87 inserts / 87 deletes.
+- Tightened `study-schedule-generator.html:397` paragraph that conflated free plan with free trial; now names the 3-day trial explicitly.
+- Kept (accurate): FAQ-style answers that explicitly distinguish "free plan, no card" from "Pro $2.99/wk with 3-day trial" (e.g. ai-tutor, ai-study-coach, ai-flashcard-maker, quizlet-alternative, khan-academy-alternative, notion-for-studying, all 13 `what-gpa-do-you-need-for-*` JSON-LD blocks, login.html). The free plan really has no card, so these claims are true.
+
+### 2. Internal Related-links block on 52 pages (`0766b18`)
+- Added a `Related on StudyEdge AI` section (4 contextually relevant internal links) above each page's footer.
+- Curated per-cluster neighbor map: comparison pages cross-link to 2 sibling comparisons + 2 feature pages; `best-study-app-for-[major]` pages link to 1-2 sibling majors + 2 topical blog/feature pages; `what-gpa-for-[school]` pages link to 3 peer schools + GPA calculator; calculator pages link to the other 3 calculators + a cross-tool; feature pages link to 2 sibling features + 2 comparison/guide pages.
+- Block uses brand palette (`#FFFFFF` bg, `rgba(0,0,0,0.07)` hairline, light-only). Sentinel comment `<!-- Related links (internal) -->` so future re-runs are idempotent.
+- Verified every link target resolves to an existing `public/*.html` or `public/*/index.html`. One pre-existing `/pricing` 404 in shared footers is out of scope here.
+
+### 3. Drop stuffed meta keywords from `index.html` (`72a57d4`)
+- Removed `<meta name="keywords" content="...">` tag with 14 comma-separated keywords. Google has ignored meta keywords since 2009.
+- Per-page public `<meta name="keywords">` tags are short (4-5 focused keywords each) and left alone for now.
+
+### 4. Sitemap lastmod refresh (`ea0fe46`)
+- All 87 URLs in `public/sitemap.xml` bumped from `2026-06-01` to `2026-06-08` so Google re-crawls promptly after today's content changes.
+
+### 5. Audit-only: `LandingPage.jsx` is clean on trial duration
+- Confirmed no stray `7-day` references in LandingPage.jsx or anywhere else in the repo. CONTEXT.md Run 5 had mentioned a `7-day free trial` pill, but that was already corrected in a later run. No edit needed.
+
+### Open SEO backlog (next-run priority)
+1. **`/pricing` 404** — referenced from shared footers across all public/*.html pages. Either build the page or rewrite the footer link to point at the in-app pricing.
+2. **Pre-existing emoji in proof-strip items** (`&#128274;` lock) violates the "no emojis in UI" rule. Out of scope for this pass.
+3. **Per-page meta keywords on 46 public pages** — accurate but useless (Google ignores). Bytes-only cleanup, not urgent.
+4. **GSC verification** — meta tag is present; the SEO_KEYWORDS.md note about confirming the property is connected in GSC needs a human in the GSC dashboard.
+5. **Live state on landing-page hero mockup** — separate Landing Page Agent backlog item, not SEO.
+
+---
 
 ## Landing Page Agent — Runs 2–6 (2026-05-24, visual polish pass)
 _Driven by user request "make it much more professional and visually appealing." Five sequential commits, build verified clean after each. All on `main`._
