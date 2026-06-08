@@ -7,12 +7,12 @@ const PLAN_INFO = {
   free: {
     label: 'Free',
     features: [
-      '1 course (full schedule & planner)',
-      '2 AI messages / day',
-      'Session Blueprint · 1 free/day',
-      'Brain Dump, Quiz Burst, Exam Rescue · 2 free/week',
-      'Focus Mode · 60 min/day free',
-      'Coach Plan · 1 free total',
+      '1 course (preview only)',
+      '2 AI messages total',
+      'Session Blueprint · 1 total',
+      'Brain Dump, Quiz Burst, Exam Rescue · 1 each',
+      'Focus Mode · 30 min/day',
+      'Coach Plan · 1 total',
     ],
     color: '#64748b',
   },

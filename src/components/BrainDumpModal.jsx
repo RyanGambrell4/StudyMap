@@ -257,7 +257,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall }) {
               return (
                 <div style={{ textAlign: 'center', fontSize: 12, color: D.textDim, marginTop: 12 }}>
                   {remaining !== null && remaining > 0
-                    ? <>{2 - remaining} of 2 brain dumps used this week · <button onClick={() => onShowPaywall?.('study-hacks')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>Upgrade for full breakdown</button></>
+                    ? <>{1 - remaining} of 1 brain dump used · <button onClick={() => onShowPaywall?.('study-hacks')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>Upgrade for full breakdown</button></>
                     : <>{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'} for unlimited brain dumps · <button onClick={() => onShowPaywall?.('brainDump')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>Unlock now</button></>
                   }
                 </div>

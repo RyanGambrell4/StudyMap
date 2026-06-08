@@ -2019,7 +2019,7 @@ export default function LandingPage({ onGetStarted }) {
                   <p style={{ margin: '8px 0 0', fontSize: 13, color: 'rgba(226,232,240,0.50)' }}>Try the basics, free forever.</p>
                 </div>
                 <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8, flex: 1, fontSize: 13.5, color: 'rgba(226,232,240,0.7)' }}>
-                  {['1 course', '2 AI tutor actions/day', '1 Coach Plan', '1 Practice Exam', '60 min Focus/day'].map(f => (
+                  {['1 course (preview only)', '2 AI tutor actions total', '1 Coach Plan', '1 Practice Exam', '30 min Focus/day'].map(f => (
                     <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="rgba(226,232,240,0.50)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       {f}

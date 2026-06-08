@@ -17,18 +17,21 @@ import { track } from './analytics'
 
 // ── Plan limits ───────────────────────────────────────────────────────────────
 
+// Free is a one-time preview tier: most premium features are limited to a
+// single lifetime use so users see what each tool does, then hit a real wall
+// that drives them into the 3-day trial.
 export const FREE_LIMITS = {
   courses:             1,
-  aiTutor:             { count: 2,  period: 'day'   },
-  blueprint:           { count: 1,  period: 'day'   },
+  aiTutor:             { count: 2,  period: 'total' },
+  blueprint:           { count: 1,  period: 'total' },
   coachPlan:           { count: 1,  period: 'total' },
   practiceExam:        { count: 1,  period: 'total' },
-  focusMode:           { minutes: 60, period: 'day' },
-  brainDump:           { count: 2,  period: 'week'  },
-  quizBurst:           { count: 2,  period: 'week'  },
-  examRescue:          { count: 2,  period: 'week'  },
-  flashcardDecks:      2,
-  flashcardCardsPerDeck: 20,
+  focusMode:           { minutes: 30, period: 'day' },
+  brainDump:           { count: 1,  period: 'total' },
+  quizBurst:           { count: 1,  period: 'total' },
+  examRescue:          { count: 1,  period: 'total' },
+  flashcardDecks:      1,
+  flashcardCardsPerDeck: 10,
 }
 
 export const PRO_LIMITS = {

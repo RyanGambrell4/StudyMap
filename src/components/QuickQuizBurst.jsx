@@ -230,7 +230,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
               const { remaining } = canUseFeature('quizBurst')
               return remaining !== null && remaining > 0 ? (
                 <div style={{ textAlign: 'center', fontSize: 12, color: D.textDim, marginTop: 12 }}>
-                  {2 - remaining} of 2 quiz bursts used this week
+                  {1 - remaining} of 1 quiz burst used
                   {' · '}<button onClick={() => onShowPaywall?.('quizBurst')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button>
                 </div>
               ) : null
