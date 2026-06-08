@@ -110,78 +110,72 @@ async function sendWinBackEmail(toEmail) {
   if (!process.env.RESEND_API_KEY) return
   try {
     await resend.emails.send({
-      from: 'StudyEdge AI <support@getstudyedge.com>',
+      from: 'StudyEdge AI <support@mail.getstudyedge.com>',
       to: toEmail,
-      subject: "You still have access until your period ends — here's what you'll miss",
-      html: `
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background:#080D1A;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#080D1A;padding:40px 0;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#0D1425;border-radius:16px;border:1px solid rgba(255,255,255,0.07);padding:40px 48px;max-width:560px;">
-
-        <!-- Logo -->
-        <tr><td style="padding-bottom:28px;">
-          <span style="font-size:17px;font-weight:700;color:#F1F5F9;letter-spacing:-0.3px;">StudyEdge AI</span>
-        </td></tr>
-
-        <!-- Headline -->
-        <tr><td style="padding-bottom:16px;">
-          <h1 style="margin:0;font-size:24px;font-weight:800;color:#F1F5F9;letter-spacing:-0.8px;line-height:1.3;">
-            We're sorry to see you go.
-          </h1>
-        </td></tr>
-
-        <!-- Body -->
-        <tr><td style="padding-bottom:24px;">
-          <p style="margin:0 0 14px;font-size:15px;color:#94A3B8;line-height:1.7;">
-            Your Pro access has been cancelled. You'll keep your full access until the end of your current billing period — after that your account moves to the Free plan.
-          </p>
-          <p style="margin:0 0 14px;font-size:15px;color:#94A3B8;line-height:1.7;">
-            Here's what you'll lose when it expires:
-          </p>
-          <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:20px;">
-            ${[
-              '5 courses (drops to 1)',
-              '100 study boosts/month (drops to 10)',
-              'AI-generated study plans',
-              'Session Blueprints & Study Coach',
-              'Flashcards & quizzes',
-            ].map(f => `
-            <tr>
-              <td style="padding:6px 0;font-size:14px;color:#64748b;">✕</td>
-              <td style="padding:6px 0 6px 10px;font-size:14px;color:#CBD5E1;">${f}</td>
-            </tr>`).join('')}
-          </table>
-          <p style="margin:0;font-size:15px;color:#94A3B8;line-height:1.7;">
-            If you cancelled by mistake, or want to give it another shot — we've got you. Just click below to reactivate.
-          </p>
-        </td></tr>
-
-        <!-- CTA -->
-        <tr><td style="padding-bottom:32px;text-align:center;">
-          <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1"
-             style="display:inline-block;background:linear-gradient(135deg,#4F7EF7,#7C5CFA);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;letter-spacing:-0.2px;">
-            Reactivate Pro →
-          </a>
-        </td></tr>
-
-        <!-- Footer -->
-        <tr><td style="border-top:1px solid rgba(255,255,255,0.07);padding-top:24px;">
-          <p style="margin:0;font-size:12px;color:#334155;line-height:1.6;">
-            You're receiving this because you cancelled your StudyEdge AI Pro subscription.<br/>
-            <a href="https://getstudyedge.com/app" style="color:#475569;">Log in</a> ·
-            <a href="mailto:support@getstudyedge.com" style="color:#475569;">Contact support</a>
-          </p>
-        </td></tr>
-
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`,
+      subject: "You still have Pro until your billing period ends",
+      html: `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pro cancellation confirmed</title></head>
+<body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111111;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
+      <tr><td style="padding-bottom:20px;text-align:center;">
+        <img src="https://getstudyedge.com/favicon.png" width="32" height="32" alt="StudyEdge" style="display:inline-block;width:32px;height:32px;border-radius:8px;vertical-align:middle;margin-right:10px;border:0;outline:none;text-decoration:none;" />
+        <span style="font-size:16px;font-weight:700;color:#111111;vertical-align:middle;letter-spacing:-0.3px;">StudyEdge</span>
+      </td></tr>
+      <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
+        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Cancellation confirmed</p>
+        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">
+          You still have Pro until your period ends.
+        </h1>
+        <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          Your Pro subscription has been cancelled. You keep full access until the end of your current billing period. After that, your account moves to the Free plan.
+        </p>
+        <p style="margin:18px 0 10px;font-size:11px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">What Free is missing</p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
+          ${[
+            ['5 courses', 'Free drops you to 1'],
+            ['100 AI boosts / month', 'Free gives you 10'],
+            ['AI Study Coach', 'Multi-week personalized plans'],
+            ['Session Blueprints', 'Minute-by-minute session plans'],
+            ['Flashcards and quizzes', 'Built into every session'],
+          ].map(([feat, sub], i, arr) => `
+          <tr>
+            <td style="padding:10px 0;${i < arr.length - 1 ? 'border-bottom:1px solid #F0EDE8;' : ''}">
+              <div style="font-size:14px;font-weight:600;color:#111111;">${feat}</div>
+              <div style="font-size:13px;color:#6B6B6B;margin-top:2px;">${sub}</div>
+            </td>
+          </tr>`).join('')}
+        </table>
+        <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          Cancelled by mistake or want another shot at it? Reactivate any time before your access ends and nothing changes.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;">
+          <tr><td align="center" style="padding-bottom:6px;">
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1"
+               style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">
+              Reactivate Pro
+            </a>
+          </td></tr>
+          <tr><td align="center">
+            <span style="font-size:12px;color:#9B9B9B;">Pro is $2.99/wk. Cancel anytime.</span>
+          </td></tr>
+        </table>
+      </td></tr>
+      <tr><td style="padding:24px 0 0;text-align:center;">
+        <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
+          You're receiving this because you cancelled your StudyEdge AI Pro subscription.<br>
+          <a href="https://getstudyedge.com/app" style="color:#9B9B9B;text-decoration:underline;">Open the app</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
+        </p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`,
     })
     console.log(`[stripe webhook] Win-back email sent to ${toEmail}`)
   } catch (err) {
@@ -193,90 +187,78 @@ async function sendTrialExpiryEmail(toEmail) {
   if (!process.env.RESEND_API_KEY) return
   try {
     await resend.emails.send({
-      from: 'StudyEdge AI <support@getstudyedge.com>',
+      from: 'StudyEdge AI <support@mail.getstudyedge.com>',
       to: toEmail,
-      subject: 'Your free trial ends tomorrow — keep your Pro access',
-      html: `
-<!DOCTYPE html>
-<html>
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background:#080D1A;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
-  <table width="100%" cellpadding="0" cellspacing="0" style="background:#080D1A;padding:40px 0;">
-    <tr><td align="center">
-      <table width="560" cellpadding="0" cellspacing="0" style="background:#0D1425;border-radius:16px;border:1px solid rgba(255,255,255,0.07);padding:40px 48px;max-width:560px;">
-
-        <!-- Logo -->
-        <tr><td style="padding-bottom:28px;">
-          <span style="font-size:17px;font-weight:700;color:#F1F5F9;letter-spacing:-0.3px;">StudyEdge AI</span>
-        </td></tr>
-
-        <!-- Urgency badge -->
-        <tr><td style="padding-bottom:16px;">
-          <div style="display:inline-block;background:rgba(251,191,36,0.12);border:1px solid rgba(251,191,36,0.3);border-radius:999px;padding:4px 14px;font-size:12px;font-weight:700;color:#fbbf24;letter-spacing:0.3px;">
-            ⏱ TRIAL ENDING SOON
-          </div>
-        </td></tr>
-
-        <!-- Headline -->
-        <tr><td style="padding-bottom:16px;">
-          <h1 style="margin:0;font-size:24px;font-weight:800;color:#F1F5F9;letter-spacing:-0.8px;line-height:1.3;">
-            Your Pro trial ends soon.
-          </h1>
-        </td></tr>
-
-        <!-- Body -->
-        <tr><td style="padding-bottom:24px;">
-          <p style="margin:0 0 14px;font-size:15px;color:#94A3B8;line-height:1.7;">
-            Your 3-day free trial is wrapping up. After it ends, your account drops to
-            the Free plan and you'll lose access to everything below.
-          </p>
-          <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:20px;">
-            ${[
-              ['5 courses', 'Free drops you to 1'],
-              ['100 AI study boosts/month', 'Free gives you 10'],
-              ['AI Study Coach', 'Personalized study plans'],
-              ['Session Blueprints', 'Minute-by-minute session plans'],
-              ['Flashcards & quizzes', 'Built into every session'],
-            ].map(([feat, sub]) => `
-            <tr>
-              <td style="padding:7px 0;">
-                <span style="color:#34d399;font-size:13px;margin-right:10px;">✓</span>
-                <strong style="font-size:14px;color:#CBD5E1;">${feat}</strong>
-                <span style="font-size:13px;color:#475569;margin-left:8px;">— ${sub}</span>
-              </td>
-            </tr>`).join('')}
-          </table>
-          <p style="margin:0;font-size:15px;color:#94A3B8;line-height:1.7;">
-            Keep going for <strong style="color:#c7d2fe;">$2.99/week</strong> — less than a coffee.
-            Cancel anytime from your account.
-          </p>
-        </td></tr>
-
-        <!-- CTA -->
-        <tr><td style="padding-bottom:8px;text-align:center;">
-          <a href="https://getstudyedge.com/app"
-             style="display:inline-block;background:linear-gradient(135deg,#4F7EF7,#7C5CFA);color:#fff;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;letter-spacing:-0.2px;">
-            Open my study plan →
-          </a>
-        </td></tr>
-        <tr><td style="padding-bottom:32px;text-align:center;">
-          <span style="font-size:12px;color:#334155;">Cancel before the trial ends and you won't be charged.</span>
-        </td></tr>
-
-        <!-- Footer -->
-        <tr><td style="border-top:1px solid rgba(255,255,255,0.07);padding-top:24px;">
-          <p style="margin:0;font-size:12px;color:#334155;line-height:1.6;">
-            You're receiving this because your StudyEdge AI Pro trial is ending soon.<br/>
-            <a href="https://getstudyedge.com/app" style="color:#475569;">Open the app</a> ·
-            <a href="mailto:support@getstudyedge.com" style="color:#475569;">Contact support</a>
-          </p>
-        </td></tr>
-
-      </table>
-    </td></tr>
-  </table>
-</body>
-</html>`,
+      subject: 'Your free trial ends tomorrow',
+      html: `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your free trial ends tomorrow</title></head>
+<body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111111;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
+      <tr><td style="padding-bottom:20px;text-align:center;">
+        <img src="https://getstudyedge.com/favicon.png" width="32" height="32" alt="StudyEdge" style="display:inline-block;width:32px;height:32px;border-radius:8px;vertical-align:middle;margin-right:10px;border:0;outline:none;text-decoration:none;" />
+        <span style="font-size:16px;font-weight:700;color:#111111;vertical-align:middle;letter-spacing:-0.3px;">StudyEdge</span>
+      </td></tr>
+      <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
+        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#3B61C4;text-transform:uppercase;">Trial ending soon</p>
+        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">
+          Your Pro trial ends tomorrow.
+        </h1>
+        <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          Your 3-day free trial wraps up tomorrow. If nothing changes, your card on file is billed <strong style="color:#111111;">$2.99/week</strong> and Pro stays active. Cancel before then and you won't be charged.
+        </p>
+        <p style="margin:18px 0 10px;font-size:11px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">What Pro keeps unlocked</p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
+          ${[
+            ['5 courses', 'Free drops you to 1'],
+            ['100 AI study boosts / month', 'Free gives you 10'],
+            ['AI Study Coach', 'Personalized multi-week plans'],
+            ['Session Blueprints', 'Minute-by-minute session plans'],
+            ['Flashcards and quizzes', 'Built into every session'],
+          ].map(([feat, sub], i, arr) => `
+          <tr>
+            <td style="padding:10px 0;${i < arr.length - 1 ? 'border-bottom:1px solid #F0EDE8;' : ''}">
+              <table cellpadding="0" cellspacing="0" style="width:100%;">
+                <tr>
+                  <td style="width:24px;vertical-align:top;padding-top:1px;">
+                    <span style="display:inline-block;width:18px;height:18px;border-radius:50%;background:rgba(59,97,196,0.12);text-align:center;line-height:18px;color:#3B61C4;font-size:11px;font-weight:700;">✓</span>
+                  </td>
+                  <td>
+                    <div style="font-size:14px;font-weight:600;color:#111111;line-height:1.4;">${feat}</div>
+                    <div style="font-size:13px;color:#9B9B9B;margin-top:2px;line-height:1.5;">${sub}</div>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>`).join('')}
+        </table>
+        <table cellpadding="0" cellspacing="0" style="width:100%;">
+          <tr><td align="center" style="padding-bottom:8px;">
+            <a href="https://getstudyedge.com/app"
+               style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">
+              Open my study plan
+            </a>
+          </td></tr>
+          <tr><td align="center">
+            <span style="font-size:12px;color:#9B9B9B;">Cancel any time in your account before tomorrow and you won't be charged.</span>
+          </td></tr>
+        </table>
+      </td></tr>
+      <tr><td style="padding:24px 0 0;text-align:center;">
+        <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
+          You're receiving this because your StudyEdge AI Pro trial is ending soon.<br>
+          <a href="https://getstudyedge.com/app" style="color:#9B9B9B;text-decoration:underline;">Open the app</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
+        </p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`,
     })
     console.log(`[stripe webhook] Trial expiry email sent to ${toEmail}`)
   } catch (err) {
