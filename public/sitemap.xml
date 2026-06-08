@@ -29,6 +29,14 @@
     <priority>0.6</priority>
   </url>
 
+  <!-- Pricing (commercial intent) -->
+  <url>
+    <loc>https://getstudyedge.com/pricing</loc>
+    <lastmod>2026-06-08</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
+  </url>
+
   <!-- Core product / feature pages -->
   <url>
     <loc>https://getstudyedge.com/study-schedule-generator</loc>
