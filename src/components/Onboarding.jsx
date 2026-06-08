@@ -514,19 +514,19 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           {trialLoading ? 'Loading…' : 'Start my 3-day free trial →'}
         </button>
 
-        {/* Secondary */}
-        <button
-          onClick={() => onComplete(profileData)}
-          style={{ width: '100%', padding: '13px', background: 'transparent', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 12, color: '#6B6B6B', fontSize: '0.875rem', fontWeight: 600, cursor: 'pointer' }}
-          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.22)'; e.currentTarget.style.color = '#111' }}
-          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.12)'; e.currentTarget.style.color = '#6B6B6B' }}
-        >
-          I'll try the free plan first
-        </button>
-
-        <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.72rem', marginTop: 16 }}>
+        <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.72rem', marginTop: 14 }}>
           Card required · $0 today · auto-bills $2.99/wk after trial unless canceled
         </p>
+
+        {/* Low-prominence skip — a small link instead of an equal-weight button */}
+        <div style={{ textAlign: 'center', marginTop: 18 }}>
+          <button
+            onClick={() => { track('trial_skipped', { source: 'onboarding' }); onComplete(profileData) }}
+            style={{ background: 'none', border: 'none', color: '#B5B5B5', fontSize: '0.78rem', fontWeight: 500, cursor: 'pointer', textDecoration: 'underline', padding: 4 }}
+          >
+            Continue with limited free preview
+          </button>
+        </div>
       </div>
     </div>
   )
