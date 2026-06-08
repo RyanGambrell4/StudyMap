@@ -1,5 +1,40 @@
 # StudyEdge AI — Living Context
-_Last updated by: SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+
+## SEO pass — 2026-06-08 follow-up (backlog burn-down)
+_Driven by user request "do all of that please" after the first pass shipped. Five small commits, all on `main`._
+
+### 1. Built /pricing page (`5901cd5`)
+- Several public/*.html footers were linking to /pricing but the page did not exist (404 surfaced during the first pass). Created `public/pricing.html` mirroring PRICING_SPEC.md.
+- Three cards (Free / Pro / Unlimited) with a weekly/monthly/annual billing toggle. Weekly default. Vanilla JS toggle updates both the displayed price and the CTA href's `billing=` param.
+- Honors the trial-CTA rule: Pro card CTA says "Start your 3-day free trial" with fine print "3-day free trial via Stripe Checkout. Card required. Cancel any time." Free plan CTA goes to `/app?signup=1` (no trial param) and accurately notes "No credit card required for the free plan."
+- Added Product Offer JSON-LD covering all 7 SKUs (Free + 3 Pro + 3 Unlimited) and FAQ JSON-LD answering: is it free, does the trial need a card, can I cancel, Pro vs Unlimited, why weekly billing.
+- Added to `public/sitemap.xml` at priority 0.95.
+
+### 2. Tidied /not-affiliated-with-study-edge (`f3ba36a`)
+- Audit found the page is otherwise strong (Org + WebPage + FAQ schema, disambiguatingDescription, side-by-side compare table, StudyFetch clarification, accurate trial CTAs that do not claim no-card).
+- Three small fixes: nav link `/#pricing` -> `/pricing`; footer Company column adds `/pricing`; JSON-LD `dateModified` bumped to 2026-06-08 (datePublished left at 2026-05-27).
+
+### 3. Removed lock emoji from proof-strip items (`063b792`)
+- CLAUDE.md rule "No emojis in UI" was being violated by `&#128274;` (lock) HTML entity on 3 pages: `anki-alternative`, `best-study-app-for-students`, `how-to-make-a-study-schedule`. Stripped the entity; the text-only proof item still reads cleanly.
+
+### 4. Bundled commit `11fbf4e` actually contains TWO changes
+The commit message says only "drop per-page meta keywords" but `git add public/*.html` swept both changes. Both are correct:
+- **Meta keywords sweep on 46 public pages.** Per-page `<meta name="keywords">` tags were short (4-5 focused keywords each) but pure noise (Google has ignored them since 2009). Removed for consistency with the homepage cleanup in `72a57d4`.
+- **Repointed 4 broken og:image references.** Audit caught 4 pages pointing at og:image URLs whose files do not exist in `public/`:
+  - `active-recall-app.html` -> `og-active-recall.png` (404)
+  - `grade-calculator-college.html` -> `og-grade-calculator.png` (404)
+  - `quizlet-alternative.html` -> `og-quizlet-alternative.png` (404)
+  - `study-schedule-generator.html` -> `og-study-schedule.png` (404)
+  Real social-share bug: Twitter/LinkedIn would fail to fetch the image. Repointed all 4 to `og-hero-v1.png` (1200x630, exists, used by the homepage).
+
+### Open SEO backlog (next-run priority)
+1. **Authored cluster-specific 1200x630 OG cards.** 52 pages currently share `hero-landing.png` (1920x600, wrong aspect ratio for OG). LinkedIn/Twitter crop it awkwardly. Real wins would be per-cluster cards (one for comparison pages, one for calculators, one for AI features, one for "best study app for [major]", one for GPA-for-[school]). Needs design work, not code.
+2. **GSC verification handshake** — meta tag is present and the new `/pricing` page should be submitted for indexing; needs human in the GSC dashboard.
+3. **Pre-existing /pricing footer link discovery.** Many footers in `public/*.html` still point at `/pricing` already (now resolves); no other dead links surfaced this pass, but a broader site link audit would not hurt.
+4. **PRICING_SPEC.md has internal inconsistency.** The pricing table line says "3-day free trial (no card)" but the trial section three paragraphs later correctly says "card required." The wider codebase (CLAUDE.md, /pricing JSON-LD, paywall) is aligned to the card-required version. Spec should be updated for accuracy.
+
+---
 
 ## SEO pass — 2026-06-08 (audit + quick wins)
 _Driven by user request "what can you do for my seo right now?" Five small commits, all on `main`._
