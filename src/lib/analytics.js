@@ -52,3 +52,15 @@ export function track(event, props = {}) {
   if (!_ready) return
   posthog.capture(event, props)
 }
+
+// Sticky props attached to every event (e.g. plan, school_type). Call when known.
+export function register(props = {}) {
+  if (!_ready) return
+  posthog.register(props)
+}
+
+// Sticky props that only stick the first time set (e.g. acquisition_source, signup_date).
+export function registerOnce(props = {}) {
+  if (!_ready) return
+  posthog.register_once(props)
+}

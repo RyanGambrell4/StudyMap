@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
+import { track } from '../lib/analytics'
 
 export default function AuthScreen({ initialMode, onBack }) {
   const isMobile = window.innerWidth <= 767
@@ -56,11 +57,15 @@ export default function AuthScreen({ initialMode, onBack }) {
     if (trial === '1') preserve.set('trial', '1')
     const qs = preserve.toString()
     const redirectTo = `${window.location.origin}/app${qs ? '?' + qs : ''}`
+    track('oauth_clicked', { provider: 'google', mode, plan_context: planContext?.plan ?? null })
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: { redirectTo },
     })
-    if (error) setError('Something went wrong. Please try again.')
+    if (error) {
+      track('oauth_failed', { provider: 'google', reason: error.message })
+      setError('Something went wrong. Please try again.')
+    }
   }
 
   const handleSubmit = async (e) => {
@@ -80,6 +85,7 @@ export default function AuthScreen({ initialMode, onBack }) {
         if (trial === '1') preserve.set('trial', '1')
         const qs = preserve.toString()
         const emailRedirectTo = `${window.location.origin}/app${qs ? '?' + qs : ''}`
+        track('signup_started', { method: 'email', plan_context: plan ?? null, billing_context: billing ?? null, trial_context: trial === '1' })
         const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo } })
         if (error) throw error
         // Supabase silently returns success for already-registered emails to
@@ -88,24 +94,29 @@ export default function AuthScreen({ initialMode, onBack }) {
         // because no confirmation email is sent for an already-confirmed account.
         const alreadyRegistered = data?.user && (!data.user.identities || data.user.identities.length === 0)
         if (alreadyRegistered) {
+          track('signup_already_registered', { method: 'email' })
           setMode('login')
           setError('You already have an account with this email. Sign in below.')
           setPassword('')
           return
         }
+        track('signup_email_sent', { method: 'email' })
         setSignupPendingEmail(email)
         setPassword('')
       } else if (mode === 'login') {
         const { error } = await supabase.auth.signInWithPassword({ email, password })
         if (error) throw error
+        track('login_completed', { method: 'email' })
       } else if (mode === 'forgot') {
         const { error } = await supabase.auth.resetPasswordForEmail(email, {
           redirectTo: `${window.location.origin}/app`,
         })
         if (error) throw error
+        track('password_reset_requested')
         setSuccess('Password reset email sent. Check your inbox.')
       }
     } catch (err) {
+      track(mode === 'signup' ? 'signup_failed' : mode === 'login' ? 'login_failed' : 'password_reset_failed', { method: 'email', reason: err.message })
       console.error('Auth error:', err.message)
       if (err.message?.toLowerCase().includes('invalid login credentials')) {
         setError('Incorrect email or password.')

@@ -171,12 +171,18 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     return () => clearInterval(t)
   }, [])
 
+  const handleDismiss = (reason) => {
+    track('paywall_dismissed', { trigger, reason })
+    onClose()
+  }
+
   // Close on Escape
   useEffect(() => {
-    const handler = e => { if (e.key === 'Escape') onClose() }
+    const handler = e => { if (e.key === 'Escape') handleDismiss('escape') }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [onClose])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onClose, trigger])
 
   const handleStartTrial = async () => {
     // Card-required Stripe trial — auto-converts to weekly Pro after 3 days
@@ -223,7 +229,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
         zIndex: 1000, padding: '16px',
         overflowY: 'auto',
       }}
-      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+      onClick={e => { if (e.target === e.currentTarget) handleDismiss('backdrop') }}
     >
       <style>{`
         @media (max-width: 600px) {
@@ -266,7 +272,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             </p>
           </div>
           <button
-            onClick={onClose}
+            onClick={() => handleDismiss('close_button')}
             style={{
               background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)',
               borderRadius: '8px', color: '#9B9B9B', cursor: 'pointer',

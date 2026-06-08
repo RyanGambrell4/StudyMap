@@ -3,7 +3,7 @@ import { supabase } from './lib/supabase'
 import { initUserData, clearUserData, savePlan, refreshSubscription, saveEmailDigest } from './lib/db'
 import { getActivePlan, canAddCourse, createCheckoutSession } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
-import { initAnalytics, identifyUser, resetUser, track } from './lib/analytics'
+import { initAnalytics, identifyUser, resetUser, track, register, registerOnce } from './lib/analytics'
 import { captureReferralParam, getStoredReferrer, clearStoredReferrer } from './lib/referral'
 import SharedPlanView from './components/SharedPlanView'
 import AuthScreen from './components/AuthScreen'
@@ -16,7 +16,25 @@ import './index.css'
 
 export default function App() {
   useTheme()
-  useEffect(() => { initAnalytics(); captureReferralParam() }, [])
+  useEffect(() => {
+    initAnalytics()
+    captureReferralParam()
+    // 'surface' must overwrite — if the user navigated from the marketing site,
+    // PostHog's super-properties cache still has surface: 'marketing'.
+    register({ surface: 'app' })
+    // Stamp acquisition info onto the user permanently, even pre-signup,
+    // so every later event can be sliced by source/UTM in PostHog.
+    const sp = new URLSearchParams(window.location.search)
+    registerOnce({
+      utm_source: sp.get('utm_source'),
+      utm_medium: sp.get('utm_medium'),
+      utm_campaign: sp.get('utm_campaign'),
+      utm_content: sp.get('utm_content'),
+      utm_term: sp.get('utm_term'),
+      referrer: document.referrer || null,
+      landing_path: window.location.pathname,
+    })
+  }, [])
   const [session, setSession]   = useState(undefined) // undefined = still checking
   const [dbReady, setDbReady]   = useState(false)
   const [showOutput, setShowOutput]   = useState(false)
@@ -89,8 +107,17 @@ export default function App() {
         setPasswordRecovery(true)
       }
       if (_event === 'SIGNED_IN' && session?.user) {
-        identifyUser(session.user.id, { email: session.user.email })
-        track('user_signed_in')
+        const createdAt = session.user.created_at ? new Date(session.user.created_at).toISOString() : null
+        const isFreshSignup = session.user.created_at && (Date.now() - new Date(session.user.created_at).getTime()) < 10 * 60 * 1000
+        identifyUser(session.user.id, {
+          email: session.user.email,
+          signup_date: createdAt,
+          auth_provider: session.user.app_metadata?.provider ?? 'email',
+          name: session.user.user_metadata?.name ?? null,
+        })
+        register({ auth_provider: session.user.app_metadata?.provider ?? 'email' })
+        track('user_signed_in', { fresh_signup: !!isFreshSignup, auth_provider: session.user.app_metadata?.provider ?? 'email' })
+        if (isFreshSignup) track('signup_completed', { auth_provider: session.user.app_metadata?.provider ?? 'email' })
         // Welcome email — only on actual signup, not every login.
         // Fresh signups have created_at within ~minutes of now AND have not received it before (localStorage flag).
         const welcomeKey = `studyedge_welcome_sent_${session.user.id}`
@@ -156,6 +183,15 @@ export default function App() {
         setInitialCompletedIds(new Set(plan.completedIds ?? []))
         setShowOutput(true)
       }
+      // Attach the full user profile as super properties so every event is sliceable.
+      register({
+        active_plan: getActivePlan(),
+        year_level: plan?.yearLevel ?? null,
+        learning_style: plan?.learningStyle ?? null,
+        school_type: plan?.schoolType ?? null,
+        course_count: plan?.courses?.length ?? 0,
+        has_onboarded: !!plan,
+      })
       setDbReady(true)
     })
   }, [session?.user?.id])
