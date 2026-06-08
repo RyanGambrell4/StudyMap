@@ -19,13 +19,21 @@ const HOST = import.meta.env.VITE_POSTHOG_HOST || 'https://us.i.posthog.com'
 let _ready = false
 
 export function initAnalytics() {
-  if (!KEY) return
+  if (!KEY) {
+    // Loud in prod, silent in dev — so a missing/empty key is caught next deploy, not 33 days later.
+    if (import.meta.env.PROD) {
+      console.error('[analytics] VITE_POSTHOG_KEY is missing or empty — no events will be sent')
+    }
+    return
+  }
   posthog.init(KEY, {
     api_host: HOST,
     person_profiles: 'identified_only',
     capture_pageview: true,
     capture_pageleave: true,
     autocapture: false, // manual events only — keep it clean
+    disable_session_recording: true,
+    loaded: () => { if (import.meta.env.DEV) console.info('[analytics] posthog ready') },
   })
   _ready = true
 }
