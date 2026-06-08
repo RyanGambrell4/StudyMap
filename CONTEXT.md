@@ -1,5 +1,50 @@
 # StudyEdge AI — Living Context
-_Last updated by: SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+
+---
+
+## Email Agent — Run Notes (2026-06-08)
+
+### What this run changed
+- Deleted `api/crons.js`. It was a dead consolidated email handler from the Vercel Hobby era — the seven email HTML templates inside were all dark-themed (`#080D1A` bg) and matched none of the brand. `vercel.json` cron paths point to the standalone files (`re-engage.js`, `weekly-recap.js`, `day1-tips.js`, `day7-milestone.js`, `day14-upgrade.js`, `exam-countdown.js`, plus `welcome-email.js` from `App.jsx`), which were already rewritten in the 2026-05-26 pass. No references in `src/`, `api/`, `public/`, `vercel.json`, or scripts. Confirmed dead before deletion.
+- Rewrote both Stripe-webhook emails (`sendWinBackEmail`, `sendTrialExpiryEmail` in `api/stripe.js`) to the standard light template: `#F7F6F3` page, `#FFFFFF` card, `#3B61C4` accent, system font, single primary CTA, signed "— The StudyEdge AI team". These were the last live dark templates in the codebase.
+- Aligned Stripe-webhook sender to `support@mail.getstudyedge.com` (it was the only file using bare `support@getstudyedge.com`, which is inconsistent with the rest of the suite and could trigger different SPF/DKIM signing paths in Resend).
+- Trial-expiry copy now matches the live policy: "your card on file is billed $2.99/week" — no more vague "you'll lose access" language. Cancel-before-tomorrow line preserved.
+- Shipped `public/unsubscribe.html` + a `vercel.json` rewrite (`/unsubscribe` → `/unsubscribe.html`). The `weekly-digest` email footer links to `/unsubscribe?email=...` which had been 404ing. Gmail and Outlook punish senders whose unsubscribe links don't resolve, so this is a measurable deliverability win. The page is a light, brand-matched static stub that explains the three email categories and routes users to the in-app Settings → Notifications toggle.
+- Fixed a pre-existing **build-breaking** parse error in `src/App.jsx`: the `SIGNED_IN` handler declared `createdAt` and `isFreshSignup` twice in the same block. Vercel deploys had been failing with `PARSE_ERROR: Identifier 'createdAt' has already been declared`, which means the welcome-email wiring shipped in 2026-05-26 was likely never reaching production. Collapsed to one canonical pair (`createdAtIso`, `createdAtMs`, `isFreshSignup`).
+
+### Verified clean
+- `grep -nE "#080D1A|#0D1425|#F1F5F9|#94A3B8|#CBD5E1|#334155|#475569|linear-gradient" api/*.js` → no hits. All email HTML is now light.
+- `npm run build` passes (was broken before this run because of the App.jsx duplicate declarations).
+- Sender alignment: every `from:` in `api/` now reads `StudyEdge AI <support@mail.getstudyedge.com>`.
+
+### What still needs a human in a dashboard
+1. **`RESEND_API_KEY` must be set in Vercel** → Project Settings → Environment Variables → Production + Preview. Without it every `resend.emails.send()` call no-ops via the `if (!process.env.RESEND_API_KEY) return` guard. This is the single biggest unblock. Value: the Resend API key from https://resend.com/api-keys.
+2. **`LOOPS_API_KEY`** → same place. Lifecycle/marketing automations live in the Loops dashboard but the contact sync from `lib/server/loops.js` needs the key.
+3. **`CRON_SECRET`** → same place. All cron endpoints check `Authorization: Bearer <secret>`. Without it the cron URLs are publicly callable (anyone can spam the sender pipeline). Generate any 32+ char random string.
+4. **Verify Resend domain status** → Resend dashboard → Domains. The sender is `support@mail.getstudyedge.com`, which requires the `mail.getstudyedge.com` subdomain to be added and verified in Resend with the SPF/DKIM TXT records published in the DNS host. If only the apex `getstudyedge.com` is verified, mail will silently fail Resend's domain check.
+5. **DNS records on `mail.getstudyedge.com`** (the actual envelope domain):
+   - SPF: `v=spf1 include:_spf.resend.com ~all`
+   - DKIM: TXT record provided by Resend → Domains → Show DNS records
+   - DMARC (on apex `getstudyedge.com`): `v=DMARC1; p=none; rua=mailto:support@getstudyedge.com` → after a week of clean reports, tighten to `p=quarantine`
+6. **Supabase Auth confirmation/reset** → Supabase Dashboard → Authentication → Settings → SMTP. Per the user's memory, this has gone stale before with 535 auth errors. **Check Supabase auth logs first** (Dashboard → Logs → Auth) before re-walking fresh setup — re-pasting credentials is wasted effort if the SMTP host is rate-limiting. The 2026-05-26 setup guide is in `docs/supabase-email-templates.md`. If Resend SMTP credentials have rotated, generate new ones at Resend → SMTP and paste them into Supabase.
+7. **Test deliverability after `RESEND_API_KEY` is set** → trigger a real signup against the production app, then verify in:
+   - Resend dashboard → Logs (confirm `support@mail.getstudyedge.com` accepted the send)
+   - Gmail/Outlook inbox (confirm not Promotions/Spam)
+   - `mail-tester.com` (full SPF/DKIM/DMARC score, aim for 9+/10)
+
+### Open follow-ups (not blocking)
+- Em-dash sweep in email body copy. CLAUDE.md says "No em dashes in copy" but `welcome-email.js`, `day7-milestone.js`, `day14-upgrade.js`, `re-engage.js`, `weekly-recap.js`, `exam-countdown.js`, `exam-tomorrow.js`, `streak-broken.js`, `onboarding-complete.js`, `first-plan.js`, and the two new Stripe templates all use em dashes in body sentences. The closing signature `— The StudyEdge AI team` is intentional. This run did not do a mechanical replace because converting em-dash sentences cleanly often requires restructuring, not substitution. Recommend a copy-only pass.
+- Real one-click unsubscribe. The current `/unsubscribe` page is a stub pointing users to in-app settings. Gmail's new bulk-sender requirements (effective Feb 2024) require **functional one-click unsubscribe via the `List-Unsubscribe-Post` header** for any sender hitting 5,000+ Gmail addresses/day. Below that threshold the current setup is fine. When volume grows, build:
+  1. A `POST /api/email-unsubscribe` endpoint that toggles `user_data.email_digest = false` via a signed token in the URL.
+  2. `List-Unsubscribe` + `List-Unsubscribe-Post: List-Unsubscribe=One-Click` headers on every `resend.emails.send()` call.
+- Loops.so contact sync error handling. Every `upsertContact` / `triggerEvent` call is fired-and-forgotten via `Promise.allSettled`. Add Axiom logging of failed Loops calls so we can detect when `LOOPS_API_KEY` rotates.
+
+### Commits shipped this run
+- `chore(email): delete dead api/crons.js with dark templates`
+- `design(email): rewrite Stripe win-back and trial-expiry emails to light theme`
+- `content: ship /unsubscribe page so weekly-digest links resolve`
+- `fix(auth): remove duplicate createdAt and isFreshSignup declarations`
 
 ## SEO pass — 2026-06-08 follow-up (backlog burn-down)
 _Driven by user request "do all of that please" after the first pass shipped. Five small commits, all on `main`._
