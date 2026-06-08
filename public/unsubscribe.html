@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="canonical" href="https://getstudyedge.com/unsubscribe" />
+<link rel="icon" type="image/png" href="/favicon.png" />
+<meta name="description" content="Manage your StudyEdge AI email preferences. Turn off weekly digests, study tips, and reminders." />
+<meta name="robots" content="noindex, nofollow" />
+<title>Unsubscribe | StudyEdge AI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #F7F6F3;
+    --card: #FFFFFF;
+    --text: #111111;
+    --muted: #6B6B6B;
+    --dim: #9B9B9B;
+    --border: rgba(0,0,0,0.07);
+    --accent: #3B61C4;
+  }
+  body {
+    font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 16px;
+  }
+  .wrap { width: 100%; max-width: 520px; }
+  .brand { text-align: center; margin-bottom: 24px; }
+  .brand img { width: 32px; height: 32px; border-radius: 8px; vertical-align: middle; margin-right: 10px; }
+  .brand span { font-size: 16px; font-weight: 700; vertical-align: middle; letter-spacing: -0.3px; }
+  .card {
+    background: var(--card);
+    border-radius: 16px;
+    border: 1px solid var(--border);
+    padding: 32px 32px 28px;
+  }
+  .eyebrow {
+    font-size: 12px; font-weight: 600; letter-spacing: 0.06em;
+    color: var(--dim); text-transform: uppercase; margin-bottom: 6px;
+  }
+  h1 {
+    margin: 0 0 14px;
+    font-size: 24px; font-weight: 700; letter-spacing: -0.5px; line-height: 1.3;
+  }
+  p { color: var(--muted); font-size: 15px; line-height: 1.65; margin: 0 0 14px; }
+  .email-pill {
+    display: inline-block; background: #F0F2F8; color: var(--text);
+    border-radius: 999px; padding: 4px 12px; font-size: 13px; font-weight: 500;
+    margin-top: 4px;
+  }
+  ul { list-style: none; margin: 18px 0 22px; padding: 0; }
+  li {
+    padding: 10px 0;
+    border-bottom: 1px solid #F0EDE8;
+    font-size: 14px; color: var(--text);
+  }
+  li:last-child { border-bottom: 0; }
+  li b { font-weight: 600; }
+  li small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .btn {
+    display: inline-block; background: var(--accent); color: #FFFFFF;
+    font-size: 14px; font-weight: 600; text-decoration: none;
+    border-radius: 10px; padding: 13px 30px;
+  }
+  .btn-row { text-align: center; margin-top: 8px; }
+  .note { text-align: center; font-size: 12px; color: var(--dim); margin-top: 10px; }
+  footer { text-align: center; padding: 24px 0 0; font-size: 11.5px; color: var(--dim); line-height: 1.6; }
+  footer a { color: var(--dim); text-decoration: underline; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand">
+    <img src="/favicon.png" alt="StudyEdge" />
+    <span>StudyEdge</span>
+  </div>
+  <div class="card">
+    <p class="eyebrow">Email preferences</p>
+    <h1>Manage your StudyEdge emails.</h1>
+    <p>To stop receiving the weekly study digest or other study reminders, open the app and toggle them off in <b>Settings &rarr; Notifications</b>. We don't email anyone who hasn't asked for it.</p>
+    <p id="email-line" style="display:none;">Signed in as <span id="email-pill" class="email-pill"></span></p>
+    <ul>
+      <li>
+        <b>Weekly digest</b>
+        <small>Your week ahead, current grades, and stats. Sundays.</small>
+      </li>
+      <li>
+        <b>Study reminders</b>
+        <small>Exam countdowns, streak nudges, and re-engagement. Throttled to a few per week, max.</small>
+      </li>
+      <li>
+        <b>Account emails</b>
+        <small>Signup confirmation, password reset, billing receipts. These always send because they're required.</small>
+      </li>
+    </ul>
+    <div class="btn-row">
+      <a class="btn" href="/app">Open settings in the app</a>
+    </div>
+    <p class="note">Questions? Reply to any StudyEdge email or write to <a href="mailto:support@mail.getstudyedge.com" style="color:#6B6B6B;">support@mail.getstudyedge.com</a>.</p>
+  </div>
+  <footer>
+    <a href="/">StudyEdge AI</a> &nbsp;&middot;&nbsp;
+    <a href="/privacy">Privacy</a> &nbsp;&middot;&nbsp;
+    <a href="/terms">Terms</a>
+  </footer>
+</div>
+<script>
+  // Decorate with the email param if present, no other side effects.
+  try {
+    var qs = new URLSearchParams(window.location.search);
+    var email = qs.get('email');
+    if (email && /.+@.+/.test(email)) {
+      document.getElementById('email-pill').textContent = email;
+      document.getElementById('email-line').style.display = 'block';
+    }
+  } catch (e) { /* noop */ }
+</script>
+</body>
+</html>

@@ -66,6 +66,7 @@
     { "source": "/signup/(.*)", "destination": "/signup.html" },
     { "source": "/about", "destination": "/about.html" },
     { "source": "/not-affiliated-with-study-edge", "destination": "/not-affiliated-with-study-edge.html" },
+    { "source": "/unsubscribe", "destination": "/unsubscribe.html" },
     { "source": "/study-schedule-generator", "destination": "/study-schedule-generator.html" },
     { "source": "/ai-flashcard-maker", "destination": "/ai-flashcard-maker.html" },
     { "source": "/ai-study-coach", "destination": "/ai-study-coach.html" },
