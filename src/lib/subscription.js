@@ -347,6 +347,11 @@ export function incrementAIQuery() {
   const limit = getAIQueriesLimit()
   if (limit !== Infinity && newCount >= limit) {
     track('ai_limit_reached', { plan: getActivePlan(), count: newCount })
+    // Peak intent: free user just used their last AI action. Pop the paywall
+    // in-context instead of waiting for the next attempt to be blocked.
+    if (getActivePlan() === 'free') {
+      window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'ai-exhausted' } }))
+    }
   }
 }
 

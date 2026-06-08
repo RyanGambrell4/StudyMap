@@ -82,6 +82,11 @@ const LIMIT_MESSAGES = {
     title: 'Get AI help anytime, for every course.',
     body: 'Pro gives you 100 AI actions/month — your always-on tutor for every concept you\'re stuck on.',
   },
+  'ai-exhausted': {
+    tag: "You've used your free AI actions",
+    title: 'Keep your tutor on tap.',
+    body: "Pro gives you 100 AI actions a month — your tutor for every concept this semester. Start the 3-day free trial and pick up exactly where you left off.",
+  },
   tutorMemory: {
     tag: 'Unlimited only · Tutor memory',
     title: 'AI Tutor with full session memory.',
@@ -105,7 +110,7 @@ const LIMIT_MESSAGES = {
   focus: {
     tag: 'Study without a timer cap',
     title: 'Unlock unlimited Focus sessions.',
-    body: 'Lock in for as long as you need. Pro removes the 60-min cap so you can finish what you started.',
+    body: 'Lock in for as long as you need. Pro removes the 30-min cap so you can finish what you started.',
   },
   brainDump: {
     tag: 'Train recall on every topic',
