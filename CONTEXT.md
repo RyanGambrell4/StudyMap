@@ -1,5 +1,5 @@
 # StudyEdge AI — Living Context
-_Last updated by: Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
 
 ---
 
@@ -45,6 +45,33 @@ _Last updated by: Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 St
 - `design(email): rewrite Stripe win-back and trial-expiry emails to light theme`
 - `content: ship /unsubscribe page so weekly-digest links resolve`
 - `fix(auth): remove duplicate createdAt and isFreshSignup declarations`
+
+## Landing Page Agent — 2026-06-08 (FAQ section ship)
+_Sub-agent paused mid-run waiting on a build callback that did not return. Main session picked up the uncommitted work, fixed a pricing factual error and 3 em-dash comment leaks, verified the build, and shipped._
+
+### What landed (`f5b9b30`)
+- New FAQ accordion section in `src/components/LandingPage.jsx` (264 insertions). Sits between Testimonials and the bottom CTA.
+- 8 questions: free vs paid, how the 3-day Pro trial bills (card-required + cancel-before-trial-end), syllabus / course coverage, differentiation from Notion / Quizlet / ChatGPT, grad school + MCAT/LSAT/GRE support, time-to-impact, privacy and data export, cancellation.
+- Single-open accordion, first item open by default. Full a11y: `aria-expanded`, `aria-controls`, `aria-labelledby`, `hidden` on closed panels, focus-visible ring, `prefers-reduced-motion` respected.
+- Dark-glass styling matches existing `se-section` / `se-wash` / `se-grid` / `se-horizon` atmosphere. Brand accent `#3B61C4` on open state.
+- Embedded FAQPage JSON-LD with the same 8 Q&A so Google can surface this as a rich result.
+- Build: `npm run build` clean (5m 55s, exit 0). No new chunk warnings beyond pre-existing.
+
+### Main session corrections to the sub-agent's draft
+1. **Pro pricing factual error.** Sub-agent wrote "Pro plan ($2.99/week) unlocks unlimited courses" in both the visible answer and the JSON-LD. Per `PRICING_SPEC.md`, Pro is 5 courses + 100 AI actions/month; Unlimited is the no-cap tier with AI Tutor session memory + advanced Practice Exam analytics. Corrected both copies.
+2. **Em-dash leaks.** Sub-agent shipped 3 em-dashes in code/CSS/JSX comments (CLAUDE.md "no em dashes in any copy or generated content" applies). Replaced with colons.
+
+### Updated open backlog (priority order)
+1. **Sticky bottom bar** still uses off-brand indigo (`#1e1b4b → #312e81`). Re-skin with glass surface + brand `#3B61C4` accent. (Was #1 in the previous backlog and remains #1.)
+2. **Testimonials still flat.** Varying card sizes + a large editorial pull-quote would make the 6 quotes feel like overwhelming evidence.
+3. **Live state increments in hero.** Hero is animated but each value is static once settled. A 4-8s tick on "9.6 hrs this week" or streak day could give the hero a heartbeat.
+4. **Mobile audit at 390px.** Hero stage is fixed 1920x600 scaled; FAQ section needs a sweep too (the new accordion items wrap correctly but the page max-width 880 needs verification on small screens).
+5. **Footer is bare.** 1 email link. Could carry a small site-map (Pricing · FAQ · Blog · Contact) + social + last-updated copyright.
+
+### Note on the sub-agent's "Most students notice the change within the first full week" claim
+Lives in the time-to-impact answer. Soft conversion claim, unverifiable. Left as-is for now since it's a marketing soft claim (not a fabricated metric like a user count or testimonial). Flag for review if the team wants a stricter no-soft-claims rule.
+
+---
 
 ## SEO pass — 2026-06-08 follow-up (backlog burn-down)
 _Driven by user request "do all of that please" after the first pass shipped. Five small commits, all on `main`._
