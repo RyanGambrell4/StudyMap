@@ -1,5 +1,68 @@
 # StudyEdge AI — Living Context
-_Last updated by: Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+
+---
+
+## UI Consistency Agent — 2026-06-09 (token doc + second-layer dark purge)
+_Driven by user-spec invocation. Three phases, three atomic commits, all on `main`. The 2026-05-23 + 2026-05-24 passes had already cleaned the high-leverage cases; this run picked up the residual dark-mode leaks, off-brand gradients, sub-token greys, and em-dash copy._
+
+### Phase 1: tokens.js as documented source of truth (`aab8634`)
+- Added a header comment explaining migration status: components currently inline canonical hex values via per-file `const D = { ... }` palettes (DashboardView, ExamRescueModal, QuickQuizBurst, BrainDumpModal, PracticeExamView, others). The values in those palettes mirror `T` in tokens.js. Intent is one-view-at-a-time migration, not mass replace.
+- Added `T.course` per-course fallback palette (the 6-color array duplicated inline across 4+ modals).
+- Added `T.accentSoft` for the common `rgba(59,97,196,0.08)` tint.
+- Added `LANDING_DARK` namespace mirroring values inlined in `LandingPage.jsx` so the dark marketing palette has a documented home and is never confused with the app shell.
+- Zero consumers of `src/tokens.js` yet (intentional; migration is per-view refactor work, not a Phase 1 task).
+
+### Phase 2: residual dark-theme leak purge (`ab1fb8f`)
+Five surfaces had carry-over dark styling that the 2026-05-23 sweep missed:
+
+| File | Line | Was | Now |
+|------|------|-----|-----|
+| `CoursesView.jsx` | 1272 | Toast: `linear-gradient(180deg, #101028, #0b0b20)` + `rgba(0,0,0,0.5)` shadow + per-toast-color glow halo | `#FFFFFF` card + token modal shadow + simple colored dot (no halo) |
+| `OutputView.jsx` | 1711-1726 | Exam-mode "Score Tracker" empty state: `#e8e8f0` heading, `#8888a0` body, white-on-light `rgba(255,255,255,0.04)` border, indigo-tinted card bg, em-dash, `📊` emoji | `#111111` / `#6B6B6B` / `#3B61C4` / `rgba(0,0,0,0.07)`, white card with token shadow, "Coming soon:" colon, emoji removed |
+| `StudyToolsView.jsx` | 691 | Upload tile idle: `linear-gradient(135deg, #a855f7, #9333ea)` purple; extracting: `#3b82f6 / #2563eb` blue gradient | Flat `#3B61C4` brand, lower-alpha brand-tinted shadow. Green success state kept (correct token `#16A34A`). |
+| `StudyToolsView.jsx` | 838 | "Generate with AI" CTA: `linear-gradient(135deg, #a855f7, #ec4899)` purple to pink (2018-era SaaS) | Flat `#3B61C4` with brand-tinted shadow |
+| `PaywallModal.jsx` | 354 | Trial CTA: `linear-gradient(135deg, #3B82F6, #10B981)` blue to green | Flat `#3B61C4`. AccountView's matching CTA was already flattened in the 2026-05-24 pass; PaywallModal was the last sibling. |
+
+Verified: zero `dark:` Tailwind classes outside LandingPage.jsx, zero `bg-slate-800/900` or `bg-gray-800/900` in `src/`. Build clean (`npm run build` exit 0).
+
+### Phase 3: em-dash + emoji + sub-token grey sweep (`3d3baf1`)
+**Em-dashes** in the highest-visibility user surfaces (CLAUDE.md "no em dashes in copy"):
+- `App.jsx` confirmation pending: "Checking automatically. No need to refresh." and the three resend states ("Email resent. Check your inbox.", "Failed to resend. Try again."). Leading `✓` glyph dropped from the resent state to match the prior emoji sweep.
+- `Onboarding.jsx`: school-type "Professional Exam" description; two step headers ("workload" and "brain is sharpest").
+- `AIChatView.jsx`: flag banner copy.
+- `PaywallModal.jsx`: all 8 `LIMIT_MESSAGES` bodies. Two recurring patterns: explanatory em dash (replaced with period or parenthetical) and connector em dash (replaced with sentence break).
+
+**`#C0C0C0` → `#9B9B9B` (FocusMode.jsx, 17 sites):** The light silver was sub-token. AccountView had already been normalized in the 2026-05-24 pass; FocusMode was the last big consumer. Includes timer suffix "/ 60:00", [Space] hint, flashcard "Tap to flip", quiz score denominator, and the tab strip color.
+
+**`📎` paperclip emoji → SVG icon (FocusMode.jsx, 2 sites):** Both flashcard and quiz attachment chips. Replaced with stroke-2.25 inline SVG, gap-1 flex layout. Chip color still ties to the session dot.
+
+Build clean.
+
+### Open backlog (priority order, for next UI run)
+
+1. **Em-dashes still in non-user-facing-but-still-violating spots.** Phase 3 swept the highest-visibility user copy. Remaining: code-comment em-dashes in App.jsx, FocusMode.jsx, and others (`{/* ... — ... */}` and inline string literals like `'Server error — please try again'`). These are technically in scope of "no em dashes in code or generated content" but invisible to users. Pure linting work.
+
+2. **Em-dashes in print/export HTML strings inside FocusMode.jsx.** The downloaded session-notes PDF template uses em-dashes in headings like `Self-Test — Can you explain each of these...`. These are in generated documents (user-facing eventually) but the export template hasn't been treated as in-scope for the prior copy passes. Worth a deliberate pass.
+
+3. **Per-file `D` palette migration to `tokens.js`.** Eight files duplicate the same `D = { bg, bgCard, border, ..., accent, blue }` palette: DashboardView, ExamRescueModal, QuickQuizBurst, BrainDumpModal, PracticeExamView, AccountView, AdaptModal, more. Worth a single mechanical refactor pass where each file does `import { T } from '../tokens'` and replaces `D.text` → `T.text` etc. Risk: low (values mirror), reward: drift prevention. Note that `D.accent` is `#E8531A` (orange) in some files but `T.accent` is `#3B61C4` (brand blue). Migration needs to pick the right token at each call site.
+
+4. **`<Button>`, `<Modal>`, `<Card>` primitives.** `src/components/ui/button.jsx` and `card.jsx` exist but are unused. 660+ buttons across the codebase inline `borderRadius` in 12+ different values (7/8/9/10/11/12/14/16/18). 8 modals have slightly different backdrop blur/opacity/close-button styles. Locking these down would prevent future drift.
+
+5. **Mobile responsive sweep at 390px.** The prior audit flagged GradeHubView table overflow at <600px and several pills with text below the 11px floor. Not yet run with Playwright.
+
+6. **Off-brand indigo fallbacks (`#6366F1`, `#4F46E5`, `#818cf8`) used as default course-color when `course.color?.dot` is missing.** These are rarely hit in practice (courses always carry a color), but if they ever fire they paint UI in indigo, not brand `#3B61C4`. BlueprintScreen.jsx line 17, 65; OutputView.jsx line 59, 88; CoursesView.jsx line 53, 332, 434, 533; GradePredictorView.jsx line 23, 133; ProgressView.jsx line 25; StepCourses.jsx line 20; SharedPlanView.jsx line 28; StudyCoachView.jsx line 1254, 1291. Worth a single sweep to pick a defensible brand-aligned fallback.
+
+7. **Print/PDF cover-page header gradient in FocusMode.jsx:210.** `linear-gradient(135deg, #0f1f4e 0%, #1e3a8a 45%, #3B61C4 80%, #5b7fd4 100%)` — deep navy to brand blue. This is a printable document header (editorial design for a downloaded session notes PDF), not in-app UI. Leaving as-is but flagging: if/when there's a brand decision to switch printable headers to a lighter editorial palette, this is where to do it.
+
+### What's clean now
+- Zero `dark:` Tailwind classes outside LandingPage.jsx
+- Zero `bg-slate-800/900`, `bg-gray-800/900`, `bg-zinc-800/900` in `src/`
+- Zero hardcoded dark backgrounds in user-facing app surfaces (LandingPage and ShareCardModal explicit exceptions)
+- Zero `📊 📎` emoji in app shell (LandingPage marketing glyphs intentional)
+- Zero blue-to-green or purple-to-pink gradients in app shell
+
+---
 
 ---
 

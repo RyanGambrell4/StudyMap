@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="robots" content="noindex,nofollow" />
+<title>UTM Builder · StudyEdge AI</title>
+<link rel="icon" href="/favicon.png" />
+<style>
+  :root {
+    --bg: #F7F6F3;
+    --card: #FFFFFF;
+    --border: rgba(0,0,0,0.07);
+    --accent: #3B61C4;
+    --text: #111111;
+    --muted: #6B6B6B;
+    --ok: #16a34a;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 -apple-system,BlinkMacSystemFont,"Inter",sans-serif;padding:32px 16px}
+  .wrap{max-width:760px;margin:0 auto}
+  h1{font-size:22px;margin:0 0 4px;font-weight:700}
+  p.sub{color:var(--muted);margin:0 0 24px}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;margin-bottom:16px}
+  label{display:block;font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.04em;margin:12px 0 4px;font-weight:600}
+  input,select{width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:#fff;font:inherit;color:var(--text)}
+  input:focus,select:focus{outline:2px solid var(--accent);outline-offset:-1px}
+  .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:540px){.row{grid-template-columns:1fr}}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 0}
+  .chip{padding:5px 10px;font-size:12px;border:1px solid var(--border);border-radius:999px;background:#fff;cursor:pointer;color:var(--muted)}
+  .chip:hover{border-color:var(--accent);color:var(--accent)}
+  .chip.active{background:var(--accent);border-color:var(--accent);color:#fff}
+  .result{background:#0c1320;color:#e7ecf5;font:13px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;padding:14px;border-radius:10px;word-break:break-all;border:1px solid #1c2740}
+  .btn{display:inline-flex;align-items:center;gap:8px;background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 16px;cursor:pointer;font:600 13px inherit;margin-top:12px}
+  .btn:hover{background:#2f50aa}
+  .btn.copied{background:var(--ok)}
+  .btn.secondary{background:transparent;color:var(--accent);border:1px solid var(--border)}
+  .recent{margin-top:14px}
+  .recent .item{display:flex;justify-content:space-between;gap:8px;align-items:center;padding:8px 10px;border:1px solid var(--border);border-radius:8px;margin-bottom:6px;font:12px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;word-break:break-all}
+  .recent .item:hover{background:#fafaf8}
+  .recent .item button{background:transparent;border:1px solid var(--border);border-radius:6px;padding:4px 8px;cursor:pointer;font-size:11px;color:var(--muted);flex-shrink:0}
+  .recent .item button:hover{border-color:var(--accent);color:var(--accent)}
+  .small{font-size:12px;color:var(--muted)}
+  .small a{color:var(--accent)}
+  hr{border:none;border-top:1px solid var(--border);margin:18px 0}
+</style>
+  <script src="/utm-propagate.js" defer></script>
+</head>
+<body>
+  <div class="wrap">
+    <h1>UTM Builder</h1>
+    <p class="sub">Paste a destination, pick a source preset, copy the tagged URL. Source data feeds PostHog dashboard 1686085.</p>
+
+    <div class="card">
+      <label for="base">Destination URL</label>
+      <input id="base" type="text" placeholder="https://getstudyedge.com/" value="https://getstudyedge.com/" />
+
+      <label>Source preset</label>
+      <div id="presets" class="chips">
+        <button class="chip" data-source="tiktok" data-medium="organic_video">TikTok</button>
+        <button class="chip" data-source="instagram" data-medium="organic_social">Instagram</button>
+        <button class="chip" data-source="twitter" data-medium="organic_social">Twitter / X</button>
+        <button class="chip" data-source="reddit" data-medium="organic_post">Reddit</button>
+        <button class="chip" data-source="youtube" data-medium="organic_video">YouTube</button>
+        <button class="chip" data-source="linkedin" data-medium="organic_social">LinkedIn</button>
+        <button class="chip" data-source="newsletter" data-medium="email">Email / Newsletter</button>
+        <button class="chip" data-source="discord" data-medium="organic_community">Discord</button>
+        <button class="chip" data-source="producthunt" data-medium="referral">Product Hunt</button>
+        <button class="chip" data-source="google" data-medium="cpc">Google Ads</button>
+        <button class="chip" data-source="meta" data-medium="cpc">Meta Ads</button>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="source">utm_source</label>
+          <input id="source" type="text" placeholder="tiktok" />
+        </div>
+        <div>
+          <label for="medium">utm_medium</label>
+          <input id="medium" type="text" placeholder="organic_video" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label for="campaign">utm_campaign</label>
+          <input id="campaign" type="text" placeholder="june_launch" />
+        </div>
+        <div>
+          <label for="content">utm_content (optional)</label>
+          <input id="content" type="text" placeholder="hero_demo" />
+        </div>
+      </div>
+
+      <label for="term">utm_term (optional)</label>
+      <input id="term" type="text" placeholder="ai+study+coach" />
+
+      <hr />
+      <label for="result">Tagged URL</label>
+      <div id="result" class="result">https://getstudyedge.com/</div>
+      <button id="copyBtn" class="btn">Copy</button>
+      <button id="saveBtn" class="btn secondary">Save preset</button>
+
+      <div class="recent" id="recent"></div>
+    </div>
+
+    <p class="small">Tip: any link with the same UTM tags gets the visitor a sticky <code>register_once</code> in PostHog, so every future event from that user carries the acquisition source — even months later. View live data: <a href="https://us.posthog.com/project/412740/dashboard/1686085" target="_blank">Daily Pulse</a>.</p>
+  </div>
+
+  <script>
+    var $ = function (id) { return document.getElementById(id); };
+    var fields = ['source','medium','campaign','content','term'];
+
+    function build() {
+      var base = $('base').value.trim();
+      if (!base) return '';
+      var url;
+      try { url = new URL(base); }
+      catch (e) { try { url = new URL('https://' + base); } catch (e2) { return base; } }
+      fields.forEach(function (f) {
+        var v = $(f).value.trim();
+        if (v) url.searchParams.set('utm_' + f, v);
+        else url.searchParams.delete('utm_' + f);
+      });
+      return url.toString();
+    }
+
+    function render() {
+      var url = build();
+      $('result').textContent = url || '—';
+    }
+
+    ['base'].concat(fields).forEach(function (id) {
+      $(id).addEventListener('input', render);
+    });
+
+    document.querySelectorAll('#presets .chip').forEach(function (btn) {
+      btn.addEventListener('click', function () {
+        document.querySelectorAll('#presets .chip').forEach(function (b) { b.classList.remove('active'); });
+        btn.classList.add('active');
+        $('source').value = btn.dataset.source || '';
+        $('medium').value = btn.dataset.medium || '';
+        if (!$('campaign').value) $('campaign').value = 'launch';
+        render();
+      });
+    });
+
+    $('copyBtn').addEventListener('click', function () {
+      var url = build();
+      if (!url) return;
+      navigator.clipboard.writeText(url).then(function () {
+        $('copyBtn').textContent = 'Copied ✓';
+        $('copyBtn').classList.add('copied');
+        setTimeout(function () {
+          $('copyBtn').textContent = 'Copy';
+          $('copyBtn').classList.remove('copied');
+        }, 1600);
+      });
+    });
+
+    function loadRecent() {
+      try { return JSON.parse(localStorage.getItem('se_utm_recent') || '[]'); }
+      catch (e) { return []; }
+    }
+    function renderRecent() {
+      var list = loadRecent();
+      var box = $('recent');
+      if (!list.length) { box.innerHTML = ''; return; }
+      box.innerHTML = '<label>Recent</label>' + list.map(function (url, i) {
+        return '<div class="item"><span>' + url + '</span><button data-i="' + i + '">copy</button></div>';
+      }).join('');
+      box.querySelectorAll('button').forEach(function (b) {
+        b.addEventListener('click', function () {
+          navigator.clipboard.writeText(list[+b.dataset.i]);
+          b.textContent = 'copied';
+          setTimeout(function () { b.textContent = 'copy'; }, 1200);
+        });
+      });
+    }
+
+    $('saveBtn').addEventListener('click', function () {
+      var url = build();
+      if (!url) return;
+      var list = loadRecent();
+      list = [url].concat(list.filter(function (u) { return u !== url; })).slice(0, 10);
+      localStorage.setItem('se_utm_recent', JSON.stringify(list));
+      renderRecent();
+    });
+
+    render();
+    renderRecent();
+  </script>
+</body>
+</html>
