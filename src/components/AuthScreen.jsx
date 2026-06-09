@@ -185,10 +185,10 @@ export default function AuthScreen({ initialMode, onBack }) {
 
           {/* Header */}
           <h1 style={{ fontSize: 26, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
-            {mode === 'login' ? 'Welcome back' : mode === 'signup' ? 'Create your account' : 'Reset password'}
+            {mode === 'login' ? 'Welcome back' : mode === 'signup' ? 'Two minutes to your first study plan' : 'Reset password'}
           </h1>
           <p style={{ fontSize: 14, color: '#6B6B6B', margin: '0 0 24px' }}>
-            {mode === 'login' ? 'Sign in to access your study plans.' : mode === 'signup' ? 'Your data will sync across all your devices.' : "We'll send a reset link to your email."}
+            {mode === 'login' ? 'Sign in to access your study plans.' : mode === 'signup' ? 'Tell us what you\'re studying. We\'ll build the rest.' : "We'll send a reset link to your email."}
           </p>
 
           {/* Plan context banner */}
