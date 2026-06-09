@@ -833,9 +833,25 @@ export default function OutputView({
       return
     }
     track('session_started', { courseId: s.courseId, courseName: s.courseName, sessionType: s.sessionType, duration: s.duration })
+    // Fire first_session_started exactly once per user. Anchors the
+    // "signup -> first action" funnel without double-counting on every
+    // start. Keyed on userId so a different account on the same device
+    // still gets a fresh fire.
+    try {
+      const key = `studyedge_first_session_started_${userId ?? 'anon'}`
+      if (typeof window !== 'undefined' && !window.localStorage.getItem(key)) {
+        track('first_session_started', {
+          courseId: s.courseId,
+          courseName: s.courseName,
+          sessionType: s.sessionType,
+          duration: s.duration,
+        })
+        window.localStorage.setItem(key, '1')
+      }
+    } catch {}
     setBlueprintSession(s)
     setActiveBlueprint(null)
-  }, [onShowPaywall])
+  }, [onShowPaywall, userId])
   const handleBlueprintStart = useCallback((blueprint) => {
     setActiveBlueprint(blueprint)
     setFocusSession(blueprintSession)
