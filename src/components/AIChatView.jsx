@@ -3,7 +3,7 @@ import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
 import { getCachedCoachPlan, saveCoachPlanStruggles } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
-import { getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial, incrementAIQuery } from '../lib/subscription'
+import { getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial, incrementAIQuery, canUseUnlimitedFeature } from '../lib/subscription'
 import { transcribeAudio, createRecorder } from '../lib/deepgram'
 
 export default function AIChatView({ courseId, courseName, examDate, targetGrade, userId, learningStyle, onShowPaywall, onNavigateToCoach }) {
@@ -71,11 +71,17 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
 
     try {
       const token = await getAccessToken()
+      // Unlimited plan ships full session memory so the tutor never asks for
+      // context the student already gave earlier in the conversation. Pro and
+      // Free fall back to the trailing 10 messages to keep prompt cost bounded.
+      const hasTutorMemory = canUseUnlimitedFeature('tutorMemory')
+      const messagesForApi = hasTutorMemory ? newMessages : newMessages.slice(-10)
       const res = await fetch('/api/chat-tutor', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          messages: newMessages.slice(-10),
+          messages: messagesForApi,
+          tutorMemory: hasTutorMemory,
           courseName,
           examDate: examDate ?? null,
           targetGrade: targetGrade ?? null,

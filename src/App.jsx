@@ -273,6 +273,12 @@ export default function App() {
     }
     const newCourses = [...courses, course]
     const isFirstCourse = courses.length === 0
+    track('course_added', {
+      first_course: isFirstCourse,
+      total_courses: newCourses.length,
+      has_exam_date: !!course.examDate,
+      has_target_grade: !!course.targetGrade,
+    })
     setCourses(newCourses)
     savePlan({
       courses: newCourses,

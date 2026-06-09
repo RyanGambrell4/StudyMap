@@ -12,6 +12,7 @@ export default async function handler(req, res) {
 
   const {
     messages,
+    tutorMemory,
     courseName,
     examDate,
     targetGrade,
@@ -88,7 +89,10 @@ Respond in plain text. If the student clearly expresses struggle or confusion ab
 [FLAGGED_TOPIC:topic name in 2-5 words]
 Only include this line when the student is clearly struggling. Otherwise omit it entirely.`
 
-  const recentMessages = messages.slice(-10)
+  // Unlimited clients pass tutorMemory: true and we honor the full session.
+  // Cap at 60 messages as a server-side safety net so a runaway client can't
+  // blow the context window.
+  const recentMessages = tutorMemory === true ? messages.slice(-60) : messages.slice(-10)
   const latestUserMessage = recentMessages.filter(m => m.role === 'user').slice(-1)[0]?.content ?? ''
 
   // Try Wolfram Alpha for math/science/calculation queries
