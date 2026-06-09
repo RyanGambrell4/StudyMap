@@ -4,7 +4,7 @@
   <!-- Landing page (highest priority) -->
   <url>
     <loc>https://getstudyedge.com/</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
@@ -12,19 +12,19 @@
   <!-- Brand entity / disambiguation -->
   <url>
     <loc>https://getstudyedge.com/studyedge-ai</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/not-affiliated-with-study-edge</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.95</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/about</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>
   </url>
@@ -32,7 +32,7 @@
   <!-- Pricing (commercial intent) -->
   <url>
     <loc>https://getstudyedge.com/pricing</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.95</priority>
   </url>
@@ -40,37 +40,37 @@
   <!-- Core product / feature pages -->
   <url>
     <loc>https://getstudyedge.com/study-schedule-generator</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/ai-flashcard-maker</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/ai-study-coach</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/ai-tutor</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/active-recall-app</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/best-study-app-for-students</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -78,87 +78,125 @@
   <!-- Comparison pages (commercial intent) -->
   <url>
     <loc>https://getstudyedge.com/quizlet-alternative</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/anki-alternative</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/anki-vs-quizlet</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/chegg-alternative</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/coursehero-alternative</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/khan-academy-alternative</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/notion-for-studying</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/goconqr-alternative</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/studocu-alternative</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
+  </url>
+
+  <!-- Wave 3: New comparison pages (2026-06-09) -->
+  <url>
+    <loc>https://getstudyedge.com/microsoft-onenote-for-studying</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/brainscape-alternative</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/forest-app-alternative</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/wolfram-alpha-alternative</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/photomath-alternative</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/socratic-alternative</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
   </url>
 
   <!-- High-intent guide pages -->
   <url>
     <loc>https://getstudyedge.com/study-planner-for-college-students</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/study-schedule-template</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/how-to-make-a-study-schedule</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/how-to-study-for-finals</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/pre-med-study-guide</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
@@ -166,51 +204,59 @@
   <!-- Calculators (interactive tools) -->
   <url>
     <loc>https://getstudyedge.com/gpa-calculator</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/grade-calculator</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/grade-calculator-college</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.85</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/weighted-gpa-calculator</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/cumulative-gpa-calculator</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/semester-gpa-calculator</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.9</priority>
+  </url>
+
+  <!-- Wave 1: Final exam calculator (2026-06-09) -->
+  <url>
+    <loc>https://getstudyedge.com/final-exam-calculator</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.95</priority>
   </url>
 
   <!-- Legal -->
   <url>
     <loc>https://getstudyedge.com/privacy</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/terms</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
@@ -218,7 +264,7 @@
   <!-- Blog index -->
   <url>
     <loc>https://getstudyedge.com/blog</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.85</priority>
   </url>
@@ -226,172 +272,216 @@
   <!-- Blog articles -->
   <url>
     <loc>https://getstudyedge.com/blog/how-to-study-for-finals-week</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/active-recall-study-technique</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/how-to-improve-your-grades-in-college</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/best-study-techniques-science</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/how-to-study-for-organic-chemistry</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/how-to-raise-your-gpa-after-a-bad-semester</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/best-study-schedule-for-college-students</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/how-to-get-an-a-in-any-class</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/mcat-study-schedule-6-months</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/how-to-stop-procrastinating-when-studying</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/how-to-study-with-adhd-in-college</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/what-gpa-do-you-need-for-medical-school</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/how-to-balance-a-heavy-course-load</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
-  <!-- Course-specific study guides (added 2026-06-01) -->
+  <!-- Course-specific study guides -->
   <url>
     <loc>https://getstudyedge.com/blog/how-to-study-for-calculus</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/how-to-study-for-biology</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/how-to-study-for-anatomy-and-physiology</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/how-to-study-for-biochemistry</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/how-to-study-for-physics</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/how-to-study-for-statistics</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/how-to-study-for-psychology</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/blog/how-to-study-for-microeconomics</loc>
-    <lastmod>2026-06-08</lastmod>
+    <lastmod>2026-06-09</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
 
-  <!-- Run 4: 'What GPA do you need for X' pages -->
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-harvard</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-stanford</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-mit</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-princeton</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-yale</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-columbia</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-ucla</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-uc-berkeley</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-nyu</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-usc</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-duke</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-medical-school-admissions</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-law-school-admissions</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-dental-school-admissions</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-mba-programs</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <!-- Wave 4: New blog articles (2026-06-09) -->
+  <url>
+    <loc>https://getstudyedge.com/blog/how-to-pull-an-all-nighter</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/blog/cornell-note-taking-method</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/blog/pomodoro-technique-for-studying</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/blog/how-to-take-notes-in-college</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/blog/how-to-study-for-multiple-exams-in-one-week</loc>
+    <lastmod>2026-06-09</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
 
-  <!-- Run 4: 'Best study app for [major]' pages -->
-  <url><loc>https://getstudyedge.com/best-study-app-for-nursing-students</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/best-study-app-for-pre-med-students</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/best-study-app-for-engineering-students</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/best-study-app-for-business-students</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/best-study-app-for-psychology-students</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/best-study-app-for-computer-science-students</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/best-study-app-for-biology-majors</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/best-study-app-for-chemistry-majors</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/best-study-app-for-accounting-students</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://getstudyedge.com/best-study-app-for-law-students</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <!-- 'What GPA do you need for X' pages -->
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-harvard</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-stanford</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-mit</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-princeton</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-yale</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-columbia</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-ucla</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-uc-berkeley</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-nyu</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-usc</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-duke</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-medical-school-admissions</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-law-school-admissions</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-dental-school-admissions</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-gpa-do-you-need-for-mba-programs</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
-  <!-- Run 4: Standardized test prep blog guides -->
-  <url><loc>https://getstudyedge.com/blog/how-to-study-for-the-lsat</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://getstudyedge.com/blog/how-to-study-for-the-gre</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://getstudyedge.com/blog/how-to-study-for-the-gmat</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://getstudyedge.com/blog/how-to-study-for-the-nclex</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://getstudyedge.com/blog/how-to-study-for-usmle-step-1</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
-  <url><loc>https://getstudyedge.com/blog/how-to-study-for-the-sat</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <!-- Best study app for major pages -->
+  <url><loc>https://getstudyedge.com/best-study-app-for-nursing-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-pre-med-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-engineering-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-business-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-psychology-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-computer-science-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-biology-majors</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-chemistry-majors</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-accounting-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-law-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
 
-  <!-- Run 4: Linkable assets -->
-  <url><loc>https://getstudyedge.com/printable-study-schedule-template</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
-  <url><loc>https://getstudyedge.com/embed-gpa-calculator</loc><lastmod>2026-06-08</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+  <!-- Wave 2: New major pages (2026-06-09) -->
+  <url><loc>https://getstudyedge.com/best-study-app-for-math-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-history-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-education-majors</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-political-science-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-english-majors</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-foreign-language-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-economics-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-sociology-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-kinesiology-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/best-study-app-for-criminal-justice-students</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+
+  <!-- Standardized test prep blog guides -->
+  <url><loc>https://getstudyedge.com/blog/how-to-study-for-the-lsat</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://getstudyedge.com/blog/how-to-study-for-the-gre</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://getstudyedge.com/blog/how-to-study-for-the-gmat</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://getstudyedge.com/blog/how-to-study-for-the-nclex</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://getstudyedge.com/blog/how-to-study-for-usmle-step-1</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://getstudyedge.com/blog/how-to-study-for-the-sat</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+
+  <!-- Linkable assets -->
+  <url><loc>https://getstudyedge.com/printable-study-schedule-template</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://getstudyedge.com/embed-gpa-calculator</loc><lastmod>2026-06-09</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
 
 </urlset>

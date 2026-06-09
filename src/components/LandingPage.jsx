@@ -2547,6 +2547,7 @@ export default function LandingPage({ onGetStarted }) {
               <li><a href="/cumulative-gpa-calculator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Cumulative GPA Calculator</a></li>
               <li><a href="/semester-gpa-calculator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Semester GPA Calculator</a></li>
               <li><a href="/grade-calculator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Grade Calculator</a></li>
+              <li><a href="/final-exam-calculator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Final Exam Calculator</a></li>
               <li><a href="/study-schedule-generator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study Schedule Generator</a></li>
               <li><a href="/ai-flashcard-maker" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>AI Flashcard Maker</a></li>
             </ul>
@@ -2560,6 +2561,10 @@ export default function LandingPage({ onGetStarted }) {
               <li><a href="/how-to-study-for-finals" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>How to Study for Finals</a></li>
               <li><a href="/pre-med-study-guide" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Pre-Med Study Guide</a></li>
               <li><a href="/best-study-app-for-students" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Best Study App</a></li>
+              <li><a href="/best-study-app-for-math-students" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Best App for Math</a></li>
+              <li><a href="/best-study-app-for-history-students" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Best App for History</a></li>
+              <li><a href="/best-study-app-for-economics-students" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Best App for Economics</a></li>
+              <li><a href="/best-study-app-for-kinesiology-students" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Best App for Kinesiology</a></li>
             </ul>
           </div>
           <div>
@@ -2575,6 +2580,12 @@ export default function LandingPage({ onGetStarted }) {
               <li><a href="/ai-tutor" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>AI Tutor</a></li>
               <li><a href="/ai-study-coach" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>AI Study Coach</a></li>
               <li><a href="/active-recall-app" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Active Recall App</a></li>
+              <li><a href="/microsoft-onenote-for-studying" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>OneNote Alternative</a></li>
+              <li><a href="/brainscape-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Brainscape Alternative</a></li>
+              <li><a href="/forest-app-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Forest App Alternative</a></li>
+              <li><a href="/wolfram-alpha-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Wolfram Alpha Alternative</a></li>
+              <li><a href="/photomath-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Photomath Alternative</a></li>
+              <li><a href="/socratic-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Socratic Alternative</a></li>
             </ul>
           </div>
           <div>
@@ -2592,6 +2603,10 @@ export default function LandingPage({ onGetStarted }) {
               <li><a href="/blog/how-to-study-for-statistics" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study for Statistics</a></li>
               <li><a href="/blog/mcat-study-schedule-6-months" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>MCAT Study Schedule</a></li>
               <li><a href="/blog/how-to-study-with-adhd-in-college" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Studying with ADHD</a></li>
+              <li><a href="/blog/pomodoro-technique-for-studying" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Pomodoro Technique</a></li>
+              <li><a href="/blog/cornell-note-taking-method" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Cornell Note Taking</a></li>
+              <li><a href="/blog/how-to-pull-an-all-nighter" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>How to Pull an All-Nighter</a></li>
+              <li><a href="/blog/how-to-study-for-multiple-exams-in-one-week" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study for Multiple Exams</a></li>
             </ul>
           </div>
           <div>
