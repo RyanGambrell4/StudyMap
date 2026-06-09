@@ -7,7 +7,7 @@ export default async function handler(req, res) {
   }
 
   const contentLength = parseInt(req.headers['content-length'] || '0')
-  if (contentLength > 4_500_000) return res.status(413).json({ error: 'Payload too large — try fewer or smaller images.' })
+  if (contentLength > 4_500_000) return res.status(413).json({ error: 'Payload too large. Try fewer or smaller images.' })
 
   // predict-grade mode uses simple math on already-submitted data, so it's
   // auth-only. Every other mode runs Claude and consumes a study boost.
@@ -93,7 +93,7 @@ Rules:
       const strippedQ = content.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '')
       const first = strippedQ.indexOf('[')
       const last = strippedQ.lastIndexOf(']')
-      if (first === -1 || last === -1 || last <= first) throw new Error('AI returned malformed quiz — please try again')
+      if (first === -1 || last === -1 || last <= first) throw new Error('AI returned malformed quiz. Please try again.')
       const questions = JSON.parse(strippedQ.slice(first, last + 1))
 
       const LABELS = ['A', 'B', 'C', 'D']

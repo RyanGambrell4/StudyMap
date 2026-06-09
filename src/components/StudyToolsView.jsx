@@ -1239,7 +1239,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                     border: `1px solid ${timeLeft <= 30 ? 'rgba(239,68,68,0.3)' : 'rgba(59,97,196,0.25)'}`,
                     fontVariantNumeric: 'tabular-nums',
                   }}>
-                    ⏱ {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
+                    {Math.floor(timeLeft / 60)}:{String(timeLeft % 60).padStart(2, '0')}
                   </span>
                 )}
               </div>

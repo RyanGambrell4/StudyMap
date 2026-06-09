@@ -56,7 +56,7 @@ export default async function handler(req, res) {
       await resend.emails.send({
         from: 'StudyEdge AI <support@mail.getstudyedge.com>',
         to: email,
-        subject: `Your ${previousStreak}-day streak ended — here's how to restart`,
+        subject: `Your ${previousStreak}-day streak ended. Here's how to restart.`,
         html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Restart your streak</title></head>
@@ -74,7 +74,7 @@ export default async function handler(req, res) {
           You missed a day. That's fine.
         </h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          You had a <strong style="color:#111111;">${previousStreak}-day streak</strong> going. Streaks aren't the goal — consistency is. One missed day doesn't undo the habit.
+          You had a <strong style="color:#111111;">${previousStreak}-day streak</strong> going. Streaks aren't the goal. Consistency is. One missed day doesn't undo the habit.
         </p>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           Here's the fastest way back:

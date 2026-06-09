@@ -57,7 +57,7 @@ export default async function handler(req, res) {
       await resend.emails.send({
         from: 'StudyEdge AI <support@mail.getstudyedge.com>',
         to: user.email,
-        subject: "Two weeks in — still on the free plan?",
+        subject: "Two weeks in. Still on the free plan?",
         html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Two weeks on StudyEdge</title></head>
@@ -73,7 +73,7 @@ export default async function handler(req, res) {
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Week 2 check-in</p>
         <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">You've been using StudyEdge for 2 weeks.</h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          You're on the free plan, which is a one-time preview — 1 course, 2 lifetime AI tutor messages, and a single use of each Pro feature. If you've been hitting those walls, Pro is the right move.
+          You're on the free plan, which is a one-time preview: 1 course, 2 lifetime AI tutor messages, and a single use of each Pro feature. If you've been hitting those limits, Pro is the right move.
         </p>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           Most students who upgrade do it around week 2, when they realize they're serious about their grades. You're at that point.
@@ -81,7 +81,7 @@ export default async function handler(req, res) {
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
             ['5 courses', 'Track every class, not just one'],
-            ['100 AI actions / month', '50x more than free — enough for daily use'],
+            ['100 AI actions / month', '50x more than free. Enough for daily use.'],
             ['AI Study Coach, on demand', 'Multi-week plan built around your exam dates, re-runnable any time'],
             ['Unlimited Session Blueprints', 'Know exactly what to study in every session'],
             ['Unlimited Focus sessions', 'Lock in for as long as you need; no 30-min cap'],
@@ -108,7 +108,7 @@ export default async function handler(req, res) {
           &nbsp;·&nbsp;
           <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
         </p>
-        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">The StudyEdge AI team</p>
       </td></tr>
     </table>
   </td></tr>

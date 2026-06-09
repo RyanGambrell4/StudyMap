@@ -39,8 +39,8 @@ export default async function handler(req, res) {
       from: 'StudyEdge AI <support@mail.getstudyedge.com>',
       to: email,
       subject: greetingName
-        ? `${greetingName}, you're in — Pro is free for 3 days`
-        : "You're in — Pro is free for 3 days",
+        ? `${greetingName}, you're in. Pro is free for 3 days.`
+        : "You're in. Pro is free for 3 days.",
       html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Welcome to StudyEdge</title></head>

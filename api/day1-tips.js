@@ -57,7 +57,7 @@ export default async function handler(req, res) {
         </p>
         ${[
           ['1. Add a course with a real exam date', 'Your study plan, blueprints, and grade tracker are all built around your exam dates. Without one, the AI can\'t generate anything. 30 seconds.'],
-          ['2. Generate a Session Blueprint', 'Open your course, tap Session Blueprint, get a minute-by-minute plan for your next study block. Free includes 1 — use it on the topic you\'re most behind on.'],
+          ['2. Generate a Session Blueprint', 'Open your course, tap Session Blueprint, get a minute-by-minute plan for your next study block. Free includes 1. Use it on the topic you\'re most behind on.'],
           ['3. Run the Study Coach once', 'Get a multi-week plan built around your exam date. Students who do this study far more consistently.'],
         ].map(([title, desc]) => `
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:12px;background:#F7F6F3;border-radius:10px;">

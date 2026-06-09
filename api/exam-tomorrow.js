@@ -82,10 +82,10 @@ export default async function handler(req, res) {
       await resend.emails.send({
         from: 'StudyEdge AI <support@mail.getstudyedge.com>',
         to: email,
-        subject: `${examTitle} is ${isToday ? 'tomorrow' : 'in 2 days'} — final prep time`,
+        subject: `${examTitle} is ${isToday ? 'tomorrow' : 'in 2 days'}. Final prep time.`,
         html: `<!DOCTYPE html>
 <html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${examTitle} — final prep</title></head>
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${examTitle} final prep</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
@@ -108,10 +108,10 @@ export default async function handler(req, res) {
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:18px;">
           ${[
-            'Review your weakest recall topics first — not your strongest',
+            'Review your weakest recall topics first, not your strongest',
             'Run a quick Quiz Burst to test yourself under pressure',
             'Use Exam Rescue for a last-minute strategy rundown',
-            isToday ? 'Stop studying by 10pm — sleep is your final edge' : 'Do a full practice run tomorrow morning',
+            isToday ? 'Stop studying by 10pm. Sleep is your final edge.' : 'Do a full practice run tomorrow morning',
           ].map(tip => `
           <tr>
             <td style="padding:10px 0;border-bottom:1px solid #F0EDE8;">
@@ -125,7 +125,7 @@ export default async function handler(req, res) {
           <p style="margin:0;font-size:14px;color:#111111;line-height:1.6;">
             ${isToday
               ? "Don't cram new material tonight. Your brain needs to consolidate. Trust your prep."
-              : "Two days is enough time to meaningfully sharpen your recall — but only if you're focused on the right things."}
+              : "Two days is enough time to meaningfully sharpen your recall, but only if you're focused on the right things."}
           </p>
         </div>
         <table cellpadding="0" cellspacing="0" style="width:100%;">

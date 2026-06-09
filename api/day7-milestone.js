@@ -48,14 +48,14 @@ export default async function handler(req, res) {
 
     const hasActivity = sessionCount > 0 || courseCount > 0
     const activityLine = hasActivity
-      ? `You've added ${courseCount} course${courseCount !== 1 ? 's' : ''} and completed ${sessionCount} study session${sessionCount !== 1 ? 's' : ''} — a solid start.`
-      : `You signed up a week ago but haven't started yet. That's okay — most people take a few days to get going.`
+      ? `You've added ${courseCount} course${courseCount !== 1 ? 's' : ''} and completed ${sessionCount} study session${sessionCount !== 1 ? 's' : ''}. Solid start.`
+      : `You signed up a week ago but haven't started yet. That's okay. Most people take a few days to get going.`
 
     try {
       await resend.emails.send({
         from: 'StudyEdge AI <support@mail.getstudyedge.com>',
         to: user.email,
-        subject: "One week in — here's what Pro students do differently",
+        subject: "One week in. Here's what Pro students do differently.",
         html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>One week on StudyEdge</title></head>
@@ -90,7 +90,7 @@ export default async function handler(req, res) {
           </tr>`).join('')}
         </table>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro is <strong style="color:#111111;">$2.99/week</strong> — less than a coffee. Try it free for 3 days. Card required, auto-renews unless you cancel.
+          Pro is <strong style="color:#111111;">$2.99/week</strong>, less than a coffee. Try it free for 3 days. Card required, auto-renews unless you cancel.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
@@ -107,7 +107,7 @@ export default async function handler(req, res) {
           &nbsp;·&nbsp;
           <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
         </p>
-        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">The StudyEdge AI team</p>
       </td></tr>
     </table>
   </td></tr>
