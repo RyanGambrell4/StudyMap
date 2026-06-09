@@ -685,10 +685,10 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             />
             <div className="w-14 h-14 rounded-2xl flex items-center justify-center"
               style={isExtracting
-                ? { background: 'linear-gradient(135deg, #3b82f6, #2563eb)', boxShadow: '0 4px 14px rgba(59,130,246,0.4)' }
+                ? { background: '#3B61C4', boxShadow: '0 4px 14px rgba(59,97,196,0.3)' }
                 : uploadedFile && hasText
-                  ? { background: 'linear-gradient(135deg, #22c55e, #16a34a)', boxShadow: '0 4px 14px rgba(34,197,94,0.4)' }
-                  : { background: 'linear-gradient(135deg, #a855f7, #9333ea)', boxShadow: '0 4px 14px rgba(168,85,247,0.4)' }}>
+                  ? { background: '#16A34A', boxShadow: '0 4px 14px rgba(22,163,74,0.3)' }
+                  : { background: '#3B61C4', boxShadow: '0 4px 14px rgba(59,97,196,0.3)' }}>
               {isExtracting ? (
                 <svg className="w-6 h-6 text-white animate-spin" fill="none" viewBox="0 0 24 24">
                   <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
@@ -835,7 +835,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               <button
                 onClick={handleGenerateFlashcards}
                 className="flex-1 text-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
-                style={{ background: 'linear-gradient(135deg, #a855f7, #ec4899)', boxShadow: '0 4px 16px rgba(168,85,247,0.4)' }}
+                style={{ background: '#3B61C4', boxShadow: '0 4px 16px rgba(59,97,196,0.3)' }}
               >
                 Generate with AI
               </button>

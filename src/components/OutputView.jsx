@@ -1709,17 +1709,16 @@ export default function OutputView({
         {activeSection === 'grades' && (
           isExamMode ? (
             <div style={{ padding: '48px 32px', maxWidth: 560, margin: '0 auto', textAlign: 'center' }}>
-              <div style={{ fontSize: 40, marginBottom: 16 }}>📊</div>
-              <h2 style={{ fontSize: 22, fontWeight: 700, color: '#e8e8f0', marginBottom: 8 }}>Score Tracker</h2>
-              <p style={{ fontSize: 14, color: '#8888a0', lineHeight: 1.6, marginBottom: 24 }}>
-                Log your practice test scores over time to track your progress toward your target score. Coming soon — score logging, FL score trends, and section-by-section breakdown.
+              <h2 style={{ fontSize: 22, fontWeight: 700, color: '#111111', marginBottom: 8 }}>Score Tracker</h2>
+              <p style={{ fontSize: 14, color: '#6B6B6B', lineHeight: 1.6, marginBottom: 24 }}>
+                Log your practice test scores over time to track your progress toward your target. Coming soon: score logging, full-length trends, and section-by-section breakdown.
               </p>
-              <div style={{ padding: '16px 20px', borderRadius: 12, background: 'rgba(99,102,241,0.08)', border: '1px solid rgba(99,102,241,0.2)', textAlign: 'left' }}>
-                <p style={{ margin: 0, fontSize: 13, color: '#818cf8', fontWeight: 600, marginBottom: 6 }}>Your target scores</p>
+              <div style={{ padding: '16px 20px', borderRadius: 12, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', textAlign: 'left', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                <p style={{ margin: 0, fontSize: 13, color: '#3B61C4', fontWeight: 600, marginBottom: 6 }}>Your target scores</p>
                 {courses.map((c, i) => (
-                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#8888a0', padding: '4px 0', borderBottom: i < courses.length - 1 ? '1px solid rgba(255,255,255,0.04)' : 'none' }}>
+                  <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 13, color: '#6B6B6B', padding: '4px 0', borderBottom: i < courses.length - 1 ? '1px solid rgba(0,0,0,0.07)' : 'none' }}>
                     <span>{c.name}</span>
-                    <span style={{ color: '#e8e8f0', fontWeight: 600 }}>{c.targetScore || '—'}</span>
+                    <span style={{ color: '#111111', fontWeight: 600 }}>{c.targetScore || '-'}</span>
                   </div>
                 ))}
               </div>

@@ -351,7 +351,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               disabled={trialLoading}
               style={{
                 width: '100%', padding: '13px',
-                background: 'linear-gradient(135deg, #3B82F6, #10B981)',
+                background: '#3B61C4',
                 border: 'none', borderRadius: '10px',
                 color: '#fff', fontFamily: 'inherit',
                 fontSize: '0.95rem', fontWeight: 800,

@@ -1269,8 +1269,8 @@ export default function CoursesView({
       )}
 
       {toast && (
-        <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 60, padding: '12px 18px', borderRadius: 12, background: 'linear-gradient(180deg, #101028, #0b0b20)', border: `1px solid ${toast.color}40`, boxShadow: `0 8px 30px rgba(0,0,0,0.5), 0 0 20px ${toast.color}20`, display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 500, color: D.text, animation: 'cv-slideIn 0.2s', whiteSpace: 'nowrap' }}>
-          <div style={{ width: 8, height: 8, borderRadius: '50%', background: toast.color, boxShadow: `0 0 8px ${toast.color}` }} />
+        <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 60, padding: '12px 18px', borderRadius: 12, background: '#FFFFFF', border: `1px solid ${toast.color}40`, boxShadow: '0 16px 48px rgba(0,0,0,0.12)', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, fontWeight: 500, color: D.text, animation: 'cv-slideIn 0.2s', whiteSpace: 'nowrap' }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: toast.color }} />
           {toast.msg}
         </div>
       )}
