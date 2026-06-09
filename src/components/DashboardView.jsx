@@ -632,10 +632,10 @@ export default function DashboardView({
           }}>
             <div style={{ flex: 1, minWidth: 200 }}>
               <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>
-                Your free trial is active — {getTrialDaysRemaining()} day{getTrialDaysRemaining() !== 1 ? 's' : ''} remaining
+                Your free trial is active. {getTrialDaysRemaining()} day{getTrialDaysRemaining() !== 1 ? 's' : ''} remaining.
               </p>
               <div style={{ marginTop: 6, height: 4, background: 'rgba(59,97,196,0.15)', borderRadius: 999, overflow: 'hidden', maxWidth: 280 }}>
-                <div style={{ height: '100%', borderRadius: 999, background: D.blue, width: `${Math.round(((7 - getTrialDaysRemaining()) / 7) * 100)}%`, transition: 'width 0.4s ease' }} />
+                <div style={{ height: '100%', borderRadius: 999, background: D.blue, width: `${Math.round(((3 - getTrialDaysRemaining()) / 3) * 100)}%`, transition: 'width 0.4s ease' }} />
               </div>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
