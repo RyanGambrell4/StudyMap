@@ -75,22 +75,22 @@ const LIMIT_MESSAGES = {
   courses: {
     tag: 'Manage your full semester',
     title: 'Add up to 5 courses with Pro.',
-    body: 'Stop juggling apps. Your full semester — every course, every exam — planned in one place.',
+    body: 'Stop juggling apps. Your full semester (every course, every exam) planned in one place.',
   },
   ai: {
     tag: 'Unlock AI tutoring',
     title: 'Get AI help anytime, for every course.',
-    body: 'Pro gives you 100 AI actions/month — your always-on tutor for every concept you\'re stuck on.',
+    body: 'Pro gives you 100 AI actions a month. Your always-on tutor for every concept you\'re stuck on.',
   },
   'ai-exhausted': {
     tag: "You've used your free AI actions",
     title: 'Keep your tutor on tap.',
-    body: "Pro gives you 100 AI actions a month — your tutor for every concept this semester. Start the 3-day free trial and pick up exactly where you left off.",
+    body: "Pro gives you 100 AI actions a month. Your tutor for every concept this semester. Start the 3-day free trial and pick up exactly where you left off.",
   },
   tutorMemory: {
     tag: 'Unlimited only · Tutor memory',
     title: 'AI Tutor with full session memory.',
-    body: 'Your tutor remembers everything from your conversation — no more re-explaining context every message. Available on Unlimited.',
+    body: 'Your tutor remembers everything from your conversation. No more re-explaining context every message. Available on Unlimited.',
   },
   practiceExamAnalytics: {
     tag: 'Unlimited only · Advanced analytics',
@@ -105,7 +105,7 @@ const LIMIT_MESSAGES = {
   blueprint: {
     tag: 'A plan for every session',
     title: 'Unlock unlimited Session Blueprints.',
-    body: 'A full breakdown before every study block — what to learn, in what order, with practice prompts ready to go.',
+    body: 'A full breakdown before every study block. What to learn, in what order, with practice prompts ready to go.',
   },
   focus: {
     tag: 'Study without a timer cap',
@@ -120,17 +120,17 @@ const LIMIT_MESSAGES = {
   quizBurst: {
     tag: 'Test yourself anytime',
     title: 'Unlock unlimited Quiz Bursts.',
-    body: 'Quick mastery checks for any topic — Pro lets you generate them on demand, all semester.',
+    body: 'Quick mastery checks for any topic. Pro lets you generate them on demand, all semester.',
   },
   examRescue: {
     tag: 'Behind on an exam? Rebound fast',
     title: 'Unlock unlimited Exam Rescues.',
-    body: 'Pro builds a targeted rescue plan for any exam — figure out exactly what to study and when.',
+    body: 'Pro builds a targeted rescue plan for any exam. Figure out exactly what to study and when.',
   },
   tools: {
     tag: 'Your AI-built study materials',
     title: 'Unlock Flashcards, quizzes, and more.',
-    body: 'Pro auto-generates flashcards and practice quizzes from your own course content — no manual setup.',
+    body: 'Pro auto-generates flashcards and practice quizzes from your own course content. No manual setup.',
   },
   grade_recovery: {
     tag: 'Hit the grade you need',

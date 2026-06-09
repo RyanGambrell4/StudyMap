@@ -38,7 +38,7 @@ const TIME_OPTIONS = [
 const SCHOOL_OPTIONS = [
   { key: 'hs',   label: 'High School',       desc: 'AP classes, finals week, and juggling it all before graduation.' },
   { key: 'uni',  label: 'University',        desc: 'Lectures, labs, deadlines, and somehow a social life too.' },
-  { key: 'exam', label: 'Professional Exam', desc: 'MCAT, LSAT, CPA, Bar, GRE, GMAT — a high-stakes certification or licensing exam.' },
+  { key: 'exam', label: 'Professional Exam', desc: 'MCAT, LSAT, CPA, Bar, GRE, GMAT. A high-stakes certification or licensing exam.' },
 ]
 
 const HS_YEARS = [
@@ -368,7 +368,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           What are you studying for?
         </h2>
         <p style={{ color: '#6B6B6B', fontSize: '0.95rem', marginBottom: 24, lineHeight: 1.5 }}>
-          We tune your sessions to your workload — high school finals look nothing like the bar exam.
+          We tune your sessions to your workload. High school finals look nothing like the bar exam.
         </p>
 
         <div className="ob-school-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
@@ -420,7 +420,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           When do you focus best?
         </h2>
         <p style={{ color: '#6B6B6B', fontSize: '0.95rem', marginBottom: 24, lineHeight: 1.5 }}>
-          We'll stack your sessions when your brain is sharpest — not when life is loudest.
+          We'll stack your sessions when your brain is sharpest, not when life is loudest.
         </p>
 
         <div className="ob-time-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>

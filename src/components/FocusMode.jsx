@@ -1385,7 +1385,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
               {/* Paywall hint for free users */}
               {getActivePlan() === 'free' && (
-                <p style={{ fontSize: 11.5, color: '#C0C0C0', textAlign: 'center', marginTop: 14 }}>
+                <p style={{ fontSize: 11.5, color: '#9B9B9B', textAlign: 'center', marginTop: 14 }}>
                   Upgrade to let your plan adapt based on this rating.
                 </p>
               )}
@@ -1409,15 +1409,15 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
           </div>
           {/* Center: label — hidden on mobile so it can't collide with the left course/session text */}
           <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none hidden md:block">
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#C0C0C0' }}>Focus Session</span>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9B9B9B' }}>Focus Session</span>
           </div>
           {/* Right: elapsed + exit */}
           <div className="flex items-center gap-4 shrink-0">
             <span style={{ fontSize: 12, color: '#9B9B9B', fontFamily: 'ui-monospace, monospace' }}>
-              {fmt(elapsed)} <span style={{ color: '#C0C0C0' }}>/ {String(session.duration).padStart(2,'0')}:00</span>
+              {fmt(elapsed)} <span style={{ color: '#9B9B9B' }}>/ {String(session.duration).padStart(2,'0')}:00</span>
             </span>
             {isFree && focusMinutesAllowed < Infinity && (
-              <span style={{ fontSize: 11, color: '#C0C0C0' }}>
+              <span style={{ fontSize: 11, color: '#9B9B9B' }}>
                 {Math.max(0, focusMinutesAllowed - Math.floor((totalSec - remaining) / 60))} min left today
               </span>
             )}
@@ -1475,7 +1475,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                   fontFamily: '"SF Mono", "Fira Code", ui-monospace, monospace',
                   letterSpacing: '-0.03em',
                   lineHeight: 1,
-                  color: running ? '#1A1A1A' : '#C0C0C0',
+                  color: running ? '#1A1A1A' : '#9B9B9B',
                   textShadow: running ? `0 0 80px ${dot}35` : 'none',
                   transition: 'color 0.3s, text-shadow 0.3s',
                   userSelect: 'none',
@@ -1583,7 +1583,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     <svg width="13" height="13" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
                   )}
                   <span>{running ? 'Pause' : 'Resume'}</span>
-                  <span style={{ fontSize: 10, color: '#C0C0C0' }}>[Space]</span>
+                  <span style={{ fontSize: 10, color: '#9B9B9B' }}>[Space]</span>
                 </button>
 
                 {/* Skip block */}
@@ -1609,7 +1609,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               </div>
 
               {/* Keyboard hint */}
-              <p style={{ fontSize: 11, color: '#C0C0C0', marginTop: 16 }}>
+              <p style={{ fontSize: 11, color: '#9B9B9B', marginTop: 16 }}>
                 [Space] pause &nbsp;·&nbsp; [↵] finish &nbsp;·&nbsp; [1–5] tools &nbsp;·&nbsp; [Esc] close panel
               </p>
             </>
@@ -1647,7 +1647,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     </p>
                     <p className="text-xs mt-1 leading-relaxed" style={{ color: '#9B9B9B' }}>The act of retrieving information is what builds memory. Aim for five minutes of free recall.</p>
                   </div>
-                  <div className="shrink-0 text-right" style={{ fontSize: 12, color: '#C0C0C0', fontFamily: 'ui-monospace, monospace', whiteSpace: 'nowrap' }}>
+                  <div className="shrink-0 text-right" style={{ fontSize: 12, color: '#9B9B9B', fontFamily: 'ui-monospace, monospace', whiteSpace: 'nowrap' }}>
                     {wordCount(recallText)} words
                     {recallWritingTimer > 0 && <span> · {fmt(recallWritingTimer)} elapsed</span>}
                   </div>
@@ -1705,7 +1705,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                             </div>
                           </div>
                         </div>
-                        <p className="text-center text-xs" style={{ color: '#C0C0C0' }}>Tap to flip</p>
+                        <p className="text-center text-xs" style={{ color: '#9B9B9B' }}>Tap to flip</p>
                         <div className="flex gap-2">
                           <button onClick={() => { setRcIdx(i => Math.max(0, i - 1)); setRcFlipped(false) }} disabled={rcIdx === 0} className="flex-1 py-2 rounded-xl text-sm transition-colors disabled:opacity-30" style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B' }}>← Prev</button>
                           <button onClick={() => { setRcIdx(i => Math.min(flashcards.length - 1, i + 1)); setRcFlipped(false) }} disabled={rcIdx === flashcards.length - 1} className="flex-1 py-2 rounded-xl text-sm transition-colors disabled:opacity-30" style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B' }}>Next →</button>
@@ -1771,13 +1771,13 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                               <span className="text-xs mb-3 px-2 py-0.5 rounded-full border font-medium uppercase tracking-wide" style={{ color: dot, borderColor: `${dot}40`, backgroundColor: `${dot}15` }}>{flashcards[fcIdx].topic}</span>
                             )}
                             <p className="font-semibold leading-relaxed text-base" style={{ color: '#1A1A1A' }}>{flashcards[fcIdx]?.front}</p>
-                            <p className="text-xs mt-4" style={{ color: '#C0C0C0' }}>Tap card to reveal answer</p>
+                            <p className="text-xs mt-4" style={{ color: '#9B9B9B' }}>Tap card to reveal answer</p>
                           </div>
                         ) : (
                           <div className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center p-6 text-center">
                             <span className="text-[10px] mb-3 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest" style={{ color: dot, backgroundColor: `${dot}15`, border: `1px solid ${dot}40` }}>Answer</span>
                             <p className="font-semibold leading-relaxed text-base" style={{ color: dot }}>{flashcards[fcIdx]?.back}</p>
-                            <p className="text-xs mt-4" style={{ color: '#C0C0C0' }}>Tap card to flip back</p>
+                            <p className="text-xs mt-4" style={{ color: '#9B9B9B' }}>Tap card to flip back</p>
                           </div>
                         )}
                       </div>
@@ -1792,7 +1792,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                       </button>
                     </div>
 
-                    <p className="text-center text-xs mb-3" style={{ color: '#C0C0C0' }}>← → or tap arrows to navigate · tap card to flip</p>
+                    <p className="text-center text-xs mb-3" style={{ color: '#9B9B9B' }}>← → or tap arrows to navigate · tap card to flip</p>
 
                     <div className="flex gap-2">
                       <button
@@ -1850,9 +1850,14 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     {fcSourceFiles.length > 0 && (
                       <div className="flex items-center gap-2 flex-wrap">
                         {fcSourceFiles.map((f, i) => (
-                          <span key={i} className="text-xs px-2 py-1 rounded-lg" style={{ backgroundColor: `${dot}10`, color: dot }}>📎 {f.name}</span>
+                          <span key={i} className="text-xs px-2 py-1 rounded-lg inline-flex items-center gap-1" style={{ backgroundColor: `${dot}10`, color: dot }}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                              <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                            </svg>
+                            {f.name}
+                          </span>
                         ))}
-                        <button onClick={clearFcSource} className="text-xs" style={{ color: '#C0C0C0' }}>Clear</button>
+                        <button onClick={clearFcSource} className="text-xs" style={{ color: '#9B9B9B' }}>Clear</button>
                       </div>
                     )}
 
@@ -1913,9 +1918,14 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     {quizSourceFiles.length > 0 && (
                       <div className="flex items-center gap-2 flex-wrap">
                         {quizSourceFiles.map((f, i) => (
-                          <span key={i} className="text-xs px-2 py-1 rounded-lg" style={{ backgroundColor: `${dot}10`, color: dot }}>📎 {f.name}</span>
+                          <span key={i} className="text-xs px-2 py-1 rounded-lg inline-flex items-center gap-1" style={{ backgroundColor: `${dot}10`, color: dot }}>
+                            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+                              <path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48" />
+                            </svg>
+                            {f.name}
+                          </span>
                         ))}
-                        <button onClick={clearQuizSource} className="text-xs" style={{ color: '#C0C0C0' }}>Clear</button>
+                        <button onClick={clearQuizSource} className="text-xs" style={{ color: '#9B9B9B' }}>Clear</button>
                       </div>
                     )}
                   </div>
@@ -1923,7 +1933,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                   <div>
                     <div className="text-center mb-6">
                       <p className="text-5xl font-bold mb-1 font-mono" style={{ color: '#1A1A1A' }}>
-                        {quizAnswers.filter(a => a.correct).length}<span className="text-3xl" style={{ color: '#C0C0C0' }}>/{quizQuestions.length}</span>
+                        {quizAnswers.filter(a => a.correct).length}<span className="text-3xl" style={{ color: '#9B9B9B' }}>/{quizQuestions.length}</span>
                       </p>
                       <p className="font-semibold" style={{ color: dot }}>
                         {quizAnswers.filter(a => a.correct).length === quizQuestions.length ? 'Perfect score!'
@@ -2241,7 +2251,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     alignItems: 'center',
                     gap: 2,
                     transition: 'all 0.15s',
-                    color: isActive ? tabColor : wasVisited && !isActive ? '#6B6B6B' : '#C0C0C0',
+                    color: isActive ? tabColor : wasVisited && !isActive ? '#6B6B6B' : '#9B9B9B',
                   }}
                 >
                   <span style={{ fontSize: 12, fontWeight: isActive ? 700 : 400, whiteSpace: 'nowrap' }}>
@@ -2250,7 +2260,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                       <span style={{ display: 'inline-block', width: 4, height: 4, borderRadius: '50%', backgroundColor: tabColor, marginLeft: 4, verticalAlign: 'middle', marginBottom: 1, opacity: 0.7 }} />
                     )}
                   </span>
-                  <span style={{ fontSize: 10, color: isActive ? tabColor : '#C0C0C0', fontFamily: 'ui-monospace, monospace' }}>
+                  <span style={{ fontSize: 10, color: isActive ? tabColor : '#9B9B9B', fontFamily: 'ui-monospace, monospace' }}>
                     {isActive ? '▲ hide' : num}
                   </span>
                 </button>

@@ -659,7 +659,7 @@ function EmailVerificationGate({ email, resendState, onResend, onSignOut }) {
           fontSize: 12, color: '#3B61C4', fontWeight: 600,
         }}>
           <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3B61C4', animation: 'pulse-ring-app 1.4s ease-in-out infinite' }} />
-          Checking automatically — no need to refresh
+          Checking automatically. No need to refresh.
         </div>
 
         <div style={{
@@ -685,7 +685,7 @@ function EmailVerificationGate({ email, resendState, onResend, onSignOut }) {
           className="text-sm font-medium transition-colors disabled:opacity-50"
           style={{ color: resendState === 'sent' ? '#16A34A' : resendState === 'error' ? '#DC2626' : '#3B61C4' }}
         >
-          {resendState === 'sending' ? 'Sending…' : resendState === 'sent' ? '✓ Email resent — check your inbox' : resendState === 'error' ? 'Failed to resend — try again' : 'Resend confirmation email'}
+          {resendState === 'sending' ? 'Sending…' : resendState === 'sent' ? 'Email resent. Check your inbox.' : resendState === 'error' ? 'Failed to resend. Try again.' : 'Resend confirmation email'}
         </button>
         <div className="pt-1">
           <button

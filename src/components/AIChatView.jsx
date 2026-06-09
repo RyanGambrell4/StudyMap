@@ -198,7 +198,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
         <div style={{ margin: '12px 16px 0', flexShrink: 0, padding: '12px 14px', borderRadius: 12, background: 'rgba(217,119,6,0.07)', border: '1px solid rgba(217,119,6,0.25)', display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
           <svg style={{ width: 16, height: 16, color: '#D97706', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" /></svg>
           <span style={{ flex: 1, fontSize: 13, color: '#92400E', fontWeight: 500, minWidth: 0 }}>
-            <strong style={{ color: '#B45309' }}>{flagBanner}</strong> flagged as a struggle — added to your coach plan focus areas.
+            <strong style={{ color: '#B45309' }}>{flagBanner}</strong> flagged as a struggle. Added to your coach plan focus areas.
           </span>
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
             {onNavigateToCoach && (
