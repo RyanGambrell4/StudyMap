@@ -421,7 +421,7 @@ export default function AccountView({
               <div style={{ flex: 1 }}>
                 <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#111111' }}>Google Calendar</p>
                 <p style={{ margin: '2px 0 0', fontSize: 12, color: '#9B9B9B' }}>
-                  {googleCalendarConnected ? 'Connected — syncing your schedule' : 'Connect to sync your schedule'}
+                  {googleCalendarConnected ? 'Connected. Syncing your schedule.' : 'Connect to sync your schedule'}
                 </p>
               </div>
               {googleCalendarConnected

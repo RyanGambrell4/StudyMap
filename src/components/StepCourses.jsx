@@ -125,7 +125,7 @@ export default function StepCourses({ courses, setCourses, yearLevel, setYearLev
     <div className="max-w-2xl mx-auto px-4 py-10">
       <div className="text-center mb-8">
         <h2 className="text-3xl font-bold text-slate-900 mb-2">Add Your Courses</h2>
-        <p className="text-slate-600">Add up to 8 courses — or pick an exam below to get started instantly</p>
+        <p className="text-slate-600">Add up to 8 courses, or pick an exam below to get started instantly</p>
       </div>
 
       <div className="mb-6">
@@ -149,7 +149,7 @@ export default function StepCourses({ courses, setCourses, yearLevel, setYearLev
                 {selectedExam ? `${EXAM_PRESETS[selectedExam].label} sections loaded` : 'Studying for a professional exam?'}
               </p>
               <p className="text-xs text-slate-500 mt-0.5">
-                {selectedExam ? 'Tap to switch exam or clear' : 'MCAT, LSAT, CPA, Bar, GRE, GMAT — load sections instantly'}
+                {selectedExam ? 'Tap to switch exam or clear' : 'MCAT, LSAT, CPA, Bar, GRE, GMAT: load sections instantly'}
               </p>
             </div>
           </div>

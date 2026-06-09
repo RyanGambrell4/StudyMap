@@ -541,18 +541,18 @@ function TrackTab({ course, gradeData, dot, onSave }) {
             <div style={{ marginTop: 10, padding: 14, borderRadius: 10, background: `rgba(251,191,36,0.08)`, border: `1px solid ${D.amber}30` }}>
               {defense.impossible ? (
                 <p style={{ fontSize: 12.5, color: D.amber, margin: 0 }}>
-                  Your {ltr} is already out of reach — the graded scores bring you below the {ltr} threshold regardless of remaining work. Consider adjusting your target.
+                  Your {ltr} is already out of reach. The graded scores bring you below the {ltr} threshold regardless of remaining work. Consider adjusting your target.
                 </p>
               ) : defense.rawFloor <= 0 ? (
                 <p style={{ fontSize: 12.5, color: D.amber, margin: 0 }}>
-                  Your <span style={{ fontWeight: 700 }}>{ltr}</span> is safe — even if you scored 0% on all remaining work, your current grades keep you in {ltr} territory. Your buffer is {Math.abs(defense.rawFloor?.toFixed(0))} points.
+                  Your <span style={{ fontWeight: 700 }}>{ltr}</span> is safe. Even if you scored 0% on all remaining work, your current grades keep you in {ltr} territory. Your buffer is {Math.abs(defense.rawFloor?.toFixed(0))} points.
                 </p>
               ) : (
                 <>
                   <p style={{ fontSize: 12.5, color: D.amber, margin: '0 0 8px' }}>
                     To protect your <span style={{ fontWeight: 700 }}>{ltr}</span>, score at least{' '}
                     <span style={{ fontFamily: 'inherit', fontWeight: 800, fontSize: 15 }}>{defense.floor?.toFixed(1)}%</span>{' '}
-                    on remaining work — that's the floor to stay above the {ltr} grade boundary ({defenseThreshold}%).
+                    on remaining work. That's the floor to stay above the {ltr} grade boundary ({defenseThreshold}%).
                   </p>
                   <div style={{ display: 'flex', gap: 8 }}>
                     <div style={{ flex: 1, padding: '8px 10px', borderRadius: 8, background: 'rgba(251,191,36,0.12)', border: `1px solid ${D.amber}25`, textAlign: 'center' }}>
@@ -983,7 +983,7 @@ function WhatIfBanner({ currentGPA, projectedGPA }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#D97706', flexShrink: 0 }} />
         <span style={{ fontSize: 12.5, fontWeight: 700, color: '#D97706' }}>What-if mode</span>
-        <span style={{ fontSize: 12, color: '#9B9B9B', fontWeight: 500 }}>— changes here don't affect your real grades</span>
+        <span style={{ fontSize: 12, color: '#9B9B9B', fontWeight: 500 }}>Changes here don't affect your real grades</span>
       </div>
       {currentGPA !== null && projectedGPA !== null && (
         <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>

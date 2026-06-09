@@ -149,7 +149,7 @@ export default function PracticeExamModal({ course, onStart, onClose, onShowPayw
                   <>
                     <svg width="32" height="32" fill="none" stroke="#16A34A" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     <p style={{ margin: 0, color: '#1A1A1A', fontWeight: 600, fontSize: 14 }}>{file?.name}</p>
-                    <p style={{ margin: 0, color: '#6B6B6B', fontSize: 12 }}>{extractedText.length.toLocaleString()} characters extracted — click to replace</p>
+                    <p style={{ margin: 0, color: '#6B6B6B', fontSize: 12 }}>{extractedText.length.toLocaleString()} characters extracted. Click to replace.</p>
                   </>
                 ) : (
                   <>

@@ -264,7 +264,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
                 <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Time breakdown</p>
                 <span style={{ fontSize: 12, color: '#6B6B6B' }}>Avg {fmtMs2(avg)} per question</span>
               </div>
-              <p style={{ margin: '0 0 10px', fontSize: 12, color: '#9B9B9B' }}>Slowest questions — likely areas of uncertainty</p>
+              <p style={{ margin: '0 0 10px', fontSize: 12, color: '#9B9B9B' }}>Slowest questions: likely areas of uncertainty</p>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 {slowest.map((t, i) => (
                   <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: '#FAFAF8', borderRadius: 10, border: '1px solid rgba(0,0,0,0.06)' }}>
@@ -296,7 +296,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                   <div>
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Your answer </span>
-                    <span style={{ fontSize: 14, color: given ? '#1A1A1A' : '#9B9B9B', fontStyle: given ? 'normal' : 'italic' }}>{given || '— skipped —'}</span>
+                    <span style={{ fontSize: 14, color: given ? '#1A1A1A' : '#9B9B9B', fontStyle: given ? 'normal' : 'italic' }}>{given || 'skipped'}</span>
                   </div>
                   <div>
                     <span style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{q.type === 'multiple_choice' ? 'Correct answer ' : 'Model answer '}</span>

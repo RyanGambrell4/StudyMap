@@ -656,8 +656,7 @@ export default function App() {
           padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12,
           boxShadow: '0 8px 32px rgba(0,0,0,0.10)', zIndex: 9999, whiteSpace: 'nowrap',
         }}>
-          <span style={{ fontSize: 18 }}>🎉</span>
-          <span style={{ color: '#047857', fontSize: 14, fontWeight: 600 }}>You're on the plan, welcome!</span>
+          <span style={{ color: '#047857', fontSize: 14, fontWeight: 600 }}>You're on the plan. Welcome!</span>
           <button
             onClick={() => setCheckoutSuccess(false)}
             style={{ marginLeft: 8, background: 'none', border: 'none', color: '#9B9B9B', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}

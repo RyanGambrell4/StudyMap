@@ -1170,7 +1170,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                 {[['>=80%', 'Solid', D.green], ['60-79%', 'OK', D.amber], ['<60%', 'Needs work', D.pink]].map(([range, label, color]) => (
                   <div key={range} style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 11, color: D.textDim }}>
                     <div style={{ width: 8, height: 8, borderRadius: 2, background: `${color}70` }} />
-                    {range} — {label}
+                    {range}: {label}
                   </div>
                 ))}
               </div>

@@ -164,7 +164,7 @@ export default function OnboardingTour({ onReady }) {
       {
         popover: {
           title: "You're all set.",
-          description: 'Start by adding your first course — press the + Course button on the dashboard. It takes 30 seconds.',
+          description: 'Start by adding your first course. Press the + Course button on the dashboard. It takes 30 seconds.',
           showButtons: ['previous', 'next'],
           nextBtnText: "Let's go",
         },

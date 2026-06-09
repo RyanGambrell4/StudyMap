@@ -120,7 +120,7 @@ export default function PracticeExamSetup({ courses, onBack, onStart, onShowPayw
   async function handleGenerate() {
     setError('')
     if (!selectedCourse) { setError('Select a course first.'); return }
-    if (!hasSource) { setError('Add source material first — upload a file, paste notes, or describe your exam.'); return }
+    if (!hasSource) { setError('Add source material first: upload a file, paste notes, or describe your exam.'); return }
 
     // Paywall check for free users
     const plan = getActivePlan()
@@ -206,7 +206,7 @@ export default function PracticeExamSetup({ courses, onBack, onStart, onShowPayw
         )}
 
         {/* ── Step 1: Course ─────────────────────────────────────────────── */}
-        <Section label="1 — Choose a course">
+        <Section label="1. Choose a course">
           <select
             value={selectedCourseId ?? ''}
             onChange={e => setSelectedCourseId(e.target.value)}
@@ -225,7 +225,7 @@ export default function PracticeExamSetup({ courses, onBack, onStart, onShowPayw
         </Section>
 
         {/* ── Step 2: Source material ────────────────────────────────────── */}
-        <Section label="2 — Add your source material">
+        <Section label="2. Add your source material">
           <div style={{ display: 'flex', gap: 4, background: D.bg, border: `1px solid ${D.border}`, borderRadius: 12, padding: 4, marginBottom: 16 }}>
             {tabBtn('upload', 'Upload file')}
             {tabBtn('paste', 'Paste text')}
@@ -248,7 +248,7 @@ export default function PracticeExamSetup({ courses, onBack, onStart, onShowPayw
                   <>
                     <svg width="28" height="28" fill="none" stroke="#16A34A" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
                     <p style={{ margin: 0, color: D.text, fontWeight: 600, fontSize: 13 }}>{file?.name}</p>
-                    <p style={{ margin: 0, color: D.muted, fontSize: 12 }}>{extractedText.length.toLocaleString()} characters — click to replace</p>
+                    <p style={{ margin: 0, color: D.muted, fontSize: 12 }}>{extractedText.length.toLocaleString()} characters. Click to replace.</p>
                   </>
                 ) : (
                   <>
@@ -299,7 +299,7 @@ export default function PracticeExamSetup({ courses, onBack, onStart, onShowPayw
         </Section>
 
         {/* ── Step 3: Length ─────────────────────────────────────────────── */}
-        <Section label="3 — Exam length">
+        <Section label="3. Exam length">
           <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
             {LENGTHS.map(n => (
               <button
@@ -327,7 +327,7 @@ export default function PracticeExamSetup({ courses, onBack, onStart, onShowPayw
         </Section>
 
         {/* ── Step 4: Timer ──────────────────────────────────────────────── */}
-        <Section label="4 — Timer (optional)">
+        <Section label="4. Timer (optional)">
           <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: generating ? 'not-allowed' : 'pointer', marginBottom: timerOn ? 14 : 0 }}>
             <input
               type="checkbox"

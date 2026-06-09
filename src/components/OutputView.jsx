@@ -1097,7 +1097,7 @@ export default function OutputView({
               You just used your first AI boost.
             </h2>
             <p style={{ color: '#6B6B6B', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
-              Pro gives you <strong style={{ color: '#3B61C4' }}>100 boosts per month</strong> — that's enough for a daily study session all month. Try it free for 3 days, $2.99/wk after.
+              Pro gives you <strong style={{ color: '#3B61C4' }}>100 boosts per month</strong>. That's enough for a daily study session all month. Try it free for 3 days, $2.99/wk after.
             </p>
             <button
               onClick={() => {
@@ -1421,7 +1421,7 @@ export default function OutputView({
                     <path d="M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.41 0zM12 9v4M12 17h.01"/>
                   </svg>
                   <div>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#DC2626' }}>Grade Recovery Mode — </span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: '#DC2626' }}>Grade Recovery Mode: </span>
                     <span style={{ fontSize: 13, color: '#6B6B6B' }}>
                       Extra weekly sessions added for {[...recoveryCoursesIdx].map(i => courses[i]?.name).filter(Boolean).join(', ')} to help close the gap.
                     </span>
@@ -1447,7 +1447,7 @@ export default function OutputView({
                 </div>
                 {examConflicts.map((c, i) => (
                   <div key={i} style={{ fontSize: 12.5, color: '#6B6B6B' }}>
-                    <strong style={{ color: '#1A1A1A' }}>{c.courseA}</strong> and <strong style={{ color: '#1A1A1A' }}>{c.courseB}</strong> exams are only <strong>{c.gapDays} day{c.gapDays !== 1 ? 's' : ''}</strong> apart — front-load {c.courseA} prep now to avoid a crunch.
+                    <strong style={{ color: '#1A1A1A' }}>{c.courseA}</strong> and <strong style={{ color: '#1A1A1A' }}>{c.courseB}</strong> exams are only <strong>{c.gapDays} day{c.gapDays !== 1 ? 's' : ''}</strong> apart. Front-load {c.courseA} prep now to avoid a crunch.
                   </div>
                 ))}
               </div>

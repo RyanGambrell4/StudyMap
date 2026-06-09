@@ -275,7 +275,7 @@ function CoachRail({ form, confidence, course }) {
           {!form.courseId && form.courseIdx === undefined ? (
             'Pick a course to get started.'
           ) : !form.goal?.trim() && !topics.length ? (
-            <><strong style={{ color: D.text }}>{course?.name}</strong> — add a goal or topics to start building.</>
+            <><strong style={{ color: D.text }}>{course?.name}</strong>: add a goal or topics to start building.</>
           ) : (
             <>Working with <strong style={{ color: D.text }}>{topics.length}</strong> topic{topics.length === 1 ? '' : 's'}{dates.length > 0 && <> and <strong style={{ color: D.text }}>{dates.length}</strong> date{dates.length === 1 ? '' : 's'}</>}.</>
           )}
@@ -290,10 +290,10 @@ function CoachRail({ form, confidence, course }) {
         <div style={{ fontSize: 11.5, color: D.dim, lineHeight: 1.45, marginBottom: 14 }}>
           {confidence < 3 && 'Add topics or a goal to strengthen the plan.'}
           {confidence >= 3 && confidence < 6 && 'Good start. Dates and materials improve pacing.'}
-          {confidence >= 6 && 'Strong inputs — the plan will be specific to what you shared.'}
+          {confidence >= 6 && 'Strong inputs. The plan will be specific to what you shared.'}
         </div>
         <div style={{ borderTop: `1px solid ${D.border}`, paddingTop: 12, fontSize: 11.5, color: D.dim, lineHeight: 1.5 }}>
-          Only plans from what you tell me — no invented topics or dates.
+          Only plans from what you tell me. No invented topics or dates.
         </div>
       </div>
     </div>
@@ -358,7 +358,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
         >
           <textarea className="sc-input" value={form.goal || ''} onChange={e => update('goal', e.target.value)}
             placeholder={isExamMode
-              ? `e.g. "Target 130 in this section — struggling most with timing and discrete questions"`
+              ? `e.g. "Target 130 in this section. Struggling most with timing and discrete questions"`
               : `e.g. "Score 90%+ on the final" · "Truly understand derivatives, not memorize them" · "Pass with a B+"`}
           />
         </FieldBlock>
@@ -867,7 +867,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
                     </div>
                   </div>
                   <p style={{ fontSize: 12.5, color: D.dim, lineHeight: 1.55, margin: 0, fontStyle: 'italic' }}>
-                    Tell me your goal, topics, and dates — I'll build a week-by-week plan grounded only in what you share.
+                    Tell me your goal, topics, and dates. I'll build a week-by-week plan grounded only in what you share.
                   </p>
                   <button onClick={() => onBuildPlan(idx)} style={{ background: 'none', border: 'none', padding: 0, color: D.indigo, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', marginTop: 'auto' }}>
                     Build Plan →
@@ -1457,7 +1457,7 @@ function StruggleTracker({ struggles, courseId, courseName, dot, onSave }) {
 
           {active.length === 0 && (
             <div style={{ padding: '20px 0', textAlign: 'center', color: D.dim, fontSize: 13 }}>
-              No active struggles logged — great work! Add anything that felt hard or confusing.
+              No active struggles logged. Great work. Add anything that felt hard or confusing.
             </div>
           )}
 
@@ -1565,7 +1565,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
     const lines = []
     const courseName = course?.name || 'Course'
     const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-    lines.push(`StudyEdge AI — ${courseName} Study Plan`)
+    lines.push(`StudyEdge AI: ${courseName} Study Plan`)
     lines.push(`Generated ${dateStr}`)
     lines.push('')
     if (goal) lines.push(`Goal: ${goal}`)
@@ -1581,9 +1581,9 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
     ;(plan.weeklyFocus || []).forEach((week, wi) => {
       const range = weekDateRange(wi)
       lines.push('')
-      lines.push(`WEEK ${wi + 1} — ${week.theme || 'Foundation'} (${range.start} – ${range.end})`)
+      lines.push(`WEEK ${wi + 1}: ${week.theme || 'Foundation'} (${range.start} to ${range.end})`)
       ;(week.sessions || []).forEach((sess, si) => {
-        lines.push(`  Session ${si + 1}: ${sess.sessionLabel || ''} — ${sess.focusArea || ''}`)
+        lines.push(`  Session ${si + 1}: ${sess.sessionLabel || ''} - ${sess.focusArea || ''}`)
         if (sess.keyTopics?.length) lines.push(`    Topics: ${sess.keyTopics.join(', ')}`)
         if (sess.deliverable) lines.push(`    Deliverable: ${sess.deliverable}`)
       })
@@ -1658,7 +1658,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
     doc.setFillColor(15, 10, 40)
     doc.rect(0, 0, pageW, 72, 'F')
     doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(232, 232, 240)
-    doc.text(courseName + ' — Study Plan', margin, 36)
+    doc.text(courseName + ': Study Plan', margin, 36)
     doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(136, 136, 160)
     doc.text(`Generated ${dateStr} · StudyEdge AI`, margin, 54)
     y = 96
@@ -1676,7 +1676,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
       writeLine('DEADLINES', 8, [99, 102, 241], true)
       validDates.forEach(d => {
         const label = new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        writeLine(`${d.label}  —  ${label}`, 11, [232, 232, 240])
+        writeLine(`${d.label}: ${label}`, 11, [232, 232, 240])
       })
       y += 6
     }
@@ -1834,14 +1834,14 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
             </div>
             <div style={{ display: 'flex', gap: 8 }}>
               <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my ${course?.name || 'study'} plan on StudyEdge AI — ${shareLink}`)}`}
+                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my ${course?.name || 'study'} plan on StudyEdge AI: ${shareLink}`)}`}
                 target="_blank" rel="noopener noreferrer"
                 style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 12px', borderRadius: 10, border: '1px solid #E5E5E5', fontSize: 12.5, fontWeight: 600, color: '#374151', textDecoration: 'none', background: '#fff' }}
               >
                 Share on X
               </a>
               <a
-                href={`https://wa.me/?text=${encodeURIComponent(`Here's my ${course?.name || ''} study plan — built with StudyEdge AI: ${shareLink}`)}`}
+                href={`https://wa.me/?text=${encodeURIComponent(`Here's my ${course?.name || ''} study plan, built with StudyEdge AI: ${shareLink}`)}`}
                 target="_blank" rel="noopener noreferrer"
                 style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 12px', borderRadius: 10, border: '1px solid #E5E5E5', fontSize: 12.5, fontWeight: 600, color: '#374151', textDecoration: 'none', background: '#fff' }}
               >

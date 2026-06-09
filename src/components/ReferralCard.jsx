@@ -45,7 +45,7 @@ export default function ReferralCard() {
       </div>
 
       <p style={{ margin: '8px 0 12px', fontSize: 13, color: '#9B9B9B', lineHeight: 1.6 }}>
-        Share your link. When a friend upgrades to Pro, they get their first month free — and so do you.
+        Share your link. When a friend upgrades to Pro, they get their first month free, and so do you.
       </p>
 
       <div style={{ display: 'flex', gap: 8, marginBottom: 10 }}>
@@ -84,7 +84,7 @@ export default function ReferralCard() {
           Share on X
         </a>
         <a
-          href={`https://wa.me/?text=${encodeURIComponent(`Use my link to try StudyEdge AI free — it builds your entire study schedule in 60 seconds: ${link}`)}`}
+          href={`https://wa.me/?text=${encodeURIComponent(`Use my link to try StudyEdge AI free. It builds your entire study schedule in 60 seconds: ${link}`)}`}
           target="_blank" rel="noopener noreferrer"
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,

@@ -365,7 +365,7 @@ function AddCoursePanel({ courseCount, onClose, onAdd }) {
 
   const handleAdd = () => {
     if (!name.trim()) { setError('Enter a course name'); return }
-    if (!examDate) { setError('Add a final/exam date — your study plan needs it'); return }
+    if (!examDate) { setError('Add a final/exam date. Your study plan needs it.'); return }
     if (examDate <= todayStr) { setError('Exam date must be in the future'); return }
     const colorObj = { name: 'custom', dot: color }
     const courseId = Date.now().toString(36) + Math.random().toString(36).slice(2, 5)
@@ -410,7 +410,7 @@ function AddCoursePanel({ courseCount, onClose, onAdd }) {
             <Label>Exam / finals date <span style={{ color: D.orange }}>*</span></Label>
             <input type="date" className="cv-input" value={examDate} min={todayStr} onChange={e => { setExamDate(e.target.value); setError('') }} />
             <p style={{ margin: '6px 0 0', fontSize: 11.5, color: D.muted, lineHeight: 1.4 }}>
-              Required — your study plan, blueprints, and grade tracker are all built around this date. Estimate if you don't know yet; you can change it later.
+              Required. Your study plan, blueprints, and grade tracker are all built around this date. Estimate if you don't know yet; you can change it later.
             </p>
           </div>
 
@@ -880,7 +880,7 @@ function ExamSetupModal({ courseCount, onClose, onAdd, onOpenStudyCoach }) {
           {step > 1 && <button onClick={() => setStep(s => s - 1)} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Back</button>}
           {step < 4 ? (
             <button onClick={() => { if (!canNext) return; setStep(s => s + 1) }} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: canNext ? '#E8531A' : 'rgba(0,0,0,0.04)', color: canNext ? '#fff' : D.dim, fontSize: 13, fontWeight: 600, border: 'none', cursor: canNext ? 'pointer' : 'not-allowed', boxShadow: canNext ? '0 4px 12px rgba(232,83,26,0.25)' : 'none' }}>
-              {step === 3 ? 'Next — almost done' : 'Next'}
+              {step === 3 ? 'Next (almost done)' : 'Next'}
             </button>
           ) : (
             <button onClick={handleComplete} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: '#E8531A', color: '#fff', fontSize: 13, fontWeight: 600, border: 'none', cursor: 'pointer', boxShadow: '0 4px 12px rgba(232,83,26,0.25)' }}>

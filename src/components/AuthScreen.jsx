@@ -416,7 +416,7 @@ function LeftPanel() {
           Study smarter.<br />Score higher.<br /><em style={{ fontStyle: 'italic', color: 'rgba(255,255,255,0.75)' }}>Every semester.</em>
         </h2>
         <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: 15, lineHeight: 1.6, margin: 0, maxWidth: 300 }}>
-          AI-powered study plans, grade tracking, and an always-on tutor — all in one place.
+          AI-powered study plans, grade tracking, and an always-on tutor. All in one place.
         </p>
       </div>
 
@@ -596,8 +596,8 @@ function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onS
             {resendStatus === 'sending' ? 'Resending…'
               : resendStatus === 'sent' ? 'Email resent ✓'
               : resendStatus === 'cooldown' ? 'Wait a moment before resending'
-              : resendStatus === 'ratelimited' ? 'Too many tries — try again in a minute'
-              : resendStatus === 'error' ? 'Resend failed — try again'
+              : resendStatus === 'ratelimited' ? 'Too many tries. Try again in a minute'
+              : resendStatus === 'error' ? 'Resend failed. Try again'
               : 'Resend confirmation email'}
           </button>
 

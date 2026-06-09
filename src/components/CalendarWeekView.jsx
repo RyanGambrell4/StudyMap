@@ -518,7 +518,7 @@ export default function CalendarWeekView({
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                 }}>
-                  {ex.daysAway === 0 ? `${ex.courseName} exam today` : `${ex.courseName} — ${ex.daysAway}d`}
+                  {ex.daysAway === 0 ? `${ex.courseName} exam today` : `${ex.courseName} · ${ex.daysAway}d`}
                 </div>
               ))}
 
@@ -787,7 +787,7 @@ export default function CalendarWeekView({
                       {/* Notes preview */}
                       {notePreview && height > 46 && (
                         <p className="text-[8px] leading-tight truncate mt-0.5" style={{ color: ev.color.dot, opacity: 0.55 }}>
-                          📝 {notePreview}
+                          {notePreview}
                         </p>
                       )}
                     </div>

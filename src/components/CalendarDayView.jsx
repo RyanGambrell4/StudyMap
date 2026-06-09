@@ -139,7 +139,7 @@ export default function CalendarDayView({
         body: JSON.stringify({
           userId,
           title: session.fromCoachPlan
-            ? `${session.courseName} — Study Plan · Session ${session.planSessionNum} of ${session.planTotalSessions}`
+            ? `${session.courseName} · Study Plan · Session ${session.planSessionNum} of ${session.planTotalSessions}`
             : `Study: ${session.courseName}`,
           description: session.fromCoachPlan
             ? `${session.sessionType} · ${session.duration} min · StudyEdge AI Plan`

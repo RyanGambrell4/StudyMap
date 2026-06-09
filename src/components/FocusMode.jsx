@@ -184,7 +184,7 @@ function generatePDF({ courseName, dateStr, sessionType, recallText, concepts, m
   // ── Self-assessment checklist ──────────────────────────────────────────────
   function renderChecklist(list) {
     if (!list.length) return ''
-    return `<div class="check-wrap"><div class="check-ttl">✏️ Self-Test — Can you explain each of these without looking?</div><div class="check-grid">${list.map(c=>`<div class="check-item"><span class="check-box"></span><span>${esc(c)}</span></div>`).join('')}</div></div>`
+    return `<div class="check-wrap"><div class="check-ttl">Self-Test: Can you explain each of these without looking?</div><div class="check-grid">${list.map(c=>`<div class="check-item"><span class="check-box"></span><span>${esc(c)}</span></div>`).join('')}</div></div>`
   }
 
   // ── Parse all content ──────────────────────────────────────────────────────
@@ -396,15 +396,15 @@ ${summary?.trim() ? `
 
 <div class="tips">
   <div class="tip" style="border-top-color:#3B61C4">
-    <div class="tipn" style="color:#3B61C4">⏱ Spaced Repetition</div>
+    <div class="tipn" style="color:#3B61C4">Spaced Repetition</div>
     <div class="tipt">Review again in 24 h, then 3 days, then 1 week to lock these concepts into long-term memory.</div>
   </div>
   <div class="tip" style="border-top-color:#a855f7">
-    <div class="tipn" style="color:#a855f7">🧠 Active Recall</div>
-    <div class="tipt">Cover the notes and retrieve key points from scratch — the struggle IS the learning.</div>
+    <div class="tipn" style="color:#a855f7">Active Recall</div>
+    <div class="tipt">Cover the notes and retrieve key points from scratch. The struggle is the learning.</div>
   </div>
   <div class="tip" style="border-top-color:#f97316">
-    <div class="tipn" style="color:#f97316">🗣 Teach It</div>
+    <div class="tipn" style="color:#f97316">Teach It</div>
     <div class="tipt">Explain each concept aloud as if teaching someone. If you stumble, that's your gap to close.</div>
   </div>
 </div>
@@ -1006,7 +1006,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
         }),
       })
       let data
-      try { data = await res.json() } catch { throw new Error('Server error — please try again') }
+      try { data = await res.json() } catch { throw new Error('Server error. Please try again.') }
       if (!res.ok) throw new Error(data.error ?? 'Failed to generate flashcards')
       setInSessionFlashcards(data.flashcards ?? [])
       incrementAIQuery()

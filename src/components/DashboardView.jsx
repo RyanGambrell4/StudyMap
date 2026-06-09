@@ -465,7 +465,7 @@ export default function DashboardView({
           </h2>
           <p style={{ color: D.textMuted, fontSize: 14, lineHeight: 1.65, margin: '0 0 22px' }}>
             {isExamMode
-              ? 'Tell us what you\'re prepping for — your sections, your test date — and we\'ll build the full prep plan in under a minute.'
+              ? 'Tell us what you\'re prepping for, your sections, your test date, and we\'ll build the full prep plan in under a minute.'
               : 'Drop in one course with its exam date. Your AI plan will fill in the sessions, the order, and the recovery work automatically.'}
           </p>
           <div style={{
@@ -618,7 +618,7 @@ export default function DashboardView({
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#DC2626', marginBottom: 2 }}>Grade Recovery Mode Active</div>
               <div style={{ fontSize: 12.5, color: D.muted }}>
-                Extra weekly sessions scheduled for <strong>{[...recoveryCoursesIdx].map(i => courses[i]?.name).filter(Boolean).join(', ')}</strong> — your grades are below target and we're helping close the gap.
+                Extra weekly sessions scheduled for <strong>{[...recoveryCoursesIdx].map(i => courses[i]?.name).filter(Boolean).join(', ')}</strong>. Your grades are below target and we're helping close the gap.
               </div>
             </div>
             <button
@@ -717,7 +717,7 @@ export default function DashboardView({
             </div>
             <div style={{ flex: 1 }}>
               <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: D.text }}>Daily CARS Drill</p>
-              <p style={{ margin: '1px 0 0', fontSize: 12, color: D.textMuted }}>MCAT top scorers read one CARS passage every day. Make it the first thing you do — 10 minutes, no exceptions.</p>
+              <p style={{ margin: '1px 0 0', fontSize: 12, color: D.textMuted }}>MCAT top scorers read one CARS passage every day. Make it the first thing you do: 10 minutes, no exceptions.</p>
             </div>
             <button onClick={() => onOpenStudyCoach?.()} style={{ padding: '6px 14px', borderRadius: 7, fontSize: 12, fontWeight: 600, background: 'rgba(59,97,196,0.07)', color: D.blue, border: `1px solid rgba(59,97,196,0.2)`, cursor: 'pointer', whiteSpace: 'nowrap' }}>
               Plan today's session
@@ -837,7 +837,7 @@ export default function DashboardView({
                       </div>
                     ) : (
                       <p style={{ color: D.textMuted, fontSize: 14, marginBottom: 16, lineHeight: 1.6 }}>
-                        No sessions scheduled today. A free day — use it well.
+                        No sessions scheduled today. A free day. Use it well.
                       </p>
                     )}
 

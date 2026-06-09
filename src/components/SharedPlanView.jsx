@@ -21,7 +21,7 @@ export default function SharedPlanView() {
         gap: 12,
       }}>
         <div style={{ fontSize: 40 }}>🔗</div>
-        <h1 style={{ fontSize: 20, fontWeight: 700, color: '#0F172A', margin: 0 }}>Invalid or expired link</h1>
+        <h1 style={{ fontSize: 20, fontWeight: 700, color: '#111111', margin: 0 }}>Invalid or expired link</h1>
         <p style={{ fontSize: 14, color: '#64748B', margin: 0 }}>This study plan link couldn't be decoded.</p>
         <a href="/" style={{
           marginTop: 8, padding: '10px 22px', borderRadius: 10,
@@ -37,7 +37,7 @@ export default function SharedPlanView() {
   return (
     <div style={{
       minHeight: '100vh', backgroundColor: '#F8FAFC',
-      fontFamily: "'Inter', system-ui, sans-serif", color: '#0F172A',
+      fontFamily: "'Inter', system-ui, sans-serif", color: '#111111',
     }}>
       {/* Nav */}
       <nav style={{
@@ -47,7 +47,7 @@ export default function SharedPlanView() {
       }}>
         <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none' }}>
           <img src="/favicon.png" alt="StudyEdge AI" style={{ width: 28, height: 28, borderRadius: 7, objectFit: 'contain' }} />
-          <span style={{ fontWeight: 700, fontSize: 16, color: '#0F172A', letterSpacing: '-0.2px' }}>StudyEdge AI</span>
+          <span style={{ fontWeight: 700, fontSize: 16, color: '#111111', letterSpacing: '-0.2px' }}>StudyEdge AI</span>
         </a>
         <a
           href="/app?signup=1"
@@ -79,12 +79,12 @@ export default function SharedPlanView() {
           }}>
             📋 Shared Study Plan
           </div>
-          <h1 style={{ fontSize: 22, fontWeight: 800, color: '#0F172A', margin: '0 0 8px', letterSpacing: '-0.3px' }}>
+          <h1 style={{ fontSize: 22, fontWeight: 800, color: '#111111', margin: '0 0 8px', letterSpacing: '-0.3px' }}>
             {courseName}
           </h1>
           {goal && (
             <p style={{ fontSize: 14, color: '#475569', margin: 0, lineHeight: 1.6 }}>
-              <span style={{ fontWeight: 600, color: '#0F172A' }}>Goal:</span> {goal}
+              <span style={{ fontWeight: 600, color: '#111111' }}>Goal:</span> {goal}
             </p>
           )}
         </div>
@@ -139,9 +139,9 @@ export default function SharedPlanView() {
                     {i + 1}
                   </div>
                   <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', marginBottom: 2 }}>
+                    <div style={{ fontSize: 14, fontWeight: 700, color: '#111111', marginBottom: 2 }}>
                       {w.week}
-                      {w.theme ? ` — ${w.theme}` : ''}
+                      {w.theme ? `: ${w.theme}` : ''}
                     </div>
                     {w.sessions > 0 && (
                       <div style={{ fontSize: 12, color: '#94A3B8' }}>
@@ -162,7 +162,7 @@ export default function SharedPlanView() {
           background: 'linear-gradient(135deg, #EEF2FF, #F5F3FF)',
           border: '1px solid #C7D2FE',
         }}>
-          <div style={{ fontSize: 18, fontWeight: 800, color: '#0F172A', marginBottom: 8, letterSpacing: '-0.2px' }}>
+          <div style={{ fontSize: 18, fontWeight: 800, color: '#111111', marginBottom: 8, letterSpacing: '-0.2px' }}>
             Generate your own AI study plan
           </div>
           <p style={{ fontSize: 14, color: '#475569', margin: '0 0 18px', lineHeight: 1.6 }}>

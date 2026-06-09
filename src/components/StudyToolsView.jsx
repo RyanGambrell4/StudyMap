@@ -490,7 +490,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Generation failed')
       const questions = (data.questions ?? []).map(q => ({ ...q, type: 'mc' }))
-      if (!questions.length) throw new Error('No questions returned — try a different topic.')
+      if (!questions.length) throw new Error('No questions returned. Try a different topic.')
       setDrillQuiz(questions)
       await incrementAIQuery()
     } catch (e) {
@@ -851,7 +851,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                     onClick={() => handleGenerateQuiz(true)}
                     className="bg-white hover:bg-slate-50 border border-amber-300 text-amber-600 font-semibold py-2 px-4 rounded-xl text-xs transition-colors"
                   >
-                    ⏱ Timed
+                    Timed
                   </button>
                 </div>
               )}
@@ -946,7 +946,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                         style={{
                           textAlign: 'left', padding: '8px 12px', borderRadius: 8,
                           border: '1px solid rgba(59,97,196,0.2)', background: 'rgba(59,97,196,0.05)',
-                          cursor: 'pointer', fontSize: 13, color: '#1e293b',
+                          cursor: 'pointer', fontSize: 13, color: '#111111',
                         }}
                       >
                         {card.front}
@@ -1112,7 +1112,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
-                Generate 5 Questions — 1 AI Boost
+                Generate 5 Questions (1 AI Boost)
               </button>
             </div>
           )}
@@ -1294,7 +1294,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                   <div className="space-y-2.5">
                     {quiz.map((q, i) => !answers[i] && (
                       <div key={i} style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, padding: '12px 14px' }}>
-                        <p style={{ fontSize: 13, fontWeight: 600, color: '#1e293b', marginBottom: 4 }}>{q.question}</p>
+                        <p style={{ fontSize: 13, fontWeight: 600, color: '#111111', marginBottom: 4 }}>{q.question}</p>
                         <p style={{ fontSize: 12, color: '#16a34a', fontWeight: 500 }}>
                           ✓ {typeof q.answer === 'boolean' ? (q.answer ? 'True' : 'False') : q.answer}
                         </p>
