@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import Spinner from './ui/spinner'
 import { jsPDF } from 'jspdf'
-import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan, saveCoachPlanStruggles } from '../lib/db'
+import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan, saveCoachPlanStruggles, saveCoachPlanHardNote, clearCoachPlanHardNotes } from '../lib/db'
 import { extractText } from '../utils/extractText'
 import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
@@ -611,7 +611,7 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
 }
 
 // ── Step 3: Plan ──────────────────────────────────────────────────────────────
-function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error, onStartFocus, struggles, onSaveStruggles }) {
+function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error, onStartFocus, struggles, onSaveStruggles, pendingHardNotes, onWeekCheckIn }) {
   const course = courses[form.courseIdx]
   const color = course?.color?.dot || D.accent
   const sessionLen = form.sessionLen || 60
@@ -622,6 +622,23 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
   const priorityTopicsCount = plan?.priorityTopics?.length || 0
   const deadlinesCount = (form?.dates || []).filter(d => d.date && d.label).length
   const firstSession = plan?.weeklyFocus?.[0]?.sessions?.[0]
+  const [hardNoteDismissed, setHardNoteDismissed] = useState(false)
+
+  const handleBannerDismiss = async () => {
+    setHardNoteDismissed(true)
+    try {
+      const courseId = course?.id ?? form.courseIdx
+      await clearCoachPlanHardNotes(courseId)
+    } catch {}
+  }
+
+  const handleBannerUpdate = async () => {
+    try {
+      const courseId = course?.id ?? form.courseIdx
+      await clearCoachPlanHardNotes(courseId)
+    } catch {}
+    onRefine()
+  }
 
   if (error) {
     return (
@@ -636,9 +653,18 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
 
   if (!plan) return null
 
+  const showBanner = !hardNoteDismissed && pendingHardNotes?.length > 0
+
   return (
     <div className="sc-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: 24, alignItems: 'flex-start' }}>
       <div>
+        {showBanner && (
+          <AdaptiveFeedbackBanner
+            notes={pendingHardNotes}
+            onUpdate={handleBannerUpdate}
+            onDismiss={handleBannerDismiss}
+          />
+        )}
         {onSaveStruggles && (
           <StruggleTracker
             struggles={struggles ?? []}
@@ -648,7 +674,7 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
             onSave={onSaveStruggles}
           />
         )}
-        <PlanView plan={plan} course={course} dot={color} pushed={pushed} onPush={onPush} onReset={onRefine} form={form} />
+        <PlanView plan={plan} course={course} dot={color} pushed={pushed} onPush={onPush} onReset={onRefine} form={form} onStartFocus={onStartFocus} onWeekCheckIn={onWeekCheckIn} />
       </div>
       {/* Right rail */}
       <div className="sc-rail" style={{ position: 'sticky', top: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -1353,6 +1379,19 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
                 const courseId = courses[form.courseIdx]?.id ?? form.courseIdx
                 saveCoachPlanStruggles(courseId, updated)
               }}
+              pendingHardNotes={(() => {
+                const course = courses[form.courseIdx]
+                const courseId = course?.id ?? form.courseIdx
+                const saved = loadCoachPlan(courseId)
+                return saved?.pendingHardNotes?.filter(n => n.note?.trim()) ?? []
+              })()}
+              onWeekCheckIn={async (weekIdx, note) => {
+                try {
+                  const course = courses[form.courseIdx]
+                  const courseId = course?.id ?? form.courseIdx
+                  await saveCoachPlanHardNote(courseId, note, `Week ${weekIdx + 1} check-in`)
+                } catch {}
+              }}
             />
           )}
         </div>
@@ -1496,6 +1535,45 @@ function StruggleTracker({ struggles, courseId, courseName, dot, onSave }) {
   )
 }
 
+// ── Adaptive feedback banner ──────────────────────────────────────────────────
+function AdaptiveFeedbackBanner({ notes, onUpdate, onDismiss }) {
+  const latest = notes[notes.length - 1]
+  return (
+    <div style={{
+      background: 'rgba(245,158,11,0.06)',
+      border: '1px solid rgba(245,158,11,0.2)',
+      borderRadius: 12,
+      padding: '14px 16px',
+      marginBottom: 16,
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: 12,
+    }}>
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ fontSize: 12, fontWeight: 700, color: '#F59E0B', marginBottom: 4, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Session feedback</div>
+        <div style={{ fontSize: 13, color: D.text, lineHeight: 1.5, marginBottom: 10 }}>
+          You flagged <strong>"{latest.note}"</strong> as difficult. Regenerate to prioritize this in upcoming sessions.
+        </div>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button
+            onClick={onUpdate}
+            style={{ padding: '7px 14px', borderRadius: 8, background: '#3B61C4', color: '#fff', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', border: 'none' }}
+          >
+            Update plan
+          </button>
+          <button
+            onClick={onDismiss}
+            style={{ padding: '7px 14px', borderRadius: 8, background: 'transparent', color: D.muted, fontSize: 12.5, fontWeight: 500, cursor: 'pointer', border: `1px solid ${D.border}` }}
+          >
+            Dismiss
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Plan display ──────────────────────────────────────────────────────────────
 function getPhaseColor(label) {
   const l = (label || '').toUpperCase()
@@ -1519,9 +1597,12 @@ function weekDateRange(weekIndex) {
 // Legacy placeholder — kept for safety, unused
 function tv() { return {} }
 
-function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
+function PlanView({ plan, course, dot, pushed, onPush, onReset, form, onStartFocus, onWeekCheckIn }) {
   const [checked, setChecked] = useState({})
   const [expandedWeek, setExpandedWeek] = useState(0)
+  const [weekCheckIns, setWeekCheckIns] = useState({})
+  const [weekCheckInInput, setWeekCheckInInput] = useState({})
+  const [weekCheckInSubmitted, setWeekCheckInSubmitted] = useState({})
   const sessionLen = form?.sessionLen || 60
   const allSessions = plan?.weeklyFocus?.flatMap(w => w.sessions || []) || []
   const totalSessions = allSessions.length
@@ -1888,6 +1969,82 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
         </div>
       )}
 
+      {/* Missed sessions banner */}
+      {(() => {
+        const today = new Date().toISOString().split('T')[0]
+        const missedSessions = []
+        ;(plan.weeklyFocus || []).forEach((week, wi) => {
+          if (!week.endDate || week.endDate >= today) return
+          ;(week.sessions || []).forEach((sess, si) => {
+            if (!checked[`${wi}-${si}`]) {
+              missedSessions.push({ wi, si, focusArea: sess.focusArea, weekLabel: week.week })
+            }
+          })
+        })
+        if (!missedSessions.length) return null
+        const count = missedSessions.length
+        const firstMissed = missedSessions[0]
+        return (
+          <div style={{
+            background: 'rgba(249,115,22,0.05)',
+            border: '1px solid rgba(249,115,22,0.2)',
+            borderRadius: 12,
+            padding: '14px 16px',
+            marginBottom: 16,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 12,
+          }}>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#F97316', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 3 }}>
+                {count} session{count !== 1 ? 's' : ''} behind
+              </div>
+              <div style={{ fontSize: 13, color: D.muted }}>
+                {firstMissed.focusArea} and {count - 1 > 0 ? `${count - 1} other${count - 1 !== 1 ? 's' : ''}` : 'more'} from {firstMissed.weekLabel}
+              </div>
+            </div>
+            {onStartFocus && (
+              <button
+                onClick={() => {
+                  const todayStr = new Date().toISOString().split('T')[0]
+                  const combinedTopics = [...new Set(missedSessions.slice(0, 3).map(m => m.focusArea).filter(Boolean))]
+                  onStartFocus({
+                    id: `catch-up-${todayStr}`,
+                    courseId: course?.id ?? 0,
+                    courseName: course?.name ?? '',
+                    color: course?.color,
+                    sessionType: 'Catch-up review',
+                    duration: sessionLen,
+                    dateStr: todayStr,
+                    isManual: true,
+                    fromCoachPlan: true,
+                    focusArea: `Catch-up: ${combinedTopics.join(', ')}`,
+                    keyTopics: combinedTopics,
+                    goal: `Cover ${count} missed session${count !== 1 ? 's' : ''} with active recall`,
+                    studyMethod: 'Cumulative review',
+                  })
+                }}
+                style={{
+                  padding: '8px 14px',
+                  borderRadius: 8,
+                  background: '#F97316',
+                  color: '#fff',
+                  fontSize: 12,
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  border: 'none',
+                  flexShrink: 0,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                Start catch-up
+              </button>
+            )}
+          </div>
+        )
+      })()}
+
       {/* Week by week */}
       <div>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
@@ -1930,8 +2087,68 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
                 {isOpen && (
                   <div style={{ padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {weekSessions.map((sess, si) => (
-                      <SessionCard key={si} session={sess} wi={wi} si={si} checked={!!checked[`${wi}-${si}`]} onCheck={() => toggleCheck(wi, si)} struggles={struggles} />
+                      <SessionCard key={si} session={sess} wi={wi} si={si} checked={!!checked[`${wi}-${si}`]} onCheck={() => toggleCheck(wi, si)} struggles={struggles} onStartFocus={onStartFocus} course={course} />
                     ))}
+                    {/* Week check-in -- appears when all sessions in this week are marked done */}
+                    {(() => {
+                      const allDone = weekSessions.length > 0 && weekSessions.every((_, si) => checked[`${wi}-${si}`])
+                      const alreadySubmitted = weekCheckInSubmitted[wi]
+                      if (!allDone || alreadySubmitted || wi === (plan.weeklyFocus.length - 1)) return null
+                      return (
+                        <div style={{
+                          marginTop: 10,
+                          background: 'rgba(52,211,153,0.05)',
+                          border: '1px solid rgba(52,211,153,0.2)',
+                          borderRadius: 12,
+                          padding: '14px 16px',
+                        }}>
+                          <div style={{ fontSize: 11.5, fontWeight: 700, color: '#34d399', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>Week complete</div>
+                          <div style={{ fontSize: 13, color: D.text, marginBottom: 10 }}>How did week {wi + 1} go? Note anything that was hard or unclear.</div>
+                          <textarea
+                            value={weekCheckInInput[wi] || ''}
+                            onChange={e => setWeekCheckInInput(prev => ({ ...prev, [wi]: e.target.value }))}
+                            placeholder="e.g. Struggled with oxidation states, concept mapping helped a lot..."
+                            style={{
+                              width: '100%',
+                              minHeight: 64,
+                              borderRadius: 8,
+                              border: `1px solid ${D.border}`,
+                              background: '#FFFFFF',
+                              padding: '10px 12px',
+                              fontSize: 13,
+                              color: D.text,
+                              resize: 'vertical',
+                              fontFamily: 'inherit',
+                              boxSizing: 'border-box',
+                              outline: 'none',
+                              marginBottom: 10,
+                            }}
+                          />
+                          <button
+                            disabled={!weekCheckInInput[wi]?.trim()}
+                            onClick={() => {
+                              const note = weekCheckInInput[wi]?.trim()
+                              if (!note) return
+                              setWeekCheckInSubmitted(prev => ({ ...prev, [wi]: true }))
+                              setWeekCheckIns(prev => ({ ...prev, [wi]: note }))
+                              onWeekCheckIn?.(wi, note)
+                            }}
+                            style={{
+                              padding: '8px 16px',
+                              borderRadius: 8,
+                              background: weekCheckInInput[wi]?.trim() ? '#3B61C4' : 'rgba(0,0,0,0.05)',
+                              color: weekCheckInInput[wi]?.trim() ? '#fff' : D.muted,
+                              fontSize: 12.5,
+                              fontWeight: 600,
+                              cursor: weekCheckInInput[wi]?.trim() ? 'pointer' : 'default',
+                              border: 'none',
+                            }}
+                          >
+                            Submit and update next sessions
+                          </button>
+                        </div>
+                      )
+                    })()}
                   </div>
                 )}
               </div>
@@ -1997,7 +2214,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
   )
 }
 
-function SessionCard({ session, wi, si, checked, onCheck, struggles }) {
+function SessionCard({ session, wi, si, checked, onCheck, struggles, onStartFocus, course }) {
   const phaseColor = getPhaseColor(session.sessionLabel)
   const sl = (struggles || '').toLowerCase()
   const isStruggle = sl && ((session.focusArea || '').toLowerCase().split(' ').some(w => w.length > 4 && sl.includes(w)) || (session.keyTopics || []).some(t => sl.includes(t.toLowerCase())))
@@ -2036,6 +2253,43 @@ function SessionCard({ session, wi, si, checked, onCheck, struggles }) {
           <span style={{ fontSize: 10.5, color: D.orange, background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.25)', borderRadius: 5, padding: '2px 8px', display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
             <Icon name="zap" size={9} color={D.orange} /> Priority: matches your struggles
           </span>
+        )}
+        {onStartFocus && (
+          <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${D.border}` }}>
+            <button
+              onClick={() => {
+                const today = new Date().toISOString().split('T')[0]
+                onStartFocus({
+                  id: `coach-plan-${wi}-${si}-${today}`,
+                  courseId: course?.id ?? 0,
+                  courseName: course?.name ?? '',
+                  color: course?.color,
+                  sessionType: session.studyMethod || session.sessionLabel || 'Review',
+                  duration: session.duration || 60,
+                  dateStr: today,
+                  isManual: true,
+                  fromCoachPlan: true,
+                  focusArea: session.focusArea,
+                  keyTopics: session.keyTopics ?? [],
+                  goal: session.goal ?? '',
+                  studyMethod: session.studyMethod ?? '',
+                })
+              }}
+              style={{
+                width: '100%',
+                padding: '8px',
+                borderRadius: 8,
+                background: 'rgba(59,97,196,0.07)',
+                border: `1px solid rgba(59,97,196,0.2)`,
+                color: '#3B61C4',
+                fontSize: 12.5,
+                fontWeight: 600,
+                cursor: 'pointer',
+              }}
+            >
+              Start session
+            </button>
+          </div>
         )}
       </div>
     </div>

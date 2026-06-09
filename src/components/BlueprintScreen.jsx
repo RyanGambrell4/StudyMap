@@ -36,7 +36,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
 
   const isExamMode = EXAM_PATTERN.test(session.courseName ?? '')
   const [sessionType, setSessionType] = useState(
-    isExamMode ? EXAM_SESSION_TYPES[0] : (session.sessionType ?? 'Review')
+    isExamMode ? (EXAM_SESSION_TYPES.find(t => t.toLowerCase().includes((session.studyMethod ?? '').toLowerCase().split(' ')[0])) ?? EXAM_SESSION_TYPES[0]) : (session.studyMethod || session.sessionType || 'Review')
   )
 
   useEffect(() => {
@@ -113,7 +113,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
           targetGrade: isExamMode ? null : (course?.targetGrade ?? 'B'),
           targetScore: isExamMode ? (course?.targetScore ?? null) : null,
           uploadedTopics: studyTools?.text ? studyTools.text.slice(0, 500) : null,
-          studentFocus: focus.trim() || null,
+          studentFocus: [focus.trim(), session.goal ? `Session goal: ${session.goal}` : ''].filter(Boolean).join('. ') || null,
           professorEmphasis: professorEmphasis || null,
           struggles: struggles.length ? struggles : null,
           learningStyle: learningStyle ?? null,

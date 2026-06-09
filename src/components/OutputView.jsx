@@ -13,6 +13,7 @@ import {
   saveCompletedSession,
   removeCompletedSession,
   getCachedAllNotes,
+  saveCoachPlanHardNote,
 } from '../lib/db'
 import { runAdaptation } from '../utils/adaptationEngine'
 import AdaptModal from './AdaptModal'
@@ -948,17 +949,10 @@ export default function OutputView({
       hard_notes: hardNotes || null,
     }
     saveCompletedSession(record)
-    // Background AI rebuild of remaining sessions for this course
+    // Store hard note as pending feedback for the coach plan
     if (hardNotes) {
       try {
-        const { getAccessToken } = await import('../lib/supabase')
-        const token = await getAccessToken()
-        // Fire and forget — no UI change
-        fetch('/api/generate-study-coach-plan', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ courseId: sess.courseId, triggerReason: 'session_rating', hardNotes }),
-        }).catch(() => {})
+        await saveCoachPlanHardNote(sess.courseId, hardNotes, sess.sessionType || 'session')
       } catch (_) {}
     }
   }, [ratingSession])

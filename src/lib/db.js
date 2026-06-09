@@ -159,6 +159,27 @@ export async function saveCoachPlanStruggles(courseId, struggles) {
   await _upsert({ coach_plans: updated })
 }
 
+export async function saveCoachPlanHardNote(courseId, note, sessionLabel) {
+  const existing = _cache?.coach_plans ?? {}
+  const prev = existing[courseId] ?? {}
+  const prevNotes = Array.isArray(prev.pendingHardNotes) ? prev.pendingHardNotes : []
+  const newNote = { note, sessionLabel, dateStr: new Date().toISOString().split('T')[0] }
+  const updated = {
+    ...existing,
+    [courseId]: { ...prev, pendingHardNotes: [...prevNotes, newNote].slice(-5) },
+  }
+  if (_cache) _cache.coach_plans = updated
+  await _upsert({ coach_plans: updated })
+}
+
+export async function clearCoachPlanHardNotes(courseId) {
+  const existing = _cache?.coach_plans ?? {}
+  const prev = existing[courseId] ?? {}
+  const updated = { ...existing, [courseId]: { ...prev, pendingHardNotes: [] } }
+  if (_cache) _cache.coach_plans = updated
+  await _upsert({ coach_plans: updated })
+}
+
 export function getCachedPracticeExams(courseId) {
   return _cache?.coach_plans?.[courseId]?.practice_exams ?? []
 }
