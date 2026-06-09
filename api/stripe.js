@@ -554,7 +554,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to cancel with Stripe' })
     }
 
-    const updated = { ...sub, plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null }
+    const updated = { ...sub, plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null, trial_activated: false }
     await supabaseAdmin
       .from('user_data')
       .upsert({ user_id: userId, subscription: updated, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })

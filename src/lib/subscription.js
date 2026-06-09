@@ -111,6 +111,7 @@ export function getCachedSubscription() {
 export function isTrialActive() {
   const sub = getCachedSubscription()
   if (!sub?.trial_activated || !sub?.trial_start_date) return false
+  if (sub?.status === 'cancelled') return false
   const start = new Date(sub.trial_start_date)
   const diffMs = Date.now() - start.getTime()
   return diffMs < TRIAL_DURATION_MS

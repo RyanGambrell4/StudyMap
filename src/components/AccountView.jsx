@@ -150,7 +150,7 @@ export default function AccountView({
   }, [completedSessions, todayStr])
 
   const handleCancelTrial = async () => {
-    if (!confirm('Cancel your free trial? You\'ll lose Pro access immediately.')) return
+    if (!confirm('Cancel your free trial?\n\nYou won\'t be charged. You\'ll move to the free plan immediately.')) return
     setCanceling(true)
     try {
       const { data: { user } } = await supabase.auth.getUser()
