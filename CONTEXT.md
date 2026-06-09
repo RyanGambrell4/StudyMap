@@ -1,5 +1,98 @@
 # StudyEdge AI — Living Context
-_Last updated by: Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+
+---
+
+## Onboarding Agent — 2026-06-09 (funnel-timing analytics + copy tighten)
+_Driven by user-spec invocation. Read ONBOARDING_AGENT_SPEC.md (historical 7-day pricing), PRICING_SPEC.md (live source of truth), AGENTS_SPEC.md, CLAUDE.md, and CONTEXT.md before starting. Most of the spec's hypothesized issues were already addressed by prior runs. Shipped the missing instrumentation and one copy pass; skipped padding._
+
+### Funnel map (verified current state)
+1. **AuthScreen signup form** -> `signup_started` fires on submit. Plan-context banner shows when ?plan=&billing= params are present.
+2. **Supabase signUp resolves** -> if needs confirmation, AuthScreen renders `ConfirmationPending` with auto-poll every 5s, deep-link to webmail provider, resend-with-cooldown.
+3. **Email confirmed** -> Supabase fires SIGNED_IN -> App.jsx tracks `user_signed_in` + `signup_completed` (for fresh signups) and triggers welcome email.
+4. **Onboarding splash** (`step=1`) -> headline "You're 60 seconds from your first AI study plan." 3 feature cards. Single "Let's go" CTA.
+5. **Step 2 (school + year)** -> 2-of-2 progress bar shows step 1. School type expands year/timeline options inline.
+6. **Step 4 (focus time)** -> progress shows step 2. Pick Morning/Afternoon/Evening.
+7. **Step 5 (trial offer)** -> 3-day free trial card with $0 today/cancel-anytime copy + skip-to-free link. Only renders if `!hasUsedTrial()`.
+8. **Post-onboarding** -> `handleOnboardingComplete` sets `showOutput=true` with `courses=[]`. OutputView renders DashboardView empty state with "You're set up" pill + "Add your first course" CTA + "What unlocks next" preview list.
+9. **First-action** -> Add a course -> `course_added { first_course: true }` -> Add another / Start a focus session -> `session_started` + `first_session_started` (once ever).
+
+### Already-built (not touched, verified working)
+- Progress bar with smooth fill animation, now with a11y attributes (this run).
+- Splash screen with 60-second promise + 3 feature preview cards.
+- Outcome-led copy on every onboarding step ("We tune your sessions to your workload", "When your brain is sharpest, not when life is loudest"). Spec hypothesis "Copy is generic" was already addressed by prior runs.
+- Email confirmation pending screen (AuthScreen.ConfirmationPending): auto-poll every 5s, deep-link to Gmail/Outlook/Yahoo/iCloud, value preview card, resend with cooldown + rate-limit detection, "use different email" / "already verified, sign in" fallbacks. Spec hypothesis "weak confirmation pending screen" was already addressed.
+- App.jsx EmailVerificationGate (post-OAuth gate) mirrors the above with auto-poll and "what unlocks" preview.
+- DashboardView empty state for `courses.length === 0`: "You're set up" green pill, outcome headline, "What unlocks next" preview, clear CTA. Spec hypothesis "blank dashboard after onboarding" was already addressed.
+- 3-day Pro trial card in onboarding step 5 honors PRICING_SPEC: "Card required - $0 today - auto-bills $2.99/wk".
+- Trial-take vs. trial-skip both call `onComplete` (now via `completeWith` helper).
+
+### Commits this run
+
+#### Commit 1: onboarding funnel timing + a11y (`902f232`)
+New events for the spec's signup-to-first-action funnel:
+- `onboarding_step_completed { step, step_name, ms_on_step, next_step }` fires on every forward transition. Lets us see drop-off per step + how long each step takes.
+- `onboarding_completed` payload extended with `duration_ms` (splash-to-finish total), `n_courses: 0` (always 0 at handoff per current flow), `n_assignments: 0`, `trial_taken` (true if user clicked the trial CTA, false if they skipped), and `school_type`.
+
+ProgressBar now has `role="progressbar"`, `aria-valuenow/min/max`, and a labeled "Onboarding progress, step N of 2" announcement. Visible-step indexing moved to a `VISIBLE_STEP_INDEX` constant so the internal step IDs (which skip 3) stay independent of the user-facing 1-of-2 / 2-of-2.
+
+#### Commit 2: email-confirmation funnel events + em-dash sweep (`3a81173`)
+Three new events, both gates (AuthScreen ConfirmationPending and App.jsx EmailVerificationGate) emit the same names with a `source` tag:
+- `email_confirmation_screen_shown { source }` - denominator for the wall.
+- `email_confirmation_resend_clicked { source }` - friction signal.
+- `email_confirmed { source, user_id }` - fires exactly once per gate instance when the 5s poller first sees `email_confirmed_at` set. Previously this transition was invisible to PostHog.
+
+App.jsx EmailVerificationGate poller now reads `getUser()` during the tick (was only refreshSession before) so it can detect the confirmation event. Bug-fix-grade improvement.
+
+Em-dash sweep: AuthScreen ConfirmationPending "Checking automatically - no need to refresh" -> two sentences. UI Consistency Phase 3 hit App.jsx's version but missed this one.
+
+#### Commit 3: first_session_started anchor (`cedfbc4`)
+OutputView.handleStartFocus now fires `first_session_started` exactly once per user (localStorage debounced, keyed on userId). Payload mirrors `session_started`. Lets us answer "what % of signups ever complete the funnel to a real action" without inferring from session_started cardinality.
+
+#### Commit 4: signup header copy (`55e4783`)
+AuthScreen signup mode: "Create your account" + "Your data will sync across all your devices" -> "Two minutes to your first study plan" + "Tell us what you're studying. We'll build the rest." Outcome-led per spec. Login + forgot modes unchanged.
+
+### New PostHog events shipped this run
+- `onboarding_step_completed { step, step_name, ms_on_step, next_step }`
+- `onboarding_completed` extended with `{ duration_ms, n_courses, n_assignments, trial_taken, school_type }`
+- `email_confirmation_screen_shown { source: 'auth_screen' | 'app_gate' }`
+- `email_confirmation_resend_clicked { source }`
+- `email_confirmed { source, user_id }`
+- `first_session_started { courseId, courseName, sessionType, duration }`
+
+### Build
+`npm run build` exit 0 after every commit. No new warnings beyond pre-existing AIChatView dynamic-import warning and the 500KB chunk-size warning, both flagged in prior runs and out of scope.
+
+### Dashboard items the user needs to handle (specific)
+
+1. **Supabase SMTP** for confirmation emails - per `studyedge_supabase_smtp.md`, this has gone stale before with 535 auth errors. The 2026-06-05 incident report says "check Supabase auth logs first" (Dashboard -> Logs -> Auth) before re-walking fresh SMTP setup. If users are reporting confirmation emails not arriving, that's the first stop. Do not pre-emptively rotate credentials - check the log error first.
+
+2. **`RESEND_API_KEY`** in Vercel project env vars (Production + Preview). Every transactional email no-ops without it via the `if (!process.env.RESEND_API_KEY) return` guard in api/. This includes welcome-email, onboarding-complete, day1-tips, day7-milestone, day14-upgrade, re-engage, weekly-recap, exam-countdown, streak-broken, first-plan, and the two Stripe webhook emails. Was flagged by the Email Agent on 2026-06-08; still open.
+
+3. **`LOOPS_API_KEY`** in Vercel - lifecycle automations live in Loops but the contact sync no-ops without the key.
+
+4. **`CRON_SECRET`** in Vercel - cron endpoints validate `Authorization: Bearer <secret>`. Without it the cron URLs are publicly callable.
+
+5. **Google OAuth on iOS** - per `studyedge_supabase_oauth.md`, before shipping Google sign-in on iOS you must add `studyedge://auth-callback` to Supabase redirect URLs. Not a current scope blocker for the web app.
+
+6. **Account deletion endpoint at /api/delete-account** needs deploying before App Store submission per `studyedge_account_deletion.md`.
+
+### Updated open backlog (top 5)
+
+1. **Em-dashes in non-user-facing code-comment strings across App.jsx, FocusMode.jsx, others**. Phase 3 of UI Consistency swept the highest-visibility surfaces. Pure linting work; invisible to users.
+2. **Em-dashes in FocusMode print/export HTML templates** (downloaded session-notes PDF). User-facing eventually but not in the in-app surface.
+3. **Per-file `D` palette migration to `tokens.js`** (8 files duplicate the same palette). Drift-prevention refactor.
+4. **`<Button>`, `<Modal>`, `<Card>` primitive lock-down** - components/ui/* exist but unused, 660+ inline `borderRadius` values across the codebase.
+5. **Mobile responsive sweep at 390px** for GradeHubView table overflow and pill text below the 11px floor. Not yet run with Playwright.
+
+### Things I did NOT do (and why)
+
+- **Did not touch the dead `StepCourses/StepAssignments/StepLearningStyle/StepSchedule.jsx` files.** They're 906 lines of stale code from the old 4-step flow. Onboarding.jsx is the live entry point (2-question + trial). Killing those files is a separate cleanup commit best done after confirming no archived branches reference them; flagging as backlog rather than slipping into this run.
+- **Did not change the splash "You're 60 seconds from your first AI study plan" promise** despite onboarding-completion handing off with `courses=[]` (so the user is still a course-add away from a real plan). The dashboard empty state delivers on "what unlocks next" honestly, and the splash is the cleanest emotional hook. Re-wording would dull it.
+- **Did not add a `signup_started` enhancement.** It already fires from AuthScreen.handleSubmit with `{ method, plan_context, billing_context, trial_context }`. The spec's example payload is satisfied.
+- **Did not auto-bypass the email-confirmation wall** (spec hypothesis "let users into onboarding before confirming email"). Auto-poll is already tight and the wall is part of Supabase's signup contract; bypassing it would require either anonymous sessions or a custom magic-link flow, both of which are larger architectural changes.
+
+---
 
 ---
 
