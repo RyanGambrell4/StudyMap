@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Final Exam Calculator — What Do I Need to Pass? | StudyEdge AI</title>
+  <meta name="description" content="Find out exactly what score you need on your final exam to get the grade you want. Free final exam grade calculator for college students." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://getstudyedge.com/final-exam-calculator" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://getstudyedge.com/final-exam-calculator" />
+  <meta property="og:title" content="Final Exam Calculator — What Do I Need to Pass? | StudyEdge AI" />
+  <meta property="og:description" content="Find out exactly what score you need on your final exam to get the grade you want. Free final exam grade calculator for college students." />
+  <meta property="og:image" content="https://getstudyedge.com/hero-landing.png" />
+  <meta property="og:site_name" content="StudyEdge AI" />
+
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:site" content="@getstudyedge" />
+  <meta name="twitter:title" content="Final Exam Calculator | StudyEdge AI" />
+  <meta name="twitter:image" content="https://getstudyedge.com/hero-landing.png" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/seo.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Final Exam Calculator",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web",
+    "url": "https://getstudyedge.com/final-exam-calculator",
+    "description": "Free interactive calculator that tells college students exactly what score they need on their final exam to achieve a target grade, or what final grade they will earn based on their actual exam score.",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "How do I calculate what I need on my final exam?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The formula is: score needed = (desired grade - current grade x (1 - final weight)) / final weight. For example, if your current grade is 78%, the final is worth 30% of your grade, and you want a 80% in the course, you would calculate: (0.80 - 0.78 x 0.70) / 0.30 = (0.80 - 0.546) / 0.30 = 0.254 / 0.30 = 84.7%. You need about an 85% on the final."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What if my required score is over 100%?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "If the calculator shows you need above 100%, the target grade is mathematically impossible given your current standing. Your best option is to aim as high as possible on the final to minimize grade damage, and simultaneously check whether your professor offers any extra credit opportunities. If you are in danger of failing, talk to your professor or academic advisor immediately about your options."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "Does extra credit affect my final exam calculation?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "It depends on how your professor applies extra credit. If extra credit points are added directly to your current grade percentage before the final, then yes, a higher current grade means you need a lower score on the final. Enter your grade including any extra credit already applied. If the extra credit is applied after the final, it will not change what you need on the final itself."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How much does a final exam affect my grade?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "This completely depends on how your professor weights the final. Finals typically range from 20% to 40% of the final course grade, though some courses weight them as high as 50% or as low as 10%. Check your syllabus for the exact weight. A 30% final means a 10-point improvement on your exam score moves your course grade by about 3 points."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "What is a passing grade in college?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "At most US colleges, a D (typically 60-69%) is the minimum passing grade for a course. However, many programs require a C or higher in required courses, and graduate programs often require a B or higher. Pre-med, nursing, and other competitive programs often set even higher minimums. Check your major requirements and course prerequisites carefully, since 'technically passing' and 'counts toward your degree' are not always the same thing."
+        }
+      },
+      {
+        "@type": "Question",
+        "name": "How can I improve my final exam score?",
+        "acceptedAnswer": {
+          "@type": "Answer",
+          "text": "The highest-yield strategies in the weeks before a final are: (1) do past exams and practice problems under timed conditions, not just re-read notes; (2) identify the three to four topics you are weakest on and spend the majority of your time there; (3) use active recall instead of passive review by closing your notes and writing out what you remember; (4) sleep the night before the exam instead of pulling an all-nighter. Review sessions and office hours are also underused by most students."
+        }
+      }
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://getstudyedge.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Final Exam Calculator", "item": "https://getstudyedge.com/final-exam-calculator" }
+    ]
+  }
+  </script>
+  <script src="/utm-propagate.js" defer></script>
+
+  <style>
+    .calc-container {
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 12px;
+      padding: 32px;
+      margin: 32px 0;
+      max-width: 680px;
+    }
+    .calc-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 28px;
+      border-bottom: 1px solid rgba(0,0,0,0.08);
+      padding-bottom: 0;
+    }
+    .calc-tab {
+      padding: 10px 20px;
+      border: none;
+      background: none;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 500;
+      color: #6B6B6B;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      margin-bottom: -1px;
+      transition: color 0.15s, border-color 0.15s;
+    }
+    .calc-tab.active {
+      color: #3B61C4;
+      border-bottom-color: #3B61C4;
+    }
+    .calc-panel { display: none; }
+    .calc-panel.active { display: block; }
+    .calc-field {
+      margin-bottom: 20px;
+    }
+    .calc-field label {
+      display: block;
+      font-size: 13px;
+      font-weight: 600;
+      color: #111;
+      margin-bottom: 6px;
+    }
+    .calc-field input[type="number"] {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1px solid rgba(0,0,0,0.15);
+      border-radius: 8px;
+      font-family: 'Inter', sans-serif;
+      font-size: 16px;
+      color: #111;
+      background: #F7F6F3;
+      box-sizing: border-box;
+      transition: border-color 0.15s;
+      -moz-appearance: textfield;
+    }
+    .calc-field input[type="number"]:focus {
+      outline: none;
+      border-color: #3B61C4;
+      background: #fff;
+    }
+    .calc-field input[type="number"]::-webkit-inner-spin-button,
+    .calc-field input[type="number"]::-webkit-outer-spin-button { opacity: 1; }
+    .calc-field .field-hint {
+      font-size: 12px;
+      color: #6B6B6B;
+      margin-top: 4px;
+    }
+    .calc-result {
+      margin-top: 24px;
+      padding: 20px 24px;
+      border-radius: 10px;
+      background: #F7F6F3;
+      border: 1px solid rgba(0,0,0,0.07);
+      display: none;
+    }
+    .calc-result.visible { display: block; }
+    .calc-result .result-label {
+      font-size: 13px;
+      font-weight: 600;
+      color: #6B6B6B;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 6px;
+    }
+    .calc-result .result-value {
+      font-size: 40px;
+      font-weight: 800;
+      line-height: 1;
+      margin-bottom: 8px;
+    }
+    .calc-result .result-value.green { color: #16a34a; }
+    .calc-result .result-value.yellow { color: #ca8a04; }
+    .calc-result .result-value.red { color: #dc2626; }
+    .calc-result .result-value.impossible { color: #dc2626; font-size: 28px; }
+    .calc-result .result-note {
+      font-size: 14px;
+      color: #6B6B6B;
+      line-height: 1.5;
+    }
+    .calc-btn {
+      display: inline-block;
+      background: #3B61C4;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 12px 28px;
+      font-family: 'Inter', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: opacity 0.15s;
+      margin-top: 4px;
+    }
+    .calc-btn:hover { opacity: 0.88; }
+    .scenario-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+    .scenario-table th {
+      text-align: left;
+      font-weight: 600;
+      color: #6B6B6B;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 8px 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.1);
+    }
+    .scenario-table td {
+      padding: 10px 12px;
+      border-bottom: 1px solid rgba(0,0,0,0.06);
+      color: #111;
+    }
+    .scenario-table tr:last-child td { border-bottom: none; }
+    .score-green { color: #16a34a; font-weight: 600; }
+    .score-yellow { color: #ca8a04; font-weight: 600; }
+    .score-red { color: #dc2626; font-weight: 600; }
+    .score-impossible { color: #dc2626; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-nav">
+    <a class="nav-logo" href="/">
+      <img src="/favicon.png" alt="StudyEdge AI" />
+      StudyEdge AI
+    </a>
+    <div class="nav-links">
+      <a href="/#features">Features</a>
+      <a href="/studyedge-ai#pricing">Pricing</a>
+      <a href="/blog">Blog</a>
+      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="nav-cta">Try Free</a>
+    </div>
+  </nav>
+</header>
+
+<section class="post-hero">
+  <div class="container">
+    <div class="post-meta">Calculator &middot; Free Tool</div>
+    <h1>Final Exam Calculator</h1>
+    <p class="post-intro">Find out what score you need on your final exam in seconds. Enter your current grade, the weight of the final, and the grade you want. The calculator does the rest.</p>
+  </div>
+</section>
+
+<div class="container post-body">
+
+  <div class="calc-container">
+    <div class="calc-tabs">
+      <button class="calc-tab active" onclick="switchTab('need')" id="tab-need">What do I need?</button>
+      <button class="calc-tab" onclick="switchTab('get')" id="tab-get">What will I get?</button>
+    </div>
+
+    <!-- Panel: What do I need on the final? -->
+    <div class="calc-panel active" id="panel-need">
+      <div class="calc-field">
+        <label for="current-grade">Current grade (%)</label>
+        <input type="number" id="current-grade" min="0" max="100" step="0.1" placeholder="e.g. 78" />
+        <div class="field-hint">Your grade in the course before the final exam.</div>
+      </div>
+      <div class="calc-field">
+        <label for="final-weight">Final exam weight (%)</label>
+        <input type="number" id="final-weight" min="1" max="100" step="1" placeholder="e.g. 30" />
+        <div class="field-hint">Check your syllabus. Typically 20-40%.</div>
+      </div>
+      <div class="calc-field">
+        <label for="desired-grade">Desired final course grade (%)</label>
+        <input type="number" id="desired-grade" min="0" max="100" step="0.1" placeholder="e.g. 80" />
+        <div class="field-hint">The minimum grade you want to earn in the course.</div>
+      </div>
+      <button class="calc-btn" onclick="calcNeed()">Calculate</button>
+
+      <div class="calc-result" id="result-need">
+        <div class="result-label">Score needed on final</div>
+        <div class="result-value" id="result-need-value"></div>
+        <div class="result-note" id="result-need-note"></div>
+        <div id="scenario-block"></div>
+      </div>
+    </div>
+
+    <!-- Panel: What will I get? -->
+    <div class="calc-panel" id="panel-get">
+      <div class="calc-field">
+        <label for="current-grade-2">Current grade (%)</label>
+        <input type="number" id="current-grade-2" min="0" max="100" step="0.1" placeholder="e.g. 78" />
+        <div class="field-hint">Your grade in the course before the final exam.</div>
+      </div>
+      <div class="calc-field">
+        <label for="final-weight-2">Final exam weight (%)</label>
+        <input type="number" id="final-weight-2" min="1" max="100" step="1" placeholder="e.g. 30" />
+        <div class="field-hint">The percentage of your grade the final counts for.</div>
+      </div>
+      <div class="calc-field">
+        <label for="final-score">Your actual final exam score (%)</label>
+        <input type="number" id="final-score" min="0" max="120" step="0.1" placeholder="e.g. 82" />
+        <div class="field-hint">Enter the score you received or expect to receive.</div>
+      </div>
+      <button class="calc-btn" onclick="calcGet()">Calculate</button>
+
+      <div class="calc-result" id="result-get">
+        <div class="result-label">Final course grade</div>
+        <div class="result-value" id="result-get-value"></div>
+        <div class="result-note" id="result-get-note"></div>
+      </div>
+    </div>
+  </div>
+
+  <h2>How the calculation works</h2>
+  <p>The formula for "what do I need on my final?" is straightforward. Your course grade is a weighted average: the work you did all semester counts for (1 - final weight), and the final counts for (final weight). So to solve for the final score you need:</p>
+  <p><strong>Score needed = (desired grade - current grade &times; (1 - final weight)) / final weight</strong></p>
+  <p>For example, if your current grade is 78%, the final is worth 30%, and you want an 80% in the course: (0.80 - 0.78 &times; 0.70) / 0.30 = (0.80 - 0.546) / 0.30 = 84.7%. You need roughly an 85% on the final.</p>
+
+  <h2>What to do if you need a very high score</h2>
+  <p>If the calculator says you need above 90%, that is a tough spot but not necessarily impossible. Here is how to approach it.</p>
+  <p>First, be honest about what "very high" means for you personally. If you have scored in the 80s on every exam in the course, a 92 is a stretch but plausible. If you have been struggling all semester, a 95 in three weeks is a harder ask.</p>
+  <p>Second, dig into the structure of the final. Is it cumulative? Does it use the same format as midterms? Past exams are your most valuable study material. One well-executed past exam under timed conditions tells you more about your readiness than four hours of re-reading notes.</p>
+  <p>Third, find the topics where you left the most points on the table during the semester. The exam is likely to test those same concepts again. A targeted review of your three weakest areas will return more points than reviewing everything equally.</p>
+  <p>Fourth, use office hours. Most professors will tell you which topics are heavily weighted on the final and what types of questions to expect. Most students never ask.</p>
+
+  <h2>What to do if the score you need is over 100%</h2>
+  <p>When the calculator shows a required score above 100%, the grade you are aiming for is no longer mathematically achievable. That is the honest answer. What it does not mean is that you should give up on the exam.</p>
+  <p>The best approach is to recalculate with a lower target grade and aim for the best possible outcome. If you were hoping for a B and it is no longer possible, what score do you need to guarantee a C? Work toward the highest grade still within reach, and do the math on whether extra credit can change anything.</p>
+  <p>If you are in danger of failing the course entirely, contact your professor and your academic advisor as soon as possible. Withdrawal deadlines, incomplete grades, and grade forgiveness policies vary by school, and knowing your options before the final is far better than finding out after.</p>
+
+  <h2>How to use this calculator strategically</h2>
+  <p>Most students check this calculator once, panic about the number, and close it. The smarter use is to run multiple scenarios. What do you need for an A? A B+? A B? The scenario table above shows all of these at once. Sometimes the difference between needing an 88 for a B and needing a 73 for a B-minus is only a few extra percentage points of current grade, which changes how hard you need to push in the final two weeks.</p>
+  <p>Also use the second calculator mode to project outcomes. If you are realistically expecting to score around 80% on the final, plug that in and see what course grade it produces. Knowing your likely outcome before the exam helps you plan whether to push for more or accept where you are.</p>
+
+  <h2>Final exam week strategy: a short guide</h2>
+  <p>The week before a cumulative final calls for a different approach than a regular midterm. You cannot learn new material from scratch, but you can dramatically improve your retrieval of what you already studied.</p>
+  <p>Start with a full inventory of everything on the final. Divide topics into three buckets: solid (you can explain them without notes), shaky (you understand them when you see them but struggle to produce them), and weak (you are largely lost). Spend about 70% of your study time on the shaky bucket. The solid material will hold with minimal review. The weak material is unlikely to move much in a week, and over-investing there has low expected return.</p>
+  <p>Practice under exam conditions at least once. Set a timer, close everything, and work through problems. Knowing the material and performing under time pressure are not the same skill. Students who practice the conditions of the exam consistently outperform students who study the same material passively.</p>
+  <p>On the night before the exam, do a light review of your most important process maps or concept summaries, then stop. Sleep is a bigger performance variable than one more hour of cramming at midnight. Your brain consolidates what you studied that week during sleep. Give it the time to do that.</p>
+
+  <div class="post-cta">
+    <h3>Build a study plan around your final</h3>
+    <p>StudyEdge AI takes your courses, exam dates, and grade targets and builds a week-by-week schedule that gets you to the numbers you need. The calculator tells you the target. StudyEdge AI tells you how to hit it.</p>
+    <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="btn btn-primary">Try StudyEdge AI Free</a>
+    <p style="font-size:13px;color:#6B6B6B;margin-top:8px;">3-day free trial. Cancel anytime.</p>
+  </div>
+
+</div>
+
+<section class="section" style="padding-top:0;">
+  <div class="container">
+    <div class="cta-block">
+      <h2>Know the number. Now build the plan.</h2>
+      <p>StudyEdge AI creates a personalized study schedule around your final exam dates and grade targets, so every session counts.</p>
+      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="btn btn-primary btn-lg">Try StudyEdge AI Free</a>
+      <p class="cta-fine">3-day free trial. Cancel anytime.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Related links (internal) -->
+<section class="related-links" style="background:#FFFFFF;border-top:1px solid rgba(0,0,0,0.07);padding:48px 24px">
+  <div class="container" style="max-width:1100px;margin:0 auto">
+    <h2 style="font-size:20px;font-weight:600;color:#111;margin:0 0 18px;letter-spacing:-0.01em">Related on StudyEdge AI</h2>
+    <ul style="list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px 24px">
+      <li><a href="/gpa-calculator">GPA calculator</a></li>
+      <li><a href="/grade-calculator">Grade calculator</a></li>
+      <li><a href="/how-to-study-for-finals">How to study for finals</a></li>
+      <li><a href="/blog/how-to-study-for-finals-week">Finals week study guide</a></li>
+    </ul>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-links">
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;margin-top:0;font-weight:700;">Tools</strong>
+<a href="/">Home</a>
+<a href="/gpa-calculator">GPA Calculator</a>
+<a href="/grade-calculator">Grade Calculator</a>
+<a href="/final-exam-calculator">Final Exam Calculator</a>
+<a href="/grade-calculator-college">College Grade Calculator</a>
+<a href="/study-schedule-generator">Study Schedule Generator</a>
+<a href="/ai-flashcard-maker">AI Flashcard Maker</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Guides</strong>
+<a href="/study-planner-for-college-students">Study Planner</a>
+<a href="/study-schedule-template">Schedule Template</a>
+<a href="/how-to-make-a-study-schedule">How to Make a Schedule</a>
+<a href="/how-to-study-for-finals">How to Study for Finals</a>
+<a href="/pre-med-study-guide">Pre-Med Study Guide</a>
+<a href="/best-study-app-for-students">Best Study App</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Compare</strong>
+<a href="/quizlet-alternative">Quizlet Alternative</a>
+<a href="/anki-alternative">Anki Alternative</a>
+<a href="/chegg-alternative">Chegg Alternative</a>
+<a href="/coursehero-alternative">Course Hero Alternative</a>
+<a href="/khan-academy-alternative">Khan Academy Alternative</a>
+<a href="/ai-tutor">AI Tutor</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Articles</strong>
+<a href="/blog">All Articles</a>
+<a href="/blog/how-to-raise-your-gpa-after-a-bad-semester">Raise Your GPA</a>
+<a href="/blog/how-to-get-an-a-in-any-class">Get an A in Any Class</a>
+<a href="/blog/how-to-study-for-finals-week">Finals Week Guide</a>
+<strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin:14px 0 8px;font-weight:700;">Company</strong>
+<a href="/about">About</a>
+<a href="/privacy">Privacy</a>
+<a href="/terms">Terms</a>
+  </div>
+  <p class="footer-copy">&copy; 2026 StudyEdge AI, getstudyedge.com</p>
+</footer>
+
+<script>
+  function switchTab(tab) {
+    document.querySelectorAll('.calc-tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.calc-panel').forEach(p => p.classList.remove('active'));
+    document.getElementById('tab-' + tab).classList.add('active');
+    document.getElementById('panel-' + tab).classList.add('active');
+  }
+
+  function scoreColor(score) {
+    if (score > 100) return 'impossible';
+    if (score > 90) return 'red';
+    if (score > 70) return 'yellow';
+    return 'green';
+  }
+
+  function scoreNote(score) {
+    if (score > 100) return 'This grade is no longer mathematically possible. Aim as high as you can and check your options for extra credit or course withdrawal.';
+    if (score > 90) return 'This is a challenging target. Focus your study time on your weakest topics and do at least one practice exam under timed conditions.';
+    if (score > 70) return 'A solid but achievable score. Keep your study time consistent and make sure you are doing active recall, not just re-reading.';
+    return 'This is well within reach. Stay focused and do not skip the final just because your current grade feels comfortable.';
+  }
+
+  function calcNeed() {
+    const cur = parseFloat(document.getElementById('current-grade').value);
+    const wt = parseFloat(document.getElementById('final-weight').value) / 100;
+    const des = parseFloat(document.getElementById('desired-grade').value);
+
+    if (isNaN(cur) || isNaN(wt) || isNaN(des)) {
+      alert('Please fill in all three fields.');
+      return;
+    }
+
+    const needed = (des / 100 - (cur / 100) * (1 - wt)) / wt;
+    const neededPct = needed * 100;
+
+    const resultEl = document.getElementById('result-need');
+    const valueEl = document.getElementById('result-need-value');
+    const noteEl = document.getElementById('result-need-note');
+    const scenarioEl = document.getElementById('scenario-block');
+
+    resultEl.classList.add('visible');
+
+    if (neededPct > 100) {
+      valueEl.className = 'result-value impossible';
+      valueEl.textContent = 'Not possible';
+    } else {
+      const color = scoreColor(neededPct);
+      valueEl.className = 'result-value ' + color;
+      valueEl.textContent = neededPct.toFixed(1) + '%';
+    }
+    noteEl.textContent = scoreNote(neededPct);
+
+    // Scenario table
+    const grades = [
+      { label: 'A', pct: 93 },
+      { label: 'A-', pct: 90 },
+      { label: 'B+', pct: 87 },
+      { label: 'B', pct: 83 },
+      { label: 'B-', pct: 80 },
+      { label: 'C+', pct: 77 },
+      { label: 'C', pct: 73 },
+      { label: 'D', pct: 60 },
+    ];
+
+    let rows = grades.map(g => {
+      const s = ((g.pct / 100 - (cur / 100) * (1 - wt)) / wt) * 100;
+      let cls, label;
+      if (s > 100) { cls = 'score-impossible'; label = 'Not possible'; }
+      else if (s > 90) { cls = 'score-red'; label = s.toFixed(1) + '%'; }
+      else if (s > 70) { cls = 'score-yellow'; label = s.toFixed(1) + '%'; }
+      else { cls = 'score-green'; label = s.toFixed(1) + '%'; }
+      return `<tr><td>${g.label} (${g.pct}%)</td><td class="${cls}">${label}</td></tr>`;
+    }).join('');
+
+    scenarioEl.innerHTML = `
+      <table class="scenario-table" style="margin-top:20px">
+        <thead><tr><th>Target grade</th><th>Score needed on final</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  function calcGet() {
+    const cur = parseFloat(document.getElementById('current-grade-2').value);
+    const wt = parseFloat(document.getElementById('final-weight-2').value) / 100;
+    const fs = parseFloat(document.getElementById('final-score').value);
+
+    if (isNaN(cur) || isNaN(wt) || isNaN(fs)) {
+      alert('Please fill in all three fields.');
+      return;
+    }
+
+    const finalGrade = cur / 100 * (1 - wt) + fs / 100 * wt;
+    const finalPct = finalGrade * 100;
+
+    const resultEl = document.getElementById('result-get');
+    const valueEl = document.getElementById('result-get-value');
+    const noteEl = document.getElementById('result-get-note');
+
+    resultEl.classList.add('visible');
+
+    let letter;
+    if (finalPct >= 93) letter = 'A';
+    else if (finalPct >= 90) letter = 'A-';
+    else if (finalPct >= 87) letter = 'B+';
+    else if (finalPct >= 83) letter = 'B';
+    else if (finalPct >= 80) letter = 'B-';
+    else if (finalPct >= 77) letter = 'C+';
+    else if (finalPct >= 73) letter = 'C';
+    else if (finalPct >= 70) letter = 'C-';
+    else if (finalPct >= 67) letter = 'D+';
+    else if (finalPct >= 63) letter = 'D';
+    else if (finalPct >= 60) letter = 'D-';
+    else letter = 'F';
+
+    let color = 'green';
+    if (finalPct < 70) color = 'red';
+    else if (finalPct < 80) color = 'yellow';
+
+    valueEl.className = 'result-value ' + color;
+    valueEl.textContent = finalPct.toFixed(1) + '% (' + letter + ')';
+    noteEl.textContent = finalPct >= 90 ? 'Strong result. Your consistent work throughout the semester paid off.' :
+      finalPct >= 80 ? 'Solid outcome. A B range grade reflects real understanding of the material.' :
+      finalPct >= 70 ? 'You passed. If you needed a higher grade for your program requirements, speak with your advisor.' :
+      'Below a C. Check whether this grade satisfies your program requirements and consider whether a retake or withdrawal makes sense.';
+  }
+</script>
+
+</body>
+</html>
