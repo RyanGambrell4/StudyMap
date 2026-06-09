@@ -196,24 +196,29 @@ export default function PracticeExamView({ courses = [], onShowPaywall }) {
                 <p style={{ margin: '0 0 3px', fontSize: 13.5, fontWeight: 600, color: D.text }}>No courses added yet</p>
                 <p style={{ margin: 0, fontSize: 13, color: D.muted }}>Add a course first, then come back to run a practice exam.</p>
               </div>
-            ) : (
-              <button
-                onClick={() => {
-                  const plan = getActivePlan()
-                  const isPro = plan === 'pro' || plan === 'unlimited' || plan === 'trial'
-                  if (!isPro) { onShowPaywall?.('pro'); return }
-                  setSubview('setup')
-                }}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '13px 24px', background: D.accent, border: 'none', borderRadius: 11, color: '#fff', fontWeight: 700, fontSize: 14.5, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em', transition: 'opacity 0.15s' }}
-                onMouseEnter={e => e.currentTarget.style.opacity = '0.87'}
-                onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-              >
-                Start Practice Exam
-                <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <path d="M5 12h14M12 5l7 7-7 7"/>
-                </svg>
-              </button>
-            )}
+            ) : (() => {
+              const plan = getActivePlan()
+              const isPro = plan === 'pro' || plan === 'unlimited'
+              return (
+                <button
+                  onClick={() => {
+                    if (!isPro) { onShowPaywall?.('pro'); return }
+                    setSubview('setup')
+                  }}
+                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '13px 24px', background: D.accent, border: 'none', borderRadius: 11, color: '#fff', fontWeight: 700, fontSize: 14.5, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em', transition: 'opacity 0.15s' }}
+                  onMouseEnter={e => e.currentTarget.style.opacity = '0.87'}
+                  onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+                >
+                  {!isPro && (
+                    <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 999, background: 'rgba(255,255,255,0.18)', color: '#fff', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Pro</span>
+                  )}
+                  Start Practice Exam
+                  <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    <path d="M5 12h14M12 5l7 7-7 7"/>
+                  </svg>
+                </button>
+              )
+            })()}
           </div>
         </div>
 

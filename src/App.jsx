@@ -570,8 +570,15 @@ export default function App() {
   }
 
   // ── Stripe checkout redirect (paid plans AND 3-day free trial) ───────────
-  // Trial=1 still redirects to Stripe Checkout: the trial requires a card up
-  // front via `payment_method_collection: 'always'` and auto-bills after 3 days.
+  // REVENUE-CRITICAL. Read before changing the condition below.
+  // Trial=1 MUST redirect to Stripe Checkout. The "trial" in this product is
+  // card-required — `payment_method_collection: 'always'` in api/stripe.js
+  // collects the card, and Stripe auto-bills after 3 days. Skipping this block
+  // for trial signups (e.g. adding `!checkoutIntent.trial`) breaks the trial:
+  // the user gets dropped into the app as free, no customer is created, no
+  // subscription exists. That bug shipped 2026-05-25 (commit 2af08aa) and
+  // produced 0 new customers for 9 days. Verify any change with
+  // `node scripts/verify-trial-flow.mjs` BEFORE merging.
   if (checkoutIntent && getActivePlan() === 'free') {
     window.history.replaceState({}, '', window.location.pathname)
     createCheckoutSession(checkoutIntent.plan, checkoutIntent.billing, session.user.email, session.user.id, { trial: checkoutIntent.trial }).then(result => {

@@ -555,8 +555,15 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid plan or billing period' })
   }
 
-  // Trial available on Pro only — all three billing periods (weekly/monthly/yearly).
-  // 3-day no-card trial.
+  // REVENUE-CRITICAL.
+  // Trial is available on Pro only (all three billing periods). It is a
+  // CARD-REQUIRED 3-day trial: `payment_method_collection: 'always'` below
+  // forces Stripe Checkout to collect a card before the trial starts, and
+  // Stripe auto-bills after 3 days unless the user cancels. There is no
+  // "no-card trial" path anywhere in this product anymore — earlier copy
+  // and an old commit (2af08aa, 2026-05-25) assumed otherwise and silently
+  // produced 0 new customers for 9 days. Verify with
+  // `node scripts/verify-trial-flow.mjs` after any change to this block.
   const wantsTrial = !!trial && plan === 'pro'
 
   const subscriptionData = {

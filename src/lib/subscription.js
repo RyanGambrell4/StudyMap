@@ -356,6 +356,12 @@ export function incrementAIQuery() {
 }
 
 // ── Stripe checkout session creator ──────────────────────────────────────────
+// REVENUE-CRITICAL. This is the single entry point that talks to /api/stripe.
+// Every "Start free trial" button in the app eventually calls this. Trial =
+// card-required, 3-day, auto-bills (see api/stripe.js for the server side).
+// If you add a code path that creates a "trial" without calling this, you
+// have just rebuilt the 2026-05-25 bug. Verify with
+// `node scripts/verify-trial-flow.mjs` after any change to this function.
 
 export async function createCheckoutSession(plan, billingPeriod, userEmail, userId, opts = {}) {
   track('checkout_started', { plan, billingPeriod, trial: !!opts.trial })
