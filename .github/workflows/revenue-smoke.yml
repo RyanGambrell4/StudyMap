@@ -1,0 +1,48 @@
+name: Revenue smoke
+
+# Runs the trial -> Stripe Checkout smoke test against production on every push
+# to main. Also runs every 6 hours so a broken deploy doesn't sit silent if no
+# new commits land for a few days.
+#
+# Background: on 2026-05-25 a one-line commit silently disabled the trial flow.
+# Zero new customers for 9 days. This workflow exists so that fails the build.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/App.jsx'
+      - 'src/lib/subscription.js'
+      - 'src/components/AuthScreen.jsx'
+      - 'src/components/PaywallModal.jsx'
+      - 'src/components/LandingPage.jsx'
+      - 'src/components/Onboarding.jsx'
+      - 'api/stripe.js'
+      - 'scripts/verify-trial-flow.mjs'
+      - '.github/workflows/revenue-smoke.yml'
+  pull_request:
+    branches: [main]
+  schedule:
+    # Every 6 hours
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+
+jobs:
+  trial-flow:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Wait for Vercel deploy to settle (push only)
+        if: github.event_name == 'push'
+        run: sleep 60
+
+      - name: Verify trial -> Stripe Checkout
+        run: node scripts/verify-trial-flow.mjs --base=https://getstudyedge.com
+
+      - name: Notify failure
+        if: failure()
+        run: |
+          echo "::error::Trial -> Stripe Checkout flow is broken on production."
+          echo "::error::This is the exact failure mode that caused the 2026-05-25 incident."
+          echo "::error::Drive https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1 manually NOW."

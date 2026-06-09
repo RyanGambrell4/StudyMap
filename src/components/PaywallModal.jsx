@@ -1,5 +1,5 @@
-import { useEffect, useState } from 'react'
-import { createCheckoutSession, hasUsedTrial, isTrialActive } from '../lib/subscription'
+import { useEffect, useRef, useState } from 'react'
+import { createCheckoutSession, hasUsedTrial, isTrialActive, getActivePlan } from '../lib/subscription'
 import { track } from '../lib/analytics'
 
 // ── Config ────────────────────────────────────────────────────────────────────
@@ -153,6 +153,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   const [testimonialIdx, setTestimonialIdx] = useState(0)
   const [trialLoading, setTrialLoading] = useState(false)
   const [trialError, setTrialError] = useState(null)
+  const openedAtRef = useRef(Date.now())
 
   const trialUsed = hasUsedTrial()
   const trialActive = isTrialActive()
@@ -172,7 +173,12 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   }, [])
 
   const handleDismiss = (reason) => {
-    track('paywall_dismissed', { trigger, reason })
+    track('paywall_dismissed', {
+      trigger_feature: trigger,
+      reason,
+      dwell_ms: Date.now() - openedAtRef.current,
+      current_plan: currentPlan,
+    })
     onClose()
   }
 
@@ -185,10 +191,20 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   }, [onClose, trigger])
 
   const handleStartTrial = async () => {
-    // Card-required Stripe trial — auto-converts to weekly Pro after 3 days
-    // unless the user cancels. Replaces the prior no-card trial which had ~0%
-    // conversion to paid because no payment method was ever collected.
-    track('trial_start_clicked', { trigger, plan: 'pro', billingPeriod: 'weekly' })
+    // Card-required Stripe trial. Auto-converts to weekly Pro after 3 days
+    // unless the user cancels. Replaces the prior no-card trial which had
+    // ~0% conversion to paid because no payment method was ever collected.
+    track('paywall_cta_click', {
+      plan_clicked: 'pro',
+      billing_period: 'weekly',
+      trigger_feature: trigger,
+      is_trial: true,
+    })
+    track('trial_started', {
+      plan: 'pro',
+      billing_period: 'weekly',
+      source: trigger,
+    })
     setTrialLoading(true)
     setTrialError(null)
     try {
@@ -207,7 +223,12 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   }
 
   const handleSelectPlan = async (planId) => {
-    track('upgrade_clicked', { planId, billingPeriod, trigger })
+    track('paywall_cta_click', {
+      plan_clicked: planId,
+      billing_period: billingPeriod,
+      trigger_feature: trigger,
+      is_trial: false,
+    })
     setLoading(planId)
     const url = await createCheckoutSession(planId, billingPeriod, userEmail, userId)
     setLoading(null)

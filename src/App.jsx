@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from './lib/supabase'
 import { initUserData, clearUserData, savePlan, refreshSubscription, saveEmailDigest } from './lib/db'
-import { getActivePlan, canAddCourse, createCheckoutSession } from './lib/subscription'
+import { getActivePlan, canAddCourse, createCheckoutSession, hasUsedTrial, isTrialActive, getCachedSubscription, TRIAL_DURATION_DAYS } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
 import { initAnalytics, identifyUser, resetUser, track, register, registerOnce } from './lib/analytics'
 import { captureReferralParam, getStoredReferrer, clearStoredReferrer } from './lib/referral'
@@ -97,6 +97,25 @@ export default function App() {
     window.addEventListener('studyedge:open-paywall', handler)
     return () => window.removeEventListener('studyedge:open-paywall', handler)
   }, [openPaywall])
+
+  // Trial expiry tracking. When a user who used the trial returns and the
+  // trial window has now passed (and they did not convert to paid), fire
+  // trial_expired once per browser. Uses localStorage to debounce across
+  // sessions so we never double-count a single trial expiry.
+  useEffect(() => {
+    const sub = getCachedSubscription()
+    if (!sub?.trial_activated || !sub?.trial_start_date) return
+    if (isTrialActive()) return
+    const plan = getActivePlan()
+    if (plan === 'pro' || plan === 'unlimited') return // converted
+    const stamp = `studyedge_trial_expired_${sub.trial_start_date}`
+    if (localStorage.getItem(stamp) === '1') return
+    track('trial_expired', {
+      days_used: TRIAL_DURATION_DAYS,
+      trial_start_date: sub.trial_start_date,
+    })
+    localStorage.setItem(stamp, '1')
+  }, [session])
 
   // Tracks the latest completedIds/assignments so handleAddCourse can save immediately
   const latestPlanRef = useRef({ completedIds: [], assignments: [] })
