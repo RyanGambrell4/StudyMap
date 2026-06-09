@@ -135,6 +135,7 @@ export default function AuthScreen({ initialMode, onBack }) {
   // ── Post-signup confirmation screen ──
   if (signupPendingEmail) {
     const handleResend = async () => {
+      track('email_confirmation_resend_clicked', { source: 'auth_screen' })
       setResendStatus('sending')
       try {
         const { error: resendErr } = await supabase.auth.resend({ type: 'signup', email: signupPendingEmail })
@@ -448,12 +449,16 @@ function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onS
   // onAuthStateChange in App.jsx fires SIGNED_IN and the gate falls away.
   useEffect(() => {
     let cancelled = false
+    let fired = false
+    track('email_confirmation_screen_shown', { source: 'auth_screen' })
     const tick = async () => {
       if (cancelled) return
       try {
         await supabase.auth.refreshSession()
         const { data } = await supabase.auth.getUser()
-        if (data?.user?.email_confirmed_at) {
+        if (data?.user?.email_confirmed_at && !fired) {
+          fired = true
+          track('email_confirmed', { source: 'auth_screen', user_id: data.user.id })
           // Force a session refresh so onAuthStateChange picks up confirmation
           await supabase.auth.refreshSession()
         }
@@ -511,7 +516,7 @@ function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onS
             marginBottom: 18,
           }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3B61C4', animation: 'pulse-ring 1.4s ease-in-out infinite' }} />
-            Checking automatically — no need to refresh
+            Checking automatically. No need to refresh.
           </div>
 
           <div style={{

@@ -507,8 +507,10 @@ export default function App() {
     return (
       <EmailVerificationGate
         email={session.user.email}
+        userId={session.user.id}
         resendState={resendState}
         onResend={async () => {
+          track('email_confirmation_resend_clicked', { source: 'app_gate' })
           setResendState('sending')
           try {
             const { error } = await supabase.auth.resend({ type: 'signup', email: session.user.email })
@@ -668,15 +670,24 @@ export default function App() {
 
 // Auto-polls every 5s for email confirmation. When confirmed, refreshSession
 // triggers onAuthStateChange which re-renders the app past this gate.
-function EmailVerificationGate({ email, resendState, onResend, onSignOut }) {
+function EmailVerificationGate({ email, userId, resendState, onResend, onSignOut }) {
   useEffect(() => {
     let cancelled = false
+    let fired = false
+    track('email_confirmation_screen_shown', { source: 'app_gate' })
     const interval = setInterval(async () => {
       if (cancelled) return
-      try { await supabase.auth.refreshSession() } catch {}
+      try {
+        await supabase.auth.refreshSession()
+        const { data } = await supabase.auth.getUser()
+        if (data?.user?.email_confirmed_at && !fired) {
+          fired = true
+          track('email_confirmed', { source: 'app_gate', user_id: userId ?? data.user.id })
+        }
+      } catch {}
     }, 5000)
     return () => { cancelled = true; clearInterval(interval) }
-  }, [])
+  }, [userId])
 
   const PREVIEWS = [
     'AI Study Coach',
