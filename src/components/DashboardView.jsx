@@ -5,8 +5,7 @@ import ReferralCard from './ReferralCard'
 import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
-import { getActivePlan, getAIQueriesUsed, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession, initSubscription, getCachedSubscription } from '../lib/subscription'
-import { supabase } from '../lib/supabase'
+import { getActivePlan, getAIQueriesUsed, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import { daysBetween, formatShortDate } from '../utils/dateUtils'
 
@@ -168,8 +167,6 @@ export default function DashboardView({
   const plan = getActivePlan()
   const aiUsed = getAIQueriesUsed()
   const [trialBannerLoading, setTrialBannerLoading] = useState(false)
-  const [cancelingTrial, setCancelingTrial] = useState(false)
-  const [trialBannerCanceled, setTrialBannerCanceled] = useState(false)
 
   // Fire the empty-state impression once on mount so we have a denominator
   // for first_course_cta_clicked. courses is stable from props at mount time.
@@ -179,27 +176,6 @@ export default function DashboardView({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
-
-  const handleCancelTrial = async () => {
-    if (!confirm('Cancel your free trial?\n\nYou won\'t be charged. You\'ll move to the free plan immediately.')) return
-    setCancelingTrial(true)
-    try {
-      const res = await fetch('/api/stripe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'cancel-trial', userId }),
-      })
-      if (!res.ok) throw new Error('Failed')
-      const current = getCachedSubscription()
-      initSubscription(userId, { ...current, plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null, trial_activated: false })
-      setTrialBannerCanceled(true)
-      track('trial_canceled', { source: 'dashboard_banner' })
-    } catch {
-      alert('Something went wrong. Please try again or contact support@getstudyedge.com.')
-    } finally {
-      setCancelingTrial(false)
-    }
-  }
 
   const handleStartTrial = async () => {
     if (trialBannerLoading) return
@@ -656,45 +632,30 @@ export default function DashboardView({
       )}
 
       {/* ── Pro trial banner ── */}
-      {(isTrialActive() || trialBannerCanceled) ? (
+      {isTrialActive() ? (
         <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
           <div className="dash-banner-inner" style={{
-            background: trialBannerCanceled ? 'rgba(5,150,105,0.05)' : `linear-gradient(135deg, rgba(59,97,196,0.04) 0%, rgba(59,97,196,0.08) 100%)`,
-            border: trialBannerCanceled ? '1px solid rgba(5,150,105,0.2)' : `1px solid rgba(59,97,196,0.2)`,
-            borderLeft: trialBannerCanceled ? '4px solid #059669' : `4px solid ${D.blue}`,
+            background: `linear-gradient(135deg, rgba(59,97,196,0.04) 0%, rgba(59,97,196,0.08) 100%)`,
+            border: `1px solid rgba(59,97,196,0.2)`,
+            borderLeft: `4px solid ${D.blue}`,
             borderRadius: 10,
             boxShadow: `0 2px 12px rgba(59,97,196,0.07)`,
             padding: '14px 18px',
             display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
           }}>
-            {trialBannerCanceled ? (
-              <p style={{ margin: 0, flex: 1, fontWeight: 600, fontSize: 13, color: '#059669' }}>
-                Trial canceled. You won't be charged.
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>
+                Your free trial is active. {getTrialDaysRemaining()} day{getTrialDaysRemaining() !== 1 ? 's' : ''} remaining.
               </p>
-            ) : (
-              <>
-                <div style={{ flex: 1, minWidth: 200 }}>
-                  <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>
-                    Your free trial is active. {getTrialDaysRemaining()} day{getTrialDaysRemaining() !== 1 ? 's' : ''} remaining.
-                  </p>
-                  <div style={{ marginTop: 6, height: 4, background: 'rgba(59,97,196,0.15)', borderRadius: 999, overflow: 'hidden', maxWidth: 280 }}>
-                    <div style={{ height: '100%', borderRadius: 999, background: D.blue, width: `${Math.round(((3 - getTrialDaysRemaining()) / 3) * 100)}%`, transition: 'width 0.4s ease' }} />
-                  </div>
-                </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                  <button onClick={() => onShowPaywall?.('upgrade')} style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                    Upgrade to Pro →
-                  </button>
-                  <button
-                    onClick={handleCancelTrial}
-                    disabled={cancelingTrial}
-                    style={{ background: 'none', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 8, padding: '8px 12px', fontSize: 12, color: '#6B6B6B', cursor: cancelingTrial ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: cancelingTrial ? 0.5 : 1 }}
-                  >
-                    {cancelingTrial ? 'Canceling…' : 'Cancel trial'}
-                  </button>
-                </div>
-              </>
-            )}
+              <div style={{ marginTop: 6, height: 4, background: 'rgba(59,97,196,0.15)', borderRadius: 999, overflow: 'hidden', maxWidth: 280 }}>
+                <div style={{ height: '100%', borderRadius: 999, background: D.blue, width: `${Math.round(((3 - getTrialDaysRemaining()) / 3) * 100)}%`, transition: 'width 0.4s ease' }} />
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+              <button onClick={() => onShowPaywall?.('upgrade')} style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                Upgrade to Pro →
+              </button>
+            </div>
           </div>
         </div>
       ) : showTrialCard ? (
