@@ -365,7 +365,8 @@ function AddCoursePanel({ courseCount, onClose, onAdd }) {
 
   const handleAdd = () => {
     if (!name.trim()) { setError('Enter a course name'); return }
-    if (examDate && examDate <= todayStr) { setError('Exam date must be in the future'); return }
+    if (!examDate) { setError('Add a final/exam date — your study plan needs it'); return }
+    if (examDate <= todayStr) { setError('Exam date must be in the future'); return }
     const colorObj = { name: 'custom', dot: color }
     const courseId = Date.now().toString(36) + Math.random().toString(36).slice(2, 5)
     onAdd({ id: courseId, name: name.trim(), code: code.trim(), examDate, difficulty, targetGrade, color: colorObj, classSchedule: classSchedule || undefined })
@@ -406,8 +407,11 @@ function AddCoursePanel({ courseCount, onClose, onAdd }) {
 
           {/* Exam date */}
           <div>
-            <Label>Exam / finals date <span style={{ color: D.dim, fontWeight: 400 }}>(optional)</span></Label>
+            <Label>Exam / finals date <span style={{ color: D.orange }}>*</span></Label>
             <input type="date" className="cv-input" value={examDate} min={todayStr} onChange={e => { setExamDate(e.target.value); setError('') }} />
+            <p style={{ margin: '6px 0 0', fontSize: 11.5, color: D.muted, lineHeight: 1.4 }}>
+              Required — your study plan, blueprints, and grade tracker are all built around this date. Estimate if you don't know yet; you can change it later.
+            </p>
           </div>
 
           {/* Color */}

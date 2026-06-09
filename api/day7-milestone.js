@@ -76,10 +76,11 @@ export default async function handler(req, res) {
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
           ${[
-            ['AI Study Coach', 'Builds a full multi-week study plan around your exam dates'],
-            ['Session Blueprints', 'Minute-by-minute plan for every study session'],
-            ['100 AI boosts / month', 'Free gives you 10. Pro is enough for daily use all semester.'],
-            ['5 courses', 'Add your full course load, not just one'],
+            ['100 AI actions / month', 'Free gives you 2 total. Pro is enough for daily use all semester.'],
+            ['5 courses · not just 1', 'Track every class you\'re taking, with its own plan'],
+            ['Unlimited Session Blueprints', 'A minute-by-minute plan before every study block'],
+            ['AI Study Coach, on demand', 'Rebuild your full multi-week plan any time things change'],
+            ['No more lifetime feature caps', 'Brain Dumps, Quiz Bursts, Exam Rescues all unlimited'],
           ].map(([feat, desc]) => `
           <tr>
             <td style="padding:10px 0;border-bottom:1px solid #F0EDE8;">
@@ -89,14 +90,14 @@ export default async function handler(req, res) {
           </tr>`).join('')}
         </table>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro starts at <strong style="color:#111111;">$2.99/week</strong>, less than a coffee. Try it free for 3 days, cancel anytime in your account.
+          Pro is <strong style="color:#111111;">$2.99/week</strong> — less than a coffee. Try it free for 3 days. Card required, auto-renews unless you cancel.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Try Pro free for 3 days</a>
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day7_milestone" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Start 3-day free trial</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">$2.99/wk after trial · Cancel anytime</span>
+            <span style="font-size:12px;color:#9B9B9B;">3-day trial · $2.99/wk after · Card required · Cancel in account anytime</span>
           </td></tr>
         </table>
       </td></tr>

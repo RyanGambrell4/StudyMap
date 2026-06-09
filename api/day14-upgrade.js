@@ -73,7 +73,7 @@ export default async function handler(req, res) {
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Week 2 check-in</p>
         <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">You've been using StudyEdge for 2 weeks.</h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          You're on the free plan, which limits you to 1 course and 10 AI boosts. If you've been hitting those limits — or want to use the app properly this semester — Pro is the right move.
+          You're on the free plan, which is a one-time preview — 1 course, 2 lifetime AI tutor messages, and a single use of each Pro feature. If you've been hitting those walls, Pro is the right move.
         </p>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           Most students who upgrade do it around week 2, when they realize they're serious about their grades. You're at that point.
@@ -81,10 +81,10 @@ export default async function handler(req, res) {
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
             ['5 courses', 'Track every class, not just one'],
-            ['100 AI boosts / month', '10x more than free — enough for daily use'],
-            ['AI Study Coach', '8-week personalized plan built around your deadlines'],
-            ['Session Blueprints', 'Know exactly what to study in every session'],
-            ['Focus sessions', 'Timed, distraction-free study with your plan loaded'],
+            ['100 AI actions / month', '50x more than free — enough for daily use'],
+            ['AI Study Coach, on demand', 'Multi-week plan built around your exam dates, re-runnable any time'],
+            ['Unlimited Session Blueprints', 'Know exactly what to study in every session'],
+            ['Unlimited Focus sessions', 'Lock in for as long as you need; no 30-min cap'],
           ].map(([feat, detail]) => `
           <tr>
             <td style="padding:10px 0;border-bottom:1px solid #F0EDE8;">
@@ -95,10 +95,10 @@ export default async function handler(req, res) {
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Try Pro free for 3 days</a>
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day14_upgrade" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Start 3-day free trial</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">$2.99/week after trial · Cancel anytime.</span>
+            <span style="font-size:12px;color:#9B9B9B;">3-day trial · $2.99/wk after · Card required · Cancel in account anytime</span>
           </td></tr>
         </table>
       </td></tr>

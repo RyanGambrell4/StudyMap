@@ -56,9 +56,9 @@ export default async function handler(req, res) {
           Students who stick with StudyEdge usually do three things in their first week:
         </p>
         ${[
-          ['1. Add your courses with real exam dates', 'The app builds everything around your deadlines. Without a date it is just guessing. Takes 30 seconds.'],
-          ['2. Generate a Session Blueprint before your next study block', 'Open any course, tap Session Blueprint, and get a minute-by-minute plan. It changes how you approach each block.'],
-          ['3. Use Study Coach once a week', 'Ask it to build a weekly plan around your current workload. Students who do this study 40% more consistently.'],
+          ['1. Add a course with a real exam date', 'Your study plan, blueprints, and grade tracker are all built around your exam dates. Without one, the AI can\'t generate anything. 30 seconds.'],
+          ['2. Generate a Session Blueprint', 'Open your course, tap Session Blueprint, get a minute-by-minute plan for your next study block. Free includes 1 — use it on the topic you\'re most behind on.'],
+          ['3. Run the Study Coach once', 'Get a multi-week plan built around your exam date. Students who do this study far more consistently.'],
         ].map(([title, desc]) => `
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:12px;background:#F7F6F3;border-radius:10px;">
           <tr><td style="padding:14px 16px;">
@@ -71,7 +71,7 @@ export default async function handler(req, res) {
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center">
-            <a href="https://getstudyedge.com/app" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Open StudyEdge</a>
+            <a href="https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day1_tips" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Open StudyEdge</a>
           </td></tr>
         </table>
       </td></tr>
