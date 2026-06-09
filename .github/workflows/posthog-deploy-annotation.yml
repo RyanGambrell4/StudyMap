@@ -1,0 +1,29 @@
+name: PostHog deploy annotation
+
+# Creates a PostHog annotation on every push to main so metric shifts in
+# PostHog dashboards can be correlated with specific deploys.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  annotate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create PostHog annotation
+        env:
+          POSTHOG_PERSONAL_KEY: ${{ secrets.POSTHOG_PERSONAL_KEY }}
+        run: |
+          COMMIT_MSG=$(git log -1 --pretty=format:'%s')
+          AUTHOR=$(git log -1 --pretty=format:'%an')
+          SHORT_SHA=$(git rev-parse --short HEAD)
+          CONTENT="Deploy: ${COMMIT_MSG} (${SHORT_SHA}) by ${AUTHOR}"
+          curl -s -o /dev/null -w "%{http_code}" \
+            -X POST "https://us.posthog.com/api/projects/412740/annotations/" \
+            -H "Authorization: Bearer ${POSTHOG_PERSONAL_KEY}" \
+            -H "Content-Type: application/json" \
+            -d "{\"content\":\"${CONTENT}\",\"date_marker\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"scope\":\"project\"}"
