@@ -297,7 +297,7 @@ Hard rules:
     const stripped = content.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '')
     const firstBrace = stripped.indexOf('{')
     const lastBrace = stripped.lastIndexOf('}')
-    if (firstBrace === -1 || lastBrace <= firstBrace) throw new Error('Malformed AI response — please try again')
+    if (firstBrace === -1 || lastBrace <= firstBrace) throw new Error('Malformed AI response. Please try again.')
     const parsed = JSON.parse(stripped.slice(firstBrace, lastBrace + 1))
 
     // Shuffle quiz options so correct answer is evenly distributed across positions

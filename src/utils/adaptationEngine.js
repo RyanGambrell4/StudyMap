@@ -99,7 +99,7 @@ export function runAdaptation(session, recallScore, courses, manualSessions, tod
     ? session.sessionType
     : 'that material'
 
-  const reason = `You found ${what} ${difficulty} — we added a ${dur}-min ${injected.sessionType} on ${dayName(injectDate)} to lock it in.`
+  const reason = `You found ${what} ${difficulty}, so we added a ${dur}-min ${injected.sessionType} on ${dayName(injectDate)} to lock it in.`
 
   return { injectedSession: injected, reason, dayName: dayName(injectDate) }
 }

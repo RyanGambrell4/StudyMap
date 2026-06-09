@@ -141,7 +141,7 @@ export default async function handler(req, res) {
           &nbsp;·&nbsp;
           <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
         </p>
-        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">The StudyEdge AI team</p>
       </td></tr>
     </table>
   </td></tr>
