@@ -299,6 +299,18 @@ export default async function handler(req, res) {
 
     console.log(`[stripe webhook] ${event.type}`)
 
+    // ── Idempotency check — skip duplicate event deliveries ───────────────────
+    const eventId = event.id
+    const { data: existingEvent } = await supabaseAdmin
+      .from('stripe_idempotency')
+      .select('event_id')
+      .eq('event_id', eventId)
+      .maybeSingle()
+    if (existingEvent) {
+      console.log(`[stripe] Duplicate event ${eventId} — skipping`)
+      return res.status(200).json({ ok: true, duplicate: true })
+    }
+
     // ── Trial expiry warning (fires 3 days before trial ends) ─────────────────
     if (event.type === 'customer.subscription.trial_will_end') {
       const sub = event.data.object
@@ -491,6 +503,12 @@ export default async function handler(req, res) {
         return res.status(500).json({ error: 'DB update failed' })
       }
     }
+
+    // Record processed event for idempotency
+    await supabaseAdmin
+      .from('stripe_idempotency')
+      .insert({ event_id: eventId, processed_at: new Date().toISOString() })
+      .then(({ error }) => { if (error) console.error('[stripe] Failed to record event', error) })
 
     return res.status(200).json({ received: true })
   }

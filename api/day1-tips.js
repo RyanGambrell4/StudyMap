@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
+import { acquireCronLock } from '../lib/server/cronLock.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -12,6 +13,12 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
   if (!process.env.RESEND_API_KEY) return res.status(200).json({ ok: true, skipped: true })
+
+  const locked = await acquireCronLock('day1-tips')
+  if (!locked) {
+    console.log('[day1-tips] Already ran today — skipping')
+    return res.status(200).json({ ok: true, skipped: true, reason: 'already_ran_today' })
+  }
 
   const now = new Date()
   const windowStart = new Date(now - 28 * 60 * 60 * 1000)

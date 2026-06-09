@@ -67,6 +67,9 @@ export default function App() {
   // ── Checkout success banner ────────────────────────────────────────────────
   const [checkoutSuccess, setCheckoutSuccess] = useState(false)
 
+  // ── Checkout cancel banner ─────────────────────────────────────────────────
+  const [showCheckoutCancelBanner, setShowCheckoutCancelBanner] = useState(false)
+
   // Capture checkout intent on mount before Supabase PKCE exchange clears the URL
   const [checkoutIntent] = useState(() => {
     const sp = new URLSearchParams(window.location.search)
@@ -231,6 +234,16 @@ export default function App() {
       identifyUser(session.user.id, { plan })
       setCheckoutSuccess(true)
     })
+  }, [session?.user?.id, dbReady])
+
+  // ── Checkout cancel handler ────────────────────────────────────────────────
+  useEffect(() => {
+    if (!session?.user || !dbReady) return
+    const params = new URLSearchParams(window.location.search)
+    if (params.get('checkout') !== 'cancelled') return
+    window.history.replaceState({}, '', window.location.pathname)
+    track('checkout_abandoned', { from: 'stripe_cancel_button' })
+    setShowCheckoutCancelBanner(true)
   }, [session?.user?.id, dbReady])
 
   // ── Handlers ──────────────────────────────────────────────────────────────
@@ -646,6 +659,44 @@ export default function App() {
           userId={session?.user?.id}
           currentPlan={getActivePlan()}
         />
+      )}
+
+      {/* Checkout cancel banner */}
+      {showCheckoutCancelBanner && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          zIndex: 1000,
+          background: 'rgba(245,158,11,0.95)',
+          padding: '12px 20px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: 12,
+        }}>
+          <span style={{ fontSize: 13.5, color: '#fff', fontWeight: 500 }}>
+            Your 3-day trial is still available. No commitment until day 4.
+          </span>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            <button
+              onClick={() => {
+                setShowCheckoutCancelBanner(false)
+                openPaywall('pro')
+              }}
+              style={{ padding: '7px 14px', borderRadius: 7, background: '#fff', color: '#B45309', fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none' }}
+            >
+              Try again
+            </button>
+            <button
+              onClick={() => setShowCheckoutCancelBanner(false)}
+              style={{ padding: '7px 10px', borderRadius: 7, background: 'rgba(255,255,255,0.2)', color: '#fff', fontSize: 13, fontWeight: 500, cursor: 'pointer', border: 'none' }}
+            >
+              Dismiss
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Checkout success banner */}

@@ -5,6 +5,7 @@ import { getCachedCoachPlan, saveCoachPlanStruggles } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
 import { getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial, incrementAIQuery, canUseUnlimitedFeature } from '../lib/subscription'
 import { transcribeAudio, createRecorder } from '../lib/deepgram'
+import { track } from '../lib/analytics'
 
 export default function AIChatView({ courseId, courseName, examDate, targetGrade, userId, learningStyle, onShowPaywall, onNavigateToCoach }) {
   const plan = getActivePlan()
@@ -22,6 +23,16 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
 
   const [recording, setRecording] = useState(false)
   const [recorderRef] = useState(() => ({ current: null }))
+  const [tutorMemoryNudgeDismissed, setTutorMemoryNudgeDismissed] = useState(false)
+
+  const hasTutorMemory = canUseUnlimitedFeature('tutorMemory')
+
+  // Fire a PostHog event the first time the nudge becomes visible
+  useEffect(() => {
+    if (!hasTutorMemory && messages.length === 8) {
+      track('tutor_memory_nudge_shown', { messageCount: messages.length })
+    }
+  }, [messages.length, hasTutorMemory])
 
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
@@ -74,7 +85,6 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       // Unlimited plan ships full session memory so the tutor never asks for
       // context the student already gave earlier in the conversation. Pro and
       // Free fall back to the trailing 10 messages to keep prompt cost bounded.
-      const hasTutorMemory = canUseUnlimitedFeature('tutorMemory')
       const messagesForApi = hasTutorMemory ? newMessages : newMessages.slice(-10)
       const res = await fetch('/api/chat-tutor', {
         method: 'POST',
@@ -279,6 +289,40 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
               {[0, 1, 2].map(i => (
                 <span key={i} className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
               ))}
+            </div>
+          </div>
+        )}
+
+        {!hasTutorMemory && !tutorMemoryNudgeDismissed && messages.length >= 8 && (
+          <div style={{
+            margin: '8px 0',
+            padding: '10px 14px',
+            borderRadius: 10,
+            background: 'rgba(59,97,196,0.06)',
+            border: '1px solid rgba(59,97,196,0.18)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: 10,
+          }}>
+            <span style={{ fontSize: 12.5, color: '#3B61C4', lineHeight: 1.4 }}>
+              Your tutor remembers the last 10 messages. Upgrade to Unlimited for full session memory.
+            </span>
+            <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+              <button
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'tutorMemory' } }))
+                }}
+                style={{ padding: '5px 10px', borderRadius: 6, background: '#3B61C4', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer', border: 'none', whiteSpace: 'nowrap' }}
+              >
+                Upgrade
+              </button>
+              <button
+                onClick={() => setTutorMemoryNudgeDismissed(true)}
+                style={{ padding: '5px 8px', borderRadius: 6, background: 'transparent', color: '#6B6B6B', fontSize: 12, cursor: 'pointer', border: '1px solid rgba(0,0,0,0.1)' }}
+              >
+                Dismiss
+              </button>
             </div>
           </div>
         )}

@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
+import { acquireCronLock } from '../lib/server/cronLock.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -12,6 +13,12 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
   if (!process.env.RESEND_API_KEY) return res.status(200).json({ ok: true, skipped: true })
+
+  const locked = await acquireCronLock('day14-upgrade')
+  if (!locked) {
+    console.log('[day14-upgrade] Already ran today — skipping')
+    return res.status(200).json({ ok: true, skipped: true, reason: 'already_ran_today' })
+  }
 
   const now = new Date()
   const windowEnd   = new Date(now - 14 * 24 * 60 * 60 * 1000)
@@ -26,7 +33,7 @@ export default async function handler(req, res) {
   const users = { users: (rpcRows ?? []).map(r => ({ id: r.user_id, email: r.email, created_at: r.created_at })) }
   if (error) {
     console.error('[day14-upgrade] Failed to list users:', error)
-    return res.status(500).json({ error: 'Failed to list users' })
+    return res.status(500).json({ error: 'Failed to list users', detail: error.message })
   }
 
   const eligible = (users?.users ?? []).filter(u => {
@@ -39,11 +46,17 @@ export default async function handler(req, res) {
   for (const user of eligible) {
     if (!user.email) { skipped++; continue }
 
-    const { data: row } = await supabaseAdmin
+    const { data: row, error: rowError } = await supabaseAdmin
       .from('user_data')
       .select('subscription')
       .eq('user_id', user.id)
-      .single()
+      .maybeSingle()
+
+    if (rowError) {
+      console.error(`[day14] Failed to read user data for ${user.id}:`, rowError.message)
+      skipped++
+      continue
+    }
 
     const activeStatuses = ['active', 'trialing', 'past_due']
     const sub = row?.subscription ?? {}

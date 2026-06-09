@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
+import { acquireCronLock } from '../lib/server/cronLock.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -12,6 +13,12 @@ export default async function handler(req, res) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
   if (!process.env.RESEND_API_KEY) return res.status(200).json({ ok: true, skipped: true })
+
+  const locked = await acquireCronLock('day7-milestone')
+  if (!locked) {
+    console.log('[day7-milestone] Already ran today — skipping')
+    return res.status(200).json({ ok: true, skipped: true, reason: 'already_ran_today' })
+  }
 
   const now = new Date()
   const windowStart = new Date(now - 172 * 60 * 60 * 1000)
@@ -32,11 +39,17 @@ export default async function handler(req, res) {
   for (const user of weekOldUsers) {
     if (!user.email) continue
 
-    const { data: row } = await supabaseAdmin
+    const { data: row, error: rowError } = await supabaseAdmin
       .from('user_data')
       .select('subscription, completed_sessions, courses')
       .eq('user_id', user.id)
       .maybeSingle()
+
+    if (rowError) {
+      console.error(`[day7] Failed to read user data for ${user.id}:`, rowError.message)
+      skipped++
+      continue
+    }
 
     const plan = row?.subscription?.plan ?? 'free'
     const sessionCount = Array.isArray(row?.completed_sessions) ? row.completed_sessions.length : 0
