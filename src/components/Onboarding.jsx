@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { track } from '../lib/analytics'
 import { createCheckoutSession, hasUsedTrial } from '../lib/subscription'
 
@@ -9,6 +9,11 @@ const STEP_NAMES = {
   4: 'preferred_time',
   5: 'trial_offer',
 }
+
+// Onboarding has 5 internal steps but only 2 visible question screens (steps 2
+// and 4). Splash and trial-offer don't count toward the progress bar.
+const VISIBLE_STEP_INDEX = { 2: 1, 4: 2 }
+const VISIBLE_STEP_TOTAL = 2
 
 // ── Options ───────────────────────────────────────────────────────────────────
 const TIME_ICONS = {
@@ -208,7 +213,14 @@ function StepWrap({ children, animKey, dir }) {
 // ── Progress bar ───────────────────────────────────────────────────────────────
 function ProgressBar({ current, total }) {
   return (
-    <div style={{ display: 'flex', gap: 6, marginBottom: 36 }}>
+    <div
+      role="progressbar"
+      aria-label={`Onboarding progress, step ${current} of ${total}`}
+      aria-valuenow={current}
+      aria-valuemin={1}
+      aria-valuemax={total}
+      style={{ display: 'flex', gap: 6, marginBottom: 36 }}
+    >
       {Array.from({ length: total }, (_, i) => {
         const filled = i + 1 <= current
         return (
@@ -340,20 +352,43 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   const [yearLevel, setYearLevel]           = useState(null)
   const [preferredTime, setPreferredTime]   = useState(null)
 
+  // Funnel timing. stepEnteredAt tracks how long the user spent on the current
+  // step so we can fire ms_on_step in onboarding_step_completed. onboardingStart
+  // measures the full splash-to-finish duration for onboarding_completed.
+  const stepEnteredAt = useRef(Date.now())
+  const onboardingStart = useRef(Date.now())
+
   const goTo = (next, dir = 1) => {
     if (dir > 0) {
+      const fromName = STEP_NAMES[step] ?? `step_${step}`
+      const msOnStep = Date.now() - stepEnteredAt.current
+      track('onboarding_step_completed', {
+        step,
+        step_name: fromName,
+        ms_on_step: msOnStep,
+        next_step: next,
+      })
       track('onboarding_step', {
         from: step,
         to: next,
         step: next,
         step_name: STEP_NAMES[next] ?? `step_${next}`,
-        from_step_name: STEP_NAMES[step] ?? `step_${step}`,
+        from_step_name: fromName,
       })
     }
+    stepEnteredAt.current = Date.now()
     setAnimDir(dir)
     setAnimKey(k => k + 1)
     setStep(next)
     window.scrollTo(0, 0)
+  }
+
+  // Bundle the duration into the completion handler so App.jsx can include it
+  // in onboarding_completed. Used for both "Build my plan" (skip trial offer)
+  // and trial flow which calls onComplete before redirecting to Stripe.
+  const completeWith = (profile, extra = {}) => {
+    const durationMs = Date.now() - onboardingStart.current
+    onComplete({ ...profile, durationMs, ...extra })
   }
 
   // ── Step 1: Splash ───────────────────────────────────────────────────────────
@@ -363,7 +398,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   if (step === 2) return (
     <Page>
       <StepWrap animKey={animKey} dir={animDir}>
-        <ProgressBar current={1} total={2} />
+        <ProgressBar current={VISIBLE_STEP_INDEX[2]} total={VISIBLE_STEP_TOTAL} />
         <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.03em', marginBottom: 6, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
           What are you studying for?
         </h2>
@@ -415,7 +450,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   if (step === 4) return (
     <Page>
       <StepWrap animKey={animKey} dir={animDir}>
-        <ProgressBar current={2} total={2} />
+        <ProgressBar current={VISIBLE_STEP_INDEX[4]} total={VISIBLE_STEP_TOTAL} />
         <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.03em', marginBottom: 6, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
           When do you focus best?
         </h2>
@@ -442,7 +477,17 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
         <div style={{ display: 'flex', gap: 10 }}>
           <BackBtn onClick={() => goTo(2, -1)} />
-          <ContinueBtn onClick={() => { if (!hasUsedTrial()) { goTo(5) } else { onComplete({ yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true }) } }} disabled={!preferredTime} label="Build my plan" />
+          <ContinueBtn
+            onClick={() => {
+              if (!hasUsedTrial()) {
+                goTo(5)
+              } else {
+                completeWith({ yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true })
+              }
+            }}
+            disabled={!preferredTime}
+            label="Build my plan"
+          />
         </div>
       </StepWrap>
     </Page>
@@ -498,7 +543,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           onClick={async () => {
             track('trial_cta_clicked', { source: 'onboarding' })
             setTrialLoading(true)
-            onComplete(profileData)
+            completeWith(profileData, { trialTaken: true })
             const url = await createCheckoutSession('pro', 'weekly', userEmail, userId, { trial: true })
             if (url && !url.alreadySubscribed) {
               window.location.href = url
@@ -521,7 +566,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         {/* Low-prominence skip — a small link instead of an equal-weight button */}
         <div style={{ textAlign: 'center', marginTop: 18 }}>
           <button
-            onClick={() => { track('trial_skipped', { source: 'onboarding' }); onComplete(profileData) }}
+            onClick={() => { track('trial_skipped', { source: 'onboarding' }); completeWith(profileData, { trialTaken: false }) }}
             style={{ background: 'none', border: 'none', color: '#B5B5B5', fontSize: '0.78rem', fontWeight: 500, cursor: 'pointer', textDecoration: 'underline', padding: 4 }}
           >
             Continue with limited free preview

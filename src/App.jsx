@@ -239,7 +239,7 @@ export default function App() {
     window.location.href = '/'
   }
 
-  const handleOnboardingComplete = ({ yearLevel: yl, learningStyle: ls, preferredTime, schoolType: st, emailDigest }) => {
+  const handleOnboardingComplete = ({ yearLevel: yl, learningStyle: ls, preferredTime, schoolType: st, emailDigest, durationMs, trialTaken }) => {
     setYearLevel(yl)
     setLearningStyle(ls)
     setSchoolType(st ?? null)
@@ -254,7 +254,22 @@ export default function App() {
       localStorage.removeItem('studyedge_email_digest')
     }
     saveEmailDigest(!!emailDigest)
-    track('onboarding_completed', { yearLevel: yl, learningStyle: ls, preferredTime, emailDigest: !!emailDigest })
+    // duration_ms captures total time from splash to onboarding finish.
+    // n_courses is 0 here by definition (user lands in dashboard empty-state)
+    // but kept for spec compliance and future flows that may pre-seed
+    // courses. trial_taken differentiates trial-start vs. skip since both
+    // call handleOnboardingComplete.
+    track('onboarding_completed', {
+      yearLevel: yl,
+      learningStyle: ls,
+      preferredTime,
+      emailDigest: !!emailDigest,
+      duration_ms: typeof durationMs === 'number' ? durationMs : null,
+      n_courses: 0,
+      n_assignments: 0,
+      trial_taken: !!trialTaken,
+      school_type: st ?? null,
+    })
     // Post-onboarding email — fire once per user
     if (session?.user?.email) {
       const key = `studyedge_onboarding_email_${session.user.id}`
