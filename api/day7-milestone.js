@@ -17,13 +17,14 @@ export default async function handler(req, res) {
   const windowStart = new Date(now - 172 * 60 * 60 * 1000)
   const windowEnd   = new Date(now - 156 * 60 * 60 * 1000)
 
-  const { data: users, error } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 500 })
-  if (error) return res.status(500).json({ error: 'Failed to list users' })
-
-  const weekOldUsers = (users?.users ?? []).filter(u => {
-    const created = new Date(u.created_at)
-    return created >= windowStart && created <= windowEnd
+  // Direct RPC against auth.users — auth.admin.listUsers() is broken on
+  // GoTrue when any OAuth user exists (NULL confirmation_token scan panic).
+  const { data: rows, error } = await supabaseAdmin.rpc('list_users_by_signup_window', {
+    start_ts: windowStart.toISOString(),
+    end_ts:   windowEnd.toISOString(),
   })
+  if (error) return res.status(500).json({ error: 'Failed to list users', detail: error.message })
+  const weekOldUsers = (rows ?? []).map(r => ({ id: r.user_id, email: r.email, created_at: r.created_at }))
 
   console.log(`[day7-milestone] Found ${weekOldUsers.length} users at 7-day mark`)
   let sent = 0, skipped = 0

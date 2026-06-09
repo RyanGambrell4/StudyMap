@@ -17,7 +17,13 @@ export default async function handler(req, res) {
   const windowEnd   = new Date(now - 14 * 24 * 60 * 60 * 1000)
   const windowStart = new Date(now - 15 * 24 * 60 * 60 * 1000)
 
-  const { data: users, error } = await supabaseAdmin.auth.admin.listUsers({ page: 1, perPage: 1000 })
+  // Direct RPC against auth.users — auth.admin.listUsers() is broken on
+  // GoTrue when any OAuth user exists (NULL confirmation_token scan panic).
+  const { data: rpcRows, error } = await supabaseAdmin.rpc('list_users_by_signup_window', {
+    start_ts: windowStart.toISOString(),
+    end_ts:   windowEnd.toISOString(),
+  })
+  const users = { users: (rpcRows ?? []).map(r => ({ id: r.user_id, email: r.email, created_at: r.created_at })) }
   if (error) {
     console.error('[day14-upgrade] Failed to list users:', error)
     return res.status(500).json({ error: 'Failed to list users' })
