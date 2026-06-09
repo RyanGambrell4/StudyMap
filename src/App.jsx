@@ -82,7 +82,12 @@ export default function App() {
   const openPaywall = useCallback((trigger = 'courses') => {
     setPaywallTrigger(trigger)
     setPaywallOpen(true)
-    track('paywall_shown', { trigger })
+    const unlimitedTriggers = new Set(['tutorMemory', 'practiceExamAnalytics', 'unlimited'])
+    track('paywall_shown', {
+      trigger_feature: trigger,
+      plan_required: unlimitedTriggers.has(trigger) ? 'unlimited' : 'pro',
+      current_plan: getActivePlan(),
+    })
   }, [])
 
   // Any component can open the paywall by dispatching `studyedge:open-paywall`

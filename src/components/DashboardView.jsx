@@ -168,6 +168,15 @@ export default function DashboardView({
   const aiUsed = getAIQueriesUsed()
   const [trialBannerLoading, setTrialBannerLoading] = useState(false)
 
+  // Fire the empty-state impression once on mount so we have a denominator
+  // for first_course_cta_clicked. courses is stable from props at mount time.
+  useEffect(() => {
+    if (courses.length === 0) {
+      track('dashboard_empty_state_shown', { exam_mode: schoolType === 'exam' })
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   const handleStartTrial = async () => {
     if (trialBannerLoading) return
     setTrialBannerLoading(true)
@@ -479,7 +488,10 @@ export default function DashboardView({
             ))}
           </div>
           <button
-            onClick={onNavigateToCourses}
+            onClick={() => {
+              track('first_course_cta_clicked', { source: 'dashboard_empty_state', exam_mode: !!isExamMode })
+              onNavigateToCourses?.()
+            }}
             style={{ background: D.blue, color: '#fff', fontSize: 15, fontWeight: 700, padding: '13px 28px', borderRadius: 12, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(59,97,196,0.25)' }}
           >
             {isExamMode ? 'Add your first section →' : 'Add your first course →'}
