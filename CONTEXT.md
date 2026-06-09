@@ -1,5 +1,47 @@
 # StudyEdge AI — Living Context
-_Last updated by: UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+
+---
+
+## Paywall Agent — 2026-06-09 (trial math fix + Unlimited tutor memory + event contract)
+_Driven by user-spec invocation. Read PAYWALL_REDESIGN_SPEC.md (historical), PRICING_SPEC.md (live source of truth), CLAUDE.md, and CONTEXT.md. Found the paywall system mostly built (PaywallModal redesign, billing toggle, context-aware Unlimited gate, soft-nudge pills in StudyToolsView, trial pill in AppShell, advanced PE analytics gate, all `onShowPaywall` triggers wired). Shipped the missing pieces only — no padding._
+
+### Commit 1: trial-progress math + em-dash sweep (`9002911`)
+- DashboardView trial banner used `(7 - daysLeft) / 7` for the progress fill — old 7-day formula. On a 3-day trial it jumped past 66% on day 1. Switched to `(3 - daysLeft) / 3`.
+- Swept two em dashes from user-facing trial copy: AppShell `trialMsg` (both branches) and DashboardView "Your free trial is active —". Converted to sentence breaks ("…active. N days remaining.").
+
+### Commit 2: Unlimited tutor session memory (`65e5db4`)
+- AIChatView now calls `canUseUnlimitedFeature('tutorMemory')` and passes the full conversation when Unlimited, vs. `.slice(-10)` for Pro/Free.
+- `api/chat-tutor.js` accepts `tutorMemory: boolean` and switches to `.slice(-60)` as a server-side cap when set. Keeps prompt cost predictable for Pro/Free while honoring the Unlimited promise.
+- The PaywallModal already had the `tutorMemory` LIMIT_MESSAGE and Unlimited-only gating; this wired the actual server-side benefit so the upsell isn't hollow.
+
+### Commit 3: PostHog event contract refresh (`a183267`)
+Brought instrumentation in line with the spec event names + payloads:
+- `paywall_shown` now carries `trigger_feature`, `plan_required` (pro/unlimited), `current_plan`. Previously `{ trigger }` only.
+- `paywall_dismissed` now carries `dwell_ms`, `trigger_feature`, `current_plan`, `reason`. Dwell timing via `useRef(Date.now())` set on mount.
+- Renamed two CTAs (`upgrade_clicked` / `trial_start_clicked`) to a single canonical `paywall_cta_click` with `plan_clicked`, `billing_period`, `trigger_feature`, `is_trial`.
+- New `trial_started` fires when the user click-throughs into Stripe Checkout (separate from `trial_activated` which fires after the legacy no-card flow).
+- New `trial_expired` fires once per trial via localStorage debounce, when a user who used the trial returns and the window has passed without conversion. Previously the silent expiry rate was unmeasurable.
+
+### Commit 4: Practice Exam Pro pill (`ef392cc`)
+- Free users now see a small "Pro" pill inside the "Start Practice Exam" button on `PracticeExamView`, matching the soft-nudge pattern already used in StudyToolsView for AI Cheat Sheet and Exam Rescue. Pro/Unlimited users see the CTA unchanged.
+
+### Already-built (not touched, verified working)
+- Trial pill in AppShell topnav (days-left countdown, color-shifts to amber under 1 day).
+- Trial banner dismissible in AppShell (sessionStorage debounce).
+- Advanced practice-exam analytics gate (score-trend chart + predicted score) in PracticeExamResults.jsx, with the Unlimited upsell card dispatching `studyedge:open-paywall` with `trigger: 'practiceExamAnalytics'`.
+- `canUseFeature` / `canUseUnlimitedFeature` / `incrementFeatureUsage` / `getActivePlan` in subscription.js.
+- All paywall triggers (AI Cheat Sheet, Exam Rescue, Brain Dump, Quiz Burst, Practice Exam, Focus mode, course-cap, AI exhausted, blueprint, etc.) wired in their respective modals/views.
+- PaywallModal billing toggle (Weekly default), Pro/Unlimited card layout, rotating testimonials, Stripe Checkout integration, "Or choose a paid plan" divider, 3-day trial card.
+
+### Spec contradiction reconciled
+- `PRICING_SPEC.md` says "no card" on the table row, but says "card required" in the trial section three paragraphs down. CLAUDE.md is the source of truth: **3-day Pro trial via Stripe Checkout, card required, auto-bills $2.99/wk after.** All commit work honored that:
+  - No "no credit card required" anywhere in trial CTAs (only in Free-plan messaging in AuthScreen + LandingPage FAQ).
+  - PaywallModal trial card copy: "Full access for 3 days, then $2.99/week. Cancel anytime from your account before your trial ends." + "Card required · $0 today · cancel anytime."
+  - `trial_started` event does NOT carry a `no_card_required: true` flag.
+
+### Build
+- `npm run build` exit 0 after every commit. Bundle clean; one pre-existing AIChatView dynamic-import warning (out of scope).
 
 ---
 
