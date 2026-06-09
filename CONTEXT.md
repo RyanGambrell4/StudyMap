@@ -1,5 +1,81 @@
 # StudyEdge AI — Living Context
-_Last updated by: Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+
+---
+
+## QA Agent -- 2026-06-09 (code audit pass)
+
+_Playwright not run (Supabase auth requires real email verification). Full code audit performed instead: every major component and API route read and audited for em dashes, emojis, dark color leaks, AI slop copy, and broken logic._
+
+### Bugs found and fixed
+
+#### Em dashes in user-facing copy (Category 2: AI slop / style)
+Previous agents had cleared some em dashes, but a second full sweep found dozens more across components and API files. All replaced with periods, commas, or colons as appropriate.
+
+**Components fixed (20 files):**
+- OutputView.jsx: 3 em dashes (boost nudge copy, Grade Recovery Mode label, exam cluster banner)
+- DashboardView.jsx: 3 (empty state MCAT copy, grade recovery banner, no-sessions message)
+- AuthScreen.jsx: 3 (marketing subheadline, rate-limit error, resend-failed error)
+- FocusMode.jsx: 2 (Self-Test checklist header in PDF HTML template, Active Recall tip)
+- StudyCoachView.jsx: 9 (empty state, confidence badge, plan disclaimer, MCAT goal placeholder, info callout, struggles empty state, share tweet/WhatsApp link, exported txt/PDF headers)
+- GradeHubView.jsx: 3 (grade-out-of-reach message, grade-safe message, floor callout, predictor disclaimer)
+- CoursesView.jsx: 3 (error message, exam date description, next button label)
+- StepCourses.jsx: 2 (courses header, exam picker button)
+- CalendarWeekView.jsx: 1 (exam countdown chip)
+- CalendarDayView.jsx: 1 (session title in day view)
+- PracticeExamSetup.jsx: 5 (error message, 4 numbered section labels)
+- PracticeExamModal.jsx: 1 (extracted text count line)
+- PracticeExamResults.jsx: 2 (slowest questions header, skipped answer display)
+- ReferralCard.jsx: 2 (referral copy, WhatsApp share text)
+- OnboardingTour.jsx: 1 (tour step description)
+- AccountView.jsx: 1 (Google Calendar connected label)
+- ProgressView.jsx: 1 (flashcard legend key)
+- SharedPlanView.jsx: 1 (week theme label)
+- StudyToolsView.jsx: 2 (quiz error message, generate button label)
+- adaptationEngine.js: 1 (adaptation reason message shown to user)
+
+**API email/error files fixed (7 files):**
+- day14-upgrade.js: subject line, body copy, feature detail, email footer
+- day7-milestone.js: body copy, subject line, pricing line, email footer
+- streak-broken.js: subject line, body copy
+- exam-tomorrow.js: subject line, HTML title, 2 tip lines, body copy, footer (2 occurrences)
+- welcome-email.js: subject line (2 variants)
+- day1-tips.js: tip detail copy
+- generate-study-tools.js: 2 user-facing error messages
+
+#### Emojis in UI (Category 2: design standard violation)
+- FocusMode.jsx HTML template: removed ✏️ from Self-Test header, ⏱ from Spaced Repetition, 🧠 from Active Recall, 🗣 from Teach It
+- CalendarWeekView.jsx: removed 📝 from inline note preview chip
+- StudyToolsView.jsx: removed ⏱ from Timed button and quiz live timer display
+- App.jsx: removed 🎉 from checkout success banner
+
+#### Dark color leaks (Category 3: visual bug)
+- StudyToolsView.jsx: #1e293b (slate-800) used for flashcard search result text and quiz weak-areas question text -- replaced with #111111
+- SharedPlanView.jsx: #0F172A (slate-900) used as primary text and heading color throughout the public shared-plan page -- replaced with #111111
+
+### What was NOT touched (and why)
+- Exam section label strings like "C/P -- Chemistry & Physics", "FAR -- Financial Accounting" etc: these contain literal hyphens used as section-name separators in the standardized exam naming convention, not em dashes in UI copy. Left as-is.
+- `'--'` used as a null/empty display value (e.g. `hrs > 0 ? hrs+'h' : '--'`): acceptable typographic placeholder for "no data", not copy.
+- Em dashes inside AI prompt strings (instructions sent to Claude, never shown to users): left as-is.
+- OutputView.jsx ShareCard modal with dark gradient (#1e293b/#0f172a): intentionally dark -- it's a screenshot card for social sharing, not in-app UI.
+- FocusMode.jsx CSS strings (#1f2937, #374151 etc) used in the PDF HTML template styles: these are in a print/export template, not interactive UI. Within acceptable range for rendered PDF text.
+- SharedPlanView.jsx slate palette for backgrounds/borders (#F8FAFC, #E2E8F0, #F1F5F9): very light colors, not dark-mode leaks.
+
+### Commits
+- `8e3bbec` -- fix: sweep em dashes, emojis, and dark color leaks across 20 components
+- `95ab5fc` -- fix: sweep em dashes from email copy and API error messages
+- `38887a6` -- fix: final em dash sweep in exam-tomorrow footer, generate-study-tools error, and adaptationEngine user message
+
+### Build
+Clean. No errors. 3 commits pushed to main, Vercel auto-deploy triggered.
+
+### Playwright testing
+Not performed -- Supabase email verification wall blocks automated signup flow. Code audit found and fixed all Category 2/3 issues visually.
+
+### Open items for next QA run
+- Run full Playwright flows once a test account bypass or magic-link approach is available
+- Verify AI output quality end-to-end (flashcard course-specificity, quiz burst relevance, study plan accuracy) with a real login
+- Check mobile layout at 390px for newer components (PracticeExamSetup, PracticeExamView) -- not audited this run
 
 ---
 
