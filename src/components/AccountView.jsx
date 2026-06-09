@@ -153,14 +153,16 @@ export default function AccountView({
     if (!confirm('Cancel your free trial?\n\nYou won\'t be charged. You\'ll move to the free plan immediately.')) return
     setCanceling(true)
     try {
-      const { data: { user } } = await supabase.auth.getUser()
+      const { data: { session } } = await supabase.auth.getSession()
       const res = await fetch('/api/stripe', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'cancel-trial', userId: user.id }),
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+        body: JSON.stringify({ action: 'cancel-trial', userId: session?.user?.id }),
       })
       if (!res.ok) throw new Error('Failed')
-      initSubscription(user.id, { plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null })
+      const data = await res.json()
+      // Use the server-returned subscription so the cache stays consistent.
+      initSubscription(session.user.id, data.subscription ?? { ...getCachedSubscription(), plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null })
       setCanceled(true)
     } catch {
       alert('Something went wrong. Please try again or contact support@getstudyedge.com.')

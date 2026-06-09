@@ -320,12 +320,17 @@ export default async function handler(req, res) {
         const email = authUser?.user?.email
         if (email) {
           await sendTrialExpiryEmail(email)
-          // Loops.so — fire trial_ending_soon automation
           await Promise.allSettled([
             onTrialEndingSoon({ email, userId, daysLeft: 3 }),
           ])
         }
       }
+      // Record idempotency here — this handler returns early and never reaches the
+      // global insert below, so Stripe retries would re-send the email without this.
+      await supabaseAdmin
+        .from('stripe_idempotency')
+        .insert({ event_id: eventId, processed_at: new Date().toISOString() })
+        .then(({ error }) => { if (error) console.error('[stripe] Failed to record trial_will_end event', error) })
       return res.status(200).json({ received: true })
     }
 
@@ -528,8 +533,14 @@ export default async function handler(req, res) {
 
   // ── Cancel trial path ──────────────────────────────────────────────────────
   if (body.action === 'cancel-trial') {
+    // Verify the request comes from the authenticated user.
+    const token = req.headers['authorization']?.replace('Bearer ', '')
+    if (!token) return res.status(401).json({ error: 'Unauthorized' })
+    const { data: { user: authUser }, error: authErr } = await supabaseAdmin.auth.getUser(token)
+    if (authErr || !authUser) return res.status(401).json({ error: 'Unauthorized' })
+
     const { userId } = body
-    if (!userId) return res.status(400).json({ error: 'Missing userId' })
+    if (!userId || userId !== authUser.id) return res.status(403).json({ error: 'Forbidden' })
 
     const { data, error: dbErr } = await supabaseAdmin
       .from('user_data')
@@ -554,12 +565,19 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to cancel with Stripe' })
     }
 
-    const updated = { ...sub, plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null, trial_activated: false }
-    await supabaseAdmin
+    // Keep trial_activated: true so hasUsedTrial() stays true — prevents a second free trial.
+    // status: 'cancelled' is what isTrialActive() checks to block re-activation.
+    const updated = { ...sub, plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null }
+    const { error: upsertErr } = await supabaseAdmin
       .from('user_data')
       .upsert({ user_id: userId, subscription: updated, updated_at: new Date().toISOString() }, { onConflict: 'user_id' })
 
-    return res.status(200).json({ success: true })
+    if (upsertErr) {
+      console.error('[cancel-trial] DB upsert failed after Stripe cancel:', upsertErr)
+      return res.status(500).json({ error: 'Subscription cancelled in Stripe but failed to update database. Contact support.' })
+    }
+
+    return res.status(200).json({ success: true, subscription: updated })
   }
 
   const { plan, billingPeriod: rawBillingPeriod, userEmail, userId, trial } = body
