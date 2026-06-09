@@ -1547,7 +1547,9 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form }) {
         topics: plan.priorityTopics?.slice(0, 8) ?? [],
       })
       const b64 = btoa(encodeURIComponent(payload))
-      return `${window.location.origin}/shared-plan#${b64}`
+      // utm_* tells PostHog this signup came from a user-shared coach plan,
+      // distinct from organic / referral / paid.
+      return `${window.location.origin}/shared-plan?utm_source=shared_plan&utm_medium=user_share&utm_campaign=coach_plan_share#${b64}`
     } catch { return null }
   })()
 

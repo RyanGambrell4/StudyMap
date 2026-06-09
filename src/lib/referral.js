@@ -31,5 +31,11 @@ export function clearStoredReferrer() {
 
 /** Builds the shareable referral link for a given user */
 export function getReferralLink(userId) {
-  return `https://getstudyedge.com/signup?ref=${userId}`
+  const params = new URLSearchParams({
+    ref: userId,
+    utm_source: 'referral',
+    utm_medium: 'user_share',
+    utm_campaign: 'in_app_referral',
+  })
+  return `https://getstudyedge.com/signup?${params}`
 }
