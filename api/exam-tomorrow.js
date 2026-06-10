@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { sendExamReminderSMS } from '../lib/server/twilio.js'
 import { recordUserEmail } from '../lib/server/emailGuard.js'
+import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -83,10 +84,12 @@ export default async function handler(req, res) {
         from: 'StudyEdge AI <support@mail.getstudyedge.com>',
         to: email,
         subject: `${examTitle} is ${isToday ? 'tomorrow' : 'in 2 days'}. Final prep time.`,
+        headers: listUnsubscribeHeaders(email),
         html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${examTitle} final prep</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+${preheader(`${examTitle} is ${isToday ? 'tomorrow' : 'in 2 days'}. Here is your final prep checklist.`)}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">

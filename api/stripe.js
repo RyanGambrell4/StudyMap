@@ -16,6 +16,7 @@ import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { onTrialEndingSoon, onUpgraded, onChurned } from '../lib/server/loops.js'
+import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 
 // Disable Vercel's default body parsing — required for Stripe signature verification
 export const config = {
@@ -113,16 +114,17 @@ async function sendWinBackEmail(toEmail) {
       from: 'StudyEdge AI <support@mail.getstudyedge.com>',
       to: toEmail,
       subject: "You still have Pro until your billing period ends",
+      headers: listUnsubscribeHeaders(toEmail),
       html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pro cancellation confirmed</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111111;">
+${preheader("Your Pro subscription is cancelled. You keep full access until the end of your billing period.")}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
       <tr><td style="padding-bottom:20px;text-align:center;">
-        <img src="https://getstudyedge.com/favicon.png" width="32" height="32" alt="StudyEdge" style="display:inline-block;width:32px;height:32px;border-radius:8px;vertical-align:middle;margin-right:10px;border:0;outline:none;text-decoration:none;" />
-        <span style="font-size:16px;font-weight:700;color:#111111;vertical-align:middle;letter-spacing:-0.3px;">StudyEdge</span>
+        <span style="font-size:16px;font-weight:700;color:#111111;letter-spacing:-0.3px;">StudyEdge</span>
       </td></tr>
       <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Cancellation confirmed</p>
@@ -170,7 +172,7 @@ async function sendWinBackEmail(toEmail) {
           &nbsp;·&nbsp;
           <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
         </p>
-        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">The StudyEdge AI team</p>
       </td></tr>
     </table>
   </td></tr>
@@ -189,17 +191,18 @@ async function sendTrialExpiryEmail(toEmail) {
     await resend.emails.send({
       from: 'StudyEdge AI <support@mail.getstudyedge.com>',
       to: toEmail,
-      subject: 'Your free trial ends tomorrow',
+      subject: 'Your trial ends tomorrow. Keep Pro for $2.99/wk.',
+      headers: listUnsubscribeHeaders(toEmail),
       html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your free trial ends tomorrow</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111111;">
+${preheader("Trial ends tomorrow. Your card gets charged $2.99/wk unless you cancel in your account.")}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
       <tr><td style="padding-bottom:20px;text-align:center;">
-        <img src="https://getstudyedge.com/favicon.png" width="32" height="32" alt="StudyEdge" style="display:inline-block;width:32px;height:32px;border-radius:8px;vertical-align:middle;margin-right:10px;border:0;outline:none;text-decoration:none;" />
-        <span style="font-size:16px;font-weight:700;color:#111111;vertical-align:middle;letter-spacing:-0.3px;">StudyEdge</span>
+        <span style="font-size:16px;font-weight:700;color:#111111;letter-spacing:-0.3px;">StudyEdge</span>
       </td></tr>
       <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#3B61C4;text-transform:uppercase;">Trial ending soon</p>
@@ -207,9 +210,9 @@ async function sendTrialExpiryEmail(toEmail) {
           Your Pro trial ends tomorrow.
         </h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Your 3-day free trial wraps up tomorrow. If nothing changes, your card on file is billed <strong style="color:#111111;">$2.99/week</strong> and Pro stays active. Cancel before then and you won't be charged.
+          Tomorrow your card is charged <strong style="color:#111111;">$2.99/week</strong> and Pro continues automatically. If you don't want to keep it, cancel in Settings before then.
         </p>
-        <p style="margin:18px 0 10px;font-size:11px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">What Pro keeps unlocked</p>
+        <p style="margin:18px 0 10px;font-size:11px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">What you keep with Pro</p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
           ${[
             ['5 courses', 'Free drops you to 1'],
@@ -238,11 +241,11 @@ async function sendTrialExpiryEmail(toEmail) {
           <tr><td align="center" style="padding-bottom:8px;">
             <a href="https://getstudyedge.com/app"
                style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">
-              Open my study plan
+              Keep Pro and study today
             </a>
           </td></tr>
-          <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">Cancel any time in your account before tomorrow and you won't be charged.</span>
+          <tr><td align="center" style="padding-top:10px;">
+            <span style="font-size:12px;color:#9B9B9B;">Don't want to keep it? Cancel anytime in <strong>Settings</strong> before tomorrow.</span>
           </td></tr>
         </table>
       </td></tr>
@@ -253,7 +256,7 @@ async function sendTrialExpiryEmail(toEmail) {
           &nbsp;·&nbsp;
           <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
         </p>
-        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">The StudyEdge AI team</p>
       </td></tr>
     </table>
   </td></tr>
@@ -263,6 +266,152 @@ async function sendTrialExpiryEmail(toEmail) {
     console.log(`[stripe webhook] Trial expiry email sent to ${toEmail}`)
   } catch (err) {
     console.error('[stripe webhook] Failed to send trial expiry email:', err)
+  }
+}
+
+async function sendTrialStartedEmail(toEmail, trialEndTs) {
+  if (!process.env.RESEND_API_KEY) return
+  const endDate = trialEndTs
+    ? new Date(trialEndTs * 1000).toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
+    : null
+  try {
+    await resend.emails.send({
+      from: 'StudyEdge AI <support@mail.getstudyedge.com>',
+      to: toEmail,
+      subject: 'Your 3-day Pro trial has started.',
+      headers: listUnsubscribeHeaders(toEmail),
+      html: `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your trial has started</title></head>
+<body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111111;">
+${preheader("You have full Pro access. Here is everything that is now unlocked.")}
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
+      <tr><td style="padding-bottom:20px;text-align:center;">
+        <span style="font-size:16px;font-weight:700;color:#111111;letter-spacing:-0.3px;">StudyEdge</span>
+      </td></tr>
+      <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
+        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#3B61C4;text-transform:uppercase;">Trial started</p>
+        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">
+          You have full Pro access.
+        </h1>
+        <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          Your 3-day free trial is active.${endDate ? ` It ends on <strong style="color:#111111;">${endDate}</strong>.` : ''} After that, your card is charged $2.99/week unless you cancel. Here's everything you can use right now:
+        </p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
+          ${[
+            ['5 courses', 'Track every class you are taking, each with its own plan'],
+            ['100 AI study boosts / month', 'Enough for daily use all semester'],
+            ['AI Study Coach', 'Multi-week plan built around your exam dates'],
+            ['Session Blueprints', 'Minute-by-minute plan before every study block'],
+            ['Flashcards and quizzes', 'Built into every session automatically'],
+          ].map(([feat, detail], i, arr) => `
+          <tr>
+            <td style="padding:11px 0;${i < arr.length - 1 ? 'border-bottom:1px solid #F0EDE8;' : ''}">
+              <div style="font-size:14px;font-weight:600;color:#111111;">${feat}</div>
+              <div style="font-size:13px;color:#6B6B6B;margin-top:2px;">${detail}</div>
+            </td>
+          </tr>`).join('')}
+        </table>
+        <table cellpadding="0" cellspacing="0" style="width:100%;">
+          <tr><td align="center" style="padding-bottom:8px;">
+            <a href="https://getstudyedge.com/app" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Start studying</a>
+          </td></tr>
+          <tr><td align="center">
+            <span style="font-size:12px;color:#9B9B9B;">Cancel anytime before ${endDate ?? 'the trial ends'} in Settings to avoid being charged.</span>
+          </td></tr>
+        </table>
+      </td></tr>
+      <tr><td style="padding:24px 0 0;text-align:center;">
+        <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
+          You're receiving this because you started a StudyEdge AI Pro trial.<br>
+          <a href="https://getstudyedge.com/app" style="color:#9B9B9B;text-decoration:underline;">Open the app</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
+        </p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">The StudyEdge AI team</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`,
+    })
+    console.log(`[stripe webhook] Trial started email sent to ${toEmail}`)
+  } catch (err) {
+    console.error('[stripe webhook] Failed to send trial started email:', err)
+  }
+}
+
+async function sendTrialCancelledEmail(toEmail) {
+  if (!process.env.RESEND_API_KEY) return
+  try {
+    await resend.emails.send({
+      from: 'StudyEdge AI <support@mail.getstudyedge.com>',
+      to: toEmail,
+      subject: 'Trial cancelled. You will not be charged.',
+      headers: listUnsubscribeHeaders(toEmail),
+      html: `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Trial cancelled</title></head>
+<body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111111;">
+${preheader("Your trial was cancelled. Your card will not be charged. Your account is on the free plan.")}
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
+      <tr><td style="padding-bottom:20px;text-align:center;">
+        <span style="font-size:16px;font-weight:700;color:#111111;letter-spacing:-0.3px;">StudyEdge</span>
+      </td></tr>
+      <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
+        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Confirmed</p>
+        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">
+          Your trial was cancelled. No charge.
+        </h1>
+        <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          Your 3-day trial has been cancelled and your card will not be billed. Your account is now on the free plan.
+        </p>
+        <p style="margin:0 0 20px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          You can still use StudyEdge on free. If you change your mind, you can start a new trial anytime.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
+          ${[
+            ['1 course', 'Add one course with full session planning'],
+            ['10 AI study boosts', 'Use AI features up to 10 times total'],
+            ['Grade tracker', 'Track your progress and target grade'],
+          ].map(([feat, detail], i, arr) => `
+          <tr>
+            <td style="padding:9px 0;${i < arr.length - 1 ? 'border-bottom:1px solid #F0EDE8;' : ''}">
+              <div style="font-size:14px;font-weight:600;color:#111111;">${feat}</div>
+              <div style="font-size:13px;color:#6B6B6B;margin-top:2px;">${detail}</div>
+            </td>
+          </tr>`).join('')}
+        </table>
+        <table cellpadding="0" cellspacing="0" style="width:100%;">
+          <tr><td align="center" style="padding-bottom:6px;">
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Restart trial anytime</a>
+          </td></tr>
+          <tr><td align="center">
+            <span style="font-size:12px;color:#9B9B9B;">3-day trial, then $2.99/wk. Cancel before it ends and you won't be charged.</span>
+          </td></tr>
+        </table>
+      </td></tr>
+      <tr><td style="padding:24px 0 0;text-align:center;">
+        <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
+          You're receiving this because you cancelled your StudyEdge AI Pro trial.<br>
+          <a href="https://getstudyedge.com/app" style="color:#9B9B9B;text-decoration:underline;">Open the app</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
+        </p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">The StudyEdge AI team</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`,
+    })
+    console.log(`[stripe] Trial cancelled confirmation sent to ${toEmail}`)
+  } catch (err) {
+    console.error('[stripe] Failed to send trial cancelled email:', err)
   }
 }
 
@@ -502,6 +651,11 @@ export default async function handler(req, res) {
             stripe_sub_id: sub.id,
             source: 'stripe',
           })
+          // Send trial started confirmation — tells user what's unlocked and when they'll be charged.
+          const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
+          if (authUser?.user?.email) {
+            await sendTrialStartedEmail(authUser.user.email, sub.trial_end ?? null)
+          }
         }
       } catch (err) {
         console.error('[stripe webhook] DB error:', err)
@@ -575,6 +729,13 @@ export default async function handler(req, res) {
     if (upsertErr) {
       console.error('[cancel-trial] DB upsert failed after Stripe cancel:', upsertErr)
       return res.status(500).json({ error: 'Subscription cancelled in Stripe but failed to update database. Contact support.' })
+    }
+
+    // Send cancellation confirmation — stops "was I charged?" support tickets.
+    if (authUser?.email) {
+      sendTrialCancelledEmail(authUser.email).catch(e =>
+        console.error('[cancel-trial] Failed to send confirmation email:', e)
+      )
     }
 
     return res.status(200).json({ success: true, subscription: updated })

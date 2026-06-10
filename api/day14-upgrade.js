@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 import { acquireCronLock } from '../lib/server/cronLock.js'
+import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -68,19 +69,20 @@ export default async function handler(req, res) {
 
     try {
       await resend.emails.send({
-        from: 'StudyEdge AI <support@mail.getstudyedge.com>',
+        from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
         to: user.email,
         subject: "Two weeks in. Still on the free plan?",
+        headers: listUnsubscribeHeaders(user.email),
         html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Two weeks on StudyEdge</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+${preheader("Two weeks on StudyEdge. Still on free? Here's what changes when you upgrade.")}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
       <tr><td style="padding-bottom:20px;text-align:center;">
-        <img src="https://getstudyedge.com/favicon.png" width="32" height="32" alt="StudyEdge" style="display:inline-block;width:32px;height:32px;border-radius:8px;vertical-align:middle;margin-right:10px;border:0;outline:none;text-decoration:none;" />
-        <span style="font-size:16px;font-weight:700;color:#111111;vertical-align:middle;letter-spacing:-0.3px;">StudyEdge</span>
+        <span style="font-size:16px;font-weight:700;color:#111111;letter-spacing:-0.3px;">StudyEdge</span>
       </td></tr>
       <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Week 2 check-in</p>
@@ -89,7 +91,7 @@ export default async function handler(req, res) {
           You're on the free plan, which is a one-time preview: 1 course, 2 lifetime AI tutor messages, and a single use of each Pro feature. If you've been hitting those limits, Pro is the right move.
         </p>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Most students who upgrade do it around week 2, when they realize they're serious about their grades. You're at that point.
+          You've been on StudyEdge for two weeks. That makes you one of the students who's actually trying. Free plan or not, that matters. Here's what Pro adds if you're ready for it:
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[

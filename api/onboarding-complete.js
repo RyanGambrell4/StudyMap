@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -34,7 +35,7 @@ export default async function handler(req, res) {
     }
   }
 
-  const greeting = firstName ? `Hey ${firstName.split(' ')[0]}` : 'You\'re set'
+  const greeting = firstName ? `Hi ${firstName.split(' ')[0]}` : 'You\'re set'
   const profileRows = [
     ['Year', yearLevel ?? 'Not specified'],
     ['Learning style', learningStyle ?? 'Not specified'],
@@ -46,10 +47,12 @@ export default async function handler(req, res) {
       from: 'StudyEdge AI <support@mail.getstudyedge.com>',
       to: email,
       subject: 'Your StudyEdge profile is set up — next step',
+      headers: listUnsubscribeHeaders(email),
       html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Onboarding complete</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+${preheader("Your profile is set. One step left before your study plan can work.")}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">

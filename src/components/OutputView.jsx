@@ -833,7 +833,7 @@ export default function OutputView({
       onShowPaywall?.('blueprint')
       return
     }
-    track('session_started', { courseId: s.courseId, courseName: s.courseName, sessionType: s.sessionType, duration: s.duration })
+    track('session_started', { courseId: s.courseId, courseName: s.courseName, sessionType: s.sessionType, studyMethod: s.studyMethod ?? null, duration: s.duration })
     // Fire first_session_started exactly once per user. Anchors the
     // "signup -> first action" funnel without double-counting on every
     // start. Keyed on userId so a different account on the same device
@@ -879,6 +879,16 @@ export default function OutputView({
         })
         saveCompletedSession(record)
         track('session_completed', { courseId: sess.courseId, courseName: sess.courseName, sessionType: sess.sessionType, elapsedSeconds: record.elapsedSeconds, recallScore: recallData?.score ?? null })
+
+        // First-session email -- fires once per user after their very first session.
+        const priorSessions = getCachedCompletedSessions().filter(s => s.id !== record.id)
+        if (userId && priorSessions.length === 0) {
+          fetch('/api/first-session-email', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ userId, courseName: sess.courseName }),
+          }).catch(() => {})
+        }
 
         // Run adaptation engine if recall data was provided
         if (recallData?.score !== undefined) {

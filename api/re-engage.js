@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
+import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -90,24 +91,25 @@ export default async function handler(req, res) {
         : `<tr><td style="padding:9px 0;font-size:14px;color:#6B6B6B;">Your courses are ready — pick up where you left off.</td></tr>`
 
       await resend.emails.send({
-        from: 'StudyEdge AI <support@mail.getstudyedge.com>',
+        from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
         to: email,
         subject,
+        headers: listUnsubscribeHeaders(email),
         html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your study plan is waiting</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+${preheader(courseNames.length ? `Your ${courseNames[0]} sessions are still here. Pick up where you left off.` : "Your study plan is still here. Pick up where you left off.")}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
       <tr><td style="padding-bottom:20px;text-align:center;">
-        <img src="https://getstudyedge.com/favicon.png" width="32" height="32" alt="StudyEdge" style="display:inline-block;width:32px;height:32px;border-radius:8px;vertical-align:middle;margin-right:10px;border:0;outline:none;text-decoration:none;" />
-        <span style="font-size:16px;font-weight:700;color:#111111;vertical-align:middle;letter-spacing:-0.3px;">StudyEdge</span>
+        <span style="font-size:16px;font-weight:700;color:#111111;letter-spacing:-0.3px;">StudyEdge</span>
       </td></tr>
       <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Come back</p>
         <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">
-          ${courseNames.length ? `${courseNames[0]} misses you.` : "Your study plan misses you."}
+          ${courseNames.length ? `Your ${courseNames[0]} plan is ready when you are.` : "Your study plan is ready when you are."}
         </h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           It's been a few days. Your study sessions are still waiting — and your exams aren't moving.

@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 import { acquireCronLock } from '../lib/server/cronLock.js'
+import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -42,19 +43,20 @@ export default async function handler(req, res) {
     if (!gate.ok) continue
     try {
       await resend.emails.send({
-        from: 'StudyEdge AI <support@mail.getstudyedge.com>',
+        from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
         to: user.email,
         subject: '3 things that make StudyEdge actually work',
+        headers: listUnsubscribeHeaders(user.email),
         html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Make your first week count</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+${preheader("Three habits in your first week that separate students who improve from those who don't.")}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
       <tr><td style="padding-bottom:20px;text-align:center;">
-        <img src="https://getstudyedge.com/favicon.png" width="32" height="32" alt="StudyEdge" style="display:inline-block;width:32px;height:32px;border-radius:8px;vertical-align:middle;margin-right:10px;border:0;outline:none;text-decoration:none;" />
-        <span style="font-size:16px;font-weight:700;color:#111111;vertical-align:middle;letter-spacing:-0.3px;">StudyEdge</span>
+        <span style="font-size:16px;font-weight:700;color:#111111;letter-spacing:-0.3px;">StudyEdge</span>
       </td></tr>
       <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Day 1</p>
