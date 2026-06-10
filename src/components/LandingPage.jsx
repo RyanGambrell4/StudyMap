@@ -1879,7 +1879,7 @@ export default function LandingPage({ onGetStarted }) {
             Students who stopped winging it
           </h2>
           <p style={{ fontSize: 15, color: 'rgba(226,232,240,0.4)', maxWidth: 420, margin: '0 auto' }}>
-            Real results from real students this semester.
+            What students say. Individual results vary.
           </p>
         </div>
         <div style={{
@@ -1962,6 +1962,9 @@ export default function LandingPage({ onGetStarted }) {
             </div>
           ))}
         </div>
+        <p style={{ textAlign: 'center', fontSize: 11, color: 'rgba(226,232,240,0.25)', marginTop: 28 }}>
+          Individual results may vary. StudyEdge AI is a study productivity tool and does not guarantee any specific academic outcome.
+        </p>
       </section>
 
       {/* Testimonials → FAQ horizon */}
