@@ -95,6 +95,9 @@ export default function AccountView({
   const [canceling, setCanceling] = useState(false)
   const [canceled, setCanceled] = useState(false)
   const [trialStarting, setTrialStarting] = useState(false)
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [deleteError, setDeleteError] = useState(null)
 
   const handleStartTrial = async () => {
     if (trialStarting) return
@@ -148,6 +151,27 @@ export default function AccountView({
       streak,
     }
   }, [completedSessions, todayStr])
+
+  const handleDeleteAccount = async () => {
+    setDeleting(true)
+    setDeleteError(null)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/delete-account', {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${session?.access_token}` },
+      })
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}))
+        throw new Error(data.error ?? 'Failed to delete account')
+      }
+      await supabase.auth.signOut()
+      window.location.href = '/'
+    } catch (err) {
+      setDeleteError(err.message)
+      setDeleting(false)
+    }
+  }
 
   const handleCancelTrial = async () => {
     if (!confirm('Cancel your free trial?\n\nYou won\'t be charged. You\'ll move to the free plan immediately.')) return
@@ -525,14 +549,42 @@ export default function AccountView({
             Sign Out
           </button>
         )}
-        <div style={{ textAlign: 'center' }}>
-          <a
-            href={`mailto:support@getstudyedge.com?subject=Delete%20my%20account&body=Please%20delete%20my%20account%20and%20all%20associated%20data.%0A%0AEmail%3A%20${encodeURIComponent(userEmail ?? '')}`}
-            style={{ fontSize: 12, color: '#9B9B9B', textDecoration: 'underline', textUnderlineOffset: 2 }}
-          >
-            Delete account &amp; data
-          </a>
-        </div>
+        {!showDeleteConfirm ? (
+          <div style={{ textAlign: 'center' }}>
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              style={{ background: 'none', border: 'none', fontSize: 12, color: '#9B9B9B', textDecoration: 'underline', textUnderlineOffset: 2, cursor: 'pointer', padding: 0 }}
+            >
+              Delete account &amp; data
+            </button>
+          </div>
+        ) : (
+          <div style={{ borderTop: '1px solid rgba(0,0,0,0.06)', paddingTop: 14 }}>
+            <p style={{ margin: '0 0 10px', fontSize: 13, color: '#111111', fontWeight: 600 }}>Delete your account?</p>
+            <p style={{ margin: '0 0 14px', fontSize: 12, color: '#6B6B6B', lineHeight: 1.5 }}>
+              This permanently deletes your account, all study data, and cancels any active subscription. This cannot be undone.
+            </p>
+            {deleteError && (
+              <p style={{ margin: '0 0 10px', fontSize: 12, color: '#DC2626' }}>{deleteError}</p>
+            )}
+            <div style={{ display: 'flex', gap: 8 }}>
+              <button
+                onClick={handleDeleteAccount}
+                disabled={deleting}
+                style={{ flex: 1, padding: '10px', background: '#DC2626', border: 'none', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 700, cursor: deleting ? 'not-allowed' : 'pointer', opacity: deleting ? 0.6 : 1 }}
+              >
+                {deleting ? 'Deleting…' : 'Yes, delete everything'}
+              </button>
+              <button
+                onClick={() => { setShowDeleteConfirm(false); setDeleteError(null) }}
+                disabled={deleting}
+                style={{ padding: '10px 16px', background: 'none', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 10, fontSize: 13, color: '#6B6B6B', cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )

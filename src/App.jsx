@@ -71,7 +71,7 @@ export default function App() {
   const [showCheckoutCancelBanner, setShowCheckoutCancelBanner] = useState(false)
 
   // Capture checkout intent on mount before Supabase PKCE exchange clears the URL
-  const [checkoutIntent] = useState(() => {
+  const [checkoutIntent, setCheckoutIntent] = useState(() => {
     const sp = new URLSearchParams(window.location.search)
     const plan = sp.get('plan')
     const billing = sp.get('billing')
@@ -223,17 +223,34 @@ export default function App() {
   }, [session?.user?.id])
 
   // ── Checkout success handler ───────────────────────────────────────────────
+  // Stripe webhooks are async: the DB may not reflect the new plan for a few
+  // seconds after redirect. Poll until plan != 'free' (up to 10s) so the UI
+  // shows the correct plan instead of 'free' while the webhook is in-flight.
   useEffect(() => {
     if (!session?.user || !dbReady) return
     const params = new URLSearchParams(window.location.search)
     if (params.get('checkout') !== 'success') return
     window.history.replaceState({}, '', window.location.pathname)
-    refreshSubscription(session.user.id).then(() => {
+
+    let attempts = 0
+    const MAX_ATTEMPTS = 10
+    let cancelled = false
+
+    const poll = async () => {
+      if (cancelled) return
+      try { await refreshSubscription(session.user.id) } catch (e) { console.error('[checkout success] refresh failed:', e) }
       const plan = getActivePlan()
-      track('checkout_success', { plan })
-      identifyUser(session.user.id, { plan })
-      setCheckoutSuccess(true)
-    })
+      if (plan !== 'free' || attempts >= MAX_ATTEMPTS) {
+        track('checkout_success', { plan })
+        identifyUser(session.user.id, { plan })
+        setCheckoutSuccess(true)
+        return
+      }
+      attempts++
+      setTimeout(poll, 1000)
+    }
+    poll()
+    return () => { cancelled = true }
   }, [session?.user?.id, dbReady])
 
   // ── Checkout cancel handler ────────────────────────────────────────────────
@@ -612,7 +629,12 @@ export default function App() {
   if (checkoutIntent && getActivePlan() === 'free') {
     window.history.replaceState({}, '', window.location.pathname)
     createCheckoutSession(checkoutIntent.plan, checkoutIntent.billing, session.user.email, session.user.id, { trial: checkoutIntent.trial }).then(result => {
-      if (!result || result.alreadySubscribed) return
+      if (result?.alreadySubscribed) return
+      if (!result) {
+        // Network or server error — surface it rather than leaving a dead spinner.
+        setCheckoutIntent(null)
+        return
+      }
       window.location.href = result
     })
     return (
