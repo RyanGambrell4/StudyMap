@@ -173,6 +173,28 @@
     { "source": "/what-gpa-do-you-need-for-pharmacy-school-admissions", "destination": "/what-gpa-do-you-need-for-pharmacy-school-admissions.html" },
     { "source": "/what-gpa-do-you-need-for-veterinary-school-admissions", "destination": "/what-gpa-do-you-need-for-veterinary-school-admissions.html" },
     { "source": "/what-gpa-do-you-need-for-architecture-school-admissions", "destination": "/what-gpa-do-you-need-for-architecture-school-admissions.html" },
-    { "source": "/what-gpa-do-you-need-for-engineering-grad-school-admissions", "destination": "/what-gpa-do-you-need-for-engineering-grad-school-admissions.html" }
+    { "source": "/what-gpa-do-you-need-for-engineering-grad-school-admissions", "destination": "/what-gpa-do-you-need-for-engineering-grad-school-admissions.html" },
+
+    { "source": "/best-study-app-for-south-african-students", "destination": "/best-study-app-for-south-african-students.html" },
+    { "source": "/best-study-app-for-uct-students", "destination": "/best-study-app-for-uct-students.html" },
+    { "source": "/best-study-app-for-wits-students", "destination": "/best-study-app-for-wits-students.html" },
+    { "source": "/best-study-app-for-stellenbosch-students", "destination": "/best-study-app-for-stellenbosch-students.html" },
+    { "source": "/best-study-app-for-up-students", "destination": "/best-study-app-for-up-students.html" },
+    { "source": "/best-study-app-for-uj-students", "destination": "/best-study-app-for-uj-students.html" },
+    { "source": "/best-study-app-for-ukzn-students", "destination": "/best-study-app-for-ukzn-students.html" },
+    { "source": "/best-study-app-for-nwu-students", "destination": "/best-study-app-for-nwu-students.html" },
+    { "source": "/best-study-app-for-unisa-students", "destination": "/best-study-app-for-unisa-students.html" },
+
+    { "source": "/best-study-app-for-canadian-university-students", "destination": "/best-study-app-for-canadian-university-students.html" },
+    { "source": "/best-study-app-for-university-of-toronto-students", "destination": "/best-study-app-for-university-of-toronto-students.html" },
+    { "source": "/best-study-app-for-ubc-students", "destination": "/best-study-app-for-ubc-students.html" },
+    { "source": "/best-study-app-for-mcgill-students", "destination": "/best-study-app-for-mcgill-students.html" },
+    { "source": "/best-study-app-for-western-university-students", "destination": "/best-study-app-for-western-university-students.html" },
+    { "source": "/best-study-app-for-waterloo-students", "destination": "/best-study-app-for-waterloo-students.html" },
+    { "source": "/best-study-app-for-queens-university-students", "destination": "/best-study-app-for-queens-university-students.html" },
+    { "source": "/best-study-app-for-mcmaster-students", "destination": "/best-study-app-for-mcmaster-students.html" },
+    { "source": "/best-study-app-for-university-of-alberta-students", "destination": "/best-study-app-for-university-of-alberta-students.html" },
+
+    { "source": "/studyedge-app", "destination": "/studyedge-app.html" }
   ]
 }
