@@ -1,5 +1,42 @@
 # StudyEdge AI — Living Context
-_Last updated by: QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: SEO Agent on 2026-06-10 (43 new pages: Wave A AI category, Wave B panic-study blog, Wave C study science/GPA, Wave D 30 school GPA pages, Wave E vercel.json + sitemap + footer); QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+
+---
+
+## SEO Agent -- 2026-06-10 (43-page content expansion)
+
+43 new static HTML pages shipped to `public/` in 5 waves. All pages use `/seo.css`, no em dashes, no emojis, proper JSON-LD, and CTA links to `/app?signup=1&plan=pro&billing=weekly&trial=1`.
+
+### Wave A: AI category pages (5 pages)
+- `/best-ai-for-students` -- comparison of 4 AI tools, compare table, FAQPage JSON-LD
+- `/ai-study-tools` -- category guide with card grid
+- `/ai-homework-helper` -- landing page with 4-step how-it-works section
+- `/chatgpt-for-studying` -- blog format, honest comparison, effective prompt guidance
+- `/chatgpt-alternative-for-students` -- comparison page with ChatGPT vs StudyEdge AI table
+
+### Wave B: Panic-study blog articles (5 posts)
+- `/blog/how-to-cram-for-an-exam`
+- `/blog/how-to-study-the-night-before-an-exam`
+- `/blog/how-to-focus-while-studying`
+- `/blog/how-to-memorize-notes-fast`
+- `/blog/how-to-overcome-test-anxiety`
+
+### Wave C: Study science / GPA pages (3 pages)
+- `/how-to-get-a-4-0-gpa-in-college`
+- `/spaced-repetition-explained` -- Ebbinghaus forgetting curve, optimal intervals, Leitner box
+- `/test-taking-strategies`
+
+### Wave D: GPA school pages (30 pages)
+15 large state universities: Michigan, UT Austin, Ohio State, Florida, Penn State, Purdue, MSU, Wisconsin, UIUC, Georgia Tech, UW, UVA, UNC, Arizona, ASU.
+10 ivy-adjacent: Georgetown, Vanderbilt, Emory, Notre Dame, BU, Northeastern, Tulane, Wake Forest, Rochester, Case Western.
+5 professional admissions: nursing, pharmacy, veterinary, architecture, engineering grad school.
+
+### Wave E: Infrastructure
+- `vercel.json`: 43 new rewrite rules added
+- `public/sitemap.xml`: 43 new URL entries with `lastmod 2026-06-10`; sitemap now ~145 URLs
+- `src/components/LandingPage.jsx`: footer mesh additions -- Tools (4.0 GPA guide), Compare (best AI, ChatGPT alternative, ChatGPT for studying), Articles (cram, focus, spaced repetition)
+
+Build passed clean. 5 commits pushed to main. Vercel auto-deploying.
 
 ---
 
@@ -344,6 +381,62 @@ _Sub-agent paused mid-run waiting on a build callback that did not return. Main 
 
 ### Note on the sub-agent's "Most students notice the change within the first full week" claim
 Lives in the time-to-impact answer. Soft conversion claim, unverifiable. Left as-is for now since it's a marketing soft claim (not a fabricated metric like a user count or testimonial). Flag for review if the team wants a stricter no-soft-claims rule.
+
+---
+
+## SEO Agent — 2026-06-09 (22-page expansion wave)
+
+_Commits: `838d908` (Wave 1), `4397421` (Wave 2), `56fab07` (Wave 3), `7d15b1c` (Wave 4), `3508504` (Wave 5). All pushed to `main` and live on getstudyedge.com._
+
+### What shipped
+
+**Wave 1 — Final Exam Calculator**
+- `/final-exam-calculator` — Interactive calculator with two modes ("What do I need?" and "What will I get?"), color-coded results, scenario table for all grade targets, FAQPage + EducationalApplication + BreadcrumbList JSON-LD
+
+**Wave 2 — 10 "Best Study App for X Major" pages**
+- `/best-study-app-for-math-students`
+- `/best-study-app-for-history-students`
+- `/best-study-app-for-education-majors`
+- `/best-study-app-for-political-science-students`
+- `/best-study-app-for-english-majors`
+- `/best-study-app-for-foreign-language-students`
+- `/best-study-app-for-economics-students`
+- `/best-study-app-for-sociology-students`
+- `/best-study-app-for-kinesiology-students`
+- `/best-study-app-for-criminal-justice-students`
+
+Each: unique hero copy, 6 feature cards, comparison table, 6-question FAQ, SoftwareApplication + FAQPage + BreadcrumbList JSON-LD.
+
+**Wave 3 — 6 Comparison pages**
+- `/microsoft-onenote-for-studying`
+- `/brainscape-alternative`
+- `/forest-app-alternative`
+- `/wolfram-alpha-alternative`
+- `/photomath-alternative`
+- `/socratic-alternative`
+
+Each follows chegg-alternative template: hero, proof-strip, 6-card "Why Students Switch" section, comparison table, FAQPage JSON-LD.
+
+**Wave 4 — 5 Blog articles**
+- `/blog/how-to-pull-an-all-nighter`
+- `/blog/cornell-note-taking-method`
+- `/blog/pomodoro-technique-for-studying`
+- `/blog/how-to-take-notes-in-college`
+- `/blog/how-to-study-for-multiple-exams-in-one-week`
+
+Each: 6-8 H2 sections, post-cta block, related-links, BlogPosting + BreadcrumbList JSON-LD.
+
+**Wave 5 — Infrastructure**
+- `public/sitemap.xml` rebuilt with all ~110 URLs, all lastmod dates set to 2026-06-09
+- `vercel.json` updated with 22 new rewrite rules for all new pages
+- `LandingPage.jsx` footer link mesh updated: final-exam-calculator in Tools, 4 new major pages in Guides, 6 new comparison pages in Compare, 4 new blog articles in Articles
+
+### Key rules enforced throughout
+- No em dashes in any copy
+- Trial CTAs: "3-day free trial. Cancel anytime." — never "no credit card required"
+- No emojis in UI or page copy
+- CTA links: `/app?signup=1&plan=pro&billing=weekly&trial=1`
+- Brand name: "StudyEdge AI" everywhere
 
 ---
 
