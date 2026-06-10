@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react'
+import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import Spinner from './ui/spinner'
 import { track } from '../lib/analytics'
 import { generateSchedule } from '../utils/generateSchedule'
@@ -34,7 +34,7 @@ const ProgressView   = lazy(() => import('./ProgressView'))
 const StudyToolsView = lazy(() => import('./StudyToolsView'))
 const StudyCoachView = lazy(() => import('./StudyCoachView'))
 const PracticeExamView = lazy(() => import('./PracticeExamView'))
-const AIChatView     = lazy(() => import('./AIChatView'))
+import AIChatView from './AIChatView'
 const GradeHubView   = lazy(() => import('./GradeHubView'))
 const AccountView    = lazy(() => import('./AccountView'))
 import CheatSheetModal from './CheatSheetModal'
