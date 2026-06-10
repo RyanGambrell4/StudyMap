@@ -800,7 +800,7 @@ export default function LandingPage({ onGetStarted }) {
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                 <path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              3-day free trial · Cancel anytime
+              3-day free trial · Card required · Cancel anytime
             </div>
 
             {/* Social proof — live "studying right now" badge */}
@@ -1554,7 +1554,7 @@ export default function LandingPage({ onGetStarted }) {
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
               <path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            3-day free trial · Cancel anytime
+            3-day free trial · Card required · Cancel anytime
           </div>
         </div>
       </section>
@@ -2325,7 +2325,7 @@ export default function LandingPage({ onGetStarted }) {
                   </div>
                   <p style={{ margin: '8px 0 0', fontSize: 13, color: 'rgba(226,232,240,0.55)' }}>{proP.sub}</p>
                   <p style={{ margin: '6px 0 0', fontSize: 12.5, color: '#34d399', fontWeight: 700 }}>
-                    3-day free trial · Cancel anytime
+                    3-day free trial · Card required · Cancel anytime
                   </p>
                 </div>
                 <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8, flex: 1, fontSize: 13.5, color: 'rgba(226,232,240,0.85)' }}>
@@ -2447,6 +2447,8 @@ export default function LandingPage({ onGetStarted }) {
           </span>
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
           <span>3-day free trial</span>
+          <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
+          <span>Card required</span>
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
           <span>Cancel anytime</span>
         </div>

@@ -328,6 +328,16 @@ export default function AuthScreen({ initialMode, onBack }) {
             </button>
           </form>
 
+          {/* Clickwrap consent — shown only on signup */}
+          {mode === 'signup' && (
+            <p style={{ fontSize: 12, color: '#9B9B9B', textAlign: 'center', marginTop: 14, lineHeight: 1.55 }}>
+              By creating an account you agree to our{' '}
+              <a href="/terms.html" target="_blank" rel="noopener" style={{ color: '#6B6B6B', textDecoration: 'underline' }}>Terms of Service</a>
+              {' '}and{' '}
+              <a href="/privacy.html" target="_blank" rel="noopener" style={{ color: '#6B6B6B', textDecoration: 'underline' }}>Privacy Policy</a>.
+            </p>
+          )}
+
           {/* Footer links */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10, textAlign: 'center', marginTop: 20 }}>
             {mode === 'login' && (

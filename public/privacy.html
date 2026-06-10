@@ -100,23 +100,25 @@
 <div class="container">
 
   <h1>Privacy Policy</h1>
-  <p class="meta">Last updated: April 14, 2026 &nbsp;&middot;&nbsp; Effective: April 14, 2026</p>
+  <p class="meta">Last updated: June 10, 2026 &nbsp;&middot;&nbsp; Effective: June 10, 2026</p>
 
-  <p>StudyEdge AI ("we", "us", or "our") is committed to protecting your personal information. This Privacy Policy explains what we collect, how we use it, who we share it with, and your rights as a user. We comply with Canada's Personal Information Protection and Electronic Documents Act (PIPEDA) and Canada's Anti-Spam Legislation (CASL).</p>
+  <p>StudyEdge AI ("we", "us", or "our") is committed to protecting your personal information. This Privacy Policy explains what we collect, how we use it, who we share it with, and your rights as a user. We comply with Canada's Personal Information Protection and Electronic Documents Act (PIPEDA), Canada's Anti-Spam Legislation (CASL), the European Union General Data Protection Regulation (GDPR) where applicable, and the California Consumer Privacy Act (CCPA) where applicable.</p>
 
   <div class="highlight">
-    If you are under 13 years of age, you must have a parent or guardian's consent before creating an account. By creating an account, you confirm that either (a) you are 13 or older, or (b) a parent or guardian has consented on your behalf.
+    You must be at least 13 years of age to use StudyEdge AI. If you are under 18, you represent that a parent or legal guardian has reviewed and agreed to this Privacy Policy on your behalf. By creating an account, you confirm that you meet this requirement.
   </div>
 
   <h2>1. What We Collect</h2>
-  <p>We collect the following information when you use StudyEdge AI:</p>
+  <p>We collect the following categories of information when you use StudyEdge AI:</p>
   <ul>
-    <li><strong>Account information:</strong> your email address and password (stored securely via Supabase authentication).</li>
+    <li><strong>Account information:</strong> your email address and password (stored securely via Supabase authentication). If you sign in with Google, we receive your name and email from Google.</li>
     <li><strong>Study data:</strong> courses, schedules, assignments, exam dates, session notes, and study plans you create inside the app.</li>
-    <li><strong>AI interaction data:</strong> the content of prompts you send to StudyEdge AI's AI features (flashcards, session blueprints, study coach, quizzes). This content is processed by Anthropic's API.</li>
-    <li><strong>Usage data:</strong> how you interact with the app, session frequency, features used, and general performance metrics.</li>
-    <li><strong>Payment information:</strong> if you subscribe to a paid plan, payment is handled entirely by Lemon Squeezy. We do not store or see your credit card details.</li>
-    <li><strong>Calendar data:</strong> if you connect Google Calendar, we access your calendar events solely to build your study schedule. We do not store or share your calendar data beyond this purpose.</li>
+    <li><strong>AI interaction data:</strong> the content of prompts you send to StudyEdge AI's AI features (flashcards, session blueprints, study coach, quizzes, AI tutor). This content is processed by Anthropic's API and is not used to train Anthropic's models under the current API terms.</li>
+    <li><strong>Usage and analytics data:</strong> how you interact with the app, session frequency, features used, page visits, click events, and general performance metrics. This data is collected via PostHog.</li>
+    <li><strong>Payment information:</strong> if you subscribe to a paid plan, payment is processed by Stripe, who acts as the payment processor. We receive confirmation of your subscription status but do not store or see your full credit card number.</li>
+    <li><strong>Calendar data:</strong> if you connect Google Calendar, we access your calendar events solely to build your study schedule. We do not store your raw calendar event data beyond what is needed to generate your schedule, and we do not share it with third parties.</li>
+    <li><strong>Phone number (optional):</strong> if you opt in to SMS study reminders, we collect your mobile phone number. Providing this is entirely voluntary. Message and data rates may apply. You can opt out at any time from your account settings.</li>
+    <li><strong>Communications data:</strong> if you contact us by email, we retain the contents of that communication to respond and resolve your inquiry.</li>
   </ul>
 
   <h2>2. How We Use Your Information</h2>
@@ -124,27 +126,45 @@
     <li>To provide and operate the StudyEdge AI service.</li>
     <li>To generate your study schedule, session plans, flashcards, and other AI-powered features.</li>
     <li>To send transactional emails (account verification, password reset, subscription receipts) via Resend.</li>
-    <li>To send product updates and announcements, where you have given consent under CASL. You can opt out at any time.</li>
-    <li>To improve the product through aggregate, anonymized usage analysis.</li>
-    <li>To process your subscription and manage billing events via Lemon Squeezy.</li>
+    <li>To send product updates and announcements via Loops.so, where you have given consent under CASL. You can opt out at any time using the unsubscribe link in any marketing email or at <a href="/unsubscribe">getstudyedge.com/unsubscribe</a>.</li>
+    <li>To send SMS study reminders, if you have opted in. You can opt out at any time by replying STOP to any message or from your account settings.</li>
+    <li>To improve the product through aggregate and anonymized usage analysis via PostHog.</li>
+    <li>To process your subscription and manage billing events via Stripe.</li>
+    <li>To comply with legal obligations and enforce these policies.</li>
   </ul>
 
   <h2>3. Third-Party Services</h2>
-  <p>StudyEdge AI uses the following third-party services to operate. Each has its own privacy practices:</p>
+  <p>StudyEdge AI uses the following third-party services to operate. Each has its own privacy practices and we encourage you to review them:</p>
   <ul>
-    <li><strong>Supabase:</strong> database and authentication. Your data is stored in a secure PostgreSQL database.</li>
-    <li><strong>Anthropic:</strong> powers all AI features. Content you submit to AI features is processed by Anthropic's API. See <a href="https://www.anthropic.com/privacy" target="_blank">Anthropic's Privacy Policy</a>.</li>
-    <li><strong>Stripe:</strong> subscription billing and payment processing. See <a href="https://stripe.com/privacy" target="_blank">Stripe's Privacy Policy</a>.</li>
-    <li><strong>Resend:</strong> transactional and marketing email delivery.</li>
-    <li><strong>Vercel:</strong> web hosting and infrastructure.</li>
-    <li><strong>Google:</strong> optional Google Calendar integration, used only with your explicit authorization.</li>
+    <li><strong>Supabase:</strong> database and authentication. Your data is stored in a secure PostgreSQL database hosted by Supabase. See <a href="https://supabase.com/privacy" target="_blank" rel="noopener">Supabase's Privacy Policy</a>.</li>
+    <li><strong>Anthropic:</strong> powers all AI features. Content you submit to AI features is processed by Anthropic's API. Anthropic does not use API inputs and outputs to train its models by default. See <a href="https://www.anthropic.com/privacy" target="_blank" rel="noopener">Anthropic's Privacy Policy</a>.</li>
+    <li><strong>Stripe:</strong> subscription billing and payment processing. Stripe is our payment processor and handles all credit card data. See <a href="https://stripe.com/privacy" target="_blank" rel="noopener">Stripe's Privacy Policy</a>.</li>
+    <li><strong>PostHog:</strong> product analytics. PostHog collects behavioral usage data (page views, clicks, feature interactions) to help us understand how the product is used. PostHog may use cookies and similar tracking technologies. See <a href="https://posthog.com/privacy" target="_blank" rel="noopener">PostHog's Privacy Policy</a>.</li>
+    <li><strong>Resend:</strong> transactional email delivery (account confirmations, billing receipts, password resets).</li>
+    <li><strong>Loops.so:</strong> marketing email automation (study tips, product updates, re-engagement). See <a href="https://loops.so/privacy" target="_blank" rel="noopener">Loops.so's Privacy Policy</a>.</li>
+    <li><strong>Vercel:</strong> web hosting and infrastructure. See <a href="https://vercel.com/legal/privacy-policy" target="_blank" rel="noopener">Vercel's Privacy Policy</a>.</li>
+    <li><strong>Google:</strong> optional Google sign-in and Google Calendar integration, used only with your explicit authorization. StudyEdge AI's use of information received from Google APIs adheres to <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener">Google API Services User Data Policy</a>, including the Limited Use requirements.</li>
   </ul>
 
-  <h2>4. Data Retention</h2>
-  <p>We retain your account and study data for as long as your account is active. If you delete your account, we will delete your personal data within 30 days, except where we are required to retain it for legal or financial record-keeping purposes.</p>
+  <h2>4. Cookies and Tracking Technologies</h2>
+  <p>StudyEdge AI uses cookies and similar browser storage for the following purposes:</p>
+  <ul>
+    <li><strong>Authentication cookies:</strong> to keep you logged in and maintain your session. These are required for the app to function.</li>
+    <li><strong>Analytics cookies (PostHog):</strong> PostHog sets cookies to track usage patterns across sessions, such as which features are used and how users navigate the app. This data is used in aggregate to improve the product. It is not used for advertising or sold to third parties.</li>
+  </ul>
+  <p>You can disable cookies in your browser settings. Disabling analytics cookies will not affect app functionality, but disabling authentication cookies will prevent you from staying logged in. We do not use advertising or retargeting cookies.</p>
 
-  <h2>5. Your Rights Under PIPEDA</h2>
-  <p>As a Canadian user, you have the right to:</p>
+  <h2>5. Data Retention</h2>
+  <p>We retain your account and study data for as long as your account is active. If you delete your account, we will delete your personal data within 30 days, except where we are required to retain it for legal, tax, or financial record-keeping purposes (for example, billing records are retained for up to 7 years as required by applicable law). Aggregated, anonymized analytics data that cannot be linked back to you may be retained indefinitely.</p>
+
+  <h2>6. Data Security</h2>
+  <p>We use industry-standard security measures including encrypted connections (HTTPS/TLS), secure authentication via Supabase, and row-level security policies so users can only access their own data. No system is 100% secure, and we cannot guarantee absolute security of your personal information.</p>
+
+  <h2>7. Data Breach Notification</h2>
+  <p>In the event of a data breach that is likely to result in a risk to your rights and freedoms, we will notify affected users and applicable regulatory authorities as required by law. Under GDPR, this notification will occur within 72 hours of becoming aware of the breach where feasible.</p>
+
+  <h2>8. Your Rights Under PIPEDA (Canada)</h2>
+  <p>As a user, you have the right to:</p>
   <ul>
     <li>Access the personal information we hold about you.</li>
     <li>Request correction of inaccurate or incomplete information.</li>
@@ -152,18 +172,42 @@
     <li>Request deletion of your account and personal data.</li>
     <li>File a complaint with the Office of the Privacy Commissioner of Canada.</li>
   </ul>
-  <p>To exercise any of these rights, contact us at <a href="mailto:support@getstudyedge.com">support@getstudyedge.com</a>.</p>
 
-  <h2>6. Data Security</h2>
-  <p>We use industry-standard security measures including encrypted connections (HTTPS), secure authentication via Supabase, and row-level security policies so users can only access their own data. No system is 100% secure, and we cannot guarantee absolute security.</p>
+  <h2>9. Your Rights Under GDPR (European Union / EEA)</h2>
+  <p>If you are located in the European Union or European Economic Area, you have the following additional rights under the GDPR:</p>
+  <ul>
+    <li><strong>Right of access:</strong> obtain a copy of the personal data we hold about you.</li>
+    <li><strong>Right to rectification:</strong> request correction of inaccurate personal data.</li>
+    <li><strong>Right to erasure ("right to be forgotten"):</strong> request deletion of your personal data, subject to legal retention obligations.</li>
+    <li><strong>Right to restriction of processing:</strong> request that we limit how we use your data in certain circumstances.</li>
+    <li><strong>Right to data portability:</strong> receive your personal data in a structured, machine-readable format.</li>
+    <li><strong>Right to object:</strong> object to processing of your personal data for direct marketing or based on legitimate interests.</li>
+    <li><strong>Right to lodge a complaint:</strong> with your local data protection supervisory authority.</li>
+  </ul>
+  <p>Our lawful basis for processing personal data is: (a) performance of a contract, for data necessary to provide the service; (b) legitimate interests, for analytics and product improvement; and (c) consent, for marketing communications and optional SMS reminders.</p>
+  <p>To exercise any GDPR rights, contact us at <a href="mailto:support@getstudyedge.com">support@getstudyedge.com</a>. We will respond within 30 days.</p>
 
-  <h2>7. Cookies</h2>
-  <p>StudyEdge AI uses minimal cookies necessary to keep you logged in and maintain your session. We do not use advertising or tracking cookies.</p>
+  <h2>10. Your Rights Under CCPA (California)</h2>
+  <p>If you are a California resident, you have the following rights under the California Consumer Privacy Act:</p>
+  <ul>
+    <li><strong>Right to know:</strong> request information about the categories and specific pieces of personal information we have collected about you, the sources, our business purpose, and the third parties we share it with.</li>
+    <li><strong>Right to delete:</strong> request deletion of personal information we have collected from you, subject to certain exceptions.</li>
+    <li><strong>Right to correct:</strong> request correction of inaccurate personal information.</li>
+    <li><strong>Right to opt out of sale or sharing:</strong> we do not sell or share your personal information with third parties for advertising purposes. We have no "sale" of personal information to disclose.</li>
+    <li><strong>Right to non-discrimination:</strong> we will not discriminate against you for exercising any of your CCPA rights.</li>
+  </ul>
+  <p>To exercise your California rights, contact us at <a href="mailto:support@getstudyedge.com">support@getstudyedge.com</a> or submit a request through the app. We will verify your identity before processing your request.</p>
 
-  <h2>8. Changes to This Policy</h2>
-  <p>We may update this Privacy Policy from time to time. When we do, we will update the "Last updated" date at the top of this page and notify you by email if the changes are material.</p>
+  <h2>11. Children's Privacy</h2>
+  <p>StudyEdge AI is not directed to children under the age of 13. We do not knowingly collect personal information from children under 13. If we become aware that a child under 13 has provided personal information without verifiable parental consent, we will delete that information promptly. If you believe a child under 13 has registered, please contact us at <a href="mailto:support@getstudyedge.com">support@getstudyedge.com</a>.</p>
 
-  <h2>9. Contact</h2>
+  <h2>12. International Data Transfers</h2>
+  <p>StudyEdge AI operates from Canada and uses third-party services based in the United States and other countries. If you are located in the EU/EEA or elsewhere, your data may be transferred to and processed in countries outside your jurisdiction. We rely on standard contractual clauses and other transfer mechanisms where required by applicable law to ensure your data is protected during such transfers.</p>
+
+  <h2>13. Changes to This Policy</h2>
+  <p>We may update this Privacy Policy from time to time. When we do, we will update the "Last updated" date at the top of this page. If changes are material, we will notify you by email at least 14 days before they take effect. Continued use of the Service after the effective date constitutes your acceptance of the updated policy.</p>
+
+  <h2>14. Contact</h2>
   <p>Questions about this Privacy Policy or your data? Contact us at <a href="mailto:support@getstudyedge.com">support@getstudyedge.com</a>.</p>
 
 </div>
