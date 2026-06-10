@@ -741,6 +741,39 @@ export default async function handler(req, res) {
     return res.status(200).json({ success: true, subscription: updated })
   }
 
+  // ── Customer Portal path ───────────────────────────────────────────────────
+  if (body.action === 'create-portal-session') {
+    const token = req.headers['authorization']?.replace('Bearer ', '')
+    if (!token) return res.status(401).json({ error: 'Unauthorized' })
+    const { data: { user: authUser }, error: authErr } = await supabaseAdmin.auth.getUser(token)
+    if (authErr || !authUser) return res.status(401).json({ error: 'Unauthorized' })
+
+    const { userId } = body
+    if (!userId || userId !== authUser.id) return res.status(403).json({ error: 'Forbidden' })
+
+    const { data, error: dbErr } = await supabaseAdmin
+      .from('user_data')
+      .select('subscription')
+      .eq('user_id', userId)
+      .maybeSingle()
+
+    if (dbErr || !data) return res.status(404).json({ error: 'User not found' })
+
+    const stripeCustomerId = data.subscription?.stripeCustomerId
+    if (!stripeCustomerId) return res.status(400).json({ error: 'No billing account found' })
+
+    try {
+      const portalSession = await stripe.billingPortal.sessions.create({
+        customer: stripeCustomerId,
+        return_url: 'https://getstudyedge.com/app?tab=account',
+      })
+      return res.status(200).json({ url: portalSession.url })
+    } catch (stripeErr) {
+      console.error('[create-portal-session] Stripe error:', stripeErr)
+      return res.status(500).json({ error: 'Failed to open billing portal' })
+    }
+  }
+
   const { plan, billingPeriod: rawBillingPeriod, userEmail, userId, trial } = body
 
   // Normalize billing period aliases: 'annual' → 'yearly'.

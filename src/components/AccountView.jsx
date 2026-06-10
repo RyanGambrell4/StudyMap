@@ -98,6 +98,7 @@ export default function AccountView({
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState(null)
+  const [portalLoading, setPortalLoading] = useState(false)
 
   const handleStartTrial = async () => {
     if (trialStarting) return
@@ -170,6 +171,28 @@ export default function AccountView({
     } catch (err) {
       setDeleteError(err.message)
       setDeleting(false)
+    }
+  }
+
+  const handleManageSubscription = async () => {
+    if (portalLoading) return
+    setPortalLoading(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      const res = await fetch('/api/stripe', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${session?.access_token}`,
+        },
+        body: JSON.stringify({ action: 'create-portal-session', userId }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to open billing portal')
+      window.location.href = data.url
+    } catch (err) {
+      alert(err.message)
+      setPortalLoading(false)
     }
   }
 
@@ -405,19 +428,48 @@ export default function AccountView({
           </button>
         )}
         {plan === 'pro' && !trialActive && (
-          <button
-            onClick={onShowPaywall}
-            style={{
-              width: '100%', padding: '11px', backgroundColor: '#059669',
-              border: 'none', borderRadius: 10, color: '#fff',
-              fontSize: 14, fontWeight: 700, cursor: 'pointer',
-            }}
-          >
-            Upgrade to Unlimited →
-          </button>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <button
+              onClick={onShowPaywall}
+              style={{
+                width: '100%', padding: '11px', backgroundColor: '#059669',
+                border: 'none', borderRadius: 10, color: '#fff',
+                fontSize: 14, fontWeight: 700, cursor: 'pointer',
+              }}
+            >
+              Upgrade to Unlimited →
+            </button>
+            <button
+              onClick={handleManageSubscription}
+              disabled={portalLoading}
+              style={{
+                width: '100%', padding: '10px',
+                background: 'none', border: '1px solid rgba(0,0,0,0.10)',
+                borderRadius: 10, color: '#6B6B6B',
+                fontSize: 13, fontWeight: 600,
+                cursor: portalLoading ? 'not-allowed' : 'pointer',
+                opacity: portalLoading ? 0.5 : 1,
+              }}
+            >
+              {portalLoading ? 'Opening…' : 'Manage subscription'}
+            </button>
+          </div>
         )}
         {plan === 'unlimited' && (
-          <p style={{ fontSize: 13, color: '#9B9B9B', margin: 0 }}>You're on the best plan. Thank you!</p>
+          <button
+            onClick={handleManageSubscription}
+            disabled={portalLoading}
+            style={{
+              width: '100%', padding: '10px',
+              background: 'none', border: '1px solid rgba(0,0,0,0.10)',
+              borderRadius: 10, color: '#6B6B6B',
+              fontSize: 13, fontWeight: 600,
+              cursor: portalLoading ? 'not-allowed' : 'pointer',
+              opacity: portalLoading ? 0.5 : 1,
+            }}
+          >
+            {portalLoading ? 'Opening…' : 'Manage subscription'}
+          </button>
         )}
       </div>
 
