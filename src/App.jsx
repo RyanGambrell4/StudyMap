@@ -87,7 +87,7 @@ export default function App() {
     setPaywallOpen(true)
     const unlimitedTriggers = new Set(['tutorMemory', 'practiceExamAnalytics', 'unlimited'])
     track('paywall_shown', {
-      trigger_feature: trigger,
+      trigger,
       plan_required: unlimitedTriggers.has(trigger) ? 'unlimited' : 'pro',
       current_plan: getActivePlan(),
     })

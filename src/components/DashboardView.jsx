@@ -445,60 +445,70 @@ export default function DashboardView({
           'Grade tracker that catches drops early',
         ]
     return (
-      <div style={{ minHeight: '100vh', background: D.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 24 }}>
-        <div style={{ maxWidth: 440, width: '100%', textAlign: 'center' }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 6,
-            background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)',
-            borderRadius: 999, padding: '4px 12px',
-            fontSize: 11, fontWeight: 800, color: '#059669',
-            textTransform: 'uppercase', letterSpacing: '0.5px',
-            marginBottom: 18,
-          }}>
-            <svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="3" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-            </svg>
-            You're set up
-          </div>
-          <h2 style={{ color: D.text, fontSize: 24, fontWeight: 700, letterSpacing: -0.4, margin: '0 0 10px', lineHeight: 1.2 }}>
-            {isExamMode ? 'Add your first section. We\'ll do the rest.' : 'Add your hardest course. We\'ll do the rest.'}
+      <div style={{ minHeight: '100vh', background: D.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 24px' }}>
+        <div style={{ maxWidth: 420, width: '100%', textAlign: 'center' }}>
+          <h2 style={{ color: D.text, fontSize: 26, fontWeight: 700, letterSpacing: -0.5, margin: '0 0 10px', lineHeight: 1.2 }}>
+            {isExamMode ? 'One section to get started.' : 'One course to get started.'}
           </h2>
-          <p style={{ color: D.textMuted, fontSize: 14, lineHeight: 1.65, margin: '0 0 22px' }}>
+          <p style={{ color: D.textMuted, fontSize: 14.5, lineHeight: 1.65, margin: '0 0 28px', maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
             {isExamMode
-              ? 'Tell us what you\'re prepping for, your sections, your test date, and we\'ll build the full prep plan in under a minute.'
-              : 'Drop in one course with its exam date. Your AI plan will fill in the sessions, the order, and the recovery work automatically.'}
+              ? 'Add a section with its test date and we\'ll build your full prep plan automatically.'
+              : 'Add a course with its exam date and your AI study plan builds itself in under a minute.'}
           </p>
-          <div style={{
-            background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)',
-            borderRadius: 14, padding: '14px 18px', marginBottom: 18,
-            textAlign: 'left',
-          }}>
-            <p style={{ margin: '0 0 10px', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-              What unlocks next
-            </p>
-            {previews.map(item => (
-              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '5px 0' }}>
-                <div style={{ width: 16, height: 16, borderRadius: '50%', background: 'rgba(59,97,196,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  <svg width="9" height="9" fill="none" stroke={D.blue} strokeWidth="3" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
+
+          {/* Steps preview */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0, marginBottom: 28 }}>
+            {[
+              { step: '1', label: isExamMode ? 'Name + test date' : 'Name + exam date' },
+              { step: '2', label: 'Your weaknesses' },
+              { step: '3', label: 'AI builds the plan' },
+            ].map((s, i) => (
+              <div key={s.step} style={{ display: 'flex', alignItems: 'center' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, minWidth: 80 }}>
+                  <div style={{
+                    width: 28, height: 28, borderRadius: '50%',
+                    background: i === 2 ? D.blue : 'rgba(59,97,196,0.1)',
+                    border: `2px solid ${i === 2 ? D.blue : 'rgba(59,97,196,0.2)'}`,
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 12, fontWeight: 700, color: i === 2 ? '#fff' : D.blue,
+                  }}>
+                    {i === 2
+                      ? <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7"/></svg>
+                      : s.step}
+                  </div>
+                  <span style={{ fontSize: 11, color: D.textMuted, fontWeight: 500, lineHeight: 1.3 }}>{s.label}</span>
                 </div>
-                <span style={{ fontSize: 13, color: D.text, fontWeight: 500 }}>{item}</span>
+                {i < 2 && (
+                  <div style={{ width: 24, height: 1, background: 'rgba(0,0,0,0.12)', margin: '0 0 18px', flexShrink: 0 }} />
+                )}
               </div>
             ))}
           </div>
+
           <button
             onClick={() => {
               track('first_course_cta_clicked', { source: 'dashboard_empty_state', exam_mode: !!isExamMode })
               onNavigateToCourses?.()
             }}
-            style={{ background: D.blue, color: '#fff', fontSize: 15, fontWeight: 700, padding: '13px 28px', borderRadius: 12, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(59,97,196,0.25)' }}
+            style={{ background: D.blue, color: '#fff', fontSize: 15, fontWeight: 700, padding: '14px 32px', borderRadius: 12, border: 'none', cursor: 'pointer', boxShadow: '0 4px 18px rgba(59,97,196,0.3)', width: '100%', maxWidth: 280 }}
           >
-            {isExamMode ? 'Add your first section →' : 'Add your first course →'}
+            {isExamMode ? 'Add your first section' : 'Add your first course'}
           </button>
-          <p style={{ margin: '12px 0 0', fontSize: 12, color: '#9B9B9B' }}>
-            Takes about a minute. You can always add more later.
+          <p style={{ margin: '10px 0 0', fontSize: 12, color: '#9B9B9B' }}>
+            About 60 seconds. You can edit anything after.
           </p>
+
+          {typeof onNavigateToTools === 'function' && (
+            <button
+              onClick={() => {
+                track('first_course_cta_clicked', { source: 'dashboard_empty_state_explore', exam_mode: !!isExamMode })
+                onNavigateToTools()
+              }}
+              style={{ marginTop: 16, background: 'none', border: 'none', fontSize: 13, color: D.textMuted, cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(0,0,0,0.2)' }}
+            >
+              Explore the study tools first
+            </button>
+          )}
         </div>
       </div>
     )

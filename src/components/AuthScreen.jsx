@@ -118,11 +118,14 @@ export default function AuthScreen({ initialMode, onBack }) {
     } catch (err) {
       track(mode === 'signup' ? 'signup_failed' : mode === 'login' ? 'login_failed' : 'password_reset_failed', { method: 'email', reason: err.message })
       console.error('Auth error:', err.message)
-      if (err.message?.toLowerCase().includes('invalid login credentials')) {
+      const msg = err.message?.toLowerCase() ?? ''
+      if (msg.includes('email not confirmed') || msg.includes('email_not_confirmed')) {
+        setError('__email_not_confirmed__')
+      } else if (msg.includes('invalid login credentials')) {
         setError('Incorrect email or password.')
-      } else if (err.message?.toLowerCase().includes('email')) {
+      } else if (mode === 'signup' && msg.includes('email')) {
         setError("Couldn't create your account. Please try again, or use 'Continue with Google' above.")
-      } else if (err.message?.toLowerCase().includes('password')) {
+      } else if (msg.includes('password')) {
         setError('Password must be at least 6 characters.')
       } else {
         setError('Something went wrong. Please try again.')
@@ -304,9 +307,34 @@ export default function AuthScreen({ initialMode, onBack }) {
               </div>
             )}
 
-            {error && (
+            {error && error !== '__email_not_confirmed__' && (
               <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#dc2626' }}>
                 {error}
+              </div>
+            )}
+            {error === '__email_not_confirmed__' && (
+              <div style={{ backgroundColor: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '12px 14px', fontSize: 13, color: '#dc2626' }}>
+                <p style={{ margin: '0 0 8px', fontWeight: 600 }}>Confirm your email first.</p>
+                <p style={{ margin: '0 0 10px', color: '#b91c1c', lineHeight: 1.5 }}>
+                  We sent a confirmation link to <strong>{email}</strong>. Check your inbox (and spam folder).
+                </p>
+                <button
+                  type="button"
+                  onClick={async () => {
+                    track('email_confirmation_resend_clicked', { source: 'login_error' })
+                    setResendStatus('sending')
+                    try {
+                      await supabase.auth.resend({ type: 'signup', email })
+                      setResendStatus('sent')
+                    } catch {
+                      setResendStatus('error')
+                    }
+                  }}
+                  disabled={resendStatus === 'sending' || resendStatus === 'sent'}
+                  style={{ background: 'none', border: '1px solid #fca5a5', borderRadius: 8, padding: '5px 12px', fontSize: 12, color: '#dc2626', cursor: resendStatus === 'sent' ? 'default' : 'pointer', fontWeight: 600 }}
+                >
+                  {resendStatus === 'sending' ? 'Sending...' : resendStatus === 'sent' ? 'Confirmation sent' : 'Resend confirmation email'}
+                </button>
               </div>
             )}
             {success && (

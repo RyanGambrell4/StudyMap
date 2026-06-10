@@ -878,7 +878,7 @@ export default function OutputView({
           return [...filtered, record].slice(-500)
         })
         saveCompletedSession(record)
-        track('session_completed', { courseId: sess.courseId, courseName: sess.courseName, sessionType: sess.sessionType, elapsedSeconds: record.elapsedSeconds, recallScore: recallData?.score ?? null })
+        track('session_completed', { courseId: sess.courseId, courseName: sess.courseName, sessionType: sess.sessionType, studyMethod: sess.studyMethod ?? null, elapsedSeconds: record.elapsedSeconds, recallScore: recallData?.score ?? null })
 
         // First-session email -- fires once per user after their very first session.
         const priorSessions = getCachedCompletedSessions().filter(s => s.id !== record.id)
