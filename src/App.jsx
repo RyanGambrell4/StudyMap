@@ -309,6 +309,7 @@ export default function App() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email: session.user.email,
+            userId: session.user.id,
             firstName: session.user.user_metadata?.name,
             yearLevel: yl,
             learningStyle: ls,

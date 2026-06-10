@@ -1,6 +1,8 @@
+import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
+const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
@@ -12,12 +14,24 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid JSON' })
   }
 
-  const { email, firstName, yearLevel, learningStyle, preferredTime } = body
+  const { email, userId, firstName, yearLevel, learningStyle, preferredTime } = body
   if (!email) return res.status(400).json({ error: 'Missing email' })
 
   if (!process.env.RESEND_API_KEY) {
     console.warn('[onboarding-complete] RESEND_API_KEY not set — skipping')
     return res.status(200).json({ ok: true, skipped: true })
+  }
+
+  if (userId) {
+    const { data: row } = await supabaseAdmin
+      .from('user_data')
+      .select('subscription')
+      .eq('user_id', userId)
+      .maybeSingle()
+    if (row?.subscription?.onboarding_email_sent) {
+      console.log(`[onboarding-complete] Skipping duplicate for ${userId}`)
+      return res.status(200).json({ ok: true, skipped: true, reason: 'Already sent' })
+    }
   }
 
   const greeting = firstName ? `Hey ${firstName.split(' ')[0]}` : 'You\'re set'
@@ -84,6 +98,14 @@ export default async function handler(req, res) {
 </body></html>`,
     })
 
+    if (userId) {
+      const { data: r } = await supabaseAdmin.from('user_data').select('subscription').eq('user_id', userId).maybeSingle()
+      const merged = { ...(r?.subscription ?? {}), onboarding_email_sent: true }
+      await supabaseAdmin.from('user_data').upsert(
+        { user_id: userId, subscription: merged, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id' }
+      ).catch(e => console.error('[onboarding-complete] Failed to record flag:', e))
+    }
     return res.status(200).json({ ok: true })
   } catch (err) {
     console.error('[onboarding-complete] Failed to send:', err)

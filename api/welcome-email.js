@@ -1,8 +1,10 @@
+import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { upsertContact, triggerEvent } from '../lib/server/loops.js'
 import { logUserEvent } from '../lib/server/axiom.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
+const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
@@ -29,6 +31,21 @@ export default async function handler(req, res) {
   if (!process.env.RESEND_API_KEY) {
     console.warn('[welcome-email] RESEND_API_KEY not set — skipping')
     return res.status(200).json({ ok: true, skipped: true })
+  }
+
+  // Server-side dedup: prevent duplicates when the same user opens the app on
+  // a second device within the 30-min freshness window. Stores a flag in the
+  // subscription JSON so the drip email timing (last_emailed_at) is unaffected.
+  if (userId) {
+    const { data: row } = await supabaseAdmin
+      .from('user_data')
+      .select('subscription')
+      .eq('user_id', userId)
+      .maybeSingle()
+    if (row?.subscription?.welcome_email_sent) {
+      console.log(`[welcome-email] Skipping duplicate for ${userId}`)
+      return res.status(200).json({ ok: true, skipped: true, reason: 'Already sent' })
+    }
   }
 
   const greetingName = firstName ? firstName.split(' ')[0] : null
@@ -122,6 +139,14 @@ export default async function handler(req, res) {
     await Promise.allSettled([
       upsertContact({ email, userId, firstName, plan: 'free', trialActive: false }),
       triggerEvent({ email, eventName: 'signup', properties: { userId } }),
+      userId ? (async () => {
+        const { data: r } = await supabaseAdmin.from('user_data').select('subscription').eq('user_id', userId).maybeSingle()
+        const merged = { ...(r?.subscription ?? {}), welcome_email_sent: true }
+        await supabaseAdmin.from('user_data').upsert(
+          { user_id: userId, subscription: merged, updated_at: new Date().toISOString() },
+          { onConflict: 'user_id' }
+        )
+      })() : Promise.resolve(),
     ])
 
     logUserEvent({ event: 'signup', userId, plan: 'free' })
