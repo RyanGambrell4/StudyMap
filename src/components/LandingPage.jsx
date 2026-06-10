@@ -2555,6 +2555,7 @@ export default function LandingPage({ onGetStarted }) {
               <li><a href="/final-exam-calculator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Final Exam Calculator</a></li>
               <li><a href="/study-schedule-generator" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study Schedule Generator</a></li>
               <li><a href="/ai-flashcard-maker" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>AI Flashcard Maker</a></li>
+              <li><a href="/how-to-get-a-4-0-gpa-in-college" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>How to Get a 4.0 GPA</a></li>
             </ul>
           </div>
           <div>
@@ -2591,6 +2592,9 @@ export default function LandingPage({ onGetStarted }) {
               <li><a href="/wolfram-alpha-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Wolfram Alpha Alternative</a></li>
               <li><a href="/photomath-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Photomath Alternative</a></li>
               <li><a href="/socratic-alternative" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Socratic Alternative</a></li>
+              <li><a href="/best-ai-for-students" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Best AI for Students</a></li>
+              <li><a href="/chatgpt-alternative-for-students" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>ChatGPT Alternative</a></li>
+              <li><a href="/chatgpt-for-studying" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>ChatGPT for Studying</a></li>
             </ul>
           </div>
           <div>
@@ -2612,6 +2616,9 @@ export default function LandingPage({ onGetStarted }) {
               <li><a href="/blog/cornell-note-taking-method" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Cornell Note Taking</a></li>
               <li><a href="/blog/how-to-pull-an-all-nighter" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>How to Pull an All-Nighter</a></li>
               <li><a href="/blog/how-to-study-for-multiple-exams-in-one-week" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Study for Multiple Exams</a></li>
+              <li><a href="/blog/how-to-cram-for-an-exam" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>How to Cram for an Exam</a></li>
+              <li><a href="/blog/how-to-focus-while-studying" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>How to Focus While Studying</a></li>
+              <li><a href="/spaced-repetition-explained" style={{ color: 'rgba(226,232,240,0.75)', textDecoration: 'none', fontSize: 14 }}>Spaced Repetition Explained</a></li>
             </ul>
           </div>
           <div>
