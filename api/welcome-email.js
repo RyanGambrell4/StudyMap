@@ -29,14 +29,8 @@ export default async function handler(req, res) {
     }
   }
 
-  if (!process.env.RESEND_API_KEY) {
-    console.warn('[welcome-email] RESEND_API_KEY not set — skipping')
-    return res.status(200).json({ ok: true, skipped: true })
-  }
-
-  // Server-side dedup: prevent duplicates when the same user opens the app on
-  // a second device within the 30-min freshness window. Stores a flag in the
-  // subscription JSON so the drip email timing (last_emailed_at) is unaffected.
+  // Server-side dedup — runs before the RESEND_API_KEY check so the flag is
+  // always set and respected even in envs where email delivery is disabled.
   if (userId) {
     const { data: row } = await supabaseAdmin
       .from('user_data')
@@ -47,6 +41,19 @@ export default async function handler(req, res) {
       console.log(`[welcome-email] Skipping duplicate for ${userId}`)
       return res.status(200).json({ ok: true, skipped: true, reason: 'Already sent' })
     }
+  }
+
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('[welcome-email] RESEND_API_KEY not set — marking sent to block retries')
+    if (userId) {
+      const { data: row } = await supabaseAdmin.from('user_data').select('subscription').eq('user_id', userId).maybeSingle()
+      const merged = { ...(row?.subscription ?? {}), welcome_email_sent: true }
+      await supabaseAdmin.from('user_data').upsert(
+        { user_id: userId, subscription: merged, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id' }
+      )
+    }
+    return res.status(200).json({ ok: true, skipped: true })
   }
 
   const greetingName = firstName ? firstName.split(' ')[0] : null

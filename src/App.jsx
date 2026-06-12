@@ -136,7 +136,10 @@ export default function App() {
       if (_event === 'SIGNED_IN' && session?.user) {
         const createdAtIso = session.user.created_at ? new Date(session.user.created_at).toISOString() : null
         const createdAtMs = session.user.created_at ? new Date(session.user.created_at).getTime() : 0
-        const isFreshSignup = createdAtMs && Date.now() - createdAtMs < 10 * 60 * 1000 // 10 minutes
+        const lastSignInMs = session.user.last_sign_in_at ? new Date(session.user.last_sign_in_at).getTime() : 0
+        // Supabase sets created_at and last_sign_in_at simultaneously on signup (<30s apart).
+        // On every subsequent sign-in last_sign_in_at is bumped to now, widening the gap.
+        const isFreshSignup = createdAtMs > 0 && lastSignInMs > 0 && (lastSignInMs - createdAtMs) < 30 * 1000
         identifyUser(session.user.id, {
           email: session.user.email,
           signup_date: createdAtIso,
