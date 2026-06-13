@@ -7,6 +7,7 @@ import { sm2, sortCardsByDue, getDueCards } from '../lib/sm2'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
 import { findSimilarCards } from '../lib/embeddings'
+import { useCelebration } from '../utils/useCelebration'
 
 function loadSaved() {
   return getCachedStudyTools()
@@ -213,6 +214,21 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
   const [knownSet, setKnownSet] = useState(new Set())
   const [almostSet, setAlmostSet] = useState(new Set())
   const [reviewSet, setReviewSet] = useState(new Set())
+
+  const celebrate = useCelebration()
+  const deckDoneRef = useRef(false)
+
+  // Fire confetti when user reaches the last flashcard
+  useEffect(() => {
+    if (flashcards.length > 0 && cardIdx === flashcards.length - 1) {
+      if (!deckDoneRef.current) {
+        deckDoneRef.current = true
+        setTimeout(() => celebrate('medium'), 300)
+      }
+    } else {
+      deckDoneRef.current = false
+    }
+  }, [cardIdx, flashcards.length])
 
   // Quiz state
   const [questionIdx, setQuestionIdx] = useState(0)
@@ -1036,8 +1052,9 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
           {/* End of deck */}
           {cardIdx === flashcards.length - 1 && (
-            <div className="bg-white border border-[#E5E5E5] rounded-2xl px-5 py-4 text-center">
-              <p className="text-slate-800 font-semibold mb-1">You've gone through all {flashcards.length} cards!</p>
+            <div className="bg-white border border-[#E5E5E5] rounded-2xl px-5 py-5 text-center" style={{ boxShadow: '0 0 0 2px rgba(249,115,22,0.15)' }}>
+              <div style={{ fontSize: 36, marginBottom: 6 }}>🎉</div>
+              <p className="text-slate-800 font-bold text-base mb-1">Deck complete!</p>
               <p className="text-[#6B6B6B] text-xs mb-3">{knownSet.size} known · {almostSet.size} almost · {reviewSet.size} to review</p>
               <div className="flex gap-3 justify-center">
                 <button

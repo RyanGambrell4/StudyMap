@@ -1,6 +1,7 @@
-import { useMemo } from 'react'
+import { useMemo, useEffect, useRef, useState } from 'react'
 import { getActivePlan } from '../lib/subscription'
 import { getCachedPracticeExams } from '../lib/db'
+import { useCelebration } from '../utils/useCelebration'
 
 function fmtMs(ms) {
   const total = Math.round(ms / 1000)
@@ -99,6 +100,40 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
   const correctCount = graded.filter(g => g.correct === true).length
   const score = autoGradedCount > 0 ? Math.round((correctCount / autoGradedCount) * 100) : null
 
+  const celebrate = useCelebration()
+  const celebratedRef = useRef(false)
+  const [displayScore, setDisplayScore] = useState(0)
+
+  // Animate score counter from 0 → actual score
+  useEffect(() => {
+    if (score === null) return
+    const target = score
+    const steps = 28
+    const delay = 600 // start after brief pause
+    let step = 0
+    const timer = setTimeout(() => {
+      const interval = setInterval(() => {
+        step++
+        const eased = Math.round(target * (1 - Math.pow(1 - step / steps, 3)))
+        setDisplayScore(Math.min(target, eased))
+        if (step >= steps) clearInterval(interval)
+      }, 30)
+    }, delay)
+    return () => clearTimeout(timer)
+  }, [score])
+
+  // Fire confetti when score is good
+  useEffect(() => {
+    if (score === null || celebratedRef.current) return
+    celebratedRef.current = true
+    if (score >= 70) {
+      const timer = setTimeout(() => {
+        celebrate(score >= 90 ? 'big' : 'medium')
+      }, 900)
+      return () => clearTimeout(timer)
+    }
+  }, [])
+
   // Weak topics: missed counts grouped by topic, only from auto-graded
   const weakTopics = useMemo(() => {
     const map = new Map()
@@ -164,7 +199,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
             {score !== null && (
               <div>
                 <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Score</p>
-                <p style={{ margin: '4px 0 0', fontSize: 38, fontWeight: 800, color: score >= 70 ? '#16A34A' : score >= 50 ? '#D97706' : '#DC2626', lineHeight: 1, letterSpacing: '-0.02em' }}>{score}<span style={{ fontSize: 18, color: '#6B6B6B', fontWeight: 700 }}>%</span></p>
+                <p style={{ margin: '4px 0 0', fontSize: 38, fontWeight: 800, color: score >= 70 ? '#16A34A' : score >= 50 ? '#D97706' : '#DC2626', lineHeight: 1, letterSpacing: '-0.02em' }}>{displayScore}<span style={{ fontSize: 18, color: '#6B6B6B', fontWeight: 700 }}>%</span></p>
                 <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6B6B6B' }}>{correctCount} of {autoGradedCount} multiple-choice correct</p>
               </div>
             )}

@@ -209,6 +209,20 @@ export default function DashboardView({
   const [sessionIdx, setSessionIdx] = useState(0)
   const [upNextHovered, setUpNextHovered] = useState(false)
   const [startBtnHovered, setStartBtnHovered] = useState(false)
+  const [streakToast, setStreakToast] = useState(null)
+  const streakMilestoneRef = useRef(null)
+
+  const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100]
+
+  // Show a toast on streak milestones
+  useEffect(() => {
+    if (streak > 0 && STREAK_MILESTONES.includes(streak) && streakMilestoneRef.current !== streak) {
+      streakMilestoneRef.current = streak
+      setStreakToast(streak)
+      const timer = setTimeout(() => setStreakToast(null), 4500)
+      return () => clearTimeout(timer)
+    }
+  }, [streak])
 
   // ── This-week performance stats (for dashboard nudge) ─────────────────────
   const weekPerf = useMemo(() => {
@@ -520,6 +534,7 @@ export default function DashboardView({
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
         @keyframes dash-pulse { 0%,100%{opacity:0.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.3)} }
+        @keyframes streak-toast-in { from { opacity:0; transform:translateX(-50%) translateY(-16px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
         @media (max-width: 767px) {
           .dash-header { padding: 20px 16px 6px !important; }
           .dash-grid { grid-template-columns: 1fr !important; padding: 12px 16px 90px !important; gap: 12px !important; }
@@ -538,6 +553,25 @@ export default function DashboardView({
           .dash-banner-inner button { white-space: normal !important; }
         }
       `}</style>
+
+      {/* ── Streak milestone toast ── */}
+      {streakToast && (
+        <div style={{
+          position: 'fixed', top: 20, left: '50%',
+          transform: 'translateX(-50%)',
+          background: '#1A1A1A', color: '#fff',
+          padding: '11px 20px', borderRadius: 999, zIndex: 9999,
+          display: 'flex', alignItems: 'center', gap: 8,
+          boxShadow: '0 6px 24px rgba(0,0,0,0.22)',
+          animation: 'streak-toast-in 0.35s cubic-bezier(0.34,1.56,0.64,1) both',
+          fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap',
+          pointerEvents: 'none',
+        }}>
+          <span style={{ fontSize: 18 }}>🔥</span>
+          <span>{streakToast}-day streak!</span>
+          <span style={{ fontWeight: 400, color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>Keep it up</span>
+        </div>
+      )}
 
       {/* ── Header ── */}
       <div className="dash-header" style={{ padding: '28px 32px 8px' }}>
@@ -1021,7 +1055,7 @@ export default function DashboardView({
                   </div>
                 </div>
                 <div className="dash-course-meta" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: D.text }}>{hrs > 0 ? `${hrs}h` : '—'}</span>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: D.text }}>{hrs > 0 ? `${hrs}h` : '-'}</span>
                   <span style={{ fontSize: 11, color: D.textDim }}>
                     {recall != null ? `${recall}% recall` : 'no sessions'}
                   </span>
