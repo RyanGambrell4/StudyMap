@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Help & Support | StudyEdge AI</title>
+  <meta name="robots" content="noindex" />
+  <link rel="icon" type="image/png" href="/favicon.png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #F7F6F3;
+      --surface: #FFFFFF;
+      --border: rgba(0,0,0,0.08);
+      --text1: #1A1A1A;
+      --text2: #444444;
+      --text3: #9B9B9B;
+      --accent: #3B61C4;
+    }
+    body {
+      font-family: 'DM Sans', 'Inter', system-ui, sans-serif;
+      background: var(--bg);
+      color: var(--text2);
+      line-height: 1.75;
+      font-size: 1rem;
+    }
+    nav {
+      position: sticky; top: 0; z-index: 50;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      padding: 18px 40px;
+      display: flex; align-items: center; gap: 12px;
+    }
+    nav a { color: var(--text1); text-decoration: none; font-weight: 700; font-size: 1.1rem; }
+    nav span { color: var(--text3); font-size: 0.9rem; }
+    .container {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 64px 32px 120px;
+    }
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: var(--text1);
+      margin-bottom: 8px;
+      letter-spacing: -0.5px;
+    }
+    .subtitle {
+      font-size: 1.05rem;
+      color: var(--text3);
+      margin-bottom: 56px;
+      padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 32px;
+      margin-bottom: 20px;
+    }
+    .card h2 {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--text1);
+      margin-bottom: 8px;
+    }
+    .card p {
+      font-size: 0.95rem;
+      color: var(--text2);
+      margin-bottom: 20px;
+    }
+    .btn {
+      display: inline-block;
+      background: var(--accent);
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.95rem;
+      font-weight: 600;
+      padding: 12px 24px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: opacity 0.15s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn-outline {
+      background: transparent;
+      color: var(--accent);
+      border: 1.5px solid var(--accent);
+    }
+    .faq-item {
+      border-bottom: 1px solid var(--border);
+      padding: 18px 0;
+    }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q {
+      font-weight: 600;
+      color: var(--text1);
+      margin-bottom: 6px;
+    }
+    .faq-a { font-size: 0.95rem; }
+    h2.section {
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--text3);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      margin: 40px 0 16px;
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <a href="/">StudyEdge AI</a>
+    <span>/ Help & Support</span>
+  </nav>
+
+  <div class="container">
+    <h1>Help & Support</h1>
+    <p class="subtitle">We're here to help. Reach out anytime.</p>
+
+    <div class="card">
+      <h2>Contact Support</h2>
+      <p>Have a question, bug report, or billing issue? Send us an email and we'll get back to you within 24 hours.</p>
+      <a class="btn" href="mailto:support@getstudyedge.com">Email support@getstudyedge.com</a>
+    </div>
+
+    <h2 class="section">Common Questions</h2>
+
+    <div class="card">
+      <div class="faq-item">
+        <div class="faq-q">How do I cancel my subscription?</div>
+        <div class="faq-a">Open the app, go to Account → Manage Subscription. You can cancel anytime and keep access until the end of your billing period.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">I was charged but can't access premium features.</div>
+        <div class="faq-a">Go to Account → Restore Purchases, or email us at <a href="mailto:support@getstudyedge.com" style="color:var(--accent)">support@getstudyedge.com</a> and we'll fix it right away.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">How do I delete my account?</div>
+        <div class="faq-a">Email <a href="mailto:support@getstudyedge.com" style="color:var(--accent)">support@getstudyedge.com</a> with the subject "Delete My Account" and we'll process it within 48 hours.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q">The AI gave me an incorrect answer.</div>
+        <div class="faq-a">AI can make mistakes — always verify important information. If you notice a consistent issue, let us know so we can improve.</div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
