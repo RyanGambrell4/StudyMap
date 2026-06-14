@@ -564,4 +564,13 @@
   <!-- App gateway page (2026-06-10) -->
   <url><loc>https://getstudyedge.com/studyedge-app</loc><lastmod>2026-06-10</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
 
+  <!-- Brand entity + disambiguation pages (2026-06-13) -->
+  <url><loc>https://getstudyedge.com/not-affiliated-with-study-edge</loc><lastmod>2026-06-13</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/what-is-studyedge-ai</loc><lastmod>2026-06-13</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/studyedge-company</loc><lastmod>2026-06-13</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+
+  <!-- Keyword landing pages (2026-06-13) -->
+  <url><loc>https://getstudyedge.com/ai-study-planner</loc><lastmod>2026-06-13</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://getstudyedge.com/how-to-study-in-college</loc><lastmod>2026-06-13</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+
 </urlset>
