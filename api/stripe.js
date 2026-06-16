@@ -1,15 +1,15 @@
 /**
- * stripe.js — Unified Stripe handler
+ * stripe.js - Unified Stripe handler
  *
  * Routes requests based on presence of Stripe-Signature header:
  *   - With Stripe-Signature → webhook event handler
  *   - Without (POST with JSON body) → create checkout session
  *
  * Required environment variables (set in Vercel):
- *   STRIPE_SECRET_KEY       — from Stripe dashboard → Developers → API keys
- *   STRIPE_WEBHOOK_SECRET   — from Stripe dashboard → Developers → Webhooks → signing secret
- *   SUPABASE_URL            — same value as VITE_SUPABASE_URL
- *   SUPABASE_SERVICE_KEY    — Service Role key from Supabase → Settings → API
+ *   STRIPE_SECRET_KEY       - from Stripe dashboard → Developers → API keys
+ *   STRIPE_WEBHOOK_SECRET   - from Stripe dashboard → Developers → Webhooks → signing secret
+ *   SUPABASE_URL            - same value as VITE_SUPABASE_URL
+ *   SUPABASE_SERVICE_KEY    - Service Role key from Supabase → Settings → API
  */
 
 import Stripe from 'stripe'
@@ -18,7 +18,7 @@ import { Resend } from 'resend'
 import { onTrialEndingSoon, onUpgraded, onChurned } from '../lib/server/loops.js'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 
-// Disable Vercel's default body parsing — required for Stripe signature verification
+// Disable Vercel's default body parsing - required for Stripe signature verification
 export const config = {
   api: { bodyParser: false },
 }
@@ -46,7 +46,7 @@ const supabaseAdmin = createClient(
 
 // ── Stripe price IDs ──────────────────────────────────────────────────────────
 // 6 new price IDs (Pro/Unlimited × Weekly/Monthly/Annual). Created manually in
-// the Stripe dashboard — env vars override the placeholder strings below.
+// the Stripe dashboard - env vars override the placeholder strings below.
 //
 // Legacy semester/old-monthly IDs are intentionally NOT in the lookup map.
 // Existing subscribers on those prices are still resolved correctly via
@@ -74,7 +74,7 @@ const PRICE_TO_PLAN = {
   [PRICE_IDS.unlimited.yearly]:  { plan: 'unlimited', billingPeriod: 'yearly'  },
 
   // Grandfathered: existing subscribers on legacy price IDs still resolve.
-  // These prices are archived in Stripe — no new checkout sessions target them.
+  // These prices are archived in Stripe - no new checkout sessions target them.
   'price_1TMEqQKCY4pCgrHv5F0n5XSz': { plan: 'pro',       billingPeriod: 'monthly'  },
   'price_1TMaQxKCY4pCgrHvB2uE3ZhB': { plan: 'pro',       billingPeriod: 'semester' },
   'price_1TMEqPKCY4pCgrHvbhffsA2M': { plan: 'pro',       billingPeriod: 'yearly'   },
@@ -448,7 +448,7 @@ export default async function handler(req, res) {
 
     console.log(`[stripe webhook] ${event.type}`)
 
-    // ── Idempotency check — skip duplicate event deliveries ───────────────────
+    // ── Idempotency check - skip duplicate event deliveries ───────────────────
     const eventId = event.id
     const { data: existingEvent } = await supabaseAdmin
       .from('stripe_idempotency')
@@ -456,7 +456,7 @@ export default async function handler(req, res) {
       .eq('event_id', eventId)
       .maybeSingle()
     if (existingEvent) {
-      console.log(`[stripe] Duplicate event ${eventId} — skipping`)
+      console.log(`[stripe] Duplicate event ${eventId} - skipping`)
       return res.status(200).json({ ok: true, duplicate: true })
     }
 
@@ -474,7 +474,7 @@ export default async function handler(req, res) {
           ])
         }
       }
-      // Record idempotency here — this handler returns early and never reaches the
+      // Record idempotency here - this handler returns early and never reaches the
       // global insert below, so Stripe retries would re-send the email without this.
       await supabaseAdmin
         .from('stripe_idempotency')
@@ -491,7 +491,7 @@ export default async function handler(req, res) {
       const sub = event.data.object
       const userId = sub.metadata?.user_id
       if (!userId) {
-        console.warn('[stripe webhook] No user_id in metadata — skipping')
+        console.warn('[stripe webhook] No user_id in metadata - skipping')
         return res.status(200).json({ received: true })
       }
 
@@ -556,13 +556,13 @@ export default async function handler(req, res) {
             const referrerCustomerId = referrerRow?.subscription?.stripeCustomerId
             const newCustomerId = sub.customer
 
-            const CREDIT_CENTS = 999 // $9.99 — 1 month Pro at new pricing
+            const CREDIT_CENTS = 999 // $9.99 - 1 month Pro at new pricing
 
             if (referrerCustomerId) {
               await stripe.customers.createBalanceTransaction(referrerCustomerId, {
                 amount: -CREDIT_CENTS,
                 currency: 'usd',
-                description: 'Referral reward — friend upgraded to Pro',
+                description: 'Referral reward - friend upgraded to Pro',
               })
               // Increment referrer's count
               const referrerMerged = {
@@ -579,7 +579,7 @@ export default async function handler(req, res) {
               await stripe.customers.createBalanceTransaction(newCustomerId, {
                 amount: -CREDIT_CENTS,
                 currency: 'usd',
-                description: 'Referral signup bonus — 1 month free',
+                description: 'Referral signup bonus - 1 month free',
               })
             }
 
@@ -592,7 +592,7 @@ export default async function handler(req, res) {
               },
               { onConflict: 'user_id' }
             )
-            console.log(`[stripe webhook] Referral reward applied — referrer: ${referrerId}, new: ${userId}`)
+            console.log(`[stripe webhook] Referral reward applied - referrer: ${referrerId}, new: ${userId}`)
           } catch (refErr) {
             console.error('[stripe webhook] Referral reward failed (non-fatal):', refErr)
           }
@@ -608,14 +608,14 @@ export default async function handler(req, res) {
           const email = authUser?.user?.email
           if (email) {
             await sendWinBackEmail(email)
-            // Loops.so — fire churned automation
+            // Loops.so - fire churned automation
             await Promise.allSettled([
               onChurned({ email, userId }),
             ])
           }
         }
 
-        // ── Loops.so — fire upgraded_to_pro on active (non-trial) activation ─
+        // ── Loops.so - fire upgraded_to_pro on active (non-trial) activation ─
         if (sub.status === 'active' && (
           event.type === 'customer.subscription.created' ||
           event.type === 'customer.subscription.updated'
@@ -633,7 +633,7 @@ export default async function handler(req, res) {
           }
         }
 
-        // ── PostHog — fire checkout_success on first paid activation ─────────
+        // ── PostHog - fire checkout_success on first paid activation ─────────
         // Only on `customer.subscription.created` so renewals don't double-count.
         if (sub.status === 'active' && event.type === 'customer.subscription.created') {
           await posthogCapture('checkout_success', userId, {
@@ -651,7 +651,7 @@ export default async function handler(req, res) {
             stripe_sub_id: sub.id,
             source: 'stripe',
           })
-          // Send trial started confirmation — tells user what's unlocked and when they'll be charged.
+          // Send trial started confirmation - tells user what's unlocked and when they'll be charged.
           const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
           if (authUser?.user?.email) {
             await sendTrialStartedEmail(authUser.user.email, sub.trial_end ?? null)
@@ -719,7 +719,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Failed to cancel with Stripe' })
     }
 
-    // Keep trial_activated: true so hasUsedTrial() stays true — prevents a second free trial.
+    // Keep trial_activated: true so hasUsedTrial() stays true - prevents a second free trial.
     // status: 'cancelled' is what isTrialActive() checks to block re-activation.
     const updated = { ...sub, plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null }
     const { error: upsertErr } = await supabaseAdmin
@@ -731,7 +731,7 @@ export default async function handler(req, res) {
       return res.status(500).json({ error: 'Subscription cancelled in Stripe but failed to update database. Contact support.' })
     }
 
-    // Send cancellation confirmation — stops "was I charged?" support tickets.
+    // Send cancellation confirmation - stops "was I charged?" support tickets.
     if (authUser?.email) {
       sendTrialCancelledEmail(authUser.email).catch(e =>
         console.error('[cancel-trial] Failed to send confirmation email:', e)
@@ -790,7 +790,7 @@ export default async function handler(req, res) {
   // CARD-REQUIRED 3-day trial: `payment_method_collection: 'always'` below
   // forces Stripe Checkout to collect a card before the trial starts, and
   // Stripe auto-bills after 3 days unless the user cancels. There is no
-  // "no-card trial" path anywhere in this product anymore — earlier copy
+  // "no-card trial" path anywhere in this product anymore - earlier copy
   // and an old commit (2af08aa, 2026-05-25) assumed otherwise and silently
   // produced 0 new customers for 9 days. Verify with
   // `node scripts/verify-trial-flow.mjs` after any change to this block.
@@ -821,7 +821,7 @@ export default async function handler(req, res) {
         && ['active', 'trialing', 'past_due'].includes(existingSub?.status)
         && ['pro', 'unlimited'].includes(existingSub?.plan)
       if (hasRealPaidSub) {
-        console.warn(`[stripe checkout] Blocked duplicate checkout for user ${userId} — already ${existingSub.status} on ${existingSub.plan}`)
+        console.warn(`[stripe checkout] Blocked duplicate checkout for user ${userId} - already ${existingSub.status} on ${existingSub.plan}`)
         return res.status(409).json({
           error: 'You already have an active subscription.',
           alreadySubscribed: true,
@@ -829,16 +829,17 @@ export default async function handler(req, res) {
       }
     } catch (dbErr) {
       console.error('[stripe checkout] Error checking existing subscription:', dbErr)
-      // Non-fatal — allow checkout to proceed if the check itself fails
+      // Non-fatal - allow checkout to proceed if the check itself fails
     }
   }
 
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
-      // No explicit payment_method_types — Stripe auto-includes whatever's
-      // activated in the Dashboard (card, Link, Apple/Google Pay, Cash App Pay,
-      // etc.), so new methods turn on without a code change.
+      // Explicitly card-only. Stripe would otherwise auto-include Apple Pay
+      // on iOS Safari, which Apple App Review flags as IAP products being
+      // "mislabeled as Apple Pay" (Guideline 1.1.6).
+      payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       customer_email: userEmail || undefined,
       // For trials we must collect the card up front so billing starts after the trial ends.
@@ -846,10 +847,10 @@ export default async function handler(req, res) {
       subscription_data: subscriptionData,
       metadata: { user_id: userId, trial: wantsTrial ? '1' : '0' },
       allow_promotion_codes: true,
-      // Reassurance copy directly under the Start trial button — the moment of
+      // Reassurance copy directly under the Start trial button - the moment of
       // highest abandonment anxiety on the trial path.
       custom_text: wantsTrial
-        ? { submit: { message: "Free for 3 days, then $2.99/week. Cancel anytime in your account before your trial ends — you won't be charged." } }
+        ? { submit: { message: "Free for 3 days, then $2.99/week. Cancel anytime in your account before your trial ends - you won't be charged." } }
         : undefined,
       success_url: 'https://getstudyedge.com/app?checkout=success',
       cancel_url: 'https://getstudyedge.com/app?checkout=cancelled',
