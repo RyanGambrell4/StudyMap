@@ -11,6 +11,8 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
   const plan = getActivePlan()
   const isFree = plan === 'free'
 
+  const chatKey = courseId != null ? `se_chat_${courseId}` : null
+
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
   const [loading, setLoading] = useState(false)
@@ -38,11 +40,20 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
   const inputRef = useRef(null)
 
   useEffect(() => {
-    setMessages([])
     setInput('')
     setError('')
     setFlagBanner(null)
-    if (courseId == null) return
+    if (courseId == null) {
+      setMessages([])
+      return
+    }
+    // Restore messages from this session so history survives tab switches
+    try {
+      const saved = sessionStorage.getItem(`se_chat_${courseId}`)
+      setMessages(saved ? JSON.parse(saved) : [])
+    } catch {
+      setMessages([])
+    }
     const cached = getCachedCoachPlan(courseId)
     if (cached) {
       setCoachPlan(cached.plan ?? null)
@@ -56,6 +67,15 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       setStrengths(null)
     }
   }, [courseId])
+
+  // Persist messages to sessionStorage after each completed exchange
+  useEffect(() => {
+    if (!loading && messages.length > 0 && chatKey) {
+      try {
+        sessionStorage.setItem(chatKey, JSON.stringify(messages.slice(-50)))
+      } catch {}
+    }
+  }, [messages, loading, chatKey])
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -155,7 +175,14 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
 
       await incrementAIQuery()
 
+      track('ai_message_sent', {
+        course_name: courseName,
+        message_count: newMessages.filter(m => m.role === 'user').length,
+        flagged_topic: finalFlaggedTopic ?? null,
+      })
+
       if (finalFlaggedTopic) {
+        track('ai_topic_flagged', { topic: finalFlaggedTopic, course_name: courseName })
         const updatedStruggles = struggles.includes(finalFlaggedTopic)
           ? struggles
           : [...struggles, finalFlaggedTopic]
@@ -187,6 +214,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
           const transcript = await transcribeAudio(blob)
           if (transcript) {
             setInput(prev => prev ? prev + ' ' + transcript : transcript)
+            track('voice_input_used', { course_name: courseName })
           }
         } catch {
           // transcription failed silently
@@ -340,9 +368,11 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       {/* Input */}
       <div className="px-4 pb-4 pt-2 shrink-0 border-t border-slate-100">
       {isFree && (() => { const { remaining } = canUseFeature('aiTutor'); return remaining !== null && (
-        <p className="text-xs text-slate-400 mb-1.5">
-          {2 - remaining} of 2 AI messages used today
-          {remaining === 0 && <> · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>}
+        <p className={`text-xs mb-1.5 ${remaining === 1 ? 'text-amber-500 font-medium' : 'text-slate-400'}`}>
+          {remaining === 1
+            ? <>Last free message · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>
+            : <>{2 - remaining} of 2 free AI messages used{remaining === 0 && <> · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>}</>
+          }
         </p>
       )})()}
       <div className="flex items-end gap-2">

@@ -8,11 +8,12 @@ import {
   appendSessionRecall,
 } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, getFocusMinutesUsed, incrementFeatureUsage } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, getFocusMinutesUsed, incrementFeatureUsage, FREE_LIMITS } from '../lib/subscription'
 import { sliderToRecall } from '../utils/adaptationEngine'
 import { useCelebration } from '../utils/useCelebration'
 import { extractText } from '../utils/extractText'
 import AIChatView from './AIChatView'
+import { track } from '../lib/analytics'
 
 function fmt(seconds) {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
@@ -445,7 +446,7 @@ const ACTIVITY_COLORS = {
   'break':             '#22C55E',
 }
 
-// All tabs share the brand accent — semantic state (success / warn) lives in copy,
+// All tabs share the brand accent - semantic state (success / warn) lives in copy,
 // not in the tab color itself. Keeps the screen tonally calm across switches.
 const TAB_COLORS = {
   recall:     '#3B61C4',
@@ -463,7 +464,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const plan = getActivePlan()
   const isFree = plan === 'free'
   const focusMinutesAlreadyUsed = isFree ? getFocusMinutesUsed() : 0
-  const focusMinutesAllowed = isFree ? Math.max(0, 60 - focusMinutesAlreadyUsed) : Infinity
+  const focusMinutesAllowed = isFree ? Math.max(0, FREE_LIMITS.focusMode.minutes - focusMinutesAlreadyUsed) : Infinity
 
   // ── Blueprint blocks ──
   const blocks = blueprint?.blocks ?? null
@@ -521,7 +522,14 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     setShowRecallSheet(false)
     const elapsedMinutes = Math.max(1, Math.round((totalSec - remaining) / 60))
     if (isFree) incrementFeatureUsage('focusMode', elapsedMinutes)
-    // Pass recall data upstream when session completes
+    track('focus_recall_rated', {
+      score,
+      label,
+      elapsed_seconds: elapsed,
+      course_name: session.courseName,
+      session_type: session.sessionType,
+      tabs_used: [...tabsVisited],
+    })
     onComplete(session.id, elapsed, data)
   }
 
@@ -530,6 +538,11 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     setShowRecallSheet(false)
     const elapsedMinutes = Math.max(1, Math.round((totalSec - remaining) / 60))
     if (isFree) incrementFeatureUsage('focusMode', elapsedMinutes)
+    track('focus_recall_skipped', {
+      elapsed_seconds: elapsed,
+      course_name: session.courseName,
+      session_type: session.sessionType,
+    })
     onComplete(session.id, elapsed, null)
   }
 
@@ -791,8 +804,20 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const hasNotes = !!(notesConcepts.trim() || notesMain.trim() || notesSummary.trim() || recallText.trim())
 
   // ── Handlers ──
-  const visitTab = tab => { setActiveTab(tab); setTabsVisited(prev => new Set([...prev, tab])) }
+  const visitTab = tab => {
+    setActiveTab(tab)
+    setTabsVisited(prev => new Set([...prev, tab]))
+    track('focus_tab_opened', { tab, course_name: session.courseName, session_type: session.sessionType })
+  }
   const handleMarkComplete = () => { if (running) setRunning(false); setShowComplete(true) }
+  const handleTogglePause = () => {
+    const willPause = running
+    setRunning(r => !r)
+    track(willPause ? 'focus_session_paused' : 'focus_session_resumed', {
+      elapsed_seconds: elapsed,
+      course_name: session.courseName,
+    })
+  }
 
   const handleSkipBlock = () => {
     if (!blocks || !nextBlock) return
@@ -803,7 +828,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     setBlockRemaining(nextBlock.duration * 60)
     setRunning(true)
   }
-  // If recall was already submitted via the sheet, onComplete was already called —
+  // If recall was already submitted via the sheet, onComplete was already called -
   // these buttons are only reachable if the sheet was skipped or dismissed.
   const handleBackToDashboard = () => {
     if (!recallSubmitted) onComplete(session.id, elapsed, null)
@@ -874,6 +899,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       const data = await res.json()
       setQuizQuestions(data.questions)
       incrementAIQuery()
+      track('focus_quiz_generated', { course_name: session.courseName, question_count: data.questions?.length ?? 0 })
     } catch (e) { setQuizError(e.message) }
     finally { setQuizLoading(false) }
   }
@@ -889,8 +915,16 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   }
 
   const handleNextQuestion = () => {
-    if (quizIdx + 1 >= quizQuestions.length) setQuizDone(true)
-    else { setQuizIdx(i => i + 1); setQuizSelected(null); setQuizConfirmed(false) }
+    if (quizIdx + 1 >= quizQuestions.length) {
+      const allAnswers = [...quizAnswers, { correct: quizSelected === quizQuestions[quizIdx].answer }]
+      const correctCount = allAnswers.filter(a => a.correct).length
+      track('focus_quiz_completed', {
+        course_name: session.courseName,
+        score_pct: Math.round((correctCount / quizQuestions.length) * 100),
+        question_count: quizQuestions.length,
+      })
+      setQuizDone(true)
+    } else { setQuizIdx(i => i + 1); setQuizSelected(null); setQuizConfirmed(false) }
   }
 
   const resetQuiz = () => { setQuizQuestions(null); setQuizDone(false); setQuizAnswers([]); setQuizIdx(0); setQuizSelected(null); setQuizConfirmed(false) }
@@ -1010,6 +1044,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       if (!res.ok) throw new Error(data.error ?? 'Failed to generate flashcards')
       setInSessionFlashcards(data.flashcards ?? [])
       incrementAIQuery()
+      track('focus_flashcards_generated', { course_name: session.courseName, count: data.flashcards?.length ?? 0 })
       setFcIdx(0); setFcFlipped(false); setFcKnown(new Set())
     } catch (e) { setFcGenerateError(e.message) }
     finally { setFcGenerating(false) }
@@ -1086,7 +1121,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
         courseName: session.courseName, dateStr: todayStr, sessionType: session.sessionType,
         recallText, concepts: notesConcepts, main: notesMain, summary: notesSummary,
       })
-    } catch { /* PDF generation failed — ignore */ }
+    } catch { /* PDF generation failed - ignore */ }
     finally { setPdfDownloading(false) }
   }
 
@@ -1158,7 +1193,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       {showComplete && (
         <>
         <div className="absolute inset-0 z-[105] flex flex-col overflow-y-auto" style={{ backgroundColor: '#F7F6F3' }}>
-          {/* Tinted gradient overlay — separate element so base bg stays fully opaque */}
+          {/* Tinted gradient overlay - separate element so base bg stays fully opaque */}
           <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(160deg, ${dot}28 0%, transparent 55%)` }} />
           {/* Hero header */}
           <div className="flex flex-col items-center pt-14 pb-10 px-6 shrink-0">
@@ -1213,7 +1248,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               })}
             </div>
 
-            {/* Buttons — hidden while recall sheet is open */}
+            {/* Buttons - hidden while recall sheet is open */}
             {!showRecallSheet && (
               <div className="flex flex-col gap-2.5">
                 <button onClick={handleBackToDashboard} className="w-full py-3.5 rounded-2xl font-bold text-white text-sm"
@@ -1239,6 +1274,22 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     {pdfDownloading ? 'Generating PDF…' : 'Download Session Notes'}
                   </button>
                 )}
+              </div>
+            )}
+
+            {/* Upgrade nudge for free users at/near their daily limit */}
+            {isFree && focusMinutesAllowed <= 0 && !showRecallSheet && (
+              <div style={{ marginTop: 12, padding: '14px 16px', background: 'rgba(59,97,196,0.05)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 12, textAlign: 'center' }}>
+                <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: '#1e3a8a' }}>
+                  You've hit today's 30-min free limit.
+                </p>
+                <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>Upgrade for unlimited focus sessions, AI tutoring, and full blueprints.</p>
+                <button
+                  onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'focus-limit' } }))}
+                  style={{ padding: '10px 20px', background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+                >
+                  Unlock unlimited sessions →
+                </button>
               </div>
             )}
 
@@ -1407,7 +1458,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
             <span className="shrink-0" style={{ color: 'rgba(0,0,0,0.18)', fontSize: 12 }}>·</span>
             <span className="text-xs shrink-0" style={{ color: '#9B9B9B' }}>{session.sessionType}</span>
           </div>
-          {/* Center: label — hidden on mobile so it can't collide with the left course/session text */}
+          {/* Center: label - hidden on mobile so it can't collide with the left course/session text */}
           <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none hidden md:block">
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9B9B9B' }}>Focus Session</span>
           </div>
@@ -1499,7 +1550,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 </p>
               )}
 
-              {/* YouTube suggestions — collapsed by default */}
+              {/* YouTube suggestions - collapsed by default */}
               {!finished && (
                 <div style={{ marginTop: 12, borderRadius: 12, overflow: 'hidden', border: '1px solid rgba(0,0,0,0.07)', width: '100%', maxWidth: 420 }}>
                   <button
@@ -1574,7 +1625,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               <div style={{ display: 'flex', gap: 10, marginTop: 28, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {/* Pause / Resume */}
                 <button
-                  onClick={() => setRunning(r => !r)}
+                  onClick={handleTogglePause}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 16px', borderRadius: 10, backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B', fontSize: 13, fontWeight: 500, cursor: 'pointer', lineHeight: 1 }}
                 >
                   {running ? (
@@ -1669,7 +1720,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 {!showRecallCards ? (
                   <div className="flex items-center justify-between">
                     <button
-                      onClick={() => { /* save for later — keep recallText, close panel */ setActiveTab(null) }}
+                      onClick={() => { /* save for later - keep recallText, close panel */ setActiveTab(null) }}
                       className="text-sm transition-colors"
                       style={{ color: '#9B9B9B' }}
                     >

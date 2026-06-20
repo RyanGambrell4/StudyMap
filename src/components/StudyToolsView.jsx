@@ -5,7 +5,7 @@ import { extractText } from '../utils/extractText'
 import { getCachedStudyTools, getCachedCoachPlan, saveStudyTools } from '../lib/db'
 import { sm2, sortCardsByDue, getDueCards } from '../lib/sm2'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, hasUsedTrial } from '../lib/subscription'
 import { findSimilarCards } from '../lib/embeddings'
 import { useCelebration } from '../utils/useCelebration'
 
@@ -266,7 +266,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     }
   }, [])
 
-  // Timer effect — runs only in test mode during quiz
+  // Timer effect - runs only in test mode during quiz
   useEffect(() => {
     if (mode === 'quiz' && testMode && !quizDone && timeLeft > 0) {
       timerRef.current = setInterval(() => {
@@ -537,6 +537,13 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
         const isPro = plan === 'pro' || plan === 'unlimited' || plan === 'trial'
         const proGate = (fn) => isPro ? fn() : onShowPaywall?.('pro')
 
+        const freeBadge = (feature, color) => {
+          if (isPro) return { badge: null, badgeColor: color }
+          const { remaining } = canUseFeature(feature)
+          if (remaining === 0) return { badge: 'Upgrade to use again', badgeColor: '#9B9B9B' }
+          return { badge: '1 use · free', badgeColor: color }
+        }
+
         const tools = [
           {
             label: 'AI Cheat Sheet',
@@ -551,8 +558,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             desc: 'Get a crisis study plan when your exam is hours away.',
             color: '#DC2626',
             icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
-            onClick: () => proGate(() => onOpenExamRescue?.()),
-            pro: !isPro,
+            onClick: () => onOpenExamRescue?.(),
+            ...freeBadge('examRescue', '#DC2626'),
           },
           {
             label: 'Brain Dump',
@@ -560,6 +567,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             color: '#8B5CF6',
             icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3a3 3 0 00-3 3 3 3 0 00-3 3v3a3 3 0 003 3v2a3 3 0 003 3 3 3 0 003-3V3z"/><path d="M15 3a3 3 0 013 3 3 3 0 013 3v3a3 3 0 01-3 3v2a3 3 0 01-3 3 3 3 0 01-3-3V3z"/></svg>,
             onClick: () => onOpenBrainDump?.(),
+            ...freeBadge('brainDump', '#8B5CF6'),
           },
           {
             label: 'Quiz Burst',
@@ -567,6 +575,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             color: '#D97706',
             icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>,
             onClick: () => onOpenQuizBurst?.(),
+            ...freeBadge('quizBurst', '#D97706'),
           },
           {
             label: 'Flashcards',
@@ -662,7 +671,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             </button>
             <h1 className="text-lg font-bold text-slate-900">Upload Material</h1>
           </div>
-          {/* Course selector — always visible at top */}
+          {/* Course selector - always visible at top */}
           {courses.length > 0 && (
             <div>
               <label className="block text-xs font-medium text-slate-400 mb-1.5">Which course is this for?</label>
@@ -1089,7 +1098,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             <h1 className="text-lg font-semibold text-slate-900">Topic Drill</h1>
           </div>
 
-          {/* Setup form — shown until questions are generated */}
+          {/* Setup form - shown until questions are generated */}
           {drillQuiz.length === 0 && !drillGenerating && (
             <div className="space-y-4">
               {courses.length > 0 && (
@@ -1301,7 +1310,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 </p>
               </div>
 
-              {/* Weak areas — only show if any wrong */}
+              {/* Weak areas - only show if any wrong */}
               {answers.some(a => !a) && (
                 <div>
                   <div className="flex items-center gap-2 mb-3">
@@ -1324,7 +1333,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 </div>
               )}
 
-              {/* Correct — collapsed list */}
+              {/* Correct - collapsed list */}
               {answers.some(a => a) && (
                 <div>
                   <div className="flex items-center gap-2 mb-3">

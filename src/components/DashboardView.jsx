@@ -5,7 +5,7 @@ import ReferralCard from './ReferralCard'
 import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
-import { getActivePlan, getAIQueriesUsed, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession } from '../lib/subscription'
+import { getActivePlan, canUseFeature, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import { daysBetween, formatShortDate } from '../utils/dateUtils'
 
@@ -163,9 +163,11 @@ export default function DashboardView({
   onOpenQuizBurst,
   completedSessions,
   recoveryCoursesIdx = new Set(),
+  weeklyHourGoal,
 }) {
   const plan = getActivePlan()
-  const aiUsed = getAIQueriesUsed()
+  const { remaining: aiRemaining } = canUseFeature('aiTutor')
+  const aiUsed = aiRemaining !== null ? Math.max(0, 2 - aiRemaining) : 0
   const [trialBannerLoading, setTrialBannerLoading] = useState(false)
 
   // Fire the empty-state impression once on mount so we have a denominator
@@ -195,10 +197,13 @@ export default function DashboardView({
   const [aiChipDismissed, setAiChipDismissed] = useState(
     () => sessionStorage.getItem('studyedge_ai_chip_dismissed') === '1'
   )
-  const showAiChip = plan === 'free' && aiUsed >= 7 && !aiChipDismissed
-  const [trialCardDismissed, setTrialCardDismissed] = useState(
-    () => localStorage.getItem('studyedge_trial_card_dismissed') === '1'
-  )
+  const showAiChip = plan === 'free' && aiUsed >= 1 && !aiChipDismissed
+  const [trialCardDismissed, setTrialCardDismissed] = useState(() => {
+    const ts = localStorage.getItem('studyedge_trial_card_dismissed_at')
+    if (!ts) return false
+    const hoursSince = (Date.now() - parseInt(ts, 10)) / 3_600_000
+    return hoursSince < 24
+  })
   const showTrialCard = plan === 'free' && !hasUsedTrial() && !trialCardDismissed
   const { currentStreak, recordCompletion } = useStreak()
   const celebrate = useCelebration()
@@ -210,17 +215,26 @@ export default function DashboardView({
   const [upNextHovered, setUpNextHovered] = useState(false)
   const [startBtnHovered, setStartBtnHovered] = useState(false)
   const [streakToast, setStreakToast] = useState(null)
-  const streakMilestoneRef = useRef(null)
-
   const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100]
 
-  // Show a toast on streak milestones
+  // Track AI chip impression once per session
   useEffect(() => {
-    if (streak > 0 && STREAK_MILESTONES.includes(streak) && streakMilestoneRef.current !== streak) {
-      streakMilestoneRef.current = streak
-      setStreakToast(streak)
-      const timer = setTimeout(() => setStreakToast(null), 4500)
-      return () => clearTimeout(timer)
+    if (showAiChip) track('ai_chip_shown', { aiUsed, plan })
+  }, [showAiChip])
+
+  // Show a toast on streak milestones — use sessionStorage so it doesn't
+  // re-fire when the component remounts on tab navigation.
+  useEffect(() => {
+    if (streak > 0 && STREAK_MILESTONES.includes(streak)) {
+      const key = 'se_streak_toast_shown'
+      const shown = parseInt(sessionStorage.getItem(key) ?? '0', 10)
+      if (shown !== streak) {
+        sessionStorage.setItem(key, String(streak))
+        setStreakToast(streak)
+        track('streak_milestone_shown', { streak })
+        const timer = setTimeout(() => setStreakToast(null), 4500)
+        return () => clearTimeout(timer)
+      }
     }
   }, [streak])
 
@@ -309,7 +323,7 @@ export default function DashboardView({
   const prevWeekSessionCount = prevWeekDone.length
   const deltaHours = Math.round((weekHours - prevWeekHours) * 10) / 10
   const deltaSessions = weekSessionCount - prevWeekSessionCount
-  const weeklyGoalHours = 10
+  const weeklyGoalHours = weeklyHourGoal ?? 10
   const goalPct = Math.min(100, Math.round((weekHours / weeklyGoalHours) * 100))
   const onPace = goalPct >= Math.round((new Date().getDay() / 7) * 100) - 10
 
@@ -582,7 +596,7 @@ export default function DashboardView({
             borderRadius: 999, padding: '5px 14px', marginBottom: 14,
           }}>
             <span style={{ fontSize: 12, color: D.amber, fontWeight: 600 }}>
-              {Math.max(0, 2 - aiUsed)} AI message{Math.max(0, 2 - aiUsed) !== 1 ? 's' : ''} left today
+              {Math.max(0, 2 - aiUsed)} AI message{Math.max(0, 2 - aiUsed) !== 1 ? 's' : ''} left
             </span>
             <button onClick={() => onShowPaywall?.('ai')} style={{ fontSize: 12, fontWeight: 700, color: D.accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Upgrade</button>
             <button onClick={() => { sessionStorage.setItem('studyedge_ai_chip_dismissed', '1'); setAiChipDismissed(true) }} style={{ fontSize: 16, color: D.textDim, background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', lineHeight: 1 }} aria-label="Dismiss">×</button>
@@ -735,7 +749,7 @@ export default function DashboardView({
               >
                 {trialBannerLoading ? 'Loading…' : 'Start Free Trial →'}
               </button>
-              <button onClick={() => { localStorage.setItem('studyedge_trial_card_dismissed', '1'); setTrialCardDismissed(true) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: D.textDim, fontSize: 20, lineHeight: 1, padding: '0 4px', flexShrink: 0 }} aria-label="Dismiss">×</button>
+              <button onClick={() => { localStorage.setItem('studyedge_trial_card_dismissed_at', String(Date.now())); setTrialCardDismissed(true); track('trial_card_dismissed', { streak }) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: D.textDim, fontSize: 20, lineHeight: 1, padding: '0 4px', flexShrink: 0 }} aria-label="Dismiss">×</button>
             </div>
           </div>
         </div>
@@ -1082,7 +1096,7 @@ export default function DashboardView({
           style={{ gridColumn: 'span 6', padding: 20, position: 'relative' }}
           onClick={pendingAdaptation ? onShowAdaptModal : onNavigateToProgress}
         >
-          {/* Adaptation badge — pulsing blue dot */}
+          {/* Adaptation badge - pulsing blue dot */}
           {pendingAdaptation && (
             <div style={{
               position: 'absolute', top: 14, right: 14,

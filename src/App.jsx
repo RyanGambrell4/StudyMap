@@ -19,7 +19,7 @@ export default function App() {
   useEffect(() => {
     initAnalytics()
     captureReferralParam()
-    // 'surface' must overwrite — if the user navigated from the marketing site,
+    // 'surface' must overwrite - if the user navigated from the marketing site,
     // PostHog's super-properties cache still has surface: 'marketing'.
     register({ surface: 'app' })
     // Stamp acquisition info onto the user permanently, even pre-signup,
@@ -149,7 +149,7 @@ export default function App() {
         register({ auth_provider: session.user.app_metadata?.provider ?? 'email' })
         track('user_signed_in', { fresh_signup: !!isFreshSignup, auth_provider: session.user.app_metadata?.provider ?? 'email' })
         if (isFreshSignup) track('signup_completed', { auth_provider: session.user.app_metadata?.provider ?? 'email' })
-        // Welcome email — only on actual signup, not every login.
+        // Welcome email - only on actual signup, not every login.
         // Fresh signups have created_at within ~minutes of now AND have not received it before (localStorage flag).
         const welcomeKey = `studyedge_welcome_sent_${session.user.id}`
         if (isFreshSignup && !localStorage.getItem(welcomeKey)) {
@@ -164,7 +164,7 @@ export default function App() {
             }),
           }).then(() => localStorage.setItem(welcomeKey, '1')).catch(() => {})
         }
-        // Save referral — fire-and-forget, won't overwrite if already set
+        // Save referral - fire-and-forget, won't overwrite if already set
         const referrer = getStoredReferrer()
         if (referrer && referrer !== session.user.id) {
           supabase.from('user_data').select('subscription').eq('user_id', session.user.id).maybeSingle()
@@ -303,7 +303,7 @@ export default function App() {
       trial_taken: !!trialTaken,
       school_type: st ?? null,
     })
-    // Post-onboarding email — fire once per user
+    // Post-onboarding email - fire once per user
     if (session?.user?.email) {
       const key = `studyedge_onboarding_email_${session.user.id}`
       if (!localStorage.getItem(key)) {
@@ -341,6 +341,7 @@ export default function App() {
   const handleAddCourse = (course) => {
     // Check course limit before adding
     if (!canAddCourse(courses.length)) {
+      track('course_limit_reached', { plan: getActivePlan(), courseCount: courses.length })
       openPaywall('courses')
       return
     }
@@ -363,7 +364,7 @@ export default function App() {
       assignments: latestPlanRef.current.assignments,
       savedAt: Date.now(),
     })
-    // First-plan email — only when user goes from zero courses to one
+    // First-plan email - only when user goes from zero courses to one
     if (isFirstCourse && session?.user?.email) {
       const key = `studyedge_first_plan_email_${session.user.id}`
       if (!localStorage.getItem(key)) {
@@ -474,7 +475,7 @@ export default function App() {
   }
 
   if (!session) {
-    // The real landing page lives at / — the React app only hosts the
+    // The real landing page lives at / - the React app only hosts the
     // auth screen (?signup=1 / ?login=1) and OAuth error bouncebacks.
     const sp = new URLSearchParams(window.location.search)
     const urlSignup = sp.get('signup') === '1'
@@ -493,7 +494,7 @@ export default function App() {
     // client is still booting (before getSession resolves), `session` is
     // null/undefined even though a valid token is sitting in storage. If we
     // blindly redirect to '/', the landing-page bounce script sees the
-    // session and redirects us right back to '/app' — creating an infinite
+    // session and redirects us right back to '/app' - creating an infinite
     // flip-flop that dumps the user on the marketing page.
     let hasStoredSession = false
     try {
@@ -514,7 +515,7 @@ export default function App() {
       return <AuthScreen initialMode={mode} onBack={() => { window.location.href = '/' }} />
     }
 
-    // Mid-OAuth callback OR Supabase still hydrating a stored session —
+    // Mid-OAuth callback OR Supabase still hydrating a stored session -
     // hold with a spinner. onAuthStateChange will fire and we'll render.
     if (inOAuthCallback || hasStoredSession) {
       return (
@@ -527,7 +528,7 @@ export default function App() {
       )
     }
 
-    // No auth intent — send them to the real landing page
+    // No auth intent - send them to the real landing page
     window.location.href = '/'
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F7F6F3' }}>
@@ -623,7 +624,7 @@ export default function App() {
   // ── Stripe checkout redirect (paid plans AND 3-day free trial) ───────────
   // REVENUE-CRITICAL. Read before changing the condition below.
   // Trial=1 MUST redirect to Stripe Checkout. The "trial" in this product is
-  // card-required — `payment_method_collection: 'always'` in api/stripe.js
+  // card-required - `payment_method_collection: 'always'` in api/stripe.js
   // collects the card, and Stripe auto-bills after 3 days. Skipping this block
   // for trial signups (e.g. adding `!checkoutIntent.trial`) breaks the trial:
   // the user gets dropped into the app as free, no customer is created, no
@@ -635,7 +636,7 @@ export default function App() {
     createCheckoutSession(checkoutIntent.plan, checkoutIntent.billing, session.user.email, session.user.id, { trial: checkoutIntent.trial }).then(result => {
       if (result?.alreadySubscribed) return
       if (!result) {
-        // Network or server error — surface it rather than leaving a dead spinner.
+        // Network or server error - surface it rather than leaving a dead spinner.
         setCheckoutIntent(null)
         return
       }
@@ -676,7 +677,7 @@ export default function App() {
         <Onboarding onComplete={handleOnboardingComplete} userEmail={session.user.email} userId={session.user.id} />
       )}
 
-      {/* Global paywall modal — rendered at App level so any component can trigger it */}
+      {/* Global paywall modal - rendered at App level so any component can trigger it */}
       {paywallOpen && (
         <PaywallModal
           trigger={paywallTrigger}
@@ -703,7 +704,9 @@ export default function App() {
           gap: 12,
         }}>
           <span style={{ fontSize: 13.5, color: '#fff', fontWeight: 500 }}>
-            Your 3-day trial is still available. No commitment until day 4.
+            {hasUsedTrial()
+              ? 'Pick up where you left off. No hidden fees.'
+              : 'Your 3-day trial is still available. No commitment until day 4.'}
           </span>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             <button
@@ -747,11 +750,14 @@ export default function App() {
 // Auto-polls every 5s for email confirmation. When confirmed, refreshSession
 // triggers onAuthStateChange which re-renders the app past this gate.
 function EmailVerificationGate({ email, userId, resendState, onResend, onSignOut }) {
+  const [secondsWaited, setSecondsWaited] = useState(0)
+
   useEffect(() => {
     let cancelled = false
     let fired = false
     track('email_confirmation_screen_shown', { source: 'app_gate' })
-    const interval = setInterval(async () => {
+
+    const pollInterval = setInterval(async () => {
       if (cancelled) return
       try {
         await supabase.auth.refreshSession()
@@ -762,81 +768,129 @@ function EmailVerificationGate({ email, userId, resendState, onResend, onSignOut
         }
       } catch {}
     }, 5000)
-    return () => { cancelled = true; clearInterval(interval) }
+
+    // Tick a visible "waiting" counter so users know something is happening
+    const tickInterval = setInterval(() => {
+      if (!cancelled) setSecondsWaited(s => s + 1)
+    }, 1000)
+
+    return () => { cancelled = true; clearInterval(pollInterval); clearInterval(tickInterval) }
   }, [userId])
 
-  const PREVIEWS = [
-    'AI Study Coach',
-    'Session Blueprints',
-    'Focus sessions + streak tracking',
-  ]
+  const domain = email ? email.split('@')[1] : null
+  const waitLabel = secondsWaited < 60
+    ? `Waiting… ${secondsWaited}s`
+    : `Waiting… ${Math.floor(secondsWaited / 60)}m ${secondsWaited % 60}s`
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#F7F6F3' }}>
-      <style>{`@keyframes pulse-ring-app { 0%,100% { box-shadow: 0 0 0 0 rgba(59,97,196,0.4) } 50% { box-shadow: 0 0 0 8px rgba(59,97,196,0) } }`}</style>
-      <div className="max-w-md w-full text-center space-y-5">
-        <div
-          className="w-16 h-16 mx-auto rounded-2xl bg-indigo-50 border border-indigo-200 flex items-center justify-center"
-          style={{ animation: 'pulse-ring-app 1.8s ease-in-out infinite' }}
-        >
-          <svg className="w-8 h-8" style={{ color: '#3B61C4' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+    <div style={{ minHeight: '100vh', backgroundColor: '#080C18', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', position: 'relative', overflow: 'hidden' }}>
+      <style>{`
+        @keyframes evg-spin    { from { transform: rotate(0deg) } to { transform: rotate(360deg) } }
+        @keyframes evg-orb     { 0%,100% { opacity:.3; transform:scale(1) } 50% { opacity:.6; transform:scale(1.08) } }
+        @keyframes evg-fade-up { from { opacity:0; transform:translateY(14px) } to { opacity:1; transform:translateY(0) } }
+      `}</style>
+
+      {/* Background glow */}
+      <div style={{ position:'absolute', top:'-100px', left:'50%', transform:'translateX(-50%)', width:500, height:400, background:'radial-gradient(ellipse, rgba(107,143,255,.1) 0%, transparent 70%)', animation:'evg-orb 5s ease-in-out infinite', pointerEvents:'none' }} />
+
+      <div style={{ maxWidth: 420, width: '100%', textAlign: 'center', animation: 'evg-fade-up 400ms ease both', position: 'relative', zIndex: 1 }}>
+
+        {/* Brand pill */}
+        <div style={{ display:'inline-flex', alignItems:'center', gap:9, padding:'7px 16px', background:'rgba(255,255,255,.05)', border:'1px solid rgba(255,255,255,.09)', borderRadius:999, marginBottom:28 }}>
+          <img src="/favicon.png" alt="" style={{ width:20, height:20, borderRadius:5, objectFit:'contain' }} />
+          <span style={{ color:'rgba(255,255,255,.65)', fontWeight:600, fontSize:'0.82rem', letterSpacing:'-0.2px' }}>StudyEdge AI</span>
+        </div>
+
+        {/* Email icon */}
+        <div style={{
+          width:64, height:64, margin:'0 auto 22px',
+          borderRadius:18,
+          background:'linear-gradient(135deg, rgba(107,143,255,.15), rgba(167,139,250,.15))',
+          border:'1px solid rgba(107,143,255,.25)',
+          display:'flex', alignItems:'center', justifyContent:'center',
+          boxShadow:'0 4px 32px rgba(107,143,255,.2)',
+        }}>
+          <svg width="28" height="28" fill="none" stroke="#8AABFF" strokeWidth="1.5" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
           </svg>
         </div>
-        <div>
-          <h1 className="text-2xl font-bold" style={{ color: '#111111' }}>One click to unlock your study plan</h1>
-          <p className="text-sm leading-relaxed mt-2" style={{ color: '#6B6B6B' }}>
-            We sent a confirmation link to{' '}
-            <span className="font-medium" style={{ color: '#111111' }}>{email}</span>.
-          </p>
+
+        {/* Headline */}
+        <h1 style={{ fontSize:'1.55rem', fontWeight:800, letterSpacing:'-0.035em', marginBottom:8, background:'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.6))', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', backgroundClip:'text' }}>
+          Check your inbox
+        </h1>
+        <p style={{ fontSize:'0.88rem', color:'rgba(255,255,255,.4)', lineHeight:1.65, marginBottom:5 }}>
+          We sent a confirmation link to
+        </p>
+        <p style={{ fontSize:'0.93rem', fontWeight:700, color:'rgba(255,255,255,.75)', marginBottom:24, wordBreak:'break-all' }}>
+          {email}
+        </p>
+
+        {/* Auto-checking pill */}
+        <div style={{
+          display:'inline-flex', alignItems:'center', gap:8,
+          background:'rgba(107,143,255,.1)', border:'1px solid rgba(107,143,255,.25)',
+          borderRadius:999, padding:'6px 14px',
+          fontSize:12, color:'#8AABFF', fontWeight:600,
+          marginBottom:24,
+        }}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#8AABFF" strokeWidth="2.5"
+            style={{ animation:'evg-spin 1.6s linear infinite', flexShrink:0 }}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          {waitLabel} · Checking automatically
         </div>
 
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 7,
-          background: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.15)',
-          borderRadius: 999, padding: '5px 12px',
-          fontSize: 12, color: '#3B61C4', fontWeight: 600,
-        }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3B61C4', animation: 'pulse-ring-app 1.4s ease-in-out infinite' }} />
-          Checking automatically. No need to refresh.
-        </div>
-
-        <div style={{
-          backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)',
-          borderRadius: 12, padding: '14px 18px', textAlign: 'left',
-        }}>
-          <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>
-            What unlocks once you verify
+        {/* Tips card */}
+        <div style={{ background:'rgba(255,255,255,.04)', border:'1px solid rgba(255,255,255,.08)', borderRadius:14, padding:'18px 20px', marginBottom:18, textAlign:'left' }}>
+          <p style={{ fontSize:10, fontWeight:700, color:'rgba(255,255,255,.3)', textTransform:'uppercase', letterSpacing:'0.1em', marginBottom:12 }}>
+            Can't find it?
           </p>
-          {PREVIEWS.map(item => (
-            <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '4px 0' }}>
-              <svg width="12" height="12" fill="none" stroke="#3B61C4" strokeWidth="3" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-              </svg>
-              <span style={{ fontSize: 13, color: '#1A1A1A', fontWeight: 500 }}>{item}</span>
+          {[
+            { icon: '📁', text: 'Check your spam or junk folder' },
+            { icon: '⏱',  text: 'It can take up to 2 minutes to arrive' },
+            { icon: '📧', text: 'Look for an email from StudyEdge AI' },
+          ].map(({ icon, text }) => (
+            <div key={text} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
+              <span style={{ fontSize:14, flexShrink:0 }}>{icon}</span>
+              <span style={{ fontSize:13, color:'rgba(255,255,255,.55)' }}>{text}</span>
             </div>
           ))}
         </div>
 
+        {/* Resend */}
         <button
-          disabled={resendState === 'sending'}
+          disabled={resendState === 'sending' || resendState === 'sent'}
           onClick={onResend}
-          className="text-sm font-medium transition-colors disabled:opacity-50"
-          style={{ color: resendState === 'sent' ? '#16A34A' : resendState === 'error' ? '#DC2626' : '#3B61C4' }}
+          style={{
+            width:'100%', padding:'13px',
+            background: resendState === 'sent' ? 'rgba(52,211,153,.1)' : 'rgba(255,255,255,.06)',
+            border: resendState === 'sent' ? '1px solid rgba(52,211,153,.3)' : '1px solid rgba(255,255,255,.1)',
+            borderRadius:12,
+            color: resendState === 'sent' ? '#34D399' : resendState === 'error' ? '#F87171' : 'rgba(255,255,255,.6)',
+            fontFamily:'inherit', fontSize:'0.88rem', fontWeight:600,
+            cursor:(resendState === 'sending' || resendState === 'sent') ? 'default' : 'pointer',
+            transition:'all .15s', marginBottom:12,
+            opacity: resendState === 'sending' ? 0.5 : 1,
+          }}
+          onMouseEnter={e => { if (!resendState) { e.currentTarget.style.background='rgba(255,255,255,.1)'; e.currentTarget.style.color='rgba(255,255,255,.9)' } }}
+          onMouseLeave={e => { if (!resendState) { e.currentTarget.style.background='rgba(255,255,255,.06)'; e.currentTarget.style.color='rgba(255,255,255,.6)' } }}
         >
-          {resendState === 'sending' ? 'Sending…' : resendState === 'sent' ? 'Email resent. Check your inbox.' : resendState === 'error' ? 'Failed to resend. Try again.' : 'Resend confirmation email'}
+          {resendState === 'sending' ? 'Sending…'
+            : resendState === 'sent'  ? '✓ Resent — check inbox and spam folder'
+            : resendState === 'error' ? 'Failed to resend. Try again.'
+            : 'Resend confirmation email'}
         </button>
-        <div className="pt-1">
-          <button
-            onClick={onSignOut}
-            className="text-xs transition-colors"
-            style={{ color: '#9B9B9B' }}
-            onMouseEnter={(e) => e.currentTarget.style.color = '#6B6B6B'}
-            onMouseLeave={(e) => e.currentTarget.style.color = '#9B9B9B'}
-          >
-            Sign out
-          </button>
-        </div>
+
+        <button
+          onClick={onSignOut}
+          style={{ background:'none', border:'none', color:'rgba(255,255,255,.2)', fontSize:'0.76rem', cursor:'pointer', padding:4, transition:'color .15s' }}
+          onMouseEnter={e => e.currentTarget.style.color='rgba(255,255,255,.5)'}
+          onMouseLeave={e => e.currentTarget.style.color='rgba(255,255,255,.2)'}
+        >
+          Wrong email? Sign out and try again
+        </button>
+
       </div>
     </div>
   )

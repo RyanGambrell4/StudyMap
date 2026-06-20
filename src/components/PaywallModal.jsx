@@ -112,6 +112,11 @@ const LIMIT_MESSAGES = {
     title: 'Unlock unlimited Focus sessions.',
     body: 'Lock in for as long as you need. Pro removes the 30-min cap so you can finish what you started.',
   },
+  'focus-limit': {
+    tag: "You've hit your daily focus limit",
+    title: 'Unlock unlimited Focus sessions.',
+    body: "You just hit your 30-min free cap. Pro removes it entirely — study as long as you need, every day.",
+  },
   brainDump: {
     tag: 'Train recall on every topic',
     title: 'Unlock unlimited Brain Dumps.',
@@ -153,6 +158,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   const [testimonialIdx, setTestimonialIdx] = useState(0)
   const [trialLoading, setTrialLoading] = useState(false)
   const [trialError, setTrialError] = useState(null)
+  const [planError, setPlanError] = useState(null)
   const openedAtRef = useRef(Date.now())
 
   const trialUsed = hasUsedTrial()
@@ -229,10 +235,11 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
       trigger_feature: trigger,
       is_trial: false,
     })
+    setPlanError(null)
     setLoading(planId)
     const url = await createCheckoutSession(planId, billingPeriod, userEmail, userId)
     setLoading(null)
-    if (!url) { alert('Something went wrong. Please try again.'); return }
+    if (!url) { setPlanError('Checkout failed. No charge was made — please try again.'); return }
     if (url?.alreadySubscribed) { onClose(); return }
     window.location.href = url
   }
@@ -504,7 +511,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                     {plan.subPrices[billingPeriod]}
                   </div>
                 )}
-                {planId === 'pro' && (
+                {planId === 'pro' && !trialUsed && !trialActive && (
                   <div style={{ fontSize: '0.68rem', color: '#059669', marginTop: '4px', fontWeight: 700 }}>
                     Start with a 3-day free trial · cancel anytime
                   </div>
@@ -547,6 +554,12 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             )
           })}
         </div>
+
+        {planError && (
+          <p style={{ textAlign: 'center', color: '#DC2626', fontSize: '0.78rem', margin: '0 0 8px', fontWeight: 500 }}>
+            {planError}
+          </p>
+        )}
 
         {/* ── Footer ── */}
         <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.75rem', margin: 0 }}>

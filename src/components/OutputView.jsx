@@ -1,4 +1,4 @@
-import { useMemo, useState, useCallback, useEffect, useRef } from 'react'
+import { useMemo, useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react'
 import Spinner from './ui/spinner'
 import { track } from '../lib/analytics'
 import { generateSchedule } from '../utils/generateSchedule'
@@ -28,7 +28,7 @@ import AppShell from './AppShell'
 import DashboardView from './DashboardView'
 import { useSessionReminders } from '../utils/useSessionReminders'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes } from '../lib/subscription'
 const CoursesView    = lazy(() => import('./CoursesView'))
 const ProgressView   = lazy(() => import('./ProgressView'))
 const StudyToolsView = lazy(() => import('./StudyToolsView'))
@@ -397,6 +397,15 @@ export default function OutputView({
     return () => window.removeEventListener('studyedge:ai-query-used', handler)
   }, [])
   // ─────────────────────────────────────────────────────────────────────────────
+
+  // ── SPA section-change tracking ──────────────────────────────────────────────
+  const prevSection = useRef(null)
+  useEffect(() => {
+    if (prevSection.current !== null) {
+      track('view_changed', { view: activeSection, previous_view: prevSection.current })
+    }
+    prevSection.current = activeSection
+  }, [activeSection])
 
   // ── Browser back-button support ──────────────────────────────────────────────
   const sectionMounted = useRef(false)
@@ -830,8 +839,11 @@ export default function OutputView({
   // ── handlers ──
   const handleStartFocus = useCallback(s => {
     if (getActivePlan() === 'free') {
-      onShowPaywall?.('blueprint')
-      return
+      if (!canUseFocusMinutes(1)) {
+        onShowPaywall?.('focus')
+        return
+      }
+      // Allow free users to start — FocusMode enforces the 30-min daily cap internally
     }
     track('session_started', { courseId: s.courseId, courseName: s.courseName, sessionType: s.sessionType, studyMethod: s.studyMethod ?? null, duration: s.duration })
     // Fire first_session_started exactly once per user. Anchors the
@@ -1395,6 +1407,7 @@ export default function OutputView({
             onShowPaywall={onShowPaywall}
             userEmail={userEmail}
             userId={userId}
+            weeklyHourGoal={schedule?.hoursPerWeek ?? 10}
             recoveryCoursesIdx={recoveryCoursesIdx}
             examConflicts={examConflicts}
             coachPlans={coachPlans}
@@ -1459,7 +1472,7 @@ export default function OutputView({
 
             {/* View controls */}
             <div className="flex items-center justify-between mb-6">
-              {/* Month navigation — only shown in month view; day/week views have their own nav */}
+              {/* Month navigation - only shown in month view; day/week views have their own nav */}
               {viewMode === 'month' ? (
                 <div className="flex items-center gap-3">
                   <button
