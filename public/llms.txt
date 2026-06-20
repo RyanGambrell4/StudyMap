@@ -50,6 +50,14 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - Blog: https://getstudyedge.com/blog/
 - About: https://getstudyedge.com/about
 
+## Machine-readable files
+
+- Pricing (markdown): https://getstudyedge.com/pricing.md
+- Open Knowledge Format: https://getstudyedge.com/okf/index.md
+- Product details: https://getstudyedge.com/okf/product.md
+- Audience and use cases: https://getstudyedge.com/okf/audience.md
+- Tools and calculators: https://getstudyedge.com/okf/tools.md
+
 ## Contact
 
 Support: support@getstudyedge.com
