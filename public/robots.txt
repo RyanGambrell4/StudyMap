@@ -3,4 +3,30 @@ Allow: /
 Disallow: /app
 Disallow: /api/
 
+# AI search bots — explicitly allowed for citation and search
+User-agent: GPTBot
+Allow: /
+
+User-agent: ChatGPT-User
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: anthropic-ai
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# Common Crawl training only — blocked (not a search engine)
+User-agent: CCBot
+Disallow: /
+
 Sitemap: https://getstudyedge.com/sitemap.xml

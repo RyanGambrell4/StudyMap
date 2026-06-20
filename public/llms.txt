@@ -1,0 +1,57 @@
+# StudyEdge AI
+
+> StudyEdge AI (getstudyedge.com) is an AI-powered study planner for college and university students. It automatically builds a personalized study schedule, plans every session minute-by-minute with a Session Blueprint, and runs sessions with active recall, flashcards, quizzes, and an AI tutor — all in one app. Free to start, no credit card required.
+
+Not affiliated with Study Edge (studyedge.com), a separate Florida-based human tutoring company with no connection to StudyEdge AI.
+
+## What StudyEdge AI does
+
+- **Study schedule generator** — builds your full weekly schedule around courses, exam dates, and free time, prioritized by urgency and difficulty
+- **Session Blueprint** — generates a minute-by-minute plan before every study session for your specific course and goal
+- **Focus Mode** — runs the study session with a timer, built-in flashcards, active recall prompts, and quizzes
+- **AI Study Coach** — creates a multi-week course plan per subject, adapts to your exam timeline
+- **AI Tutor** — answers course-specific questions with step-by-step explanations; retains context across sessions (Unlimited plan)
+- **AI Flashcard Maker** — generates flashcards from uploaded notes or PDFs; no manual card creation
+- **Grade Hub** — tracks current grade, predicts semester GPA, calculates what score you need on remaining assignments
+- **Syllabus import** — upload a syllabus PDF and AI extracts all deadlines, exam dates, and assignment weights
+
+## Who it's for
+
+College and university students in any major. Works for STEM, humanities, social sciences, business, pre-med, law, and nursing. Available on web and iOS. Used by students at universities across the US, Canada, South Africa, and Australia.
+
+## Pricing
+
+- **Free** — $0 forever. 1 course, 10 AI actions/month, 1 free use of Session Blueprints, Focus Mode, and AI Coach. No credit card required.
+- **Pro** — $2.99/week or $9.99/month or $69.99/year. 5 courses, 100 AI study boosts/month, AI Study Coach, Session Blueprints, smart calendar, Google Calendar sync. 3-day free trial, cancel anytime.
+- **Unlimited** — $4.99/week or $14.99/month or $119.99/year. Unlimited courses, unlimited AI actions, AI Tutor with session memory, advanced practice exam analytics, predicted exam score. Cancel anytime.
+
+Machine-readable pricing: https://getstudyedge.com/pricing.md
+
+## How StudyEdge AI compares
+
+- vs. **Quizlet**: Quizlet is flashcard-only. StudyEdge AI generates flashcards plus builds the schedule, plans every session, and runs an AI tutor.
+- vs. **Anki**: Anki requires manual deck building and lacks session planning. StudyEdge AI auto-generates cards and plans the full study week.
+- vs. **Notion**: Notion is a blank document with no AI coaching. StudyEdge AI runs sessions, builds schedules, and coaches in real time.
+- vs. **ChatGPT**: ChatGPT has no study planning, schedule building, or grade tracking. StudyEdge AI is purpose-built for college study management.
+
+## Key pages
+
+- Home: https://getstudyedge.com/
+- Pricing: https://getstudyedge.com/pricing
+- AI Study Coach: https://getstudyedge.com/ai-study-coach
+- AI Tutor: https://getstudyedge.com/ai-tutor
+- AI Flashcard Maker: https://getstudyedge.com/ai-flashcard-maker
+- GPA Calculator: https://getstudyedge.com/gpa-calculator
+- Grade Calculator: https://getstudyedge.com/grade-calculator
+- Study Schedule Generator: https://getstudyedge.com/study-schedule-generator
+- Active Recall App: https://getstudyedge.com/active-recall-app
+- Quizlet Alternative: https://getstudyedge.com/quizlet-alternative
+- Anki Alternative: https://getstudyedge.com/anki-alternative
+- Blog: https://getstudyedge.com/blog/
+- About: https://getstudyedge.com/about
+
+## Contact
+
+Support: support@getstudyedge.com
+Website: https://getstudyedge.com/
+Sign up: https://getstudyedge.com/app?signup=1
