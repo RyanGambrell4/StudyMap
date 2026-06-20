@@ -269,6 +269,9 @@
     <priority>0.85</priority>
   </url>
 
+  <!-- Blog index -->
+  <url><loc>https://getstudyedge.com/blog</loc><lastmod>2026-06-19</lastmod><changefreq>weekly</changefreq><priority>0.85</priority></url>
+
   <!-- Blog articles -->
   <url>
     <loc>https://getstudyedge.com/blog/how-to-study-for-finals-week</loc>
