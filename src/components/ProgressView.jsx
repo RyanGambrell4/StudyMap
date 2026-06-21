@@ -3,6 +3,7 @@ import { clean } from '../utils/strings'
 import { toDateStr, addDays, daysBetween } from '../utils/dateUtils'
 import { getCachedPracticeScores, savePracticeScores, getCachedSessionRecalls, getCachedStudyTools } from '../lib/db'
 import { getDueCards } from '../lib/sm2'
+import { getActivePlan, hasUsedTrial } from '../lib/subscription'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
@@ -244,8 +245,10 @@ function ScoreLineChart({ entries, color }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-export default function ProgressView({ courses, allSessions, completedIds, completedSessionLog = [], todayStr }) {
+export default function ProgressView({ courses, allSessions, completedIds, completedSessionLog = [], todayStr, onShowPaywall }) {
   const [period, setPeriod] = useState('Term')
+  const isFree = getActivePlan() === 'free'
+  const trialUsed = hasUsedTrial()
 
   const isExamMode = courses.some(c => EXAM_PATTERN.test(c.name))
 
@@ -1229,6 +1232,28 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
             ))}
           </div>
         </div>
+      )}
+
+      {/* ── Pro upgrade nudge for free users ── */}
+      {isFree && (
+        <button
+          onClick={() => onShowPaywall?.('study-hacks')}
+          style={{ width: '100%', background: 'rgba(59,97,196,0.05)', border: '1px solid rgba(59,97,196,0.16)', borderRadius: 14, padding: '18px 22px', cursor: 'pointer', textAlign: 'left', marginTop: 2, fontFamily: 'inherit' }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ fontSize: 13, fontWeight: 700, color: '#2563EB', marginBottom: 4 }}>
+                {trialUsed ? 'Upgrade to Pro' : 'Start your 3-day free trial'}
+              </div>
+              <div style={{ fontSize: 12.5, color: D.textMuted, lineHeight: 1.55 }}>
+                Unlock unlimited Brain Dumps, Practice Exams, AI Tutor, and more — so every score shows up here.
+              </div>
+            </div>
+            <svg width="16" height="16" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginLeft: 16 }}>
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </div>
+        </button>
       )}
 
     </div>

@@ -1697,6 +1697,7 @@ export default function OutputView({
             completedIds={completedIds}
             completedSessionLog={completedSessionLog}
             todayStr={todayStr}
+            onShowPaywall={onShowPaywall}
           />
         )}
 
