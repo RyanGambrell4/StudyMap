@@ -5,7 +5,7 @@ import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
 
-function buildDigestHtml({ name, email, stats, courses, weekAhead }) {
+function buildDigestHtml({ name, email, stats, courses, weekAhead, isFree = false, trialUsed = false }) {
   const firstName = (name ?? email ?? 'there').split(' ')[0]
   const totalMin  = stats?.totalMinutes ?? 0
   const sessions  = stats?.sessionCount ?? 0
@@ -89,6 +89,16 @@ function buildDigestHtml({ name, email, stats, courses, weekAhead }) {
       <tr><td style="padding:20px 0 0;text-align:center;">
         <a href="https://getstudyedge.com/app" style="display:inline-block;padding:13px 28px;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;">Open StudyEdge</a>
       </td></tr>
+      ${isFree ? `
+      <tr><td style="padding:16px 0 0;">
+        <table cellpadding="0" cellspacing="0" style="width:100%;background:#F4F7FF;border-radius:12px;border:1px solid rgba(59,97,196,0.15);">
+          <tr><td style="padding:14px 18px;text-align:center;">
+            <p style="margin:0 0 5px;font-size:13px;font-weight:600;color:#3B61C4;">${trialUsed ? 'Upgrade to Pro' : 'You have a free trial waiting'}</p>
+            <p style="margin:0 0 10px;font-size:13px;color:#6B6B6B;line-height:1.55;">Unlock unlimited AI tutoring, brain dumps, cheat sheets, and practice exams.</p>
+            <a href="https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=digest&utm_campaign=weekly_digest" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">${trialUsed ? 'Upgrade to Pro →' : 'Start free trial →'}</a>
+          </td></tr>
+        </table>
+      </td></tr>` : ''}
       <tr><td style="padding:24px 0 0;text-align:center;">
         <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
           You opted into weekly digests in StudyEdge.<br>
@@ -119,7 +129,7 @@ export default async function handler(req, res) {
 
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
-    .select('user_id, email_digest, manual_sessions, completed_sessions, study_tools')
+    .select('user_id, email_digest, manual_sessions, completed_sessions, study_tools, subscription')
     .eq('email_digest', true)
 
   if (error) return res.status(500).json({ error: error.message })
@@ -180,12 +190,17 @@ export default async function handler(req, res) {
         else if (i > 0) break
       }
 
+      const userPlan = row?.subscription?.plan ?? 'free'
+      const trialUsed = !!(row?.subscription?.trialUsedAt)
+
       const html = buildDigestHtml({
         name: authUser.user_metadata?.name,
         email: authUser.email,
         stats: { totalMinutes, sessionCount: weekSessions.length, streak },
         courses,
         weekAhead,
+        isFree: userPlan === 'free',
+        trialUsed,
       })
 
       const { error: sendErr } = await resend.emails.send({
