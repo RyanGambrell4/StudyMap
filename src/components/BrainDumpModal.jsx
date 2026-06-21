@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { transcribeAudio, createRecorder } from '../lib/deepgram'
+import { getCachedStudyTools, saveStudyTools } from '../lib/db'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -64,6 +65,8 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall }) {
   const [result, setResult] = useState(null)
   const [bdRecording, setBdRecording] = useState(false)
   const [bdRecorderRef] = useState(() => ({ current: null }))
+  const [isConvertingCards, setIsConvertingCards] = useState(false)
+  const [cardsAdded, setCardsAdded] = useState(0)
   const intervalRef = useRef(null)
   const textareaRef = useRef(null)
 
@@ -159,6 +162,38 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall }) {
           setStep('setup')
         }
       }
+    }
+  }
+
+  async function handleConvertToFlashcards() {
+    if (!text.trim() || isConvertingCards) return
+    setIsConvertingCards(true)
+    try {
+      const token = await getAccessToken()
+      const res = await fetch('/api/generate-study-tools', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          text,
+          courseName: course?.name ?? null,
+          topic: topic.trim() || undefined,
+          tool: 'flashcards',
+          count: 10,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed')
+      const newCards = data.flashcards ?? []
+      if (newCards.length > 0) {
+        const existing = getCachedStudyTools() ?? {}
+        const merged = [...(existing.flashcards ?? []), ...newCards]
+        await saveStudyTools({ ...existing, flashcards: merged })
+        setCardsAdded(newCards.length)
+      }
+    } catch {
+      // silently fail — don't disrupt the result view
+    } finally {
+      setIsConvertingCards(false)
     }
   }
 
@@ -436,8 +471,36 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall }) {
               </div>
             )}
 
+            {/* Convert to flashcards */}
+            {cardsAdded > 0 ? (
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '11px 14px', background: 'rgba(22,163,74,0.07)', border: '1px solid rgba(22,163,74,0.20)', borderRadius: 10, marginBottom: 10 }}>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                <span style={{ fontSize: 13, fontWeight: 600, color: '#16A34A' }}>{cardsAdded} cards added to Flashcards</span>
+              </div>
+            ) : (
+              <button
+                onClick={handleConvertToFlashcards}
+                disabled={isConvertingCards}
+                style={{
+                  width: '100%', padding: '11px', marginBottom: 10,
+                  background: isConvertingCards ? 'rgba(249,115,22,0.08)' : 'rgba(249,115,22,0.09)',
+                  border: '1px solid rgba(249,115,22,0.25)', borderRadius: 10,
+                  fontSize: 13, fontWeight: 700, color: '#F97316',
+                  cursor: isConvertingCards ? 'default' : 'pointer', fontFamily: 'inherit',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                  opacity: isConvertingCards ? 0.7 : 1,
+                }}
+              >
+                {isConvertingCards ? (
+                  <><Spinner size="xs" color="#F97316" /> Generating cards...</>
+                ) : (
+                  <><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="4" width="20" height="14" rx="2"/><path d="M6 8h12M6 12h7"/></svg> Convert to Flashcards</>
+                )}
+              </button>
+            )}
+
             <div style={{ display: 'flex', gap: 10 }}>
-              <button onClick={() => { setStep('setup'); setResult(null); setText(''); setError('') }} style={{ flex: 1, padding: '11px', background: D.bg, border: `1px solid ${D.borderStrong}`, borderRadius: 9, fontSize: 13, fontWeight: 600, color: D.textMuted, cursor: 'pointer', fontFamily: 'inherit' }}>
+              <button onClick={() => { setStep('setup'); setResult(null); setText(''); setError(''); setCardsAdded(0) }} style={{ flex: 1, padding: '11px', background: D.bg, border: `1px solid ${D.borderStrong}`, borderRadius: 9, fontSize: 13, fontWeight: 600, color: D.textMuted, cursor: 'pointer', fontFamily: 'inherit' }}>
                 Run again
               </button>
               <button onClick={onClose} style={{ flex: 1, padding: '11px', background: D.blue, border: 'none', borderRadius: 9, fontSize: 13, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: 'inherit' }}>
