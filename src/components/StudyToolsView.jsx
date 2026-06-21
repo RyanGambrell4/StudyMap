@@ -535,8 +535,6 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       {mode === 'hub' && (() => {
         const plan = getActivePlan()
         const isPro = plan === 'pro' || plan === 'unlimited' || plan === 'trial'
-        const proGate = (fn) => isPro ? fn() : onShowPaywall?.('pro')
-
         const freeBadge = (feature, color) => {
           if (isPro) return { badge: null, badgeColor: color }
           const { remaining } = canUseFeature(feature)
@@ -550,7 +548,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             desc: 'Instantly see what to focus on based on your weakest areas.',
             color: '#3B61C4',
             icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>,
-            onClick: () => proGate(() => onOpenCheatSheet?.()),
+            onClick: () => isPro ? onOpenCheatSheet?.() : onShowPaywall?.('cheat-sheet'),
             pro: !isPro,
           },
           {
