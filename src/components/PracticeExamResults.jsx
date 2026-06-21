@@ -356,7 +356,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
               <p style={{ margin: '3px 0 0', fontSize: 13, color: '#6B6B6B', lineHeight: 1.5 }}>Upgrade to Pro for unlimited practice exams, AI scoring, and score trend analytics.</p>
             </div>
             <button
-              onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'practice_exam_results' } }))}
+              onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'practice-exam-results' } }))}
               style={{ padding: '10px 18px', background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap' }}
             >
               {hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial →'}

@@ -177,6 +177,26 @@ const LIMIT_MESSAGES = {
     title: 'Unlock unlimited focus time.',
     body: "Great session. Free caps you at 30 min/day — Pro removes that entirely so you can study as long as you need.",
   },
+  adapt: {
+    tag: 'Your plan just got smarter',
+    title: 'Let your schedule adapt automatically.',
+    body: "Based on your recall score, your plan should shift. Pro applies these adjustments automatically so you always study the right thing next.",
+  },
+  grades: {
+    tag: 'Know your grade before finals',
+    title: 'Unlock full Grade Hub.',
+    body: "Track every assignment, run what-if scenarios, and know exactly what you need on your final to hit your target grade. Pro and Unlimited plans only.",
+  },
+  'study-hacks': {
+    tag: 'Unlock your full study toolkit',
+    title: 'Get every AI study tool.',
+    body: 'Pro unlocks Cheat Sheets, Exam Rescues, unlimited Brain Dumps, and more. One toolkit for your entire semester.',
+  },
+  flashcardDecks: {
+    tag: 'More decks, more mastery',
+    title: 'Unlock unlimited flashcard decks.',
+    body: 'Free includes 1 deck. Pro gives you unlimited decks with unlimited cards — one deck per course, or go deeper on any topic.',
+  },
 }
 
 const TESTIMONIALS = [
@@ -206,6 +226,17 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
 
   const msg = LIMIT_MESSAGES[trigger] ?? LIMIT_MESSAGES.ai
   const visiblePlanIds = currentPlan === 'pro' ? ['unlimited'] : Object.keys(PLANS)
+
+  // Track modal open — this is the funnel entry event for paywall conversion analysis
+  useEffect(() => {
+    track('paywall_opened', {
+      trigger_feature: trigger,
+      current_plan: currentPlan,
+      trial_used: trialUsed,
+      is_unlimited_trigger: isUnlimitedTrigger,
+    })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   // Rotate testimonials every 4 seconds
   useEffect(() => {

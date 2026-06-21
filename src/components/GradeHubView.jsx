@@ -1,10 +1,11 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
 import Spinner from './ui/spinner'
 import EmptyState from './ui/empty-state'
-import { getActivePlan, canUseAI, incrementAIQuery } from '../lib/subscription'
+import { getActivePlan, canUseAI, incrementAIQuery, hasUsedTrial } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
 import { saveCoachPlanStruggles, getCachedCoachPlan } from '../lib/db'
+import { track } from '../lib/analytics'
 import {
   TARGET_OPTIONS, letterGrade, gradeStatus,
   getCurrentGrade, getProjectedGrade, getNeededOnRemaining,
@@ -32,11 +33,11 @@ const D = {
 
 const PATH_COLORS = [D.sky, D.mint, D.orange]
 const PATH_ICONS = [
-  // Steady — gentle climb
+  // Steady - gentle climb
   <svg key="steady" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7" /><path d="M9 7h8v8" /></svg>,
-  // Strong — vertical arrow
+  // Strong - vertical arrow
   <svg key="strong" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5" /><path d="M5 12l7-7 7 7" /></svg>,
-  // Aggressive — lightning
+  // Aggressive - lightning
   <svg key="aggressive" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" /></svg>,
 ]
 
@@ -128,6 +129,7 @@ function IcoArrow()    { return <svg width="11" height="11" viewBox="0 0 24 24" 
 
 // ── Locked state ──────────────────────────────────────────────────────────────
 function LockedState({ onShowPaywall }) {
+  const trialUsed = hasUsedTrial()
   return (
     <div style={{ padding: '60px 32px', textAlign: 'center' }}>
       <div style={{
@@ -138,14 +140,18 @@ function LockedState({ onShowPaywall }) {
         <IcoShield />
       </div>
       <div style={{ fontSize: 18, fontWeight: 700, color: D.text, marginBottom: 8 }}>Grade Hub · Pro Feature</div>
-      <p style={{ fontSize: 13.5, color: D.muted, maxWidth: 320, margin: '0 auto 20px', lineHeight: 1.55 }}>
-        Advanced grade planning, live tracking, and what-if scenario modeling require a Pro or Unlimited plan.
+      <p style={{ fontSize: 13.5, color: D.muted, maxWidth: 320, margin: '0 auto 6px', lineHeight: 1.55 }}>
+        Track every assignment, run what-if scenarios, and know exactly what you need on your final to hit your target grade.
       </p>
+      {!trialUsed && (
+        <p style={{ fontSize: 12, color: D.indigo, fontWeight: 600, margin: '0 auto 20px' }}>Try it free for 3 days — no commitment.</p>
+      )}
+      {trialUsed && <div style={{ marginBottom: 20 }} />}
       <button
         onClick={() => onShowPaywall?.('grades')}
-        style={{ padding: '11px 26px', background: '#3B61C4', borderRadius: 10, color: '#fff', fontSize: 13.5, fontWeight: 600, border: 'none' }}
+        style={{ padding: '11px 26px', background: '#3B61C4', borderRadius: 10, color: '#fff', fontSize: 13.5, fontWeight: 600, border: 'none', cursor: 'pointer' }}
       >
-        Upgrade to Pro
+        {trialUsed ? 'Upgrade to Pro' : 'Start 3-day free trial'}
       </button>
     </div>
   )
@@ -253,6 +259,12 @@ function PlanTab({ course, gradeData, dot, onSave }) {
     }))
     onSave({ ...(gradeData ?? {}), components, targetGrade, scenarios: gradeData?.scenarios ?? [] })
     setShowPlan(true)
+    track('grade_plan_saved', {
+      course_name: course?.name,
+      component_count: components.length,
+      target_grade: targetGrade,
+      is_first_save: !gradeData?.components?.length,
+    })
   }
 
   const savedComps   = gradeData?.components ?? []
@@ -443,7 +455,16 @@ function TrackTab({ course, gradeData, dot, onSave }) {
   }, [components, gradeData, onSave])
 
   const setGrade     = (id, val) => { const g = { ...localGrades, [id]: val }; setLocalGrades(g); autoSave(g, localGraded, ptsEarned, ptsPossible) }
-  const toggleGraded = (id)      => { const g = { ...localGraded, [id]: !localGraded[id] }; setLocalGraded(g); autoSave(localGrades, g, ptsEarned, ptsPossible) }
+  const toggleGraded = (id) => {
+    const nowGraded = !localGraded[id]
+    const g = { ...localGraded, [id]: nowGraded }
+    setLocalGraded(g)
+    autoSave(localGrades, g, ptsEarned, ptsPossible)
+    if (nowGraded) {
+      const comp = components.find(c => c.id === id)
+      track('grade_logged', { course_name: course?.name, component: comp?.component })
+    }
+  }
 
   const setPtsEntry = (id, field, val) => {
     const e = field === 'earned'   ? { ...ptsEarned,   [id]: val } : ptsEarned
@@ -1262,7 +1283,7 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
           </span>
         </div>
         <div style={{ marginBottom: 20 }}>
-          <Tabs active={activeTab} onChange={setActiveTab} />
+          <Tabs active={activeTab} onChange={tab => { setActiveTab(tab); track('grade_hub_tab_changed', { tab, course_name: course?.name }) }} />
         </div>
 
         {whatIfMode && hasSetup ? (
