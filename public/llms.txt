@@ -43,12 +43,32 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - AI Flashcard Maker: https://getstudyedge.com/ai-flashcard-maker
 - GPA Calculator: https://getstudyedge.com/gpa-calculator
 - Grade Calculator: https://getstudyedge.com/grade-calculator
+- Weighted GPA Calculator: https://getstudyedge.com/weighted-gpa-calculator
+- Final Exam Calculator: https://getstudyedge.com/final-exam-calculator
 - Study Schedule Generator: https://getstudyedge.com/study-schedule-generator
 - Active Recall App: https://getstudyedge.com/active-recall-app
+- AI Homework Helper: https://getstudyedge.com/ai-homework-helper
 - Quizlet Alternative: https://getstudyedge.com/quizlet-alternative
 - Anki Alternative: https://getstudyedge.com/anki-alternative
+- Chegg Alternative: https://getstudyedge.com/chegg-alternative
+- Khan Academy Alternative: https://getstudyedge.com/khan-academy-alternative
+- Best AI for Students: https://getstudyedge.com/best-ai-for-students
+- Best Study App for College Students: https://getstudyedge.com/best-study-app-for-students
 - Blog: https://getstudyedge.com/blog/
 - About: https://getstudyedge.com/about
+
+## Top blog posts
+
+- Active Recall: The Study Technique That Works: https://getstudyedge.com/blog/active-recall-study-technique
+- Best Study Techniques (Science-Backed): https://getstudyedge.com/blog/best-study-techniques-science
+- How to Study for Finals: https://getstudyedge.com/blog/how-to-study-for-finals
+- MCAT Study Schedule (6 Months): https://getstudyedge.com/blog/mcat-study-schedule-6-months
+- How to Study for Organic Chemistry: https://getstudyedge.com/blog/how-to-study-for-organic-chemistry
+- How to Study with ADHD in College: https://getstudyedge.com/blog/how-to-study-with-adhd-in-college
+- Spaced Repetition Explained: https://getstudyedge.com/blog/spaced-repetition-explained
+- Cornell Note-Taking Method: https://getstudyedge.com/blog/cornell-note-taking-method
+- How to Raise Your GPA After a Bad Semester: https://getstudyedge.com/blog/how-to-raise-your-gpa-after-a-bad-semester
+- Pomodoro Technique for Studying: https://getstudyedge.com/blog/pomodoro-technique-for-studying
 
 ## Machine-readable files
 
