@@ -197,6 +197,11 @@ const LIMIT_MESSAGES = {
     title: 'Unlock unlimited flashcard decks.',
     body: 'Free includes 1 deck. Pro gives you unlimited decks with unlimited cards — one deck per course, or go deeper on any topic.',
   },
+  'cheat-sheet': {
+    tag: 'See every high-priority topic',
+    title: 'Unlock all 10 exam topics.',
+    body: "Free shows the #1 ranked topic. Pro unlocks all 10, ranked by AI-estimated exam likelihood and your current readiness — so you know exactly where to spend the time you have left.",
+  },
 }
 
 const TESTIMONIALS = [
