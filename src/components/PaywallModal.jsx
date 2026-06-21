@@ -202,6 +202,16 @@ const LIMIT_MESSAGES = {
     title: 'Unlock all 10 exam topics.',
     body: "Free shows the #1 ranked topic. Pro unlocks all 10, ranked by AI-estimated exam likelihood and your current readiness — so you know exactly where to spend the time you have left.",
   },
+  'prep-blast': {
+    tag: 'Smarter session briefs',
+    title: 'Unlock exam-focused and goal-based modes.',
+    body: "Pro uses your exam dates and coach plan to pick the highest-leverage focus question for your next session. Free mode only covers general weak areas.",
+  },
+  'quiz-result': {
+    tag: 'Keep testing yourself',
+    title: 'Unlimited quizzes, any topic.',
+    body: "Self-testing is the most effective study technique. Pro generates unlimited quizzes from any topic or your uploaded notes — on demand, all semester.",
+  },
 }
 
 const TESTIMONIALS = [
