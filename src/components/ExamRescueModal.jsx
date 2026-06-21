@@ -219,7 +219,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
               return (
                 <div style={{ textAlign: 'center', fontSize: 12, color: D.textDim, marginTop: 12 }}>
                   {remaining !== null && remaining > 0
-                    ? <>{2 - remaining} of 2 rescue plans used this week · <button onClick={() => onShowPaywall?.('study-hacks')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>Upgrade for the full plan</button></>
+                    ? <>{1 - remaining} of 1 rescue plan used · <button onClick={() => onShowPaywall?.('study-hacks')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>Upgrade for the full plan</button></>
                     : <>{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'} for unlimited rescue plans · <button onClick={() => onShowPaywall?.('examRescue')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>Unlock now</button></>
                   }
                 </div>

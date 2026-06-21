@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     }
   }
 
-  // Server-side dedup — runs before the RESEND_API_KEY check so the flag is
+  // Server-side dedup - runs before the RESEND_API_KEY check so the flag is
   // always set and respected even in envs where email delivery is disabled.
   if (userId) {
     const { data: row } = await supabaseAdmin
@@ -44,7 +44,7 @@ export default async function handler(req, res) {
   }
 
   if (!process.env.RESEND_API_KEY) {
-    console.warn('[welcome-email] RESEND_API_KEY not set — marking sent to block retries')
+    console.warn('[welcome-email] RESEND_API_KEY not set - marking sent to block retries')
     if (userId) {
       const { data: row } = await supabaseAdmin.from('user_data').select('subscription').eq('user_id', userId).maybeSingle()
       const merged = { ...(row?.subscription ?? {}), welcome_email_sent: true }
@@ -91,7 +91,7 @@ ${preheader("You have 3 days of Pro free. Here's what to do first.")}
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:28px;">
           ${[
             ['5 courses', 'Free gives you 1'],
-            ['100 AI study boosts / month', 'Free gives you 10'],
+            ['100 AI study boosts / month', 'Free gives you 2 total'],
             ['AI Study Coach', 'Personalized multi-week plans'],
             ['Session Blueprints', 'Minute-by-minute session plans'],
             ['Flashcards and quizzes', 'Built into every session'],
@@ -126,7 +126,7 @@ ${preheader("You have 3 days of Pro free. Here's what to do first.")}
       </td></tr>
       <tr><td style="padding:18px 6px 0;">
         <p style="margin:0;font-size:13.5px;color:#6B6B6B;line-height:1.65;">
-          Not into the trial? Add your courses and exam dates first — StudyEdge builds everything around your real schedule. <a href="https://getstudyedge.com/app" style="color:#3B61C4;text-decoration:none;font-weight:600;">Open the app →</a>
+          Not into the trial? Add your courses and exam dates first - StudyEdge builds everything around your real schedule. <a href="https://getstudyedge.com/app" style="color:#3B61C4;text-decoration:none;font-weight:600;">Open the app →</a>
         </p>
       </td></tr>
       <tr><td style="padding:28px 4px 0;text-align:center;">

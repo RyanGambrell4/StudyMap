@@ -138,7 +138,7 @@ ${preheader("Your Pro subscription is cancelled. You keep full access until the 
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
           ${[
             ['5 courses', 'Free drops you to 1'],
-            ['100 AI boosts / month', 'Free gives you 10'],
+            ['100 AI boosts / month', 'Free gives you 2 total'],
             ['AI Study Coach', 'Multi-week personalized plans'],
             ['Session Blueprints', 'Minute-by-minute session plans'],
             ['Flashcards and quizzes', 'Built into every session'],
@@ -216,7 +216,7 @@ ${preheader("Trial ends tomorrow. Your card gets charged $2.99/wk unless you can
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
           ${[
             ['5 courses', 'Free drops you to 1'],
-            ['100 AI study boosts / month', 'Free gives you 10'],
+            ['100 AI study boosts / month', 'Free gives you 2 total'],
             ['AI Study Coach', 'Personalized multi-week plans'],
             ['Session Blueprints', 'Minute-by-minute session plans'],
             ['Flashcards and quizzes', 'Built into every session'],
@@ -602,7 +602,11 @@ export default async function handler(req, res) {
         const wasDowngraded =
           event.type === 'customer.subscription.deleted' ||
           (event.type === 'customer.subscription.updated' && !isActive)
-        if (wasDowngraded) {
+        // Skip win-back if this was a trial cancellation via the in-app cancel
+        // button — that path already sent a confirmation email and setting
+        // cancelled_via metadata prevents a double churn sequence here.
+        const isTrialCancellation = sub?.metadata?.cancelled_via === 'trial_cancel'
+        if (wasDowngraded && !isTrialCancellation) {
           // Fetch user email from Supabase Auth
           const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
           const email = authUser?.user?.email
@@ -713,6 +717,9 @@ export default async function handler(req, res) {
     if (!stripeSubId) return res.status(400).json({ error: 'No Stripe subscription found' })
 
     try {
+      // Tag the subscription before cancelling so the customer.subscription.deleted
+      // webhook can distinguish trial cancellation from paid churn and skip win-back.
+      await stripe.subscriptions.update(stripeSubId, { metadata: { cancelled_via: 'trial_cancel' } })
       await stripe.subscriptions.cancel(stripeSubId)
     } catch (stripeErr) {
       console.error('[cancel-trial] Stripe error:', stripeErr)
@@ -783,6 +790,13 @@ export default async function handler(req, res) {
 
   if (!priceId) {
     return res.status(400).json({ error: 'Invalid plan or billing period' })
+  }
+  // Real Stripe price IDs always start with 'price_1'. Placeholder fallbacks
+  // like 'price_pro_weekly' mean the env var is missing — fail loudly instead
+  // of sending a bad price ID to Stripe and getting a cryptic 400 back.
+  if (!priceId.startsWith('price_1')) {
+    console.error(`[stripe checkout] Missing STRIPE_PRICE env var for ${plan}/${billingPeriod} — got placeholder "${priceId}"`)
+    return res.status(500).json({ error: 'Checkout not configured. Please contact support.' })
   }
 
   // REVENUE-CRITICAL.

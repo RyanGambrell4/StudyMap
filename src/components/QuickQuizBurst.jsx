@@ -199,7 +199,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
               const { allowed: canQuiz, remaining } = canUseFeature('quizBurst')
               return !canQuiz ? (
                 <div style={{ fontSize: 13, color: D.amber, marginBottom: 16, padding: '10px 14px', background: 'rgba(217,119,6,0.08)', borderRadius: 8, border: '1px solid rgba(217,119,6,0.20)' }}>
-                  You've used your 2 free Quiz Bursts this week. Resets next Monday.
+                  You've used your free Quiz Burst. Upgrade to Pro for unlimited.
                 </div>
               ) : null
             })()}
