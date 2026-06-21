@@ -2,7 +2,7 @@
 title: StudyEdge AI — Product Details
 description: Feature breakdown, differentiators, and comparisons for StudyEdge AI
 url: https://getstudyedge.com/
-last_updated: "2026-06-19"
+last_updated: "2026-06-20"
 ---
 
 # StudyEdge AI Product

@@ -3,7 +3,7 @@ title: StudyEdge AI — Open Knowledge Format Index
 description: Machine-readable site index for AI agents and crawlers. StudyEdge AI is an AI-powered study planner for college students at getstudyedge.com.
 url: https://getstudyedge.com/
 version: "0.1"
-last_updated: "2026-06-19"
+last_updated: "2026-06-20"
 ---
 
 # StudyEdge AI

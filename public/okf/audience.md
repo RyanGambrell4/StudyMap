@@ -2,7 +2,7 @@
 title: StudyEdge AI — Audience and Use Cases
 description: Who uses StudyEdge AI and how different student types use it
 url: https://getstudyedge.com/
-last_updated: "2026-06-19"
+last_updated: "2026-06-20"
 ---
 
 # Who Uses StudyEdge AI
