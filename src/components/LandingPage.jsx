@@ -125,7 +125,7 @@ export default function LandingPage({ onGetStarted }) {
     document.getElementById('how-it-works')?.scrollIntoView({ behavior: 'smooth', block: 'start' })
   }
 
-  // Scroll-triggered reveals — any element with [data-reveal] fades up on enter.
+  // Scroll-triggered reveals - any element with [data-reveal] fades up on enter.
   // Sibling stagger via [data-reveal-delay="1|2|3"].
   const revealRoot = useRef(null)
   useEffect(() => {
@@ -144,7 +144,7 @@ export default function LandingPage({ onGetStarted }) {
     return () => io.disconnect()
   }, [])
 
-  // Hero cursor-following spotlight — sets --sx/--sy on the hero section element.
+  // Hero cursor-following spotlight - sets --sx/--sy on the hero section element.
   const heroSpotlightRef = useRef(null)
   useEffect(() => {
     const el = heroSpotlightRef.current
@@ -164,7 +164,7 @@ export default function LandingPage({ onGetStarted }) {
     return () => { el.removeEventListener('mousemove', onMove); cancelAnimationFrame(raf) }
   }, [])
 
-  // Animated stat counters — count from 0 → target when scrolled into view.
+  // Animated stat counters - count from 0 → target when scrolled into view.
   // Targets are read from data-count-to on each .se-count element inside .se-counter-band.
   const counterBandRef = useRef(null)
   useEffect(() => {
@@ -199,7 +199,7 @@ export default function LandingPage({ onGetStarted }) {
     return () => io.disconnect()
   }, [])
 
-  // Live "studying right now" badge — gently fluctuates between min/max each tick.
+  // Live "studying right now" badge - gently fluctuates between min/max each tick.
   const [liveNow, setLiveNow] = useState(() => 832 + Math.floor(Math.random() * 40))
   useEffect(() => {
     const id = setInterval(() => {
@@ -212,7 +212,7 @@ export default function LandingPage({ onGetStarted }) {
     return () => clearInterval(id)
   }, [])
 
-  // Magnetic CTA — small translation toward cursor on hover.
+  // Magnetic CTA - small translation toward cursor on hover.
   const magneticHandlers = (strength = 0.25, maxPx = 10) => ({
     onMouseMove: (e) => {
       const el = e.currentTarget
@@ -232,7 +232,7 @@ export default function LandingPage({ onGetStarted }) {
     },
   })
 
-  // 3D tilt — sets --rx/--ry on card based on cursor position.
+  // 3D tilt - sets --rx/--ry on card based on cursor position.
   const tiltHandlers = (max = 8) => ({
     onMouseMove: (e) => {
       const el = e.currentTarget
@@ -252,16 +252,16 @@ export default function LandingPage({ onGetStarted }) {
   })
 
   // ─────────────────────────────────────────────────────────────────────
-  // Headline A/B variants — current default is "While others cram. You execute."
-  // Documented alternates for future tests (do not silently swap — A/B in code/cms):
-  //   B: "Built to raise your GPA."        — outcome-led, specific to the result
-  //   C: "Your AI study system. Your next A." — system + outcome, two-beat
-  //   D: "Stop studying harder. Study what matters." — contrast-led, problem-first
+  // Headline A/B variants - current default is "While others cram. You execute."
+  // Documented alternates for future tests (do not silently swap - A/B in code/cms):
+  //   B: "Built to raise your GPA."        - outcome-led, specific to the result
+  //   C: "Your AI study system. Your next A." - system + outcome, two-beat
+  //   D: "Stop studying harder. Study what matters." - contrast-led, problem-first
   // Default kept for now; revisit once we have data from any of the three.
   // ─────────────────────────────────────────────────────────────────────
 
   return (
-    /* intentionally dark — marketing landing page; the app shell itself is light-themed */
+    /* intentionally dark - marketing landing page; the app shell itself is light-themed */
     <div ref={revealRoot} style={{ backgroundColor: '#060614', color: '#e2e8f0', minHeight: '100vh', fontFamily: "'Inter', -apple-system, sans-serif" }}>
       <style>{`
         [data-reveal] { opacity: 0; transform: translateY(18px); transition: opacity 0.55s cubic-bezier(0.22,1,0.36,1), transform 0.55s cubic-bezier(0.22,1,0.36,1); }
@@ -272,7 +272,7 @@ export default function LandingPage({ onGetStarted }) {
         @media (prefers-reduced-motion: reduce) {
           [data-reveal] { opacity: 1; transform: none; transition: none; }
         }
-        /* Atmospheric layer — sits behind content, above page bg */
+        /* Atmospheric layer - sits behind content, above page bg */
         .se-section { position: relative; overflow: hidden; isolation: isolate; }
         .se-section > * { position: relative; z-index: 1; }
         .se-wash, .se-grid { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
@@ -299,7 +299,7 @@ export default function LandingPage({ onGetStarted }) {
         .se-mono { font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace; font-feature-settings: 'tnum' 1, 'cv11' 1; }
         .se-display { font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif; letter-spacing: -0.035em; }
 
-        /* Aurora — slow-drifting conic gradient blob */
+        /* Aurora - slow-drifting conic gradient blob */
         @keyframes se-aurora {
           0%   { transform: translate3d(0,0,0) rotate(0deg) scale(1); }
           33%  { transform: translate3d(-4%, 3%, 0) rotate(120deg) scale(1.1); }
@@ -327,7 +327,7 @@ export default function LandingPage({ onGetStarted }) {
           mix-blend-mode: screen;
         }
 
-        /* Hero headline — gradient cycling text */
+        /* Hero headline - gradient cycling text */
         @keyframes se-gradient-shift {
           0%, 100% { background-position: 0% 50%; }
           50%      { background-position: 100% 50%; }
@@ -342,7 +342,7 @@ export default function LandingPage({ onGetStarted }) {
           animation: se-gradient-shift 7s ease-in-out infinite;
         }
 
-        /* Marquee — endless horizontal scroll */
+        /* Marquee - endless horizontal scroll */
         @keyframes se-marquee {
           from { transform: translateX(0); }
           to   { transform: translateX(-50%); }
@@ -359,21 +359,21 @@ export default function LandingPage({ onGetStarted }) {
         }
         .se-marquee-wrap:hover .se-marquee-track { animation-play-state: paused; }
 
-        /* Twinkle — for decorative stars/dots */
+        /* Twinkle - for decorative stars/dots */
         @keyframes se-twinkle {
           0%, 100% { opacity: 0.25; transform: scale(0.85); }
           50%      { opacity: 1;    transform: scale(1.4); }
         }
         .se-twinkle { animation: se-twinkle 3.4s ease-in-out infinite; }
 
-        /* Drift — floating decorative items */
+        /* Drift - floating decorative items */
         @keyframes se-drift {
           0%, 100% { transform: translateY(0) translateX(0); }
           50%      { transform: translateY(-14px) translateX(8px); }
         }
         .se-drift { animation: se-drift 9s ease-in-out infinite; }
 
-        /* 3D tilt — applied via inline transform using --rx/--ry */
+        /* 3D tilt - applied via inline transform using --rx/--ry */
         .se-tilt {
           transform-style: preserve-3d;
           transform: perspective(1000px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(0);
@@ -382,14 +382,14 @@ export default function LandingPage({ onGetStarted }) {
         }
         .se-tilt:hover { transition: transform 0.08s ease-out; }
 
-        /* Magnetic — primary CTA uses --mx/--my for nudge */
+        /* Magnetic - primary CTA uses --mx/--my for nudge */
         .se-magnetic {
           transform: translate3d(var(--mx, 0px), var(--my, 0px), 0);
           transition: transform 0.25s cubic-bezier(0.22,1,0.36,1);
           will-change: transform;
         }
 
-        /* Shimmer — for buttons/labels */
+        /* Shimmer - for buttons/labels */
         @keyframes se-shimmer-x {
           0%   { transform: translateX(-100%); }
           100% { transform: translateX(200%); }
@@ -511,7 +511,7 @@ export default function LandingPage({ onGetStarted }) {
         }
       `}</style>
 
-      {/* Fixed full-page noise grain — pointer-events:none, opacity 0.035, sits above bg/below text */}
+      {/* Fixed full-page noise grain - pointer-events:none, opacity 0.035, sits above bg/below text */}
       <div aria-hidden="true" style={{
         position: 'fixed', inset: 0, zIndex: 1, pointerEvents: 'none', opacity: 0.04,
         mixBlendMode: 'overlay',
@@ -519,7 +519,7 @@ export default function LandingPage({ onGetStarted }) {
         backgroundSize: '220px 220px',
       }} />
 
-      {/* ── Sticky bottom trial bar — glass + brand ── */}
+      {/* ── Sticky bottom trial bar - glass + brand ── */}
       {!stickyDismissed && scrollY > 300 && (
         <div style={{
           position: 'fixed', bottom: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 999,
@@ -537,7 +537,7 @@ export default function LandingPage({ onGetStarted }) {
             <span className="se-ping" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 10px #22c55e' }} />
           </span>
           <span style={{ fontSize: 13.5, color: '#e2e8f0', fontWeight: 500, letterSpacing: '-0.005em' }}>
-            <strong style={{ color: '#fff', fontWeight: 700 }}>Try Pro free for 3 days</strong> — $2.99/wk after, cancel anytime
+            <strong style={{ color: '#fff', fontWeight: 700 }}>Try Pro free for 3 days</strong> - $2.99/wk after, cancel anytime
           </span>
           <button
             onClick={goTrial}
@@ -639,7 +639,7 @@ export default function LandingPage({ onGetStarted }) {
           overflow: 'hidden', background: '#060614', isolation: 'isolate',
         }}
       >
-        {/* Aurora — slow-drifting conic gradient */}
+        {/* Aurora - slow-drifting conic gradient */}
         <div aria-hidden="true" className="se-aurora" />
         {/* Cursor-following spotlight */}
         <div aria-hidden="true" className="se-spotlight" />
@@ -668,7 +668,7 @@ export default function LandingPage({ onGetStarted }) {
             />
           ))}
         </div>
-        {/* 1920×600 stage — scaled to fill container width */}
+        {/* 1920×600 stage - scaled to fill container width */}
         <div ref={heroStageRef} style={{
           position: 'absolute', inset: 0,
           width: 1920, height: 600,
@@ -743,7 +743,7 @@ export default function LandingPage({ onGetStarted }) {
               fontSize: 19, lineHeight: 1.5, color: 'rgba(226,232,240,0.62)',
               margin: '0 0 28px', maxWidth: 520, fontWeight: 400, letterSpacing: '-0.005em',
             }}>
-              Your AI study system — plans, coaches, tracks, and tells you exactly where to focus. Every course. All semester.
+              Your AI study system - plans, coaches, tracks, and tells you exactly where to focus. Every course. All semester.
             </p>
 
             {/* Primary CTAs */}
@@ -803,7 +803,7 @@ export default function LandingPage({ onGetStarted }) {
               3-day free trial · Card required · Cancel anytime
             </div>
 
-            {/* Social proof — live "studying right now" badge */}
+            {/* Social proof - live "studying right now" badge */}
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 9,
@@ -1191,7 +1191,7 @@ export default function LandingPage({ onGetStarted }) {
             { big: 4,   suffix: '',  decimals: 0, prefix: '',  sub: 'problems no other app solves together', accent: '#818cf8' },
             { big: 60,  suffix: 's', decimals: 0, prefix: '',  sub: 'setup, then your plan is live',           accent: '#c4b5fd' },
             { big: 100, suffix: '%', decimals: 0, prefix: '',  sub: 'of your syllabus, planned end-to-end',    accent: '#5eead4' },
-            { big: 1,   suffix: '',  decimals: 0, prefix: '',  sub: 'grade target — backwards from the exam',  accent: '#86efac' },
+            { big: 1,   suffix: '',  decimals: 0, prefix: '',  sub: 'grade target - backwards from the exam',  accent: '#86efac' },
           ].map((s, i, arr) => (
             <div key={i} style={{
               padding: '34px 24px 30px', textAlign: 'center',
@@ -1280,7 +1280,7 @@ export default function LandingPage({ onGetStarted }) {
             fontSize: 16.5, color: 'rgba(226,232,240,0.55)',
             maxWidth: 560, margin: '0 auto', lineHeight: 1.6, letterSpacing: '-0.005em',
           }}>
-            Most students open their notes and start reading. StudyEdge tells you exactly what to study, when, and for how long — and then scores you on what you actually retained.
+            Most students open their notes and start reading. StudyEdge tells you exactly what to study, when, and for how long - and then scores you on what you actually retained.
           </p>
         </div>
 
@@ -1292,7 +1292,7 @@ export default function LandingPage({ onGetStarted }) {
             {
               num: '01',
               title: 'Add your courses',
-              copy: 'Drop your syllabus, paste your class list, or pick from common courses. We pull exam dates, weights, and assignments — automatically.',
+              copy: 'Drop your syllabus, paste your class list, or pick from common courses. We pull exam dates, weights, and assignments - automatically.',
               accent: '#6366F1',
               accentSoft: 'rgba(99,102,241,0.10)',
               mockup: (
@@ -1348,7 +1348,7 @@ export default function LandingPage({ onGetStarted }) {
             {
               num: '02',
               title: 'AI builds your plan',
-              copy: 'Every week gets a strategy. Every session gets a minute-by-minute blueprint. Every grade gets a target score — backwards from the exam date.',
+              copy: 'Every week gets a strategy. Every session gets a minute-by-minute blueprint. Every grade gets a target score - backwards from the exam date.',
               accent: '#7c5cfc',
               accentSoft: 'rgba(124,92,252,0.10)',
               mockup: (
@@ -1357,7 +1357,7 @@ export default function LandingPage({ onGetStarted }) {
                     <div style={{ fontSize: 9.5, fontWeight: 700, color: '#c4b5fd', letterSpacing: '0.12em' }}>SESSION BLUEPRINT</div>
                     <div style={{ fontSize: 10, color: 'rgba(226,232,240,0.4)' }}>60 min · 5 blocks</div>
                   </div>
-                  <div style={{ fontSize: 12, fontWeight: 700, color: '#fff', marginBottom: 4, letterSpacing: '-0.005em' }}>Organic Chem — Stereochem</div>
+                  <div style={{ fontSize: 12, fontWeight: 700, color: '#fff', marginBottom: 4, letterSpacing: '-0.005em' }}>Organic Chem - Stereochem</div>
                   <div style={{ fontSize: 10.5, color: 'rgba(226,232,240,0.45)', marginBottom: 12 }}>To hit 88% on the midterm</div>
                   <div style={{ display: 'flex', gap: 3, height: 8, borderRadius: 4, overflow: 'hidden', marginBottom: 12 }}>
                     {[
@@ -1391,7 +1391,7 @@ export default function LandingPage({ onGetStarted }) {
             {
               num: '03',
               title: 'Execute every session',
-              copy: 'Hit start. Follow the plan. Get scored on recall. Watch your grade target move in real time — and know exactly what to study next.',
+              copy: 'Hit start. Follow the plan. Get scored on recall. Watch your grade target move in real time - and know exactly what to study next.',
               accent: '#22c55e',
               accentSoft: 'rgba(34,197,94,0.10)',
               mockup: (
@@ -1602,7 +1602,7 @@ export default function LandingPage({ onGetStarted }) {
             fontSize: 16.5, color: 'rgba(226,232,240,0.55)',
             maxWidth: 580, margin: '0 auto', lineHeight: 1.6, letterSpacing: '-0.005em',
           }}>
-            Plan, execute, recall, track — each one wired to your actual courses, syllabus, and exam dates. Not another flashcard app.
+            Plan, execute, recall, track - each one wired to your actual courses, syllabus, and exam dates. Not another flashcard app.
           </p>
         </div>
 
@@ -1611,7 +1611,7 @@ export default function LandingPage({ onGetStarted }) {
           gap: 16,
         }}>
 
-          {/* ── PRIMARY TIER: Session Blueprint — the differentiator (full-width) ── */}
+          {/* ── PRIMARY TIER: Session Blueprint - the differentiator (full-width) ── */}
           <div data-reveal style={{
             gridColumn: '1 / -1',
             position: 'relative',
@@ -1672,7 +1672,7 @@ export default function LandingPage({ onGetStarted }) {
                   fontSize: 15, color: 'rgba(226,232,240,0.65)',
                   lineHeight: 1.6, margin: '0 0 20px', letterSpacing: '-0.005em',
                 }}>
-                  Every session gets a <strong style={{ color: '#fff', fontWeight: 600 }}>minute-by-minute blueprint</strong> — warm-up, deep dive, active recall, mixed quiz. No staring at a syllabus trying to decide where to start.
+                  Every session gets a <strong style={{ color: '#fff', fontWeight: 600 }}>minute-by-minute blueprint</strong> - warm-up, deep dive, active recall, mixed quiz. No staring at a syllabus trying to decide where to start.
                 </p>
                 <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'grid', gap: 10 }}>
                   {[
@@ -1804,7 +1804,7 @@ export default function LandingPage({ onGetStarted }) {
           </FeatureCard>
 
           {/* ── 5. Study Schedule ── */}
-          <FeatureCard color="#2dd4bf" eyebrow="Your week, decided" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>} title="See your week before you've thought about it." desc="Every session, every course, slotted into the hours you actually have free. Miss one and the rest rebalance — no rebuilding the calendar.">
+          <FeatureCard color="#2dd4bf" eyebrow="Your week, decided" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2dd4bf" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>} title="See your week before you've thought about it." desc="Every session, every course, slotted into the hours you actually have free. Miss one and the rest rebalance - no rebuilding the calendar.">
             <div style={{ padding: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 10 }}>
                 {['Mon','Tue','Wed','Thu','Fri'].map((d,i) => (
@@ -1828,7 +1828,7 @@ export default function LandingPage({ onGetStarted }) {
           </FeatureCard>
 
           {/* ── 6. Progress Dashboard ── */}
-          <FeatureCard color="#a78bfa" eyebrow="Watch the grade move" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>} title="Every session updates the grade you'll get." desc="Hours, streak, recall, sessions done — and your projected exam score, recalculated after every session. The only feedback loop that means anything.">
+          <FeatureCard color="#a78bfa" eyebrow="Watch the grade move" icon={<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#a78bfa" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 20V10M12 20V4M6 20v-6"/></svg>} title="Every session updates the grade you'll get." desc="Hours, streak, recall, sessions done - and your projected exam score, recalculated after every session. The only feedback loop that means anything.">
             <div style={{ padding: '16px' }}>
               <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
                 <div style={{ flex: 1, background: 'rgba(255,255,255,0.04)', borderRadius: 10, padding: '10px', textAlign: 'center', border: '1px solid rgba(255,255,255,0.07)' }}>
@@ -1887,7 +1887,7 @@ export default function LandingPage({ onGetStarted }) {
         }}>
           {[
             {
-              quote: "I went from a C+ to a B+ in Organic Chemistry. Having a session plan every time I sat down made the difference — I stopped wasting time figuring out what to study.",
+              quote: "I went from a C+ to a B+ in Organic Chemistry. Having a session plan every time I sat down made the difference - I stopped wasting time figuring out what to study.",
               name: 'Maya R.',
               role: '3rd year · Pre-Med',
               color: '#6366f1',
@@ -2245,7 +2245,7 @@ export default function LandingPage({ onGetStarted }) {
           }
           const proP = pricing.pro[pricingPeriod]
           const ultP = pricing.unlimited[pricingPeriod]
-          // Per-card savings badge — shows on monthly (vs weekly) and annual.
+          // Per-card savings badge - shows on monthly (vs weekly) and annual.
           // Caller passes { monthly, annual } amounts.
           const savingsBadge = (savings) => {
             const val = pricingPeriod === 'yearly' ? savings?.annual
@@ -2300,7 +2300,7 @@ export default function LandingPage({ onGetStarted }) {
                 </button>
               </div>
 
-              {/* Pro — featured */}
+              {/* Pro - featured */}
               <div style={{
                 background: 'linear-gradient(180deg, rgba(99,102,241,0.08), rgba(99,102,241,0.02))',
                 border: '1.5px solid rgba(99,102,241,0.45)',
@@ -2476,7 +2476,7 @@ export default function LandingPage({ onGetStarted }) {
           marginBottom: 40, lineHeight: 1.55, letterSpacing: '-0.005em',
           maxWidth: 580, marginLeft: 'auto', marginRight: 'auto',
         }}>
-          Your AI study system builds the plan, scores every session, and tells you exactly what to study next — for every course, all semester.
+          Your AI study system builds the plan, scores every session, and tells you exactly what to study next - for every course, all semester.
         </p>
         <div data-reveal data-reveal-delay="3" style={{
           display: 'inline-flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',

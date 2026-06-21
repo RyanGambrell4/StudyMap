@@ -58,7 +58,7 @@ export default function AppShell({
     return () => document.removeEventListener('mousedown', h)
   }, [settingsOpen])
 
-  // Flyout helpers — 150ms grace period so diagonal cursor movement doesn't close
+  // Flyout helpers - 150ms grace period so diagonal cursor movement doesn't close
   const openFlyout = (hub) => {
     if (closeTimerRef.current) clearTimeout(closeTimerRef.current)
     setOpenHub(hub)
@@ -446,7 +446,7 @@ export default function AppShell({
       {/* ── Mobile bottom bar ── */}
       <nav className="lg:hidden fixed bottom-0 inset-x-0 z-40" style={{ background: '#FFFFFF', borderTop: `1px solid ${BORDER}`, paddingBottom: 'env(safe-area-inset-bottom)' }}>
 
-        {/* Mobile hub sheet — slides up above the tab bar */}
+        {/* Mobile hub sheet - slides up above the tab bar */}
         {mobileHub && (
           <div style={{ borderTop: `1px solid ${BORDER}`, background: '#FFFFFF', padding: 16 }}>
             {mobileHub === 'strategy' ? (

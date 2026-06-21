@@ -283,7 +283,7 @@ export default function AccountView({
             { label: 'This week', value: `${progressStats.weekHours}h`, sub: `${progressStats.totalHours}h total`, primary: true },
             { label: 'Sessions', value: progressStats.sessions, sub: 'completed' },
             { label: 'Study streak', value: `${progressStats.streak}d`, sub: progressStats.streak === 0 ? 'Start today' : 'in a row' },
-            { label: 'Avg recall', value: progressStats.avgRecall != null ? `${progressStats.avgRecall}%` : '—', sub: progressStats.avgRecall != null ? 'across sessions' : 'No data yet' },
+            { label: 'Avg recall', value: progressStats.avgRecall != null ? `${progressStats.avgRecall}%` : '-', sub: progressStats.avgRecall != null ? 'across sessions' : 'No data yet' },
           ].map(({ label, value, sub, primary }) => (
             <div key={label} style={{ background: '#F7F6F3', borderRadius: 10, padding: '12px 14px', border: '1px solid rgba(0,0,0,0.07)' }}>
               <p style={{ margin: '0 0 3px', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{label}</p>
@@ -382,7 +382,7 @@ export default function AccountView({
           ))}
         </ul>
 
-        {/* Free trial CTA — only when plan is free and trial never used */}
+        {/* Free trial CTA - only when plan is free and trial never used */}
         {plan === 'free' && !trialUsed && !trialActive && (
           <div style={{
             background: '#F0EFEC',

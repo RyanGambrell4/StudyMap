@@ -57,10 +57,10 @@ const DIFFICULTY_LABELS = ['Easy', 'Medium', 'Hard']
 const GRADE_OPTIONS = ['A', 'B', 'C', 'Pass/Fail']
 const WEEK_DAYS = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 const EXAM_PRESETS = {
-  MCAT:       { sections: ['C/P — Chemistry & Physics', 'CARS — Critical Analysis', 'B/B — Biology & Biochem', 'P/S — Psych & Sociology'], scoreLabel: 'e.g. 515' },
+  MCAT:       { sections: ['C/P: Chemistry & Physics', 'CARS: Critical Analysis', 'B/B: Biology & Biochem', 'P/S: Psych & Sociology'], scoreLabel: 'e.g. 515' },
   LSAT:       { sections: ['Logical Reasoning', 'Analytical Reasoning', 'Reading Comprehension'], scoreLabel: 'e.g. 170' },
-  CPA:        { sections: ['FAR — Financial Accounting', 'AUD — Auditing', 'REG — Regulation', 'BAR — Business Analysis'], scoreLabel: 'e.g. 85' },
-  'Bar Exam': { sections: ['MBE — Multistate Bar', 'MEE — Multistate Essay', 'MPT — Performance Test'], scoreLabel: 'Pass' },
+  CPA:        { sections: ['FAR: Financial Accounting', 'AUD: Auditing', 'REG: Regulation', 'BAR: Business Analysis'], scoreLabel: 'e.g. 85' },
+  'Bar Exam': { sections: ['MBE: Multistate Bar', 'MEE: Multistate Essay', 'MPT: Performance Test'], scoreLabel: 'Pass' },
   GRE:        { sections: ['Verbal Reasoning', 'Quantitative Reasoning', 'Analytical Writing'], scoreLabel: 'e.g. 160' },
   GMAT:       { sections: ['Quantitative', 'Verbal', 'Data Insights'], scoreLabel: 'e.g. 700' },
 }
@@ -926,7 +926,7 @@ function ExamAddSectionModal({ courseCount, onClose, onAdd }) {
         <div style={{ padding: 24, display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div>
             <Label>Section name <span style={{ color: D.orange }}>*</span></Label>
-            <input type="text" className="cv-input" placeholder="e.g. C/P — Chemistry & Physics" value={name} onChange={e => { setName(e.target.value); setError('') }} autoFocus />
+            <input type="text" className="cv-input" placeholder="e.g. C/P: Chemistry & Physics" value={name} onChange={e => { setName(e.target.value); setError('') }} autoFocus />
           </div>
           <div>
             <Label>Your exam date</Label>

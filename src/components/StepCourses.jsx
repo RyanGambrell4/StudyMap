@@ -19,7 +19,7 @@ const EXAM_PRESETS = {
     label: 'MCAT',
     color: '#6366f1',
     desc: 'Med school entrance',
-    sections: ['C/P — Chemistry & Physics', 'CARS — Critical Analysis', 'B/B — Biology & Biochemistry', 'P/S — Psychology & Sociology'],
+    sections: ['C/P - Chemistry & Physics', 'CARS - Critical Analysis', 'B/B - Biology & Biochemistry', 'P/S - Psychology & Sociology'],
   },
   LSAT: {
     label: 'LSAT',
@@ -31,13 +31,13 @@ const EXAM_PRESETS = {
     label: 'CPA',
     color: '#14b8a6',
     desc: 'Accounting license',
-    sections: ['FAR — Financial Accounting', 'AUD — Auditing & Attestation', 'REG — Tax & Regulation', 'BAR — Business Analysis'],
+    sections: ['FAR - Financial Accounting', 'AUD - Auditing & Attestation', 'REG - Tax & Regulation', 'BAR - Business Analysis'],
   },
   BAR: {
     label: 'Bar Exam',
     color: '#f97316',
     desc: 'Legal license',
-    sections: ['MBE — Multistate Bar', 'MEE — Multistate Essay', 'MPT — Performance Test'],
+    sections: ['MBE - Multistate Bar', 'MEE - Multistate Essay', 'MPT - Performance Test'],
   },
   GRE: {
     label: 'GRE',

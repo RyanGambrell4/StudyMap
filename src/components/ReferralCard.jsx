@@ -24,7 +24,7 @@ export default function ReferralCard() {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
     }).catch(() => {
-      // Clipboard denied — select the link text so user can copy manually
+      // Clipboard denied - select the link text so user can copy manually
       const el = document.querySelector('[data-referral-link]')
       if (el) { const range = document.createRange(); range.selectNode(el); window.getSelection()?.removeAllRanges(); window.getSelection()?.addRange(range) }
     })

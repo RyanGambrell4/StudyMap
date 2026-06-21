@@ -1,49 +1,51 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { track } from '../lib/analytics'
 import { createCheckoutSession, hasUsedTrial } from '../lib/subscription'
 
-const STEP_NAMES = {
-  1: 'splash',
-  2: 'school_level',
-  3: 'year_level',
-  4: 'preferred_time',
-  5: 'trial_offer',
+const STEP_NAMES = { 1: 'personalize', 2: 'trial_offer' }
+
+// Color accent per school type
+const SCHOOL_COLORS = {
+  hs:   { accent: '#F97316', bg: 'rgba(249,115,22,0.1)',  border: 'rgba(249,115,22,0.45)', glow: 'rgba(249,115,22,0.2)' },
+  uni:  { accent: '#6B8FFF', bg: 'rgba(107,143,255,0.1)', border: 'rgba(107,143,255,0.45)', glow: 'rgba(107,143,255,0.2)' },
+  exam: { accent: '#34D399', bg: 'rgba(52,211,153,0.1)',  border: 'rgba(52,211,153,0.45)', glow: 'rgba(52,211,153,0.2)' },
 }
 
-// Onboarding has 5 internal steps but only 2 visible question screens (steps 2
-// and 4). Splash and trial-offer don't count toward the progress bar.
-const VISIBLE_STEP_INDEX = { 2: 1, 4: 2 }
-const VISIBLE_STEP_TOTAL = 2
+// Color accent per study time
+const TIME_COLORS = {
+  Morning:   { accent: '#FBBF24', bg: 'rgba(251,191,36,0.1)',  border: 'rgba(251,191,36,0.45)', glow: 'rgba(251,191,36,0.2)' },
+  Afternoon: { accent: '#FB923C', bg: 'rgba(251,146,60,0.1)',  border: 'rgba(251,146,60,0.45)', glow: 'rgba(251,146,60,0.2)' },
+  Evening:   { accent: '#A78BFA', bg: 'rgba(167,139,250,0.1)', border: 'rgba(167,139,250,0.45)', glow: 'rgba(167,139,250,0.2)' },
+}
 
-// ── Options ───────────────────────────────────────────────────────────────────
 const TIME_ICONS = {
   Morning: (
-    <svg style={{ width: '1.75rem', height: '1.75rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <svg style={{ width: '2rem', height: '2rem' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
     </svg>
   ),
   Afternoon: (
-    <svg style={{ width: '1.75rem', height: '1.75rem' }} viewBox="0 0 20 20" fill="currentColor">
+    <svg style={{ width: '2rem', height: '2rem' }} viewBox="0 0 20 20" fill="currentColor">
       <path fillRule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clipRule="evenodd" />
     </svg>
   ),
   Evening: (
-    <svg style={{ width: '1.75rem', height: '1.75rem' }} viewBox="0 0 20 20" fill="currentColor">
+    <svg style={{ width: '2rem', height: '2rem' }} viewBox="0 0 20 20" fill="currentColor">
       <path d="M17.293 13.293A8 8 0 016.707 2.707a8.001 8.001 0 1010.586 10.586z" />
     </svg>
   ),
 }
 
 const TIME_OPTIONS = [
-  { value: 'Morning',   label: 'Morning',   desc: 'Sharpest before the day gets noisy. Early sessions, clear head.' },
-  { value: 'Afternoon', label: 'Afternoon', desc: 'Post-lunch and fully awake. You hit your stride after noon.' },
-  { value: 'Evening',   label: 'Evening',   desc: 'Night owl energy. When the world quiets down, you focus.' },
+  { value: 'Morning',   label: 'Morning',   desc: 'Sharp before the world wakes up.' },
+  { value: 'Afternoon', label: 'Afternoon', desc: 'You hit your stride after noon.' },
+  { value: 'Evening',   label: 'Evening',   desc: 'Night mode. Deep work after dark.' },
 ]
 
 const SCHOOL_OPTIONS = [
-  { key: 'hs',   label: 'High School',       desc: 'AP classes, finals week, and juggling it all before graduation.' },
-  { key: 'uni',  label: 'University',        desc: 'Lectures, labs, deadlines, and somehow a social life too.' },
-  { key: 'exam', label: 'Professional Exam', desc: 'MCAT, LSAT, CPA, Bar, GRE, GMAT. A high-stakes certification or licensing exam.' },
+  { key: 'hs',   label: 'High School',       emoji: '🎒', desc: 'AP classes, finals, juggling everything.' },
+  { key: 'uni',  label: 'University',        emoji: '🎓', desc: 'Lectures, labs, deadlines — somehow a social life too.' },
+  { key: 'exam', label: 'Professional Exam', emoji: '💼', desc: 'MCAT, LSAT, CPA, Bar, GRE, GMAT — high stakes.' },
 ]
 
 const HS_YEARS = [
@@ -61,320 +63,140 @@ const UNI_YEARS = [
 ]
 
 const EXAM_TIMELINES = [
-  { value: '1-3 months',  desc: 'Final push, test is close' },
+  { value: '1-3 months',  desc: 'Final push — test is close' },
   { value: '3-6 months',  desc: 'Building momentum' },
   { value: '6-12 months', desc: 'Long game, structured prep' },
   { value: '1 year+',     desc: 'Starting early, building deep' },
 ]
 
-const SPLASH_CARDS = [
-  {
-    icon: (
-      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-      </svg>
-    ),
-    label: 'Session Blueprint',
-    desc: 'Your session planned before you start',
-  },
-  {
-    icon: (
-      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-    ),
-    label: 'Focus Mode',
-    desc: 'Timed blocks that keep you locked in',
-  },
-  {
-    icon: (
-      <svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.8} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-      </svg>
-    ),
-    label: 'Streak Tracking',
-    desc: 'Build the habit, ace the semester',
-  },
+// Progress persistence
+const LS_KEY = 'se_ob_progress'
+const saveProgress  = (d) => { try { localStorage.setItem(LS_KEY, JSON.stringify(d)) } catch {} }
+const loadProgress  = ()  => { try { return JSON.parse(localStorage.getItem(LS_KEY) ?? 'null') } catch { return null } }
+const clearProgress = ()  => { try { localStorage.removeItem(LS_KEY) } catch {} }
+
+const AVATARS = [
+  { initials: 'SK', color: '#6B8FFF' },
+  { initials: 'MR', color: '#A78BFA' },
+  { initials: 'JL', color: '#34D399' },
+  { initials: 'AT', color: '#FB923C' },
+  { initials: 'CW', color: '#F472B6' },
 ]
 
-// ── Splash screen ──────────────────────────────────────────────────────────────
-function SplashScreen({ onNext }) {
+// ── Animated CSS bag ─────────────────────────────────────────────────────────
+const STYLES = `
+  @keyframes ob-bg-drift {
+    0%,100% { background-position: 0% 50%; }
+    50%      { background-position: 100% 50%; }
+  }
+  @keyframes ob-glow-pulse {
+    0%,100% { opacity: .35; transform: scale(1);    }
+    50%      { opacity: .65; transform: scale(1.08); }
+  }
+  @keyframes ob-shimmer {
+    0%   { background-position: -250% center; }
+    100% { background-position:  250% center; }
+  }
+  @keyframes ob-year-in {
+    from { transform: translateY(14px) scale(.97); opacity: 0; }
+    to   { transform: translateY(0)    scale(1);   opacity: 1; }
+  }
+  @keyframes ob-ready-in {
+    from { transform: translateY(8px) scale(.95); opacity: 0; }
+    to   { transform: translateY(0)   scale(1);   opacity: 1; }
+  }
+  @keyframes ob-confetti {
+    0%   { transform: translateY(-10px) rotate(0deg);    opacity: 1; }
+    100% { transform: translateY(80px)  rotate(600deg);  opacity: 0; }
+  }
+  @keyframes ob-check-pop {
+    0%  { transform: scale(0) rotate(-20deg); opacity: 0; }
+    60% { transform: scale(1.2) rotate(5deg); opacity: 1; }
+    100%{ transform: scale(1)   rotate(0deg); opacity: 1; }
+  }
+  @keyframes ob-card-select {
+    0%   { transform: scale(1);    }
+    45%  { transform: scale(1.05); }
+    100% { transform: scale(1.02); }
+  }
+  .ob-selected { animation: ob-card-select 250ms cubic-bezier(.34,1.56,.64,1) both; }
+  .ob-year-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .ob-school-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ob-time-grid   { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+  .ob-year-reveal { animation: ob-year-in 280ms cubic-bezier(.22,1,.36,1) both; }
+  @media (max-width: 500px) {
+    .ob-school-grid, .ob-time-grid, .ob-year-grid { grid-template-columns: 1fr !important; }
+    .ob-school-grid [data-span] { grid-column: span 1 !important; }
+  }
+`
+
+// ── Confetti burst ────────────────────────────────────────────────────────────
+function Confetti() {
+  const COLORS = ['#6B8FFF','#A78BFA','#FBBF24','#FB923C','#34D399','#F472B6']
   return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#F7F6F3',
-      display: 'flex',
-      flexDirection: 'column',
-      alignItems: 'center',
-      justifyContent: 'center',
-      padding: '48px 24px',
-    }}>
-      <div style={{ width: '100%', maxWidth: 520, textAlign: 'center' }}>
-
-        {/* Logo */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginBottom: 40 }}>
-          <img src="/favicon.png" alt="StudyEdge AI" style={{ width: 34, height: 34, borderRadius: 9, objectFit: 'contain' }} />
-          <span style={{ color: '#1A1A1A', fontWeight: 700, fontSize: '1.1rem', letterSpacing: '-0.4px' }}>StudyEdge AI</span>
-        </div>
-
-        {/* Headline */}
-        <h1 style={{
-          fontSize: 'clamp(2rem, 5vw, 2.6rem)',
-          fontWeight: 700,
-          color: '#1A1A1A',
-          lineHeight: 1.15,
-          letterSpacing: '-0.03em',
-          marginBottom: 16,
-          fontFamily: "'Cormorant Garamond', Georgia, serif",
-        }}>
-          You're 60 seconds from<br />
-          <em style={{ fontStyle: 'italic', color: '#3B61C4' }}>your first AI study plan.</em>
-        </h1>
-
-        {/* Subtext */}
-        <p style={{ color: '#6B6B6B', fontSize: '1rem', lineHeight: 1.6, marginBottom: 40 }}>
-          Two quick questions. Then we'll build the rest around you.
-        </p>
-
-        {/* Feature cards */}
-        <style>{`@media (max-width: 480px) {
-          .ob-splash-grid { grid-template-columns: 1fr !important; }
-          .ob-time-grid   { grid-template-columns: 1fr !important; }
-          .ob-plan-grid   { grid-template-columns: 1fr !important; }
-          .ob-school-grid { grid-template-columns: 1fr !important; }
-          .ob-school-grid [style*="span 2"] { grid-column: span 1 !important; }
-        }`}</style>
-        <div className="ob-splash-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 36 }}>
-          {SPLASH_CARDS.map(card => (
-            <div
-              key={card.label}
-              style={{
-                backgroundColor: '#fff',
-                border: '1px solid rgba(0,0,0,0.07)',
-                borderRadius: 14,
-                padding: '16px 12px',
-                textAlign: 'left',
-                boxShadow: '0 1px 4px rgba(0,0,0,0.05)',
-              }}
-            >
-              <div style={{
-                color: '#3B61C4', marginBottom: 10,
-                width: 32, height: 32,
-                backgroundColor: 'rgba(59,97,196,0.08)',
-                borderRadius: 8,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                {card.icon}
-              </div>
-              <p style={{ color: '#1A1A1A', fontSize: '0.78rem', fontWeight: 700, marginBottom: 4, letterSpacing: '-0.1px' }}>
-                {card.label}
-              </p>
-              <p style={{ color: '#9B9B9B', fontSize: '0.73rem', lineHeight: 1.45 }}>
-                {card.desc}
-              </p>
-            </div>
-          ))}
-        </div>
-
-        {/* CTA */}
-        <button
-          onClick={onNext}
+    <>
+      {Array.from({ length: 20 }).map((_, i) => (
+        <div
+          key={i}
           style={{
-            width: '100%', padding: '15px',
-            backgroundColor: '#3B61C4', border: 'none',
-            borderRadius: 12, color: '#fff',
-            fontFamily: 'inherit', fontSize: '1rem', fontWeight: 700,
-            cursor: 'pointer', letterSpacing: '-0.2px', marginBottom: 12,
+            position: 'fixed',
+            top: '35%',
+            left: `${8 + ((i * 4.6) % 84)}%`,
+            width: i % 3 === 0 ? 7 : 5,
+            height: i % 3 === 0 ? 7 : 10,
+            borderRadius: i % 4 === 0 ? '50%' : 2,
+            backgroundColor: COLORS[i % COLORS.length],
+            animation: `ob-confetti ${0.7 + (i % 5) * 0.12}s ease-out ${(i % 7) * 0.04}s forwards`,
+            zIndex: 200,
+            pointerEvents: 'none',
           }}
-          onMouseEnter={e => e.currentTarget.style.backgroundColor = '#2D4FA8'}
-          onMouseLeave={e => e.currentTarget.style.backgroundColor = '#3B61C4'}
-        >
-          Let's go
-        </button>
-
-        <p style={{ color: '#9B9B9B', fontSize: '0.8rem' }}>
-          Takes less than a minute
-        </p>
-
-      </div>
-    </div>
+        />
+      ))}
+    </>
   )
 }
 
-// ── Animation wrapper ──────────────────────────────────────────────────────────
-function StepWrap({ children, animKey, dir }) {
-  return (
-    <div key={animKey} className={dir >= 0 ? 'slide-in' : 'slide-in-back'} style={{ willChange: 'opacity, transform' }}>
-      {children}
-    </div>
-  )
-}
-
-// ── Progress bar ───────────────────────────────────────────────────────────────
-function ProgressBar({ current, total }) {
-  return (
-    <div
-      role="progressbar"
-      aria-label={`Onboarding progress, step ${current} of ${total}`}
-      aria-valuenow={current}
-      aria-valuemin={1}
-      aria-valuemax={total}
-      style={{ display: 'flex', gap: 6, marginBottom: 36 }}
-    >
-      {Array.from({ length: total }, (_, i) => {
-        const filled = i + 1 <= current
-        return (
-          <div key={i} style={{
-            flex: 1, height: 4, borderRadius: 999, overflow: 'hidden',
-            backgroundColor: 'rgba(0,0,0,0.07)',
-          }}>
-            <div style={{
-              height: '100%',
-              width: filled ? '100%' : '0%',
-              borderRadius: 999,
-              backgroundColor: '#3B61C4',
-              transition: 'width 0.4s cubic-bezier(0.22,1,0.36,1)',
-            }} />
-          </div>
-        )
-      })}
-    </div>
-  )
-}
-
-// ── Page shell ─────────────────────────────────────────────────────────────────
-function Page({ children }) {
-  return (
-    <div style={{
-      minHeight: '100vh',
-      backgroundColor: '#F7F6F3',
-      display: 'flex', flexDirection: 'column',
-      alignItems: 'center', justifyContent: 'center',
-      padding: '48px 24px',
-    }}>
-      <div style={{ width: '100%', maxWidth: 480 }}>
-        {children}
-      </div>
-    </div>
-  )
-}
-
-// ── Buttons ────────────────────────────────────────────────────────────────────
-function ContinueBtn({ onClick, disabled, label = 'Continue' }) {
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        flex: 1, padding: '14px',
-        backgroundColor: disabled ? 'rgba(59,97,196,0.15)' : '#3B61C4',
-        border: 'none', borderRadius: 12,
-        color: disabled ? 'rgba(59,97,196,0.4)' : '#fff',
-        fontFamily: 'inherit', fontSize: '0.95rem', fontWeight: 700,
-        cursor: disabled ? 'not-allowed' : 'pointer',
-        transition: 'background 0.15s',
-      }}
-      onMouseEnter={e => { if (!disabled) e.currentTarget.style.backgroundColor = '#2D4FA8' }}
-      onMouseLeave={e => { if (!disabled) e.currentTarget.style.backgroundColor = disabled ? 'rgba(59,97,196,0.15)' : '#3B61C4' }}
-    >
-      {label}
-    </button>
-  )
-}
-
-function BackBtn({ onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        padding: '14px 20px',
-        backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.10)',
-        borderRadius: 12, color: '#6B6B6B',
-        fontFamily: 'inherit', fontSize: '0.95rem', fontWeight: 600,
-        cursor: 'pointer', transition: 'background 0.15s',
-      }}
-      onMouseEnter={e => e.currentTarget.style.backgroundColor = '#f0efed'}
-      onMouseLeave={e => e.currentTarget.style.backgroundColor = '#fff'}
-    >
-      Back
-    </button>
-  )
-}
-
-// ── Option card ────────────────────────────────────────────────────────────────
-function OptionCard({ selected, onClick, children, style = {} }) {
-  const [hovered, setHovered] = useState(false)
-  return (
-    <button
-      onClick={onClick}
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        position: 'relative',
-        backgroundColor: selected ? 'rgba(59,97,196,0.06)' : hovered ? '#fafaf8' : '#fff',
-        border: selected ? '1.5px solid rgba(59,97,196,0.4)' : '1px solid rgba(0,0,0,0.08)',
-        borderRadius: 14,
-        cursor: 'pointer',
-        transition: 'border-color 0.15s, box-shadow 0.15s, background 0.15s',
-        fontFamily: 'inherit',
-        textAlign: 'left',
-        WebkitAppearance: 'none',
-        appearance: 'none',
-        boxShadow: selected ? '0 0 0 3px rgba(59,97,196,0.08)' : hovered ? '0 2px 8px rgba(0,0,0,0.06)' : '0 1px 3px rgba(0,0,0,0.04)',
-        ...style,
-      }}
-    >
-      {children}
-      {selected && (
-        <div className="ob-check-pop" style={{
-          position: 'absolute', top: 10, right: 10,
-          width: 20, height: 20, borderRadius: '50%',
-          backgroundColor: '#3B61C4',
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-        }}>
-          <svg width="11" height="11" fill="none" stroke="white" strokeWidth="2.5" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-        </div>
-      )}
-    </button>
-  )
-}
-
-// ── Main ───────────────────────────────────────────────────────────────────────
+// ── Main ──────────────────────────────────────────────────────────────────────
 export default function Onboarding({ onComplete, userEmail, userId }) {
-  const [step, setStep]       = useState(1)
-  const [animKey, setAnimKey] = useState(0)
-  const [animDir, setAnimDir] = useState(1)
+  const saved = loadProgress()
+
+  const [step, setStep]               = useState(1)
+  const [animKey, setAnimKey]         = useState(0)
+  const [animDir, setAnimDir]         = useState(1)
   const [trialLoading, setTrialLoading] = useState(false)
+  const [trialError, setTrialError]     = useState(null)
+  const [schoolType, setSchoolType]   = useState(saved?.schoolType ?? null)
+  const [yearLevel, setYearLevel]     = useState(saved?.yearLevel ?? null)
+  const [preferredTime, setPreferredTime] = useState(saved?.preferredTime ?? null)
+  const [showConfetti, setShowConfetti]   = useState(false)
 
-  const [schoolType, setSchoolType]         = useState(null)
-  const [yearLevel, setYearLevel]           = useState(null)
-  const [preferredTime, setPreferredTime]   = useState(null)
-
-  // Funnel timing. stepEnteredAt tracks how long the user spent on the current
-  // step so we can fire ms_on_step in onboarding_step_completed. onboardingStart
-  // measures the full splash-to-finish duration for onboarding_completed.
-  const stepEnteredAt = useRef(Date.now())
+  const stepEnteredAt   = useRef(Date.now())
   const onboardingStart = useRef(Date.now())
+  const prevDone        = useRef(false)
+
+  useEffect(() => { saveProgress({ schoolType, yearLevel, preferredTime }) }, [schoolType, yearLevel, preferredTime])
+
+  useEffect(() => {
+    track('onboarding_step_viewed', { step, step_name: STEP_NAMES[step] ?? `step_${step}` })
+  }, [step])
+
+  const allDone = !!(yearLevel && preferredTime)
+  const answered = [schoolType, yearLevel, preferredTime].filter(Boolean).length
+
+  useEffect(() => {
+    if (allDone && !prevDone.current) {
+      setShowConfetti(true)
+      setTimeout(() => setShowConfetti(false), 1600)
+    }
+    prevDone.current = allDone
+  }, [allDone])
 
   const goTo = (next, dir = 1) => {
     if (dir > 0) {
-      const fromName = STEP_NAMES[step] ?? `step_${step}`
-      const msOnStep = Date.now() - stepEnteredAt.current
-      track('onboarding_step_completed', {
-        step,
-        step_name: fromName,
-        ms_on_step: msOnStep,
-        next_step: next,
-      })
-      track('onboarding_step', {
-        from: step,
-        to: next,
-        step: next,
-        step_name: STEP_NAMES[next] ?? `step_${next}`,
-        from_step_name: fromName,
-      })
+      const name = STEP_NAMES[step] ?? `step_${step}`
+      const ms   = Date.now() - stepEnteredAt.current
+      track('onboarding_step_completed', { step, step_name: name, ms_on_step: ms, next_step: next })
+      track('onboarding_step', { from: step, to: next, step: next, step_name: STEP_NAMES[next] ?? `step_${next}`, from_step_name: name })
     }
     stepEnteredAt.current = Date.now()
     setAnimDir(dir)
@@ -383,124 +205,287 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
     window.scrollTo(0, 0)
   }
 
-  // Bundle the duration into the completion handler so App.jsx can include it
-  // in onboarding_completed. Used for both "Build my plan" (skip trial offer)
-  // and trial flow which calls onComplete before redirecting to Stripe.
   const completeWith = (profile, extra = {}) => {
-    const durationMs = Date.now() - onboardingStart.current
-    onComplete({ ...profile, durationMs, ...extra })
+    clearProgress()
+    onComplete({ ...profile, durationMs: Date.now() - onboardingStart.current, ...extra })
   }
 
-  // ── Step 1: Splash ───────────────────────────────────────────────────────────
-  if (step === 1) return <SplashScreen onNext={() => goTo(2)} />
+  const profileData = { yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true }
 
-  // ── Step 2: School level ─────────────────────────────────────────────────────
-  if (step === 2) return (
-    <Page>
-      <StepWrap animKey={animKey} dir={animDir}>
-        <ProgressBar current={VISIBLE_STEP_INDEX[2]} total={VISIBLE_STEP_TOTAL} />
-        <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.03em', marginBottom: 6, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-          What are you studying for?
-        </h2>
-        <p style={{ color: '#6B6B6B', fontSize: '0.95rem', marginBottom: 24, lineHeight: 1.5 }}>
-          We tune your sessions to your workload. High school finals look nothing like the bar exam.
-        </p>
+  // ── Step 1: Questions ──────────────────────────────────────────────────────
+  if (step === 1) {
+    const sc = schoolType ? SCHOOL_COLORS[schoolType] : null
 
-        <div className="ob-school-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 16 }}>
-          {SCHOOL_OPTIONS.map(({ key, label, desc }) => (
-            <OptionCard
-              key={key}
-              selected={schoolType === key}
-              onClick={() => { setSchoolType(key); setYearLevel(null) }}
-              style={{ padding: '20px 16px', width: '100%', ...(key === 'exam' ? { gridColumn: 'span 2' } : {}) }}
-            >
-              <p style={{ color: '#1A1A1A', fontSize: '0.95rem', fontWeight: 700, letterSpacing: '-0.3px', marginBottom: 5 }}>{label}</p>
-              <p style={{ color: '#9B9B9B', fontSize: '0.78rem', lineHeight: 1.45 }}>{desc}</p>
-            </OptionCard>
-          ))}
-        </div>
+    return (
+      <div style={{ backgroundColor: '#080C18', minHeight: '100vh', padding: '0', position: 'relative', overflow: 'hidden' }}>
+        <style>{STYLES}</style>
+        {showConfetti && <Confetti />}
 
-        {schoolType && (
-          <div className="ob-year-in" style={{ marginBottom: 24 }}>
-            <p style={{ color: '#9B9B9B', fontSize: '0.72rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
-              {schoolType === 'exam' ? 'How long until your exam?' : 'What year are you in?'}
-            </p>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-              {(schoolType === 'hs' ? HS_YEARS : schoolType === 'exam' ? EXAM_TIMELINES : UNI_YEARS).map(({ value, desc }) => (
-                <OptionCard
-                  key={value}
-                  selected={yearLevel === value}
-                  onClick={() => setYearLevel(value)}
-                  style={{ padding: '14px 16px', width: '100%' }}
-                >
-                  <p style={{ color: '#1A1A1A', fontSize: '0.88rem', fontWeight: 700, marginBottom: 3 }}>{value}</p>
-                  <p style={{ color: '#9B9B9B', fontSize: '0.75rem' }}>{desc}</p>
-                </OptionCard>
-              ))}
+        {/* Background glow orbs */}
+        <div style={{ position: 'absolute', top: '-120px', left: '-80px',  width: 420, height: 420, borderRadius: '50%', background: 'radial-gradient(circle, rgba(107,143,255,.12) 0%, transparent 70%)', animation: 'ob-glow-pulse 5s ease-in-out infinite',      pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', bottom: '-80px',  right: '-60px', width: 340, height: 340, borderRadius: '50%', background: 'radial-gradient(circle, rgba(167,139,250,.10) 0%, transparent 70%)', animation: 'ob-glow-pulse 5s ease-in-out infinite 2.5s', pointerEvents: 'none' }} />
+
+        <div
+          key={animKey}
+          className={animDir >= 0 ? 'slide-in' : 'slide-in-back'}
+          style={{ maxWidth: 520, margin: '0 auto', padding: '48px 24px 80px', position: 'relative', zIndex: 1 }}
+        >
+          {/* ── Brand pill ── */}
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 32 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 9, padding: '7px 16px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.09)', borderRadius: 999 }}>
+              <img src="/favicon.png" alt="" style={{ width: 20, height: 20, borderRadius: 5, objectFit: 'contain' }} />
+              <span style={{ color: 'rgba(255,255,255,0.7)', fontWeight: 600, fontSize: '0.82rem', letterSpacing: '-0.2px' }}>StudyEdge AI</span>
             </div>
           </div>
-        )}
 
-        <ContinueBtn onClick={() => goTo(4)} disabled={!yearLevel} />
-      </StepWrap>
-    </Page>
-  )
+          {/* ── Headline ── */}
+          <div style={{ textAlign: 'center', marginBottom: 32 }}>
+            <h1 style={{
+              fontSize: 'clamp(2rem, 5.5vw, 2.75rem)',
+              fontWeight: 800, letterSpacing: '-0.045em', lineHeight: 1.08, marginBottom: 10,
+              fontFamily: "'Cormorant Garamond', Georgia, serif",
+            }}>
+              <span style={{ background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                Two questions.
+              </span>
+              <br />
+              <span style={{ background: 'linear-gradient(135deg, #6B8FFF 0%, #A78BFA 55%, #6B8FFF 100%)', backgroundSize: '200% 200%', animation: 'ob-bg-drift 5s ease infinite', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                Then your plan is live.
+              </span>
+            </h1>
+            <p style={{ color: 'rgba(255,255,255,.38)', fontSize: '0.84rem', letterSpacing: '-0.1px' }}>
+              Under 60 seconds · no commitment
+            </p>
+          </div>
 
-  // ── Step 4: Study time preference ───────────────────────────────────────────
-  if (step === 4) return (
-    <Page>
-      <StepWrap animKey={animKey} dir={animDir}>
-        <ProgressBar current={VISIBLE_STEP_INDEX[4]} total={VISIBLE_STEP_TOTAL} />
-        <h2 style={{ fontSize: '1.75rem', fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.03em', marginBottom: 6, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
-          When do you focus best?
-        </h2>
-        <p style={{ color: '#6B6B6B', fontSize: '0.95rem', marginBottom: 24, lineHeight: 1.5 }}>
-          We'll stack your sessions when your brain is sharpest, not when life is loudest.
-        </p>
-
-        <div className="ob-time-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 24 }}>
-          {TIME_OPTIONS.map(({ value, label, desc }) => (
-            <OptionCard
-              key={value}
-              selected={preferredTime === value}
-              onClick={() => setPreferredTime(value)}
-              style={{ padding: '22px 12px 18px', width: '100%', textAlign: 'center' }}
-            >
-              <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 8, color: preferredTime === value ? '#3B61C4' : '#9B9B9B' }}>
-                {TIME_ICONS[value]}
+          {/* ── Progress chips ── */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, marginBottom: 36, flexWrap: 'wrap' }}>
+            {[
+              { label: 'School type', done: !!schoolType },
+              { label: 'Year',        done: !!yearLevel },
+              { label: 'Study time',  done: !!preferredTime },
+            ].map(({ label, done }, i) => (
+              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <div style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 5,
+                  padding: '5px 11px', borderRadius: 999,
+                  background: done ? 'rgba(107,143,255,.14)' : 'rgba(255,255,255,.05)',
+                  border:     done ? '1px solid rgba(107,143,255,.4)' : '1px solid rgba(255,255,255,.08)',
+                  transition: 'all .3s ease',
+                }}>
+                  {done ? (
+                    <svg width="11" height="11" fill="none" stroke="#6B8FFF" strokeWidth="2.5" viewBox="0 0 24 24" style={{ animation: 'ob-check-pop 300ms cubic-bezier(.34,1.56,.64,1) both' }}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                  ) : (
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: 'rgba(255,255,255,.18)', display: 'block' }} />
+                  )}
+                  <span style={{ fontSize: '0.7rem', fontWeight: 600, color: done ? '#8AABFF' : 'rgba(255,255,255,.3)', transition: 'color .3s', whiteSpace: 'nowrap' }}>
+                    {label}
+                  </span>
+                </div>
+                {i < 2 && <div style={{ width: 14, height: 1, background: 'rgba(255,255,255,.08)', flexShrink: 0 }} />}
               </div>
-              <p style={{ color: '#1A1A1A', fontSize: '0.92rem', fontWeight: 700, marginBottom: 6, letterSpacing: '-0.2px' }}>{label}</p>
-              <p style={{ color: '#9B9B9B', fontSize: '0.75rem', lineHeight: 1.45 }}>{desc}</p>
-            </OptionCard>
-          ))}
-        </div>
+            ))}
+          </div>
 
-        <div style={{ display: 'flex', gap: 10 }}>
-          <BackBtn onClick={() => goTo(2, -1)} />
-          <ContinueBtn
+          {/* ── Q1: School type ── */}
+          <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 10 }}>
+            01 · What are you studying for?
+          </p>
+          <div className="ob-school-grid" style={{ marginBottom: schoolType ? 12 : 28 }}>
+            {SCHOOL_OPTIONS.map(({ key, label, emoji, desc }) => {
+              const sel = schoolType === key
+              const c   = SCHOOL_COLORS[key]
+              return (
+                <button
+                  key={key}
+                  data-span={key === 'exam' ? 'true' : undefined}
+                  onClick={() => { setSchoolType(key); setYearLevel(null) }}
+                  className={sel ? 'ob-selected' : ''}
+                  style={{
+                    padding: '18px 16px', borderRadius: 14,
+                    background: sel ? c.bg    : 'rgba(255,255,255,.04)',
+                    border:     sel ? `1.5px solid ${c.border}` : '1px solid rgba(255,255,255,.08)',
+                    boxShadow:  sel ? `0 0 0 1px ${c.border}, 0 8px 32px ${c.glow}` : '0 1px 4px rgba(0,0,0,.25)',
+                    cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                    transition: 'background .2s, border .2s, box-shadow .2s',
+                    ...(key === 'exam' ? { gridColumn: 'span 2' } : {}),
+                  }}
+                  onMouseEnter={e => { if (!sel) e.currentTarget.style.background = 'rgba(255,255,255,.07)' }}
+                  onMouseLeave={e => { if (!sel) e.currentTarget.style.background = 'rgba(255,255,255,.04)' }}
+                >
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+                    <span style={{ fontSize: '1.25rem', lineHeight: 1.1, marginTop: 1 }}>{emoji}</span>
+                    <div>
+                      <p style={{ color: sel ? c.accent : 'rgba(255,255,255,.88)', fontSize: '0.91rem', fontWeight: 700, letterSpacing: '-0.3px', marginBottom: 3, transition: 'color .2s' }}>{label}</p>
+                      <p style={{ color: 'rgba(255,255,255,.32)', fontSize: '0.74rem', lineHeight: 1.45 }}>{desc}</p>
+                    </div>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* ── Q1b: Year / timeline ── */}
+          {schoolType && (
+            <div className="ob-year-reveal" style={{ marginBottom: 28 }}>
+              <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 10 }}>
+                {schoolType === 'exam' ? '01b · How long until your exam?' : '01b · What year are you in?'}
+              </p>
+              <div className="ob-year-grid">
+                {(schoolType === 'hs' ? HS_YEARS : schoolType === 'exam' ? EXAM_TIMELINES : UNI_YEARS).map(({ value, desc }) => {
+                  const sel = yearLevel === value
+                  const c   = SCHOOL_COLORS[schoolType]
+                  return (
+                    <button
+                      key={value}
+                      onClick={() => setYearLevel(value)}
+                      className={sel ? 'ob-selected' : ''}
+                      style={{
+                        padding: '12px 14px', borderRadius: 12,
+                        background: sel ? c.bg    : 'rgba(255,255,255,.04)',
+                        border:     sel ? `1.5px solid ${c.border}` : '1px solid rgba(255,255,255,.08)',
+                        boxShadow:  sel ? `0 4px 20px ${c.glow}` : 'none',
+                        cursor: 'pointer', textAlign: 'left', fontFamily: 'inherit',
+                        transition: 'background .2s, border .2s, box-shadow .2s',
+                      }}
+                      onMouseEnter={e => { if (!sel) e.currentTarget.style.background = 'rgba(255,255,255,.07)' }}
+                      onMouseLeave={e => { if (!sel) e.currentTarget.style.background = 'rgba(255,255,255,.04)' }}
+                    >
+                      <p style={{ color: sel ? c.accent : 'rgba(255,255,255,.85)', fontSize: '0.86rem', fontWeight: 700, marginBottom: 2, transition: 'color .2s' }}>{value}</p>
+                      <p style={{ color: 'rgba(255,255,255,.28)', fontSize: '0.71rem' }}>{desc}</p>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* ── Divider ── */}
+          <div style={{ height: 1, background: 'linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent)', margin: '0 0 24px' }} />
+
+          {/* ── Q2: Study time ── */}
+          <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 10 }}>
+            02 · When do you focus best?
+          </p>
+          <div className="ob-time-grid" style={{ marginBottom: 28 }}>
+            {TIME_OPTIONS.map(({ value, label, desc }) => {
+              const sel = preferredTime === value
+              const c   = TIME_COLORS[value]
+              return (
+                <button
+                  key={value}
+                  onClick={() => setPreferredTime(value)}
+                  className={sel ? 'ob-selected' : ''}
+                  style={{
+                    padding: '22px 10px 18px', borderRadius: 14, textAlign: 'center',
+                    background: sel ? c.bg    : 'rgba(255,255,255,.04)',
+                    border:     sel ? `1.5px solid ${c.border}` : '1px solid rgba(255,255,255,.08)',
+                    boxShadow:  sel ? `0 0 0 1px ${c.border}, 0 8px 28px ${c.glow}` : '0 1px 4px rgba(0,0,0,.25)',
+                    cursor: 'pointer', fontFamily: 'inherit',
+                    transition: 'background .2s, border .2s, box-shadow .2s',
+                  }}
+                  onMouseEnter={e => { if (!sel) e.currentTarget.style.background = 'rgba(255,255,255,.07)' }}
+                  onMouseLeave={e => { if (!sel) e.currentTarget.style.background = 'rgba(255,255,255,.04)' }}
+                >
+                  <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10, color: sel ? c.accent : 'rgba(255,255,255,.28)', transition: 'color .2s' }}>
+                    {TIME_ICONS[value]}
+                  </div>
+                  <p style={{ color: sel ? '#fff' : 'rgba(255,255,255,.8)', fontSize: '0.88rem', fontWeight: 700, marginBottom: 5, letterSpacing: '-0.2px', transition: 'color .2s' }}>{label}</p>
+                  <p style={{ color: 'rgba(255,255,255,.28)', fontSize: '0.7rem', lineHeight: 1.4 }}>{desc}</p>
+                </button>
+              )
+            })}
+          </div>
+
+          {/* ── Ready banner ── */}
+          {allDone && (
+            <div
+              style={{
+                background: 'linear-gradient(135deg, rgba(107,143,255,.12), rgba(167,139,250,.12))',
+                border: '1px solid rgba(107,143,255,.3)',
+                borderRadius: 12, padding: '11px 16px', marginBottom: 14,
+                display: 'flex', alignItems: 'center', gap: 10,
+                animation: 'ob-ready-in 320ms cubic-bezier(.22,1,.36,1) both',
+              }}
+            >
+              <svg width="15" height="15" fill="none" stroke="#8AABFF" strokeWidth="2.2" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <p style={{ fontSize: '0.8rem', color: '#8AABFF', fontWeight: 600, margin: 0 }}>
+                All set — your personalised study plan is ready to build.
+              </p>
+            </div>
+          )}
+
+          {/* ── CTA ── */}
+          <button
             onClick={() => {
-              if (!hasUsedTrial()) {
-                goTo(5)
-              } else {
-                completeWith({ yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true })
-              }
+              if (!hasUsedTrial()) { goTo(2) } else { completeWith(profileData) }
             }}
-            disabled={!preferredTime}
-            label="Build my plan"
-          />
-        </div>
-      </StepWrap>
-    </Page>
-  )
+            disabled={!allDone}
+            style={{
+              width: '100%', padding: '16px', border: 'none', borderRadius: 14,
+              fontFamily: 'inherit', fontSize: '1rem', fontWeight: 800, letterSpacing: '-0.2px',
+              cursor: allDone ? 'pointer' : 'not-allowed',
+              transition: 'opacity .2s, transform .15s',
+              ...(allDone ? {
+                background: 'linear-gradient(135deg, #3B61C4 0%, #6B35D9 50%, #3B61C4 100%)',
+                backgroundSize: '200% 200%',
+                animation: 'ob-bg-drift 4s ease infinite',
+                color: '#fff',
+                boxShadow: '0 4px 32px rgba(59,97,196,.5), 0 0 0 1px rgba(107,53,217,.35)',
+              } : {
+                background: 'rgba(255,255,255,.07)',
+                color: 'rgba(255,255,255,.22)',
+              }),
+            }}
+            onMouseEnter={e => { if (allDone) e.currentTarget.style.transform = 'scale(1.01)' }}
+            onMouseLeave={e => { if (allDone) e.currentTarget.style.transform = 'scale(1)' }}
+          >
+            {allDone ? 'Build my plan →' : `${answered} of 3 answered — keep going`}
+          </button>
 
-  // ── Step 5: Trial offer ───────────────────────────────────────────────────────
-  const profileData = { yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true }
-  if (step === 5) return (
-    <div style={{ minHeight: '100vh', background: '#F7F6F3', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px' }}>
-      <div style={{ maxWidth: 460, width: '100%' }}>
+          {/* ── Social proof ── */}
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10, marginTop: 20 }}>
+            <div style={{ display: 'flex' }}>
+              {AVATARS.map((a, i) => (
+                <div key={i} style={{
+                  width: 26, height: 26, borderRadius: '50%',
+                  background: a.color, border: '2px solid #080C18',
+                  marginLeft: i === 0 ? 0 : -9,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 8, fontWeight: 800, color: '#fff', letterSpacing: '0',
+                  boxShadow: `0 0 0 1px ${a.color}33`,
+                }}>
+                  {a.initials}
+                </div>
+              ))}
+            </div>
+            <p style={{ color: 'rgba(255,255,255,.3)', fontSize: '0.74rem' }}>
+              Joined by <span style={{ color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>345+</span> students
+            </p>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Step 2: Trial offer ──────────────────────────────────────────────────────
+  if (step === 2) return (
+    <div style={{ minHeight: '100vh', background: '#080C18', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', position: 'relative', overflow: 'hidden' }}>
+      <style>{STYLES}</style>
+      <div style={{ position: 'absolute', top: '-200px', left: '50%', transform: 'translateX(-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(107,53,217,.14) 0%, transparent 65%)', pointerEvents: 'none' }} />
+
+      <div
+        key={animKey}
+        className={animDir >= 0 ? 'slide-in' : 'slide-in-back'}
+        style={{ maxWidth: 460, width: '100%', position: 'relative', zIndex: 1 }}
+      >
         {/* Badge */}
-        <div style={{ textAlign: 'center', marginBottom: 28 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)', borderRadius: 999, padding: '6px 16px', fontSize: 12, fontWeight: 700, color: '#3B61C4', letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+        <div style={{ textAlign: 'center', marginBottom: 22 }}>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'linear-gradient(135deg, rgba(107,143,255,.15), rgba(167,139,250,.15))', border: '1px solid rgba(167,139,250,.35)', borderRadius: 999, padding: '6px 18px', fontSize: 11, fontWeight: 700, color: '#A78BFA', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
             <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
             </svg>
@@ -509,67 +494,117 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         </div>
 
         {/* Headline */}
-        <h1 style={{ fontSize: '2rem', fontWeight: 800, color: '#111111', letterSpacing: '-0.04em', textAlign: 'center', marginBottom: 10, lineHeight: 1.15 }}>
-          Try every Pro feature.<br />Free for 3 days.
+        <h1 style={{ textAlign: 'center', marginBottom: 10, lineHeight: 1.08 }}>
+          <span style={{ display: 'block', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            Try every Pro feature.
+          </span>
+          <span style={{ display: 'block', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(135deg, #6B8FFF, #A78BFA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+            Free for 3 days.
+          </span>
         </h1>
-        <p style={{ color: '#6B6B6B', fontSize: '0.95rem', textAlign: 'center', marginBottom: 32, lineHeight: 1.6 }}>
-          See your full study plan, AI coach, and focus sessions in action before you pay anything.
+        <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.9rem', textAlign: 'center', marginBottom: 28, lineHeight: 1.65 }}>
+          Full access. No restrictions. See how much sharper you study before paying a cent.
         </p>
 
         {/* Feature list */}
-        <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, padding: '20px 24px', marginBottom: 24 }}>
+        <div style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 16, padding: '20px 22px', marginBottom: 20 }}>
           {[
-            ['5 courses', 'Your full semester, all in one place'],
-            ['100 AI actions/month', 'AI tutor, coach plans, blueprints, quizzes'],
-            ['Unlimited focus sessions', 'Study as long as you need'],
-            ['Rebuild plans anytime', 'When exams shift and life happens'],
-          ].map(([title, desc]) => (
-            <div key={title} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 14 }}>
-              <div style={{ width: 20, height: 20, borderRadius: '50%', background: 'rgba(59,97,196,0.1)', border: '1px solid rgba(59,97,196,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, marginTop: 1 }}>
-                <svg width="10" height="10" fill="none" stroke="#3B61C4" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
-                </svg>
-              </div>
+            { emoji: '📚', title: '5 courses',               desc: 'Your full semester, all in one place' },
+            { emoji: '🤖', title: '100 AI actions/month',    desc: 'Tutor, coach, blueprints, quizzes' },
+            { emoji: '⏱',  title: 'Unlimited focus sessions', desc: 'Study as long as you need' },
+            { emoji: '🔄', title: 'Rebuild plans anytime',   desc: 'When exams shift and life happens' },
+          ].map(({ emoji, title, desc }) => (
+            <div key={title} style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
+              <span style={{ fontSize: '1.15rem', flexShrink: 0 }}>{emoji}</span>
               <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: '#111111' }}>{title}</div>
-                <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 1 }}>{desc}</div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.9)' }}>{title}</div>
+                <div style={{ fontSize: 12, color: 'rgba(255,255,255,.32)', marginTop: 1 }}>{desc}</div>
               </div>
             </div>
           ))}
         </div>
 
+        {/* Stars */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 22 }}>
+          <div style={{ display: 'flex', gap: 2 }}>
+            {Array.from({ length: 5 }).map((_, i) => (
+              <svg key={i} width="14" height="14" viewBox="0 0 20 20" fill="#FBBF24">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+              </svg>
+            ))}
+          </div>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,.38)', fontWeight: 500 }}>Loved by 345+ students</span>
+        </div>
+
         {/* Primary CTA */}
+        {trialError && (
+          <p style={{ color: '#F87171', fontSize: '0.78rem', textAlign: 'center', marginBottom: 8 }}>
+            {trialError}
+          </p>
+        )}
         <button
           onClick={async () => {
             track('trial_cta_clicked', { source: 'onboarding' })
             setTrialLoading(true)
-            completeWith(profileData, { trialTaken: true })
+            setTrialError(null)
             const url = await createCheckoutSession('pro', 'weekly', userEmail, userId, { trial: true })
             if (url && !url.alreadySubscribed) {
+              completeWith(profileData, { trialTaken: true })
               window.location.href = url
+            } else if (url?.alreadySubscribed) {
+              completeWith(profileData, { trialTaken: false })
             } else {
               setTrialLoading(false)
+              setTrialError('Something went wrong starting your trial. Please try again.')
             }
           }}
           disabled={trialLoading}
-          style={{ width: '100%', padding: '15px', background: '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: trialLoading ? 'not-allowed' : 'pointer', letterSpacing: '-0.01em', marginBottom: 10, opacity: trialLoading ? 0.7 : 1 }}
-          onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.background = '#2d4fa3' }}
-          onMouseLeave={e => { if (!trialLoading) e.currentTarget.style.background = '#3B61C4' }}
+          style={{
+            width: '100%', padding: '16px',
+            background: 'linear-gradient(135deg, #3B61C4, #7C3AED)',
+            border: 'none', borderRadius: 14,
+            color: '#fff', fontSize: '1rem', fontWeight: 800,
+            cursor: trialLoading ? 'not-allowed' : 'pointer',
+            letterSpacing: '-0.01em', marginBottom: 8,
+            opacity: trialLoading ? 0.7 : 1,
+            boxShadow: '0 4px 32px rgba(59,97,196,.45), 0 0 0 1px rgba(124,58,237,.3)',
+            transition: 'transform .15s, opacity .2s',
+          }}
+          onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.transform = 'scale(1.01)' }}
+          onMouseLeave={e => { if (!trialLoading) e.currentTarget.style.transform = 'scale(1)' }}
         >
           {trialLoading ? 'Loading…' : 'Start my 3-day free trial →'}
         </button>
 
-        <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.72rem', marginTop: 14 }}>
-          Card required · $0 today · auto-bills $2.99/wk after trial unless canceled
+        <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.25)', fontSize: '0.71rem', marginBottom: 14 }}>
+          $0 today · auto-bills $2.99/wk after trial · cancel any time
         </p>
 
-        {/* Low-prominence skip — a small link instead of an equal-weight button */}
-        <div style={{ textAlign: 'center', marginTop: 18 }}>
+        {/* Skip */}
+        <button
+          onClick={() => { track('trial_skipped', { source: 'onboarding' }); completeWith(profileData, { trialTaken: false }) }}
+          style={{
+            display: 'block', width: '100%', padding: '13px',
+            background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.09)',
+            borderRadius: 12, color: 'rgba(255,255,255,.45)',
+            fontFamily: 'inherit', fontSize: '0.88rem', fontWeight: 600,
+            cursor: 'pointer', textAlign: 'center', marginBottom: 14,
+            transition: 'all .15s',
+          }}
+          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,.09)'; e.currentTarget.style.color = 'rgba(255,255,255,.75)' }}
+          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,.05)'; e.currentTarget.style.color = 'rgba(255,255,255,.45)' }}
+        >
+          Continue with free plan
+        </button>
+
+        <div style={{ textAlign: 'center' }}>
           <button
-            onClick={() => { track('trial_skipped', { source: 'onboarding' }); completeWith(profileData, { trialTaken: false }) }}
-            style={{ background: 'none', border: 'none', color: '#B5B5B5', fontSize: '0.78rem', fontWeight: 500, cursor: 'pointer', textDecoration: 'underline', padding: 4 }}
+            onClick={() => goTo(1, -1)}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.22)', fontSize: '0.77rem', cursor: 'pointer', padding: 4, transition: 'color .15s' }}
+            onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,.5)'}
+            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,.22)'}
           >
-            Continue with limited free preview
+            ← Back to questions
           </button>
         </div>
       </div>

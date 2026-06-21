@@ -153,7 +153,7 @@ export default function AuthScreen({ initialMode, onBack }) {
           return
         }
         setResendStatus('sent')
-        // 60s cooldown — Supabase's own rate limit is 1 every 60s anyway
+        // 60s cooldown - Supabase's own rate limit is 1 every 60s anyway
         setTimeout(() => setResendStatus('cooldown'), 4000)
         setTimeout(() => setResendStatus(''), 64000)
       } catch {
@@ -356,7 +356,7 @@ export default function AuthScreen({ initialMode, onBack }) {
             </button>
           </form>
 
-          {/* Clickwrap consent — shown only on signup */}
+          {/* Clickwrap consent - shown only on signup */}
           {mode === 'signup' && (
             <p style={{ fontSize: 12, color: '#9B9B9B', textAlign: 'center', marginTop: 14, lineHeight: 1.55 }}>
               By creating an account you agree to our{' '}
@@ -579,7 +579,7 @@ function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onS
             ))}
           </div>
 
-          {/* Open inbox shortcut — deep-link to the user's webmail provider */}
+          {/* Open inbox shortcut - deep-link to the user's webmail provider */}
           {(() => {
             const domain = (email?.split('@')[1] ?? '').toLowerCase()
             const inboxUrl =

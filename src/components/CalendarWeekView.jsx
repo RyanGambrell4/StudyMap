@@ -69,7 +69,7 @@ function addDays(dateStr, n) {
   return d.toISOString().split('T')[0]
 }
 
-// Returns plain event handler objects (not a hook) — safe to call inside render
+// Returns plain event handler objects (not a hook) - safe to call inside render
 function makeSwipeHandlers(onSwipeRight, onSwipeLeft, threshold = 60) {
   let startX = null, startY = null
   return {
@@ -433,7 +433,7 @@ export default function CalendarWeekView({
               Add session
             </button>
           )}
-          {/* Bulk reschedule — push whole week forward */}
+          {/* Bulk reschedule - push whole week forward */}
           {onBulkRescheduleWeek && weekSessionIds.length > 0 && (
             <button
               onClick={() => onBulkRescheduleWeek(mondayStr, weekSessionIds)}
@@ -726,7 +726,7 @@ export default function CalendarWeekView({
                 const isHovered    = hoveredSessionId === ev.id
                 const isSelected   = selectedSessionId === ev.id
 
-                // Session notes preview — look up first line of concepts
+                // Session notes preview - look up first line of concepts
                 const noteKey  = ev.courseId ? `${ev.courseId}_${col.dateStr}` : null
                 const noteText = noteKey ? (sessionNotes[noteKey]?.concepts ?? '') : ''
                 const notePreview = noteText ? noteText.split('\n')[0].slice(0, 40) : null
@@ -792,7 +792,7 @@ export default function CalendarWeekView({
                       )}
                     </div>
 
-                    {/* Delete button — desktop hover */}
+                    {/* Delete button - desktop hover */}
                     {(isHovered || isSelected) && onDeleteSession && (
                       <button
                         style={{ position: 'absolute', top: 2, right: 2, width: 14, height: 14, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, zIndex: 10 }}
