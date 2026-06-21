@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { getActivePlan, hasUsedTrial } from '../lib/subscription'
 
 const D = {
   bg:     '#FFFFFF',
@@ -13,14 +14,16 @@ const D = {
  * SessionRatingModal
  * Slides up from the bottom after a session is marked complete.
  * Props:
- *   session     — { id, courseName, sessionType, courseId }
- *   onSave(rating, hardNotes) — called with rating (1-5) and optional struggle text
- *   onSkip()    — dismissed without rating
+ *   session     - { id, courseName, sessionType, courseId }
+ *   onSave(rating, hardNotes) - called with rating (1-5) and optional struggle text
+ *   onSkip()    - dismissed without rating
  */
-export default function SessionRatingModal({ session, onSave, onSkip }) {
+export default function SessionRatingModal({ session, onSave, onSkip, onShowPaywall }) {
   const [rating, setRating] = useState(null)
   const [hardNotes, setHardNotes] = useState('')
   const [saving, setSaving] = useState(false)
+  const isFree = getActivePlan() === 'free'
+  const trialUsed = hasUsedTrial()
 
   const handleSave = async () => {
     if (!rating) return
@@ -167,6 +170,20 @@ export default function SessionRatingModal({ session, onSave, onSkip }) {
             Skip
           </button>
         </div>
+
+        {isFree && (
+          <div style={{ marginTop: 18, padding: '12px 14px', background: 'rgba(59,97,196,0.05)', borderRadius: 12, border: '1px solid rgba(59,97,196,0.12)', textAlign: 'center' }}>
+            <p style={{ margin: '0 0 6px', fontSize: 12.5, color: D.muted, lineHeight: 1.5 }}>
+              Keep the momentum going. Pro unlocks unlimited AI tutoring, brain dumps, cheat sheets, and more.
+            </p>
+            <button
+              onClick={() => onShowPaywall?.('study-hacks')}
+              style={{ fontSize: 13, fontWeight: 700, color: D.accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+            >
+              {trialUsed ? 'Upgrade to Pro →' : 'Start 3-day free trial →'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

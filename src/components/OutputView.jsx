@@ -1213,6 +1213,7 @@ export default function OutputView({
           session={ratingSession}
           onSave={handleRatingSave}
           onSkip={() => setRatingSession(null)}
+          onShowPaywall={onShowPaywall}
         />
       )}
 
