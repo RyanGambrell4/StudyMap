@@ -71,6 +71,9 @@ export default async function handler(req, res) {
       const isToday = examDate === tomorrowStr
       const examTitle = exam.title ?? 'Your exam'
 
+      const userPlan = row?.subscription?.plan ?? 'free'
+      const trialUsed = !!(row?.subscription?.trialUsedAt)
+
       const courseNames = (row.plan?.courses ?? []).map(c => c.name).filter(Boolean)
       const courseLine = courseNames.length
         ? `<p style="margin:0 0 14px;font-size:13px;color:#9B9B9B;">Your courses: ${courseNames.slice(0, 3).join(', ')}</p>`
@@ -136,6 +139,20 @@ ${preheader(`${examTitle} is ${isToday ? 'tomorrow' : 'in 2 days'}. Here is your
             <a href="https://getstudyedge.com/app" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Open StudyEdge</a>
           </td></tr>
         </table>
+        ${userPlan === 'free' ? `
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-top:20px;">
+          <tr><td style="background:#FEF2F2;border-radius:12px;border:1px solid rgba(220,38,38,0.18);padding:14px 18px;text-align:center;">
+            <p style="margin:0 0 5px;font-size:13px;font-weight:600;color:#DC2626;">
+              Your free Exam Rescue is limited to 1 use
+            </p>
+            <p style="margin:0 0 10px;font-size:13px;color:#6B6B6B;line-height:1.55;">
+              Pro gives you unlimited Exam Rescue, Quiz Bursts, and Brain Dumps for every exam this semester.
+            </p>
+            <a href="https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=exam_tomorrow" style="display:inline-block;background:#DC2626;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">
+              ${trialUsed ? 'Upgrade to Pro →' : 'Start free trial →'}
+            </a>
+          </td></tr>
+        </table>` : ''}
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">
         <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
