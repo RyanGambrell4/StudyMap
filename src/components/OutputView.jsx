@@ -1113,7 +1113,7 @@ export default function OutputView({
               You just used your first AI boost.
             </h2>
             <p style={{ color: '#6B6B6B', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
-              Pro gives you <strong style={{ color: '#3B61C4' }}>100 boosts per month</strong>. That's enough for a daily study session all month. Try it free for 3 days, $2.99/wk after.
+              Pro gives you <strong style={{ color: '#3B61C4' }}>100 boosts per month</strong>. That's enough for a daily study session all month. {hasUsedTrial() ? '$2.99/wk.' : 'Try it free for 3 days, $2.99/wk after.'}
             </p>
             <button
               onClick={() => {
@@ -1128,7 +1128,7 @@ export default function OutputView({
                 fontSize: 15, fontWeight: 700, cursor: 'pointer',
               }}
             >
-              Start 3-day free trial →
+              {hasUsedTrial() ? 'Upgrade to Pro →' : 'Start 3-day free trial →'}
             </button>
             <button
               onClick={() => {
