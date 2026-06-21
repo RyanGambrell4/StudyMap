@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   // Pull users who had a streak going. study_tools._streak is populated by the client.
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
-    .select('user_id, study_tools, completed_sessions, last_emailed_at')
+    .select('user_id, study_tools, completed_sessions, last_emailed_at, subscription')
     .limit(2000)
 
   if (error) {
@@ -41,6 +41,9 @@ export default async function handler(req, res) {
       const completedDates = new Set(completed.map(s => s.dateStr).filter(Boolean))
       const studiedRecently = completedDates.has(todayStr) || completedDates.has(yesterdayStr)
       if (studiedRecently) { skipped++; continue }
+
+      const userPlan = row?.subscription?.plan ?? 'free'
+      const trialUsed = !!(row?.subscription?.trialUsedAt)
 
       // Rate-limit: low priority (>= 5 days since last email)
       const gate = await canSendUserEmail(row.user_id, { priority: 'low' })
@@ -98,6 +101,20 @@ export default async function handler(req, res) {
             <a href="https://getstudyedge.com/app" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Start a 25-min session</a>
           </td></tr>
         </table>
+        ${userPlan === 'free' ? `
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-top:20px;">
+          <tr><td style="background:#FFF9F0;border-radius:12px;border:1px solid rgba(217,119,6,0.20);padding:14px 18px;text-align:center;">
+            <p style="margin:0 0 5px;font-size:13px;font-weight:600;color:#D97706;">
+              Pro users never hit AI study limits
+            </p>
+            <p style="margin:0 0 10px;font-size:13px;color:#6B6B6B;line-height:1.55;">
+              Unlimited Brain Dumps, Prep Blasts, and AI Tutor messages — so nothing slows your next streak down.
+            </p>
+            <a href="https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=streak_broken" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">
+              ${trialUsed ? 'Upgrade to Pro →' : 'Start free trial →'}
+            </a>
+          </td></tr>
+        </table>` : ''}
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">
         <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
