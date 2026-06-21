@@ -1,4 +1,4 @@
-// YouTube Data API v3 — contextual video suggestions during study sessions
+// YouTube Data API v3 - contextual video suggestions during study sessions
 // Env var: YOUTUBE_API_KEY
 
 export default async function handler(req, res) {

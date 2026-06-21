@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   }
 
   if (!process.env.RESEND_API_KEY) {
-    console.warn('[exam-tomorrow] RESEND_API_KEY not set — skipping')
+    console.warn('[exam-tomorrow] RESEND_API_KEY not set - skipping')
     return res.status(200).json({ ok: true, skipped: true })
   }
 
@@ -159,7 +159,7 @@ ${preheader(`${examTitle} is ${isToday ? 'tomorrow' : 'in 2 days'}. Here is your
       }
 
       // Record so non-critical emails (re-engage, streak-broken, weekly) skip
-      // this user for the next 48h — they're heads-down for the exam.
+      // this user for the next 48h - they're heads-down for the exam.
       await recordUserEmail(row.user_id)
       sent++
     } catch (err) {

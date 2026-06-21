@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   if (!process.env.RESEND_API_KEY) {
-    console.warn('[exam-countdown] RESEND_API_KEY not set — skipping')
+    console.warn('[exam-countdown] RESEND_API_KEY not set - skipping')
     return res.status(200).json({ ok: true, skipped: true })
   }
 
@@ -62,7 +62,7 @@ export default async function handler(req, res) {
     const plan = activeStatuses.includes(sub.status) ? (sub.plan ?? 'free') : 'free'
     const isFreePlan = plan === 'free'
 
-    // Send ONE email per user — most-urgent exam first (7d before 14d). The 48h
+    // Send ONE email per user - most-urgent exam first (7d before 14d). The 48h
     // throttle means secondary exams won't get their own dedicated email here;
     // exam-tomorrow (critical, unthrottled) will catch them at 1-2 days out.
     matches.sort((a, b) => (a.examDate === target7 ? 0 : 1) - (b.examDate === target7 ? 0 : 1))
@@ -75,7 +75,7 @@ export default async function handler(req, res) {
       const targetScore = course.targetScore ? ` Your target: ${course.targetScore}.` : ''
 
       const tips = {
-        14: ['Switch from new content to active recall and practice questions.', 'Review your weakest areas first — not your strongest.', 'Start timing yourself on practice passages or problems.'],
+        14: ['Switch from new content to active recall and practice questions.', 'Review your weakest areas first - not your strongest.', 'Start timing yourself on practice passages or problems.'],
         7:  ['Do a full-length practice test or timed section today.', 'Focus only on high-yield topics. No new material.', 'Sleep and nutrition matter more than an extra hour of studying.'],
       }
       const tip = tips[daysLeft][Math.floor(Math.random() * 3)]
@@ -88,7 +88,7 @@ export default async function handler(req, res) {
         await resend.emails.send({
           from: 'StudyEdge AI <support@mail.getstudyedge.com>',
           to: email,
-          subject: `${daysLeft} days to ${examName} — here's what to focus on`,
+          subject: `${daysLeft} days to ${examName} - here's what to focus on`,
           html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${daysLeft} days to ${examName}</title></head>
@@ -119,7 +119,7 @@ export default async function handler(req, res) {
         <p style="margin:0 0 24px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           ${isUrgent
             ? "Don't cram new material. Your brain needs time to consolidate. Trust your prep."
-            : "Two weeks is enough time to meaningfully move your score — but only if you're studying the right things."}
+            : "Two weeks is enough time to meaningfully move your score - but only if you're studying the right things."}
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center">
@@ -142,7 +142,7 @@ export default async function handler(req, res) {
           &nbsp;·&nbsp;
           <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
         </p>
-        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">- The StudyEdge AI team</p>
       </td></tr>
     </table>
   </td></tr>

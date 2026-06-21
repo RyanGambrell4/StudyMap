@@ -17,7 +17,7 @@ export default async function handler(req, res) {
 
   const locked = await acquireCronLock('day14-upgrade')
   if (!locked) {
-    console.log('[day14-upgrade] Already ran today — skipping')
+    console.log('[day14-upgrade] Already ran today - skipping')
     return res.status(200).json({ ok: true, skipped: true, reason: 'already_ran_today' })
   }
 
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   const windowEnd   = new Date(now - 14 * 24 * 60 * 60 * 1000)
   const windowStart = new Date(now - 15 * 24 * 60 * 60 * 1000)
 
-  // Direct RPC against auth.users — auth.admin.listUsers() is broken on
+  // Direct RPC against auth.users - auth.admin.listUsers() is broken on
   // GoTrue when any OAuth user exists (NULL confirmation_token scan panic).
   const { data: rpcRows, error } = await supabaseAdmin.rpc('list_users_by_signup_window', {
     start_ts: windowStart.toISOString(),

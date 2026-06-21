@@ -20,7 +20,7 @@ export default async function handler(req, res) {
   const { phone, enabled, consent_text } = req.body ?? {}
 
   if (enabled === false) {
-    // Opt out — clear phone
+    // Opt out - clear phone
     await supabase.from('user_data').upsert({
       user_id: userData.id,
       sms_phone: null,

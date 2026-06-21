@@ -17,7 +17,7 @@ export default async function handler(req, res) {
 
   const locked = await acquireCronLock('day1-tips')
   if (!locked) {
-    console.log('[day1-tips] Already ran today — skipping')
+    console.log('[day1-tips] Already ran today - skipping')
     return res.status(200).json({ ok: true, skipped: true, reason: 'already_ran_today' })
   }
 
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   const windowStart = new Date(now - 28 * 60 * 60 * 1000)
   const windowEnd   = new Date(now - 20 * 60 * 60 * 1000)
 
-  // Direct RPC against auth.users — auth.admin.listUsers() is broken on
+  // Direct RPC against auth.users - auth.admin.listUsers() is broken on
   // GoTrue when any OAuth user exists (NULL confirmation_token scan panic).
   // See migration: add_list_users_by_window_for_drip_emails.
   const { data: rows, error } = await supabaseAdmin.rpc('list_users_by_signup_window', {

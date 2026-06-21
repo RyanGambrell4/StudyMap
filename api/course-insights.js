@@ -41,7 +41,7 @@ Return ONLY valid JSON:
   "insight": "<one sharp sentence about what this student most needs to do differently right now>"
 }
 
-No em dashes. Be specific to the course and data — not generic advice.`
+No em dashes. Be specific to the course and data - not generic advice.`
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {

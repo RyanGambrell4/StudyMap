@@ -1,5 +1,5 @@
 /**
- * google-calendar.js — Consolidated Google Calendar + Notion calendar handler
+ * google-calendar.js - Consolidated Google Calendar + Notion calendar handler
  *
  * POST /api/google-calendar              → fetch events (google + notion)
  * POST /api/google-calendar?action=add   → add event to Google Calendar

@@ -17,7 +17,7 @@ export default async function handler(req, res) {
 
   const locked = await acquireCronLock('day7-milestone')
   if (!locked) {
-    console.log('[day7-milestone] Already ran today — skipping')
+    console.log('[day7-milestone] Already ran today - skipping')
     return res.status(200).json({ ok: true, skipped: true, reason: 'already_ran_today' })
   }
 
@@ -25,7 +25,7 @@ export default async function handler(req, res) {
   const windowStart = new Date(now - 172 * 60 * 60 * 1000)
   const windowEnd   = new Date(now - 156 * 60 * 60 * 1000)
 
-  // Direct RPC against auth.users — auth.admin.listUsers() is broken on
+  // Direct RPC against auth.users - auth.admin.listUsers() is broken on
   // GoTrue when any OAuth user exists (NULL confirmation_token scan panic).
   const { data: rows, error } = await supabaseAdmin.rpc('list_users_by_signup_window', {
     start_ts: windowStart.toISOString(),
@@ -75,7 +75,7 @@ export default async function handler(req, res) {
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>One week on StudyEdge</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-${preheader("One week in. Here's what the free plan can't give you — and what Pro changes.")}
+${preheader("One week in. Here's what the free plan can't give you - and what Pro changes.")}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">

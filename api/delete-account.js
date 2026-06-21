@@ -1,20 +1,20 @@
 /**
- * delete-account.js — Permanently deletes the authenticated user's account.
+ * delete-account.js - Permanently deletes the authenticated user's account.
  *
- * Required by App Store Guideline 5.1.1(v) — apps with account creation must
+ * Required by App Store Guideline 5.1.1(v) - apps with account creation must
  * allow users to delete their account from within the app.
  *
  * Flow:
  *   1. Client sends POST with Authorization: Bearer <access_token>
- *   2. Verify token — get user ID
+ *   2. Verify token - get user ID
  *   3. Cancel any active Stripe subscription so billing stops immediately
  *   4. Delete user rows from all public tables
  *   5. Delete the Supabase Auth user (cascades to auth.identities, sessions, etc.)
  *
  * Required environment variables (set in Vercel):
- *   SUPABASE_URL             — same as VITE_SUPABASE_URL
- *   SUPABASE_SERVICE_KEY     — Service Role key from Supabase → Settings → API
- *   STRIPE_SECRET_KEY        — Stripe secret key
+ *   SUPABASE_URL             - same as VITE_SUPABASE_URL
+ *   SUPABASE_SERVICE_KEY     - Service Role key from Supabase → Settings → API
+ *   STRIPE_SECRET_KEY        - Stripe secret key
  */
 
 import { createClient } from '@supabase/supabase-js'
@@ -71,7 +71,7 @@ export default async function handler(req, res) {
       .eq('user_id', userId)
     if (error) {
       console.error(`[delete-account] Failed to delete from ${table}:`, error)
-      // Log but continue — partial cleanup is better than no cleanup.
+      // Log but continue - partial cleanup is better than no cleanup.
     }
   }
 

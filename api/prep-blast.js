@@ -31,7 +31,7 @@ export default async function handler(req, res) {
 
   const personalLines = []
   if (resolvedDays !== null) {
-    personalLines.push(`Exam in ${resolvedDays} days.${resolvedDays <= 3 ? ' TIGHT TIMELINE — focus only on highest-yield review.' : ''}`)
+    personalLines.push(`Exam in ${resolvedDays} days.${resolvedDays <= 3 ? ' TIGHT TIMELINE - focus only on highest-yield review.' : ''}`)
   }
   if (targetGrade) personalLines.push(`Target grade: ${targetGrade}.`)
   if (learningStyle) personalLines.push(`Student learns best by: ${learningStyle}. Frame the 3 points accordingly.`)

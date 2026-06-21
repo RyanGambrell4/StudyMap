@@ -29,7 +29,7 @@ export default async function handler(req, res) {
     const hasText = typeof text === 'string' && text.trim().length >= 50
     const hasDescription = typeof description === 'string' && description.trim().length >= 30
     if (!hasText && !hasDescription) {
-      return res.status(400).json({ error: 'Provide source material — upload a file, paste notes, or describe your exam (at least a few sentences).' })
+      return res.status(400).json({ error: 'Provide source material - upload a file, paste notes, or describe your exam (at least a few sentences).' })
     }
 
     const source = hasText ? text.slice(0, MAX_SOURCE_CHARS) : null
@@ -62,20 +62,20 @@ export default async function handler(req, res) {
 ${courseLine}${personalizationLine}${personalContextLine}${contextLine}
 ${sourceSection}
 
-Use ALL provided context equally — treat uploaded source material and the student's description as equal-weight inputs. Use the personalization data to skew questions toward weak areas and align with the student's course content.
+Use ALL provided context equally - treat uploaded source material and the student's description as equal-weight inputs. Use the personalization data to skew questions toward weak areas and align with the student's course content.
 
 Build a practice exam of exactly ${length} questions.
 
 CRITICAL ORDERING:
-1. FIRST — scan the source for any actual exam questions present verbatim (multiple choice, short answer, fill-in-the-blank). Include these EXACTLY as written, marked with "sourceType":"verbatim". Do not paraphrase verbatim questions.
-2. THEN — generate additional questions inspired by the source material to reach exactly ${length} total. Mark these "sourceType":"generated".
-3. Mix difficulty across the set — some quick recall, some applied reasoning, some integrative.
+1. FIRST - scan the source for any actual exam questions present verbatim (multiple choice, short answer, fill-in-the-blank). Include these EXACTLY as written, marked with "sourceType":"verbatim". Do not paraphrase verbatim questions.
+2. THEN - generate additional questions inspired by the source material to reach exactly ${length} total. Mark these "sourceType":"generated".
+3. Mix difficulty across the set - some quick recall, some applied reasoning, some integrative.
 
 Question shape rules:
 - Multiple choice (preferred): 4 options labeled "A. text", "B. text", "C. text", "D. text". "answer" must be the FULL string of the correct option, letter prefix included.
 - Short answer: no options array, "answer" is a 1–3 sentence model answer.
 - Every question MUST have a "topic" field (a 2–5 word phrase describing what concept is being tested) so weak-area grouping works in results.
-- Every question MUST have an "explanation" — 1–3 sentences on why the correct answer is right, written like a tutor would say it.
+- Every question MUST have an "explanation" - 1–3 sentences on why the correct answer is right, written like a tutor would say it.
 
 Return ONLY this JSON, no preamble, no commentary, no markdown fence:
 {

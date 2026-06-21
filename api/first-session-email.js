@@ -30,7 +30,7 @@ export default async function handler(req, res) {
   }
 
   // Only fire for users who have 1-3 sessions. If they somehow have more,
-  // the first session moment has long passed — no point sending a stale email.
+  // the first session moment has long passed - no point sending a stale email.
   const sessionCount = Array.isArray(row?.completed_sessions) ? row.completed_sessions.length : 0
   if (sessionCount > 3) return res.status(200).json({ ok: true, skipped: true })
 
@@ -75,7 +75,7 @@ ${preheader("That is the hardest part. Every session from here gets easier to st
           ${[
             ['Check your grade tracker', 'Today\'s session already moved your projected score. Open the app and see where you stand.'],
             ['Schedule your next session', 'The best time to plan the next one is right after you finish this one.'],
-            ['Try a Session Blueprint', 'Get a minute-by-minute plan before you study, not after. Free includes one — use it on your weakest topic.'],
+            ['Try a Session Blueprint', 'Get a minute-by-minute plan before you study, not after. Free includes one - use it on your weakest topic.'],
           ].map(([title, desc], i, arr) => `
           <tr>
             <td style="padding:13px 0;${i < arr.length - 1 ? 'border-bottom:1px solid #F0EDE8;' : ''}">

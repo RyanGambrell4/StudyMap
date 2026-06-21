@@ -33,11 +33,11 @@ export default async function handler(req, res) {
       ? `The student's source material:\n${text.slice(0, 6000)}\n\n`
       : ''
     const imageLine = hasImages
-      ? `The student also uploaded ${safeImages.length} image(s) (attached) — treat them as authoritative source material.\n\n`
+      ? `The student also uploaded ${safeImages.length} image(s) (attached) - treat them as authoritative source material.\n\n`
       : ''
 
     const emphasisLine = professorEmphasis ? `Professor emphasizes these topics (prioritize these in questions): ${professorEmphasis}\n\n` : ''
-    const struggleLine = struggles?.length ? `Student struggles with: ${struggles.join(', ')} — include at least one question testing each struggle area.\n\n` : ''
+    const struggleLine = struggles?.length ? `Student struggles with: ${struggles.join(', ')} - include at least one question testing each struggle area.\n\n` : ''
 
     const prompt = `You are making a quiz for a student studying ${courseName}${sessionType ? ` (${sessionType} session)` : ''}.
 
@@ -206,23 +206,23 @@ Rules:
   }
 
   const scopeFc = hasTopicFc
-    ? `The student asked for flashcards ONLY on this topic — do not go outside it:\n"${topic.trim()}"\n\n`
+    ? `The student asked for flashcards ONLY on this topic - do not go outside it:\n"${topic.trim()}"\n\n`
     : ''
   const sourceFc = hasTextFc
     ? `Source material the student uploaded or wrote:\n${text.slice(0, 8000)}\n\n`
     : ''
   const imagesFc = hasImagesFc
-    ? `The student also uploaded ${safeImages.length} image(s), attached — use them as source material.\n\n`
+    ? `The student also uploaded ${safeImages.length} image(s), attached - use them as source material.\n\n`
     : ''
 
-  const emphasisFc = professorEmphasis ? `Professor emphasizes these high-priority topics — weight at least 40% of cards toward them: ${professorEmphasis}\n\n` : ''
-  const struggleFc = struggles?.length ? `Student struggles with: ${struggles.join(', ')} — make sure these are well-represented in the cards.\n\n` : ''
+  const emphasisFc = professorEmphasis ? `Professor emphasizes these high-priority topics - weight at least 40% of cards toward them: ${professorEmphasis}\n\n` : ''
+  const struggleFc = struggles?.length ? `Student struggles with: ${struggles.join(', ')} - make sure these are well-represented in the cards.\n\n` : ''
   const styleFc = learningStyle === 'visual'
-    ? 'This student is a visual learner — use analogy-based cards, spatial relationships, and "what would this look like" prompts where helpful.\n\n'
+    ? 'This student is a visual learner - use analogy-based cards, spatial relationships, and "what would this look like" prompts where helpful.\n\n'
     : learningStyle === 'practice'
-    ? 'This student is practice-based — favor scenario and application cards over pure definition recall.\n\n'
+    ? 'This student is practice-based - favor scenario and application cards over pure definition recall.\n\n'
     : learningStyle === 'reading'
-    ? 'This student learns through reading/writing — include cards that test organized summaries and written explanations.\n\n'
+    ? 'This student learns through reading/writing - include cards that test organized summaries and written explanations.\n\n'
     : ''
 
   const fcPrompt = `You are an expert study coach building flashcards + a quiz.
@@ -230,28 +230,28 @@ Rules:
 ${emphasisFc}${struggleFc}${styleFc}${scopeFc}${sourceFc}${imagesFc}Generate exactly this JSON structure with no extra text:
 {
   "flashcards": [
-    {"front": "clear question about a key concept", "back": "concise answer — a few words or 1 short sentence", "topic": "topic name"}
+    {"front": "clear question about a key concept", "back": "concise answer - a few words or 1 short sentence", "topic": "topic name"}
   ],
   "quiz": [
     {"question": "question text", "type": "multiple_choice", "options": ["A", "B", "C", "D"], "answer": "correct option text", "explanation": "why this is correct"}
   ]
 }
 
-${hasTopicFc ? 'EVERY flashcard and quiz question MUST stay strictly inside the requested topic. Do not produce any card that goes outside it. If the topic is narrow, produce fewer but deeper cards — quality over quantity.' : ''}
+${hasTopicFc ? 'EVERY flashcard and quiz question MUST stay strictly inside the requested topic. Do not produce any card that goes outside it. If the topic is narrow, produce fewer but deeper cards - quality over quantity.' : ''}
 ${hasTextFc || hasImagesFc ? 'Only build cards on material that actually appears in the source. Do not invent facts.' : ''}
 
 Creativity rules (make the cards actually interesting, not robotic):
-- Mix card styles: definition recall, "fill in the blank", "which of these is NOT…", scenario-based ("A student argues X — what concept are they missing?"), contrast pairs ("How does X differ from Y?"), causal chains ("If X happens, what follows?"), and compare/contrast.
+- Mix card styles: definition recall, "fill in the blank", "which of these is NOT…", scenario-based ("A student argues X - what concept are they missing?"), contrast pairs ("How does X differ from Y?"), causal chains ("If X happens, what follows?"), and compare/contrast.
 - Use real-world examples, mini-scenarios, or analogies on the FRONT when it helps memory stick.
-- Vary difficulty across the set — some quick recall, some applied reasoning.
+- Vary difficulty across the set - some quick recall, some applied reasoning.
 - Group related cards by topic so a student feels momentum.
 
 Hard rules:
-- Flashcard fronts must be complete questions or prompts — never a single word.
-- Flashcard backs must be SHORT — a few words or 1 sentence. Students should instantly self-check.
+- Flashcard fronts must be complete questions or prompts - never a single word.
+- Flashcard backs must be SHORT - a few words or 1 sentence. Students should instantly self-check.
 - Good backs: "Increases shareholder equity", "Assets minus liabilities", "When price exceeds marginal cost".
 - Bad backs: long explanations, multiple clauses, anything over 25 words unless truly necessary.
-- Generate 15 flashcards and 10 quiz questions (fewer only if the topic is too narrow to support that many — never pad with irrelevant content).
+- Generate 15 flashcards and 10 quiz questions (fewer only if the topic is too narrow to support that many - never pad with irrelevant content).
 - Quiz wrong answers must be plausible but clearly wrong if you know the material.`
 
   const userContentFc = hasImagesFc

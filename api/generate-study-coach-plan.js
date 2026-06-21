@@ -235,11 +235,11 @@ export default async function handler(req, res) {
   const weeksBlock = scaffold.weeks.map((w) => {
     const phase = phaseMap[w.index]
     const tag = phase ? ` [Phase ${phase}]` : ''
-    const ms = w.milestones.length ? ` — milestones: ${w.milestones.join('; ')}` : ''
+    const ms = w.milestones.length ? ` - milestones: ${w.milestones.join('; ')}` : ''
     return `${w.index}. ${w.label} (${w.startDate} → ${w.endDate})${tag}${ms}`
   }).join('\n')
 
-  // Static rules / schema — cacheable across all student inputs.
+  // Static rules / schema - cacheable across all student inputs.
   const systemPrompt = `You are an elite study strategist who builds week-by-week study plans grounded in evidence-based learning science: retrieval practice (Karpicke), spaced repetition, interleaving, deliberate practice, and the testing effect.
 
 Hard rules you ALWAYS follow:
@@ -247,7 +247,7 @@ Hard rules you ALWAYS follow:
 - You will be given an exact list of weeks with locked startDate/endDate and (in exam mode) a locked phase number. You MUST output exactly one object per week, in order, copying its startDate and endDate verbatim.
 - Generate exactly the requested number of sessions per week. Never more, never fewer.
 - Vary studyMethod across the week. Do NOT use the same method for every session. A good week mixes new-content learning, retrieval practice, mixed problem-solving, and a cumulative review of prior weeks.
-- From week 2 onwards, at least one session per week MUST be cumulative review of weak topics from earlier weeks (label its focusArea like "Cumulative recall: <earlier topic>"). This is non-negotiable — spaced retrieval is what makes plans work.
+- From week 2 onwards, at least one session per week MUST be cumulative review of weak topics from earlier weeks (label its focusArea like "Cumulative recall: <earlier topic>"). This is non-negotiable - spaced retrieval is what makes plans work.
 - Each session is a single, concrete activity the student can sit down and execute today. No vague "study the chapter" instructions.
 - Earlier weeks introduce content; later weeks compress to retrieval, problem-sets, and timed practice. Intensity ramps as milestones approach.
 - focusArea is what appears on a calendar row. Keep it ≤ 5 words for course plans, ≤ 8 words for exam plans, and never end mid-word.
@@ -255,7 +255,7 @@ Hard rules you ALWAYS follow:
 - keyTopics: 2–4 specific items, ≤ 4 words each.
 - studyMethod: pick ONE concrete technique per session. Allowed vocabulary: "Active recall", "Spaced retrieval", "Practice problems", "Mixed problem set", "Concept map", "Feynman explanation", "Flashcards", "Worked examples", "Past exam questions", "Timed drill", "Cumulative review", "Mock test", "Test review".
 - sessionType: include one of: "New content", "Retrieval", "Practice", "Cumulative review", "Weak area", "Mock test", "Test review".
-- warningZones: 3 items, ≤ 10 words each — common student traps for this kind of plan.
+- warningZones: 3 items, ≤ 10 words each - common student traps for this kind of plan.
 - priorityTopics: exactly 5, ≤ 5 words each, ordered by what matters most to hit the goal.
 
 If the student did not provide any topics or materials, do NOT invent course-specific subject matter. In that case, focusArea/keyTopics/priorityTopics MUST describe study methods or activities, not invented content (e.g. "Active recall on this week's lecture", "Build flashcards from notes"). It is better to be generic-but-true than specific-but-fabricated.
@@ -294,9 +294,9 @@ Student's goal (verbatim): ${goal}
 Sessions per week: ${sessionsPerWeek}
 Session length: ${sessionLen} minutes
 Topics emphasized by the professor / exam blueprint: ${emphasisTopics || 'Not specified'}
-Learning style: ${learningStyle || 'Not specified — pick mixed methods'}
+Learning style: ${learningStyle || 'Not specified - pick mixed methods'}
 Preferred study window: ${pref.label} (${pref.hours})
-${calendarStr ? `\nKnown blocked time on the student's calendar (informational; the app schedules around these — you do NOT need to assign day-of-week):\n${calendarStr}\n` : ''}
+${calendarStr ? `\nKnown blocked time on the student's calendar (informational; the app schedules around these - you do NOT need to assign day-of-week):\n${calendarStr}\n` : ''}
 Struggle areas (allocate more reps and resurface in later weeks): ${struggles?.length ? struggles.join(', ') : 'None reported'}
 Strong areas (one review session is enough): ${strengths || 'None reported'}
 ${gradeGap != null && gradeGap < 0 ? `GRADE ALERT: student is ${Math.abs(gradeGap).toFixed(1)} points below target. Treat recovery as the primary objective.` : ''}
@@ -306,7 +306,7 @@ ${recallLine}
 ${ungrounded ? 'NOTE: The student gave no specific topics or course materials. You MUST use generic study-method language, not invented subject matter (see system rule).' : ''}
 ${courseMaterials ? `Course material the student uploaded (use to ground specific topics; do not exceed the actual content):\n${String(courseMaterials).slice(0, 8000)}` : ''}
 
-WEEK SCAFFOLD — generate exactly one weeklyFocus object per row below, in order, copying startDate and endDate verbatim. In exam mode, the theme must start with the locked phase label.
+WEEK SCAFFOLD - generate exactly one weeklyFocus object per row below, in order, copying startDate and endDate verbatim. In exam mode, the theme must start with the locked phase label.
 ${weeksBlock}
 
 ${isExamMode ? `Phase intent reminder:

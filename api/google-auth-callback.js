@@ -2,11 +2,11 @@ export default async function handler(req, res) {
   const { code, state, error } = req.query
 
   if (error || !code || !state) {
-    console.error('[auth-callback] Missing params — error:', error, '| code present:', !!code, '| state:', state)
+    console.error('[auth-callback] Missing params - error:', error, '| code present:', !!code, '| state:', state)
     return res.redirect('https://getstudyedge.com/app?gcal=error')
   }
 
-  // Parse provider and userId from state — format: "provider:userId" or legacy "userId"
+  // Parse provider and userId from state - format: "provider:userId" or legacy "userId"
   let provider = 'google'
   let userId = state
   if (state.startsWith('google:')) { provider = 'google'; userId = state.slice(7) }
@@ -32,10 +32,10 @@ export default async function handler(req, res) {
       })
 
       const tokens = await tokenRes.json()
-      console.log('[auth-callback] Notion token exchange — access_token present:', !!tokens.access_token, '| workspace:', tokens.workspace_name, '| error:', tokens.error ?? null)
+      console.log('[auth-callback] Notion token exchange - access_token present:', !!tokens.access_token, '| workspace:', tokens.workspace_name, '| error:', tokens.error ?? null)
 
       if (!tokens.access_token) {
-        console.error('[auth-callback] Notion — no access_token:', JSON.stringify(tokens))
+        console.error('[auth-callback] Notion - no access_token:', JSON.stringify(tokens))
         return res.redirect('https://getstudyedge.com/app?notion=error')
       }
 
@@ -89,10 +89,10 @@ export default async function handler(req, res) {
     })
 
     const tokens = await tokenRes.json()
-    console.log('[auth-callback] Google token exchange — access_token present:', !!tokens.access_token, '| refresh_token present:', !!tokens.refresh_token, '| error:', tokens.error ?? null)
+    console.log('[auth-callback] Google token exchange - access_token present:', !!tokens.access_token, '| refresh_token present:', !!tokens.refresh_token, '| error:', tokens.error ?? null)
 
     if (!tokens.refresh_token) {
-      console.error('[auth-callback] Google — no refresh_token:', JSON.stringify(tokens))
+      console.error('[auth-callback] Google - no refresh_token:', JSON.stringify(tokens))
       return res.redirect('https://getstudyedge.com/app?gcal=error')
     }
 

@@ -14,7 +14,7 @@ export default async function handler(req, res) {
   }
 
   if (!process.env.RESEND_API_KEY) {
-    console.warn('[weekly-recap] RESEND_API_KEY not set — skipping')
+    console.warn('[weekly-recap] RESEND_API_KEY not set - skipping')
     return res.status(200).json({ ok: true, skipped: true })
   }
 
@@ -70,9 +70,9 @@ export default async function handler(req, res) {
 
     const highlights = weekSessions.slice(0, 3).map(s => s.course ?? s.title ?? 'Study session')
     const totalMins = weekSessions.reduce((sum, s) => sum + (Number(s.duration) || 0), 0)
-    const hoursStr = totalMins >= 60 ? `${Math.floor(totalMins / 60)}h ${totalMins % 60}m` : totalMins > 0 ? `${totalMins}m` : '—'
+    const hoursStr = totalMins >= 60 ? `${Math.floor(totalMins / 60)}h ${totalMins % 60}m` : totalMins > 0 ? `${totalMins}m` : '-'
     const sessionWord = weekSessions.length === 1 ? 'session' : 'sessions'
-    const streakLine = streak >= 2 ? `${streak}-day streak — keep it going.` : null
+    const streakLine = streak >= 2 ? `${streak}-day streak - keep it going.` : null
     const motiveLine = weekSessions.length >= 5
       ? "That's a strong week. Consistency like this is what moves the needle."
       : weekSessions.length >= 3 ? "Solid week. You're building the habit."
@@ -153,7 +153,7 @@ export default async function handler(req, res) {
         <table cellpadding="0" cellspacing="0" style="width:100%;background:rgba(59,97,196,0.06);border:1px solid rgba(59,97,196,0.18);border-radius:12px;margin-bottom:22px;">
           <tr><td style="padding:16px 18px;">
             <div style="font-size:14px;font-weight:600;color:#111111;margin-bottom:4px;">Want to study more effectively next week?</div>
-            <div style="font-size:13px;color:#6B6B6B;line-height:1.55;margin-bottom:12px;">Pro gives you 100 AI boosts/month, 5 courses, Study Coach, and Session Blueprints — $2.99/wk. Try free for 3 days.</div>
+            <div style="font-size:13px;color:#6B6B6B;line-height:1.55;margin-bottom:12px;">Pro gives you 100 AI boosts/month, 5 courses, Study Coach, and Session Blueprints - $2.99/wk. Try free for 3 days.</div>
             <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:9px 18px;">Start 3-day free trial</a>
           </td></tr>
         </table>` : ''}
@@ -171,7 +171,7 @@ export default async function handler(req, res) {
           &nbsp;·&nbsp;
           <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
         </p>
-        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">- The StudyEdge AI team</p>
       </td></tr>
     </table>
   </td></tr>

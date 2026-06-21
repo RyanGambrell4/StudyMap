@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   }
 
   if (!process.env.RESEND_API_KEY) {
-    console.warn('[re-engage] RESEND_API_KEY not set — skipping')
+    console.warn('[re-engage] RESEND_API_KEY not set - skipping')
     return res.status(200).json({ ok: true, skipped: true })
   }
 
@@ -69,7 +69,7 @@ export default async function handler(req, res) {
         })[0]
 
       const subject = courseNames.length
-        ? `${courseNames[0]} won't study itself — come back`
+        ? `${courseNames[0]} won't study itself - come back`
         : 'Your study streak is waiting'
 
       const examLine = upcomingExam
@@ -88,7 +88,7 @@ export default async function handler(req, res) {
               <span style="font-size:14px;color:#111111;">${name}</span>
             </td>
           </tr>`).join('')
-        : `<tr><td style="padding:9px 0;font-size:14px;color:#6B6B6B;">Your courses are ready — pick up where you left off.</td></tr>`
+        : `<tr><td style="padding:9px 0;font-size:14px;color:#6B6B6B;">Your courses are ready. Pick up where you left off.</td></tr>`
 
       await resend.emails.send({
         from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
@@ -112,7 +112,7 @@ ${preheader(courseNames.length ? `Your ${courseNames[0]} sessions are still here
           ${courseNames.length ? `Your ${courseNames[0]} plan is ready when you are.` : "Your study plan is ready when you are."}
         </h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          It's been a few days. Your study sessions are still waiting — and your exams aren't moving.
+          It's been a few days. Your study sessions are still waiting - and your exams aren't moving.
         </p>
         ${examLine}
         ${courseNames.length ? `<p style="margin:18px 0 8px;font-size:11px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Your courses</p>` : ''}

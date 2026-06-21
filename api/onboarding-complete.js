@@ -19,7 +19,7 @@ export default async function handler(req, res) {
   if (!email) return res.status(400).json({ error: 'Missing email' })
 
   if (!process.env.RESEND_API_KEY) {
-    console.warn('[onboarding-complete] RESEND_API_KEY not set — skipping')
+    console.warn('[onboarding-complete] RESEND_API_KEY not set - skipping')
     return res.status(200).json({ ok: true, skipped: true })
   }
 
@@ -46,7 +46,7 @@ export default async function handler(req, res) {
     await resend.emails.send({
       from: 'StudyEdge AI <support@mail.getstudyedge.com>',
       to: email,
-      subject: 'Your StudyEdge profile is set up — next step',
+      subject: 'Your StudyEdge profile is set up - next step',
       headers: listUnsubscribeHeaders(email),
       html: `<!DOCTYPE html>
 <html lang="en">
@@ -63,7 +63,7 @@ ${preheader("Your profile is set. One step left before your study plan can work.
       <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Onboarding complete</p>
         <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">
-          ${greeting} — your profile is set up.
+          ${greeting} - your profile is set up.
         </h1>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           Here's what you told us, so we can build a plan that actually fits you:
@@ -93,7 +93,7 @@ ${preheader("Your profile is set. One step left before your study plan can work.
           &nbsp;·&nbsp;
           <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
         </p>
-        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">- The StudyEdge AI team</p>
       </td></tr>
     </table>
   </td></tr>

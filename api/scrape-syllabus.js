@@ -82,7 +82,7 @@ For each item return:
   "date": "YYYY-MM-DD format",
   "type": "one of: Exam, Midterm, Assignment, Project, Quiz, Lab, Other",
   "weight": percentage as number if mentioned or null,
-  "notes": "any extra details like time, room, or chapters — null if none"
+  "notes": "any extra details like time, room, or chapters - null if none"
 }
 
 Return ONLY the JSON array with no other text, markdown, or explanation.

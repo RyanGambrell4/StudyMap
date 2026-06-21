@@ -16,7 +16,7 @@ export default async function handler(req, res) {
   if (!email) return res.status(400).json({ error: 'Missing email' })
 
   if (!process.env.RESEND_API_KEY) {
-    console.warn('[first-plan] RESEND_API_KEY not set — skipping')
+    console.warn('[first-plan] RESEND_API_KEY not set - skipping')
     return res.status(200).json({ ok: true, skipped: true })
   }
 
@@ -45,7 +45,7 @@ export default async function handler(req, res) {
       <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Plan ready</p>
         <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">
-          ${greeting} — your first plan is live.
+          ${greeting} - your first plan is live.
         </h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           ${courseLine} Your sessions are scheduled around your exam dates and balanced across the week.
@@ -55,7 +55,7 @@ export default async function handler(req, res) {
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
-            ['Open the next session', 'Tap any session card to see its blueprint — what to study, in what order, for how long.'],
+            ['Open the next session', 'Tap any session card to see its blueprint - what to study, in what order, for how long.'],
             ['Mark sessions complete', "Your plan adapts as you go. Don't fall behind on this step."],
             ['Use Study Coach weekly', 'Once a week, ask Study Coach to refine your plan. It catches problems before they become panic.'],
           ].map(([title, desc]) => `
@@ -80,7 +80,7 @@ export default async function handler(req, res) {
           &nbsp;·&nbsp;
           <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
         </p>
-        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">— The StudyEdge AI team</p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">- The StudyEdge AI team</p>
       </td></tr>
     </table>
   </td></tr>

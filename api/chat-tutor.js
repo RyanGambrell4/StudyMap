@@ -42,11 +42,11 @@ export default async function handler(req, res) {
   const strugglesStr = struggles?.length ? struggles.join(', ') : null
 
   const learningStyleHint = learningStyle === 'visual'
-    ? 'This student is a visual learner — use diagrams described in text, analogies, and structured visual breakdowns.'
+    ? 'This student is a visual learner - use diagrams described in text, analogies, and structured visual breakdowns.'
     : learningStyle === 'reading'
-    ? 'This student learns through reading & writing — use clear written explanations, bullet-point summaries, and structured notes.'
+    ? 'This student learns through reading & writing - use clear written explanations, bullet-point summaries, and structured notes.'
     : learningStyle === 'practice'
-    ? 'This student is practice-based — lead with worked examples, practice questions, and active recall drills.'
+    ? 'This student is practice-based - lead with worked examples, practice questions, and active recall drills.'
     : null
 
   const personalLines = []
@@ -110,7 +110,7 @@ Only include this line when the student is clearly struggling. Otherwise omit it
         wolframContext = `\n\n[Wolfram Alpha computed result for this query: "${wolfData.answer}". Use this as ground truth for the calculation.]\n`
       }
     } catch {
-      // Wolfram unavailable — proceed without it
+      // Wolfram unavailable - proceed without it
     }
   }
 

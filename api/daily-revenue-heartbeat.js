@@ -1,4 +1,4 @@
-// REVENUE-CRITICAL OBSERVABILITY — DO NOT DISABLE WITHOUT REPLACING.
+// REVENUE-CRITICAL OBSERVABILITY - DO NOT DISABLE WITHOUT REPLACING.
 //
 // Daily cron that checks two things and pages via email when either looks broken:
 //   1. Stripe: new customers in last 24h / 7d. If 0 in 48h AND 7d_avg > 0 -> red alert.
@@ -34,7 +34,7 @@ export default async function handler(req, res) {
   }
 
   if (!process.env.STRIPE_SECRET_KEY) {
-    return res.status(500).json({ error: 'STRIPE_SECRET_KEY not set — cron is a no-op' })
+    return res.status(500).json({ error: 'STRIPE_SECRET_KEY not set - cron is a no-op' })
   }
 
   const now = Math.floor(Date.now() / 1000)
@@ -141,7 +141,7 @@ export default async function handler(req, res) {
       console.error('[heartbeat] Resend error:', err)
     }
   } else {
-    console.warn('[heartbeat] RESEND_API_KEY not set — would have sent:', subject)
+    console.warn('[heartbeat] RESEND_API_KEY not set - would have sent:', subject)
   }
 
   return res.status(200).json({
@@ -222,9 +222,9 @@ function renderEmail(d) {
     </table>
     <h2 style="font-size:13px;text-transform:uppercase;letter-spacing:0.08em;color:#6B6B6B;margin:24px 0 8px">PostHog funnel (24h)</h2>
     <table style="width:100%;border-collapse:collapse;font-size:14px;color:#111">
-      <tr><td style="padding:6px 0;color:#6B6B6B">signup_completed</td><td style="text-align:right;font-weight:600">${d.phSignups24h ?? '—'}</td></tr>
-      <tr><td style="padding:6px 0;color:#6B6B6B">checkout_started</td><td style="text-align:right;font-weight:600">${d.phCheckoutStarted24h ?? '—'}</td></tr>
-      <tr><td style="padding:6px 0;color:#6B6B6B">Conversion rate</td><td style="text-align:right;font-weight:600">${d.phRate !== null ? (d.phRate * 100).toFixed(0) + '%' : '—'}</td></tr>
+      <tr><td style="padding:6px 0;color:#6B6B6B">signup_completed</td><td style="text-align:right;font-weight:600">${d.phSignups24h ?? '-'}</td></tr>
+      <tr><td style="padding:6px 0;color:#6B6B6B">checkout_started</td><td style="text-align:right;font-weight:600">${d.phCheckoutStarted24h ?? '-'}</td></tr>
+      <tr><td style="padding:6px 0;color:#6B6B6B">Conversion rate</td><td style="text-align:right;font-weight:600">${d.phRate !== null ? (d.phRate * 100).toFixed(0) + '%' : '-'}</td></tr>
     </table>
     ${d.phErr ? `<p style="color:#B91C1C;font-size:12px;margin:8px 0 0">PostHog query failed: ${escapeHtml(d.phErr)}. Set POSTHOG_PERSONAL_API_KEY to enable funnel checks.</p>` : ''}
     <p style="color:#9B9B9B;font-size:11px;margin-top:24px;border-top:1px solid rgba(0,0,0,0.07);padding-top:12px">

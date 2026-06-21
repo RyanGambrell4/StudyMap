@@ -30,7 +30,7 @@ Return ONLY valid JSON:
   "recallGaps": ["<specific concept that seems shaky or missing>"],
   "nextSessionPriority": "<the single most important topic to tackle next session>",
   "nextSessionType": "<one of: 'Active Recall', 'Practice Problems', 'Concept Review', 'Mixed'>",
-  "coachNote": "<one direct sentence of coaching feedback — be honest, not just encouraging>"
+  "coachNote": "<one direct sentence of coaching feedback - be honest, not just encouraging>"
 }
 
 No em dashes. If no recall text was provided, base gaps and strengths on the known weak topics and session type only.`
