@@ -1,6 +1,9 @@
+import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
+import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
+const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
@@ -12,7 +15,7 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid JSON' })
   }
 
-  const { email, firstName, courses } = body
+  const { email, firstName, courses, userId } = body
   if (!email) return res.status(400).json({ error: 'Missing email' })
 
   if (!process.env.RESEND_API_KEY) {
@@ -26,15 +29,29 @@ export default async function handler(req, res) {
     ? `We built it around: <strong style="color:#111111;">${courseNames.join(', ')}</strong>.`
     : `We built it around your courses.`
 
+  let userPlan = 'free'
+  let trialUsed = false
+  if (userId) {
+    const { data: row } = await supabaseAdmin
+      .from('user_data')
+      .select('subscription')
+      .eq('user_id', userId)
+      .maybeSingle()
+    userPlan = row?.subscription?.plan ?? 'free'
+    trialUsed = !!(row?.subscription?.trialUsedAt)
+  }
+
   try {
     await resend.emails.send({
       from: 'StudyEdge AI <support@mail.getstudyedge.com>',
       to: email,
       subject: 'Your first StudyEdge plan is ready',
+      headers: listUnsubscribeHeaders(email),
       html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your first plan is ready</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+${preheader("Your study plan is live — open it and start your first session today.")}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
@@ -72,6 +89,14 @@ export default async function handler(req, res) {
             <a href="https://getstudyedge.com/app" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Open my plan</a>
           </td></tr>
         </table>
+        ${userPlan === 'free' ? `
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-top:20px;">
+          <tr><td style="background:#F4F7FF;border-radius:12px;border:1px solid rgba(59,97,196,0.15);padding:14px 18px;text-align:center;">
+            <p style="margin:0 0 5px;font-size:13px;font-weight:600;color:#3B61C4;">${trialUsed ? 'Unlock your full semester plan with Pro' : 'Your 3-day free trial is waiting'}</p>
+            <p style="margin:0 0 10px;font-size:13px;color:#6B6B6B;line-height:1.55;">${trialUsed ? 'Unlimited AI tutoring, brain dumps, cheat sheets, and practice exams — make the most of every session.' : 'Unlimited study tools, AI tutoring, and more. No card required — just tap to unlock.'}</p>
+            <a href="https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=first_plan" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">${trialUsed ? 'Upgrade to Pro →' : 'Start free trial →'}</a>
+          </td></tr>
+        </table>` : ''}
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">
         <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
@@ -79,6 +104,8 @@ export default async function handler(req, res) {
           <a href="https://getstudyedge.com/app" style="color:#9B9B9B;text-decoration:underline;">Open the app</a>
           &nbsp;·&nbsp;
           <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
+          &nbsp;&middot;&nbsp;
+          <a href="https://getstudyedge.com/unsubscribe?email=${encodeURIComponent(email)}" style="color:#9B9B9B;text-decoration:underline;">Unsubscribe</a>
         </p>
         <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">- The StudyEdge AI team</p>
       </td></tr>

@@ -375,6 +375,7 @@ export default function App() {
             email: session.user.email,
             firstName: session.user.user_metadata?.name,
             courses: newCourses.map(c => c.name).filter(Boolean),
+            userId: session.user.id,
           }),
         }).then(() => localStorage.setItem(key, '1')).catch(() => {})
       }
