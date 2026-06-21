@@ -1277,20 +1277,35 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               </div>
             )}
 
-            {/* Upgrade nudge for free users at/near their daily limit */}
-            {isFree && focusMinutesAllowed <= 0 && !showRecallSheet && (
-              <div style={{ marginTop: 12, padding: '14px 16px', background: 'rgba(59,97,196,0.05)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 12, textAlign: 'center' }}>
-                <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: '#1e3a8a' }}>
-                  You've hit today's 30-min free limit.
-                </p>
-                <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>Upgrade for unlimited focus sessions, AI tutoring, and full blueprints.</p>
-                <button
-                  onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'focus-limit' } }))}
-                  style={{ padding: '10px 20px', background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
-                >
-                  Unlock unlimited sessions →
-                </button>
-              </div>
+            {/* Upgrade nudge for free users — hard limit message when capped, soft nudge otherwise */}
+            {isFree && !showRecallSheet && (
+              focusMinutesAllowed <= 0 ? (
+                <div style={{ marginTop: 12, padding: '14px 16px', background: 'rgba(59,97,196,0.05)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 12, textAlign: 'center' }}>
+                  <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: '#1e3a8a' }}>
+                    You've hit today's 30-min free limit.
+                  </p>
+                  <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>Upgrade for unlimited focus sessions, AI tutoring, and full blueprints.</p>
+                  <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'focus-limit' } }))}
+                    style={{ padding: '10px 20px', background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    Unlock unlimited sessions →
+                  </button>
+                </div>
+              ) : (
+                <div style={{ marginTop: 12, padding: '12px 16px', background: 'rgba(59,97,196,0.04)', border: '1px solid rgba(59,97,196,0.14)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 12.5, fontWeight: 600, color: '#1A1A1A' }}>Free plan · {focusMinutesAllowed} min left today</p>
+                    <p style={{ margin: '2px 0 0', fontSize: 11.5, color: '#6B6B6B' }}>Pro removes the daily cap entirely.</p>
+                  </div>
+                  <button
+                    onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'focus-complete' } }))}
+                    style={{ flexShrink: 0, padding: '7px 14px', background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
+                  >
+                    Upgrade →
+                  </button>
+                </div>
+              )
             )}
 
             {/* Recall submitted confirmation */}
