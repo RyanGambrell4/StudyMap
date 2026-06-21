@@ -1,5 +1,5 @@
 import { useMemo, useEffect, useRef, useState } from 'react'
-import { getActivePlan } from '../lib/subscription'
+import { getActivePlan, canUseFeature, hasUsedTrial } from '../lib/subscription'
 import { getCachedPracticeExams } from '../lib/db'
 import { useCelebration } from '../utils/useCelebration'
 
@@ -21,7 +21,7 @@ function gradeMc(question, given) {
 function gradeShort(question, given) {
   if (!given) return false
   // Heuristic: short-answer can't be auto-graded perfectly. We mark as
-  // "self-grade" — neither right nor wrong by default. User reads the model
+  // "self-grade" - neither right nor wrong by default. User reads the model
   // answer and learns. We return null to signal "not auto-graded".
   return null
 }
@@ -156,7 +156,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
   const plan = getActivePlan()
   const isUnlimited = plan === 'unlimited'
 
-  // Pull cached score history for this course (Unlimited only — gated below).
+  // Pull cached score history for this course (Unlimited only - gated below).
   // savePracticeExam saves before the results view renders, so the newest exam
   // is already at index 0. We reverse for oldest→newest chart order.
   const scoreHistory = useMemo(() => {
@@ -347,6 +347,22 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
             )
           })}
         </div>
+
+        {/* Free upgrade nudge — shown after using the 1 free practice exam */}
+        {plan === 'free' && !canUseFeature('practiceExam').allowed && (
+          <div style={{ background: 'linear-gradient(135deg, rgba(59,97,196,0.06), rgba(99,102,241,0.06))', border: '1px solid rgba(59,97,196,0.22)', borderRadius: 18, padding: 18, marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 220 }}>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>You've used your free practice exam.</p>
+              <p style={{ margin: '3px 0 0', fontSize: 13, color: '#6B6B6B', lineHeight: 1.5 }}>Upgrade to Pro for unlimited practice exams, AI scoring, and score trend analytics.</p>
+            </div>
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'practice_exam_results' } }))}
+              style={{ padding: '10px 18px', background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap' }}
+            >
+              {hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial →'}
+            </button>
+          </div>
+        )}
 
         {/* Actions */}
         <div style={{ display: 'flex', gap: 10, marginTop: 24, justifyContent: 'flex-end' }}>

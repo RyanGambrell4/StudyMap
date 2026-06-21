@@ -725,6 +725,18 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
           </div>
           <div style={{ fontSize: 11.5, color: D.muted, lineHeight: 1.5 }}>Every session references a topic, date, or learning style you provided. Nothing has been invented.</div>
         </div>
+        {!canUseFeature('coachPlan').allowed && (
+          <div style={{ padding: 14, borderRadius: 11, background: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.20)' }}>
+            <div style={{ fontSize: 12, fontWeight: 700, color: D.accent, marginBottom: 4 }}>You've used your free plan.</div>
+            <div style={{ fontSize: 11.5, color: D.muted, lineHeight: 1.5, marginBottom: 10 }}>Upgrade to regenerate, add more courses, and build plans for every class.</div>
+            <button
+              onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'coach-plan-result' } }))}
+              style={{ width: '100%', padding: '9px', borderRadius: 8, background: D.accent, color: '#fff', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', border: 'none' }}
+            >
+              {hasUsedTrial() ? 'Upgrade to Pro →' : 'Start free trial →'}
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -806,7 +818,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
         <Stat label="Study Hours" value={`${Math.round(totalHours)}h`} />
         <div style={{ width: 1, background: D.border, flexShrink: 0 }} />
         <Stat label="Next Deadline"
-          value={nextDeadline ? `${nextDeadline.days}d` : '—'}
+          value={nextDeadline ? `${nextDeadline.days}d` : '-'}
           sub={nextDeadline ? nextDeadline.course.name : 'No deadlines'} />
       </div>
 
@@ -1192,7 +1204,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
             if (!s || s.length <= max) return s
             const cut = s.slice(0, max)
             const lastSpace = cut.lastIndexOf(' ')
-            return (lastSpace > max * 0.5 ? cut.slice(0, lastSpace) : cut).replace(/[,:;\-—]+$/, '') + '…'
+            return (lastSpace > max * 0.5 ? cut.slice(0, lastSpace) : cut).replace(/[,:;\--]+$/, '') + '…'
           }
           const focusSuffix = sess.focusArea ? ` · ${truncateAtWord(sess.focusArea, 28)}` : ''
           calSessions.push({
@@ -1594,7 +1606,7 @@ function weekDateRange(weekIndex) {
   return { start: fmt(monday), end: fmt(sunday), startDate: new Date(monday) }
 }
 
-// Legacy placeholder — kept for safety, unused
+// Legacy placeholder - kept for safety, unused
 function tv() { return {} }
 
 function PlanView({ plan, course, dot, pushed, onPush, onReset, form, onStartFocus, onWeekCheckIn }) {

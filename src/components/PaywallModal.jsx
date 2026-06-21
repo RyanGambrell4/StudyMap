@@ -142,6 +142,41 @@ const LIMIT_MESSAGES = {
     title: 'Unlock Grade Recovery.',
     body: 'See exactly how many points you need to hit your target, then get a study plan built to get you there.',
   },
+  'coach-plan-result': {
+    tag: 'Adapt your plan as things change',
+    title: 'Rebuild your plan anytime.',
+    body: 'Your free plan is locked after generation. Pro lets you rebuild it anytime — new exam dates, topic changes, schedule shifts.',
+  },
+  'practice_exam': {
+    tag: 'Practice more, score higher',
+    title: 'Unlock unlimited practice exams.',
+    body: 'Free includes 1 exam total. Pro gives you unlimited practice, score trend tracking, and weak-topic targeting.',
+  },
+  'practice-exam-results': {
+    tag: "You've used your free exam",
+    title: 'Unlock unlimited practice exams.',
+    body: 'Consistent practice is what moves the needle. Pro gives you unlimited exams with detailed score tracking.',
+  },
+  'brain-dump-result': {
+    tag: 'Keep training your recall',
+    title: 'Unlock unlimited Brain Dumps.',
+    body: "You've used your free brain dump. Pro removes the limit — dump and score any topic, anytime you need it.",
+  },
+  'quiz-burst-result': {
+    tag: 'Quiz yourself every session',
+    title: 'Unlock unlimited Quiz Bursts.',
+    body: "Daily self-testing is one of the fastest ways to lock in material. Pro gives you unlimited quiz bursts.",
+  },
+  'exam-rescue-result': {
+    tag: 'Next time, come back ready',
+    title: 'Unlock unlimited Exam Rescues.',
+    body: "Pro builds a rescue plan for any exam, any time. Never go into a test unprepared again.",
+  },
+  'focus-complete': {
+    tag: 'Keep your momentum going',
+    title: 'Unlock unlimited focus time.',
+    body: "Great session. Free caps you at 30 min/day — Pro removes that entirely so you can study as long as you need.",
+  },
 }
 
 const TESTIMONIALS = [
