@@ -87,6 +87,17 @@
       transition: opacity 0.15s;
     }
     .btn:hover { opacity: 0.85; }
+    .email-fallback {
+      display: none;
+      margin-top: 14px;
+      padding: 12px 16px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 0.9rem;
+      color: var(--text2);
+    }
+    .email-fallback strong { color: var(--text1); user-select: all; -webkit-user-select: all; }
     .btn-outline {
       background: transparent;
       color: var(--accent);
@@ -126,8 +137,21 @@
     <div class="card">
       <h2>Contact Support</h2>
       <p>Have a question, bug report, or billing issue? Send us an email and we'll get back to you within 24 hours.</p>
-      <a class="btn" href="mailto:support@getstudyedge.com">Email support@getstudyedge.com</a>
+      <a class="btn" id="emailBtn" href="mailto:support@getstudyedge.com" onclick="handleEmailClick(event)">Email support@getstudyedge.com</a>
+      <div class="email-fallback" id="emailFallback">
+        Can't open Mail? Copy our address: <strong>support@getstudyedge.com</strong>
+      </div>
     </div>
+    <script>
+      function handleEmailClick(e) {
+        // Show fallback after a short delay — if Mail opened, user won't see it
+        setTimeout(function() {
+          if (document.visibilityState !== 'hidden') {
+            document.getElementById('emailFallback').style.display = 'block';
+          }
+        }, 1000);
+      }
+    </script>
 
     <h2 class="section">Common Questions</h2>
 
