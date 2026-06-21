@@ -208,11 +208,10 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
               const { allowed: canQuiz, remaining } = canUseFeature('quizBurst')
               return (
                 <button
-                  onClick={startQuiz}
-                  disabled={!canQuiz}
-                  style={{ width: '100%', padding: '13px', background: !canQuiz ? D.textDim : D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: !canQuiz ? 'default' : 'pointer', fontFamily: 'inherit', boxShadow: !canQuiz ? 'none' : `0 3px 12px rgba(232,83,26,0.35)` }}
+                  onClick={!canQuiz ? () => onShowPaywall?.('quizBurst') : startQuiz}
+                  style={{ width: '100%', padding: '13px', background: !canQuiz ? D.blue : D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: !canQuiz ? `0 3px 12px rgba(59,97,196,0.30)` : `0 3px 12px rgba(232,83,26,0.35)` }}
                 >
-                  {!canQuiz ? 'Upgrade to continue' : 'Start burst'}
+                  {!canQuiz ? 'Upgrade to Pro →' : 'Start burst'}
                 </button>
               )
             })()}
