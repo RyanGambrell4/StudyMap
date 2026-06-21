@@ -53,6 +53,8 @@ export default async function handler(req, res) {
       if (!email) { skipped++; continue }
 
       const plan = row.plan ?? {}
+      const userPlan = row?.subscription?.plan ?? 'free'
+      const trialUsed = !!(row?.subscription?.trialUsedAt)
       const courseNames = (plan.courses ?? []).map(c => c.name).filter(Boolean)
 
       const todayStr = new Date().toISOString().slice(0, 10)
@@ -124,6 +126,22 @@ ${preheader(courseNames.length ? `Your ${courseNames[0]} sessions are still here
             <a href="https://getstudyedge.com/app" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Resume studying</a>
           </td></tr>
         </table>
+        ${userPlan === 'free' ? `
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-top:20px;">
+          <tr><td style="background:#F4F7FF;border-radius:12px;border:1px solid rgba(59,97,196,0.15);padding:16px 20px;text-align:center;">
+            <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#3B61C4;">
+              ${trialUsed ? 'Upgrade to Pro' : 'You have a free trial waiting'}
+            </p>
+            <p style="margin:0 0 12px;font-size:13px;color:#6B6B6B;line-height:1.55;">
+              ${trialUsed
+                ? 'Unlock unlimited AI tutoring, brain dumps, cheat sheets, and more.'
+                : 'Try all Pro features free for 3 days — no card required.'}
+            </p>
+            <a href="https://getstudyedge.com/app?upgrade=1" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">
+              ${trialUsed ? 'Upgrade to Pro →' : 'Start free trial →'}
+            </a>
+          </td></tr>
+        </table>` : ''}
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">
         <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
