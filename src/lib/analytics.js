@@ -1,5 +1,5 @@
 /**
- * analytics.js — PostHog wrapper for StudyEdge AI
+ * analytics.js - PostHog wrapper for StudyEdge AI
  *
  * All tracking is no-op when VITE_POSTHOG_KEY is not set,
  * so local dev stays clean without any extra config.
@@ -20,9 +20,9 @@ let _ready = false
 
 export function initAnalytics() {
   if (!KEY) {
-    // Loud in prod, silent in dev — so a missing/empty key is caught next deploy, not 33 days later.
+    // Loud in prod, silent in dev - so a missing/empty key is caught next deploy, not 33 days later.
     if (import.meta.env.PROD) {
-      console.error('[analytics] VITE_POSTHOG_KEY is missing or empty — no events will be sent')
+      console.error('[analytics] VITE_POSTHOG_KEY is missing or empty - no events will be sent')
     }
     return
   }
@@ -31,8 +31,11 @@ export function initAnalytics() {
     person_profiles: 'identified_only',
     capture_pageview: true,
     capture_pageleave: true,
-    autocapture: false, // manual events only — keep it clean
-    disable_session_recording: true,
+    autocapture: false, // manual events only - keep it clean
+    session_recording: {
+      maskAllInputs: true,   // never record passwords / typed text
+      maskTextSelector: '[data-private]', // opt-in masking for extra-sensitive elements
+    },
     loaded: () => { if (import.meta.env.DEV) console.info('[analytics] posthog ready') },
   })
   _ready = true

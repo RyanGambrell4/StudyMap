@@ -30,7 +30,7 @@ export function letterGrade(pct) {
   return 'F'
 }
 
-// Status vs target — returns 'on-track' | 'at-risk' | 'needs-recovery'
+// Status vs target - returns 'on-track' | 'at-risk' | 'needs-recovery'
 export function gradeStatus(pct, target) {
   if (pct === null || pct === undefined) return 'unknown'
   const t = target ?? 73
@@ -133,11 +133,11 @@ export function generateScenarioPaths(components, targetGrade) {
   const needed = Math.max(0, rawNeeded)
   const clamp = v => Math.max(0, Math.min(100, Math.round(v * 10) / 10))
 
-  // Path 1: Consistent — same score on everything
+  // Path 1: Consistent - same score on everything
   const consistent = {}
   ungraded.forEach(c => { consistent[c.id] = clamp(needed) })
 
-  // Path 2: Strong Finish — lower on early, higher on last component
+  // Path 2: Strong Finish - lower on early, higher on last component
   const strong = {}
   if (ungraded.length === 1) {
     strong[ungraded[0].id] = clamp(needed)
@@ -151,7 +151,7 @@ export function generateScenarioPaths(components, targetGrade) {
     rest.forEach(c => { strong[c.id] = clamp(restNeeded) })
   }
 
-  // Path 3: Front-Loaded — higher on first, lower on last
+  // Path 3: Front-Loaded - higher on first, lower on last
   const front = {}
   if (ungraded.length === 1) {
     front[ungraded[0].id] = clamp(needed)

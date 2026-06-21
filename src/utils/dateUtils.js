@@ -1,5 +1,5 @@
 /**
- * Shared date/time utilities — single source of truth across components.
+ * Shared date/time utilities - single source of truth across components.
  */
 
 export function toDateStr(d) {

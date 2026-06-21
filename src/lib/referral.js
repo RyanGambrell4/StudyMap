@@ -1,5 +1,5 @@
 /**
- * referral.js — Client-side referral utilities
+ * referral.js - Client-side referral utilities
  *
  * Flow:
  *   1. User visits /signup?ref=REFERRER_USER_ID → captureReferralParam() stores it
@@ -9,7 +9,7 @@
 
 const STORAGE_KEY = 'studyedge_referrer'
 
-/** Call on app mount — saves ?ref= param from URL to localStorage */
+/** Call on app mount - saves ?ref= param from URL to localStorage */
 export function captureReferralParam() {
   try {
     const ref = new URLSearchParams(window.location.search).get('ref')

@@ -1,5 +1,5 @@
 /**
- * subscription.js — Trial & subscription layer for StudyEdge AI
+ * subscription.js - Trial & subscription layer for StudyEdge AI
  *
  * 3-tier model:
  *  Free      → permanent, capped per feature
@@ -54,7 +54,7 @@ export const UNLIMITED_LIMITS = {
 
 export const TRIAL_LIMITS = PRO_LIMITS
 
-// Legacy — kept for backwards compatibility
+// Legacy - kept for backwards compatibility
 export const PLAN_LIMITS = {
   free:      { courses: 1,        aiQueries: 2,        aiResetPeriod: 'day'   },
   pro:       { courses: 5,        aiQueries: 100,      aiResetPeriod: 'month' },
@@ -169,7 +169,7 @@ export function getActivePlan() {
   // No-card trial (3 days)
   if (isTrialActive()) return 'pro'
 
-  // Stripe trialing (legacy — card required old flow)
+  // Stripe trialing (legacy - card required old flow)
   if (sub?.status === 'trialing' && sub?.plan) return sub.plan
 
   return 'free'
@@ -338,19 +338,21 @@ export function incrementAIQuery() {
 
   if (!_sub) return
   const now = new Date().toISOString()
-  const usage = getFeatureUsage('aiTutor')
-  const newCount = usage.count ?? 0
+  const plan = getActivePlan()
 
-  _sub = { ..._sub, aiQueriesUsed: newCount, aiQueriesResetAt: now }
+  // getFeatureUsage only tracks free-plan counts; for paid users it returns
+  // { count: 0 } since incrementFeatureUsage is a no-op for them.
+  if (plan === 'free') {
+    const usage = getFeatureUsage('aiTutor')
+    const newCount = usage.count ?? 0
+    _sub = { ..._sub, aiQueriesUsed: newCount, aiQueriesResetAt: now }
+    window.dispatchEvent(new CustomEvent('studyedge:ai-query-used', { detail: { count: newCount } }))
 
-  window.dispatchEvent(new CustomEvent('studyedge:ai-query-used', { detail: { count: newCount } }))
-
-  const limit = getAIQueriesLimit()
-  if (limit !== Infinity && newCount >= limit) {
-    track('ai_limit_reached', { plan: getActivePlan(), count: newCount })
-    // Peak intent: free user just used their last AI action. Pop the paywall
-    // in-context instead of waiting for the next attempt to be blocked.
-    if (getActivePlan() === 'free') {
+    const limit = getAIQueriesLimit()
+    if (limit !== Infinity && newCount >= limit) {
+      track('ai_limit_reached', { plan, count: newCount })
+      // Peak intent: free user just hit their last AI action — pop the paywall
+      // immediately rather than waiting for the next blocked attempt.
       window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'ai-exhausted' } }))
     }
   }
@@ -376,7 +378,7 @@ export async function createCheckoutSession(plan, billingPeriod, userEmail, user
     const data = await res.json()
 
     if (res.status === 409 && data.alreadySubscribed) {
-      console.warn('[subscription] User already subscribed — skipping checkout')
+      console.warn('[subscription] User already subscribed - skipping checkout')
       return { alreadySubscribed: true }
     }
 

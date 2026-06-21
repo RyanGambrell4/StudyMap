@@ -67,7 +67,7 @@ function extractDates(line) {
     if (ds) dates.push(ds)
   }
 
-  // "Week 3 (Sept 18)" — recurse into the parenthetical
+  // "Week 3 (Sept 18)" - recurse into the parenthetical
   const re4 = /\(([^)]{3,25})\)/g
   while ((m = re4.exec(line)) !== null) {
     const inner = m[1]

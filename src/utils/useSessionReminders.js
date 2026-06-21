@@ -61,7 +61,7 @@ export function useSessionReminders(allSessions, completedIds, todayStr) {
       if (minutesUntil < 0 || minutesUntil > 30) continue
 
       // Fire the notification after the appropriate delay
-      // (i.e. at exactly 30 min before start — but if we're already past that, fire soon)
+      // (i.e. at exactly 30 min before start - but if we're already past that, fire soon)
       const targetNotifMinutes = sessionMinutes - 30
       const delayMs = Math.max(0, (targetNotifMinutes - nowMinutes) * 60 * 1000)
 

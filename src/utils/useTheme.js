@@ -1,4 +1,4 @@
-// App is light mode — remove any stale dark class
+// App is light mode - remove any stale dark class
 document.documentElement.classList.remove('dark')
 try { localStorage.removeItem('studyedge_theme') } catch {}
 

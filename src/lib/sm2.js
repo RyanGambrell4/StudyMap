@@ -13,7 +13,7 @@ export function sm2(card, quality) {
     else interval = Math.round(interval * easeFactor)
     repetitions += 1
   } else {
-    // Incorrect — reset
+    // Incorrect - reset
     repetitions = 0
     interval = 1
   }
@@ -34,7 +34,7 @@ export function sm2(card, quality) {
 }
 
 /**
- * Sort cards by due date — cards due today or overdue first,
+ * Sort cards by due date - cards due today or overdue first,
  * then new cards, then future cards
  */
 export function sortCardsByDue(cards) {
@@ -51,7 +51,7 @@ export function sortCardsByDue(cards) {
 export function getDueCards(cards) {
   const now = new Date()
   return cards.filter(card => {
-    if (!card.nextReview) return true // New card — always due
+    if (!card.nextReview) return true // New card - always due
     return new Date(card.nextReview) <= now
   })
 }

@@ -1,4 +1,4 @@
-// Deepgram voice transcription — browser-side recording + server transcription
+// Deepgram voice transcription - browser-side recording + server transcription
 
 export async function transcribeAudio(audioBlob) {
   const res = await fetch('/api/transcribe', {

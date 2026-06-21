@@ -50,7 +50,7 @@ export async function deduplicateFlashcards(cards, threshold = 0.90) {
 
     return kept.map(i => cards[i])
   } catch {
-    return cards // Fail open — never break flashcard generation
+    return cards // Fail open - never break flashcard generation
   }
 }
 

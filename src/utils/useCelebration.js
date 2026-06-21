@@ -4,7 +4,7 @@ import { useCallback, useRef } from 'react'
 const todayStr = () => new Date().toISOString().split('T')[0]
 
 export function useCelebration() {
-  // Track light-confetti fires per day — resets automatically when date changes
+  // Track light-confetti fires per day - resets automatically when date changes
   const lightRef = useRef({ date: todayStr(), count: 0 })
 
   const celebrate = useCallback((level = 'medium') => {
