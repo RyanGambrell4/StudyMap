@@ -417,7 +417,12 @@ export default function AppShell({
             ) : plan !== 'free' ? (
               <span style={{ fontSize: 11, fontWeight: 700, color: plan === 'unlimited' ? '#16A34A' : ACCENT }}>{planLabel}</span>
             ) : (
-              <span style={{ fontSize: 11, fontWeight: 700, color: ACCENT }}>Upgrade</span>
+              <button
+                onClick={(e) => { e.stopPropagation(); onOpenPaywall?.('nav-upgrade') }}
+                style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ACCENT, border: 'none', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                Upgrade
+              </button>
             )}
           </button>
         </div>

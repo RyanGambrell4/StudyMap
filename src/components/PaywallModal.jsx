@@ -222,6 +222,16 @@ const LIMIT_MESSAGES = {
     title: 'Unlimited Topic Drills, all semester.',
     body: "Drilling is how knowledge sticks. Pro gives you unlimited topic drills so you can target every weak area before exam day.",
   },
+  'nav-upgrade': {
+    tag: 'Ready to go back to Pro?',
+    title: 'Everything you had during your trial.',
+    body: "$2.99/wk — 5 courses, 100 AI actions/month, unlimited focus sessions, blueprints, and every study tool. Cancel anytime.",
+  },
+  'nav-trial': {
+    tag: 'Try Pro free for 3 days',
+    title: 'Full access. No restrictions.',
+    body: "5 courses, 100 AI actions/month, unlimited focus sessions, Session Blueprints, and every study tool. $2.99/wk after — cancel anytime.",
+  },
 }
 
 const TESTIMONIALS = [
