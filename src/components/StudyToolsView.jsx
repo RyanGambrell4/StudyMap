@@ -538,8 +538,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
         const freeBadge = (feature, color) => {
           if (isPro) return { badge: null, badgeColor: color }
           const { remaining } = canUseFeature(feature)
-          if (remaining === 0) return { badge: hasUsedTrial() ? 'Upgrade to use again' : 'Start trial to use again', badgeColor: '#9B9B9B' }
-          return { badge: '1 use · free', badgeColor: color }
+          if (remaining === 0) return { badge: hasUsedTrial() ? '0 left · Upgrade' : '0 left · Start trial', badgeColor: '#D97706' }
+          return { badge: '1 left', badgeColor: color }
         }
 
         const tools = [
