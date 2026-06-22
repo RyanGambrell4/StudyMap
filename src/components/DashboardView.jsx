@@ -232,7 +232,8 @@ export default function DashboardView({
         sessionStorage.setItem(key, String(streak))
         setStreakToast(streak)
         track('streak_milestone_shown', { streak })
-        const timer = setTimeout(() => setStreakToast(null), 4500)
+        const duration = plan === 'free' && streak >= 7 ? 7000 : 4500
+        const timer = setTimeout(() => setStreakToast(null), duration)
         return () => clearTimeout(timer)
       }
     }
@@ -570,21 +571,44 @@ export default function DashboardView({
 
       {/* ── Streak milestone toast ── */}
       {streakToast && (
-        <div style={{
-          position: 'fixed', top: 20, left: '50%',
-          transform: 'translateX(-50%)',
-          background: '#1A1A1A', color: '#fff',
-          padding: '11px 20px', borderRadius: 999, zIndex: 9999,
-          display: 'flex', alignItems: 'center', gap: 8,
-          boxShadow: '0 6px 24px rgba(0,0,0,0.22)',
-          animation: 'streak-toast-in 0.35s cubic-bezier(0.34,1.56,0.64,1) both',
-          fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap',
-          pointerEvents: 'none',
-        }}>
-          <span style={{ fontSize: 18 }}>🔥</span>
-          <span>{streakToast}-day streak!</span>
-          <span style={{ fontWeight: 400, color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>Keep it up</span>
-        </div>
+        plan === 'free' && streakToast >= 7 ? (
+          <button
+            onClick={() => onShowPaywall?.('ai')}
+            style={{
+              position: 'fixed', top: 20, left: '50%',
+              transform: 'translateX(-50%)',
+              background: '#1A1A1A', color: '#fff',
+              padding: '11px 20px', borderRadius: 999, zIndex: 9999,
+              display: 'flex', alignItems: 'center', gap: 10,
+              boxShadow: '0 6px 24px rgba(0,0,0,0.22)',
+              animation: 'streak-toast-in 0.35s cubic-bezier(0.34,1.56,0.64,1) both',
+              fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap',
+              border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+            }}
+          >
+            <span style={{ fontSize: 18 }}>🔥</span>
+            <span>{streakToast}-day streak!</span>
+            <span style={{ fontWeight: 500, color: '#93C5FD', fontSize: 13 }}>
+              {hasUsedTrial() ? 'Upgrade to keep it going →' : 'Start free trial →'}
+            </span>
+          </button>
+        ) : (
+          <div style={{
+            position: 'fixed', top: 20, left: '50%',
+            transform: 'translateX(-50%)',
+            background: '#1A1A1A', color: '#fff',
+            padding: '11px 20px', borderRadius: 999, zIndex: 9999,
+            display: 'flex', alignItems: 'center', gap: 8,
+            boxShadow: '0 6px 24px rgba(0,0,0,0.22)',
+            animation: 'streak-toast-in 0.35s cubic-bezier(0.34,1.56,0.64,1) both',
+            fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap',
+            pointerEvents: 'none',
+          }}>
+            <span style={{ fontSize: 18 }}>🔥</span>
+            <span>{streakToast}-day streak!</span>
+            <span style={{ fontWeight: 400, color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>Keep it up</span>
+          </div>
+        )
       )}
 
       {/* ── Header ── */}
