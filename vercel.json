@@ -47,6 +47,10 @@
       "schedule": "0 11 * * *"
     },
     {
+      "path": "/api/trial-warning",
+      "schedule": "0 12 * * *"
+    },
+    {
       "path": "/api/trial-expired",
       "schedule": "0 12 * * *"
     },
