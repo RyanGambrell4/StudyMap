@@ -217,6 +217,9 @@ export default function DashboardView({
   const [streakToast, setStreakToast] = useState(null)
   const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100]
 
+  const nextStreakMilestone = STREAK_MILESTONES.find(m => m > streak)
+  const daysToNextMilestone = nextStreakMilestone ? nextStreakMilestone - streak : null
+
   // Track AI chip impression once per session
   useEffect(() => {
     if (showAiChip) track('ai_chip_shown', { aiUsed, plan })
@@ -1188,7 +1191,7 @@ export default function DashboardView({
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {[
-              { label: 'Study streak',  value: streak,         unit: streak === 1 ? 'day' : 'days', delta: streak,        positive: streak > 0,       icon: <IcoFlame color="#F97316" />,  iconBg: 'rgba(249,115,22,0.1)',  iconColor: '#F97316' },
+              { label: 'Study streak',  value: streak,         unit: streak === 1 ? 'day' : 'days', delta: streak,        positive: streak > 0,       icon: <IcoFlame color="#F97316" />,  iconBg: 'rgba(249,115,22,0.1)',  iconColor: '#F97316', subtext: daysToNextMilestone === 1 ? `${nextStreakMilestone}-day streak tomorrow 🔥` : daysToNextMilestone === 2 ? `${daysToNextMilestone} days to ${nextStreakMilestone}-day streak` : null },
               { label: 'Hours studied', value: weekHours,      unit: 'hrs',                          delta: deltaHours,    positive: deltaHours >= 0,  icon: <IcoClock color={D.blue} />,   iconBg: 'rgba(59,97,196,0.1)',   iconColor: D.blue },
               { label: 'Sessions done', value: weekSessionCount, unit: '',                           delta: deltaSessions, positive: deltaSessions >= 0, icon: <IcoCheck color={D.green} />, iconBg: 'rgba(22,163,74,0.1)',   iconColor: D.green },
             ].map((stat, i) => (
@@ -1196,7 +1199,10 @@ export default function DashboardView({
                 <div style={{ width: 30, height: 30, borderRadius: 8, background: stat.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: stat.iconColor }}>
                   {stat.icon}
                 </div>
-                <div style={{ flex: 1, fontSize: 13, color: D.textMuted }}>{stat.label}</div>
+                <div style={{ flex: 1 }}>
+                  <div style={{ fontSize: 13, color: D.textMuted }}>{stat.label}</div>
+                  {stat.subtext && <div style={{ fontSize: 11, color: '#F97316', fontWeight: 600, marginTop: 1 }}>{stat.subtext}</div>}
+                </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                   <span style={{ fontSize: 24, fontWeight: 800, color: D.text, letterSpacing: -0.5 }}>{stat.value}</span>
                   {stat.unit && <span style={{ fontSize: 12, color: D.textMuted }}>{stat.unit}</span>}
