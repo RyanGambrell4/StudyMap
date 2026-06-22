@@ -83,11 +83,13 @@ export default function AppShell({
   const [trialBannerDismissed, setTrialBannerDismissed] = useState(
     () => sessionStorage.getItem('studyedge_trial_banner_dismissed') === '1'
   )
-  const trialMsg = daysLeft !== null && daysLeft <= 2
-    ? "Your trial ends tomorrow. Upgrade to keep all your courses and AI tools."
-    : daysLeft !== null
-      ? `Your free trial ends in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}. Upgrade to keep Pro access.`
-      : null
+  const trialMsg = daysLeft !== null && daysLeft <= 1
+    ? "Your trial ends tomorrow. Upgrade now to keep all your courses and AI tools."
+    : daysLeft !== null && daysLeft <= 2
+      ? "Your trial ends in 2 days. Upgrade to keep Pro access."
+      : daysLeft !== null
+        ? `Your free trial ends in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}. Upgrade to keep Pro access.`
+        : null
   const showTrialBanner = isTrialing && trialMsg && !trialBannerDismissed
   const initials    = userEmail ? userEmail.split('@')[0].slice(0, 2).toUpperCase() : 'U'
   const displayName = userEmail?.split('@')[0] ?? 'Account'
