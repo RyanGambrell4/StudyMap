@@ -1102,6 +1102,53 @@ export default function DashboardView({
           </Card>
         )}
 
+        {/* ── AI COACH RECOMMENDATION (span 12) ── */}
+        <Card
+          glowColor={D.blue}
+          style={{
+            gridColumn: 'span 12',
+            padding: 20, display: 'flex', flexDirection: 'column',
+            background: `linear-gradient(145deg, rgba(59,97,196,0.05) 0%, #ffffff 60%)`,
+          }}
+        >
+          <div style={{ marginBottom: 12 }}><Label color={D.blue}>Study Coach recommendation</Label></div>
+          <p style={{ margin: '0 0 auto', fontSize: 15, lineHeight: 1.65, color: D.textMuted, fontWeight: 400, flex: 1 }}>
+            {aiCoachMessage}
+          </p>
+          <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
+            <button
+              onClick={() => typeof onOpenStudyCoach === 'function' && onOpenStudyCoach(0)}
+              style={{
+                flex: 1, padding: '10px 14px',
+                background: '#3B61C4',
+                border: 'none', borderRadius: 10,
+                fontSize: 13, fontWeight: 600, color: '#fff',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                cursor: 'pointer', fontFamily: 'inherit',
+                transition: 'background-color 0.15s ease',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = '#3155b3' }}
+              onMouseLeave={e => { e.currentTarget.style.background = '#3B61C4' }}
+            >
+              <IcoStar /> Build my plan
+            </button>
+            <button
+              onClick={() => typeof onNavigateToTutor === 'function' && onNavigateToTutor()}
+              style={{
+                flex: 1, padding: '10px 14px',
+                background: 'none', border: `1px solid rgba(59,97,196,0.25)`,
+                borderRadius: 9, fontSize: 13, fontWeight: 600, color: D.blue,
+                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                cursor: 'pointer', fontFamily: 'inherit', transition: 'background 0.15s',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,97,196,0.06)' }}
+              onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
+            >
+              <IcoMsg /> Talk to your coach
+            </button>
+          </div>
+        </Card>
+
         {/* ── COURSES (span 6) ── */}
         <Card glowColor={D.blue} style={{ gridColumn: 'span 6', padding: '20px 0' }} onClick={onNavigateToCourses}>
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 20px', marginBottom: 14 }}>
@@ -1246,9 +1293,9 @@ export default function DashboardView({
           </div>
         </Card>
 
-        {/* ── DEADLINE RADAR (span 7) ── */}
+        {/* ── DEADLINE RADAR (span 12) ── */}
         {upcomingDeadlines.length > 0 && (
-          <Card glowColor="#DC2626" style={{ gridColumn: 'span 7', padding: 20 }} onClick={onNavigateToCalendar}>
+          <Card glowColor="#DC2626" style={{ gridColumn: 'span 12', padding: 20 }} onClick={onNavigateToCalendar}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
               <div>
                 <Label color="#DC2626">Upcoming deadlines</Label>
@@ -1306,53 +1353,6 @@ export default function DashboardView({
             </div>
           </Card>
         )}
-
-        {/* ── AI COACH RECOMMENDATION (span 5 or 12) ── */}
-        <Card
-          glowColor={D.blue}
-          style={{
-            gridColumn: upcomingDeadlines.length > 0 ? 'span 5' : 'span 12',
-            padding: 20, display: 'flex', flexDirection: 'column',
-            background: `linear-gradient(145deg, rgba(59,97,196,0.05) 0%, #ffffff 60%)`,
-          }}
-        >
-          <div style={{ marginBottom: 12 }}><Label color={D.blue}>Study Coach recommendation</Label></div>
-          <p style={{ margin: '0 0 auto', fontSize: 15, lineHeight: 1.65, color: D.textMuted, fontWeight: 400, flex: 1 }}>
-            {aiCoachMessage}
-          </p>
-          <div style={{ display: 'flex', gap: 8, marginTop: 20 }}>
-            <button
-              onClick={() => typeof onOpenStudyCoach === 'function' && onOpenStudyCoach(0)}
-              style={{
-                flex: 1, padding: '10px 14px',
-                background: '#3B61C4',
-                border: 'none', borderRadius: 10,
-                fontSize: 13, fontWeight: 600, color: '#fff',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                cursor: 'pointer', fontFamily: 'inherit',
-                transition: 'background-color 0.15s ease',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = '#3155b3' }}
-              onMouseLeave={e => { e.currentTarget.style.background = '#3B61C4' }}
-            >
-              <IcoStar /> Build my plan
-            </button>
-            <button
-              onClick={() => typeof onNavigateToTutor === 'function' && onNavigateToTutor()}
-              style={{
-                flex: 1, padding: '10px 14px',
-                background: 'none', border: `1px solid rgba(59,97,196,0.25)`,
-                borderRadius: 9, fontSize: 13, fontWeight: 600, color: D.blue,
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-                cursor: 'pointer', fontFamily: 'inherit', transition: 'background 0.15s',
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,97,196,0.06)' }}
-              onMouseLeave={e => { e.currentTarget.style.background = 'none' }}
-            >
-              <IcoMsg /> Talk to your coach
-            </button>
-          </div>
-        </Card>
 
         {/* ── Referral card (free users only) ── */}
         {plan === 'free' && (
