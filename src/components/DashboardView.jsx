@@ -716,29 +716,46 @@ export default function DashboardView({
       {/* ── Pro trial banner ── */}
       {isTrialActive() ? (
         <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
-          <div className="dash-banner-inner" style={{
-            background: `linear-gradient(135deg, rgba(59,97,196,0.04) 0%, rgba(59,97,196,0.08) 100%)`,
-            border: `1px solid rgba(59,97,196,0.2)`,
-            borderLeft: `4px solid ${D.blue}`,
-            borderRadius: 10,
-            boxShadow: `0 2px 12px rgba(59,97,196,0.07)`,
-            padding: '14px 18px',
-            display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
-          }}>
-            <div style={{ flex: 1, minWidth: 200 }}>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>
-                Your free trial is active. {getTrialDaysRemaining()} day{getTrialDaysRemaining() !== 1 ? 's' : ''} remaining.
-              </p>
-              <div style={{ marginTop: 6, height: 4, background: 'rgba(59,97,196,0.15)', borderRadius: 999, overflow: 'hidden', maxWidth: 280 }}>
-                <div style={{ height: '100%', borderRadius: 999, background: D.blue, width: `${Math.round(((3 - getTrialDaysRemaining()) / 3) * 100)}%`, transition: 'width 0.4s ease' }} />
+          {(() => {
+            const daysLeft = getTrialDaysRemaining()
+            const expiringSoon = daysLeft <= 1
+            const accentColor = expiringSoon ? '#F97316' : D.blue
+            return (
+              <div className="dash-banner-inner" style={{
+                background: expiringSoon
+                  ? 'linear-gradient(135deg, rgba(249,115,22,0.05) 0%, rgba(249,115,22,0.1) 100%)'
+                  : `linear-gradient(135deg, rgba(59,97,196,0.04) 0%, rgba(59,97,196,0.08) 100%)`,
+                border: `1px solid ${expiringSoon ? 'rgba(249,115,22,0.3)' : 'rgba(59,97,196,0.2)'}`,
+                borderLeft: `4px solid ${accentColor}`,
+                borderRadius: 10,
+                boxShadow: expiringSoon ? '0 2px 12px rgba(249,115,22,0.1)' : `0 2px 12px rgba(59,97,196,0.07)`,
+                padding: '14px 18px',
+                display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+              }}>
+                <div style={{ flex: 1, minWidth: 200 }}>
+                  <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: expiringSoon ? '#C2410C' : D.text }}>
+                    {expiringSoon
+                      ? '⚠️ Your trial expires today — don\'t lose your progress.'
+                      : `Your free trial is active. ${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining.`}
+                  </p>
+                  {expiringSoon ? (
+                    <p style={{ margin: '3px 0 0', fontSize: 12, color: '#92400E', lineHeight: 1.5 }}>
+                      Upgrade now to keep your courses, AI tutoring, and everything you've built this week.
+                    </p>
+                  ) : (
+                    <div style={{ marginTop: 6, height: 4, background: 'rgba(59,97,196,0.15)', borderRadius: 999, overflow: 'hidden', maxWidth: 280 }}>
+                      <div style={{ height: '100%', borderRadius: 999, background: D.blue, width: `${Math.round(((3 - daysLeft) / 3) * 100)}%`, transition: 'width 0.4s ease' }} />
+                    </div>
+                  )}
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+                  <button onClick={() => onShowPaywall?.('upgrade')} style={{ background: accentColor, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+                    {expiringSoon ? 'Upgrade Now →' : 'Upgrade to Pro →'}
+                  </button>
+                </div>
               </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-              <button onClick={() => onShowPaywall?.('upgrade')} style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>
-                Upgrade to Pro →
-              </button>
-            </div>
-          </div>
+            )
+          })()}
         </div>
       ) : showTrialCard ? (
         <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
