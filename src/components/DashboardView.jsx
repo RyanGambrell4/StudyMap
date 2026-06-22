@@ -794,6 +794,25 @@ export default function DashboardView({
             </div>
           </div>
         </div>
+      ) : (plan === 'free' && hasUsedTrial()) ? (
+        <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
+          <div className="dash-banner-inner" style={{
+            background: '#FFFFFF',
+            border: '1px solid rgba(0,0,0,0.08)',
+            borderLeft: `4px solid ${D.blue}`,
+            borderRadius: 10,
+            padding: '12px 18px',
+            display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+          }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>Ready to go back to Pro?</p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: D.textMuted }}>$2.99/wk — cancel anytime. Everything you had during your trial.</p>
+            </div>
+            <button onClick={() => onShowPaywall?.('ai')} style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+              Upgrade to Pro →
+            </button>
+          </div>
+        </div>
       ) : null}
 
       {/* ── Grid ── */}
