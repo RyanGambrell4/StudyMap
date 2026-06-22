@@ -457,7 +457,7 @@ const TAB_COLORS = {
   ai:         '#3B61C4',
 }
 
-export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools, course, onShowPaywall, userId, learningStyle }) {
+export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools, onOpenBrainDump, course, onShowPaywall, userId, learningStyle }) {
   const totalSec = session.duration * 60
   const isLongSession = session.duration > 45
   const todayStr = new Date().toISOString().split('T')[0]
@@ -836,6 +836,10 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const handleStartNext = () => {
     if (!recallSubmitted) onComplete(session.id, elapsed, null)
     if (nextSession && onStartNext) onStartNext(session.id, elapsed, nextSession)
+  }
+  const handleBrainDump = () => {
+    if (!recallSubmitted) onComplete(session.id, elapsed, null)
+    onOpenBrainDump?.()
   }
 
   const handleCheckYourself = () => {
@@ -1259,6 +1263,13 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                   <button onClick={handleStartNext} className="w-full py-3 rounded-2xl font-semibold text-sm"
                     style={{ backgroundColor: `${dot}14`, border: `1px solid ${dot}35`, color: dot }}>
                     Start Next: {nextSession.courseName} →
+                  </button>
+                )}
+                {onOpenBrainDump && (
+                  <button onClick={handleBrainDump} className="w-full py-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2"
+                    style={{ backgroundColor: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.22)', color: '#8B5CF6' }}>
+                    <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+                    Reinforce with Brain Dump
                   </button>
                 )}
                 {hasNotes && (

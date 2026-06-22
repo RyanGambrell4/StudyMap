@@ -896,7 +896,38 @@ export default function DashboardView({
               )}
             </div>
 
-            {displaySession ? (
+            {allComplete && todaySessions.length > 0 ? (
+              <div style={{ paddingTop: 4 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 10 }}>
+                  <div style={{ width: 32, height: 32, borderRadius: '50%', background: 'rgba(34,197,94,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="16" height="16" fill="none" stroke="#16a34a" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+                  </div>
+                  <div>
+                    <p style={{ margin: 0, fontSize: 15, fontWeight: 700, color: D.text }}>All done for today.</p>
+                    <p style={{ margin: '2px 0 0', fontSize: 12.5, color: D.textMuted }}>
+                      {todaySessions.length === 1 ? '1 session complete' : `${todaySessions.length} sessions complete`}
+                    </p>
+                  </div>
+                </div>
+                <p style={{ fontSize: 13, color: D.textMuted, lineHeight: 1.6, marginBottom: 16 }}>
+                  The best time to test your recall is right after a session — before the forgetting curve kicks in. A quick Brain Dump now doubles what sticks.
+                </p>
+                <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                  <button
+                    onClick={e => { e.stopPropagation(); onOpenBrainDump?.() }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, color: '#fff', background: '#8B5CF6', border: 'none', cursor: 'pointer' }}
+                  >
+                    Try a Brain Dump →
+                  </button>
+                  <button
+                    onClick={e => { e.stopPropagation(); onOpenQuizBurst?.() }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: D.amber, background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.2)', cursor: 'pointer' }}
+                  >
+                    Quiz Burst
+                  </button>
+                </div>
+              </div>
+            ) : displaySession ? (
               <>
                 <div style={{ fontSize: 12, color: D.textMuted, fontWeight: 500, marginBottom: 4 }}>
                   <span style={{ color: sessionColor, fontWeight: 600 }}>{clean(displaySession.courseName)}</span>
@@ -965,7 +996,7 @@ export default function DashboardView({
                       </div>
                     ) : (
                       <p style={{ color: D.textMuted, fontSize: 14, marginBottom: 16, lineHeight: 1.6 }}>
-                        No sessions scheduled today. A free day. Use it well.
+                        No sessions today. A Brain Dump or Quiz Burst keeps the material fresh — even 10 minutes builds the habit.
                       </p>
                     )}
 

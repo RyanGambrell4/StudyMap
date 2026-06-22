@@ -1168,6 +1168,7 @@ export default function OutputView({
           onStartNext={handleFocusStartNext}
           nextSession={allSessions.find(s => s.dateStr >= todayStr && !completedIds.has(s.id) && s.id !== focusSession.id) ?? null}
           onGoToTools={() => setActiveSection('tools')}
+          onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump', source: 'focus_complete' }); setShowBrainDump(true) }}
           course={courses[focusSession.courseId] ?? null}
           onShowPaywall={onShowPaywall}
           userId={userId}
