@@ -464,8 +464,8 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall }) {
                 }}>
                   <div style={{ fontSize: 14, fontWeight: 700, color: D.text }}>Full breakdown is Pro</div>
                   <div style={{ fontSize: 13, color: D.textMuted, textAlign: 'center', padding: '0 24px' }}>See category scores, gaps, and grade projection.</div>
-                  <button onClick={() => onShowPaywall?.('study-hacks')} style={{ background: D.blue, border: 'none', borderRadius: 9, padding: '10px 22px', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(59,97,196,0.35)' }}>
-                    Upgrade to Pro
+                  <button onClick={() => onShowPaywall?.('brainDump')} style={{ background: D.blue, border: 'none', borderRadius: 9, padding: '10px 22px', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(59,97,196,0.35)' }}>
+                    {hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial →'}
                   </button>
                 </div>
               </div>

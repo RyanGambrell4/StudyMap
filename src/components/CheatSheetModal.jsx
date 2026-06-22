@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import Spinner from './ui/spinner'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan, hasUsedTrial } from '../lib/subscription'
 
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
@@ -320,7 +320,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall }) {
                           boxShadow: '0 3px 12px rgba(59,97,196,0.35)',
                         }}
                       >
-                        Upgrade to Pro
+                        {hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial →'}
                       </button>
                     </div>
                   </div>

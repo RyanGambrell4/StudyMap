@@ -269,7 +269,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
                   <div style={{ position: 'absolute', inset: 0, background: 'linear-gradient(to bottom, rgba(255,255,255,0.3) 0%, rgba(255,255,255,0.97) 50%)', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'flex-end', padding: '0 24px 20px' }}>
                     <div style={{ background: D.bgCard, borderRadius: 14, padding: '18px 22px', border: `1px solid ${D.border}`, boxShadow: '0 8px 28px rgba(0,0,0,0.10)', textAlign: 'center', width: '100%', maxWidth: 340 }}>
                       <div style={{ fontSize: 14, fontWeight: 700, color: D.text, marginBottom: 6 }}>Unlock {lockedTopicCount} more topic{lockedTopicCount !== 1 ? 's' : ''} and the full schedule</div>
-                      <button onClick={() => onShowPaywall?.('study-hacks')} style={{ width: '100%', padding: '10px', background: D.blue, border: 'none', borderRadius: 9, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>Upgrade to Pro</button>
+                      <button onClick={() => onShowPaywall?.('examRescue')} style={{ width: '100%', padding: '10px', background: D.blue, border: 'none', borderRadius: 9, color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial →'}</button>
                     </div>
                   </div>
                 </div>
