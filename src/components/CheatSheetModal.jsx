@@ -212,7 +212,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall }) {
 
             {!isPro && (
               <div style={{ textAlign: 'center', fontSize: 12, color: D.textDim, marginTop: 12 }}>
-                Free: topic 1 only. <button onClick={() => onShowPaywall?.('study-hacks')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>Upgrade for all 10</button>
+                Free: topic 1 only. <button onClick={() => onShowPaywall?.('study-hacks')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>{hasUsedTrial() ? 'Upgrade for all 10' : 'Start free trial for all 10'}</button>
               </div>
             )}
           </div>

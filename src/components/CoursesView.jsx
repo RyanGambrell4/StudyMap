@@ -1,5 +1,5 @@
 import { useState, useMemo, useRef, useEffect } from 'react'
-import { canAddCourse, getActivePlan, getPlanLimits } from '../lib/subscription'
+import { canAddCourse, getActivePlan, getPlanLimits, hasUsedTrial } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import EmptyState from './ui/empty-state'
 import { saveExamContext } from '../lib/db'
@@ -1097,7 +1097,7 @@ export default function CoursesView({
           onClick={() => { if (atLimit) { onShowPaywall?.('courses'); return } isExamMode ? setShowExamAddSection(true) : setShowAddPanel(true) }}
           style={{ padding: '11px 18px', background: '#E8531A', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7, boxShadow: '0 4px 12px rgba(232,83,26,0.25)', border: 'none', cursor: 'pointer' }}
         >
-          <Icon name="plus" size={14} /> {atLimit ? 'Upgrade to Add' : isExamMode ? 'Add Section' : 'Add Course'}
+          <Icon name="plus" size={14} /> {atLimit ? (hasUsedTrial() ? 'Upgrade to Add' : 'Free Trial to Add') : isExamMode ? 'Add Section' : 'Add Course'}
         </button>
       </div>
 
