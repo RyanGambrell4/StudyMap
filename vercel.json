@@ -212,6 +212,15 @@
     { "source": "/best-study-app-for-mcmaster-students", "destination": "/best-study-app-for-mcmaster-students.html" },
     { "source": "/best-study-app-for-university-of-alberta-students", "destination": "/best-study-app-for-university-of-alberta-students.html" },
 
-    { "source": "/studyedge-app", "destination": "/studyedge-app.html" }
+    { "source": "/studyedge-app", "destination": "/studyedge-app.html" },
+
+    { "source": "/best-study-app-for-university-of-wisconsin-madison-students", "destination": "/best-study-app-for-university-of-wisconsin-madison-students.html" },
+    { "source": "/best-study-app-for-michigan-state-students", "destination": "/best-study-app-for-michigan-state-students.html" },
+    { "source": "/best-study-app-for-arizona-state-students", "destination": "/best-study-app-for-arizona-state-students.html" },
+    { "source": "/best-study-app-for-university-of-minnesota-students", "destination": "/best-study-app-for-university-of-minnesota-students.html" },
+    { "source": "/best-study-app-for-cornell-students", "destination": "/best-study-app-for-cornell-students.html" },
+    { "source": "/best-study-app-for-upenn-students", "destination": "/best-study-app-for-upenn-students.html" },
+    { "source": "/best-study-app-for-rutgers-students", "destination": "/best-study-app-for-rutgers-students.html" },
+    { "source": "/best-study-app-for-university-of-pittsburgh-students", "destination": "/best-study-app-for-university-of-pittsburgh-students.html" }
   ]
 }
