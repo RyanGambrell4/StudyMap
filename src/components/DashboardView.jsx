@@ -198,13 +198,14 @@ export default function DashboardView({
     () => sessionStorage.getItem('studyedge_ai_chip_dismissed') === '1'
   )
   const showAiChip = plan === 'free' && aiUsed >= 1 && !aiChipDismissed
+  const aiChipTrialEligible = showAiChip && !hasUsedTrial()
   const [trialCardDismissed, setTrialCardDismissed] = useState(() => {
     const ts = localStorage.getItem('studyedge_trial_card_dismissed_at')
     if (!ts) return false
     const hoursSince = (Date.now() - parseInt(ts, 10)) / 3_600_000
     return hoursSince < 24
   })
-  const showTrialCard = plan === 'free' && !hasUsedTrial() && !trialCardDismissed
+  const showTrialCard = plan === 'free' && !hasUsedTrial() && !trialCardDismissed && !showAiChip
   const { currentStreak, recordCompletion } = useStreak()
   const celebrate = useCelebration()
   const streak = currentStreak
@@ -538,7 +539,7 @@ export default function DashboardView({
               }}
               style={{ marginTop: 16, background: 'none', border: 'none', fontSize: 13, color: D.textMuted, cursor: 'pointer', textDecoration: 'underline', textDecorationColor: 'rgba(0,0,0,0.2)' }}
             >
-              Explore the study tools first
+              See what Pro unlocks →
             </button>
           )}
         </div>
@@ -625,7 +626,13 @@ export default function DashboardView({
             <span style={{ fontSize: 12, color: D.amber, fontWeight: 600 }}>
               {Math.max(0, 2 - aiUsed)} AI message{Math.max(0, 2 - aiUsed) !== 1 ? 's' : ''} left
             </span>
-            <button onClick={() => onShowPaywall?.('ai')} style={{ fontSize: 12, fontWeight: 700, color: D.accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Upgrade</button>
+            {aiChipTrialEligible ? (
+              <button onClick={handleStartTrial} disabled={trialBannerLoading} style={{ fontSize: 12, fontWeight: 700, color: D.blue, background: 'none', border: 'none', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', padding: 0, opacity: trialBannerLoading ? 0.7 : 1 }}>
+                {trialBannerLoading ? 'Loading…' : 'Start free trial →'}
+              </button>
+            ) : (
+              <button onClick={() => onShowPaywall?.('ai')} style={{ fontSize: 12, fontWeight: 700, color: D.accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Upgrade</button>
+            )}
             <button onClick={() => { sessionStorage.setItem('studyedge_ai_chip_dismissed', '1'); setAiChipDismissed(true) }} style={{ fontSize: 16, color: D.textDim, background: 'none', border: 'none', cursor: 'pointer', padding: '0 2px', lineHeight: 1 }} aria-label="Dismiss">×</button>
           </div>
         )}
