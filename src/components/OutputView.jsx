@@ -28,7 +28,7 @@ import AppShell from './AppShell'
 import DashboardView from './DashboardView'
 import { useSessionReminders } from '../utils/useSessionReminders'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, hasUsedTrial } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, hasUsedTrial, canUseFeature } from '../lib/subscription'
 const CoursesView    = lazy(() => import('./CoursesView'))
 const ProgressView   = lazy(() => import('./ProgressView'))
 const StudyToolsView = lazy(() => import('./StudyToolsView'))
@@ -841,6 +841,11 @@ export default function OutputView({
     if (getActivePlan() === 'free') {
       if (!canUseFocusMinutes(1)) {
         onShowPaywall?.('focus')
+        return
+      }
+      // Check blueprint limit before opening blueprint screen (1 total on free plan)
+      if (!canUseFeature('blueprint').allowed) {
+        onShowPaywall?.('blueprint')
         return
       }
       // Allow free users to start — FocusMode enforces the 30-min daily cap internally
