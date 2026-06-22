@@ -135,7 +135,7 @@ ${preheader(courseNames.length ? `Your ${courseNames[0]} sessions are still here
             <p style="margin:0 0 12px;font-size:13px;color:#6B6B6B;line-height:1.55;">
               ${trialUsed
                 ? 'Unlock unlimited AI tutoring, brain dumps, cheat sheets, and more.'
-                : 'Try all Pro features free for 3 days — no card required.'}
+                : 'Try all Pro features free for 3 days — $2.99/wk after, cancel anytime.'}
             </p>
             <a href="https://getstudyedge.com/app?upgrade=1" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">
               ${trialUsed ? 'Upgrade to Pro →' : 'Start free trial →'}
