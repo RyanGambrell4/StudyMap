@@ -67,36 +67,56 @@ export default async function handler(req, res) {
     const gate = await canSendUserEmail(user.id, { priority: 'normal' })
     if (!gate.ok) { skipped++; continue }
 
-    try {
-      await resend.emails.send({
-        from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
-        to: user.email,
-        subject: "Two weeks in. Still on the free plan?",
-        headers: listUnsubscribeHeaders(user.email),
-        html: `<!DOCTYPE html>
-<html lang="en">
-<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Two weeks on StudyEdge</title></head>
-<body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-${preheader("Two weeks on StudyEdge. Still on free? Here's what changes when you upgrade.")}
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
-  <tr><td align="center">
-    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
-      <tr><td style="padding-bottom:20px;text-align:center;">
-        <span style="font-size:16px;font-weight:700;color:#111111;letter-spacing:-0.3px;">StudyEdge</span>
-      </td></tr>
-      <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
+    const trialUsed = !!(sub.trialUsedAt || sub.trial_activated)
+    const upgradeUrl = trialUsed
+      ? `https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day14_winback`
+      : `https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day14_upgrade`
+
+    const subject = trialUsed
+      ? "You tried Pro. What would bring you back?"
+      : "Two weeks in. Still on the free plan?"
+
+    const bodyHtml = trialUsed ? `
+        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Week 2</p>
+        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">You tried Pro. You're back on free.</h1>
+        <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          That's fine — but I want to make sure the price was the only thing holding you back, not the product.
+        </p>
+        <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          Pro is $2.99/wk — less than a coffee. At that price it pays for itself the first time you use it to prep for an exam. Here's what you had during your trial:
+        </p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
+          ${[
+            ['5 courses', 'Your full semester tracked in one place'],
+            ['100 AI actions / month', 'Your always-on tutor for every concept'],
+            ['Unlimited Session Blueprints', 'A focused plan before every study block'],
+            ['Unlimited Focus sessions', 'No 30-min cap — study as long as you need'],
+            ['Cheat Sheets, Brain Dumps, Exam Rescue', 'The full toolkit for any situation'],
+          ].map(([feat, detail]) => `
+          <tr>
+            <td style="padding:10px 0;border-bottom:1px solid #F0EDE8;">
+              <div style="font-size:14px;font-weight:600;color:#111111;">${feat}</div>
+              <div style="font-size:13px;color:#6B6B6B;margin-top:2px;">${detail}</div>
+            </td>
+          </tr>`).join('')}
+        </table>
+        <table cellpadding="0" cellspacing="0" style="width:100%;">
+          <tr><td align="center" style="padding-bottom:6px;">
+            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Upgrade to Pro — $2.99/wk</a>
+          </td></tr>
+          <tr><td align="center">
+            <span style="font-size:12px;color:#9B9B9B;">$2.99/wk · Cancel in account anytime</span>
+          </td></tr>
+        </table>` : `
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Week 2 check-in</p>
         <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">You've been using StudyEdge for 2 weeks.</h1>
-        <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          You're on the free plan, which is a one-time preview: 1 course, 2 lifetime AI tutor messages, and a single use of each Pro feature. If you've been hitting those limits, Pro is the right move.
-        </p>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           You've been on StudyEdge for two weeks. That makes you one of the students who's actually trying. Free plan or not, that matters. Here's what Pro adds if you're ready for it:
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
             ['5 courses', 'Track every class, not just one'],
-            ['100 AI actions / month', '50x more than free. Enough for daily use.'],
+            ['100 AI actions / month', 'Enough for daily use all semester'],
             ['AI Study Coach, on demand', 'Multi-week plan built around your exam dates, re-runnable any time'],
             ['Unlimited Session Blueprints', 'Know exactly what to study in every session'],
             ['Unlimited Focus sessions', 'Lock in for as long as you need; no 30-min cap'],
@@ -110,12 +130,32 @@ ${preheader("Two weeks on StudyEdge. Still on free? Here's what changes when you
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day14_upgrade" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Start 3-day free trial</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Start 3-day free trial</a>
           </td></tr>
           <tr><td align="center">
             <span style="font-size:12px;color:#9B9B9B;">3-day trial · $2.99/wk after · Card required · Cancel in account anytime</span>
           </td></tr>
-        </table>
+        </table>`
+
+    try {
+      await resend.emails.send({
+        from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
+        to: user.email,
+        subject,
+        headers: listUnsubscribeHeaders(user.email),
+        html: `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Two weeks on StudyEdge</title></head>
+<body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+${preheader(trialUsed ? "You tried Pro. Here's why most students come back." : "Two weeks on StudyEdge. Still on free? Here's what changes when you upgrade.")}
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
+      <tr><td style="padding-bottom:20px;text-align:center;">
+        <span style="font-size:16px;font-weight:700;color:#111111;letter-spacing:-0.3px;">StudyEdge</span>
+      </td></tr>
+      <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
+        ${bodyHtml}
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">
         <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
