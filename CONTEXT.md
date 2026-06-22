@@ -1300,3 +1300,41 @@ The `AuthScreen` confirmation-pending screen was also tightened:
 - Added an "Open Gmail/Outlook/iCloud Mail" button that deep-links to the user's webmail provider based on their email domain
 - Resend button now has a 60s cooldown (matches Supabase's per-email rate limit) and surfaces "Too many tries" vs generic "Failed" states
 - Existing auto-polling (every 5s for `email_confirmed_at`) preserved
+
+---
+
+## SEO Agent — International (2026-06-10)
+
+Added 18 university landing pages and 1 app gateway page across 4 commits.
+
+**South Africa (9 pages):**
+- `/best-study-app-for-south-african-students` — SA hub
+- `/best-study-app-for-uct-students` — University of Cape Town
+- `/best-study-app-for-wits-students` — University of the Witwatersrand
+- `/best-study-app-for-stellenbosch-students` — Stellenbosch University
+- `/best-study-app-for-up-students` — University of Pretoria (Tuks)
+- `/best-study-app-for-uj-students` — University of Johannesburg
+- `/best-study-app-for-ukzn-students` — University of KwaZulu-Natal
+- `/best-study-app-for-nwu-students` — North-West University
+- `/best-study-app-for-unisa-students` — UNISA (distance learning angle)
+
+**Canada (9 pages):**
+- `/best-study-app-for-canadian-university-students` — Canada hub
+- `/best-study-app-for-university-of-toronto-students` — U of T
+- `/best-study-app-for-ubc-students` — UBC
+- `/best-study-app-for-mcgill-students` — McGill
+- `/best-study-app-for-western-university-students` — Western (Ivey AEO angle)
+- `/best-study-app-for-waterloo-students` — Waterloo (co-op GPA angle)
+- `/best-study-app-for-queens-university-students` — Queen's
+- `/best-study-app-for-mcmaster-students` — McMaster (Medicine competitiveness angle)
+- `/best-study-app-for-university-of-alberta-students` — U of Alberta
+
+**App gateway:**
+- `/studyedge-app` — Log In / Start Free Trial gateway page
+
+**Infrastructure updated:**
+- `vercel.json`: 19 new rewrite rules
+- `public/sitemap.xml`: 19 new URLs with `lastmod 2026-06-10`, priority 0.85–0.9
+- Pushed to main → auto-deployed to getstudyedge.com via Vercel
+
+Each page follows the UCT template: university-specific H1, eyebrow pill, tailored hero copy, 6 feature cards addressing that university's real challenges, stats strip (500,000+ students / 4.8/5 / 3-day free trial), FAQ with 5 questions in JSON-LD, cross-links to sibling university pages, and full JSON-LD (SoftwareApplication + FAQPage + BreadcrumbList).
