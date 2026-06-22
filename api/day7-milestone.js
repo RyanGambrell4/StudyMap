@@ -55,6 +55,7 @@ export default async function handler(req, res) {
     const plan = row?.subscription?.plan ?? 'free'
     const sessionCount = Array.isArray(row?.completed_sessions) ? row.completed_sessions.length : 0
     const courseCount = Array.isArray(row?.courses) ? row.courses.length : 0
+    const trialUsed = !!(row?.subscription?.trialUsedAt || row?.subscription?.trial_activated)
     if (plan !== 'free') { skipped++; continue }
 
     const gate = await canSendUserEmail(user.id, { priority: 'normal' })
@@ -65,11 +66,20 @@ export default async function handler(req, res) {
       ? `You've added ${courseCount} course${courseCount !== 1 ? 's' : ''} and completed ${sessionCount} study session${sessionCount !== 1 ? 's' : ''}. Solid start.`
       : `You signed up a week ago but haven't started yet. That's okay. Most people take a few days to get going.`
 
+    const upgradeUrl = trialUsed
+      ? `https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day7_winback`
+      : `https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day7_milestone`
+    const ctaLabel = trialUsed ? 'Upgrade to Pro — $2.99/wk' : 'Start 3-day free trial'
+    const ctaFootnote = trialUsed ? '$2.99/wk · Cancel in account anytime' : '3-day trial · $2.99/wk after · Card required · Cancel in account anytime'
+    const valueClose = trialUsed
+      ? `Pro is <strong style="color:#111111;">$2.99/week</strong>, less than a coffee. Everything you had during your trial, permanently.`
+      : `Pro is <strong style="color:#111111;">$2.99/week</strong>, less than a coffee. Try it free for 3 days. Card required, auto-renews unless you cancel.`
+
     try {
       await resend.emails.send({
         from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
         to: user.email,
-        subject: "One week in. Here's what you're still missing.",
+        subject: trialUsed ? "One week in. Ready to go back to Pro?" : "One week in. Here's what you're still missing.",
         headers: listUnsubscribeHeaders(user.email),
         html: `<!DOCTYPE html>
 <html lang="en">
@@ -104,15 +114,13 @@ ${preheader("One week in. Here's what the free plan can't give you - and what Pr
             </td>
           </tr>`).join('')}
         </table>
-        <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro is <strong style="color:#111111;">$2.99/week</strong>, less than a coffee. Try it free for 3 days. Card required, auto-renews unless you cancel.
-        </p>
+        <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">${valueClose}</p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day7_milestone" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Start 3-day free trial</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">${ctaLabel}</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">3-day trial · $2.99/wk after · Card required · Cancel in account anytime</span>
+            <span style="font-size:12px;color:#9B9B9B;">${ctaFootnote}</span>
           </td></tr>
         </table>
       </td></tr>
