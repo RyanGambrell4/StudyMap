@@ -8,7 +8,7 @@ import {
   appendSessionRecall,
 } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, getFocusMinutesUsed, incrementFeatureUsage, FREE_LIMITS } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, getFocusMinutesUsed, incrementFeatureUsage, FREE_LIMITS, hasUsedTrial } from '../lib/subscription'
 import { sliderToRecall } from '../utils/adaptationEngine'
 import { useCelebration } from '../utils/useCelebration'
 import { extractText } from '../utils/extractText'
@@ -1284,12 +1284,12 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                   <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: '#1e3a8a' }}>
                     You've hit today's 30-min free limit.
                   </p>
-                  <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>Upgrade for unlimited focus sessions, AI tutoring, and full blueprints.</p>
+                  <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>{hasUsedTrial() ? 'Upgrade to Pro for unlimited focus sessions, AI tutoring, and full blueprints.' : 'Start your free trial for unlimited focus sessions, AI tutoring, and full blueprints.'}</p>
                   <button
                     onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'focus-limit' } }))}
                     style={{ padding: '10px 20px', background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
                   >
-                    Unlock unlimited sessions →
+                    {hasUsedTrial() ? 'Upgrade to Pro →' : 'Start free trial →'}
                   </button>
                 </div>
               ) : (
@@ -1302,7 +1302,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'focus-complete' } }))}
                     style={{ flexShrink: 0, padding: '7px 14px', background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer' }}
                   >
-                    Upgrade →
+                    {hasUsedTrial() ? 'Upgrade →' : 'Free trial →'}
                   </button>
                 </div>
               )
@@ -1452,7 +1452,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               {/* Paywall hint for free users */}
               {getActivePlan() === 'free' && (
                 <p style={{ fontSize: 11.5, color: '#9B9B9B', textAlign: 'center', marginTop: 14 }}>
-                  Upgrade to let your plan adapt based on this rating.
+                  {hasUsedTrial() ? 'Upgrade to Pro to let your plan adapt based on this rating.' : 'Start your free trial to let your plan adapt based on this rating.'}
                 </p>
               )}
             </div>
