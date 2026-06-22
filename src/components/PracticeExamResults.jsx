@@ -353,7 +353,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
           <div style={{ background: 'linear-gradient(135deg, rgba(59,97,196,0.06), rgba(99,102,241,0.06))', border: '1px solid rgba(59,97,196,0.22)', borderRadius: 18, padding: 18, marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 220 }}>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>You've used your free practice exam.</p>
-              <p style={{ margin: '3px 0 0', fontSize: 13, color: '#6B6B6B', lineHeight: 1.5 }}>Upgrade to Pro for unlimited practice exams, AI scoring, and score trend analytics.</p>
+              <p style={{ margin: '3px 0 0', fontSize: 13, color: '#6B6B6B', lineHeight: 1.5 }}>{hasUsedTrial() ? 'Upgrade to Pro for unlimited practice exams, AI scoring, and score trend analytics.' : 'Start your free trial — unlimited practice exams, AI scoring, and score trend analytics.'}</p>
             </div>
             <button
               onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'practice-exam-results' } }))}

@@ -212,6 +212,16 @@ const LIMIT_MESSAGES = {
     title: 'Unlimited quizzes, any topic.',
     body: "Self-testing is the most effective study technique. Pro generates unlimited quizzes from any topic or your uploaded notes — on demand, all semester.",
   },
+  'streak-milestone': {
+    tag: 'Your streak is worth protecting',
+    title: 'Keep your streak going with Pro.',
+    body: "You've built a real habit. Pro gives you unlimited AI tutoring, blueprints, and focus sessions — so nothing slows you down.",
+  },
+  'drill-result': {
+    tag: 'Keep drilling weak spots',
+    title: 'Unlimited Topic Drills, all semester.',
+    body: "Drilling is how knowledge sticks. Pro gives you unlimited topic drills so you can target every weak area before exam day.",
+  },
 }
 
 const TESTIMONIALS = [
