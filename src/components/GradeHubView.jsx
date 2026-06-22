@@ -130,29 +130,70 @@ function IcoArrow()    { return <svg width="11" height="11" viewBox="0 0 24 24" 
 // ── Locked state ──────────────────────────────────────────────────────────────
 function LockedState({ onShowPaywall }) {
   const trialUsed = hasUsedTrial()
+  const fakeRows = [
+    { label: 'Midterm Exam',    weight: '25%', score: '82 / 100', grade: 'B',  color: '#3B61C4' },
+    { label: 'Lab Report 3',    weight: '10%', score: '91 / 100', grade: 'A-', color: '#16A34A' },
+    { label: 'Problem Set 4',   weight: '8%',  score: '—',        grade: '—',  color: '#D97706' },
+    { label: 'Final Exam',      weight: '35%', score: '—',        grade: '—',  color: '#D97706' },
+  ]
   return (
-    <div style={{ padding: '60px 32px', textAlign: 'center' }}>
-      <div style={{
-        width: 52, height: 52, borderRadius: 14, margin: '0 auto 16px',
-        background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)',
-        display: 'grid', placeItems: 'center', color: D.indigo,
-      }}>
-        <IcoShield />
+    <div style={{ position: 'relative', minHeight: 480, background: D.bg, overflow: 'hidden' }}>
+      {/* Ghost preview */}
+      <div style={{ filter: 'blur(4px)', opacity: 0.4, pointerEvents: 'none', userSelect: 'none', padding: '28px 32px' }}>
+        <div style={{ display: 'flex', gap: 16, marginBottom: 20 }}>
+          <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: '16px 20px', flex: 1 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Current Grade</div>
+            <div style={{ fontSize: 36, fontWeight: 800, color: '#3B61C4', letterSpacing: -1 }}>83.4%</div>
+            <div style={{ fontSize: 13, color: '#6B6B6B', marginTop: 4 }}>B+ · On track for A-</div>
+          </div>
+          <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: '16px 20px', flex: 1 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Need on Final</div>
+            <div style={{ fontSize: 36, fontWeight: 800, color: '#16A34A', letterSpacing: -1 }}>78%</div>
+            <div style={{ fontSize: 13, color: '#6B6B6B', marginTop: 4 }}>to hit your A- target</div>
+          </div>
+        </div>
+        <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, overflow: 'hidden' }}>
+          <div style={{ padding: '12px 20px', borderBottom: '1px solid rgba(0,0,0,0.07)', display: 'grid', gridTemplateColumns: '1fr 80px 100px 60px', gap: 12 }}>
+            {['Assignment', 'Weight', 'Score', 'Grade'].map(h => (
+              <div key={h} style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</div>
+            ))}
+          </div>
+          {fakeRows.map((r, i) => (
+            <div key={i} style={{ padding: '12px 20px', borderBottom: i < fakeRows.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none', display: 'grid', gridTemplateColumns: '1fr 80px 100px 60px', gap: 12, alignItems: 'center' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div style={{ width: 4, height: 16, borderRadius: 2, background: r.color }} />
+                <span style={{ fontSize: 13, fontWeight: 500, color: '#111' }}>{r.label}</span>
+              </div>
+              <span style={{ fontSize: 12, color: '#6B6B6B' }}>{r.weight}</span>
+              <span style={{ fontSize: 12, color: '#6B6B6B' }}>{r.score}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: r.grade === '—' ? '#9B9B9B' : r.color }}>{r.grade}</span>
+            </div>
+          ))}
+        </div>
       </div>
-      <div style={{ fontSize: 18, fontWeight: 700, color: D.text, marginBottom: 8 }}>Grade Hub · Pro Feature</div>
-      <p style={{ fontSize: 13.5, color: D.muted, maxWidth: 320, margin: '0 auto 6px', lineHeight: 1.55 }}>
-        Track every assignment, run what-if scenarios, and know exactly what you need on your final to hit your target grade.
-      </p>
-      {!trialUsed && (
-        <p style={{ fontSize: 12, color: D.indigo, fontWeight: 600, margin: '0 auto 20px' }}>Try it free for 3 days — no commitment.</p>
-      )}
-      {trialUsed && <div style={{ marginBottom: 20 }} />}
-      <button
-        onClick={() => onShowPaywall?.('grades')}
-        style={{ padding: '11px 26px', background: '#3B61C4', borderRadius: 10, color: '#fff', fontSize: 13.5, fontWeight: 600, border: 'none', cursor: 'pointer' }}
-      >
-        {trialUsed ? 'Upgrade to Pro' : 'Start 3-day free trial'}
-      </button>
+
+      {/* CTA overlay */}
+      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(247,246,243,0.65)', backdropFilter: 'blur(1px)', padding: 24 }}>
+        <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 20, padding: '36px 32px', maxWidth: 380, width: '100%', textAlign: 'center', boxShadow: '0 16px 48px rgba(0,0,0,0.12)' }}>
+          <div style={{ width: 48, height: 48, borderRadius: 12, margin: '0 auto 16px', background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)', display: 'grid', placeItems: 'center', color: D.indigo }}>
+            <IcoShield />
+          </div>
+          <div style={{ fontSize: 18, fontWeight: 700, color: D.text, marginBottom: 8 }}>Know your grade before it's too late.</div>
+          <p style={{ fontSize: 13.5, color: D.muted, margin: '0 auto 6px', lineHeight: 1.55 }}>
+            Track every assignment, run what-if scenarios, and see exactly what you need on your final to hit your target.
+          </p>
+          {!trialUsed && (
+            <p style={{ fontSize: 12, color: D.indigo, fontWeight: 600, margin: '8px auto 20px' }}>Try it free for 3 days — no commitment.</p>
+          )}
+          {trialUsed && <div style={{ marginBottom: 20 }} />}
+          <button
+            onClick={() => onShowPaywall?.('grades')}
+            style={{ width: '100%', padding: '12px 24px', background: '#3B61C4', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(59,97,196,0.35)' }}
+          >
+            {trialUsed ? 'Upgrade to Pro' : 'Start 3-day free trial →'}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
