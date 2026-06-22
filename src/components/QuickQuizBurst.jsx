@@ -339,7 +339,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
             {!isPro && !canUseFeature('quizBurst').allowed && (
               <div style={{ padding: '14px 16px', background: 'rgba(217,119,6,0.05)', border: '1px solid rgba(217,119,6,0.2)', borderRadius: 12, marginBottom: 8, textAlign: 'center' }}>
                 <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: '#92400E' }}>
-                  You've used your free quiz. Upgrade for unlimited daily practice.
+                  {hasUsedTrial() ? 'You\'ve used your free quiz. Upgrade to Pro for unlimited daily practice.' : 'You\'ve used your free quiz. Start your free trial for unlimited daily practice.'}
                 </p>
                 <button onClick={() => onShowPaywall?.('quizBurst')} style={{ padding: '10px 20px', background: '#D97706', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
                   {hasUsedTrial() ? 'Upgrade to Pro →' : 'Start 3-day free trial →'}

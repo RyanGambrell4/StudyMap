@@ -28,7 +28,7 @@ import AppShell from './AppShell'
 import DashboardView from './DashboardView'
 import { useSessionReminders } from '../utils/useSessionReminders'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, hasUsedTrial } from '../lib/subscription'
 const CoursesView    = lazy(() => import('./CoursesView'))
 const ProgressView   = lazy(() => import('./ProgressView'))
 const StudyToolsView = lazy(() => import('./StudyToolsView'))
@@ -1286,7 +1286,7 @@ export default function OutputView({
                   boxShadow: '0 4px 14px rgba(59,97,196,0.35)',
                 }}
               >
-                Upgrade for $9/month
+                {hasUsedTrial() ? 'Upgrade to Pro — $2.99/wk' : 'Start free trial — 3 days free'}
               </button>
               <button
                 onClick={() => { setShowPaywallAdaptModal(false); setPendingPaywallAdaptation(null) }}
