@@ -236,7 +236,9 @@ h2.section-title { font-family: var(--sans); font-size: clamp(28px, 4vw, 44px); 
 
 /* ── Footer ──────────────────────────────────────────────────────────────── */
 .site-footer { background: var(--bg); border-top: 1px solid var(--border); padding: 48px 24px 40px; text-align: center; }
-.footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px 22px; margin-bottom: 18px; }
+.footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 5px 22px; margin-bottom: 18px; }
+.footer-links strong { margin: 10px 0 0 !important; }
+.footer-links strong:first-child { margin-top: 0 !important; }
 .footer-links a { font-size: 14px; color: var(--text-muted); }
 .footer-links a:hover { color: var(--text); text-decoration: none; }
 .footer-copy { font-size: 13px; color: var(--text-dim); }
