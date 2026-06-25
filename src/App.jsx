@@ -66,6 +66,7 @@ export default function App() {
 
   // ── Checkout success banner ────────────────────────────────────────────────
   const [checkoutSuccess, setCheckoutSuccess] = useState(false)
+  const [checkoutProcessing, setCheckoutProcessing] = useState(false)
 
   // ── Checkout cancel banner ─────────────────────────────────────────────────
   const [showCheckoutCancelBanner, setShowCheckoutCancelBanner] = useState(false)
@@ -236,21 +237,27 @@ export default function App() {
     window.history.replaceState({}, '', window.location.pathname)
 
     let attempts = 0
-    const MAX_ATTEMPTS = 10
+    const MAX_ATTEMPTS = 20
     let cancelled = false
 
     const poll = async () => {
       if (cancelled) return
       try { await refreshSubscription(session.user.id) } catch (e) { console.error('[checkout success] refresh failed:', e) }
       const plan = getActivePlan()
-      if (plan !== 'free' || attempts >= MAX_ATTEMPTS) {
+      if (plan !== 'free') {
         track('checkout_success', { plan })
         identifyUser(session.user.id, { plan })
+        setCheckoutProcessing(false)
         setCheckoutSuccess(true)
         return
       }
+      if (attempts >= MAX_ATTEMPTS) {
+        // Webhook hasn't arrived yet — show a processing state instead of false success
+        setCheckoutProcessing(true)
+        return
+      }
       attempts++
-      setTimeout(poll, 1000)
+      setTimeout(poll, 1500)
     }
     poll()
     return () => { cancelled = true }
@@ -740,6 +747,20 @@ export default function App() {
           <span style={{ color: '#047857', fontSize: 14, fontWeight: 600 }}>You're on the plan. Welcome!</span>
           <button
             onClick={() => setCheckoutSuccess(false)}
+            style={{ marginLeft: 8, background: 'none', border: 'none', color: '#9B9B9B', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}
+          >×</button>
+        </div>
+      )}
+      {checkoutProcessing && (
+        <div style={{
+          position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)',
+          background: '#FFFFFF', border: '1px solid #BFDBFE', borderRadius: 12,
+          padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12,
+          boxShadow: '0 8px 32px rgba(0,0,0,0.10)', zIndex: 9999, whiteSpace: 'nowrap',
+        }}>
+          <span style={{ color: '#1D4ED8', fontSize: 14, fontWeight: 600 }}>Payment received — activating your plan…</span>
+          <button
+            onClick={() => setCheckoutProcessing(false)}
             style={{ marginLeft: 8, background: 'none', border: 'none', color: '#9B9B9B', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}
           >×</button>
         </div>
