@@ -1,8 +1,13 @@
 // OpenAI embeddings for semantic similarity
 // Env var: OPENAI_API_KEY
 
+import { verifyAuth } from '../lib/server/usage.js'
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
+
+  const auth = await verifyAuth(req, { requireEmailConfirmed: false })
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) return res.status(503).json({ error: 'Embeddings not configured', embeddings: [] })

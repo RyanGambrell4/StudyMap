@@ -1,8 +1,13 @@
 // YouTube Data API v3 - contextual video suggestions during study sessions
 // Env var: YOUTUBE_API_KEY
 
+import { verifyAuth } from '../lib/server/usage.js'
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
+
+  const auth = await verifyAuth(req, { requireEmailConfirmed: false })
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const apiKey = process.env.YOUTUBE_API_KEY
   if (!apiKey) return res.status(503).json({ error: 'YouTube not configured', videos: [] })

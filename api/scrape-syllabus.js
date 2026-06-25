@@ -15,8 +15,22 @@ export default async function handler(req, res) {
   const { url, courseName } = req.body ?? {}
   if (!url) return res.status(400).json({ error: 'url required' })
 
-  // Validate URL
-  try { new URL(url) } catch { return res.status(400).json({ error: 'Invalid URL' }) }
+  // Validate URL and block SSRF targets (private IPs, localhost, cloud metadata)
+  let parsedUrl
+  try { parsedUrl = new URL(url) } catch { return res.status(400).json({ error: 'Invalid URL' }) }
+  if (!['http:', 'https:'].includes(parsedUrl.protocol)) {
+    return res.status(400).json({ error: 'Invalid URL' })
+  }
+  const hostname = parsedUrl.hostname
+  const ssrfDenylist = [
+    /^localhost$/i, /^127\./, /^0\.0\.0\./,
+    /^10\./, /^172\.(1[6-9]|2\d|3[01])\./, /^192\.168\./,
+    /^169\.254\./, /^100\.64\./, /^198\.51\.100\./, /^203\.0\.113\./,
+    /^::1$/, /^fc[\da-f]{2}:/i, /^fe80:/i,
+  ]
+  if (ssrfDenylist.some(p => p.test(hostname))) {
+    return res.status(400).json({ error: 'Invalid URL' })
+  }
 
   const now = new Date()
   const currentYear = now.getFullYear()

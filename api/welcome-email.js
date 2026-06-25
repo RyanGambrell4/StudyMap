@@ -3,12 +3,16 @@ import { Resend } from 'resend'
 import { upsertContact, triggerEvent } from '../lib/server/loops.js'
 import { logUserEvent } from '../lib/server/axiom.js'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
+import { verifyAuth } from '../lib/server/usage.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
+
+  const auth = await verifyAuth(req, { requireEmailConfirmed: false })
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   let body
   try {
@@ -19,6 +23,7 @@ export default async function handler(req, res) {
 
   const { email, userId, firstName, createdAt } = body
   if (!email) return res.status(400).json({ error: 'Missing email' })
+  if (userId && userId !== auth.userId) return res.status(403).json({ error: 'Forbidden' })
 
   // Server-side guard: only send if the account is truly new (< 30 min old).
   // Prevents re-sends from new devices/browsers where localStorage is empty.

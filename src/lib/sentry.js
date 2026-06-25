@@ -10,7 +10,7 @@ export function initSentry() {
     environment: import.meta.env.MODE,
     integrations: [
       Sentry.browserTracingIntegration(),
-      Sentry.replayIntegration({ maskAllText: false, blockAllMedia: false }),
+      Sentry.replayIntegration({ maskAllText: true, blockAllMedia: true }),
     ],
     tracesSampleRate: 0.2,   // 20% of transactions
     replaysSessionSampleRate: 0.05,

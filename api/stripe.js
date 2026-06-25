@@ -790,6 +790,16 @@ export default async function handler(req, res) {
     }
   }
 
+  // If the request includes a Bearer token, verify it matches the userId in the body.
+  // This blocks an attacker who knows a victim's UUID from creating a checkout on their behalf.
+  const checkoutToken = req.headers['authorization']?.replace('Bearer ', '').trim()
+  if (checkoutToken && body.userId) {
+    const { data: { user: checkoutUser }, error: checkoutAuthErr } = await supabaseAdmin.auth.getUser(checkoutToken)
+    if (checkoutAuthErr || !checkoutUser || checkoutUser.id !== body.userId) {
+      return res.status(403).json({ error: 'Forbidden' })
+    }
+  }
+
   const { plan, billingPeriod: rawBillingPeriod, userEmail, userId, trial } = body
 
   // Normalize billing period aliases: 'annual' → 'yearly'.

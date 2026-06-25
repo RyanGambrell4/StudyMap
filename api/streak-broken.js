@@ -8,7 +8,7 @@ const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABAS
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).end()
   const secret = process.env.CRON_SECRET
-  if (secret && req.headers['authorization'] !== `Bearer ${secret}`) {
+  if (!secret || req.headers['authorization'] !== `Bearer ${secret}`) {
     return res.status(401).json({ error: 'Unauthorized' })
   }
   if (!process.env.RESEND_API_KEY) return res.status(200).json({ ok: true, skipped: true })

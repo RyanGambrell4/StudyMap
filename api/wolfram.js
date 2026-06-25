@@ -1,8 +1,13 @@
 // Wolfram Alpha Short Answers API
 // Env var: WOLFRAM_APP_ID
 
+import { verifyAuth } from '../lib/server/usage.js'
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
+
+  const auth = await verifyAuth(req, { requireEmailConfirmed: false })
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const appId = process.env.WOLFRAM_APP_ID
   if (!appId) return res.status(503).json({ error: 'Wolfram not configured' })

@@ -1,12 +1,16 @@
 import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
+import { verifyAuth } from '../lib/server/usage.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
+
+  const auth = await verifyAuth(req, { requireEmailConfirmed: false })
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   let body
   try {
@@ -17,6 +21,7 @@ export default async function handler(req, res) {
 
   const { userId, courseName } = body
   if (!userId) return res.status(400).json({ error: 'Missing userId' })
+  if (userId !== auth.userId) return res.status(403).json({ error: 'Forbidden' })
   if (!process.env.RESEND_API_KEY) return res.status(200).json({ ok: true, skipped: true })
 
   const { data: row } = await supabaseAdmin
