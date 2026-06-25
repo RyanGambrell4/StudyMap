@@ -460,22 +460,31 @@ export default async function handler(req, res) {
       return res.status(200).json({ ok: true, duplicate: true })
     }
 
-    // ── Trial expiry warning (fires 3 days before trial ends) ─────────────────
+    // ── Trial expiry warning (Stripe fires this 3 days before trial ends) ───────
+    // For a 3-day trial this fires immediately on signup — skip it here and let
+    // the daily cron (trial-warning.js) send the email on the actual last day.
+    // Only send if the trial genuinely ends within 36 hours so the copy is right.
     if (event.type === 'customer.subscription.trial_will_end') {
       const sub = event.data.object
-      const userId = sub.metadata?.user_id
-      if (userId) {
-        const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
-        const email = authUser?.user?.email
-        if (email) {
-          await sendTrialExpiryEmail(email)
-          await Promise.allSettled([
-            onTrialEndingSoon({ email, userId, daysLeft: 3 }),
-          ])
+      const hoursLeft = sub.trial_end
+        ? (sub.trial_end - Math.floor(Date.now() / 1000)) / 3600
+        : 999
+      if (hoursLeft <= 36) {
+        const userId = sub.metadata?.user_id
+        if (userId) {
+          const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
+          const email = authUser?.user?.email
+          if (email) {
+            await sendTrialExpiryEmail(email)
+            await Promise.allSettled([
+              onTrialEndingSoon({ email, userId, daysLeft: 1 }),
+            ])
+          }
         }
+      } else {
+        console.log(`[stripe webhook] trial_will_end skipped — ${Math.round(hoursLeft)}h left, letting cron handle it`)
       }
-      // Record idempotency here - this handler returns early and never reaches the
-      // global insert below, so Stripe retries would re-send the email without this.
+      // Always record idempotency so this event isn't reprocessed on Stripe retry.
       await supabaseAdmin
         .from('stripe_idempotency')
         .insert({ event_id: eventId, processed_at: new Date().toISOString() })
