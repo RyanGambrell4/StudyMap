@@ -206,11 +206,25 @@ export default function DashboardView({
     return hoursSince < 24
   })
   const showTrialCard = plan === 'free' && !hasUsedTrial() && !trialCardDismissed && !showAiChip
-  const { currentStreak, recordCompletion } = useStreak()
+  const { currentStreak, lastCompletedDate, recordCompletion } = useStreak()
   const celebrate = useCelebration()
   const streak = currentStreak
   const [aiBriefDismissed, setAiBriefDismissed] = useState(() =>
     sessionStorage.getItem('studyedge_brief_dismissed') === '1'
+  )
+  const [streakBannerDismissed, setStreakBannerDismissed] = useState(() =>
+    sessionStorage.getItem('se_streak_banner_dismissed') === '1'
+  )
+  // Streak is "broken" when they had a multi-day streak but didn't study yesterday or today.
+  // currentStreak still holds the old value (resets only on next recordCompletion call).
+  const todayStr = new Date().toISOString().split('T')[0]
+  const yesterdayStr = (() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().split('T')[0] })()
+  const isStreakBroken = !!(
+    lastCompletedDate &&
+    lastCompletedDate !== todayStr &&
+    lastCompletedDate !== yesterdayStr &&
+    currentStreak > 1 &&
+    !streakBannerDismissed
   )
   const [sessionIdx, setSessionIdx] = useState(0)
   const [upNextHovered, setUpNextHovered] = useState(false)
@@ -824,6 +838,46 @@ export default function DashboardView({
           </div>
         </div>
       ) : null}
+
+      {/* ── Broken streak recovery banner ── */}
+      {isStreakBroken && (
+        <div style={{ padding: '0 32px 4px' }}>
+          <div style={{
+            background: '#FFFBEB',
+            border: '1px solid rgba(217,119,6,0.2)',
+            borderLeft: '4px solid #F97316',
+            borderRadius: 10,
+            padding: '12px 16px',
+            display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+          }}>
+            <span style={{ fontSize: 22 }}>🔥</span>
+            <div style={{ flex: 1, minWidth: 180 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#92400E' }}>
+                Your {currentStreak}-day streak broke.
+              </p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: '#B45309', lineHeight: 1.4 }}>
+                Start a session today to rebuild it.
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+              <button
+                onClick={() => {
+                  track('streak_recovery_cta_clicked', { streak: currentStreak })
+                  onNavigateToCourses?.()
+                }}
+                style={{ background: '#F97316', border: 'none', borderRadius: 8, padding: '7px 14px', fontSize: 12, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                Start a session →
+              </button>
+              <button
+                onClick={() => { sessionStorage.setItem('se_streak_banner_dismissed', '1'); setStreakBannerDismissed(true); track('streak_recovery_banner_dismissed', { streak: currentStreak }) }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#B45309', fontSize: 18, lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
+                aria-label="Dismiss"
+              >×</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Grid ── */}
       <div className="dash-grid" style={{ padding: '20px 32px 48px', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>

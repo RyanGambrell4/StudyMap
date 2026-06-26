@@ -1664,6 +1664,8 @@ export default function OutputView({
                 restDays={restDays}
                 onToggleRestDay={handleToggleRestDay}
                 onBulkRescheduleWeek={handleBulkRescheduleWeek}
+                plan={getActivePlan()}
+                onShowPaywall={onShowPaywall}
               />
             )}
           </div>

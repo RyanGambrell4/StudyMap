@@ -109,6 +109,8 @@ export default function CalendarWeekView({
   restDays = [],          // [dateStr, ...]
   onToggleRestDay,
   onBulkRescheduleWeek,
+  plan = 'free',
+  onShowPaywall,
   theme = 'dark',
 }) {
   const tv = theme_vars(theme === 'dark')
@@ -433,18 +435,29 @@ export default function CalendarWeekView({
               Add session
             </button>
           )}
-          {/* Bulk reschedule - push whole week forward */}
-          {onBulkRescheduleWeek && weekSessionIds.length > 0 && (
+          {/* Bulk reschedule - push whole week forward (Pro feature) */}
+          {weekSessionIds.length > 0 && (onBulkRescheduleWeek || onShowPaywall) && (
             <button
-              onClick={() => onBulkRescheduleWeek(mondayStr, weekSessionIds)}
+              onClick={() => {
+                if (plan !== 'free') {
+                  onBulkRescheduleWeek?.(mondayStr, weekSessionIds)
+                } else {
+                  onShowPaywall?.('schedule')
+                }
+              }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{ color: '#9B6B1A', border: '1px solid rgba(217,119,6,0.25)', backgroundColor: 'rgba(217,119,6,0.06)' }}
-              title="Push all sessions this week forward by 7 days"
+              title={plan === 'free' ? 'Pro feature — reschedule your entire week' : 'Push all sessions this week forward by 7 days'}
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
               </svg>
               Reschedule week
+              {plan === 'free' && (
+                <svg className="w-3 h-3 opacity-60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+              )}
             </button>
           )}
         </div>

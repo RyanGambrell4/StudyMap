@@ -1,16 +1,63 @@
+import crypto from 'crypto'
+import { getRedis } from '../lib/server/redis.js'
+
+const REDIRECT_BASE = 'https://getstudyedge.com/app'
+
 export default async function handler(req, res) {
   const { code, state, error } = req.query
+  const errRedirect = (p) => res.redirect(`${REDIRECT_BASE}?${p === 'notion' ? 'notion' : 'gcal'}=error`)
 
   if (error || !code || !state) {
     console.error('[auth-callback] Missing params - error:', error, '| code present:', !!code, '| state:', state)
-    return res.redirect('https://getstudyedge.com/app?gcal=error')
+    return errRedirect('google')
   }
 
-  // Parse provider and userId from state - format: "provider:userId" or legacy "userId"
+  // ── Parse state parameter ───────────────────────────────────────────────────
+  // New format: "provider:nonce[.sig]" — nonce is pure hex (no hyphens)
+  // Legacy format: "provider:uuid" — uuid contains hyphens
   let provider = 'google'
-  let userId = state
-  if (state.startsWith('google:')) { provider = 'google'; userId = state.slice(7) }
-  else if (state.startsWith('notion:')) { provider = 'notion'; userId = state.slice(7) }
+  let stateContent = state
+  if (state.startsWith('google:')) { provider = 'google'; stateContent = state.slice(7) }
+  else if (state.startsWith('notion:')) { provider = 'notion'; stateContent = state.slice(7) }
+
+  // Detect format by presence of hyphens (UUID = legacy, hex = new nonce)
+  const isLegacy = /^[0-9a-f]{8}-/.test(stateContent)
+
+  let userId
+  if (isLegacy) {
+    // Legacy format: stateContent is the bare userId
+    userId = stateContent
+    console.warn('[auth-callback] Processing legacy state format (no CSRF protection)')
+  } else {
+    // New format: stateContent is "nonce[.sig]"
+    const dotIdx = stateContent.indexOf('.')
+    const rawNonce = dotIdx >= 0 ? stateContent.slice(0, dotIdx) : stateContent
+    const sig = dotIdx >= 0 ? stateContent.slice(dotIdx + 1) : ''
+
+    // Verify HMAC signature if OAUTH_STATE_SECRET is set
+    const secret = process.env.OAUTH_STATE_SECRET
+    if (secret && sig) {
+      const expected = crypto.createHmac('sha256', secret).update(rawNonce).digest('hex').slice(0, 16)
+      if (sig !== expected) {
+        console.error('[auth-callback] Invalid state signature — possible CSRF attempt')
+        return errRedirect(provider)
+      }
+    }
+
+    // Look up nonce in Redis and mark as used (one-time)
+    const redis = getRedis()
+    if (!redis) {
+      console.error('[auth-callback] Redis unavailable — cannot verify nonce')
+      return errRedirect(provider)
+    }
+    const stored = await redis.get(`oauth:${rawNonce}`)
+    if (!stored || stored === 'used') {
+      console.error('[auth-callback] Nonce missing or already used — possible replay attack')
+      return errRedirect(provider)
+    }
+    userId = stored
+    await redis.set(`oauth:${rawNonce}`, 'used', 60)
+  }
 
   try {
     const supabaseUrl = process.env.SUPABASE_URL
