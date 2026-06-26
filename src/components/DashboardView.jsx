@@ -217,7 +217,6 @@ export default function DashboardView({
   )
   // Streak is "broken" when they had a multi-day streak but didn't study yesterday or today.
   // currentStreak still holds the old value (resets only on next recordCompletion call).
-  const todayStr = new Date().toISOString().split('T')[0]
   const yesterdayStr = (() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().split('T')[0] })()
   const isStreakBroken = !!(
     lastCompletedDate &&
