@@ -471,7 +471,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
               ))}
             </div>
             <p style={{ color: 'rgba(255,255,255,.3)', fontSize: '0.74rem' }}>
-              Joined by <span style={{ color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>2,400+</span> students
+              Joined by <span style={{ color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>400+</span> students
             </p>
           </div>
         </div>
@@ -666,7 +666,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
               </svg>
             ))}
           </div>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,.38)', fontWeight: 500 }}>Loved by 2,400+ students</span>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,.38)', fontWeight: 500 }}>Loved by 400+ students</span>
         </div>
 
         {/* Primary CTA */}
