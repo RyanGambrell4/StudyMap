@@ -484,12 +484,10 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         style={{ maxWidth: 460, width: '100%', position: 'relative', zIndex: 1 }}
       >
         {/* Badge */}
-        <div style={{ textAlign: 'center', marginBottom: 22 }}>
+        <div style={{ textAlign: 'center', marginBottom: 18 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'linear-gradient(135deg, rgba(107,143,255,.15), rgba(167,139,250,.15))', border: '1px solid rgba(167,139,250,.35)', borderRadius: 999, padding: '6px 18px', fontSize: 11, fontWeight: 700, color: '#A78BFA', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-            <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-            </svg>
-            3 days free · cancel anytime
+            <span style={{ display: 'inline-block', width: 7, height: 7, background: '#A78BFA', borderRadius: '50%', animation: 'pulse 1.8s ease-in-out infinite' }} />
+            New account offer · expires in 24h
           </div>
         </div>
 
@@ -503,7 +501,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           </span>
         </h1>
         <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.9rem', textAlign: 'center', marginBottom: 28, lineHeight: 1.65 }}>
-          Full access. No restrictions. See how much sharper you study before paying a cent.
+          Full access, no restrictions. See how much sharper you study — before paying a cent.
         </p>
 
         {/* Feature list */}
@@ -576,25 +574,24 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           {trialLoading ? 'Loading…' : 'Start my 3-day free trial →'}
         </button>
 
-        <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.25)', fontSize: '0.71rem', marginBottom: 14 }}>
-          $0 today · auto-bills $2.99/wk after trial · cancel any time
+        <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.25)', fontSize: '0.71rem', marginBottom: 18 }}>
+          $0 today · card required · auto-bills $2.99/wk after trial · cancel any time
         </p>
 
-        {/* Skip */}
+        {/* Skip — intentionally low-prominence text link */}
         <button
           onClick={() => { track('trial_skipped', { source: 'onboarding' }); completeWith(profileData, { trialTaken: false }) }}
           style={{
-            display: 'block', width: '100%', padding: '13px',
-            background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.09)',
-            borderRadius: 12, color: 'rgba(255,255,255,.45)',
-            fontFamily: 'inherit', fontSize: '0.88rem', fontWeight: 600,
-            cursor: 'pointer', textAlign: 'center', marginBottom: 14,
-            transition: 'all .15s',
+            background: 'none', border: 'none', padding: '6px',
+            color: 'rgba(255,255,255,.18)', fontSize: '0.74rem',
+            cursor: 'pointer', textAlign: 'center', display: 'block',
+            width: '100%', fontFamily: 'inherit', marginBottom: 10,
+            transition: 'color .15s',
           }}
-          onMouseEnter={e => { e.currentTarget.style.background = 'rgba(255,255,255,.09)'; e.currentTarget.style.color = 'rgba(255,255,255,.75)' }}
-          onMouseLeave={e => { e.currentTarget.style.background = 'rgba(255,255,255,.05)'; e.currentTarget.style.color = 'rgba(255,255,255,.45)' }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,.38)' }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,.18)' }}
         >
-          Continue with free plan
+          No thanks, I'll stick with the free plan
         </button>
 
         <div style={{ textAlign: 'center' }}>

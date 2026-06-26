@@ -79,13 +79,19 @@ export default async function handler(req, res) {
 
   // ── PostHog: signup -> checkout_started conversion ───────────────────────
   let phSignups24h = null
+  let phEmailConfirmed24h = null
+  let phOnboardingCompleted24h = null
+  let phTrialSkipped24h = null
   let phCheckoutStarted24h = null
   let phRate = null
   let phErr = null
   if (POSTHOG_PERSONAL_API_KEY) {
     try {
-      ;[phSignups24h, phCheckoutStarted24h] = await Promise.all([
+      ;[phSignups24h, phEmailConfirmed24h, phOnboardingCompleted24h, phTrialSkipped24h, phCheckoutStarted24h] = await Promise.all([
         posthogEventCount('signup_completed', last24h),
+        posthogEventCount('email_confirmed', last24h),
+        posthogEventCount('onboarding_completed', last24h),
+        posthogEventCount('trial_skipped', last24h),
         posthogEventCount('checkout_started', last24h),
       ])
       if (phSignups24h > 0) phRate = phCheckoutStarted24h / phSignups24h
@@ -106,9 +112,20 @@ export default async function handler(req, res) {
   }
   const isFunnelDrop = phSignups24h !== null && phSignups24h > 5 && phRate !== null && phRate < 0.30
   if (isFunnelDrop) {
+    // Build a diagnostic hint based on where the funnel is dropping
+    let hint = 'Check Stripe is being called on the post-signup redirect.'
+    if (phEmailConfirmed24h !== null && phSignups24h > 0) {
+      const emailRate = phEmailConfirmed24h / phSignups24h
+      if (emailRate < 0.50) hint = `Only ${(emailRate * 100).toFixed(0)}% of signups confirmed their email — primary drop-off is at email verification.`
+      else if (phOnboardingCompleted24h !== null && phTrialSkipped24h !== null) {
+        const skipRate = phTrialSkipped24h / Math.max(phOnboardingCompleted24h, 1)
+        if (skipRate > 0.50) hint = `${(skipRate * 100).toFixed(0)}% of users who reached the trial offer skipped it — improve trial offer CRO.`
+        else hint = `Drop-off between onboarding and trial offer. Check trial offer is rendering and checkout session creation is working.`
+      }
+    }
     reasons.push(
-      `Funnel drop: ${phSignups24h} signups in 24h but only ${phCheckoutStarted24h} reached checkout (${(phRate * 100).toFixed(0)}%). ` +
-      `Threshold is 30%. Check Stripe is being called on the post-signup redirect.`
+      `Funnel drop: ${phSignups24h} signups → ${phEmailConfirmed24h ?? '?'} email confirmed → ${phOnboardingCompleted24h ?? '?'} onboarded → ${phCheckoutStarted24h} checkout (${(phRate * 100).toFixed(0)}% total). ` +
+      `Threshold is 30%. ${hint}`
     )
   }
   if (stripeErr) reasons.push(`Stripe API error: ${stripeErr}`)
@@ -128,6 +145,9 @@ export default async function handler(req, res) {
     trialsStartedLast24h,
     trialsStartedLast7d,
     phSignups24h,
+    phEmailConfirmed24h,
+    phOnboardingCompleted24h,
+    phTrialSkipped24h,
     phCheckoutStarted24h,
     phRate,
     phErr,
@@ -155,6 +175,9 @@ export default async function handler(req, res) {
     trialsStartedLast24h,
     trialsStartedLast7d,
     phSignups24h,
+    phEmailConfirmed24h,
+    phOnboardingCompleted24h,
+    phTrialSkipped24h,
     phCheckoutStarted24h,
     phRate,
   })
@@ -223,8 +246,11 @@ function renderEmail(d) {
     <h2 style="font-size:13px;text-transform:uppercase;letter-spacing:0.08em;color:#6B6B6B;margin:24px 0 8px">PostHog funnel (24h)</h2>
     <table style="width:100%;border-collapse:collapse;font-size:14px;color:#111">
       <tr><td style="padding:6px 0;color:#6B6B6B">signup_completed</td><td style="text-align:right;font-weight:600">${d.phSignups24h ?? '-'}</td></tr>
+      <tr><td style="padding:5px 0 5px 16px;color:#9B9B9B;font-size:13px">↳ email_confirmed</td><td style="text-align:right;font-weight:500;color:#6B6B6B">${d.phEmailConfirmed24h ?? '-'}</td></tr>
+      <tr><td style="padding:5px 0 5px 16px;color:#9B9B9B;font-size:13px">↳ onboarding_completed</td><td style="text-align:right;font-weight:500;color:#6B6B6B">${d.phOnboardingCompleted24h ?? '-'}</td></tr>
+      <tr><td style="padding:5px 0 5px 16px;color:#9B9B9B;font-size:13px">↳ trial_skipped</td><td style="text-align:right;font-weight:500;color:#6B6B6B">${d.phTrialSkipped24h ?? '-'}</td></tr>
       <tr><td style="padding:6px 0;color:#6B6B6B">checkout_started</td><td style="text-align:right;font-weight:600">${d.phCheckoutStarted24h ?? '-'}</td></tr>
-      <tr><td style="padding:6px 0;color:#6B6B6B">Conversion rate</td><td style="text-align:right;font-weight:600">${d.phRate !== null ? (d.phRate * 100).toFixed(0) + '%' : '-'}</td></tr>
+      <tr><td style="padding:6px 0;color:#6B6B6B">Conversion rate (signup → checkout)</td><td style="text-align:right;font-weight:700;color:${d.phRate !== null && d.phRate < 0.30 ? '#B91C1C' : '#059669'}">${d.phRate !== null ? (d.phRate * 100).toFixed(0) + '%' : '-'}</td></tr>
     </table>
     ${d.phErr ? `<p style="color:#B91C1C;font-size:12px;margin:8px 0 0">PostHog query failed: ${escapeHtml(d.phErr)}. Set POSTHOG_PERSONAL_API_KEY to enable funnel checks.</p>` : ''}
     <p style="color:#9B9B9B;font-size:11px;margin-top:24px;border-top:1px solid rgba(0,0,0,0.07);padding-top:12px">
