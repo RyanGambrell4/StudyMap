@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react'
 import { track } from '../lib/analytics'
 import { createCheckoutSession, hasUsedTrial } from '../lib/subscription'
 
-const STEP_NAMES = { 1: 'personalize', 2: 'trial_offer' }
+const STEP_NAMES = { 1: 'personalize', 2: 'app_preview', 3: 'trial_offer' }
 
 // Color accent per school type
 const SCHOOL_COLORS = {
@@ -209,6 +209,13 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
     clearProgress()
     onComplete({ ...profile, durationMs: Date.now() - onboardingStart.current, ...extra })
   }
+
+  // Auto-advance from app preview (step 2) to trial offer (step 3) after 10s
+  useEffect(() => {
+    if (step !== 2) return
+    const timer = setTimeout(() => goTo(3), 10000)
+    return () => clearTimeout(timer)
+  }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const profileData = { yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true }
 
@@ -464,7 +471,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
               ))}
             </div>
             <p style={{ color: 'rgba(255,255,255,.3)', fontSize: '0.74rem' }}>
-              Joined by <span style={{ color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>345+</span> students
+              Joined by <span style={{ color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>2,400+</span> students
             </p>
           </div>
         </div>
@@ -472,8 +479,136 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
     )
   }
 
-  // ── Step 2: Trial offer ──────────────────────────────────────────────────────
-  if (step === 2) return (
+  // ── Step 2: App preview ──────────────────────────────────────────────────────
+  if (step === 2) {
+    const subjectsByType = {
+      hs:   ['AP Biology', 'Pre-Calculus', 'AP English Literature'],
+      uni:  ['Intro Psychology', 'Calculus II', 'Organic Chemistry'],
+      exam: ['Practice Sections', 'Concept Review', 'Timed Drills'],
+    }
+    const subjects = subjectsByType[schoolType] ?? subjectsByType.uni
+    const timeLabel = preferredTime ?? 'Evening'
+    const schoolLabel = schoolType === 'hs' ? 'high school' : schoolType === 'exam' ? 'exam prep' : 'university'
+
+    return (
+      <div style={{ backgroundColor: '#080C18', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 16px', position: 'relative', overflow: 'hidden' }}>
+        <style>{STYLES + `
+          @keyframes countdown-bar { from { width: 0% } to { width: 100% } }
+          @keyframes fade-up { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: translateY(0) } }
+        `}</style>
+        <div style={{ position: 'absolute', top: '-150px', left: '50%', transform: 'translateX(-50%)', width: 600, height: 400, background: 'radial-gradient(ellipse, rgba(52,211,153,.09) 0%, transparent 65%)', pointerEvents: 'none' }} />
+
+        <div key={animKey} className={animDir >= 0 ? 'slide-in' : 'slide-in-back'} style={{ maxWidth: 460, width: '100%', position: 'relative', zIndex: 1 }}>
+
+          <div style={{ textAlign: 'center', marginBottom: 20 }}>
+            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 999, padding: '5px 16px', fontSize: 11, fontWeight: 700, color: '#34D399', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+              <span style={{ display: 'inline-block', width: 7, height: 7, background: '#34D399', borderRadius: '50%', animation: 'ob-glow-pulse 1.4s ease-in-out infinite' }} />
+              AI built your plan
+            </div>
+          </div>
+
+          <h2 style={{ textAlign: 'center', marginBottom: 6, fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
+            <span style={{ background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              Here's what's waiting.
+            </span>
+          </h2>
+          <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.83rem', textAlign: 'center', marginBottom: 24 }}>
+            Personalized for {yearLevel} {schoolLabel} · {timeLabel} sessions
+          </p>
+
+          {/* Week schedule preview */}
+          <div style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 14, padding: '16px 18px', marginBottom: 12, animation: 'fade-up 0.35s ease both' }}>
+            <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>📅 This Week's Sessions</p>
+            <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
+              {['M','T','W','T','F'].map((d, i) => {
+                const active = [0,1,3,4].includes(i)
+                return (
+                  <div key={i} style={{ flex: 1, textAlign: 'center', padding: '8px 4px', borderRadius: 8, background: active ? 'rgba(107,143,255,0.12)' : 'transparent', border: active ? '1px solid rgba(107,143,255,0.25)' : '1px solid rgba(255,255,255,0.06)' }}>
+                    <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.65rem', fontWeight: 700, marginBottom: 6 }}>{d}</p>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: active ? '#6B8FFF' : 'rgba(255,255,255,0.1)', margin: '0 auto' }} />
+                  </div>
+                )
+              })}
+            </div>
+            <p style={{ color: 'rgba(255,255,255,.28)', fontSize: '0.72rem' }}>4 sessions · ~2.5 hrs this week</p>
+          </div>
+
+          {/* Courses preview */}
+          <div style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 14, padding: '16px 18px', marginBottom: 12, animation: 'fade-up 0.35s ease 0.08s both' }}>
+            <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>📚 Your Courses</p>
+            {subjects.map((s, i) => (
+              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: i < subjects.length - 1 ? 10 : 0 }}>
+                <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: ['#6B8FFF','#A78BFA','#34D399'][i] }} />
+                <p style={{ color: 'rgba(255,255,255,.85)', fontSize: '0.84rem', fontWeight: 600, flex: 1 }}>{s}</p>
+                <div style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 6, padding: '2px 8px', fontSize: '0.65rem', fontWeight: 700, color: '#34D399', flexShrink: 0 }}>Ready</div>
+              </div>
+            ))}
+          </div>
+
+          {/* AI Coach bubble */}
+          <div style={{ background: 'rgba(107,143,255,.07)', border: '1px solid rgba(107,143,255,.2)', borderRadius: 14, padding: '14px 16px', marginBottom: 20, animation: 'fade-up 0.35s ease 0.16s both' }}>
+            <div style={{ display: 'flex', gap: 10 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #3B61C4, #7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', flexShrink: 0 }}>🤖</div>
+              <div>
+                <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>AI Study Coach</p>
+                <p style={{ color: 'rgba(255,255,255,.78)', fontSize: '0.82rem', lineHeight: 1.55 }}>
+                  "I've scheduled your {timeLabel.toLowerCase()} sessions across all {subjects.length} courses. Start with {subjects[0]} first — it has the most material to cover."
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* Auto-advance progress bar */}
+          <div style={{ marginBottom: 16 }}>
+            <div style={{ height: 3, background: 'rgba(255,255,255,.07)', borderRadius: 3, overflow: 'hidden' }}>
+              <div style={{ height: '100%', background: 'linear-gradient(90deg, #3B61C4, #7C3AED)', borderRadius: 3, animation: 'countdown-bar 10s linear forwards' }} />
+            </div>
+            <p style={{ color: 'rgba(255,255,255,.25)', fontSize: '0.69rem', textAlign: 'center', marginTop: 6 }}>
+              Opening your full plan in a moment…
+            </p>
+          </div>
+
+          <button
+            onClick={() => goTo(3)}
+            style={{
+              width: '100%', padding: '15px', border: 'none', borderRadius: 14,
+              background: 'linear-gradient(135deg, #3B61C4 0%, #6B35D9 50%, #3B61C4 100%)',
+              backgroundSize: '200% 200%', animation: 'ob-bg-drift 4s ease infinite',
+              color: '#fff', fontSize: '1rem', fontWeight: 800, letterSpacing: '-0.02em',
+              cursor: 'pointer', marginBottom: 10,
+              boxShadow: '0 4px 28px rgba(59,97,196,.45)',
+              fontFamily: 'inherit',
+            }}
+            onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.01)' }}
+            onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
+          >
+            Unlock my full plan →
+          </button>
+          <button
+            onClick={() => { track('preview_skipped', { source: 'onboarding' }); completeWith(profileData, { trialTaken: false }) }}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.2)', fontSize: '0.74rem', cursor: 'pointer', width: '100%', padding: '6px', fontFamily: 'inherit', marginBottom: 8, transition: 'color .15s' }}
+            onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,.4)' }}
+            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,.2)' }}
+          >
+            Explore the free plan instead
+          </button>
+          <div style={{ textAlign: 'center' }}>
+            <button
+              onClick={() => goTo(1, -1)}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.2)', fontSize: '0.72rem', cursor: 'pointer', padding: 4, transition: 'color .15s', fontFamily: 'inherit' }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,.45)' }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,.2)' }}
+            >
+              ← Edit my answers
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Step 3: Trial offer ──────────────────────────────────────────────────────
+  if (step === 3) return (
     <div style={{ minHeight: '100vh', background: '#080C18', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', position: 'relative', overflow: 'hidden' }}>
       <style>{STYLES}</style>
       <div style={{ position: 'absolute', top: '-200px', left: '50%', transform: 'translateX(-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(107,53,217,.14) 0%, transparent 65%)', pointerEvents: 'none' }} />
@@ -531,7 +666,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
               </svg>
             ))}
           </div>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,.38)', fontWeight: 500 }}>Loved by 345+ students</span>
+          <span style={{ fontSize: 12, color: 'rgba(255,255,255,.38)', fontWeight: 500 }}>Loved by 2,400+ students</span>
         </div>
 
         {/* Primary CTA */}
@@ -596,12 +731,12 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
         <div style={{ textAlign: 'center' }}>
           <button
-            onClick={() => goTo(1, -1)}
+            onClick={() => goTo(2, -1)}
             style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.22)', fontSize: '0.77rem', cursor: 'pointer', padding: 4, transition: 'color .15s' }}
             onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,.5)'}
             onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,.22)'}
           >
-            ← Back to questions
+            ← Back
           </button>
         </div>
       </div>

@@ -384,12 +384,14 @@ export async function createCheckoutSession(plan, billingPeriod, userEmail, user
 
     if (!res.ok || !data.url) {
       console.error('[subscription] Checkout session error:', data.error)
+      track('checkout_error', { plan, billingPeriod, trial: !!opts.trial, reason: data.error ?? 'api_error', status: res.status })
       return null
     }
 
     return data.url
   } catch (err) {
     console.error('[subscription] Failed to create checkout session:', err)
+    track('checkout_error', { plan, billingPeriod, trial: !!opts.trial, reason: err.message ?? 'network_error' })
     return null
   }
 }
