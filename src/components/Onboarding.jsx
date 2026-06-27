@@ -170,6 +170,21 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   const [preferredTime, setPreferredTime] = useState(saved?.preferredTime ?? null)
   const [showConfetti, setShowConfetti]   = useState(false)
 
+  // Trial offer countdown — persisted so it's consistent across re-renders
+  const [trialOfferExpiry] = useState(() => {
+    const stored = sessionStorage.getItem('studyedge_trial_offer_expiry')
+    if (stored) return parseInt(stored, 10)
+    const expiry = Date.now() + 24 * 60 * 60 * 1000
+    sessionStorage.setItem('studyedge_trial_offer_expiry', String(expiry))
+    return expiry
+  })
+  const [timeLeft, setTimeLeft] = useState(() => Math.max(0, trialOfferExpiry - Date.now()))
+  useEffect(() => {
+    if (step !== 3) return
+    const t = setInterval(() => setTimeLeft(Math.max(0, trialOfferExpiry - Date.now())), 1000)
+    return () => clearInterval(t)
+  }, [step, trialOfferExpiry])
+
   const stepEnteredAt   = useRef(Date.now())
   const onboardingStart = useRef(Date.now())
   const prevDone        = useRef(false)
@@ -620,10 +635,17 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
       >
         {/* Badge */}
         <div style={{ textAlign: 'center', marginBottom: 18 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'linear-gradient(135deg, rgba(107,143,255,.15), rgba(167,139,250,.15))', border: '1px solid rgba(167,139,250,.35)', borderRadius: 999, padding: '6px 18px', fontSize: 11, fontWeight: 700, color: '#A78BFA', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-            <span style={{ display: 'inline-block', width: 7, height: 7, background: '#A78BFA', borderRadius: '50%', animation: 'pulse 1.8s ease-in-out infinite' }} />
-            New account offer · expires in 24h
-          </div>
+          {(() => {
+            const hh = String(Math.floor(timeLeft / 3_600_000)).padStart(2, '0')
+            const mm = String(Math.floor((timeLeft % 3_600_000) / 60_000)).padStart(2, '0')
+            const ss = String(Math.floor((timeLeft % 60_000) / 1_000)).padStart(2, '0')
+            return (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'linear-gradient(135deg, rgba(107,143,255,.15), rgba(167,139,250,.15))', border: '1px solid rgba(167,139,250,.35)', borderRadius: 999, padding: '6px 18px', fontSize: 11, fontWeight: 700, color: '#A78BFA', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+                <span style={{ display: 'inline-block', width: 7, height: 7, background: '#A78BFA', borderRadius: '50%', animation: 'pulse 1.8s ease-in-out infinite' }} />
+                Offer expires in {hh}:{mm}:{ss}
+              </div>
+            )
+          })()}
         </div>
 
         {/* Headline */}
@@ -706,11 +728,11 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.transform = 'scale(1.01)' }}
           onMouseLeave={e => { if (!trialLoading) e.currentTarget.style.transform = 'scale(1)' }}
         >
-          {trialLoading ? 'Loading…' : 'Start my 3-day free trial →'}
+          {trialLoading ? 'Loading…' : 'Start free — $0 today →'}
         </button>
 
         <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.25)', fontSize: '0.71rem', marginBottom: 18 }}>
-          $0 today · card required · auto-bills $2.99/wk after trial · cancel any time
+          No charge until day 4 · $2.99/wk after · cancel anytime before trial ends
         </p>
 
         {/* Skip — intentionally low-prominence text link */}

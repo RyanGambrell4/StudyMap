@@ -59,6 +59,9 @@ export default function App() {
 
   // ── Email verification resend state ────────────────────────────────────────
   const [resendState, setResendState] = useState('') // '' | 'sending' | 'sent' | 'error'
+  const [emailBannerDismissed, setEmailBannerDismissed] = useState(
+    () => sessionStorage.getItem('studyedge_email_banner_dismissed') === '1'
+  )
 
   // ── Paywall state ──────────────────────────────────────────────────────────
   const [paywallOpen, setPaywallOpen]     = useState(false)
@@ -197,6 +200,25 @@ export default function App() {
 
     return () => subscription.unsubscribe()
   }, [])
+
+  // ── Background-poll for email confirmation when user is unconfirmed ────────
+  useEffect(() => {
+    if (!session?.user?.id || session.user.email_confirmed_at) return
+    let cancelled = false
+    let fired = false
+    const interval = setInterval(async () => {
+      if (cancelled || fired) return
+      try {
+        const { data } = await supabase.auth.getUser()
+        if (data?.user?.email_confirmed_at) {
+          fired = true
+          track('email_confirmed', { source: 'app_banner', user_id: session.user.id })
+          await supabase.auth.refreshSession()
+        }
+      } catch {}
+    }, 5000)
+    return () => { cancelled = true; clearInterval(interval) }
+  }, [session?.user?.id, session?.user?.email_confirmed_at])
 
   // ── Load data after login ──────────────────────────────────────────────────
   useEffect(() => {
@@ -545,31 +567,6 @@ export default function App() {
     )
   }
 
-  // ── Email verification gate ──────────────────────────────────────────────
-  if (!session.user.email_confirmed_at) {
-    return (
-      <EmailVerificationGate
-        email={session.user.email}
-        userId={session.user.id}
-        resendState={resendState}
-        onResend={async () => {
-          track('email_confirmation_resend_clicked', { source: 'app_gate' })
-          setResendState('sending')
-          try {
-            const { error } = await supabase.auth.resend({ type: 'signup', email: session.user.email })
-            if (error) throw error
-            setResendState('sent')
-            setTimeout(() => setResendState(''), 5000)
-          } catch {
-            setResendState('error')
-            setTimeout(() => setResendState(''), 5000)
-          }
-        }}
-        onSignOut={handleSignOut}
-      />
-    )
-  }
-
   // ── Password recovery screen ────────────────────────────────────────────
   if (passwordRecovery) {
     const handlePasswordUpdate = async (e) => {
@@ -694,6 +691,46 @@ export default function App() {
           userId={session?.user?.id}
           currentPlan={getActivePlan()}
         />
+      )}
+
+      {/* Email confirmation banner — shown in the main app after onboarding */}
+      {showOutput && session?.user && !session.user.email_confirmed_at && !emailBannerDismissed && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, zIndex: 999,
+          background: '#3B61C4', padding: '9px 20px',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
+        }}>
+          <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>
+            📧 Confirm your email to secure your account — check <strong>{session.user.email}</strong>
+          </span>
+          <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
+            <button
+              onClick={async () => {
+                if (resendState === 'sending' || resendState === 'sent') return
+                track('email_confirmation_resend_clicked', { source: 'app_banner' })
+                setResendState('sending')
+                try {
+                  await supabase.auth.resend({ type: 'signup', email: session.user.email })
+                  setResendState('sent')
+                  setTimeout(() => setResendState(''), 5000)
+                } catch {
+                  setResendState('error')
+                  setTimeout(() => setResendState(''), 5000)
+                }
+              }}
+              style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
+            >
+              {resendState === 'sending' ? 'Sending…' : resendState === 'sent' ? '✓ Sent' : resendState === 'error' ? 'Failed — retry' : 'Resend email'}
+            </button>
+            <button
+              onClick={() => { sessionStorage.setItem('studyedge_email_banner_dismissed', '1'); setEmailBannerDismissed(true) }}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.55)', fontSize: 18, cursor: 'pointer', padding: '0 4px', lineHeight: 1, flexShrink: 0 }}
+              aria-label="Dismiss"
+            >
+              ×
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Checkout cancel banner */}

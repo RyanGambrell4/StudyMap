@@ -44,6 +44,7 @@ export default function AuthScreen({ initialMode, onBack }) {
   const [signupPendingEmail, setSignupPendingEmail] = useState('')
   const [resendStatus, setResendStatus] = useState('')
   const [showPassword, setShowPassword] = useState(false)
+  const [magicLinkMode, setMagicLinkMode] = useState(false)
 
   const handleGoogleSignIn = async () => {
     setError('')
@@ -85,6 +86,16 @@ export default function AuthScreen({ initialMode, onBack }) {
         if (trial === '1') preserve.set('trial', '1')
         const qs = preserve.toString()
         const emailRedirectTo = `${window.location.origin}/app${qs ? '?' + qs : ''}`
+
+        if (magicLinkMode) {
+          track('signup_started', { method: 'magic_link', plan_context: plan ?? null, trial_context: trial === '1' })
+          const { error } = await supabase.auth.signInWithOtp({ email, options: { shouldCreateUser: true, emailRedirectTo } })
+          if (error) throw error
+          track('signup_email_sent', { method: 'magic_link' })
+          setSignupPendingEmail(email)
+          return
+        }
+
         track('signup_started', { method: 'email', plan_context: plan ?? null, billing_context: billing ?? null, trial_context: trial === '1' })
         const { data, error } = await supabase.auth.signUp({ email, password, options: { emailRedirectTo } })
         if (error) throw error
@@ -164,7 +175,7 @@ export default function AuthScreen({ initialMode, onBack }) {
     }
 
     return (
-      <ConfirmationPending email={signupPendingEmail} onResend={handleResend} resendStatus={resendStatus} onSwitchEmail={() => { setSignupPendingEmail(''); setError(''); setSuccess('') }} onSignIn={() => { setSignupPendingEmail(''); setMode('login'); setError(''); setSuccess('') }} onBack={onBack} isMobile={isMobile} onGoogleSignIn={handleGoogleSignIn} />
+      <ConfirmationPending email={signupPendingEmail} onResend={handleResend} resendStatus={resendStatus} onSwitchEmail={() => { setSignupPendingEmail(''); setError(''); setSuccess('') }} onSignIn={() => { setSignupPendingEmail(''); setMode('login'); setError(''); setSuccess('') }} onBack={onBack} isMobile={isMobile} onGoogleSignIn={handleGoogleSignIn} isMagicLink={magicLinkMode} />
     )
   }
 
@@ -272,7 +283,24 @@ export default function AuthScreen({ initialMode, onBack }) {
               />
             </div>
 
-            {mode !== 'forgot' && (
+            {mode === 'signup' && !magicLinkMode && (
+              <button
+                type="button"
+                onClick={() => setMagicLinkMode(true)}
+                style={{ background: 'none', border: 'none', fontSize: 12, color: '#3B61C4', cursor: 'pointer', fontWeight: 500, padding: '0 0 4px', textAlign: 'left' }}
+              >
+                Prefer a one-click login link? Skip the password →
+              </button>
+            )}
+            {mode === 'signup' && magicLinkMode && (
+              <div style={{ backgroundColor: '#EEF2FF', border: '1px solid #C7D2FE', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#3730A3', lineHeight: 1.5 }}>
+                We'll email you a one-click link — no password needed. Click it to confirm and sign in instantly.
+                <button type="button" onClick={() => setMagicLinkMode(false)} style={{ display: 'block', marginTop: 6, background: 'none', border: 'none', fontSize: 12, color: '#6366F1', cursor: 'pointer', padding: 0, fontWeight: 500 }}>
+                  ← Set a password instead
+                </button>
+              </div>
+            )}
+            {mode !== 'forgot' && !magicLinkMode && (
               <div>
                 <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Password</label>
                 <div style={{ position: 'relative' }}>
@@ -363,7 +391,7 @@ export default function AuthScreen({ initialMode, onBack }) {
                 cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.6 : 1, marginTop: 2,
               }}
             >
-              {loading ? 'Loading…' : mode === 'login' ? 'Sign in' : mode === 'signup' ? 'Create account' : 'Send reset link'}
+              {loading ? 'Loading…' : mode === 'login' ? 'Sign in' : mode === 'signup' ? (magicLinkMode ? 'Email me a login link' : 'Create account') : 'Send reset link'}
             </button>
           </form>
 
@@ -491,7 +519,7 @@ function LeftPanel() {
 }
 
 // ── Confirmation pending: auto-polls for verified status every 5s ─────────────
-function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onSignIn, onBack, isMobile, onGoogleSignIn }) {
+function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onSignIn, onBack, isMobile, onGoogleSignIn, isMagicLink }) {
   const [pollCount, setPollCount] = useState(0)
   const [elapsed, setElapsed] = useState(0)
 
@@ -558,8 +586,12 @@ function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onS
             </svg>
           </div>
 
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>Check your email — you're almost in</h1>
-          <p style={{ fontSize: 14, color: '#6B6B6B', margin: '0 0 4px', lineHeight: 1.5 }}>We sent a confirmation link to</p>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
+            {isMagicLink ? 'You're one click away' : 'Check your email — you\'re almost in'}
+          </h1>
+          <p style={{ fontSize: 14, color: '#6B6B6B', margin: '0 0 4px', lineHeight: 1.5 }}>
+            {isMagicLink ? 'We sent a one-click login link to' : 'We sent a confirmation link to'}
+          </p>
           <p style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 14px', wordBreak: 'break-all' }}>{email}</p>
 
           <div style={{ backgroundColor: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: 10, padding: '11px 14px', marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 10, textAlign: 'left' }}>
