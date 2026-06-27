@@ -50,7 +50,15 @@
       "schedule": "0 11 * * *"
     },
     {
+      "path": "/api/day21-upgrade",
+      "schedule": "0 11 * * *"
+    },
+    {
       "path": "/api/day1-tips",
+      "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/day3-progress",
       "schedule": "0 11 * * *"
     },
     {

@@ -5,9 +5,9 @@ import { track } from '../lib/analytics'
 // ── Config ────────────────────────────────────────────────────────────────────
 
 const BILLING_PERIODS = [
-  { id: 'weekly',  label: 'Weekly',  badge: null,        best: false },
-  { id: 'monthly', label: 'Monthly', badge: 'Save 17%',  best: false },
-  { id: 'yearly',  label: 'Annual',  badge: 'Save 55%',  best: true  },
+  { id: 'weekly',  label: 'Weekly',  badge: null,          best: false },
+  { id: 'monthly', label: 'Monthly', badge: 'Save 17%',    best: false },
+  { id: 'yearly',  label: 'Annual',  badge: 'Best Value ✦', best: true  },
 ]
 
 // Plan tier → billing period → display price.
@@ -235,9 +235,11 @@ const LIMIT_MESSAGES = {
 }
 
 const TESTIMONIALS = [
-  { quote: 'finally consistent with my studying for the first time ever', name: 'Andy G.', detail: 'University, 2nd year' },
   { quote: 'finished top of my cohort last semester. I genuinely could not have done it without this', name: 'Danny K.', detail: 'Pre-med, 3.8 GPA' },
+  { quote: 'finally consistent with my studying for the first time ever', name: 'Andy G.', detail: 'University, 2nd year' },
   { quote: 'one app. all semester. I don\'t need anything else.', name: 'Charlotte B.', detail: 'Law school prep' },
+  { quote: 'went from a C to a B+ in Orgo after using Exam Rescue the week before my midterm', name: 'Priya S.', detail: 'Chemistry major' },
+  { quote: 'the AI study coach actually understands my schedule. worth every penny', name: 'Marcus T.', detail: 'Engineering, 3rd year' },
 ]
 
 // ── Component ─────────────────────────────────────────────────────────────────
@@ -255,9 +257,10 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   const trialActive = isTrialActive()
   const isUnlimitedTrigger = UNLIMITED_ONLY_TRIGGERS.has(trigger)
 
-  // Trial card only shows for free users, never for Unlimited-only triggers
-  // (the trial unlocks Pro features, not Unlimited features).
+  // Trial card only shows for free users, never for Unlimited-only triggers.
   const showTrialCard = currentPlan === 'free' && !trialUsed && !trialActive && !isUnlimitedTrigger
+  // Win-back card shows for users whose trial expired and haven't subscribed.
+  const showWinBackCard = currentPlan === 'free' && trialUsed && !trialActive && !isUnlimitedTrigger
 
   const msg = LIMIT_MESSAGES[trigger] ?? LIMIT_MESSAGES.ai
   const visiblePlanIds = currentPlan === 'pro' ? ['unlimited'] : Object.keys(PLANS)
@@ -394,11 +397,16 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               {msg.tag}
             </div>
             <h2 style={{ fontSize: '1.3rem', fontWeight: 800, letterSpacing: '-0.4px', color: '#1A1A1A', margin: '0 0 6px' }}>
-              {isUnlimitedTrigger ? msg.title : 'Unlock everything for less than a coffee'}
+              {msg.title}
             </h2>
-            <p style={{ color: '#6B6B6B', fontSize: '0.875rem', lineHeight: 1.55, margin: 0, maxWidth: 420 }}>
-              {isUnlimitedTrigger ? msg.body : '$2.99/week · Cancel anytime'}
+            <p style={{ color: '#6B6B6B', fontSize: '0.875rem', lineHeight: 1.55, margin: '0 0 4px', maxWidth: 420 }}>
+              {msg.body}
             </p>
+            {!isUnlimitedTrigger && (
+              <p style={{ color: '#9B9B9B', fontSize: '0.78rem', margin: 0 }}>
+                From $2.99/week · Cancel anytime
+              </p>
+            )}
           </div>
           <button
             onClick={() => handleDismiss('close_button')}
@@ -416,35 +424,83 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
         <div style={{
           background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)',
           borderRadius: '12px', padding: '12px 16px', marginBottom: '18px',
-          display: 'flex', alignItems: 'flex-start', gap: '12px',
-          minHeight: 62,
+          display: 'flex', flexDirection: 'column', gap: '10px',
         }}>
-          <svg style={{ width: 16, height: 16, color: '#3B61C4', flexShrink: 0, marginTop: 2 }} fill="currentColor" viewBox="0 0 24 24">
-            <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
-          </svg>
-          <div style={{ flex: 1 }}>
-            <p style={{ margin: '0 0 4px', fontSize: '0.82rem', color: '#1A1A1A', lineHeight: 1.5, fontStyle: 'italic' }}>
-              "{t.quote}"
-            </p>
-            <p style={{ margin: 0, fontSize: '0.72rem', color: '#9B9B9B', fontWeight: 600 }}>
-              {t.name} · {t.detail}
-            </p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Star rating */}
+            <div style={{ display: 'flex', gap: '2px' }}>
+              {[1,2,3,4,5].map(s => (
+                <svg key={s} width="12" height="12" viewBox="0 0 24 24" fill="#FBBF24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+              ))}
+            </div>
+            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6B6B6B' }}>
+              Trusted by 400+ students
+            </span>
           </div>
-          {/* Dots */}
-          <div style={{ display: 'flex', gap: 4, flexShrink: 0, marginTop: 6 }}>
-            {TESTIMONIALS.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setTestimonialIdx(i)}
-                style={{
-                  width: i === testimonialIdx ? 14 : 5, height: 5, borderRadius: 3,
-                  background: i === testimonialIdx ? '#3B61C4' : 'rgba(0,0,0,0.12)',
-                  border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.2s',
-                }}
-              />
-            ))}
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+            <svg style={{ width: 14, height: 14, color: '#3B61C4', flexShrink: 0, marginTop: 3 }} fill="currentColor" viewBox="0 0 24 24">
+              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+            </svg>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: '0 0 4px', fontSize: '0.82rem', color: '#1A1A1A', lineHeight: 1.5, fontStyle: 'italic' }}>
+                "{t.quote}"
+              </p>
+              <p style={{ margin: 0, fontSize: '0.72rem', color: '#9B9B9B', fontWeight: 600 }}>
+                {t.name} · {t.detail}
+              </p>
+            </div>
+            {/* Dots */}
+            <div style={{ display: 'flex', gap: 4, flexShrink: 0, marginTop: 4 }}>
+              {TESTIMONIALS.map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setTestimonialIdx(i)}
+                  style={{
+                    width: i === testimonialIdx ? 14 : 5, height: 5, borderRadius: 3,
+                    background: i === testimonialIdx ? '#3B61C4' : 'rgba(0,0,0,0.12)',
+                    border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.2s',
+                  }}
+                />
+              ))}
+            </div>
           </div>
         </div>
+
+        {/* ── Win-Back Card (trial used, now back on free) ── */}
+        {showWinBackCard && (
+          <div style={{
+            background: 'linear-gradient(135deg, #fff8f0, #fff4e8)',
+            border: '1.5px solid rgba(234,88,12,0.2)',
+            borderRadius: '16px',
+            padding: '20px',
+            marginBottom: '16px',
+          }}>
+            <div style={{
+              display: 'inline-flex', alignItems: 'center', gap: '5px',
+              background: 'rgba(234,88,12,0.08)', border: '1px solid rgba(234,88,12,0.2)',
+              borderRadius: '999px', padding: '3px 10px',
+              fontSize: '0.68rem', fontWeight: 800, color: '#EA580C',
+              textTransform: 'uppercase', letterSpacing: '0.5px',
+              marginBottom: '10px',
+            }}>
+              Your trial ended
+            </div>
+            <p style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px', letterSpacing: '-0.2px' }}>
+              Here's what you lost when your trial ended:
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '14px' }}>
+              {['Unlimited focus sessions (30-min cap is back)', '100 AI actions/month (you now have 2 total)', '5 courses (you\'re back to 1)', 'Session Blueprints, Brain Dumps, Exam Rescues'].map(item => (
+                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#6B6B6B' }}>
+                  <span style={{ color: '#EA580C', fontSize: '0.75rem' }}>✕</span>
+                  {item}
+                </div>
+              ))}
+            </div>
+            <p style={{ fontSize: '0.78rem', color: '#6B6B6B', margin: '0 0 12px' }}>
+              Get it all back for $2.99/week. Cancel anytime.
+            </p>
+          </div>
+        )}
 
         {/* ── Free Trial Card (shown when trial not yet used) ── */}
         {showTrialCard && (
@@ -527,9 +583,9 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 onClick={() => setBillingPeriod(bp.id)}
                 style={{
                   flex: 1, padding: '8px 12px', borderRadius: '9px',
-                  border: 'none',
+                  border: bp.best && !isActive ? '1px solid rgba(5,150,105,0.35)' : 'none',
                   cursor: 'pointer',
-                  background: isActive ? '#fff' : 'transparent',
+                  background: isActive ? (bp.best ? 'linear-gradient(135deg, #ecfdf5, #d1fae5)' : '#fff') : 'transparent',
                   color: isActive ? '#1A1A1A' : '#9B9B9B',
                   fontFamily: 'inherit', fontSize: '0.82rem', fontWeight: 600,
                   transition: 'all 0.15s',
@@ -663,8 +719,11 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
         )}
 
         {/* ── Footer ── */}
-        <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.75rem', margin: 0 }}>
+        <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.75rem', margin: '0 0 6px' }}>
           Secure checkout via Stripe · Cancel anytime · No hidden fees
+        </p>
+        <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.72rem', margin: 0 }}>
+          🛡️ 30-day money-back guarantee on paid plans. No questions asked.
         </p>
       </div>
     </div>
