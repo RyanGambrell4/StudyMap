@@ -492,7 +492,6 @@ function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onS
     const tick = async () => {
       if (cancelled) return
       try {
-        await supabase.auth.refreshSession()
         const { data } = await supabase.auth.getUser()
         if (data?.user?.email_confirmed_at && !fired) {
           fired = true

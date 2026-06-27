@@ -782,11 +782,11 @@ function EmailVerificationGate({ email, userId, resendState, onResend, onSignOut
     const pollInterval = setInterval(async () => {
       if (cancelled) return
       try {
-        await supabase.auth.refreshSession()
         const { data } = await supabase.auth.getUser()
         if (data?.user?.email_confirmed_at && !fired) {
           fired = true
           track('email_confirmed', { source: 'app_gate', user_id: userId ?? data.user.id })
+          await supabase.auth.refreshSession()
         }
       } catch {}
     }, 5000)
