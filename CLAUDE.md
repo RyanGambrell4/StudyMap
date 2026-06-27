@@ -1,6 +1,6 @@
 # StudyEdge AI — Claude Code Context
 
-**App:** StudyEdge AI | **URL:** getstudyedge.com | **Repo:** /Users/ryangambrell/Desktop/StudyMap
+**App:** StudyEdge AI | **URL:** getstudyedge.com | **Repo:** /Users/ryangambrell/Desktop/StudyEdge AI/Web App
 
 Read `AGENTS_SPEC.md` before running any agent task. It contains the full app context, quality rules, and shared conventions that every agent must follow.
 

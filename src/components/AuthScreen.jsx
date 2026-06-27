@@ -222,8 +222,11 @@ export default function AuthScreen({ initialMode, onBack }) {
                 onClick={handleGoogleSignIn}
                 style={{
                   width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12,
-                  padding: '12px', borderRadius: 12, backgroundColor: '#fff',
-                  border: '1px solid rgba(0,0,0,0.12)', fontSize: 14, fontWeight: 600, color: '#1A1A1A',
+                  padding: '13px', borderRadius: 12,
+                  backgroundColor: mode === 'signup' ? '#3B61C4' : '#fff',
+                  border: mode === 'signup' ? 'none' : '1px solid rgba(0,0,0,0.12)',
+                  fontSize: 14, fontWeight: 600,
+                  color: mode === 'signup' ? '#fff' : '#1A1A1A',
                   cursor: 'pointer', marginBottom: 4,
                 }}
               >
@@ -233,12 +236,17 @@ export default function AuthScreen({ initialMode, onBack }) {
                   <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
                   <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
                 </svg>
-                Continue with Google
+                {mode === 'signup' ? 'Sign up with Google — instant access' : 'Continue with Google'}
               </button>
+              {mode === 'signup' && (
+                <p style={{ fontSize: 12, color: '#059669', textAlign: 'center', margin: '4px 0 2px', fontWeight: 500 }}>
+                  ✓ No email verification step
+                </p>
+              )}
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '16px 0' }}>
                 <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(0,0,0,0.08)' }} />
-                <span style={{ fontSize: 12, color: '#9B9B9B' }}>or</span>
+                <span style={{ fontSize: 12, color: '#9B9B9B' }}>{mode === 'signup' ? 'or sign up with email instead' : 'or'}</span>
                 <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(0,0,0,0.08)' }} />
               </div>
             </>
@@ -347,8 +355,11 @@ export default function AuthScreen({ initialMode, onBack }) {
               type="submit"
               disabled={loading}
               style={{
-                width: '100%', padding: '13px', borderRadius: 12, border: 'none',
-                backgroundColor: '#3B61C4', color: '#fff', fontSize: 14, fontWeight: 700,
+                width: '100%', padding: '13px', borderRadius: 12,
+                border: mode === 'signup' ? '1.5px solid rgba(59,97,196,0.3)' : 'none',
+                backgroundColor: mode === 'signup' ? '#fff' : '#3B61C4',
+                color: mode === 'signup' ? '#3B61C4' : '#fff',
+                fontSize: 14, fontWeight: 700,
                 cursor: loading ? 'default' : 'pointer', opacity: loading ? 0.6 : 1, marginTop: 2,
               }}
             >
@@ -482,6 +493,12 @@ function LeftPanel() {
 // ── Confirmation pending: auto-polls for verified status every 5s ─────────────
 function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onSignIn, onBack, isMobile, onGoogleSignIn }) {
   const [pollCount, setPollCount] = useState(0)
+  const [elapsed, setElapsed] = useState(0)
+
+  useEffect(() => {
+    const t = setInterval(() => setElapsed(s => s + 1), 1000)
+    return () => clearInterval(t)
+  }, [])
 
   // Auto-poll: every 5s, refresh the user. When email_confirmed_at is set,
   // onAuthStateChange in App.jsx fires SIGNED_IN and the gate falls away.
@@ -541,9 +558,16 @@ function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onS
             </svg>
           </div>
 
-          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>One click to unlock your study plan</h1>
+          <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>Check your email — you're almost in</h1>
           <p style={{ fontSize: 14, color: '#6B6B6B', margin: '0 0 4px', lineHeight: 1.5 }}>We sent a confirmation link to</p>
           <p style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 14px', wordBreak: 'break-all' }}>{email}</p>
+
+          <div style={{ backgroundColor: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: 10, padding: '11px 14px', marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 10, textAlign: 'left' }}>
+            <span style={{ fontSize: 16, flexShrink: 0 }}>📬</span>
+            <p style={{ margin: 0, fontSize: 13, color: '#92400E', lineHeight: 1.5 }}>
+              <strong>Check Spam or Promotions first</strong> — confirmation emails often land there. Search your inbox for <strong>"StudyEdge"</strong>.
+            </p>
+          </div>
 
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 7,
@@ -553,7 +577,7 @@ function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onS
             marginBottom: 18,
           }}>
             <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#3B61C4', animation: 'pulse-ring 1.4s ease-in-out infinite' }} />
-            Checking automatically. No need to refresh.
+            Sent {elapsed < 60 ? `${elapsed}s` : `${Math.floor(elapsed / 60)}m ${elapsed % 60}s`} ago · checking automatically
           </div>
 
           <div style={{
@@ -613,10 +637,6 @@ function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onS
               </a>
             ) : null
           })()}
-
-          <p style={{ fontSize: 12, color: '#9B9B9B', margin: '0 0 14px', lineHeight: 1.5 }}>
-            Email not there yet? Check Spam or Promotions and search for "StudyEdge AI".
-          </p>
 
           {onGoogleSignIn && (
             <>

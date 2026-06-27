@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
+import { acquireCronLock } from '../lib/server/cronLock.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -17,6 +18,12 @@ export default async function handler(req, res) {
   if (!process.env.RESEND_API_KEY) {
     console.warn('[re-engage] RESEND_API_KEY not set - skipping')
     return res.status(200).json({ ok: true, skipped: true })
+  }
+
+  const locked = await acquireCronLock('re-engage')
+  if (!locked) {
+    console.log('[re-engage] Already ran today - skipping')
+    return res.status(200).json({ ok: true, skipped: true, reason: 'already_ran_today' })
   }
 
   const { data: rows, error } = await supabaseAdmin
