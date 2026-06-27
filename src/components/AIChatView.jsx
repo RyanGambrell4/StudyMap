@@ -81,8 +81,8 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }, [messages, loading])
 
-  const sendMessage = async () => {
-    const text = input.trim()
+  const sendMessage = async (overrideText) => {
+    const text = (overrideText ?? input).trim()
     if (!text || loading) return
 
     const { allowed } = canUseFeature('aiTutor')
@@ -263,15 +263,38 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-center py-8">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-4" style={{ background: 'rgba(59,97,196,0.1)', border: '1px solid rgba(59,97,196,0.2)' }}>
+          <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-center py-6">
+            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3" style={{ background: 'rgba(59,97,196,0.1)', border: '1px solid rgba(59,97,196,0.2)' }}>
               <svg className="w-5 h-5" style={{ color: '#3B61C4' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             </div>
-            <p className="text-slate-500 text-sm max-w-xs leading-relaxed">
-              Ask me anything about <span className="font-semibold text-slate-700">{courseName}</span>. I can explain concepts, quiz you, or work through practice problems. If you're struggling with a topic, tell me and I'll update your study plan.
+            <p className="text-slate-700 text-sm font-semibold mb-1">Your AI tutor for {courseName}</p>
+            <p className="text-slate-400 text-xs max-w-[220px] leading-relaxed mb-5">
+              Explain concepts, quiz me, work through problems, or build my study plan.
             </p>
+            <div className="flex flex-col gap-2 w-full max-w-xs">
+              {[
+                `Explain the most important concept in ${courseName} that I need to master`,
+                `Quiz me on ${courseName} with 3 practice questions`,
+                `What should I focus on most to do well on my exam?`,
+                `I'm struggling — what's the best way to study ${courseName}?`,
+              ].map(prompt => (
+                <button
+                  key={prompt}
+                  onClick={() => { track('tutor_suggestion_tapped', { courseName }); sendMessage(prompt) }}
+                  style={{
+                    textAlign: 'left', padding: '9px 14px', borderRadius: 10, fontSize: 13, lineHeight: 1.4,
+                    background: 'rgba(59,97,196,0.05)', border: '1px solid rgba(59,97,196,0.15)',
+                    color: '#3B4B6B', cursor: 'pointer', transition: 'all 0.15s',
+                  }}
+                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,97,196,0.10)'; e.currentTarget.style.borderColor = 'rgba(59,97,196,0.3)' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = 'rgba(59,97,196,0.05)'; e.currentTarget.style.borderColor = 'rgba(59,97,196,0.15)' }}
+                >
+                  {prompt}
+                </button>
+              ))}
+            </div>
           </div>
         )}
 

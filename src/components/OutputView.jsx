@@ -27,6 +27,7 @@ import AddSessionModal from './AddSessionModal'
 import AppShell from './AppShell'
 import DashboardView from './DashboardView'
 import { useSessionReminders } from '../utils/useSessionReminders'
+import { useStreak } from '../utils/useStreak'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, hasUsedTrial, canUseFeature } from '../lib/subscription'
 const CoursesView    = lazy(() => import('./CoursesView'))
@@ -77,7 +78,25 @@ function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateTo
           </div>
         )}
         {courses.length === 0 && (
-          <p className="text-slate-400 text-sm">Add courses to start using the AI Tutor.</p>
+          <div style={{ marginTop: 32, display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center', gap: 12 }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="20" height="20" fill="none" stroke="#3B61C4" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </div>
+            <div>
+              <p style={{ fontSize: 15, fontWeight: 700, color: '#111', margin: '0 0 4px' }}>No courses yet</p>
+              <p style={{ fontSize: 13, color: '#9B9B9B', margin: 0, maxWidth: 220, lineHeight: 1.5 }}>Add a course to unlock your AI tutor and get personalized help for every topic.</p>
+            </div>
+            {onNavigateToCoach && (
+              <button
+                onClick={onNavigateToCoach}
+                style={{ padding: '10px 22px', background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+              >
+                Add your first course →
+              </button>
+            )}
+          </div>
         )}
       </div>
 
@@ -759,6 +778,7 @@ export default function OutputView({
   }, [courses])
 
   useSessionReminders(allSessions, completedIds, todayStr)
+  const { currentStreak } = useStreak()
 
   // ── Conflict detection ────────────────────────────────────────────────────────
   const conflictMap = useMemo(() => {
@@ -1173,6 +1193,7 @@ export default function OutputView({
           onShowPaywall={onShowPaywall}
           userId={userId}
           learningStyle={learningStyle}
+          currentStreak={currentStreak}
         />
       )}
 

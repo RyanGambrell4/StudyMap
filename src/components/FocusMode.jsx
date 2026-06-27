@@ -457,7 +457,7 @@ const TAB_COLORS = {
   ai:         '#3B61C4',
 }
 
-export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools, onOpenBrainDump, course, onShowPaywall, userId, learningStyle }) {
+export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools, onOpenBrainDump, course, onShowPaywall, userId, learningStyle, currentStreak = 0 }) {
   const totalSec = session.duration * 60
   const isLongSession = session.duration > 45
   const todayStr = new Date().toISOString().split('T')[0]
@@ -1225,6 +1225,12 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 <p className="text-2xl font-bold font-mono" style={{ color: '#3B61C4' }}>{tabsVisited.size}</p>
                 <p className="text-xs mt-1" style={{ color: '#6B6B6B' }}>Activities used</p>
               </div>
+              {currentStreak > 0 && (
+                <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: '#FFF9F0', border: '1px solid rgba(234,88,12,0.18)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
+                  <p className="text-2xl font-bold font-mono" style={{ color: '#EA580C' }}>{currentStreak}</p>
+                  <p className="text-xs mt-1" style={{ color: '#9B6A4A' }}>Day streak</p>
+                </div>
+              )}
             </div>
 
             {/* Activity chips */}
@@ -1251,6 +1257,21 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 )
               })}
             </div>
+
+            {/* Exam countdown — shown when exam is within 30 days */}
+            {course?.examDate && (() => {
+              const days = Math.ceil((new Date(course.examDate + 'T12:00:00') - new Date()) / 86400000)
+              if (days < 0 || days > 30) return null
+              const urgent = days <= 7
+              return (
+                <div className="mb-5 rounded-xl px-4 py-3 text-center" style={{ background: urgent ? '#FFF5E6' : '#F7F6F3', border: `1px solid ${urgent ? '#F0B27A' : 'rgba(0,0,0,0.07)'}` }}>
+                  <p className="text-sm font-semibold m-0" style={{ color: urgent ? '#7A4B0A' : '#111111' }}>
+                    {days === 0 ? `${course.name ?? 'Your exam'} is today` : `${days} day${days !== 1 ? 's' : ''} to ${course.name ?? 'your exam'}`}
+                  </p>
+                  {urgent && <p className="text-xs m-0 mt-1" style={{ color: '#9C6E2A' }}>Focus only on high-yield topics. No new material.</p>}
+                </div>
+              )
+            })()}
 
             {/* Buttons - hidden while recall sheet is open */}
             {!showRecallSheet && (
