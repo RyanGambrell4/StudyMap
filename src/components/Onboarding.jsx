@@ -169,6 +169,15 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   const [yearLevel, setYearLevel]     = useState(saved?.yearLevel ?? null)
   const [preferredTime, setPreferredTime] = useState(saved?.preferredTime ?? null)
   const [showConfetti, setShowConfetti]   = useState(false)
+  const [skipVisible, setSkipVisible]     = useState(false)
+
+  // Delay the step-2 skip button by 4s so the preview lands first
+  useEffect(() => {
+    if (step !== 2) return
+    setSkipVisible(false)
+    const t = setTimeout(() => setSkipVisible(true), 4000)
+    return () => clearTimeout(t)
+  }, [step])
 
   // Trial offer countdown — persisted so it's consistent across re-renders
   const [trialOfferExpiry] = useState(() => {
@@ -466,7 +475,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             onMouseEnter={e => { if (allDone) e.currentTarget.style.transform = 'scale(1.01)' }}
             onMouseLeave={e => { if (allDone) e.currentTarget.style.transform = 'scale(1)' }}
           >
-            {allDone ? 'Build my plan →' : `${answered} of 3 answered — keep going`}
+            {allDone ? 'Show me my study plan →' : `${answered} of 3 answered — keep going`}
           </button>
 
           {/* ── Social proof ── */}
@@ -524,11 +533,11 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
           <h2 style={{ textAlign: 'center', marginBottom: 6, fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
             <span style={{ background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              Here's what's waiting.
+              Here's your personalized plan.
             </span>
           </h2>
           <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.83rem', textAlign: 'center', marginBottom: 24 }}>
-            Personalized for {yearLevel} {schoolLabel} · {timeLabel} sessions
+            Built for {yearLevel} {schoolLabel} · {timeLabel} sessions
           </p>
 
           {/* Week schedule preview */}
@@ -599,14 +608,16 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           >
             Unlock my full plan →
           </button>
-          <button
-            onClick={() => { track('preview_skipped', { source: 'onboarding' }); completeWith(profileData, { trialTaken: false }) }}
-            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.2)', fontSize: '0.74rem', cursor: 'pointer', width: '100%', padding: '6px', fontFamily: 'inherit', marginBottom: 8, transition: 'color .15s' }}
-            onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,.4)' }}
-            onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,.2)' }}
-          >
-            Explore the free plan instead
-          </button>
+          {skipVisible && (
+            <button
+              onClick={() => { track('preview_skipped', { source: 'onboarding' }); completeWith(profileData, { trialTaken: false }) }}
+              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.2)', fontSize: '0.74rem', cursor: 'pointer', width: '100%', padding: '6px', fontFamily: 'inherit', marginBottom: 8, transition: 'color .15s opacity .4s', opacity: skipVisible ? 1 : 0 }}
+              onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,.4)' }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,.2)' }}
+            >
+              Continue with free plan
+            </button>
+          )}
           <div style={{ textAlign: 'center' }}>
             <button
               onClick={() => goTo(1, -1)}
