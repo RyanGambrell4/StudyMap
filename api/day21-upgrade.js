@@ -104,7 +104,7 @@ export default async function handler(req, res) {
             <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Get Pro back — $2.99/wk</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">30-day money-back guarantee · Cancel in account anytime</span>
+            <span style="font-size:12px;color:#9B9B9B;">Cancel in account anytime</span>
           </td></tr>
         </table>` : `
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Week 3 check-in</p>
@@ -135,7 +135,7 @@ export default async function handler(req, res) {
             <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Start 3-day free trial</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">$0 today · $2.99/wk after · 30-day money-back guarantee</span>
+            <span style="font-size:12px;color:#9B9B9B;">$0 today · $2.99/wk after · Cancel anytime in account</span>
           </td></tr>
         </table>`
 

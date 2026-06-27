@@ -719,11 +719,8 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
         )}
 
         {/* ── Footer ── */}
-        <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.75rem', margin: '0 0 6px' }}>
+        <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.75rem', margin: 0 }}>
           Secure checkout via Stripe · Cancel anytime · No hidden fees
-        </p>
-        <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.72rem', margin: 0 }}>
-          🛡️ 30-day money-back guarantee on paid plans. No questions asked.
         </p>
       </div>
     </div>
