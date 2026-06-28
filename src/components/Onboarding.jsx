@@ -678,24 +678,26 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             : 'Full access, no restrictions. See how much sharper you study — before paying a cent.'}
         </p>
 
-        {/* Feature list */}
-        <div style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 16, padding: '20px 22px', marginBottom: 20 }}>
-          {[
-            { emoji: '📚', title: '5 courses',                desc: 'Your full semester, all in one place' },
-            { emoji: '🤖', title: '100 AI actions/month',     desc: 'Tutor, coach, blueprints, quizzes — on demand' },
-            { emoji: '⏱',  title: 'Unlimited focus sessions', desc: 'Study as long as you need, no 30-min cap' },
-            { emoji: '⚡', title: 'Session Blueprints',       desc: 'Minute-by-minute plan before every session' },
-            { emoji: '🧠', title: 'Brain Dumps & Exam Rescue', desc: 'Active recall and emergency exam prep' },
-            { emoji: '📋', title: 'Cheat Sheets & Flashcards', desc: 'AI-built from your actual course material' },
-          ].map(({ emoji, title, desc }) => (
-            <div key={title} style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
-              <span style={{ fontSize: '1.15rem', flexShrink: 0 }}>{emoji}</span>
-              <div>
-                <div style={{ fontSize: 14, fontWeight: 700, color: 'rgba(255,255,255,.9)' }}>{title}</div>
-                <div style={{ fontSize: 12, color: 'rgba(255,255,255,.32)', marginTop: 1 }}>{desc}</div>
+        {/* Free vs Pro comparison */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
+          <div style={{ background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)', borderRadius: 12, padding: '14px' }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.28)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Free plan</p>
+            {['1 course only', '2 AI actions total', 'No Study Coach', 'No practice exams', '1 Blueprint ever'].map(item => (
+              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7 }}>
+                <span style={{ fontSize: 10, color: '#EF4444', flexShrink: 0 }}>✕</span>
+                <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.38)', lineHeight: 1.35 }}>{item}</span>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
+          <div style={{ background: 'rgba(107,143,255,.07)', border: '1px solid rgba(107,143,255,.22)', borderRadius: 12, padding: '14px' }}>
+            <p style={{ fontSize: 10, fontWeight: 700, color: '#6B8FFF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Pro trial · free</p>
+            {['5 courses', '100 AI actions/mo', 'AI Study Coach', 'Practice exams', 'Unlimited Blueprints'].map(item => (
+              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7 }}>
+                <span style={{ fontSize: 10, color: '#34D399', flexShrink: 0 }}>✓</span>
+                <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.75)', lineHeight: 1.35 }}>{item}</span>
+              </div>
+            ))}
+          </div>
         </div>
 
         {/* Stars */}
@@ -754,20 +756,20 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           No charge until day 4 · $2.99/wk after · cancel anytime before trial ends
         </p>
 
-        {/* Skip — intentionally low-prominence text link */}
+        {/* Skip — low-prominence, copy reminds them what they're giving up */}
         <button
           onClick={() => { track('trial_skipped', { source: 'onboarding' }); completeWith(profileData, { trialTaken: false }) }}
           style={{
             background: 'none', border: 'none', padding: '6px',
-            color: 'rgba(255,255,255,.18)', fontSize: '0.74rem',
+            color: 'rgba(255,255,255,.18)', fontSize: '0.72rem',
             cursor: 'pointer', textAlign: 'center', display: 'block',
             width: '100%', fontFamily: 'inherit', marginBottom: 10,
-            transition: 'color .15s',
+            transition: 'color .15s', lineHeight: 1.5,
           }}
-          onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,.38)' }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,.35)' }}
           onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,.18)' }}
         >
-          Skip for now
+          No thanks — I'll stay on the free plan (1 course, 2 AI uses)
         </button>
 
         <div style={{ textAlign: 'center' }}>

@@ -63,6 +63,19 @@ export default function App() {
     () => sessionStorage.getItem('studyedge_email_banner_dismissed') === '1'
   )
 
+  // ── Floating trial nudge (appears 2 min after entering app) ───────────────
+  const [trialNudgeDismissed, setTrialNudgeDismissed] = useState(
+    () => sessionStorage.getItem('studyedge_trial_nudge_dismissed') === '1'
+  )
+  const [trialNudgeVisible, setTrialNudgeVisible] = useState(false)
+
+  useEffect(() => {
+    if (!showOutput) return
+    if (getActivePlan() !== 'free' || hasUsedTrial()) return
+    const t = setTimeout(() => setTrialNudgeVisible(true), 120000)
+    return () => clearTimeout(t)
+  }, [showOutput])
+
   // ── Paywall state ──────────────────────────────────────────────────────────
   const [paywallOpen, setPaywallOpen]     = useState(false)
   const [paywallTrigger, setPaywallTrigger] = useState('courses')
@@ -737,6 +750,33 @@ export default function App() {
               ×
             </button>
           </div>
+        </div>
+      )}
+
+      {/* Floating trial nudge — appears 2 min in for free users who haven't trialed */}
+      {showOutput && trialNudgeVisible && !trialNudgeDismissed && getActivePlan() === 'free' && !hasUsedTrial() && (
+        <div style={{
+          position: 'fixed', bottom: 20, right: 20, zIndex: 998,
+          background: 'linear-gradient(135deg, #3B61C4, #7C3AED)',
+          borderRadius: 14, padding: '12px 14px',
+          boxShadow: '0 8px 32px rgba(59,97,196,.45), 0 2px 8px rgba(0,0,0,.2)',
+          display: 'flex', alignItems: 'center', gap: 10, maxWidth: 300,
+        }}>
+          <div style={{ flex: 1 }}>
+            <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 700, color: '#fff' }}>Try Pro free for 3 days</p>
+            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,.65)' }}>$0 today · $2.99/wk after · cancel anytime</p>
+          </div>
+          <button
+            onClick={() => { track('trial_nudge_clicked', { source: 'floating_pill' }); openPaywall('trial_nudge') }}
+            style={{ background: 'rgba(255,255,255,.2)', border: '1px solid rgba(255,255,255,.3)', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, padding: '6px 10px', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, fontFamily: 'inherit' }}
+          >
+            Start free →
+          </button>
+          <button
+            onClick={() => { sessionStorage.setItem('studyedge_trial_nudge_dismissed', '1'); setTrialNudgeDismissed(true); track('trial_nudge_dismissed') }}
+            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.45)', fontSize: 18, cursor: 'pointer', padding: 0, lineHeight: 1, flexShrink: 0 }}
+            aria-label="Dismiss"
+          >×</button>
         </div>
       )}
 

@@ -54,6 +54,14 @@
       "schedule": "0 11 * * *"
     },
     {
+      "path": "/api/no-first-session",
+      "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/day10-recap",
+      "schedule": "0 11 * * *"
+    },
+    {
       "path": "/api/day1-tips",
       "schedule": "0 11 * * *"
     },
