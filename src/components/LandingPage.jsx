@@ -2192,9 +2192,9 @@ export default function LandingPage({ onGetStarted }) {
             borderRadius: 999, padding: 4,
           }}>
             {[
-              { id: 'weekly',  label: 'Weekly',  save: null      },
-              { id: 'monthly', label: 'Monthly', save: 'Save 17%' },
-              { id: 'yearly',  label: 'Annual',  save: 'Save 55%' },
+              { id: 'weekly',  label: 'Weekly',  save: null,           best: false },
+              { id: 'monthly', label: 'Monthly', save: 'Save 17%',     best: false },
+              { id: 'yearly',  label: 'Annual',  save: 'Best Value ✦', best: true  },
             ].map(p => {
               const active = pricingPeriod === p.id
               return (
@@ -2204,11 +2204,20 @@ export default function LandingPage({ onGetStarted }) {
                   aria-selected={active}
                   onClick={() => setPricingPeriod(p.id)}
                   style={{
-                    padding: '8px 18px', borderRadius: 999, border: 'none', cursor: 'pointer',
-                    background: active ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'transparent',
-                    color: active ? '#fff' : 'rgba(226,232,240,0.65)',
+                    padding: '8px 18px', borderRadius: 999, cursor: 'pointer',
+                    border: p.best && !active ? '1px solid rgba(52,211,153,0.4)' : 'none',
+                    background: active
+                      ? p.best
+                        ? 'linear-gradient(135deg, #059669, #10b981)'
+                        : 'linear-gradient(135deg, #6366f1, #4f46e5)'
+                      : 'transparent',
+                    color: active ? '#fff' : p.best ? '#34d399' : 'rgba(226,232,240,0.65)',
                     fontSize: 13.5, fontWeight: 700, letterSpacing: '-0.005em',
-                    boxShadow: active ? '0 6px 18px rgba(99,102,241,0.35)' : 'none',
+                    boxShadow: active
+                      ? p.best
+                        ? '0 6px 18px rgba(16,185,129,0.35)'
+                        : '0 6px 18px rgba(99,102,241,0.35)'
+                      : 'none',
                     transition: 'all 0.15s ease',
                     display: 'inline-flex', alignItems: 'center', gap: 6,
                   }}
@@ -2217,7 +2226,7 @@ export default function LandingPage({ onGetStarted }) {
                   {p.save && (
                     <span style={{
                       fontSize: 11, fontWeight: 800,
-                      color: active ? '#a5f3d4' : '#34d399',
+                      color: active ? (p.best ? '#d1fae5' : '#a5f3d4') : '#34d399',
                       letterSpacing: '0.005em',
                     }}>
                       {p.save}

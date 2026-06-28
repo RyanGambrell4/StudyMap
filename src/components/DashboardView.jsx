@@ -792,9 +792,15 @@ export default function DashboardView({
             display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap',
           }}>
             <div style={{ flex: 1, minWidth: 200 }}>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>3 days of full Pro. Cancel anytime.</p>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>
+                {upcomingExam && upcomingExam.days <= 5
+                  ? `${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. Start your free Pro trial.`
+                  : '3 days of full Pro. Cancel anytime.'}
+              </p>
               <p style={{ margin: '3px 0 8px', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
-                Try 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions, free for 3 days. $2.99/wk after.
+                {upcomingExam && upcomingExam.days <= 5
+                  ? 'Exam Rescue, Cheat Sheets, and unlimited Blueprints are all Pro. Free for 3 days — $2.99/wk after.'
+                  : 'Try 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions, free for 3 days. $2.99/wk after.'}
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 {['5 courses', '100 AI actions/month', 'Unlimited everything'].map(f => (
@@ -828,10 +834,14 @@ export default function DashboardView({
             display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
           }}>
             <div style={{ flex: 1, minWidth: 200 }}>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>Ready to go back to Pro?</p>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>
+                {upcomingExam && upcomingExam.days <= 5
+                  ? `${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. Exam Rescue is a Pro feature.`
+                  : 'Ready to go back to Pro?'}
+              </p>
               <p style={{ margin: '2px 0 0', fontSize: 12, color: D.textMuted }}>$2.99/wk — cancel anytime. Everything you had during your trial.</p>
             </div>
-            <button onClick={() => onShowPaywall?.('ai')} style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>
+            <button onClick={() => onShowPaywall?.(upcomingExam && upcomingExam.days <= 5 ? 'examRescue' : 'nav-upgrade')} style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>
               Upgrade to Pro →
             </button>
           </div>

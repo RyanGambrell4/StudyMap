@@ -669,16 +669,24 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           </span>
         </h1>
         <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.9rem', textAlign: 'center', marginBottom: 28, lineHeight: 1.65 }}>
-          Full access, no restrictions. See how much sharper you study — before paying a cent.
+          {schoolType === 'hs'
+            ? 'Built for AP classes, finals, and everything between. See the difference in your first study session.'
+            : schoolType === 'exam'
+            ? 'High-stakes prep, built around your real test date. See how much sharper your studying gets — before paying a cent.'
+            : schoolType === 'uni'
+            ? 'Your full semester — every course, every exam — finally organized. Full access, no restrictions.'
+            : 'Full access, no restrictions. See how much sharper you study — before paying a cent.'}
         </p>
 
         {/* Feature list */}
         <div style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 16, padding: '20px 22px', marginBottom: 20 }}>
           {[
-            { emoji: '📚', title: '5 courses',               desc: 'Your full semester, all in one place' },
-            { emoji: '🤖', title: '100 AI actions/month',    desc: 'Tutor, coach, blueprints, quizzes' },
-            { emoji: '⏱',  title: 'Unlimited focus sessions', desc: 'Study as long as you need' },
-            { emoji: '🔄', title: 'Rebuild plans anytime',   desc: 'When exams shift and life happens' },
+            { emoji: '📚', title: '5 courses',                desc: 'Your full semester, all in one place' },
+            { emoji: '🤖', title: '100 AI actions/month',     desc: 'Tutor, coach, blueprints, quizzes — on demand' },
+            { emoji: '⏱',  title: 'Unlimited focus sessions', desc: 'Study as long as you need, no 30-min cap' },
+            { emoji: '⚡', title: 'Session Blueprints',       desc: 'Minute-by-minute plan before every session' },
+            { emoji: '🧠', title: 'Brain Dumps & Exam Rescue', desc: 'Active recall and emergency exam prep' },
+            { emoji: '📋', title: 'Cheat Sheets & Flashcards', desc: 'AI-built from your actual course material' },
           ].map(({ emoji, title, desc }) => (
             <div key={title} style={{ display: 'flex', alignItems: 'center', gap: 14, marginBottom: 14 }}>
               <span style={{ fontSize: '1.15rem', flexShrink: 0 }}>{emoji}</span>
@@ -759,7 +767,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,.38)' }}
           onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,.18)' }}
         >
-          No thanks, I'll stick with the free plan
+          Skip for now
         </button>
 
         <div style={{ textAlign: 'center' }}>
