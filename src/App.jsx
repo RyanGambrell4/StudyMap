@@ -694,7 +694,14 @@ export default function App() {
       )}
 
       {/* Email confirmation banner — shown in the main app after onboarding */}
-      {showOutput && session?.user && !session.user.email_confirmed_at && !emailBannerDismissed && (
+      {showOutput && session?.user && !session.user.email_confirmed_at && !emailBannerDismissed && (() => {
+        // Track once per mount
+        if (typeof window !== 'undefined' && !window.__emailBannerTracked) {
+          window.__emailBannerTracked = true
+          track('email_banner_shown', { user_id: session.user.id })
+        }
+        return true
+      })() && (
         <div style={{
           position: 'fixed', top: 0, left: 0, right: 0, zIndex: 999,
           background: '#3B61C4', padding: '9px 20px',
@@ -723,7 +730,7 @@ export default function App() {
               {resendState === 'sending' ? 'Sending…' : resendState === 'sent' ? '✓ Sent' : resendState === 'error' ? 'Failed — retry' : 'Resend email'}
             </button>
             <button
-              onClick={() => { sessionStorage.setItem('studyedge_email_banner_dismissed', '1'); setEmailBannerDismissed(true) }}
+              onClick={() => { sessionStorage.setItem('studyedge_email_banner_dismissed', '1'); setEmailBannerDismissed(true); track('email_banner_dismissed', { user_id: session.user.id }) }}
               style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.55)', fontSize: 18, cursor: 'pointer', padding: '0 4px', lineHeight: 1, flexShrink: 0 }}
               aria-label="Dismiss"
             >

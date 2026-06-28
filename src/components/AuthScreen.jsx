@@ -286,7 +286,7 @@ export default function AuthScreen({ initialMode, onBack }) {
             {mode === 'signup' && !magicLinkMode && (
               <button
                 type="button"
-                onClick={() => setMagicLinkMode(true)}
+                onClick={() => { setMagicLinkMode(true); track('magic_link_mode_selected') }}
                 style={{ background: 'none', border: 'none', fontSize: 12, color: '#3B61C4', cursor: 'pointer', fontWeight: 500, padding: '0 0 4px', textAlign: 'left' }}
               >
                 Prefer a one-click login link? Skip the password →
@@ -587,7 +587,7 @@ function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onS
           </div>
 
           <h1 style={{ fontSize: 24, fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px' }}>
-            {isMagicLink ? 'You're one click away' : 'Check your email — you\'re almost in'}
+            {isMagicLink ? "You're one click away" : "Check your email — you're almost in"}
           </h1>
           <p style={{ fontSize: 14, color: '#6B6B6B', margin: '0 0 4px', lineHeight: 1.5 }}>
             {isMagicLink ? 'We sent a one-click login link to' : 'We sent a confirmation link to'}
