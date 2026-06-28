@@ -242,12 +242,26 @@ const TESTIMONIALS = [
   { quote: 'the AI study coach actually understands my schedule. worth every penny', name: 'Marcus T.', detail: 'Engineering, 3rd year' },
 ]
 
+// Maps each trigger to the most contextually relevant testimonial index.
+// Danny (0) = academic outcomes. Andy (1) = consistency/habit. Charlotte (2) = all-in-one.
+// Priya (3) = exam rescue/rescue scenarios. Marcus (4) = coach, focus, blueprints.
+const TRIGGER_TESTIMONIAL_IDX = {
+  'practice-exam-results': 0, 'practice_exam': 0, 'practiceExamAnalytics': 0,
+  'grades': 0, 'grade_recovery': 0, 'ai-exhausted': 0, 'ai': 0,
+  'brain-dump-result': 1, 'brainDump': 1, 'quiz-burst-result': 1, 'quizBurst': 1,
+  'streak-milestone': 1, 'drill-result': 1,
+  'courses': 2, 'nav-trial': 2, 'nav-upgrade': 2, 'tools': 2, 'flashcardDecks': 2,
+  'exam-rescue-result': 3, 'examRescue': 3, 'cheat-sheet': 3, 'prep-blast': 3,
+  'focus-limit': 4, 'focus-complete': 4, 'focus': 4,
+  'coach': 4, 'coach-plan-result': 4, 'blueprint': 4, 'adapt': 4,
+}
+
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function PaywallModal({ trigger, onClose, userEmail, userId, currentPlan = 'free', onTrialActivated }) {
   const [billingPeriod, setBillingPeriod] = useState('weekly')
   const [loading, setLoading] = useState(null)
-  const [testimonialIdx, setTestimonialIdx] = useState(0)
+  const [testimonialIdx, setTestimonialIdx] = useState(() => TRIGGER_TESTIMONIAL_IDX[trigger] ?? 0)
   const [trialLoading, setTrialLoading] = useState(false)
   const [trialError, setTrialError] = useState(null)
   const [planError, setPlanError] = useState(null)

@@ -472,6 +472,37 @@ export default function CalendarWeekView({
         </button>
       </div>
 
+      {/* ── Pro nudge for free users ── */}
+      {plan === 'free' && onShowPaywall && (
+        <div
+          onClick={() => onShowPaywall('courses')}
+          style={{
+            display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+            gap: 12, padding: '9px 14px', marginBottom: 10,
+            background: 'rgba(59,97,196,0.04)',
+            border: '1px solid rgba(59,97,196,0.14)',
+            borderLeft: '3px solid rgba(59,97,196,0.5)',
+            borderRadius: 8, cursor: 'pointer',
+            transition: 'background 0.15s',
+          }}
+          onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,97,196,0.08)'}
+          onMouseLeave={e => e.currentTarget.style.background = 'rgba(59,97,196,0.04)'}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, flex: 1, minWidth: 0 }}>
+            <svg width="14" height="14" fill="none" stroke="rgba(59,97,196,0.8)" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
+              <rect x="3" y="4" width="18" height="18" rx="2" /><line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" /><line x1="3" y1="10" x2="21" y2="10" />
+            </svg>
+            <span style={{ fontSize: 12, color: '#6B6B6B', lineHeight: 1.4 }}>
+              <strong style={{ color: '#3B61C4', fontWeight: 700 }}>Pro:</strong>
+              {' '}See all 5 courses color-coded across your week, bulk-reschedule any week in one tap, and sync Google Calendar events.
+            </span>
+          </div>
+          <span style={{ fontSize: 11.5, fontWeight: 700, color: '#3B61C4', whiteSpace: 'nowrap', flexShrink: 0 }}>
+            Try free →
+          </span>
+        </div>
+      )}
+
       {/* ── Column headers ── */}
       <div className="flex" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
         <div className="w-12 shrink-0" />
