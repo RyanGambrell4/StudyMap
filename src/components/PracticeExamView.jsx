@@ -192,9 +192,10 @@ export default function PracticeExamView({ courses = [], onShowPaywall }) {
           {/* CTA */}
           <div style={{ borderTop: `1px solid ${D.border}`, padding: '24px 36px' }}>
             {courses.length === 0 ? (
-              <div style={{ padding: '16px 20px', background: D.bg, borderRadius: 10, border: `1px dashed rgba(0,0,0,0.11)` }}>
-                <p style={{ margin: '0 0 3px', fontSize: 13.5, fontWeight: 600, color: D.text }}>No courses added yet</p>
-                <p style={{ margin: 0, fontSize: 13, color: D.muted }}>Add a course first, then come back to run a practice exam.</p>
+              <div style={{ padding: '18px 20px', background: 'rgba(59,97,196,0.04)', borderRadius: 10, border: '1px solid rgba(59,97,196,0.14)', borderLeft: '3px solid rgba(59,97,196,0.4)' }}>
+                <p style={{ margin: '0 0 4px', fontSize: 13.5, fontWeight: 700, color: D.text }}>Add a course to unlock practice exams</p>
+                <p style={{ margin: '0 0 8px', fontSize: 12.5, color: D.muted, lineHeight: 1.5 }}>Practice exams are the #1 predictor of real exam performance — students who take 3+ improve their scores significantly by targeting their actual weak spots.</p>
+                <p style={{ margin: 0, fontSize: 12, color: '#3B61C4', fontWeight: 600 }}>Go to Courses → add your first course to get started.</p>
               </div>
             ) : (() => {
               const plan = getActivePlan()

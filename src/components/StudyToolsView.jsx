@@ -614,7 +614,22 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
         return (
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 800, color: '#111111', margin: '0 0 4px', letterSpacing: '-0.02em' }}>Study Tools</h1>
-            <p style={{ fontSize: 13.5, color: '#6B6B6B', margin: '0 0 20px' }}>Everything you need to learn faster and remember more.</p>
+            <p style={{ fontSize: 13.5, color: '#6B6B6B', margin: '0 0 14px' }}>Everything you need to learn faster and remember more.</p>
+
+            {!isPro && (
+              <div
+                onClick={() => onShowPaywall?.(hasUsedTrial() ? 'tools' : 'tools')}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 14px', marginBottom: 14, background: 'rgba(59,97,196,0.04)', border: '1px solid rgba(59,97,196,0.14)', borderLeft: '3px solid rgba(59,97,196,0.5)', borderRadius: 8, cursor: 'pointer' }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,97,196,0.08)'}
+                onMouseLeave={e => e.currentTarget.style.background = 'rgba(59,97,196,0.04)'}
+              >
+                <span style={{ fontSize: 12, color: '#6B6B6B', lineHeight: 1.4 }}>
+                  <strong style={{ color: '#3B61C4' }}>Free:</strong> 1 use each of Exam Rescue, Brain Dump &amp; Quiz Burst.{' '}
+                  <strong style={{ color: '#3B61C4' }}>Pro:</strong> unlimited everything, plus AI Cheat Sheet.
+                </span>
+                <span style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, color: '#3B61C4' }}>{hasUsedTrial() ? 'Upgrade →' : 'Try free →'}</span>
+              </div>
+            )}
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
               {tools.map(({ label, desc, color, icon, onClick, pro, badge, badgeColor }) => (

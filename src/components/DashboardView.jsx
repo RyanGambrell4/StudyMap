@@ -637,7 +637,10 @@ export default function DashboardView({
             borderRadius: 999, padding: '5px 14px', marginBottom: 14,
           }}>
             <span style={{ fontSize: 12, color: D.amber, fontWeight: 600 }}>
-              {Math.max(0, 2 - aiUsed)} AI message{Math.max(0, 2 - aiUsed) !== 1 ? 's' : ''} left
+              {aiUsed < 2
+                ? <>{2 - aiUsed} free AI message{2 - aiUsed !== 1 ? 's' : ''} left · <span style={{ fontWeight: 400, color: '#9B6C1A' }}>Pro: 100/month</span></>
+                : <>Out of free AI messages this week</>
+              }
             </span>
             {aiChipTrialEligible ? (
               <button onClick={handleStartTrial} disabled={trialBannerLoading} style={{ fontSize: 12, fontWeight: 700, color: D.blue, background: 'none', border: 'none', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', padding: 0, opacity: trialBannerLoading ? 0.7 : 1 }}>

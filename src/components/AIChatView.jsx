@@ -391,10 +391,12 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       {/* Input */}
       <div className="px-4 pb-4 pt-2 shrink-0 border-t border-slate-100">
       {isFree && (() => { const { remaining } = canUseFeature('aiTutor'); return remaining !== null && (
-        <p className={`text-xs mb-1.5 ${remaining === 1 ? 'text-amber-500 font-medium' : 'text-slate-400'}`}>
-          {remaining === 1
-            ? <>Last free message · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>
-            : <>{2 - remaining} of 2 free AI messages used{remaining === 0 && <> · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>}</>
+        <p className={`text-xs mb-1.5 ${remaining <= 1 ? 'text-amber-500 font-medium' : 'text-slate-400'}`}>
+          {remaining === 0
+            ? <>Out of free questions this week · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro — 100/month' : 'Start free trial — 100/month'}</button></>
+            : remaining === 1
+            ? <>Last free question this week · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>
+            : <>2 free AI questions/week · Pro gives you 100/month</>
           }
         </p>
       )})()}
