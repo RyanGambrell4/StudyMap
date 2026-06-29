@@ -2,6 +2,7 @@ import { useMemo, useEffect, useRef, useState } from 'react'
 import { track } from '../lib/analytics'
 import ReadinessPill, { computeReadiness } from './ReadinessPill'
 import ReferralCard from './ReferralCard'
+import StudyBuddyCard from './StudyBuddyCard'
 import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
@@ -74,6 +75,7 @@ const IcoBrain  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="no
 const IcoGrad   = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M2 10l10-4 10 4-10 4-10-4z"/><path d="M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5"/><path d="M22 10v6"/></svg>
 const IcoCards  = () => <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="14" height="14" rx="2"/><path d="M7 9h6M7 13h4"/><path d="M21 8v10a2 2 0 01-2 2H8"/></svg>
 const IcoArrowUp = () => <svg width="8" height="8" viewBox="0 0 12 12" fill="none"><path d="M3 8l3-4 3 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
+const READINESS_SCORES = { strong: 100, 'on-track': 75, 'needs-work': 50, 'at-risk': 25, prompt: 10 }
 const IcoArrowDown = () => <svg width="8" height="8" viewBox="0 0 12 12" fill="none"><path d="M3 4l3 4 3-4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
 
 // ── Label ─────────────────────────────────────────────────────────────────────
@@ -206,7 +208,7 @@ export default function DashboardView({
     return hoursSince < 24
   })
   const showTrialCard = plan === 'free' && !hasUsedTrial() && !trialCardDismissed && !showAiChip
-  const { currentStreak, lastCompletedDate, recordCompletion } = useStreak()
+  const { currentStreak, lastCompletedDate, recordCompletion, freezeCount, useFreeze } = useStreak()
   const celebrate = useCelebration()
   const streak = currentStreak
   const [aiBriefDismissed, setAiBriefDismissed] = useState(() =>
@@ -385,6 +387,27 @@ export default function DashboardView({
     })
     return map
   }, [courses, completedSessions])
+
+  const overallReadiness = useMemo(() => {
+    if (!courses.length) return null
+    let totalWeight = 0, totalScore = 0
+    courses.forEach((course, idx) => {
+      const last = lastSessionPerCourse[idx]
+      const status = computeReadiness(course, last, todayStr)
+      const score = READINESS_SCORES[status] ?? 50
+      const examDate = course.examDate ?? null
+      const daysToExam = examDate
+        ? Math.max(0, Math.ceil((new Date(examDate + 'T12:00:00').getTime() - Date.now()) / 86400000))
+        : 90
+      const weight = daysToExam <= 7 ? 4 : daysToExam <= 30 ? 2 : 1
+      totalWeight += weight
+      totalScore += score * weight
+    })
+    const score = Math.round(totalScore / totalWeight)
+    const label = score >= 80 ? 'On Track' : score >= 60 ? 'Needs Attention' : 'At Risk'
+    const color = score >= 80 ? '#16A34A' : score >= 60 ? '#D97706' : '#DC2626'
+    return { score, label, color }
+  }, [courses, lastSessionPerCourse, todayStr])
 
   const dueNextPerCourse = useMemo(() => {
     const map = {}
@@ -868,10 +891,25 @@ export default function DashboardView({
                 Your {currentStreak}-day streak broke.
               </p>
               <p style={{ margin: '2px 0 0', fontSize: 12, color: '#B45309', lineHeight: 1.4 }}>
-                Start a session today to rebuild it.
+                {freezeCount > 0
+                  ? `Use a Streak Freeze to save it — you have ${freezeCount} left.`
+                  : 'Start a session today to rebuild it.'}
               </p>
             </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
+              {freezeCount > 0 && (
+                <button
+                  onClick={() => {
+                    useFreeze(todayStr)
+                    sessionStorage.setItem('se_streak_banner_dismissed', '1')
+                    setStreakBannerDismissed(true)
+                    track('streak_freeze_used', { streak: currentStreak, freezesLeft: freezeCount - 1 })
+                  }}
+                  style={{ background: '#FFFFFF', border: '1.5px solid #F97316', borderRadius: 8, padding: '7px 14px', fontSize: 12, fontWeight: 700, color: '#F97316', cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5 }}
+                >
+                  🧊 Use Freeze ({freezeCount})
+                </button>
+              )}
               <button
                 onClick={() => {
                   track('streak_recovery_cta_clicked', { streak: currentStreak })
@@ -1342,7 +1380,7 @@ export default function DashboardView({
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {[
-              { label: 'Study streak',  value: streak,         unit: streak === 1 ? 'day' : 'days', delta: streak,        positive: streak > 0,       icon: <IcoFlame color="#F97316" />,  iconBg: 'rgba(249,115,22,0.1)',  iconColor: '#F97316', subtext: daysToNextMilestone === 1 ? `${nextStreakMilestone}-day streak tomorrow 🔥` : daysToNextMilestone === 2 ? `${daysToNextMilestone} days to ${nextStreakMilestone}-day streak` : null },
+              { label: 'Study streak',  value: streak,         unit: streak === 1 ? 'day' : 'days', delta: streak,        positive: streak > 0,       icon: <IcoFlame color="#F97316" />,  iconBg: 'rgba(249,115,22,0.1)',  iconColor: '#F97316', subtext: daysToNextMilestone === 1 ? `${nextStreakMilestone}-day streak tomorrow 🔥` : daysToNextMilestone === 2 ? `${daysToNextMilestone} days to ${nextStreakMilestone}-day streak` : freezeCount > 0 ? `🧊 ${freezeCount} freeze${freezeCount !== 1 ? 's' : ''} available` : null },
               { label: 'Hours studied', value: weekHours,      unit: 'hrs',                          delta: deltaHours,    positive: deltaHours >= 0,  icon: <IcoClock color={D.blue} />,   iconBg: 'rgba(59,97,196,0.1)',   iconColor: D.blue },
               { label: 'Sessions done', value: weekSessionCount, unit: '',                           delta: deltaSessions, positive: deltaSessions >= 0, icon: <IcoCheck color={D.green} />, iconBg: 'rgba(22,163,74,0.1)',   iconColor: D.green },
             ].map((stat, i) => (
@@ -1388,6 +1426,25 @@ export default function DashboardView({
               }} />
             </div>
           </div>
+
+          {overallReadiness && (
+            <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${D.border}` }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 7 }}>
+                <span style={{ fontSize: 11, fontWeight: 600, color: D.textDim }}>Exam Readiness</span>
+                <span style={{ fontSize: 11, fontWeight: 700, color: overallReadiness.color, background: `${overallReadiness.color}12`, padding: '2px 8px', borderRadius: 5 }}>{overallReadiness.label}</span>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                <div style={{ flex: 1, height: 7, background: '#EEECE8', borderRadius: 4, overflow: 'hidden' }}>
+                  <div style={{
+                    width: `${overallReadiness.score}%`, height: '100%', borderRadius: 4,
+                    background: `linear-gradient(90deg, ${overallReadiness.color}, ${overallReadiness.color}BB)`,
+                    transition: 'width 0.6s ease',
+                  }} />
+                </div>
+                <span style={{ fontSize: 14, fontWeight: 800, color: overallReadiness.color, minWidth: 38, textAlign: 'right', letterSpacing: -0.3 }}>{overallReadiness.score}%</span>
+              </div>
+            </div>
+          )}
         </Card>
 
         {/* ── DEADLINE RADAR (span 12) ── */}
@@ -1450,6 +1507,11 @@ export default function DashboardView({
             </div>
           </Card>
         )}
+
+        {/* ── Study Buddy card (all users) ── */}
+        <Card style={{ gridColumn: 'span 12', padding: 20 }}>
+          <StudyBuddyCard />
+        </Card>
 
         {/* ── Referral card (free users only) ── */}
         {plan === 'free' && (

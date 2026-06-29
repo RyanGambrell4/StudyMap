@@ -197,6 +197,18 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
   const [pastedText, setPastedText] = useState('')
   const [isExtracting, setIsExtracting] = useState(false)
   const [extractError, setExtractError] = useState('')
+
+  // YouTube ingestion state
+  const [youtubeUrl, setYoutubeUrl] = useState('')
+  const [isImportingYoutube, setIsImportingYoutube] = useState(false)
+  const [youtubeError, setYoutubeError] = useState('')
+  const [youtubeTitle, setYoutubeTitle] = useState('')
+
+  // Lecture audio upload state
+  const audioInputRef = useRef(null)
+  const [isTranscribingAudio, setIsTranscribingAudio] = useState(false)
+  const [audioError, setAudioError] = useState('')
+  const [audioFileName, setAudioFileName] = useState('')
   const [showTextPreview, setShowTextPreview] = useState(false)
   const [selectedCourse, setSelectedCourse] = useState(null)
 
@@ -348,6 +360,73 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     } finally {
       setIsScanning(false)
       if (scanInputRef.current) scanInputRef.current.value = ''
+    }
+  }
+
+  async function handleAudioUpload(file) {
+    if (!file) return
+    const ext = file.name.split('.').pop().toLowerCase()
+    const allowed = ['mp3', 'm4a', 'mp4', 'wav', 'webm', 'ogg', 'oga', 'aac', 'flac']
+    if (!allowed.includes(ext)) {
+      setAudioError('Please upload an audio file (mp3, m4a, wav, webm, ogg, aac, flac)')
+      return
+    }
+    if (file.size > 50 * 1024 * 1024) {
+      setAudioError('File too large — max 50 MB')
+      return
+    }
+    setAudioError('')
+    setIsTranscribingAudio(true)
+    setAudioFileName(file.name)
+    setPastedText('')
+    setExtractedText('')
+    setUploadedFile(null)
+    setYoutubeTitle('')
+    try {
+      const token = await getAccessToken()
+      const res = await fetch('/api/transcribe-file', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/octet-stream',
+          'x-file-ext': ext,
+          Authorization: `Bearer ${token}`,
+        },
+        body: file,
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Transcription failed')
+      setPastedText(data.transcript)
+    } catch (err) {
+      setAudioError(err.message ?? 'Could not transcribe this audio file')
+      setAudioFileName('')
+    } finally {
+      setIsTranscribingAudio(false)
+    }
+  }
+
+  async function handleYoutubeImport() {
+    if (!youtubeUrl.trim()) return
+    setYoutubeError('')
+    setIsImportingYoutube(true)
+    setYoutubeTitle('')
+    try {
+      const token = await getAccessToken()
+      const res = await fetch('/api/youtube-ingest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ url: youtubeUrl.trim() }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed to fetch transcript')
+      setPastedText(data.transcript)
+      setExtractedText('')
+      setUploadedFile(null)
+      setYoutubeTitle(data.title ?? '')
+      setYoutubeUrl('')
+    } catch (err) {
+      setYoutubeError(err.message ?? 'Could not import this video')
+    } finally {
+      setIsImportingYoutube(false)
     }
   }
 
@@ -531,6 +610,15 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
   return (
     <div className="px-6 py-8 max-w-2xl mx-auto">
 
+      {/* Always-mounted hidden inputs (must be outside mode conditionals so refs work from hub) */}
+      <input
+        ref={audioInputRef}
+        type="file"
+        accept=".mp3,.m4a,.mp4,.wav,.webm,.ogg,.oga,.aac,.flac"
+        className="hidden"
+        onChange={e => { handleAudioUpload(e.target.files?.[0]); e.target.value = '' }}
+      />
+
       {/* ── Hub screen ── */}
       {mode === 'hub' && (() => {
         const plan = getActivePlan()
@@ -601,6 +689,24 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             onClick: () => { setDrillQuiz([]); setDrillAnswers([]); setDrillDone(false); setDrillQuestionIdx(0); setDrillError(''); setMode('drill') },
             badge: 'No upload needed',
             badgeColor: '#16A34A',
+          },
+          {
+            label: 'Lecture Audio',
+            desc: 'Upload a recorded lecture (mp3, m4a, wav) and AI builds your study materials.',
+            color: '#7C3AED',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>,
+            onClick: () => { setAudioError(''); setMode('upload'); audioInputRef.current?.click() },
+            badge: 'No notes needed',
+            badgeColor: '#7C3AED',
+          },
+          {
+            label: 'YouTube Lecture',
+            desc: 'Paste a YouTube lecture URL to generate flashcards and a quiz.',
+            color: '#DC2626',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/></svg>,
+            onClick: () => { setYoutubeUrl(''); setYoutubeError(''); setYoutubeTitle(''); setMode('upload') },
+            badge: 'No notes needed',
+            badgeColor: '#DC2626',
           },
           {
             label: 'Study Coach',
@@ -801,6 +907,40 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             )}
           </div>
 
+          {/* Upload lecture audio */}
+          <div>
+            <p className="text-xs text-slate-500 text-center mb-3">or</p>
+            <button
+              onClick={() => { setAudioError(''); audioInputRef.current?.click() }}
+              disabled={isTranscribingAudio}
+              className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl border border-dashed border-[#E5E5E5] text-[#6B6B6B] hover:border-[#7C3AED] hover:text-[#7C3AED] hover:bg-purple-50/30 transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {isTranscribingAudio ? (
+                <>
+                  <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  Transcribing audio…
+                </>
+              ) : (
+                <>
+                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="1.75">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/>
+                  </svg>
+                  Upload Lecture Audio (mp3, m4a, wav)
+                </>
+              )}
+            </button>
+            {audioError && <p className="text-red-600 text-xs mt-1.5">{audioError}</p>}
+            {audioFileName && !isTranscribingAudio && pastedText.length > 50 && (
+              <p style={{ fontSize: 11.5, color: '#16a34a', marginTop: 6 }}>
+                ✓ Transcribed: <strong>{audioFileName}</strong> — {pastedText.trim().split(/\s+/).length.toLocaleString()} words. Click &ldquo;Generate with AI&rdquo; below.
+              </p>
+            )}
+          </div>
+
           {/* Paste box */}
           <div>
             <p className="text-xs text-slate-500 text-center mb-3">or</p>
@@ -820,6 +960,41 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             )}
             {pastedText.length > 50 && (
               <p className="text-slate-600 text-xs mt-1">{pastedText.trim().split(/\s+/).length.toLocaleString()} words</p>
+            )}
+          </div>
+
+          {/* YouTube lecture import */}
+          <div>
+            <p className="text-xs text-slate-500 text-center mb-3">or import a YouTube lecture</p>
+            <div className="flex gap-2">
+              <div style={{ flex: 1, position: 'relative' }}>
+                <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#DC2626" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="#DC2626" stroke="none"/></svg>
+                </span>
+                <input
+                  type="url"
+                  value={youtubeUrl}
+                  onChange={e => { setYoutubeUrl(e.target.value); setYoutubeError('') }}
+                  onKeyDown={e => e.key === 'Enter' && !isImportingYoutube && youtubeUrl.trim() && handleYoutubeImport()}
+                  placeholder="youtube.com/watch?v=..."
+                  style={{ width: '100%', paddingLeft: 36, paddingRight: 12, paddingTop: 10, paddingBottom: 10, borderRadius: 10, border: '1px solid #E5E5E5', fontSize: 13, color: '#111', background: '#fff', boxSizing: 'border-box', outline: 'none' }}
+                  onFocus={e => e.target.style.borderColor = '#DC2626'}
+                  onBlur={e => e.target.style.borderColor = '#E5E5E5'}
+                />
+              </div>
+              <button
+                onClick={handleYoutubeImport}
+                disabled={!youtubeUrl.trim() || isImportingYoutube}
+                style={{ flexShrink: 0, padding: '10px 16px', borderRadius: 10, background: '#DC2626', color: '#fff', border: 'none', fontWeight: 700, fontSize: 12.5, cursor: youtubeUrl.trim() && !isImportingYoutube ? 'pointer' : 'not-allowed', opacity: youtubeUrl.trim() && !isImportingYoutube ? 1 : 0.5, whiteSpace: 'nowrap' }}
+              >
+                {isImportingYoutube ? 'Importing…' : 'Import'}
+              </button>
+            </div>
+            {youtubeError && <p className="text-red-600 text-xs mt-1.5">{youtubeError}</p>}
+            {youtubeTitle && !isImportingYoutube && (
+              <p style={{ fontSize: 11.5, color: '#16a34a', marginTop: 6 }}>
+                ✓ Imported: <strong>{youtubeTitle}</strong> — transcript ready. Click &ldquo;Generate with AI&rdquo; below.
+              </p>
             )}
           </div>
 
