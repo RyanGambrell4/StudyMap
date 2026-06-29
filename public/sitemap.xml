@@ -657,4 +657,13 @@
   <url><loc>https://getstudyedge.com/blog/chatgpt-vs-studyedge-for-studying</loc><lastmod>2026-06-27</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
   <url><loc>https://getstudyedge.com/blog/best-study-apps-for-college-students</loc><lastmod>2026-06-27</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
 
+  <!-- Hub/index pages 2026-06-28 — critical for crawl path to content clusters -->
+  <url><loc>https://getstudyedge.com/best-study-apps</loc><lastmod>2026-06-28</lastmod><changefreq>weekly</changefreq><priority>0.95</priority></url>
+  <url><loc>https://getstudyedge.com/gpa-requirements</loc><lastmod>2026-06-28</lastmod><changefreq>weekly</changefreq><priority>0.95</priority></url>
+
+  <!-- New blog posts 2026-06-28 -->
+  <url><loc>https://getstudyedge.com/blog/active-recall-study-technique</loc><lastmod>2026-06-28</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://getstudyedge.com/blog/pomodoro-technique-for-studying</loc><lastmod>2026-06-28</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://getstudyedge.com/blog/how-to-use-ai-for-studying</loc><lastmod>2026-06-28</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+
 </urlset>
