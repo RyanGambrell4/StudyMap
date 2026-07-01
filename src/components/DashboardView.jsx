@@ -244,7 +244,7 @@ export default function DashboardView({
     const key = `se_streak_trigger_sent_${currentStreak}`
     if (sessionStorage.getItem(key)) return
     sessionStorage.setItem(key, '1')
-    import('../lib/auth').then(({ getAccessToken }) =>
+    import('../lib/supabase').then(({ getAccessToken }) =>
       getAccessToken().then(token =>
         fetch('/api/streak-broken-trigger', {
           method: 'POST',

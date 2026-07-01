@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getAccessToken } from '../lib/auth'
+import { getAccessToken } from '../lib/supabase'
 
 const LS_KEY = 'se_push_dismissed'
 const LS_SUBSCRIBED_KEY = 'se_push_subscribed'
