@@ -503,7 +503,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               Here's what you lost when your trial ended:
             </p>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '14px' }}>
-              {['Unlimited focus sessions (30-min cap is back)', '100 AI actions/month (you now have 2 total)', '5 courses (you\'re back to 1)', 'Session Blueprints, Brain Dumps, Exam Rescues'].map(item => (
+              {['Unlimited focus sessions (30-min cap is back)', '100 AI actions/month (you now have 5 total)', '5 courses (you\'re back to 1)', 'Session Blueprints, Brain Dumps, Exam Rescues'].map(item => (
                 <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#6B6B6B' }}>
                   <span style={{ color: '#EA580C', fontSize: '0.75rem' }}>✕</span>
                   {item}

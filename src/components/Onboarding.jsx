@@ -181,20 +181,6 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
     return () => clearTimeout(t)
   }, [step])
 
-  // Trial offer countdown — persisted so it's consistent across re-renders
-  const [trialOfferExpiry] = useState(() => {
-    const stored = sessionStorage.getItem('studyedge_trial_offer_expiry')
-    if (stored) return parseInt(stored, 10)
-    const expiry = Date.now() + 24 * 60 * 60 * 1000
-    sessionStorage.setItem('studyedge_trial_offer_expiry', String(expiry))
-    return expiry
-  })
-  const [timeLeft, setTimeLeft] = useState(() => Math.max(0, trialOfferExpiry - Date.now()))
-  useEffect(() => {
-    if (step !== 3) return
-    const t = setInterval(() => setTimeLeft(Math.max(0, trialOfferExpiry - Date.now())), 1000)
-    return () => clearInterval(t)
-  }, [step, trialOfferExpiry])
 
   const stepEnteredAt   = useRef(Date.now())
   const onboardingStart = useRef(Date.now())
@@ -719,17 +705,10 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
       >
         {/* Badge */}
         <div style={{ textAlign: 'center', marginBottom: 18 }}>
-          {(() => {
-            const hh = String(Math.floor(timeLeft / 3_600_000)).padStart(2, '0')
-            const mm = String(Math.floor((timeLeft % 3_600_000) / 60_000)).padStart(2, '0')
-            const ss = String(Math.floor((timeLeft % 60_000) / 1_000)).padStart(2, '0')
-            return (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'linear-gradient(135deg, rgba(107,143,255,.15), rgba(167,139,250,.15))', border: '1px solid rgba(167,139,250,.35)', borderRadius: 999, padding: '6px 18px', fontSize: 11, fontWeight: 700, color: '#A78BFA', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-                <span style={{ display: 'inline-block', width: 7, height: 7, background: '#A78BFA', borderRadius: '50%', animation: 'pulse 1.8s ease-in-out infinite' }} />
-                Offer expires in {hh}:{mm}:{ss}
-              </div>
-            )
-          })()}
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.30)', borderRadius: 999, padding: '6px 18px', fontSize: 11, fontWeight: 700, color: '#34D399', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
+            <span style={{ display: 'inline-block', width: 7, height: 7, background: '#34D399', borderRadius: '50%', animation: 'ob-glow-pulse 1.8s ease-in-out infinite' }} />
+            3-day free trial · $0 today · cancel anytime
+          </div>
         </div>
 
         {/* Headline */}
@@ -759,25 +738,24 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             : 'Full access, no restrictions. See how much sharper you study — before paying a cent.'}
         </p>
 
-        {/* Free vs Pro comparison */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, marginBottom: 16 }}>
-          <div style={{ background: 'rgba(255,255,255,.03)', border: '1px solid rgba(255,255,255,.07)', borderRadius: 12, padding: '14px' }}>
-            <p style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,.28)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Free plan</p>
-            {['1 course only', '2 AI actions total', 'No Study Coach', 'No practice exams', '1 Blueprint ever'].map(item => (
-              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7 }}>
-                <span style={{ fontSize: 10, color: '#EF4444', flexShrink: 0 }}>✕</span>
-                <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.38)', lineHeight: 1.35 }}>{item}</span>
-              </div>
-            ))}
-          </div>
-          <div style={{ background: 'rgba(107,143,255,.07)', border: '1px solid rgba(107,143,255,.22)', borderRadius: 12, padding: '14px' }}>
-            <p style={{ fontSize: 10, fontWeight: 700, color: '#6B8FFF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>Pro trial · free</p>
-            {['5 courses', '100 AI actions/mo', 'AI Study Coach', 'Practice exams', 'Unlimited Blueprints'].map(item => (
-              <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 7 }}>
-                <span style={{ fontSize: 10, color: '#34D399', flexShrink: 0 }}>✓</span>
-                <span style={{ fontSize: 11.5, color: 'rgba(255,255,255,.75)', lineHeight: 1.35 }}>{item}</span>
-              </div>
-            ))}
+        {/* What unlocks with trial */}
+        <div style={{ background: 'rgba(107,143,255,.07)', border: '1px solid rgba(107,143,255,.22)', borderRadius: 14, padding: '18px 20px', marginBottom: 16 }}>
+          <p style={{ fontSize: 10, fontWeight: 700, color: '#6B8FFF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Everything unlocked with your 3-day trial</p>
+          {[
+            { text: '5 courses — plan your full semester', icon: '📚' },
+            { text: '100 AI tutor messages/month', icon: '🤖' },
+            { text: 'AI Study Coach — week-by-week session plan', icon: '🗓' },
+            { text: 'Unlimited Session Blueprints', icon: '⚡' },
+            { text: 'Unlimited Focus sessions (no 30-min cap)', icon: '🎯' },
+            { text: 'Practice exams, Brain Dumps, Exam Rescue', icon: '📝' },
+          ].map(({ text, icon }) => (
+            <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 9 }}>
+              <span style={{ fontSize: 14, flexShrink: 0, lineHeight: 1 }}>{icon}</span>
+              <span style={{ fontSize: 12, color: 'rgba(255,255,255,.82)', lineHeight: 1.4 }}>{text}</span>
+            </div>
+          ))}
+          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(107,143,255,.15)', fontSize: 11, color: 'rgba(255,255,255,.35)', lineHeight: 1.5 }}>
+            After 3 days: $2.99/week. Cancel before trial ends — no charge.
           </div>
         </div>
 
@@ -850,7 +828,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,.35)' }}
           onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,.18)' }}
         >
-          No thanks — I'll stay on the free plan (1 course, 2 AI uses)
+          Continue with free plan — I'll upgrade when I'm ready
         </button>
 
         <div style={{ textAlign: 'center' }}>

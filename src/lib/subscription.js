@@ -22,7 +22,7 @@ import { track } from './analytics'
 // that drives them into the 3-day trial.
 export const FREE_LIMITS = {
   courses:             1,
-  aiTutor:             { count: 2,  period: 'total' },
+  aiTutor:             { count: 5,  period: 'total' },
   blueprint:           { count: 1,  period: 'total' },
   coachPlan:           { count: 1,  period: 'total' },
   practiceExam:        { count: 1,  period: 'total' },

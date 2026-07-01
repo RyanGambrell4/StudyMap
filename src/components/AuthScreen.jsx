@@ -27,6 +27,7 @@ export default function AuthScreen({ initialMode, onBack }) {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [loading, setLoading] = useState(false)
+  const [emailFormVisible, setEmailFormVisible] = useState(() => mode !== 'signup')
   const [error, setError] = useState(() => {
     const sp = new URLSearchParams(window.location.search)
     const raw = sp.get('error_description') || sp.get('error')
@@ -251,20 +252,39 @@ export default function AuthScreen({ initialMode, onBack }) {
               </button>
               {mode === 'signup' && (
                 <p style={{ fontSize: 12, color: '#059669', textAlign: 'center', margin: '4px 0 2px', fontWeight: 500 }}>
-                  ✓ No email verification step
+                  ✓ No email verification needed — get in instantly
                 </p>
               )}
 
               <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '16px 0' }}>
                 <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(0,0,0,0.08)' }} />
-                <span style={{ fontSize: 12, color: '#9B9B9B' }}>{mode === 'signup' ? 'or sign up with email instead' : 'or'}</span>
+                <span style={{ fontSize: 12, color: '#9B9B9B' }}>{mode === 'signup' ? 'or' : 'or'}</span>
                 <div style={{ flex: 1, height: 1, backgroundColor: 'rgba(0,0,0,0.08)' }} />
               </div>
+
+              {/* On signup: hide email form behind a toggle to reduce friction and push Google */}
+              {mode === 'signup' && !emailFormVisible && (
+                <button
+                  type="button"
+                  onClick={() => setEmailFormVisible(true)}
+                  style={{
+                    width: '100%', padding: '12px', borderRadius: 12,
+                    backgroundColor: '#fff', border: '1px solid rgba(0,0,0,0.12)',
+                    fontSize: 14, fontWeight: 600, color: '#6B6B6B',
+                    cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                  </svg>
+                  Sign up with email instead
+                </button>
+              )}
             </>
           )}
 
-          {/* Form */}
-          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          {/* Form — hidden on signup until user chooses email */}
+          <form onSubmit={handleSubmit} style={{ display: mode === 'signup' && !emailFormVisible ? 'none' : 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
               <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Email</label>
               <input
@@ -395,8 +415,8 @@ export default function AuthScreen({ initialMode, onBack }) {
             </button>
           </form>
 
-          {/* Clickwrap consent - shown only on signup */}
-          {mode === 'signup' && (
+          {/* Clickwrap consent - shown only on signup when email form is visible */}
+          {mode === 'signup' && emailFormVisible && (
             <p style={{ fontSize: 12, color: '#9B9B9B', textAlign: 'center', marginTop: 14, lineHeight: 1.55 }}>
               By creating an account you agree to our{' '}
               <a href="/terms.html" target="_blank" rel="noopener" style={{ color: '#6B6B6B', textDecoration: 'underline' }}>Terms of Service</a>
@@ -412,13 +432,13 @@ export default function AuthScreen({ initialMode, onBack }) {
                 <button onClick={() => { setMode('forgot'); setError(''); setSuccess('') }} style={{ background: 'none', border: 'none', fontSize: 13, color: '#9B9B9B', cursor: 'pointer' }}>
                   Forgot password?
                 </button>
-                <button onClick={() => { setMode('signup'); setError(''); setSuccess('') }} style={{ background: 'none', border: 'none', fontSize: 14, color: '#6B6B6B', cursor: 'pointer' }}>
+                <button onClick={() => { setMode('signup'); setError(''); setSuccess(''); setEmailFormVisible(false) }} style={{ background: 'none', border: 'none', fontSize: 14, color: '#6B6B6B', cursor: 'pointer' }}>
                   Don't have an account? <span style={{ color: '#3B61C4', fontWeight: 600 }}>Sign up</span>
                 </button>
               </>
             )}
             {mode === 'signup' && (
-              <button onClick={() => { setMode('login'); setError(''); setSuccess('') }} style={{ background: 'none', border: 'none', fontSize: 14, color: '#6B6B6B', cursor: 'pointer' }}>
+              <button onClick={() => { setMode('login'); setError(''); setSuccess(''); setEmailFormVisible(true) }} style={{ background: 'none', border: 'none', fontSize: 14, color: '#6B6B6B', cursor: 'pointer' }}>
                 Already have an account? <span style={{ color: '#3B61C4', fontWeight: 600 }}>Sign in</span>
               </button>
             )}
