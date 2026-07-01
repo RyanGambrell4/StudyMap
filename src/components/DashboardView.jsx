@@ -1374,7 +1374,7 @@ export default function DashboardView({
                   <div style={{ fontSize: 13, fontWeight: 600, color: D.text, lineHeight: 1.3 }}>{topic}</div>
                   <div style={{ fontSize: 11.5, color: D.textDim, marginBottom: 6 }}>{cName}</div>
                   <button
-                    onClick={() => onNavigateToTutor?.()}
+                    onClick={() => onNavigateToTutor?.(`I need help with ${topic} — I've been getting this wrong in my ${cName} quizzes. Can you quiz me on it and explain what I'm missing?`)}
                     style={{
                       fontSize: 11.5, fontWeight: 700, color: D.red,
                       background: 'none', border: 'none', cursor: 'pointer',

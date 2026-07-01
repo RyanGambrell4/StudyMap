@@ -82,6 +82,11 @@ const LIMIT_MESSAGES = {
     title: 'Get AI help anytime, for every course.',
     body: 'Pro gives you 100 AI actions a month. Your always-on tutor for every concept you\'re stuck on.',
   },
+  'ai-struggle': {
+    tag: 'Close your knowledge gaps',
+    title: 'Your AI coach can fix this.',
+    body: 'You\'re struggling with a flagged topic. Pro unlocks unlimited AI coaching sessions to drill exactly what you\'re missing — before your exam.',
+  },
   'ai-exhausted': {
     tag: "You've used your free AI actions",
     title: 'Keep your tutor on tap.',

@@ -1,23 +1,32 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '../lib/supabase'
+import { supabase, getAccessToken } from '../lib/supabase'
 import { getReferralLink } from '../lib/referral'
-import { getCachedSubscription } from '../lib/subscription'
 
 export default function ReferralCard() {
   const [userId, setUserId] = useState(null)
   const [copied, setCopied] = useState(false)
+  const [referralCount, setReferralCount] = useState(0)
+  const [convertedCount, setConvertedCount] = useState(0)
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user?.id) setUserId(session.user.id)
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
+      if (!session?.user?.id) return
+      setUserId(session.user.id)
+      try {
+        const token = await getAccessToken()
+        const res = await fetch('/api/referral-stats', { headers: { Authorization: `Bearer ${token}` } })
+        if (res.ok) {
+          const d = await res.json()
+          setReferralCount(d.total ?? 0)
+          setConvertedCount(d.converted ?? 0)
+        }
+      } catch { /* non-critical */ }
     })
   }, [])
 
   if (!userId) return null
 
   const link = getReferralLink(userId)
-  const sub = getCachedSubscription()
-  const referralCount = sub?.referralCount ?? 0
 
   const handleCopy = () => {
     navigator.clipboard.writeText(link).then(() => {
@@ -39,7 +48,7 @@ export default function ReferralCard() {
         </div>
         {referralCount > 0 && (
           <span style={{ fontSize: 12, fontWeight: 700, color: '#3B61C4', background: 'rgba(59,97,196,0.08)', padding: '3px 10px', borderRadius: 999 }}>
-            {referralCount} reward{referralCount !== 1 ? 's' : ''} earned
+            {referralCount} joined{convertedCount > 0 ? ` · ${convertedCount} converted` : ''}
           </span>
         )}
       </div>

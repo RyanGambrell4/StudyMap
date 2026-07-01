@@ -46,7 +46,7 @@ import QuickQuizBurst from './QuickQuizBurst'
 import SessionRatingModal from './SessionRatingModal'
 
 // ─── TutorView ────────────────────────────────────────────────────────────────
-function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateToCoach }) {
+function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateToCoach, initialMessage, paywallTrigger = 'ai' }) {
   const [selectedCourse, setSelectedCourse] = useState(courses.length > 0 ? 0 : -1)
   const course = courses[selectedCourse] ?? null
 
@@ -118,6 +118,8 @@ function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateTo
             learningStyle={learningStyle}
             onShowPaywall={onShowPaywall}
             onNavigateToCoach={onNavigateToCoach}
+            initialMessage={initialMessage}
+            paywallTrigger={paywallTrigger}
           />
         </div>
       )}
@@ -459,6 +461,7 @@ export default function OutputView({
   const [gradesCourseIdx, setGradesCourseIdx] = useState(0)
   const [coachCourseIdx, setCoachCourseIdx] = useState(0)
   const [coachPlans, setCoachPlans] = useState({})
+  const [tutorPrefill, setTutorPrefill] = useState(null)
 
   useEffect(() => {
     if (activeSection === 'dashboard') {
@@ -1453,7 +1456,7 @@ export default function OutputView({
             }}
             onNavigateToProgress={() => setActiveSection('progress')}
             onNavigateToGrades={(idx) => { setGradesCourseIdx(idx); setActiveSection('grades') }}
-            onNavigateToTutor={() => setActiveSection('tutor')}
+            onNavigateToTutor={(msg) => { if (msg) setTutorPrefill(msg); setActiveSection('tutor') }}
             onNavigateToTools={() => setActiveSection('tools')}
             onShowPaywall={onShowPaywall}
             userEmail={userEmail}
@@ -1845,6 +1848,9 @@ export default function OutputView({
             onShowPaywall={onShowPaywall}
             learningStyle={learningStyle}
             onNavigateToCoach={() => setActiveSection('coach')}
+            initialMessage={tutorPrefill}
+            paywallTrigger={tutorPrefill ? 'ai-struggle' : 'ai'}
+            key={tutorPrefill ?? 'default'}
           />
         )}
 

@@ -7,7 +7,7 @@ import { getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial, incr
 import { transcribeAudio, createRecorder } from '../lib/deepgram'
 import { track } from '../lib/analytics'
 
-export default function AIChatView({ courseId, courseName, examDate, targetGrade, userId, learningStyle, onShowPaywall, onNavigateToCoach }) {
+export default function AIChatView({ courseId, courseName, examDate, targetGrade, userId, learningStyle, onShowPaywall, onNavigateToCoach, initialMessage = null, paywallTrigger = 'ai' }) {
   const plan = getActivePlan()
   const isFree = plan === 'free'
 
@@ -54,6 +54,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
     } catch {
       setMessages([])
     }
+    if (initialMessage) setInput(initialMessage)
     const cached = getCachedCoachPlan(courseId)
     if (cached) {
       setCoachPlan(cached.plan ?? null)
@@ -87,7 +88,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
 
     const { allowed } = canUseFeature('aiTutor')
     if (!allowed) {
-      onShowPaywall?.('ai')
+      onShowPaywall?.(paywallTrigger)
       return
     }
 
@@ -400,9 +401,9 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       {isFree && (() => { const { remaining } = canUseFeature('aiTutor'); return remaining !== null && (
         <p className={`text-xs mb-1.5 ${remaining <= 1 ? 'text-amber-500 font-medium' : 'text-slate-400'}`}>
           {remaining === 0
-            ? <>Out of free AI questions · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro — 100/month' : 'Start free trial — 100/month'}</button></>
+            ? <>Out of free AI questions · <button onClick={() => onShowPaywall?.(paywallTrigger)} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro — 100/month' : 'Start free trial — 100/month'}</button></>
             : remaining === 1
-            ? <>1 free AI question left · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>
+            ? <>1 free AI question left · <button onClick={() => onShowPaywall?.(paywallTrigger)} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>
             : <>{remaining} free AI questions left · Pro gives you 100/month</>
           }
         </p>
