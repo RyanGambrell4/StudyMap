@@ -5,6 +5,7 @@ import ReferralCard from './ReferralCard'
 import StudyBuddyCard from './StudyBuddyCard'
 import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
+import { usePushNotifications } from '../utils/usePushNotifications'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
 import { getActivePlan, canUseFeature, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession } from '../lib/subscription'
 import { clean } from '../utils/strings'
@@ -209,6 +210,7 @@ export default function DashboardView({
   })
   const showTrialCard = plan === 'free' && !hasUsedTrial() && !trialCardDismissed && !showAiChip
   const { currentStreak, lastCompletedDate, recordCompletion, freezeCount, useFreeze } = useStreak()
+  const { shouldPrompt: shouldPromptPush, requestAndSubscribe, dismiss: dismissPush } = usePushNotifications(userId)
   const celebrate = useCelebration()
   const streak = currentStreak
   const [aiBriefDismissed, setAiBriefDismissed] = useState(() =>
@@ -235,6 +237,23 @@ export default function DashboardView({
 
   const nextStreakMilestone = STREAK_MILESTONES.find(m => m > streak)
   const daysToNextMilestone = nextStreakMilestone ? nextStreakMilestone - streak : null
+
+  // Trigger real-time streak-broken email when streak breaks
+  useEffect(() => {
+    if (!isStreakBroken || !userEmail || !userId || currentStreak <= 1) return
+    const key = `se_streak_trigger_sent_${currentStreak}`
+    if (sessionStorage.getItem(key)) return
+    sessionStorage.setItem(key, '1')
+    import('../lib/auth').then(({ getAccessToken }) =>
+      getAccessToken().then(token =>
+        fetch('/api/streak-broken-trigger', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ streak: currentStreak, email: userEmail }),
+        }).catch(() => {})
+      )
+    )
+  }, [isStreakBroken]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Track AI chip impression once per session
   useEffect(() => {
@@ -922,6 +941,41 @@ export default function DashboardView({
               <button
                 onClick={() => { sessionStorage.setItem('se_streak_banner_dismissed', '1'); setStreakBannerDismissed(true); track('streak_recovery_banner_dismissed', { streak: currentStreak }) }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#B45309', fontSize: 18, lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
+                aria-label="Dismiss"
+              >×</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Push notification prompt ── */}
+      {shouldPromptPush && (
+        <div style={{ padding: '0 32px 4px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(107,143,255,0.08), rgba(167,139,250,0.08))',
+            border: '1px solid rgba(107,143,255,0.2)',
+            borderRadius: 10, padding: '12px 16px',
+            display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+          }}>
+            <span style={{ fontSize: 20, flexShrink: 0 }}>🔔</span>
+            <div style={{ flex: 1, minWidth: 180 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#1e3a5f' }}>
+                Never miss a study session
+              </p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: '#4B5563', lineHeight: 1.4 }}>
+                Get a daily nudge at 9 AM so your streak stays alive and exams don't sneak up on you.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
+              <button
+                onClick={() => { track('push_subscribe_clicked'); requestAndSubscribe() }}
+                style={{ background: '#3B61C4', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 700, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                Turn on reminders
+              </button>
+              <button
+                onClick={() => { track('push_subscribe_dismissed'); dismissPush() }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', fontSize: 18, lineHeight: 1, padding: '0 2px' }}
                 aria-label="Dismiss"
               >×</button>
             </div>

@@ -14,6 +14,7 @@ import {
   removeCompletedSession,
   getCachedAllNotes,
   saveCoachPlanHardNote,
+  getCachedStudyTools,
 } from '../lib/db'
 import { runAdaptation } from '../utils/adaptationEngine'
 import AdaptModal from './AdaptModal'
@@ -823,8 +824,30 @@ export default function OutputView({
   const syllabusEventsByDate = useMemo(() => {
     const map = {}
     syllabusEvents.forEach(e => { if (!map[e.date]) map[e.date] = []; map[e.date].push(e) })
+    // Inject SM-2 flashcard review events onto their due dates
+    const studyTools = getCachedStudyTools()
+    const cards = studyTools?.flashcards ?? []
+    if (cards.length) {
+      const cardsByDate = {}
+      cards.forEach(card => {
+        const dateStr = card.nextReview ? card.nextReview.split('T')[0] : todayStr
+        if (!cardsByDate[dateStr]) cardsByDate[dateStr] = 0
+        cardsByDate[dateStr]++
+      })
+      Object.entries(cardsByDate).forEach(([dateStr, count]) => {
+        if (!map[dateStr]) map[dateStr] = []
+        const isDue = dateStr <= todayStr
+        map[dateStr].push({
+          id: `flashcard-review-${dateStr}`,
+          date: dateStr,
+          name: `${count} flashcard${count > 1 ? 's' : ''} ${isDue ? 'due' : 'scheduled'}`,
+          type: 'Spaced Review',
+          color: { dot: '#A78BFA' },
+        })
+      })
+    }
     return map
-  }, [syllabusEvents])
+  }, [syllabusEvents, todayStr])
 
   const availableMonths = useMemo(() => {
     const seen = new Set()

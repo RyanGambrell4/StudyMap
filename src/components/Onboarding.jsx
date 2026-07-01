@@ -168,6 +168,8 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   const [schoolType, setSchoolType]   = useState(saved?.schoolType ?? null)
   const [yearLevel, setYearLevel]     = useState(saved?.yearLevel ?? null)
   const [preferredTime, setPreferredTime] = useState(saved?.preferredTime ?? null)
+  const [courseName, setCourseName]   = useState(saved?.courseName ?? '')
+  const [examDate, setExamDate]       = useState(saved?.examDate ?? '')
   const [showConfetti, setShowConfetti]   = useState(false)
   const [skipVisible, setSkipVisible]     = useState(false)
 
@@ -198,7 +200,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   const onboardingStart = useRef(Date.now())
   const prevDone        = useRef(false)
 
-  useEffect(() => { saveProgress({ schoolType, yearLevel, preferredTime }) }, [schoolType, yearLevel, preferredTime])
+  useEffect(() => { saveProgress({ schoolType, yearLevel, preferredTime, courseName, examDate }) }, [schoolType, yearLevel, preferredTime, courseName, examDate])
 
   useEffect(() => {
     track('onboarding_step_viewed', { step, step_name: STEP_NAMES[step] ?? `step_${step}` })
@@ -241,7 +243,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
     return () => clearTimeout(timer)
   }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const profileData = { yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true }
+  const profileData = { yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true, courseName: courseName.trim() || null, examDate: examDate || null }
 
   // ── Step 1: Questions ──────────────────────────────────────────────────────
   if (step === 1) {
@@ -430,6 +432,58 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             })}
           </div>
 
+          {/* ── Optional: Course + Exam date ── */}
+          {allDone && (
+            <div className="ob-year-reveal" style={{ marginBottom: 24 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
+                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.06)' }} />
+                <p style={{ color: 'rgba(255,255,255,.2)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>✨ Make it personal (optional)</p>
+                <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.06)' }} />
+              </div>
+
+              <div style={{ marginBottom: 10 }}>
+                <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>
+                  📚 Main subject or exam name?
+                </p>
+                <input
+                  type="text"
+                  placeholder={schoolType === 'exam' ? 'e.g. MCAT, LSAT, CPA Exam…' : schoolType === 'hs' ? 'e.g. AP Chemistry, Pre-Calculus…' : 'e.g. Organic Chemistry, Calc II…'}
+                  value={courseName}
+                  onChange={e => setCourseName(e.target.value)}
+                  style={{
+                    width: '100%', padding: '12px 14px', borderRadius: 10,
+                    background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)',
+                    color: '#fff', fontSize: '0.88rem', fontFamily: 'inherit',
+                    outline: 'none', boxSizing: 'border-box', transition: 'border .2s, background .2s',
+                  }}
+                  onFocus={e => { e.target.style.border = '1px solid rgba(107,143,255,.45)'; e.target.style.background = 'rgba(107,143,255,.07)' }}
+                  onBlur={e => { e.target.style.border = '1px solid rgba(255,255,255,.1)'; e.target.style.background = 'rgba(255,255,255,.05)' }}
+                />
+              </div>
+
+              <div>
+                <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>
+                  📅 When's your exam or deadline?
+                </p>
+                <input
+                  type="date"
+                  value={examDate}
+                  onChange={e => setExamDate(e.target.value)}
+                  min={new Date().toISOString().split('T')[0]}
+                  style={{
+                    width: '100%', padding: '12px 14px', borderRadius: 10,
+                    background: 'rgba(255,255,255,.05)', border: '1px solid rgba(255,255,255,.1)',
+                    color: examDate ? '#fff' : 'rgba(255,255,255,.35)', fontSize: '0.88rem', fontFamily: 'inherit',
+                    outline: 'none', boxSizing: 'border-box', transition: 'border .2s, background .2s',
+                    colorScheme: 'dark',
+                  }}
+                  onFocus={e => { e.target.style.border = '1px solid rgba(107,143,255,.45)'; e.target.style.background = 'rgba(107,143,255,.07)' }}
+                  onBlur={e => { e.target.style.border = '1px solid rgba(255,255,255,.1)'; e.target.style.background = 'rgba(255,255,255,.05)' }}
+                />
+              </div>
+            </div>
+          )}
+
           {/* ── Ready banner ── */}
           {allDone && (
             <div
@@ -445,7 +499,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               <p style={{ fontSize: '0.8rem', color: '#8AABFF', fontWeight: 600, margin: 0 }}>
-                All set — your personalised study plan is ready to build.
+                {courseName.trim() ? `All set — your ${courseName.trim()} plan is ready to build.` : 'All set — your personalised study plan is ready to build.'}
               </p>
             </div>
           )}
@@ -475,7 +529,9 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             onMouseEnter={e => { if (allDone) e.currentTarget.style.transform = 'scale(1.01)' }}
             onMouseLeave={e => { if (allDone) e.currentTarget.style.transform = 'scale(1)' }}
           >
-            {allDone ? 'Show me my study plan →' : `${answered} of 3 answered — keep going`}
+            {allDone
+              ? (courseName.trim() ? `Show me my ${courseName.trim()} plan →` : 'Show me my study plan →')
+              : `${answered} of 3 answered — keep going`}
           </button>
 
           {/* ── Social proof ── */}
@@ -510,9 +566,17 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
       uni:  ['Intro Psychology', 'Calculus II', 'Organic Chemistry'],
       exam: ['Practice Sections', 'Concept Review', 'Timed Drills'],
     }
-    const subjects = subjectsByType[schoolType] ?? subjectsByType.uni
+    const genericSubjects = subjectsByType[schoolType] ?? subjectsByType.uni
+    const trimmedCourse = courseName.trim()
+    const subjects = trimmedCourse
+      ? [trimmedCourse, ...genericSubjects.slice(0, 2)]
+      : genericSubjects
+    const daysToExam = examDate
+      ? Math.ceil((new Date(examDate) - new Date()) / (1000 * 60 * 60 * 24))
+      : null
     const timeLabel = preferredTime ?? 'Evening'
     const schoolLabel = schoolType === 'hs' ? 'high school' : schoolType === 'exam' ? 'exam prep' : 'university'
+    const examWord = schoolType === 'exam' ? 'exam' : 'final'
 
     return (
       <div style={{ backgroundColor: '#080C18', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 16px', position: 'relative', overflow: 'hidden' }}>
@@ -537,7 +601,9 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             </span>
           </h2>
           <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.83rem', textAlign: 'center', marginBottom: 24 }}>
-            Built for {yearLevel} {schoolLabel} · {timeLabel} sessions
+            {daysToExam && trimmedCourse
+              ? `${trimmedCourse} · ${daysToExam} days to go · ${timeLabel} sessions`
+              : `Built for ${yearLevel} ${schoolLabel} · ${timeLabel} sessions`}
           </p>
 
           {/* Week schedule preview */}
@@ -576,7 +642,9 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
               <div>
                 <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>AI Study Coach</p>
                 <p style={{ color: 'rgba(255,255,255,.78)', fontSize: '0.82rem', lineHeight: 1.55 }}>
-                  "I've scheduled your {timeLabel.toLowerCase()} sessions across all {subjects.length} courses. Start with {subjects[0]} first — it has the most material to cover."
+                  {daysToExam && trimmedCourse
+                    ? `"Your ${trimmedCourse} ${examWord} is in ${daysToExam} days. I've built ${timeLabel.toLowerCase()} sessions around what matters most — start your Blueprint today and you'll walk in ready."`
+                    : `"I've scheduled your ${timeLabel.toLowerCase()} sessions across all ${subjects.length} courses. Start with ${subjects[0]} first — it has the most material to cover."`}
                 </p>
               </div>
             </div>
@@ -634,6 +702,11 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   }
 
   // ── Step 3: Trial offer ──────────────────────────────────────────────────────
+  const step3DaysToExam = examDate
+    ? Math.ceil((new Date(examDate) - new Date()) / (1000 * 60 * 60 * 24))
+    : null
+  const step3Course = courseName.trim()
+  const step3ExamWord = schoolType === 'exam' ? 'exam' : 'final'
   if (step === 3) return (
     <div style={{ minHeight: '100vh', background: '#080C18', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', position: 'relative', overflow: 'hidden' }}>
       <style>{STYLES}</style>
@@ -661,15 +734,23 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
         {/* Headline */}
         <h1 style={{ textAlign: 'center', marginBottom: 10, lineHeight: 1.08 }}>
-          <span style={{ display: 'block', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-            Try every Pro feature.
-          </span>
+          {step3DaysToExam && step3Course ? (
+            <span style={{ display: 'block', fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              Your {step3Course} {step3ExamWord} is in {step3DaysToExam} days.
+            </span>
+          ) : (
+            <span style={{ display: 'block', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              Try every Pro feature.
+            </span>
+          )}
           <span style={{ display: 'block', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(135deg, #6B8FFF, #A78BFA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-            Free for 3 days.
+            {step3DaysToExam && step3Course ? "Here's your plan. Free for 3 days." : 'Free for 3 days.'}
           </span>
         </h1>
         <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.9rem', textAlign: 'center', marginBottom: 28, lineHeight: 1.65 }}>
-          {schoolType === 'hs'
+          {step3DaysToExam && step3Course
+            ? `Every session between now and your ${step3ExamWord} — mapped out, optimized, and ready. Unlock it all with a 3-day free trial. No charge today.`
+            : schoolType === 'hs'
             ? 'Built for AP classes, finals, and everything between. See the difference in your first study session.'
             : schoolType === 'exam'
             ? 'High-stakes prep, built around your real test date. See how much sharper your studying gets — before paying a cent.'

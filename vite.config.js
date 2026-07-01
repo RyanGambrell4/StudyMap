@@ -390,8 +390,11 @@ export default defineConfig({
     react(),
     apiDevPlugin(),
     VitePWA({
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.js',
       registerType: 'autoUpdate',
-      injectRegister: 'null', // we inject manually via app.html registerSW.js
+      injectRegister: 'null', // we inject manually via app.html
       includeAssets: ['favicon.png'],
       // Re-use the existing public/manifest.json without overwriting it
       manifest: {
@@ -405,17 +408,8 @@ export default defineConfig({
         theme_color: '#6366f1',
         icons: [{ src: '/favicon.png', sizes: '512x512', type: 'image/png', purpose: 'any maskable' }],
       },
-      workbox: {
+      injectManifest: {
         globPatterns: ['assets/**/*.{js,css}', 'app.html'],
-        navigateFallback: '/app.html',
-        navigateFallbackDenylist: [/^\/api\//, /^\/login/, /^\/signup/, /^\/$/, /^\/blog/, /^\/privacy/, /^\/terms/],
-        runtimeCaching: [
-          {
-            urlPattern: /^https:\/\/fonts\.googleapis\.com\/.*/i,
-            handler: 'CacheFirst',
-            options: { cacheName: 'google-fonts', expiration: { maxEntries: 10, maxAgeSeconds: 60 * 60 * 24 * 365 } },
-          },
-        ],
       },
     }),
   ],

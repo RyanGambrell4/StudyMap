@@ -1105,6 +1105,107 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
+      {/* ── Migration banner: Quizlet & Chegg refugees ── */}
+      <section className="se-section" style={{ padding: '60px 24px 0', maxWidth: 1100, margin: '0 auto' }}>
+        <div data-reveal style={{
+          background: 'linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(124,92,252,0.06) 50%, rgba(45,212,191,0.05) 100%)',
+          border: '1px solid rgba(99,102,241,0.22)',
+          borderRadius: 20,
+          padding: '36px 40px',
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          {/* Background accent */}
+          <div aria-hidden="true" style={{ position: 'absolute', top: -60, right: -60, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,92,252,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 40, flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
+            {/* Left: headline */}
+            <div style={{ flex: '1 1 320px', minWidth: 280 }}>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                background: 'rgba(250,204,21,0.1)', border: '1px solid rgba(250,204,21,0.25)',
+                borderRadius: 999, padding: '4px 12px', fontSize: 11, fontWeight: 700,
+                color: '#fbbf24', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14,
+              }}>
+                📢 Quizlet killed Q-Chat. Chegg is raising prices. You deserve better.
+              </div>
+              <h2 style={{
+                fontSize: 'clamp(1.4rem, 3vw, 1.9rem)', fontWeight: 800, letterSpacing: '-0.04em',
+                color: '#fff', lineHeight: 1.1, marginBottom: 10,
+              }}>
+                The AI tutor Quizlet killed<br />
+                <span style={{ background: 'linear-gradient(135deg, #6366f1, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                  is here. And it's better.
+                </span>
+              </h2>
+              <p style={{ color: 'rgba(226,232,240,0.55)', fontSize: 14.5, lineHeight: 1.6, marginBottom: 0, maxWidth: 460 }}>
+                Q-Chat was shut down in June 2025. Chegg's AI features cost more and do less. StudyEdge gives you a personal AI Study Coach, spaced-repetition flashcards, practice exams, and a daily study plan — all built around <em>your</em> courses and exam dates.
+              </p>
+            </div>
+
+            {/* Right: comparison cards */}
+            <div style={{ flex: '1 1 280px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                {
+                  logo: '🔵',
+                  name: 'Quizlet',
+                  pain: 'Q-Chat AI tutor discontinued',
+                  verdict: 'Dead feature',
+                  color: '#3b82f6',
+                  bad: true,
+                },
+                {
+                  logo: '🟡',
+                  name: 'Chegg',
+                  pain: 'Price hikes, no personalized plan',
+                  verdict: 'Overpriced',
+                  color: '#f59e0b',
+                  bad: true,
+                },
+                {
+                  logo: '🟣',
+                  name: 'StudyEdge AI',
+                  pain: 'AI coach + plan + flashcards + exams',
+                  verdict: '3 days free →',
+                  color: '#6366f1',
+                  bad: false,
+                },
+              ].map(({ logo, name, pain, verdict, color, bad }) => (
+                <div
+                  key={name}
+                  onClick={!bad ? goTrial : undefined}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 14,
+                    padding: '13px 16px', borderRadius: 12,
+                    background: bad ? 'rgba(255,255,255,0.025)' : 'rgba(99,102,241,0.12)',
+                    border: bad ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(99,102,241,0.35)',
+                    cursor: bad ? 'default' : 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => { if (!bad) { e.currentTarget.style.background = 'rgba(99,102,241,0.18)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.55)' } }}
+                  onMouseLeave={e => { if (!bad) { e.currentTarget.style.background = 'rgba(99,102,241,0.12)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.35)' } }}
+                >
+                  <span style={{ fontSize: 20, flexShrink: 0 }}>{logo}</span>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: bad ? 'rgba(255,255,255,0.7)' : '#fff', marginBottom: 2 }}>{name}</div>
+                    <div style={{ fontSize: 12, color: 'rgba(226,232,240,0.45)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pain}</div>
+                  </div>
+                  <div style={{
+                    background: bad ? 'rgba(239,68,68,0.12)' : 'rgba(99,102,241,0.25)',
+                    border: bad ? '1px solid rgba(239,68,68,0.25)' : '1px solid rgba(99,102,241,0.4)',
+                    color: bad ? '#f87171' : '#a5b4fc',
+                    borderRadius: 8, padding: '4px 10px', fontSize: 11.5, fontWeight: 700,
+                    whiteSpace: 'nowrap', flexShrink: 0,
+                  }}>
+                    {verdict}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* ── Trust strip: endless marquee of programs ── */}
       <section className="se-section" style={{
         margin: '0 auto', padding: '56px 0 28px',

@@ -86,6 +86,14 @@
       "schedule": "0 17 * * *"
     },
     {
+      "path": "/api/push-notify",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/early-activation",
+      "schedule": "0 */4 * * *"
+    },
+    {
       "path": "/api/daily-revenue-heartbeat",
       "schedule": "0 14 * * *"
     }
@@ -116,6 +124,8 @@
     { "source": "/grade-calculator-college", "destination": "/grade-calculator-college.html" },
     { "source": "/active-recall-app", "destination": "/active-recall-app.html" },
     { "source": "/quizlet-alternative", "destination": "/quizlet-alternative.html" },
+    { "source": "/quizlet-qchat-alternative", "destination": "/quizlet-qchat-alternative.html" },
+    { "source": "/chegg-alternative", "destination": "/chegg-alternative.html" },
     { "source": "/anki-vs-quizlet", "destination": "/anki-vs-quizlet.html" },
     { "source": "/how-to-make-a-study-schedule", "destination": "/how-to-make-a-study-schedule.html" },
     { "source": "/best-study-app-for-students", "destination": "/best-study-app-for-students.html" },
