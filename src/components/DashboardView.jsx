@@ -7,7 +7,7 @@ import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { usePushNotifications } from '../utils/usePushNotifications'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
-import { getActivePlan, canUseFeature, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession } from '../lib/subscription'
+import { getActivePlan, canUseFeature, getFeatureUsage, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import { daysBetween, formatShortDate } from '../utils/dateUtils'
 
@@ -234,6 +234,9 @@ export default function DashboardView({
   )
   const [streakBannerDismissed, setStreakBannerDismissed] = useState(() =>
     sessionStorage.getItem('se_streak_banner_dismissed') === '1'
+  )
+  const [featDiscoveryDismissed, setFeatDiscoveryDismissed] = useState(() =>
+    localStorage.getItem('se_feat_discovery_dismissed') === '1'
   )
   // Streak is "broken" when they had a multi-day streak but didn't study yesterday or today.
   // currentStreak still holds the old value (resets only on next recordCompletion call).
@@ -991,6 +994,51 @@ export default function DashboardView({
               </button>
               <button
                 onClick={() => { track('push_subscribe_dismissed'); dismissPush() }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', fontSize: 18, lineHeight: 1, padding: '0 2px' }}
+                aria-label="Dismiss"
+              >×</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Feature discovery nudge (one-time, for users who haven't tried AI Tutor) ── */}
+      {!featDiscoveryDismissed && courses.length > 0 && getFeatureUsage('aiTutor').count === 0 && plan === 'free' && (
+        <div style={{ padding: '0 32px 4px' }}>
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(59,97,196,0.06), rgba(107,143,255,0.10))',
+            border: '1px solid rgba(59,97,196,0.18)',
+            borderLeft: '4px solid #3B61C4',
+            borderRadius: 10, padding: '12px 16px',
+            display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
+          }}>
+            <span style={{ fontSize: 20, flexShrink: 0 }}>🤖</span>
+            <div style={{ flex: 1, minWidth: 180 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#1e3a5f' }}>
+                Try the AI Tutor — 5 free questions
+              </p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: '#4B5563', lineHeight: 1.4 }}>
+                Ask anything about your courses. Get explanations, practice questions, and step-by-step breakdowns.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
+              <button
+                onClick={() => {
+                  track('feat_discovery_ai_tutor_clicked')
+                  localStorage.setItem('se_feat_discovery_dismissed', '1')
+                  setFeatDiscoveryDismissed(true)
+                  onNavigateToTutor?.()
+                }}
+                style={{ background: '#3B61C4', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 700, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                Try the AI Tutor →
+              </button>
+              <button
+                onClick={() => {
+                  track('feat_discovery_dismissed')
+                  localStorage.setItem('se_feat_discovery_dismissed', '1')
+                  setFeatDiscoveryDismissed(true)
+                }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', fontSize: 18, lineHeight: 1, padding: '0 2px' }}
                 aria-label="Dismiss"
               >×</button>

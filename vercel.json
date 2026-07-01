@@ -262,6 +262,9 @@
     { "source": "/best-study-app-for-cornell-students", "destination": "/best-study-app-for-cornell-students.html" },
     { "source": "/best-study-app-for-upenn-students", "destination": "/best-study-app-for-upenn-students.html" },
     { "source": "/best-study-app-for-rutgers-students", "destination": "/best-study-app-for-rutgers-students.html" },
-    { "source": "/best-study-app-for-university-of-pittsburgh-students", "destination": "/best-study-app-for-university-of-pittsburgh-students.html" }
+    { "source": "/best-study-app-for-university-of-pittsburgh-students", "destination": "/best-study-app-for-university-of-pittsburgh-students.html" },
+    { "source": "/best-study-app-for-carnegie-mellon-students", "destination": "/best-study-app-for-carnegie-mellon-students.html" },
+    { "source": "/best-study-app-for-university-of-georgia-students", "destination": "/best-study-app-for-university-of-georgia-students.html" },
+    { "source": "/best-study-app-for-florida-state-students", "destination": "/best-study-app-for-florida-state-students.html" }
   ]
 }
