@@ -190,6 +190,13 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
         await saveCoachPlanStruggles(courseId, updatedStruggles)
         setFlagBanner(finalFlaggedTopic)
         setTimeout(() => setFlagBanner(null), 5000)
+        getAccessToken().then(token => {
+          fetch('/api/log-struggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ courseName, topic: finalFlaggedTopic }),
+          }).catch(() => {})
+        })
       }
     } catch (e) {
       setMessages([...newMessages, { role: 'assistant', content: 'Connection error. Please try again.' }])
@@ -393,10 +400,10 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       {isFree && (() => { const { remaining } = canUseFeature('aiTutor'); return remaining !== null && (
         <p className={`text-xs mb-1.5 ${remaining <= 1 ? 'text-amber-500 font-medium' : 'text-slate-400'}`}>
           {remaining === 0
-            ? <>Out of free questions this week · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro — 100/month' : 'Start free trial — 100/month'}</button></>
+            ? <>Out of free AI questions · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro — 100/month' : 'Start free trial — 100/month'}</button></>
             : remaining === 1
-            ? <>Last free question this week · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>
-            : <>2 free AI questions/week · Pro gives you 100/month</>
+            ? <>1 free AI question left · <button onClick={() => onShowPaywall?.('ai')} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>
+            : <>{remaining} free AI questions left · Pro gives you 100/month</>
           }
         </p>
       )})()}

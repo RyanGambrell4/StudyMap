@@ -173,6 +173,22 @@ export default function DashboardView({
   const aiUsed = aiRemaining !== null ? Math.max(0, 2 - aiRemaining) : 0
   const [trialBannerLoading, setTrialBannerLoading] = useState(false)
 
+  const weakSpots = useMemo(() => {
+    if (!coachPlans) return []
+    const courseMap = {}
+    courses.forEach((c, idx) => { courseMap[String(c.id ?? idx)] = c.name })
+    const seen = new Set()
+    const result = []
+    for (const [courseId, planData] of Object.entries(coachPlans)) {
+      const cName = courseMap[String(courseId)] ?? String(courseId)
+      for (const topic of (planData?.struggles ?? [])) {
+        const key = `${topic}::${cName}`
+        if (!seen.has(key)) { seen.add(key); result.push({ topic, courseName: cName }) }
+      }
+    }
+    return result
+  }, [coachPlans, courses])
+
   // Fire the empty-state impression once on mount so we have a denominator
   // for first_course_cta_clicked. courses is stable from props at mount time.
   useEffect(() => {
@@ -200,7 +216,7 @@ export default function DashboardView({
   const [aiChipDismissed, setAiChipDismissed] = useState(
     () => sessionStorage.getItem('studyedge_ai_chip_dismissed') === '1'
   )
-  const showAiChip = plan === 'free' && aiUsed >= 1 && !aiChipDismissed
+  const showAiChip = plan === 'free' && aiUsed >= 3 && !aiChipDismissed
   const aiChipTrialEligible = showAiChip && !hasUsedTrial()
   const [trialCardDismissed, setTrialCardDismissed] = useState(() => {
     const ts = localStorage.getItem('studyedge_trial_card_dismissed_at')
@@ -679,9 +695,9 @@ export default function DashboardView({
             borderRadius: 999, padding: '5px 14px', marginBottom: 14,
           }}>
             <span style={{ fontSize: 12, color: D.amber, fontWeight: 600 }}>
-              {aiUsed < 2
-                ? <>{2 - aiUsed} free AI message{2 - aiUsed !== 1 ? 's' : ''} left · <span style={{ fontWeight: 400, color: '#9B6C1A' }}>Pro: 100/month</span></>
-                : <>Out of free AI messages this week</>
+              {aiUsed < 5
+                ? <>{5 - aiUsed} free AI question{5 - aiUsed !== 1 ? 's' : ''} left · <span style={{ fontWeight: 400, color: '#9B6C1A' }}>Pro: 100/month</span></>
+                : <>Out of free AI questions</>
               }
             </span>
             {aiChipTrialEligible ? (
@@ -1337,6 +1353,41 @@ export default function DashboardView({
             </button>
           </div>
         </Card>
+
+        {/* ── WEAK SPOTS (span 12) ── */}
+        {weakSpots.length > 0 && (
+          <Card glowColor={D.red} style={{ gridColumn: 'span 12', padding: '18px 20px 16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+              <Label color={D.red}>Your weak spots</Label>
+              <span style={{ fontSize: 11.5, color: D.textDim }}>flagged by AI coach · practice to close the gap</span>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 10 }}>
+              {weakSpots.slice(0, 6).map(({ topic, courseName: cName }, i) => (
+                <div
+                  key={i}
+                  style={{
+                    background: `${D.red}07`, border: `1px solid ${D.red}18`,
+                    borderRadius: 10, padding: '12px 14px',
+                    display: 'flex', flexDirection: 'column', gap: 3,
+                  }}
+                >
+                  <div style={{ fontSize: 13, fontWeight: 600, color: D.text, lineHeight: 1.3 }}>{topic}</div>
+                  <div style={{ fontSize: 11.5, color: D.textDim, marginBottom: 6 }}>{cName}</div>
+                  <button
+                    onClick={() => onNavigateToTutor?.()}
+                    style={{
+                      fontSize: 11.5, fontWeight: 700, color: D.red,
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      padding: 0, textAlign: 'left',
+                    }}
+                  >
+                    Practice with AI Coach →
+                  </button>
+                </div>
+              ))}
+            </div>
+          </Card>
+        )}
 
         {/* ── COURSES (span 6) ── */}
         <Card glowColor={D.blue} style={{ gridColumn: 'span 6', padding: '20px 0' }} onClick={onNavigateToCourses}>

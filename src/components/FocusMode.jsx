@@ -916,6 +916,18 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     setQuizConfirmed(true)
     setQuizAnswerFlash(correct ? 'correct' : 'wrong')
     setTimeout(() => setQuizAnswerFlash(null), 600)
+    if (!correct && session?.courseName) {
+      const topic = session.focusArea || session.sessionType
+      if (topic) {
+        getAccessToken().then(token => {
+          fetch('/api/log-struggle', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ courseName: session.courseName, topic }),
+          }).catch(() => {})
+        })
+      }
+    }
   }
 
   const handleNextQuestion = () => {
