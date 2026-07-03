@@ -199,18 +199,6 @@ export default function LandingPage({ onGetStarted }) {
     return () => io.disconnect()
   }, [])
 
-  // Live "studying right now" badge - gently fluctuates between min/max each tick.
-  const [liveNow, setLiveNow] = useState(() => 832 + Math.floor(Math.random() * 40))
-  useEffect(() => {
-    const id = setInterval(() => {
-      setLiveNow((prev) => {
-        const delta = Math.floor(Math.random() * 7) - 2
-        const next = Math.max(780, Math.min(940, prev + delta))
-        return next
-      })
-    }, 4200)
-    return () => clearInterval(id)
-  }, [])
 
   // Magnetic CTA - small translation toward cursor on hover.
   const magneticHandlers = (strength = 0.25, maxPx = 10) => ({
@@ -803,7 +791,7 @@ export default function LandingPage({ onGetStarted }) {
               3-day free trial · No charge until day 4 · Cancel anytime
             </div>
 
-            {/* Social proof - live "studying right now" badge */}
+            {/* Social proof - honest trust badges */}
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 14, flexWrap: 'wrap' }}>
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 9,
@@ -814,22 +802,25 @@ export default function LandingPage({ onGetStarted }) {
                 color: 'rgba(255,255,255,0.85)', letterSpacing: '-0.005em',
                 backdropFilter: 'blur(8px)',
               }}>
-                <span style={{ position: 'relative', display: 'inline-block', width: 7, height: 7, color: '#22c55e' }}>
-                  <span className="se-ping" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 8px #22c55e' }} />
-                </span>
-                <span className="se-mono" style={{ color: '#86efac', fontWeight: 700, fontSize: 13, letterSpacing: '0.01em' }}>{liveNow.toLocaleString()}</span>
-                <span style={{ color: 'rgba(226,232,240,0.7)' }}>studying right now</span>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span style={{ color: 'rgba(226,232,240,0.85)' }}>No credit card required</span>
               </div>
-              <span style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                fontSize: 13.5, color: 'rgba(255,255,255,0.55)', fontWeight: 500, letterSpacing: '-0.005em',
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 9,
+                padding: '6px 14px 6px 10px',
+                background: 'rgba(99,102,241,0.08)',
+                border: '1px solid rgba(99,102,241,0.25)',
+                borderRadius: 999, fontSize: 13, fontWeight: 500,
+                color: 'rgba(255,255,255,0.75)', letterSpacing: '-0.005em',
+                backdropFilter: 'blur(8px)',
               }}>
-                <span style={{
-                  width: 5, height: 5, borderRadius: '50%', background: '#6366F1',
-                  boxShadow: '0 0 10px #6366F1', flexShrink: 0,
-                }} />
-                <strong className="se-mono" style={{ color: '#fff', fontWeight: 600, fontSize: 13.5 }}>9.6h</strong> studied this week
-              </span>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
+                  <path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#a5b4fc" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                <span>Trial includes all Pro features</span>
+              </div>
             </div>
           </div>
 
@@ -2394,7 +2385,7 @@ export default function LandingPage({ onGetStarted }) {
                   <p style={{ margin: '8px 0 0', fontSize: 13, color: 'rgba(226,232,240,0.50)' }}>Try the basics, free forever.</p>
                 </div>
                 <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8, flex: 1, fontSize: 13.5, color: 'rgba(226,232,240,0.7)' }}>
-                  {['1 course (preview only)', '2 AI tutor actions total', '1 Coach Plan', '1 Practice Exam', '30 min Focus/day'].map(f => (
+                  {['1 course (preview only)', '5 AI tutor actions total', '1 Coach Plan', '1 Practice Exam', '30 min Focus/day'].map(f => (
                     <li key={f} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <svg width="12" height="12" viewBox="0 0 12 12" fill="none"><path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="rgba(226,232,240,0.50)" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>
                       {f}
@@ -2563,7 +2554,7 @@ export default function LandingPage({ onGetStarted }) {
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
           <span>No charge until day 4</span>
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
-          <span>Cancel anytime</span>
+          <span>No credit card for free plan</span>
         </div>
 
         <h2 data-reveal data-reveal-delay="1" style={{
