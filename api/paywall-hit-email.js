@@ -72,8 +72,9 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
   if (!process.env.RESEND_API_KEY) return res.status(200).json({ ok: true, skipped: 'no_resend' })
 
-  const userId = await verifyAuth(req)
-  if (!userId) return res.status(401).json({ error: 'Unauthorized' })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(401).json({ error: 'Unauthorized' })
+  const userId = auth.userId
 
   const { trigger } = req.body ?? {}
 
@@ -86,11 +87,11 @@ export default async function handler(req, res) {
 
   const plan = row?.subscription?.plan ?? 'free'
   if (plan !== 'free') return res.status(200).json({ ok: true, skipped: 'not_free' })
-  if (row?.subscription?.trial_started_at) return res.status(200).json({ ok: true, skipped: 'trial_used' })
+  if (row?.subscription?.trialUsedAt) return res.status(200).json({ ok: true, skipped: 'trial_used' })
 
   // Max 1 paywall-hit email per 48 hours — don't spam
-  const ok = await canSendUserEmail(userId, 'paywall-hit', 48 * 60)
-  if (!ok) return res.status(200).json({ ok: true, skipped: 'cooldown' })
+  const guard = await canSendUserEmail(userId, { priority: 'normal' })
+  if (!guard.ok) return res.status(200).json({ ok: true, skipped: 'cooldown' })
 
   const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
   const email = authUser?.user?.email
@@ -108,11 +109,11 @@ export default async function handler(req, res) {
       subject: copy.subject,
       headers: listUnsubscribeHeaders(userId),
       html: `
-${preheader(copy.unlock)}
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+${preheader(copy.unlock)}
   <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
     <div style="background:#fff;border-radius:16px;padding:36px 32px;border:1px solid #e5e7eb;">
       <img src="https://getstudyedge.com/favicon.png" alt="StudyEdge AI" style="width:36px;height:36px;border-radius:9px;margin-bottom:20px;">

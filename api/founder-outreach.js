@@ -49,14 +49,14 @@ export default async function handler(req, res) {
     // Skip paid users and trial users
     const plan = row?.subscription?.plan ?? 'free'
     if (plan !== 'free') { skipped++; continue }
-    if (row?.subscription?.trial_started_at) { skipped++; continue }
+    if (row?.subscription?.trialUsedAt) { skipped++; continue }
 
     // Skip if no onboarding data (ghost signups who never opened the app)
     if (!row) { skipped++; continue }
 
-    // EmailGuard: only send this once, ever
-    const ok = await canSendUserEmail(user.user_id, 'founder-outreach', 99999)
-    if (!ok) { skipped++; continue }
+    // EmailGuard: skip users emailed in the last 48h
+    const guard = await canSendUserEmail(user.user_id, { priority: 'normal' })
+    if (!guard.ok) { skipped++; continue }
 
     const firstName = (user.email.split('@')[0].split('.')?.[0] ?? 'there')
     const cap = firstName.charAt(0).toUpperCase() + firstName.slice(1)
@@ -74,11 +74,11 @@ export default async function handler(req, res) {
         subject: 'honest question about StudyEdge',
         headers: listUnsubscribeHeaders(user.user_id),
         html: `
-${preheader('Quick question from the founder — takes 30 seconds.')}
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+${preheader('Quick question from the founder — takes 30 seconds.')}
   <div style="max-width:540px;margin:0 auto;padding:40px 16px;">
     <div style="background:#fff;border-radius:12px;padding:36px 32px;border:1px solid #e5e7eb;">
 

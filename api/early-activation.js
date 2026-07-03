@@ -51,8 +51,8 @@ export default async function handler(req, res) {
     const sessionCount = Array.isArray(row?.completed_sessions) ? row.completed_sessions.length : 0
     if (sessionCount > 0) { skipped++; continue }
 
-    const ok = await canSendUserEmail(user.id, 'early-activation', 24 * 60)
-    if (!ok) { skipped++; continue }
+    const guard = await canSendUserEmail(user.id, { priority: 'normal' })
+    if (!guard.ok) { skipped++; continue }
 
     const subjectOptions = [
       "Here's how to get the most out of StudyEdge",
@@ -68,11 +68,11 @@ export default async function handler(req, res) {
         subject,
         headers: listUnsubscribeHeaders(user.id),
         html: `
-${preheader('Start with your Study Coach → it builds your whole plan in 2 minutes.')}
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+${preheader('Start with your Study Coach → it builds your whole plan in 2 minutes.')}
   <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
     <div style="background:#fff;border-radius:16px;padding:36px 32px;border:1px solid #e5e7eb;">
       <img src="https://getstudyedge.com/favicon.png" alt="StudyEdge AI" style="width:36px;height:36px;border-radius:9px;margin-bottom:20px;">

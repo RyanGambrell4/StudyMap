@@ -1057,7 +1057,7 @@ export default function DashboardView({
       )}
 
       {/* ── Feature discovery nudge (one-time, for users who haven't tried AI Tutor) ── */}
-      {!featDiscoveryDismissed && courses.length > 0 && getFeatureUsage('aiTutor').count === 0 && plan === 'free' && (
+      {!featDiscoveryDismissed && courses.length > 0 && (getFeatureUsage('aiTutor').count ?? 0) === 0 && plan === 'free' && (
         <div style={{ padding: '0 32px 4px' }}>
           <div style={{
             background: 'linear-gradient(135deg, rgba(59,97,196,0.06), rgba(107,143,255,0.10))',

@@ -29,7 +29,7 @@ export default async function handler(req, res) {
 
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
-    .select('user_id, plan, syllabus_events, subscription, sms_phone, sms_enabled')
+    .select('user_id, plan, courses, syllabus_events, subscription, sms_phone, sms_enabled')
     .limit(2000)
 
   if (error) {
@@ -81,7 +81,7 @@ export default async function handler(req, res) {
       const userPlan = row?.subscription?.plan ?? 'free'
       const trialUsed = !!(row?.subscription?.trialUsedAt)
 
-      const courseNames = (row.plan?.courses ?? []).map(c => c.name).filter(Boolean)
+      const courseNames = (row.courses ?? []).map(c => c.name).filter(Boolean)
       const courseLine = courseNames.length
         ? `<p style="margin:0 0 14px;font-size:13px;color:#9B9B9B;">Your courses: ${courseNames.slice(0, 3).join(', ')}</p>`
         : ''
