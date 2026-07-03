@@ -1161,10 +1161,10 @@ export default function OutputView({
               </svg>
             </div>
             <h2 style={{ color: '#1A1A1A', fontSize: 22, fontWeight: 800, letterSpacing: '-0.5px', marginBottom: 8 }}>
-              You just used your first AI boost.
+              Your AI tutor is working.
             </h2>
             <p style={{ color: '#6B6B6B', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
-              Pro gives you <strong style={{ color: '#3B61C4' }}>100 boosts per month</strong>. That's enough for a daily study session all month. {hasUsedTrial() ? '$2.99/wk.' : 'Try it free for 3 days, $2.99/wk after.'}
+              You've used 1 of your 5 free AI questions. Pro gives you <strong style={{ color: '#3B61C4' }}>100 per month</strong> — enough to cover every course, all semester. {hasUsedTrial() ? '$2.99/wk.' : 'Try it free for 3 days, $2.99/wk after.'}
             </p>
             <button
               onClick={() => {
@@ -1188,7 +1188,7 @@ export default function OutputView({
               }}
               style={{ background: 'none', border: 'none', color: '#9B9B9B', fontSize: 13, cursor: 'pointer' }}
             >
-              Keep using the free plan
+              Continue — I still have 4 free questions left
             </button>
           </div>
         </div>

@@ -563,6 +563,18 @@ export default function DashboardView({
               : 'Add a course with its exam date and your AI study plan builds itself in under a minute.'}
           </p>
 
+          {/* What you get preview */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 24, textAlign: 'left', maxWidth: 320, marginLeft: 'auto', marginRight: 'auto' }}>
+            {previews.map(p => (
+              <div key={p} style={{ display: 'flex', alignItems: 'center', gap: 9, fontSize: 13, color: D.textMuted }}>
+                <svg width="13" height="13" viewBox="0 0 12 12" fill="none" style={{ flexShrink: 0 }}>
+                  <path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke={D.blue} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                {p}
+              </div>
+            ))}
+          </div>
+
           {/* Steps preview */}
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 0, marginBottom: 28 }}>
             {[
