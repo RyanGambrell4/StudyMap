@@ -7,7 +7,7 @@ import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { usePushNotifications } from '../utils/usePushNotifications'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
-import { getActivePlan, canUseFeature, getFeatureUsage, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession } from '../lib/subscription'
+import { getActivePlan, canUseFeature, getFeatureUsage, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession, activateTrial } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import { daysBetween, formatShortDate } from '../utils/dateUtils'
 
@@ -202,13 +202,8 @@ export default function DashboardView({
     if (trialBannerLoading) return
     setTrialBannerLoading(true)
     try {
-      const url = await createCheckoutSession('pro', 'weekly', userEmail, userId, { trial: true })
-      if (url && !url.alreadySubscribed) {
-        window.location.href = url
-      } else {
-        setTrialBannerLoading(false)
-        if (url?.alreadySubscribed) onShowPaywall?.('trial')
-      }
+      const ok = await activateTrial()
+      if (!ok) setTrialBannerLoading(false)
     } catch {
       setTrialBannerLoading(false)
     }
@@ -224,7 +219,7 @@ export default function DashboardView({
     const hoursSince = (Date.now() - parseInt(ts, 10)) / 3_600_000
     return hoursSince < 24
   })
-  const showTrialCard = plan === 'free' && !hasUsedTrial() && !trialCardDismissed && !showAiChip
+  const showTrialCard = plan === 'free' && !hasUsedTrial() && !trialCardDismissed && !showAiChip && !(completedSessions?.length >= 1)
   const { currentStreak, lastCompletedDate, recordCompletion, freezeCount, useFreeze } = useStreak()
   const { shouldPrompt: shouldPromptPush, requestAndSubscribe, dismiss: dismissPush } = usePushNotifications(userId)
   const celebrate = useCelebration()
@@ -238,6 +233,10 @@ export default function DashboardView({
   const [featDiscoveryDismissed, setFeatDiscoveryDismissed] = useState(() =>
     localStorage.getItem('se_feat_discovery_dismissed') === '1'
   )
+  const [firstBlueprintCtaDismissed, setFirstBlueprintCtaDismissed] = useState(() =>
+    localStorage.getItem('se_first_blueprint_cta_dismissed') === '1'
+  )
+  const hasCompletedFirstSession = (completedSessions?.length ?? 0) >= 1
   // Streak is "broken" when they had a multi-day streak but didn't study yesterday or today.
   // currentStreak still holds the old value (resets only on next recordCompletion call).
   const yesterdayStr = (() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().split('T')[0] })()
@@ -855,6 +854,49 @@ export default function DashboardView({
               </div>
             )
           })()}
+        </div>
+      ) : (hasCompletedFirstSession && plan === 'free' && !hasUsedTrial() && !firstBlueprintCtaDismissed) ? (
+        <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
+          <div className="dash-banner-inner" style={{
+            background: 'linear-gradient(135deg, #f8f9ff, #eef1ff)',
+            border: `1px solid rgba(59,97,196,0.25)`,
+            borderLeft: `4px solid ${D.blue}`,
+            borderRadius: 10,
+            boxShadow: `0 2px 16px rgba(59,97,196,0.09)`,
+            padding: '16px 18px',
+            display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap',
+          }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>
+                Your study plan is live. Unlock the full picture.
+              </p>
+              <p style={{ margin: '4px 0 10px', fontSize: 12, color: D.textMuted, lineHeight: 1.55 }}>
+                You generated your first blueprint — the hardest part is done. Pro gives you 5 courses, 100 AI coaching sessions/month, and unlimited blueprints. Free for 3 days.
+              </p>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                {['5 courses', '100 AI sessions/month', 'Unlimited blueprints'].map(f => (
+                  <span key={f} style={{ fontSize: 11, fontWeight: 600, color: D.blue, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
+                    {f}
+                  </span>
+                ))}
+              </div>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+              <button
+                onClick={handleStartTrial}
+                disabled={trialBannerLoading}
+                style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
+              >
+                {trialBannerLoading ? 'Loading…' : 'Try Pro Free →'}
+              </button>
+              <button
+                onClick={() => { localStorage.setItem('se_first_blueprint_cta_dismissed', '1'); setFirstBlueprintCtaDismissed(true); track('first_blueprint_cta_dismissed') }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: D.textDim, fontSize: 20, lineHeight: 1, padding: '0 4px', flexShrink: 0 }}
+                aria-label="Dismiss"
+              >×</button>
+            </div>
+          </div>
         </div>
       ) : showTrialCard ? (
         <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>

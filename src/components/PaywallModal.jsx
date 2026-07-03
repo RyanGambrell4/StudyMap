@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
-import { createCheckoutSession, hasUsedTrial, isTrialActive, getActivePlan } from '../lib/subscription'
+import { createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getActivePlan } from '../lib/subscription'
 import { track } from '../lib/analytics'
+import { getAccessToken } from '../lib/supabase'
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -308,6 +309,16 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
       dwell_ms: Date.now() - openedAtRef.current,
       current_plan: currentPlan,
     })
+    // Fire behavioral email while intent is hot — free users only, fire-and-forget
+    if (currentPlan === 'free' && userId) {
+      getAccessToken().then(token => {
+        fetch('/api/paywall-hit-email', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ trigger }),
+        }).catch(() => {})
+      }).catch(() => {})
+    }
     onClose()
   }
 
@@ -320,9 +331,6 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   }, [onClose, trigger])
 
   const handleStartTrial = async () => {
-    // Card-required Stripe trial. Auto-converts to weekly Pro after 3 days
-    // unless the user cancels. Replaces the prior no-card trial which had
-    // ~0% conversion to paid because no payment method was ever collected.
     track('paywall_cta_click', {
       plan_clicked: 'pro',
       billing_period: 'weekly',
@@ -337,13 +345,12 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     setTrialLoading(true)
     setTrialError(null)
     try {
-      const url = await createCheckoutSession('pro', 'weekly', userEmail, userId, { trial: true })
-      if (!url) {
+      const ok = await activateTrial()
+      if (!ok) {
         setTrialError('Something went wrong. Please try again.')
         return
       }
-      if (url?.alreadySubscribed) { onClose(); return }
-      window.location.href = url
+      onClose()
     } catch {
       setTrialError('Something went wrong. Please try again.')
     } finally {
@@ -545,7 +552,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               Try every Pro feature free for 3 days.
             </h3>
             <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 16px', lineHeight: 1.5 }}>
-              Full access for 3 days, then $2.99/week. Cancel anytime from your account before your trial ends.
+              Full access for 3 days, no credit card needed. After your trial, choose a plan to keep access.
             </p>
             {trialError && (
               <p style={{ fontSize: '0.78rem', color: '#EF4444', margin: '0 0 10px' }}>{trialError}</p>
@@ -570,7 +577,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               {trialLoading ? 'Loading…' : 'Start 3-day free trial →'}
             </button>
             <p style={{ margin: '10px 0 0', fontSize: '0.72rem', color: '#9B9B9B' }}>
-              Card required &nbsp;·&nbsp; $0 today &nbsp;·&nbsp; cancel anytime
+              No credit card required &nbsp;·&nbsp; free for 3 days
             </p>
           </div>
         )}
