@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { getActivePlan, getCachedSubscription, initSubscription, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession } from '../lib/subscription'
+import { getActivePlan, getCachedSubscription, initSubscription, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession, activateTrial } from '../lib/subscription'
 import { supabase } from '../lib/supabase'
 import ReferralCard from './ReferralCard'
 
@@ -104,13 +104,11 @@ export default function AccountView({
     if (trialStarting) return
     setTrialStarting(true)
     try {
-      const url = await createCheckoutSession('pro', 'weekly', userEmail, userId, { trial: true })
-      if (url && !url.alreadySubscribed) {
-        window.location.href = url
-      } else {
+      const ok = await activateTrial()
+      if (!ok) {
         setTrialStarting(false)
-        if (url?.alreadySubscribed) onShowPaywall?.('trial')
       }
+      // On success, subscription state updates via initSubscription inside activateTrial
     } catch {
       setTrialStarting(false)
     }
@@ -197,19 +195,31 @@ export default function AccountView({
   }
 
   const handleCancelTrial = async () => {
-    if (!confirm('Cancel your free trial?\n\nYou won\'t be charged. You\'ll move to the free plan immediately.')) return
+    if (!confirm('Cancel your free trial?\n\nYou\'ll move to the free plan immediately.')) return
     setCanceling(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
-      const res = await fetch('/api/stripe', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
-        body: JSON.stringify({ action: 'cancel-trial', userId: session?.user?.id }),
-      })
-      if (!res.ok) throw new Error('Failed')
-      const data = await res.json()
-      // Use the server-returned subscription so the cache stays consistent.
-      initSubscription(session.user.id, data.subscription ?? { ...getCachedSubscription(), plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null })
+      const sub = getCachedSubscription()
+      if (sub?.stripeSubId) {
+        // Legacy card-required trial — cancel via Stripe
+        const res = await fetch('/api/stripe', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
+          body: JSON.stringify({ action: 'cancel-trial', userId: session?.user?.id }),
+        })
+        if (!res.ok) throw new Error('Failed')
+        const data = await res.json()
+        initSubscription(session.user.id, data.subscription ?? { ...sub, plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null })
+      } else {
+        // No-card trial — cancel directly in DB
+        const cancelled = { ...sub, status: 'cancelled', trial_cancelled: true }
+        const now = new Date().toISOString()
+        const { error } = await supabase
+          .from('user_data')
+          .upsert({ user_id: session.user.id, subscription: cancelled, updated_at: now }, { onConflict: 'user_id' })
+        if (error) throw new Error('Failed')
+        initSubscription(session.user.id, cancelled)
+      }
       setCanceled(true)
     } catch {
       alert('Something went wrong. Please try again or contact support@getstudyedge.com.')

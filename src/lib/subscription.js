@@ -3,7 +3,7 @@
  *
  * 3-tier model:
  *  Free      → permanent, capped per feature
- *  Trial     → 3-day full Pro via Stripe Checkout (card required, auto-bills $2.99/wk after unless canceled)
+ *  Trial     → 3-day full Pro, no credit card required (DB-only via activateTrial). Card collected only if user upgrades after.
  *  Pro       → Stripe paid (weekly/monthly/annual), 5 courses, 100 AI actions/month
  *  Unlimited → Stripe paid (weekly/monthly/annual), unlimited everything + tutor memory & advanced analytics
  */
@@ -359,12 +359,8 @@ export function incrementAIQuery() {
 }
 
 // ── Stripe checkout session creator ──────────────────────────────────────────
-// REVENUE-CRITICAL. This is the single entry point that talks to /api/stripe.
-// Every "Start free trial" button in the app eventually calls this. Trial =
-// card-required, 3-day, auto-bills (see api/stripe.js for the server side).
-// If you add a code path that creates a "trial" without calling this, you
-// have just rebuilt the 2026-05-25 bug. Verify with
-// `node scripts/verify-trial-flow.mjs` after any change to this function.
+// Used for paid plan signups ONLY. Trial activation uses activateTrial() above
+// (no-card, DB-only). Do not pass trial:true here — it is no longer wired up.
 
 export async function createCheckoutSession(plan, billingPeriod, userEmail, userId, opts = {}) {
   track('checkout_started', { plan, billingPeriod, trial: !!opts.trial })

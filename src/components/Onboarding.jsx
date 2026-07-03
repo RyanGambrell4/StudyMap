@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { track } from '../lib/analytics'
-import { createCheckoutSession, hasUsedTrial } from '../lib/subscription'
+import { activateTrial, hasUsedTrial } from '../lib/subscription'
 
 const STEP_NAMES = { 1: 'personalize', 2: 'app_preview', 3: 'trial_offer' }
 
@@ -755,7 +755,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             </div>
           ))}
           <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(107,143,255,.15)', fontSize: 11, color: 'rgba(255,255,255,.35)', lineHeight: 1.5 }}>
-            After 3 days: $2.99/week. Cancel before trial ends — no charge.
+            After 3 days, choose a plan to keep access. No card required to start.
           </div>
         </div>
 
@@ -782,12 +782,9 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             track('trial_cta_clicked', { source: 'onboarding' })
             setTrialLoading(true)
             setTrialError(null)
-            const url = await createCheckoutSession('pro', 'weekly', userEmail, userId, { trial: true })
-            if (url && !url.alreadySubscribed) {
+            const ok = await activateTrial()
+            if (ok) {
               completeWith(profileData, { trialTaken: true })
-              window.location.href = url
-            } else if (url?.alreadySubscribed) {
-              completeWith(profileData, { trialTaken: false })
             } else {
               setTrialLoading(false)
               setTrialError('Something went wrong starting your trial. Please try again.')
@@ -812,7 +809,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         </button>
 
         <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.25)', fontSize: '0.71rem', marginBottom: 18 }}>
-          No charge until day 4 · $2.99/wk after · cancel anytime before trial ends
+          No credit card required · upgrade to keep access after 3 days
         </p>
 
         {/* Skip — low-prominence, copy reminds them what they're giving up */}

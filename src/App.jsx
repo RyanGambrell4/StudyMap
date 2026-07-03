@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from './lib/supabase'
 import { initUserData, clearUserData, savePlan, refreshSubscription, saveEmailDigest } from './lib/db'
-import { getActivePlan, canAddCourse, createCheckoutSession, hasUsedTrial, isTrialActive, getCachedSubscription, TRIAL_DURATION_DAYS } from './lib/subscription'
+import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getCachedSubscription, TRIAL_DURATION_DAYS } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
 import { initAnalytics, identifyUser, resetUser, track, register, registerOnce } from './lib/analytics'
 import { captureReferralParam, getStoredReferrer, clearStoredReferrer } from './lib/referral'
@@ -639,32 +639,27 @@ export default function App() {
     )
   }
 
-  // ── Stripe checkout redirect (paid plans AND 3-day free trial) ───────────
-  // REVENUE-CRITICAL. Read before changing the condition below.
-  // Trial=1 MUST redirect to Stripe Checkout. The "trial" in this product is
-  // card-required - `payment_method_collection: 'always'` in api/stripe.js
-  // collects the card, and Stripe auto-bills after 3 days. Skipping this block
-  // for trial signups (e.g. adding `!checkoutIntent.trial`) breaks the trial:
-  // the user gets dropped into the app as free, no customer is created, no
-  // subscription exists. That bug shipped 2026-05-25 (commit 2af08aa) and
-  // produced 0 new customers for 9 days. Verify any change with
-  // `node scripts/verify-trial-flow.mjs` BEFORE merging.
+  // ── Checkout intent handler (paid plans via Stripe; trial via DB) ─────────
   if (checkoutIntent && getActivePlan() === 'free') {
     window.history.replaceState({}, '', window.location.pathname)
-    createCheckoutSession(checkoutIntent.plan, checkoutIntent.billing, session.user.email, session.user.id, { trial: checkoutIntent.trial }).then(result => {
-      if (result?.alreadySubscribed) return
-      if (!result) {
-        // Network or server error - surface it rather than leaving a dead spinner.
+    if (checkoutIntent.trial) {
+      // No-card trial: activate directly in DB, stay in app
+      activateTrial().then(ok => {
         setCheckoutIntent(null)
-        return
-      }
-      window.location.href = result
-    })
+        if (!ok) console.warn('[App] activateTrial returned false')
+      })
+    } else {
+      createCheckoutSession(checkoutIntent.plan, checkoutIntent.billing, session.user.email, session.user.id).then(result => {
+        if (result?.alreadySubscribed) { setCheckoutIntent(null); return }
+        if (!result) { setCheckoutIntent(null); return }
+        window.location.href = result
+      })
+    }
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F6F3' }}>
         <div style={{ textAlign: 'center' }}>
           <Spinner size="md" style={{ display: 'block', margin: '0 auto 12px' }} />
-          <p style={{ color: '#6B6B6B', fontSize: 14 }}>Redirecting to checkout…</p>
+          <p style={{ color: '#6B6B6B', fontSize: 14 }}>{checkoutIntent.trial ? 'Activating your free trial…' : 'Redirecting to checkout…'}</p>
         </div>
       </div>
     )
@@ -798,7 +793,7 @@ export default function App() {
           <span style={{ fontSize: 13.5, color: '#fff', fontWeight: 500 }}>
             {hasUsedTrial()
               ? 'Pick up where you left off. No hidden fees.'
-              : 'Your 3-day trial is still available. No commitment until day 4.'}
+              : 'Your 3-day trial is still available. No credit card required.'}
           </span>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             <button
