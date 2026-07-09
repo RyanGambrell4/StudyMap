@@ -492,6 +492,72 @@ export default async function handler(req, res) {
       return res.status(200).json({ received: true })
     }
 
+    // ── Abandoned checkout recovery ──────────────────────────────────────────
+    // Fires when a Stripe Checkout session expires (default 24h) without completion.
+    // Send a one-time nudge email while intent is still warm.
+    if (event.type === 'checkout.session.expired') {
+      const session = event.data.object
+      const userId = session.metadata?.user_id
+      const email = session.customer_details?.email ?? session.customer_email
+      const wasTrial = session.metadata?.trial === '1'
+
+      if (userId && email && process.env.RESEND_API_KEY) {
+        try {
+          await resend.emails.send({
+            from: 'Ryan at StudyEdge <ryan@getstudyedge.com>',
+            to: email,
+            subject: 'You left before finishing — your trial spot is still open',
+            headers: listUnsubscribeHeaders(userId),
+            html: `<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
+${preheader('You started signing up for Pro but didn\'t finish. Your spot is still open.')}
+<div style="max-width:560px;margin:0 auto;padding:32px 16px;">
+  <div style="background:#fff;border-radius:16px;padding:36px 32px;border:1px solid #e5e7eb;">
+    <img src="https://getstudyedge.com/favicon.png" alt="StudyEdge AI" style="width:36px;height:36px;border-radius:9px;margin-bottom:20px;">
+    <h1 style="margin:0 0 12px;font-size:20px;font-weight:800;color:#111;letter-spacing:-0.03em;">
+      You were one step away.
+    </h1>
+    <p style="margin:0 0 20px;font-size:15px;color:#4b5563;line-height:1.6;">
+      You started ${wasTrial ? 'your 3-day free trial' : 'signing up for Pro'} but didn't finish. Your spot is still open — it takes about 30 seconds to complete.
+    </p>
+    <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 18px;margin-bottom:24px;">
+      <p style="margin:0;font-size:13.5px;color:#166534;line-height:1.6;">
+        ${wasTrial
+          ? '<strong>Try Pro free for 3 days.</strong> Enter your card to start — you won\'t be charged until day 4. Cancel anytime before then.'
+          : '<strong>Pro is $2.99/week.</strong> 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions. Cancel anytime.'
+        }
+      </p>
+    </div>
+    <a href="https://getstudyedge.com/app?plan=pro&billing=weekly${wasTrial ? '&trial=1' : ''}" style="display:block;text-align:center;background:#3B61C4;color:#fff;font-weight:800;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none;letter-spacing:-0.01em;">
+      ${wasTrial ? 'Complete your free trial →' : 'Complete signup →'}
+    </a>
+    <p style="margin:24px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">
+      Any questions? Just reply — I read every message.
+    </p>
+    <p style="margin:8px 0 0;font-size:13px;color:#6b7280;">— Ryan, StudyEdge AI</p>
+    <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;text-align:center;">
+      StudyEdge AI · <a href="https://getstudyedge.com/unsubscribe?uid=${userId}" style="color:#9ca3af;">Unsubscribe</a>
+    </p>
+  </div>
+</div>
+</body>
+</html>`,
+          })
+          console.log(`[stripe webhook] Abandoned checkout email sent to ${email} userId=${userId}`)
+        } catch (e) {
+          console.error('[stripe webhook] Failed to send abandoned checkout email:', e.message)
+        }
+      }
+
+      await supabaseAdmin
+        .from('stripe_idempotency')
+        .insert({ event_id: eventId, processed_at: new Date().toISOString() })
+        .then(({ error }) => { if (error) console.error('[stripe] Failed to record checkout.session.expired event', error) })
+      return res.status(200).json({ received: true })
+    }
+
     if (
       event.type === 'customer.subscription.created' ||
       event.type === 'customer.subscription.updated' ||
@@ -534,6 +600,12 @@ export default async function handler(req, res) {
           referredBy:       existing?.subscription?.referredBy       ?? null,
           referralRewarded: existing?.subscription?.referralRewarded ?? false,
           referralCount:    existing?.subscription?.referralCount    ?? 0,
+          // Preserve existing trialUsedAt; stamp it on first trialing activation so
+          // hasUsedTrial() in the client correctly blocks a second free trial.
+          trialUsedAt: existing?.subscription?.trialUsedAt
+            ?? (sub.status === 'trialing' && event.type === 'customer.subscription.created'
+                ? new Date().toISOString()
+                : null),
         }
 
         const { error } = await supabaseAdmin

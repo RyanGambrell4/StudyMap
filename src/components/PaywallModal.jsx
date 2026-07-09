@@ -345,12 +345,12 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     setTrialLoading(true)
     setTrialError(null)
     try {
-      const ok = await activateTrial()
-      if (!ok) {
+      const url = await activateTrial(userId, userEmail)
+      if (!url) {
         setTrialError('Something went wrong. Please try again.')
         return
       }
-      onClose()
+      window.location.href = url
     } catch {
       setTrialError('Something went wrong. Please try again.')
     } finally {
@@ -460,7 +460,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               ))}
             </div>
             <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6B6B6B' }}>
-              Trusted by 400+ students
+              Trusted by 500+ students
             </span>
           </div>
           <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
@@ -552,7 +552,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               Try every Pro feature free for 3 days.
             </h3>
             <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 16px', lineHeight: 1.5 }}>
-              Full access for 3 days, no credit card needed. After your trial, choose a plan to keep access.
+              Full access for 3 days. Card required — cancel before your trial ends and you won't be charged.
             </p>
             {trialError && (
               <p style={{ fontSize: '0.78rem', color: '#EF4444', margin: '0 0 10px' }}>{trialError}</p>
@@ -577,7 +577,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               {trialLoading ? 'Loading…' : 'Start 3-day free trial →'}
             </button>
             <p style={{ margin: '10px 0 0', fontSize: '0.72rem', color: '#9B9B9B' }}>
-              No credit card required &nbsp;·&nbsp; free for 3 days
+              Card required &nbsp;·&nbsp; free for 3 days &nbsp;·&nbsp; cancel anytime
             </p>
           </div>
         )}

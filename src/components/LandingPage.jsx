@@ -788,7 +788,7 @@ export default function LandingPage({ onGetStarted }) {
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                 <path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              3-day free trial · No credit card required · Cancel anytime
+              3-day free trial · Card required · Cancel anytime
             </div>
 
             {/* Social proof - honest trust badges */}
@@ -805,7 +805,7 @@ export default function LandingPage({ onGetStarted }) {
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                   <path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span style={{ color: 'rgba(226,232,240,0.85)' }}>No credit card required</span>
+                <span style={{ color: 'rgba(226,232,240,0.85)' }}>Cancel before day 4 · no charge</span>
               </div>
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 9,
@@ -1646,7 +1646,7 @@ export default function LandingPage({ onGetStarted }) {
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
               <path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            3-day free trial · No credit card required · Cancel anytime
+            3-day free trial · Card required · Cancel anytime
           </div>
         </div>
       </section>
@@ -2117,7 +2117,7 @@ export default function LandingPage({ onGetStarted }) {
               q: 'Is there a free version, or do I have to pay?',
               a: (
                 <>
-                  Yes. The <strong>Free plan</strong> includes one course, basic session planning, and limited flashcards, with no credit card required. <strong>Pro</strong> ($2.99/week) unlocks 5 courses, 100 AI actions per month, the AI Study Coach, Grade Hub, Focus Mode, and unlimited flashcards, and starts with a 3-day free trial. <strong>Unlimited</strong> ($4.99/week) removes the course and AI caps, and adds AI Tutor with session memory plus advanced Practice Exam analytics.
+                  Yes. The <strong>Free plan</strong> includes one course, basic session planning, and limited flashcards — no credit card required to sign up. <strong>Pro</strong> ($2.99/week) unlocks 5 courses, 100 AI actions per month, the AI Study Coach, Grade Hub, Focus Mode, and unlimited flashcards, and starts with a 3-day free trial (card required upfront — cancel before day 4 and you won't be charged). <strong>Unlimited</strong> ($4.99/week) removes the course and AI caps, and adds AI Tutor with session memory plus advanced Practice Exam analytics.
                 </>
               ),
             },
@@ -2125,7 +2125,7 @@ export default function LandingPage({ onGetStarted }) {
               q: 'How does the 3-day Pro trial work?',
               a: (
                 <>
-                  No credit card required. Just sign up, start your trial, and get full Pro access for 3 days. After your trial, you can choose a plan to keep access. If you don't upgrade, you automatically return to the free tier.
+                  Card required upfront — you won't be charged during the 3-day trial. Just cancel before it ends and no payment is taken. After the trial, you're automatically moved to the free tier unless you keep Pro.
                 </>
               ),
             },
@@ -2173,7 +2173,7 @@ export default function LandingPage({ onGetStarted }) {
               q: 'Can I cancel any time?',
               a: (
                 <>
-                  Yes. One click from your account. The trial is free with no card required — just don't upgrade and you automatically return to the free plan. If you cancel a paid subscription, you keep Pro access until the end of the current billing cycle, no questions asked.
+                  Yes. One click from your account. The 3-day trial requires a card upfront — cancel before day 4 and you won't be charged, and you automatically return to the free plan. If you cancel a paid subscription, you keep Pro access until the end of the current billing cycle, no questions asked.
                 </>
               ),
             },
@@ -2236,14 +2236,14 @@ export default function LandingPage({ onGetStarted }) {
             '@context': 'https://schema.org',
             '@type': 'FAQPage',
             mainEntity: [
-              { q: 'Is there a free version, or do I have to pay?', a: "Yes. The Free plan includes one course, basic session planning, and limited flashcards, with no credit card required. Pro ($2.99/week) unlocks 5 courses, 100 AI actions per month, the AI Study Coach, Grade Hub, Focus Mode, and unlimited flashcards, and starts with a 3-day free trial. Unlimited ($4.99/week) removes the course and AI caps, and adds AI Tutor with session memory plus advanced Practice Exam analytics." },
-              { q: 'How does the 3-day Pro trial work?', a: "No credit card required. Just sign up, start your trial, and get full Pro access for 3 days. After your trial, you can choose a plan to keep access. If you don't upgrade, you return to the free tier automatically." },
+              { q: 'Is there a free version, or do I have to pay?', a: "Yes. The Free plan includes one course, basic session planning, and limited flashcards — no credit card required to sign up. Pro ($2.99/week) unlocks 5 courses, 100 AI actions per month, the AI Study Coach, Grade Hub, Focus Mode, and unlimited flashcards, and starts with a 3-day free trial (card required upfront — cancel before day 4 and you won't be charged). Unlimited ($4.99/week) removes the course and AI caps, and adds AI Tutor with session memory plus advanced Practice Exam analytics." },
+              { q: 'How does the 3-day Pro trial work?', a: "Card required upfront — you won't be charged during the 3-day trial. Cancel before it ends and no payment is taken. After the trial, you return to the free tier automatically." },
               { q: "What if my syllabus or course isn't already in the system?", a: "You can add any course. Drop your syllabus as a PDF or paste it as text, and StudyEdge pulls out exam dates, topics, weights, and assignments. No syllabus on hand? Add the course manually in about 30 seconds: pick the dates, enter your grading breakdown, and the AI builds the plan around it." },
               { q: 'How is this different from Notion, Quizlet, or ChatGPT?', a: "Those tools each solve one piece. Notion is a blank canvas you have to build. Quizlet is a flashcard deck. ChatGPT doesn't know your courses, exam dates, or grades. StudyEdge does all four jobs together: it knows your syllabus, plans every session minute by minute, runs your focus blocks, and tells you the exact score you need on what's left to hit your grade target." },
               { q: 'Does StudyEdge work for grad school and exams like the MCAT, LSAT, or GRE?', a: "Yes. Pre-med, law, and grad students are some of our most active users. You can add any standardized test as a course with its real exam date, and the AI builds a multi-week schedule that respects your other classes." },
               { q: 'How long until I see a difference in my grades?', a: "Most students notice the change within the first full week, because the plan removes the daily question of what to study right now. The compounding wins show up in the next round of quizzes and midterms. The Study Coach adapts as your scores come in." },
               { q: 'Will my data and notes stay private?', a: "Yes. Your courses, notes, and study history are tied to your account and never sold or used to train outside models. You can export everything, or delete your account at any time." },
-              { q: 'Can I cancel any time?', a: "Yes. One click from your account. The trial is free with no card required. If you cancel a paid subscription, you keep Pro access until the end of the current billing cycle." },
+              { q: 'Can I cancel any time?', a: "Yes. One click from your account. The 3-day trial requires a card upfront — cancel before day 4 and you won't be charged. If you cancel a paid subscription, you keep Pro access until the end of the current billing cycle." },
             ].map(({ q, a }) => ({
               '@type': 'Question',
               name: q,
@@ -2429,7 +2429,7 @@ export default function LandingPage({ onGetStarted }) {
                   </div>
                   <p style={{ margin: '8px 0 0', fontSize: 13, color: 'rgba(226,232,240,0.55)' }}>{proP.sub}</p>
                   <p style={{ margin: '6px 0 0', fontSize: 12.5, color: '#34d399', fontWeight: 700 }}>
-                    3-day free trial · No credit card required · Cancel anytime
+                    3-day free trial · Card required · Cancel anytime
                   </p>
                 </div>
                 <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8, flex: 1, fontSize: 13.5, color: 'rgba(226,232,240,0.85)' }}>
@@ -2552,9 +2552,9 @@ export default function LandingPage({ onGetStarted }) {
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
           <span>3-day free trial</span>
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
-          <span>No credit card required</span>
+          <span>Cancel before day 4 · no charge</span>
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
-          <span>No credit card for free plan</span>
+          <span>No credit card to use free plan</span>
         </div>
 
         <h2 data-reveal data-reveal-delay="1" style={{
