@@ -5,7 +5,7 @@
  *   1. Writes it to `public.feedback` (Supabase) for durable record + later review.
  *   2. Fires a real-time notification to a Slack webhook if configured
  *      (SLACK_FEEDBACK_WEBHOOK), otherwise falls back to an email to
- *      FEEDBACK_NOTIFY_EMAIL (default: ryan@olunix.com).
+ *      FEEDBACK_NOTIFY_EMAIL (default: support@mail.getstudyedge.com).
  *
  * This is the direct feedback loop referenced in the conversion plan — the
  * whole point is that Ryan sees each submission the moment it lands so he
@@ -20,7 +20,10 @@ const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABAS
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 const MAX_MESSAGE_LEN = 4000
-const NOTIFY_EMAIL = process.env.FEEDBACK_NOTIFY_EMAIL || 'ryan@olunix.com'
+// Where the email fallback ships feedback to when SLACK_FEEDBACK_WEBHOOK is
+// not set. Kept on the studyedge domain by default — set FEEDBACK_NOTIFY_EMAIL
+// in Vercel to route to any other inbox.
+const NOTIFY_EMAIL = process.env.FEEDBACK_NOTIFY_EMAIL || 'support@mail.getstudyedge.com'
 
 async function postToSlack({ webhookUrl, message, email, route, plan }) {
   try {

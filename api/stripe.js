@@ -419,9 +419,11 @@ ${preheader("Your trial was cancelled. Your card will not be charged. Your accou
 
 /**
  * One-time comeback offer email. Sent right after the trial cancellation
- * confirmation with a time-limited (24h) 80% off promotion code embedded.
- * The Stripe checkout page has `allow_promotion_codes: true` so the user
- * pastes the code at checkout.
+ * confirmation with a time-limited (24h) promotion code embedded. The
+ * discount percentage is set by OFFER_DISCOUNT_PCT in lib/server/oneTimeOffer.js
+ * (currently 50%). The Stripe checkout page has `allow_promotion_codes: true`
+ * so the user pastes the code at checkout, or the app auto-applies it via
+ * the `?promo=CODE` URL param embedded in the email link.
  */
 async function sendOneTimeOfferEmail(toEmail, offer) {
   if (!process.env.RESEND_API_KEY || !offer?.code) return
@@ -905,10 +907,11 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
     //   1. Personal founder email asking "why did you cancel?" — highest reply
     //      rate of any email in this flow, drives direct product feedback and
     //      sometimes recovers the sale.
-    //   2. One-time 24h 80% off comeback offer — recovers price-sensitive
-    //      cancellations. Guarded so a user who already got an offer once
-    //      (e.g. trial → offer → convert → cancel → trial → cancel) does not
-    //      get repeatedly discounted.
+    //   2. One-time 24h comeback offer with percentage discount defined by
+    //      OFFER_DISCOUNT_PCT in lib/server/oneTimeOffer.js — recovers
+    //      price-sensitive cancellations. Guarded so a user who already got
+    //      an offer once (e.g. trial → offer → convert → cancel → trial →
+    //      cancel) does not get repeatedly discounted.
     if (authUser?.email) {
       sendTrialCancelledEmail(authUser.email).catch(e =>
         console.error('[cancel-trial] Failed to send confirmation email:', e)
