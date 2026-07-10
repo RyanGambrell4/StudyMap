@@ -3,7 +3,7 @@
  *
  * 3-tier model:
  *  Free      → permanent, capped per feature
- *  Trial     → 3-day full Pro, no credit card required (DB-only via activateTrial). Card collected only if user upgrades after.
+ *  Trial     → 3-day Pro via Stripe Checkout. Card required upfront; charged after 3 days unless cancelled.
  *  Pro       → Stripe paid (weekly/monthly/annual), 5 courses, 100 AI actions/month
  *  Unlimited → Stripe paid (weekly/monthly/annual), unlimited everything + tutor memory & advanced analytics
  */
@@ -110,6 +110,9 @@ export function getCachedSubscription() {
 
 export function isTrialActive() {
   const sub = getCachedSubscription()
+  // Stripe-backed trial
+  if (sub?.status === 'trialing' && sub?.stripeSubId) return true
+  // Legacy DB-only trial (backwards compat for accounts that activated before this fix)
   if (!sub?.trial_activated || !sub?.trial_start_date) return false
   if (sub?.status === 'cancelled') return false
   const start = new Date(sub.trial_start_date)
@@ -118,7 +121,10 @@ export function isTrialActive() {
 }
 
 export function hasUsedTrial() {
-  return !!(getCachedSubscription()?.trial_activated)
+  const sub = getCachedSubscription()
+  // trialUsedAt is stamped by the Stripe webhook on subscription.created (trialing).
+  // trial_activated is the legacy DB-only flag from the no-card flow (backwards compat).
+  return !!(sub?.trialUsedAt || sub?.trial_activated)
 }
 
 export function getTrialDaysRemaining() {
@@ -129,31 +135,16 @@ export function getTrialDaysRemaining() {
   return Math.max(0, Math.ceil(TRIAL_DURATION_DAYS - elapsed))
 }
 
-export async function activateTrial() {
-  if (!_uid) return false
-  if (hasUsedTrial()) return false
-
-  const now = new Date().toISOString()
-  const updated = {
-    ...(getCachedSubscription() ?? {}),
-    trial_activated: true,
-    trial_start_date: now,
-    status: 'trialing',
-  }
-
-  const { error } = await supabase
-    .from('user_data')
-    .upsert({ user_id: _uid, subscription: updated, updated_at: now }, { onConflict: 'user_id' })
-
-  if (error) {
-    console.error('[subscription] activateTrial error:', error)
-    return false
-  }
-
-  _sub = updated
-  track('trial_activated', {})
-  window.dispatchEvent(new CustomEvent('studyedge:trial-activated'))
-  return true
+// activateTrial routes through Stripe Checkout so a card is collected upfront.
+// Returns the checkout URL on success, or null on failure.
+// Pass userId and userEmail from the calling component.
+export async function activateTrial(userId, userEmail) {
+  const uid = userId ?? _uid
+  if (!uid) return null
+  if (hasUsedTrial()) return null
+  track('trial_cta_clicked', { source: 'activateTrial' })
+  const url = await createCheckoutSession('pro', 'weekly', userEmail, uid, { trial: true })
+  return url ?? null
 }
 
 // ── Plan resolution ───────────────────────────────────────────────────────────
@@ -166,10 +157,10 @@ export function getActivePlan() {
   if (paidStatuses.includes(sub?.status) && sub?.plan === 'unlimited') return 'unlimited'
   if (paidStatuses.includes(sub?.status) && sub?.plan === 'pro') return 'pro'
 
-  // No-card trial (3 days)
+  // Active trial (Stripe trialing or legacy DB-only)
   if (isTrialActive()) return 'pro'
 
-  // Stripe trialing (legacy - card required old flow)
+  // Stripe trialing belt-and-suspenders
   if (sub?.status === 'trialing' && sub?.plan) return sub.plan
 
   return 'free'
@@ -359,16 +350,16 @@ export function incrementAIQuery() {
 }
 
 // ── Stripe checkout session creator ──────────────────────────────────────────
-// Used for paid plan signups ONLY. Trial activation uses activateTrial() above
-// (no-card, DB-only). Do not pass trial:true here — it is no longer wired up.
+// Used for paid plan signups and card-required trials.
+// Pass opts.trial: true to create a 3-day Stripe trial (card collected upfront).
 
 export async function createCheckoutSession(plan, billingPeriod, userEmail, userId, opts = {}) {
-  track('checkout_started', { plan, billingPeriod, trial: !!opts.trial })
+  track('checkout_started', { plan, billingPeriod, trial: !!opts.trial, has_promo: !!opts.promo })
   try {
     const res = await fetch('/api/stripe', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ plan, billingPeriod, userEmail, userId, trial: !!opts.trial }),
+      body: JSON.stringify({ plan, billingPeriod, userEmail, userId, trial: !!opts.trial, promo: opts.promo ?? null }),
     })
 
     const data = await res.json()

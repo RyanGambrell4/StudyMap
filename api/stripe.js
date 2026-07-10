@@ -17,6 +17,8 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { onTrialEndingSoon, onUpgraded, onChurned } from '../lib/server/loops.js'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
+import { sendFounderCancellationEmail } from '../lib/server/founderOutreach.js'
+import { createTrialCancelOffer, userHasExistingOffer } from '../lib/server/oneTimeOffer.js'
 
 // Disable Vercel's default body parsing - required for Stripe signature verification
 export const config = {
@@ -412,6 +414,85 @@ ${preheader("Your trial was cancelled. Your card will not be charged. Your accou
     console.log(`[stripe] Trial cancelled confirmation sent to ${toEmail}`)
   } catch (err) {
     console.error('[stripe] Failed to send trial cancelled email:', err)
+  }
+}
+
+/**
+ * One-time comeback offer email. Sent right after the trial cancellation
+ * confirmation with a time-limited (24h) 80% off promotion code embedded.
+ * The Stripe checkout page has `allow_promotion_codes: true` so the user
+ * pastes the code at checkout.
+ */
+async function sendOneTimeOfferEmail(toEmail, offer) {
+  if (!process.env.RESEND_API_KEY || !offer?.code) return
+  const expiresLabel = offer.expiresAt.toLocaleString('en-US', {
+    weekday: 'short', month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit',
+    timeZone: 'America/New_York', timeZoneName: 'short',
+  })
+  const checkoutUrl = `https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&promo=${encodeURIComponent(offer.code)}&utm_source=email&utm_medium=lifecycle&utm_campaign=trial_cancel_offer`
+  try {
+    await resend.emails.send({
+      from: 'StudyEdge AI <support@mail.getstudyedge.com>',
+      to: toEmail,
+      subject: `Before you go — ${offer.discountPct}% off your first month.`,
+      headers: listUnsubscribeHeaders(toEmail),
+      html: `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>One-time comeback offer</title></head>
+<body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111111;">
+${preheader(`One-time ${offer.discountPct}% off code inside. Expires in 24 hours.`)}
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
+      <tr><td style="padding-bottom:20px;text-align:center;">
+        <span style="font-size:16px;font-weight:700;color:#111111;letter-spacing:-0.3px;">StudyEdge</span>
+      </td></tr>
+      <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
+        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#E8531A;text-transform:uppercase;">One-time offer · 24h</p>
+        <h1 style="margin:0 0 16px;font-size:26px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.25;">
+          ${offer.discountPct}% off your first month.
+        </h1>
+        <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          You just cancelled your trial — I get it, not every product clicks in three days. Before you go, here's one thing: a one-time <strong style="color:#111111;">${offer.discountPct}% off your first month of Pro</strong>. Paste the code below at checkout.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin:6px 0 22px;">
+          <tr><td align="center" style="background:#FFF6F0;border:2px dashed #E8531A;border-radius:12px;padding:22px 24px;">
+            <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9B6B4A;text-transform:uppercase;margin-bottom:6px;">Your code</div>
+            <div style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:28px;font-weight:700;color:#E8531A;letter-spacing:0.15em;">${offer.code}</div>
+            <div style="font-size:12px;color:#9B6B4A;margin-top:8px;">Expires ${expiresLabel} — one-time use</div>
+          </td></tr>
+        </table>
+        <table cellpadding="0" cellspacing="0" style="width:100%;">
+          <tr><td align="center" style="padding-bottom:6px;">
+            <a href="${checkoutUrl}" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Redeem ${offer.discountPct}% off</a>
+          </td></tr>
+          <tr><td align="center">
+            <span style="font-size:12px;color:#9B9B9B;">Applies to first month of Pro. Cancel anytime.</span>
+          </td></tr>
+        </table>
+        <p style="margin:22px 0 0;font-size:13px;color:#9B9B9B;line-height:1.6;">
+          If you're set on skipping Pro entirely, no worries — this offer will quietly expire.
+        </p>
+      </td></tr>
+      <tr><td style="padding:24px 0 0;text-align:center;">
+        <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
+          Sent because your StudyEdge AI Pro trial was cancelled.
+          <a href="https://getstudyedge.com/app" style="color:#9B9B9B;text-decoration:underline;">Open the app</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
+          &nbsp;&middot;&nbsp;
+          <a href="https://getstudyedge.com/unsubscribe?email=${encodeURIComponent(toEmail)}" style="color:#9B9B9B;text-decoration:underline;">Unsubscribe</a>
+        </p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">The StudyEdge AI team</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`,
+    })
+    console.log(`[stripe] One-time offer email sent to ${toEmail} (code=${offer.code})`)
+  } catch (err) {
+    console.error('[stripe] Failed to send one-time offer email:', err)
   }
 }
 
@@ -820,10 +901,44 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
     }
 
     // Send cancellation confirmation - stops "was I charged?" support tickets.
+    // Then run two save-the-conversion emails in parallel (best-effort, non-blocking):
+    //   1. Personal founder email asking "why did you cancel?" — highest reply
+    //      rate of any email in this flow, drives direct product feedback and
+    //      sometimes recovers the sale.
+    //   2. One-time 24h 80% off comeback offer — recovers price-sensitive
+    //      cancellations. Guarded so a user who already got an offer once
+    //      (e.g. trial → offer → convert → cancel → trial → cancel) does not
+    //      get repeatedly discounted.
     if (authUser?.email) {
       sendTrialCancelledEmail(authUser.email).catch(e =>
         console.error('[cancel-trial] Failed to send confirmation email:', e)
       )
+
+      // Pull first name from auth metadata if we have it — makes the founder
+      // email read as a real personal message instead of "Hey there".
+      const firstName = authUser?.user_metadata?.first_name
+        ?? authUser?.user_metadata?.full_name
+        ?? authUser?.user_metadata?.name
+        ?? null
+
+      sendFounderCancellationEmail(authUser.email, { firstName }).catch(e =>
+        console.error('[cancel-trial] Failed to send founder email:', e)
+      )
+
+      // Fire-and-forget: coupon creation + email. Even if it fails, the
+      // user's cancellation still succeeds.
+      ;(async () => {
+        try {
+          if (await userHasExistingOffer(userId)) {
+            console.log(`[cancel-trial] Skipping one-time offer — user ${userId} already has one`)
+            return
+          }
+          const offer = await createTrialCancelOffer({ userId })
+          if (offer) await sendOneTimeOfferEmail(authUser.email, offer)
+        } catch (e) {
+          console.error('[cancel-trial] one-time offer flow failed:', e)
+        }
+      })()
     }
 
     return res.status(200).json({ success: true, subscription: updated })
@@ -872,7 +987,7 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
     }
   }
 
-  const { plan, billingPeriod: rawBillingPeriod, userEmail, userId, trial } = body
+  const { plan, billingPeriod: rawBillingPeriod, userEmail, userId, trial, promo } = body
 
   // Normalize billing period aliases: 'annual' → 'yearly'.
   const billingPeriod = rawBillingPeriod === 'annual' ? 'yearly' : rawBillingPeriod
@@ -938,6 +1053,31 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
     }
   }
 
+  // If the client passed a `promo` code (from the trial-cancel comeback-offer
+  // email link), resolve it to a Stripe promotion_code ID and attach it as a
+  // discount so the user does not have to paste anything. If the code is bad,
+  // invalid, or expired, we fall back to a codeless checkout instead of
+  // failing — the promo is a bonus, not a hard requirement.
+  //
+  // Stripe rejects sessions that pass BOTH `discounts` and
+  // `allow_promotion_codes: true`, so when a valid promo is auto-applied we
+  // drop `allow_promotion_codes`.
+  let promoDiscounts
+  if (promo && typeof promo === 'string' && /^[A-Z0-9]{6,24}$/.test(promo)) {
+    try {
+      const list = await stripe.promotionCodes.list({ code: promo, active: true, limit: 1 })
+      const promotionCode = list.data?.[0]
+      if (promotionCode?.id) {
+        promoDiscounts = [{ promotion_code: promotionCode.id }]
+        console.log(`[stripe checkout] Auto-applying promo ${promo} (${promotionCode.id})`)
+      } else {
+        console.warn(`[stripe checkout] Promo ${promo} not found or inactive — falling back`)
+      }
+    } catch (promoErr) {
+      console.error('[stripe checkout] Promo lookup failed, continuing without discount:', promoErr?.message ?? promoErr)
+    }
+  }
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
@@ -950,8 +1090,12 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
       // For trials we must collect the card up front so billing starts after the trial ends.
       payment_method_collection: wantsTrial ? 'always' : undefined,
       subscription_data: subscriptionData,
-      metadata: { user_id: userId, trial: wantsTrial ? '1' : '0' },
-      allow_promotion_codes: true,
+      metadata: { user_id: userId, trial: wantsTrial ? '1' : '0', promo: promoDiscounts ? promo : '' },
+      // discounts and allow_promotion_codes are mutually exclusive in Stripe.
+      ...(promoDiscounts
+        ? { discounts: promoDiscounts }
+        : { allow_promotion_codes: true }
+      ),
       // Reassurance copy directly under the Start trial button - the moment of
       // highest abandonment anxiety on the trial path.
       custom_text: wantsTrial

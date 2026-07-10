@@ -74,6 +74,14 @@
       "schedule": "0 11 * * *"
     },
     {
+      "path": "/api/day1-trial-tips",
+      "schedule": "0 11 * * *"
+    },
+    {
+      "path": "/api/day2-trial-progress",
+      "schedule": "0 14 * * *"
+    },
+    {
       "path": "/api/trial-warning",
       "schedule": "0 12 * * *"
     },

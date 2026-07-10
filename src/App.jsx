@@ -12,6 +12,7 @@ import Spinner from './components/ui/spinner'
 import Onboarding from './components/Onboarding'
 import OutputView from './components/OutputView'
 import PaywallModal from './components/PaywallModal'
+import FeedbackModal from './components/FeedbackModal'
 import './index.css'
 
 export default function App() {
@@ -80,6 +81,9 @@ export default function App() {
   const [paywallOpen, setPaywallOpen]     = useState(false)
   const [paywallTrigger, setPaywallTrigger] = useState('courses')
 
+  // ── Feedback modal state ───────────────────────────────────────────────────
+  const [feedbackOpen, setFeedbackOpen] = useState(false)
+
   // ── Checkout success banner ────────────────────────────────────────────────
   const [checkoutSuccess, setCheckoutSuccess] = useState(false)
   const [checkoutProcessing, setCheckoutProcessing] = useState(false)
@@ -87,14 +91,20 @@ export default function App() {
   // ── Checkout cancel banner ─────────────────────────────────────────────────
   const [showCheckoutCancelBanner, setShowCheckoutCancelBanner] = useState(false)
 
-  // Capture checkout intent on mount before Supabase PKCE exchange clears the URL
+  // Capture checkout intent on mount before Supabase PKCE exchange clears the URL.
+  // `promo` is used by the trial-cancel comeback offer email — that link deep-links
+  // straight into checkout with a one-time discount code auto-applied.
   const [checkoutIntent, setCheckoutIntent] = useState(() => {
     const sp = new URLSearchParams(window.location.search)
     const plan = sp.get('plan')
     const billing = sp.get('billing')
     const trial = sp.get('trial') === '1'
+    const rawPromo = sp.get('promo')
+    // Only forward well-formed codes (uppercase alphanumeric, 6–24 chars). Blocks
+    // arbitrary URL crud from ever reaching Stripe as a promotion code.
+    const promo = rawPromo && /^[A-Z0-9]{6,24}$/.test(rawPromo) ? rawPromo : null
     if (plan === 'pro' || plan === 'unlimited') {
-      return { plan, billing: ['weekly', 'monthly', 'yearly', 'semester'].includes(billing) ? billing : 'weekly', trial }
+      return { plan, billing: ['weekly', 'monthly', 'yearly', 'semester'].includes(billing) ? billing : 'weekly', trial, promo }
     }
     return null
   })
@@ -117,6 +127,14 @@ export default function App() {
     window.addEventListener('studyedge:open-paywall', handler)
     return () => window.removeEventListener('studyedge:open-paywall', handler)
   }, [openPaywall])
+
+  // Same pattern for the feedback modal — AppShell settings menu, empty
+  // states, and any surface can trigger it via a global event.
+  useEffect(() => {
+    const handler = () => setFeedbackOpen(true)
+    window.addEventListener('studyedge:open-feedback', handler)
+    return () => window.removeEventListener('studyedge:open-feedback', handler)
+  }, [])
 
   // Trial expiry tracking. When a user who used the trial returns and the
   // trial window has now passed (and they did not convert to paid), fire
@@ -639,17 +657,17 @@ export default function App() {
     )
   }
 
-  // ── Checkout intent handler (paid plans via Stripe; trial via DB) ─────────
+  // ── Checkout intent handler (all paths go through Stripe) ───────────────
   if (checkoutIntent && getActivePlan() === 'free') {
     window.history.replaceState({}, '', window.location.pathname)
     if (checkoutIntent.trial) {
-      // No-card trial: activate directly in DB, stay in app
-      activateTrial().then(ok => {
-        setCheckoutIntent(null)
-        if (!ok) console.warn('[App] activateTrial returned false')
+      createCheckoutSession('pro', 'weekly', session.user.email, session.user.id, { trial: true }).then(result => {
+        if (result?.alreadySubscribed) { setCheckoutIntent(null); return }
+        if (!result) { setCheckoutIntent(null); return }
+        window.location.href = result
       })
     } else {
-      createCheckoutSession(checkoutIntent.plan, checkoutIntent.billing, session.user.email, session.user.id).then(result => {
+      createCheckoutSession(checkoutIntent.plan, checkoutIntent.billing, session.user.email, session.user.id, { promo: checkoutIntent.promo }).then(result => {
         if (result?.alreadySubscribed) { setCheckoutIntent(null); return }
         if (!result) { setCheckoutIntent(null); return }
         window.location.href = result
@@ -700,6 +718,9 @@ export default function App() {
           currentPlan={getActivePlan()}
         />
       )}
+
+      {/* Global feedback modal — opened via ⚙︎ menu or `studyedge:open-feedback` event */}
+      <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
 
       {/* Email confirmation banner — shown in the main app after onboarding */}
       {showOutput && session?.user && !session.user.email_confirmed_at && !emailBannerDismissed && (() => {
@@ -793,7 +814,7 @@ export default function App() {
           <span style={{ fontSize: 13.5, color: '#fff', fontWeight: 500 }}>
             {hasUsedTrial()
               ? 'Pick up where you left off. No hidden fees.'
-              : 'Your 3-day trial is still available. No credit card required.'}
+              : 'Your 3-day free trial requires a card — cancel within 3 days and you won\'t be charged.'}
           </span>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             <button

@@ -104,11 +104,9 @@ export default function AccountView({
     if (trialStarting) return
     setTrialStarting(true)
     try {
-      const ok = await activateTrial()
-      if (!ok) {
-        setTrialStarting(false)
-      }
-      // On success, subscription state updates via initSubscription inside activateTrial
+      const url = await activateTrial(userId, userEmail)
+      if (!url) { setTrialStarting(false); return }
+      window.location.href = url
     } catch {
       setTrialStarting(false)
     }
@@ -201,7 +199,7 @@ export default function AccountView({
       const { data: { session } } = await supabase.auth.getSession()
       const sub = getCachedSubscription()
       if (sub?.stripeSubId) {
-        // Legacy card-required trial — cancel via Stripe
+        // Stripe-backed trial — cancel via API so Stripe stops billing
         const res = await fetch('/api/stripe', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${session?.access_token}` },
@@ -211,7 +209,7 @@ export default function AccountView({
         const data = await res.json()
         initSubscription(session.user.id, data.subscription ?? { ...sub, plan: 'free', status: 'cancelled', stripeSubId: null, currentPeriodEnd: null })
       } else {
-        // No-card trial — cancel directly in DB
+        // Legacy DB-only trial (backwards compat) — cancel directly in DB
         const cancelled = { ...sub, status: 'cancelled', trial_cancelled: true }
         const now = new Date().toISOString()
         const { error } = await supabase
@@ -580,6 +578,7 @@ export default function AccountView({
               display: 'flex', alignItems: 'center', gap: 14,
               padding: '12px 0',
               background: 'none', border: 'none',
+              borderBottom: '1px solid rgba(0,0,0,0.06)',
               cursor: 'pointer', textAlign: 'left', width: '100%',
             }}
           >
@@ -589,6 +588,24 @@ export default function AccountView({
             <div style={{ flex: 1 }}>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#111111' }}>Edit Study Plan</p>
               <p style={{ margin: '2px 0 0', fontSize: 12, color: '#9B9B9B' }}>Modify your courses and schedule settings</p>
+            </div>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
+          </button>
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-feedback'))}
+            style={{
+              display: 'flex', alignItems: 'center', gap: 14,
+              padding: '12px 0',
+              background: 'none', border: 'none',
+              cursor: 'pointer', textAlign: 'left', width: '100%',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0EA5E9" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-3l-4 4z" />
+            </svg>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#111111' }}>Send Feedback</p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: '#9B9B9B' }}>Tell Ryan what's confusing, broken, or missing</p>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
           </button>
