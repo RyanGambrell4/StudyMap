@@ -5,6 +5,7 @@ import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasU
 import { useTheme } from './utils/useTheme'
 import { initAnalytics, identifyUser, resetUser, track, register, registerOnce } from './lib/analytics'
 import { captureReferralParam, getStoredReferrer, clearStoredReferrer } from './lib/referral'
+import { captureUtmForOnboarding } from './lib/utmPersonalize'
 import SharedPlanView from './components/SharedPlanView'
 import AuthScreen from './components/AuthScreen'
 import LandingPage from './components/LandingPage'
@@ -20,6 +21,10 @@ export default function App() {
   useEffect(() => {
     initAnalytics()
     captureReferralParam()
+    // Snapshot utm params before Supabase's PKCE flow clears the query
+    // string. Onboarding reads this back to pre-select schoolType/yearLevel
+    // for users coming from targeted campaigns (e.g. r/mcat, r/premed).
+    captureUtmForOnboarding()
     // 'surface' must overwrite - if the user navigated from the marketing site,
     // PostHog's super-properties cache still has surface: 'marketing'.
     register({ surface: 'app' })

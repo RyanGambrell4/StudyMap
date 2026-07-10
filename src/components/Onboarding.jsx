@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { track } from '../lib/analytics'
 import { activateTrial, hasUsedTrial } from '../lib/subscription'
+import { readUtmPrefill } from '../lib/utmPersonalize'
 
 const STEP_NAMES = { 1: 'personalize', 2: 'app_preview', 3: 'trial_offer' }
 
@@ -160,13 +161,18 @@ function Confetti() {
 export default function Onboarding({ onComplete, userEmail, userId }) {
   const saved = loadProgress()
 
+  // Prefill inferred from UTM params (e.g. Reddit r/mcat → exam/3-6 months).
+  // Localstorage progress from a prior partial onboarding wins over UTM
+  // inference — if a user was actively answering questions and reloaded, we
+  // don't override their in-progress selection with a campaign default.
+  const utm = readUtmPrefill()
   const [step, setStep]               = useState(1)
   const [animKey, setAnimKey]         = useState(0)
   const [animDir, setAnimDir]         = useState(1)
   const [trialLoading, setTrialLoading] = useState(false)
   const [trialError, setTrialError]     = useState(null)
-  const [schoolType, setSchoolType]   = useState(saved?.schoolType ?? null)
-  const [yearLevel, setYearLevel]     = useState(saved?.yearLevel ?? null)
+  const [schoolType, setSchoolType]   = useState(saved?.schoolType ?? utm.schoolType ?? null)
+  const [yearLevel, setYearLevel]     = useState(saved?.yearLevel  ?? utm.yearLevel  ?? null)
   const [preferredTime, setPreferredTime] = useState(saved?.preferredTime ?? null)
   const [courseName, setCourseName]   = useState(saved?.courseName ?? '')
   const [examDate, setExamDate]       = useState(saved?.examDate ?? '')
@@ -191,6 +197,22 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   useEffect(() => {
     track('onboarding_step_viewed', { step, step_name: STEP_NAMES[step] ?? `step_${step}` })
   }, [step])
+
+  // Track UTM prefill once so we can slice funnels by whether a user came
+  // in with the schoolType/yearLevel pre-filled (i.e. from a targeted sub
+  // or campaign) vs. picked it blind. Fires exactly once on mount if a
+  // prefill applied.
+  const prefillTracked = useRef(false)
+  useEffect(() => {
+    if (prefillTracked.current) return
+    if (!utm.schoolType && !utm.yearLevel) return
+    prefillTracked.current = true
+    track('onboarding_prefilled', {
+      prefill_source:      utm.source ?? null,
+      prefill_school_type: utm.schoolType ?? null,
+      prefill_year_level:  utm.yearLevel ?? null,
+    })
+  }, [utm.schoolType, utm.yearLevel, utm.source])
 
   const allDone = !!(yearLevel && preferredTime)
   const answered = [schoolType, yearLevel, preferredTime].filter(Boolean).length
@@ -782,9 +804,9 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             track('trial_cta_clicked', { source: 'onboarding' })
             setTrialLoading(true)
             setTrialError(null)
-            const ok = await activateTrial()
-            if (ok) {
-              completeWith(profileData, { trialTaken: true })
+            const url = await activateTrial(userId, userEmail)
+            if (url) {
+              window.location.href = url
             } else {
               setTrialLoading(false)
               setTrialError('Something went wrong starting your trial. Please try again.')
@@ -805,11 +827,11 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.transform = 'scale(1.01)' }}
           onMouseLeave={e => { if (!trialLoading) e.currentTarget.style.transform = 'scale(1)' }}
         >
-          {trialLoading ? 'Loading…' : 'Start free — $0 today →'}
+          {trialLoading ? 'Loading…' : 'Start 3-day free trial →'}
         </button>
 
         <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.25)', fontSize: '0.71rem', marginBottom: 18 }}>
-          No credit card required · upgrade to keep access after 3 days
+          Card required · $2.99/wk after 3 days · Cancel anytime in account
         </p>
 
         {/* Skip — low-prominence, copy reminds them what they're giving up */}

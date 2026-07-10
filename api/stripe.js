@@ -803,21 +803,72 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
 
         // ── PostHog - fire checkout_success on first paid activation ─────────
         // Only on `customer.subscription.created` so renewals don't double-count.
+        //
+        // $revenue + $revenue_currency are PostHog's native revenue-tracking
+        // properties: they let us compute realized LTV per acquisition source
+        // (utm_source, utm_campaign) using PostHog's Revenue insight — which
+        // is the input to sane paid-ad CAC math. Pulling from the Stripe
+        // subscription item itself (not a hardcoded map) means pricing
+        // changes flow through automatically.
+        const priceItem = sub?.items?.data?.[0]?.price
+        const revenueCents = typeof priceItem?.unit_amount === 'number' ? priceItem.unit_amount : null
+        const revenueDollars = revenueCents !== null ? revenueCents / 100 : null
+        const revenueCurrency = priceItem?.currency ? priceItem.currency.toUpperCase() : 'USD'
+
         if (sub.status === 'active' && event.type === 'customer.subscription.created') {
           await posthogCapture('checkout_success', userId, {
             plan: planInfo.plan,
             billing_period: planInfo.billingPeriod,
             stripe_sub_id: sub.id,
             stripe_customer_id: sub.customer,
+            source: 'direct',
+            ...(revenueDollars !== null && {
+              $revenue: revenueDollars,
+              $revenue_currency: revenueCurrency,
+            }),
+          })
+        }
+
+        // Trial → paid conversion. Stripe fires `customer.subscription.updated`
+        // with `previous_attributes.status === 'trialing'` when the trial ends
+        // and the first invoice is paid. This is the actual moment of realized
+        // revenue for trial users — without this, PostHog's LTV curve would
+        // never include any user who came through the trial (which is ~all of
+        // them). We fire checkout_success (not a new event name) so a single
+        // insight in PostHog captures both flows.
+        const previousStatus = event.data?.previous_attributes?.status
+        if (
+          sub.status === 'active' &&
+          event.type === 'customer.subscription.updated' &&
+          previousStatus === 'trialing'
+        ) {
+          await posthogCapture('checkout_success', userId, {
+            plan: planInfo.plan,
+            billing_period: planInfo.billingPeriod,
+            stripe_sub_id: sub.id,
+            stripe_customer_id: sub.customer,
+            source: 'trial_conversion',
+            ...(revenueDollars !== null && {
+              $revenue: revenueDollars,
+              $revenue_currency: revenueCurrency,
+            }),
           })
         }
         // Also fire trial_activated on `trialing` so funnel reconciles with iOS StoreKit trials.
+        // We attach revenue as `expected_revenue` here (not $revenue) — Stripe
+        // has not billed yet, so counting it as realized revenue would inflate
+        // LTV. $revenue only fires on the paid conversion (checkout_success or
+        // the `trialing → active` transition below).
         if (sub.status === 'trialing' && event.type === 'customer.subscription.created') {
           await posthogCapture('trial_activated', userId, {
             plan: planInfo.plan,
             billing_period: planInfo.billingPeriod,
             stripe_sub_id: sub.id,
             source: 'stripe',
+            ...(revenueDollars !== null && {
+              expected_revenue: revenueDollars,
+              revenue_currency: revenueCurrency,
+            }),
           })
           // Send trial started confirmation - tells user what's unlocked and when they'll be charged.
           const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(userId)
