@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getActivePlan } from '../lib/subscription'
 import { track } from '../lib/analytics'
 import { getAccessToken } from '../lib/supabase'
+import PaywallExitGift from './PaywallExitGift'
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -302,6 +303,14 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     return () => clearInterval(t)
   }, [])
 
+  // Paywall-exit gift: on the FIRST dismiss for a free user, intercept and
+  // show the "5 free AI actions + rate us" screen instead of closing. The
+  // server-side /api/claim-paywall-exit-gift enforces one-shot per user
+  // globally — this flag just prevents re-showing the intercept once the
+  // user has already dismissed it in this open of the paywall.
+  const [exitGiftOpen, setExitGiftOpen] = useState(false)
+  const [exitGiftShown, setExitGiftShown] = useState(false)
+
   const handleDismiss = (reason) => {
     track('paywall_dismissed', {
       trigger_feature: trigger,
@@ -319,6 +328,22 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
         }).catch(() => {})
       }).catch(() => {})
     }
+
+    // Show the exit gift once — only for free users who have not yet seen
+    // it this open. Escape key and outside-click both go through here.
+    const shouldOfferGift = currentPlan === 'free' && !!userId && !exitGiftShown
+    if (shouldOfferGift) {
+      setExitGiftShown(true)
+      setExitGiftOpen(true)
+      return  // hold the paywall behind the gift; onClose fires once the gift closes
+    }
+    onClose()
+  }
+
+  // Called by the gift modal on any close. Fires the real onClose so the
+  // paywall goes away and control returns to the parent.
+  const handleGiftDismiss = () => {
+    setExitGiftOpen(false)
     onClose()
   }
 
@@ -378,6 +403,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   const t = TESTIMONIALS[testimonialIdx]
 
   return (
+    <>
     <div
       style={{
         position: 'fixed', inset: 0,
@@ -750,5 +776,14 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
         </p>
       </div>
     </div>
+
+    {/* Exit-intent gift — intercepts the first close for free users, offers
+        5 bonus AI actions + review ask, then closes the paywall for real. */}
+    <PaywallExitGift
+      open={exitGiftOpen}
+      trigger={trigger}
+      onDismiss={handleGiftDismiss}
+    />
+    </>
   )
 }
