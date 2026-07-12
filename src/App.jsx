@@ -721,6 +721,9 @@ export default function App() {
           userEmail={session?.user?.email}
           userId={session?.user?.id}
           currentPlan={getActivePlan()}
+          sessionsCompleted={initialCompletedIds?.size ?? 0}
+          coursesCount={courses.length}
+          primaryCourseName={courses[0]?.name ?? null}
         />
       )}
 
