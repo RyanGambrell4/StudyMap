@@ -286,102 +286,67 @@ export default function AppShell({
             </button>
 
             {openHub === 'brainTraining' && (
-              <div style={{ position: 'absolute', top: '100%', left: 0, width: 390, background: '#FFFFFF', border: `1px solid ${BORDER}`, borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.12)', padding: 14, zIndex: 200 }}>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 10, marginBottom: 10 }}>
-                  {[
-                    { label: 'Brain Dump',   sub: 'Clear your head',          color: '#8B5CF6', icon: 'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18', onClick: () => handleBrainAction(onOpenBrainDump) },
-                    { label: 'Quiz Burst',   sub: 'Fire 5 quick questions',   color: '#F59E0B', icon: 'M13 2L4 14h7l-1 8 9-12h-7l1-8z',                                                                     onClick: () => handleBrainAction(onOpenQuizBurst) },
-                    { label: 'Exam Rescue',  sub: 'Emergency study plan',     color: '#DC2626', icon: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',                                                        onClick: () => handleBrainAction(onOpenExamRescue) },
-                  ].map(({ label, sub, color, icon, onClick }) => (
-                    <button
-                      key={label}
-                      onClick={onClick}
-                      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '14px 10px', borderRadius: 10, background: `${color}06`, border: `1px solid ${color}18`, cursor: 'pointer', textAlign: 'center' }}
-                      onMouseEnter={e => { e.currentTarget.style.background = `${color}12`; e.currentTarget.style.borderColor = `${color}30` }}
-                      onMouseLeave={e => { e.currentTarget.style.background = `${color}06`; e.currentTarget.style.borderColor = `${color}18` }}
-                    >
-                      <div style={{ width: 34, height: 34, borderRadius: 9, background: `${color}15`, border: `1px solid ${color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <svg width="15" height="15" fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                          <path d={icon}/>
-                        </svg>
-                      </div>
-                      <div>
-                        <div style={{ fontSize: 12, fontWeight: 600, color: TEXT, marginBottom: 2 }}>{label}</div>
-                        <div style={{ fontSize: 10.5, color: MUTED, lineHeight: 1.3 }}>{sub}</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-                <div style={{ height: 1, background: BORDER, marginBottom: 8 }} />
+              <div style={{ position: 'absolute', top: '100%', left: 0, width: 220, background: '#FFFFFF', border: `1px solid ${BORDER}`, borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.12)', padding: '6px 0', zIndex: 200 }}>
                 <button
                   onClick={() => { setOpenHub(null); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px', borderRadius: 8, background: 'none', border: 'none', cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '9px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
                   onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
                 >
                   <svg width="14" height="14" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <rect x="2" y="3" width="7" height="7" rx="1"/><rect x="15" y="3" width="7" height="7" rx="1"/><rect x="2" y="14" width="7" height="7" rx="1"/><path d="M15 17.5h7M18.5 14v7"/>
                   </svg>
-                  <span style={{ fontSize: 12, color: MUTED, fontWeight: 500, flex: 1 }}>Flashcards &amp; Quizzes</span>
+                  <span style={{ fontSize: 13, color: TEXT, fontWeight: 600, flex: 1 }}>All Study Tools</span>
+                </button>
+                <div style={{ height: 1, background: BORDER, margin: '4px 0' }} />
+                <button
+                  onClick={() => { setOpenHub(null); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  <svg width="14" height="14" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                  <span style={{ fontSize: 13, color: MUTED, fontWeight: 500, flex: 1 }}>Flashcards &amp; Quizzes</span>
                   {dueCount > 0 && (
-                    <span style={{ fontSize: 10, fontWeight: 800, padding: '1px 6px', borderRadius: 999, background: '#EF4444', color: '#fff', lineHeight: 1.5 }}>
-                      {dueCount} due
+                    <span style={{ fontSize: 10, fontWeight: 800, padding: '1px 5px', borderRadius: 999, background: '#EF4444', color: '#fff', lineHeight: 1.5 }}>
+                      {dueCount}
                     </span>
                   )}
-                  <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
-                  </svg>
                 </button>
                 <button
                   onClick={() => { setOpenHub(null); setActiveSection('diagrams') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px', borderRadius: 8, background: 'none', border: 'none', cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
                   onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
                 >
                   <svg width="14" height="14" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
                   </svg>
-                  <span style={{ fontSize: 12, color: MUTED, fontWeight: 500, flex: 1 }}>Study Diagrams</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: 'rgba(59,97,196,0.1)', color: '#3B61C4', lineHeight: 1.5 }}>
-                    New
-                  </span>
-                  <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
-                  </svg>
+                  <span style={{ fontSize: 13, color: MUTED, fontWeight: 500, flex: 1 }}>Study Diagrams</span>
                 </button>
                 <button
                   onClick={() => { setOpenHub(null); setActiveSection('problem-solver') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px', borderRadius: 8, background: 'none', border: 'none', cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
                   onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
                 >
                   <svg width="14" height="14" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
-                  <span style={{ fontSize: 12, color: MUTED, fontWeight: 500, flex: 1 }}>STEM Problem Solver</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: 'rgba(59,97,196,0.1)', color: '#3B61C4', lineHeight: 1.5 }}>
-                    New
-                  </span>
-                  <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
-                  </svg>
+                  <span style={{ fontSize: 13, color: MUTED, fontWeight: 500, flex: 1 }}>STEM Problem Solver</span>
                 </button>
                 <button
                   onClick={() => { setOpenHub(null); setActiveSection('essay-architect') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px', borderRadius: 8, background: 'none', border: 'none', cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
                   onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
                 >
                   <svg width="14" height="14" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
-                  <span style={{ fontSize: 12, color: MUTED, fontWeight: 500, flex: 1 }}>Essay Architect</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: 'rgba(59,97,196,0.1)', color: '#3B61C4', lineHeight: 1.5 }}>
-                    New
-                  </span>
-                  <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
-                  </svg>
+                  <span style={{ fontSize: 13, color: MUTED, fontWeight: 500, flex: 1 }}>Essay Architect</span>
                 </button>
               </div>
             )}
@@ -530,66 +495,60 @@ export default function AppShell({
                 ))}
               </div>
             ) : (
-              <div>
-                <p style={{ margin: '0 0 8px', fontSize: 10, fontWeight: 700, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Brain Training</p>
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 10 }}>
-                  {[
-                    { label: 'Brain Dump',  color: '#8B5CF6', icon: 'M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18', onClick: () => handleBrainAction(onOpenBrainDump) },
-                    { label: 'Quiz Burst',  color: '#F59E0B', icon: 'M13 2L4 14h7l-1 8 9-12h-7l1-8z',                                                                      onClick: () => handleBrainAction(onOpenQuizBurst) },
-                    { label: 'Exam Rescue', color: '#DC2626', icon: 'M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z',                                                         onClick: () => handleBrainAction(onOpenExamRescue) },
-                  ].map(({ label, color, icon, onClick }) => (
-                    <button key={label} onClick={onClick}
-                      style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, padding: '12px 8px', borderRadius: 10, background: `${color}06`, border: `1px solid ${color}18`, cursor: 'pointer', textAlign: 'center' }}>
-                      <div style={{ width: 30, height: 30, borderRadius: 8, background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <svg width="14" height="14" fill="none" stroke={color} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d={icon}/></svg>
-                      </div>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: TEXT }}>{label}</span>
-                    </button>
-                  ))}
-                </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <button
                   onClick={() => { setMobileHub(null); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '10px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer', marginBottom: 8 }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
-                  <span style={{ fontSize: 12.5, fontWeight: 500, color: MUTED, flex: 1 }}>Flashcards &amp; Quizzes</span>
+                  <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    <rect x="2" y="3" width="7" height="7" rx="1"/><rect x="15" y="3" width="7" height="7" rx="1"/><rect x="2" y="14" width="7" height="7" rx="1"/><path d="M15 17.5h7M18.5 14v7"/>
+                  </svg>
+                  <span style={{ fontSize: 13, fontWeight: 600, color: TEXT, flex: 1 }}>All Study Tools</span>
+                  <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+                </button>
+                <button
+                  onClick={() => { setMobileHub(null); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
+                >
+                  <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                  </svg>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: MUTED, flex: 1 }}>Flashcards &amp; Quizzes</span>
                   {dueCount > 0 && (
-                    <span style={{ fontSize: 10, fontWeight: 800, padding: '1px 6px', borderRadius: 999, background: '#EF4444', color: '#fff', lineHeight: 1.5, marginRight: 4 }}>
-                      {dueCount} due
+                    <span style={{ fontSize: 10, fontWeight: 800, padding: '1px 6px', borderRadius: 999, background: '#EF4444', color: '#fff', lineHeight: 1.5 }}>
+                      {dueCount}
                     </span>
                   )}
                   <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
                 </button>
                 <button
                   onClick={() => { setMobileHub(null); setActiveSection('diagrams') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '10px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
-                  <svg width="14" height="14" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
                   </svg>
-                  <span style={{ fontSize: 12.5, fontWeight: 500, color: MUTED, flex: 1 }}>Study Diagrams</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: 'rgba(59,97,196,0.1)', color: '#3B61C4', lineHeight: 1.5, marginRight: 4 }}>New</span>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: MUTED, flex: 1 }}>Study Diagrams</span>
                   <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
                 </button>
                 <button
                   onClick={() => { setMobileHub(null); setActiveSection('problem-solver') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '10px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
-                  <svg width="14" height="14" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                   </svg>
-                  <span style={{ fontSize: 12.5, fontWeight: 500, color: MUTED, flex: 1 }}>STEM Problem Solver</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: 'rgba(59,97,196,0.1)', color: '#3B61C4', lineHeight: 1.5, marginRight: 4 }}>New</span>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: MUTED, flex: 1 }}>STEM Problem Solver</span>
                   <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
                 </button>
                 <button
                   onClick={() => { setMobileHub(null); setActiveSection('essay-architect') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '10px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
-                  <svg width="14" height="14" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                  <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                   </svg>
-                  <span style={{ fontSize: 12.5, fontWeight: 500, color: MUTED, flex: 1 }}>Essay Architect</span>
-                  <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: 'rgba(59,97,196,0.1)', color: '#3B61C4', lineHeight: 1.5, marginRight: 4 }}>New</span>
+                  <span style={{ fontSize: 13, fontWeight: 500, color: MUTED, flex: 1 }}>Essay Architect</span>
                   <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
                 </button>
               </div>

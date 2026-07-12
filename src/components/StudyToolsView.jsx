@@ -635,7 +635,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             label: 'AI Cheat Sheet',
             desc: 'Instantly see what to focus on based on your weakest areas.',
             color: '#3B61C4',
-            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>,
+            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>,
             onClick: () => isPro ? onOpenCheatSheet?.() : onShowPaywall?.('cheat-sheet'),
             pro: !isPro,
           },
@@ -643,7 +643,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             label: 'Exam Rescue',
             desc: 'Get a crisis study plan when your exam is hours away.',
             color: '#DC2626',
-            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
+            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>,
             onClick: () => onOpenExamRescue?.(),
             ...freeBadge('examRescue', '#DC2626'),
           },
@@ -651,7 +651,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             label: 'Brain Dump',
             desc: 'Recall everything you know on a topic and score your memory.',
             color: '#8B5CF6',
-            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3a3 3 0 00-3 3 3 3 0 00-3 3v3a3 3 0 003 3v2a3 3 0 003 3 3 3 0 003-3V3z"/><path d="M15 3a3 3 0 013 3 3 3 0 013 3v3a3 3 0 01-3 3v2a3 3 0 01-3 3 3 3 0 01-3-3V3z"/></svg>,
+            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3a3 3 0 00-3 3 3 3 0 00-3 3v3a3 3 0 003 3v2a3 3 0 003 3 3 3 0 003-3V3z"/><path d="M15 3a3 3 0 013 3 3 3 0 013 3v3a3 3 0 01-3 3v2a3 3 0 01-3 3 3 3 0 01-3-3V3z"/></svg>,
             onClick: () => onOpenBrainDump?.(),
             ...freeBadge('brainDump', '#8B5CF6'),
           },
@@ -659,7 +659,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             label: 'Quiz Burst',
             desc: '5 rapid-fire questions in 10 seconds to warm up your brain.',
             color: '#D97706',
-            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>,
+            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>,
             onClick: () => onOpenQuizBurst?.(),
             ...freeBadge('quizBurst', '#D97706'),
           },
@@ -667,7 +667,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             label: 'Study Podcast',
             desc: 'AI hosts review your notes as a 5-minute audio conversation.',
             color: '#7C3AED',
-            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>,
+            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>,
             onClick: () => plan === 'unlimited' ? onOpenPodcast?.() : onShowPaywall?.('unlimited'),
             badge: plan !== 'unlimited' ? 'Unlimited' : null,
             badgeColor: '#7C3AED',
@@ -676,7 +676,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             label: 'Flashcards',
             desc: 'AI-generated cards from your notes with spaced repetition.',
             color: '#3B61C4',
-            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>,
+            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>,
             onClick: () => setMode('upload'),
             badge: flashcards.length > 0 ? `${flashcards.length} ready` : null,
             badgeColor: '#3B61C4',
@@ -685,7 +685,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             label: 'Quizzes',
             desc: 'Multiple choice, true/false, and fill-in-the-blank questions.',
             color: '#D97706',
-            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>,
+            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>,
             onClick: () => setMode('upload'),
             badge: quiz.length > 0 ? `${quiz.length} ready` : null,
             badgeColor: '#D97706',
@@ -694,7 +694,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             label: 'Topic Drill',
             desc: 'Type any topic and get 5 practice questions instantly.',
             color: '#16A34A',
-            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>,
+            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>,
             onClick: () => { setDrillQuiz([]); setDrillAnswers([]); setDrillDone(false); setDrillQuestionIdx(0); setDrillError(''); setMode('drill') },
             badge: 'No upload needed',
             badgeColor: '#16A34A',
@@ -703,7 +703,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             label: 'Lecture Audio',
             desc: 'Upload a recorded lecture (mp3, m4a, wav) and AI builds your study materials.',
             color: '#7C3AED',
-            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>,
+            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>,
             onClick: () => { setAudioError(''); setMode('upload'); audioInputRef.current?.click() },
             badge: 'No notes needed',
             badgeColor: '#7C3AED',
@@ -712,7 +712,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             label: 'YouTube Lecture',
             desc: 'Paste a YouTube lecture URL to generate flashcards and a quiz.',
             color: '#DC2626',
-            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/></svg>,
+            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M22.54 6.42a2.78 2.78 0 00-1.95-1.96C18.88 4 12 4 12 4s-6.88 0-8.59.46A2.78 2.78 0 001.46 6.42 29 29 0 001 12a29 29 0 00.46 5.58 2.78 2.78 0 001.95 1.96C5.12 20 12 20 12 20s6.88 0 8.59-.46a2.78 2.78 0 001.95-1.96A29 29 0 0023 12a29 29 0 00-.46-5.58z"/><polygon points="9.75 15.02 15.5 12 9.75 8.98 9.75 15.02" fill="currentColor" stroke="none"/></svg>,
             onClick: () => { setYoutubeUrl(''); setYoutubeError(''); setYoutubeTitle(''); setMode('upload') },
             badge: 'No notes needed',
             badgeColor: '#DC2626',
@@ -721,7 +721,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             label: 'Study Coach',
             desc: 'Personalized AI study plan built around your schedule and exams.',
             color: '#0891B2',
-            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>,
+            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>,
             onClick: () => onNavigateToCoach?.(),
           },
         ]
@@ -765,7 +765,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                           onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.14)' }}
                           onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)' }}
                         >
-                          <div style={{ width: 32, height: 32, borderRadius: 8, background: `${color}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, flexShrink: 0, marginTop: 1 }}>
+                          <div style={{ width: 38, height: 38, borderRadius: 9, background: `${color}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, flexShrink: 0, marginTop: 1 }}>
                             {icon}
                           </div>
                           <div style={{ flex: 1, minWidth: 0 }}>
@@ -775,7 +775,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                                 <span style={{ fontSize: 9.5, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: 'rgba(59,97,196,0.1)', color: '#3B61C4', border: '1px solid rgba(59,97,196,0.2)', letterSpacing: '0.04em' }}>PRO</span>
                               )}
                               {showCountBadge && (
-                                <span style={{ fontSize: 9.5, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: `${badgeColor}12`, color: badgeColor, border: `1px solid ${badgeColor}30`, letterSpacing: '0.02em' }}>{badge}</span>
+                                <span style={{ fontSize: 9.5, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: 'rgba(22,163,74,0.1)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.25)', letterSpacing: '0.02em' }}>{badge}</span>
                               )}
                             </div>
                             {isNoNotes && (
