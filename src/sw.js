@@ -3,6 +3,10 @@ import { NavigationRoute, registerRoute } from 'workbox-routing'
 import { CacheFirst, NetworkFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 
+// Take over immediately on update so users don't see stale UI
+self.addEventListener('install', () => self.skipWaiting())
+self.addEventListener('activate', (e) => e.waitUntil(clients.claim()))
+
 // Precache all Vite-built assets
 precacheAndRoute(self.__WB_MANIFEST)
 
