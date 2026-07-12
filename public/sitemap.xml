@@ -262,15 +262,7 @@
   </url>
 
   <!-- Blog index -->
-  <url>
-    <loc>https://getstudyedge.com/blog</loc>
-    <lastmod>2026-06-09</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.85</priority>
-  </url>
-
-  <!-- Blog index -->
-  <url><loc>https://getstudyedge.com/blog</loc><lastmod>2026-06-19</lastmod><changefreq>weekly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://getstudyedge.com/blog</loc><lastmod>2026-07-11</lastmod><changefreq>weekly</changefreq><priority>0.90</priority></url>
 
   <!-- Blog articles -->
   <url>
