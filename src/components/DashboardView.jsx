@@ -164,6 +164,7 @@ export default function DashboardView({
   onOpenBrainDump,
   onOpenExamRescue,
   onOpenQuizBurst,
+  onOpenPodcast,
   completedSessions,
   recoveryCoursesIdx = new Set(),
   weeklyHourGoal,
@@ -1334,11 +1335,12 @@ export default function DashboardView({
             <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', color: D.textDim, textTransform: 'uppercase' }}>Study Hacks</span>
             <div style={{ flex: 1, height: 1, background: D.border }} />
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, padding: '0 4px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, padding: '0 4px' }}>
             {[
               { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>, color: '#8B5CF6', label: 'Brain Dump',  onClick: () => typeof onOpenBrainDump === 'function' && onOpenBrainDump() },
               { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, color: D.red,     label: 'Rescue Plan', onClick: () => typeof onOpenExamRescue === 'function' && onOpenExamRescue() },
               { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>,               color: D.amber,   label: 'Quiz Burst',  onClick: () => typeof onOpenQuizBurst === 'function' && onOpenQuizBurst() },
+              { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>, color: '#7C3AED', label: 'Podcast', onClick: () => typeof onOpenPodcast === 'function' && onOpenPodcast() },
             ].map(a => (
               <button
                 key={a.label}

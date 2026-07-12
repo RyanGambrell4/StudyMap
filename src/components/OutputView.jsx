@@ -43,6 +43,7 @@ import CheatSheetModal from './CheatSheetModal'
 import BrainDumpModal from './BrainDumpModal'
 import ExamRescueModal from './ExamRescueModal'
 import QuickQuizBurst from './QuickQuizBurst'
+import PodcastGenerator from './PodcastGenerator'
 import SessionRatingModal from './SessionRatingModal'
 
 // ─── TutorView ────────────────────────────────────────────────────────────────
@@ -406,6 +407,7 @@ export default function OutputView({
   const [showBrainDump, setShowBrainDump] = useState(false)
   const [showExamRescue, setShowExamRescue] = useState(false)
   const [showQuizBurst, setShowQuizBurst] = useState(false)
+  const [showPodcast, setShowPodcast] = useState(false)
   const [ratingSession, setRatingSession] = useState(null) // session to rate after completion
 
   // ── First-query nudge listener ────────────────────────────────────────────────
@@ -1473,6 +1475,7 @@ export default function OutputView({
             onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump' }); setShowBrainDump(true) }}
             onOpenExamRescue={() => { track('feature_opened', { feature: 'exam_rescue' }); setShowExamRescue(true) }}
             onOpenQuizBurst={() => { track('feature_opened', { feature: 'quiz_burst' }); setShowQuizBurst(true) }}
+            onOpenPodcast={() => { track('feature_opened', { feature: 'podcast' }); setShowPodcast(true) }}
             completedSessions={completedSessionLog}
           />
         )}
@@ -1768,6 +1771,7 @@ export default function OutputView({
             onOpenBrainDump={() => setShowBrainDump(true)}
             onOpenExamRescue={() => setShowExamRescue(true)}
             onOpenQuizBurst={() => setShowQuizBurst(true)}
+            onOpenPodcast={() => setShowPodcast(true)}
           />
         )}
 
@@ -1913,6 +1917,14 @@ export default function OutputView({
           onClose={() => setShowQuizBurst(false)}
           onShowPaywall={onShowPaywall}
           onOpenCheatSheet={() => { setShowQuizBurst(false); setShowCheatSheet(true) }}
+        />
+      )}
+      {showPodcast && (
+        <PodcastGenerator
+          courses={courses}
+          userId={userId}
+          onClose={() => setShowPodcast(false)}
+          onShowPaywall={onShowPaywall}
         />
       )}
     </>

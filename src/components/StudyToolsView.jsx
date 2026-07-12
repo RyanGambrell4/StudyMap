@@ -184,7 +184,7 @@ function QuizQuestion({ question, onAnswer }) {
 }
 
 // ── Main view ─────────────────────────────────────────────────────────────────
-export default function StudyToolsView({ courses, userId, onShowPaywall, onNavigateToCoach, learningStyle, onOpenCheatSheet, onOpenBrainDump, onOpenExamRescue, onOpenQuizBurst }) {
+export default function StudyToolsView({ courses, userId, onShowPaywall, onNavigateToCoach, learningStyle, onOpenCheatSheet, onOpenBrainDump, onOpenExamRescue, onOpenQuizBurst, onOpenPodcast }) {
   const fileInputRef = useRef(null)
   const scanInputRef = useRef(null)
   const [dragging, setDragging] = useState(false)
@@ -662,6 +662,15 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>,
             onClick: () => onOpenQuizBurst?.(),
             ...freeBadge('quizBurst', '#D97706'),
+          },
+          {
+            label: 'Study Podcast',
+            desc: 'AI hosts review your notes as a 5-minute audio conversation.',
+            color: '#7C3AED',
+            icon: <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>,
+            onClick: () => plan === 'unlimited' ? onOpenPodcast?.() : onShowPaywall?.('unlimited'),
+            badge: plan !== 'unlimited' ? 'Unlimited' : null,
+            badgeColor: '#7C3AED',
           },
           {
             label: 'Flashcards',
