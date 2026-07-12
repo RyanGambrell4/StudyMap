@@ -1171,6 +1171,14 @@
         {
             "source": "/what-gpa-do-you-need-for-stanford",
             "destination": "/what-gpa-do-you-need-for-stanford.html"
+        },
+        {
+            "source": "/blog/how-to-study-effectively",
+            "destination": "/blog/how-to-study-effectively.html"
+        },
+        {
+            "source": "/blog/study-schedule-tips",
+            "destination": "/blog/study-schedule-tips.html"
         }
     ]
 }

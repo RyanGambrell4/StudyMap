@@ -61,8 +61,10 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - Blog: https://getstudyedge.com/blog
 - About: https://getstudyedge.com/about
 
-## Top blog posts (45 posts total — full list at https://getstudyedge.com/blog)
+## Top blog posts (47 posts total — full list at https://getstudyedge.com/blog)
 
+- How to Study Effectively (Science-Backed System): https://getstudyedge.com/blog/how-to-study-effectively
+- Study Schedule Tips That Actually Stick: https://getstudyedge.com/blog/study-schedule-tips
 - Active Recall: The Study Technique That Works: https://getstudyedge.com/blog/active-recall-study-technique
 - The 5 Study Techniques That Actually Work (Research-Backed): https://getstudyedge.com/blog/best-study-techniques-science
 - How to Study for Finals Week Without Burning Out: https://getstudyedge.com/blog/how-to-study-for-finals-week
