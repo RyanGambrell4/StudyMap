@@ -39,7 +39,9 @@ const PracticeExamView = lazy(() => import('./PracticeExamView'))
 import AIChatView from './AIChatView'
 const GradeHubView   = lazy(() => import('./GradeHubView'))
 const AccountView    = lazy(() => import('./AccountView'))
-const DiagramsView   = lazy(() => import('./DiagramsView'))
+const DiagramsView        = lazy(() => import('./DiagramsView'))
+const ProblemSolverView   = lazy(() => import('./ProblemSolverView'))
+const EssayArchitectView  = lazy(() => import('./EssayArchitectView'))
 import CheatSheetModal from './CheatSheetModal'
 import BrainDumpModal from './BrainDumpModal'
 import ExamRescueModal from './ExamRescueModal'
@@ -1947,6 +1949,23 @@ export default function OutputView({
         {activeSection === 'diagrams' && (
           <DiagramsView
             courses={courses}
+            userId={userId}
+            onShowPaywall={onShowPaywall}
+          />
+        )}
+
+
+        {/* ── Problem Solver ── */}
+        {activeSection === 'problem-solver' && (
+          <ProblemSolverView
+            userId={userId}
+            onShowPaywall={onShowPaywall}
+          />
+        )}
+
+        {/* ── Essay Architect ── */}
+        {activeSection === 'essay-architect' && (
+          <EssayArchitectView
             userId={userId}
             onShowPaywall={onShowPaywall}
           />
