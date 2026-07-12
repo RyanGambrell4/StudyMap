@@ -51,6 +51,10 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - Quizlet Alternative: https://getstudyedge.com/quizlet-alternative
 - Anki Alternative: https://getstudyedge.com/anki-alternative
 - Chegg Alternative: https://getstudyedge.com/chegg-alternative
+- Notion Alternative: https://getstudyedge.com/notion-alternative
+- Is a 3.5 GPA Good?: https://getstudyedge.com/is-a-3-5-gpa-good
+- Is a 3.0 GPA Good?: https://getstudyedge.com/is-a-3-0-gpa-good
+- Is a 3.7 GPA Good?: https://getstudyedge.com/is-a-3-7-gpa-good
 - Best AI for Students: https://getstudyedge.com/best-ai-for-students
 - Best Study App for College Students: https://getstudyedge.com/best-study-app-for-students
 - Best Study Apps by University (hub): https://getstudyedge.com/best-study-apps

@@ -1179,6 +1179,22 @@
         {
             "source": "/blog/study-schedule-tips",
             "destination": "/blog/study-schedule-tips.html"
+        },
+        {
+            "source": "/notion-alternative",
+            "destination": "/notion-alternative.html"
+        },
+        {
+            "source": "/is-a-3-5-gpa-good",
+            "destination": "/is-a-3-5-gpa-good.html"
+        },
+        {
+            "source": "/is-a-3-0-gpa-good",
+            "destination": "/is-a-3-0-gpa-good.html"
+        },
+        {
+            "source": "/is-a-3-7-gpa-good",
+            "destination": "/is-a-3-7-gpa-good.html"
         }
     ]
 }
