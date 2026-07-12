@@ -608,7 +608,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="px-6 py-8 max-w-2xl mx-auto">
+    <div className="px-6 py-8 max-w-3xl mx-auto">
 
       {/* Always-mounted hidden inputs (must be outside mode conditionals so refs work from hub) */}
       <input
@@ -726,62 +726,80 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           },
         ]
 
+        const toolsByLabel = Object.fromEntries(tools.map(t => [t.label, t]))
+        const contentReadyCount = [flashcards.length > 0, quiz.length > 0].filter(Boolean).length
+        const hubSections = [
+          { id: 'quick', label: 'Quick Study', keys: ['Quiz Burst', 'Topic Drill', 'Brain Dump'] },
+          { id: 'materials', label: 'Study Materials', keys: ['Flashcards', 'Quizzes', 'AI Cheat Sheet'] },
+          { id: 'ai', label: 'AI-Powered', keys: ['Study Coach', 'Exam Rescue', 'Study Podcast'] },
+          { id: 'import', label: 'Import & Convert', keys: ['Lecture Audio', 'YouTube Lecture'] },
+        ]
+
         return (
           <div>
-            <h1 style={{ fontSize: 22, fontWeight: 800, color: '#111111', margin: '0 0 4px', letterSpacing: '-0.02em' }}>Study Tools</h1>
-            <p style={{ fontSize: 13.5, color: '#6B6B6B', margin: '0 0 14px' }}>Everything you need to learn faster and remember more.</p>
-
-            {!isPro && (
-              <div
-                onClick={() => onShowPaywall?.(hasUsedTrial() ? 'tools' : 'tools')}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, padding: '10px 14px', marginBottom: 14, background: 'rgba(59,97,196,0.04)', border: '1px solid rgba(59,97,196,0.14)', borderLeft: '3px solid rgba(59,97,196,0.5)', borderRadius: 8, cursor: 'pointer' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,97,196,0.08)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'rgba(59,97,196,0.04)'}
-              >
-                <span style={{ fontSize: 12, color: '#6B6B6B', lineHeight: 1.4 }}>
-                  <strong style={{ color: '#3B61C4' }}>Free:</strong> 1 use each of Exam Rescue, Brain Dump &amp; Quiz Burst.{' '}
-                  <strong style={{ color: '#3B61C4' }}>Pro:</strong> unlimited everything, plus AI Cheat Sheet.
-                </span>
-                <span style={{ flexShrink: 0, fontSize: 12, fontWeight: 700, color: '#3B61C4' }}>{hasUsedTrial() ? 'Upgrade →' : 'Try free →'}</span>
+            {contentReadyCount > 0 && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 11px', borderRadius: 999, background: '#DCFCE7', marginBottom: 12 }}>
+                <div style={{ width: 6, height: 6, borderRadius: 999, background: '#16A34A' }} />
+                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#15803D' }}>{contentReadyCount} tool{contentReadyCount !== 1 ? 's' : ''} have content ready</span>
               </div>
             )}
 
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-              {tools.map(({ label, desc, color, icon, onClick, pro, badge, badgeColor }) => (
-                <button
-                  key={label}
-                  onClick={onClick}
-                  style={{ display: 'flex', alignItems: 'center', gap: 14, width: '100%', textAlign: 'left', padding: '14px 16px', borderRadius: 14, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', cursor: 'pointer', transition: 'border-color 0.15s', fontFamily: 'inherit' }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.14)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)' }}
-                >
-                  <div style={{ width: 40, height: 40, borderRadius: 10, background: `${color}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, flexShrink: 0 }}>
-                    {icon}
+            <h1 style={{ fontSize: 22, fontWeight: 800, color: '#111111', margin: '0 0 4px', letterSpacing: '-0.02em' }}>Study Tools</h1>
+            <p style={{ fontSize: 13.5, color: '#6B6B6B', margin: '0 0 22px' }}>Everything you need to learn faster and remember more.</p>
+
+            {hubSections.map(({ id, label, keys }) => {
+              const sectionTools = keys.map(k => toolsByLabel[k]).filter(Boolean)
+              return (
+                <div key={id} style={{ marginBottom: 20 }}>
+                  <p style={{ fontSize: 10.5, fontWeight: 700, color: '#9B9B9B', letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 8px' }}>{label}</p>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                    {sectionTools.map(({ label: lbl, desc, color, icon, onClick, pro, badge, badgeColor }) => {
+                      const isNoNotes = badge === 'No notes needed' || badge === 'No upload needed'
+                      const isProBadge = pro || badge === 'Unlimited'
+                      const showCountBadge = badge && !isNoNotes && !isProBadge
+                      return (
+                        <button
+                          key={lbl}
+                          onClick={onClick}
+                          style={{ display: 'flex', alignItems: 'flex-start', gap: 10, width: '100%', textAlign: 'left', padding: '12px 12px', borderRadius: 12, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', cursor: 'pointer', transition: 'border-color 0.15s', fontFamily: 'inherit' }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.14)' }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)' }}
+                        >
+                          <div style={{ width: 32, height: 32, borderRadius: 8, background: `${color}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, flexShrink: 0, marginTop: 1 }}>
+                            {icon}
+                          </div>
+                          <div style={{ flex: 1, minWidth: 0 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 5, marginBottom: 2, flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: 12.5, fontWeight: 700, color: '#111111', lineHeight: 1.3 }}>{lbl}</span>
+                              {isProBadge && (
+                                <span style={{ fontSize: 9.5, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: 'rgba(59,97,196,0.1)', color: '#3B61C4', border: '1px solid rgba(59,97,196,0.2)', letterSpacing: '0.04em' }}>PRO</span>
+                              )}
+                              {showCountBadge && (
+                                <span style={{ fontSize: 9.5, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: `${badgeColor}12`, color: badgeColor, border: `1px solid ${badgeColor}30`, letterSpacing: '0.02em' }}>{badge}</span>
+                              )}
+                            </div>
+                            {isNoNotes && (
+                              <div style={{ marginBottom: 3 }}>
+                                <span style={{ fontSize: 10.5, fontWeight: 600, color: '#D97706' }}>No notes needed</span>
+                              </div>
+                            )}
+                            <p style={{ margin: 0, fontSize: 11.5, color: '#6B6B6B', lineHeight: 1.4 }}>{desc}</p>
+                          </div>
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
+                            <path d="M9 5l7 7-7 7"/>
+                          </svg>
+                        </button>
+                      )
+                    })}
+                    {id === 'import' && (
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '12px', borderRadius: 12, border: '1.5px dashed rgba(0,0,0,0.12)', minHeight: 72 }}>
+                        <span style={{ fontSize: 11.5, color: '#9B9B9B', fontWeight: 500, textAlign: 'center' }}>+ More tools coming soon</span>
+                      </div>
+                    )}
                   </div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 2 }}>
-                      <span style={{ fontSize: 13.5, fontWeight: 700, color: '#111111' }}>{label}</span>
-                      {pro && (
-                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: 'rgba(59,97,196,0.1)', color: '#3B61C4', border: '1px solid rgba(59,97,196,0.2)', letterSpacing: '0.03em' }}>Pro</span>
-                      )}
-                      {badge && !pro && (
-                        <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 7px', borderRadius: 999, background: `${badgeColor}12`, color: badgeColor, border: `1px solid ${badgeColor}30`, letterSpacing: '0.02em' }}>{badge}</span>
-                      )}
-                    </div>
-                    <p style={{ margin: 0, fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.45 }}>{desc}</p>
-                  </div>
-                  {pro ? (
-                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
-                    </svg>
-                  ) : (
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-                      <path d="M9 5l7 7-7 7"/>
-                    </svg>
-                  )}
-                </button>
-              ))}
-            </div>
+                </div>
+              )
+            })}
           </div>
         )
       })()}
