@@ -37,7 +37,7 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 ## Key pages
 
 - Home: https://getstudyedge.com/
-- Pricing: https://getstudyedge.com/pricing
+- Pricing: https://getstudyedge.com/studyedge-ai
 - AI Study Coach: https://getstudyedge.com/ai-study-coach
 - AI Tutor: https://getstudyedge.com/ai-tutor
 - AI Flashcard Maker: https://getstudyedge.com/ai-flashcard-maker
@@ -51,24 +51,45 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - Quizlet Alternative: https://getstudyedge.com/quizlet-alternative
 - Anki Alternative: https://getstudyedge.com/anki-alternative
 - Chegg Alternative: https://getstudyedge.com/chegg-alternative
-- Khan Academy Alternative: https://getstudyedge.com/khan-academy-alternative
 - Best AI for Students: https://getstudyedge.com/best-ai-for-students
 - Best Study App for College Students: https://getstudyedge.com/best-study-app-for-students
-- Blog: https://getstudyedge.com/blog/
+- Best Study Apps by University (hub): https://getstudyedge.com/best-study-apps
+- GPA Requirements Guide (hub): https://getstudyedge.com/gpa-requirements
+- How to Get a 4.0 GPA: https://getstudyedge.com/how-to-get-a-4-0-gpa-in-college
+- Spaced Repetition Explained: https://getstudyedge.com/spaced-repetition-explained
+- Test Taking Strategies: https://getstudyedge.com/test-taking-strategies
+- Blog: https://getstudyedge.com/blog
 - About: https://getstudyedge.com/about
 
-## Top blog posts
+## Top blog posts (45 posts total — full list at https://getstudyedge.com/blog)
 
 - Active Recall: The Study Technique That Works: https://getstudyedge.com/blog/active-recall-study-technique
-- Best Study Techniques (Science-Backed): https://getstudyedge.com/blog/best-study-techniques-science
-- How to Study for Finals: https://getstudyedge.com/blog/how-to-study-for-finals
+- The 5 Study Techniques That Actually Work (Research-Backed): https://getstudyedge.com/blog/best-study-techniques-science
+- How to Study for Finals Week Without Burning Out: https://getstudyedge.com/blog/how-to-study-for-finals-week
 - MCAT Study Schedule (6 Months): https://getstudyedge.com/blog/mcat-study-schedule-6-months
 - How to Study for Organic Chemistry: https://getstudyedge.com/blog/how-to-study-for-organic-chemistry
 - How to Study with ADHD in College: https://getstudyedge.com/blog/how-to-study-with-adhd-in-college
-- Spaced Repetition Explained: https://getstudyedge.com/blog/spaced-repetition-explained
 - Cornell Note-Taking Method: https://getstudyedge.com/blog/cornell-note-taking-method
 - How to Raise Your GPA After a Bad Semester: https://getstudyedge.com/blog/how-to-raise-your-gpa-after-a-bad-semester
 - Pomodoro Technique for Studying: https://getstudyedge.com/blog/pomodoro-technique-for-studying
+- How to Stop Procrastinating When Studying: https://getstudyedge.com/blog/how-to-stop-procrastinating-when-studying
+- How to Focus While Studying (12 Techniques): https://getstudyedge.com/blog/how-to-focus-while-studying
+- How to Get an A in Any Class: https://getstudyedge.com/blog/how-to-get-an-a-in-any-class
+- Best Study Schedule for College Students: https://getstudyedge.com/blog/best-study-schedule-for-college-students
+- How to Balance a Heavy Course Load: https://getstudyedge.com/blog/how-to-balance-a-heavy-course-load
+- How to Prepare for Midterms: https://getstudyedge.com/blog/how-to-prepare-for-midterms
+- Time Management Tips for College Students: https://getstudyedge.com/blog/time-management-tips-for-college-students
+- How to Use AI for Studying: https://getstudyedge.com/blog/how-to-use-ai-for-studying
+- ChatGPT vs StudyEdge AI for Studying: https://getstudyedge.com/blog/chatgpt-vs-studyedge-for-studying
+- Anki vs Quizlet vs StudyEdge AI: https://getstudyedge.com/blog/anki-vs-quizlet-vs-studyedge
+- Best Study Apps for College Students (2026): https://getstudyedge.com/blog/best-study-apps-for-college-students
+- How to Study for USMLE Step 1: https://getstudyedge.com/blog/how-to-study-for-usmle-step-1
+- How to Study for Biology: https://getstudyedge.com/blog/how-to-study-for-biology
+- How to Study for Anatomy and Physiology: https://getstudyedge.com/blog/how-to-study-for-anatomy-and-physiology
+- How to Study for Calculus: https://getstudyedge.com/blog/how-to-study-for-calculus
+- How to Study for Physics: https://getstudyedge.com/blog/how-to-study-for-physics
+- How to Overcome Test Anxiety: https://getstudyedge.com/blog/how-to-overcome-test-anxiety
+- How to Cram for an Exam: https://getstudyedge.com/blog/how-to-cram-for-an-exam
 
 ## Machine-readable files
 
