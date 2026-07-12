@@ -65,8 +65,11 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - Blog: https://getstudyedge.com/blog
 - About: https://getstudyedge.com/about
 
-## Top blog posts (47 posts total — full list at https://getstudyedge.com/blog)
+## Top blog posts (51 posts total — full list at https://getstudyedge.com/blog)
 
+- How to Study for a Test (5-Step System): https://getstudyedge.com/blog/how-to-study-for-a-test
+- How to Memorize Things (7 Techniques): https://getstudyedge.com/blog/how-to-memorize-things
+- How to Take Notes in College: https://getstudyedge.com/blog/how-to-take-notes-in-college
 - How to Study Effectively (Science-Backed System): https://getstudyedge.com/blog/how-to-study-effectively
 - Study Schedule Tips That Actually Stick: https://getstudyedge.com/blog/study-schedule-tips
 - Active Recall: The Study Technique That Works: https://getstudyedge.com/blog/active-recall-study-technique

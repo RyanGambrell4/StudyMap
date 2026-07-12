@@ -1195,6 +1195,22 @@
         {
             "source": "/is-a-3-7-gpa-good",
             "destination": "/is-a-3-7-gpa-good.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-a-test",
+            "destination": "/blog/how-to-study-for-a-test.html"
+        },
+        {
+            "source": "/blog/how-to-memorize-things",
+            "destination": "/blog/how-to-memorize-things.html"
+        },
+        {
+            "source": "/blog/how-to-take-notes-in-college",
+            "destination": "/blog/how-to-take-notes-in-college.html"
+        },
+        {
+            "source": "/blog/how-to-memorize-notes-fast",
+            "destination": "/blog/how-to-memorize-notes-fast.html"
         }
     ]
 }
