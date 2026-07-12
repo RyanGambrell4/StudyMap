@@ -151,6 +151,14 @@ function amPmToMins(str) {
 
 const PREF_START_MIN = { Morning: 8 * 60, Afternoon: 13 * 60, Evening: 18 * 60 }
 
+function amPmToISO(dateStr, timeStr) {
+  const mins = amPmToMins(timeStr)
+  if (mins === null) return null
+  const h = Math.floor(mins / 60)
+  const m = mins % 60
+  return `${dateStr}T${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:00`
+}
+
 function addDays(date, n) {
   const d = new Date(date); d.setDate(d.getDate() + n); return d
 }
@@ -502,7 +510,10 @@ export default function OutputView({
   // ── Google Calendar & Notion Calendar ────────────────────────────────────────
   const [googleEvents, setGoogleEvents] = useState([])
   const [gcalConnected, setGcalConnected] = useState(false)
+  const [notionConnected, setNotionConnected] = useState(false)
   const [gcalToast, setGcalToast] = useState(null) // 'connected' | 'error' | null
+  const manualSessionsRef = useRef(manualSessions)
+  useEffect(() => { manualSessionsRef.current = manualSessions }, [manualSessions])
   const [scheduleToast, setScheduleToast] = useState(null) // string | null
   const [fixConflictsLoading, setFixConflictsLoading] = useState(false)
   const [rescheduleResults, setRescheduleResults] = useState(null)
@@ -525,35 +536,57 @@ export default function OutputView({
     }
   }, [])
 
-  useEffect(() => {
+  const refreshGoogleEvents = useCallback(() => {
     if (!userId) return
     getAccessToken().then(token =>
-      fetch('/api/google-calendar-events', {
+      fetch('/api/google-calendar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ userId }),
       })
         .then(r => r.json())
         .then(data => {
-          if (data.connected) setGcalConnected(true)
-          if (data.events?.length) setGoogleEvents(data.events)
+          setGcalConnected(!!data.connected)
+          setNotionConnected(!!data.notionConnected)
+          if (data.events) setGoogleEvents(data.events)
         })
         .catch(() => {})
     )
   }, [userId])
+
+  useEffect(() => {
+    refreshGoogleEvents()
+    const interval = setInterval(refreshGoogleEvents, 5 * 60 * 1000)
+    const onVisible = () => { if (!document.hidden) refreshGoogleEvents() }
+    document.addEventListener('visibilitychange', onVisible)
+    return () => {
+      clearInterval(interval)
+      document.removeEventListener('visibilitychange', onVisible)
+    }
+  }, [refreshGoogleEvents])
 
   const handleConnectGoogleCalendar = () => {
     window.location.href = `/api/google-auth?userId=${encodeURIComponent(userId)}`
   }
 
   const handleDeleteSession = useCallback((sessionId) => {
+    const session = manualSessionsRef.current.find(s => s.id === sessionId)
     setManualSessions(prev => prev.filter(s => s.id !== sessionId))
     setSessionTimeOverrides(prev => {
       const next = { ...prev }
       delete next[sessionId]
       return next
     })
-  }, [])
+    if (session?.googleEventId) {
+      getAccessToken().then(token =>
+        fetch('/api/google-calendar?action=delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ userId, googleEventId: session.googleEventId }),
+        }).catch(() => {})
+      )
+    }
+  }, [userId])
 
   const handleToggleRestDay = useCallback((dateStr) => {
     setRestDays(prev =>
@@ -1107,6 +1140,39 @@ export default function OutputView({
     track('session_added', { courseId: s.courseId, courseName: s.courseName, sessionType: s.sessionType })
     setManualSessions(prev => [...prev, s])
     setAddSessionDayStr(null)
+
+    // Push to Google Calendar if connected
+    if (gcalConnected) {
+      const tz = Intl.DateTimeFormat().resolvedOptions().timeZone
+      const sessionId = s.id
+      const startISO = s.startTime ? amPmToISO(s.dateStr, s.startTime) : null
+      const endISO = s.endTime ? amPmToISO(s.dateStr, s.endTime) : null
+      const gcalTitle = s.isEvent ? s.courseName : `${s.courseName} – ${s.sessionType}`
+      getAccessToken().then(token =>
+        fetch('/api/google-calendar?action=add', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            userId,
+            title: gcalTitle,
+            description: s.isEvent ? undefined : 'StudyEdge AI study session',
+            startDateTime: startISO,
+            endDateTime: endISO,
+            date: startISO ? undefined : s.dateStr,
+            timeZone: tz,
+          }),
+        })
+          .then(r => r.json())
+          .then(data => {
+            if (data.eventId) {
+              setManualSessions(prev => prev.map(ms =>
+                ms.id === sessionId ? { ...ms, googleEventId: data.eventId } : ms
+              ))
+            }
+          })
+          .catch(() => {})
+      )
+    }
   }
 
   const handleJumpToMonth = monthKey => {

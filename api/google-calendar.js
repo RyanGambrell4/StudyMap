@@ -195,7 +195,7 @@ async function handleAddEvent(req, res) {
   })
   if (!verifyRes.ok) return res.status(401).json({ error: 'Unauthorized' })
 
-  const { userId, title, description, startDateTime, endDateTime, date } = req.body
+  const { userId, title, description, startDateTime, endDateTime, date, timeZone } = req.body
   if (!userId || !title) return res.status(400).json({ error: 'userId and title required' })
 
   const userData = await verifyRes.json()
@@ -217,14 +217,15 @@ async function handleAddEvent(req, res) {
     const accessToken = await getAccessToken(gcal.refresh_token)
     if (!accessToken) return res.status(500).json({ error: 'Failed to get access token' })
 
+    const tz = timeZone || 'UTC'
     const event = {
       summary: title,
       description: description || undefined,
       start: startDateTime
-        ? { dateTime: startDateTime, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+        ? { dateTime: startDateTime, timeZone: tz }
         : { date },
       end: endDateTime
-        ? { dateTime: endDateTime, timeZone: Intl.DateTimeFormat().resolvedOptions().timeZone }
+        ? { dateTime: endDateTime, timeZone: tz }
         : { date: date || startDateTime?.split('T')[0] },
     }
 
@@ -253,10 +254,68 @@ async function handleAddEvent(req, res) {
   }
 }
 
+async function handleDeleteEvent(req, res) {
+  const authHeader = req.headers['authorization']
+  const token = authHeader?.startsWith('Bearer ') ? authHeader.slice(7) : null
+  if (!token) return res.status(401).json({ error: 'Unauthorized' })
+
+  const verifyRes = await fetch(`${process.env.SUPABASE_URL}/auth/v1/user`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      apikey: process.env.SUPABASE_SERVICE_KEY,
+    },
+  })
+  if (!verifyRes.ok) return res.status(401).json({ error: 'Unauthorized' })
+
+  const { userId, googleEventId } = req.body
+  if (!userId || !googleEventId) return res.status(400).json({ error: 'userId and googleEventId required' })
+
+  const userData = await verifyRes.json()
+  if (userData.id !== userId) return res.status(403).json({ error: 'Forbidden' })
+
+  try {
+    const supabaseUrl = process.env.SUPABASE_URL
+    const serviceKey = process.env.SUPABASE_SERVICE_KEY
+
+    const getRes = await fetch(
+      `${supabaseUrl}/rest/v1/user_data?user_id=eq.${encodeURIComponent(userId)}&select=study_tools`,
+      { headers: { apikey: serviceKey, Authorization: `Bearer ${serviceKey}` } }
+    )
+    const rows = await getRes.json()
+    const gcal = rows[0]?.study_tools?.google_calendar
+
+    if (!gcal?.refresh_token) return res.status(400).json({ error: 'Google Calendar not connected' })
+
+    const accessToken = await getAccessToken(gcal.refresh_token)
+    if (!accessToken) return res.status(500).json({ error: 'Failed to get access token' })
+
+    const deleteRes = await fetch(
+      `https://www.googleapis.com/calendar/v3/calendars/primary/events/${encodeURIComponent(googleEventId)}`,
+      {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      }
+    )
+
+    // 204 = success, 410 = already deleted — both are fine
+    if (deleteRes.status === 204 || deleteRes.status === 410) {
+      return res.status(200).json({ success: true })
+    }
+
+    const errBody = await deleteRes.json().catch(() => ({}))
+    console.error('[google-calendar] delete error:', errBody)
+    return res.status(500).json({ error: 'Failed to delete event' })
+  } catch (err) {
+    console.error('[google-calendar] delete event error:', err)
+    res.status(500).json({ error: 'Internal server error' })
+  }
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   const action = req.query?.action
   if (action === 'add') return handleAddEvent(req, res)
+  if (action === 'delete') return handleDeleteEvent(req, res)
   return handleFetchEvents(req, res)
 }
