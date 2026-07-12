@@ -3,6 +3,11 @@ import { createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getA
 import { track } from '../lib/analytics'
 import { getAccessToken } from '../lib/supabase'
 import PaywallExitGift from './PaywallExitGift'
+import PrePaywall from './PrePaywall'
+
+// Session flag so the 3-screen value stack only fires on the FIRST paywall
+// open per session for eligible free users.
+const PREPAYWALL_SESSION_KEY = 'se_prepaywall_seen_v1'
 
 // ── Config ────────────────────────────────────────────────────────────────────
 
@@ -27,8 +32,8 @@ const PLANS = {
     },
     subPrices: {
       weekly:  'Less than a coffee · billed weekly',
-      monthly: 'Billed monthly · $2.31/wk equivalent',
-      yearly:  'Billed annually · $1.35/wk equivalent',
+      monthly: '$2.31/week · billed monthly',
+      yearly:  'Just $1.35/week · billed once a year',
     },
     monthlySavingsBadge: 'Save 17%',
     annualSavingsBadge: 'Save 55%',
@@ -53,8 +58,8 @@ const PLANS = {
     },
     subPrices: {
       weekly:  'Billed weekly',
-      monthly: 'Billed monthly · $3.46/wk equivalent',
-      yearly:  'Billed annually · $2.31/wk equivalent',
+      monthly: '$3.46/week · billed monthly',
+      yearly:  'Just $2.31/week · billed once a year',
     },
     monthlySavingsBadge: 'Save 25%',
     annualSavingsBadge: 'Save 53%',
@@ -266,7 +271,9 @@ const TRIGGER_TESTIMONIAL_IDX = {
 // ── Component ─────────────────────────────────────────────────────────────────
 
 export default function PaywallModal({ trigger, onClose, userEmail, userId, currentPlan = 'free', onTrialActivated }) {
-  const [billingPeriod, setBillingPeriod] = useState('weekly')
+  // Default to yearly — largest weekly-equivalent discount and highest LTV.
+  // Users can still switch via the toggle; we're just picking the anchor.
+  const [billingPeriod, setBillingPeriod] = useState('yearly')
   const [loading, setLoading] = useState(null)
   const [testimonialIdx, setTestimonialIdx] = useState(() => TRIGGER_TESTIMONIAL_IDX[trigger] ?? 0)
   const [trialLoading, setTrialLoading] = useState(false)
@@ -277,6 +284,23 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   const trialUsed = hasUsedTrial()
   const trialActive = isTrialActive()
   const isUnlimitedTrigger = UNLIMITED_ONLY_TRIGGERS.has(trigger)
+
+  // 3-screen value stack: shown once per session for eligible free users.
+  // Eligibility: free plan, trial not yet used, not on a "hard" Unlimited-only
+  // trigger (those users landed here because they need a specific paid feature —
+  // don't slow them down with a benefits pitch).
+  const prePaywallEligible = (
+    currentPlan === 'free'
+    && !trialUsed
+    && !trialActive
+    && !isUnlimitedTrigger
+  )
+  const [showPrePaywall, setShowPrePaywall] = useState(() => {
+    if (!prePaywallEligible) return false
+    try {
+      return typeof window !== 'undefined' && !window.sessionStorage.getItem(PREPAYWALL_SESSION_KEY)
+    } catch { return false }
+  })
 
   // Trial card only shows for free users, never for Unlimited-only triggers.
   const showTrialCard = currentPlan === 'free' && !trialUsed && !trialActive && !isUnlimitedTrigger
@@ -347,13 +371,15 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     onClose()
   }
 
-  // Close on Escape
+  // Close on Escape — but not while the pre-paywall is up; it owns its own
+  // Escape handler and firing both would trigger the exit-gift flow prematurely.
   useEffect(() => {
+    if (showPrePaywall) return
     const handler = e => { if (e.key === 'Escape') handleDismiss('escape') }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onClose, trigger])
+  }, [onClose, trigger, showPrePaywall])
 
   const handleStartTrial = async () => {
     track('paywall_cta_click', {
@@ -401,6 +427,18 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
 
   const isAnnual = billingPeriod === 'yearly'
   const t = TESTIMONIALS[testimonialIdx]
+
+  const markPrePaywallSeen = () => {
+    try { window.sessionStorage.setItem(PREPAYWALL_SESSION_KEY, '1') } catch {}
+  }
+  const handlePrePaywallContinue = () => {
+    markPrePaywallSeen()
+    setShowPrePaywall(false)
+  }
+  const handlePrePaywallDismiss = () => {
+    markPrePaywallSeen()
+    setShowPrePaywall(false)
+  }
 
   return (
     <>
@@ -456,7 +494,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             </p>
             {!isUnlimitedTrigger && (
               <p style={{ color: '#9B9B9B', fontSize: '0.78rem', margin: 0 }}>
-                From $2.99/week · Cancel anytime
+                $0 today · From $1.35/week · Cancel with one tap
               </p>
             )}
           </div>
@@ -549,7 +587,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               ))}
             </div>
             <p style={{ fontSize: '0.78rem', color: '#6B6B6B', margin: '0 0 12px' }}>
-              Get it all back for $2.99/week. Cancel anytime.
+              Get it all back — from just $1.35/week on the annual plan. Cancel with one tap.
             </p>
           </div>
         )}
@@ -572,14 +610,26 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               textTransform: 'uppercase', letterSpacing: '0.5px',
               marginBottom: '10px',
             }}>
-              3 days free · cancel anytime
+              3 days on us · No charge today
             </div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 6px', letterSpacing: '-0.3px' }}>
-              Try every Pro feature free for 3 days.
+              Try every Pro feature — free for 3 days.
             </h3>
-            <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 16px', lineHeight: 1.5 }}>
-              Full access for 3 days. Card required — cancel before your trial ends and you won't be charged.
+            <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 14px', lineHeight: 1.5 }}>
+              Full access starting today. We'll email you the day before your trial ends so nothing catches you off guard.
             </p>
+            {/* $0 today — the single most important reassurance on this screen. */}
+            <div style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              background: 'rgba(5,150,105,0.08)', border: '1px solid rgba(5,150,105,0.22)',
+              borderRadius: 10, padding: '8px 12px', marginBottom: 14,
+              fontSize: '0.82rem', fontWeight: 700, color: '#047857',
+            }}>
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                <path d="M12 8v4l3 3" /><circle cx="12" cy="12" r="10" />
+              </svg>
+              $0 charged today
+            </div>
             {trialError && (
               <p style={{ fontSize: '0.78rem', color: '#EF4444', margin: '0 0 10px' }}>{trialError}</p>
             )}
@@ -600,10 +650,10 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.opacity = '0.88' }}
               onMouseLeave={e => { e.currentTarget.style.opacity = trialLoading ? '0.75' : '1' }}
             >
-              {trialLoading ? 'Loading…' : 'Start 3-day free trial →'}
+              {trialLoading ? 'Loading…' : 'Continue — free for 3 days'}
             </button>
             <p style={{ margin: '10px 0 0', fontSize: '0.72rem', color: '#9B9B9B' }}>
-              Card required &nbsp;·&nbsp; free for 3 days &nbsp;·&nbsp; cancel anytime
+              Payment info saved for after your trial &nbsp;·&nbsp; Cancel with one tap
             </p>
           </div>
         )}
@@ -722,7 +772,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 )}
                 {planId === 'pro' && !trialUsed && !trialActive && (
                   <div style={{ fontSize: '0.68rem', color: '#059669', marginTop: '4px', fontWeight: 700 }}>
-                    Start with a 3-day free trial · cancel anytime
+                    $0 today · 3-day free trial · Cancel with one tap
                   </div>
                 )}
               </div>
@@ -757,7 +807,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 onMouseEnter={e => { if (loading !== planId) e.currentTarget.style.opacity = '0.88' }}
                 onMouseLeave={e => { e.currentTarget.style.opacity = loading === planId ? '0.7' : '1' }}
               >
-                {loading === planId ? 'Loading...' : `Get ${plan.name} →`}
+                {loading === planId ? 'Loading...' : `Continue with ${plan.name} →`}
               </button>
             </div>
             )
@@ -772,7 +822,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
 
         {/* ── Footer ── */}
         <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.75rem', margin: 0 }}>
-          Secure checkout via Stripe · Cancel anytime · No hidden fees
+          Secure checkout via Stripe · Cancel with one tap · No hidden fees
         </p>
       </div>
     </div>
@@ -783,6 +833,16 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
       open={exitGiftOpen}
       trigger={trigger}
       onDismiss={handleGiftDismiss}
+    />
+
+    {/* Pre-paywall value stack — the 3-screen pitch shown once per session
+        for eligible free users. Overlays the paywall (higher z-index) until
+        the user Continues or Skips. */}
+    <PrePaywall
+      open={showPrePaywall}
+      trigger={trigger}
+      onContinue={handlePrePaywallContinue}
+      onDismiss={handlePrePaywallDismiss}
     />
     </>
   )
