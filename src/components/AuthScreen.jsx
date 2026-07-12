@@ -20,7 +20,7 @@ export default function AuthScreen({ initialMode, onBack }) {
       billing === 'weekly' ? 'weekly' :
       billing === 'semester' ? 'per semester' :
       'monthly'
-    if (trial === '1') return { text: `3-day free trial · ${planLabel}`, sub: `Full access included. $0 today, then $2.99/wk. Cancel anytime in your account.` }
+    if (trial === '1') return { text: `7-day free trial · ${planLabel}`, sub: `Full access included. $0 today, then $2.99/wk. Cancel anytime in your account.` }
     return { text: `${planLabel} plan`, sub: `Billed ${billingLabel}. Cancel anytime.` }
   })()
 

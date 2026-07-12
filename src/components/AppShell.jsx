@@ -13,7 +13,7 @@ const MUTED   = '#6B6B6B'
 const BORDER  = '#E5E5E5'
 
 const STRATEGY_SECTIONS = ['coach', 'grades', 'practice', 'tutor']
-const BRAIN_SECTIONS    = ['tools']
+const BRAIN_SECTIONS    = ['tools', 'diagrams']
 
 const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
 
@@ -332,6 +332,23 @@ export default function AppShell({
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
                   </svg>
                 </button>
+                <button
+                  onClick={() => { setOpenHub(null); setActiveSection('diagrams') }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '7px 10px', borderRadius: 8, background: 'none', border: 'none', cursor: 'pointer' }}
+                  onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  <svg width="14" height="14" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
+                  </svg>
+                  <span style={{ fontSize: 12, color: MUTED, fontWeight: 500, flex: 1 }}>Study Diagrams</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: 'rgba(59,97,196,0.1)', color: '#3B61C4', lineHeight: 1.5 }}>
+                    New
+                  </span>
+                  <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/>
+                  </svg>
+                </button>
               </div>
             )}
           </div>
@@ -498,7 +515,7 @@ export default function AppShell({
                 </div>
                 <button
                   onClick={() => { setMobileHub(null); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '10px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '10px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer', marginBottom: 8 }}
                 >
                   <span style={{ fontSize: 12.5, fontWeight: 500, color: MUTED, flex: 1 }}>Flashcards &amp; Quizzes</span>
                   {dueCount > 0 && (
@@ -506,6 +523,17 @@ export default function AppShell({
                       {dueCount} due
                     </span>
                   )}
+                  <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
+                </button>
+                <button
+                  onClick={() => { setMobileHub(null); setActiveSection('diagrams') }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 8, width: '100%', padding: '10px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
+                >
+                  <svg width="14" height="14" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
+                  </svg>
+                  <span style={{ fontSize: 12.5, fontWeight: 500, color: MUTED, flex: 1 }}>Study Diagrams</span>
+                  <span style={{ fontSize: 10, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: 'rgba(59,97,196,0.1)', color: '#3B61C4', lineHeight: 1.5, marginRight: 4 }}>New</span>
                   <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
                 </button>
               </div>

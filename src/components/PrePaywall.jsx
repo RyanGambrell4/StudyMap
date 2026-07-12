@@ -7,7 +7,7 @@ import { track } from '../lib/analytics'
  *
  *   Step 1 — What you'll get   (outcome-focused benefits, big icons)
  *   Step 2 — Social proof      (star rating + count + rotating quotes)
- *   Step 3 — How the trial works (Today / Day 2 / Day 3 timeline)
+ *   Step 3 — How the trial works (Today / Day 6 / Day 7 timeline)
  *
  * The last step's CTA advances into the actual PaywallModal — the parent
  * (PaywallModal) mounts this first, then swaps to the plan grid once the
@@ -49,13 +49,13 @@ const TIMELINE = [
     body: 'Every Pro feature — AI Coach, 100 AI actions, unlimited focus, blueprints, flashcards, quizzes, and Grade Hub. $0 today.',
   },
   {
-    day: 'Day 2',
+    day: 'Day 6',
     color: '#F59E0B',
     title: "We'll remind you by email",
     body: "Heads-up that your trial ends tomorrow, so nothing catches you by surprise.",
   },
   {
-    day: 'Day 3',
+    day: 'Day 7',
     color: '#3B61C4',
     title: 'Continue for $2.99/wk — or cancel',
     body: "Loving it? Stay on Pro for $2.99/wk. Not for you? One tap to cancel — no charge, no email chase.",
@@ -206,7 +206,7 @@ export default function PrePaywall({ open, trigger, onContinue, onDismiss }) {
         >
           {step === 0 && 'Continue →'}
           {step === 1 && 'Continue →'}
-          {step === 2 && 'Continue — free for 3 days'}
+          {step === 2 && 'Continue — free for 7 days'}
         </button>
 
         {step === 2 && (
@@ -342,13 +342,13 @@ function StepTrialTimeline() {
   return (
     <>
       <p style={{ margin: 0, fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', color: '#059669', textTransform: 'uppercase', textAlign: 'center' }}>
-        How your 3-day trial works
+        How your 7-day trial works
       </p>
       <h2 style={{ margin: '8px 0 6px', fontSize: '1.4rem', fontWeight: 800, color: '#111', letterSpacing: '-0.5px', textAlign: 'center', lineHeight: 1.25 }}>
         Full access. Zero pressure.
       </h2>
       <p style={{ margin: '0 0 22px', fontSize: '0.9rem', color: '#6B6B6B', textAlign: 'center', lineHeight: 1.55 }}>
-        Here's exactly what to expect over the next 3 days.
+        Here's exactly what to expect over the next 7 days.
       </p>
 
       <div style={{ position: 'relative', paddingLeft: 30 }}>

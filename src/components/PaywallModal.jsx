@@ -97,7 +97,7 @@ const LIMIT_MESSAGES = {
   'ai-exhausted': {
     tag: "You've used your free AI actions",
     title: 'Keep your tutor on tap.',
-    body: "Pro gives you 100 AI actions a month. Your tutor for every concept this semester. Start the 3-day free trial and pick up exactly where you left off.",
+    body: "Pro gives you 100 AI actions a month. Your tutor for every concept this semester. Start the 7-day free trial and pick up exactly where you left off.",
   },
   tutorMemory: {
     tag: 'Unlimited only · Tutor memory',
@@ -240,7 +240,7 @@ const LIMIT_MESSAGES = {
     body: "$2.99/wk — 5 courses, 100 AI actions/month, unlimited focus sessions, blueprints, and every study tool. Cancel anytime.",
   },
   'nav-trial': {
-    tag: 'Try Pro free for 3 days',
+    tag: 'Try Pro free for 7 days',
     title: 'Full access. No restrictions.',
     body: "5 courses, 100 AI actions/month, unlimited focus sessions, Session Blueprints, and every study tool. $2.99/wk after — cancel anytime.",
   },
@@ -610,10 +610,10 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               textTransform: 'uppercase', letterSpacing: '0.5px',
               marginBottom: '10px',
             }}>
-              3 days on us · No charge today
+              7 days on us · No charge today
             </div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 6px', letterSpacing: '-0.3px' }}>
-              Try every Pro feature — free for 3 days.
+              Try every Pro feature — free for 7 days.
             </h3>
             <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 14px', lineHeight: 1.5 }}>
               Full access starting today. We'll email you the day before your trial ends so nothing catches you off guard.
@@ -650,7 +650,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.opacity = '0.88' }}
               onMouseLeave={e => { e.currentTarget.style.opacity = trialLoading ? '0.75' : '1' }}
             >
-              {trialLoading ? 'Loading…' : 'Continue — free for 3 days'}
+              {trialLoading ? 'Loading…' : 'Continue — free for 7 days'}
             </button>
             <p style={{ margin: '10px 0 0', fontSize: '0.72rem', color: '#9B9B9B' }}>
               Payment info saved for after your trial &nbsp;·&nbsp; Cancel with one tap
@@ -772,7 +772,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 )}
                 {planId === 'pro' && !trialUsed && !trialActive && (
                   <div style={{ fontSize: '0.68rem', color: '#059669', marginTop: '4px', fontWeight: 700 }}>
-                    $0 today · 3-day free trial · Cancel with one tap
+                    $0 today · 7-day free trial · Cancel with one tap
                   </div>
                 )}
               </div>

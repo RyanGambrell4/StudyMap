@@ -2,7 +2,6 @@ import { useMemo, useEffect, useRef, useState } from 'react'
 import { track } from '../lib/analytics'
 import ReadinessPill, { computeReadiness } from './ReadinessPill'
 import ReferralCard from './ReferralCard'
-import StudyBuddyCard from './StudyBuddyCard'
 import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { usePushNotifications } from '../utils/usePushNotifications'
@@ -203,8 +202,9 @@ export default function DashboardView({
     if (trialBannerLoading) return
     setTrialBannerLoading(true)
     try {
-      const ok = await activateTrial()
-      if (!ok) setTrialBannerLoading(false)
+      const url = await activateTrial(userId, userEmail)
+      if (!url) { setTrialBannerLoading(false); return }
+      window.location.href = url
     } catch {
       setTrialBannerLoading(false)
     }
@@ -230,9 +230,6 @@ export default function DashboardView({
   )
   const [streakBannerDismissed, setStreakBannerDismissed] = useState(() =>
     sessionStorage.getItem('se_streak_banner_dismissed') === '1'
-  )
-  const [featDiscoveryDismissed, setFeatDiscoveryDismissed] = useState(() =>
-    localStorage.getItem('se_feat_discovery_dismissed') === '1'
   )
   const [firstBlueprintCtaDismissed, setFirstBlueprintCtaDismissed] = useState(() =>
     localStorage.getItem('se_first_blueprint_cta_dismissed') === '1'
@@ -872,7 +869,7 @@ export default function DashboardView({
                 Your study plan is live. Unlock the full picture.
               </p>
               <p style={{ margin: '4px 0 10px', fontSize: 12, color: D.textMuted, lineHeight: 1.55 }}>
-                You generated your first blueprint — the hardest part is done. Pro gives you 5 courses, 100 AI coaching sessions/month, and unlimited blueprints. Free for 3 days.
+                You generated your first blueprint — the hardest part is done. Pro gives you 5 courses, 100 AI coaching sessions/month, and unlimited blueprints. Free for 7 days.
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 {['5 courses', '100 AI sessions/month', 'Unlimited blueprints'].map(f => (
@@ -914,12 +911,12 @@ export default function DashboardView({
               <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>
                 {upcomingExam && upcomingExam.days <= 5
                   ? `${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. Start your free Pro trial.`
-                  : '3 days of full Pro. Cancel anytime.'}
+                  : '7 days of full Pro. Cancel anytime.'}
               </p>
               <p style={{ margin: '3px 0 8px', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
                 {upcomingExam && upcomingExam.days <= 5
-                  ? 'Exam Rescue, Cheat Sheets, and unlimited Blueprints are all Pro. Free for 3 days — $2.99/wk after.'
-                  : 'Try 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions, free for 3 days. $2.99/wk after.'}
+                  ? 'Exam Rescue, Cheat Sheets, and unlimited Blueprints are all Pro. Free for 7 days — $2.99/wk after.'
+                  : 'Try 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions, free for 7 days. $2.99/wk after.'}
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 {['5 courses', '100 AI actions/month', 'Unlimited everything'].map(f => (
@@ -1049,51 +1046,6 @@ export default function DashboardView({
               </button>
               <button
                 onClick={() => { track('push_subscribe_dismissed'); dismissPush() }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', fontSize: 18, lineHeight: 1, padding: '0 2px' }}
-                aria-label="Dismiss"
-              >×</button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Feature discovery nudge (one-time, for users who haven't tried AI Tutor) ── */}
-      {!featDiscoveryDismissed && courses.length > 0 && (getFeatureUsage('aiTutor').count ?? 0) === 0 && plan === 'free' && (
-        <div style={{ padding: '0 32px 4px' }}>
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(59,97,196,0.06), rgba(107,143,255,0.10))',
-            border: '1px solid rgba(59,97,196,0.18)',
-            borderLeft: '4px solid #3B61C4',
-            borderRadius: 10, padding: '12px 16px',
-            display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
-          }}>
-            <span style={{ fontSize: 20, flexShrink: 0 }}>🤖</span>
-            <div style={{ flex: 1, minWidth: 180 }}>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#1e3a5f' }}>
-                Try the AI Tutor — 5 free questions
-              </p>
-              <p style={{ margin: '2px 0 0', fontSize: 12, color: '#4B5563', lineHeight: 1.4 }}>
-                Ask anything about your courses. Get explanations, practice questions, and step-by-step breakdowns.
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
-              <button
-                onClick={() => {
-                  track('feat_discovery_ai_tutor_clicked')
-                  localStorage.setItem('se_feat_discovery_dismissed', '1')
-                  setFeatDiscoveryDismissed(true)
-                  onNavigateToTutor?.()
-                }}
-                style={{ background: '#3B61C4', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 700, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}
-              >
-                Try the AI Tutor →
-              </button>
-              <button
-                onClick={() => {
-                  track('feat_discovery_dismissed')
-                  localStorage.setItem('se_feat_discovery_dismissed', '1')
-                  setFeatDiscoveryDismissed(true)
-                }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', fontSize: 18, lineHeight: 1, padding: '0 2px' }}
                 aria-label="Dismiss"
               >×</button>
@@ -1716,11 +1668,6 @@ export default function DashboardView({
             </div>
           </Card>
         )}
-
-        {/* ── Study Buddy card (all users) ── */}
-        <Card style={{ gridColumn: 'span 12', padding: 20 }}>
-          <StudyBuddyCard />
-        </Card>
 
         {/* ── Referral card (free users only) ── */}
         {plan === 'free' && (

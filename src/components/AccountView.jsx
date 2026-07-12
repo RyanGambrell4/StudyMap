@@ -334,12 +334,12 @@ export default function AccountView({
                     height: '100%',
                     borderRadius: 3,
                     background: trialDaysLeft <= 2 ? '#DC2626' : '#3B61C4',
-                    width: `${Math.min(100, ((3 - trialDaysLeft) / 3) * 100)}%`,
+                    width: `${Math.min(100, ((7 - trialDaysLeft) / 7) * 100)}%`,
                     transition: 'width 0.3s',
                   }} />
                 </div>
                 <p style={{ margin: '4px 0 0', fontSize: 11, color: '#9B9B9B' }}>
-                  {3 - trialDaysLeft} of 3 days used
+                  {7 - trialDaysLeft} of 7 days used
                 </p>
               </div>
             )}
@@ -400,10 +400,10 @@ export default function AccountView({
             textAlign: 'center',
           }}>
             <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: '#111111' }}>
-              Start your 3-day free trial
+              Start your 7-day free trial
             </p>
             <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>
-              Full Pro access for 3 days. $0 today, then $2.99/wk. Cancel anytime in your account.
+              Full Pro access for 7 days. $0 today, then $2.99/wk. Cancel anytime in your account.
             </p>
             <button
               onClick={handleStartTrial}
