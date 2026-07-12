@@ -1,278 +1,856 @@
 {
-  "headers": [
-    {
-      "source": "/(.*)",
-      "headers": [
-        { "key": "X-Content-Type-Options", "value": "nosniff" },
-        { "key": "X-Frame-Options", "value": "SAMEORIGIN" },
-        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" },
-        { "key": "Permissions-Policy", "value": "camera=(), microphone=(), geolocation=()" },
-        { "key": "Strict-Transport-Security", "value": "max-age=63072000; includeSubDomains" },
-        { "key": "X-XSS-Protection", "value": "0" }
-      ]
-    },
-    {
-      "source": "/(.*\\.html)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=0, must-revalidate" }]
-    },
-    {
-      "source": "/assets/(.*)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }]
-    },
-    {
-      "source": "/(favicon\\.png|hero-landing\\.png|manifest\\.json|robots\\.txt|sitemap\\.xml)",
-      "headers": [{ "key": "Cache-Control", "value": "public, max-age=86400, stale-while-revalidate=3600" }]
-    }
-  ],
-  "crons": [
-    {
-      "path": "/api/re-engage",
-      "schedule": "0 10 * * *"
-    },
-    {
-      "path": "/api/weekly-recap",
-      "schedule": "0 10 * * 0"
-    },
-    {
-      "path": "/api/weekly-digest",
-      "schedule": "0 10 * * 0"
-    },
-    {
-      "path": "/api/exam-countdown",
-      "schedule": "0 11 * * *"
-    },
-    {
-      "path": "/api/exam-tomorrow",
-      "schedule": "0 18 * * *"
-    },
-    {
-      "path": "/api/day14-upgrade",
-      "schedule": "0 11 * * *"
-    },
-    {
-      "path": "/api/day21-upgrade",
-      "schedule": "0 11 * * *"
-    },
-    {
-      "path": "/api/no-first-session",
-      "schedule": "0 11 * * *"
-    },
-    {
-      "path": "/api/day10-recap",
-      "schedule": "0 11 * * *"
-    },
-    {
-      "path": "/api/day1-tips",
-      "schedule": "0 11 * * *"
-    },
-    {
-      "path": "/api/day3-progress",
-      "schedule": "0 11 * * *"
-    },
-    {
-      "path": "/api/day7-milestone",
-      "schedule": "0 11 * * *"
-    },
-    {
-      "path": "/api/day1-trial-tips",
-      "schedule": "0 11 * * *"
-    },
-    {
-      "path": "/api/day2-trial-progress",
-      "schedule": "0 14 * * *"
-    },
-    {
-      "path": "/api/trial-warning",
-      "schedule": "0 12 * * *"
-    },
-    {
-      "path": "/api/trial-expired",
-      "schedule": "0 12 * * *"
-    },
-    {
-      "path": "/api/streak-broken",
-      "schedule": "0 17 * * *"
-    },
-    {
-      "path": "/api/push-notify",
-      "schedule": "0 9 * * *"
-    },
-    {
-      "path": "/api/early-activation",
-      "schedule": "0 */4 * * *"
-    },
-    {
-      "path": "/api/daily-revenue-heartbeat",
-      "schedule": "0 14 * * *"
-    },
-    {
-      "path": "/api/struggle-digest",
-      "schedule": "0 11 * * 1"
-    }
-  ],
-  "rewrites": [
-    { "source": "/ph/static/(.*)", "destination": "https://us-assets.i.posthog.com/static/$1" },
-    { "source": "/ph/(.*)", "destination": "https://us.i.posthog.com/$1" },
-    { "source": "/login", "destination": "/login.html" },
-    { "source": "/api/stripe-webhook", "destination": "/api/stripe" },
-    { "source": "/api/cancel-trial", "destination": "/api/stripe" },
-    { "source": "/api/google-calendar-events", "destination": "/api/google-calendar" },
-    { "source": "/api/add-to-google-calendar", "destination": "/api/google-calendar?action=add" },
-    { "source": "/privacy", "destination": "/privacy.html" },
-    { "source": "/terms", "destination": "/terms.html" },
-    { "source": "/support", "destination": "/support.html" },
-    { "source": "/shared-plan", "destination": "/app.html" },
-    { "source": "/app", "destination": "/app.html" },
-    { "source": "/app/(.*)", "destination": "/app.html" },
-    { "source": "/signup", "destination": "/signup.html" },
-    { "source": "/signup/(.*)", "destination": "/signup.html" },
-    { "source": "/about", "destination": "/about.html" },
-    { "source": "/not-affiliated-with-study-edge", "destination": "/not-affiliated-with-study-edge.html" },
-    { "source": "/unsubscribe", "destination": "/unsubscribe.html" },
-    { "source": "/study-schedule-generator", "destination": "/study-schedule-generator.html" },
-    { "source": "/ai-flashcard-maker", "destination": "/ai-flashcard-maker.html" },
-    { "source": "/ai-study-coach", "destination": "/ai-study-coach.html" },
-    { "source": "/ai-tutor", "destination": "/ai-tutor.html" },
-    { "source": "/grade-calculator-college", "destination": "/grade-calculator-college.html" },
-    { "source": "/active-recall-app", "destination": "/active-recall-app.html" },
-    { "source": "/quizlet-alternative", "destination": "/quizlet-alternative.html" },
-    { "source": "/quizlet-qchat-alternative", "destination": "/quizlet-qchat-alternative.html" },
-    { "source": "/chegg-alternative", "destination": "/chegg-alternative.html" },
-    { "source": "/anki-vs-quizlet", "destination": "/anki-vs-quizlet.html" },
-    { "source": "/how-to-make-a-study-schedule", "destination": "/how-to-make-a-study-schedule.html" },
-    { "source": "/best-study-app-for-students", "destination": "/best-study-app-for-students.html" },
-    { "source": "/anki-alternative", "destination": "/anki-alternative.html" },
-    { "source": "/studyedge-ai", "destination": "/studyedge-ai.html" },
-    { "source": "/study-planner-for-college-students", "destination": "/study-planner-for-college-students.html" },
-    { "source": "/gpa-calculator", "destination": "/gpa-calculator.html" },
-    { "source": "/how-to-study-for-finals", "destination": "/how-to-study-for-finals.html" },
-    { "source": "/pre-med-study-guide", "destination": "/pre-med-study-guide.html" },
-    { "source": "/grade-calculator", "destination": "/grade-calculator.html" },
-    { "source": "/study-schedule-template", "destination": "/study-schedule-template.html" },
-    { "source": "/blog", "destination": "/blog/index.html" },
-    { "source": "/blog/how-to-study-for-finals-week", "destination": "/blog/how-to-study-for-finals-week.html" },
-    { "source": "/blog/active-recall-study-technique", "destination": "/blog/active-recall-study-technique.html" },
-    { "source": "/blog/how-to-improve-your-grades-in-college", "destination": "/blog/how-to-improve-your-grades-in-college.html" },
-    { "source": "/blog/best-study-techniques-science", "destination": "/blog/best-study-techniques-science.html" },
-    { "source": "/blog/how-to-study-for-organic-chemistry", "destination": "/blog/how-to-study-for-organic-chemistry.html" },
-    { "source": "/blog/how-to-raise-your-gpa-after-a-bad-semester", "destination": "/blog/how-to-raise-your-gpa-after-a-bad-semester.html" },
-    { "source": "/blog/best-study-schedule-for-college-students", "destination": "/blog/best-study-schedule-for-college-students.html" },
-    { "source": "/blog/how-to-get-an-a-in-any-class", "destination": "/blog/how-to-get-an-a-in-any-class.html" },
-    { "source": "/blog/mcat-study-schedule-6-months", "destination": "/blog/mcat-study-schedule-6-months.html" },
-    { "source": "/blog/how-to-stop-procrastinating-when-studying", "destination": "/blog/how-to-stop-procrastinating-when-studying.html" },
-    { "source": "/blog/how-to-study-with-adhd-in-college", "destination": "/blog/how-to-study-with-adhd-in-college.html" },
-    { "source": "/blog/what-gpa-do-you-need-for-medical-school", "destination": "/blog/what-gpa-do-you-need-for-medical-school.html" },
-    { "source": "/blog/how-to-balance-a-heavy-course-load", "destination": "/blog/how-to-balance-a-heavy-course-load.html" },
-    { "source": "/final-exam-calculator", "destination": "/final-exam-calculator.html" },
-    { "source": "/best-study-app-for-math-students", "destination": "/best-study-app-for-math-students.html" },
-    { "source": "/best-study-app-for-history-students", "destination": "/best-study-app-for-history-students.html" },
-    { "source": "/best-study-app-for-education-majors", "destination": "/best-study-app-for-education-majors.html" },
-    { "source": "/best-study-app-for-political-science-students", "destination": "/best-study-app-for-political-science-students.html" },
-    { "source": "/best-study-app-for-english-majors", "destination": "/best-study-app-for-english-majors.html" },
-    { "source": "/best-study-app-for-foreign-language-students", "destination": "/best-study-app-for-foreign-language-students.html" },
-    { "source": "/best-study-app-for-economics-students", "destination": "/best-study-app-for-economics-students.html" },
-    { "source": "/best-study-app-for-sociology-students", "destination": "/best-study-app-for-sociology-students.html" },
-    { "source": "/best-study-app-for-kinesiology-students", "destination": "/best-study-app-for-kinesiology-students.html" },
-    { "source": "/best-study-app-for-criminal-justice-students", "destination": "/best-study-app-for-criminal-justice-students.html" },
-    { "source": "/best-study-app-for-princeton-students", "destination": "/best-study-app-for-princeton-students.html" },
-    { "source": "/best-study-app-for-yale-students", "destination": "/best-study-app-for-yale-students.html" },
-    { "source": "/best-study-app-for-usc-students", "destination": "/best-study-app-for-usc-students.html" },
-    { "source": "/best-study-app-for-georgetown-students", "destination": "/best-study-app-for-georgetown-students.html" },
-    { "source": "/best-study-app-for-northeastern-university-students", "destination": "/best-study-app-for-northeastern-university-students.html" },
-    { "source": "/best-study-app-for-unc-chapel-hill-students", "destination": "/best-study-app-for-unc-chapel-hill-students.html" },
-    { "source": "/best-study-app-for-university-of-virginia-students", "destination": "/best-study-app-for-university-of-virginia-students.html" },
-    { "source": "/best-study-app-for-university-of-washington-students", "destination": "/best-study-app-for-university-of-washington-students.html" },
-    { "source": "/microsoft-onenote-for-studying", "destination": "/microsoft-onenote-for-studying.html" },
-    { "source": "/brainscape-alternative", "destination": "/brainscape-alternative.html" },
-    { "source": "/forest-app-alternative", "destination": "/forest-app-alternative.html" },
-    { "source": "/wolfram-alpha-alternative", "destination": "/wolfram-alpha-alternative.html" },
-    { "source": "/photomath-alternative", "destination": "/photomath-alternative.html" },
-    { "source": "/socratic-alternative", "destination": "/socratic-alternative.html" },
-    { "source": "/blog/how-to-pull-an-all-nighter", "destination": "/blog/how-to-pull-an-all-nighter.html" },
-    { "source": "/blog/cornell-note-taking-method", "destination": "/blog/cornell-note-taking-method.html" },
-    { "source": "/blog/pomodoro-technique-for-studying", "destination": "/blog/pomodoro-technique-for-studying.html" },
-    { "source": "/blog/how-to-take-notes-in-college", "destination": "/blog/how-to-take-notes-in-college.html" },
-    { "source": "/blog/how-to-study-for-multiple-exams-in-one-week", "destination": "/blog/how-to-study-for-multiple-exams-in-one-week.html" },
-
-    { "source": "/best-ai-for-students", "destination": "/best-ai-for-students.html" },
-    { "source": "/ai-study-tools", "destination": "/ai-study-tools.html" },
-    { "source": "/ai-homework-helper", "destination": "/ai-homework-helper.html" },
-    { "source": "/chatgpt-for-studying", "destination": "/chatgpt-for-studying.html" },
-    { "source": "/chatgpt-alternative-for-students", "destination": "/chatgpt-alternative-for-students.html" },
-
-    { "source": "/blog/how-to-cram-for-an-exam", "destination": "/blog/how-to-cram-for-an-exam.html" },
-    { "source": "/blog/how-to-study-the-night-before-an-exam", "destination": "/blog/how-to-study-the-night-before-an-exam.html" },
-    { "source": "/blog/how-to-focus-while-studying", "destination": "/blog/how-to-focus-while-studying.html" },
-    { "source": "/blog/how-to-memorize-notes-fast", "destination": "/blog/how-to-memorize-notes-fast.html" },
-    { "source": "/blog/how-to-overcome-test-anxiety", "destination": "/blog/how-to-overcome-test-anxiety.html" },
-
-    { "source": "/how-to-get-a-4-0-gpa-in-college", "destination": "/how-to-get-a-4-0-gpa-in-college.html" },
-    { "source": "/spaced-repetition-explained", "destination": "/spaced-repetition-explained.html" },
-    { "source": "/test-taking-strategies", "destination": "/test-taking-strategies.html" },
-
-    { "source": "/what-gpa-do-you-need-for-university-of-michigan", "destination": "/what-gpa-do-you-need-for-university-of-michigan.html" },
-    { "source": "/what-gpa-do-you-need-for-university-of-texas-austin", "destination": "/what-gpa-do-you-need-for-university-of-texas-austin.html" },
-    { "source": "/what-gpa-do-you-need-for-ohio-state-university", "destination": "/what-gpa-do-you-need-for-ohio-state-university.html" },
-    { "source": "/what-gpa-do-you-need-for-university-of-florida", "destination": "/what-gpa-do-you-need-for-university-of-florida.html" },
-    { "source": "/what-gpa-do-you-need-for-penn-state-university", "destination": "/what-gpa-do-you-need-for-penn-state-university.html" },
-    { "source": "/what-gpa-do-you-need-for-purdue-university", "destination": "/what-gpa-do-you-need-for-purdue-university.html" },
-    { "source": "/what-gpa-do-you-need-for-michigan-state-university", "destination": "/what-gpa-do-you-need-for-michigan-state-university.html" },
-    { "source": "/what-gpa-do-you-need-for-university-of-wisconsin-madison", "destination": "/what-gpa-do-you-need-for-university-of-wisconsin-madison.html" },
-    { "source": "/what-gpa-do-you-need-for-university-of-illinois-urbana-champaign", "destination": "/what-gpa-do-you-need-for-university-of-illinois-urbana-champaign.html" },
-    { "source": "/what-gpa-do-you-need-for-georgia-tech", "destination": "/what-gpa-do-you-need-for-georgia-tech.html" },
-    { "source": "/what-gpa-do-you-need-for-university-of-washington", "destination": "/what-gpa-do-you-need-for-university-of-washington.html" },
-    { "source": "/what-gpa-do-you-need-for-university-of-virginia", "destination": "/what-gpa-do-you-need-for-university-of-virginia.html" },
-    { "source": "/what-gpa-do-you-need-for-unc-chapel-hill", "destination": "/what-gpa-do-you-need-for-unc-chapel-hill.html" },
-    { "source": "/what-gpa-do-you-need-for-university-of-arizona", "destination": "/what-gpa-do-you-need-for-university-of-arizona.html" },
-    { "source": "/what-gpa-do-you-need-for-arizona-state-university", "destination": "/what-gpa-do-you-need-for-arizona-state-university.html" },
-    { "source": "/what-gpa-do-you-need-for-georgetown-university", "destination": "/what-gpa-do-you-need-for-georgetown-university.html" },
-    { "source": "/what-gpa-do-you-need-for-vanderbilt-university", "destination": "/what-gpa-do-you-need-for-vanderbilt-university.html" },
-    { "source": "/what-gpa-do-you-need-for-emory-university", "destination": "/what-gpa-do-you-need-for-emory-university.html" },
-    { "source": "/what-gpa-do-you-need-for-university-of-notre-dame", "destination": "/what-gpa-do-you-need-for-university-of-notre-dame.html" },
-    { "source": "/what-gpa-do-you-need-for-boston-university", "destination": "/what-gpa-do-you-need-for-boston-university.html" },
-    { "source": "/what-gpa-do-you-need-for-northeastern-university", "destination": "/what-gpa-do-you-need-for-northeastern-university.html" },
-    { "source": "/what-gpa-do-you-need-for-tulane-university", "destination": "/what-gpa-do-you-need-for-tulane-university.html" },
-    { "source": "/what-gpa-do-you-need-for-wake-forest-university", "destination": "/what-gpa-do-you-need-for-wake-forest-university.html" },
-    { "source": "/what-gpa-do-you-need-for-university-of-rochester", "destination": "/what-gpa-do-you-need-for-university-of-rochester.html" },
-    { "source": "/what-gpa-do-you-need-for-case-western-reserve", "destination": "/what-gpa-do-you-need-for-case-western-reserve.html" },
-    { "source": "/what-gpa-do-you-need-for-nursing-school-admissions", "destination": "/what-gpa-do-you-need-for-nursing-school-admissions.html" },
-    { "source": "/what-gpa-do-you-need-for-pharmacy-school-admissions", "destination": "/what-gpa-do-you-need-for-pharmacy-school-admissions.html" },
-    { "source": "/what-gpa-do-you-need-for-veterinary-school-admissions", "destination": "/what-gpa-do-you-need-for-veterinary-school-admissions.html" },
-    { "source": "/what-gpa-do-you-need-for-architecture-school-admissions", "destination": "/what-gpa-do-you-need-for-architecture-school-admissions.html" },
-    { "source": "/what-gpa-do-you-need-for-engineering-grad-school-admissions", "destination": "/what-gpa-do-you-need-for-engineering-grad-school-admissions.html" },
-
-    { "source": "/best-study-app-for-south-african-students", "destination": "/best-study-app-for-south-african-students.html" },
-    { "source": "/best-study-app-for-uct-students", "destination": "/best-study-app-for-uct-students.html" },
-    { "source": "/best-study-app-for-wits-students", "destination": "/best-study-app-for-wits-students.html" },
-    { "source": "/best-study-app-for-stellenbosch-students", "destination": "/best-study-app-for-stellenbosch-students.html" },
-    { "source": "/best-study-app-for-up-students", "destination": "/best-study-app-for-up-students.html" },
-    { "source": "/best-study-app-for-uj-students", "destination": "/best-study-app-for-uj-students.html" },
-    { "source": "/best-study-app-for-ukzn-students", "destination": "/best-study-app-for-ukzn-students.html" },
-    { "source": "/best-study-app-for-nwu-students", "destination": "/best-study-app-for-nwu-students.html" },
-    { "source": "/best-study-app-for-unisa-students", "destination": "/best-study-app-for-unisa-students.html" },
-
-    { "source": "/best-study-app-for-canadian-university-students", "destination": "/best-study-app-for-canadian-university-students.html" },
-    { "source": "/best-study-app-for-university-of-toronto-students", "destination": "/best-study-app-for-university-of-toronto-students.html" },
-    { "source": "/best-study-app-for-ubc-students", "destination": "/best-study-app-for-ubc-students.html" },
-    { "source": "/best-study-app-for-mcgill-students", "destination": "/best-study-app-for-mcgill-students.html" },
-    { "source": "/best-study-app-for-western-university-students", "destination": "/best-study-app-for-western-university-students.html" },
-    { "source": "/best-study-app-for-waterloo-students", "destination": "/best-study-app-for-waterloo-students.html" },
-    { "source": "/best-study-app-for-queens-university-students", "destination": "/best-study-app-for-queens-university-students.html" },
-    { "source": "/best-study-app-for-mcmaster-students", "destination": "/best-study-app-for-mcmaster-students.html" },
-    { "source": "/best-study-app-for-university-of-alberta-students", "destination": "/best-study-app-for-university-of-alberta-students.html" },
-
-    { "source": "/studyedge-app", "destination": "/studyedge-app.html" },
-
-    { "source": "/best-study-app-for-university-of-wisconsin-madison-students", "destination": "/best-study-app-for-university-of-wisconsin-madison-students.html" },
-    { "source": "/best-study-app-for-michigan-state-students", "destination": "/best-study-app-for-michigan-state-students.html" },
-    { "source": "/best-study-app-for-arizona-state-students", "destination": "/best-study-app-for-arizona-state-students.html" },
-    { "source": "/best-study-app-for-university-of-minnesota-students", "destination": "/best-study-app-for-university-of-minnesota-students.html" },
-    { "source": "/best-study-app-for-cornell-students", "destination": "/best-study-app-for-cornell-students.html" },
-    { "source": "/best-study-app-for-upenn-students", "destination": "/best-study-app-for-upenn-students.html" },
-    { "source": "/best-study-app-for-rutgers-students", "destination": "/best-study-app-for-rutgers-students.html" },
-    { "source": "/best-study-app-for-university-of-pittsburgh-students", "destination": "/best-study-app-for-university-of-pittsburgh-students.html" },
-    { "source": "/best-study-app-for-carnegie-mellon-students", "destination": "/best-study-app-for-carnegie-mellon-students.html" },
-    { "source": "/best-study-app-for-university-of-georgia-students", "destination": "/best-study-app-for-university-of-georgia-students.html" },
-    { "source": "/best-study-app-for-florida-state-students", "destination": "/best-study-app-for-florida-state-students.html" }
-  ]
+    "headers": [
+        {
+            "source": "/(.*)",
+            "headers": [
+                {
+                    "key": "X-Content-Type-Options",
+                    "value": "nosniff"
+                },
+                {
+                    "key": "X-Frame-Options",
+                    "value": "SAMEORIGIN"
+                },
+                {
+                    "key": "Referrer-Policy",
+                    "value": "strict-origin-when-cross-origin"
+                },
+                {
+                    "key": "Permissions-Policy",
+                    "value": "camera=(), microphone=(), geolocation=()"
+                },
+                {
+                    "key": "Strict-Transport-Security",
+                    "value": "max-age=63072000; includeSubDomains"
+                },
+                {
+                    "key": "X-XSS-Protection",
+                    "value": "0"
+                }
+            ]
+        },
+        {
+            "source": "/(.*\\.html)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=0, must-revalidate"
+                }
+            ]
+        },
+        {
+            "source": "/assets/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=31536000, immutable"
+                }
+            ]
+        },
+        {
+            "source": "/(favicon\\.png|hero-landing\\.png|manifest\\.json|robots\\.txt|sitemap\\.xml)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=86400, stale-while-revalidate=3600"
+                }
+            ]
+        }
+    ],
+    "crons": [
+        {
+            "path": "/api/re-engage",
+            "schedule": "0 10 * * *"
+        },
+        {
+            "path": "/api/weekly-recap",
+            "schedule": "0 10 * * 0"
+        },
+        {
+            "path": "/api/weekly-digest",
+            "schedule": "0 10 * * 0"
+        },
+        {
+            "path": "/api/exam-countdown",
+            "schedule": "0 11 * * *"
+        },
+        {
+            "path": "/api/exam-tomorrow",
+            "schedule": "0 18 * * *"
+        },
+        {
+            "path": "/api/day14-upgrade",
+            "schedule": "0 11 * * *"
+        },
+        {
+            "path": "/api/day21-upgrade",
+            "schedule": "0 11 * * *"
+        },
+        {
+            "path": "/api/no-first-session",
+            "schedule": "0 11 * * *"
+        },
+        {
+            "path": "/api/day10-recap",
+            "schedule": "0 11 * * *"
+        },
+        {
+            "path": "/api/day1-tips",
+            "schedule": "0 11 * * *"
+        },
+        {
+            "path": "/api/day3-progress",
+            "schedule": "0 11 * * *"
+        },
+        {
+            "path": "/api/day7-milestone",
+            "schedule": "0 11 * * *"
+        },
+        {
+            "path": "/api/day1-trial-tips",
+            "schedule": "0 11 * * *"
+        },
+        {
+            "path": "/api/day2-trial-progress",
+            "schedule": "0 14 * * *"
+        },
+        {
+            "path": "/api/trial-warning",
+            "schedule": "0 12 * * *"
+        },
+        {
+            "path": "/api/trial-expired",
+            "schedule": "0 12 * * *"
+        },
+        {
+            "path": "/api/streak-broken",
+            "schedule": "0 17 * * *"
+        },
+        {
+            "path": "/api/push-notify",
+            "schedule": "0 9 * * *"
+        },
+        {
+            "path": "/api/early-activation",
+            "schedule": "0 */4 * * *"
+        },
+        {
+            "path": "/api/daily-revenue-heartbeat",
+            "schedule": "0 14 * * *"
+        },
+        {
+            "path": "/api/struggle-digest",
+            "schedule": "0 11 * * 1"
+        }
+    ],
+    "rewrites": [
+        {
+            "source": "/ph/static/(.*)",
+            "destination": "https://us-assets.i.posthog.com/static/$1"
+        },
+        {
+            "source": "/ph/(.*)",
+            "destination": "https://us.i.posthog.com/$1"
+        },
+        {
+            "source": "/login",
+            "destination": "/login.html"
+        },
+        {
+            "source": "/api/stripe-webhook",
+            "destination": "/api/stripe"
+        },
+        {
+            "source": "/api/cancel-trial",
+            "destination": "/api/stripe"
+        },
+        {
+            "source": "/api/google-calendar-events",
+            "destination": "/api/google-calendar"
+        },
+        {
+            "source": "/api/add-to-google-calendar",
+            "destination": "/api/google-calendar?action=add"
+        },
+        {
+            "source": "/privacy",
+            "destination": "/privacy.html"
+        },
+        {
+            "source": "/terms",
+            "destination": "/terms.html"
+        },
+        {
+            "source": "/support",
+            "destination": "/support.html"
+        },
+        {
+            "source": "/shared-plan",
+            "destination": "/app.html"
+        },
+        {
+            "source": "/app",
+            "destination": "/app.html"
+        },
+        {
+            "source": "/app/(.*)",
+            "destination": "/app.html"
+        },
+        {
+            "source": "/signup",
+            "destination": "/signup.html"
+        },
+        {
+            "source": "/signup/(.*)",
+            "destination": "/signup.html"
+        },
+        {
+            "source": "/about",
+            "destination": "/about.html"
+        },
+        {
+            "source": "/not-affiliated-with-study-edge",
+            "destination": "/not-affiliated-with-study-edge.html"
+        },
+        {
+            "source": "/unsubscribe",
+            "destination": "/unsubscribe.html"
+        },
+        {
+            "source": "/study-schedule-generator",
+            "destination": "/study-schedule-generator.html"
+        },
+        {
+            "source": "/ai-flashcard-maker",
+            "destination": "/ai-flashcard-maker.html"
+        },
+        {
+            "source": "/ai-study-coach",
+            "destination": "/ai-study-coach.html"
+        },
+        {
+            "source": "/ai-tutor",
+            "destination": "/ai-tutor.html"
+        },
+        {
+            "source": "/grade-calculator-college",
+            "destination": "/grade-calculator-college.html"
+        },
+        {
+            "source": "/active-recall-app",
+            "destination": "/active-recall-app.html"
+        },
+        {
+            "source": "/quizlet-alternative",
+            "destination": "/quizlet-alternative.html"
+        },
+        {
+            "source": "/quizlet-qchat-alternative",
+            "destination": "/quizlet-qchat-alternative.html"
+        },
+        {
+            "source": "/chegg-alternative",
+            "destination": "/chegg-alternative.html"
+        },
+        {
+            "source": "/anki-vs-quizlet",
+            "destination": "/anki-vs-quizlet.html"
+        },
+        {
+            "source": "/how-to-make-a-study-schedule",
+            "destination": "/how-to-make-a-study-schedule.html"
+        },
+        {
+            "source": "/best-study-app-for-students",
+            "destination": "/best-study-app-for-students.html"
+        },
+        {
+            "source": "/anki-alternative",
+            "destination": "/anki-alternative.html"
+        },
+        {
+            "source": "/studyedge-ai",
+            "destination": "/studyedge-ai.html"
+        },
+        {
+            "source": "/study-planner-for-college-students",
+            "destination": "/study-planner-for-college-students.html"
+        },
+        {
+            "source": "/gpa-calculator",
+            "destination": "/gpa-calculator.html"
+        },
+        {
+            "source": "/how-to-study-for-finals",
+            "destination": "/how-to-study-for-finals.html"
+        },
+        {
+            "source": "/pre-med-study-guide",
+            "destination": "/pre-med-study-guide.html"
+        },
+        {
+            "source": "/grade-calculator",
+            "destination": "/grade-calculator.html"
+        },
+        {
+            "source": "/study-schedule-template",
+            "destination": "/study-schedule-template.html"
+        },
+        {
+            "source": "/blog",
+            "destination": "/blog/index.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-finals-week",
+            "destination": "/blog/how-to-study-for-finals-week.html"
+        },
+        {
+            "source": "/blog/active-recall-study-technique",
+            "destination": "/blog/active-recall-study-technique.html"
+        },
+        {
+            "source": "/blog/how-to-improve-your-grades-in-college",
+            "destination": "/blog/how-to-improve-your-grades-in-college.html"
+        },
+        {
+            "source": "/blog/best-study-techniques-science",
+            "destination": "/blog/best-study-techniques-science.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-organic-chemistry",
+            "destination": "/blog/how-to-study-for-organic-chemistry.html"
+        },
+        {
+            "source": "/blog/how-to-raise-your-gpa-after-a-bad-semester",
+            "destination": "/blog/how-to-raise-your-gpa-after-a-bad-semester.html"
+        },
+        {
+            "source": "/blog/best-study-schedule-for-college-students",
+            "destination": "/blog/best-study-schedule-for-college-students.html"
+        },
+        {
+            "source": "/blog/how-to-get-an-a-in-any-class",
+            "destination": "/blog/how-to-get-an-a-in-any-class.html"
+        },
+        {
+            "source": "/blog/mcat-study-schedule-6-months",
+            "destination": "/blog/mcat-study-schedule-6-months.html"
+        },
+        {
+            "source": "/blog/how-to-stop-procrastinating-when-studying",
+            "destination": "/blog/how-to-stop-procrastinating-when-studying.html"
+        },
+        {
+            "source": "/blog/how-to-study-with-adhd-in-college",
+            "destination": "/blog/how-to-study-with-adhd-in-college.html"
+        },
+        {
+            "source": "/blog/what-gpa-do-you-need-for-medical-school",
+            "destination": "/blog/what-gpa-do-you-need-for-medical-school.html"
+        },
+        {
+            "source": "/blog/how-to-balance-a-heavy-course-load",
+            "destination": "/blog/how-to-balance-a-heavy-course-load.html"
+        },
+        {
+            "source": "/final-exam-calculator",
+            "destination": "/final-exam-calculator.html"
+        },
+        {
+            "source": "/best-study-app-for-math-students",
+            "destination": "/best-study-app-for-math-students.html"
+        },
+        {
+            "source": "/best-study-app-for-history-students",
+            "destination": "/best-study-app-for-history-students.html"
+        },
+        {
+            "source": "/best-study-app-for-education-majors",
+            "destination": "/best-study-app-for-education-majors.html"
+        },
+        {
+            "source": "/best-study-app-for-political-science-students",
+            "destination": "/best-study-app-for-political-science-students.html"
+        },
+        {
+            "source": "/best-study-app-for-english-majors",
+            "destination": "/best-study-app-for-english-majors.html"
+        },
+        {
+            "source": "/best-study-app-for-foreign-language-students",
+            "destination": "/best-study-app-for-foreign-language-students.html"
+        },
+        {
+            "source": "/best-study-app-for-economics-students",
+            "destination": "/best-study-app-for-economics-students.html"
+        },
+        {
+            "source": "/best-study-app-for-sociology-students",
+            "destination": "/best-study-app-for-sociology-students.html"
+        },
+        {
+            "source": "/best-study-app-for-kinesiology-students",
+            "destination": "/best-study-app-for-kinesiology-students.html"
+        },
+        {
+            "source": "/best-study-app-for-criminal-justice-students",
+            "destination": "/best-study-app-for-criminal-justice-students.html"
+        },
+        {
+            "source": "/best-study-app-for-princeton-students",
+            "destination": "/best-study-app-for-princeton-students.html"
+        },
+        {
+            "source": "/best-study-app-for-yale-students",
+            "destination": "/best-study-app-for-yale-students.html"
+        },
+        {
+            "source": "/best-study-app-for-usc-students",
+            "destination": "/best-study-app-for-usc-students.html"
+        },
+        {
+            "source": "/best-study-app-for-georgetown-students",
+            "destination": "/best-study-app-for-georgetown-students.html"
+        },
+        {
+            "source": "/best-study-app-for-northeastern-university-students",
+            "destination": "/best-study-app-for-northeastern-university-students.html"
+        },
+        {
+            "source": "/best-study-app-for-unc-chapel-hill-students",
+            "destination": "/best-study-app-for-unc-chapel-hill-students.html"
+        },
+        {
+            "source": "/best-study-app-for-university-of-virginia-students",
+            "destination": "/best-study-app-for-university-of-virginia-students.html"
+        },
+        {
+            "source": "/best-study-app-for-university-of-washington-students",
+            "destination": "/best-study-app-for-university-of-washington-students.html"
+        },
+        {
+            "source": "/microsoft-onenote-for-studying",
+            "destination": "/microsoft-onenote-for-studying.html"
+        },
+        {
+            "source": "/brainscape-alternative",
+            "destination": "/brainscape-alternative.html"
+        },
+        {
+            "source": "/forest-app-alternative",
+            "destination": "/forest-app-alternative.html"
+        },
+        {
+            "source": "/wolfram-alpha-alternative",
+            "destination": "/wolfram-alpha-alternative.html"
+        },
+        {
+            "source": "/photomath-alternative",
+            "destination": "/photomath-alternative.html"
+        },
+        {
+            "source": "/socratic-alternative",
+            "destination": "/socratic-alternative.html"
+        },
+        {
+            "source": "/blog/how-to-pull-an-all-nighter",
+            "destination": "/blog/how-to-pull-an-all-nighter.html"
+        },
+        {
+            "source": "/blog/cornell-note-taking-method",
+            "destination": "/blog/cornell-note-taking-method.html"
+        },
+        {
+            "source": "/blog/pomodoro-technique-for-studying",
+            "destination": "/blog/pomodoro-technique-for-studying.html"
+        },
+        {
+            "source": "/blog/how-to-take-notes-in-college",
+            "destination": "/blog/how-to-take-notes-in-college.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-multiple-exams-in-one-week",
+            "destination": "/blog/how-to-study-for-multiple-exams-in-one-week.html"
+        },
+        {
+            "source": "/best-ai-for-students",
+            "destination": "/best-ai-for-students.html"
+        },
+        {
+            "source": "/ai-study-tools",
+            "destination": "/ai-study-tools.html"
+        },
+        {
+            "source": "/ai-homework-helper",
+            "destination": "/ai-homework-helper.html"
+        },
+        {
+            "source": "/chatgpt-for-studying",
+            "destination": "/chatgpt-for-studying.html"
+        },
+        {
+            "source": "/chatgpt-alternative-for-students",
+            "destination": "/chatgpt-alternative-for-students.html"
+        },
+        {
+            "source": "/blog/how-to-cram-for-an-exam",
+            "destination": "/blog/how-to-cram-for-an-exam.html"
+        },
+        {
+            "source": "/blog/how-to-study-the-night-before-an-exam",
+            "destination": "/blog/how-to-study-the-night-before-an-exam.html"
+        },
+        {
+            "source": "/blog/how-to-focus-while-studying",
+            "destination": "/blog/how-to-focus-while-studying.html"
+        },
+        {
+            "source": "/blog/how-to-memorize-notes-fast",
+            "destination": "/blog/how-to-memorize-notes-fast.html"
+        },
+        {
+            "source": "/blog/how-to-overcome-test-anxiety",
+            "destination": "/blog/how-to-overcome-test-anxiety.html"
+        },
+        {
+            "source": "/how-to-get-a-4-0-gpa-in-college",
+            "destination": "/how-to-get-a-4-0-gpa-in-college.html"
+        },
+        {
+            "source": "/spaced-repetition-explained",
+            "destination": "/spaced-repetition-explained.html"
+        },
+        {
+            "source": "/test-taking-strategies",
+            "destination": "/test-taking-strategies.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-university-of-michigan",
+            "destination": "/what-gpa-do-you-need-for-university-of-michigan.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-university-of-texas-austin",
+            "destination": "/what-gpa-do-you-need-for-university-of-texas-austin.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-ohio-state-university",
+            "destination": "/what-gpa-do-you-need-for-ohio-state-university.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-university-of-florida",
+            "destination": "/what-gpa-do-you-need-for-university-of-florida.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-penn-state-university",
+            "destination": "/what-gpa-do-you-need-for-penn-state-university.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-purdue-university",
+            "destination": "/what-gpa-do-you-need-for-purdue-university.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-michigan-state-university",
+            "destination": "/what-gpa-do-you-need-for-michigan-state-university.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-university-of-wisconsin-madison",
+            "destination": "/what-gpa-do-you-need-for-university-of-wisconsin-madison.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-university-of-illinois-urbana-champaign",
+            "destination": "/what-gpa-do-you-need-for-university-of-illinois-urbana-champaign.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-georgia-tech",
+            "destination": "/what-gpa-do-you-need-for-georgia-tech.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-university-of-washington",
+            "destination": "/what-gpa-do-you-need-for-university-of-washington.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-university-of-virginia",
+            "destination": "/what-gpa-do-you-need-for-university-of-virginia.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-unc-chapel-hill",
+            "destination": "/what-gpa-do-you-need-for-unc-chapel-hill.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-university-of-arizona",
+            "destination": "/what-gpa-do-you-need-for-university-of-arizona.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-arizona-state-university",
+            "destination": "/what-gpa-do-you-need-for-arizona-state-university.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-georgetown-university",
+            "destination": "/what-gpa-do-you-need-for-georgetown-university.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-vanderbilt-university",
+            "destination": "/what-gpa-do-you-need-for-vanderbilt-university.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-emory-university",
+            "destination": "/what-gpa-do-you-need-for-emory-university.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-university-of-notre-dame",
+            "destination": "/what-gpa-do-you-need-for-university-of-notre-dame.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-boston-university",
+            "destination": "/what-gpa-do-you-need-for-boston-university.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-northeastern-university",
+            "destination": "/what-gpa-do-you-need-for-northeastern-university.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-tulane-university",
+            "destination": "/what-gpa-do-you-need-for-tulane-university.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-wake-forest-university",
+            "destination": "/what-gpa-do-you-need-for-wake-forest-university.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-university-of-rochester",
+            "destination": "/what-gpa-do-you-need-for-university-of-rochester.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-case-western-reserve",
+            "destination": "/what-gpa-do-you-need-for-case-western-reserve.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-nursing-school-admissions",
+            "destination": "/what-gpa-do-you-need-for-nursing-school-admissions.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-pharmacy-school-admissions",
+            "destination": "/what-gpa-do-you-need-for-pharmacy-school-admissions.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-veterinary-school-admissions",
+            "destination": "/what-gpa-do-you-need-for-veterinary-school-admissions.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-architecture-school-admissions",
+            "destination": "/what-gpa-do-you-need-for-architecture-school-admissions.html"
+        },
+        {
+            "source": "/what-gpa-do-you-need-for-engineering-grad-school-admissions",
+            "destination": "/what-gpa-do-you-need-for-engineering-grad-school-admissions.html"
+        },
+        {
+            "source": "/best-study-app-for-south-african-students",
+            "destination": "/best-study-app-for-south-african-students.html"
+        },
+        {
+            "source": "/best-study-app-for-uct-students",
+            "destination": "/best-study-app-for-uct-students.html"
+        },
+        {
+            "source": "/best-study-app-for-wits-students",
+            "destination": "/best-study-app-for-wits-students.html"
+        },
+        {
+            "source": "/best-study-app-for-stellenbosch-students",
+            "destination": "/best-study-app-for-stellenbosch-students.html"
+        },
+        {
+            "source": "/best-study-app-for-up-students",
+            "destination": "/best-study-app-for-up-students.html"
+        },
+        {
+            "source": "/best-study-app-for-uj-students",
+            "destination": "/best-study-app-for-uj-students.html"
+        },
+        {
+            "source": "/best-study-app-for-ukzn-students",
+            "destination": "/best-study-app-for-ukzn-students.html"
+        },
+        {
+            "source": "/best-study-app-for-nwu-students",
+            "destination": "/best-study-app-for-nwu-students.html"
+        },
+        {
+            "source": "/best-study-app-for-unisa-students",
+            "destination": "/best-study-app-for-unisa-students.html"
+        },
+        {
+            "source": "/best-study-app-for-canadian-university-students",
+            "destination": "/best-study-app-for-canadian-university-students.html"
+        },
+        {
+            "source": "/best-study-app-for-university-of-toronto-students",
+            "destination": "/best-study-app-for-university-of-toronto-students.html"
+        },
+        {
+            "source": "/best-study-app-for-ubc-students",
+            "destination": "/best-study-app-for-ubc-students.html"
+        },
+        {
+            "source": "/best-study-app-for-mcgill-students",
+            "destination": "/best-study-app-for-mcgill-students.html"
+        },
+        {
+            "source": "/best-study-app-for-western-university-students",
+            "destination": "/best-study-app-for-western-university-students.html"
+        },
+        {
+            "source": "/best-study-app-for-waterloo-students",
+            "destination": "/best-study-app-for-waterloo-students.html"
+        },
+        {
+            "source": "/best-study-app-for-queens-university-students",
+            "destination": "/best-study-app-for-queens-university-students.html"
+        },
+        {
+            "source": "/best-study-app-for-mcmaster-students",
+            "destination": "/best-study-app-for-mcmaster-students.html"
+        },
+        {
+            "source": "/best-study-app-for-university-of-alberta-students",
+            "destination": "/best-study-app-for-university-of-alberta-students.html"
+        },
+        {
+            "source": "/studyedge-app",
+            "destination": "/studyedge-app.html"
+        },
+        {
+            "source": "/best-study-app-for-university-of-wisconsin-madison-students",
+            "destination": "/best-study-app-for-university-of-wisconsin-madison-students.html"
+        },
+        {
+            "source": "/best-study-app-for-michigan-state-students",
+            "destination": "/best-study-app-for-michigan-state-students.html"
+        },
+        {
+            "source": "/best-study-app-for-arizona-state-students",
+            "destination": "/best-study-app-for-arizona-state-students.html"
+        },
+        {
+            "source": "/best-study-app-for-university-of-minnesota-students",
+            "destination": "/best-study-app-for-university-of-minnesota-students.html"
+        },
+        {
+            "source": "/best-study-app-for-cornell-students",
+            "destination": "/best-study-app-for-cornell-students.html"
+        },
+        {
+            "source": "/best-study-app-for-upenn-students",
+            "destination": "/best-study-app-for-upenn-students.html"
+        },
+        {
+            "source": "/best-study-app-for-rutgers-students",
+            "destination": "/best-study-app-for-rutgers-students.html"
+        },
+        {
+            "source": "/best-study-app-for-university-of-pittsburgh-students",
+            "destination": "/best-study-app-for-university-of-pittsburgh-students.html"
+        },
+        {
+            "source": "/best-study-app-for-carnegie-mellon-students",
+            "destination": "/best-study-app-for-carnegie-mellon-students.html"
+        },
+        {
+            "source": "/best-study-app-for-university-of-georgia-students",
+            "destination": "/best-study-app-for-university-of-georgia-students.html"
+        },
+        {
+            "source": "/best-study-app-for-florida-state-students",
+            "destination": "/best-study-app-for-florida-state-students.html"
+        },
+        {
+            "source": "/blog/anki-vs-quizlet-vs-studyedge",
+            "destination": "/blog/anki-vs-quizlet-vs-studyedge.html"
+        },
+        {
+            "source": "/blog/best-flashcard-apps-for-college",
+            "destination": "/blog/best-flashcard-apps-for-college.html"
+        },
+        {
+            "source": "/blog/best-note-taking-apps-for-college-students",
+            "destination": "/blog/best-note-taking-apps-for-college-students.html"
+        },
+        {
+            "source": "/blog/best-study-apps-for-college-students",
+            "destination": "/blog/best-study-apps-for-college-students.html"
+        },
+        {
+            "source": "/blog/chatgpt-vs-studyedge-for-studying",
+            "destination": "/blog/chatgpt-vs-studyedge-for-studying.html"
+        },
+        {
+            "source": "/blog/how-to-prepare-for-midterms",
+            "destination": "/blog/how-to-prepare-for-midterms.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-anatomy-and-physiology",
+            "destination": "/blog/how-to-study-for-anatomy-and-physiology.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-biochemistry",
+            "destination": "/blog/how-to-study-for-biochemistry.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-biology",
+            "destination": "/blog/how-to-study-for-biology.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-calculus",
+            "destination": "/blog/how-to-study-for-calculus.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-microeconomics",
+            "destination": "/blog/how-to-study-for-microeconomics.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-physics",
+            "destination": "/blog/how-to-study-for-physics.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-psychology",
+            "destination": "/blog/how-to-study-for-psychology.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-statistics",
+            "destination": "/blog/how-to-study-for-statistics.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-the-gmat",
+            "destination": "/blog/how-to-study-for-the-gmat.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-the-gre",
+            "destination": "/blog/how-to-study-for-the-gre.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-the-lsat",
+            "destination": "/blog/how-to-study-for-the-lsat.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-the-nclex",
+            "destination": "/blog/how-to-study-for-the-nclex.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-the-sat",
+            "destination": "/blog/how-to-study-for-the-sat.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-usmle-step-1",
+            "destination": "/blog/how-to-study-for-usmle-step-1.html"
+        },
+        {
+            "source": "/blog/how-to-use-ai-for-studying",
+            "destination": "/blog/how-to-use-ai-for-studying.html"
+        },
+        {
+            "source": "/blog/time-management-tips-for-college-students",
+            "destination": "/blog/time-management-tips-for-college-students.html"
+        }
+    ]
 }
