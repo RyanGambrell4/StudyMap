@@ -1243,6 +1243,22 @@
         {
             "source": "/blog/how-to-study-for-history",
             "destination": "/blog/how-to-study-for-history.html"
+        },
+        {
+            "source": "/blog/study-techniques",
+            "destination": "/blog/study-techniques.html"
+        },
+        {
+            "source": "/blog/exam-prep",
+            "destination": "/blog/exam-prep.html"
+        },
+        {
+            "source": "/blog/subject-guides",
+            "destination": "/blog/subject-guides.html"
+        },
+        {
+            "source": "/blog/gpa-grades",
+            "destination": "/blog/gpa-grades.html"
         }
     ]
 }

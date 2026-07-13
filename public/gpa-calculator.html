@@ -6,6 +6,8 @@
   <title>GPA Calculator | Know Exactly Where You Stand | StudyEdge AI</title>
   <meta name="description" content="A GPA calculator built for college students. Run the math on what each course is doing to your GPA, what you need to recover, and where your hours pay off the most." />
   <link rel="canonical" href="https://getstudyedge.com/gpa-calculator" />
+  <link rel="alternate" hreflang="en" href="https://getstudyedge.com/gpa-calculator" />
+  <link rel="alternate" hreflang="x-default" href="https://getstudyedge.com/gpa-calculator" />
   <link rel="icon" type="image/png" href="/favicon.png" />
 
   <meta property="og:type" content="article" />
@@ -99,6 +101,47 @@
   }
   </script>
   <script src="/utm-propagate.js" defer></script>
+  <style>
+    /* Interactive calculator widget */
+    .calc-widget { max-width: 780px; margin: 40px auto 8px; padding: 0 24px; }
+    .calc-tabs { display: flex; gap: 6px; background: var(--bg1); border: 1px solid var(--border); border-radius: 12px; padding: 4px; margin: 0 auto 20px; width: fit-content; box-shadow: var(--card-shadow); }
+    .calc-tab { background: transparent; border: none; padding: 10px 18px; font-family: var(--sans); font-size: 14px; font-weight: 600; color: var(--text-muted); border-radius: 8px; cursor: pointer; transition: background 0.15s, color 0.15s; }
+    .calc-tab.active { background: var(--accent); color: #fff; }
+    .calc-tab:not(.active):hover { background: var(--bg-card-h); color: var(--text); }
+    .calc-panel { background: var(--bg1); border: 1px solid var(--border); border-radius: 16px; padding: 32px; box-shadow: var(--card-shadow); }
+    .calc-panel h3 { font-size: 15px; font-weight: 700; color: var(--text); margin-bottom: 14px; letter-spacing: -0.005em; }
+    .calc-panel[hidden] { display: none; }
+    .course-row { display: grid; grid-template-columns: 1fr 130px 100px 32px; gap: 10px; margin-bottom: 10px; align-items: center; }
+    .course-row input, .course-row select { width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: var(--sans); font-size: 14px; color: var(--text); background: #fff; }
+    .course-row input:focus, .course-row select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,97,196,0.12); }
+    .course-row .remove-btn { background: transparent; border: 1px solid var(--border); color: var(--text-dim); border-radius: 8px; padding: 8px 0; font-size: 16px; cursor: pointer; transition: border-color 0.15s, color 0.15s; }
+    .course-row .remove-btn:hover { border-color: var(--border-h); color: var(--text); }
+    .calc-labels { display: grid; grid-template-columns: 1fr 130px 100px 32px; gap: 10px; margin-bottom: 8px; font-size: 12px; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; padding: 0 2px; }
+    .calc-actions { display: flex; justify-content: space-between; align-items: center; margin-top: 18px; flex-wrap: wrap; gap: 10px; }
+    .add-course-btn { background: var(--bg-card-h); color: var(--text); border: 1px solid var(--border); padding: 10px 18px; font-family: var(--sans); font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: background 0.15s, border-color 0.15s; }
+    .add-course-btn:hover { background: var(--bg1); border-color: var(--border-h); }
+    .calc-result { background: linear-gradient(180deg, var(--bg1), #F4F5FB); border: 1px solid var(--border); border-radius: 14px; padding: 26px; margin-top: 24px; text-align: center; }
+    .calc-result-num { font-size: 56px; font-weight: 700; color: var(--accent); letter-spacing: -0.03em; line-height: 1; font-family: var(--sans); }
+    .calc-result-label { font-size: 14px; color: var(--text-muted); margin-top: 8px; font-weight: 500; }
+    .calc-result-meta { display: flex; justify-content: center; gap: 26px; margin-top: 18px; padding-top: 18px; border-top: 1px solid var(--border); flex-wrap: wrap; }
+    .calc-result-meta div { text-align: center; }
+    .calc-result-meta .val { font-size: 18px; font-weight: 700; color: var(--text); }
+    .calc-result-meta .lbl { font-size: 12px; color: var(--text-muted); margin-top: 2px; }
+    /* Final-score mode */
+    .final-form { display: grid; gap: 14px; }
+    .final-field { display: grid; grid-template-columns: 200px 1fr; gap: 12px; align-items: center; }
+    .final-field label { font-size: 14px; color: var(--text); font-weight: 500; }
+    .final-field input { padding: 10px 12px; border: 1px solid var(--border); border-radius: 8px; font-family: var(--sans); font-size: 14px; background: #fff; }
+    .final-field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(59,97,196,0.12); }
+    .final-verdict { background: rgba(59,97,196,0.06); border: 1px solid rgba(59,97,196,0.18); border-radius: 10px; padding: 18px 20px; margin-top: 16px; font-size: 15px; color: var(--text); line-height: 1.6; }
+    .final-verdict strong { color: var(--accent); font-size: 20px; }
+    @media (max-width: 640px) {
+      .course-row, .calc-labels { grid-template-columns: 1fr 90px 72px 32px; gap: 6px; }
+      .final-field { grid-template-columns: 1fr; gap: 6px; }
+      .calc-result-num { font-size: 44px; }
+      .calc-panel { padding: 22px 18px; }
+    }
+  </style>
 </head>
 <body>
 
@@ -121,10 +164,238 @@
   <div class="container">
     <div class="post-meta">GPA &middot; 7 min read &middot; <time datetime="2026-06-19">Updated June 19, 2026</time> &middot; By the StudyEdge AI team</div>
     <h1>GPA Calculator</h1>
-    <p class="post-definition"><strong>A GPA calculator</strong> finds your cumulative grade point average by multiplying each course's letter grade (A = 4.0, B = 3.0, etc.) by its credit hours, summing those weighted grade points, then dividing by total credits attempted. A one-letter-grade drop in a single 3-credit course moves your semester GPA by roughly 0.07–0.15 points depending on your total credit load.</p>
+    <p class="post-definition"><strong>A GPA calculator</strong> finds your cumulative grade point average by multiplying each course's letter grade (A = 4.0, B = 3.0, etc.) by its credit hours, summing those weighted grade points, then dividing by total credits attempted. A one-letter-grade drop in a single 3-credit course moves your semester GPA by roughly 0.07 to 0.15 points depending on your total credit load.</p>
     <p class="post-intro">A GPA calculator is only useful if it tells you what to do next. Knowing you are sitting at a 3.21 does nothing on its own. Knowing that one B+ instead of a B on Friday's exam moves you to a 3.27, and that the same hour spent on your other course only gets you to a 3.23, is what changes how you spend the weekend.</p>
   </div>
 </section>
+
+<div class="calc-widget" aria-label="GPA and grade calculator">
+  <div class="calc-tabs" role="tablist">
+    <button class="calc-tab active" role="tab" aria-selected="true" data-tab="gpa" id="tab-gpa">GPA Calculator</button>
+    <button class="calc-tab" role="tab" aria-selected="false" data-tab="final" id="tab-final">Final Grade Needed</button>
+  </div>
+
+  <div class="calc-panel" id="panel-gpa" role="tabpanel" aria-labelledby="tab-gpa">
+    <h3>Enter your courses</h3>
+    <div class="calc-labels">
+      <span>Course</span>
+      <span>Grade</span>
+      <span>Credits</span>
+      <span></span>
+    </div>
+    <div id="course-list">
+      <div class="course-row">
+        <input type="text" placeholder="e.g. Calculus I" aria-label="Course name" />
+        <select aria-label="Letter grade">
+          <option value="4.0">A (4.0)</option>
+          <option value="3.7">A- (3.7)</option>
+          <option value="3.3">B+ (3.3)</option>
+          <option value="3.0" selected>B (3.0)</option>
+          <option value="2.7">B- (2.7)</option>
+          <option value="2.3">C+ (2.3)</option>
+          <option value="2.0">C (2.0)</option>
+          <option value="1.7">C- (1.7)</option>
+          <option value="1.3">D+ (1.3)</option>
+          <option value="1.0">D (1.0)</option>
+          <option value="0.0">F (0.0)</option>
+        </select>
+        <input type="number" min="0" max="12" step="0.5" value="3" aria-label="Credit hours" />
+        <button class="remove-btn" aria-label="Remove course" type="button">&times;</button>
+      </div>
+      <div class="course-row">
+        <input type="text" placeholder="e.g. Biology 101" aria-label="Course name" />
+        <select aria-label="Letter grade">
+          <option value="4.0" selected>A (4.0)</option>
+          <option value="3.7">A- (3.7)</option>
+          <option value="3.3">B+ (3.3)</option>
+          <option value="3.0">B (3.0)</option>
+          <option value="2.7">B- (2.7)</option>
+          <option value="2.3">C+ (2.3)</option>
+          <option value="2.0">C (2.0)</option>
+          <option value="1.7">C- (1.7)</option>
+          <option value="1.3">D+ (1.3)</option>
+          <option value="1.0">D (1.0)</option>
+          <option value="0.0">F (0.0)</option>
+        </select>
+        <input type="number" min="0" max="12" step="0.5" value="4" aria-label="Credit hours" />
+        <button class="remove-btn" aria-label="Remove course" type="button">&times;</button>
+      </div>
+      <div class="course-row">
+        <input type="text" placeholder="e.g. English Comp" aria-label="Course name" />
+        <select aria-label="Letter grade">
+          <option value="4.0">A (4.0)</option>
+          <option value="3.7" selected>A- (3.7)</option>
+          <option value="3.3">B+ (3.3)</option>
+          <option value="3.0">B (3.0)</option>
+          <option value="2.7">B- (2.7)</option>
+          <option value="2.3">C+ (2.3)</option>
+          <option value="2.0">C (2.0)</option>
+          <option value="1.7">C- (1.7)</option>
+          <option value="1.3">D+ (1.3)</option>
+          <option value="1.0">D (1.0)</option>
+          <option value="0.0">F (0.0)</option>
+        </select>
+        <input type="number" min="0" max="12" step="0.5" value="3" aria-label="Credit hours" />
+        <button class="remove-btn" aria-label="Remove course" type="button">&times;</button>
+      </div>
+    </div>
+    <div class="calc-actions">
+      <button class="add-course-btn" id="add-course" type="button">+ Add course</button>
+      <span style="font-size:13px;color:var(--text-muted)">Updates as you type</span>
+    </div>
+    <div class="calc-result" aria-live="polite">
+      <div class="calc-result-num" id="gpa-out">3.51</div>
+      <div class="calc-result-label">Semester GPA</div>
+      <div class="calc-result-meta">
+        <div><div class="val" id="credits-out">10</div><div class="lbl">Total credits</div></div>
+        <div><div class="val" id="points-out">35.1</div><div class="lbl">Grade points</div></div>
+        <div><div class="val" id="standing-out">Dean's list</div><div class="lbl">Academic standing</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="calc-panel" id="panel-final" role="tabpanel" aria-labelledby="tab-final" hidden>
+    <h3>Find the exact score you need on the final</h3>
+    <div class="final-form">
+      <div class="final-field">
+        <label for="final-current">Current grade in class (%)</label>
+        <input type="number" id="final-current" min="0" max="100" step="0.1" value="82" />
+      </div>
+      <div class="final-field">
+        <label for="final-target">Grade you want (%)</label>
+        <input type="number" id="final-target" min="0" max="100" step="0.1" value="90" />
+      </div>
+      <div class="final-field">
+        <label for="final-weight">Final exam weight (%)</label>
+        <input type="number" id="final-weight" min="1" max="100" step="1" value="30" />
+      </div>
+    </div>
+    <div class="final-verdict" id="final-verdict" aria-live="polite">
+      You need a <strong id="final-score">108.7%</strong> on the final to reach 90% overall. That is not possible. Aim to protect your current grade, or set a lower target.
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  'use strict';
+
+  // ── Tabs ─────────────────────────────────────────────────────────────────
+  var tabs = document.querySelectorAll('.calc-tab');
+  var panels = { gpa: document.getElementById('panel-gpa'), final: document.getElementById('panel-final') };
+  tabs.forEach(function (t) {
+    t.addEventListener('click', function () {
+      tabs.forEach(function (x) { x.classList.remove('active'); x.setAttribute('aria-selected', 'false'); });
+      t.classList.add('active');
+      t.setAttribute('aria-selected', 'true');
+      Object.keys(panels).forEach(function (k) { panels[k].hidden = k !== t.dataset.tab; });
+    });
+  });
+
+  // ── GPA calculator ───────────────────────────────────────────────────────
+  var courseList = document.getElementById('course-list');
+  var gpaOut = document.getElementById('gpa-out');
+  var creditsOut = document.getElementById('credits-out');
+  var pointsOut = document.getElementById('points-out');
+  var standingOut = document.getElementById('standing-out');
+
+  function gpaStanding(g) {
+    if (g >= 3.9) return 'Summa cum laude';
+    if (g >= 3.7) return 'Magna cum laude';
+    if (g >= 3.5) return "Dean's list";
+    if (g >= 3.0) return 'Good standing';
+    if (g >= 2.0) return 'Passing';
+    return 'Academic probation';
+  }
+
+  function recalc() {
+    var rows = courseList.querySelectorAll('.course-row');
+    var totalCredits = 0;
+    var totalPoints = 0;
+    rows.forEach(function (row) {
+      var gpaSelect = row.querySelector('select');
+      var creditInput = row.querySelectorAll('input')[1];
+      var gp = parseFloat(gpaSelect.value);
+      var cr = parseFloat(creditInput.value);
+      if (!isNaN(gp) && !isNaN(cr) && cr > 0) {
+        totalCredits += cr;
+        totalPoints += gp * cr;
+      }
+    });
+    var gpa = totalCredits > 0 ? totalPoints / totalCredits : 0;
+    gpaOut.textContent = gpa.toFixed(2);
+    creditsOut.textContent = totalCredits.toString();
+    pointsOut.textContent = totalPoints.toFixed(1);
+    standingOut.textContent = totalCredits > 0 ? gpaStanding(gpa) : '—';
+  }
+
+  function attachRow(row) {
+    row.querySelectorAll('input, select').forEach(function (el) {
+      el.addEventListener('input', recalc);
+      el.addEventListener('change', recalc);
+    });
+    var rm = row.querySelector('.remove-btn');
+    rm.addEventListener('click', function () {
+      if (courseList.querySelectorAll('.course-row').length > 1) {
+        row.remove();
+        recalc();
+      }
+    });
+  }
+
+  courseList.querySelectorAll('.course-row').forEach(attachRow);
+
+  document.getElementById('add-course').addEventListener('click', function () {
+    var template = courseList.querySelector('.course-row').cloneNode(true);
+    template.querySelectorAll('input')[0].value = '';
+    template.querySelectorAll('input')[1].value = '3';
+    template.querySelector('select').value = '4.0';
+    courseList.appendChild(template);
+    attachRow(template);
+    recalc();
+  });
+
+  recalc();
+
+  // ── Final grade needed ────────────────────────────────────────────────────
+  var curEl = document.getElementById('final-current');
+  var tgtEl = document.getElementById('final-target');
+  var wtEl = document.getElementById('final-weight');
+  var scoreEl = document.getElementById('final-score');
+  var verdictEl = document.getElementById('final-verdict');
+
+  function recalcFinal() {
+    var current = parseFloat(curEl.value);
+    var target = parseFloat(tgtEl.value);
+    var weight = parseFloat(wtEl.value) / 100;
+    if (isNaN(current) || isNaN(target) || isNaN(weight) || weight <= 0) {
+      scoreEl.textContent = '—';
+      verdictEl.innerHTML = 'Enter your current grade, target, and final exam weight to see the exact score you need.';
+      return;
+    }
+    var needed = (target - current * (1 - weight)) / weight;
+    var neededFmt = needed.toFixed(1) + '%';
+    scoreEl.textContent = neededFmt;
+    var msg;
+    if (needed > 100) {
+      msg = 'You need a <strong>' + neededFmt + '</strong> on the final to reach ' + target + '% overall. That is not mathematically possible with a standard final. The best-case scenario if you ace the exam is <strong>' + (current * (1 - weight) + 100 * weight).toFixed(1) + '%</strong> overall. Set a lower target, or ask if there is extra credit available.';
+    } else if (needed < 0) {
+      msg = 'You already have this grade locked in. Even a <strong>0%</strong> on the final leaves you at <strong>' + (current * (1 - weight)).toFixed(1) + '%</strong> or higher. You cannot fall below your target.';
+    } else if (needed >= 90) {
+      msg = 'You need a <strong>' + neededFmt + '</strong> on the final. Tight but doable. Focus on the highest-weight topics and skip anything that will not appear on the exam.';
+    } else if (needed >= 70) {
+      msg = 'You need a <strong>' + neededFmt + '</strong> on the final. Very achievable with a focused study plan for the exam material.';
+    } else {
+      msg = 'You need a <strong>' + neededFmt + '</strong> on the final. Comfortable. Do not coast though — showing up unprepared can still cost you.';
+    }
+    verdictEl.innerHTML = msg;
+  }
+  [curEl, tgtEl, wtEl].forEach(function (el) {
+    el.addEventListener('input', recalcFinal);
+  });
+  recalcFinal();
+})();
+</script>
 
 <div class="container post-body">
 
