@@ -1259,6 +1259,22 @@
         {
             "source": "/blog/gpa-grades",
             "destination": "/blog/gpa-grades.html"
+        },
+        {
+            "source": "/is-a-3-6-gpa-good",
+            "destination": "/is-a-3-6-gpa-good.html"
+        },
+        {
+            "source": "/is-a-3-4-gpa-good",
+            "destination": "/is-a-3-4-gpa-good.html"
+        },
+        {
+            "source": "/is-a-3-2-gpa-good",
+            "destination": "/is-a-3-2-gpa-good.html"
+        },
+        {
+            "source": "/is-a-2-7-gpa-good",
+            "destination": "/is-a-2-7-gpa-good.html"
         }
     ]
 }

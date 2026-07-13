@@ -204,9 +204,9 @@
   <!-- Calculators (interactive tools) -->
   <url>
     <loc>https://getstudyedge.com/gpa-calculator</loc>
-    <lastmod>2026-06-21</lastmod>
+    <lastmod>2026-07-13</lastmod>
     <changefreq>monthly</changefreq>
-    <priority>0.9</priority>
+    <priority>0.95</priority>
   </url>
   <url>
     <loc>https://getstudyedge.com/grade-calculator</loc>
@@ -710,11 +710,24 @@
   <url><loc>https://getstudyedge.com/blog/exam-prep</loc><lastmod>2026-07-13</lastmod><changefreq>weekly</changefreq><priority>0.90</priority></url>
   <url><loc>https://getstudyedge.com/blog/subject-guides</loc><lastmod>2026-07-13</lastmod><changefreq>weekly</changefreq><priority>0.90</priority></url>
   <url><loc>https://getstudyedge.com/blog/gpa-grades</loc><lastmod>2026-07-13</lastmod><changefreq>weekly</changefreq><priority>0.90</priority></url>
+  <url><loc>https://getstudyedge.com/is-a-3-6-gpa-good</loc><lastmod>2026-07-13</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://getstudyedge.com/is-a-3-4-gpa-good</loc><lastmod>2026-07-13</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://getstudyedge.com/is-a-3-2-gpa-good</loc><lastmod>2026-07-13</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://getstudyedge.com/is-a-2-7-gpa-good</loc><lastmod>2026-07-13</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
 
   <!-- University best-study-app pages missing from sitemap -->
   <url><loc>https://getstudyedge.com/best-study-app-for-carnegie-mellon-students</loc><lastmod>2026-07-11</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://getstudyedge.com/best-study-app-for-florida-state-students</loc><lastmod>2026-07-11</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://getstudyedge.com/best-study-app-for-university-of-georgia-students</loc><lastmod>2026-07-11</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
   <url><loc>https://getstudyedge.com/quizlet-qchat-alternative</loc><lastmod>2026-07-11</lastmod><changefreq>monthly</changefreq><priority>0.75</priority></url>
+
+  <!-- Backlink assets 2026-07-13: interactive tools, data report, AP templates, research comparison -->
+  <url><loc>https://getstudyedge.com/flashcard-converter</loc><lastmod>2026-07-13</lastmod><changefreq>monthly</changefreq><priority>0.90</priority></url>
+  <url><loc>https://getstudyedge.com/how-students-study-report-2026</loc><lastmod>2026-07-13</lastmod><changefreq>monthly</changefreq><priority>0.90</priority></url>
+  <url><loc>https://getstudyedge.com/spaced-repetition-vs-cramming</loc><lastmod>2026-07-13</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
+  <url><loc>https://getstudyedge.com/ap-exam-study-schedule-templates</loc><lastmod>2026-07-13</lastmod><changefreq>monthly</changefreq><priority>0.90</priority></url>
+  <url><loc>https://getstudyedge.com/ap-calculus-ab-study-schedule</loc><lastmod>2026-07-13</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://getstudyedge.com/ap-biology-study-schedule</loc><lastmod>2026-07-13</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
+  <url><loc>https://getstudyedge.com/apush-study-schedule</loc><lastmod>2026-07-13</lastmod><changefreq>monthly</changefreq><priority>0.80</priority></url>
 
 </urlset>
