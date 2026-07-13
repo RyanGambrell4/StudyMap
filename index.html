@@ -505,11 +505,11 @@
     }
     .hero-eyebrow {
       display: inline-flex; align-items: center; gap: 8px;
-      background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.09);
+      background: rgba(59,97,196,0.08); border: 1px solid rgba(59,97,196,0.24);
       border-radius: 999px; padding: 6px 16px;
       font-size: 13px; font-weight: 500;
       letter-spacing: 0.01em; text-transform: none;
-      color: var(--muted); margin-bottom: 40px;
+      color: #3B61C4; margin-bottom: 40px;
     }
     .hero-eyebrow strong { color: var(--text); font-weight: 700; }
     .hero-eyebrow-dot {
@@ -523,7 +523,7 @@
     }
     .hero-h1 {
       font-family: var(--serif); font-weight: 500;
-      font-size: clamp(54px, 7.8vw, 108px);
+      font-size: clamp(58px, 8.8vw, 122px);
       line-height: 1.03; letter-spacing: -0.01em;
       color: var(--text); margin-bottom: 28px;
     }
@@ -615,7 +615,7 @@
     }
     .outcome-card { background: var(--bg1); padding: 44px 40px; }
     .outcome-metric {
-      font-family: var(--serif); font-size: 52px; font-weight: 500;
+      font-family: var(--serif); font-size: 68px; font-weight: 500;
       color: #3B61C4; line-height: 1; margin-bottom: 12px;
     }
     .outcome-metric em { font-style: italic; }
@@ -643,7 +643,7 @@
     .sl-green  { background: rgba(16,185,129,0.09); border-color: rgba(16,185,129,0.25); color: #059669; }
     .section-h2 {
       font-family: var(--serif); font-weight: 500;
-      font-size: clamp(38px, 4.8vw, 68px);
+      font-size: clamp(42px, 5.5vw, 80px);
       line-height: 1.07; letter-spacing: -0.01em; color: var(--text);
     }
     .section-h2 em { font-style: italic; color: var(--accent); }
@@ -790,21 +790,30 @@
 
     /* Final CTA */
     .finalcta {
-      padding: 128px 24px; text-align: center;
-      border-top: 1px solid var(--border);
-      background: linear-gradient(180deg, #F7F6F3 0%, #EEF2FF 100%);
+      padding: 140px 24px; text-align: center;
+      border-top: none;
+      background: #3B61C4;
     }
     .finalcta-accent-line {
       width: 56px; height: 4px;
-      background: linear-gradient(90deg, #3B61C4, #7C5CBF);
+      background: rgba(255,255,255,0.35);
       border-radius: 2px; margin: 0 auto 48px;
     }
     .finalcta-h2 {
       font-family: var(--serif); font-weight: 500; font-style: italic;
-      font-size: clamp(42px, 5.8vw, 84px);
-      line-height: 1.1; color: var(--text); margin-bottom: 28px;
+      font-size: clamp(46px, 6.5vw, 98px);
+      line-height: 1.1; color: #fff; margin-bottom: 28px;
     }
-    .finalcta-sub { font-size: 15px; color: var(--muted); margin-bottom: 44px; }
+    .finalcta-sub { font-size: 15px; color: rgba(255,255,255,0.72); margin-bottom: 44px; }
+    .btn-cta-white {
+      display: inline-flex; align-items: center; justify-content: center;
+      background: #fff; color: #3B61C4; padding: 15px 40px; font-size: 16px;
+      border-radius: 10px; border: none; cursor: pointer; font-family: var(--sans);
+      font-weight: 700; text-decoration: none; white-space: nowrap;
+      box-shadow: 0 4px 28px rgba(0,0,0,0.18);
+      transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-cta-white:hover { background: rgba(255,255,255,0.92); transform: translateY(-1px); box-shadow: 0 6px 32px rgba(0,0,0,0.22); }
 
     /* Footer */
     .footer {
@@ -840,6 +849,45 @@
     .fade-up { opacity: 0; transform: translateY(18px); transition: opacity 0.6s ease, transform 0.6s ease; }
     .fade-up.in { opacity: 1; transform: translateY(0); }
 
+    /* Hero entrance stagger */
+    .hero-stagger-1 { animation: hero-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both; }
+    .hero-stagger-2 { animation: hero-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.22s both; }
+    .hero-stagger-3 { animation: hero-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.38s both; }
+    .hero-stagger-4 { animation: hero-enter 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.54s both; }
+    @keyframes hero-enter {
+      from { opacity: 0; transform: translateY(22px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* CTA button pulse ring (starts after hero entrance finishes) */
+    @keyframes cta-ring {
+      0%   { box-shadow: 0 4px 20px rgba(59,97,196,0.30), 0 0 0 0   rgba(59,97,196,0.18); }
+      60%  { box-shadow: 0 4px 24px rgba(59,97,196,0.38), 0 0 0 12px rgba(59,97,196,0); }
+      100% { box-shadow: 0 4px 20px rgba(59,97,196,0.30), 0 0 0 0   rgba(59,97,196,0); }
+    }
+    .btn-cta-pulse { animation: cta-ring 3s ease-out 1.6s infinite; }
+
+    /* Hero stat colored backgrounds */
+    .hero-stat-c1 { background: rgba(59,97,196,0.05); }
+    .hero-stat-c2 { background: rgba(5,150,105,0.05); }
+    .hero-stat-c3 { background: rgba(232,124,62,0.05); }
+
+    /* Pricing Pro card elevation */
+    .pricing-elevated {
+      background: rgba(59,97,196,0.04) !important;
+      box-shadow: 0 0 0 2px rgba(59,97,196,0.22), 0 8px 40px rgba(59,97,196,0.14);
+      position: relative; z-index: 2;
+    }
+    .pricing-elevated .pricing-price { color: #3B61C4; }
+
+    /* Scroll progress bar */
+    .scroll-progress {
+      position: fixed; top: 0; left: 0; right: 0; height: 3px; z-index: 200;
+      background: linear-gradient(to right, #3B61C4, #7C5CBF);
+      transform-origin: left; transform: scaleX(0);
+      pointer-events: none;
+    }
+
     /* SEO prerender */
     .seo-prerender {
       position: absolute; width: 1px; height: 1px;
@@ -857,6 +905,7 @@
       .how-cell { padding: 36px 24px; }
       .outcome-strip { grid-template-columns: 1fr; }
       .outcome-card { padding: 36px 24px; }
+      .outcome-metric { font-size: 52px; }
       .product-inner { grid-template-columns: 1fr; gap: 40px; padding: 64px 20px; }
       .product-inner.rev { direction: ltr; }
       .pricing-grid { grid-template-columns: 1fr; }
@@ -866,7 +915,7 @@
       .hero-stats { flex-direction: column; }
       .hero-stat { border-right: none; border-bottom: 1px solid var(--border); }
       .hero-stat:last-child { border-bottom: none; }
-      .finalcta { padding: 80px 20px; }
+      .finalcta { padding: 90px 24px; }
       .testi-header { margin-bottom: 40px; }
     }
 
@@ -1016,30 +1065,30 @@
             <div className="hero-aurora-layer"></div>
           </div>
           <section className="hero" style={{position:'relative',zIndex:1}}>
-            <p className="hero-eyebrow"><span className="hero-eyebrow-dot" /><strong>30,000+</strong> students in the StudyEdge community</p>
-            <h1 className="hero-h1">
+            <p className="hero-eyebrow hero-stagger-1"><span className="hero-eyebrow-dot" /><strong>30,000+</strong> students in the StudyEdge community</p>
+            <h1 className="hero-h1 hero-stagger-2">
               Your grades aren't<br />
               the problem.<br />
               <em>Your system is.</em>
             </h1>
-            <p className="hero-sub">
+            <p className="hero-sub hero-stagger-3">
               StudyEdge builds your schedule, plans every session minute by minute, and runs your study sessions with flashcards, quizzes, and active recall built in. One app. All semester.
             </p>
-            <div className="hero-cta">
-              <button className="btn btn-primary-lg" onClick={() => goTo('/app?signup=1')}>Start for free</button>
+            <div className="hero-cta hero-stagger-4">
+              <button className="btn btn-primary-lg btn-cta-pulse" onClick={() => goTo('/app?signup=1')}>Start for free</button>
               <p className="hero-fine">No credit card required. Free plan available.</p>
             </div>
             <div className="hero-divider" />
             <div className="hero-stats">
-              <div className="hero-stat">
+              <div className="hero-stat hero-stat-c1">
                 <div className="hero-stat-num" style={{color:'#3B61C4'}}>30k+</div>
                 <div className="hero-stat-label">Community</div>
               </div>
-              <div className="hero-stat">
+              <div className="hero-stat hero-stat-c2">
                 <div className="hero-stat-num" style={{color:'#059669'}}>Free</div>
                 <div className="hero-stat-label">To start</div>
               </div>
-              <div className="hero-stat">
+              <div className="hero-stat hero-stat-c3">
                 <div className="hero-stat-num" style={{color:'#E87C3E'}}>1 app</div>
                 <div className="hero-stat-label">All your courses</div>
               </div>
@@ -1057,18 +1106,21 @@
         {
           metric: 'finally consistent',
           metricClass: 'om-blue',
+          bg: 'rgba(59,97,196,0.04)',
           claim: "I've always struggled to stay consistent, then StudyEdge just planned everything for me. I didn't have to think, I just had to show up. My hours went up, my grades went up, and for the first time I actually felt in control of my semester.",
           who: 'Andy G., Undergraduate'
         },
         {
           metric: 'top of my cohort',
           metricClass: 'om-purple',
+          bg: 'rgba(124,92,191,0.05)',
           claim: "If you want to stay mediocre at studying, don't use this. I went from scraping by to leading my cohort. The scheduling, the coaching, the daily plan, it executes everything for you. I didn't change how hard I worked. I changed how smart I worked.",
           who: 'Danny K., PhD Student'
         },
         {
           metric: 'one app. all semester.',
           metricClass: 'om-green',
+          bg: 'rgba(5,150,105,0.04)',
           claim: "First AI study platform I can genuinely say has it all. Week-by-week plans, grade tracking, flashcards, quizzes, all connected, all automatic. My prep time was cut in half. Nothing else comes close.",
           who: 'Charlotte B., University Student'
         },
@@ -1077,7 +1129,7 @@
         <div className="outcome-wrap">
           <div className="outcome-strip">
             {outcomes.map((o, i) => (
-              <div className="outcome-card fade-up" key={i}>
+              <div className="outcome-card fade-up" key={i} style={{background:o.bg}}>
                 <div className={`outcome-metric ${o.metricClass}`}><em>{o.metric}</em></div>
                 <p className="outcome-claim">{o.claim}</p>
                 <div className="outcome-line" />
@@ -1969,7 +2021,7 @@
                 <button className="btn btn-ghost btn-block" onClick={() => goSignup(null)}>Start for free</button>
               </div>
 
-              <div className="pricing-cell featured">
+              <div className="pricing-cell featured pricing-elevated">
                 <div className="pricing-badge">Most popular</div>
                 <div className="pricing-tier">Pro</div>
                 <div className="pricing-price">
@@ -2021,10 +2073,10 @@
         <div className="finalcta">
           <div className="finalcta-accent-line" />
           <h2 className="finalcta-h2">
-            Your semester isn't going<br />to <em style={{color:'var(--accent)'}}>plan itself.</em>
+            Your semester isn't going<br />to <em style={{color:'rgba(255,255,255,0.68)'}}>plan itself.</em>
           </h2>
           <p className="finalcta-sub">3-day free trial · Cancel anytime · Takes three minutes to set up.</p>
-          <button className="btn btn-primary-lg" onClick={() => goTo('/app?signup=1&plan=pro&billing=weekly&trial=1')}>Start Free Trial</button>
+          <button className="btn-cta-white" onClick={() => goTo('/app?signup=1&plan=pro&billing=weekly&trial=1')}>Start Free Trial</button>
         </div>
       );
     }
@@ -2071,7 +2123,21 @@
           { threshold: 0.1 }
         );
         document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
-        return () => io.disconnect();
+
+        const bar = document.createElement('div');
+        bar.className = 'scroll-progress';
+        document.body.prepend(bar);
+        const onScroll = () => {
+          const pct = window.scrollY / (document.body.scrollHeight - window.innerHeight);
+          bar.style.transform = 'scaleX(' + Math.min(pct, 1) + ')';
+        };
+        window.addEventListener('scroll', onScroll, { passive: true });
+
+        return () => {
+          io.disconnect();
+          window.removeEventListener('scroll', onScroll);
+          if (bar.parentNode) bar.remove();
+        };
       }, []);
 
       return (
