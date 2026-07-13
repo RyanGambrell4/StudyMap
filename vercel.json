@@ -1275,6 +1275,18 @@
         {
             "source": "/is-a-2-7-gpa-good",
             "destination": "/is-a-2-7-gpa-good.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-sociology",
+            "destination": "/blog/how-to-study-for-sociology.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-accounting",
+            "destination": "/blog/how-to-study-for-accounting.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-english-literature",
+            "destination": "/blog/how-to-study-for-english-literature.html"
         }
     ]
 }
