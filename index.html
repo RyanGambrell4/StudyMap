@@ -485,13 +485,15 @@
     }
     .btn-primary { background: var(--accent); color: #fff; padding: 11px 22px; font-size: 14px; }
     .btn-primary:hover { background: #2D4FA8; transform: translateY(-1px); }
-    .btn-primary-lg { background: var(--accent); color: #fff; padding: 15px 38px; font-size: 16px; border-radius: 10px; }
-    .btn-primary-lg:hover { background: #2D4FA8; transform: translateY(-1px); }
+    .btn-primary-lg { background: linear-gradient(135deg, #3B61C4 0%, #7C5CBF 100%); color: #fff; padding: 15px 38px; font-size: 16px; border-radius: 10px; box-shadow: 0 4px 20px rgba(59,97,196,0.30); }
+    .btn-primary-lg:hover { background: linear-gradient(135deg, #2D4FA8 0%, #6649a3 100%); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(59,97,196,0.38); }
     .btn-ghost {
       background: transparent; color: var(--muted);
       border: 1px solid var(--border); padding: 13px 24px; font-size: 14px;
     }
-    .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.18); }
+    .btn-ghost:hover { color: var(--text); border-color: rgba(0,0,0,0.15); }
+    .btn-dark { background: #111111; color: #fff; padding: 13px 24px; font-size: 14px; border: none; }
+    .btn-dark:hover { background: #2a2a2a; transform: translateY(-1px); }
     .btn-block { display: block; width: 100%; text-align: center; }
 
     /* Hero */
@@ -502,11 +504,23 @@
       margin: 0 auto;
     }
     .hero-eyebrow {
-      font-size: 14px; font-weight: 600;
-      letter-spacing: 0.15em; text-transform: uppercase;
-      color: var(--muted); margin-bottom: 36px;
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.09);
+      border-radius: 999px; padding: 6px 16px;
+      font-size: 13px; font-weight: 500;
+      letter-spacing: 0.01em; text-transform: none;
+      color: var(--muted); margin-bottom: 40px;
     }
-    .hero-eyebrow strong { color: var(--accent); font-weight: 700; }
+    .hero-eyebrow strong { color: var(--text); font-weight: 700; }
+    .hero-eyebrow-dot {
+      width: 7px; height: 7px; border-radius: 50%; background: #059669;
+      display: inline-block; flex-shrink: 0;
+      animation: pulse-dot 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.45; }
+    }
     .hero-h1 {
       font-family: var(--serif); font-weight: 500;
       font-size: clamp(54px, 7.8vw, 108px);
@@ -605,6 +619,9 @@
       color: #3B61C4; line-height: 1; margin-bottom: 12px;
     }
     .outcome-metric em { font-style: italic; }
+    .om-blue   { color: #3B61C4; }
+    .om-purple { color: #7C5CBF; }
+    .om-green  { color: #059669; }
     .outcome-claim { font-size: 14px; color: var(--muted); line-height: 1.65; margin-bottom: 24px; }
     .outcome-line { width: 24px; height: 1px; background: var(--dim); margin-bottom: 10px; }
     .outcome-who { font-size: 13px; color: var(--dim); font-weight: 500; }
@@ -613,9 +630,17 @@
     .section-wrap { border-top: 1px solid var(--border); }
     .section { padding: 96px 40px; max-width: 1120px; margin: 0 auto; }
     .section-label {
-      font-size: 11px; font-weight: 600; letter-spacing: 0.18em;
-      text-transform: uppercase; color: var(--dim); margin-bottom: 24px;
+      display: inline-flex; align-items: center;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.11em;
+      text-transform: uppercase;
+      background: rgba(0,0,0,0.04); border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 999px; padding: 5px 13px;
+      color: var(--muted); margin-bottom: 20px;
     }
+    .sl-blue   { background: rgba(59,97,196,0.09);  border-color: rgba(59,97,196,0.25);  color: #3B61C4; }
+    .sl-purple { background: rgba(124,92,191,0.09); border-color: rgba(124,92,191,0.25); color: #7C5CBF; }
+    .sl-orange { background: rgba(232,124,62,0.09); border-color: rgba(232,124,62,0.25); color: #C2611A; }
+    .sl-green  { background: rgba(16,185,129,0.09); border-color: rgba(16,185,129,0.25); color: #059669; }
     .section-h2 {
       font-family: var(--serif); font-weight: 500;
       font-size: clamp(38px, 4.8vw, 68px);
@@ -630,6 +655,12 @@
       margin-top: 60px; border: 1px solid var(--border);
     }
     .how-cell { background: var(--bg); padding: 48px 36px; }
+    .how-cell-c1 { border-top: 3px solid #3B61C4; }
+    .how-cell-c2 { border-top: 3px solid #7C5CBF; }
+    .how-cell-c3 { border-top: 3px solid #10B981; }
+    .how-cell-c1 .how-num { color: #3B61C4 !important; }
+    .how-cell-c2 .how-num { color: #7C5CBF !important; }
+    .how-cell-c3 .how-num { color: #10B981 !important; }
     .how-num {
       font-family: var(--serif); font-size: 64px; font-weight: 500; color: var(--accent) !important;
       color: var(--dim); line-height: 1; margin-bottom: 28px;
@@ -689,8 +720,11 @@
       background: var(--bg2); border: 1px solid var(--border);
       border-radius: 12px; padding: 28px 28px;
       width: 340px; flex-shrink: 0;
+      border-top: 3px solid transparent;
     }
-    .tq-stars { color: var(--accent); font-size: 13px; margin-bottom: 12px; letter-spacing: 2px; }
+    .tq:nth-child(odd)  { border-top-color: #3B61C4; }
+    .tq:nth-child(even) { border-top-color: #7C5CBF; }
+    .tq-stars { color: #F59E0B; font-size: 13px; margin-bottom: 12px; letter-spacing: 2px; }
     .tq-t {
       font-size: 14px; color: var(--text); line-height: 1.65;
       margin-bottom: 16px;
@@ -758,6 +792,12 @@
     .finalcta {
       padding: 128px 24px; text-align: center;
       border-top: 1px solid var(--border);
+      background: linear-gradient(180deg, #F7F6F3 0%, #EEF2FF 100%);
+    }
+    .finalcta-accent-line {
+      width: 56px; height: 4px;
+      background: linear-gradient(90deg, #3B61C4, #7C5CBF);
+      border-radius: 2px; margin: 0 auto 48px;
     }
     .finalcta-h2 {
       font-family: var(--serif); font-weight: 500; font-style: italic;
@@ -976,7 +1016,7 @@
             <div className="hero-aurora-layer"></div>
           </div>
           <section className="hero" style={{position:'relative',zIndex:1}}>
-            <p className="hero-eyebrow"><strong>30,000+</strong> students in the StudyEdge community</p>
+            <p className="hero-eyebrow"><span className="hero-eyebrow-dot" /><strong>30,000+</strong> students in the StudyEdge community</p>
             <h1 className="hero-h1">
               Your grades aren't<br />
               the problem.<br />
@@ -992,15 +1032,15 @@
             <div className="hero-divider" />
             <div className="hero-stats">
               <div className="hero-stat">
-                <div className="hero-stat-num">30k+</div>
+                <div className="hero-stat-num" style={{color:'#3B61C4'}}>30k+</div>
                 <div className="hero-stat-label">Community</div>
               </div>
               <div className="hero-stat">
-                <div className="hero-stat-num">Free</div>
+                <div className="hero-stat-num" style={{color:'#059669'}}>Free</div>
                 <div className="hero-stat-label">To start</div>
               </div>
               <div className="hero-stat">
-                <div className="hero-stat-num">1 app</div>
+                <div className="hero-stat-num" style={{color:'#E87C3E'}}>1 app</div>
                 <div className="hero-stat-label">All your courses</div>
               </div>
             </div>
@@ -1016,16 +1056,19 @@
       const outcomes = [
         {
           metric: 'finally consistent',
+          metricClass: 'om-blue',
           claim: "I've always struggled to stay consistent, then StudyEdge just planned everything for me. I didn't have to think, I just had to show up. My hours went up, my grades went up, and for the first time I actually felt in control of my semester.",
           who: 'Andy G., Undergraduate'
         },
         {
           metric: 'top of my cohort',
+          metricClass: 'om-purple',
           claim: "If you want to stay mediocre at studying, don't use this. I went from scraping by to leading my cohort. The scheduling, the coaching, the daily plan, it executes everything for you. I didn't change how hard I worked. I changed how smart I worked.",
           who: 'Danny K., PhD Student'
         },
         {
           metric: 'one app. all semester.',
+          metricClass: 'om-green',
           claim: "First AI study platform I can genuinely say has it all. Week-by-week plans, grade tracking, flashcards, quizzes, all connected, all automatic. My prep time was cut in half. Nothing else comes close.",
           who: 'Charlotte B., University Student'
         },
@@ -1035,7 +1078,7 @@
           <div className="outcome-strip">
             {outcomes.map((o, i) => (
               <div className="outcome-card fade-up" key={i}>
-                <div className="outcome-metric"><em>{o.metric}</em></div>
+                <div className={`outcome-metric ${o.metricClass}`}><em>{o.metric}</em></div>
                 <p className="outcome-claim">{o.claim}</p>
                 <div className="outcome-line" />
                 <div className="outcome-who">{o.who}</div>
@@ -1067,14 +1110,14 @@
       return (
         <div className="section-wrap" id="how">
           <div className="section">
-            <p className="section-label">How it works</p>
+            <p className="section-label sl-blue">How it works</p>
             <h2 className="section-h2">
               Three reasons students fail.<br />
               <em>None of them are intelligence.</em>
             </h2>
             <div className="how-grid fade-up">
-              {steps.map(s => (
-                <div className="how-cell" key={s.n}>
+              {steps.map((s, i) => (
+                <div className={`how-cell how-cell-c${i + 1}`} key={s.n}>
                   <div className="how-num">{s.n}</div>
                   <div className="how-title">{s.title}</div>
                   <div className="how-body">{s.body}</div>
@@ -1757,6 +1800,7 @@
       const features = [
         {
           label: 'Session Blueprint',
+          labelClass: 'sl-blue',
           h3: <>Every session planned<br /><em>before you sit down.</em></>,
           body: "Before you open a single tab, Session Blueprint builds a minute-by-minute study plan for your course, your exam date, and your exact goal today. Warm-up, deep review, active recall, synthesis, all sequenced. You just execute.",
           card: true,
@@ -1764,6 +1808,7 @@
         },
         {
           label: 'Focus Mode',
+          labelClass: 'sl-orange',
           h3: <>The session runs itself.<br /><em>You just show up.</em></>,
           body: "A structured timer that runs each block with built-in flashcards, recall prompts, and quizzes. No tab-switching, no deciding what to do next. The work is already organized. You just do it.",
           card: 'focus',
@@ -1771,6 +1816,7 @@
         },
         {
           label: 'Grade Hub',
+          labelClass: 'sl-green',
           h3: <>Know exactly where<br /><em>you stand.</em></>,
           body: "Your exact projected grade, what you need on every remaining assignment, and three different scenarios to hit your target. Not a guess. A calculation. Most students find out too late, this tells you now.",
           card: 'grade',
@@ -1778,6 +1824,7 @@
         },
         {
           label: 'AI Study Coach',
+          labelClass: 'sl-purple',
           h3: <>A week-by-week plan<br /><em>built for your exam.</em></>,
           body: "The AI Coach builds a full prep plan for each course, adapted to your exact exam date and how much time you have left. It shifts focus automatically as the semester changes.",
           card: 'coach',
@@ -1790,7 +1837,7 @@
             <div className="product-wrap" key={f.label} style={{background: i % 2 === 1 ? 'var(--bg1)' : 'var(--bg)'}}>
               <div className={'product-inner' + (f.rev ? ' rev' : '')}>
                 <div className="product-text-block">
-                  <p className="section-label">{f.label}</p>
+                  <p className={`section-label ${f.labelClass}`}>{f.label}</p>
                   <h3 className="product-h3">{f.h3}</h3>
                   <p className="product-body">{f.body}</p>
                 </div>
@@ -1816,7 +1863,9 @@
       return (
         <div className="testi-wrap">
           <div className="testi-header fade-up">
-            <p className="section-label" style={{textAlign:'center'}}>What students say</p>
+            <div style={{display:'flex',justifyContent:'center',marginBottom:20}}>
+              <p className="section-label sl-purple" style={{marginBottom:0}}>What students say</p>
+            </div>
             <h2 className="section-h2" style={{textAlign:'center'}}>
               Grades don't improve<br /><em>by accident.</em>
             </h2>
@@ -1882,7 +1931,7 @@
       return (
         <div className="pricing-wrap" id="pricing">
           <div className="pricing-section">
-            <p className="section-label">Pricing</p>
+            <p className="section-label sl-green">Pricing</p>
             <h2 className="section-h2 fade-up">
               Less than a coffee,<br />
               <em>free to start.</em>
@@ -1957,7 +2006,7 @@
                   <li className="pf em"><span className="pf-dot" /><span>Advanced exam analytics</span></li>
                   <li className="pf em"><span className="pf-dot" /><span>Predicted exam score</span></li>
                 </ul>
-                <button className="btn btn-ghost btn-block" style={{padding:'14px'}} onClick={() => goSignup('unlimited')}>Get Unlimited</button>
+                <button className="btn btn-dark btn-block" style={{padding:'14px'}} onClick={() => goSignup('unlimited')}>Get Unlimited</button>
                 <p style={{textAlign:'center', fontSize:12, color:'var(--dim)', marginTop:10}}>Cancel anytime</p>
               </div>
 
@@ -1970,6 +2019,7 @@
     function FinalCTA() {
       return (
         <div className="finalcta">
+          <div className="finalcta-accent-line" />
           <h2 className="finalcta-h2">
             Your semester isn't going<br />to <em style={{color:'var(--accent)'}}>plan itself.</em>
           </h2>
