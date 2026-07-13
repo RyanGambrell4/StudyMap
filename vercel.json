@@ -1211,6 +1211,38 @@
         {
             "source": "/blog/how-to-memorize-notes-fast",
             "destination": "/blog/how-to-memorize-notes-fast.html"
+        },
+        {
+            "source": "/is-a-2-0-gpa-good",
+            "destination": "/is-a-2-0-gpa-good.html"
+        },
+        {
+            "source": "/is-a-2-5-gpa-good",
+            "destination": "/is-a-2-5-gpa-good.html"
+        },
+        {
+            "source": "/is-a-3-3-gpa-good",
+            "destination": "/is-a-3-3-gpa-good.html"
+        },
+        {
+            "source": "/is-a-3-8-gpa-good",
+            "destination": "/is-a-3-8-gpa-good.html"
+        },
+        {
+            "source": "/is-a-4-0-gpa-good",
+            "destination": "/is-a-4-0-gpa-good.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-chemistry",
+            "destination": "/blog/how-to-study-for-chemistry.html"
+        },
+        {
+            "source": "/blog/act-study-guide",
+            "destination": "/blog/act-study-guide.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-history",
+            "destination": "/blog/how-to-study-for-history.html"
         }
     ]
 }
