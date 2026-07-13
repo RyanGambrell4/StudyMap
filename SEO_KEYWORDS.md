@@ -69,3 +69,23 @@ High volume but very competitive. Worth tracking, not chasing for first 90 days.
 - After 30 days of indexing, pull GSC query report and update this file with: impressions, clicks, average position per Tier 1 page.
 - Watch for cannibalization between `/gpa-calculator` and any future Tier 2 blog post on GPA recovery.
 - Brand disambiguation: pages must consistently use "StudyEdge AI" (never "Study Edge") to avoid Google merging us with studyedge.com tutoring company. The `/not-affiliated-with-study-edge` canonical page handles this.
+
+## Linkable-asset layer (added 2026-07-13)
+
+Assets built specifically to earn backlinks (tools + original data + AP subject templates + cited research). Each is cross-linked from top existing SEO pages (`/gpa-calculator`, `/ai-flashcard-maker`, `/spaced-repetition-explained`) and added to `sitemap.xml`.
+
+| Asset | URL | Type | Backlink hook |
+|---|---|---|---|
+| GPA & Grade Calculator (interactive) | `/gpa-calculator` | Tool (upgraded) | Real interactive widget added: live GPA math, "grade needed on final" mode. Teachers + school resource pages. |
+| 2026 Study Behavior Report | `/how-students-study-report-2026` | Original data | Report + Dataset schema, CC BY 4.0, embed code. Ed journalists, counselor blogs. |
+| AP Exam Study Schedule Templates (hub) | `/ap-exam-study-schedule-templates` | Template hub | CollectionPage schema, unit-weight tables. Print-friendly. r/APStudents, teacher blogs. |
+| AP Calculus AB schedule | `/ap-calculus-ab-study-schedule` | Subject template | HowTo schema. Search: "AP Calc AB study schedule" (~2k/mo Apr-May). |
+| AP Biology schedule | `/ap-biology-study-schedule` | Subject template | HowTo schema. Search: "AP Bio study schedule" (~2.5k/mo Apr-May). |
+| APUSH schedule | `/apush-study-schedule` | Subject template | HowTo schema. Search: "APUSH study schedule" (~4k/mo Apr-May). |
+| Spaced Repetition vs Cramming | `/spaced-repetition-vs-cramming` | Research review | ScholarlyArticle schema. Cited: Ebbinghaus, Cepeda et al. 2006/2008, Dunlosky 2013. Blogs/teachers cite academic-tone pieces. |
+| Free Flashcard Converter | `/flashcard-converter` | Interactive tool | SoftwareApplication + HowTo schema. Client-side. Anki/Quizlet import. Anki forums, r/Anki, study YouTubers. |
+
+**Ongoing tasks:**
+- Submit new URLs to Google Search Console URL Inspection for immediate re-crawl.
+- Consider outreach: send the 2026 Study Report to 5 education journalists (Inside Higher Ed, The Chronicle, EdSurge) and 5 large study-tip YouTubers.
+- Track backlinks with a monthly Ahrefs/Semrush pull. First measurement: 2026-08-13.

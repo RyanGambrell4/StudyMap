@@ -560,44 +560,63 @@ export default function LandingPage({ onGetStarted }) {
       {/* ── Nav ── */}
       <nav style={{
         position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50,
-        padding: '16px 32px',
+        padding: '14px 32px',
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         background: scrollY > 40 ? 'rgba(6,6,20,0.92)' : 'transparent',
         backdropFilter: scrollY > 40 ? 'blur(16px)' : 'none',
         borderBottom: scrollY > 40 ? '1px solid rgba(255,255,255,0.06)' : '1px solid transparent',
         transition: 'all 0.3s ease',
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+        {/* Left: logo */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1' }}>
           <img
             src="/favicon.png"
             alt="StudyEdge AI"
-            style={{ width: 34, height: 34, borderRadius: 10, objectFit: 'contain' }}
+            style={{ width: 32, height: 32, borderRadius: 9, objectFit: 'contain' }}
           />
-          <span style={{ color: '#fff', fontWeight: 700, fontSize: 18, letterSpacing: '-0.3px' }}>StudyEdge AI</span>
+          <span style={{ color: '#fff', fontWeight: 700, fontSize: 17, letterSpacing: '-0.3px' }}>StudyEdge AI</span>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <a
-            href="/blog/"
-            style={{
-              color: 'rgba(226,232,240,0.78)', textDecoration: 'none',
-              fontSize: 14, fontWeight: 600, padding: '9px 14px',
-              borderRadius: 8, transition: 'color 0.2s',
-            }}
-            onMouseEnter={e => e.currentTarget.style.color = '#fff'}
-            onMouseLeave={e => e.currentTarget.style.color = 'rgba(226,232,240,0.78)'}
-          >
-            Blog
-          </a>
+
+        {/* Center: nav links */}
+        <div style={{
+          position: 'absolute', left: '50%', transform: 'translateX(-50%)',
+          display: 'flex', alignItems: 'center', gap: '2px',
+        }}>
+          {[
+            { label: 'How it works', href: '#how-it-works' },
+            { label: 'Features', href: '#features' },
+            { label: 'Pricing', href: '#pricing' },
+            { label: 'Blog', href: '/blog/' },
+          ].map(({ label, href }) => (
+            <a
+              key={label}
+              href={href}
+              style={{
+                color: 'rgba(226,232,240,0.65)', textDecoration: 'none',
+                fontSize: 14, fontWeight: 500, padding: '8px 14px',
+                borderRadius: 8, transition: 'color 0.2s, background 0.2s',
+                letterSpacing: '-0.005em',
+              }}
+              onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.06)' }}
+              onMouseLeave={e => { e.currentTarget.style.color = 'rgba(226,232,240,0.65)'; e.currentTarget.style.background = 'transparent' }}
+            >
+              {label}
+            </a>
+          ))}
+        </div>
+
+        {/* Right: auth */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: '1', justifyContent: 'flex-end' }}>
           <button
             onClick={() => onGetStarted('login')}
             style={{
               background: 'none', border: '1px solid rgba(255,255,255,0.12)',
-              color: '#e2e8f0', borderRadius: 10, padding: '9px 20px',
+              color: 'rgba(226,232,240,0.85)', borderRadius: 9, padding: '8px 18px',
               fontSize: 14, fontWeight: 600, cursor: 'pointer',
               transition: 'all 0.2s',
             }}
-            onMouseEnter={e => e.target.style.borderColor = 'rgba(255,255,255,0.25)'}
-            onMouseLeave={e => e.target.style.borderColor = 'rgba(255,255,255,0.12)'}
+            onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.28)'; e.currentTarget.style.color = '#fff' }}
+            onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.12)'; e.currentTarget.style.color = 'rgba(226,232,240,0.85)' }}
           >
             Sign in
           </button>
@@ -605,13 +624,13 @@ export default function LandingPage({ onGetStarted }) {
             onClick={() => onGetStarted('signup')}
             style={{
               background: 'linear-gradient(135deg, #6366f1, #4f46e5)',
-              border: 'none', color: '#fff', borderRadius: 10, padding: '9px 22px',
+              border: 'none', color: '#fff', borderRadius: 9, padding: '8px 20px',
               fontSize: 14, fontWeight: 700, cursor: 'pointer',
               boxShadow: '0 0 20px rgba(99,102,241,0.3)',
               transition: 'all 0.2s',
             }}
-            onMouseEnter={e => e.target.style.boxShadow = '0 0 30px rgba(99,102,241,0.5)'}
-            onMouseLeave={e => e.target.style.boxShadow = '0 0 20px rgba(99,102,241,0.3)'}
+            onMouseEnter={e => e.currentTarget.style.boxShadow = '0 0 30px rgba(99,102,241,0.5)'}
+            onMouseLeave={e => e.currentTarget.style.boxShadow = '0 0 20px rgba(99,102,241,0.3)'}
           >
             Get Started Free
           </button>
@@ -711,7 +730,7 @@ export default function LandingPage({ onGetStarted }) {
               }}>S</span>
               <span>StudyEdge AI</span>
               <span style={{ width: 1, height: 12, background: 'rgba(255,255,255,0.1)' }} />
-              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>getstudyedge.com</span>
+              <span style={{ color: 'rgba(255,255,255,0.5)', fontSize: 12 }}>Web + iOS</span>
             </div>
 
             {/* Headline */}
@@ -1093,107 +1112,6 @@ export default function LandingPage({ onGetStarted }) {
             position: 'absolute', inset: 0, zIndex: 5, pointerEvents: 'none',
             background: 'linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0) 30%, rgba(0,0,0,0) 70%, rgba(0,0,0,0.4) 100%), radial-gradient(ellipse at center, rgba(0,0,0,0) 60%, rgba(0,0,0,0.5) 100%)',
           }} />
-        </div>
-      </section>
-
-      {/* ── Migration banner: Quizlet & Chegg refugees ── */}
-      <section className="se-section" style={{ padding: '60px 24px 0', maxWidth: 1100, margin: '0 auto' }}>
-        <div data-reveal style={{
-          background: 'linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(124,92,252,0.06) 50%, rgba(45,212,191,0.05) 100%)',
-          border: '1px solid rgba(99,102,241,0.22)',
-          borderRadius: 20,
-          padding: '36px 40px',
-          position: 'relative',
-          overflow: 'hidden',
-        }}>
-          {/* Background accent */}
-          <div aria-hidden="true" style={{ position: 'absolute', top: -60, right: -60, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,92,252,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
-
-          <div style={{ display: 'flex', alignItems: 'center', gap: 40, flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
-            {/* Left: headline */}
-            <div style={{ flex: '1 1 320px', minWidth: 280 }}>
-              <div style={{
-                display: 'inline-flex', alignItems: 'center', gap: 7,
-                background: 'rgba(250,204,21,0.1)', border: '1px solid rgba(250,204,21,0.25)',
-                borderRadius: 999, padding: '4px 12px', fontSize: 11, fontWeight: 700,
-                color: '#fbbf24', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14,
-              }}>
-                📢 Quizlet killed Q-Chat. Chegg is raising prices. You deserve better.
-              </div>
-              <h2 style={{
-                fontSize: 'clamp(1.4rem, 3vw, 1.9rem)', fontWeight: 800, letterSpacing: '-0.04em',
-                color: '#fff', lineHeight: 1.1, marginBottom: 10,
-              }}>
-                The AI tutor Quizlet killed<br />
-                <span style={{ background: 'linear-gradient(135deg, #6366f1, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-                  is here. And it's better.
-                </span>
-              </h2>
-              <p style={{ color: 'rgba(226,232,240,0.55)', fontSize: 14.5, lineHeight: 1.6, marginBottom: 0, maxWidth: 460 }}>
-                Q-Chat was shut down in June 2025. Chegg's AI features cost more and do less. StudyEdge gives you a personal AI Study Coach, spaced-repetition flashcards, practice exams, and a daily study plan — all built around <em>your</em> courses and exam dates.
-              </p>
-            </div>
-
-            {/* Right: comparison cards */}
-            <div style={{ flex: '1 1 280px', display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[
-                {
-                  logo: '🔵',
-                  name: 'Quizlet',
-                  pain: 'Q-Chat AI tutor discontinued',
-                  verdict: 'Dead feature',
-                  color: '#3b82f6',
-                  bad: true,
-                },
-                {
-                  logo: '🟡',
-                  name: 'Chegg',
-                  pain: 'Price hikes, no personalized plan',
-                  verdict: 'Overpriced',
-                  color: '#f59e0b',
-                  bad: true,
-                },
-                {
-                  logo: '🟣',
-                  name: 'StudyEdge AI',
-                  pain: 'AI coach + plan + flashcards + exams',
-                  verdict: '7 days free →',
-                  color: '#6366f1',
-                  bad: false,
-                },
-              ].map(({ logo, name, pain, verdict, color, bad }) => (
-                <div
-                  key={name}
-                  onClick={!bad ? goTrial : undefined}
-                  style={{
-                    display: 'flex', alignItems: 'center', gap: 14,
-                    padding: '13px 16px', borderRadius: 12,
-                    background: bad ? 'rgba(255,255,255,0.025)' : 'rgba(99,102,241,0.12)',
-                    border: bad ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(99,102,241,0.35)',
-                    cursor: bad ? 'default' : 'pointer',
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={e => { if (!bad) { e.currentTarget.style.background = 'rgba(99,102,241,0.18)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.55)' } }}
-                  onMouseLeave={e => { if (!bad) { e.currentTarget.style.background = 'rgba(99,102,241,0.12)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.35)' } }}
-                >
-                  <span style={{ fontSize: 20, flexShrink: 0 }}>{logo}</span>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ fontSize: 13.5, fontWeight: 700, color: bad ? 'rgba(255,255,255,0.7)' : '#fff', marginBottom: 2 }}>{name}</div>
-                    <div style={{ fontSize: 12, color: 'rgba(226,232,240,0.45)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pain}</div>
-                  </div>
-                  <div style={{
-                    background: bad ? 'rgba(239,68,68,0.12)' : 'rgba(99,102,241,0.25)',
-                    border: bad ? '1px solid rgba(239,68,68,0.25)' : '1px solid rgba(99,102,241,0.4)',
-                    color: bad ? '#f87171' : '#a5b4fc',
-                    borderRadius: 8, padding: '4px 10px', fontSize: 11.5, fontWeight: 700,
-                    whiteSpace: 'nowrap', flexShrink: 0,
-                  }}>
-                    {verdict}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </section>
 
@@ -1655,7 +1573,7 @@ export default function LandingPage({ onGetStarted }) {
       <div className="se-horizon" style={{ marginTop: 40 }} />
 
       {/* ── Features Grid ── */}
-      <section className="se-section" style={{
+      <section id="features" className="se-section" style={{
         maxWidth: 1000, margin: '0 auto', padding: '80px 24px 100px',
       }}>
         {/* Atmospheric washes */}
@@ -1668,13 +1586,13 @@ export default function LandingPage({ onGetStarted }) {
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
             fontSize: 11.5, fontWeight: 600, letterSpacing: '0.18em',
-            color: 'rgba(94,234,212,0.85)', textTransform: 'uppercase',
+            color: 'rgba(199,210,254,0.85)', textTransform: 'uppercase',
             padding: '6px 14px', borderRadius: 999,
-            background: 'rgba(45,212,191,0.10)',
-            border: '1px solid rgba(45,212,191,0.22)',
+            background: 'rgba(99,102,241,0.10)',
+            border: '1px solid rgba(99,102,241,0.22)',
             marginBottom: 22,
           }}>
-            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#2dd4bf', boxShadow: '0 0 10px #2dd4bf' }} />
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#6366f1', boxShadow: '0 0 10px #6366f1' }} />
             What's inside
           </div>
           <h2 style={{
@@ -1953,6 +1871,85 @@ export default function LandingPage({ onGetStarted }) {
         </div>
       </section>
 
+      {/* ── Migration banner: Quizlet & Chegg refugees ── */}
+      <section className="se-section" style={{ padding: '60px 24px 0', maxWidth: 1100, margin: '0 auto' }}>
+        <div data-reveal style={{
+          background: 'linear-gradient(135deg, rgba(99,102,241,0.08) 0%, rgba(124,92,252,0.06) 50%, rgba(45,212,191,0.05) 100%)',
+          border: '1px solid rgba(99,102,241,0.22)',
+          borderRadius: 20,
+          padding: '36px 40px',
+          position: 'relative',
+          overflow: 'hidden',
+        }}>
+          {/* Background accent */}
+          <div aria-hidden="true" style={{ position: 'absolute', top: -60, right: -60, width: 280, height: 280, borderRadius: '50%', background: 'radial-gradient(circle, rgba(124,92,252,0.12) 0%, transparent 70%)', pointerEvents: 'none' }} />
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: 40, flexWrap: 'wrap', position: 'relative', zIndex: 1 }}>
+            {/* Left: headline */}
+            <div style={{ flex: '1 1 320px', minWidth: 280 }}>
+              <div style={{
+                display: 'inline-flex', alignItems: 'center', gap: 7,
+                background: 'rgba(250,204,21,0.1)', border: '1px solid rgba(250,204,21,0.25)',
+                borderRadius: 999, padding: '4px 12px', fontSize: 11, fontWeight: 700,
+                color: '#fbbf24', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 14,
+              }}>
+                Quizlet killed Q-Chat. Chegg is raising prices. You deserve better.
+              </div>
+              <h2 style={{
+                fontSize: 'clamp(1.4rem, 3vw, 1.9rem)', fontWeight: 800, letterSpacing: '-0.04em',
+                color: '#fff', lineHeight: 1.1, marginBottom: 10,
+              }}>
+                The AI tutor Quizlet killed<br />
+                <span style={{ background: 'linear-gradient(135deg, #6366f1, #a78bfa)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                  is here. And it's better.
+                </span>
+              </h2>
+              <p style={{ color: 'rgba(226,232,240,0.55)', fontSize: 14.5, lineHeight: 1.6, marginBottom: 0, maxWidth: 460 }}>
+                Q-Chat was shut down in June 2025. Chegg's AI features cost more and do less. StudyEdge gives you a personal AI Study Coach, spaced-repetition flashcards, practice exams, and a daily study plan — all built around <em>your</em> courses and exam dates.
+              </p>
+            </div>
+
+            {/* Right: comparison cards */}
+            <div style={{ flex: '1 1 280px', display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {[
+                { name: 'Quizlet', pain: 'Q-Chat AI tutor discontinued', verdict: 'Dead feature', bad: true },
+                { name: 'Chegg', pain: 'Price hikes, no personalized plan', verdict: 'Overpriced', bad: true },
+                { name: 'StudyEdge AI', pain: 'AI coach + plan + flashcards + exams', verdict: '7 days free', bad: false },
+              ].map(({ name, pain, verdict, bad }) => (
+                <div
+                  key={name}
+                  onClick={!bad ? goTrial : undefined}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 14,
+                    padding: '13px 16px', borderRadius: 12,
+                    background: bad ? 'rgba(255,255,255,0.025)' : 'rgba(99,102,241,0.12)',
+                    border: bad ? '1px solid rgba(255,255,255,0.07)' : '1px solid rgba(99,102,241,0.35)',
+                    cursor: bad ? 'default' : 'pointer',
+                    transition: 'all 0.2s',
+                  }}
+                  onMouseEnter={e => { if (!bad) { e.currentTarget.style.background = 'rgba(99,102,241,0.18)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.55)' } }}
+                  onMouseLeave={e => { if (!bad) { e.currentTarget.style.background = 'rgba(99,102,241,0.12)'; e.currentTarget.style.borderColor = 'rgba(99,102,241,0.35)' } }}
+                >
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ fontSize: 13.5, fontWeight: 700, color: bad ? 'rgba(255,255,255,0.7)' : '#fff', marginBottom: 2 }}>{name}</div>
+                    <div style={{ fontSize: 12, color: 'rgba(226,232,240,0.45)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{pain}</div>
+                  </div>
+                  <div style={{
+                    background: bad ? 'rgba(239,68,68,0.12)' : 'rgba(99,102,241,0.25)',
+                    border: bad ? '1px solid rgba(239,68,68,0.25)' : '1px solid rgba(99,102,241,0.4)',
+                    color: bad ? '#f87171' : '#a5b4fc',
+                    borderRadius: 8, padding: '4px 10px', fontSize: 11.5, fontWeight: 700,
+                    whiteSpace: 'nowrap', flexShrink: 0,
+                  }}>
+                    {verdict}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
       {/* Features → Testimonials horizon */}
       <div className="se-horizon" />
 
@@ -2059,201 +2056,7 @@ export default function LandingPage({ onGetStarted }) {
         </p>
       </section>
 
-      {/* Testimonials → FAQ horizon */}
-      <div className="se-horizon" />
-
-      {/* ── FAQ ── */}
-      <section
-        id="faq"
-        className="se-section"
-        style={{ maxWidth: 880, margin: '0 auto', padding: '100px 24px 110px' }}
-      >
-        <div aria-hidden="true" className="se-wash" style={{
-          background:
-            'radial-gradient(640px 460px at 18% 10%, rgba(59,97,196,0.12), transparent 60%),' +
-            'radial-gradient(620px 460px at 92% 92%, rgba(124,92,252,0.10), transparent 60%)',
-        }} />
-        <div aria-hidden="true" className="se-grid" />
-
-        {/* Eyebrow + headline */}
-        <div data-reveal style={{ textAlign: 'center', marginBottom: 56 }}>
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            fontSize: 11.5, fontWeight: 600, letterSpacing: '0.18em',
-            color: 'rgba(199,210,254,0.85)', textTransform: 'uppercase',
-            padding: '6px 14px', borderRadius: 999,
-            background: 'rgba(59,97,196,0.12)',
-            border: '1px solid rgba(59,97,196,0.28)',
-            marginBottom: 22,
-          }}>
-            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#3B61C4', boxShadow: '0 0 10px #3B61C4' }} />
-            Questions, answered
-          </div>
-          <h2 style={{
-            fontSize: 'clamp(30px, 4.2vw, 50px)', fontWeight: 700,
-            color: '#fff', letterSpacing: '-0.035em', lineHeight: 1.04, margin: '0 0 16px',
-          }}>
-            Everything you'd ask before<br />
-            <span style={{
-              fontFamily: "'Instrument Serif', serif",
-              fontStyle: 'italic', fontWeight: 400, letterSpacing: '-0.02em',
-              background: 'linear-gradient(180deg, #ffffff 0%, #c7d2fe 100%)',
-              WebkitBackgroundClip: 'text', backgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-            }}>you start your trial.</span>
-          </h2>
-          <p style={{
-            fontSize: 16, color: 'rgba(226,232,240,0.55)',
-            maxWidth: 520, margin: '0 auto', lineHeight: 1.6, letterSpacing: '-0.005em',
-          }}>
-            Real answers to the things students actually email us about.
-          </p>
-        </div>
-
-        {/* Accordion */}
-        <div data-reveal data-reveal-delay="1" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {[
-            {
-              q: 'Is there a free version, or do I have to pay?',
-              a: (
-                <>
-                  Yes. The <strong>Free plan</strong> includes one course, basic session planning, and limited flashcards — no credit card required to sign up. <strong>Pro</strong> ($2.99/week) unlocks 5 courses, 100 AI actions per month, the AI Study Coach, Grade Hub, Focus Mode, and unlimited flashcards, and starts with a 7-day free trial (card required upfront — cancel before day 8 and you won't be charged). <strong>Unlimited</strong> ($4.99/week) removes the course and AI caps, and adds AI Tutor with session memory plus advanced Practice Exam analytics.
-                </>
-              ),
-            },
-            {
-              q: 'How does the 7-day Pro trial work?',
-              a: (
-                <>
-                  Card required upfront — you won't be charged during the 7-day trial. Just cancel before it ends and no payment is taken. After the trial, you're automatically moved to the free tier unless you keep Pro.
-                </>
-              ),
-            },
-            {
-              q: "What if my syllabus or course isn't already in the system?",
-              a: (
-                <>
-                  You can add any course. Drop your syllabus as a PDF or paste it as text, and StudyEdge pulls out exam dates, topics, weights, and assignments. No syllabus on hand? Add the course manually in about 30 seconds: pick the dates, enter your grading breakdown, and the AI builds the plan around it.
-                </>
-              ),
-            },
-            {
-              q: 'How is this different from Notion, Quizlet, or ChatGPT?',
-              a: (
-                <>
-                  Those tools each solve one piece. Notion is a blank canvas you have to build. Quizlet is a flashcard deck. ChatGPT doesn't know your courses, exam dates, or grades. StudyEdge does all four jobs together: it knows your syllabus, plans every session minute by minute, runs your focus blocks, and tells you the exact score you need on what's left to hit your grade target.
-                </>
-              ),
-            },
-            {
-              q: 'Does StudyEdge work for grad school and exams like the MCAT, LSAT, or GRE?',
-              a: (
-                <>
-                  Yes. Pre-med, law, and grad students are some of our most active users. You can add any standardized test as a course with its real exam date, and the AI builds a multi-week schedule that respects your other classes. Long content domains (CARS passages, logic games, full-length practice exams) plug into the same session blueprints as a normal college course.
-                </>
-              ),
-            },
-            {
-              q: 'How long until I see a difference in my grades?',
-              a: (
-                <>
-                  Most students notice the change within the first full week, because the plan removes the daily "what do I even study right now" decision. The compounding wins (better recall, smarter review timing, Grade Hub targeting) show up in the next round of quizzes and midterms. The Study Coach adapts as your scores come in, so the plan gets sharper the longer you use it.
-                </>
-              ),
-            },
-            {
-              q: 'Will my data and notes stay private?',
-              a: (
-                <>
-                  Yes. Your courses, notes, and study history are tied to your account and never sold or used to train outside models. You can export everything, or delete your account at any time from <a href="/about">Account settings</a>. Full details in our <a href="/privacy">privacy policy</a>.
-                </>
-              ),
-            },
-            {
-              q: 'Can I cancel any time?',
-              a: (
-                <>
-                  Yes. One click from your account. The 7-day trial requires a card upfront — cancel before day 8 and you won't be charged, and you automatically return to the free plan. If you cancel a paid subscription, you keep Pro access until the end of the current billing cycle, no questions asked.
-                </>
-              ),
-            },
-          ].map(({ q, a }, i) => {
-            const isOpen = openFAQ === i
-            const panelId = `se-faq-panel-${i}`
-            const buttonId = `se-faq-trigger-${i}`
-            return (
-              <div key={i} className={`se-faq-item${isOpen ? ' is-open' : ''}`}>
-                <button
-                  id={buttonId}
-                  type="button"
-                  className="se-faq-trigger"
-                  aria-expanded={isOpen}
-                  aria-controls={panelId}
-                  onClick={() => setOpenFAQ(isOpen ? -1 : i)}
-                >
-                  <span className="se-faq-q">{q}</span>
-                  <span className="se-faq-icon" aria-hidden="true">
-                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
-                      <path d="M7 2.5v9M2.5 7h9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-                    </svg>
-                  </span>
-                </button>
-                <div
-                  id={panelId}
-                  role="region"
-                  aria-labelledby={buttonId}
-                  className="se-faq-panel"
-                  hidden={!isOpen}
-                >
-                  <div>
-                    <div className="se-faq-a">{a}</div>
-                  </div>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-
-        {/* Soft handoff line into pricing */}
-        <div data-reveal data-reveal-delay="2" style={{
-          marginTop: 48, textAlign: 'center',
-          fontSize: 14, color: 'rgba(226,232,240,0.5)',
-        }}>
-          Still stuck on something?{' '}
-          <a
-            href="mailto:support@getstudyedge.com"
-            style={{ color: '#c7d2fe', textDecoration: 'none', borderBottom: '1px solid rgba(199,210,254,0.4)' }}
-          >
-            Email support
-          </a>
-          {' '}and a real person will get back to you.
-        </div>
-
-        {/* FAQ structured data: helps Google surface this section as a rich result */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify({
-            '@context': 'https://schema.org',
-            '@type': 'FAQPage',
-            mainEntity: [
-              { q: 'Is there a free version, or do I have to pay?', a: "Yes. The Free plan includes one course, basic session planning, and limited flashcards — no credit card required to sign up. Pro ($2.99/week) unlocks 5 courses, 100 AI actions per month, the AI Study Coach, Grade Hub, Focus Mode, and unlimited flashcards, and starts with a 7-day free trial (card required upfront — cancel before day 8 and you won't be charged). Unlimited ($4.99/week) removes the course and AI caps, and adds AI Tutor with session memory plus advanced Practice Exam analytics." },
-              { q: 'How does the 7-day Pro trial work?', a: "Card required upfront — you won't be charged during the 7-day trial. Cancel before day 8 and no payment is taken. After the trial, you return to the free tier automatically." },
-              { q: "What if my syllabus or course isn't already in the system?", a: "You can add any course. Drop your syllabus as a PDF or paste it as text, and StudyEdge pulls out exam dates, topics, weights, and assignments. No syllabus on hand? Add the course manually in about 30 seconds: pick the dates, enter your grading breakdown, and the AI builds the plan around it." },
-              { q: 'How is this different from Notion, Quizlet, or ChatGPT?', a: "Those tools each solve one piece. Notion is a blank canvas you have to build. Quizlet is a flashcard deck. ChatGPT doesn't know your courses, exam dates, or grades. StudyEdge does all four jobs together: it knows your syllabus, plans every session minute by minute, runs your focus blocks, and tells you the exact score you need on what's left to hit your grade target." },
-              { q: 'Does StudyEdge work for grad school and exams like the MCAT, LSAT, or GRE?', a: "Yes. Pre-med, law, and grad students are some of our most active users. You can add any standardized test as a course with its real exam date, and the AI builds a multi-week schedule that respects your other classes." },
-              { q: 'How long until I see a difference in my grades?', a: "Most students notice the change within the first full week, because the plan removes the daily question of what to study right now. The compounding wins show up in the next round of quizzes and midterms. The Study Coach adapts as your scores come in." },
-              { q: 'Will my data and notes stay private?', a: "Yes. Your courses, notes, and study history are tied to your account and never sold or used to train outside models. You can export everything, or delete your account at any time." },
-              { q: 'Can I cancel any time?', a: "Yes. One click from your account. The 7-day trial requires a card upfront — cancel before day 8 and you won't be charged. If you cancel a paid subscription, you keep Pro access until the end of the current billing cycle." },
-            ].map(({ q, a }) => ({
-              '@type': 'Question',
-              name: q,
-              acceptedAnswer: { '@type': 'Answer', text: a },
-            })),
-          }) }}
-        />
-      </section>
-
-      {/* FAQ → Pricing horizon */}
+      {/* Testimonials → Pricing horizon */}
       <div className="se-horizon" />
 
       {/* ── Pricing ── */}
@@ -2495,10 +2298,11 @@ export default function LandingPage({ onGetStarted }) {
                   ))}
                 </ul>
                 <button onClick={() => goCheckout('unlimited', pricingPeriod)} style={{
-                  background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.40)',
-                  color: '#34d399', borderRadius: 12,
+                  background: 'linear-gradient(135deg, #059669, #10b981)', border: 'none',
+                  color: '#fff', borderRadius: 12,
                   padding: '14px 18px', fontSize: 15, fontWeight: 800, cursor: 'pointer',
                   letterSpacing: '-0.005em',
+                  boxShadow: '0 14px 36px rgba(16,185,129,0.30), 0 0 0 1px rgba(255,255,255,0.08) inset',
                   display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 }}>
                   Get Unlimited
@@ -2514,6 +2318,200 @@ export default function LandingPage({ onGetStarted }) {
         <p style={{ textAlign: 'center', marginTop: 28, fontSize: 13, color: 'rgba(226,232,240,0.40)' }}>
           Already a member? <button onClick={goSignupFree} style={{ background: 'none', border: 'none', color: '#c7d2fe', cursor: 'pointer', fontSize: 13, padding: 0, textDecoration: 'underline' }}>Sign in</button>
         </p>
+      </section>
+
+      {/* Pricing → FAQ horizon */}
+      <div className="se-horizon" />
+
+      {/* ── FAQ ── */}
+      <section
+        id="faq"
+        className="se-section"
+        style={{ maxWidth: 880, margin: '0 auto', padding: '100px 24px 110px' }}
+      >
+        <div aria-hidden="true" className="se-wash" style={{
+          background:
+            'radial-gradient(640px 460px at 18% 10%, rgba(59,97,196,0.12), transparent 60%),' +
+            'radial-gradient(620px 460px at 92% 92%, rgba(124,92,252,0.10), transparent 60%)',
+        }} />
+        <div aria-hidden="true" className="se-grid" />
+
+        {/* Eyebrow + headline */}
+        <div data-reveal style={{ textAlign: 'center', marginBottom: 56 }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            fontSize: 11.5, fontWeight: 600, letterSpacing: '0.18em',
+            color: 'rgba(199,210,254,0.85)', textTransform: 'uppercase',
+            padding: '6px 14px', borderRadius: 999,
+            background: 'rgba(99,102,241,0.10)',
+            border: '1px solid rgba(99,102,241,0.22)',
+            marginBottom: 22,
+          }}>
+            <span style={{ width: 5, height: 5, borderRadius: '50%', background: '#6366f1', boxShadow: '0 0 10px #6366f1' }} />
+            Questions, answered
+          </div>
+          <h2 style={{
+            fontSize: 'clamp(30px, 4.2vw, 50px)', fontWeight: 700,
+            color: '#fff', letterSpacing: '-0.035em', lineHeight: 1.04, margin: '0 0 16px',
+          }}>
+            Everything you'd ask before<br />
+            <span style={{
+              fontFamily: "'Instrument Serif', serif",
+              fontStyle: 'italic', fontWeight: 400, letterSpacing: '-0.02em',
+              background: 'linear-gradient(180deg, #ffffff 0%, #c7d2fe 100%)',
+              WebkitBackgroundClip: 'text', backgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>you start your trial.</span>
+          </h2>
+          <p style={{
+            fontSize: 16, color: 'rgba(226,232,240,0.55)',
+            maxWidth: 520, margin: '0 auto', lineHeight: 1.6, letterSpacing: '-0.005em',
+          }}>
+            Real answers to the things students actually email us about.
+          </p>
+        </div>
+
+        {/* Accordion */}
+        <div data-reveal data-reveal-delay="1" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {[
+            {
+              q: 'Is there a free version, or do I have to pay?',
+              a: (
+                <>
+                  Yes. The <strong>Free plan</strong> includes one course, basic session planning, and limited flashcards — no credit card required to sign up. <strong>Pro</strong> ($2.99/week) unlocks 5 courses, 100 AI actions per month, the AI Study Coach, Grade Hub, Focus Mode, and unlimited flashcards, and starts with a 7-day free trial (card required upfront — cancel before day 8 and you won't be charged). <strong>Unlimited</strong> ($4.99/week) removes the course and AI caps, and adds AI Tutor with session memory plus advanced Practice Exam analytics.
+                </>
+              ),
+            },
+            {
+              q: 'How does the 7-day Pro trial work?',
+              a: (
+                <>
+                  Card required upfront — you won't be charged during the 7-day trial. Just cancel before it ends and no payment is taken. After the trial, you're automatically moved to the free tier unless you keep Pro.
+                </>
+              ),
+            },
+            {
+              q: "What if my syllabus or course isn't already in the system?",
+              a: (
+                <>
+                  You can add any course. Drop your syllabus as a PDF or paste it as text, and StudyEdge pulls out exam dates, topics, weights, and assignments. No syllabus on hand? Add the course manually in about 30 seconds: pick the dates, enter your grading breakdown, and the AI builds the plan around it.
+                </>
+              ),
+            },
+            {
+              q: 'How is this different from Notion, Quizlet, or ChatGPT?',
+              a: (
+                <>
+                  Those tools each solve one piece. Notion is a blank canvas you have to build. Quizlet is a flashcard deck. ChatGPT doesn't know your courses, exam dates, or grades. StudyEdge does all four jobs together: it knows your syllabus, plans every session minute by minute, runs your focus blocks, and tells you the exact score you need on what's left to hit your grade target.
+                </>
+              ),
+            },
+            {
+              q: 'Does StudyEdge work for grad school and exams like the MCAT, LSAT, or GRE?',
+              a: (
+                <>
+                  Yes. Pre-med, law, and grad students are some of our most active users. You can add any standardized test as a course with its real exam date, and the AI builds a multi-week schedule that respects your other classes. Long content domains (CARS passages, logic games, full-length practice exams) plug into the same session blueprints as a normal college course.
+                </>
+              ),
+            },
+            {
+              q: 'How long until I see a difference in my grades?',
+              a: (
+                <>
+                  Most students notice the change within the first full week, because the plan removes the daily "what do I even study right now" decision. The compounding wins (better recall, smarter review timing, Grade Hub targeting) show up in the next round of quizzes and midterms. The Study Coach adapts as your scores come in, so the plan gets sharper the longer you use it.
+                </>
+              ),
+            },
+            {
+              q: 'Will my data and notes stay private?',
+              a: (
+                <>
+                  Yes. Your courses, notes, and study history are tied to your account and never sold or used to train outside models. You can export everything, or delete your account at any time from <a href="/about">Account settings</a>. Full details in our <a href="/privacy">privacy policy</a>.
+                </>
+              ),
+            },
+            {
+              q: 'Can I cancel any time?',
+              a: (
+                <>
+                  Yes. One click from your account. The 7-day trial requires a card upfront — cancel before day 8 and you won't be charged, and you automatically return to the free plan. If you cancel a paid subscription, you keep Pro access until the end of the current billing cycle, no questions asked.
+                </>
+              ),
+            },
+          ].map(({ q, a }, i) => {
+            const isOpen = openFAQ === i
+            const panelId = `se-faq-panel-${i}`
+            const buttonId = `se-faq-trigger-${i}`
+            return (
+              <div key={i} className={`se-faq-item${isOpen ? ' is-open' : ''}`}>
+                <button
+                  id={buttonId}
+                  type="button"
+                  className="se-faq-trigger"
+                  aria-expanded={isOpen}
+                  aria-controls={panelId}
+                  onClick={() => setOpenFAQ(isOpen ? -1 : i)}
+                >
+                  <span className="se-faq-q">{q}</span>
+                  <span className="se-faq-icon" aria-hidden="true">
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                      <path d="M7 2.5v9M2.5 7h9" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                    </svg>
+                  </span>
+                </button>
+                <div
+                  id={panelId}
+                  role="region"
+                  aria-labelledby={buttonId}
+                  className="se-faq-panel"
+                  hidden={!isOpen}
+                >
+                  <div>
+                    <div className="se-faq-a">{a}</div>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+
+        {/* Soft handoff line into pricing */}
+        <div data-reveal data-reveal-delay="2" style={{
+          marginTop: 48, textAlign: 'center',
+          fontSize: 14, color: 'rgba(226,232,240,0.5)',
+        }}>
+          Still stuck on something?{' '}
+          <a
+            href="mailto:support@getstudyedge.com"
+            style={{ color: '#c7d2fe', textDecoration: 'none', borderBottom: '1px solid rgba(199,210,254,0.4)' }}
+          >
+            Email support
+          </a>
+          {' '}and a real person will get back to you.
+        </div>
+
+        {/* FAQ structured data: helps Google surface this section as a rich result */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: [
+              { q: 'Is there a free version, or do I have to pay?', a: "Yes. The Free plan includes one course, basic session planning, and limited flashcards — no credit card required to sign up. Pro ($2.99/week) unlocks 5 courses, 100 AI actions per month, the AI Study Coach, Grade Hub, Focus Mode, and unlimited flashcards, and starts with a 7-day free trial (card required upfront — cancel before day 8 and you won't be charged). Unlimited ($4.99/week) removes the course and AI caps, and adds AI Tutor with session memory plus advanced Practice Exam analytics." },
+              { q: 'How does the 7-day Pro trial work?', a: "Card required upfront — you won't be charged during the 7-day trial. Cancel before day 8 and no payment is taken. After the trial, you return to the free tier automatically." },
+              { q: "What if my syllabus or course isn't already in the system?", a: "You can add any course. Drop your syllabus as a PDF or paste it as text, and StudyEdge pulls out exam dates, topics, weights, and assignments. No syllabus on hand? Add the course manually in about 30 seconds: pick the dates, enter your grading breakdown, and the AI builds the plan around it." },
+              { q: 'How is this different from Notion, Quizlet, or ChatGPT?', a: "Those tools each solve one piece. Notion is a blank canvas you have to build. Quizlet is a flashcard deck. ChatGPT doesn't know your courses, exam dates, or grades. StudyEdge does all four jobs together: it knows your syllabus, plans every session minute by minute, runs your focus blocks, and tells you the exact score you need on what's left to hit your grade target." },
+              { q: 'Does StudyEdge work for grad school and exams like the MCAT, LSAT, or GRE?', a: "Yes. Pre-med, law, and grad students are some of our most active users. You can add any standardized test as a course with its real exam date, and the AI builds a multi-week schedule that respects your other classes." },
+              { q: 'How long until I see a difference in my grades?', a: "Most students notice the change within the first full week, because the plan removes the daily question of what to study right now. The compounding wins show up in the next round of quizzes and midterms. The Study Coach adapts as your scores come in." },
+              { q: 'Will my data and notes stay private?', a: "Yes. Your courses, notes, and study history are tied to your account and never sold or used to train outside models. You can export everything, or delete your account at any time." },
+              { q: 'Can I cancel any time?', a: "Yes. One click from your account. The 7-day trial requires a card upfront — cancel before day 8 and you won't be charged. If you cancel a paid subscription, you keep Pro access until the end of the current billing cycle." },
+            ].map(({ q, a }) => ({
+              '@type': 'Question',
+              name: q,
+              acceptedAnswer: { '@type': 'Answer', text: a },
+            })),
+          }) }}
+        />
       </section>
 
       {/* ── Bottom CTA (full-bleed arrival moment) ── */}
