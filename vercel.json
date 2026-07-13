@@ -1297,6 +1297,14 @@
             "destination": "/blog/how-to-study-for-political-science.html"
         },
         {
+            "source": "/blog/how-to-study-for-philosophy",
+            "destination": "/blog/how-to-study-for-philosophy.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-spanish",
+            "destination": "/blog/how-to-study-for-spanish.html"
+        },
+        {
             "source": "/blog/how-to-study-for-computer-science",
             "destination": "/blog/how-to-study-for-computer-science.html"
         },
