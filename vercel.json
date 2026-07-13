@@ -1287,6 +1287,14 @@
         {
             "source": "/blog/how-to-study-for-english-literature",
             "destination": "/blog/how-to-study-for-english-literature.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-macroeconomics",
+            "destination": "/blog/how-to-study-for-macroeconomics.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-political-science",
+            "destination": "/blog/how-to-study-for-political-science.html"
         }
     ]
 }
