@@ -413,6 +413,16 @@ export default defineConfig({
       },
     }),
   ],
+  server: {
+    proxy: {
+      '/ph': {
+        target: 'https://us.i.posthog.com',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/ph/, ''),
+        secure: false,
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': path.resolve(process.cwd(), 'src'),
