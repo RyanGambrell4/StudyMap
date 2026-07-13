@@ -1297,6 +1297,14 @@
             "destination": "/blog/how-to-study-for-political-science.html"
         },
         {
+            "source": "/blog/how-to-study-for-criminal-justice",
+            "destination": "/blog/how-to-study-for-criminal-justice.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-marketing",
+            "destination": "/blog/how-to-study-for-marketing.html"
+        },
+        {
             "source": "/blog/how-to-study-for-business",
             "destination": "/blog/how-to-study-for-business.html"
         },
