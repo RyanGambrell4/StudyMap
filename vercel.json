@@ -1309,6 +1309,14 @@
             "destination": "/ap-chemistry-study-schedule.html"
         },
         {
+            "source": "/ap-statistics-study-schedule",
+            "destination": "/ap-statistics-study-schedule.html"
+        },
+        {
+            "source": "/ap-english-language-study-schedule",
+            "destination": "/ap-english-language-study-schedule.html"
+        },
+        {
             "source": "/ap-psychology-study-schedule",
             "destination": "/ap-psychology-study-schedule.html"
         }
