@@ -1297,6 +1297,14 @@
             "destination": "/blog/how-to-study-for-political-science.html"
         },
         {
+            "source": "/blog/how-to-study-for-business",
+            "destination": "/blog/how-to-study-for-business.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-finance",
+            "destination": "/blog/how-to-study-for-finance.html"
+        },
+        {
             "source": "/blog/how-to-study-for-philosophy",
             "destination": "/blog/how-to-study-for-philosophy.html"
         },
@@ -1315,6 +1323,14 @@
         {
             "source": "/ap-chemistry-study-schedule",
             "destination": "/ap-chemistry-study-schedule.html"
+        },
+        {
+            "source": "/ap-world-history-study-schedule",
+            "destination": "/ap-world-history-study-schedule.html"
+        },
+        {
+            "source": "/ap-physics-1-study-schedule",
+            "destination": "/ap-physics-1-study-schedule.html"
         },
         {
             "source": "/ap-statistics-study-schedule",
