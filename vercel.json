@@ -1295,6 +1295,14 @@
         {
             "source": "/blog/how-to-study-for-political-science",
             "destination": "/blog/how-to-study-for-political-science.html"
+        },
+        {
+            "source": "/ap-chemistry-study-schedule",
+            "destination": "/ap-chemistry-study-schedule.html"
+        },
+        {
+            "source": "/ap-psychology-study-schedule",
+            "destination": "/ap-psychology-study-schedule.html"
         }
     ]
 }
