@@ -132,12 +132,12 @@ ${preheader(copy.unlock)}
 
       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 18px;margin-bottom:24px;">
         <p style="margin:0;font-size:13.5px;color:#166534;line-height:1.6;">
-          <strong>Try Pro free for 3 days.</strong> No charge during the trial. $2.99/week or $9.99/month after — cancel anytime.
+          <strong>Try Pro free for 7 days.</strong> No charge during the trial. $2.99/week or $9.99/month after — cancel anytime.
         </p>
       </div>
 
       <a href="https://getstudyedge.com/app?plan=pro&billing=weekly&trial=1" style="display:block;text-align:center;background:#3B61C4;color:#fff;font-weight:800;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none;letter-spacing:-0.01em;">
-        Start Free 3-Day Trial →
+        Start Free 7-Day Trial →
       </a>
 
       <p style="margin:24px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">

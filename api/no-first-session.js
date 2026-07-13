@@ -120,7 +120,7 @@ ${preheader("You set up your study plan yesterday and haven't come back. Everyth
         ${!trialUsed ? `
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-top:8px;">
           <tr><td style="background:#F4F7FF;border-radius:12px;border:1px solid rgba(59,97,196,0.15);padding:16px 20px;text-align:center;">
-            <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#3B61C4;">Your 3-day free trial is still waiting</p>
+            <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#3B61C4;">Your 7-day free trial is still waiting</p>
             <p style="margin:0 0 12px;font-size:13px;color:#6B6B6B;line-height:1.55;">
               Try every Pro feature free — unlimited AI tutoring, 5 courses, Session Blueprints on every session. $0 today, $2.99/wk after, cancel any time.
             </p>

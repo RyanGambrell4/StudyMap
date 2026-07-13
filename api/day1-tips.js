@@ -85,8 +85,8 @@ ${preheader("Three habits in your first week that separate students who improve 
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-top:20px;">
           <tr><td style="background:#F4F7FF;border-radius:12px;border:1px solid rgba(59,97,196,0.15);padding:14px 18px;text-align:center;">
-            <p style="margin:0 0 5px;font-size:13px;font-weight:600;color:#3B61C4;">Your 3-day free trial is waiting</p>
-            <p style="margin:0 0 10px;font-size:13px;color:#6B6B6B;line-height:1.55;">Unlock unlimited AI tutoring, brain dumps, cheat sheets, practice exams, and more. 3-day trial · $2.99/wk after · Cancel any time.</p>
+            <p style="margin:0 0 5px;font-size:13px;font-weight:600;color:#3B61C4;">Your 7-day free trial is waiting</p>
+            <p style="margin:0 0 10px;font-size:13px;color:#6B6B6B;line-height:1.55;">Unlock unlimited AI tutoring, brain dumps, cheat sheets, practice exams, and more. 7-day trial · $2.99/wk after · Cancel any time.</p>
             <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day1_trial" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">Start free trial →</a>
           </td></tr>
         </table>

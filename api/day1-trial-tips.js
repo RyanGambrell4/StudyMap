@@ -189,7 +189,7 @@ ${preheader(`Day 1: the 5-minute setup step most Pro users skip — and regret.`
             <a href="${audience.ctaHref}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">${audience.ctaLabel}</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">Your trial ends in ~2 days. No charge until then.</span>
+            <span style="font-size:12px;color:#9B9B9B;">~6 days left on your trial. No charge until then.</span>
           </td></tr>
         </table>
         <p style="margin:22px 0 0;font-size:13px;color:#9B9B9B;line-height:1.6;">

@@ -117,7 +117,7 @@ export default async function handler(req, res) {
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
-            ['3-day free trial', 'No charge today. Cancel if it doesn\'t click.'],
+            ['7-day free trial', 'No charge today. Cancel if it doesn\'t click.'],
             ['Unlimited focus sessions', 'No 30-min cap — study as long as you need'],
             ['100 AI actions/month', 'Your tutor for every concept, every course'],
             ['Session Blueprints', 'Know exactly what to study before every session'],
@@ -132,7 +132,7 @@ export default async function handler(req, res) {
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Start 3-day free trial</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Start 7-day free trial</a>
           </td></tr>
           <tr><td align="center">
             <span style="font-size:12px;color:#9B9B9B;">$0 today · $2.99/wk after · Cancel anytime in account</span>

@@ -197,7 +197,7 @@ ${preheader(courseNames.length ? `Your ${courseNames[0]} plan is sitting here. $
             <p style="margin:0 0 12px;font-size:13px;color:#6B6B6B;line-height:1.55;">
               ${trialUsed
                 ? 'Everything you had during your trial — unlimited AI tutoring, 5 courses, Blueprints every session — back permanently for $2.99/wk.'
-                : `Try every Pro feature free for 3 days. Unlimited AI tutoring, Session Blueprints on every study block, 5 courses. $0 today, $2.99/wk after.`}
+                : `Try every Pro feature free for 7 days. Unlimited AI tutoring, Session Blueprints on every study block, 5 courses. $0 today, $2.99/wk after.`}
             </p>
             <a href="https://getstudyedge.com/app?${trialUsed ? 'upgrade=1' : 'signup=1&plan=pro&billing=weekly&trial=1'}&utm_source=email&utm_medium=lifecycle&utm_campaign=re_engage_${tier}_upsell" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">
               ${trialUsed ? 'Upgrade to Pro →' : 'Start free trial →'}

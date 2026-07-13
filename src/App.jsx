@@ -787,7 +787,7 @@ export default function App() {
           display: 'flex', alignItems: 'center', gap: 10, maxWidth: 300,
         }}>
           <div style={{ flex: 1 }}>
-            <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 700, color: '#fff' }}>Try Pro free for 3 days</p>
+            <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 700, color: '#fff' }}>Try Pro free for 7 days</p>
             <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,.65)' }}>$0 today · $2.99/wk after · cancel anytime</p>
           </div>
           <button
@@ -822,7 +822,7 @@ export default function App() {
           <span style={{ fontSize: 13.5, color: '#fff', fontWeight: 500 }}>
             {hasUsedTrial()
               ? 'Pick up where you left off. No hidden fees.'
-              : 'Your 3-day free trial requires a card — cancel within 3 days and you won\'t be charged.'}
+              : 'Your 7-day free trial requires a card — cancel within 7 days and you won\'t be charged.'}
           </span>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             <button

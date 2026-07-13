@@ -473,7 +473,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 Trial ended
               </div>
               <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 8px', letterSpacing: '-0.4px' }}>Don't lose your work.</h2>
-              <p style={{ fontSize: '0.875rem', color: '#6B6B6B', margin: 0, lineHeight: 1.5 }}>Here's what you built during your 3-day trial:</p>
+              <p style={{ fontSize: '0.875rem', color: '#6B6B6B', margin: 0, lineHeight: 1.5 }}>Here's what you built during your 7-day trial:</p>
             </div>
             {stats.length > 0 ? (
               <div style={{ display: 'grid', gridTemplateColumns: `repeat(${stats.length}, 1fr)`, gap: 10, marginBottom: 20 }}>
