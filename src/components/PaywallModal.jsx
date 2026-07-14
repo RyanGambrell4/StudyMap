@@ -400,9 +400,9 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     setTrialLoading(true)
     setTrialError(null)
     try {
-      const ok = await activateTrial()
-      if (!ok) { setTrialError('Something went wrong. Please try again.'); return }
-      onClose()
+      const url = await activateTrial(userId, userEmail)
+      if (!url) { setTrialError('Something went wrong. Please try again.'); return }
+      window.location.href = url
     } catch {
       setTrialError('Something went wrong. Please try again.')
     } finally {
@@ -523,16 +523,32 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             </div>
             <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 10px', letterSpacing: '-0.4px', lineHeight: 1.2 }}>{question}</h2>
             <p style={{ fontSize: '0.875rem', color: '#6B6B6B', margin: '0 0 28px', lineHeight: 1.55 }}>
-              Your study plan is still running. Upgrade to keep your AI tutor, unlimited focus sessions, and full schedule — everything you need to finish strong.
+              {showTrialCard
+                ? 'Your study plan is still running. Unlock everything — AI tutor, unlimited sessions, and your full schedule — free for 7 days.'
+                : 'Your study plan is still running. Upgrade to keep your AI tutor, unlimited focus sessions, and full schedule — everything you need to finish strong.'}
             </p>
             <button
-              onClick={() => { track('commitment_yes', { trigger_feature: trigger }); setScreen('plans') }}
-              style={{ width: '100%', padding: '14px', background: '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.01em', marginBottom: 10, transition: 'opacity 0.15s' }}
-              onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }} onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
+              onClick={() => {
+                track('commitment_yes', { trigger_feature: trigger, trial_eligible: showTrialCard })
+                if (showTrialCard) { handleStartTrial() } else { setScreen('plans') }
+              }}
+              style={{ width: '100%', padding: '14px', background: '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: trialLoading ? 'not-allowed' : 'pointer', letterSpacing: '-0.01em', marginBottom: 10, transition: 'opacity 0.15s', opacity: trialLoading ? 0.75 : 1 }}
+              onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.opacity = '0.88' }} onMouseLeave={e => { e.currentTarget.style.opacity = trialLoading ? '0.75' : '1' }}
             >
-              Yes, keep going →
+              {trialLoading ? 'Loading…' : showTrialCard ? 'Start free 7-day trial →' : 'Yes, keep going →'}
             </button>
-            <button onClick={() => { track('commitment_no', { trigger_feature: trigger }); handleDismiss('commitment_no') }} style={{ width: '100%', background: 'none', border: 'none', padding: '8px', color: '#9B9B9B', fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit' }}>
+            {showTrialCard && (
+              <p style={{ fontSize: '0.72rem', color: '#9B9B9B', margin: '-4px 0 10px' }}>Card required · $0 today · Cancel before day 8</p>
+            )}
+            {trialError && (
+              <p style={{ fontSize: '0.78rem', color: '#EF4444', margin: '0 0 8px' }}>{trialError}</p>
+            )}
+            {showTrialCard && (
+              <button onClick={() => { track('commitment_see_plans', { trigger_feature: trigger }); setScreen('plans') }} style={{ width: '100%', background: 'none', border: 'none', padding: '6px', color: '#9B9B9B', fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit', marginBottom: 4 }}>
+                See all plans instead
+              </button>
+            )}
+            <button onClick={() => { track('commitment_no', { trigger_feature: trigger }); handleDismiss('commitment_no') }} style={{ width: '100%', background: 'none', border: 'none', padding: '8px', color: '#C0C0C0', fontSize: '0.78rem', cursor: 'pointer', fontFamily: 'inherit' }}>
               Not right now
             </button>
           </div>
@@ -833,7 +849,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               {trialLoading ? 'Loading…' : 'Continue — free for 7 days'}
             </button>
             <p style={{ margin: '10px 0 0', fontSize: '0.72rem', color: '#9B9B9B' }}>
-              No credit card required &nbsp;·&nbsp; cancel anytime
+              Card required · $0 today · Cancel before day 8
             </p>
           </div>
         )}

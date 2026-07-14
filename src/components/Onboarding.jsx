@@ -836,7 +836,16 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
         {/* Skip — low-prominence, copy reminds them what they're giving up */}
         <button
-          onClick={() => { track('trial_skipped', { source: 'onboarding' }); completeWith(profileData, { trialTaken: false }) }}
+          onClick={() => {
+            track('trial_skipped', {
+              source: 'onboarding',
+              ms_on_step: Date.now() - stepEnteredAt.current,
+              has_course: !!step3Course,
+              has_exam_date: !!examDate,
+              days_to_exam: step3DaysToExam,
+            })
+            completeWith(profileData, { trialTaken: false })
+          }}
           style={{
             background: 'none', border: 'none', padding: '6px',
             color: 'rgba(255,255,255,.18)', fontSize: '0.72rem',
@@ -847,7 +856,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,.35)' }}
           onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,.18)' }}
         >
-          Continue with free plan — I'll upgrade when I'm ready
+          No thanks, I'll skip the 7 free days
         </button>
 
         <div style={{ textAlign: 'center' }}>
