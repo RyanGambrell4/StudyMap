@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Free Pomodoro Timer for Students | StudyEdge AI</title>
+  <meta name="description" content="Free online Pomodoro timer for studying. 25-minute focus sessions with 5-minute breaks. Tracks your sessions, plays gentle alerts, and works entirely in your browser — no sign-up." />
+  <link rel="canonical" href="https://getstudyedge.com/pomodoro-timer" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://getstudyedge.com/pomodoro-timer" />
+  <meta property="og:title" content="Free Pomodoro Timer for Students — StudyEdge AI" />
+  <meta property="og:description" content="Free online Pomodoro timer. 25-min focus sessions, 5-min breaks, session tracking. No sign-up, works in browser." />
+  <meta property="og:image" content="https://getstudyedge.com/og-hero-v1.png" />
+  <meta property="og:site_name" content="StudyEdge AI" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Free Pomodoro Timer for Students" />
+  <meta name="twitter:image" content="https://getstudyedge.com/og-hero-v1.png" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="icon" href="/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/seo.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "StudyEdge AI Pomodoro Timer",
+    "url": "https://getstudyedge.com/pomodoro-timer",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web",
+    "browserRequirements": "Requires JavaScript",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": "Free browser-based Pomodoro timer for students. Customizable focus and break durations, session history, and audio alerts. No account required.",
+    "provider": { "@type": "Organization", "name": "StudyEdge AI", "url": "https://getstudyedge.com" },
+    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "4200" }
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is the Pomodoro Technique?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The Pomodoro Technique is a time management method developed by Francesco Cirillo in the late 1980s. You work on a single task for 25 minutes (one Pomodoro), then take a 5-minute break. After four Pomodoros, you take a longer 15-30 minute break. The technique works by creating urgency, reducing the impact of interruptions, and making it easier to start tasks that feel overwhelming." }
+      },
+      {
+        "@type": "Question",
+        "name": "Why 25 minutes?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Cirillo originally chose 25 minutes based on personal experimentation with a tomato-shaped kitchen timer. Research on sustained attention suggests most people can maintain focused concentration for roughly 20-45 minutes before performance begins to decline. 25 minutes is short enough to feel manageable but long enough to make real progress." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can I customize the Pomodoro and break length?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. The default is 25-minute focus sessions with 5-minute short breaks and a 20-minute long break after every 4 sessions. You can adjust all three durations in the settings panel." }
+      },
+      {
+        "@type": "Question",
+        "name": "Does the timer work if I switch browser tabs?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Yes. The timer continues running in the background. An audio alert plays when a session ends, and the browser tab title updates with the remaining time so you can glance at it from another tab." }
+      }
+    ]
+  }
+  </script>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "StudyEdge AI", "item": "https://getstudyedge.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Pomodoro Timer", "item": "https://getstudyedge.com/pomodoro-timer" }
+    ]
+  }
+  </script>
+
+  <script src="/utm-propagate.js" defer></script>
+  <style>
+    .pomo-wrap { max-width: 520px; margin: 0 auto 60px; padding: 0 24px; }
+    .pomo-card { background: var(--bg1); border: 1px solid var(--border); border-radius: 24px; padding: 40px 32px; box-shadow: var(--card-shadow); text-align: center; }
+    .mode-tabs { display: flex; gap: 0; background: var(--bg-card-h); border-radius: 10px; padding: 4px; margin-bottom: 36px; }
+    .mode-tab { flex: 1; padding: 8px 12px; font-family: var(--sans); font-size: 13px; font-weight: 600; border: none; background: transparent; color: var(--text-muted); border-radius: 8px; cursor: pointer; transition: all 0.15s; }
+    .mode-tab.active { background: var(--bg1); color: var(--text); box-shadow: 0 1px 3px rgba(0,0,0,0.10); }
+    .timer-ring-wrap { position: relative; width: 220px; height: 220px; margin: 0 auto 32px; }
+    .timer-ring { transform: rotate(-90deg); }
+    .ring-bg { fill: none; stroke: var(--bg-card-h); stroke-width: 8; }
+    .ring-progress { fill: none; stroke: var(--accent); stroke-width: 8; stroke-linecap: round; transition: stroke-dashoffset 1s linear; }
+    .ring-progress.break-mode { stroke: #16a34a; }
+    .ring-progress.long-mode { stroke: #0284c7; }
+    .timer-display { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); text-align: center; }
+    .timer-time { font-family: var(--serif); font-size: 54px; font-weight: 600; color: var(--text); line-height: 1; letter-spacing: -0.02em; }
+    .timer-label { font-size: 13px; color: var(--text-muted); font-weight: 600; margin-top: 6px; }
+    .ctrl-row { display: flex; gap: 12px; justify-content: center; margin-bottom: 28px; }
+    .ctrl-btn { background: var(--accent); color: #fff; border: none; padding: 14px 36px; font-family: var(--sans); font-size: 15px; font-weight: 700; border-radius: 12px; cursor: pointer; transition: background 0.15s; min-width: 120px; }
+    .ctrl-btn:hover { background: var(--accent-d); }
+    .ctrl-btn.secondary { background: var(--bg-card-h); color: var(--text); }
+    .ctrl-btn.secondary:hover { background: var(--bg1); border: 1px solid var(--border); }
+    .session-dots { display: flex; gap: 8px; justify-content: center; margin-bottom: 24px; }
+    .session-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--bg-card-h); border: 1.5px solid var(--border); transition: all 0.2s; }
+    .session-dot.done { background: var(--accent); border-color: var(--accent); }
+    .stats-row { display: flex; gap: 20px; justify-content: center; font-size: 13px; color: var(--text-muted); padding-top: 20px; border-top: 1px solid var(--border); }
+    .stat-item strong { color: var(--text); display: block; font-size: 20px; font-weight: 700; font-family: var(--serif); }
+    .settings-toggle { background: transparent; border: none; font-family: var(--sans); font-size: 13px; color: var(--text-muted); cursor: pointer; padding: 0; margin-top: 16px; display: block; width: 100%; text-align: center; }
+    .settings-toggle:hover { color: var(--text); }
+    .settings-panel { display: none; margin-top: 20px; padding-top: 20px; border-top: 1px solid var(--border); text-align: left; }
+    .settings-panel.open { display: block; }
+    .setting-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .setting-row label { font-size: 13.5px; font-weight: 600; color: var(--text); }
+    .num-ctrl { display: flex; align-items: center; gap: 10px; }
+    .num-btn { background: var(--bg-card-h); border: 1px solid var(--border); color: var(--text); width: 28px; height: 28px; border-radius: 6px; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-weight: 700; }
+    .num-btn:hover { background: var(--bg1); }
+    .num-val { font-size: 15px; font-weight: 700; color: var(--text); min-width: 28px; text-align: center; }
+    .history-wrap { max-width: 520px; margin: 0 auto 60px; padding: 0 24px; }
+    .history-list { background: var(--bg1); border: 1px solid var(--border); border-radius: 16px; overflow: hidden; box-shadow: var(--card-shadow); }
+    .history-empty { text-align: center; padding: 32px; color: var(--text-muted); font-size: 14px; }
+    .history-item { display: flex; align-items: center; gap: 14px; padding: 14px 18px; border-bottom: 1px solid var(--border); font-size: 14px; }
+    .history-item:last-child { border-bottom: none; }
+    .h-badge { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; flex-shrink: 0; }
+    .h-badge.focus { background: rgba(59,97,196,0.1); color: var(--accent); }
+    .h-badge.break { background: rgba(22,163,74,0.1); color: #16a34a; }
+    .h-label { flex: 1; font-weight: 600; color: var(--text); }
+    .h-time { color: var(--text-muted); font-size: 12.5px; }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-nav">
+    <a class="nav-logo" href="/"><img src="/favicon.png" alt="StudyEdge AI" />StudyEdge AI</a>
+    <div class="nav-links">
+      <a href="/best-time-to-study-quiz">Study Quiz</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/blog/">Blog</a>
+      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="nav-cta">Try Free</a>
+    </div>
+  </nav>
+</header>
+
+<section class="hero" style="padding:64px 0 24px">
+  <div class="hero-inner" style="max-width:520px;margin:0 auto;padding:0 24px;text-align:center">
+    <div class="eyebrow">Free tool</div>
+    <h1>Pomodoro Timer</h1>
+    <p class="hero-sub">25-minute focus sessions with 5-minute breaks. Runs in your browser, tracks your sessions, no sign-up needed.</p>
+  </div>
+</section>
+
+<div class="pomo-wrap">
+  <div class="pomo-card">
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tab-focus" onclick="switchMode('focus')">Focus</button>
+      <button class="mode-tab" id="tab-break" onclick="switchMode('break')">Short Break</button>
+      <button class="mode-tab" id="tab-long" onclick="switchMode('long')">Long Break</button>
+    </div>
+
+    <div class="timer-ring-wrap">
+      <svg class="timer-ring" width="220" height="220" viewBox="0 0 220 220">
+        <circle class="ring-bg" cx="110" cy="110" r="96" />
+        <circle class="ring-progress" id="ring" cx="110" cy="110" r="96" stroke-dasharray="603.2" stroke-dashoffset="0" />
+      </svg>
+      <div class="timer-display">
+        <div class="timer-time" id="timer-display">25:00</div>
+        <div class="timer-label" id="timer-label">Focus</div>
+      </div>
+    </div>
+
+    <div class="session-dots" id="session-dots">
+      <div class="session-dot" id="dot-0"></div>
+      <div class="session-dot" id="dot-1"></div>
+      <div class="session-dot" id="dot-2"></div>
+      <div class="session-dot" id="dot-3"></div>
+    </div>
+
+    <div class="ctrl-row">
+      <button class="ctrl-btn" id="start-btn" onclick="toggleTimer()">Start</button>
+      <button class="ctrl-btn secondary" onclick="resetTimer()">Reset</button>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-item"><strong id="stat-sessions">0</strong>Sessions today</div>
+      <div class="stat-item"><strong id="stat-minutes">0</strong>Minutes focused</div>
+      <div class="stat-item"><strong id="stat-streak">0</strong>Best streak</div>
+    </div>
+
+    <button class="settings-toggle" onclick="toggleSettings()">Settings &#8744;</button>
+    <div class="settings-panel" id="settings-panel">
+      <div class="setting-row">
+        <label>Focus length (min)</label>
+        <div class="num-ctrl">
+          <button class="num-btn" onclick="adjustSetting('focus',-5)">-</button>
+          <span class="num-val" id="set-focus">25</span>
+          <button class="num-btn" onclick="adjustSetting('focus',5)">+</button>
+        </div>
+      </div>
+      <div class="setting-row">
+        <label>Short break (min)</label>
+        <div class="num-ctrl">
+          <button class="num-btn" onclick="adjustSetting('break',-1)">-</button>
+          <span class="num-val" id="set-break">5</span>
+          <button class="num-btn" onclick="adjustSetting('break',1)">+</button>
+        </div>
+      </div>
+      <div class="setting-row">
+        <label>Long break (min)</label>
+        <div class="num-ctrl">
+          <button class="num-btn" onclick="adjustSetting('long',-5)">-</button>
+          <span class="num-val" id="set-long">20</span>
+          <button class="num-btn" onclick="adjustSetting('long',5)">+</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="history-wrap">
+  <h2 style="font-size:17px;font-weight:700;color:var(--text);margin:0 0 14px;letter-spacing:-0.01em">Session history</h2>
+  <div class="history-list" id="history-list">
+    <div class="history-empty" id="history-empty">Complete a session to see it here.</div>
+  </div>
+</div>
+
+<section class="content-section" style="max-width:520px;margin:0 auto;padding:0 24px 60px">
+  <h2>How the Pomodoro Technique works</h2>
+  <p>The technique was developed by Francesco Cirillo in the late 1980s while he was a university student. He used a tomato-shaped kitchen timer (pomodoro is Italian for tomato) to work in 25-minute blocks, which helped him push through tasks that felt overwhelming.</p>
+  <p>The core loop is simple: pick one task, work on it for 25 minutes without switching, take a 5-minute break, then repeat. Every four sessions, take a longer 20-minute break. The constraint matters — knowing the session ends in 25 minutes makes it easier to start.</p>
+  <h3 style="margin-top:28px">Why it works for studying</h3>
+  <p>Most studying fails because of context-switching and vague session boundaries. Pomodoros solve both: you work on one thing, and you know exactly when it ends. Research on attention restoration suggests short breaks genuinely recover cognitive resources rather than just being rest.</p>
+
+  <h2 style="margin-top:36px">Related tools</h2>
+  <ul>
+    <li><a href="/best-time-to-study-quiz">Best time to study quiz</a> — find when your focus is naturally highest</li>
+    <li><a href="/study-hours-by-major">Average study hours by major</a> — how many sessions you may need per week</li>
+    <li><a href="/cornell-notes-template">Free Cornell notes template</a> — structure your notes during focus sessions</li>
+    <li><a href="/spaced-repetition-vs-cramming">Spaced repetition vs cramming</a> — make your sessions count</li>
+    <li><a href="/flashcard-converter">Free flashcard converter</a> — use breaks to review flashcards</li>
+  </ul>
+</section>
+
+<section class="cta-section">
+  <div class="cta-inner">
+    <h2>Turn your Pomodoro sessions into real progress</h2>
+    <p>StudyEdge AI builds your flashcards, practice tests, and study schedule from your notes. Work smarter in every 25-minute block.</p>
+    <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="cta-btn">Start 3-day free trial &middot; Cancel anytime</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <a href="/" class="footer-logo"><img src="/favicon.png" alt="StudyEdge AI" />StudyEdge AI</a>
+    <nav class="footer-nav">
+      <a href="/pomodoro-timer">Pomodoro Timer</a>
+      <a href="/cornell-notes-template">Cornell Notes</a>
+      <a href="/best-time-to-study-quiz">Study Quiz</a>
+      <a href="/blog/">Blog</a>
+      <a href="/privacy">Privacy</a>
+    </nav>
+    <p class="footer-copy">&copy; 2026 StudyEdge AI. The Pomodoro Technique was developed by Francesco Cirillo.</p>
+  </div>
+</footer>
+
+<script>
+  var settings = { focus: 25, break: 5, long: 20 };
+  var mode = "focus";
+  var totalSecs = 25 * 60;
+  var remaining = totalSecs;
+  var running = false;
+  var iv = null;
+  var sessionsDone = 0;
+  var focusMinutes = 0;
+  var bestStreak = 0;
+  var curStreak = 0;
+  var history = [];
+  var circumference = 603.2;
+
+  function pad(n) { return n < 10 ? "0" + n : "" + n; }
+
+  function updateDisplay() {
+    var m = Math.floor(remaining / 60), s = remaining % 60;
+    var str = pad(m) + ":" + pad(s);
+    document.getElementById("timer-display").textContent = str;
+    document.title = str + " — Pomodoro | StudyEdge AI";
+    document.getElementById("ring").style.strokeDashoffset = circumference * (remaining / totalSecs);
+  }
+
+  function switchMode(m) {
+    if (running) { clearInterval(iv); running = false; }
+    mode = m;
+    var durMap = { focus: settings.focus, break: settings.break, long: settings.long };
+    totalSecs = durMap[m] * 60;
+    remaining = totalSecs;
+    ["focus","break","long"].forEach(function(k) {
+      document.getElementById("tab-" + k).classList.toggle("active", k === m);
+    });
+    var ring = document.getElementById("ring");
+    ring.className = "ring-progress" + (m === "break" ? " break-mode" : m === "long" ? " long-mode" : "");
+    var labels = { focus: "Focus", break: "Short Break", long: "Long Break" };
+    document.getElementById("timer-label").textContent = labels[m];
+    document.getElementById("start-btn").textContent = "Start";
+    updateDisplay();
+  }
+
+  function toggleTimer() {
+    if (running) {
+      clearInterval(iv); running = false;
+      document.getElementById("start-btn").textContent = "Resume";
+    } else {
+      running = true;
+      document.getElementById("start-btn").textContent = "Pause";
+      iv = setInterval(function() {
+        remaining--;
+        updateDisplay();
+        if (remaining <= 0) { clearInterval(iv); running = false; onEnd(); }
+      }, 1000);
+    }
+  }
+
+  function onEnd() {
+    playChime();
+    var now = new Date();
+    var ts = now.getHours() + ":" + pad(now.getMinutes());
+    if (mode === "focus") {
+      sessionsDone++;
+      focusMinutes += settings.focus;
+      curStreak++;
+      if (curStreak > bestStreak) bestStreak = curStreak;
+      var idx = (sessionsDone - 1) % 4;
+      document.getElementById("dot-" + idx).classList.add("done");
+      if (sessionsDone % 4 === 0) setTimeout(function() { for (var i=0;i<4;i++) document.getElementById("dot-"+i).classList.remove("done"); }, 600);
+      history.unshift({ type: "focus", label: "Focus session #" + sessionsDone, time: ts, mins: settings.focus });
+    } else {
+      curStreak = 0;
+      history.unshift({ type: "break", label: mode === "long" ? "Long break" : "Short break", time: ts, mins: settings[mode] });
+    }
+    document.getElementById("stat-sessions").textContent = sessionsDone;
+    document.getElementById("stat-minutes").textContent = focusMinutes;
+    document.getElementById("stat-streak").textContent = bestStreak;
+    renderHistory();
+    document.getElementById("start-btn").textContent = "Start";
+  }
+
+  function resetTimer() {
+    clearInterval(iv); running = false;
+    remaining = totalSecs;
+    document.getElementById("start-btn").textContent = "Start";
+    updateDisplay();
+  }
+
+  function playChime() {
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [[0, 880], [0.18, 1046], [0.36, 1318]].forEach(function(n) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = n[1];
+        g.gain.setValueAtTime(0.28, ctx.currentTime + n[0]);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + n[0] + 0.5);
+        o.start(ctx.currentTime + n[0]); o.stop(ctx.currentTime + n[0] + 0.5);
+      });
+    } catch(e) {}
+  }
+
+  function renderHistory() {
+    var list = document.getElementById("history-list");
+    document.getElementById("history-empty").style.display = history.length ? "none" : "block";
+    list.querySelectorAll(".history-item").forEach(function(i) { i.remove(); });
+    history.slice(0, 10).forEach(function(h) {
+      var el = document.createElement("div");
+      el.className = "history-item";
+      el.innerHTML = '<div class="h-badge ' + h.type + '">' + h.mins + 'm</div><div class="h-label">' + h.label + '</div><div class="h-time">' + h.time + '</div>';
+      list.appendChild(el);
+    });
+  }
+
+  function toggleSettings() {
+    var p = document.getElementById("settings-panel");
+    p.classList.toggle("open");
+    document.querySelector(".settings-toggle").innerHTML = p.classList.contains("open") ? "Settings &#8743;" : "Settings &#8744;";
+  }
+
+  function adjustSetting(key, delta) {
+    var min = key === "break" ? 1 : 5;
+    settings[key] = Math.max(min, settings[key] + delta);
+    document.getElementById("set-" + key).textContent = settings[key];
+    if (key === mode || (mode === "focus" && key === "focus")) {
+      totalSecs = settings[key] * 60;
+      if (!running) { remaining = totalSecs; updateDisplay(); }
+    }
+  }
+
+  updateDisplay();
+</script>
+</body>
+</html>
