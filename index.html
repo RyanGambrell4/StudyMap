@@ -424,6 +424,23 @@
     })();
   </script>
 
+  <!-- PostHog: scroll depth tracking (25/50/75/100%) -->
+  <script>
+    (function () {
+      var depths = [25, 50, 75, 100], fired = {};
+      function onScroll() {
+        var pct = Math.round((window.scrollY + window.innerHeight) / document.documentElement.scrollHeight * 100);
+        depths.forEach(function (d) {
+          if (pct >= d && !fired[d]) {
+            fired[d] = true;
+            posthog && posthog.capture('landing_scroll_depth', { depth_pct: d, page: 'homepage' });
+          }
+        });
+      }
+      window.addEventListener('scroll', onScroll, { passive: true });
+    })();
+  </script>
+
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -938,7 +955,7 @@
           <a href="#pricing">Pricing</a>
           <a href="/blog/">Blog</a>
           <a href="/app?login=1">Sign in</a>
-          <a href="/app?signup=1">Get Started Free</a>
+          <a href="/app?signup=1" onclick="posthog && posthog.capture('landing_cta_clicked', {page:'homepage', cta_text:'Get Started Free', destination:'/app?signup=1'})">Get Started Free</a>
         </nav>
       </header>
       <main>
@@ -946,7 +963,7 @@
           <h1>StudyEdge AI: AI Study Planner for College Students | getstudyedge.com</h1>
           <p>StudyEdge AI at getstudyedge.com is the AI-powered study planner built for college and university students. Search for "StudyEdge AI" or visit getstudyedge.com to access your account. StudyEdge AI (getstudyedge.com) is not affiliated with studyedge.com, we are a separate AI study app for students.</p>
           <p>StudyEdge AI builds your personalized study schedule, plans every session minute-by-minute with a Session Blueprint, and runs your sessions with flashcards, quizzes, active recall, and an AI tutor all built in. One app, all semester. Free to start at getstudyedge.com, no credit card required.</p>
-          <a href="/app?signup=1">Get Started Free on StudyEdge AI</a>
+          <a href="/app?signup=1" onclick="posthog && posthog.capture('landing_cta_clicked', {page:'homepage', cta_text:'Get Started Free on StudyEdge AI', destination:'/app?signup=1'})">Get Started Free on StudyEdge AI</a>
           <a href="/login">Log In to StudyEdge AI</a>
         </section>
         <section id="how">
@@ -988,13 +1005,13 @@
           <p>StudyEdge AI is the app at getstudyedge.com, seen on TikTok and used by 30,000+ college and high school students. We are the AI study planner with Session Blueprints, Focus Mode, AI Study Coach, Brain Dump, Exam Rescue, and Quiz Burst. Log in or create a free account below.</p>
           <p>Common searches that bring students here: "StudyEdge AI", "studyedge ai app", "getstudyedge", "studyedge login", "study edge ai", "studyedge ai review", "studyedge ai tiktok".</p>
           <a href="/login">Log In to StudyEdge AI</a>
-          <a href="/app?signup=1">Create Free Account</a>
+          <a href="/app?signup=1" onclick="posthog && posthog.capture('landing_cta_clicked', {page:'homepage', cta_text:'Create Free Account', destination:'/app?signup=1'})">Create Free Account</a>
         </section>
         <footer>
           <p>© 2026 StudyEdge AI (getstudyedge.com). Built by students, for students.</p>
           <p><strong>Disclaimer:</strong> StudyEdge AI is an AI study planner app at getstudyedge.com. It is <strong>not affiliated with, endorsed by, or connected to Study Edge</strong> at studyedge.com, a separate Florida-based human tutoring company. The two companies are unrelated. <a href="/not-affiliated-with-study-edge">Learn more</a>.</p>
           <a href="/login">Log In</a>
-          <a href="/app?signup=1">Sign Up Free</a>
+          <a href="/app?signup=1" onclick="posthog && posthog.capture('landing_cta_clicked', {page:'homepage', cta_text:'Sign Up Free', destination:'/app?signup=1'})">Sign Up Free</a>
           <a href="/about">About</a>
           <a href="/not-affiliated-with-study-edge">Not Study Edge tutoring</a>
           <a href="/privacy">Privacy Policy</a>
@@ -1035,7 +1052,12 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    const goTo = (path) => { window.location.href = path; };
+    const goTo = (path) => {
+      if (path && (path.includes('/app') || path.includes('signup'))) {
+        posthog && posthog.capture('landing_cta_clicked', { page: 'homepage', destination: path });
+      }
+      window.location.href = path;
+    };
 
     function Nav() {
       return (
@@ -1977,7 +1999,15 @@
           qs.set('billing', bill);
           if (plan === 'pro') qs.set('trial', '1');
         }
-        window.location.href = '/app?' + qs.toString();
+        const dest = '/app?' + qs.toString();
+        posthog && posthog.capture('landing_cta_clicked', {
+          page: 'homepage',
+          cta_text: plan === 'pro' ? 'Start free trial' : plan === 'unlimited' ? 'Get Unlimited' : 'Start for free',
+          plan: plan || 'free',
+          billing: bill,
+          destination: dest,
+        });
+        window.location.href = dest;
       };
 
       return (

@@ -168,6 +168,7 @@
     [data-bill] { display: none; }
     [data-bill].is-active { display: inline; }
   </style>
+  <script src="/ph-init.js"></script>
   <script src="/utm-propagate.js" defer></script>
 </head>
 <body>
@@ -182,7 +183,7 @@
       <a href="/#features">Features</a>
       <a href="/pricing">Pricing</a>
       <a href="/blog/">Blog</a>
-      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="nav-cta">Try Free</a>
+      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="nav-cta" onclick="posthog && posthog.capture('landing_cta_clicked', {page:'pricing', cta_text:'Try Free', destination:'/app?signup=1&plan=pro&billing=weekly&trial=1'})">Try Free</a>
     </div>
   </nav>
 </header>
@@ -214,7 +215,7 @@
         <li>60 min Focus Mode per day</li>
         <li>2 flashcard decks, 20 cards per deck</li>
       </ul>
-      <a href="/app?signup=1" class="pricing-cta pricing-cta-ghost">Get started free</a>
+      <a href="/app?signup=1" class="pricing-cta pricing-cta-ghost" onclick="posthog && posthog.capture('landing_cta_clicked', {page:'pricing', cta_text:'Get started free', plan:'free', destination:'/app?signup=1'})">Get started free</a>
       <p class="pricing-fine">No credit card required for the free plan.</p>
     </div>
 
@@ -239,7 +240,7 @@
         <li>Unlimited flashcard decks and cards</li>
         <li>Smart calendar and Google Calendar sync</li>
       </ul>
-      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="pricing-cta pricing-cta-primary" data-cta="pro">Start your 7-day free trial</a>
+      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="pricing-cta pricing-cta-primary" data-cta="pro" onclick="posthog && posthog.capture('landing_cta_clicked', {page:'pricing', cta_text:'Start your 7-day free trial', plan:'pro', destination:this.getAttribute('href')})">Start your 7-day free trial</a>
       <p class="pricing-fine">7-day free trial via Stripe Checkout. Card required. Cancel any time.</p>
     </div>
 
@@ -264,7 +265,7 @@
         <li>Predicted real-exam score with confidence range</li>
         <li>Everything in Pro</li>
       </ul>
-      <a href="/app?signup=1&plan=unlimited&billing=weekly" class="pricing-cta pricing-cta-ghost" data-cta="unlimited">Get Unlimited</a>
+      <a href="/app?signup=1&plan=unlimited&billing=weekly" class="pricing-cta pricing-cta-ghost" data-cta="unlimited" onclick="posthog && posthog.capture('landing_cta_clicked', {page:'pricing', cta_text:'Get Unlimited', plan:'unlimited', destination:this.getAttribute('href')})">Get Unlimited</a>
       <p class="pricing-fine">No trial. Pay to start. Cancel any time.</p>
       <p class="pricing-fine" style="margin-top:6px;">Predicted score is an AI estimate based on practice performance. Not a guarantee of actual exam results.</p>
     </div>
@@ -371,8 +372,28 @@
     }
 
     buttons.forEach(function (b) {
-      b.addEventListener('click', function () { setPeriod(b.getAttribute('data-period')); });
+      b.addEventListener('click', function () {
+        var period = b.getAttribute('data-period');
+        setPeriod(period);
+        posthog && posthog.capture('pricing_billing_toggle', { page: 'pricing', billing_period: period });
+      });
     });
+  })();
+</script>
+
+<script>
+  (function () {
+    var depths = [25, 50, 75, 100], fired = {};
+    function onScroll() {
+      var pct = Math.round((window.scrollY + window.innerHeight) / document.documentElement.scrollHeight * 100);
+      depths.forEach(function (d) {
+        if (pct >= d && !fired[d]) {
+          fired[d] = true;
+          posthog && posthog.capture('landing_scroll_depth', { depth_pct: d, page: 'pricing' });
+        }
+      });
+    }
+    window.addEventListener('scroll', onScroll, { passive: true });
   })();
 </script>
 
