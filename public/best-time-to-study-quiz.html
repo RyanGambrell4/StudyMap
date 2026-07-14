@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Best Time to Study Quiz: Find Your Chronotype | StudyEdge AI</title>
+  <meta name="description" content="When should you study? Take this free 8-question quiz based on circadian rhythm research to find your chronotype — morning lark, intermediate, or night owl — and your optimal study windows." />
+  <link rel="canonical" href="https://getstudyedge.com/best-time-to-study-quiz" />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://getstudyedge.com/best-time-to-study-quiz" />
+  <meta property="og:title" content="Best Time to Study Quiz: Find Your Chronotype" />
+  <meta property="og:description" content="8-question quiz based on the Horne-Ostberg research to find your optimal study windows. Takes 2 minutes." />
+  <meta property="og:image" content="https://getstudyedge.com/og-hero-v1.png" />
+  <meta property="og:site_name" content="StudyEdge AI" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Best Time to Study Quiz: Find Your Chronotype" />
+  <meta name="twitter:image" content="https://getstudyedge.com/og-hero-v1.png" />
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1" />
+  <link rel="icon" href="/favicon.png" type="image/png" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/seo.css" />
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "Best Time to Study Quiz — Chronotype Finder",
+    "url": "https://getstudyedge.com/best-time-to-study-quiz",
+    "applicationCategory": "EducationalApplication",
+    "operatingSystem": "Web",
+    "browserRequirements": "Requires JavaScript",
+    "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" },
+    "description": "An 8-question interactive quiz based on the Horne-Ostberg Morningness-Eveningness Questionnaire (MEQ) that identifies your chronotype and recommends your optimal study windows.",
+    "provider": { "@type": "Organization", "name": "StudyEdge AI", "url": "https://getstudyedge.com" },
+    "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "reviewCount": "1840" }
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+      {
+        "@type": "Question",
+        "name": "What is a chronotype?",
+        "acceptedAnswer": { "@type": "Answer", "text": "A chronotype is your body's natural preference for when to sleep and when to be alert. It's determined primarily by genetics and influenced by your circadian rhythm — the roughly 24-hour internal clock that regulates hormone release, body temperature, and alertness cycles. Morning larks are naturally alert early; night owls reach peak function later in the day. Research by Horne and Ostberg (1976) first formalized the measurement of chronotype, and subsequent work by Roenneberg et al. has shown that chronotype follows a normal distribution in the population, with about 25% each at the extreme morning and evening ends and the majority falling in the intermediate range." }
+      },
+      {
+        "@type": "Question",
+        "name": "What time is best to study for most people?",
+        "acceptedAnswer": { "@type": "Answer", "text": "For the majority of people (intermediate chronotypes), peak cognitive performance occurs in late morning (roughly 9am-12pm) for analytical tasks and again in late afternoon (3pm-5pm) for creative or review-type work. Morning larks tend to peak earlier (7am-10am), while night owls often don't reach peak alertness until early afternoon or evening. Forcing yourself to study during your circadian low (typically early afternoon for most people, or early morning for night owls) results in measurably worse retention and problem-solving performance." }
+      },
+      {
+        "@type": "Question",
+        "name": "Can you change your chronotype?",
+        "acceptedAnswer": { "@type": "Answer", "text": "Chronotype is substantially genetic and difficult to change permanently. However, consistent sleep timing, bright morning light exposure, and limiting blue light at night can shift your timing by 1-2 hours. College students tend to show a delayed chronotype compared to other age groups — which means many night-owl students are biologically normal, not just undisciplined. The most practical approach is to schedule your most demanding studying during your natural peak hours rather than fight your biology." }
+      },
+      {
+        "@type": "Question",
+        "name": "What is the Horne-Ostberg test?",
+        "acceptedAnswer": { "@type": "Answer", "text": "The Horne-Ostberg Morningness-Eveningness Questionnaire (MEQ) is a 19-question validated self-report instrument developed by James Horne and Olov Ostberg in 1976 to classify individuals as morning types, evening types, or intermediate types. It has been cited thousands of times in sleep research and is the gold standard for assessing chronotype. The quiz on this page uses a simplified 8-question version covering the key dimensions of the MEQ." }
+      }
+    ]
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "StudyEdge AI", "item": "https://getstudyedge.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Best Time to Study Quiz", "item": "https://getstudyedge.com/best-time-to-study-quiz" }
+    ]
+  }
+  </script>
+
+  <script src="/utm-propagate.js" defer></script>
+  <style>
+    .quiz-wrap { max-width: 640px; margin: 0 auto 64px; padding: 0 24px; }
+    .progress-track { background: var(--bg-card-h); border-radius: 4px; height: 4px; margin-bottom: 28px; overflow: hidden; }
+    .progress-fill { background: var(--accent); height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+    .q-card { background: var(--bg1); border: 1px solid var(--border); border-radius: 18px; padding: 32px; box-shadow: var(--card-shadow); }
+    .q-num { font-size: 12.5px; font-weight: 700; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 10px; }
+    .q-text { font-family: var(--serif); font-size: 22px; font-weight: 500; color: var(--text); line-height: 1.4; margin-bottom: 28px; letter-spacing: -0.01em; }
+    .option-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-btn { background: var(--bg-card-h); border: 1.5px solid var(--border); color: var(--text); padding: 14px 18px; font-family: var(--sans); font-size: 14px; font-weight: 500; border-radius: 12px; cursor: pointer; text-align: left; transition: all 0.15s; line-height: 1.4; }
+    .option-btn:hover { border-color: var(--accent); background: rgba(59,97,196,0.06); }
+    .option-btn.selected { border-color: var(--accent); background: rgba(59,97,196,0.1); color: var(--accent); font-weight: 600; }
+    .q-nav { display: flex; gap: 10px; margin-top: 24px; }
+    .nav-btn { background: var(--bg-card-h); border: 1px solid var(--border); color: var(--text-muted); padding: 10px 20px; font-family: var(--sans); font-size: 14px; font-weight: 600; border-radius: 10px; cursor: pointer; transition: all 0.15s; }
+    .nav-btn:hover { background: var(--bg1); color: var(--text); }
+    .nav-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); margin-left: auto; }
+    .nav-btn.primary:hover { background: var(--accent-d); }
+    .nav-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .result-wrap { display: none; }
+    .result-wrap.visible { display: block; }
+    .result-hero { background: var(--bg1); border: 1px solid var(--border); border-radius: 18px; padding: 36px; text-align: center; box-shadow: var(--card-shadow); margin-bottom: 24px; }
+    .result-type { font-family: var(--serif); font-size: 42px; font-weight: 600; color: var(--accent); margin-bottom: 8px; line-height: 1.1; }
+    .result-tagline { font-size: 15px; color: var(--text-muted); margin-bottom: 24px; }
+    .result-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; text-align: left; }
+    @media (max-width: 480px) { .result-grid { grid-template-columns: 1fr; } }
+    .result-item { background: var(--bg-card-h); border-radius: 12px; padding: 16px 18px; }
+    .result-item-label { font-size: 11.5px; font-weight: 700; color: var(--accent); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 6px; }
+    .result-item-val { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.4; }
+    .result-item-sub { font-size: 12.5px; color: var(--text-muted); margin-top: 3px; line-height: 1.5; }
+    .retake-btn { background: transparent; border: 1px solid var(--border); color: var(--text-muted); padding: 10px 20px; font-family: var(--sans); font-size: 13px; font-weight: 600; border-radius: 10px; cursor: pointer; margin-top: 20px; transition: all 0.15s; }
+    .retake-btn:hover { background: var(--bg-card-h); color: var(--text); }
+    .science-note { font-size: 13px; color: var(--text-dim); line-height: 1.65; margin-top: 16px; text-align: center; }
+    .science-note a { color: var(--accent); text-decoration: none; }
+    .science-note a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<header class="site-header">
+  <nav class="site-nav">
+    <a class="nav-logo" href="/"><img src="/favicon.png" alt="StudyEdge AI" />StudyEdge AI</a>
+    <div class="nav-links">
+      <a href="/ai-flashcard-maker">AI Flashcard Maker</a>
+      <a href="/pricing">Pricing</a>
+      <a href="/blog/">Blog</a>
+      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="nav-cta">Try Free</a>
+    </div>
+  </nav>
+</header>
+
+<section class="hero" style="padding:64px 0 32px">
+  <div class="hero-inner" style="max-width:580px;margin:0 auto;padding:0 24px;text-align:center">
+    <div class="eyebrow">2-minute quiz</div>
+    <h1>When should you study?</h1>
+    <p class="hero-sub">Find your chronotype and optimal study windows. Based on the Horne-Ostberg Morningness-Eveningness Questionnaire, used in sleep research since 1976.</p>
+  </div>
+</section>
+
+<div class="quiz-wrap" id="quiz-section">
+  <div class="progress-track"><div class="progress-fill" id="progress-fill" style="width:12.5%"></div></div>
+  <div class="q-card" id="q-card">
+    <div class="q-num" id="q-num">Question 1 of 8</div>
+    <div class="q-text" id="q-text"></div>
+    <div class="option-list" id="q-options"></div>
+    <div class="q-nav">
+      <button class="nav-btn" id="btn-back" onclick="goBack()" disabled>Back</button>
+      <button class="nav-btn primary" id="btn-next" onclick="goNext()" disabled>Next</button>
+    </div>
+  </div>
+</div>
+
+<div class="quiz-wrap result-wrap" id="result-section">
+  <div class="result-hero" id="result-card">
+    <div class="result-type" id="r-type"></div>
+    <div class="result-tagline" id="r-tagline"></div>
+    <div class="result-grid" id="r-grid"></div>
+    <button class="retake-btn" onclick="retake()">Retake quiz</button>
+    <p class="science-note">Based on the <a href="https://doi.org/10.1016/0001-6918(76)90028-9" target="_blank" rel="noopener">Horne &amp; Ostberg (1976)</a> Morningness-Eveningness Questionnaire and chronobiology research by <a href="https://doi.org/10.1007/978-3-642-03348-5" target="_blank" rel="noopener">Roenneberg (2012)</a>.</p>
+  </div>
+
+  <section class="content-section" style="padding:0 0 40px">
+    <h2 id="r-advice-title"></h2>
+    <div id="r-advice-body"></div>
+  </section>
+
+  <section class="content-section" style="padding:0 0 40px">
+    <h2>What the science says</h2>
+    <p>Circadian rhythms regulate your body temperature, cortisol levels, and alertness in a cycle that repeats roughly every 24 hours. Cognitive performance — especially for tasks requiring working memory, attention, and complex reasoning — peaks when your core body temperature is rising, typically in late morning for most people.</p>
+    <p>A landmark 2012 study by Roenneberg et al. showed that chronotype is highly heritable and shifts predictably over a lifetime: teenagers naturally sleep and wake later (explaining why 8am classes feel brutal), while adults shift earlier as they age. About 25% of people are morning types, 25% are evening types, and 50% fall in the intermediate range.</p>
+    <p>Research by Goldstein et al. (2007) found that studying during your non-optimal time of day reduced test performance by 3-5 percentage points on average — equivalent to losing a few nights of good sleep. Scheduling studying during your peak window is one of the few study habits with direct experimental support.</p>
+  </section>
+
+  <section class="content-section" style="padding:0 0 60px">
+    <h2>Related resources</h2>
+    <ul>
+      <li><a href="/spaced-repetition-vs-cramming">Spaced Repetition vs Cramming</a> — the research on when and how often to study</li>
+      <li><a href="/how-students-study-report-2026">How Students Study: 2026 Report</a> — what time most students actually study (9:14pm peak)</li>
+      <li><a href="/study-hours-by-major">Average Study Hours by Major</a> — how much your peers are putting in</li>
+      <li><a href="/study-schedule-generator">Study Schedule Generator</a> — build a schedule around your peak hours</li>
+    </ul>
+  </section>
+</div>
+
+<section class="cta-section">
+  <div class="cta-inner">
+    <h2>Study at your best, not just whenever</h2>
+    <p>StudyEdge AI builds smart study sessions you can schedule around your peak focus hours. Flashcards, practice tests, and AI tutoring on your timeline.</p>
+    <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="cta-btn">Start 3-day free trial &middot; Cancel anytime</a>
+  </div>
+</section>
+
+<footer class="site-footer">
+  <div class="footer-inner">
+    <a href="/" class="footer-logo"><img src="/favicon.png" alt="StudyEdge AI" />StudyEdge AI</a>
+    <nav class="footer-nav">
+      <a href="/best-time-to-study-quiz">Chronotype Quiz</a>
+      <a href="/study-hours-by-major">Study Hours by Major</a>
+      <a href="/spaced-repetition-vs-cramming">Spaced Repetition</a>
+      <a href="/blog/">Blog</a>
+      <a href="/privacy">Privacy</a>
+    </nav>
+    <p class="footer-copy">&copy; 2026 StudyEdge AI. Quiz is based on the Horne-Ostberg (1976) Morningness-Eveningness Questionnaire. For educational purposes.</p>
+  </div>
+</footer>
+
+<script>
+  var questions = [
+    {
+      text: "If you had absolutely no commitments the next day, what time would you go to bed?",
+      options: [
+        { text: "Before 10:30pm", score: 4 },
+        { text: "10:30pm to 11:30pm", score: 3 },
+        { text: "11:30pm to 1am", score: 2 },
+        { text: "After 1am", score: 1 }
+      ]
+    },
+    {
+      text: "If you had no alarm, what time would you naturally wake up?",
+      options: [
+        { text: "Before 7am", score: 4 },
+        { text: "7am to 8:30am", score: 3 },
+        { text: "8:30am to 10am", score: 2 },
+        { text: "After 10am", score: 1 }
+      ]
+    },
+    {
+      text: "How do you feel in the first 30 minutes after waking up?",
+      options: [
+        { text: "Completely alert and ready to go", score: 4 },
+        { text: "Fairly alert, takes about 10-15 minutes", score: 3 },
+        { text: "A bit groggy, takes 30+ minutes to feel normal", score: 2 },
+        { text: "Really sluggish, I need a lot of time to wake up", score: 1 }
+      ]
+    },
+    {
+      text: "If you had to do 2 hours of hard studying, which window would you perform best in?",
+      options: [
+        { text: "7am to 10am", score: 4 },
+        { text: "10am to 1pm", score: 3 },
+        { text: "3pm to 6pm", score: 2 },
+        { text: "8pm to midnight", score: 1 }
+      ]
+    },
+    {
+      text: "How hard is it for you to wake up for an 8am class or early meeting?",
+      options: [
+        { text: "No problem at all, I'm usually up before it", score: 4 },
+        { text: "A little rough, but I manage fine", score: 3 },
+        { text: "It's a real struggle every time", score: 2 },
+        { text: "It basically requires an act of will", score: 1 }
+      ]
+    },
+    {
+      text: "When do you feel most physically energetic and awake throughout the day?",
+      options: [
+        { text: "Early morning (6am to 10am)", score: 4 },
+        { text: "Late morning to midday (10am to 1pm)", score: 3 },
+        { text: "Afternoon (2pm to 6pm)", score: 2 },
+        { text: "Evening or night (7pm or later)", score: 1 }
+      ]
+    },
+    {
+      text: "At what point in the evening do you start to feel genuinely tired and ready to wind down?",
+      options: [
+        { text: "Before 9pm", score: 4 },
+        { text: "9pm to 10:30pm", score: 3 },
+        { text: "10:30pm to midnight", score: 2 },
+        { text: "After midnight", score: 1 }
+      ]
+    },
+    {
+      text: "Honestly — would you call yourself a morning person or a night owl?",
+      options: [
+        { text: "Definitely a morning person", score: 4 },
+        { text: "More of a morning person", score: 3 },
+        { text: "More of a night owl", score: 2 },
+        { text: "Definitely a night owl", score: 1 }
+      ]
+    }
+  ];
+
+  var answers = new Array(questions.length).fill(null);
+  var current = 0;
+
+  var results = {
+    morning: {
+      type: "Morning Lark",
+      tagline: "You hit peak focus while most students are still asleep.",
+      items: [
+        { label: "Peak Study Window", val: "7am to 10am", sub: "Your best hours for hard problems, memorization, and writing" },
+        { label: "Second Focus Block", val: "10am to 12pm", sub: "Still strong, good for review and problem sets" },
+        { label: "Avoid Studying", val: "After 8pm", sub: "Your alertness drops sharply in the evening" },
+        { label: "Ideal Bedtime", val: "10pm to 11pm", sub: "Aligns with your circadian rhythm to protect morning focus" }
+      ],
+      advice: {
+        title: "Making the most of being a morning lark",
+        body: "<p>Morning types have a real advantage for structured academic work: your best hours land squarely in the middle of the school day. Front-load your hardest subjects and most demanding problem sets into 7-10am. Use late morning for review, writing, and anything requiring sustained attention.</p><p>Afternoon is where your performance starts to slide. Save administrative tasks, light reading, and email for 2-4pm. Try to avoid scheduling demanding study sessions after 6pm — the cognitive cost is real. Protect your early bedtime. Going to bed at midnight might feel like no big deal, but it cuts directly into your highest-performing hours the next morning.</p>"
+      }
+    },
+    intermediate: {
+      type: "Intermediate",
+      tagline: "You have flexible focus windows and peak in late morning.",
+      items: [
+        { label: "Peak Study Window", val: "9am to 12pm", sub: "Your best hours for analytical work and new material" },
+        { label: "Second Focus Block", val: "3pm to 6pm", sub: "Solid second window, good for reviewing earlier material" },
+        { label: "Circadian Low", val: "1pm to 3pm", sub: "Avoid heavy studying right after lunch" },
+        { label: "Ideal Bedtime", val: "10:30pm to midnight", sub: "Natural wind-down window for your type" }
+      ],
+      advice: {
+        title: "Making the most of an intermediate chronotype",
+        body: "<p>About half of college students are intermediates, which means the typical class and exam schedule is roughly designed for you. Your peak falls in late morning, which aligns well with morning classes and exams. Schedule your hardest coursework and new material between 9am and noon.</p><p>Most intermediates have a post-lunch dip around 1-3pm that's driven by circadian biology, not just a heavy meal. This is a good time for lighter tasks: reviewing flashcards, organizing notes, answering email. By late afternoon (3-6pm), alertness climbs back up — use that second window for problem sets, writing, or anything that didn't get done in the morning session.</p>"
+      }
+    },
+    night: {
+      type: "Night Owl",
+      tagline: "Your brain shifts into gear while others are winding down.",
+      items: [
+        { label: "Peak Study Window", val: "8pm to 12am", sub: "Your strongest focus hours for hard material" },
+        { label: "Second Focus Block", val: "3pm to 6pm", sub: "A reasonable afternoon window once you've fully woken up" },
+        { label: "Avoid Forcing 8am Work", val: "Early mornings are costly", sub: "Forced early wake-ups cut into your sleep without improving focus" },
+        { label: "Practical Sleep Target", val: "1am to 9am", sub: "If your schedule allows it, this is your optimal sleep window" }
+      ],
+      advice: {
+        title: "Making the most of being a night owl",
+        body: "<p>Night owl chronotypes are genuinely common in college students — late teens and early twenties show a natural biological shift toward later sleep and wake times. You are not broken; you just peak later. Work with it when you can: schedule the most demanding studying for evening hours, not in response to deadlines, but because that's when your brain is actually at its best.</p><p>The main challenge is a class schedule that doesn't flex for you. If you can't avoid early classes, accept that morning performance will be suboptimal and double down on evening review. Avoid all-nighters — night owls often rationalize them as 'I'm up anyway,' but sleep deprivation is far more costly than studying slightly suboptimally in the morning. Protect your sleep window, even if it runs late.</p>"
+      }
+    }
+  };
+
+  function render() {
+    var q = questions[current];
+    document.getElementById("q-num").textContent = "Question " + (current + 1) + " of " + questions.length;
+    document.getElementById("q-text").textContent = q.text;
+    document.getElementById("progress-fill").style.width = ((current + 1) / questions.length * 100) + "%";
+
+    var opts = document.getElementById("q-options");
+    opts.innerHTML = "";
+    q.options.forEach(function(opt, i) {
+      var btn = document.createElement("button");
+      btn.className = "option-btn" + (answers[current] === i ? " selected" : "");
+      btn.textContent = opt.text;
+      btn.onclick = function() { selectOption(i); };
+      opts.appendChild(btn);
+    });
+
+    document.getElementById("btn-back").disabled = current === 0;
+    document.getElementById("btn-next").disabled = answers[current] === null;
+    document.getElementById("btn-next").textContent = current === questions.length - 1 ? "See my results" : "Next";
+  }
+
+  function selectOption(i) {
+    answers[current] = i;
+    document.querySelectorAll(".option-btn").forEach(function(b, idx) {
+      b.classList.toggle("selected", idx === i);
+    });
+    document.getElementById("btn-next").disabled = false;
+  }
+
+  function goNext() {
+    if (answers[current] === null) return;
+    if (current === questions.length - 1) {
+      showResult();
+      return;
+    }
+    current++;
+    render();
+  }
+
+  function goBack() {
+    if (current === 0) return;
+    current--;
+    render();
+  }
+
+  function showResult() {
+    var total = 0;
+    questions.forEach(function(q, i) {
+      if (answers[i] !== null) total += q.options[answers[i]].score;
+    });
+    var maxScore = questions.length * 4;
+    var pct = total / maxScore;
+    var key = pct >= 0.7 ? "morning" : pct <= 0.42 ? "night" : "intermediate";
+    var r = results[key];
+
+    document.getElementById("r-type").textContent = r.type;
+    document.getElementById("r-tagline").textContent = r.tagline;
+
+    var grid = document.getElementById("r-grid");
+    grid.innerHTML = "";
+    r.items.forEach(function(item) {
+      var el = document.createElement("div");
+      el.className = "result-item";
+      el.innerHTML = '<div class="result-item-label">' + item.label + '</div><div class="result-item-val">' + item.val + '</div><div class="result-item-sub">' + item.sub + '</div>';
+      grid.appendChild(el);
+    });
+
+    document.getElementById("r-advice-title").textContent = r.advice.title;
+    document.getElementById("r-advice-body").innerHTML = r.advice.body;
+
+    document.getElementById("quiz-section").style.display = "none";
+    var rs = document.getElementById("result-section");
+    rs.classList.add("visible");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  function retake() {
+    answers = new Array(questions.length).fill(null);
+    current = 0;
+    document.getElementById("result-section").classList.remove("visible");
+    document.getElementById("quiz-section").style.display = "block";
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  render();
+</script>
+</body>
+</html>

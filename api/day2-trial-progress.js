@@ -43,7 +43,7 @@ function inactiveBody({ audienceLine, greeting, firstName }) {
   const nameSuffix = firstName ? ` ${firstName},` : ''
   return {
     subject: 'Your trial is more than half gone. 5 minutes fixes that.',
-    heading: `2 days in${nameSuffix ? '' : '.'}${firstName ? ' Let\'s make the most of it.' : ''}`,
+    heading: `Trial is halfway done${nameSuffix ? '' : '.'}${firstName ? ' Let\'s not waste it.' : ''}`,
     kicker: 'Day 2 · rescue',
     kickerColor: '#E8531A',
     lead: `${greeting} — you haven't run a session yet. That's the only thing standing between you and knowing if this actually works for you.`,
@@ -52,7 +52,7 @@ function inactiveBody({ audienceLine, greeting, firstName }) {
     tipContext: audienceLine,
     ctaLabel: 'Try one session now',
     ctaHref: 'https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day2_rescue',
-    ctaSub: '~5 days left on your trial.',
+    ctaSub: 'Trial ends in ~5 days.',
   }
 }
 
@@ -71,7 +71,7 @@ function activeBody({ audienceLine, greeting, firstName, sessionCount }) {
     tipContext: audienceLine,
     ctaLabel: 'Generate a cheat sheet',
     ctaHref: 'https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day2_active',
-    ctaSub: '~5 days left — keep Pro at $2.99/wk.',
+    ctaSub: 'Trial ends in ~5 days — keep Pro at $2.99/wk.',
   }
 }
 

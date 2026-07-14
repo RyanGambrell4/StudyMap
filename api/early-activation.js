@@ -54,60 +54,74 @@ export default async function handler(req, res) {
     const guard = await canSendUserEmail(user.id, { priority: 'normal' })
     if (!guard.ok) { skipped++; continue }
 
-    const subjectOptions = [
-      "Here's how to get the most out of StudyEdge",
-      "Your study system is set up — here's where to start",
-      "3 things to do in your first StudyEdge session",
-    ]
-    const subject = subjectOptions[Math.floor(Date.now() / 1000) % subjectOptions.length]
+    const subject = "One thing to do in StudyEdge right now (takes 30 sec)"
 
     try {
       await resend.emails.send({
-        from: 'StudyEdge AI <noreply@getstudyedge.com>',
+        from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
         to: user.email,
         subject,
-        headers: listUnsubscribeHeaders(user.id),
-        html: `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-${preheader('Start with your Study Coach → it builds your whole plan in 2 minutes.')}
-  <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
-    <div style="background:#fff;border-radius:16px;padding:36px 32px;border:1px solid #e5e7eb;">
-      <img src="https://getstudyedge.com/favicon.png" alt="StudyEdge AI" style="width:36px;height:36px;border-radius:9px;margin-bottom:20px;">
-      <h1 style="margin:0 0 6px;font-size:22px;font-weight:800;color:#111;letter-spacing:-0.03em;">
-        Your plan is waiting for you.
-      </h1>
-      <p style="margin:0 0 22px;font-size:15px;color:#4b5563;line-height:1.6;">
-        Most students who get real results with StudyEdge do one thing right away — they run their Study Coach. It asks you about your courses, deadlines, and schedule, then builds a full semester plan around your exam dates.
-      </p>
-      <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#6b7280;text-transform:uppercase;letter-spacing:0.06em;">Start here →</p>
-      <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:24px;">
-        ${[
-          { num: '1', title: 'Add your first course', desc: 'Takes 30 seconds. Drop in your course name and exam date.' },
-          { num: '2', title: 'Run Study Coach', desc: 'Upload your syllabus or paste your deadlines. It builds your whole plan.' },
-          { num: '3', title: 'Start your first session', desc: 'Open a Blueprint and begin. Session 1 takes 10 minutes.' },
-        ].map(s => `
-          <div style="display:flex;gap:14px;align-items:flex-start;padding:14px;background:#f9fafb;border-radius:10px;border:1px solid #e5e7eb;">
-            <div style="width:28px;height:28px;border-radius:8px;background:#ede9fe;color:#7c3aed;font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">${s.num}</div>
-            <div>
-              <p style="margin:0 0 2px;font-weight:700;font-size:14px;color:#111;">${s.title}</p>
-              <p style="margin:0;font-size:13px;color:#6b7280;">${s.desc}</p>
-            </div>
-          </div>
-        `).join('')}
-      </div>
-      <a href="https://getstudyedge.com/app" style="display:block;text-align:center;background:linear-gradient(135deg,#3b61c4,#7c3aed);color:#fff;font-weight:800;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none;letter-spacing:-0.01em;">
-        Open StudyEdge →
-      </a>
-      <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;text-align:center;">
-        studyedge.com · <a href="https://getstudyedge.com/unsubscribe?uid=${user.id}" style="color:#9ca3af;">Unsubscribe</a>
-      </p>
-    </div>
-  </div>
-</body>
-</html>`,
+        headers: listUnsubscribeHeaders(user.email),
+        html: `<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Get started with StudyEdge</title></head>
+<body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111111;">
+${preheader("Add a course with an exam date. Everything else — your plan, your blueprints, your coach — runs from there.")}
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
+  <tr><td align="center">
+    <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
+      <tr><td style="padding-bottom:20px;text-align:center;">
+        <img src="https://getstudyedge.com/favicon.png" width="32" height="32" alt="StudyEdge" style="display:inline-block;width:32px;height:32px;border-radius:8px;vertical-align:middle;margin-right:10px;border:0;" />
+        <span style="font-size:16px;font-weight:700;color:#111111;vertical-align:middle;letter-spacing:-0.3px;">StudyEdge</span>
+      </td></tr>
+      <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
+        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">From Ryan</p>
+        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">
+          The one thing that makes StudyEdge actually work.
+        </h1>
+        <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          You signed up a couple hours ago. Before you dive in, here's the single most important thing: <strong style="color:#111111;">add a course with a real exam date.</strong>
+        </p>
+        <p style="margin:0 0 20px;font-size:15px;color:#6B6B6B;line-height:1.65;">
+          Your study plan, Session Blueprints, Study Coach, and grade tracker are all built around exam dates. Without one, the AI doesn't know what to focus on — or when.
+        </p>
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
+          ${[
+            ['Add a course (30 seconds)', 'Tap Courses → Add course. Give it a name and an exam date.'],
+            ['Run the Study Coach', 'It builds a full multi-week plan around your deadlines. Takes 2 minutes.'],
+            ['Start your first session', 'Open a Session Blueprint. It tells you exactly what to study and for how long.'],
+          ].map(([title, desc], i, arr) => `
+          <tr>
+            <td style="padding:13px 0;${i < arr.length - 1 ? 'border-bottom:1px solid #F0EDE8;' : ''}">
+              <div style="font-size:14px;font-weight:600;color:#3B61C4;margin-bottom:3px;">${title}</div>
+              <div style="font-size:13px;color:#6B6B6B;line-height:1.55;">${desc}</div>
+            </td>
+          </tr>`).join('')}
+        </table>
+        <table cellpadding="0" cellspacing="0" style="width:100%;">
+          <tr><td align="center" style="padding-bottom:6px;">
+            <a href="https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=early_activation" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Add my first course</a>
+          </td></tr>
+        </table>
+        <p style="margin:22px 0 0;font-size:14px;color:#6B6B6B;line-height:1.65;">
+          Reply if you have questions — I read them.<br>— Ryan
+        </p>
+      </td></tr>
+      <tr><td style="padding:24px 0 0;text-align:center;">
+        <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
+          You just created a StudyEdge account.
+          <a href="https://getstudyedge.com/app" style="color:#9B9B9B;text-decoration:underline;">Open the app</a>
+          &nbsp;·&nbsp;
+          <a href="mailto:support@mail.getstudyedge.com" style="color:#9B9B9B;text-decoration:underline;">Contact support</a>
+          &nbsp;&middot;&nbsp;
+          <a href="https://getstudyedge.com/unsubscribe?email=${encodeURIComponent(user.email ?? '')}" style="color:#9B9B9B;text-decoration:underline;">Unsubscribe</a>
+        </p>
+        <p style="margin:14px 0 0;font-size:11.5px;color:#9B9B9B;">The StudyEdge AI team</p>
+      </td></tr>
+    </table>
+  </td></tr>
+</table>
+</body></html>`,
       })
       await recordUserEmail(user.id, 'early-activation')
       sent++

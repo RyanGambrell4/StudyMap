@@ -21,11 +21,11 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, skipped: true, reason: 'already_ran_today' })
   }
 
-  // Target users whose trial ended 1-2 days ago.
-  // 7-day trial: trialUsedAt + 168h = trial end. We want 24-48h after that.
+  // Target users whose trial ended 1-2 days ago (trialUsedAt was 8-9 days ago).
+  // 7-day trial: trialUsedAt + 168h = trial end. We want 24-48h after that = 192-216h after trialUsedAt.
   const now = new Date()
-  const windowStart = new Date(now - 48 * 60 * 60 * 1000) // 2 days ago
-  const windowEnd   = new Date(now - 24 * 60 * 60 * 1000) // 1 day ago
+  const windowStart = new Date(now - 216 * 60 * 60 * 1000) // 9 days ago
+  const windowEnd   = new Date(now - 192 * 60 * 60 * 1000) // 8 days ago
 
   // Pull free users who had a trial (trialUsedAt set) so we can filter by when their trial ended.
   const { data: rows, error } = await supabaseAdmin

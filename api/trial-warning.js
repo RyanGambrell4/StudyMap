@@ -91,7 +91,7 @@ ${preheader("Lock in Pro now — $2.99/wk. Your trial ends in less than 24 hours
       </td></tr>
       <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#E87820;text-transform:uppercase;">Trial ending soon</p>
-        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">Your Pro trial ends in less than 24 hours.</h1>
+        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">Your 7-day Pro trial ends in less than 24 hours.</h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           ${activityLine} When the trial ends, you'll drop back to the free plan — 2 AI actions total, 1 course, and a 30-minute focus cap.
         </p>

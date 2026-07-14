@@ -89,3 +89,16 @@ Assets built specifically to earn backlinks (tools + original data + AP subject 
 - Submit new URLs to Google Search Console URL Inspection for immediate re-crawl.
 - Consider outreach: send the 2026 Study Report to 5 education journalists (Inside Higher Ed, The Chronicle, EdSurge) and 5 large study-tip YouTubers.
 - Track backlinks with a monthly Ahrefs/Semrush pull. First measurement: 2026-08-13.
+
+## Linkable-asset layer wave 2 (added 2026-07-14)
+
+Skipped: `/study-schedule-generator` (already exists, 519 lines, comprehensive).
+
+| Asset | URL | Type | Backlink hook |
+|---|---|---|---|
+| Study Hours by Major | `/study-hours-by-major` | Dataset + ScholarlyArticle | NSSE 2023 data, CC BY 4.0, sortable bar chart. Ed journalists, career sites, Reddit r/college. |
+| AP Score Calculator | `/ap-score-calculator` | Interactive tool | MC + FRQ sliders for 14 AP exams, composite to 1-5 score. r/APStudents, AP tutors, teacher blogs. |
+| Best Time to Study Quiz | `/best-time-to-study-quiz` | Interactive quiz | 8-question Horne-Ostberg chronotype quiz; morning/intermediate/night owl + study windows. Wellness blogs, sleep researchers, study YouTubers. |
+| Grad School GPA Requirements | `/grad-school-gpa-requirements` | Dataset + filterable table | 40+ programs (MD, law, MBA, PhD, nursing, pharmacy, dental), filter by type + search. Pre-med forums, r/lawschooladmissions, r/MBA. |
+
+Cross-links added: `/gpa-calculator` Related, `/gpa-requirements` Related, `/ap-exam-study-schedule-templates` Related.

@@ -115,6 +115,10 @@
             "schedule": "0 14 * * *"
         },
         {
+            "path": "/api/day3-trial-tips",
+            "schedule": "0 12 * * *"
+        },
+        {
             "path": "/api/trial-warning",
             "schedule": "0 12 * * *"
         },
