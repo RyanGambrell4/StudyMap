@@ -47,6 +47,8 @@ import BrainDumpModal from './BrainDumpModal'
 import ExamRescueModal from './ExamRescueModal'
 import QuickQuizBurst from './QuickQuizBurst'
 import PodcastGenerator from './PodcastGenerator'
+import TeachItBackModal from './TeachItBackModal'
+import ConnectionsModeModal from './ConnectionsModeModal'
 import SessionRatingModal from './SessionRatingModal'
 
 // ─── TutorView ────────────────────────────────────────────────────────────────
@@ -419,6 +421,8 @@ export default function OutputView({
   const [showExamRescue, setShowExamRescue] = useState(false)
   const [showQuizBurst, setShowQuizBurst] = useState(false)
   const [showPodcast, setShowPodcast] = useState(false)
+  const [showTeachItBack, setShowTeachItBack] = useState(false)
+  const [showConnectionsMode, setShowConnectionsMode] = useState(false)
   const [ratingSession, setRatingSession] = useState(null) // session to rate after completion
 
   // ── First-query nudge listener ────────────────────────────────────────────────
@@ -1841,6 +1845,8 @@ export default function OutputView({
             onOpenExamRescue={() => setShowExamRescue(true)}
             onOpenQuizBurst={() => setShowQuizBurst(true)}
             onOpenPodcast={() => setShowPodcast(true)}
+            onOpenTeachItBack={() => setShowTeachItBack(true)}
+            onOpenConnectionsMode={() => setShowConnectionsMode(true)}
           />
         )}
 
@@ -2019,6 +2025,20 @@ export default function OutputView({
           courses={courses}
           userId={userId}
           onClose={() => setShowPodcast(false)}
+          onShowPaywall={onShowPaywall}
+        />
+      )}
+      {showTeachItBack && (
+        <TeachItBackModal
+          courses={courses}
+          onClose={() => setShowTeachItBack(false)}
+          onShowPaywall={onShowPaywall}
+        />
+      )}
+      {showConnectionsMode && (
+        <ConnectionsModeModal
+          courses={courses}
+          onClose={() => setShowConnectionsMode(false)}
           onShowPaywall={onShowPaywall}
         />
       )}

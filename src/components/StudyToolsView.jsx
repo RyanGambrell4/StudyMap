@@ -184,7 +184,7 @@ function QuizQuestion({ question, onAnswer }) {
 }
 
 // ── Main view ─────────────────────────────────────────────────────────────────
-export default function StudyToolsView({ courses, userId, onShowPaywall, onNavigateToCoach, learningStyle, onOpenCheatSheet, onOpenBrainDump, onOpenExamRescue, onOpenQuizBurst, onOpenPodcast }) {
+export default function StudyToolsView({ courses, userId, onShowPaywall, onNavigateToCoach, learningStyle, onOpenCheatSheet, onOpenBrainDump, onOpenExamRescue, onOpenQuizBurst, onOpenPodcast, onOpenTeachItBack, onOpenConnectionsMode }) {
   const fileInputRef = useRef(null)
   const scanInputRef = useRef(null)
   const [dragging, setDragging] = useState(false)
@@ -724,14 +724,30 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>,
             onClick: () => onNavigateToCoach?.(),
           },
+          {
+            label: 'Teach It Back',
+            desc: 'Explain a concept out loud. AI scores your accuracy and asks a follow-up.',
+            color: '#7C3AED',
+            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>,
+            onClick: () => onOpenTeachItBack?.(),
+            ...freeBadge('teachItBack', '#7C3AED'),
+          },
+          {
+            label: 'Connections',
+            desc: 'See how your concepts relate to each other and explain the links.',
+            color: '#059669',
+            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="6" cy="12" r="3"/><circle cx="18" cy="6" r="3"/><circle cx="18" cy="18" r="3"/><path d="M8.7 10.7l6.6-3.4M8.7 13.3l6.6 3.4"/></svg>,
+            onClick: () => onOpenConnectionsMode?.(),
+            ...freeBadge('connectionsMode', '#059669'),
+          },
         ]
 
         const toolsByLabel = Object.fromEntries(tools.map(t => [t.label, t]))
         const contentReadyCount = [flashcards.length > 0, quiz.length > 0].filter(Boolean).length
         const hubSections = [
-          { id: 'quick', label: 'Quick Study', keys: ['Quiz Burst', 'Topic Drill', 'Brain Dump'] },
+          { id: 'quick', label: 'Quick Study', keys: ['Quiz Burst', 'Topic Drill', 'Brain Dump', 'Teach It Back'] },
           { id: 'materials', label: 'Study Materials', keys: ['Flashcards', 'Quizzes', 'AI Cheat Sheet'] },
-          { id: 'ai', label: 'AI-Powered', keys: ['Study Coach', 'Exam Rescue', 'Study Podcast'] },
+          { id: 'ai', label: 'AI-Powered', keys: ['Study Coach', 'Exam Rescue', 'Study Podcast', 'Connections'] },
           { id: 'import', label: 'Import & Convert', keys: ['Lecture Audio', 'YouTube Lecture'] },
         ]
 
