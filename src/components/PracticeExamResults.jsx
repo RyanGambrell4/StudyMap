@@ -1,7 +1,8 @@
-import { useMemo, useEffect, useRef, useState } from 'react'
+import { useMemo, useEffect, useRef, useState, useCallback } from 'react'
 import { getActivePlan, canUseFeature, hasUsedTrial } from '../lib/subscription'
 import { getCachedPracticeExams } from '../lib/db'
 import { useCelebration } from '../utils/useCelebration'
+import { getAccessToken } from '../lib/supabase'
 
 function fmtMs(ms) {
   const total = Math.round(ms / 1000)
@@ -155,6 +156,37 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
 
   const plan = getActivePlan()
   const isUnlimited = plan === 'unlimited'
+
+  const [repairs, setRepairs] = useState({})
+
+  const fetchRepair = useCallback(async (questionIdx) => {
+    const { q, given } = graded[questionIdx]
+    setRepairs(prev => ({ ...prev, [questionIdx]: { loading: true } }))
+    try {
+      const token = await getAccessToken()
+      const res = await fetch('/api/repair-misconception', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          courseName: courseName || 'this course',
+          topic: q.topic || undefined,
+          wrongQuestion: q.question,
+          wrongAnswer: given || null,
+          correctAnswer: q.answer,
+          existingExplanation: q.explanation,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed')
+      setRepairs(prev => ({ ...prev, [questionIdx]: { loading: false, data, repairSelected: null, repairConfirmed: false } }))
+    } catch (e) {
+      setRepairs(prev => ({ ...prev, [questionIdx]: { loading: false, error: e.message } }))
+    }
+  }, [graded, courseName])
+
+  function handleRepairAnswer(questionIdx, opt) {
+    setRepairs(prev => ({ ...prev, [questionIdx]: { ...prev[questionIdx], repairSelected: opt, repairConfirmed: true } }))
+  }
 
   // Pull cached score history for this course (Unlimited only - gated below).
   // savePracticeExam saves before the results view renders, so the newest exam
@@ -343,6 +375,76 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
                     </p>
                   )}
                 </div>
+
+                {correct === false && (() => {
+                  const repair = repairs[i]
+                  const rq = repair?.data?.repairQuestion
+                  return (
+                    <div style={{ marginTop: 14, borderTop: '1px solid rgba(220,38,38,0.12)', paddingTop: 12 }}>
+                      {!repair && (
+                        <button
+                          onClick={() => fetchRepair(i)}
+                          style={{ fontSize: 12, fontWeight: 700, color: '#3B61C4', background: 'rgba(59,97,196,0.07)', border: '1px solid rgba(59,97,196,0.20)', borderRadius: 7, padding: '6px 14px', cursor: 'pointer', fontFamily: 'inherit' }}
+                        >
+                          Why was I wrong?
+                        </button>
+                      )}
+                      {repair?.loading && (
+                        <p style={{ margin: 0, fontSize: 12.5, color: '#6B6B6B' }}>Analyzing your mistake...</p>
+                      )}
+                      {repair?.error && (
+                        <p style={{ margin: 0, fontSize: 12.5, color: '#DC2626' }}>{repair.error}</p>
+                      )}
+                      {repair?.data && (
+                        <div style={{ background: 'rgba(59,97,196,0.04)', border: '1px solid rgba(59,97,196,0.14)', borderRadius: 10, padding: '14px' }}>
+                          <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 700, color: '#3B61C4', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What went wrong</p>
+                          <p style={{ margin: '0 0 14px', fontSize: 13, color: '#1A1A1A', lineHeight: 1.55 }}>{repair.data.diagnosis}</p>
+                          {rq && (
+                            <>
+                              <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 700, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Reinforce this concept</p>
+                              <p style={{ margin: '0 0 8px', fontSize: 13.5, fontWeight: 600, color: '#1A1A1A', lineHeight: 1.45 }}>{rq.question}</p>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                                {rq.options.map((opt, oi) => {
+                                  const isSelected = repair.repairSelected === opt
+                                  const isCorrect = opt === rq.answer
+                                  const showRight = repair.repairConfirmed && isCorrect
+                                  const showWrong = repair.repairConfirmed && isSelected && !isCorrect
+                                  return (
+                                    <button
+                                      key={oi}
+                                      onClick={() => !repair.repairConfirmed && handleRepairAnswer(i, opt)}
+                                      disabled={repair.repairConfirmed}
+                                      style={{
+                                        padding: '9px 13px', borderRadius: 8, textAlign: 'left',
+                                        fontSize: 13, fontWeight: showRight ? 700 : 500, lineHeight: 1.4,
+                                        border: `1.5px solid ${showRight ? '#16A34A' : showWrong ? '#DC2626' : isSelected ? '#3B61C4' : 'rgba(0,0,0,0.09)'}`,
+                                        background: showRight ? 'rgba(22,163,74,0.08)' : showWrong ? 'rgba(220,38,38,0.08)' : isSelected ? 'rgba(59,97,196,0.06)' : '#fff',
+                                        color: showRight ? '#16A34A' : showWrong ? '#DC2626' : isSelected ? '#3B61C4' : '#1A1A1A',
+                                        cursor: repair.repairConfirmed ? 'default' : 'pointer',
+                                        fontFamily: 'inherit',
+                                        transition: 'all 0.15s',
+                                      }}
+                                    >
+                                      {opt}{showRight ? ' ✓' : showWrong ? ' ✕' : ''}
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                              {repair.repairConfirmed && (
+                                <div style={{ marginTop: 8, padding: '9px 12px', borderRadius: 8, background: repair.repairSelected === rq.answer ? 'rgba(22,163,74,0.07)' : 'rgba(220,38,38,0.06)', border: `1px solid ${repair.repairSelected === rq.answer ? 'rgba(22,163,74,0.20)' : 'rgba(220,38,38,0.18)'}` }}>
+                                  <p style={{ margin: '0 0 3px', fontSize: 12.5, fontWeight: 700, color: repair.repairSelected === rq.answer ? '#16A34A' : '#DC2626' }}>
+                                    {repair.repairSelected === rq.answer ? 'Got it.' : 'Not quite -- review the explanation above.'}
+                                  </p>
+                                  <p style={{ margin: 0, fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.5 }}>{rq.explanation}</p>
+                                </div>
+                              )}
+                            </>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  )
+                })()}
               </div>
             )
           })}

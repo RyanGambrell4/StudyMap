@@ -31,6 +31,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME)
   const [flash, setFlash] = useState(null) // 'correct' | 'wrong'
   const [error, setError] = useState('')
+  const [repairs, setRepairs] = useState({}) // { [qIdx]: { loading, data, repairSelected, repairConfirmed, error } }
   const intervalRef = useRef(null)
 
   const course = courses[courseIdx] ?? null
@@ -106,7 +107,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
     const newStreak = isCorrect ? streak + 1 : 0
     setStreak(newStreak)
     setMaxStreak(prev => Math.max(prev, newStreak))
-    setAnswers(prev => [...prev, { correct: isCorrect, difficulty: q.difficulty }])
+    setAnswers(prev => [...prev, { correct: isCorrect, difficulty: q.difficulty, selected: opt }])
 
     setTimeout(() => {
       if (qIdx + 1 >= questions.length) {
@@ -119,8 +120,38 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
     }, 1200)
   }
 
+  async function fetchRepair(questionIdx) {
+    const q = questions[questionIdx]
+    const ans = answers[questionIdx]
+    setRepairs(prev => ({ ...prev, [questionIdx]: { loading: true } }))
+    try {
+      const token = await getAccessToken()
+      const res = await fetch('/api/repair-misconception', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          courseName: course?.name ?? 'unknown',
+          topic: topic.trim() || undefined,
+          wrongQuestion: q.question,
+          wrongAnswer: ans?.selected ?? null,
+          correctAnswer: q.answer,
+          existingExplanation: q.explanation,
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed')
+      setRepairs(prev => ({ ...prev, [questionIdx]: { loading: false, data, repairSelected: null, repairConfirmed: false } }))
+    } catch (e) {
+      setRepairs(prev => ({ ...prev, [questionIdx]: { loading: false, error: e.message } }))
+    }
+  }
+
+  function handleRepairAnswer(questionIdx, opt) {
+    setRepairs(prev => ({ ...prev, [questionIdx]: { ...prev[questionIdx], repairSelected: opt, repairConfirmed: true } }))
+  }
+
   const score = answers.filter(a => a.correct).length
-  const weakTopics = questions?.filter((_, i) => answers[i] && !answers[i].correct).map(q => q.question.slice(0, 40)).slice(0, 2) ?? []
+  const missedQuestions = questions?.map((q, i) => ({ q, i })).filter(({ i }) => answers[i] && !answers[i].correct) ?? []
   const q = questions?.[qIdx]
   const timePct = timeLeft / QUESTION_TIME
 
@@ -325,14 +356,90 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
               )}
             </div>
 
-            {weakTopics.length > 0 && (
-              <div style={{ padding: '14px 16px', background: 'rgba(220,38,38,0.04)', borderRadius: 10, border: '1px solid rgba(220,38,38,0.12)', marginBottom: 20 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: D.red, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Questions you missed</div>
-                {questions.filter((_, i) => answers[i] && !answers[i].correct).map((q, i) => (
-                  <div key={i} style={{ fontSize: 12.5, color: D.textMuted, padding: '4px 0', borderTop: i > 0 ? `1px solid rgba(220,38,38,0.10)` : 'none', lineHeight: 1.4 }}>
-                    {q.question}
-                  </div>
-                ))}
+            {missedQuestions.length > 0 && (
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: D.red, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>Questions you missed</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                  {missedQuestions.map(({ q: missed, i: qI }, idx) => {
+                    const repair = repairs[qI]
+                    const rq = repair?.data?.repairQuestion
+                    return (
+                      <div key={qI} style={{ borderRadius: 10, border: '1px solid rgba(220,38,38,0.15)', background: 'rgba(220,38,38,0.03)', overflow: 'hidden' }}>
+                        <div style={{ padding: '10px 14px' }}>
+                          <div style={{ fontSize: 12.5, color: D.text, lineHeight: 1.45, fontWeight: 500, marginBottom: 8 }}>{missed.question}</div>
+                          <div style={{ fontSize: 12, color: D.textMuted, marginBottom: 8 }}>
+                            <span style={{ color: D.red }}>Your answer:</span> {answers[qI]?.selected ?? 'No answer'} &nbsp;·&nbsp; <span style={{ color: D.green }}>Correct:</span> {missed.answer}
+                          </div>
+                          {!repair && (
+                            <button
+                              onClick={() => fetchRepair(qI)}
+                              style={{ fontSize: 12, fontWeight: 700, color: D.blue, background: 'rgba(59,97,196,0.07)', border: '1px solid rgba(59,97,196,0.20)', borderRadius: 6, padding: '5px 12px', cursor: 'pointer', fontFamily: 'inherit' }}
+                            >
+                              Deep Dive
+                            </button>
+                          )}
+                          {repair?.loading && (
+                            <div style={{ fontSize: 12, color: D.textDim, display: 'flex', alignItems: 'center', gap: 6 }}>
+                              <Spinner size="sm" /> Analyzing your mistake...
+                            </div>
+                          )}
+                          {repair?.error && (
+                            <div style={{ fontSize: 12, color: D.red }}>{repair.error}</div>
+                          )}
+                        </div>
+
+                        {repair?.data && (
+                          <div style={{ borderTop: '1px solid rgba(59,97,196,0.12)', background: 'rgba(59,97,196,0.03)', padding: '12px 14px' }}>
+                            <div style={{ fontSize: 12, fontWeight: 700, color: D.blue, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>What went wrong</div>
+                            <p style={{ margin: '0 0 12px', fontSize: 13, color: D.text, lineHeight: 1.5 }}>{repair.data.diagnosis}</p>
+
+                            {rq && (
+                              <>
+                                <div style={{ fontSize: 12, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>Reinforce this concept</div>
+                                <p style={{ margin: '0 0 8px', fontSize: 13, fontWeight: 600, color: D.text, lineHeight: 1.45 }}>{rq.question}</p>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
+                                  {rq.options.map((opt, oi) => {
+                                    const isSelected = repair.repairSelected === opt
+                                    const isCorrect = opt === rq.answer
+                                    const showRight = repair.repairConfirmed && isCorrect
+                                    const showWrong = repair.repairConfirmed && isSelected && !isCorrect
+                                    return (
+                                      <button
+                                        key={oi}
+                                        onClick={() => !repair.repairConfirmed && handleRepairAnswer(qI, opt)}
+                                        disabled={repair.repairConfirmed}
+                                        style={{
+                                          padding: '8px 12px', borderRadius: 8, textAlign: 'left',
+                                          fontSize: 12.5, fontWeight: showRight ? 700 : 500, lineHeight: 1.4,
+                                          border: `1.5px solid ${showRight ? D.green : showWrong ? D.red : isSelected ? D.blue : D.border}`,
+                                          background: showRight ? 'rgba(22,163,74,0.08)' : showWrong ? 'rgba(220,38,38,0.08)' : isSelected ? 'rgba(59,97,196,0.06)' : D.bgCard,
+                                          color: showRight ? D.green : showWrong ? D.red : isSelected ? D.blue : D.text,
+                                          cursor: repair.repairConfirmed ? 'default' : 'pointer',
+                                          fontFamily: 'inherit',
+                                          transition: 'all 0.15s',
+                                        }}
+                                      >
+                                        {opt}{showRight ? ' ✓' : showWrong ? ' ✕' : ''}
+                                      </button>
+                                    )
+                                  })}
+                                </div>
+                                {repair.repairConfirmed && (
+                                  <div style={{ marginTop: 8, padding: '8px 10px', background: repair.repairSelected === rq.answer ? 'rgba(22,163,74,0.06)' : 'rgba(220,38,38,0.05)', borderRadius: 8, border: `1px solid ${repair.repairSelected === rq.answer ? 'rgba(22,163,74,0.18)' : 'rgba(220,38,38,0.18)'}` }}>
+                                    <div style={{ fontSize: 12, fontWeight: 700, color: repair.repairSelected === rq.answer ? D.green : D.red, marginBottom: 3 }}>
+                                      {repair.repairSelected === rq.answer ? 'Got it.' : 'Not quite -- review the explanation above.'}
+                                    </div>
+                                    <div style={{ fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>{rq.explanation}</div>
+                                  </div>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
               </div>
             )}
 
@@ -348,7 +455,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
             )}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
               <button
-                onClick={() => { setStep('setup'); setQuestions(null); setAnswers([]); setStreak(0); setMaxStreak(0) }}
+                onClick={() => { setStep('setup'); setQuestions(null); setAnswers([]); setStreak(0); setMaxStreak(0); setRepairs({}) }}
                 style={{ padding: '12px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 Go again
