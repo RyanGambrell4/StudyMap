@@ -138,12 +138,14 @@ export function getTrialDaysRemaining() {
 // activateTrial routes through Stripe Checkout so a card is collected upfront.
 // Returns the checkout URL on success, or null on failure.
 // Pass userId and userEmail from the calling component.
+// Trial is on Unlimited (weekly) — this matches revealed user preference: 100% of
+// paying users chose Unlimited, so we start them there and let them downgrade if needed.
 export async function activateTrial(userId, userEmail) {
   const uid = userId ?? _uid
   if (!uid) return null
   if (hasUsedTrial()) return null
   track('trial_cta_clicked', { source: 'activateTrial' })
-  const url = await createCheckoutSession('pro', 'weekly', userEmail, uid, { trial: true })
+  const url = await createCheckoutSession('unlimited', 'weekly', userEmail, uid, { trial: true })
   return url ?? null
 }
 

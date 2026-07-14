@@ -1060,7 +1060,7 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
   }
 
   // REVENUE-CRITICAL.
-  // Trial is available on Pro only (all three billing periods). It is a
+  // Trial is available on Pro or Unlimited (all three billing periods). It is a
   // CARD-REQUIRED 7-day trial: `payment_method_collection: 'always'` below
   // forces Stripe Checkout to collect a card before the trial starts, and
   // Stripe auto-bills after 7 days unless the user cancels. There is no
@@ -1068,7 +1068,9 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
   // and an old commit (2af08aa, 2026-05-25) assumed otherwise and silently
   // produced 0 new customers for 9 days. Verify with
   // `node scripts/verify-trial-flow.mjs` after any change to this block.
-  const wantsTrial = !!trial && plan === 'pro'
+  // Trial now defaults to Unlimited/weekly — 100% of paying users chose Unlimited,
+  // so we align the trial with revealed user preference. Pro trial still works.
+  const wantsTrial = !!trial && (plan === 'pro' || plan === 'unlimited')
 
   const subscriptionData = {
     metadata: { user_id: userId },
@@ -1151,9 +1153,11 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
         : { allow_promotion_codes: true }
       ),
       // Reassurance copy directly under the Start trial button - the moment of
-      // highest abandonment anxiety on the trial path.
+      // highest abandonment anxiety on the trial path. Price varies by plan.
       custom_text: wantsTrial
-        ? { submit: { message: "Free for 7 days, then $2.99/week. Cancel anytime in your account before day 8 — you won't be charged." } }
+        ? { submit: { message: plan === 'unlimited'
+            ? "Free for 7 days, then $4.99/week. Cancel anytime in your account before day 8 — you won't be charged."
+            : "Free for 7 days, then $2.99/week. Cancel anytime in your account before day 8 — you won't be charged." } }
         : undefined,
       success_url: 'https://getstudyedge.com/app?checkout=success',
       cancel_url: 'https://getstudyedge.com/app?checkout=cancelled',

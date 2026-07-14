@@ -167,6 +167,7 @@ export default function DashboardView({
   completedSessions,
   recoveryCoursesIdx = new Set(),
   weeklyHourGoal,
+  userCreatedAt,
 }) {
   const plan = getActivePlan()
   const { remaining: aiRemaining } = canUseFeature('aiTutor')
@@ -221,6 +222,42 @@ export default function DashboardView({
     return hoursSince < 24
   })
   const showTrialCard = plan === 'free' && !hasUsedTrial() && !trialCardDismissed && !showAiChip && !(completedSessions?.length >= 1)
+
+  // ── Session-based nudge: shown when user completes 3+ focus sessions ──────
+  const sessionsCount = completedSessions?.length ?? 0
+  const [sessionNudgeDismissed, setSessionNudgeDismissed] = useState(() =>
+    sessionStorage.getItem('se_session_nudge_dismissed') === '1'
+  )
+  const showSessionNudge = plan === 'free' && !hasUsedTrial() && sessionsCount >= 3 && !sessionNudgeDismissed && !showAiChip && !isTrialActive()
+  useEffect(() => {
+    if (showSessionNudge) {
+      track('sessions_nudge_shown', { sessions_count: sessionsCount })
+    }
+  }, [showSessionNudge]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  // ── 7-day free user banner: shown once per day for users free for 7+ days ──
+  const accountAgeDays = userCreatedAt
+    ? Math.floor((Date.now() - new Date(userCreatedAt).getTime()) / 86_400_000)
+    : null
+  const [sevenDayBannerDismissed, setSevenDayBannerDismissed] = useState(() => {
+    const ts = sessionStorage.getItem('se_7day_banner_dismissed_date')
+    return ts === new Date().toISOString().slice(0, 10)
+  })
+  const showSevenDayBanner =
+    plan === 'free' &&
+    !hasUsedTrial() &&
+    accountAgeDays !== null &&
+    accountAgeDays >= 7 &&
+    !sevenDayBannerDismissed &&
+    !showSessionNudge &&
+    !showAiChip &&
+    !isTrialActive()
+  useEffect(() => {
+    if (showSevenDayBanner) {
+      track('seven_day_free_banner_shown', { account_age_days: accountAgeDays })
+    }
+  }, [showSevenDayBanner]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const { currentStreak, lastCompletedDate, recordCompletion, freezeCount, useFreeze } = useStreak()
   const { shouldPrompt: shouldPromptPush, requestAndSubscribe, dismiss: dismissPush } = usePushNotifications(userId)
   const celebrate = useCelebration()
@@ -275,6 +312,17 @@ export default function DashboardView({
   useEffect(() => {
     if (showAiChip) track('ai_chip_shown', { aiUsed, plan })
   }, [showAiChip])
+
+  // Track trial banner impression once per session
+  useEffect(() => {
+    if (showTrialCard) track('trial_banner_impression', { source: 'trial_card', plan })
+  }, [showTrialCard]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (hasCompletedFirstSession && plan === 'free' && !hasUsedTrial()) {
+      track('trial_banner_impression', { source: 'first_blueprint_cta', plan })
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Show a toast on streak milestones — use sessionStorage so it doesn't
   // re-fire when the component remounts on tab navigation.
@@ -886,7 +934,7 @@ export default function DashboardView({
                 disabled={trialBannerLoading}
                 style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
               >
-                {trialBannerLoading ? 'Loading…' : 'Try Pro Free →'}
+                {trialBannerLoading ? 'Loading…' : 'Start 7-day trial — $0 today'}
               </button>
               <button
                 onClick={() => { localStorage.setItem('se_first_blueprint_cta_dismissed', '1'); setFirstBlueprintCtaDismissed(true); track('first_blueprint_cta_dismissed') }}
@@ -910,16 +958,16 @@ export default function DashboardView({
             <div style={{ flex: 1, minWidth: 200 }}>
               <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>
                 {upcomingExam && upcomingExam.days <= 5
-                  ? `${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. Start your free Pro trial.`
-                  : '7 days of full Pro. Cancel anytime.'}
+                  ? `${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. You're at your 30-min session limit.`
+                  : 'You\'re at your 30-min session cap. Start 7 days free.'}
               </p>
               <p style={{ margin: '3px 0 8px', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
                 {upcomingExam && upcomingExam.days <= 5
-                  ? 'Exam Rescue, Cheat Sheets, and unlimited Blueprints are all Pro. Free for 7 days — $2.99/wk after.'
-                  : 'Try 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions, free for 7 days. $2.99/wk after.'}
+                  ? 'Exam Rescue, Cheat Sheets, and unlimited focus sessions are all Pro. Free for 7 days — $2.99/wk after.'
+                  : 'Pro removes the 30-min cap, adds 5 courses, 100 AI coaching sessions/month, and unlimited blueprints. $2.99/wk after 7 days.'}
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                {['5 courses', '100 AI actions/month', 'Unlimited everything'].map(f => (
+                {['Unlimited sessions', '100 AI actions/month', '5 courses'].map(f => (
                   <span key={f} style={{ fontSize: 11, fontWeight: 600, color: D.blue, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                     <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                     {f}
@@ -933,7 +981,7 @@ export default function DashboardView({
                 disabled={trialBannerLoading}
                 style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
               >
-                {trialBannerLoading ? 'Loading…' : 'Start Free Trial →'}
+                {trialBannerLoading ? 'Loading…' : 'Start 7-day trial — $0 today'}
               </button>
               <button onClick={() => { localStorage.setItem('studyedge_trial_card_dismissed_at', String(Date.now())); setTrialCardDismissed(true); track('trial_card_dismissed', { streak }) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: D.textDim, fontSize: 20, lineHeight: 1, padding: '0 4px', flexShrink: 0 }} aria-label="Dismiss">×</button>
             </div>
@@ -963,6 +1011,87 @@ export default function DashboardView({
           </div>
         </div>
       ) : null}
+
+      {/* ── Session-based trial nudge — triggered after 3+ completed sessions ── */}
+      {showSessionNudge && (
+        <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
+          <div className="dash-banner-inner" style={{
+            background: 'linear-gradient(135deg, #f5f3ff, #ede9fe)',
+            border: '1px solid rgba(124,58,237,0.25)',
+            borderLeft: '4px solid #7C3AED',
+            borderRadius: 10,
+            boxShadow: '0 2px 16px rgba(124,58,237,0.09)',
+            padding: '16px 18px',
+            display: 'flex', alignItems: 'flex-start', gap: 16, flexWrap: 'wrap',
+          }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#3B0764' }}>
+                You've had {sessionsCount} study sessions — you're actually using this.
+              </p>
+              <p style={{ margin: '4px 0 0', fontSize: 12, color: '#6D28D9', lineHeight: 1.55 }}>
+                Unlock unlimited focus time, 5 courses, and 100 AI coaching sessions/month. Free for 7 days.
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+              <button
+                onClick={handleStartTrial}
+                disabled={trialBannerLoading}
+                style={{ background: '#7C3AED', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
+              >
+                {trialBannerLoading ? 'Loading…' : 'Start 7-day trial — $0 today'}
+              </button>
+              <button
+                onClick={() => { sessionStorage.setItem('se_session_nudge_dismissed', '1'); setSessionNudgeDismissed(true); track('sessions_nudge_dismissed', { sessions_count: sessionsCount }) }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#7C3AED', fontSize: 20, lineHeight: 1, padding: '0 4px', flexShrink: 0 }}
+                aria-label="Dismiss"
+              >×</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── 7-day free user banner — once per day for users free for 7+ days ── */}
+      {showSevenDayBanner && (
+        <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
+          <div className="dash-banner-inner" style={{
+            background: '#FFFFFF',
+            border: '1px solid rgba(232,83,26,0.2)',
+            borderLeft: '4px solid #E8531A',
+            borderRadius: 10,
+            boxShadow: '0 2px 12px rgba(232,83,26,0.07)',
+            padding: '14px 18px',
+            display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+          }}>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>
+                You've been on free for {accountAgeDays} days. The trial is still open.
+              </p>
+              <p style={{ margin: '3px 0 0', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
+                7 days free — then $2.99/wk. Unlimited sessions, 5 courses, 100 AI actions/month. Cancel anytime.
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
+              <button
+                onClick={handleStartTrial}
+                disabled={trialBannerLoading}
+                style={{ background: D.accent, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
+              >
+                {trialBannerLoading ? 'Loading…' : 'Start 7-day trial — $0 today'}
+              </button>
+              <button
+                onClick={() => {
+                  const today = new Date().toISOString().slice(0, 10)
+                  sessionStorage.setItem('se_7day_banner_dismissed_date', today)
+                  setSevenDayBannerDismissed(true)
+                  track('seven_day_free_banner_dismissed', { account_age_days: accountAgeDays })
+                }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: D.textDim, fontSize: 20, lineHeight: 1, padding: '0 4px', flexShrink: 0 }}
+                aria-label="Dismiss"
+              >×</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Broken streak recovery banner ── */}
       {isStreakBroken && (

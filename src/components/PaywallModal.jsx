@@ -235,14 +235,14 @@ const LIMIT_MESSAGES = {
     body: "Drilling is how knowledge sticks. Pro gives you unlimited topic drills so you can target every weak area before exam day.",
   },
   'nav-upgrade': {
-    tag: 'Ready to go back to Pro?',
+    tag: 'Ready to go back to Unlimited?',
     title: 'Everything you had during your trial.',
-    body: "$2.99/wk — 5 courses, 100 AI actions/month, unlimited focus sessions, blueprints, and every study tool. Cancel anytime.",
+    body: "$4.99/wk — unlimited courses, unlimited AI, AI Tutor with session memory, advanced analytics, and every study tool. Cancel anytime.",
   },
   'nav-trial': {
-    tag: 'Try Pro free for 7 days',
+    tag: 'Try Unlimited free for 7 days',
     title: 'Full access. No restrictions.',
-    body: "5 courses, 100 AI actions/month, unlimited focus sessions, Session Blueprints, and every study tool. $2.99/wk after — cancel anytime.",
+    body: "Unlimited courses, unlimited AI actions, AI Tutor with session memory, advanced exam analytics, and every study tool. $4.99/wk after — cancel anytime.",
   },
 }
 
@@ -395,8 +395,8 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   }, [onClose, trigger, showPrePaywall])
 
   const handleStartTrial = async () => {
-    track('paywall_cta_click', { plan_clicked: 'pro', billing_period: 'weekly', trigger_feature: trigger, is_trial: true })
-    track('trial_started', { plan: 'pro', billing_period: 'weekly', source: trigger })
+    track('paywall_cta_click', { plan_clicked: 'unlimited', billing_period: 'weekly', trigger_feature: trigger, is_trial: true })
+    track('trial_started', { plan: 'unlimited', billing_period: 'weekly', source: trigger })
     setTrialLoading(true)
     setTrialError(null)
     try {
@@ -690,7 +690,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             </p>
             {!isUnlimitedTrigger && (
               <p style={{ color: '#9B9B9B', fontSize: '0.78rem', margin: 0 }}>
-                $0 today · From $1.35/week · Cancel with one tap
+                $0 today · From $2.31/week · Cancel with one tap
               </p>
             )}
           </div>
@@ -809,7 +809,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               7 days on us · No charge today
             </div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 6px', letterSpacing: '-0.3px' }}>
-              Try every Pro feature — free for 7 days.
+              Try Unlimited — free for 7 days.
             </h3>
             <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 14px', lineHeight: 1.5 }}>
               Full access starting today. We'll email you the day before your trial ends so nothing catches you off guard.
@@ -905,8 +905,9 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
         {/* ── Plan cards ── */}
         <div className="pw-cards" style={{ display: 'grid', gridTemplateColumns: visiblePlanIds.length === 1 ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '18px' }}>
           {Object.entries(PLANS).filter(([planId]) => visiblePlanIds.includes(planId)).map(([planId, plan]) => {
-            // Highlight Unlimited card when trigger requires it; otherwise Pro is primary.
-            const isPrimary = isUnlimitedTrigger ? planId === 'unlimited' : planId === 'pro'
+            // Unlimited is always primary — 100% of paying users chose Unlimited.
+            // Pro shown as the lower-commitment entry option.
+            const isPrimary = planId === 'unlimited'
             const primaryColor = planId === 'pro' ? '#3B61C4' : '#059669'
             const primaryBorder = planId === 'pro' ? 'rgba(59,97,196,0.3)' : 'rgba(5,150,105,0.3)'
             return (
@@ -921,14 +922,12 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 boxShadow: isPrimary ? '0 8px 24px rgba(0,0,0,0.06)' : 'none',
               }}
             >
-              {/* Most popular / Required badge */}
+              {/* Most popular / Required badge — always on Unlimited */}
               {isPrimary && visiblePlanIds.length > 1 && (
                 <div style={{
                   position: 'absolute', top: 12, right: 12,
                   fontSize: '0.62rem', fontWeight: 800, color: '#fff',
-                  background: planId === 'pro'
-                    ? 'linear-gradient(135deg, #4F7EF7, #7C5CFA)'
-                    : 'linear-gradient(135deg, #10B981, #059669)',
+                  background: 'linear-gradient(135deg, #10B981, #059669)',
                   borderRadius: '999px', padding: '3px 9px',
                   textTransform: 'uppercase', letterSpacing: '0.4px',
                 }}>
@@ -966,7 +965,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                     {plan.subPrices[billingPeriod]}
                   </div>
                 )}
-                {planId === 'pro' && !trialUsed && !trialActive && (
+                {planId === 'unlimited' && !trialUsed && !trialActive && (
                   <div style={{ fontSize: '0.68rem', color: '#059669', marginTop: '4px', fontWeight: 700 }}>
                     $0 today · 7-day free trial · Cancel with one tap
                   </div>

@@ -86,9 +86,9 @@ export default function AppShell({
   const trialMsg = daysLeft !== null && daysLeft <= 1
     ? "Your trial ends tomorrow. Upgrade now to keep all your courses and AI tools."
     : daysLeft !== null && daysLeft <= 2
-      ? "Your trial ends in 2 days. Upgrade to keep Pro access."
+      ? "Your trial ends in 2 days. Upgrade to keep Unlimited access."
       : daysLeft !== null
-        ? `Your free trial ends in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}. Upgrade to keep Pro access.`
+        ? `Your free trial ends in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}. Upgrade to keep Unlimited access.`
         : null
   const showTrialBanner = isTrialing && trialMsg && !trialBannerDismissed
   const initials    = userEmail ? userEmail.split('@')[0].slice(0, 2).toUpperCase() : 'U'

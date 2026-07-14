@@ -707,6 +707,7 @@ export default function App() {
           onDeleteCourse={handleDeleteCourse}
           userEmail={session.user.email}
           userId={session.user.id}
+          userCreatedAt={session.user.created_at ?? null}
           onShowPaywall={openPaywall}
         />
       ) : (
@@ -787,14 +788,14 @@ export default function App() {
           display: 'flex', alignItems: 'center', gap: 10, maxWidth: 300,
         }}>
           <div style={{ flex: 1 }}>
-            <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 700, color: '#fff' }}>Try Pro free for 7 days</p>
-            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,.65)' }}>$0 today · $2.99/wk after · cancel anytime</p>
+            <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 700, color: '#fff' }}>Unlock unlimited sessions</p>
+            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,.65)' }}>7-day trial — $0 today, $2.99/wk after</p>
           </div>
           <button
             onClick={() => { track('trial_nudge_clicked', { source: 'floating_pill' }); openPaywall('trial_nudge') }}
             style={{ background: 'rgba(255,255,255,.2)', border: '1px solid rgba(255,255,255,.3)', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, padding: '6px 10px', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, fontFamily: 'inherit' }}
           >
-            Start free →
+            Start free trial →
           </button>
           <button
             onClick={() => { sessionStorage.setItem('studyedge_trial_nudge_dismissed', '1'); setTrialNudgeDismissed(true); track('trial_nudge_dismissed') }}
