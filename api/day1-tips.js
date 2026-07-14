@@ -78,16 +78,17 @@ ${preheader("Three habits in your first week that separate students who improve 
         <p style="margin:18px 0 24px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           Set aside 10 minutes today to get your courses in. Everything else follows from there.
         </p>
-        <table cellpadding="0" cellspacing="0" style="width:100%;">
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:8px;">
+          <tr><td align="center" style="padding-bottom:6px;">
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day1_trial" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;">Start your free 7-day trial →</a>
+          </td></tr>
           <tr><td align="center">
-            <a href="https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day1_tips" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Open StudyEdge</a>
+            <span style="font-size:12px;color:#9B9B9B;">Card required · $0 today · Cancel before day 8 and pay nothing</span>
           </td></tr>
         </table>
-        <table cellpadding="0" cellspacing="0" style="width:100%;margin-top:20px;">
-          <tr><td style="background:#F4F7FF;border-radius:12px;border:1px solid rgba(59,97,196,0.15);padding:14px 18px;text-align:center;">
-            <p style="margin:0 0 5px;font-size:13px;font-weight:600;color:#3B61C4;">Your 7-day free trial is waiting</p>
-            <p style="margin:0 0 10px;font-size:13px;color:#6B6B6B;line-height:1.55;">Unlock unlimited AI tutoring, brain dumps, cheat sheets, practice exams, and more. 7-day trial · $2.99/wk after · Cancel any time.</p>
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day1_trial" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">Start free trial →</a>
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-top:14px;">
+          <tr><td align="center">
+            <a href="https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day1_tips" style="font-size:13px;color:#9B9B9B;text-decoration:underline;">Or just open the app →</a>
           </td></tr>
         </table>
       </td></tr>

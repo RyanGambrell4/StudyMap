@@ -108,10 +108,10 @@ export default async function handler(req, res) {
             <span style="font-size:12px;color:#9B9B9B;">$2.99/wk · Cancel in account anytime</span>
           </td></tr>
         </table>` : `
-        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Week 2 check-in</p>
-        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">You've been using StudyEdge for 2 weeks.</h1>
+        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#E8531A;text-transform:uppercase;">Two weeks in — still free</p>
+        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">You haven't tried the trial yet. Here's your reminder.</h1>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          You've been on StudyEdge for two weeks. That makes you one of the students who's actually trying. Free plan or not, that matters. Here's what Pro adds if you're ready for it:
+          Two weeks on StudyEdge and you're still capped at 2 AI actions and 1 course. Your trial is still available — $0 today, card required, cancel before day 8 and you pay nothing. Here's what it unlocks:
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
@@ -130,10 +130,10 @@ export default async function handler(req, res) {
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Start 7-day free trial</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;">Start your free 7-day trial →</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">7-day trial · $2.99/wk after · Card required · Cancel in account anytime</span>
+            <span style="font-size:12px;color:#9B9B9B;">Card required · $0 today · Cancel before day 8 and pay nothing</span>
           </td></tr>
         </table>`
 

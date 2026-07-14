@@ -98,8 +98,8 @@ ${preheader("Your profile is set. One step left before your study plan can work.
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-top:20px;">
           <tr><td style="background:#F4F7FF;border-radius:12px;border:1px solid rgba(59,97,196,0.15);padding:14px 18px;text-align:center;">
             <p style="margin:0 0 5px;font-size:13px;font-weight:600;color:#3B61C4;">${trialUsed ? 'Unlock everything with Pro' : 'Your 7-day free trial is waiting'}</p>
-            <p style="margin:0 0 10px;font-size:13px;color:#6B6B6B;line-height:1.55;">${trialUsed ? 'Unlimited courses, AI tutoring, brain dumps, cheat sheets, and more.' : 'Full access to every AI tool, unlimited courses, and more. No card required.'}</p>
-            <a href="https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=onboarding_complete" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">${trialUsed ? 'Upgrade to Pro →' : 'Start free trial →'}</a>
+            <p style="margin:0 0 10px;font-size:13px;color:#6B6B6B;line-height:1.55;">${trialUsed ? 'Unlimited courses, AI tutoring, brain dumps, cheat sheets, and more. $2.99/wk.' : 'Card required · $0 today · Cancel before day 8 and pay nothing.'}</p>
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=onboarding_complete" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">${trialUsed ? 'Upgrade to Pro →' : 'Start free 7-day trial →'}</a>
           </td></tr>
         </table>` : ''}
       </td></tr>

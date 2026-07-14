@@ -117,7 +117,7 @@ ${preheader("One week in. Here's what the free plan can't give you - and what Pr
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">${valueClose}</p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">${ctaLabel}</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:${trialUsed ? '#3B61C4' : '#E8531A'};color:#FFFFFF;font-size:${trialUsed ? '14' : '15'}px;font-weight:700;text-decoration:none;border-radius:10px;padding:${trialUsed ? '13px 30px' : '14px 32px'};">${ctaLabel}</a>
           </td></tr>
           <tr><td align="center">
             <span style="font-size:12px;color:#9B9B9B;">${ctaFootnote}</span>

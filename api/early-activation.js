@@ -103,6 +103,12 @@ ${preheader("Add a course with an exam date. Everything else — your plan, your
             <a href="https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=early_activation" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Add my first course</a>
           </td></tr>
         </table>
+        <div style="margin:24px 0 0;background:#F4F7FF;border-radius:12px;border:1px solid rgba(59,97,196,0.18);padding:18px 20px;text-align:center;">
+          <p style="margin:0 0 4px;font-size:14px;font-weight:700;color:#3B61C4;">Start your free 7-day trial →</p>
+          <p style="margin:0 0 12px;font-size:13px;color:#6B6B6B;line-height:1.55;">Unlock unlimited AI tutoring, 5 courses, and Session Blueprints on every session.</p>
+          <p style="margin:0 0 12px;font-size:12px;color:#9B9B9B;">Card required · $0 today · Cancel before day 8 and pay nothing</p>
+          <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=early_activation_trial" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:700;text-decoration:none;border-radius:8px;padding:11px 24px;">Start free 7-day trial →</a>
+        </div>
         <p style="margin:22px 0 0;font-size:14px;color:#6B6B6B;line-height:1.65;">
           Reply if you have questions — I read them.<br>— Ryan
         </p>

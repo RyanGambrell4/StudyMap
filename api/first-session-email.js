@@ -92,19 +92,25 @@ ${preheader("That is the hardest part. Every session from here gets easier to st
             </td>
           </tr>`).join('')}
         </table>
-        <table cellpadding="0" cellspacing="0" style="width:100%;">
+        ${userPlan === 'free' && !trialUsed ? `
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:14px;">
+          <tr><td align="center" style="padding-bottom:6px;">
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=first_session_trial" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;">Start your free 7-day trial →</a>
+          </td></tr>
           <tr><td align="center">
-            <a href="https://getstudyedge.com/app" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Open StudyEdge</a>
+            <span style="font-size:12px;color:#9B9B9B;">Card required · $0 today · Cancel before day 8 and pay nothing</span>
           </td></tr>
         </table>
-        ${userPlan === 'free' ? `
-        <table cellpadding="0" cellspacing="0" style="width:100%;margin-top:20px;">
-          <tr><td style="background:#F4F7FF;border-radius:12px;border:1px solid rgba(59,97,196,0.15);padding:14px 18px;text-align:center;">
-            <p style="margin:0 0 5px;font-size:13px;font-weight:600;color:#3B61C4;">${trialUsed ? 'Keep the momentum going with Pro' : 'Your free trial is still waiting'}</p>
-            <p style="margin:0 0 10px;font-size:13px;color:#6B6B6B;line-height:1.55;">${trialUsed ? 'Unlimited AI tutoring, brain dumps, cheat sheets, and unlimited sessions.' : 'Unlock everything free for 7 days — 7-day trial · $2.99/wk after · cancel any time.'}</p>
-            <a href="https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=first_session" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">${trialUsed ? 'Upgrade to Pro →' : 'Start free trial →'}</a>
+        <table cellpadding="0" cellspacing="0" style="width:100%;margin-top:6px;">
+          <tr><td align="center">
+            <a href="https://getstudyedge.com/app" style="font-size:13px;color:#9B9B9B;text-decoration:underline;">Or open the app →</a>
           </td></tr>
-        </table>` : ''}
+        </table>` : `
+        <table cellpadding="0" cellspacing="0" style="width:100%;">
+          <tr><td align="center">
+            <a href="https://getstudyedge.com/app${userPlan === 'free' && trialUsed ? '?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=first_session_upgrade' : ''}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">${userPlan === 'free' && trialUsed ? 'Upgrade to Pro →' : 'Open StudyEdge'}</a>
+          </td></tr>
+        </table>`}
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">
         <p style="margin:0;font-size:11.5px;color:#9B9B9B;line-height:1.6;">
