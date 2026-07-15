@@ -92,7 +92,7 @@ const LIMIT_MESSAGES = {
   'ai-struggle': {
     tag: 'Close your knowledge gaps',
     title: 'Your AI coach can fix this.',
-    body: 'You\'re struggling with a flagged topic. Pro unlocks unlimited AI coaching sessions to drill exactly what you\'re missing — before your exam.',
+    body: 'You\'re struggling with a flagged topic. Pro unlocks unlimited AI coaching sessions to drill exactly what you\'re missing before your exam.',
   },
   'ai-exhausted': {
     tag: "You've used your free AI actions",
@@ -127,7 +127,7 @@ const LIMIT_MESSAGES = {
   'focus-limit': {
     tag: "You've hit your daily focus limit",
     title: 'Unlock unlimited Focus sessions.',
-    body: "You just hit your 30-min free cap. Pro removes it entirely — study as long as you need, every day.",
+    body: "You just hit your 30-min free cap. Pro removes it entirely. Study as long as you need, every day.",
   },
   brainDump: {
     tag: 'Train recall on every topic',
@@ -157,7 +157,7 @@ const LIMIT_MESSAGES = {
   'coach-plan-result': {
     tag: 'Adapt your plan as things change',
     title: 'Rebuild your plan anytime.',
-    body: 'Your free plan is locked after generation. Pro lets you rebuild it anytime — new exam dates, topic changes, schedule shifts.',
+    body: 'Your free plan is locked after generation. Pro lets you rebuild it anytime. New exam dates, topic changes, schedule shifts - all covered.',
   },
   'practice_exam': {
     tag: 'Practice more, score higher',
@@ -172,7 +172,7 @@ const LIMIT_MESSAGES = {
   'brain-dump-result': {
     tag: 'Keep training your recall',
     title: 'Unlock unlimited Brain Dumps.',
-    body: "You've used your free brain dump. Pro removes the limit — dump and score any topic, anytime you need it.",
+    body: "You've used your free brain dump. Pro removes the limit. Dump and score any topic, anytime you need it.",
   },
   'quiz-burst-result': {
     tag: 'Quiz yourself every session',
@@ -187,7 +187,7 @@ const LIMIT_MESSAGES = {
   'focus-complete': {
     tag: 'Keep your momentum going',
     title: 'Unlock unlimited focus time.',
-    body: "Great session. Free caps you at 30 min/day — Pro removes that entirely so you can study as long as you need.",
+    body: "Great session. Free caps you at 30 min/day. Pro removes that entirely so you can study as long as you need.",
   },
   adapt: {
     tag: 'Your plan just got smarter',
@@ -207,12 +207,12 @@ const LIMIT_MESSAGES = {
   flashcardDecks: {
     tag: 'More decks, more mastery',
     title: 'Unlock unlimited flashcard decks.',
-    body: 'Free includes 1 deck. Pro gives you unlimited decks with unlimited cards — one deck per course, or go deeper on any topic.',
+    body: 'Free includes 1 deck. Pro gives you unlimited decks with unlimited cards. One deck per course, or go deeper on any topic.',
   },
   'cheat-sheet': {
     tag: 'See every high-priority topic',
     title: 'Unlock all 10 exam topics.',
-    body: "Free shows the #1 ranked topic. Pro unlocks all 10, ranked by AI-estimated exam likelihood and your current readiness — so you know exactly where to spend the time you have left.",
+    body: "Free shows the #1 ranked topic. Pro unlocks all 10, ranked by AI-estimated exam likelihood and your current readiness, so you know exactly where to spend the time you have left.",
   },
   'prep-blast': {
     tag: 'Smarter session briefs',
@@ -222,12 +222,12 @@ const LIMIT_MESSAGES = {
   'quiz-result': {
     tag: 'Keep testing yourself',
     title: 'Unlimited quizzes, any topic.',
-    body: "Self-testing is the most effective study technique. Pro generates unlimited quizzes from any topic or your uploaded notes — on demand, all semester.",
+    body: "Self-testing is the most effective study technique. Pro generates unlimited quizzes from any topic or your uploaded notes, on demand, all semester.",
   },
   'streak-milestone': {
     tag: 'Your streak is worth protecting',
     title: 'Keep your streak going with Pro.',
-    body: "You've built a real habit. Pro gives you unlimited AI tutoring, blueprints, and focus sessions — so nothing slows you down.",
+    body: "You've built a real habit. Pro gives you unlimited AI tutoring, blueprints, and focus sessions. Nothing slows you down.",
   },
   'drill-result': {
     tag: 'Keep drilling weak spots',
@@ -237,12 +237,12 @@ const LIMIT_MESSAGES = {
   'nav-upgrade': {
     tag: 'Ready to go back to Unlimited?',
     title: 'Everything you had during your trial.',
-    body: "$4.99/wk — unlimited courses, unlimited AI, AI Tutor with session memory, advanced analytics, and every study tool. Cancel anytime.",
+    body: "$4.99/wk. Unlimited courses, unlimited AI, AI Tutor with session memory, advanced analytics, and every study tool. Cancel anytime.",
   },
   'nav-trial': {
     tag: 'Try Unlimited free for 3 days',
     title: 'Full access. No restrictions.',
-    body: "Unlimited courses, unlimited AI actions, AI Tutor with session memory, advanced exam analytics, and every study tool. $4.99/wk after — cancel anytime.",
+    body: "Unlimited courses, unlimited AI actions, AI Tutor with session memory, advanced exam analytics, and every study tool. $4.99/wk after. Cancel anytime.",
   },
 }
 
@@ -425,7 +425,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     setLoading(pendingPlan.planId)
     const url = await createCheckoutSession(pendingPlan.planId, pendingPlan.billingPeriod, userEmail, userId)
     setLoading(null)
-    if (!url) { setPlanError('Checkout failed. No charge was made — please try again.'); setScreen('plans'); return }
+    if (!url) { setPlanError('Checkout failed. No charge was made. Please try again.'); setScreen('plans'); return }
     if (url?.alreadySubscribed) { onClose(); return }
     window.location.href = url
   }
@@ -490,7 +490,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               </div>
             )}
             <p style={{ fontSize: '0.875rem', color: '#6B6B6B', margin: '0 0 20px', lineHeight: 1.55, textAlign: 'center' }}>
-              Upgrade to keep full access — your AI tutor, focus sessions, and everything you set up are still here.
+              Upgrade to keep full access. Your AI tutor, focus sessions, and everything you set up are still here.
             </p>
             <button onClick={() => setScreen('plans')} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #3B61C4, #7C3AED)', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.01em', marginBottom: 10, transition: 'opacity 0.15s' }} onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }} onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}>
               Keep everything →
@@ -524,8 +524,8 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 10px', letterSpacing: '-0.4px', lineHeight: 1.2 }}>{question}</h2>
             <p style={{ fontSize: '0.875rem', color: '#6B6B6B', margin: '0 0 28px', lineHeight: 1.55 }}>
               {showTrialCard
-                ? 'Your study plan is still running. Unlock everything — AI tutor, unlimited sessions, and your full schedule — free for 3 days.'
-                : 'Your study plan is still running. Upgrade to keep your AI tutor, unlimited focus sessions, and full schedule — everything you need to finish strong.'}
+                ? 'Your study plan is still running. Unlock everything - AI tutor, unlimited sessions, and your full schedule - free for 3 days.'
+                : 'Your study plan is still running. Upgrade to keep your AI tutor, unlimited focus sessions, and full schedule. Everything you need to finish strong.'}
             </p>
             <button
               onClick={() => {
@@ -581,7 +581,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 </svg>
               </div>
               <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Secure checkout</h2>
-              <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: 0 }}>Powered by Stripe — trusted by millions of businesses</p>
+              <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: 0 }}>Powered by Stripe, trusted by millions of businesses</p>
             </div>
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginBottom: 20 }}>
               <CardBadge label="VISA" bg="#1A1F71" />
@@ -596,7 +596,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               </div>
             </div>
             <div style={{ background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, padding: '14px 16px', marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {['256-bit SSL encryption on all data', 'Cancel anytime in 2 clicks from your account', 'No surprise charges — full control over your plan'].map(item => (
+              {['256-bit SSL encryption on all data', 'Cancel anytime in 2 clicks from your account', 'No surprise charges. Full control over your plan.'].map(item => (
                 <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.82rem', color: '#1A1A1A' }}>
                   <Checkmark />
                   {item}
@@ -783,7 +783,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               ))}
             </div>
             <p style={{ fontSize: '0.78rem', color: '#6B6B6B', margin: '0 0 12px' }}>
-              Get it all back — from just $1.35/week on the annual plan. Cancel with one tap.
+              Get it all back from just $1.35/week on the annual plan. Cancel with one tap.
             </p>
           </div>
         )}
@@ -809,7 +809,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               3 days on us · No charge today
             </div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 6px', letterSpacing: '-0.3px' }}>
-              Try Unlimited — free for 3 days.
+              Try Unlimited, free for 3 days.
             </h3>
             <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 14px', lineHeight: 1.5 }}>
               Full access starting today. We'll email you the day before your trial ends so nothing catches you off guard.
@@ -846,7 +846,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.opacity = '0.88' }}
               onMouseLeave={e => { e.currentTarget.style.opacity = trialLoading ? '0.75' : '1' }}
             >
-              {trialLoading ? 'Loading…' : 'Continue — free for 3 days'}
+              {trialLoading ? 'Loading…' : 'Continue - free for 3 days'}
             </button>
             <p style={{ margin: '10px 0 0', fontSize: '0.72rem', color: '#9B9B9B' }}>
               Card required · $0 today · Cancel anytime
