@@ -26,12 +26,20 @@ const MUTED       = '#6B6B6B'
 const BORDER      = 'rgba(0,0,0,0.08)'
 const BG_CARD     = '#FFFFFF'
 
+const BENEFIT_ICONS = {
+  coach:  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2a9 9 0 0 1 9 9v1a9 9 0 0 1-9 9H7l-4 4V11a9 9 0 0 1 9-9z"/></svg>,
+  ai:     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>,
+  focus:  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>,
+  tools:  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>,
+  grades: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>,
+}
+
 const BENEFITS = [
-  { icon: '🧠', title: 'AI Study Coach',       body: 'A minute-by-minute plan for your whole semester, built around your real schedule.' },
-  { icon: '⚡', title: '100 AI actions/month',  body: 'Cheat sheets, exam rescues, session blueprints, quiz bursts — on demand, all semester.' },
-  { icon: '🎯', title: 'Unlimited focus time',  body: 'No 30-minute cap. Lock in for as long as you need, every single day.' },
-  { icon: '📚', title: 'Every study tool',      body: 'Flashcards, quizzes, brain dumps, topic drills — auto-generated from your own courses.' },
-  { icon: '📈', title: 'Grade Hub',             body: 'Track every assignment, run what-if scenarios, know what you need on your final.' },
+  { icon: BENEFIT_ICONS.coach,  title: 'AI Study Coach',       body: 'A minute-by-minute plan for your whole semester, built around your real schedule.' },
+  { icon: BENEFIT_ICONS.ai,     title: '100 AI actions/month',  body: 'Cheat sheets, exam rescues, session blueprints, quiz bursts — on demand, all semester.' },
+  { icon: BENEFIT_ICONS.focus,  title: 'Unlimited focus time',  body: 'No 30-minute cap. Lock in for as long as you need, every single day.' },
+  { icon: BENEFIT_ICONS.tools,  title: 'Every study tool',      body: 'Flashcards, quizzes, brain dumps, topic drills — auto-generated from your own courses.' },
+  { icon: BENEFIT_ICONS.grades, title: 'Grade Hub',             body: 'Track every assignment, run what-if scenarios, know what you need on your final.' },
 ]
 
 const QUOTES = [
@@ -49,13 +57,13 @@ const TIMELINE = [
     body: 'Every Pro feature — AI Coach, 100 AI actions, unlimited focus, blueprints, flashcards, quizzes, and Grade Hub. $0 today.',
   },
   {
-    day: 'Day 6',
+    day: 'Day 2',
     color: '#F59E0B',
     title: "We'll remind you by email",
     body: "Heads-up that your trial ends tomorrow, so nothing catches you by surprise.",
   },
   {
-    day: 'Day 7',
+    day: 'Day 3',
     color: '#3B61C4',
     title: 'Continue for $2.99/wk — or cancel',
     body: "Loving it? Stay on Pro for $2.99/wk. Not for you? One tap to cancel — no charge, no email chase.",
@@ -206,7 +214,7 @@ export default function PrePaywall({ open, trigger, onContinue, onDismiss }) {
         >
           {step === 0 && 'Continue →'}
           {step === 1 && 'Continue →'}
-          {step === 2 && 'Continue — free for 7 days'}
+          {step === 2 && 'Start your 3-day free trial'}
         </button>
 
         {step === 2 && (
@@ -255,10 +263,10 @@ function StepBenefits() {
           }}>
             <div style={{
               width: 36, height: 36, borderRadius: 10,
-              background: '#fff', border: '1px solid rgba(0,0,0,0.06)',
+              background: 'rgba(59,97,196,0.07)', border: '1px solid rgba(59,97,196,0.15)',
               display: 'flex', alignItems: 'center', justifyContent: 'center',
-              fontSize: 20, flexShrink: 0,
-            }} aria-hidden>
+              flexShrink: 0,
+            }}>
               {b.icon}
             </div>
             <div>
@@ -342,13 +350,13 @@ function StepTrialTimeline() {
   return (
     <>
       <p style={{ margin: 0, fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', color: '#059669', textTransform: 'uppercase', textAlign: 'center' }}>
-        How your 7-day trial works
+        How your 3-day trial works
       </p>
       <h2 style={{ margin: '8px 0 6px', fontSize: '1.4rem', fontWeight: 800, color: '#111', letterSpacing: '-0.5px', textAlign: 'center', lineHeight: 1.25 }}>
         Full access. Zero pressure.
       </h2>
       <p style={{ margin: '0 0 22px', fontSize: '0.9rem', color: '#6B6B6B', textAlign: 'center', lineHeight: 1.55 }}>
-        Here's exactly what to expect over the next 7 days.
+        Here's exactly what to expect.
       </p>
 
       <div style={{ position: 'relative', paddingLeft: 30 }}>

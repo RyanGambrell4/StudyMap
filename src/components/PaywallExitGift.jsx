@@ -166,9 +166,9 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
             <div style={{
               width: 60, height: 60, borderRadius: '50%', background: '#FFF6F0',
               border: `2px dashed ${ACCENT}`, display: 'inline-flex', alignItems: 'center',
-              justifyContent: 'center', marginBottom: 14, fontSize: 30,
-            }} aria-hidden>
-              🎁
+              justifyContent: 'center', marginBottom: 14,
+            }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={ACCENT} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 12 20 22 4 22 4 12"/><rect x="2" y="7" width="20" height="5"/><line x1="12" y1="22" x2="12" y2="7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"/><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"/></svg>
             </div>
             <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: ACCENT, textTransform: 'uppercase' }}>
               Before you go
@@ -180,7 +180,7 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
               No card required — just five more AI-powered study sessions to try blueprints, cheat sheets, and flashcards.
             </p>
             <p style={{ margin: '0 0 18px', fontSize: 13, color: MUTED, lineHeight: 1.55, background: '#FFF6F0', border: `1px solid ${ACCENT}25`, borderRadius: 10, padding: '10px 14px' }}>
-              Or skip the gift and start a <strong style={{ color: ACCENT }}>7-day free trial</strong> — $0 today, $2.99/wk after. Unlimited sessions, 5 courses, 100 AI actions/month. Cancel anytime.
+              Or skip the gift and start a <strong style={{ color: ACCENT }}>3-day free trial</strong> — $0 today, $2.99/wk after. Unlimited sessions, 5 courses, 100 AI actions/month. Cancel anytime.
             </p>
             {claimError && (
               <p style={{ margin: '0 0 12px', fontSize: 13, color: '#DC2626' }}>{claimError}</p>
@@ -213,9 +213,9 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
             <div style={{
               width: 60, height: 60, borderRadius: '50%', background: '#F0FDF4',
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              marginBottom: 14, fontSize: 30,
-            }} aria-hidden>
-              ✨
+              marginBottom: 14,
+            }}>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
             <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: '#22C55E', textTransform: 'uppercase' }}>
               Claimed · 5 actions added
