@@ -525,7 +525,7 @@ export default function LandingPage({ onGetStarted }) {
             <span className="se-ping" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 10px #22c55e' }} />
           </span>
           <span style={{ fontSize: 13.5, color: '#e2e8f0', fontWeight: 500, letterSpacing: '-0.005em' }}>
-            <strong style={{ color: '#fff', fontWeight: 700 }}>Try Pro free for 7 days</strong> - $2.99/wk after, cancel anytime
+            <strong style={{ color: '#fff', fontWeight: 700 }}>Try Pro free for 3 days</strong> - $2.99/wk after, cancel anytime
           </span>
           <button
             onClick={goTrial}
@@ -772,7 +772,7 @@ export default function LandingPage({ onGetStarted }) {
                 }}
               >
                 <span style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: 8 }}>
-                  Start free 7-day trial
+                  Start free 3-day trial
                   <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                     <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                   </svg>
@@ -807,7 +807,7 @@ export default function LandingPage({ onGetStarted }) {
               <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                 <path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
-              7-day free trial · Card required · Cancel anytime
+              3-day free trial · Card required · Cancel anytime
             </div>
 
             {/* Social proof - honest trust badges */}
@@ -824,7 +824,7 @@ export default function LandingPage({ onGetStarted }) {
                 <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
                   <path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
                 </svg>
-                <span style={{ color: 'rgba(226,232,240,0.85)' }}>Cancel before day 8 · no charge</span>
+                <span style={{ color: 'rgba(226,232,240,0.85)' }}>Cancel anytime · no charge today</span>
               </div>
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 9,
@@ -1552,7 +1552,7 @@ export default function LandingPage({ onGetStarted }) {
               e.currentTarget.style.boxShadow = '0 10px 30px rgba(99,102,241,0.35), 0 0 0 1px rgba(255,255,255,0.06) inset'
             }}
           >
-            Try all three free for 7 days
+            Try all three free for 3 days
             <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
               <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
@@ -1564,7 +1564,7 @@ export default function LandingPage({ onGetStarted }) {
             <svg width="12" height="12" viewBox="0 0 12 12" fill="none" aria-hidden="true">
               <path d="M2.5 6.5l2.2 2.2L9.5 3.8" stroke="#22c55e" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
-            7-day free trial · Card required · Cancel anytime
+            3-day free trial · Card required · Cancel anytime
           </div>
         </div>
       </section>
@@ -1914,7 +1914,7 @@ export default function LandingPage({ onGetStarted }) {
               {[
                 { name: 'Quizlet', pain: 'Q-Chat AI tutor discontinued', verdict: 'Dead feature', bad: true },
                 { name: 'Chegg', pain: 'Price hikes, no personalized plan', verdict: 'Overpriced', bad: true },
-                { name: 'StudyEdge AI', pain: 'AI coach + plan + flashcards + exams', verdict: '7 days free', bad: false },
+                { name: 'StudyEdge AI', pain: 'AI coach + plan + flashcards + exams', verdict: '3 days free', bad: false },
               ].map(({ name, pain, verdict, bad }) => (
                 <div
                   key={name}
@@ -2232,7 +2232,7 @@ export default function LandingPage({ onGetStarted }) {
                   </div>
                   <p style={{ margin: '8px 0 0', fontSize: 13, color: 'rgba(226,232,240,0.55)' }}>{proP.sub}</p>
                   <p style={{ margin: '6px 0 0', fontSize: 12.5, color: '#34d399', fontWeight: 700 }}>
-                    7-day free trial · Card required · Cancel anytime
+                    3-day free trial · Card required · Cancel anytime
                   </p>
                 </div>
                 <ul style={{ listStyle: 'none', margin: 0, padding: 0, display: 'flex', flexDirection: 'column', gap: 8, flex: 1, fontSize: 13.5, color: 'rgba(226,232,240,0.85)' }}>
@@ -2434,7 +2434,7 @@ export default function LandingPage({ onGetStarted }) {
               q: 'Can I cancel any time?',
               a: (
                 <>
-                  Yes. One click from your account. The 7-day trial requires a card upfront — cancel before day 8 and you won't be charged, and you automatically return to the free plan. If you cancel a paid subscription, you keep Pro access until the end of the current billing cycle, no questions asked.
+                  Yes. One click from your account. The 3-day trial requires a card upfront - cancel anytime and you won't be charged, and you automatically return to the free plan. If you cancel a paid subscription, you keep Pro access until the end of the current billing cycle, no questions asked.
                 </>
               ),
             },
@@ -2548,9 +2548,9 @@ export default function LandingPage({ onGetStarted }) {
             Cancel anytime
           </span>
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
-          <span>7-day free trial</span>
+          <span>3-day free trial</span>
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
-          <span>Cancel before day 8 · no charge</span>
+          <span>Cancel anytime · no charge today</span>
           <span style={{ width: 3, height: 3, borderRadius: '50%', background: 'rgba(255,255,255,0.25)' }} />
           <span>No credit card to use free plan</span>
         </div>
@@ -2596,7 +2596,7 @@ export default function LandingPage({ onGetStarted }) {
             }}
           >
             <span style={{ position: 'relative', zIndex: 1, display: 'inline-flex', alignItems: 'center', gap: 10 }}>
-              Start your free 7-day trial
+              Start your free 3-day trial
               <svg width="15" height="15" viewBox="0 0 14 14" fill="none" aria-hidden="true">
                 <path d="M3 7h8m0 0L7.5 3.5M11 7l-3.5 3.5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
