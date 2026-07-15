@@ -960,8 +960,9 @@ export default function DashboardView({
             <div style={{ flex: 1, minWidth: 200 }}>
               <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>
                 {upcomingExam && upcomingExam.days <= 5
-                  ? `${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. You're at your 30-min session limit.`
-                  : 'You\'re at your 30-min session cap. Try Pro free for 3 days.'}
+                  ? `${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. Unlock Exam Rescue and unlimited sessions with Pro.`
+                  : 'You\'re on the free plan. Upgrade to Pro for unlimited sessions.'}
+
               </p>
               <p style={{ margin: '3px 0 8px', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
                 {upcomingExam && upcomingExam.days <= 5

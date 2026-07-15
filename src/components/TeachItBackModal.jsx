@@ -296,34 +296,47 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
               )}
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                {result.followUp && (
-                  <button
-                    onClick={() => { setFollowUpAnswer(''); setStep('followup') }}
-                    style={{ padding: '12px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(124,58,237,0.30)' }}
-                  >
-                    {result.score < 80 ? 'Answer the follow-up to finish' : 'Answer the follow-up'}
-                  </button>
-                )}
-                {result.score >= 80 && (
-                  <button
-                    onClick={reset}
-                    style={{ padding: '11px', background: 'none', border: `1px solid ${D.border}`, borderRadius: 10, color: D.textMuted, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-                  >
-                    Try another topic
-                  </button>
-                )}
-                {result.score < 80 && !result.followUp && (
-                  <button
-                    onClick={reset}
-                    style={{ padding: '11px', background: 'none', border: `1px solid ${D.border}`, borderRadius: 10, color: D.textMuted, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-                  >
-                    Try another topic
-                  </button>
-                )}
-                {result.score < 80 && result.followUp && (
-                  <p style={{ margin: 0, textAlign: 'center', fontSize: 11.5, color: D.textDim }}>
-                    Answer the follow-up question to complete this session.
-                  </p>
+                {result.score >= 80 ? (
+                  <>
+                    <button
+                      onClick={reset}
+                      style={{ padding: '12px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                    >
+                      Try another topic
+                    </button>
+                    {result.followUp && (
+                      <button
+                        onClick={() => { setFollowUpAnswer(''); setStep('followup') }}
+                        style={{ padding: '11px', background: 'none', border: `1px solid ${D.border}`, borderRadius: 10, color: D.textMuted, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                      >
+                        Answer the follow-up question
+                      </button>
+                    )}
+                  </>
+                ) : (
+                  <>
+                    {result.followUp && (
+                      <button
+                        onClick={() => { setFollowUpAnswer(''); setStep('followup') }}
+                        style={{ padding: '12px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(124,58,237,0.30)' }}
+                      >
+                        Answer the follow-up to finish
+                      </button>
+                    )}
+                    {!result.followUp && (
+                      <button
+                        onClick={reset}
+                        style={{ padding: '11px', background: 'none', border: `1px solid ${D.border}`, borderRadius: 10, color: D.textMuted, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                      >
+                        Try another topic
+                      </button>
+                    )}
+                    {result.followUp && (
+                      <p style={{ margin: 0, textAlign: 'center', fontSize: 11.5, color: D.textDim }}>
+                        Answer the follow-up question to complete this session.
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             </div>

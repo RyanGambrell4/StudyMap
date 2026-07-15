@@ -231,17 +231,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
   const celebrate = useCelebration()
   const deckDoneRef = useRef(false)
 
-  // Fire confetti when user reaches the last flashcard
-  useEffect(() => {
-    if (flashcards.length > 0 && cardIdx === flashcards.length - 1) {
-      if (!deckDoneRef.current) {
-        deckDoneRef.current = true
-        setTimeout(() => celebrate('medium'), 300)
-      }
-    } else {
-      deckDoneRef.current = false
-    }
-  }, [cardIdx, flashcards.length])
+  // deckDoneRef prevents double-fire if the component re-renders after rating the last card
+
 
   // Quiz state
   const [questionIdx, setQuestionIdx] = useState(0)
@@ -518,6 +509,13 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     setAlmostSet(prev => { const s = new Set(prev); if (rating === 'almost') s.add(cardIdx); else s.delete(cardIdx); return s })
     setReviewSet(prev => { const s = new Set(prev); if (rating === 'review') s.add(cardIdx); else s.delete(cardIdx); return s })
     setFlipped(false)
+    const isLast = cardIdx === flashcards.length - 1
+    if (isLast && !deckDoneRef.current) {
+      deckDoneRef.current = true
+      setTimeout(() => celebrate('medium'), 300)
+    } else if (!isLast) {
+      deckDoneRef.current = false
+    }
     setTimeout(() => {
       if (cardIdx < flashcards.length - 1) setCardIdx(i => i + 1)
     }, 150)
@@ -539,6 +537,13 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       fileLabel: uploadedFile?.name ?? (pastedText ? 'Pasted notes' : ''),
     })
     setFlipped(false)
+    const isLastSm2 = cardIdx === flashcards.length - 1
+    if (isLastSm2 && !deckDoneRef.current) {
+      deckDoneRef.current = true
+      setTimeout(() => celebrate('medium'), 300)
+    } else if (!isLastSm2) {
+      deckDoneRef.current = false
+    }
     setTimeout(() => {
       if (cardIdx < flashcards.length - 1) setCardIdx(i => i + 1)
     }, 150)

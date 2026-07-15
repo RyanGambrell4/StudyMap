@@ -336,6 +336,17 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
               >
                 Go Again
               </button>
+              {doneStats.score < 80 && topic.trim() && (
+                <button
+                  onClick={() => {
+                    window.dispatchEvent(new CustomEvent('studyedge:drill-topics', { detail: { topic: topic.trim() } }))
+                    onClose()
+                  }}
+                  style={{ width: '100%', padding: '11px', borderRadius: 11, background: 'transparent', border: `1.5px solid ${D.accent}`, color: D.accent, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  Drill this topic
+                </button>
+              )}
               <button
                 onClick={() => { setStep('setup'); setTopic('') }}
                 style={{ width: '100%', padding: '11px', borderRadius: 11, background: 'transparent', border: `1px solid rgba(0,0,0,0.1)`, color: D.muted, fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}

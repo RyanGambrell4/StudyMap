@@ -109,7 +109,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
             setText(prev => prev ? prev + ' ' + transcript : transcript)
           }
         } catch {
-          // transcription failed silently
+          setError('Voice input failed — type your answer instead.')
         }
       })
       bdRecorderRef.current = recorder
@@ -133,6 +133,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
     setRunning(false)
     if (!text.trim()) {
       setStep('setup')
+      setError('Nothing to score — write something first, then submit.')
       return
     }
     setStep('scoring')
@@ -330,7 +331,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
             <textarea
               ref={textareaRef}
               value={text}
-              onChange={e => setText(e.target.value)}
+              onChange={e => { setText(e.target.value); if (error) setError('') }}
               placeholder="Just write. Don't stop. Don't edit. Get it all out."
               style={{
                 width: '100%', boxSizing: 'border-box',
