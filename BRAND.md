@@ -37,7 +37,7 @@
 - Give concrete, immediately actionable systems — not vague advice
 - Name the mechanism (why) not just the method (what)
 - Connect each technique to StudyEdge AI features naturally, not as a hard sell
-- Use "3-day free trial · Cancel anytime" for all trial mentions
+- Use "7-day free trial · Cancel anytime" for all trial mentions
 
 ### Never do
 - Say "no credit card required" — the trial requires a card via Stripe
@@ -54,7 +54,7 @@
 - Any emoji
 
 ### Required disclosures
-- Trial copy must say "3-day free trial · Cancel anytime"
+- Trial copy must say "7-day free trial · Cancel anytime"
 - Pro plan: $2.99/week after trial
 - CTA URLs: /app?signup=1&plan=pro&billing=weekly&trial=1
 

@@ -47,7 +47,7 @@
     })();
   </script>
   <title>StudyEdge AI — AI Study App for College Students | getstudyedge.com</title>
-  <meta name="description" content="StudyEdge AI builds your study schedule, generates flashcards from your syllabus, coaches every session, and tracks your grades. The complete AI study system for university students. 3-day free trial." />
+  <meta name="description" content="StudyEdge AI builds your study schedule, generates flashcards from your syllabus, coaches every session, and tracks your grades. The complete AI study system for university students. 7-day free trial." />
   <link rel="canonical" href="https://getstudyedge.com/" />
   <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png" />
@@ -169,7 +169,7 @@
         "name": "Pro",
         "price": "2.99",
         "priceCurrency": "USD",
-        "description": "Pro plan, $2.99/week (also $9.99/month or $69.99/year). 5 courses, 100 AI study boosts/month, AI Study Coach, Session Blueprints, smart calendar. 3-day free trial, cancel anytime."
+        "description": "Pro plan, $2.99/week (also $9.99/month or $69.99/year). 5 courses, 100 AI study boosts/month, AI Study Coach, Session Blueprints, smart calendar. 7-day free trial, cancel anytime."
       },
       {
         "@type": "Offer",
@@ -288,7 +288,7 @@
         "name": "Is StudyEdge AI free?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. StudyEdge AI has a free plan that includes 1 course, 2 AI tutor actions per day, and one free use of key features like Session Blueprints, Focus Mode, and the AI Coach, no credit card required. Pro plan starts at $2.99/week (also available monthly at $9.99 or annually at $69.99) with a 3-day free trial, cancel anytime."
+          "text": "Yes. StudyEdge AI has a free plan that includes 1 course, 2 AI tutor actions per day, and one free use of key features like Session Blueprints, Focus Mode, and the AI Coach, no credit card required. Pro plan starts at $2.99/week (also available monthly at $9.99 or annually at $69.99) with a 7-day free trial, cancel anytime."
         }
       },
       {
@@ -312,7 +312,7 @@
         "name": "Can I cancel anytime?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Paid plans can be cancelled at any time and all new Pro subscriptions come with a 3-day free trial, cancel anytime."
+          "text": "Yes. Paid plans can be cancelled at any time and all new Pro subscriptions come with a 7-day free trial, cancel anytime."
         }
       },
       {
@@ -996,7 +996,7 @@
           <h2>StudyEdge AI pricing: The full system, free to start.</h2>
           <dl>
             <dt>Free</dt><dd>$0 forever. 1 course, 10 AI actions/month. No credit card required.</dd>
-            <dt>Pro</dt><dd>From $2.99/week (also $9.99/mo or $69.99/yr). 5 courses, 100 AI actions/month, 3-day free trial, cancel anytime.</dd>
+            <dt>Pro</dt><dd>From $2.99/week (also $9.99/mo or $69.99/yr). 5 courses, 100 AI actions/month, 7-day free trial, cancel anytime.</dd>
             <dt>Unlimited</dt><dd>From $4.99/week (also $14.99/mo or $119.99/yr). Unlimited courses and AI actions, AI Tutor memory, advanced exam analytics. Cancel anytime.</dd>
           </dl>
         </section>
@@ -1980,9 +1980,9 @@
 
       const billedSub = (planKey) => {
         if (planKey === 'pro') {
-          if (bill === 'weekly')  return 'Billed weekly · 3-day free trial, cancel anytime';
-          if (bill === 'monthly') return 'Billed $' + PRICE_TABLE[planKey].monthly.toFixed(2) + '/month · 3-day free trial';
-          return 'Billed $' + PRICE_TABLE[planKey].yearly.toFixed(2) + '/year · 3-day free trial';
+          if (bill === 'weekly')  return 'Billed weekly · 7-day free trial, cancel anytime';
+          if (bill === 'monthly') return 'Billed $' + PRICE_TABLE[planKey].monthly.toFixed(2) + '/month · 7-day free trial';
+          return 'Billed $' + PRICE_TABLE[planKey].yearly.toFixed(2) + '/year · 7-day free trial';
         }
         if (bill === 'weekly')  return 'Billed weekly · cancel anytime';
         if (bill === 'monthly') return 'Billed $' + PRICE_TABLE[planKey].monthly.toFixed(2) + '/month · cancel anytime';
@@ -2070,7 +2070,7 @@
                   <li className="pf em"><span className="pf-dot" /><span>Syllabus import for all courses</span></li>
                 </ul>
                 <button className="btn btn-primary btn-block" style={{padding:'14px'}} onClick={() => goSignup('pro')}>Start free trial</button>
-                <p style={{textAlign:'center', fontSize:12, color:'var(--dim)', marginTop:10}}>3-day free trial, cancel anytime</p>
+                <p style={{textAlign:'center', fontSize:12, color:'var(--dim)', marginTop:10}}>7-day free trial, cancel anytime</p>
               </div>
 
               <div className="pricing-cell">
@@ -2105,7 +2105,7 @@
           <h2 className="finalcta-h2">
             Your semester isn't going<br />to <em style={{color:'rgba(255,255,255,0.68)'}}>plan itself.</em>
           </h2>
-          <p className="finalcta-sub">3-day free trial · Cancel anytime · Takes three minutes to set up.</p>
+          <p className="finalcta-sub">7-day free trial · Cancel anytime · Takes three minutes to set up.</p>
           <button className="btn-cta-white" onClick={() => goTo('/app?signup=1&plan=pro&billing=weekly&trial=1')}>Start Free Trial</button>
         </div>
       );

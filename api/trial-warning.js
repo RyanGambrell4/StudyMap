@@ -29,7 +29,7 @@ export default async function handler(req, res) {
 
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
-    .select('user_id, subscription, completed_sessions, courses')
+    .select('user_id, subscription, completed_sessions, courses, trial_email_flags')
     .not('subscription->trialUsedAt', 'is', null)
     .limit(2000)
 
@@ -63,12 +63,43 @@ export default async function handler(req, res) {
       } catch { /* skip */ }
       if (!email) { skipped++; continue }
 
-      const sessionCount = Array.isArray(row.completed_sessions) ? row.completed_sessions.length : 0
-      const courseCount  = Array.isArray(row.courses) ? row.courses.length : 0
+      const sessionCount    = Array.isArray(row.completed_sessions) ? row.completed_sessions.length : 0
+      const courseCount     = Array.isArray(row.courses) ? row.courses.length : 0
+      const eng             = row.subscription?.email_engagement ?? {}
+      const openedCampaigns = Array.isArray(eng.opened_campaigns) ? eng.opened_campaigns : []
+      const clickedAny      = Array.isArray(eng.clicked_campaigns) && eng.clicked_campaigns.length > 0
 
-      const activityLine = sessionCount > 0
-        ? `You've completed ${sessionCount} session${sessionCount !== 1 ? 's' : ''} on Pro. That progress is real.`
-        : `You've set up ${courseCount} course${courseCount !== 1 ? 's' : ''} on Pro.`
+      // Branch on real engagement signals: sessions completed + emails opened/clicked.
+      // High engagement = they're interested but haven't paid — needs a different push.
+      // Zero activity = they never tried it — needs a "you're about to let it expire unused" message.
+      const isHighEngagement = sessionCount >= 3 || (openedCampaigns.length >= 2 && sessionCount >= 1) || clickedAny
+      const isZeroActivity   = sessionCount === 0 && openedCampaigns.length === 0
+
+      let subject, kicker, heading, activityLine
+      if (isHighEngagement) {
+        subject      = sessionCount >= 3
+          ? `You've logged ${sessionCount} sessions. Don't let that reset.`
+          : `You've been paying attention. Here's the honest case.`
+        kicker       = 'Trial ending — you\'re engaged'
+        heading      = sessionCount >= 3
+          ? `${sessionCount} sessions in 7 days. That's the habit that changes grades.`
+          : `You've read every email. Here's why $2.99 actually makes sense.`
+        activityLine = sessionCount >= 3
+          ? `You've logged ${sessionCount} sessions in 7 days. That puts you in the top 10% of trial users. Tomorrow, without Pro, those AI Study Coach plans, Blueprints, and Exam Rescue runs all go away. The 5-course tracking drops back to 1.`
+          : `You've been reading these. You know what Pro does. The honest case: $2.99/week is less than one coffee, and the students who keep it for a full semester consistently pull a GPA tier higher than those who don't.`
+      } else if (isZeroActivity) {
+        subject      = `Your trial ends in 24 hours. You haven't tried it yet.`
+        kicker       = 'Trial ending — unused'
+        heading      = `24 hours left. You set it up but never ran a session.`
+        activityLine = `You've set up ${courseCount > 0 ? `${courseCount} course${courseCount !== 1 ? 's' : ''}` : 'your account'} but never ran a study session. That's the one step between "I have this app" and "this app actually helped my grade." Takes 2 minutes.`
+      } else {
+        subject      = `Your Pro trial ends tomorrow.`
+        kicker       = 'Trial ending soon'
+        heading      = `Your 7-day Pro trial ends in less than 24 hours.`
+        activityLine = sessionCount > 0
+          ? `You've completed ${sessionCount} session${sessionCount !== 1 ? 's' : ''} on Pro. That progress is real — and it disappears without Pro. You drop back to 2 AI actions total, 1 course, and a 30-minute focus cap.`
+          : `You've set up ${courseCount} course${courseCount !== 1 ? 's' : ''} on Pro. When the trial ends, you'll drop back to the free plan — 2 AI actions total, 1 course, and a 30-minute focus cap.`
+      }
 
       const upgradeUrl = `https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=trial_warning`
 
@@ -76,8 +107,12 @@ export default async function handler(req, res) {
         await resend.emails.send({
           from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
           to: email,
-          subject: 'Your Pro trial ends tomorrow.',
+          subject,
           headers: listUnsubscribeHeaders(email),
+          tags: [
+            { name: 'campaign', value: 'trial_warning' },
+            { name: 'user_id', value: row.user_id },
+          ],
           html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your trial ends tomorrow</title></head>
@@ -90,10 +125,10 @@ ${preheader("Lock in Pro now — $2.99/wk. Your trial ends in less than 24 hours
         <span style="font-size:16px;font-weight:700;color:#111111;letter-spacing:-0.3px;">StudyEdge</span>
       </td></tr>
       <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
-        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#E87820;text-transform:uppercase;">Trial ending soon</p>
-        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">Your 7-day Pro trial ends in less than 24 hours.</h1>
+        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#E87820;text-transform:uppercase;">${kicker}</p>
+        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">${heading}</h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          ${activityLine} When the trial ends, you'll drop back to the free plan — 2 AI actions total, 1 course, and a 30-minute focus cap.
+          ${activityLine}
         </p>
         <p style="margin:0 0 6px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           Keep everything you've been using:
@@ -147,6 +182,8 @@ ${preheader("Lock in Pro now — $2.99/wk. Your trial ends in less than 24 hours
         })
         await recordUserEmail(row.user_id)
         sent++
+        const branch = isHighEngagement ? 'high_engagement' : isZeroActivity ? 'zero_activity' : 'default'
+        console.log(`[trial-warning] Sent to ${email} branch=${branch} sessions=${sessionCount} opened=${openedCampaigns.length}`)
       } catch (err) {
         console.error(`[trial-warning] Failed to send to ${email}:`, err)
       }

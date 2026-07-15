@@ -156,6 +156,10 @@ export default async function handler(req, res) {
           to: email,
           subject: `${audience.audienceLabel === 'exam prep' ? 'Day 1 of exam prep' : 'Day 1 of your Pro trial'} — do this first`,
           headers: listUnsubscribeHeaders(email),
+          tags: [
+            { name: 'campaign', value: 'day1_trial_tips' },
+            { name: 'user_id', value: row.user_id },
+          ],
           html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Day 1 of your Pro trial</title></head>

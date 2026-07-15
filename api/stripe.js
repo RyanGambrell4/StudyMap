@@ -19,6 +19,7 @@ import { onTrialEndingSoon, onUpgraded, onChurned } from '../lib/server/loops.js
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 import { sendFounderCancellationEmail } from '../lib/server/founderOutreach.js'
 import { createTrialCancelOffer, userHasExistingOffer } from '../lib/server/oneTimeOffer.js'
+import { sendProWelcomeEmail } from '../lib/server/proWelcomeEmail.js'
 
 // Disable Vercel's default body parsing - required for Stripe signature verification
 export const config = {
@@ -853,6 +854,22 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
               $revenue_currency: revenueCurrency,
             }),
           })
+          // Send pro welcome email on trial → paid conversion.
+          try {
+            const { data: conversionUser } = await supabaseAdmin.auth.admin.getUserById(userId)
+            if (conversionUser?.user?.email) {
+              const meta = conversionUser.user.user_metadata ?? {}
+              const firstName = (meta.first_name ?? meta.full_name ?? meta.name ?? '').split(' ')[0] || null
+              await sendProWelcomeEmail(conversionUser.user.email, {
+                firstName,
+                plan: planInfo.plan,
+                billingPeriod: planInfo.billingPeriod,
+                userId,
+              })
+            }
+          } catch (err) {
+            console.error('[stripe] Pro welcome email failed:', err)
+          }
         }
         // Also fire trial_activated on `trialing` so funnel reconciles with iOS StoreKit trials.
         // We attach revenue as `expected_revenue` here (not $revenue) — Stripe

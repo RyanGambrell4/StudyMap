@@ -62,6 +62,10 @@ export default async function handler(req, res) {
         to: user.email,
         subject,
         headers: listUnsubscribeHeaders(user.email),
+        tags: [
+          { name: 'campaign', value: 'early_activation' },
+          { name: 'user_id', value: user.id },
+        ],
         html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Get started with StudyEdge</title></head>

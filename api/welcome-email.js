@@ -72,6 +72,10 @@ export default async function handler(req, res) {
         ? `${greetingName}, you're in. Pro is free for 7 days.`
         : "You're in. Pro is free for 7 days.",
       headers: listUnsubscribeHeaders(email),
+      tags: [
+        { name: 'campaign', value: 'welcome' },
+        ...(userId ? [{ name: 'user_id', value: userId }] : []),
+      ],
       html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Welcome to StudyEdge</title></head>

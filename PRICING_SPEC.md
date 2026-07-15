@@ -11,7 +11,7 @@ Four tiers: Free, Pro, Unlimited. Pro and Unlimited each have three billing peri
 | Tier       | Weekly      | Monthly      | Annual         | Notes                          |
 |------------|-------------|--------------|----------------|--------------------------------|
 | Free       | —           | —            | —              | Always available               |
-| Pro        | $2.99/week  | $9.99/month  | $69.99/year    | 3-day free trial (no card)     |
+| Pro        | $2.99/week  | $9.99/month  | $69.99/year    | 7-day free trial (no card)     |
 | Unlimited  | $4.99/week  | $14.99/month | $119.99/year   | No trial                       |
 
 **Savings framing:**
@@ -42,7 +42,7 @@ Four tiers: Free, Pro, Unlimited. Pro and Unlimited each have three billing peri
 - Unlimited Focus Mode
 - Unlimited flashcard decks and cards
 - All features except Unlimited-only (see below)
-- **3-day free trial via Stripe Checkout (card required, auto-bills $2.99/wk after unless canceled)**
+- **7-day free trial via Stripe Checkout (card required, auto-bills $2.99/wk after unless canceled)**
 - Billed weekly / monthly / annual depending on chosen period
 
 ### Unlimited
@@ -57,11 +57,11 @@ Four tiers: Free, Pro, Unlimited. Pro and Unlimited each have three billing peri
 
 ## Trial
 
-- **Duration:** 3 days (down from 7)
+- **Duration: 7 days
 - **Credit card:** Not required
 - **Applies to:** Pro only (all three billing periods)
 - **Rationale:** Creates urgency. At $2.99/week, hitting the paywall after 3 days is a low-friction upgrade decision.
-- **Implementation:** `trial_activated` flag in subscription, `trial_start_date`, expires after 72 hours. Already built — just update duration constant from 7 days to 3 days.
+- **Implementation:** `trial_activated` flag in subscription, `trial_start_date`, expires after 168 hours (7 days). Already built — just duration constant: 7 days.
 
 ---
 
@@ -81,7 +81,7 @@ Each card has a **Weekly / Monthly / Annual** billing toggle. Default: Weekly se
 │ $0 forever          │  │ $2.99/week                │  │ $4.99/week          │
 │                     │  │ ← default shown           │  │                     │
 │ • 1 course          │  │                           │  │ Everything in Pro + │
-│ • Limited AI        │  │ 3-day free trial          │  │ • Unlimited AI      │
+│ • Limited AI        │  │ 7-day free trial          │  │ • Unlimited AI      │
 │ • Basic features    │  │ Card required, cancel any │  │ • Tutor memory      │
 │                     │  │                           │  │ • Exam analytics    │
 │ [Get started free]  │  │ [Start free trial →]      │  │ [Get Unlimited →]   │
@@ -125,7 +125,7 @@ Value-focused, not guilt-based. Lead with price, not with what they're missing.
 │                                              │
 │  ┌─────────────────────────────────────┐     │
 │  │  Pro — $2.99/week                   │     │
-│  │  3-day free trial · card required   │     │
+│  │  7-day free trial · card required   │     │
 │  │  [Start free trial]                 │     │
 │  └─────────────────────────────────────┘     │
 │                                              │

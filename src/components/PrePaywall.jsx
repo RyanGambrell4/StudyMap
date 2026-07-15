@@ -214,7 +214,7 @@ export default function PrePaywall({ open, trigger, onContinue, onDismiss }) {
         >
           {step === 0 && 'Continue →'}
           {step === 1 && 'Continue →'}
-          {step === 2 && 'Start your 3-day free trial'}
+          {step === 2 && 'Start your 7-day free trial'}
         </button>
 
         {step === 2 && (
@@ -350,7 +350,7 @@ function StepTrialTimeline() {
   return (
     <>
       <p style={{ margin: 0, fontSize: 11, fontWeight: 800, letterSpacing: '0.08em', color: '#059669', textTransform: 'uppercase', textAlign: 'center' }}>
-        How your 3-day trial works
+        How your 7-day trial works
       </p>
       <h2 style={{ margin: '8px 0 6px', fontSize: '1.4rem', fontWeight: 800, color: '#111', letterSpacing: '-0.5px', textAlign: 'center', lineHeight: 1.25 }}>
         Full access. Zero pressure.

@@ -119,6 +119,18 @@
             "schedule": "0 12 * * *"
         },
         {
+            "path": "/api/day5-social-proof",
+            "schedule": "0 13 * * *"
+        },
+        {
+            "path": "/api/exam-approaching",
+            "schedule": "0 9 * * *"
+        },
+        {
+            "path": "/api/trial-report-card",
+            "schedule": "0 11 * * *"
+        },
+        {
             "path": "/api/trial-warning",
             "schedule": "0 12 * * *"
         },

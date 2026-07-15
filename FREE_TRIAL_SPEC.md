@@ -1,6 +1,6 @@
 # StudyEdge AI — Free Trial & Paywall Redesign Spec
 
-> ⚠ **HISTORICAL — written under the old 7-day / $12.99 model.** Live pricing is now $2.99/wk Pro · 3-day trial. See `PRICING_SPEC.md` (PRICING_SPEC.md is the live source of truth) for current pricing.
+> ⚠ **HISTORICAL — written under the old 7-day / $12.99 model.** Live pricing is now $2.99/wk Pro · 7-day trial. See `PRICING_SPEC.md` (PRICING_SPEC.md is the live source of truth) for current pricing.
 _Derived from product interview — May 21, 2026_
 
 ---

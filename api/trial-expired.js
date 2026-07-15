@@ -80,6 +80,10 @@ export default async function handler(req, res) {
           to: email,
           subject: 'Your trial ended. Here\'s what you lost.',
           headers: listUnsubscribeHeaders(email),
+          tags: [
+            { name: 'campaign', value: 'trial_expired' },
+            { name: 'user_id', value: row.user_id },
+          ],
           html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your trial ended</title></head>

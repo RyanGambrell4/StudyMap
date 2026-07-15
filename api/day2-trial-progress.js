@@ -157,6 +157,10 @@ export default async function handler(req, res) {
           to: email,
           subject: body.subject,
           headers: listUnsubscribeHeaders(email),
+          tags: [
+            { name: 'campaign', value: 'day2_trial_progress' },
+            { name: 'user_id', value: row.user_id },
+          ],
           html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${body.subject}</title></head>

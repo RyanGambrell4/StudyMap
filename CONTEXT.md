@@ -126,7 +126,7 @@ _Driven by user-spec invocation. Read ONBOARDING_AGENT_SPEC.md (historical 7-day
 4. **Onboarding splash** (`step=1`) -> headline "You're 60 seconds from your first AI study plan." 3 feature cards. Single "Let's go" CTA.
 5. **Step 2 (school + year)** -> 2-of-2 progress bar shows step 1. School type expands year/timeline options inline.
 6. **Step 4 (focus time)** -> progress shows step 2. Pick Morning/Afternoon/Evening.
-7. **Step 5 (trial offer)** -> 3-day free trial card with $0 today/cancel-anytime copy + skip-to-free link. Only renders if `!hasUsedTrial()`.
+7. **Step 5 (trial offer)** -> 7-day free trial card with $0 today/cancel-anytime copy + skip-to-free link. Only renders if `!hasUsedTrial()`.
 8. **Post-onboarding** -> `handleOnboardingComplete` sets `showOutput=true` with `courses=[]`. OutputView renders DashboardView empty state with "You're set up" pill + "Add your first course" CTA + "What unlocks next" preview list.
 9. **First-action** -> Add a course -> `course_added { first_course: true }` -> Add another / Start a focus session -> `session_started` + `first_session_started` (once ever).
 
@@ -213,7 +213,7 @@ AuthScreen signup mode: "Create your account" + "Your data will sync across all 
 _Driven by user-spec invocation. Read PAYWALL_REDESIGN_SPEC.md (historical), PRICING_SPEC.md (live source of truth), CLAUDE.md, and CONTEXT.md. Found the paywall system mostly built (PaywallModal redesign, billing toggle, context-aware Unlimited gate, soft-nudge pills in StudyToolsView, trial pill in AppShell, advanced PE analytics gate, all `onShowPaywall` triggers wired). Shipped the missing pieces only — no padding._
 
 ### Commit 1: trial-progress math + em-dash sweep (`9002911`)
-- DashboardView trial banner used `(7 - daysLeft) / 7` for the progress fill — old 7-day formula. On a 3-day trial it jumped past 66% on day 1. Switched to `(3 - daysLeft) / 3`.
+- DashboardView trial banner used `(7 - daysLeft) / 7` for the progress fill — old 7-day formula. On a 7-day trial it jumped past 66% on day 1. Switched to `(3 - daysLeft) / 3`.
 - Swept two em dashes from user-facing trial copy: AppShell `trialMsg` (both branches) and DashboardView "Your free trial is active —". Converted to sentence breaks ("…active. N days remaining.").
 
 ### Commit 2: Unlimited tutor session memory (`65e5db4`)
@@ -238,12 +238,12 @@ Brought instrumentation in line with the spec event names + payloads:
 - Advanced practice-exam analytics gate (score-trend chart + predicted score) in PracticeExamResults.jsx, with the Unlimited upsell card dispatching `studyedge:open-paywall` with `trigger: 'practiceExamAnalytics'`.
 - `canUseFeature` / `canUseUnlimitedFeature` / `incrementFeatureUsage` / `getActivePlan` in subscription.js.
 - All paywall triggers (AI Cheat Sheet, Exam Rescue, Brain Dump, Quiz Burst, Practice Exam, Focus mode, course-cap, AI exhausted, blueprint, etc.) wired in their respective modals/views.
-- PaywallModal billing toggle (Weekly default), Pro/Unlimited card layout, rotating testimonials, Stripe Checkout integration, "Or choose a paid plan" divider, 3-day trial card.
+- PaywallModal billing toggle (Weekly default), Pro/Unlimited card layout, rotating testimonials, Stripe Checkout integration, "Or choose a paid plan" divider, 7-day trial card.
 
 ### Spec contradiction reconciled
 - `PRICING_SPEC.md` says "no card" on the table row, but says "card required" in the trial section three paragraphs down. CLAUDE.md is the source of truth: **3-day Pro trial via Stripe Checkout, card required, auto-bills $2.99/wk after.** All commit work honored that:
   - No "no credit card required" anywhere in trial CTAs (only in Free-plan messaging in AuthScreen + LandingPage FAQ).
-  - PaywallModal trial card copy: "Full access for 3 days, then $2.99/week. Cancel anytime from your account before your trial ends." + "Card required · $0 today · cancel anytime."
+  - PaywallModal trial card copy: "Full access for 7 days, then $2.99/week. Cancel anytime from your account before your trial ends." + "Card required · $0 today · cancel anytime."
   - `trial_started` event does NOT carry a `no_card_required: true` flag.
 
 ### Build
@@ -433,7 +433,7 @@ Each: 6-8 H2 sections, post-cta block, related-links, BlogPosting + BreadcrumbLi
 
 ### Key rules enforced throughout
 - No em dashes in any copy
-- Trial CTAs: "3-day free trial. Cancel anytime." — never "no credit card required"
+- Trial CTAs: "7-day free trial. Cancel anytime." — never "no credit card required"
 - No emojis in UI or page copy
 - CTA links: `/app?signup=1&plan=pro&billing=weekly&trial=1`
 - Brand name: "StudyEdge AI" everywhere
@@ -446,7 +446,7 @@ _Driven by user request "do all of that please" after the first pass shipped. Fi
 ### 1. Built /pricing page (`5901cd5`)
 - Several public/*.html footers were linking to /pricing but the page did not exist (404 surfaced during the first pass). Created `public/pricing.html` mirroring PRICING_SPEC.md.
 - Three cards (Free / Pro / Unlimited) with a weekly/monthly/annual billing toggle. Weekly default. Vanilla JS toggle updates both the displayed price and the CTA href's `billing=` param.
-- Honors the trial-CTA rule: Pro card CTA says "Start your 3-day free trial" with fine print "3-day free trial via Stripe Checkout. Card required. Cancel any time." Free plan CTA goes to `/app?signup=1` (no trial param) and accurately notes "No credit card required for the free plan."
+- Honors the trial-CTA rule: Pro card CTA says "Start your 7-day free trial" with fine print "7-day free trial via Stripe Checkout. Card required. Cancel any time." Free plan CTA goes to `/app?signup=1` (no trial param) and accurately notes "No credit card required for the free plan."
 - Added Product Offer JSON-LD covering all 7 SKUs (Free + 3 Pro + 3 Unlimited) and FAQ JSON-LD answering: is it free, does the trial need a card, can I cancel, Pro vs Unlimited, why weekly billing.
 - Added to `public/sitemap.xml` at priority 0.95.
 
@@ -471,7 +471,7 @@ The commit message says only "drop per-page meta keywords" but `git add public/*
 1. **Authored cluster-specific 1200x630 OG cards.** 52 pages currently share `hero-landing.png` (1920x600, wrong aspect ratio for OG). LinkedIn/Twitter crop it awkwardly. Real wins would be per-cluster cards (one for comparison pages, one for calculators, one for AI features, one for "best study app for [major]", one for GPA-for-[school]). Needs design work, not code.
 2. **GSC verification handshake** — meta tag is present and the new `/pricing` page should be submitted for indexing; needs human in the GSC dashboard.
 3. **Pre-existing /pricing footer link discovery.** Many footers in `public/*.html` still point at `/pricing` already (now resolves); no other dead links surfaced this pass, but a broader site link audit would not hurt.
-4. **PRICING_SPEC.md has internal inconsistency.** The pricing table line says "3-day free trial (no card)" but the trial section three paragraphs later correctly says "card required." The wider codebase (CLAUDE.md, /pricing JSON-LD, paywall) is aligned to the card-required version. Spec should be updated for accuracy.
+4. **PRICING_SPEC.md has internal inconsistency.** The pricing table line says "7-day free trial (no card)" but the trial section three paragraphs later correctly says "card required." The wider codebase (CLAUDE.md, /pricing JSON-LD, paywall) is aligned to the card-required version. Spec should be updated for accuracy.
 
 ---
 
@@ -481,8 +481,8 @@ _Driven by user request "what can you do for my seo right now?" Five small commi
 ### 1. NCR copy sweep on public landing pages (`b8f0655`)
 - Every comparison page (anki, quizlet, chegg, coursehero, khan-academy, notion-for-studying, goconqr, studocu, anki-vs-quizlet), every `best-study-app-for-*` page, and `cumulative/semester/weighted-gpa-calculator` had a `Try StudyEdge AI Free` button that routes to `/app?signup=1&plan=pro&billing=weekly&trial=1` (Stripe Checkout trial flow, card required) paired with `Free to start. No credit card required.` fine print.
 - Replaced CTA fine print, proof-strip items, OG/Twitter descriptions, and chegg/coursehero hero subs with `Free plan available` (or `Free plan available. Pro from $2.99/week.` where Pro pricing was already in the line). 41 files, 87 inserts / 87 deletes.
-- Tightened `study-schedule-generator.html:397` paragraph that conflated free plan with free trial; now names the 3-day trial explicitly.
-- Kept (accurate): FAQ-style answers that explicitly distinguish "free plan, no card" from "Pro $2.99/wk with 3-day trial" (e.g. ai-tutor, ai-study-coach, ai-flashcard-maker, quizlet-alternative, khan-academy-alternative, notion-for-studying, all 13 `what-gpa-do-you-need-for-*` JSON-LD blocks, login.html). The free plan really has no card, so these claims are true.
+- Tightened `study-schedule-generator.html:397` paragraph that conflated free plan with free trial; now names the 7-day trial explicitly.
+- Kept (accurate): FAQ-style answers that explicitly distinguish "free plan, no card" from "Pro $2.99/wk with 7-day trial" (e.g. ai-tutor, ai-study-coach, ai-flashcard-maker, quizlet-alternative, khan-academy-alternative, notion-for-studying, all 13 `what-gpa-do-you-need-for-*` JSON-LD blocks, login.html). The free plan really has no card, so these claims are true.
 
 ### 2. Internal Related-links block on 52 pages (`0766b18`)
 - Added a `Related on StudyEdge AI` section (4 contextually relevant internal links) above each page's footer.
@@ -932,7 +932,7 @@ Tier-1 consistency/bug fixes + three structural primitives. All 28 touched files
   - Upgraded JSON-LD schema from `SoftwareApplication` to `WebApplication` (more specific subtype) + added `browserRequirements`
   - Added preconnect hints for Supabase (`https://vpmgamaspefwqywttdtj.supabase.co`) and PostHog (`https://us.i.posthog.com`)
 - Layer 2 brand compliance pass on all 6 landing pages:
-  - CTA fine-print "Free to start. No credit card required." → "3-day free trial. Cancel anytime." (Stripe collects a card; the old copy was incorrect)
+  - CTA fine-print "Free to start. No credit card required." → "7-day free trial. Cancel anytime." (Stripe collects a card; the old copy was incorrect)
   - Footer em-dash `StudyEdge AI &mdash; getstudyedge.com` → comma
   - `how-to-study-for-finals.html`: removed "leverage" usages (banned brand word — replaced with "payoff" and "highest-impact")
 - Layer 4: established keyword baseline in `SEO_KEYWORDS.md` (40+ keywords across 4 tiers — primary targets, long-tail blog, comparison/alternative, watch list). Next monthly run: pull GSC query report and update with impressions/clicks/position.
@@ -1337,4 +1337,4 @@ Added 18 university landing pages and 1 app gateway page across 4 commits.
 - `public/sitemap.xml`: 19 new URLs with `lastmod 2026-06-10`, priority 0.85–0.9
 - Pushed to main → auto-deployed to getstudyedge.com via Vercel
 
-Each page follows the UCT template: university-specific H1, eyebrow pill, tailored hero copy, 6 feature cards addressing that university's real challenges, stats strip (500,000+ students / 4.8/5 / 3-day free trial), FAQ with 5 questions in JSON-LD, cross-links to sibling university pages, and full JSON-LD (SoftwareApplication + FAQPage + BreadcrumbList).
+Each page follows the UCT template: university-specific H1, eyebrow pill, tailored hero copy, 6 feature cards addressing that university's real challenges, stats strip (500,000+ students / 4.8/5 / 7-day free trial), FAQ with 5 questions in JSON-LD, cross-links to sibling university pages, and full JSON-LD (SoftwareApplication + FAQPage + BreadcrumbList).
