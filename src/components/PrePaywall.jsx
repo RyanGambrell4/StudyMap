@@ -36,9 +36,9 @@ const BENEFIT_ICONS = {
 
 const BENEFITS = [
   { icon: BENEFIT_ICONS.coach,  title: 'AI Study Coach',       body: 'A minute-by-minute plan for your whole semester, built around your real schedule.' },
-  { icon: BENEFIT_ICONS.ai,     title: '100 AI actions/month',  body: 'Cheat sheets, exam rescues, session blueprints, quiz bursts — on demand, all semester.' },
+  { icon: BENEFIT_ICONS.ai,     title: '100 AI actions/month',  body: 'Cheat sheets, exam rescues, session blueprints, quiz bursts. On demand, all semester.' },
   { icon: BENEFIT_ICONS.focus,  title: 'Unlimited focus time',  body: 'No 30-minute cap. Lock in for as long as you need, every single day.' },
-  { icon: BENEFIT_ICONS.tools,  title: 'Every study tool',      body: 'Flashcards, quizzes, brain dumps, topic drills — auto-generated from your own courses.' },
+  { icon: BENEFIT_ICONS.tools,  title: 'Every study tool',      body: 'Flashcards, quizzes, brain dumps, topic drills. Auto-generated from your own courses.' },
   { icon: BENEFIT_ICONS.grades, title: 'Grade Hub',             body: 'Track every assignment, run what-if scenarios, know what you need on your final.' },
 ]
 
@@ -54,7 +54,7 @@ const TIMELINE = [
     day: 'Today',
     color: '#059669',
     title: 'Full access unlocks',
-    body: 'Every Pro feature — AI Coach, 100 AI actions, unlimited focus, blueprints, flashcards, quizzes, and Grade Hub. $0 today.',
+    body: 'Every Pro feature: AI Coach, 100 AI actions, unlimited focus, blueprints, flashcards, quizzes, and Grade Hub. $0 today.',
   },
   {
     day: 'Day 2',
@@ -65,8 +65,8 @@ const TIMELINE = [
   {
     day: 'Day 3',
     color: '#3B61C4',
-    title: 'Continue for $2.99/wk — or cancel',
-    body: "Loving it? Stay on Pro for $2.99/wk. Not for you? One tap to cancel — no charge, no email chase.",
+    title: 'Continue for $2.99/wk or cancel',
+    body: "Loving it? Stay on Pro for $2.99/wk. Not for you? One tap to cancel. No charge, no email chase.",
   },
 ]
 

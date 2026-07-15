@@ -379,7 +379,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       return
     }
     if (file.size > 50 * 1024 * 1024) {
-      setAudioError('File too large — max 50 MB')
+      setAudioError('File too large. Max 50 MB.')
       return
     }
     setAudioError('')
@@ -1054,7 +1054,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             {audioFileName && !isTranscribingAudio && pastedText.length > 50 && (
               <p style={{ fontSize: 11.5, color: '#16a34a', marginTop: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Transcribed: <strong>{audioFileName}</strong> — {pastedText.trim().split(/\s+/).length.toLocaleString()} words. Click "Generate with AI" below.
+                Transcribed: <strong>{audioFileName}</strong>. {pastedText.trim().split(/\s+/).length.toLocaleString()} words. Click "Generate with AI" below.
               </p>
             )}
           </div>
@@ -1112,7 +1112,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             {youtubeTitle && !isImportingYoutube && (
               <p style={{ fontSize: 11.5, color: '#16a34a', marginTop: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Imported: <strong>{youtubeTitle}</strong> — transcript ready. Click "Generate with AI" below.
+                Imported: <strong>{youtubeTitle}</strong>. Transcript ready. Click "Generate with AI" below.
               </p>
             )}
           </div>

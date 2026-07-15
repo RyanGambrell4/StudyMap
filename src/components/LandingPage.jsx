@@ -1905,7 +1905,7 @@ export default function LandingPage({ onGetStarted }) {
                 </span>
               </h2>
               <p style={{ color: 'rgba(226,232,240,0.55)', fontSize: 14.5, lineHeight: 1.6, marginBottom: 0, maxWidth: 460 }}>
-                Q-Chat was shut down in June 2025. Chegg's AI features cost more and do less. StudyEdge gives you a personal AI Study Coach, spaced-repetition flashcards, practice exams, and a daily study plan — all built around <em>your</em> courses and exam dates.
+                Q-Chat was shut down in June 2025. Chegg's AI features cost more and do less. StudyEdge gives you a personal AI Study Coach, spaced-repetition flashcards, practice exams, and a daily study plan, all built around <em>your</em> courses and exam dates.
               </p>
             </div>
 

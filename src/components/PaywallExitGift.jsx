@@ -221,7 +221,7 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
               Claimed · 5 actions added
             </p>
             <h2 style={{ margin: '6px 0 10px', fontSize: 20, fontWeight: 700, color: TEXT, letterSpacing: '-0.3px', lineHeight: 1.35 }}>
-              Quick — how would you rate StudyEdge so far?
+              How would you rate StudyEdge so far?
             </h2>
             <p style={{ margin: '0 0 20px', fontSize: 13, color: MUTED, lineHeight: 1.6 }}>
               One tap. It genuinely helps us know what to build next.
@@ -280,7 +280,7 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
               </svg>
             </div>
             <h2 style={{ margin: '6px 0 10px', fontSize: 20, fontWeight: 700, color: TEXT, letterSpacing: '-0.3px', lineHeight: 1.35 }}>
-              Thanks — that helps a lot.
+              Thanks. That helps a lot.
             </h2>
             <p style={{ margin: '0 0 18px', fontSize: 14, color: MUTED, lineHeight: 1.6 }}>
               A quick review on the App Store makes a real difference for a small team like ours. Opened it in a new tab.
