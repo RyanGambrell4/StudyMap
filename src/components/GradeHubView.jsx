@@ -930,6 +930,7 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
 function RightRail({ course, gradeData, onShowPaywall, userId, onSyncStudyPlan }) {
   const [aiLoading, setAiLoading]     = useState(false)
   const [aiPrediction, setAiPrediction] = useState(null)
+  const [aiError, setAiError]         = useState(null)
   const [syncToast, setSyncToast]     = useState(false)
 
   const components  = gradeData?.components ?? []
@@ -944,6 +945,7 @@ function RightRail({ course, gradeData, onShowPaywall, userId, onSyncStudyPlan }
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setAiLoading(true)
     setAiPrediction(null)
+    setAiError(null)
     try {
       const token = await getAccessToken()
       const res = await fetch('/api/generate-study-tools', {
@@ -962,6 +964,7 @@ function RightRail({ course, gradeData, onShowPaywall, userId, onSyncStudyPlan }
       await incrementAIQuery()
     } catch (e) {
       console.error(e)
+      setAiError('Could not run prediction. Try again.')
     } finally {
       setAiLoading(false)
     }
@@ -998,6 +1001,7 @@ function RightRail({ course, gradeData, onShowPaywall, userId, onSyncStudyPlan }
           </div>
         )}
 
+        {aiError && <p style={{ margin: '0 0 10px', fontSize: 12, color: '#DC2626' }}>{aiError}</p>}
         <button onClick={handleRunPredictor} disabled={aiLoading || !components.length} style={{ width: '100%', padding: '10px 14px', background: '#3B61C4', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, cursor: 'pointer', opacity: aiLoading ? 0.7 : 1 }}>
           {aiLoading
             ? <><Spinner size="xs" color="#fff" track="rgba(255,255,255,0.3)" style={{ width: 12, height: 12 }} /> Analyzing…</>

@@ -1,12 +1,22 @@
 import { useState } from 'react'
 import { clean } from '../utils/strings'
 
+const A = '#3B61C4'
+const TEXT = '#111111'
+const MUTED = '#6B6B6B'
+const DIM = '#9B9B9B'
+const BORDER = 'rgba(0,0,0,0.07)'
+const CARD = { background: '#FFFFFF', border: `1px solid ${BORDER}`, boxShadow: '0 1px 3px rgba(0,0,0,0.06)', borderRadius: 14 }
+
 const ASSIGNMENT_TYPES = ['Assignment', 'Quiz', 'Midterm', 'Final Exam', 'Project', 'Lab']
 
 const emptyForm = () => ({ name: '', dueDate: '', type: 'Assignment', weight: '' })
 
-const inputCls = 'w-full bg-white border rounded-xl px-4 py-2.5 text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 text-sm transition-colors'
-const CARD = { border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }
+const inputStyle = {
+  width: '100%', background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.12)',
+  borderRadius: 10, padding: '10px 14px', fontSize: 13, color: TEXT,
+  outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
+}
 
 export default function StepAssignments({ courses, assignments, setAssignments, onNext, onSkip, onBack }) {
   const [activeCourse, setActiveCourse] = useState(0)
@@ -23,7 +33,7 @@ export default function StepAssignments({ courses, assignments, setAssignments, 
     if (!form.dueDate) e.dueDate = 'Due date is required'
     const w = parseFloat(form.weight)
     if (!form.weight || isNaN(w) || w <= 0 || w > 100) {
-      e.weight = 'Enter a valid weight (1–100%)'
+      e.weight = 'Enter a valid weight (1-100%)'
     } else {
       const remaining = 100 - getTotalWeight(activeCourse)
       if (w > remaining) e.weight = `Only ${remaining}% remaining for this course`
@@ -55,14 +65,15 @@ export default function StepAssignments({ courses, assignments, setAssignments, 
   const canAdd = courseAssignments.length < 10 && totalWeight < 100
 
   return (
-    <div className="max-w-2xl mx-auto px-4 py-10">
-      <div className="text-center mb-8">
-        <h2 className="text-3xl font-bold text-slate-900 mb-2">Your Assignments</h2>
-        <p className="text-slate-600">Track grades and get smart recovery sessions when you fall behind</p>
-        <p className="text-slate-500 text-sm mt-1">Optional. You can skip and add these later.</p>
+    <div style={{ maxWidth: 672, margin: '0 auto', padding: '40px 16px' }}>
+      <div style={{ textAlign: 'center', marginBottom: 32 }}>
+        <h2 style={{ margin: '0 0 8px', fontSize: 28, fontWeight: 800, color: TEXT, letterSpacing: '-0.5px' }}>Your Assignments</h2>
+        <p style={{ margin: 0, fontSize: 14, color: MUTED }}>Track grades and get smart recovery sessions when you fall behind</p>
+        <p style={{ margin: '6px 0 0', fontSize: 12.5, color: DIM }}>Optional. You can skip and add these later.</p>
       </div>
 
-      <div className="flex gap-2 flex-wrap mb-5">
+      {/* Course tabs */}
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 20 }}>
         {courses.map((course, idx) => {
           const count = getCourseAssignments(idx).length
           const isActive = activeCourse === idx
@@ -70,57 +81,68 @@ export default function StepAssignments({ courses, assignments, setAssignments, 
             <button
               key={idx}
               onClick={() => { setActiveCourse(idx); setAdding(false); setForm(emptyForm()); setErrors({}) }}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-full text-sm font-semibold border transition-all ${
-                isActive ? 'text-white border-transparent' : 'bg-white border-slate-200 text-slate-600 hover:border-slate-300 hover:text-slate-900'
-              }`}
-              style={isActive ? { backgroundColor: course.color.dot } : {}}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 8, padding: '7px 14px', borderRadius: 999,
+                fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+                background: isActive ? course.color.dot : '#FFFFFF',
+                color: isActive ? '#FFFFFF' : MUTED,
+                border: isActive ? 'none' : '1px solid rgba(0,0,0,0.12)',
+              }}
             >
-              <span className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: isActive ? 'rgba(255,255,255,0.7)' : course.color.dot }} />
-              <span className="truncate max-w-[120px]">{clean(course.name)}</span>
-              {count > 0 && <span className={`text-xs ${isActive ? 'text-white/70' : 'text-slate-500'}`}>{count}</span>}
+              <span style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: isActive ? 'rgba(255,255,255,0.7)' : course.color.dot }} />
+              <span style={{ maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{clean(course.name)}</span>
+              {count > 0 && <span style={{ fontSize: 11, color: isActive ? 'rgba(255,255,255,0.75)' : DIM }}>{count}</span>}
             </button>
           )
         })}
       </div>
 
-      <div className="bg-white rounded-xl p-4 mb-4" style={CARD}>
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-slate-700">Grade Weight Used</span>
-          <span className={`text-sm font-bold tabular-nums ${totalWeight >= 100 ? 'text-emerald-600' : totalWeight > 75 ? 'text-amber-600' : 'text-slate-700'}`}>
+      {/* Weight progress bar */}
+      <div style={{ ...CARD, padding: '14px 16px', marginBottom: 16 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+          <span style={{ fontSize: 12.5, fontWeight: 500, color: MUTED }}>Grade Weight Used</span>
+          <span style={{
+            fontSize: 12.5, fontWeight: 700, fontVariantNumeric: 'tabular-nums',
+            color: totalWeight >= 100 ? '#16A34A' : totalWeight > 75 ? '#D97706' : TEXT,
+          }}>
             {totalWeight}% / 100%
           </span>
         </div>
-        <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
-          <div
-            className="h-full rounded-full transition-all duration-300"
-            style={{
-              width: `${Math.min(totalWeight, 100)}%`,
-              backgroundColor: totalWeight >= 100 ? '#16A34A' : courses[activeCourse]?.color.dot ?? '#3B61C4',
-            }}
-          />
+        <div style={{ height: 8, background: 'rgba(0,0,0,0.07)', borderRadius: 4, overflow: 'hidden' }}>
+          <div style={{
+            height: '100%', borderRadius: 4, transition: 'width 0.3s',
+            width: `${Math.min(totalWeight, 100)}%`,
+            background: totalWeight >= 100 ? '#16A34A' : courses[activeCourse]?.color.dot ?? A,
+          }} />
         </div>
         {totalWeight >= 100 && (
-          <p className="text-emerald-600 text-xs mt-1.5 font-medium">✓ 100% of grade accounted for</p>
+          <p style={{ margin: '6px 0 0', fontSize: 11.5, color: '#16A34A', fontWeight: 600 }}>100% of grade accounted for</p>
         )}
       </div>
 
+      {/* Assignment list */}
       {courseAssignments.length > 0 && (
-        <div className="space-y-2 mb-4">
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 16 }}>
           {courseAssignments.map(a => (
-            <div key={a.id} className="flex items-center gap-3 px-4 py-3 rounded-xl bg-white" style={CARD}>
-              <div className="flex-1 min-w-0">
-                <p className="font-semibold text-slate-900 text-sm truncate">{a.name}</p>
-                <div className="flex items-center gap-2 mt-0.5 flex-wrap">
-                  <span className="text-xs text-slate-500">
+            <div key={a.id} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', ...CARD }}>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ margin: 0, fontWeight: 600, fontSize: 13.5, color: TEXT, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{a.name}</p>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 11.5, color: MUTED }}>
                     Due {new Date(a.dueDate + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
                   </span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-slate-100 text-slate-700">{a.type}</span>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 text-indigo-700 font-medium border border-indigo-200">{a.weight}%</span>
+                  <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(0,0,0,0.06)', color: MUTED, fontWeight: 500 }}>{a.type}</span>
+                  <span style={{ fontSize: 11, padding: '2px 8px', borderRadius: 999, background: 'rgba(59,97,196,0.08)', color: A, fontWeight: 600, border: '1px solid rgba(59,97,196,0.2)' }}>{a.weight}%</span>
                 </div>
               </div>
-              <button onClick={() => handleRemove(a.id)} className="text-slate-400 hover:text-red-600 transition-colors p-1 shrink-0">
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <button
+                onClick={() => handleRemove(a.id)}
+                style={{ background: 'none', border: 'none', color: DIM, cursor: 'pointer', padding: 4, flexShrink: 0, borderRadius: 6 }}
+                onMouseEnter={e => e.currentTarget.style.color = '#DC2626'}
+                onMouseLeave={e => e.currentTarget.style.color = DIM}
+              >
+                <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
             </div>
@@ -129,67 +151,78 @@ export default function StepAssignments({ courses, assignments, setAssignments, 
       )}
 
       {courseAssignments.length === 0 && !adding && (
-        <div className="text-center py-6 text-slate-500 text-sm mb-2">No assignments added for this course yet.</div>
+        <div style={{ textAlign: 'center', padding: '24px 0', fontSize: 13, color: DIM, marginBottom: 8 }}>No assignments added for this course yet.</div>
       )}
 
+      {/* Add form */}
       {adding ? (
-        <div className="bg-white rounded-2xl p-5 mb-4" style={CARD}>
-          <div className="space-y-3">
+        <div style={{ ...CARD, borderRadius: 16, padding: '20px', marginBottom: 16 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1.5">Assignment Name</label>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: MUTED, marginBottom: 6 }}>Assignment Name</label>
               <input
                 type="text"
                 value={form.name}
                 onChange={e => { setForm({ ...form, name: e.target.value }); setErrors({ ...errors, name: '' }) }}
                 placeholder="e.g. Midterm 1, Problem Set 3"
-                className={`${inputCls} ${errors.name ? 'border-red-400' : 'border-slate-200'}`}
+                style={{ ...inputStyle, borderColor: errors.name ? '#F87171' : 'rgba(0,0,0,0.12)' }}
+                onFocus={e => e.target.style.borderColor = A}
+                onBlur={e => e.target.style.borderColor = errors.name ? '#F87171' : 'rgba(0,0,0,0.12)'}
               />
-              {errors.name && <p className="text-red-600 text-xs mt-1">{errors.name}</p>}
+              {errors.name && <p style={{ margin: '4px 0 0', fontSize: 11.5, color: '#DC2626' }}>{errors.name}</p>}
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1.5">Due Date</label>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: MUTED, marginBottom: 6 }}>Due Date</label>
                 <input
                   type="date"
                   value={form.dueDate}
                   onChange={e => { setForm({ ...form, dueDate: e.target.value }); setErrors({ ...errors, dueDate: '' }) }}
-                  className={`${inputCls} ${errors.dueDate ? 'border-red-400' : 'border-slate-200'}`}
-                  style={{ colorScheme: 'light' }}
+                  style={{ ...inputStyle, borderColor: errors.dueDate ? '#F87171' : 'rgba(0,0,0,0.12)', colorScheme: 'light' }}
+                  onFocus={e => e.target.style.borderColor = A}
+                  onBlur={e => e.target.style.borderColor = errors.dueDate ? '#F87171' : 'rgba(0,0,0,0.12)'}
                 />
-                {errors.dueDate && <p className="text-red-600 text-xs mt-1">{errors.dueDate}</p>}
+                {errors.dueDate && <p style={{ margin: '4px 0 0', fontSize: 11.5, color: '#DC2626' }}>{errors.dueDate}</p>}
               </div>
               <div>
-                <label className="block text-xs font-medium text-slate-600 mb-1.5">Type</label>
+                <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: MUTED, marginBottom: 6 }}>Type</label>
                 <select
                   value={form.type}
                   onChange={e => setForm({ ...form, type: e.target.value })}
-                  className={`${inputCls} border-slate-200`}
-                  style={{ colorScheme: 'light' }}
+                  style={{ ...inputStyle, colorScheme: 'light' }}
+                  onFocus={e => e.target.style.borderColor = A}
+                  onBlur={e => e.target.style.borderColor = 'rgba(0,0,0,0.12)'}
                 >
                   {ASSIGNMENT_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
                 </select>
               </div>
             </div>
             <div>
-              <label className="block text-xs font-medium text-slate-600 mb-1.5">Grade Weight (%)</label>
+              <label style={{ display: 'block', fontSize: 12, fontWeight: 500, color: MUTED, marginBottom: 6 }}>Grade Weight (%)</label>
               <input
                 type="number"
                 value={form.weight}
-                min="1"
-                max="100"
-                step="1"
+                min="1" max="100" step="1"
                 onChange={e => { setForm({ ...form, weight: e.target.value }); setErrors({ ...errors, weight: '' }) }}
                 placeholder="e.g. 25"
-                className={`${inputCls} ${errors.weight ? 'border-red-400' : 'border-slate-200'}`}
+                style={{ ...inputStyle, borderColor: errors.weight ? '#F87171' : 'rgba(0,0,0,0.12)' }}
+                onFocus={e => e.target.style.borderColor = A}
+                onBlur={e => e.target.style.borderColor = errors.weight ? '#F87171' : 'rgba(0,0,0,0.12)'}
               />
-              {errors.weight && <p className="text-red-600 text-xs mt-1">{errors.weight}</p>}
+              {errors.weight && <p style={{ margin: '4px 0 0', fontSize: 11.5, color: '#DC2626' }}>{errors.weight}</p>}
             </div>
           </div>
-          <div className="flex gap-3 mt-4">
-            <button onClick={handleAdd} className="flex-1 text-white font-semibold py-2.5 rounded-xl text-sm transition-colors" style={{ backgroundColor: '#3B61C4' }}>
+          <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+            <button
+              onClick={handleAdd}
+              style={{ flex: 1, background: A, color: '#fff', border: 'none', borderRadius: 10, padding: '11px', fontSize: 13.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+            >
               Add Assignment
             </button>
-            <button onClick={() => { setAdding(false); setErrors({}) }} className="px-5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 rounded-xl text-sm transition-colors">
+            <button
+              onClick={() => { setAdding(false); setErrors({}) }}
+              style={{ padding: '11px 18px', background: 'rgba(0,0,0,0.05)', border: 'none', borderRadius: 10, color: MUTED, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+            >
               Cancel
             </button>
           </div>
@@ -197,37 +230,52 @@ export default function StepAssignments({ courses, assignments, setAssignments, 
       ) : canAdd ? (
         <button
           onClick={() => setAdding(true)}
-          className="w-full border border-dashed border-slate-300 hover:border-indigo-400 hover:bg-indigo-50/40 text-slate-500 hover:text-indigo-600 font-medium py-3.5 rounded-2xl transition-all flex items-center justify-center gap-2 mb-4"
+          style={{
+            width: '100%', padding: '14px', borderRadius: 16, marginBottom: 16,
+            border: '1.5px dashed rgba(0,0,0,0.18)', background: 'transparent',
+            color: MUTED, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}
+          onMouseEnter={e => { e.currentTarget.style.borderColor = A; e.currentTarget.style.color = A; e.currentTarget.style.background = 'rgba(59,97,196,0.04)' }}
+          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.18)'; e.currentTarget.style.color = MUTED; e.currentTarget.style.background = 'transparent' }}
         >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M12 4v16m8-8H4" />
           </svg>
           Add Assignment {courseAssignments.length > 0 ? `(${courseAssignments.length}/10)` : 'for this course'}
         </button>
       ) : (
-        <p className="text-center text-sm text-slate-500 mb-4">
+        <p style={{ textAlign: 'center', fontSize: 13, color: DIM, marginBottom: 16 }}>
           {totalWeight >= 100 ? '100% of grade weight assigned' : 'Maximum 10 assignments per course'}
         </p>
       )}
 
-      <div className="flex gap-3 mt-2">
-        <button onClick={onBack} className="px-5 bg-white hover:bg-slate-50 text-slate-700 font-medium py-3.5 rounded-xl text-sm transition-colors" style={{ border: '1px solid rgba(0,0,0,0.07)' }}>
+      {/* Nav */}
+      <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+        <button
+          onClick={onBack}
+          style={{ padding: '14px 18px', background: '#FFFFFF', border: `1px solid ${BORDER}`, borderRadius: 12, color: MUTED, fontSize: 13.5, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit' }}
+        >
           Back
         </button>
         <button
           onClick={onSkip}
-          className="flex-1 bg-slate-100 hover:bg-slate-200 text-slate-600 font-medium py-3.5 rounded-xl text-sm transition-colors"
+          style={{ flex: 1, background: 'rgba(0,0,0,0.05)', border: 'none', borderRadius: 12, color: MUTED, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', padding: '14px' }}
         >
           Skip for now
         </button>
         <button
           onClick={onNext}
-          className="flex-1 text-white font-semibold py-3.5 rounded-xl text-sm transition-colors flex items-center justify-center gap-2"
-          style={{ backgroundColor: '#3B61C4', boxShadow: '0 4px 16px rgba(59,97,196,0.25)' }}
+          style={{
+            flex: 1, background: A, color: '#fff', border: 'none', borderRadius: 12,
+            padding: '14px', fontSize: 13.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+            boxShadow: '0 4px 16px rgba(59,97,196,0.25)',
+          }}
         >
           Generate Plan
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+            <path d="M13 7l5 5m0 0l-5 5m5-5H6" />
           </svg>
         </button>
       </div>

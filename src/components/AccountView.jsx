@@ -334,7 +334,7 @@ export default function AccountView({
                     height: '100%',
                     borderRadius: 3,
                     background: trialDaysLeft <= 2 ? '#DC2626' : '#3B61C4',
-                    width: `${Math.min(100, ((7 - trialDaysLeft) / 7) * 100)}%`,
+                    width: `${Math.min(100, ((3 - trialDaysLeft) / 3) * 100)}%`,
                     transition: 'width 0.3s',
                   }} />
                 </div>

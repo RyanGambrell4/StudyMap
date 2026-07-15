@@ -217,7 +217,7 @@ const LIMIT_MESSAGES = {
   'prep-blast': {
     tag: 'Smarter session briefs',
     title: 'Unlock exam-focused and goal-based modes.',
-    body: "Pro uses your exam dates and coach plan to pick the highest-leverage focus question for your next session. Free mode only covers general weak areas.",
+    body: "Pro uses your exam dates and coach plan to pick the best focus question for your next session. Free mode only covers general weak areas.",
   },
   'quiz-result': {
     tag: 'Keep testing yourself',

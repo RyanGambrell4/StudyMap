@@ -177,7 +177,7 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
               Here are <span style={{ color: ACCENT }}>5 free AI actions</span> on us.
             </h2>
             <p style={{ margin: '0 0 10px', fontSize: 14, color: MUTED, lineHeight: 1.6 }}>
-              No card required. Five more AI-powered study sessions to try blueprints, cheat sheets, and flashcards.
+              No card required. Five more study sessions to try blueprints, cheat sheets, and flashcards.
             </p>
             <p style={{ margin: '0 0 18px', fontSize: 13, color: MUTED, lineHeight: 1.55, background: '#FFF6F0', border: `1px solid ${ACCENT}25`, borderRadius: 10, padding: '10px 14px' }}>
               Or skip the gift and start a <strong style={{ color: ACCENT }}>7-day free trial</strong>. $0 today, $2.99/wk after. Unlimited sessions, 5 courses, 100 AI actions/month. Cancel anytime.
