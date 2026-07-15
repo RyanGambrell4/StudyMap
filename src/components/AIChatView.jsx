@@ -269,19 +269,19 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       )}
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
+      <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
         {messages.length === 0 && (
-          <div className="flex flex-col items-center justify-center h-full min-h-[200px] text-center py-6">
-            <div className="w-12 h-12 rounded-2xl flex items-center justify-center mb-3" style={{ background: 'rgba(59,97,196,0.1)', border: '1px solid rgba(59,97,196,0.2)' }}>
-              <svg className="w-5 h-5" style={{ color: '#3B61C4' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, minHeight: 200, textAlign: 'center', padding: '24px 0' }}>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(59,97,196,0.1)', border: '1px solid rgba(59,97,196,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
+              <svg width="20" height="20" style={{ color: '#3B61C4' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
               </svg>
             </div>
-            <p className="text-slate-700 text-sm font-semibold mb-1">Your AI tutor for {courseName}</p>
-            <p className="text-slate-400 text-xs max-w-[220px] leading-relaxed mb-5">
+            <p style={{ fontSize: 14, fontWeight: 700, color: '#111111', marginBottom: 4 }}>Your AI tutor for {courseName}</p>
+            <p style={{ fontSize: 12, color: '#9B9B9B', maxWidth: 220, lineHeight: 1.6, marginBottom: 20 }}>
               Explain concepts, quiz me, work through problems, or build my study plan.
             </p>
-            <div className="flex flex-col gap-2 w-full max-w-xs">
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: '100%', maxWidth: 300 }}>
               {[
                 `Explain the most important concept in ${courseName} that I need to master`,
                 `Quiz me on ${courseName} with 3 practice questions`,
@@ -307,32 +307,33 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
         )}
 
         {messages.map((msg, i) => (
-          <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+          <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
             <div
-              className={`max-w-[82%] px-4 py-2.5 rounded-2xl text-sm leading-relaxed ${
-                msg.role === 'user'
-                  ? 'text-white rounded-br-md whitespace-pre-wrap'
-                  : 'bg-white border border-slate-200 text-slate-800 rounded-bl-md'
-              }`}
-              style={msg.role === 'user' ? { backgroundColor: '#3B61C4' } : undefined}
+              style={{
+                maxWidth: '82%', padding: '10px 14px', borderRadius: 18, fontSize: 14, lineHeight: 1.6,
+                ...(msg.role === 'user'
+                  ? { background: '#3B61C4', color: '#fff', borderBottomRightRadius: 4, whiteSpace: 'pre-wrap' }
+                  : { background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', color: '#111111', borderBottomLeftRadius: 4 }
+                )
+              }}
             >
               {msg.role === 'user' ? msg.content : (
                 <ReactMarkdown
                   remarkPlugins={[remarkGfm]}
                   components={{
-                    p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                    ul: ({ children }) => <ul className="list-disc list-inside mb-2 space-y-0.5">{children}</ul>,
-                    ol: ({ children }) => <ol className="list-decimal list-inside mb-2 space-y-0.5">{children}</ol>,
-                    li: ({ children }) => <li className="leading-relaxed">{children}</li>,
-                    h1: ({ children }) => <h1 className="text-base font-bold mb-1 mt-2">{children}</h1>,
-                    h2: ({ children }) => <h2 className="text-sm font-bold mb-1 mt-2">{children}</h2>,
-                    h3: ({ children }) => <h3 className="text-sm font-semibold mb-1 mt-1">{children}</h3>,
+                    p: ({ children }) => <p style={{ marginBottom: 8 }}>{children}</p>,
+                    ul: ({ children }) => <ul style={{ listStyleType: 'disc', paddingLeft: 18, marginBottom: 8 }}>{children}</ul>,
+                    ol: ({ children }) => <ol style={{ listStyleType: 'decimal', paddingLeft: 18, marginBottom: 8 }}>{children}</ol>,
+                    li: ({ children }) => <li style={{ lineHeight: 1.6, marginBottom: 2 }}>{children}</li>,
+                    h1: ({ children }) => <h1 style={{ fontSize: 15, fontWeight: 700, marginBottom: 4, marginTop: 8 }}>{children}</h1>,
+                    h2: ({ children }) => <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 4, marginTop: 8 }}>{children}</h2>,
+                    h3: ({ children }) => <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, marginTop: 6 }}>{children}</h3>,
                     code: ({ inline, children }) => inline
-                      ? <code className="bg-slate-100 px-1 py-0.5 rounded text-xs font-mono">{children}</code>
-                      : <pre className="bg-slate-100 rounded-lg px-3 py-2 my-2 overflow-x-auto text-xs font-mono whitespace-pre">{children}</pre>,
-                    blockquote: ({ children }) => <blockquote className="border-l-2 pl-3 italic text-slate-600 my-1" style={{ borderColor: '#3B61C4' }}>{children}</blockquote>,
-                    strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
-                    hr: () => <hr className="border-slate-200 my-2" />,
+                      ? <code style={{ background: '#F7F6F3', padding: '1px 5px', borderRadius: 4, fontSize: 12, fontFamily: 'monospace' }}>{children}</code>
+                      : <pre style={{ background: '#F7F6F3', borderRadius: 8, padding: '10px 12px', margin: '8px 0', overflowX: 'auto', fontSize: 12, fontFamily: 'monospace', whiteSpace: 'pre' }}>{children}</pre>,
+                    blockquote: ({ children }) => <blockquote style={{ borderLeft: '2px solid #3B61C4', paddingLeft: 10, fontStyle: 'italic', color: '#6B6B6B', margin: '4px 0' }}>{children}</blockquote>,
+                    strong: ({ children }) => <strong style={{ fontWeight: 600 }}>{children}</strong>,
+                    hr: () => <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.07)', margin: '8px 0' }} />,
                   }}
                 >
                   {msg.content}
@@ -343,10 +344,10 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
         ))}
 
         {loading && (
-          <div className="flex justify-start">
-            <div className="bg-white border border-slate-200 rounded-2xl rounded-bl-md px-4 py-3 flex items-center gap-1.5">
+          <div style={{ display: 'flex', justifyContent: 'flex-start' }}>
+            <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 18, borderBottomLeftRadius: 4, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 5 }}>
               {[0, 1, 2].map(i => (
-                <span key={i} className="w-1.5 h-1.5 bg-slate-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 150}ms` }} />
+                <span key={i} style={{ width: 6, height: 6, background: '#9B9B9B', borderRadius: '50%', display: 'inline-block', animation: 'bounce 1.2s infinite', animationDelay: `${i * 150}ms` }} />
               ))}
             </div>
           </div>
@@ -397,18 +398,18 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       )}
 
       {/* Input */}
-      <div className="px-4 pb-4 pt-2 shrink-0 border-t border-slate-100">
+      <div style={{ padding: '8px 16px 16px', flexShrink: 0, borderTop: '1px solid rgba(0,0,0,0.07)' }}>
       {isFree && (() => { const { remaining } = canUseFeature('aiTutor'); return remaining !== null && (
-        <p className={`text-xs mb-1.5 ${remaining <= 1 ? 'text-amber-500 font-medium' : 'text-slate-400'}`}>
+        <p style={{ fontSize: 12, marginBottom: 6, color: remaining <= 1 ? '#D97706' : '#9B9B9B', fontWeight: remaining <= 1 ? 600 : 400 }}>
           {remaining === 0
-            ? <>Out of free AI questions · <button onClick={() => onShowPaywall?.(paywallTrigger)} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro — 100/month' : 'Start free trial — 100/month'}</button></>
+            ? <>Out of free AI questions · <button onClick={() => onShowPaywall?.(paywallTrigger)} style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', cursor: 'pointer', color: 'inherit', fontSize: 'inherit', fontWeight: 'inherit' }}>{hasUsedTrial() ? 'Upgrade to Pro — 100/month' : 'Start free trial — 100/month'}</button></>
             : remaining === 1
-            ? <>1 free AI question left · <button onClick={() => onShowPaywall?.(paywallTrigger)} className="underline hover:text-slate-600">{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>
+            ? <>1 free AI question left · <button onClick={() => onShowPaywall?.(paywallTrigger)} style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', cursor: 'pointer', color: 'inherit', fontSize: 'inherit', fontWeight: 'inherit' }}>{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>
             : <>{remaining} free AI questions left · Pro gives you 100/month</>
           }
         </p>
       )})()}
-      <div className="flex items-end gap-2">
+      <div style={{ display: 'flex', alignItems: 'flex-end', gap: 8 }}>
         <textarea
           ref={inputRef}
           value={input}
@@ -416,10 +417,14 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
           onKeyDown={handleKeyDown}
           placeholder={`Ask about ${courseName}…`}
           rows={1}
-          className="flex-1 bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2.5 text-slate-800 placeholder-slate-400 focus:outline-none text-sm resize-none leading-relaxed"
-          style={{ maxHeight: 120 }}
+          style={{
+            flex: 1, background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 12,
+            padding: '10px 14px', color: '#111111', fontSize: 14, resize: 'none',
+            lineHeight: 1.5, outline: 'none', maxHeight: 120, fontFamily: 'inherit',
+            transition: 'border-color 0.15s, box-shadow 0.15s',
+          }}
           onFocus={e => { e.target.style.borderColor = '#3B61C4'; e.target.style.boxShadow = '0 0 0 3px rgba(59,97,196,0.15)' }}
-          onBlur={e => { e.target.style.borderColor = ''; e.target.style.boxShadow = '' }}
+          onBlur={e => { e.target.style.borderColor = 'rgba(0,0,0,0.10)'; e.target.style.boxShadow = 'none' }}
           onInput={e => { e.target.style.height = 'auto'; e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px' }}
         />
         <button
