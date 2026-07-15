@@ -881,7 +881,7 @@ export default function DashboardView({
                 <div style={{ flex: 1, minWidth: 200 }}>
                   <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: expiringSoon ? '#C2410C' : D.text }}>
                     {expiringSoon
-                      ? 'Your trial expires today — don\'t lose your progress.'
+                      ? 'Your trial expires today. Don\'t lose your progress.'
                       : `Your free trial is active. ${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining.`}
                   </p>
                   {expiringSoon ? (
@@ -919,7 +919,7 @@ export default function DashboardView({
                 Your study plan is live. Unlock the full picture.
               </p>
               <p style={{ margin: '4px 0 10px', fontSize: 12, color: D.textMuted, lineHeight: 1.55 }}>
-                You generated your first blueprint — the hardest part is done. Pro gives you 5 courses, 100 AI coaching sessions/month, and unlimited blueprints. 3-day free trial, then $2.99/wk.
+                You generated your first blueprint. The hardest part is done. Pro gives you 5 courses, 100 AI coaching sessions/month, and unlimited blueprints. 3-day free trial, then $2.99/wk.
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 {['5 courses', '100 AI sessions/month', 'Unlimited blueprints'].map(f => (
@@ -936,7 +936,7 @@ export default function DashboardView({
                 disabled={trialBannerLoading}
                 style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
               >
-                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial — $0 today'}
+                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · $0 today'}
               </button>
               <button
                 onClick={() => { localStorage.setItem('se_first_blueprint_cta_dismissed', '1'); setFirstBlueprintCtaDismissed(true); track('first_blueprint_cta_dismissed') }}
@@ -984,7 +984,7 @@ export default function DashboardView({
                 disabled={trialBannerLoading}
                 style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
               >
-                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial — $0 today'}
+                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · $0 today'}
               </button>
               <button onClick={() => { localStorage.setItem('studyedge_trial_card_dismissed_at', String(Date.now())); setTrialCardDismissed(true); track('trial_card_dismissed', { streak }) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: D.textDim, fontSize: 20, lineHeight: 1, padding: '0 4px', flexShrink: 0 }} aria-label="Dismiss">×</button>
             </div>
@@ -1006,7 +1006,7 @@ export default function DashboardView({
                   ? `${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. Exam Rescue is a Pro feature.`
                   : 'Ready to go back to Pro?'}
               </p>
-              <p style={{ margin: '2px 0 0', fontSize: 12, color: D.textMuted }}>$2.99/wk — cancel anytime. Everything you had during your trial.</p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: D.textMuted }}>$2.99/wk. Cancel anytime. Everything you had during your trial.</p>
             </div>
             <button onClick={() => onShowPaywall?.(upcomingExam && upcomingExam.days <= 5 ? 'examRescue' : 'nav-upgrade')} style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>
               Upgrade to Pro →
@@ -1029,7 +1029,7 @@ export default function DashboardView({
           }}>
             <div style={{ flex: 1, minWidth: 200 }}>
               <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#3B0764' }}>
-                You've had {sessionsCount} study sessions — you're actually using this.
+                You've had {sessionsCount} study sessions. You're actually using this.
               </p>
               <p style={{ margin: '4px 0 0', fontSize: 12, color: '#6D28D9', lineHeight: 1.55 }}>
                 Unlock unlimited focus time, 5 courses, and 100 AI coaching sessions/month. 3-day free trial, then $2.99/wk.
@@ -1041,7 +1041,7 @@ export default function DashboardView({
                 disabled={trialBannerLoading}
                 style={{ background: '#7C3AED', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
               >
-                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial — $0 today'}
+                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · $0 today'}
               </button>
               <button
                 onClick={() => { sessionStorage.setItem('se_session_nudge_dismissed', '1'); setSessionNudgeDismissed(true); track('sessions_nudge_dismissed', { sessions_count: sessionsCount }) }}
@@ -1070,7 +1070,7 @@ export default function DashboardView({
                 You've been on free for {accountAgeDays} days. The trial is still open.
               </p>
               <p style={{ margin: '3px 0 0', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
-                3 days free — then $2.99/wk. Unlimited sessions, 5 courses, 100 AI actions/month. Cancel anytime.
+                3 days free, then $2.99/wk. Unlimited sessions, 5 courses, 100 AI actions/month. Cancel anytime.
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
@@ -1079,7 +1079,7 @@ export default function DashboardView({
                 disabled={trialBannerLoading}
                 style={{ background: D.accent, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
               >
-                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial — $0 today'}
+                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · $0 today'}
               </button>
               <button
                 onClick={() => {
@@ -1114,7 +1114,7 @@ export default function DashboardView({
               </p>
               <p style={{ margin: '2px 0 0', fontSize: 12, color: '#B45309', lineHeight: 1.4 }}>
                 {freezeCount > 0
-                  ? `Use a Streak Freeze to save it — you have ${freezeCount} left.`
+                  ? `Use a Streak Freeze to save it. You have ${freezeCount} left.`
                   : 'Start a session today to rebuild it.'}
               </p>
             </div>
@@ -1274,7 +1274,7 @@ export default function DashboardView({
                   </div>
                 </div>
                 <p style={{ fontSize: 13, color: D.textMuted, lineHeight: 1.6, marginBottom: 16 }}>
-                  The best time to test your recall is right after a session — before the forgetting curve kicks in. A quick Brain Dump now doubles what sticks.
+                  The best time to test your recall is right after a session, before the forgetting curve kicks in. A quick Brain Dump now doubles what sticks.
                 </p>
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   <button
@@ -1360,7 +1360,7 @@ export default function DashboardView({
                       </div>
                     ) : (
                       <p style={{ color: D.textMuted, fontSize: 14, marginBottom: 16, lineHeight: 1.6 }}>
-                        No sessions today. A Brain Dump or Quiz Burst keeps the material fresh — even 10 minutes builds the habit.
+                        No sessions today. A Brain Dump or Quiz Burst keeps the material fresh. Even 10 minutes builds the habit.
                       </p>
                     )}
 
@@ -1581,7 +1581,7 @@ export default function DashboardView({
                         Drill →
                       </button>
                       <button
-                        onClick={() => onNavigateToTutor?.(`I need help with ${topic} — I've been getting this wrong in my ${cName} quizzes. Can you quiz me on it and explain what I'm missing?`)}
+                        onClick={() => onNavigateToTutor?.(`I need help with ${topic}. I've been getting this wrong in my ${cName} quizzes. Can you quiz me on it and explain what I'm missing?`)}
                         style={{
                           fontSize: 11.5, fontWeight: 700, color: D.red,
                           background: 'none', border: 'none', cursor: 'pointer',
