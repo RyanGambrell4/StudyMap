@@ -61,8 +61,8 @@ function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateTo
     <div className="flex flex-col h-full min-h-0 max-w-3xl mx-auto w-full px-4 py-6">
       {/* Header + course selector */}
       <div className="mb-4 shrink-0">
-        <h1 className="text-2xl font-bold text-slate-900 mb-1">AI Tutor</h1>
-        <p className="text-slate-500 text-sm mb-4">Ask questions, get explanations, and flag difficult topics that feed back into your study plan.</p>
+        <h1 style={{ fontSize: 22, fontWeight: 700, color: '#111111', marginBottom: 4 }}>AI Tutor</h1>
+        <p style={{ fontSize: 13, color: '#6B6B6B', marginBottom: 16, lineHeight: 1.5 }}>Ask questions, get explanations, and flag difficult topics that feed back into your study plan.</p>
         {courses.length > 1 && (
           <div className="flex flex-wrap gap-2">
             {courses.map((c, i) => {
@@ -75,7 +75,7 @@ function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateTo
                   className="flex items-center gap-2 px-3.5 py-2 rounded-xl text-sm font-medium transition-all border"
                   style={active
                     ? { backgroundColor: `${dot}20`, color: dot, borderColor: `${dot}50` }
-                    : { backgroundColor: 'transparent', color: '#64748b', borderColor: 'rgba(148,163,184,0.3)' }
+                    : { backgroundColor: 'transparent', color: '#6B6B6B', borderColor: 'rgba(0,0,0,0.12)' }
                   }
                 >
                   <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: dot }} />
@@ -110,10 +110,10 @@ function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateTo
 
       {/* Chat */}
       {course && (
-        <div className="flex-1 min-h-0 bg-white border border-slate-200 rounded-2xl overflow-hidden flex flex-col">
-          <div className="px-4 py-3 border-b border-slate-100 shrink-0">
-            <p className="text-sm font-semibold text-slate-700">
-              AI Tutor · <span style={{ color: course.color?.dot ?? '#6366f1' }}>{clean(course.name)}</span>
+        <div style={{ flex: 1, minHeight: 0, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, overflow: 'hidden', display: 'flex', flexDirection: 'column' }}>
+          <div style={{ padding: '12px 16px', borderBottom: '1px solid rgba(0,0,0,0.07)', flexShrink: 0 }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: '#111111' }}>
+              AI Tutor · <span style={{ color: course.color?.dot ?? '#3B61C4' }}>{clean(course.name)}</span>
             </p>
           </div>
           <AIChatView
