@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { getCachedStudyTools } from '../lib/db'
@@ -24,6 +24,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
   const [cardIdx, setCardIdx] = useState(0)
   const [answer, setAnswer] = useState('')
   const [scores, setScores] = useState([]) // { score, feedback, keyRelationship }
+  const latestScoresRef = useRef([])
   const [error, setError] = useState('')
 
   const course = courses[courseIdx] ?? null
@@ -90,7 +91,9 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed')
-      setScores(prev => [...prev, data])
+      const updatedScores = [...scores, data]
+      setScores(updatedScores)
+      latestScoresRef.current = updatedScores
       setStep('scored')
     } catch (e) {
       setError(e.message || 'Something went wrong. Please try again.')
@@ -100,7 +103,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
 
   function nextCard() {
     if (cardIdx + 1 >= totalCards) {
-      const finalScores = [...scores]
+      const finalScores = latestScoresRef.current.length ? latestScoresRef.current : scores
       const finalAvg = finalScores.length ? Math.round(finalScores.reduce((s, r) => s + r.score, 0) / finalScores.length) : 0
       addStudySession({ tool: 'Connections', score: finalAvg, topic: null, courseName: course?.name || null })
       setStep('done')
@@ -145,7 +148,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 15, fontWeight: 700, color: D.text }}>Connections</div>
             <div style={{ fontSize: 11.5, color: D.textMuted, marginTop: 1 }}>
-              {step === 'setup' && 'Understand how your concepts relate to each other'}
+              {step === 'setup' && 'Explain the link between two concepts. AI scores how well you see it.'}
               {step === 'generating' && 'Finding connections...'}
               {(step === 'cards' || step === 'scoring') && totalCards > 0 && `Connection ${cardIdx + 1} of ${totalCards}`}
               {step === 'scored' && totalCards > 0 && `Connection ${cardIdx + 1} of ${totalCards}`}
@@ -305,6 +308,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
           {step === 'done' && (
             <div style={{ padding: 24 }}>
               <div style={{ textAlign: 'center', marginBottom: 24 }}>
+                <div style={{ fontSize: 10, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Avg score</div>
                 <div style={{ fontSize: 56, fontWeight: 900, color: scoreColor(avgScore), letterSpacing: -3, lineHeight: 1 }}>{avgScore}%</div>
                 <div style={{ fontSize: 14, color: D.textMuted, marginTop: 8 }}>
                   {avgScore >= 80 ? 'Strong relational understanding.' : avgScore >= 60 ? 'Decent grasp, a few connections to strengthen.' : 'Worth another pass on these relationships.'}

@@ -271,7 +271,7 @@ export default function AppShell({
               onMouseEnter={e => { if (!isBrainActive) e.currentTarget.style.color = TEXT }}
               onMouseLeave={e => { if (!isBrainActive) e.currentTarget.style.color = MUTED }}
             >
-              Brain Training
+              Study Tools
               {dueCount > 0 && (
                 <span style={{
                   fontSize: 10, fontWeight: 800, padding: '1px 6px', borderRadius: 999,
@@ -299,22 +299,6 @@ export default function AppShell({
                   <span style={{ fontSize: 13, color: TEXT, fontWeight: 600, flex: 1 }}>All Study Tools</span>
                 </button>
                 <div style={{ height: 1, background: BORDER, margin: '4px 0' }} />
-                <button
-                  onClick={() => { setOpenHub(null); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
-                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
-                >
-                  <svg width="14" height="14" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                    <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                  <span style={{ fontSize: 13, color: MUTED, fontWeight: 500, flex: 1 }}>Flashcards &amp; Quizzes</span>
-                  {dueCount > 0 && (
-                    <span style={{ fontSize: 10, fontWeight: 800, padding: '1px 5px', borderRadius: 999, background: '#EF4444', color: '#fff', lineHeight: 1.5 }}>
-                      {dueCount}
-                    </span>
-                  )}
-                </button>
                 <button
                   onClick={() => { setOpenHub(null); setActiveSection('diagrams') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
@@ -593,7 +577,7 @@ export default function AppShell({
                 <span style={{ position: 'absolute', top: -3, right: -5, width: 8, height: 8, borderRadius: '50%', background: '#EF4444', border: '1.5px solid #fff', display: 'block' }} />
               )}
             </div>
-            <span style={{ fontSize: 9, fontWeight: 500, color: (isBrainActive || mobileHub === 'brainTraining') ? ACCENT : MUTED }}>Training</span>
+            <span style={{ fontSize: 9, fontWeight: 500, color: (isBrainActive || mobileHub === 'brainTraining') ? ACCENT : MUTED }}>Tools</span>
           </button>
           {/* Account */}
           <button onClick={() => { setMobileHub(null); onNavigateToAccount?.() }}

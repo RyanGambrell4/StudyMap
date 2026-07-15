@@ -129,9 +129,11 @@ function QuizQuestion({ question, onAnswer }) {
                   'bg-white border-[#E5E5E5] text-slate-700 hover:border-[#3B61C4] hover:text-slate-900'
                 }`}
               >
-                {val ? 'True' : 'False'}
-                {showRight && ' ✓'}
-                {showWrong && ' ✗'}
+                <span className="flex items-center justify-between gap-2">
+                  <span>{val ? 'True' : 'False'}</span>
+                  {showRight && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                  {showWrong && <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>}
+                </span>
               </button>
             )
           })}
@@ -745,7 +747,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           },
           {
             label: 'Teach It Back',
-            desc: 'Explain a concept out loud. AI scores your accuracy and asks a follow-up.',
+            desc: 'Type out an explanation of any concept. AI scores your understanding and pushes back.',
             color: '#7C3AED',
             icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>,
             onClick: () => onOpenTeachItBack?.(),
@@ -790,7 +792,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             )}
 
             <h1 style={{ fontSize: 22, fontWeight: 800, color: '#111111', margin: '0 0 4px', letterSpacing: '-0.02em' }}>Study Tools</h1>
-            <p style={{ fontSize: 13.5, color: '#6B6B6B', margin: '0 0 22px' }}>Everything you need to learn faster and remember more.</p>
+            <p style={{ fontSize: 13.5, color: '#6B6B6B', margin: '0 0 22px' }}>Pick a tool, pick a topic, and go.</p>
 
             {recentSessions.length > 0 && (
               <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: '12px 14px', marginBottom: 20 }}>
@@ -1050,8 +1052,9 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             </button>
             {audioError && <p className="text-red-600 text-xs mt-1.5">{audioError}</p>}
             {audioFileName && !isTranscribingAudio && pastedText.length > 50 && (
-              <p style={{ fontSize: 11.5, color: '#16a34a', marginTop: 6 }}>
-                ✓ Transcribed: <strong>{audioFileName}</strong> — {pastedText.trim().split(/\s+/).length.toLocaleString()} words. Click &ldquo;Generate with AI&rdquo; below.
+              <p style={{ fontSize: 11.5, color: '#16a34a', marginTop: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Transcribed: <strong>{audioFileName}</strong> — {pastedText.trim().split(/\s+/).length.toLocaleString()} words. Click "Generate with AI" below.
               </p>
             )}
           </div>
@@ -1107,8 +1110,9 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             </div>
             {youtubeError && <p className="text-red-600 text-xs mt-1.5">{youtubeError}</p>}
             {youtubeTitle && !isImportingYoutube && (
-              <p style={{ fontSize: 11.5, color: '#16a34a', marginTop: 6 }}>
-                ✓ Imported: <strong>{youtubeTitle}</strong> — transcript ready. Click &ldquo;Generate with AI&rdquo; below.
+              <p style={{ fontSize: 11.5, color: '#16a34a', marginTop: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                Imported: <strong>{youtubeTitle}</strong> — transcript ready. Click "Generate with AI" below.
               </p>
             )}
           </div>
@@ -1619,8 +1623,9 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                     {quiz.map((q, i) => !answers[i] && (
                       <div key={i} style={{ background: 'rgba(239,68,68,0.05)', border: '1px solid rgba(239,68,68,0.2)', borderRadius: 12, padding: '12px 14px' }}>
                         <p style={{ fontSize: 13, fontWeight: 600, color: '#111111', marginBottom: 4 }}>{q.question}</p>
-                        <p style={{ fontSize: 12, color: '#16a34a', fontWeight: 500 }}>
-                          ✓ {typeof q.answer === 'boolean' ? (q.answer ? 'True' : 'False') : q.answer}
+                        <p style={{ fontSize: 12, color: '#16a34a', fontWeight: 500, display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                          {typeof q.answer === 'boolean' ? (q.answer ? 'True' : 'False') : q.answer}
                         </p>
                         {q.explanation && (
                           <p style={{ fontSize: 11.5, color: '#6B6B6B', marginTop: 4 }}>{q.explanation}</p>
