@@ -68,7 +68,7 @@ export default function StudyBuddyCard({ userId: propUserId }) {
     // Accept full URL or bare UUID
     const uuidMatch = code.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i)
     const buddyId = uuidMatch?.[0] ?? code
-    if (buddyId === userId) { setError("That's your own code — share it with a friend instead."); return }
+    if (buddyId === userId) { setError("That's your own code. Share it with a friend instead."); return }
     localStorage.setItem(BUDDY_STORAGE_KEY, buddyId)
     setLinkedBuddyId(buddyId)
     await fetchBuddyStats(buddyId)
@@ -204,7 +204,7 @@ export default function StudyBuddyCard({ userId: propUserId }) {
           {/* My invite link */}
           <div style={{ marginBottom: 14 }}>
             <p style={{ margin: '0 0 8px', fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.5 }}>
-              Share your link — when your buddy opens it, they can link to you automatically.
+              Share your link. When your buddy opens it, they can link to you automatically.
             </p>
             <div style={{ display: 'flex', gap: 8 }}>
               <div style={{ flex: 1, background: '#fff', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 8, padding: '9px 12px', fontSize: 11.5, color: '#9B9B9B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>

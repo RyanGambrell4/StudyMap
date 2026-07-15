@@ -1246,7 +1246,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                 {trialUsed ? 'Upgrade to Pro' : 'Start your 3-day free trial'}
               </div>
               <div style={{ fontSize: 12.5, color: D.textMuted, lineHeight: 1.55 }}>
-                Unlock unlimited Brain Dumps, Practice Exams, AI Tutor, and more — so every score shows up here.
+                Unlock unlimited Brain Dumps, Practice Exams, AI Tutor, and more so every score shows up here.
               </div>
             </div>
             <svg width="16" height="16" fill="none" stroke="#2563EB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginLeft: 16 }}>

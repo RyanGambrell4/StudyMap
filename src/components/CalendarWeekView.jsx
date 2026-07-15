@@ -447,7 +447,7 @@ export default function CalendarWeekView({
               }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{ color: '#9B6B1A', border: '1px solid rgba(217,119,6,0.25)', backgroundColor: 'rgba(217,119,6,0.06)' }}
-              title={plan === 'free' ? 'Pro feature — reschedule your entire week' : 'Push all sessions this week forward by 7 days'}
+              title={plan === 'free' ? 'Pro feature: reschedule your entire week' : 'Push all sessions this week forward by 7 days'}
             >
               <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />

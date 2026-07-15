@@ -70,7 +70,7 @@ const UNI_YEARS = [
 ]
 
 const EXAM_TIMELINES = [
-  { value: '1-3 months',  desc: 'Final push — test is close' },
+  { value: '1-3 months',  desc: 'Final push, test is close' },
   { value: '3-6 months',  desc: 'Building momentum' },
   { value: '6-12 months', desc: 'Long game, structured prep' },
   { value: '1 year+',     desc: 'Starting early, building deep' },
@@ -513,7 +513,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               <p style={{ fontSize: '0.8rem', color: '#8AABFF', fontWeight: 600, margin: 0 }}>
-                {courseName.trim() ? `All set — your ${courseName.trim()} plan is ready to build.` : 'All set — your personalised study plan is ready to build.'}
+                {courseName.trim() ? `All set. Your ${courseName.trim()} plan is ready to build.` : 'All set. Your personalised study plan is ready to build.'}
               </p>
             </div>
           )}
@@ -545,7 +545,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           >
             {allDone
               ? (courseName.trim() ? `Show me my ${courseName.trim()} plan →` : 'Show me my study plan →')
-              : `${answered} of 3 answered — keep going`}
+              : `${answered} of 3 answered - keep going`}
           </button>
 
           {/* ── Social proof ── */}
@@ -659,8 +659,8 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
                 <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>AI Study Coach</p>
                 <p style={{ color: 'rgba(255,255,255,.78)', fontSize: '0.82rem', lineHeight: 1.55 }}>
                   {daysToExam && trimmedCourse
-                    ? `"Your ${trimmedCourse} ${examWord} is in ${daysToExam} days. I've built ${timeLabel.toLowerCase()} sessions around what matters most — start your Blueprint today and you'll walk in ready."`
-                    : `"I've scheduled your ${timeLabel.toLowerCase()} sessions across all ${subjects.length} courses. Start with ${subjects[0]} first — it has the most material to cover."`}
+                    ? `"Your ${trimmedCourse} ${examWord} is in ${daysToExam} days. I've built ${timeLabel.toLowerCase()} sessions around what matters most. Start your Blueprint today and you'll walk in ready."`
+                    : `"I've scheduled your ${timeLabel.toLowerCase()} sessions across all ${subjects.length} courses. Start with ${subjects[0]} first. It has the most material to cover."`}
                 </p>
               </div>
             </div>
@@ -758,23 +758,23 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         </h1>
         <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.9rem', textAlign: 'center', marginBottom: 28, lineHeight: 1.65 }}>
           {step3DaysToExam && step3Course
-            ? `Every session between now and your ${step3ExamWord} — mapped out, optimized, and ready. Unlock it all with a 3-day free trial. No charge today.`
+            ? `Every session between now and your ${step3ExamWord}, mapped out, optimized, and ready. Unlock it all with a 3-day free trial. No charge today.`
             : schoolType === 'hs'
             ? 'Built for AP classes, finals, and everything between. See the difference in your first study session.'
             : schoolType === 'exam'
-            ? 'High-stakes prep, built around your real test date. See how much sharper your studying gets — before paying a cent.'
+            ? 'High-stakes prep, built around your real test date. See how much sharper your studying gets before paying a cent.'
             : schoolType === 'uni'
-            ? 'Your full semester — every course, every exam — finally organized. Full access, no restrictions.'
-            : 'Full access, no restrictions. See how much sharper you study — before paying a cent.'}
+            ? 'Your full semester, every course, every exam, finally organized. Full access, no restrictions.'
+            : 'Full access, no restrictions. See how much sharper you study before paying a cent.'}
         </p>
 
         {/* What unlocks with trial */}
         <div style={{ background: 'rgba(107,143,255,.07)', border: '1px solid rgba(107,143,255,.22)', borderRadius: 14, padding: '18px 20px', marginBottom: 16 }}>
           <p style={{ fontSize: 10, fontWeight: 700, color: '#6B8FFF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Everything unlocked with your 3-day trial</p>
           {[
-            '5 courses — plan your full semester',
+            '5 courses to plan your full semester',
             '100 AI tutor messages/month',
-            'AI Study Coach — week-by-week session plan',
+            'AI Study Coach with week-by-week session plan',
             'Unlimited Session Blueprints',
             'Unlimited Focus sessions (no 30-min cap)',
             'Practice exams, Brain Dumps, Exam Rescue',
@@ -785,7 +785,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             </div>
           ))}
           <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(107,143,255,.15)', fontSize: 11, color: 'rgba(255,255,255,.35)', lineHeight: 1.5 }}>
-            After 3 days, $2.99/wk. Cancel anytime — your card won't be charged today.
+            After 3 days, $2.99/wk. Cancel anytime. No charge today.
           </div>
         </div>
 

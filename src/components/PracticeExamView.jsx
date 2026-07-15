@@ -194,7 +194,7 @@ export default function PracticeExamView({ courses = [], onShowPaywall }) {
             {courses.length === 0 ? (
               <div style={{ padding: '18px 20px', background: 'rgba(59,97,196,0.04)', borderRadius: 10, border: '1px solid rgba(59,97,196,0.14)', borderLeft: '3px solid rgba(59,97,196,0.4)' }}>
                 <p style={{ margin: '0 0 4px', fontSize: 13.5, fontWeight: 700, color: D.text }}>Add a course to unlock practice exams</p>
-                <p style={{ margin: '0 0 8px', fontSize: 12.5, color: D.muted, lineHeight: 1.5 }}>Practice exams are the #1 predictor of real exam performance — students who take 3+ improve their scores significantly by targeting their actual weak spots.</p>
+                <p style={{ margin: '0 0 8px', fontSize: 12.5, color: D.muted, lineHeight: 1.5 }}>Practice exams are the #1 predictor of real exam performance. Students who take 3+ improve their scores significantly by targeting their actual weak spots.</p>
                 <p style={{ margin: 0, fontSize: 12, color: '#3B61C4', fontWeight: 600 }}>Go to Courses → add your first course to get started.</p>
               </div>
             ) : (() => {

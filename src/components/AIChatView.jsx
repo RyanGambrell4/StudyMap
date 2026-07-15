@@ -286,7 +286,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
                 `Explain the most important concept in ${courseName} that I need to master`,
                 `Quiz me on ${courseName} with 3 practice questions`,
                 `What should I focus on most to do well on my exam?`,
-                `I'm struggling — what's the best way to study ${courseName}?`,
+                `I'm struggling with ${courseName}. What's the best way to study it?`,
               ].map(prompt => (
                 <button
                   key={prompt}
@@ -402,7 +402,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       {isFree && (() => { const { remaining } = canUseFeature('aiTutor'); return remaining !== null && (
         <p style={{ fontSize: 12, marginBottom: 6, color: remaining <= 1 ? '#D97706' : '#9B9B9B', fontWeight: remaining <= 1 ? 600 : 400 }}>
           {remaining === 0
-            ? <>Out of free AI questions · <button onClick={() => onShowPaywall?.(paywallTrigger)} style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', cursor: 'pointer', color: 'inherit', fontSize: 'inherit', fontWeight: 'inherit' }}>{hasUsedTrial() ? 'Upgrade to Pro — 100/month' : 'Start free trial — 100/month'}</button></>
+            ? <>Out of free AI questions · <button onClick={() => onShowPaywall?.(paywallTrigger)} style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', cursor: 'pointer', color: 'inherit', fontSize: 'inherit', fontWeight: 'inherit' }}>{hasUsedTrial() ? 'Upgrade to Pro - 100/month' : 'Start free trial - 100/month'}</button></>
             : remaining === 1
             ? <>1 free AI question left · <button onClick={() => onShowPaywall?.(paywallTrigger)} style={{ background: 'none', border: 'none', padding: 0, textDecoration: 'underline', cursor: 'pointer', color: 'inherit', fontSize: 'inherit', fontWeight: 'inherit' }}>{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button></>
             : <>{remaining} free AI questions left · Pro gives you 100/month</>

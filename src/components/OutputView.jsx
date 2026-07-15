@@ -1252,7 +1252,7 @@ export default function OutputView({
               Your AI tutor is working.
             </h2>
             <p style={{ color: '#6B6B6B', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
-              You've used 1 of your 5 free AI questions. Pro gives you <strong style={{ color: '#3B61C4' }}>100 per month</strong> — enough to cover every course, all semester. {hasUsedTrial() ? '$2.99/wk.' : '3-day free trial, then $2.99/wk.'}
+              You've used 1 of your 5 free AI questions. Pro gives you <strong style={{ color: '#3B61C4' }}>100 per month</strong> - enough to cover every course, all semester. {hasUsedTrial() ? '$2.99/wk.' : '3-day free trial, then $2.99/wk.'}
             </p>
             <button
               onClick={() => {
@@ -1276,7 +1276,7 @@ export default function OutputView({
               }}
               style={{ background: 'none', border: 'none', color: '#9B9B9B', fontSize: 13, cursor: 'pointer' }}
             >
-              Continue — I still have 4 free questions left
+              Continue - I still have 4 free questions left
             </button>
           </div>
         </div>
@@ -1427,7 +1427,7 @@ export default function OutputView({
                   boxShadow: '0 4px 14px rgba(59,97,196,0.35)',
                 }}
               >
-                {hasUsedTrial() ? 'Upgrade to Pro — $2.99/wk' : 'Start free trial — 3 days free'}
+                {hasUsedTrial() ? 'Upgrade to Pro - $2.99/wk' : 'Start free trial - 3 days free'}
               </button>
               <button
                 onClick={() => { setShowPaywallAdaptModal(false); setPendingPaywallAdaptation(null) }}

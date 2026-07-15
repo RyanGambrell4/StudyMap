@@ -109,7 +109,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
             setText(prev => prev ? prev + ' ' + transcript : transcript)
           }
         } catch {
-          setError('Voice input failed — type your answer instead.')
+          setError('Voice input failed. Type your answer instead.')
         }
       })
       bdRecorderRef.current = recorder
@@ -133,7 +133,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
     setRunning(false)
     if (!text.trim()) {
       setStep('setup')
-      setError('Nothing to score — write something first, then submit.')
+      setError('Nothing to score. Write something first, then submit.')
       return
     }
     setStep('scoring')
