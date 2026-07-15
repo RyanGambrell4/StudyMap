@@ -183,14 +183,14 @@ function LockedState({ onShowPaywall }) {
             Track every assignment, run what-if scenarios, and see exactly what you need on your final to hit your target.
           </p>
           {!trialUsed && (
-            <p style={{ fontSize: 12, color: D.indigo, fontWeight: 600, margin: '8px auto 20px' }}>Try it free for 7 days — no commitment.</p>
+            <p style={{ fontSize: 12, color: D.indigo, fontWeight: 600, margin: '8px auto 20px' }}>Try it free for 3 days. No charge today.</p>
           )}
           {trialUsed && <div style={{ marginBottom: 20 }} />}
           <button
             onClick={() => onShowPaywall?.('grades')}
             style={{ width: '100%', padding: '12px 24px', background: '#3B61C4', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(59,97,196,0.35)' }}
           >
-            {trialUsed ? 'Upgrade to Pro' : 'Start 7-day free trial →'}
+            {trialUsed ? 'Upgrade to Pro' : 'Start 3-day free trial →'}
           </button>
         </div>
       </div>
