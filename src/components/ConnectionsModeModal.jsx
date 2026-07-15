@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { getCachedStudyTools } from '../lib/db'
+import { addStudySession } from '../lib/studyHistory'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -99,6 +100,9 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
 
   function nextCard() {
     if (cardIdx + 1 >= totalCards) {
+      const finalScores = [...scores]
+      const finalAvg = finalScores.length ? Math.round(finalScores.reduce((s, r) => s + r.score, 0) / finalScores.length) : 0
+      addStudySession({ tool: 'Connections', score: finalAvg, topic: null, courseName: course?.name || null })
       setStep('done')
     } else {
       setCardIdx(i => i + 1)

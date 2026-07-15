@@ -3,6 +3,7 @@ import Spinner from './ui/spinner'
 import imageCompression from 'browser-image-compression'
 import { extractText } from '../utils/extractText'
 import { getCachedStudyTools, getCachedCoachPlan, saveStudyTools } from '../lib/db'
+import { getToolSessionsThisWeek, getStudyHistory } from '../lib/studyHistory'
 import { sm2, sortCardsByDue, getDueCards } from '../lib/sm2'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, hasUsedTrial } from '../lib/subscription'
@@ -184,7 +185,7 @@ function QuizQuestion({ question, onAnswer }) {
 }
 
 // ── Main view ─────────────────────────────────────────────────────────────────
-export default function StudyToolsView({ courses, userId, onShowPaywall, onNavigateToCoach, learningStyle, onOpenCheatSheet, onOpenBrainDump, onOpenExamRescue, onOpenQuizBurst, onOpenPodcast, onOpenTeachItBack, onOpenConnectionsMode }) {
+export default function StudyToolsView({ courses, userId, onShowPaywall, onNavigateToCoach, learningStyle, onOpenCheatSheet, onOpenBrainDump, onOpenExamRescue, onOpenQuizBurst, onOpenPodcast, onOpenTeachItBack, onOpenConnectionsMode, onOpenTimeAttack, initialDrillTopic, onDrillTopicConsumed }) {
   const fileInputRef = useRef(null)
   const scanInputRef = useRef(null)
   const [dragging, setDragging] = useState(false)
@@ -277,6 +278,19 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       if (saved.fileLabel) setUploadedFile({ name: saved.fileLabel })
     }
   }, [])
+
+  // Auto-open drill when navigated here from another tool (e.g. Brain Dump → Drill the Gaps)
+  useEffect(() => {
+    if (!initialDrillTopic) return
+    setDrillTopic(initialDrillTopic)
+    setDrillQuiz([])
+    setDrillAnswers([])
+    setDrillDone(false)
+    setDrillQuestionIdx(0)
+    setDrillError('')
+    setMode('drill')
+    onDrillTopicConsumed?.()
+  }, [initialDrillTopic])
 
   // Timer effect - runs only in test mode during quiz
   useEffect(() => {
@@ -740,14 +754,24 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             onClick: () => onOpenConnectionsMode?.(),
             ...freeBadge('connectionsMode', '#059669'),
           },
+          {
+            label: 'Time Attack',
+            desc: '60 seconds. 14 questions. How many can you get right?',
+            color: '#EA580C',
+            icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/></svg>,
+            onClick: () => onOpenTimeAttack?.(),
+            badge: 'Speed Mode',
+            badgeColor: '#EA580C',
+          },
         ]
 
         const toolsByLabel = Object.fromEntries(tools.map(t => [t.label, t]))
         const contentReadyCount = [flashcards.length > 0, quiz.length > 0].filter(Boolean).length
+        const recentSessions = getStudyHistory().slice(-4).reverse()
         const hubSections = [
-          { id: 'quick', label: 'Quick Study', keys: ['Quiz Burst', 'Topic Drill', 'Brain Dump', 'Teach It Back'] },
+          { id: 'quick', label: 'Quick Practice', keys: ['Quiz Burst', 'Topic Drill', 'Teach It Back', 'Brain Dump', 'Time Attack', 'Connections'] },
           { id: 'materials', label: 'Study Materials', keys: ['Flashcards', 'Quizzes', 'AI Cheat Sheet'] },
-          { id: 'ai', label: 'AI-Powered', keys: ['Study Coach', 'Exam Rescue', 'Study Podcast', 'Connections'] },
+          { id: 'ai', label: 'Deep Work', keys: ['Study Coach', 'Exam Rescue', 'Study Podcast'] },
           { id: 'import', label: 'Import & Convert', keys: ['Lecture Audio', 'YouTube Lecture'] },
         ]
 
@@ -763,6 +787,40 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             <h1 style={{ fontSize: 22, fontWeight: 800, color: '#111111', margin: '0 0 4px', letterSpacing: '-0.02em' }}>Study Tools</h1>
             <p style={{ fontSize: 13.5, color: '#6B6B6B', margin: '0 0 22px' }}>Everything you need to learn faster and remember more.</p>
 
+            {recentSessions.length > 0 && (
+              <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: '12px 14px', marginBottom: 20 }}>
+                <p style={{ fontSize: 10.5, fontWeight: 700, color: '#9B9B9B', letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 10px' }}>Recent Activity</p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 7 }}>
+                  {recentSessions.map((s, i) => {
+                    const pct = s.score != null ? s.score : null
+                    const scoreColor = pct == null ? '#9B9B9B' : pct >= 80 ? '#16A34A' : pct >= 60 ? '#D97706' : '#DC2626'
+                    const when = (() => {
+                      const d = new Date(s.date)
+                      const now = new Date()
+                      const diffMs = now - d
+                      const diffH = Math.floor(diffMs / 36e5)
+                      if (diffH < 1) return 'just now'
+                      if (diffH < 24) return `${diffH}h ago`
+                      const diffD = Math.floor(diffMs / 864e5)
+                      return diffD === 1 ? 'yesterday' : `${diffD}d ago`
+                    })()
+                    return (
+                      <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, minWidth: 0 }}>
+                          <span style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', flexShrink: 0 }}>{s.tool}</span>
+                          {s.topic && <span style={{ fontSize: 11, color: '#9B9B9B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>· {s.topic}</span>}
+                        </div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+                          {pct != null && <span style={{ fontSize: 11, fontWeight: 700, color: scoreColor }}>{pct}%</span>}
+                          <span style={{ fontSize: 10.5, color: '#C4C4C4' }}>{when}</span>
+                        </div>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
             {hubSections.map(({ id, label, keys }) => {
               const sectionTools = keys.map(k => toolsByLabel[k]).filter(Boolean)
               return (
@@ -770,9 +828,10 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                   <p style={{ fontSize: 10.5, fontWeight: 700, color: '#9B9B9B', letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 8px' }}>{label}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                     {sectionTools.map(({ label: lbl, desc, color, icon, onClick, pro, badge, badgeColor }) => {
-                      const isNoNotes = badge === 'No notes needed' || badge === 'No upload needed'
+                      const isNoNotes = badge === 'No notes needed' || badge === 'No upload needed' || badge === 'Speed Mode'
                       const isProBadge = pro || badge === 'Unlimited'
                       const showCountBadge = badge && !isNoNotes && !isProBadge
+                      const weeklySessions = getToolSessionsThisWeek(lbl)
                       return (
                         <button
                           key={lbl}
@@ -794,12 +853,20 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                                 <span style={{ fontSize: 9.5, fontWeight: 700, padding: '1px 6px', borderRadius: 999, background: 'rgba(22,163,74,0.1)', color: '#16A34A', border: '1px solid rgba(22,163,74,0.25)', letterSpacing: '0.02em' }}>{badge}</span>
                               )}
                             </div>
-                            {isNoNotes && (
+                            {isNoNotes && badge !== 'Speed Mode' && (
                               <div style={{ marginBottom: 3 }}>
                                 <span style={{ fontSize: 10.5, fontWeight: 600, color: '#D97706' }}>No notes needed</span>
                               </div>
                             )}
+                            {badge === 'Speed Mode' && (
+                              <div style={{ marginBottom: 3 }}>
+                                <span style={{ fontSize: 10.5, fontWeight: 600, color: '#EA580C' }}>Speed Mode</span>
+                              </div>
+                            )}
                             <p style={{ margin: 0, fontSize: 11.5, color: '#6B6B6B', lineHeight: 1.4 }}>{desc}</p>
+                            {weeklySessions > 0 && (
+                              <p style={{ margin: '3px 0 0', fontSize: 10, color: '#9B9B9B', fontWeight: 500 }}>{weeklySessions}x this week</p>
+                            )}
                           </div>
                           <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 2 }}>
                             <path d="M9 5l7 7-7 7"/>

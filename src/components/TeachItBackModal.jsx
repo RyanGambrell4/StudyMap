@@ -1,6 +1,8 @@
 import { useState, useRef } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
+import { addWeakTopics } from '../lib/weakTopics'
+import { addStudySession } from '../lib/studyHistory'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -53,6 +55,8 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
       if (!res.ok) throw new Error(data.error ?? 'Failed')
       incrementAIQuery()
       incrementFeatureUsage('teachItBack')
+      addWeakTopics(data.missing ?? [])
+      addStudySession({ tool: 'Teach It Back', score: data.score, topic: topic.trim() || null, courseName: course?.name || null })
       setResult(data)
       setStep('result')
     } catch (e) {
@@ -297,15 +301,30 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
                     onClick={() => { setFollowUpAnswer(''); setStep('followup') }}
                     style={{ padding: '12px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(124,58,237,0.30)' }}
                   >
-                    Answer the follow-up
+                    {result.score < 80 ? 'Answer the follow-up to finish' : 'Answer the follow-up'}
                   </button>
                 )}
-                <button
-                  onClick={reset}
-                  style={{ padding: '11px', background: 'none', border: `1px solid ${D.border}`, borderRadius: 10, color: D.textMuted, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-                >
-                  Try another topic
-                </button>
+                {result.score >= 80 && (
+                  <button
+                    onClick={reset}
+                    style={{ padding: '11px', background: 'none', border: `1px solid ${D.border}`, borderRadius: 10, color: D.textMuted, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                  >
+                    Try another topic
+                  </button>
+                )}
+                {result.score < 80 && !result.followUp && (
+                  <button
+                    onClick={reset}
+                    style={{ padding: '11px', background: 'none', border: `1px solid ${D.border}`, borderRadius: 10, color: D.textMuted, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                  >
+                    Try another topic
+                  </button>
+                )}
+                {result.score < 80 && result.followUp && (
+                  <p style={{ margin: 0, textAlign: 'center', fontSize: 11.5, color: D.textDim }}>
+                    Answer the follow-up question to complete this session.
+                  </p>
+                )}
               </div>
             </div>
           )}

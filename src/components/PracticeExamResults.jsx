@@ -3,6 +3,7 @@ import { getActivePlan, canUseFeature, hasUsedTrial } from '../lib/subscription'
 import { getCachedPracticeExams } from '../lib/db'
 import { useCelebration } from '../utils/useCelebration'
 import { getAccessToken } from '../lib/supabase'
+import { addWeakTopics } from '../lib/weakTopics'
 
 function fmtMs(ms) {
   const total = Math.round(ms / 1000)
@@ -151,6 +152,10 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
       .sort((a, b) => (b[1].missed / b[1].total) - (a[1].missed / a[1].total))
       .slice(0, 5)
   }, [graded])
+
+  useEffect(() => {
+    if (weakTopics.length) addWeakTopics(weakTopics.map(([t]) => t))
+  }, [])
 
   const hasShortAnswer = graded.some(g => g.correct === null)
 
@@ -307,8 +312,21 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
         {/* Weak topics */}
         {weakTopics.length > 0 && (
           <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: 18 }}>
-            <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Weakest topics</p>
-            <div style={{ marginTop: 12, display: 'flex', flexDirection: 'column', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 12, flexWrap: 'wrap' }}>
+              <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Weakest topics</p>
+              <button
+                onClick={() => {
+                  const topicNames = weakTopics.map(([t]) => t)
+                  addWeakTopics(topicNames)
+                  window.dispatchEvent(new CustomEvent('studyedge:drill-topics', { detail: { topic: topicNames[0] } }))
+                }}
+                style={{ fontSize: 12, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.20)', borderRadius: 8, padding: '5px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
+              >
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Drill these topics
+              </button>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {weakTopics.map(([topic, s]) => (
                 <div key={topic} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
                   <span style={{ fontSize: 14, color: '#1A1A1A', fontWeight: 600 }}>{topic}</span>

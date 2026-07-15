@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
+import { addWeakTopics } from '../lib/weakTopics'
+import { addStudySession } from '../lib/studyHistory'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -111,6 +113,9 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
 
     setTimeout(() => {
       if (qIdx + 1 >= questions.length) {
+        const finalAnswers = [...answers, { correct: isCorrect, difficulty: q.difficulty, selected: opt }]
+        const finalScore = finalAnswers.filter(a => a.correct).length
+        addStudySession({ tool: 'Quiz Burst', score: Math.round((finalScore / questions.length) * 100), topic: topic.trim() || null, courseName: course?.name || null })
         setStep('done')
       } else {
         setQIdx(i => i + 1)
@@ -123,6 +128,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
   async function fetchRepair(questionIdx) {
     const q = questions[questionIdx]
     const ans = answers[questionIdx]
+    addWeakTopics([topic.trim() || q.difficulty || course?.name].filter(Boolean))
     setRepairs(prev => ({ ...prev, [questionIdx]: { loading: true } }))
     try {
       const token = await getAccessToken()
@@ -342,19 +348,28 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
         {step === 'done' && (
           <div style={{ padding: 24, overflowY: 'auto' }}>
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
-              <div style={{ fontSize: 48, fontWeight: 900, color: score >= 4 ? D.green : score >= 3 ? D.amber : D.red, letterSpacing: -2, lineHeight: 1 }}>
-                {score}/5
-              </div>
-              <div style={{ fontSize: 14, color: D.textMuted, marginTop: 8 }}>
-                {score === 5 ? 'Perfect score.' : score >= 4 ? 'Strong performance.' : score >= 3 ? 'Decent run, a few gaps to close.' : 'Worth a deeper review.'}
-              </div>
-              {maxStreak > 1 && (
-                <div style={{ fontSize: 12, color: '#F97316', marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><path d="M12 2s4 4 4 8a4 4 0 11-8 0c0-1 .5-2 1-3-1 2-4 4-4 8a7 7 0 1014 0c0-6-7-13-7-13z"/></svg>
-                  Best streak: {maxStreak}
-                </div>
-              )}
+              {(() => {
+                const pct = Math.round((score / (questions?.length || 5)) * 100)
+                const color = pct >= 80 ? D.green : pct >= 60 ? D.amber : D.red
+                return (
+                  <>
+                    <div style={{ fontSize: 56, fontWeight: 900, color, letterSpacing: -2, lineHeight: 1 }}>
+                      {pct}<span style={{ fontSize: 28, fontWeight: 700, color }}>%</span>
+                    </div>
+                    <div style={{ fontSize: 13, color: D.textDim, marginTop: 4, fontWeight: 500 }}>{score}/{questions?.length || 5} correct</div>
+                    <div style={{ fontSize: 14, color: D.textMuted, marginTop: 6 }}>
+                      {pct === 100 ? 'Perfect score.' : pct >= 80 ? 'Strong performance.' : pct >= 60 ? 'Decent run, a few gaps to close.' : 'Worth a deeper review.'}
+                    </div>
+                  </>
+                )
+              })()}
             </div>
+            {maxStreak > 1 && (
+              <div style={{ fontSize: 12, color: '#F97316', marginTop: 8, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 4 }}>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75"><path d="M12 2s4 4 4 8a4 4 0 11-8 0c0-1 .5-2 1-3-1 2-4 4-4 8a7 7 0 1014 0c0-6-7-13-7-13z"/></svg>
+                Best streak: {maxStreak}
+              </div>
+            )}
 
             {missedQuestions.length > 0 && (
               <div style={{ marginBottom: 20 }}>

@@ -3,6 +3,8 @@ import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { transcribeAudio, createRecorder } from '../lib/deepgram'
 import { getCachedStudyTools, saveStudyTools } from '../lib/db'
+import { addWeakTopics } from '../lib/weakTopics'
+import { addStudySession } from '../lib/studyHistory'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -49,7 +51,7 @@ function ScoreRing({ score }) {
   )
 }
 
-export default function BrainDumpModal({ courses, onClose, onShowPaywall }) {
+export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDrillGaps }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
@@ -150,6 +152,8 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall }) {
         if (!res.ok) throw new Error(data.error ?? 'Failed')
         incrementAIQuery()
         incrementFeatureUsage('brainDump')
+        addWeakTopics(data.possibleGaps ?? [])
+        addStudySession({ tool: 'Brain Dump', score: data.score, topic: topic.trim() || null, courseName: course?.name || null })
         setResult(data)
         setStep('result')
         setLoading(false)
@@ -499,6 +503,21 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall }) {
               </button>
             )}
 
+            {result.possibleGaps?.length > 0 && onDrillGaps && (
+              <button
+                onClick={() => onDrillGaps(result.possibleGaps[0])}
+                style={{
+                  width: '100%', padding: '11px', marginBottom: 10,
+                  background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.20)', borderRadius: 9,
+                  fontSize: 13, fontWeight: 700, color: D.red,
+                  cursor: 'pointer', fontFamily: 'inherit',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                Drill the Gaps
+              </button>
+            )}
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => { setStep('setup'); setResult(null); setText(''); setError(''); setCardsAdded(0) }} style={{ flex: 1, padding: '11px', background: D.bg, border: `1px solid ${D.borderStrong}`, borderRadius: 9, fontSize: 13, fontWeight: 600, color: D.textMuted, cursor: 'pointer', fontFamily: 'inherit' }}>
                 Run again

@@ -49,6 +49,7 @@ import QuickQuizBurst from './QuickQuizBurst'
 import PodcastGenerator from './PodcastGenerator'
 import TeachItBackModal from './TeachItBackModal'
 import ConnectionsModeModal from './ConnectionsModeModal'
+import TimedChallengeModal from './TimedChallengeModal'
 import SessionRatingModal from './SessionRatingModal'
 
 // ─── TutorView ────────────────────────────────────────────────────────────────
@@ -423,6 +424,8 @@ export default function OutputView({
   const [showPodcast, setShowPodcast] = useState(false)
   const [showTeachItBack, setShowTeachItBack] = useState(false)
   const [showConnectionsMode, setShowConnectionsMode] = useState(false)
+  const [showTimedChallenge, setShowTimedChallenge] = useState(false)
+  const [pendingDrillTopic, setPendingDrillTopic] = useState(null)
   const [ratingSession, setRatingSession] = useState(null) // session to rate after completion
 
   // ── First-query nudge listener ────────────────────────────────────────────────
@@ -434,6 +437,16 @@ export default function OutputView({
     }
     window.addEventListener('studyedge:ai-query-used', handler)
     return () => window.removeEventListener('studyedge:ai-query-used', handler)
+  }, [])
+
+  // ── Drill-topics event from PracticeExamResults ───────────────────────────────
+  useEffect(() => {
+    const handler = (e) => {
+      setPendingDrillTopic(e.detail?.topic ?? null)
+      setActiveSection('tools')
+    }
+    window.addEventListener('studyedge:drill-topics', handler)
+    return () => window.removeEventListener('studyedge:drill-topics', handler)
   }, [])
   // ─────────────────────────────────────────────────────────────────────────────
 
@@ -1847,6 +1860,9 @@ export default function OutputView({
             onOpenPodcast={() => setShowPodcast(true)}
             onOpenTeachItBack={() => setShowTeachItBack(true)}
             onOpenConnectionsMode={() => setShowConnectionsMode(true)}
+            onOpenTimeAttack={() => setShowTimedChallenge(true)}
+            initialDrillTopic={pendingDrillTopic}
+            onDrillTopicConsumed={() => setPendingDrillTopic(null)}
           />
         )}
 
@@ -2001,6 +2017,7 @@ export default function OutputView({
           userId={userId}
           onClose={() => setShowBrainDump(false)}
           onShowPaywall={onShowPaywall}
+          onDrillGaps={(topic) => { setShowBrainDump(false); setPendingDrillTopic(topic); setActiveSection('tools') }}
         />
       )}
       {showExamRescue && (
@@ -2039,6 +2056,14 @@ export default function OutputView({
         <ConnectionsModeModal
           courses={courses}
           onClose={() => setShowConnectionsMode(false)}
+          onShowPaywall={onShowPaywall}
+        />
+      )}
+      {showTimedChallenge && (
+        <TimedChallengeModal
+          courses={courses}
+          userId={userId}
+          onClose={() => setShowTimedChallenge(false)}
           onShowPaywall={onShowPaywall}
         />
       )}
