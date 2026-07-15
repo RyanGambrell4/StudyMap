@@ -137,9 +137,9 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
               {step === 'final' && (finalResult?.understood ? 'You got it.' : 'Keep reviewing.')}
             </div>
           </div>
-          {(step === 'setup' || step === 'result' || step === 'final') && (
-            <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 7, border: `1px solid ${D.border}`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: D.textDim, fontSize: 17 }}>x</button>
-          )}
+          <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 7, border: `1px solid ${D.border}`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: D.textMuted, flexShrink: 0 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
         </div>
 
         <div style={{ overflowY: 'auto', flex: 1 }}>

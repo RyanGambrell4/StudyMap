@@ -152,9 +152,9 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
               {step === 'done' && `Session complete · Avg ${avgScore}%`}
             </div>
           </div>
-          {(step === 'setup' || step === 'done') && (
-            <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 7, border: `1px solid ${D.border}`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: D.textDim, fontSize: 17 }}>x</button>
-          )}
+          <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 7, border: `1px solid ${D.border}`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: D.textMuted, flexShrink: 0 }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
           {(step === 'cards' || step === 'scored') && totalCards > 0 && (
             <div style={{ fontSize: 12, color: D.textDim, fontVariantNumeric: 'tabular-nums' }}>
               <div style={{ width: 80, height: 4, background: 'rgba(0,0,0,0.07)', borderRadius: 99, overflow: 'hidden' }}>

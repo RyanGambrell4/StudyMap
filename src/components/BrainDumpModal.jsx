@@ -120,6 +120,8 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
   }
 
   function startTimer() {
+    const { allowed: canBrainDump } = canUseFeature('brainDump')
+    if (!canBrainDump) { onShowPaywall?.('brainDump'); return }
     setTimeLeft(timerDuration)
     setRunning(true)
     setStep('timer')
@@ -133,8 +135,6 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
       setStep('setup')
       return
     }
-    const { allowed: canBrainDump } = canUseFeature('brainDump')
-    if (!canBrainDump) { onShowPaywall?.('brainDump'); return }
     setStep('scoring')
     setLoading(true)
     setError('')

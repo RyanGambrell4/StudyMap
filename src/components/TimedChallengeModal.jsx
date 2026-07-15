@@ -140,16 +140,17 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
     handleStart()
   }
 
-  // Save result and compute stats on entering 'done'
-  const doneStats = (() => {
-    if (step !== 'done' || !questions.length) return null
+  const doneStatsRef = useRef(null)
+  useEffect(() => {
+    if (step !== 'done' || !questions.length) return
     const correct = answers.filter(a => a.correct).length
     const total = answers.length
     const score = total > 0 ? Math.round((correct / total) * 100) : 0
     const isNewPB = savePB(courseKey, { score, correct, total, date: new Date().toISOString() })
     addStudySession({ tool: 'Time Attack', score, topic: topic.trim() || null, courseName: course?.name || null })
-    return { correct, total, score, isNewPB }
-  })()
+    doneStatsRef.current = { correct, total, score, isNewPB }
+  }, [step])
+  const doneStats = step === 'done' ? doneStatsRef.current : null
 
   const timerCritical = timeLeft <= 15 && step === 'active'
   const pctTime = (timeLeft / TOTAL_TIME) * 100
