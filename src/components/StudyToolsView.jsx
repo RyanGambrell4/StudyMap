@@ -1491,19 +1491,14 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 return (
                   <>
                     <div className="bg-white rounded-2xl p-8 text-center" style={{ border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                      <div className="w-20 h-20 rounded-full mx-auto mb-4 flex items-center justify-center text-3xl font-bold"
-                        style={{
-                          background: pct >= 80 ? 'rgba(22,163,74,0.1)' : pct >= 60 ? 'rgba(217,119,6,0.1)' : 'rgba(220,38,38,0.1)',
-                          border: `2px solid ${pct >= 80 ? '#16A34A' : pct >= 60 ? '#D97706' : '#DC2626'}`,
-                          color: pct >= 80 ? '#16A34A' : pct >= 60 ? '#D97706' : '#DC2626',
-                        }}
-                      >
-                        {s}/{t}
+                      <div style={{ fontSize: 58, fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, color: pct >= 80 ? '#16A34A' : pct >= 60 ? '#D97706' : '#DC2626', marginBottom: 4 }}>
+                        {pct}<span style={{ fontSize: 28, fontWeight: 700 }}>%</span>
                       </div>
-                      <h2 className="text-slate-900 text-xl font-bold mb-1">
-                        {pct >= 80 ? 'Solid understanding!' : pct >= 60 ? 'Getting there!' : 'Needs more work!'}
+                      <div style={{ fontSize: 13, color: '#6B6B6B', marginBottom: 8 }}>{s}/{t} correct</div>
+                      <h2 className="text-slate-900 text-lg font-bold mb-1">
+                        {pct >= 80 ? 'Solid understanding!' : pct >= 60 ? 'Getting there!' : 'Needs more work.'}
                       </h2>
-                      <p className="text-slate-600 text-sm">{pct}% on <span className="font-semibold text-slate-900">{drillTopic}</span></p>
+                      <p className="text-slate-500 text-sm">{drillTopic}</p>
                     </div>
                     <div className="space-y-2">
                       {drillQuiz.map((q, i) => (

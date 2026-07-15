@@ -1546,6 +1546,7 @@ export default function OutputView({
             onNavigateToGrades={(idx) => { setGradesCourseIdx(idx); setActiveSection('grades') }}
             onNavigateToTutor={(msg) => { if (msg) setTutorPrefill(msg); setActiveSection('tutor') }}
             onNavigateToTools={() => setActiveSection('tools')}
+            onDrillTopic={(topic) => { setPendingDrillTopic(topic); setActiveSection('tools') }}
             onShowPaywall={onShowPaywall}
             userEmail={userEmail}
             userId={userId}

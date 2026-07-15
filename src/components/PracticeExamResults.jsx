@@ -4,6 +4,7 @@ import { getCachedPracticeExams } from '../lib/db'
 import { useCelebration } from '../utils/useCelebration'
 import { getAccessToken } from '../lib/supabase'
 import { addWeakTopics } from '../lib/weakTopics'
+import { addStudySession } from '../lib/studyHistory'
 
 function fmtMs(ms) {
   const total = Math.round(ms / 1000)
@@ -155,6 +156,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
 
   useEffect(() => {
     if (weakTopics.length) addWeakTopics(weakTopics.map(([t]) => t))
+    addStudySession({ tool: 'Practice Exam', score: score ?? null, topic: null, courseName: courseName || null })
   }, [])
 
   const hasShortAnswer = graded.some(g => g.correct === null)

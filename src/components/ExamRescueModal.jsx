@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Spinner from './ui/spinner'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
+import { addStudySession } from '../lib/studyHistory'
 import { daysBetween } from '../utils/dateUtils'
 
 const D = {
@@ -75,6 +76,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
         if (!res.ok) throw new Error(data.error ?? 'Failed')
         incrementAIQuery()
         incrementFeatureUsage('examRescue')
+        addStudySession({ tool: 'Exam Rescue', score: null, topic: null, courseName: course?.name || null })
         setTopics(data.topics)
         setStep('topics')
         setLoading(false)

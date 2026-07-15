@@ -9,6 +9,7 @@ import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
 import { getActivePlan, canUseFeature, getFeatureUsage, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession, activateTrial } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import { daysBetween, formatShortDate } from '../utils/dateUtils'
+import { getWeakTopics } from '../lib/weakTopics'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
@@ -151,6 +152,7 @@ export default function DashboardView({
   onNavigateToGrades,
   onNavigateToTutor,
   onNavigateToTools,
+  onDrillTopic,
   onShowPaywall,
   userEmail,
   userId,
@@ -1540,39 +1542,80 @@ export default function DashboardView({
         </Card>
 
         {/* ── WEAK SPOTS (span 12) ── */}
-        {weakSpots.length > 0 && (
-          <Card glowColor={D.red} style={{ gridColumn: 'span 12', padding: '18px 20px 16px' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
-              <Label color={D.red}>Your weak spots</Label>
-              <span style={{ fontSize: 11.5, color: D.textDim }}>flagged by AI coach · practice to close the gap</span>
-            </div>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 10 }}>
-              {weakSpots.slice(0, 6).map(({ topic, courseName: cName }, i) => (
-                <div
-                  key={i}
-                  style={{
-                    background: `${D.red}07`, border: `1px solid ${D.red}18`,
-                    borderRadius: 10, padding: '12px 14px',
-                    display: 'flex', flexDirection: 'column', gap: 3,
-                  }}
-                >
-                  <div style={{ fontSize: 13, fontWeight: 600, color: D.text, lineHeight: 1.3 }}>{topic}</div>
-                  <div style={{ fontSize: 11.5, color: D.textDim, marginBottom: 6 }}>{cName}</div>
-                  <button
-                    onClick={() => onNavigateToTutor?.(`I need help with ${topic} — I've been getting this wrong in my ${cName} quizzes. Can you quiz me on it and explain what I'm missing?`)}
+        {(() => {
+          const toolWeakTopics = getWeakTopics()
+          const hasAny = weakSpots.length > 0 || toolWeakTopics.length > 0
+          if (!hasAny) return null
+          return (
+            <Card glowColor={D.red} style={{ gridColumn: 'span 12', padding: '18px 20px 16px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14 }}>
+                <Label color={D.red}>Your weak spots</Label>
+                <span style={{ fontSize: 11.5, color: D.textDim }}>identified from your study sessions · practice to close the gap</span>
+              </div>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: 10 }}>
+                {weakSpots.slice(0, 4).map(({ topic, courseName: cName }, i) => (
+                  <div
+                    key={`coach-${i}`}
                     style={{
-                      fontSize: 11.5, fontWeight: 700, color: D.red,
-                      background: 'none', border: 'none', cursor: 'pointer',
-                      padding: 0, textAlign: 'left',
+                      background: `${D.red}07`, border: `1px solid ${D.red}18`,
+                      borderRadius: 10, padding: '12px 14px',
+                      display: 'flex', flexDirection: 'column', gap: 3,
                     }}
                   >
-                    Practice with AI Coach →
-                  </button>
-                </div>
-              ))}
-            </div>
-          </Card>
-        )}
+                    <div style={{ fontSize: 10, fontWeight: 700, color: D.red, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>AI Coach</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: D.text, lineHeight: 1.3 }}>{topic}</div>
+                    <div style={{ fontSize: 11.5, color: D.textDim, marginBottom: 6 }}>{cName}</div>
+                    <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                      <button
+                        onClick={() => onDrillTopic?.(topic)}
+                        style={{
+                          fontSize: 11.5, fontWeight: 700, color: D.blue,
+                          background: 'none', border: 'none', cursor: 'pointer',
+                          padding: 0, textAlign: 'left',
+                        }}
+                      >
+                        Drill →
+                      </button>
+                      <button
+                        onClick={() => onNavigateToTutor?.(`I need help with ${topic} — I've been getting this wrong in my ${cName} quizzes. Can you quiz me on it and explain what I'm missing?`)}
+                        style={{
+                          fontSize: 11.5, fontWeight: 700, color: D.red,
+                          background: 'none', border: 'none', cursor: 'pointer',
+                          padding: 0, textAlign: 'left',
+                        }}
+                      >
+                        Ask Coach →
+                      </button>
+                    </div>
+                  </div>
+                ))}
+                {toolWeakTopics.slice(0, 6 - Math.min(weakSpots.length, 4)).map((topic, i) => (
+                  <div
+                    key={`tool-${i}`}
+                    style={{
+                      background: `${D.red}07`, border: `1px solid ${D.red}18`,
+                      borderRadius: 10, padding: '12px 14px',
+                      display: 'flex', flexDirection: 'column', gap: 3,
+                    }}
+                  >
+                    <div style={{ fontSize: 10, fontWeight: 700, color: '#D97706', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Study Tools</div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: D.text, lineHeight: 1.3 }}>{topic}</div>
+                    <button
+                      onClick={() => onDrillTopic?.(topic)}
+                      style={{
+                        fontSize: 11.5, fontWeight: 700, color: D.blue,
+                        background: 'none', border: 'none', cursor: 'pointer',
+                        padding: 0, textAlign: 'left', marginTop: 6,
+                      }}
+                    >
+                      Drill →
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </Card>
+          )
+        })()}
 
         {/* ── COURSES (span 6) ── */}
         <Card glowColor={D.blue} style={{ gridColumn: 'span 6', padding: '20px 0' }} onClick={onNavigateToCourses}>

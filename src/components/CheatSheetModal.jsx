@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Spinner from './ui/spinner'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, hasUsedTrial } from '../lib/subscription'
+import { addStudySession } from '../lib/studyHistory'
 
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
@@ -71,6 +72,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall }) {
         const data = await res.json()
         if (!res.ok) throw new Error(data.error ?? 'Failed')
         incrementAIQuery()
+        addStudySession({ tool: 'AI Cheat Sheet', score: null, topic: examPrompt.trim() || null, courseName: course?.name || null })
         setResult(data)
         setStep('result')
         setLoading(false)
@@ -129,8 +131,8 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall }) {
             <div style={{ fontSize: 16, fontWeight: 700, color: D.text, letterSpacing: -0.3 }}>AI Cheat Sheet</div>
             <div style={{ fontSize: 12, color: D.textMuted, marginTop: 1 }}>10 most likely exam topics, ranked by priority</div>
           </div>
-          <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${D.border}`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: D.textDim, fontSize: 18, lineHeight: 1 }}>
-            x
+          <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${D.border}`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: D.textDim }}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
           </button>
         </div>
 
