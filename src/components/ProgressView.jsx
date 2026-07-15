@@ -803,7 +803,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                           onClick={() => setPracticeScores(prev => prev.filter(s => s.id !== entries[entries.length - 1].id))}
                           style={{ fontSize: 10, color: D.textDim, background: 'none', border: 'none', cursor: 'pointer', padding: '4px 6px' }}
                           title="Remove last entry"
-                        >✕ last</button>
+                        >Remove last</button>
                       </div>
                     )}
                   </div>

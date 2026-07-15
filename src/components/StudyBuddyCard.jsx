@@ -155,7 +155,10 @@ export default function StudyBuddyCard({ userId: propUserId }) {
                     </p>
                   </div>
                   <div style={{ textAlign: 'right' }}>
-                    <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: buddy.streak > 0 ? '#F97316' : '#9B9B9B', letterSpacing: -0.5 }}>🔥 {buddy.streak}</p>
+                    <p style={{ margin: 0, fontSize: 22, fontWeight: 800, color: buddy.streak > 0 ? '#F97316' : '#9B9B9B', letterSpacing: -0.5, display: 'flex', alignItems: 'center', gap: 4, justifyContent: 'flex-end' }}>
+                      {buddy.streak > 0 && <svg width="18" height="18" viewBox="0 0 24 24" fill="#F97316" stroke="none"><path d="M17.66 11.2c-.23-.3-.51-.56-.77-.82-.67-.6-1.43-1.03-2.07-1.66C13.33 7.26 13 4.85 13.95 3c-.95.23-1.78.75-2.49 1.32-2.59 2.11-3.66 5.65-2.37 8.83.04.1.08.2.08.33 0 .22-.15.42-.35.5-.23.1-.47.04-.66-.12a.58.58 0 01-.14-.17c-1.13-1.43-1.31-3.48-.55-5.12C5.78 9 4.87 10.3 4 11.19c-1.17 1.2-1.78 2.95-1.7 4.7.08 1.5.56 2.99 1.45 4.2 1.28 1.79 3.29 2.92 5.45 3.06 2.28.15 4.59-.5 6.19-2.1 1.65-1.66 2.33-4 1.7-6.2l-.13-.47c-.19-.77-.35-1.57-.4-2.38.21.2.42.42.59.68.31.49.52 1.05.62 1.62.3 1.72-.05 3.62-1.3 4.93z"/></svg>}
+                      {buddy.streak}
+                    </p>
                     <p style={{ margin: 0, fontSize: 11, color: '#9B9B9B' }}>day streak</p>
                   </div>
                 </div>
@@ -187,7 +190,7 @@ export default function StudyBuddyCard({ userId: propUserId }) {
                   opacity: nudging ? 0.7 : 1, fontFamily: 'inherit', transition: 'all 0.2s',
                 }}
               >
-                {nudgeSent ? '✓ Nudge sent!' : nudging ? 'Sending…' : `👊 Nudge ${buddy.displayName}`}
+                {nudgeSent ? '✓ Nudge sent!' : nudging ? 'Sending…' : `Nudge ${buddy.displayName}`}
               </button>
               {error && <p style={{ fontSize: 12, color: '#DC2626', marginTop: 6, textAlign: 'center' }}>{error}</p>}
             </div>

@@ -163,7 +163,7 @@ function generatePDF({ courseName, dateStr, sessionType, recallText, concepts, m
       const col = COLS[i % COLS.length]
       return `<g><rect x="${x}" y="${90-h}" width="${bw}" height="${h}" rx="4" fill="${col}" opacity="0.88"/><text x="${x+bw/2}" y="106" text-anchor="middle" font-size="7.5" fill="#6b7280" font-family="system-ui,sans-serif">${esc(label)}</text></g>`
     }).join('')
-    return `<div class="chart-wrap"><div class="chart-ttl">📊 Concepts Covered This Session</div><svg width="490" height="118" viewBox="0 0 490 118" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="6" x2="10" y2="90" stroke="#e5e7eb" stroke-width="1"/><line x1="10" y1="90" x2="485" y2="90" stroke="#e5e7eb" stroke-width="1"/>${bars}</svg></div>`
+    return `<div class="chart-wrap"><div class="chart-ttl">Concepts Covered This Session</div><svg width="490" height="118" viewBox="0 0 490 118" xmlns="http://www.w3.org/2000/svg"><line x1="10" y1="6" x2="10" y2="90" stroke="#e5e7eb" stroke-width="1"/><line x1="10" y1="90" x2="485" y2="90" stroke="#e5e7eb" stroke-width="1"/>${bars}</svg></div>`
   }
 
   // ── Concept cards (color-coded, visual) ────────────────────────────────────
@@ -355,7 +355,7 @@ tr.odd td{background:#f9fafb}
 ${recallText?.trim() ? `
 <div class="sec">
   <div class="sec-hdr">
-    <div class="sec-icon" style="background:rgba(249,115,22,0.1)">✍️</div>
+    <div class="sec-icon" style="background:rgba(249,115,22,0.1)"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#f97316" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 013 3L7 19l-4 1 1-4L16.5 3.5z"/></svg></div>
     <div class="sec-label" style="color:#f97316">Active Recall</div>
     <div class="sec-rule" style="background:#f97316"></div>
   </div>

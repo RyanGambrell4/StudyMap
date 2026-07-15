@@ -569,7 +569,8 @@ function TrackTab({ course, gradeData, dot, onSave }) {
           </div>
           {needed.impossible ? (
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 999, background: 'rgba(244,114,182,0.12)', border: '1px solid rgba(244,114,182,0.3)', color: D.pink, fontSize: 13, fontWeight: 600 }}>
-              ✕ Target no longer reachable
+              <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0,marginRight:6}}><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+              Target no longer reachable
             </div>
           ) : needed.needed !== null && needed.needed > 90 ? (
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 999, background: 'rgba(249,115,22,0.12)', border: '1px solid rgba(249,115,22,0.3)', color: D.orange, fontSize: 13, fontWeight: 600 }}>

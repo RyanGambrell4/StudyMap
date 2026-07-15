@@ -20,7 +20,9 @@ export default function SharedPlanView() {
         backgroundColor: '#F8FAFC', fontFamily: "'Inter', system-ui, sans-serif",
         gap: 12,
       }}>
-        <div style={{ fontSize: 40 }}>🔗</div>
+        <div style={{ width: 56, height: 56, borderRadius: 14, background: '#EEF2FF', border: '1px solid #C7D2FE', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#6366F1" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71"/></svg>
+        </div>
         <h1 style={{ fontSize: 20, fontWeight: 700, color: '#111111', margin: 0 }}>Invalid or expired link</h1>
         <p style={{ fontSize: 14, color: '#64748B', margin: 0 }}>This study plan link couldn't be decoded.</p>
         <a href="/" style={{
@@ -77,7 +79,8 @@ export default function SharedPlanView() {
             borderRadius: 999, padding: '4px 12px', marginBottom: 14,
             fontSize: 12, fontWeight: 600, color: '#6366F1',
           }}>
-            📋 Shared Study Plan
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{marginRight:4}}><path d="M16 4h2a2 2 0 012 2v14a2 2 0 01-2 2H6a2 2 0 01-2-2V6a2 2 0 012-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+            Shared Study Plan
           </div>
           <h1 style={{ fontSize: 22, fontWeight: 800, color: '#111111', margin: '0 0 8px', letterSpacing: '-0.3px' }}>
             {courseName}

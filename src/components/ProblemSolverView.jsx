@@ -188,7 +188,7 @@ function SolutionView({ solution, onBack }) {
                     textAlign: 'center', userSelect: 'none'
                   }}
                 >
-                  Step {step.number}: {step.action} — tap to reveal
+                  Step {step.number}: {step.action} - tap to reveal
                 </div>
               ) : (
                 <StepCard step={step} />

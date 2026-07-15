@@ -1129,7 +1129,8 @@ export default function DashboardView({
                   }}
                   style={{ background: '#FFFFFF', border: '1.5px solid #F97316', borderRadius: 8, padding: '7px 14px', fontSize: 12, fontWeight: 700, color: '#F97316', cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5 }}
                 >
-                  🧊 Use Freeze ({freezeCount})
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="2" x2="12" y2="22"/><path d="M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                  Use Freeze ({freezeCount})
                 </button>
               )}
               <button
@@ -1160,7 +1161,9 @@ export default function DashboardView({
             borderRadius: 10, padding: '12px 16px',
             display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
           }}>
-            <span style={{ fontSize: 20, flexShrink: 0 }}>🔔</span>
+            <div style={{ flexShrink: 0, width: 32, height: 32, background: 'rgba(107,143,255,0.12)', border: '1px solid rgba(107,143,255,0.25)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+            </div>
             <div style={{ flex: 1, minWidth: 180 }}>
               <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#1e3a5f' }}>
                 Never miss a study session

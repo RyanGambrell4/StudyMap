@@ -43,10 +43,16 @@ const TIME_OPTIONS = [
   { value: 'Evening',   label: 'Evening',   desc: 'Night mode. Deep work after dark.' },
 ]
 
+const SCHOOL_ICONS = {
+  hs:   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10v6M2 10l10-5 10 5-10 5z"/><path d="M6 12v5c3 3 9 3 12 0v-5"/></svg>,
+  uni:  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>,
+  exam: <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 00-2-2h-4a2 2 0 00-2 2v16"/></svg>,
+}
+
 const SCHOOL_OPTIONS = [
-  { key: 'hs',   label: 'High School',       emoji: '🎒', desc: 'AP classes, finals, juggling everything.' },
-  { key: 'uni',  label: 'University',        emoji: '🎓', desc: 'Lectures, labs, deadlines — somehow a social life too.' },
-  { key: 'exam', label: 'Professional Exam', emoji: '💼', desc: 'MCAT, LSAT, CPA, Bar, GRE, GMAT — high stakes.' },
+  { key: 'hs',   label: 'High School',       desc: 'AP classes, finals, juggling everything.' },
+  { key: 'uni',  label: 'University',        desc: 'Lectures, labs, deadlines - somehow a social life too.' },
+  { key: 'exam', label: 'Professional Exam', desc: 'MCAT, LSAT, CPA, Bar, GRE, GMAT - high stakes.' },
 ]
 
 const HS_YEARS = [
@@ -335,7 +341,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             01 · What are you studying for?
           </p>
           <div className="ob-school-grid" style={{ marginBottom: schoolType ? 12 : 28 }}>
-            {SCHOOL_OPTIONS.map(({ key, label, emoji, desc }) => {
+            {SCHOOL_OPTIONS.map(({ key, label, desc }) => {
               const sel = schoolType === key
               const c   = SCHOOL_COLORS[key]
               return (
@@ -357,7 +363,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
                   onMouseLeave={e => { if (!sel) e.currentTarget.style.background = 'rgba(255,255,255,.04)' }}
                 >
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                    <span style={{ fontSize: '1.25rem', lineHeight: 1.1, marginTop: 1 }}>{emoji}</span>
+                    <div style={{ flexShrink: 0, color: sel ? c.accent : 'rgba(255,255,255,0.65)', marginTop: 2, transition: 'color .2s' }}>{SCHOOL_ICONS[key]}</div>
                     <div>
                       <p style={{ color: sel ? c.accent : 'rgba(255,255,255,.88)', fontSize: '0.91rem', fontWeight: 700, letterSpacing: '-0.3px', marginBottom: 3, transition: 'color .2s' }}>{label}</p>
                       <p style={{ color: 'rgba(255,255,255,.32)', fontSize: '0.74rem', lineHeight: 1.45 }}>{desc}</p>
@@ -445,13 +451,13 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             <div className="ob-year-reveal" style={{ marginBottom: 24 }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.06)' }} />
-                <p style={{ color: 'rgba(255,255,255,.2)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>✨ Make it personal (optional)</p>
+                <p style={{ color: 'rgba(255,255,255,.2)', fontSize: '0.65rem', fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', whiteSpace: 'nowrap' }}>Make it personal (optional)</p>
                 <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,.06)' }} />
               </div>
 
               <div style={{ marginBottom: 10 }}>
                 <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>
-                  📚 Main subject or exam name?
+                  Main subject or exam name?
                 </p>
                 <input
                   type="text"
@@ -471,7 +477,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
               <div>
                 <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.12em', marginBottom: 8 }}>
-                  📅 When's your exam or deadline?
+                  When's your exam or deadline?
                 </p>
                 <input
                   type="date"
@@ -616,7 +622,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
           {/* Week schedule preview */}
           <div style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 14, padding: '16px 18px', marginBottom: 12, animation: 'fade-up 0.35s ease both' }}>
-            <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>📅 This Week's Sessions</p>
+            <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>This Week's Sessions</p>
             <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
               {['M','T','W','T','F'].map((d, i) => {
                 const active = [0,1,3,4].includes(i)
@@ -633,7 +639,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
           {/* Courses preview */}
           <div style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 14, padding: '16px 18px', marginBottom: 12, animation: 'fade-up 0.35s ease 0.08s both' }}>
-            <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>📚 Your Courses</p>
+            <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Your Courses</p>
             {subjects.map((s, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: i < subjects.length - 1 ? 10 : 0 }}>
                 <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: ['#6B8FFF','#A78BFA','#34D399'][i] }} />
@@ -646,7 +652,9 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           {/* AI Coach bubble */}
           <div style={{ background: 'rgba(107,143,255,.07)', border: '1px solid rgba(107,143,255,.2)', borderRadius: 14, padding: '14px 16px', marginBottom: 20, animation: 'fade-up 0.35s ease 0.16s both' }}>
             <div style={{ display: 'flex', gap: 10 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #3B61C4, #7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8rem', flexShrink: 0 }}>🤖</div>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #3B61C4, #7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/><line x1="12" y1="4" x2="12" y2="2"/><circle cx="12" cy="2" r="1" fill="rgba(255,255,255,0.9)" stroke="none"/></svg>
+              </div>
               <div>
                 <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>AI Study Coach</p>
                 <p style={{ color: 'rgba(255,255,255,.78)', fontSize: '0.82rem', lineHeight: 1.55 }}>
@@ -729,7 +737,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         <div style={{ textAlign: 'center', marginBottom: 18 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.30)', borderRadius: 999, padding: '6px 18px', fontSize: 11, fontWeight: 700, color: '#34D399', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
             <span style={{ display: 'inline-block', width: 7, height: 7, background: '#34D399', borderRadius: '50%', animation: 'ob-glow-pulse 1.8s ease-in-out infinite' }} />
-            7-day free trial · $0 today · cancel anytime
+            3-day free trial · $0 today · cancel anytime
           </div>
         </div>
 
@@ -745,12 +753,12 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             </span>
           )}
           <span style={{ display: 'block', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(135deg, #6B8FFF, #A78BFA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-            {step3DaysToExam && step3Course ? "Here's your plan. Free for 7 days." : 'Free for 7 days.'}
+            {step3DaysToExam && step3Course ? "Here's your plan. Free for 3 days." : 'Free for 3 days.'}
           </span>
         </h1>
         <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.9rem', textAlign: 'center', marginBottom: 28, lineHeight: 1.65 }}>
           {step3DaysToExam && step3Course
-            ? `Every session between now and your ${step3ExamWord} — mapped out, optimized, and ready. Unlock it all with a 7-day free trial. No charge today.`
+            ? `Every session between now and your ${step3ExamWord} — mapped out, optimized, and ready. Unlock it all with a 3-day free trial. No charge today.`
             : schoolType === 'hs'
             ? 'Built for AP classes, finals, and everything between. See the difference in your first study session.'
             : schoolType === 'exam'
@@ -762,22 +770,22 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
         {/* What unlocks with trial */}
         <div style={{ background: 'rgba(107,143,255,.07)', border: '1px solid rgba(107,143,255,.22)', borderRadius: 14, padding: '18px 20px', marginBottom: 16 }}>
-          <p style={{ fontSize: 10, fontWeight: 700, color: '#6B8FFF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Everything unlocked with your 7-day trial</p>
+          <p style={{ fontSize: 10, fontWeight: 700, color: '#6B8FFF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Everything unlocked with your 3-day trial</p>
           {[
-            { text: '5 courses — plan your full semester', icon: '📚' },
-            { text: '100 AI tutor messages/month', icon: '🤖' },
-            { text: 'AI Study Coach — week-by-week session plan', icon: '🗓' },
-            { text: 'Unlimited Session Blueprints', icon: '⚡' },
-            { text: 'Unlimited Focus sessions (no 30-min cap)', icon: '🎯' },
-            { text: 'Practice exams, Brain Dumps, Exam Rescue', icon: '📝' },
-          ].map(({ text, icon }) => (
+            '5 courses — plan your full semester',
+            '100 AI tutor messages/month',
+            'AI Study Coach — week-by-week session plan',
+            'Unlimited Session Blueprints',
+            'Unlimited Focus sessions (no 30-min cap)',
+            'Practice exams, Brain Dumps, Exam Rescue',
+          ].map(text => (
             <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 9 }}>
-              <span style={{ fontSize: 14, flexShrink: 0, lineHeight: 1 }}>{icon}</span>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B8FFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
               <span style={{ fontSize: 12, color: 'rgba(255,255,255,.82)', lineHeight: 1.4 }}>{text}</span>
             </div>
           ))}
           <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(107,143,255,.15)', fontSize: 11, color: 'rgba(255,255,255,.35)', lineHeight: 1.5 }}>
-            After 7 days, $2.99/wk. Cancel before day 8 — your card won't be charged.
+            After 3 days, $2.99/wk. Cancel anytime — your card won't be charged today.
           </div>
         </div>
 
@@ -827,11 +835,11 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.transform = 'scale(1.01)' }}
           onMouseLeave={e => { if (!trialLoading) e.currentTarget.style.transform = 'scale(1)' }}
         >
-          {trialLoading ? 'Loading…' : 'Start 7-day free trial →'}
+          {trialLoading ? 'Loading…' : 'Start 3-day free trial →'}
         </button>
 
         <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.25)', fontSize: '0.71rem', marginBottom: 18 }}>
-          Card required · $2.99/wk after 7 days · Cancel anytime in account
+          Card required · $2.99/wk after 3 days · Cancel anytime in account
         </p>
 
         {/* Skip — low-prominence, copy reminds them what they're giving up */}

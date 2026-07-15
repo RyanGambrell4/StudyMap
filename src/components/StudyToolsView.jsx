@@ -1369,7 +1369,9 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           {/* End of deck */}
           {cardIdx === flashcards.length - 1 && (
             <div className="bg-white border border-[#E5E5E5] rounded-2xl px-5 py-5 text-center" style={{ boxShadow: '0 0 0 2px rgba(249,115,22,0.15)' }}>
-              <div style={{ fontSize: 36, marginBottom: 6 }}>🎉</div>
+              <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px' }}>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              </div>
               <p className="text-slate-800 font-bold text-base mb-1">Deck complete!</p>
               <p className="text-[#6B6B6B] text-xs mb-3">{knownSet.size} known · {almostSet.size} almost · {reviewSet.size} to review</p>
               <div className="flex gap-3 justify-center">
