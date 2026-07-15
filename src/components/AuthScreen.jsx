@@ -206,16 +206,7 @@ export default function AuthScreen({ initialMode, onBack }) {
             {mode === 'login' ? 'Sign in to access your study plans.' : mode === 'signup' ? 'Tell us what you\'re studying. We\'ll build the rest.' : "We'll send a reset link to your email."}
           </p>
 
-          {/* Plan context banner */}
-          {mode === 'signup' && planContext && (
-            <div style={{
-              backgroundColor: 'rgba(59,97,196,0.07)', border: '1px solid rgba(59,97,196,0.2)',
-              borderRadius: 12, padding: '12px 16px', marginBottom: 20, textAlign: 'center',
-            }}>
-              <p style={{ margin: '0 0 3px', fontSize: 13, fontWeight: 600, color: '#3B61C4' }}>{planContext.text}</p>
-              <p style={{ margin: 0, fontSize: 12, color: '#6B6B6B' }}>{planContext.sub}</p>
-            </div>
-          )}
+
           {mode === 'signup' && !planContext && (
             <div style={{
               backgroundColor: 'rgba(5,150,105,0.06)', border: '1px solid rgba(5,150,105,0.2)',
