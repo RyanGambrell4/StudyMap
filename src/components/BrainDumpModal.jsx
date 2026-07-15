@@ -234,7 +234,9 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
             <div style={{ fontSize: 12, color: D.textMuted, marginTop: 1 }}>Write everything you know. Get your readiness score.</div>
           </div>
           {step !== 'timer' && (
-            <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${D.border}`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: D.textDim, fontSize: 18, lineHeight: 1 }}>x</button>
+            <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${D.border}`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: D.textMuted }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
           )}
         </div>
 

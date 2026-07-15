@@ -146,7 +146,9 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
             <div style={{ fontSize: 16, fontWeight: 700, color: D.text, letterSpacing: -0.3 }}>Exam Rescue Plan</div>
             <div style={{ fontSize: 12, color: D.textMuted, marginTop: 1 }}>Ranked topics and an hour-by-hour schedule</div>
           </div>
-          <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${D.border}`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: D.textDim, fontSize: 18, lineHeight: 1 }}>x</button>
+          <button onClick={onClose} style={{ width: 30, height: 30, borderRadius: 8, border: `1px solid ${D.border}`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: D.textMuted }}>
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+          </button>
         </div>
 
         {/* Setup */}

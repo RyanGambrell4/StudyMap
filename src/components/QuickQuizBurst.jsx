@@ -200,7 +200,9 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
             </div>
           )}
           {step !== 'quiz' && (
-            <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 7, border: `1px solid ${D.border}`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: D.textDim, fontSize: 17, lineHeight: 1 }}>x</button>
+            <button onClick={onClose} style={{ width: 28, height: 28, borderRadius: 7, border: `1px solid ${D.border}`, background: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: D.textMuted }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
           )}
         </div>
 
@@ -328,9 +330,11 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                       fontFamily: 'inherit',
                     }}
                   >
-                    {opt}
-                    {showRight && ' ✓'}
-                    {showWrong && ' ✕'}
+                    <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8 }}>
+                      <span>{opt}</span>
+                      {showRight && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>}
+                      {showWrong && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M18 6L6 18M6 6l12 12"/></svg>}
+                    </span>
                   </button>
                 )
               })}
@@ -434,7 +438,11 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                                           transition: 'all 0.15s',
                                         }}
                                       >
-                                        {opt}{showRight ? ' ✓' : showWrong ? ' ✕' : ''}
+                                        <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                                          <span>{opt}</span>
+                                          {showRight && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>}
+                                          {showWrong && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M18 6L6 18M6 6l12 12"/></svg>}
+                                        </span>
                                       </button>
                                     )
                                   })}

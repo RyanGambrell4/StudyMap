@@ -20,7 +20,7 @@ export default function AuthScreen({ initialMode, onBack }) {
       billing === 'weekly' ? 'weekly' :
       billing === 'semester' ? 'per semester' :
       'monthly'
-    if (trial === '1') return { text: `7-day free trial · ${planLabel}`, sub: `Full access included. $0 today, then $2.99/wk. Cancel anytime in your account.` }
+    if (trial === '1') return { text: `3-day free trial · ${planLabel}`, sub: `Full access included. $0 today, then $2.99/wk. Cancel anytime in your account.` }
     return { text: `${planLabel} plan`, sub: `Billed ${billingLabel}. Cancel anytime.` }
   })()
 
@@ -615,7 +615,7 @@ function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onS
           <p style={{ fontSize: 14, fontWeight: 600, color: '#1A1A1A', margin: '0 0 14px', wordBreak: 'break-all' }}>{email}</p>
 
           <div style={{ backgroundColor: '#FFF7ED', border: '1px solid #FED7AA', borderRadius: 10, padding: '11px 14px', marginBottom: 16, display: 'flex', alignItems: 'flex-start', gap: 10, textAlign: 'left' }}>
-            <span style={{ fontSize: 16, flexShrink: 0 }}>📬</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#D97706" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
             <p style={{ margin: 0, fontSize: 13, color: '#92400E', lineHeight: 1.5 }}>
               <strong>Check Spam or Promotions first</strong> — confirmation emails often land there. Search your inbox for <strong>"StudyEdge"</strong>.
             </p>

@@ -723,7 +723,7 @@ export default function DashboardView({
               border: 'none', cursor: 'pointer', fontFamily: 'inherit',
             }}
           >
-            <span style={{ fontSize: 18 }}>🔥</span>
+            <IcoFlame color="#F97316" />
             <span>{streakToast}-day streak!</span>
             <span style={{ fontWeight: 500, color: '#93C5FD', fontSize: 13 }}>
               {hasUsedTrial() ? 'Upgrade to keep it going →' : 'Start free trial →'}
@@ -741,7 +741,7 @@ export default function DashboardView({
             fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap',
             pointerEvents: 'none',
           }}>
-            <span style={{ fontSize: 18 }}>🔥</span>
+            <IcoFlame color="#F97316" />
             <span>{streakToast}-day streak!</span>
             <span style={{ fontWeight: 400, color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>Keep it up</span>
           </div>
@@ -845,7 +845,7 @@ export default function DashboardView({
             </svg>
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#DC2626', marginBottom: 2 }}>Grade Recovery Mode Active</div>
-              <div style={{ fontSize: 12.5, color: D.muted }}>
+              <div style={{ fontSize: 12.5, color: D.textMuted }}>
                 Extra weekly sessions scheduled for <strong>{[...recoveryCoursesIdx].map(i => courses[i]?.name).filter(Boolean).join(', ')}</strong>. Your grades are below target and we're helping close the gap.
               </div>
             </div>
@@ -881,7 +881,7 @@ export default function DashboardView({
                 <div style={{ flex: 1, minWidth: 200 }}>
                   <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: expiringSoon ? '#C2410C' : D.text }}>
                     {expiringSoon
-                      ? '⚠️ Your trial expires today — don\'t lose your progress.'
+                      ? 'Your trial expires today — don\'t lose your progress.'
                       : `Your free trial is active. ${daysLeft} day${daysLeft !== 1 ? 's' : ''} remaining.`}
                   </p>
                   {expiringSoon ? (
@@ -1106,7 +1106,7 @@ export default function DashboardView({
             padding: '12px 16px',
             display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
           }}>
-            <span style={{ fontSize: 22 }}>🔥</span>
+            <IcoFlame color="#F97316" />
             <div style={{ flex: 1, minWidth: 180 }}>
               <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#92400E' }}>
                 Your {currentStreak}-day streak broke.
@@ -1713,7 +1713,7 @@ export default function DashboardView({
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {[
-              { label: 'Study streak',  value: streak,         unit: streak === 1 ? 'day' : 'days', delta: streak,        positive: streak > 0,       icon: <IcoFlame color="#F97316" />,  iconBg: 'rgba(249,115,22,0.1)',  iconColor: '#F97316', subtext: daysToNextMilestone === 1 ? `${nextStreakMilestone}-day streak tomorrow 🔥` : daysToNextMilestone === 2 ? `${daysToNextMilestone} days to ${nextStreakMilestone}-day streak` : freezeCount > 0 ? `🧊 ${freezeCount} freeze${freezeCount !== 1 ? 's' : ''} available` : null },
+              { label: 'Study streak',  value: streak,         unit: streak === 1 ? 'day' : 'days', delta: streak,        positive: streak > 0,       icon: <IcoFlame color="#F97316" />,  iconBg: 'rgba(249,115,22,0.1)',  iconColor: '#F97316', subtext: daysToNextMilestone === 1 ? `${nextStreakMilestone}-day streak tomorrow` : daysToNextMilestone === 2 ? `${daysToNextMilestone} days to ${nextStreakMilestone}-day streak` : freezeCount > 0 ? `${freezeCount} freeze${freezeCount !== 1 ? 's' : ''} available` : null },
               { label: 'Hours studied', value: weekHours,      unit: 'hrs',                          delta: deltaHours,    positive: deltaHours >= 0,  icon: <IcoClock color={D.blue} />,   iconBg: 'rgba(59,97,196,0.1)',   iconColor: D.blue },
               { label: 'Sessions done', value: weekSessionCount, unit: '',                           delta: deltaSessions, positive: deltaSessions >= 0, icon: <IcoCheck color={D.green} />, iconBg: 'rgba(22,163,74,0.1)',   iconColor: D.green },
             ].map((stat, i) => (

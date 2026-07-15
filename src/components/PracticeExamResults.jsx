@@ -374,8 +374,10 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
               <div key={i} style={{ background: bgState, border: `1px solid ${correct === true ? 'rgba(22,163,74,0.18)' : correct === false ? 'rgba(220,38,38,0.18)' : 'rgba(0,0,0,0.07)'}`, borderRadius: 14, padding: 18 }}>
                 <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
                   <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Q{i + 1} · {q.topic}</p>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: colorState, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    {correct === true ? '✓ Correct' : correct === false ? '✗ Incorrect' : 'Self-grade'}
+                  <span style={{ fontSize: 11, fontWeight: 700, color: colorState, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                    {correct === true && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
+                    {correct === false && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>}
+                    {correct === true ? 'Correct' : correct === false ? 'Incorrect' : 'Self-grade'}
                   </span>
                 </div>
                 <p style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 600, color: '#1A1A1A', lineHeight: 1.5 }}>{q.question}</p>
@@ -445,7 +447,11 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
                                         transition: 'all 0.15s',
                                       }}
                                     >
-                                      {opt}{showRight ? ' ✓' : showWrong ? ' ✕' : ''}
+                                      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
+                                        <span>{opt}</span>
+                                        {showRight && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>}
+                                        {showWrong && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M18 6L6 18M6 6l12 12"/></svg>}
+                                      </span>
                                     </button>
                                   )
                                 })}

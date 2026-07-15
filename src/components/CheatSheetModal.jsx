@@ -310,7 +310,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall }) {
                         Unlock {lockedCount} more topic{lockedCount !== 1 ? 's' : ''}
                       </div>
                       <div style={{ fontSize: 13, color: D.textMuted, marginBottom: 16, lineHeight: 1.5 }}>
-                        Pro shows all 10 topics plus regenerate and PDF export.
+                        Pro shows all 10 topics and lets you regenerate anytime.
                       </div>
                       <button
                         onClick={() => onShowPaywall?.('study-hacks')}
