@@ -737,7 +737,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         <div style={{ textAlign: 'center', marginBottom: 18 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.30)', borderRadius: 999, padding: '6px 18px', fontSize: 11, fontWeight: 700, color: '#34D399', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
             <span style={{ display: 'inline-block', width: 7, height: 7, background: '#34D399', borderRadius: '50%', animation: 'ob-glow-pulse 1.8s ease-in-out infinite' }} />
-            7-day free trial · $0 today · cancel anytime
+            3-day free trial · $0 today · cancel anytime
           </div>
         </div>
 
@@ -758,7 +758,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         </h1>
         <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.9rem', textAlign: 'center', marginBottom: 28, lineHeight: 1.65 }}>
           {step3DaysToExam && step3Course
-            ? `Every session between now and your ${step3ExamWord}, mapped out, optimized, and ready. Unlock it all with a 7-day free trial. No charge today.`
+            ? `Every session between now and your ${step3ExamWord}, mapped out, optimized, and ready. Unlock it all with a 3-day free trial. No charge today.`
             : schoolType === 'hs'
             ? 'Built for AP classes, finals, and everything between. See the difference in your first study session.'
             : schoolType === 'exam'
@@ -770,7 +770,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
         {/* What unlocks with trial */}
         <div style={{ background: 'rgba(107,143,255,.07)', border: '1px solid rgba(107,143,255,.22)', borderRadius: 14, padding: '18px 20px', marginBottom: 16 }}>
-          <p style={{ fontSize: 10, fontWeight: 700, color: '#6B8FFF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Everything unlocked with your 7-day trial</p>
+          <p style={{ fontSize: 10, fontWeight: 700, color: '#6B8FFF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Everything unlocked with your 3-day trial</p>
           {[
             '5 courses to plan your full semester',
             '100 AI tutor messages/month',
@@ -835,7 +835,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.transform = 'scale(1.01)' }}
           onMouseLeave={e => { if (!trialLoading) e.currentTarget.style.transform = 'scale(1)' }}
         >
-          {trialLoading ? 'Loading…' : 'Start 7-day free trial →'}
+          {trialLoading ? 'Loading…' : 'Start 3-day free trial →'}
         </button>
 
         <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.25)', fontSize: '0.71rem', marginBottom: 18 }}>

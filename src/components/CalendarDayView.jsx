@@ -504,7 +504,7 @@ export default function CalendarDayView({
                       onPointerDown={e => e.stopPropagation()}
                       onClick={e => { e.stopPropagation(); if (!added && !adding) handleAddToGcal(s) }}
                       className="shrink-0 mt-0.5 opacity-50 hover:opacity-100 transition-opacity"
-                      title={added ? 'Added to Google Calendar' : failed ? 'Failed — tap to retry' : 'Add to Google Calendar'}
+                      title={added ? 'Added to Google Calendar' : failed ? 'Failed. Tap to retry.' : 'Add to Google Calendar'}
                     >
                       {added ? (
                         <svg className="w-3 h-3" fill="none" stroke="#34d399" viewBox="0 0 24 24">

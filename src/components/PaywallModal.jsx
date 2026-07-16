@@ -97,7 +97,7 @@ const LIMIT_MESSAGES = {
   'ai-exhausted': {
     tag: "You've used your free AI actions",
     title: 'Keep your tutor on tap.',
-    body: "Pro gives you 100 AI actions a month. Your tutor for every concept this semester. Start the 7-day free trial and pick up exactly where you left off.",
+    body: "Pro gives you 100 AI actions a month. Your tutor for every concept this semester. Start the 3-day free trial and pick up exactly where you left off.",
   },
   tutorMemory: {
     tag: 'Unlimited only · Tutor memory',
@@ -535,7 +535,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               style={{ width: '100%', padding: '14px', background: '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: trialLoading ? 'not-allowed' : 'pointer', letterSpacing: '-0.01em', marginBottom: 10, transition: 'opacity 0.15s', opacity: trialLoading ? 0.75 : 1 }}
               onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.opacity = '0.88' }} onMouseLeave={e => { e.currentTarget.style.opacity = trialLoading ? '0.75' : '1' }}
             >
-              {trialLoading ? 'Loading…' : showTrialCard ? 'Start free 7-day trial →' : 'Yes, keep going →'}
+              {trialLoading ? 'Loading…' : showTrialCard ? 'Start free 3-day trial →' : 'Yes, keep going →'}
             </button>
             {showTrialCard && (
               <p style={{ fontSize: '0.72rem', color: '#9B9B9B', margin: '-4px 0 10px' }}>Card required · $0 today · Cancel anytime</p>
@@ -967,7 +967,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 )}
                 {planId === 'unlimited' && !trialUsed && !trialActive && (
                   <div style={{ fontSize: '0.68rem', color: '#059669', marginTop: '4px', fontWeight: 700 }}>
-                    $0 today · 7-day free trial · Cancel anytime
+                    $0 today · 3-day free trial · Cancel anytime
                   </div>
                 )}
               </div>
