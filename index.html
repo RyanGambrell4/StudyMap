@@ -47,7 +47,7 @@
     })();
   </script>
   <title>StudyEdge AI — AI Study App for College Students | getstudyedge.com</title>
-  <meta name="description" content="StudyEdge AI builds your study schedule, generates flashcards from your syllabus, coaches every session, and tracks your grades. The complete AI study system for university students. 7-day free trial." />
+  <meta name="description" content="StudyEdge AI builds your study schedule, generates flashcards from your syllabus, coaches every session, and tracks your grades. The complete AI study system for university students. 3-day free trial." />
   <link rel="canonical" href="https://getstudyedge.com/" />
   <link rel="icon" type="image/png" sizes="512x512" href="/favicon.png" />
   <link rel="icon" type="image/png" sizes="192x192" href="/favicon-192x192.png" />
@@ -169,7 +169,7 @@
         "name": "Pro",
         "price": "2.99",
         "priceCurrency": "USD",
-        "description": "Pro plan, $2.99/week (also $9.99/month or $69.99/year). 5 courses, 100 AI study boosts/month, AI Study Coach, Session Blueprints, smart calendar. 7-day free trial, cancel anytime."
+        "description": "Pro plan, $2.99/week (also $9.99/month or $69.99/year). 5 courses, 100 AI study boosts/month, AI Study Coach, Session Blueprints, smart calendar. 3-day free trial, cancel anytime."
       },
       {
         "@type": "Offer",
@@ -288,7 +288,7 @@
         "name": "Is StudyEdge AI free?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. StudyEdge AI has a free plan that includes 1 course, 2 AI tutor actions per day, and one free use of key features like Session Blueprints, Focus Mode, and the AI Coach, no credit card required. Pro plan starts at $2.99/week (also available monthly at $9.99 or annually at $69.99) with a 7-day free trial, cancel anytime."
+          "text": "Yes. StudyEdge AI has a free plan that includes 1 course, 2 AI tutor actions per day, and one free use of key features like Session Blueprints, Focus Mode, and the AI Coach, no credit card required. Pro plan starts at $2.99/week (also available monthly at $9.99 or annually at $69.99) with a 3-day free trial, cancel anytime."
         }
       },
       {
@@ -312,7 +312,7 @@
         "name": "Can I cancel anytime?",
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": "Yes. Paid plans can be cancelled at any time and all new Pro subscriptions come with a 7-day free trial, cancel anytime."
+          "text": "Yes. Paid plans can be cancelled at any time and all new Pro subscriptions come with a 3-day free trial, cancel anytime."
         }
       },
       {
@@ -502,8 +502,8 @@
     }
     .btn-primary { background: var(--accent); color: #fff; padding: 11px 22px; font-size: 14px; }
     .btn-primary:hover { background: #2D4FA8; transform: translateY(-1px); }
-    .btn-primary-lg { background: var(--accent); color: #fff; padding: 15px 38px; font-size: 16px; border-radius: 10px; box-shadow: 0 4px 20px rgba(59,97,196,0.30); }
-    .btn-primary-lg:hover { background: #2D4FA8; transform: translateY(-1px); box-shadow: 0 6px 24px rgba(59,97,196,0.38); }
+    .btn-primary-lg { background: linear-gradient(135deg, #3B61C4 0%, #7C5CBF 100%); color: #fff; padding: 15px 38px; font-size: 16px; border-radius: 10px; box-shadow: 0 4px 20px rgba(59,97,196,0.30); }
+    .btn-primary-lg:hover { background: linear-gradient(135deg, #2D4FA8 0%, #6649a3 100%); transform: translateY(-1px); box-shadow: 0 6px 24px rgba(59,97,196,0.38); }
     .btn-ghost {
       background: transparent; color: var(--muted);
       border: 1px solid var(--border); padding: 13px 24px; font-size: 14px;
@@ -539,9 +539,9 @@
       50% { opacity: 0.45; }
     }
     .hero-h1 {
-      font-family: var(--serif); font-weight: 500;
-      font-size: clamp(58px, 8.8vw, 122px);
-      line-height: 1.03; letter-spacing: -0.01em;
+      font-family: var(--serif); font-weight: 600;
+      font-size: clamp(62px, 9vw, 128px);
+      line-height: 1.02; letter-spacing: -0.02em;
       color: var(--text); margin-bottom: 28px;
     }
     .hero-h1 em { font-style: italic; color: var(--accent); }
@@ -645,7 +645,8 @@
 
     /* Sections */
     .section-wrap { border-top: 1px solid var(--border); }
-    .section { padding: 96px 40px; max-width: 1120px; margin: 0 auto; }
+    .section { padding: 96px 40px; max-width: 1120px; margin: 0 auto; text-align: center; }
+    .how-cell { text-align: left !important; }
     .section-label {
       display: inline-flex; align-items: center;
       font-size: 11px; font-weight: 600; letter-spacing: 0.11em;
@@ -659,9 +660,10 @@
     .sl-orange { background: rgba(232,124,62,0.09); border-color: rgba(232,124,62,0.25); color: #C2611A; }
     .sl-green  { background: rgba(16,185,129,0.09); border-color: rgba(16,185,129,0.25); color: #059669; }
     .section-h2 {
-      font-family: var(--serif); font-weight: 500;
-      font-size: clamp(42px, 5.5vw, 80px);
-      line-height: 1.07; letter-spacing: -0.01em; color: var(--text);
+      font-family: var(--serif); font-weight: 600;
+      font-size: clamp(48px, 5.8vw, 86px);
+      line-height: 1.05; letter-spacing: -0.02em; color: var(--text);
+      text-align: center;
     }
     .section-h2 em { font-style: italic; color: var(--accent); }
 
@@ -696,9 +698,9 @@
     .product-inner.rev > * { direction: ltr; }
     .product-text-block { display: flex; flex-direction: column; gap: 16px; }
     .product-h3 {
-      font-family: var(--serif); font-weight: 500;
-      font-size: clamp(32px, 3.6vw, 52px);
-      line-height: 1.1; color: var(--text);
+      font-family: var(--serif); font-weight: 600;
+      font-size: clamp(34px, 3.8vw, 56px);
+      line-height: 1.08; color: var(--text);
     }
     .product-h3 em { font-style: italic; }
     .product-body { font-size: 15px; color: var(--muted); line-height: 1.7; }
@@ -849,7 +851,6 @@
     .footer-socials { display: flex; gap: 16px; align-items: center; }
     .footer-socials a { color: var(--dim); transition: color 0.15s; }
     .footer-socials a:hover { color: var(--muted); }
-    .footer-tagline { flex-basis: 100%; font-size: 14px; color: var(--muted); font-style: italic; margin-bottom: 4px; }
     .footer-copy { font-size: 13px; color: var(--dim); }
     .footer-disclaimer {
       flex-basis: 100%;
@@ -997,7 +998,7 @@
           <h2>StudyEdge AI pricing: The full system, free to start.</h2>
           <dl>
             <dt>Free</dt><dd>$0 forever. 1 course, 10 AI actions/month. No credit card required.</dd>
-            <dt>Pro</dt><dd>From $2.99/week (also $9.99/mo or $69.99/yr). 5 courses, 100 AI actions/month, 7-day free trial, cancel anytime.</dd>
+            <dt>Pro</dt><dd>From $2.99/week (also $9.99/mo or $69.99/yr). 5 courses, 100 AI actions/month, 3-day free trial, cancel anytime.</dd>
             <dt>Unlimited</dt><dd>From $4.99/week (also $14.99/mo or $119.99/yr). Unlimited courses and AI actions, AI Tutor memory, advanced exam analytics. Cancel anytime.</dd>
           </dl>
         </section>
@@ -1088,14 +1089,14 @@
             <div className="hero-aurora-layer"></div>
           </div>
           <section className="hero" style={{position:'relative',zIndex:1}}>
-            <p className="hero-eyebrow hero-stagger-1"><span className="hero-eyebrow-dot" /><strong>30,000+</strong> students in the StudyEdge AI community</p>
+            <p className="hero-eyebrow hero-stagger-1"><span className="hero-eyebrow-dot" /><strong>30,000+</strong> students in the StudyEdge community</p>
             <h1 className="hero-h1 hero-stagger-2">
-              The schedule,<br />
-              the sessions,<br />
-              <em>all planned for you.</em>
+              Your grades aren't<br />
+              the problem.<br />
+              <em>Your system is.</em>
             </h1>
             <p className="hero-sub hero-stagger-3">
-              Upload your syllabus. We turn it into a week-by-week schedule, build your study sessions, and walk you through them with flashcards and quizzes already loaded. You just show up.
+              StudyEdge builds your schedule, plans every session minute by minute, and runs your study sessions with flashcards, quizzes, and active recall built in. One app. All semester.
             </p>
             <div className="hero-cta hero-stagger-4">
               <button className="btn btn-primary-lg btn-cta-pulse" onClick={() => goTo('/app?signup=1')}>Start for free</button>
@@ -1168,17 +1169,17 @@
       const steps = [
         {
           n: '01',
-          title: "We fill your week automatically",
+          title: "You don't know what to study",
           body: "Add your courses and upload your syllabus. StudyEdge reads your exam dates, assignment weights, and deadlines and fills your week automatically, prioritized by urgency and difficulty."
         },
         {
           n: '02',
-          title: "We plan every session before you sit down",
+          title: "You sit down with no plan",
           body: "Before every session, Session Blueprint generates a minute-by-minute study plan for that specific course, your current goal, and how much time you have. You never open a notebook wondering where to start."
         },
         {
           n: '03',
-          title: "We run the session with you",
+          title: "You study but it doesn't stick",
           body: "Focus Mode runs the session. Flashcards, recall prompts, and quizzes are built into each block. You're actively retrieving information, not passively rereading notes."
         }
       ];
@@ -1187,8 +1188,8 @@
           <div className="section">
             <p className="section-label sl-blue">How it works</p>
             <h2 className="section-h2">
-              Sunday night. Four exams in three weeks.<br />
-              <em>Here is what we do.</em>
+              Three reasons students fail.<br />
+              <em>None of them are intelligence.</em>
             </h2>
             <div className="how-grid fade-up">
               {steps.map((s, i) => (
@@ -1892,8 +1893,8 @@
         {
           label: 'Grade Hub',
           labelClass: 'sl-green',
-          h3: <>You are sitting at a 74.<br /><em>Here is what you need.</em></>,
-          body: "Your exact projected grade, what you need on every remaining assignment, and three scenarios to hit your target. Not a guess. A calculation. Most students find out they needed a 91 on the final when it is too late to change that.",
+          h3: <>Know exactly where<br /><em>you stand.</em></>,
+          body: "Your exact projected grade, what you need on every remaining assignment, and three different scenarios to hit your target. Not a guess. A calculation. Most students find out too late, this tells you now.",
           card: 'grade',
           rev: false
         },
@@ -1908,15 +1909,6 @@
       ];
       return (
         <div id="features">
-          <div className="section-wrap" style={{paddingBottom:0}}>
-            <div className="section" style={{paddingBottom:0}}>
-              <p className="section-label sl-blue">Features</p>
-              <h2 className="section-h2 fade-up">
-                Built so you can stop opening 7 tabs<br />
-                <em>to study one chapter.</em>
-              </h2>
-            </div>
-          </div>
           {features.map((f, i) => (
             <div className="product-wrap" key={f.label} style={{background: i % 2 === 1 ? 'var(--bg1)' : 'var(--bg)'}}>
               <div className={'product-inner' + (f.rev ? ' rev' : '')}>
@@ -1937,11 +1929,11 @@
 
     function TestimonialsMarquee() {
       const row1 = [
-        {t: "I've always struggled to stay consistent. StudyEdge AI just plans it for me. Seeing my hours and progress tracked has genuinely helped bring my grades up.", n: "Andy G.", r: "UCLA · 2.8 → 3.4 GPA"},
-        {t: "If you want to stay mediocre at studying, don't use this. Scheduling, coaching, daily organization: it has everything you need to take your marks to the next level with less effort.", n: "Danny K.", r: "Stanford · PhD Program"},
-        {t: "First AI study platform I can confidently say has it all. Week-by-week study plans, progress tracking, flashcards, quizzes, and it cuts all the prep time so you can just focus on actually learning.", n: "Charlotte B.", r: "NYU · 3.1 → 3.8 GPA"},
-        {t: "It does an amazing job of meeting you where you're at and taking you where you want to go academically.", n: "Gavin D.", r: "University of Michigan · Grad Student"},
-        {t: "Right when you log in you see a beautifully structured dashboard that makes you want to get to work. Personalized schedule, flashcards, quizzes: there's so much you can do, how can you not be excited?", n: "Alex G.", r: "Ohio State · 3.0 → 3.6 GPA"},
+        {t: "I've always struggled to stay consistent. StudyEdge AI just plans it for me. Seeing my hours and progress tracked has genuinely helped bring my grades up.", n: "Andy G.", r: "Undergraduate"},
+        {t: "If you want to stay mediocre at studying, don't use this. Scheduling, coaching, daily organization: it has everything you need to take your marks to the next level with less effort.", n: "Danny K.", r: "PhD Student"},
+        {t: "First AI study platform I can confidently say has it all. Week-by-week study plans, progress tracking, flashcards, quizzes, and it cuts all the prep time so you can just focus on actually learning.", n: "Charlotte B.", r: "University Student"},
+        {t: "It does an amazing job of meeting you where you're at and taking you where you want to go academically.", n: "Gavin D.", r: "Graduate Student"},
+        {t: "Right when you log in you see a beautifully structured dashboard that makes you want to get to work. Personalized schedule, flashcards, quizzes: there's so much you can do, how can you not be excited?", n: "Alex G.", r: "College Student"},
       ];
       const row2 = [row1[2], row1[4], row1[0], row1[3], row1[1]];
       return (
@@ -1951,7 +1943,7 @@
               <p className="section-label sl-purple" style={{marginBottom:0}}>What students say</p>
             </div>
             <h2 className="section-h2" style={{textAlign:'center'}}>
-              30,000 students figured it out.<br /><em>Here is what they said.</em>
+              Grades don't improve<br /><em>by accident.</em>
             </h2>
           </div>
           <div className="marquee">
@@ -1990,9 +1982,9 @@
 
       const billedSub = (planKey) => {
         if (planKey === 'pro') {
-          if (bill === 'weekly')  return 'Billed weekly · 7-day free trial, cancel anytime';
-          if (bill === 'monthly') return 'Billed $' + PRICE_TABLE[planKey].monthly.toFixed(2) + '/month · 7-day free trial';
-          return 'Billed $' + PRICE_TABLE[planKey].yearly.toFixed(2) + '/year · 7-day free trial';
+          if (bill === 'weekly')  return 'Billed weekly · 3-day free trial, cancel anytime';
+          if (bill === 'monthly') return 'Billed $' + PRICE_TABLE[planKey].monthly.toFixed(2) + '/month · 3-day free trial';
+          return 'Billed $' + PRICE_TABLE[planKey].yearly.toFixed(2) + '/year · 3-day free trial';
         }
         if (bill === 'weekly')  return 'Billed weekly · cancel anytime';
         if (bill === 'monthly') return 'Billed $' + PRICE_TABLE[planKey].monthly.toFixed(2) + '/month · cancel anytime';
@@ -2080,7 +2072,7 @@
                   <li className="pf em"><span className="pf-dot" /><span>Syllabus import for all courses</span></li>
                 </ul>
                 <button className="btn btn-primary btn-block" style={{padding:'14px'}} onClick={() => goSignup('pro')}>Start free trial</button>
-                <p style={{textAlign:'center', fontSize:12, color:'var(--dim)', marginTop:10}}>7-day free trial, cancel anytime</p>
+                <p style={{textAlign:'center', fontSize:12, color:'var(--dim)', marginTop:10}}>3-day free trial, cancel anytime</p>
               </div>
 
               <div className="pricing-cell">
@@ -2115,7 +2107,7 @@
           <h2 className="finalcta-h2">
             Your semester isn't going<br />to <em style={{color:'rgba(255,255,255,0.68)'}}>plan itself.</em>
           </h2>
-          <p className="finalcta-sub">7-day free trial · Cancel anytime · Takes three minutes to set up.</p>
+          <p className="finalcta-sub">3-day free trial · Cancel anytime · Takes three minutes to set up.</p>
           <button className="btn-cta-white" onClick={() => goTo('/app?signup=1&plan=pro&billing=weekly&trial=1')}>Start Free Trial</button>
         </div>
       );
@@ -2147,7 +2139,6 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L2.25 2.25h6.844l4.262 5.634 5.888-5.634Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             </a>
           </div>
-          <p className="footer-tagline">Made by students who got tired of being behind.</p>
           <p className="footer-copy">2026 StudyEdge AI</p>
           <p className="footer-disclaimer">
             StudyEdge AI (getstudyedge.com) is an AI study planner app and is not affiliated with{' '}
