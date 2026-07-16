@@ -1167,17 +1167,17 @@ export default function CoursesView({
 
         {isExamMode ? (
           <div className="cv-import-band" style={{ gridTemplateColumns: '1fr' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '20px 24px', borderRadius: 14, background: 'linear-gradient(155deg, rgba(232,83,26,0.06) 0%, rgba(99,102,241,0.04) 45%, transparent 100%)', border: '1px solid rgba(99,102,241,0.18)' }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(232,83,26,0.1)', border: '1px solid rgba(99,102,241,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#818cf8" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 18, padding: '20px 24px', borderRadius: 14, background: 'rgba(232,83,26,0.04)', border: '1px solid rgba(232,83,26,0.18)' }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(232,83,26,0.1)', border: '1px solid rgba(232,83,26,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#E8531A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
               </div>
               <div style={{ flex: 1 }}>
-                <div style={{ fontSize: 13, fontWeight: 700, color: '#c7d2fe', marginBottom: 3 }}>Use exam preset</div>
-                <div style={{ fontSize: 12, color: 'rgba(199,210,254,0.5)' }}>Load all sections for MCAT, LSAT, CPA, Bar, GRE, or GMAT instantly</div>
+                <div style={{ fontSize: 13, fontWeight: 700, color: '#111111', marginBottom: 3 }}>Use exam preset</div>
+                <div style={{ fontSize: 12, color: '#6B6B6B' }}>Load all sections for MCAT, LSAT, CPA, Bar, GRE, or GMAT instantly</div>
               </div>
               <button
                 onClick={() => setShowExamSetup(true)}
-                style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(99,102,241,0.18)', border: '1px solid rgba(99,102,241,0.35)', color: '#c7d2fe', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                style={{ padding: '8px 16px', borderRadius: 8, background: 'rgba(232,83,26,0.1)', border: '1px solid rgba(232,83,26,0.25)', color: '#E8531A', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
               >
                 Load preset →
               </button>

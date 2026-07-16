@@ -204,7 +204,7 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
             {idx < total - 1 ? (
               <button
                 onClick={() => navigateTo(Math.min(total - 1, idx + 1))}
-                style={{ padding: '10px 16px', background: '#1A1A1A', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+                style={{ padding: '10px 16px', background: '#3B61C4', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
               >Next →</button>
             ) : (
               <button
