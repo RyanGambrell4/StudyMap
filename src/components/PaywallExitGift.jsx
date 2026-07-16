@@ -180,7 +180,7 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
               No card required. Five more study sessions to try blueprints, cheat sheets, and flashcards.
             </p>
             <p style={{ margin: '0 0 18px', fontSize: 13, color: MUTED, lineHeight: 1.55, background: '#FFF6F0', border: `1px solid ${ACCENT}25`, borderRadius: 10, padding: '10px 14px' }}>
-              Or skip the gift and start a <strong style={{ color: ACCENT }}>3-day free trial</strong>. $0 today, $2.99/wk after. Unlimited sessions, 5 courses, 100 AI actions/month. Cancel anytime.
+              Or skip the gift and start a <strong style={{ color: ACCENT }}>3-day free trial</strong>. Card required · $4.99/wk after 3 days. Unlimited sessions, 5 courses, 100 AI actions/month. Cancel anytime.
             </p>
             {claimError && (
               <p style={{ margin: '0 0 12px', fontSize: 13, color: '#DC2626' }}>{claimError}</p>

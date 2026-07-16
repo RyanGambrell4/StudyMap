@@ -823,7 +823,7 @@ export default function App() {
           <span style={{ fontSize: 13.5, color: '#fff', fontWeight: 500 }}>
             {hasUsedTrial()
               ? 'Pick up where you left off. No hidden fees.'
-              : '3-day free trial. Card required. Cancel before day 3 and you won\'t be charged.'}
+              : '3-day free trial. Card required. Cancel before day 4 and you won\'t be charged.'}
           </span>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             <button

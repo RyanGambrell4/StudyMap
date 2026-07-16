@@ -65,8 +65,8 @@ const TIMELINE = [
   {
     day: 'Day 3',
     color: '#3B61C4',
-    title: 'Continue for $2.99/wk or cancel',
-    body: "Loving it? Stay on Pro for $2.99/wk. Not for you? One tap to cancel. No charge, no email chase.",
+    title: 'Continue for $4.99/wk or cancel',
+    body: "Loving it? Stay on Unlimited for $4.99/wk. Not for you? One tap to cancel. No charge, no email chase.",
   },
 ]
 

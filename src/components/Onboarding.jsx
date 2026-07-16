@@ -785,7 +785,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             </div>
           ))}
           <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(107,143,255,.15)', fontSize: 11, color: 'rgba(255,255,255,.35)', lineHeight: 1.5 }}>
-            After 3 days, $2.99/wk. Cancel anytime. Cancel anytime.
+            After 3 days, $4.99/wk. Cancel anytime.
           </div>
         </div>
 
@@ -839,7 +839,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         </button>
 
         <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.25)', fontSize: '0.71rem', marginBottom: 18 }}>
-          Card required · $2.99/wk after 3 days · Cancel anytime in account
+          Card required · $4.99/wk after 3 days · Cancel anytime in account
         </p>
 
         {/* Skip — low-prominence, copy reminds them what they're giving up */}
