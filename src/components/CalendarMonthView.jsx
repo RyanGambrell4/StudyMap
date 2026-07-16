@@ -311,7 +311,7 @@ export default function CalendarMonthView({
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] font-medium truncate" style={{ color: tv.gcalText }}>{clean(e.title)}</p>
-                    <p className="text-[10px] text-slate-600">Google Calendar{e.allDay ? ' · All day' : ''}</p>
+                    <p style={{ fontSize: 10, color: '#6B6B6B' }}>Google Calendar{e.allDay ? ' · All day' : ''}</p>
                   </div>
                 </div>
               ))}
@@ -322,7 +322,7 @@ export default function CalendarMonthView({
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] font-medium truncate" style={{ color: s.color.dot }}>{s.courseName}</p>
-                    <p className="text-[10px] text-slate-600">{s.sessionType} · {s.duration}m{s.startTime ? ` · ${s.startTime}` : ''}</p>
+                    <p style={{ fontSize: 10, color: '#6B6B6B' }}>{s.sessionType} · {s.duration}m{s.startTime ? ` · ${s.startTime}` : ''}</p>
                   </div>
                   {completedIds.has(s.id) && (
                     <svg className="text-emerald-600 shrink-0" width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
@@ -336,7 +336,7 @@ export default function CalendarMonthView({
                 >
                   <div className="flex-1 min-w-0">
                     <p className="text-[12px] font-medium truncate" style={{ color: e.color.dot }}>{e.name}</p>
-                    <p className="text-[10px] text-slate-600">{e.type} · {e.courseName}</p>
+                    <p style={{ fontSize: 10, color: '#6B6B6B' }}>{e.type} · {e.courseName}</p>
                   </div>
                 </div>
               ))}

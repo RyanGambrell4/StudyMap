@@ -333,7 +333,7 @@ export default function CalendarDayView({
       {hasAllDay && (
         <div className="flex mb-px" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
           <div className="w-12 shrink-0 flex items-start justify-end pt-1.5 pr-3">
-            <span className="text-[9px] font-medium text-slate-600 uppercase tracking-wide">All day</span>
+            <span style={{ fontSize: 9, fontWeight: 500, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>All day</span>
           </div>
           <div className="flex-1 py-1 px-1 space-y-0.5 min-h-[28px]" style={{ borderLeft: `1px solid ${tv.gridLine}` }}>
             {allDayGoogleBlocks.map((ev, i) => (
@@ -354,9 +354,11 @@ export default function CalendarDayView({
                 <span className="truncate">{ev.isSyllabus ? ev.name : ev.courseName}</span>
                 {!ev.isSyllabus && (
                   <button onClick={() => onToggle(ev.id)} className="ml-2 shrink-0">
-                    <div className={`w-3.5 h-3.5 rounded-full border flex items-center justify-center transition-colors ${
-                      completedIds.has(ev.id) ? 'bg-emerald-500 border-emerald-500' : 'border-slate-300 hover:border-slate-500'
-                    }`}>
+                    <div style={{
+                      width: 14, height: 14, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      background: completedIds.has(ev.id) ? '#10B981' : 'transparent',
+                      border: `1.5px solid ${completedIds.has(ev.id) ? '#10B981' : '#D4D4D4'}`,
+                    }}>
                       {completedIds.has(ev.id) && (
                         <svg className="w-2 h-2 text-white" fill="currentColor" viewBox="0 0 20 20">
                           <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />

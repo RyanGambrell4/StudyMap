@@ -1803,7 +1803,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                       <>
                         <div className="flex items-center justify-between">
                           <p className="text-xs font-medium uppercase tracking-widest" style={{ color: dot }}>Quick check</p>
-                          <span className="text-xs text-slate-500">Card {rcIdx + 1} of {flashcards.length}</span>
+                          <span style={{ fontSize: 11, color: '#9B9B9B' }}>Card {rcIdx + 1} of {flashcards.length}</span>
                         </div>
                         <div className="relative cursor-pointer select-none" style={{ perspective: '1200px', height: '150px' }} onClick={() => setRcFlipped(f => !f)}>
                           <div className="absolute inset-0 rounded-2xl" style={{ transformStyle: 'preserve-3d', WebkitTransformStyle: 'preserve-3d', transition: 'transform 0.55s cubic-bezier(0.4,0,0.2,1)', transform: rcFlipped ? 'rotateY(180deg)' : 'rotateY(0)' }}>
@@ -1846,7 +1846,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     <div className="flex items-center justify-between mb-4">
                       <p className="text-xs uppercase tracking-widest font-medium" style={{ color: dot }}>
                         Card {fcIdx + 1} of {flashcards.length}
-                        {fcKnown.size > 0 && <span className="text-slate-600"> · {fcKnown.size} mastered</span>}
+                        {fcKnown.size > 0 && <span style={{ color: '#6B6B6B' }}> · {fcKnown.size} mastered</span>}
                       </p>
                       <div className="flex gap-1">
                         {flashcards.map((_, i) => (
