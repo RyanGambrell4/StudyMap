@@ -671,10 +671,10 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           {
             label: 'Brain Dump',
             desc: 'Recall everything you know on a topic and score your memory.',
-            color: '#8B5CF6',
+            color: '#059669',
             icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3a3 3 0 00-3 3 3 3 0 00-3 3v3a3 3 0 003 3v2a3 3 0 003 3 3 3 0 003-3V3z"/><path d="M15 3a3 3 0 013 3 3 3 0 013 3v3a3 3 0 01-3 3v2a3 3 0 01-3 3 3 3 0 01-3-3V3z"/></svg>,
             onClick: () => onOpenBrainDump?.(),
-            ...freeBadge('brainDump', '#8B5CF6'),
+            ...freeBadge('brainDump', '#059669'),
           },
           {
             label: 'Quiz Burst',
@@ -935,7 +935,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               ? { borderColor: '#3b82f6', background: 'linear-gradient(135deg, #eff6ff, #dbeafe)' }
               : uploadedFile && hasText
                 ? { borderColor: '#86efac', background: 'linear-gradient(135deg, #f0fdf4, #dcfce7)' }
-                : { borderColor: '#c4b5fd', background: 'linear-gradient(135deg, #faf5ff, #f5f3ff)' }}
+                : { borderColor: 'rgba(59,97,196,0.3)', background: 'linear-gradient(135deg, #EEF2FF, #E8EEFF)' }}
           >
             <input
               ref={fileInputRef}
@@ -979,8 +979,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               </div>
             ) : (
               <div className="text-center">
-                <p className="font-semibold" style={{ color: '#7e22ce' }}>Drop your file here or click to browse</p>
-                <p className="text-xs mt-1" style={{ color: '#9333ea' }}>PDF, .docx, or .pptx</p>
+                <p className="font-semibold" style={{ color: '#3B61C4' }}>Drop your file here or click to browse</p>
+                <p className="text-xs mt-1" style={{ color: '#6B6B6B' }}>PDF, .docx, or .pptx</p>
               </div>
             )}
           </div>
@@ -1417,7 +1417,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                     value={drillCourse ?? ''}
                     onChange={e => setDrillCourse(e.target.value === '' ? null : Number(e.target.value))}
                     className="w-full bg-white border border-[#E5E5E5] rounded-xl px-4 py-2.5 text-[#111111] text-sm focus:outline-none focus:ring-2 focus:ring-[#3B61C4] appearance-none"
-                    style={{ colorScheme: 'dark' }}
+                    style={{ colorScheme: 'light' }}
                   >
                     <option value="">No course</option>
                     {courses.map((c, i) => <option key={i} value={i}>{c.name}</option>)}

@@ -16,7 +16,7 @@ const D = {
 
 const CATEGORY_COLORS = {
   Concepts:    '#3B61C4',
-  Application: '#8B5CF6',
+  Application: '#6366F1',
   Detail:      '#D97706',
   Connections: '#059669',
 }
@@ -226,8 +226,8 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
 
         {/* Header */}
         <div style={{ padding: '20px 24px 16px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>
-          <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(139,92,246,0.10)', border: '1px solid rgba(139,92,246,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-            <svg width="18" height="18" fill="none" stroke="#8B5CF6" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+          <div style={{ width: 38, height: 38, borderRadius: 10, background: 'rgba(5,150,105,0.10)', border: '1px solid rgba(5,150,105,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+            <svg width="18" height="18" fill="none" stroke="#059669" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
               <path d="M9 3a3 3 0 00-3 3 3 3 0 00-3 3v3a3 3 0 003 3v2a3 3 0 003 3 3 3 0 003-3V3z"/><path d="M15 3a3 3 0 013 3 3 3 0 013 3v3a3 3 0 01-3 3v2a3 3 0 01-3 3 3 3 0 01-3-3V3z"/>
             </svg>
           </div>
@@ -278,9 +278,9 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
                 {[60, 90, 120].map(s => (
                   <button key={s} onClick={() => setTimerDuration(s)} style={{
                     flex: 1, padding: '10px', borderRadius: 9, fontSize: 13, fontWeight: 700,
-                    border: `1px solid ${timerDuration === s ? '#8B5CF6' : D.border}`,
-                    background: timerDuration === s ? 'rgba(139,92,246,0.10)' : 'none',
-                    color: timerDuration === s ? '#8B5CF6' : D.textMuted,
+                    border: `1px solid ${timerDuration === s ? '#059669' : D.border}`,
+                    background: timerDuration === s ? 'rgba(5,150,105,0.10)' : 'none',
+                    color: timerDuration === s ? '#059669' : D.textMuted,
                     cursor: 'pointer',
                   }}>
                     {s / 60} min
@@ -291,7 +291,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
 
             {error && <div style={{ fontSize: 13, color: D.red, marginBottom: 16, padding: '10px 14px', background: 'rgba(220,38,38,0.06)', borderRadius: 8 }}>{error}</div>}
 
-            <button onClick={startTimer} style={{ width: '100%', padding: '13px', background: '#8B5CF6', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(139,92,246,0.35)' }}>
+            <button onClick={startTimer} style={{ width: '100%', padding: '13px', background: '#059669', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(5,150,105,0.35)' }}>
               Start brain dump
             </button>
 
@@ -350,8 +350,8 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
                 title={bdRecording ? 'Stop recording' : 'Voice input'}
                 style={{
                   width: 44, height: 44, borderRadius: 10, border: 'none', flexShrink: 0,
-                  background: bdRecording ? 'rgba(239,68,68,0.1)' : 'rgba(139,92,246,0.08)',
-                  color: bdRecording ? '#EF4444' : '#8B5CF6',
+                  background: bdRecording ? 'rgba(239,68,68,0.1)' : 'rgba(5,150,105,0.08)',
+                  color: bdRecording ? '#EF4444' : '#059669',
                   cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   animation: bdRecording ? 'pulse 1s infinite' : 'none',
                 }}
@@ -365,7 +365,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
               </button>
               <button onClick={handleSubmit} disabled={!text.trim()} style={{
                 flex: 1, padding: '12px',
-                background: text.trim() ? '#8B5CF6' : D.textDim,
+                background: text.trim() ? '#059669' : D.textDim,
                 border: 'none', borderRadius: 10, color: '#fff',
                 fontSize: 14, fontWeight: 700, cursor: text.trim() ? 'pointer' : 'default',
                 fontFamily: 'inherit',
