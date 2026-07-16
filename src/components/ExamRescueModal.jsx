@@ -31,6 +31,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
   const [topics, setTopics] = useState(null)
   const [schedule, setSchedule] = useState(null)
   const [scheduleLoading, setScheduleLoading] = useState(false)
+  const [scheduleError, setScheduleError] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
 
@@ -95,6 +96,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
 
   async function generateSchedule(topicList) {
     setScheduleLoading(true)
+    setScheduleError(false)
     try {
       const token = await getAccessToken()
       const res = await fetch('/api/exam-rescue', {
@@ -110,9 +112,11 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
       const data = await res.json()
       if (res.ok && data.blocks) {
         setSchedule(data)
+      } else {
+        setScheduleError(true)
       }
     } catch (e) {
-      console.error('[exam-rescue schedule]', e)
+      setScheduleError(true)
     } finally {
       setScheduleLoading(false)
     }
@@ -291,6 +295,13 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 0' }}>
                     <Spinner size="sm" color={D.blue} />
                     <span style={{ fontSize: 13, color: D.textMuted }}>Building your schedule...</span>
+                  </div>
+                )}
+
+                {scheduleError && !scheduleLoading && (
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: 8, background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)' }}>
+                    <span style={{ fontSize: 12, color: D.red }}>Could not build schedule. Try again.</span>
+                    <button onClick={() => generateSchedule(topics)} style={{ fontSize: 12, fontWeight: 600, color: D.red, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Retry</button>
                   </div>
                 )}
 

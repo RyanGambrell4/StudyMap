@@ -55,7 +55,9 @@ export default function PracticeExamView({ courses = [], onShowPaywall }) {
           answers,
           score,
           timeMs,
-        }).then(() => setRefreshKey(k => k + 1))
+        })
+          .then(() => setRefreshKey(k => k + 1))
+          .catch(e => console.error('savePracticeExam failed', e))
       }
     } catch (e) { console.error('savePracticeExam failed', e) }
   }

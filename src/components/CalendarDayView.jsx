@@ -77,6 +77,7 @@ export default function CalendarDayView({
   const tv = theme_vars(theme === 'dark')
   const [addingToGcal, setAddingToGcal] = useState(null)
   const [gcalAdded, setGcalAdded]       = useState(new Set())
+  const [gcalFailed, setGcalFailed]     = useState(new Set())
 
   // ── Drag state ──
   const dragRef    = useRef(null)
@@ -119,6 +120,7 @@ export default function CalendarDayView({
 
   const handleAddToGcal = async (session) => {
     if (!userId || !gcalConnected) return
+    setGcalFailed(prev => { const n = new Set(prev); n.delete(session.id); return n })
     setAddingToGcal(session.id)
     try {
       const parseTime = (str, d) => {
@@ -151,7 +153,7 @@ export default function CalendarDayView({
       })
       setGcalAdded(prev => new Set([...prev, session.id]))
     } catch (e) {
-      console.error('[CalendarDayView] add-to-gcal error:', e)
+      setGcalFailed(prev => new Set([...prev, session.id]))
     } finally {
       setAddingToGcal(null)
     }
@@ -455,6 +457,7 @@ export default function CalendarDayView({
             const height = Math.max(((s.endMin - s.startMin) / 60) * HOUR_HEIGHT, 22)
             const done         = completedIds.has(s.id)
             const added        = gcalAdded.has(s.id)
+            const failed       = gcalFailed.has(s.id)
             const adding       = addingToGcal === s.id
             const conflictWith = conflictMap.get(s.id)
             const isDragging   = ghost?.sessionId === s.id
@@ -501,7 +504,7 @@ export default function CalendarDayView({
                       onPointerDown={e => e.stopPropagation()}
                       onClick={e => { e.stopPropagation(); if (!added && !adding) handleAddToGcal(s) }}
                       className="shrink-0 mt-0.5 opacity-50 hover:opacity-100 transition-opacity"
-                      title={added ? 'Added to Google Calendar' : 'Add to Google Calendar'}
+                      title={added ? 'Added to Google Calendar' : failed ? 'Failed — tap to retry' : 'Add to Google Calendar'}
                     >
                       {added ? (
                         <svg className="w-3 h-3" fill="none" stroke="#34d399" viewBox="0 0 24 24">
@@ -509,6 +512,10 @@ export default function CalendarDayView({
                         </svg>
                       ) : adding ? (
                         <Spinner size="xs" />
+                      ) : failed ? (
+                        <svg className="w-3 h-3" fill="none" stroke="#DC2626" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
                       ) : (
                         <svg className="w-3 h-3" fill="none" stroke="#64748B" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
