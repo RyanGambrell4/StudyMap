@@ -183,7 +183,7 @@ function LockedState({ onShowPaywall }) {
             Track every assignment, run what-if scenarios, and see exactly what you need on your final to hit your target.
           </p>
           {!trialUsed && (
-            <p style={{ fontSize: 12, color: D.indigo, fontWeight: 600, margin: '8px auto 20px' }}>Try it free for 3 days. No charge today.</p>
+            <p style={{ fontSize: 12, color: D.indigo, fontWeight: 600, margin: '8px auto 20px' }}>3-day free trial. Cancel anytime.</p>
           )}
           {trialUsed && <div style={{ marginBottom: 20 }} />}
           <button

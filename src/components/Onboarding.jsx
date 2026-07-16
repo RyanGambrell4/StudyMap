@@ -513,7 +513,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               <p style={{ fontSize: '0.8rem', color: '#8AABFF', fontWeight: 600, margin: 0 }}>
-                {courseName.trim() ? `All set. Your ${courseName.trim()} plan is ready to build.` : 'All set. Your personalised study plan is ready to build.'}
+                {courseName.trim() ? `All set. Your ${courseName.trim()} plan is ready to build.` : 'All set. Your personalized study plan is ready to build.'}
               </p>
             </div>
           )}
@@ -737,7 +737,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         <div style={{ textAlign: 'center', marginBottom: 18 }}>
           <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.30)', borderRadius: 999, padding: '6px 18px', fontSize: 11, fontWeight: 700, color: '#34D399', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
             <span style={{ display: 'inline-block', width: 7, height: 7, background: '#34D399', borderRadius: '50%', animation: 'ob-glow-pulse 1.8s ease-in-out infinite' }} />
-            3-day free trial · $0 today · cancel anytime
+            3-day free trial · Cancel anytime
           </div>
         </div>
 
@@ -758,7 +758,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         </h1>
         <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.9rem', textAlign: 'center', marginBottom: 28, lineHeight: 1.65 }}>
           {step3DaysToExam && step3Course
-            ? `Every session between now and your ${step3ExamWord}, mapped out, optimized, and ready. Unlock it all with a 3-day free trial. No charge today.`
+            ? `Every session between now and your ${step3ExamWord}, mapped out, optimized, and ready. Unlock it all with a 3-day free trial. Cancel anytime.`
             : schoolType === 'hs'
             ? 'Built for AP classes, finals, and everything between. See the difference in your first study session.'
             : schoolType === 'exam'
@@ -785,7 +785,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             </div>
           ))}
           <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(107,143,255,.15)', fontSize: 11, color: 'rgba(255,255,255,.35)', lineHeight: 1.5 }}>
-            After 3 days, $2.99/wk. Cancel anytime. No charge today.
+            After 3 days, $2.99/wk. Cancel anytime. Cancel anytime.
           </div>
         </div>
 
@@ -864,7 +864,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,.35)' }}
           onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,.18)' }}
         >
-          No thanks, I'll skip the 7 free days
+          No thanks, I'll skip the 3 days
         </button>
 
         <div style={{ textAlign: 'center' }}>

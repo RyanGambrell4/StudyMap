@@ -806,7 +806,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               textTransform: 'uppercase', letterSpacing: '0.5px',
               marginBottom: '10px',
             }}>
-              3 days on us · No charge today
+              3-day free trial · Cancel anytime
             </div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 6px', letterSpacing: '-0.3px' }}>
               Try Unlimited, free for 7 days.

@@ -936,7 +936,7 @@ export default function DashboardView({
                 disabled={trialBannerLoading}
                 style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
               >
-                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · $0 today'}
+                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · Cancel anytime'}
               </button>
               <button
                 onClick={() => { localStorage.setItem('se_first_blueprint_cta_dismissed', '1'); setFirstBlueprintCtaDismissed(true); track('first_blueprint_cta_dismissed') }}
@@ -984,7 +984,7 @@ export default function DashboardView({
                 disabled={trialBannerLoading}
                 style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
               >
-                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · $0 today'}
+                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · Cancel anytime'}
               </button>
               <button onClick={() => { localStorage.setItem('studyedge_trial_card_dismissed_at', String(Date.now())); setTrialCardDismissed(true); track('trial_card_dismissed', { streak }) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: D.textDim, fontSize: 20, lineHeight: 1, padding: '0 4px', flexShrink: 0 }} aria-label="Dismiss">×</button>
             </div>
@@ -1041,7 +1041,7 @@ export default function DashboardView({
                 disabled={trialBannerLoading}
                 style={{ background: '#7C3AED', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
               >
-                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · $0 today'}
+                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · Cancel anytime'}
               </button>
               <button
                 onClick={() => { sessionStorage.setItem('se_session_nudge_dismissed', '1'); setSessionNudgeDismissed(true); track('sessions_nudge_dismissed', { sessions_count: sessionsCount }) }}
@@ -1079,7 +1079,7 @@ export default function DashboardView({
                 disabled={trialBannerLoading}
                 style={{ background: D.accent, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
               >
-                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · $0 today'}
+                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · Cancel anytime'}
               </button>
               <button
                 onClick={() => {
