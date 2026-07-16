@@ -875,7 +875,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
           },
           {
             label: 'FOCUS SCORE', value: focusScore, unit: '/100',
-            sub: focusScore >= 80 ? 'Top 15% performance' : focusScore >= 60 ? 'Good momentum' : 'Keep building habits',
+            sub: focusScore >= 80 ? 'Strong momentum this week' : focusScore >= 60 ? 'Good momentum' : 'Keep building habits',
             color: D.purple, delta: `+${Math.min(focusScore, 8)}`,
             spark: sparklines.focusArr,
           },
@@ -922,7 +922,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
               <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 4 }}>STANDOUT MOMENTS</div>
               <div style={{ fontSize: 13, color: D.textMuted }}>Your best sessions this week</div>
             </div>
-            <span style={{ fontSize: 10, fontWeight: 600, color: D.accent, background: `${D.accent}1a`, border: `1px solid ${D.accent}30`, borderRadius: 5, padding: '3px 9px', whiteSpace: 'nowrap' }}>AI-picked</span>
+            <span style={{ fontSize: 10, fontWeight: 600, color: D.accent, background: `${D.accent}1a`, border: `1px solid ${D.accent}30`, borderRadius: 5, padding: '3px 9px', whiteSpace: 'nowrap' }}>This week</span>
           </div>
           {standoutMoments.length === 0 ? (
             <p style={{ color: D.textDim, fontSize: 13, margin: 0 }}>Complete sessions this week to see standout moments.</p>
@@ -1220,7 +1220,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '22px 26px' }}>
           <div style={{ marginBottom: 16 }}>
             <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 4 }}>AI INSIGHTS &nbsp;·&nbsp; THIS WEEK</div>
-            <div style={{ fontSize: 12.5, color: D.textMuted }}>Patterns detected from your recent study history</div>
+            <div style={{ fontSize: 12.5, color: D.textMuted }}>Based on your sessions this week</div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
             {aiInsights.map((ins, i) => (

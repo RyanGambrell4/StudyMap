@@ -110,7 +110,7 @@ function ProgressRing({ value, color }) {
   return (
     <div style={{ position: 'relative', width: 44, height: 44, flexShrink: 0 }}>
       <svg width="44" height="44" viewBox="0 0 44 44" style={{ transform: 'rotate(-90deg)' }}>
-        <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="3" />
+        <circle cx="22" cy="22" r="18" fill="none" stroke="rgba(0,0,0,0.08)" strokeWidth="3" />
         <circle cx="22" cy="22" r="18" fill="none" stroke={color} strokeWidth="3" strokeLinecap="round"
           strokeDasharray={c} strokeDashoffset={off}
           style={{ filter: `drop-shadow(0 0 4px ${color})`, transition: 'stroke-dashoffset 0.4s' }} />

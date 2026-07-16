@@ -223,15 +223,18 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
           if (transcript) {
             setInput(prev => prev ? prev + ' ' + transcript : transcript)
             track('voice_input_used', { course_name: courseName })
+          } else {
+            setError('Could not transcribe audio. Try again.')
           }
         } catch {
-          // transcription failed silently
+          setError('Transcription failed. Try again.')
         }
       })
       recorderRef.current = recorder
       await recorder.start()
     } catch {
       setRecording(false)
+      setError('Could not access microphone. Check your browser permissions.')
     }
   }
 
@@ -366,7 +369,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
             gap: 10,
           }}>
             <span style={{ fontSize: 12.5, color: '#3B61C4', lineHeight: 1.4 }}>
-              Your tutor remembers the last 10 messages. Upgrade to Unlimited for full session memory.
+              Long conversations drop early context. Unlimited keeps the full session in memory.
             </span>
             <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
               <button
@@ -392,7 +395,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
 
       {/* Error */}
       {error && (
-        <div className="mx-4 mb-2 shrink-0 px-3 py-2 bg-red-50 border border-red-200 rounded-xl text-red-600 text-xs">
+        <div style={{ margin: '0 16px 8px', flexShrink: 0, padding: '8px 12px', background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 10, fontSize: 12, color: '#DC2626' }}>
           {error}
         </div>
       )}

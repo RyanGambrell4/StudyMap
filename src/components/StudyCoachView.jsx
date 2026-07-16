@@ -114,11 +114,8 @@ function PageHeader({ step, uiMode, onBack, onNewPlan }) {
             </p>
           ) : (
             <>
-              <p style={{ margin: '6px 0 2px', fontSize: 14, color: D.muted, maxWidth: 680 }}>
-                Built only from what <em>you</em> tell me. I won't invent topics, dates, or facts. The more you share, the sharper your plan.
-              </p>
-              <p style={{ margin: 0, fontSize: 13, color: D.indigo, fontWeight: 500 }}>
-                Be as specific as possible for the best experience.
+              <p style={{ margin: '6px 0 0', fontSize: 14, color: D.muted, maxWidth: 680 }}>
+                Built only from what <em>you</em> tell me. More topics and deadlines mean a more specific plan.
               </p>
             </>
           )}
@@ -905,7 +902,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
                     </div>
                   </div>
                   <p style={{ fontSize: 12.5, color: D.dim, lineHeight: 1.55, margin: 0, fontStyle: 'italic' }}>
-                    Tell me your goal, topics, and dates. I'll build a week-by-week plan grounded only in what you share.
+                    Share your topics, goals, and deadlines. I'll build a week-by-week plan from exactly what you give me.
                   </p>
                   <button onClick={() => onBuildPlan(idx)} style={{ background: 'none', border: 'none', padding: 0, color: D.indigo, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', marginTop: 'auto' }}>
                     Build Plan →
