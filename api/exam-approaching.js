@@ -238,7 +238,7 @@ ${preheader(daysLeft <= 3 ? `${examTitle}: ${daysLeft} day${daysLeft !== 1 ? 's'
             </table>
             <p style="margin:14px 0 0;font-size:13px;color:#6B6B6B;line-height:1.55;">
               Pro is <strong style="color:#111111;">$2.99/week</strong>.
-              ${trialUsed ? 'You know what you get.' : `Try free for 3 days — no charge until day 8.`}
+              ${trialUsed ? 'You know what you get.' : `Try free for 3 days — no charge until day 4.`}
             </p>
           </td></tr>
         </table>`}
