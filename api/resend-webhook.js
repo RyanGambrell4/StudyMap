@@ -76,7 +76,7 @@ async function posthogCapture(event, distinctId, properties = {}) {
 // ─── Campaign fallback for emails sent before tagging was added ──────────────
 function campaignFromSubject(subject = '') {
   const s = subject.toLowerCase()
-  if (s.includes('7 days') && s.includes('free'))        return 'welcome'
+  if (s.includes('3 days') && s.includes('free'))        return 'welcome'
   if (s.includes('one thing to do'))                      return 'early_activation'
   if (s.includes('day 1') || s.includes('do this first')) return 'day1_trial_tips'
   if (s.includes('half gone') || s.includes('day 2'))     return 'day2_trial_progress'

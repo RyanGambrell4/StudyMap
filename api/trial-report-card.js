@@ -1,7 +1,7 @@
 /**
  * Trial report card — fires the moment a trial ends for non-converters.
  *
- * Window: trialUsedAt was 168–192h ago (trial ended 0–24h ago), plan !== 'pro'/'unlimited'.
+ * Window: trialUsedAt was 72–96h ago (trial ended 0–24h ago), plan !== 'pro'/'unlimited'.
  * This fills the dead zone between trial-warning (day 2) and trial-expired (day 4-5).
  * The trial-end moment is the highest-leverage conversion window — the student just
  * lost something real — and the most effective message is their OWN data, not a
@@ -39,12 +39,12 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, skipped: true, reason: 'already_ran_today' })
   }
 
-  // Window: trial ended in the last 24h = trialUsedAt was 168–192h ago.
-  // trial-warning fires at 144–168h (24h remaining), so this is right after the
+  // Window: trial ended in last 24h = trialUsedAt was 72–96h ago (3-day trial).
+  // trial-warning fires at 48–72h (24h remaining), so this is right after the
   // trial-warning window closes — no overlap.
   const now = new Date()
-  const windowStart = new Date(now - 192 * 60 * 60 * 1000) // 8 days ago
-  const windowEnd   = new Date(now - 168 * 60 * 60 * 1000) // 7 days ago
+  const windowStart = new Date(now - 96 * 60 * 60 * 1000) // 4 days ago
+  const windowEnd   = new Date(now - 72 * 60 * 60 * 1000) // 3 days ago
 
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
