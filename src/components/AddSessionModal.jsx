@@ -21,6 +21,7 @@ export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }
     if (!selectedDate) { setError('Please select a date'); return }
     const dur = parseInt(duration)
     if (!dur || dur < 5) { setError('Duration must be at least 5 minutes'); return }
+    if (dur > 480) { setError('Duration cannot exceed 480 minutes (8 hours)'); return }
 
     let stStr = null, etStr = null
     if (startTime) {
@@ -99,7 +100,6 @@ export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }
             <input
               type="date"
               value={selectedDate}
-              min={new Date().toISOString().split('T')[0]}
               onChange={e => { setSelectedDate(e.target.value); setError('') }}
               style={inputStyle}
             />
@@ -133,7 +133,7 @@ export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }
               <input type="number" value={duration} min="5" max="480" onChange={e => { setDuration(e.target.value); setError('') }} style={inputStyle} />
             </div>
             <div>
-              <label style={labelStyle}>Start time (opt.)</label>
+              <label style={labelStyle}>Start time (optional)</label>
               <input type="time" value={startTime} onChange={e => setStartTime(e.target.value)} style={inputStyle} />
             </div>
           </div>

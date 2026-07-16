@@ -240,7 +240,7 @@ const LIMIT_MESSAGES = {
     body: "$4.99/wk. Unlimited courses, unlimited AI, AI Tutor with session memory, advanced analytics, and every study tool. Cancel anytime.",
   },
   'nav-trial': {
-    tag: 'Try Unlimited free for 7 days',
+    tag: 'Try Unlimited, 3-day free trial',
     title: 'Full access. No restrictions.',
     body: "Unlimited courses, unlimited AI actions, AI Tutor with session memory, advanced exam analytics, and every study tool. $4.99/wk after. Cancel anytime.",
   },
@@ -423,11 +423,17 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     if (!pendingPlan) return
     track('trust_screen_confirmed', { plan: pendingPlan.planId, billing: pendingPlan.billingPeriod, trigger_feature: trigger })
     setLoading(pendingPlan.planId)
-    const url = await createCheckoutSession(pendingPlan.planId, pendingPlan.billingPeriod, userEmail, userId)
-    setLoading(null)
-    if (!url) { setPlanError('Checkout failed. No charge was made. Please try again.'); setScreen('plans'); return }
-    if (url?.alreadySubscribed) { onClose(); return }
-    window.location.href = url
+    try {
+      const url = await createCheckoutSession(pendingPlan.planId, pendingPlan.billingPeriod, userEmail, userId)
+      if (!url) { setPlanError('Checkout failed. No charge was made. Please try again.'); setScreen('plans'); return }
+      if (url?.alreadySubscribed) { onClose(); return }
+      window.location.href = url
+    } catch {
+      setPlanError('Checkout failed. No charge was made. Please try again.')
+      setScreen('plans')
+    } finally {
+      setLoading(null)
+    }
   }
 
   const isAnnual = billingPeriod === 'yearly'
@@ -524,7 +530,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 10px', letterSpacing: '-0.4px', lineHeight: 1.2 }}>{question}</h2>
             <p style={{ fontSize: '0.875rem', color: '#6B6B6B', margin: '0 0 28px', lineHeight: 1.55 }}>
               {showTrialCard
-                ? 'Your study plan is still running. Unlock everything - AI tutor, unlimited sessions, and your full schedule - free for 7 days.'
+                ? 'Your study plan is still running. Unlock everything - AI tutor, unlimited sessions, and your full schedule - free for 3 days.'
                 : 'Your study plan is still running. Upgrade to keep your AI tutor, unlimited focus sessions, and full schedule. Everything you need to finish strong.'}
             </p>
             <button
@@ -538,7 +544,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               {trialLoading ? 'Loading…' : showTrialCard ? 'Start free 3-day trial →' : 'Yes, keep going →'}
             </button>
             {showTrialCard && (
-              <p style={{ fontSize: '0.72rem', color: '#9B9B9B', margin: '-4px 0 10px' }}>Card required · $0 today · Cancel anytime</p>
+              <p style={{ fontSize: '0.72rem', color: '#9B9B9B', margin: '-4px 0 10px' }}>3-day free trial · Cancel anytime</p>
             )}
             {trialError && (
               <p style={{ fontSize: '0.78rem', color: '#EF4444', margin: '0 0 8px' }}>{trialError}</p>
@@ -690,7 +696,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             </p>
             {!isUnlimitedTrigger && (
               <p style={{ color: '#9B9B9B', fontSize: '0.78rem', margin: 0 }}>
-                $0 today · From $2.31/week · Cancel with one tap
+                3-day free trial · From $2.31/week · Cancel anytime
               </p>
             )}
           </div>
@@ -809,12 +815,11 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               3-day free trial · Cancel anytime
             </div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 6px', letterSpacing: '-0.3px' }}>
-              Try Unlimited, free for 7 days.
+              Try Unlimited, free for 3 days.
             </h3>
             <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 14px', lineHeight: 1.5 }}>
               Full access starting today. We'll email you the day before your trial ends so nothing catches you off guard.
             </p>
-            {/* $0 today — the single most important reassurance on this screen. */}
             <div style={{
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
               background: 'rgba(5,150,105,0.08)', border: '1px solid rgba(5,150,105,0.22)',
@@ -822,9 +827,9 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               fontSize: '0.82rem', fontWeight: 700, color: '#047857',
             }}>
               <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <path d="M12 8v4l3 3" /><circle cx="12" cy="12" r="10" />
+                <path d="M5 13l4 4L19 7" />
               </svg>
-              $0 charged today
+              Card required · Cancel anytime
             </div>
             {trialError && (
               <p style={{ fontSize: '0.78rem', color: '#EF4444', margin: '0 0 10px' }}>{trialError}</p>
@@ -846,10 +851,10 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.opacity = '0.88' }}
               onMouseLeave={e => { e.currentTarget.style.opacity = trialLoading ? '0.75' : '1' }}
             >
-              {trialLoading ? 'Loading…' : 'Continue - free for 7 days'}
+              {trialLoading ? 'Loading…' : 'Continue - free for 3 days'}
             </button>
             <p style={{ margin: '10px 0 0', fontSize: '0.72rem', color: '#9B9B9B' }}>
-              Card required · $0 today · Cancel anytime
+              3-day free trial · Cancel anytime
             </p>
           </div>
         )}
