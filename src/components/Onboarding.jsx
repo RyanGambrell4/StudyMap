@@ -652,7 +652,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           {/* AI Coach bubble */}
           <div style={{ background: 'rgba(107,143,255,.07)', border: '1px solid rgba(107,143,255,.2)', borderRadius: 14, padding: '14px 16px', marginBottom: 20, animation: 'fade-up 0.35s ease 0.16s both' }}>
             <div style={{ display: 'flex', gap: 10 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: 'linear-gradient(135deg, #3B61C4, #7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: '#3B61C4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/><line x1="12" y1="4" x2="12" y2="2"/><circle cx="12" cy="2" r="1" fill="rgba(255,255,255,0.9)" stroke="none"/></svg>
               </div>
               <div>
@@ -669,7 +669,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           {/* Auto-advance progress bar */}
           <div style={{ marginBottom: 16 }}>
             <div style={{ height: 3, background: 'rgba(255,255,255,.07)', borderRadius: 3, overflow: 'hidden' }}>
-              <div style={{ height: '100%', background: 'linear-gradient(90deg, #3B61C4, #7C3AED)', borderRadius: 3, animation: 'countdown-bar 10s linear forwards' }} />
+              <div style={{ height: '100%', background: '#3B61C4', borderRadius: 3, animation: 'countdown-bar 10s linear forwards' }} />
             </div>
             <p style={{ color: 'rgba(255,255,255,.25)', fontSize: '0.69rem', textAlign: 'center', marginTop: 6 }}>
               Opening your full plan in a moment…
@@ -749,10 +749,10 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             </span>
           ) : (
             <span style={{ display: 'block', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              Try every Pro feature.
+              Try every Unlimited feature.
             </span>
           )}
-          <span style={{ display: 'block', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(135deg, #6B8FFF, #A78BFA)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+          <span style={{ display: 'block', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
             {step3DaysToExam && step3Course ? "Here's your plan. Free for 3 days." : 'Free for 3 days.'}
           </span>
         </h1>
@@ -772,8 +772,8 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         <div style={{ background: 'rgba(107,143,255,.07)', border: '1px solid rgba(107,143,255,.22)', borderRadius: 14, padding: '18px 20px', marginBottom: 16 }}>
           <p style={{ fontSize: 10, fontWeight: 700, color: '#6B8FFF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Everything unlocked with your 3-day trial</p>
           {[
-            '5 courses to plan your full semester',
-            '100 AI tutor messages/month',
+            'Unlimited courses',
+            'Unlimited AI tutor messages',
             'AI Study Coach with week-by-week session plan',
             'Unlimited Session Blueprints',
             'Unlimited Focus sessions (no 30-min cap)',
@@ -823,13 +823,13 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           disabled={trialLoading}
           style={{
             width: '100%', padding: '16px',
-            background: 'linear-gradient(135deg, #3B61C4, #7C3AED)',
+            background: '#3B61C4',
             border: 'none', borderRadius: 14,
             color: '#fff', fontSize: '1rem', fontWeight: 800,
             cursor: trialLoading ? 'not-allowed' : 'pointer',
             letterSpacing: '-0.01em', marginBottom: 8,
             opacity: trialLoading ? 0.7 : 1,
-            boxShadow: '0 4px 32px rgba(59,97,196,.45), 0 0 0 1px rgba(124,58,237,.3)',
+            boxShadow: '0 4px 32px rgba(59,97,196,.45)',
             transition: 'transform .15s, opacity .2s',
           }}
           onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.transform = 'scale(1.01)' }}

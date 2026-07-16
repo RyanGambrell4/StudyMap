@@ -14,7 +14,7 @@ const PREPAYWALL_SESSION_KEY = 'se_prepaywall_seen_v1'
 const BILLING_PERIODS = [
   { id: 'weekly',  label: 'Weekly',  badge: null,          best: false },
   { id: 'monthly', label: 'Monthly', badge: 'Save 17%',    best: false },
-  { id: 'yearly',  label: 'Annual',  badge: 'Best Value ✦', best: true  },
+  { id: 'yearly',  label: 'Annual',  badge: 'Best Value',    best: true  },
 ]
 
 // Plan tier → billing period → display price.
@@ -23,8 +23,8 @@ const BILLING_PERIODS = [
 const PLANS = {
   pro: {
     name: 'Pro',
-    color: '#7C5CFA',
-    gradient: 'linear-gradient(135deg, #4F7EF7, #7C5CFA)',
+    color: '#3B61C4',
+    gradient: 'linear-gradient(135deg, #3B61C4, #2F4FA0)',
     prices: {
       weekly:  '$2.99/wk',
       monthly: '$9.99/mo',
@@ -463,7 +463,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     const aiUsed = getFeatureUsage('aiTutor')?.count ?? 0
     const stats = [
       sessionsCompleted > 0 ? { n: sessionsCompleted, label: sessionsCompleted === 1 ? 'session completed' : 'sessions completed', color: '#3B61C4', bg: 'rgba(59,97,196,0.08)', border: 'rgba(59,97,196,0.18)' } : null,
-      aiUsed > 0 ? { n: aiUsed, label: aiUsed === 1 ? 'AI question answered' : 'AI questions answered', color: '#7C3AED', bg: 'rgba(124,58,237,0.08)', border: 'rgba(124,58,237,0.18)' } : null,
+      aiUsed > 0 ? { n: aiUsed, label: aiUsed === 1 ? 'AI question answered' : 'AI questions answered', color: '#3B61C4', bg: 'rgba(59,97,196,0.08)', border: 'rgba(59,97,196,0.18)' } : null,
       coursesCount > 0 ? { n: coursesCount, label: coursesCount === 1 ? 'course set up' : 'courses set up', color: '#059669', bg: 'rgba(5,150,105,0.08)', border: 'rgba(5,150,105,0.18)' } : null,
     ].filter(Boolean)
     return (
@@ -472,7 +472,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
           <div className="pw-modal" style={{ ...MODAL_BASE, maxWidth: 480 }}>
             <button onClick={() => handleDismiss('close_button')} style={CLOSE_BTN} aria-label="Close"><CloseX /></button>
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
-              <div style={{ width: 56, height: 56, background: 'linear-gradient(135deg, #4F7EF7, #7C5CFA)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
+              <div style={{ width: 56, height: 56, background: '#3B61C4', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
                 <svg width="26" height="26" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               </div>
               <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(234,88,12,0.08)', border: '1px solid rgba(234,88,12,0.2)', borderRadius: 999, padding: '3px 10px', fontSize: '0.68rem', fontWeight: 800, color: '#EA580C', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 12 }}>
@@ -498,7 +498,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             <p style={{ fontSize: '0.875rem', color: '#6B6B6B', margin: '0 0 20px', lineHeight: 1.55, textAlign: 'center' }}>
               Upgrade to keep full access. Your AI tutor, focus sessions, and everything you set up are still here.
             </p>
-            <button onClick={() => setScreen('plans')} style={{ width: '100%', padding: '14px', background: 'linear-gradient(135deg, #3B61C4, #7C3AED)', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.01em', marginBottom: 10, transition: 'opacity 0.15s' }} onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }} onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}>
+            <button onClick={() => setScreen('plans')} style={{ width: '100%', padding: '14px', background: '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.01em', marginBottom: 10, transition: 'opacity 0.15s' }} onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }} onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}>
               Keep everything →
             </button>
             <button onClick={() => handleDismiss('stats_skip')} style={{ width: '100%', background: 'none', border: 'none', padding: '8px', color: '#9B9B9B', fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit' }}>
@@ -696,7 +696,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             </p>
             {!isUnlimitedTrigger && (
               <p style={{ color: '#9B9B9B', fontSize: '0.78rem', margin: 0 }}>
-                3-day free trial · From $2.31/week · Cancel anytime
+                3-day Unlimited trial · $4.99/wk after · Cancel anytime
               </p>
             )}
           </div>
@@ -972,7 +972,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 )}
                 {planId === 'unlimited' && !trialUsed && !trialActive && (
                   <div style={{ fontSize: '0.68rem', color: '#059669', marginTop: '4px', fontWeight: 700 }}>
-                    $0 today · 3-day free trial · Cancel anytime
+                    Card required · 3-day trial · $4.99/wk after
                   </div>
                 )}
               </div>
