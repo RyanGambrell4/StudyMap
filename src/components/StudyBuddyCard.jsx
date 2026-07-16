@@ -139,7 +139,7 @@ export default function StudyBuddyCard({ userId: propUserId }) {
             <div>
               <div style={{ background: 'rgba(59,97,196,0.05)', border: '1px solid rgba(59,97,196,0.12)', borderRadius: 12, padding: '14px 16px', marginBottom: 12 }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 10 }}>
-                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: 'linear-gradient(135deg,#3B61C4,#7C3AED)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15, flexShrink: 0 }}>
+                  <div style={{ width: 38, height: 38, borderRadius: '50%', background: '#3B61C4', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontWeight: 700, fontSize: 15, flexShrink: 0 }}>
                     {buddy.displayName.charAt(0).toUpperCase()}
                   </div>
                   <div style={{ flex: 1 }}>

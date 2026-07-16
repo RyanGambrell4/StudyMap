@@ -1300,7 +1300,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 )}
                 {onOpenBrainDump && (
                   <button onClick={handleBrainDump} className="w-full py-3 rounded-2xl font-semibold text-sm flex items-center justify-center gap-2"
-                    style={{ backgroundColor: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.22)', color: '#8B5CF6' }}>
+                    style={{ backgroundColor: 'rgba(5,150,105,0.08)', border: '1px solid rgba(5,150,105,0.22)', color: '#059669' }}>
                     <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
                     Reinforce with Brain Dump
                   </button>

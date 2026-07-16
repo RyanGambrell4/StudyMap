@@ -782,7 +782,7 @@ export default function App() {
       {showOutput && trialNudgeVisible && !trialNudgeDismissed && getActivePlan() === 'free' && !hasUsedTrial() && (
         <div style={{
           position: 'fixed', bottom: 20, right: 20, zIndex: 998,
-          background: 'linear-gradient(135deg, #3B61C4, #7C3AED)',
+          background: '#3B61C4',
           borderRadius: 14, padding: '12px 14px',
           boxShadow: '0 8px 32px rgba(59,97,196,.45), 0 2px 8px rgba(0,0,0,.2)',
           display: 'flex', alignItems: 'center', gap: 10, maxWidth: 300,

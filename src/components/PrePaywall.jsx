@@ -20,7 +20,7 @@ import { track } from '../lib/analytics'
  */
 
 const ACCENT      = '#3B61C4'
-const ACCENT_ALT  = '#7C5CFA'
+const ACCENT_ALT  = '#2F4FA0'
 const TEXT        = '#111111'
 const MUTED       = '#6B6B6B'
 const BORDER      = 'rgba(0,0,0,0.08)'

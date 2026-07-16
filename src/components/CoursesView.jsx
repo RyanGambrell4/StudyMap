@@ -337,7 +337,7 @@ function ImportBand({ onImportSyllabus }) {
         gradient="linear-gradient(155deg, rgba(232,83,26,0.06) 0%, rgba(99,102,241,0.04) 45%, transparent 100%)"
       />
       <ImportCard
-        icon="calendar" color="#8b5cf6" eyebrow="Sync calendar"
+        icon="calendar" color="#3B61C4" eyebrow="Sync calendar"
         title="Import class schedule"
         desc="Upload an .ics file to sync your class schedule."
         accept=".ics"

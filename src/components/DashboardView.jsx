@@ -1279,7 +1279,7 @@ export default function DashboardView({
                 <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                   <button
                     onClick={e => { e.stopPropagation(); onOpenBrainDump?.() }}
-                    style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, color: '#fff', background: '#8B5CF6', border: 'none', cursor: 'pointer' }}
+                    style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, color: '#fff', background: '#059669', border: 'none', cursor: 'pointer' }}
                   >
                     Try a Brain Dump →
                   </button>
@@ -1368,7 +1368,7 @@ export default function DashboardView({
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 16 }}>
                       <button
                         onClick={e => { e.stopPropagation(); onOpenBrainDump?.() }}
-                        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: '#8B5CF6', background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.2)', cursor: 'pointer' }}
+                        style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: '#059669', background: 'rgba(5,150,105,0.08)', border: '1px solid rgba(5,150,105,0.2)', cursor: 'pointer' }}
                       >
                         Brain Dump
                       </button>
@@ -1400,7 +1400,7 @@ export default function DashboardView({
           {[
             { icon: <IcoBrain />, color: D.blue,    label: 'Study Coach',    sub: 'AI-powered weekly plan',   onClick: () => typeof onOpenStudyCoach === 'function' && onOpenStudyCoach(0) },
             { icon: <IcoGrad />,  color: D.green,   label: 'Grade Hub',      sub: 'Track grades and targets', onClick: () => typeof onNavigateToGrades === 'function' && onNavigateToGrades(0) },
-            { icon: <IcoCards />, color: '#8B5CF6', label: 'Flashcards',     sub: 'Test your knowledge',      onClick: () => typeof onNavigateToTools === 'function' && onNavigateToTools() },
+            { icon: <IcoCards />, color: '#3B61C4', label: 'Flashcards',     sub: 'Test your knowledge',      onClick: () => typeof onNavigateToTools === 'function' && onNavigateToTools() },
           ].map((a, i) => (
             <button
               key={a.label}
@@ -1424,7 +1424,7 @@ export default function DashboardView({
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, padding: '0 4px' }}>
             {[
-              { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>, color: '#8B5CF6', label: 'Brain Dump',  onClick: () => typeof onOpenBrainDump === 'function' && onOpenBrainDump() },
+              { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>, color: '#059669', label: 'Brain Dump',  onClick: () => typeof onOpenBrainDump === 'function' && onOpenBrainDump() },
               { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>, color: D.red,     label: 'Rescue Plan', onClick: () => typeof onOpenExamRescue === 'function' && onOpenExamRescue() },
               { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/></svg>,               color: D.amber,   label: 'Quiz Burst',  onClick: () => typeof onOpenQuizBurst === 'function' && onOpenQuizBurst() },
               { icon: <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>, color: '#0D9488', label: 'Podcast', onClick: () => typeof onOpenPodcast === 'function' && onOpenPodcast() },
