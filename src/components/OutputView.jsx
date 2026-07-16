@@ -217,10 +217,10 @@ function SessionBlock({ session, completed, onToggle }) {
       onClick={() => onToggle(session.id)}
     >
       {session.startTime && (
-        <div className="text-slate-500 text-[9px] font-medium mb-0.5">{session.startTime}</div>
+        <div style={{ fontSize: 9, fontWeight: 500, color: '#9B9B9B', marginBottom: 2 }}>{session.startTime}</div>
       )}
       <div className={`font-semibold truncate ${completed ? 'line-through' : ''}`} style={{ color: session.color.dot }}>{session.courseName}</div>
-      <div className="text-slate-500 text-[10px]">{session.isRecovery ? '↑ Recovery' : session.sessionType}</div>
+      <div style={{ fontSize: 10, color: '#9B9B9B' }}>{session.isRecovery ? '↑ Recovery' : session.sessionType}</div>
     </div>
   )
 }
@@ -233,7 +233,7 @@ function SyllabusEventBlock({ event }) {
       style={{ borderColor: event.color.dot, backgroundColor: `${event.color.dot}18` }}
     >
       <div className="font-semibold truncate" style={{ color: event.color.dot }}>{event.name}</div>
-      <div className="text-slate-400 text-[10px]">{event.type}</div>
+      <div style={{ fontSize: 10, color: '#9B9B9B' }}>{event.type}</div>
     </div>
   )
 }
@@ -241,23 +241,23 @@ function SyllabusEventBlock({ event }) {
 // ─── DayCell ──────────────────────────────────────────────────────────────────
 function DayCell({ day, completedIds, onToggle, syllabusEventsForDay, onAddSession, isLast }) {
   return (
-    <div className={`min-h-[110px] px-1.5 pb-2 group ${!isLast ? 'border-r border-slate-200' : ''} ${day.isPast ? 'opacity-60' : ''}`}>
+    <div className="group" style={{ minHeight: 110, padding: '0 6px 8px', borderRight: !isLast ? '1px solid rgba(0,0,0,0.07)' : 'none', opacity: day.isPast ? 0.6 : 1 }}>
       {/* Day header */}
-      <div className="flex flex-col items-center mb-2 pt-1">
-        <span className={`text-[10px] font-medium uppercase tracking-widest mb-1 ${day.isSunday ? 'text-slate-600' : 'text-slate-500'}`}>{day.dayName}</span>
-        <div className={`w-6 h-6 flex items-center justify-center rounded-full text-xs font-semibold ${
-          day.isToday
-            ? 'bg-indigo-500 text-white'
-            : day.isSunday
-              ? 'text-slate-600'
-              : 'text-slate-400'
-        }`}>
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', marginBottom: 8, paddingTop: 4 }}>
+        <span style={{ fontSize: 10, fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 4, color: day.isSunday ? '#6B6B6B' : '#9B9B9B' }}>{day.dayName}</span>
+        <div style={{
+          width: 24, height: 24, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          borderRadius: '50%', fontSize: 11, fontWeight: 600,
+          background: day.isToday ? '#3B61C4' : 'transparent',
+          color: day.isToday ? '#fff' : day.isSunday ? '#6B6B6B' : '#9B9B9B',
+        }}>
           {day.dayNum}
         </div>
         {!day.isSunday && (
           <button
             onClick={() => onAddSession(day.dateStr)}
-            className="no-print opacity-0 group-hover:opacity-100 transition-opacity mt-1 p-0.5 rounded text-slate-600 hover:text-indigo-400"
+            className="no-print opacity-0 group-hover:opacity-100 transition-opacity"
+            style={{ marginTop: 4, padding: 2, borderRadius: 4, background: 'none', border: 'none', color: '#6B6B6B', cursor: 'pointer' }}
             title="Add session"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -291,7 +291,7 @@ function ShareCardModal({ courses, stats, onClose }) {
   return (
     <div className="fixed inset-0 z-[300] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" onClick={onClose}>
       <div onClick={e => e.stopPropagation()} className="flex flex-col items-center gap-4">
-        <p className="text-slate-400 text-sm">Screenshot this card to share your plan</p>
+        <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)' }}>Screenshot this card to share your plan</p>
         <div style={{
           width: 360, background: 'linear-gradient(160deg, #1e293b 0%, #0f172a 60%)',
           borderRadius: 24, padding: '28px 24px 24px',
@@ -354,7 +354,7 @@ function ShareCardModal({ courses, stats, onClose }) {
           )}
           <div style={{ textAlign: 'center', color: '#334155', fontSize: 11, fontWeight: 500, letterSpacing: '0.04em' }}>getstudyedge.com</div>
         </div>
-        <button onClick={onClose} className="text-slate-500 hover:text-slate-300 text-sm transition-colors">Close</button>
+        <button onClick={onClose} style={{ fontSize: 13, color: 'rgba(255,255,255,0.5)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}>Close</button>
       </div>
     </div>
   )
@@ -1106,7 +1106,7 @@ export default function OutputView({
   }
 
   const handleSyllabusConfirm = (courseIdx, items) => {
-    const NEUTRAL = { name: 'slate', bg: 'bg-slate-500', dot: '#64748b' }
+    const NEUTRAL = { name: 'neutral', bg: '#64748B', dot: '#64748b' }
     const course = courseIdx !== null ? courses[courseIdx] : null
     setSyllabusEvents(prev => [
       ...prev,
@@ -1692,14 +1692,14 @@ export default function OutputView({
               <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-900/10 p-4">
                 <div className="flex items-center justify-between mb-3">
                   <h4 className="text-sm font-medium text-amber-300">Suggested rescheduled times</h4>
-                  <button onClick={() => setRescheduleResults(null)} className="text-slate-500 hover:text-slate-300 transition-colors">
-                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  <button onClick={() => setRescheduleResults(null)} style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,0.4)', cursor: 'pointer' }}>
+                    <svg width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M6 18L18 6M6 6l12 12" />
                     </svg>
                   </button>
                 </div>
                 {rescheduleResults.length === 0 ? (
-                  <p className="text-xs text-slate-500">No suggestions available.</p>
+                  <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.4)' }}>No suggestions available.</p>
                 ) : (
                   <>
                     <div className="space-y-2 mb-4">
@@ -1711,10 +1711,10 @@ export default function OutputView({
                             <div className="flex items-start gap-2 flex-1 min-w-0">
                               <div className="shrink-0 w-1.5 h-1.5 rounded-full bg-amber-400 mt-1.5" />
                               <div className="min-w-0">
-                                <span className="text-slate-300 font-medium">{session?.courseName ?? r.sessionId}</span>
-                                <span className="text-slate-500 mx-1">·</span>
+                                <span style={{ color: 'rgba(255,255,255,0.75)', fontWeight: 500 }}>{session?.courseName ?? r.sessionId}</span>
+                                <span style={{ color: 'rgba(255,255,255,0.3)', margin: '0 4px' }}>·</span>
                                 <span className="text-amber-300">{r.date} {r.suggestedStart}–{r.suggestedEnd}</span>
-                                <p className="text-slate-500 mt-0.5 truncate">{r.reason}</p>
+                                <p style={{ color: 'rgba(255,255,255,0.35)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.reason}</p>
                               </div>
                             </div>
                             <button
@@ -1997,9 +1997,9 @@ export default function OutputView({
         </Suspense>
 
         {/* Print header */}
-        <div className="hidden print:block p-8 border-b border-gray-200">
-          <h1 className="text-3xl font-bold text-gray-900 mb-1">StudyEdge AI · Personalized Study Plan</h1>
-          <p className="text-gray-500">{stats.totalCourses} courses · {stats.totalHours}h planned</p>
+        <div className="hidden print:block" style={{ padding: 32, borderBottom: '1px solid rgba(0,0,0,0.10)' }}>
+          <h1 style={{ margin: '0 0 4px', fontSize: 28, fontWeight: 800, color: '#111111' }}>StudyEdge AI · Personalized Study Plan</h1>
+          <p style={{ margin: 0, color: '#6B6B6B' }}>{stats.totalCourses} courses · {stats.totalHours}h planned</p>
         </div>
 
       </AppShell>

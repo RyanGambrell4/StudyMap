@@ -26,13 +26,13 @@ function Flashcard({ card, flipped, onFlip }) {
         {/* Front */}
         <div className="fc-face bg-white border border-[#E5E5E5] rounded-2xl flex flex-col items-center justify-center p-8 gap-3">
           <span className="text-xs font-semibold uppercase tracking-widest text-[#6B6B6B]">Concept</span>
-          <p className="text-slate-900 text-xl font-bold text-center leading-snug">{card.front}</p>
+          <p className="text-[#111111] text-xl font-bold text-center leading-snug">{card.front}</p>
           <span className="text-[#9B9B9B] text-xs mt-2">Tap to reveal answer</span>
         </div>
         {/* Back */}
         <div className="fc-face fc-back bg-white border border-[#E5E5E5] rounded-2xl flex flex-col items-center justify-center p-8 gap-3">
           <span className="text-xs font-semibold uppercase tracking-widest text-[#6B6B6B]">Answer</span>
-          <p className="text-slate-800 text-base text-center leading-relaxed">{card.back}</p>
+          <p className="text-[#111111] text-base text-center leading-relaxed">{card.back}</p>
         </div>
       </div>
     </div>
@@ -69,8 +69,8 @@ function QuizQuestion({ question, onAnswer }) {
             {(question.type === 'mc' || question.type === 'multiple_choice') ? 'Multiple Choice' : question.type === 'tf' ? 'True / False' : 'Fill in the Blank'}
           </span>
         </div>
-        <p className="text-slate-900 font-semibold text-base leading-relaxed">{question.question}</p>
-        {question.hint && <p className="text-slate-500 text-xs mt-1">{question.hint}</p>}
+        <p className="text-[#111111] font-semibold text-base leading-relaxed">{question.question}</p>
+        {question.hint && <p className="text-[#9B9B9B] text-xs mt-1">{question.hint}</p>}
       </div>
 
       {/* Answers */}
@@ -89,11 +89,11 @@ function QuizQuestion({ question, onAnswer }) {
                 className={`w-full text-left px-4 py-3 rounded-xl border text-sm font-medium transition-all ${
                   showRight ? 'bg-emerald-50 border-emerald-400 text-emerald-700' :
                   showWrong ? 'bg-red-50 border-red-400 text-red-700' :
-                  isSelected ? 'bg-slate-100 border-slate-400 text-slate-900' :
-                  'bg-white border-[#E5E5E5] text-slate-700 hover:border-[#3B61C4] hover:text-slate-900'
+                  isSelected ? 'bg-[#F0EFE9] border-[#D4D4D4] text-[#111111]' :
+                  'bg-white border-[#E5E5E5] text-[#6B6B6B] hover:border-[#3B61C4] hover:text-[#111111]'
                 }`}
               >
-                <span className="text-slate-500 mr-2">{String.fromCharCode(65 + i)}.</span>
+                <span className="text-[#9B9B9B] mr-2">{String.fromCharCode(65 + i)}.</span>
                 {opt}
                 {showRight && (
                   <svg className="inline-block ml-2 w-4 h-4 text-emerald-600 align-text-bottom" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.25} d="M5 13l4 4L19 7" /></svg>
@@ -105,7 +105,7 @@ function QuizQuestion({ question, onAnswer }) {
             )
           })}
           {revealed && question.explanation && (
-            <p className="text-slate-500 text-xs px-1 mt-1">{question.explanation}</p>
+            <p className="text-[#9B9B9B] text-xs px-1 mt-1">{question.explanation}</p>
           )}
         </div>
       )}
@@ -125,8 +125,8 @@ function QuizQuestion({ question, onAnswer }) {
                 className={`flex-1 py-3 rounded-xl border font-semibold text-sm transition-all ${
                   showRight ? 'bg-emerald-50 border-emerald-400 text-emerald-700' :
                   showWrong ? 'bg-red-50 border-red-400 text-red-700' :
-                  isSelected ? 'bg-slate-100 border-slate-400 text-slate-900' :
-                  'bg-white border-[#E5E5E5] text-slate-700 hover:border-[#3B61C4] hover:text-slate-900'
+                  isSelected ? 'bg-[#F0EFE9] border-[#D4D4D4] text-[#111111]' :
+                  'bg-white border-[#E5E5E5] text-[#6B6B6B] hover:border-[#3B61C4] hover:text-[#111111]'
                 }`}
               >
                 <span className="flex items-center justify-between gap-2">
@@ -150,7 +150,7 @@ function QuizQuestion({ question, onAnswer }) {
             disabled={revealed}
             placeholder="Type your answer…"
             autoFocus
-            className="w-full bg-white border border-[#E5E5E5] rounded-xl px-4 py-3 text-slate-900 placeholder-[#9B9B9B] focus:outline-none focus:ring-2 focus:ring-[#3B61C4] text-sm"
+            className="w-full bg-white border border-[#E5E5E5] rounded-xl px-4 py-3 text-[#111111] placeholder-[#9B9B9B] focus:outline-none focus:ring-2 focus:ring-[#3B61C4] text-sm"
           />
           {!revealed && (
             <button
@@ -899,22 +899,22 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
         <div className="space-y-5">
           {/* Back to hub */}
           <div className="flex items-center gap-3 mb-2">
-            <button onClick={() => setMode('hub')} className="flex items-center gap-2 text-[#6B6B6B] hover:text-slate-900 text-sm transition-colors">
+            <button onClick={() => setMode('hub')} className="flex items-center gap-2 text-[#6B6B6B] hover:text-[#111111] text-sm transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               Back
             </button>
-            <h1 className="text-lg font-bold text-slate-900">Upload Material</h1>
+            <h1 className="text-lg font-bold text-[#111111]">Upload Material</h1>
           </div>
           {/* Course selector - always visible at top */}
           {courses.length > 0 && (
             <div>
-              <label className="block text-xs font-medium text-slate-400 mb-1.5">Which course is this for?</label>
+              <label className="block text-xs font-medium text-[#9B9B9B] mb-1.5">Which course is this for?</label>
               <select
                 value={selectedCourse ?? ''}
                 onChange={e => setSelectedCourse(e.target.value === '' ? null : Number(e.target.value))}
-                className="w-full bg-white border border-[#E5E5E5] rounded-xl px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B61C4] appearance-none"
+                className="w-full bg-white border border-[#E5E5E5] rounded-xl px-4 py-2.5 text-[#111111] text-sm focus:outline-none focus:ring-2 focus:ring-[#3B61C4] appearance-none"
               >
                 <option value="">No course</option>
                 {courses.map((c, i) => (
@@ -968,7 +968,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             {isExtracting ? (
               <div className="text-center">
                 <p className="font-semibold" style={{ color: '#2563eb' }}>Extracting text…</p>
-                <p className="text-slate-500 text-xs mt-1">This may take a moment</p>
+                <p className="text-[#9B9B9B] text-xs mt-1">This may take a moment</p>
               </div>
             ) : uploadedFile && hasText ? (
               <div className="text-center">
@@ -987,7 +987,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
           {/* Scan handwritten notes */}
           <div>
-            <p className="text-xs text-slate-500 text-center mb-3">or</p>
+            <p className="text-xs text-[#9B9B9B] text-center mb-3">or</p>
             <input
               ref={scanInputRef}
               type="file"
@@ -1026,7 +1026,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
           {/* Upload lecture audio */}
           <div>
-            <p className="text-xs text-slate-500 text-center mb-3">or</p>
+            <p className="text-xs text-[#9B9B9B] text-center mb-3">or</p>
             <button
               onClick={() => { setAudioError(''); audioInputRef.current?.click() }}
               disabled={isTranscribingAudio}
@@ -1061,8 +1061,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
           {/* Paste box */}
           <div>
-            <p className="text-xs text-slate-500 text-center mb-3">or</p>
-            <label className="block text-xs font-medium text-slate-400 mb-1.5">Paste your notes directly</label>
+            <p className="text-xs text-[#9B9B9B] text-center mb-3">or</p>
+            <label className="block text-xs font-medium text-[#9B9B9B] mb-1.5">Paste your notes directly</label>
             <textarea
               value={pastedText}
               onChange={e => {
@@ -1071,19 +1071,19 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               }}
               placeholder="Paste lecture notes, slides text, or any course material here…"
               rows={5}
-              className="w-full bg-white border border-[#E5E5E5] rounded-xl px-4 py-3 text-slate-800 placeholder-[#9B9B9B] focus:outline-none focus:border-[#3B61C4] text-sm resize-none leading-relaxed"
+              className="w-full bg-white border border-[#E5E5E5] rounded-xl px-4 py-3 text-[#111111] placeholder-[#9B9B9B] focus:outline-none focus:border-[#3B61C4] text-sm resize-none leading-relaxed"
             />
             {pastedText.length > 0 && pastedText.length <= 50 && (
               <p className="text-amber-400 text-xs mt-1">Paste at least a few sentences to generate useful materials.</p>
             )}
             {pastedText.length > 50 && (
-              <p className="text-slate-600 text-xs mt-1">{pastedText.trim().split(/\s+/).length.toLocaleString()} words</p>
+              <p className="text-[#6B6B6B] text-xs mt-1">{pastedText.trim().split(/\s+/).length.toLocaleString()} words</p>
             )}
           </div>
 
           {/* YouTube lecture import */}
           <div>
-            <p className="text-xs text-slate-500 text-center mb-3">or import a YouTube lecture</p>
+            <p className="text-xs text-[#9B9B9B] text-center mb-3">or import a YouTube lecture</p>
             <div className="flex gap-2">
               <div style={{ flex: 1, position: 'relative' }}>
                 <span style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
@@ -1135,7 +1135,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             <div>
               <button
                 onClick={() => setShowTextPreview(v => !v)}
-                className="flex items-center gap-2 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+                className="flex items-center gap-2 text-xs text-[#9B9B9B] hover:text-[#D4D4D4] transition-colors"
               >
                 <svg className={`w-3.5 h-3.5 transition-transform ${showTextPreview ? 'rotate-90' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -1155,7 +1155,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             <div className="bg-white rounded-2xl px-6 py-8 flex flex-col items-center gap-4" style={{ border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
               <Spinner size="md" />
               <div className="text-center">
-                <p className="text-slate-800 font-semibold">{loadingMessage}</p>
+                <p className="text-[#111111] font-semibold">{loadingMessage}</p>
                 <p className="text-[#6B6B6B] text-xs mt-1">This usually takes 5–10 seconds</p>
               </div>
             </div>
@@ -1175,13 +1175,13 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 <div className="flex flex-col gap-1.5">
                   <button
                     onClick={() => handleGenerateQuiz(false)}
-                    className="bg-white hover:bg-slate-50 border border-[#E5E5E5] text-slate-700 font-semibold py-2 px-4 rounded-xl text-xs transition-colors"
+                    className="bg-white hover:bg-[#F7F6F3] border border-[#E5E5E5] text-[#6B6B6B] font-semibold py-2 px-4 rounded-xl text-xs transition-colors"
                   >
                     Quiz
                   </button>
                   <button
                     onClick={() => handleGenerateQuiz(true)}
-                    className="bg-white hover:bg-slate-50 border border-amber-300 text-amber-600 font-semibold py-2 px-4 rounded-xl text-xs transition-colors"
+                    className="bg-white hover:bg-[#F7F6F3] border border-amber-300 text-amber-600 font-semibold py-2 px-4 rounded-xl text-xs transition-colors"
                   >
                     Timed
                   </button>
@@ -1207,7 +1207,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 {quiz.length > 0 && (
                   <button
                     onClick={() => handleGenerateQuiz(false)}
-                    className="flex items-center gap-2 text-sm text-[#6B6B6B] hover:text-slate-900 border border-[#E5E5E5] hover:border-slate-400 px-3 py-2 rounded-xl transition-all"
+                    className="flex items-center gap-2 text-sm text-[#6B6B6B] hover:text-[#111111] border border-[#E5E5E5] hover:border-[#D4D4D4] px-3 py-2 rounded-xl transition-all"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1227,7 +1227,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           {/* Header */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <button onClick={handleBack} className="flex items-center gap-2 text-[#6B6B6B] hover:text-slate-900 text-sm transition-colors">
+              <button onClick={handleBack} className="flex items-center gap-2 text-[#6B6B6B] hover:text-[#111111] text-sm transition-colors">
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
@@ -1292,7 +1292,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
           {/* Progress bar */}
           <div>
-            <div className="flex items-center justify-between text-xs text-slate-500 mb-1.5">
+            <div className="flex items-center justify-between text-xs text-[#9B9B9B] mb-1.5">
               <span>Card {cardIdx + 1} of {flashcards.length}</span>
               <span>{Math.round(((knownSet.size + almostSet.size) / flashcards.length) * 100)}% covered</span>
             </div>
@@ -1341,7 +1341,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             <button
               onClick={() => { setCardIdx(i => Math.max(0, i - 1)); setFlipped(false) }}
               disabled={cardIdx === 0}
-              className="flex items-center gap-1.5 text-sm text-[#6B6B6B] hover:text-slate-900 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+              className="flex items-center gap-1.5 text-sm text-[#6B6B6B] hover:text-[#111111] disabled:opacity-30 disabled:pointer-events-none transition-colors"
             >
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -1357,7 +1357,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             <button
               onClick={() => { setCardIdx(i => Math.min(flashcards.length - 1, i + 1)); setFlipped(false) }}
               disabled={cardIdx === flashcards.length - 1}
-              className="flex items-center gap-1.5 text-sm text-[#6B6B6B] hover:text-slate-900 disabled:opacity-30 disabled:pointer-events-none transition-colors"
+              className="flex items-center gap-1.5 text-sm text-[#6B6B6B] hover:text-[#111111] disabled:opacity-30 disabled:pointer-events-none transition-colors"
             >
               Next
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1372,7 +1372,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               <div style={{ width: 48, height: 48, borderRadius: '50%', background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 10px' }}>
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
-              <p className="text-slate-800 font-bold text-base mb-1">Deck complete!</p>
+              <p className="text-[#111111] font-bold text-base mb-1">Deck complete!</p>
               <p className="text-[#6B6B6B] text-xs mb-3">{knownSet.size} known · {almostSet.size} almost · {reviewSet.size} to review</p>
               <div className="flex gap-3 justify-center">
                 <button
@@ -1398,13 +1398,13 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
         <div className="space-y-5">
           {/* Header */}
           <div className="flex items-center gap-3 mb-2">
-            <button onClick={() => setMode('hub')} className="flex items-center gap-2 text-[#6B6B6B] hover:text-slate-900 text-sm transition-colors">
+            <button onClick={() => setMode('hub')} className="flex items-center gap-2 text-[#6B6B6B] hover:text-[#111111] text-sm transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
               Back
             </button>
-            <h1 className="text-lg font-semibold text-slate-900">Topic Drill</h1>
+            <h1 className="text-lg font-semibold text-[#111111]">Topic Drill</h1>
           </div>
 
           {/* Setup form - shown until questions are generated */}
@@ -1412,11 +1412,11 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             <div className="space-y-4">
               {courses.length > 0 && (
                 <div>
-                  <label className="block text-xs font-medium text-slate-400 mb-1.5">Course (optional)</label>
+                  <label className="block text-xs font-medium text-[#9B9B9B] mb-1.5">Course (optional)</label>
                   <select
                     value={drillCourse ?? ''}
                     onChange={e => setDrillCourse(e.target.value === '' ? null : Number(e.target.value))}
-                    className="w-full bg-white border border-[#E5E5E5] rounded-xl px-4 py-2.5 text-slate-800 text-sm focus:outline-none focus:ring-2 focus:ring-[#3B61C4] appearance-none"
+                    className="w-full bg-white border border-[#E5E5E5] rounded-xl px-4 py-2.5 text-[#111111] text-sm focus:outline-none focus:ring-2 focus:ring-[#3B61C4] appearance-none"
                     style={{ colorScheme: 'dark' }}
                   >
                     <option value="">No course</option>
@@ -1425,7 +1425,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 </div>
               )}
               <div>
-                <label className="block text-xs font-medium text-slate-400 mb-1.5">What topic do you want to drill?</label>
+                <label className="block text-xs font-medium text-[#9B9B9B] mb-1.5">What topic do you want to drill?</label>
                 <input
                   type="text"
                   value={drillTopic}
@@ -1433,7 +1433,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                   onKeyDown={e => e.key === 'Enter' && drillTopic.trim() && handleGenerateDrill()}
                   placeholder="e.g. Cardiac output, CARS reasoning, Contract formation…"
                   autoFocus
-                  className="w-full bg-white border border-[#E5E5E5] rounded-xl px-4 py-3 text-slate-800 placeholder-[#9B9B9B] focus:outline-none focus:border-[#3B61C4] text-sm"
+                  className="w-full bg-white border border-[#E5E5E5] rounded-xl px-4 py-3 text-[#111111] placeholder-[#9B9B9B] focus:outline-none focus:border-[#3B61C4] text-sm"
                 />
               </div>
               {drillError && (
@@ -1457,7 +1457,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             <div className="bg-white rounded-2xl px-6 py-8 flex flex-col items-center gap-4" style={{ border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
               <Spinner size="md" />
               <div className="text-center">
-                <p className="text-slate-800 font-semibold">Generating questions on "{drillTopic}"…</p>
+                <p className="text-[#111111] font-semibold">Generating questions on "{drillTopic}"…</p>
                 <p className="text-[#6B6B6B] text-xs mt-1">This usually takes 5–10 seconds</p>
               </div>
             </div>
@@ -1466,7 +1466,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           {/* Active drill quiz */}
           {drillQuiz.length > 0 && !drillDone && (
             <div className="space-y-5">
-              <div className="flex items-center justify-between text-xs text-slate-500">
+              <div className="flex items-center justify-between text-xs text-[#9B9B9B]">
                 <span className="text-amber-400 font-medium">{drillTopic}</span>
                 <span>Question {drillQuestionIdx + 1} of {drillQuiz.length}</span>
               </div>
@@ -1506,10 +1506,10 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                         {pct}<span style={{ fontSize: 28, fontWeight: 700 }}>%</span>
                       </div>
                       <div style={{ fontSize: 13, color: '#6B6B6B', marginBottom: 8 }}>{s}/{t} correct</div>
-                      <h2 className="text-slate-900 text-lg font-bold mb-1">
+                      <h2 className="text-[#111111] text-lg font-bold mb-1">
                         {pct >= 80 ? 'Solid understanding!' : pct >= 60 ? 'Getting there!' : 'Needs more work.'}
                       </h2>
-                      <p className="text-slate-500 text-sm">{drillTopic}</p>
+                      <p className="text-[#9B9B9B] text-sm">{drillTopic}</p>
                     </div>
                     <div className="space-y-2">
                       {drillQuiz.map((q, i) => (
@@ -1534,7 +1534,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                       </button>
                       <button
                         onClick={() => { setDrillQuiz([]); setDrillAnswers([]); setDrillDone(false); setDrillQuestionIdx(0); setDrillTopic('') }}
-                        className="flex-1 bg-white hover:bg-slate-50 border border-[#E5E5E5] text-slate-700 font-semibold py-3 rounded-xl text-sm transition-colors"
+                        className="flex-1 bg-white hover:bg-[#F7F6F3] border border-[#E5E5E5] text-[#6B6B6B] font-semibold py-3 rounded-xl text-sm transition-colors"
                       >
                         New Topic
                       </button>
@@ -1552,7 +1552,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
         <div className="space-y-6">
           {/* Header */}
           <div className="flex items-center justify-between">
-            <button onClick={handleBack} className="flex items-center gap-2 text-[#6B6B6B] hover:text-slate-900 text-sm transition-colors">
+            <button onClick={handleBack} className="flex items-center gap-2 text-[#6B6B6B] hover:text-[#111111] text-sm transition-colors">
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
               </svg>
@@ -1560,7 +1560,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             </button>
             {!quizDone && (
               <div className="flex items-center gap-3">
-                <span className="text-xs text-slate-500">Question {questionIdx + 1} of {quiz.length}</span>
+                <span className="text-xs text-[#9B9B9B]">Question {questionIdx + 1} of {quiz.length}</span>
                 {testMode && (
                   <span style={{
                     fontSize: 12, fontWeight: 700, padding: '3px 10px', borderRadius: 999,
@@ -1605,10 +1605,10 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 >
                   {score}/{quiz.length}
                 </div>
-                <h2 className="text-slate-900 text-xl font-bold mb-1">
+                <h2 className="text-[#111111] text-xl font-bold mb-1">
                   {score >= quiz.length * 0.8 ? 'Excellent work!' : score >= quiz.length * 0.6 ? 'Good effort!' : 'Keep studying!'}
                 </h2>
-                <p className="text-slate-400 text-sm">
+                <p className="text-[#9B9B9B] text-sm">
                   {Math.round((score / quiz.length) * 100)}% correct
                   {testMode && timeLeft === 0 && answers.length < quiz.length ? ' · time expired' : ''}
                 </p>
@@ -1665,7 +1665,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 </button>
                 <button
                   onClick={() => { setCardIdx(0); setFlipped(false); setMode('flashcards') }}
-                  className="flex-1 bg-white hover:bg-slate-50 border border-[#E5E5E5] text-slate-700 font-semibold py-3 rounded-xl text-sm transition-colors"
+                  className="flex-1 bg-white hover:bg-[#F7F6F3] border border-[#E5E5E5] text-[#6B6B6B] font-semibold py-3 rounded-xl text-sm transition-colors"
                 >
                   Back to Flashcards
                 </button>
