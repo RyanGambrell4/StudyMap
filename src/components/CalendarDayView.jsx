@@ -72,7 +72,7 @@ export default function CalendarDayView({
   conflictMap = new Map(),
   onSessionMove,
   onAddSession,
-  theme = 'dark',
+  theme = 'light',
 }) {
   const tv = theme_vars(theme === 'dark')
   const [addingToGcal, setAddingToGcal] = useState(null)

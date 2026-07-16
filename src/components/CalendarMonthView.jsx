@@ -44,7 +44,7 @@ export default function CalendarMonthView({
   onAddSession,
   googleEvents = [],
   conflictMap = new Map(),
-  theme = 'dark',
+  theme = 'light',
 }) {
   const tv = theme_vars(theme === 'dark')
   const [yearStr, monthStr] = activeMonth.split('-')

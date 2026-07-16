@@ -111,7 +111,7 @@ export default function CalendarWeekView({
   onBulkRescheduleWeek,
   plan = 'free',
   onShowPaywall,
-  theme = 'dark',
+  theme = 'light',
 }) {
   const tv = theme_vars(theme === 'dark')
 

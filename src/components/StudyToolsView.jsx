@@ -687,11 +687,11 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           {
             label: 'Study Podcast',
             desc: 'AI hosts review your notes as a 5-minute audio conversation.',
-            color: '#7C3AED',
+            color: '#0D9488',
             icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>,
             onClick: () => plan === 'unlimited' ? onOpenPodcast?.() : onShowPaywall?.('unlimited'),
             badge: plan !== 'unlimited' ? 'Unlimited' : null,
-            badgeColor: '#7C3AED',
+            badgeColor: '#0D9488',
           },
           {
             label: 'Flashcards',
@@ -723,11 +723,11 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           {
             label: 'Lecture Audio',
             desc: 'Upload a recorded lecture (mp3, m4a, wav) and AI builds your study materials.',
-            color: '#7C3AED',
+            color: '#0EA5E9',
             icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>,
             onClick: () => { setAudioError(''); setMode('upload'); audioInputRef.current?.click() },
             badge: 'No notes needed',
-            badgeColor: '#7C3AED',
+            badgeColor: '#0EA5E9',
           },
           {
             label: 'YouTube Lecture',
@@ -748,10 +748,10 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           {
             label: 'Teach It Back',
             desc: 'Type out an explanation of any concept. AI scores your understanding and pushes back.',
-            color: '#7C3AED',
+            color: '#3B61C4',
             icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>,
             onClick: () => onOpenTeachItBack?.(),
-            ...freeBadge('teachItBack', '#7C3AED'),
+            ...freeBadge('teachItBack', '#3B61C4'),
           },
           {
             label: 'Connections',
@@ -1030,7 +1030,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             <button
               onClick={() => { setAudioError(''); audioInputRef.current?.click() }}
               disabled={isTranscribingAudio}
-              className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl border border-dashed border-[#E5E5E5] text-[#6B6B6B] hover:border-[#7C3AED] hover:text-[#7C3AED] hover:bg-purple-50/30 transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full flex items-center justify-center gap-2.5 py-3 rounded-xl border border-dashed border-[#E5E5E5] text-[#6B6B6B] hover:border-[#0EA5E9] hover:text-[#0EA5E9] hover:bg-sky-50/30 transition-all text-sm font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isTranscribingAudio ? (
                 <>

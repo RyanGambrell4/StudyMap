@@ -201,7 +201,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       }
     } catch (e) {
       setMessages([...newMessages, { role: 'assistant', content: 'Connection error. Please try again.' }])
-      setError(e.message)
+      setError(e.message ?? 'Something went wrong. Please try again.')
     } finally {
       setLoading(false)
       inputRef.current?.focus()

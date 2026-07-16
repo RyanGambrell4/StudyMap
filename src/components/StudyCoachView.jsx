@@ -1323,17 +1323,17 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(6,6,20,0.6)', backdropFilter: 'blur(1px)', padding: 24 }}>
           <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 20, padding: '40px 36px', maxWidth: 400, width: '100%', textAlign: 'center', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}>
             <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(232,83,26,0.1)', border: '1px solid rgba(232,83,26,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-              <Icon name="sparkles" size={24} color="#818cf8" />
+              <Icon name="sparkles" size={24} color="#3B61C4" />
             </div>
-            <h2 style={{ color: '#1A1A1A', fontSize: 20, fontWeight: 700, letterSpacing: -0.4, margin: '0 0 10px' }}>Your AI study plan is one step away.</h2>
+            <h2 style={{ color: '#111111', fontSize: 20, fontWeight: 700, letterSpacing: -0.4, margin: '0 0 10px' }}>Your AI study plan is one step away.</h2>
             <p style={{ color: '#6B6B6B', fontSize: 14, lineHeight: 1.65, margin: '0 0 28px' }}>Add at least one course, then come back here. The AI Coach builds a personalized week-by-week plan around your exam dates and schedule.</p>
             <button
               onClick={onNavigateToCourses}
-              style={{ width: '100%', background: D.accent, color: '#fff', fontSize: 14, fontWeight: 700, padding: '13px 24px', borderRadius: 10, border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(99,102,241,0.4)', letterSpacing: -0.2 }}
+              style={{ width: '100%', background: D.accent, color: '#fff', fontSize: 14, fontWeight: 700, padding: '13px 24px', borderRadius: 10, border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(59,97,196,0.3)', letterSpacing: -0.2 }}
             >
               Add Your First Course →
             </button>
-            <p style={{ color: '#334155', fontSize: 12, margin: '14px 0 0' }}>Takes about 30 seconds</p>
+            <p style={{ color: '#6B6B6B', fontSize: 12, margin: '14px 0 0' }}>Takes about 30 seconds</p>
           </div>
         </div>
       </div>

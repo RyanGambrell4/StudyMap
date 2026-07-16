@@ -324,7 +324,7 @@ export default function AccountView({
             <p style={{ margin: '0 0 10px', fontSize: 12, color: '#6B6B6B', lineHeight: 1.5 }}>
               {trialDaysLeft !== null && trialDaysLeft > 0
                 ? <>You have <strong style={{ color: '#111111' }}>{trialDaysLeft} day{trialDaysLeft !== 1 ? 's' : ''} left</strong> in your free trial. Upgrade before it ends to keep full access.</>
-                : <>Your trial has ended. Upgrade to keep full Pro access.</>
+                : <>Your trial has ended. Upgrade to keep full access.</>
               }
             </p>
             {trialDaysLeft !== null && (
@@ -403,7 +403,7 @@ export default function AccountView({
               Start your 3-day free trial
             </p>
             <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>
-              Full Pro access for 3 days, then $2.99/wk. Card required. Cancel anytime.
+              Full Unlimited access for 3 days, then $4.99/wk. Card required. Cancel anytime.
             </p>
             <button
               onClick={handleStartTrial}
