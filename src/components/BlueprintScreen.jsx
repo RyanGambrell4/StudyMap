@@ -154,7 +154,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
               style={
                 urgency === 'red' ? { backgroundColor: '#FEF2F2', color: '#DC2626', border: '1px solid #FCA5A5' }
                 : urgency === 'amber' ? { backgroundColor: '#FFFBEB', color: '#D97706', border: '1px solid #FCD34D' }
-                : { backgroundColor: '#F1F5F9', color: '#64748B', border: '1px solid #E2E8F0' }
+                : { backgroundColor: 'rgba(0,0,0,0.04)', color: '#6B6B6B', border: '1px solid rgba(0,0,0,0.08)' }
               }
             >
               {daysLeft === 0 ? 'Exam today' : `${daysLeft}d to exam`}

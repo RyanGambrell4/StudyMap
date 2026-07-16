@@ -403,7 +403,7 @@ export default function AccountView({
               Start your 3-day free trial
             </p>
             <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>
-              Full Pro access for 3 days. $0 today, then $2.99/wk. Cancel anytime in your account.
+              Full Pro access for 3 days, then $2.99/wk. Card required. Cancel anytime.
             </p>
             <button
               onClick={handleStartTrial}

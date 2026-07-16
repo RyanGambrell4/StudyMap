@@ -858,7 +858,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
             sub: streak === 0 ? 'Start your streak today'
               : bestStreak > streak ? `${bestStreak - streak} days to personal best`
               : 'At personal best!',
-            color: D.amber, delta: streak > 0 ? `+${Math.min(streak, 5)}` : '0',
+            color: D.amber, delta: null,
             spark: sparklines.streakArr,
           },
           {
@@ -870,20 +870,20 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
           {
             label: 'SESSIONS', value: sessionCount, unit: '',
             sub: avgDuration > 0 ? `Avg ${avgDuration}m per session` : 'No sessions yet',
-            color: D.cyan, delta: `+${Math.min(sessionCount, 12)}`,
+            color: D.cyan, delta: null,
             spark: sparklines.sessionsArr,
           },
           {
             label: 'FOCUS SCORE', value: focusScore, unit: '/100',
             sub: focusScore >= 80 ? 'Strong momentum this week' : focusScore >= 60 ? 'Good momentum' : 'Keep building habits',
-            color: D.purple, delta: `+${Math.min(focusScore, 8)}`,
+            color: D.purple, delta: null,
             spark: sparklines.focusArr,
           },
         ].map(({ label, value, unit, sub, color, delta, spark }) => (
           <div key={label} style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '18px 20px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
               <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase' }}>{label}</span>
-              <span style={{ fontSize: 10.5, fontWeight: 700, color, background: `${color}18`, borderRadius: 5, padding: '2px 7px' }}>^ {delta}</span>
+              {delta && <span style={{ fontSize: 10.5, fontWeight: 700, color, background: `${color}18`, borderRadius: 5, padding: '2px 7px' }}>^ {delta}</span>}
             </div>
             <div style={{ display: 'flex', alignItems: 'baseline', gap: 4, marginBottom: 4 }}>
               <span style={{ fontSize: 34, fontWeight: 800, color: D.text, letterSpacing: '-0.03em', lineHeight: 1 }}>{value}</span>
