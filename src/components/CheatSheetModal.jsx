@@ -70,7 +70,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall }) {
           }),
         })
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error ?? 'Failed')
+        if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
         incrementAIQuery()
         addStudySession({ tool: 'AI Cheat Sheet', score: null, topic: examPrompt.trim() || null, courseName: course?.name || null })
         setResult(data)

@@ -116,6 +116,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
       await recorder.start()
     } catch {
       setBdRecording(false)
+      setError('Could not access microphone. Check your browser permissions.')
     }
   }
 
@@ -196,7 +197,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
         setCardsAdded(newCards.length)
       }
     } catch {
-      // silently fail — don't disrupt the result view
+      setError('Could not save flashcards. Try again.')
     } finally {
       setIsConvertingCards(false)
     }

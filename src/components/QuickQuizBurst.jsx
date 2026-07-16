@@ -360,7 +360,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                     </div>
                     <div style={{ fontSize: 13, color: D.textDim, marginTop: 4, fontWeight: 500 }}>{score}/{questions?.length || 5} correct</div>
                     <div style={{ fontSize: 14, color: D.textMuted, marginTop: 6 }}>
-                      {pct === 100 ? 'Perfect score.' : pct >= 80 ? 'Strong performance.' : pct >= 60 ? 'Decent run, a few gaps to close.' : 'Worth a deeper review.'}
+                      {pct === 100 ? 'Perfect score.' : pct >= 80 ? 'Strong performance.' : pct >= 60 ? 'Decent run, a few gaps to close.' : 'These need another pass.'}
                     </div>
                   </>
                 )
@@ -448,7 +448,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                                 {repair.repairConfirmed && (
                                   <div style={{ marginTop: 8, padding: '8px 10px', background: repair.repairSelected === rq.answer ? 'rgba(22,163,74,0.06)' : 'rgba(220,38,38,0.05)', borderRadius: 8, border: `1px solid ${repair.repairSelected === rq.answer ? 'rgba(22,163,74,0.18)' : 'rgba(220,38,38,0.18)'}` }}>
                                     <div style={{ fontSize: 12, fontWeight: 700, color: repair.repairSelected === rq.answer ? D.green : D.red, marginBottom: 3 }}>
-                                      {repair.repairSelected === rq.answer ? 'Got it.' : 'Not quite -- review the explanation above.'}
+                                      {repair.repairSelected === rq.answer ? 'Got it.' : 'Not quite. See the explanation above.'}
                                     </div>
                                     <div style={{ fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>{rq.explanation}</div>
                                   </div>
