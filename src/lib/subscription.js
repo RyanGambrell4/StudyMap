@@ -360,7 +360,7 @@ export function incrementAIQuery() {
 
 // ── Stripe checkout session creator ──────────────────────────────────────────
 // Used for paid plan signups and card-required trials.
-// Pass opts.trial: true to create a 7-day Stripe trial (card collected upfront).
+// Pass opts.trial: true to create a 3-day Stripe trial (card collected upfront).
 
 export async function createCheckoutSession(plan, billingPeriod, userEmail, userId, opts = {}) {
   track('checkout_started', { plan, billingPeriod, trial: !!opts.trial, has_promo: !!opts.promo })
