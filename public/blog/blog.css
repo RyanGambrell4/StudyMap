@@ -2,6 +2,21 @@
 /* Extends seo.css — load after it. Covers blog-specific layout, visual        */
 /* hierarchy, CTA banners, pull quotes, stat highlights, and conversion panels. */
 
+/* ── Variable Bridge ──────────────────────────────────────────────────────── */
+/* Old-style posts define --brand/--muted/--card. New posts use seo.css vars.  */
+/* This block makes all blog.css components work in both contexts.              */
+:root {
+  --accent: var(--brand, #3B61C4);
+  --accent-d: #2d4fa3;
+  --text-muted: var(--muted, #555555);
+  --text-dim: #b0b0b0;
+  --bg1: var(--card, #ffffff);
+  --sans: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --serif: Georgia, "Palatino Linotype", serif;
+  --radius: 12px;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.07), 0 4px 12px rgba(0, 0, 0, 0.04);
+}
+
 /* ── Blog Layout ──────────────────────────────────────────────────────────── */
 .blog-layout {
   max-width: 760px;
