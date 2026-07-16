@@ -135,21 +135,21 @@ export default async function handler(req, res) {
       // Branch copy
       let lead, tip, tipTitle, ctaLabel
       if (recentSessions >= 3) {
-        lead = `You've been active this week — ${recentSessions} session${recentSessions !== 1 ? 's' : ''}. That's a real head start. Here's how to make the next ${daysLeft} days count.`
+        lead = `You've been active this week: ${recentSessions} session${recentSessions !== 1 ? 's' : ''}. That's a real head start. Here's how to make the next ${daysLeft} days count.`
         tipTitle = 'Your next move: Exam Rescue'
         tip = `Open your course and tap Exam Rescue on the topics you feel shakiest about. It identifies the specific gaps between what you know and what the exam will test, then gives you a targeted review plan. Use it now while you still have time to act on it.`
         ctaLabel = daysLeft <= 3 ? 'Get my exam plan now' : 'Build my exam plan'
       } else if (sessionCount > 0) {
-        lead = `You've done ${sessionCount} session${sessionCount !== 1 ? 's' : ''} total — but the exam is in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}. Time to accelerate.`
+        lead = `You've done ${sessionCount} session${sessionCount !== 1 ? 's' : ''} total. The exam is in ${daysLeft} day${daysLeft !== 1 ? 's' : ''}. Time to accelerate.`
         tipTitle = 'The plan for the next ' + daysLeft + ' days'
-        tip = `Run the AI Study Coach on your ${examTitle} right now. It takes 2 minutes and gives you a day-by-day breakdown of exactly what to cover before the exam — prioritized by what you're most likely to miss. With ${daysLeft} days left, every session needs to count.`
+        tip = `Run the AI Study Coach on your ${examTitle} right now. It takes 2 minutes and gives you a day-by-day breakdown of exactly what to cover before the exam, prioritized by what you're most likely to miss. With ${daysLeft} days left, every session needs to count.`
         ctaLabel = 'Build my ' + daysLeft + '-day plan'
       } else {
-        lead = `You haven't started studying for it yet. ${daysLeft} days is still workable — but only if you start today, and only if every session is focused on the right things.`
-        tipTitle = daysLeft <= 5 ? 'The fastest path to prepared' : 'Start here — takes 2 minutes'
+        lead = `You haven't started studying for it yet. ${daysLeft} days is still workable, but only if you start today, and only if every session is focused on the right things.`
+        tipTitle = daysLeft <= 5 ? 'The fastest path to prepared' : 'Start here (takes 2 minutes)'
         tip = daysLeft <= 5
           ? `Don't try to cover everything. Run Exam Rescue on the highest-weight topics. It identifies the exact concepts the exam tests hardest and gives you a focused sprint. ${daysLeft} days of targeted studying beats ${daysLeft} days of rereading chapters.`
-          : `Run the AI Study Coach on your ${examTitle}. It builds a day-by-day plan for the next ${daysLeft} days — what to study, when, and for how long. You go from "I need to study for this" to "I know exactly what I'm doing tomorrow."`
+          : `Run the AI Study Coach on your ${examTitle}. It builds a day-by-day plan for the next ${daysLeft} days: what to study, when, and for how long. You go from "I need to study for this" to "I know exactly what I'm doing tomorrow."`
         ctaLabel = 'Get my exam plan'
       }
 
@@ -202,7 +202,7 @@ ${preheader(daysLeft <= 3 ? `${examTitle}: ${daysLeft} day${daysLeft !== 1 ? 's'
 
         <p style="margin:0 0 6px;font-size:11.5px;font-weight:600;letter-spacing:0.08em;color:${urgency.color};text-transform:uppercase;">Exam prep</p>
         <h1 style="margin:0 0 16px;font-size:25px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.28;">
-          ${greeting} — ${daysLeft} day${daysLeft !== 1 ? 's' : ''} until your exam.
+          ${greeting}, ${daysLeft} day${daysLeft !== 1 ? 's' : ''} until your exam.
         </h1>
 
         <p style="margin:0 0 22px;font-size:15px;color:#6B6B6B;line-height:1.7;">
@@ -238,14 +238,14 @@ ${preheader(daysLeft <= 3 ? `${examTitle}: ${daysLeft} day${daysLeft !== 1 ? 's'
             </table>
             <p style="margin:14px 0 0;font-size:13px;color:#6B6B6B;line-height:1.55;">
               Pro is <strong style="color:#111111;">$2.99/week</strong>.
-              ${trialUsed ? 'You know what you get.' : `Try free for 3 days — no charge until day 4.`}
+              ${trialUsed ? 'You know what you get.' : `Try free for 3 days. No charge until day 4.`}
             </p>
           </td></tr>
         </table>`}
 
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:10px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:${urgency.color};color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none;border-radius:12px;padding:14px 36px;">${trialUsed ? 'Upgrade to Pro — $2.99/wk' : ctaLabel}</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:${urgency.color};color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none;border-radius:12px;padding:14px 36px;">${trialUsed ? 'Upgrade to Pro · $2.99/wk' : ctaLabel}</a>
           </td></tr>
           <tr><td align="center">
             <span style="font-size:12.5px;color:#9B9B9B;">${trialUsed ? '$2.99/wk · Cancel anytime' : 'Card required · $2.99/wk after day 4 · Cancel anytime'}</span>

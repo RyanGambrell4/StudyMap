@@ -70,24 +70,24 @@ export default async function handler(req, res) {
     const upgradeUrl = trialUsed
       ? `https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day10_winback`
       : `https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day10_recap`
-    const ctaLabel    = trialUsed ? 'Upgrade to Pro — $2.99/wk' : 'Start 3-day free trial'
-    const ctaFootnote = trialUsed ? '$2.99/wk · Cancel anytime' : '$0 today · $2.99/wk after · cancel anytime'
+    const ctaLabel    = trialUsed ? 'Upgrade to Pro · $2.99/wk' : 'Start 3-day free trial'
+    const ctaFootnote = trialUsed ? '$2.99/wk · Cancel anytime' : 'Card required · $2.99/wk after 3 days · Cancel anytime'
 
     const activityBlock = sessionCount > 0 || courseCount > 0
       ? `<p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           You've added <strong style="color:#111111;">${courseCount} course${courseCount !== 1 ? 's' : ''}</strong> and completed
           <strong style="color:#111111;">${sessionCount} study session${sessionCount !== 1 ? 's' : ''}</strong> in your first 10 days.
-          That puts you ahead of most students who sign up — they quit in the first week.
+          That puts you ahead of most students who sign up. Most quit in the first week.
         </p>`
       : `<p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          You've been on StudyEdge for 10 days. You haven't started yet — but your plan is still here.
+          You've been on StudyEdge for 10 days. You haven't started yet, but your plan is still here.
           Students who add their first course this week are 4× more likely to stick with it.
         </p>`
 
     const examLine = upcomingExam
       ? `<p style="margin:0 0 20px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Your next exam — <strong style="color:#111111;">${upcomingExam.title ?? 'upcoming exam'}</strong> on
-          <strong style="color:#111111;">${upcomingExam.date ?? upcomingExam.dateStr}</strong> — is getting closer.
+          Your next exam, <strong style="color:#111111;">${upcomingExam.title ?? 'upcoming exam'}</strong> on
+          <strong style="color:#111111;">${upcomingExam.date ?? upcomingExam.dateStr}</strong>, is getting closer.
           Pro users get unlimited blueprints and a full multi-week plan built around it.
         </p>`
       : ''
@@ -107,13 +107,13 @@ export default async function handler(req, res) {
       await resend.emails.send({
         from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
         to: user.email,
-        subject: trialUsed ? '10 days in — time to go back to Pro?' : "10 days in. Here's what you're still leaving on the table.",
+        subject: trialUsed ? '10 days in. Time to go back to Pro?' : "10 days in. Here's what you're still leaving on the table.",
         headers: listUnsubscribeHeaders(user.email),
         html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>10 days on StudyEdge</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-${preheader("10 days in. Here's where you stand — and what Pro unlocks for the rest of your semester.")}
+${preheader("10 days in. Here's where you stand and what Pro unlocks for the rest of your semester.")}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
@@ -136,7 +136,7 @@ ${preheader("10 days in. Here's where you stand — and what Pro unlocks for the
             ['100 AI actions / month', 'Free gives you 2 total. Pro is enough for your entire semester.'],
             ['5 courses (not just 1)', 'Track every class you\'re taking with its own plan and schedule.'],
             ['Unlimited Session Blueprints', 'A minute-by-minute plan before every study session, every time.'],
-            ['Rebuild plans anytime', 'New exam dates, grade changes, schedule shifts — your coach adapts.'],
+            ['Rebuild plans anytime', 'New exam dates, grade changes, schedule shifts. Your coach adapts.'],
             ['Brain Dumps, Quiz Bursts, Exam Rescue', 'All the AI study tools, all unlimited.'],
           ].map(([feat, desc]) => `
           <tr>
@@ -151,7 +151,7 @@ ${preheader("10 days in. Here's where you stand — and what Pro unlocks for the
           Pro is <strong style="color:#111111;">$2.99/week</strong>, less than a coffee.
           ${trialUsed
             ? 'You\'ve already seen what it does. Everything you had during your trial, back permanently.'
-            : 'Try it free for 3 days — no charge until day 4, cancel anytime before day 4.'}
+            : 'Try it free for 3 days. No charge until day 4. Cancel anytime.'}
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">

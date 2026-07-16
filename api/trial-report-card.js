@@ -124,18 +124,18 @@ export default async function handler(req, res) {
 
       if (sessionCount >= 3) {
         subject     = `You logged ${sessionCount} sessions. Here's what you built.`
-        heading     = `${sessionCount} sessions. That's a real start — don't reset it.`
-        lead        = `${greeting}, your 3-day Pro trial just ended. You logged ${sessionCount} session${sessionCount !== 1 ? 's' : ''} — that's more than most trial users ever do. The habit is there. The question is whether you keep it.`
+        heading     = `${sessionCount} sessions. That's a real start. Don't reset it.`
+        lead        = `${greeting}, your 3-day Pro trial just ended. You logged ${sessionCount} session${sessionCount !== 1 ? 's' : ''}. That's more than most trial users ever do. The habit is there. The question is whether you keep it.`
         urgencyNote = `Students who keep studying momentum into week 2 are the ones who finish the semester ahead. The ones who let it break spend the last 3 weeks cramming.`
       } else if (sessionCount > 0) {
         subject     = `Your trial ended. You ran ${sessionCount} session${sessionCount !== 1 ? 's' : ''}.`
         heading     = `You started. Here's what you lose if you stop.`
-        lead        = `${greeting}, your Pro trial just ended. You ran ${sessionCount} session${sessionCount !== 1 ? 's' : ''} — enough to see what the tool does. The students who get the real results are the ones who use it consistently, not just once.`
+        lead        = `${greeting}, your Pro trial just ended. You ran ${sessionCount} session${sessionCount !== 1 ? 's' : ''}, enough to see what the tool does. The students who get the real results are the ones who use it consistently, not just once.`
         urgencyNote = `One session a day with a Blueprint is what moves the needle. $2.99/week is less than one coffee. The grade difference is not.`
       } else {
         subject     = `Your trial ended without a single session.`
         heading     = `Your trial is over. You never ran a session.`
-        lead        = `${greeting}, your Pro trial ended. You set up your account${courseCount > 0 ? ` and added ${courseCount} course${courseCount !== 1 ? 's' : ''}` : ''} — but never ran a study session. That's the one step that separates the students who see results from those who don't.`
+        lead        = `${greeting}, your Pro trial ended. You set up your account${courseCount > 0 ? ` and added ${courseCount} course${courseCount !== 1 ? 's' : ''}` : ''}, but never ran a study session. That's the one step that separates the students who see results from those who don't.`
         urgencyNote = `A single 2-minute session with the AI Study Coach will show you more than any email can. Pro is $2.99/week. If it doesn't help, cancel in 10 seconds from your account.`
       }
 
@@ -202,7 +202,7 @@ ${preheader(sessionCount >= 3
                 </td>
                 <td style="padding:14px 18px 14px 0;border-left:1px solid #F0EDE8;vertical-align:middle;">
                   <div style="font-size:13px;font-weight:700;color:#111111;margin-bottom:3px;">Study sessions completed</div>
-                  <div style="font-size:12px;color:#9B9B9B;">${sessionCount >= 3 ? 'Strong start — top 10% of trial users' : sessionCount > 0 ? 'You tried it. That\'s the hardest part.' : 'None started during the trial'}</div>
+                  <div style="font-size:12px;color:#9B9B9B;">${sessionCount >= 3 ? 'Strong start: top 10% of trial users' : sessionCount > 0 ? 'You tried it. That\'s the hardest part.' : 'None started during the trial'}</div>
                 </td>
               </tr>
             </table>
@@ -255,10 +255,10 @@ ${preheader(sessionCount >= 3
         <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#111111;">What just turned off:</p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:26px;">
           ${[
-            ['100 AI actions/month', sessionCount > 0 ? 'You used these — now back to 2 total.' : 'Back to 2 total.'],
+            ['100 AI actions/month', sessionCount > 0 ? 'You used these. Now back to 2 total.' : 'Back to 2 total.'],
             ['Unlimited Session Blueprints', 'Capped again. Free plan is too limited for daily use.'],
             [courseCount > 1 ? `${courseCount}-course tracking` : '5-course tracking', 'Back to 1 course. Your other courses go untracked.'],
-            ['AI Study Coach — unlimited', 'The plan that was keeping you on schedule is gone.'],
+            ['AI Study Coach (unlimited)', 'The plan that was keeping you on schedule is gone.'],
           ].map(([feat, note]) => `
           <tr>
             <td style="padding:10px 0;border-bottom:1px solid #F0EDE8;">
@@ -279,11 +279,11 @@ ${preheader(sessionCount >= 3
 
         <!-- CTA -->
         <p style="margin:0 0 20px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro is <strong style="color:#111111;">$2.99/week</strong>. Cancel in your account any time — one tap.
+          Pro is <strong style="color:#111111;">$2.99/week</strong>. Cancel in your account any time. One tap.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:10px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none;border-radius:12px;padding:14px 36px;letter-spacing:-0.2px;">Upgrade to Pro — $2.99/wk</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none;border-radius:12px;padding:14px 36px;letter-spacing:-0.2px;">Upgrade to Pro · $2.99/wk</a>
           </td></tr>
           <tr><td align="center">
             <span style="font-size:12px;color:#9B9B9B;">$2.99/wk · Cancel in account anytime</span>

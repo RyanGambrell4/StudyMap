@@ -35,7 +35,7 @@ function pickStory(schoolType, yearLevel) {
       audienceKicker: 'Exam prep',
       story: `
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.72;">
-          A nursing student I'll call Maya had failed her NCLEX on the first attempt. Not because she didn't know the material — she'd spent months with textbooks. Because she didn't know <em>which</em> material she actually didn't know.
+          A nursing student I'll call Maya had failed her NCLEX on the first attempt. Not because she didn't know the material (she'd spent months with textbooks). Because she didn't know <em>which</em> material she actually didn't know.
         </p>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.72;">
           She came to StudyEdge two weeks before her retake. She dropped her weak areas into the Study Coach, let it build a 14-day plan around her biggest gaps, and used Brain Dump every morning on the topics that felt shaky.
@@ -62,7 +62,7 @@ function pickStory(schoolType, yearLevel) {
       audienceKicker: 'High school',
       story: `
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.72;">
-          A high school junior I'll call Jake had been pulling Bs for three years — not because he wasn't capable, but because his whole study method was "cram the night before the test." It worked just well enough to keep him from taking it seriously.
+          A high school junior I'll call Jake had been pulling Bs for three years, not because he wasn't capable, but because his whole study method was "cram the night before the test." It worked just well enough to keep him from taking it seriously.
         </p>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.72;">
           He started using StudyEdge at the beginning of his junior year. He added every class with its next test date, let the Study Coach build a week-by-week plan, and ran a Session Blueprint before each study block instead of just "opening his notes."
@@ -92,10 +92,10 @@ function pickStory(schoolType, yearLevel) {
     audienceKicker: 'Student story',
     story: `
       <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.72;">
-        A sophomore I'll call Emma was taking organic chemistry for the second time. Not because she wasn't smart — because she'd been studying the way everyone told her to: highlighting chapters, rewriting notes, reviewing everything the night before.
+        A sophomore I'll call Emma was taking organic chemistry for the second time. Not because she wasn't smart. She'd been studying the way everyone told her to: highlighting chapters, rewriting notes, reviewing everything the night before.
       </p>
       <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.72;">
-        She started using StudyEdge two weeks before her retake. The first thing she did was upload her syllabus. The Study Coach gave her a 14-day plan: specific topics, specific days, specific amounts of time. Not "study more" — exactly what to study on exactly which day.
+        She started using StudyEdge two weeks before her retake. The first thing she did was upload her syllabus. The Study Coach gave her a 14-day plan: specific topics, specific days, specific amounts of time. Not "study more." Exactly what to study on exactly which day.
       </p>
       <table cellpadding="0" cellspacing="0" style="width:100%;margin:6px 0 22px;">
         <tr><td style="background:#F4F7FF;border-left:3px solid #3B61C4;border-radius:0 10px 10px 0;padding:16px 20px;">
@@ -104,7 +104,7 @@ function pickStory(schoolType, yearLevel) {
         </td></tr>
       </table>
       <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.72;">
-        She passed. 84%. The difference wasn't more hours — it was that every hour was pointed at the right thing.
+        She passed. 84%. The difference wasn't more hours. It was that every hour was pointed at the right thing.
       </p>`,
     outcomeLabel: '68% → 84% on organic chem retake',
     ctaLabel: 'Build my study plan',
@@ -169,8 +169,8 @@ export default async function handler(req, res) {
     const upgradeUrl = trialUsed
       ? `https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day5_proof_winback`
       : story.ctaHref + (story.ctaHref.includes('?') ? '&signup=1&plan=pro&billing=weekly&trial=1' : '?signup=1&plan=pro&billing=weekly&trial=1')
-    const ctaLabel    = trialUsed ? 'Upgrade to Pro — $2.99/wk' : story.ctaLabel
-    const ctaFootnote = trialUsed ? '$2.99/wk · Cancel anytime' : '$0 today · 3-day trial · $2.99/wk after · Cancel anytime'
+    const ctaLabel    = trialUsed ? 'Upgrade to Pro · $2.99/wk' : story.ctaLabel
+    const ctaFootnote = trialUsed ? '$2.99/wk · Cancel anytime' : 'Card required · $2.99/wk after 3 days · Cancel anytime'
 
     try {
       await resend.emails.send({
@@ -218,7 +218,7 @@ ${preheader(story.preheaderText)}
         </table>
 
         <p style="margin:0 0 22px;font-size:15px;color:#6B6B6B;line-height:1.7;">
-          Pro is <strong style="color:#111111;">$2.99/week</strong> — less than a coffee.
+          Pro is <strong style="color:#111111;">$2.99/week</strong>, less than a coffee.
           ${trialUsed
             ? 'You\'ve already seen what it does. Get it back.'
             : 'Try it free for 3 days. You won\'t be charged until day 4.'}
@@ -234,7 +234,7 @@ ${preheader(story.preheaderText)}
         </table>
 
         <p style="margin:26px 0 0;font-size:14px;color:#6B6B6B;line-height:1.7;">
-          Have a question about how the Study Coach or Brain Dump works? Reply to this email — I personally read every one.<br><br>— Ryan
+          Have a question about how the Study Coach or Brain Dump works? Reply to this email. I personally read every one.<br><br>Ryan
         </p>
       </td></tr>
 

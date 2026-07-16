@@ -437,7 +437,7 @@ async function sendOneTimeOfferEmail(toEmail, offer) {
     await resend.emails.send({
       from: 'StudyEdge AI <support@mail.getstudyedge.com>',
       to: toEmail,
-      subject: `Before you go — ${offer.discountPct}% off your first month.`,
+      subject: `Before you go: ${offer.discountPct}% off your first month.`,
       headers: listUnsubscribeHeaders(toEmail),
       html: `<!DOCTYPE html>
 <html lang="en">
@@ -456,7 +456,7 @@ ${preheader(`One-time ${offer.discountPct}% off code inside. Expires in 24 hours
           ${offer.discountPct}% off your first month.
         </h1>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          You just cancelled your trial — I get it, not every product clicks in three days. Before you go, here's one thing: a one-time <strong style="color:#111111;">${offer.discountPct}% off your first month of Pro</strong>. Paste the code below at checkout.
+          You just cancelled your trial. Not every product clicks in three days. Before you go, here's one thing: a one-time <strong style="color:#111111;">${offer.discountPct}% off your first month of Pro</strong>. Paste the code below at checkout.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin:6px 0 22px;">
           <tr><td align="center" style="background:#FFF6F0;border:2px dashed #E8531A;border-radius:12px;padding:22px 24px;">

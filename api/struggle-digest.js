@@ -82,7 +82,7 @@ export default async function handler(req, res) {
       <div style="margin-top:16px;padding:14px 16px;background:#f5f3ff;border-radius:10px;border:1px solid #ddd6fe;">
         <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#7c3aed;">Pro tip: Exam Rescue</p>
         <p style="margin:0 0 10px;font-size:13px;color:#4b5563;line-height:1.5;">
-          Pro users can run an Exam Rescue on any weak spot — the AI builds a targeted study plan around your exact gaps.
+          Pro users can run an Exam Rescue on any weak spot. The AI builds a targeted study plan around your exact gaps.
         </p>
         <a href="https://getstudyedge.com/app" style="font-size:13px;font-weight:700;color:#7c3aed;text-decoration:none;">
           Unlock Exam Rescue →
@@ -92,8 +92,8 @@ export default async function handler(req, res) {
 
     const firstName = email.split('@')[0].split('.')[0]
     const subject = top.length === 1
-      ? `You're still struggling with ${top[0].topic} — let's fix that`
-      : `${top.length} topics holding you back — here's how to catch up`
+      ? `You're still struggling with ${top[0].topic}. Let's fix that.`
+      : `${top.length} topics holding you back. Here's how to catch up.`
 
     try {
       await resend.emails.send({
@@ -102,7 +102,7 @@ export default async function handler(req, res) {
         subject,
         headers: listUnsubscribeHeaders(userId),
         html: `
-${preheader(`Your AI coach spotted gaps in ${top.map(s => s.topic).join(', ')} — practice to close them before your exam.`)}
+${preheader(`Your AI coach spotted gaps in ${top.map(s => s.topic).join(', ')}. Practice to close them before your exam.`)}
 <!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
@@ -114,13 +114,13 @@ ${preheader(`Your AI coach spotted gaps in ${top.map(s => s.topic).join(', ')} �
         Your AI coach flagged some gaps.
       </h1>
       <p style="margin:0 0 20px;font-size:15px;color:#4b5563;line-height:1.6;">
-        Hey ${firstName} — based on your recent study sessions, your AI coach spotted ${top.length === 1 ? 'a topic' : 'a few topics'} where you're getting stuck. Here ${top.length === 1 ? 'it is' : 'they are'}:
+        Hey ${firstName}, based on your recent study sessions, your AI coach spotted ${top.length === 1 ? 'a topic' : 'a few topics'} where you're getting stuck. Here ${top.length === 1 ? 'it is' : 'they are'}:
       </p>
       <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:20px;">
         ${topicBullets}
       </div>
       <p style="margin:0 0 20px;font-size:14px;color:#4b5563;line-height:1.6;">
-        The fastest way to close these gaps is a focused 10-minute AI coach session — it'll ask you questions on exactly these topics and explain what you're missing.
+        The fastest way to close these gaps is a focused 10-minute AI coach session. It'll ask you questions on exactly these topics and explain what you're missing.
       </p>
       <a href="https://getstudyedge.com/app" style="display:block;text-align:center;background:#dc2626;color:#fff;font-weight:800;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none;letter-spacing:-0.01em;">
         ${ctaText}

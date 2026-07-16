@@ -80,16 +80,17 @@ export default async function handler(req, res) {
         subject      = sessionCount >= 3
           ? `You've logged ${sessionCount} sessions. Don't let that reset.`
           : `You've been paying attention. Here's the honest case.`
-        kicker       = 'Trial ending — you\'re engaged'
+        kicker       = 'Trial ending: you\'re engaged'
         heading      = sessionCount >= 3
           ? `${sessionCount} sessions in 3 days. That's the habit that changes grades.`
           : `You've read every email. Here's why $2.99 actually makes sense.`
         activityLine = sessionCount >= 3
           ? `You've logged ${sessionCount} sessions in 3 days. That puts you in the top 10% of trial users. Tomorrow, without Pro, those AI Study Coach plans, Blueprints, and Exam Rescue runs all go away. The 5-course tracking drops back to 1.`
+
           : `You've been reading these. You know what Pro does. The honest case: $2.99/week is less than one coffee, and the students who keep it for a full semester consistently pull a GPA tier higher than those who don't.`
       } else if (isZeroActivity) {
         subject      = `Your trial ends in 24 hours. You haven't tried it yet.`
-        kicker       = 'Trial ending — unused'
+        kicker       = 'Trial ending: unused'
         heading      = `24 hours left. You set it up but never ran a session.`
         activityLine = `You've set up ${courseCount > 0 ? `${courseCount} course${courseCount !== 1 ? 's' : ''}` : 'your account'} but never ran a study session. That's the one step between "I have this app" and "this app actually helped my grade." Takes 2 minutes.`
       } else {
@@ -97,8 +98,8 @@ export default async function handler(req, res) {
         kicker       = 'Trial ending soon'
         heading      = `Your 3-day Pro trial ends in less than 24 hours.`
         activityLine = sessionCount > 0
-          ? `You've completed ${sessionCount} session${sessionCount !== 1 ? 's' : ''} on Pro. That progress is real — and it disappears without Pro. You drop back to 2 AI actions total, 1 course, and a 30-minute focus cap.`
-          : `You've set up ${courseCount} course${courseCount !== 1 ? 's' : ''} on Pro. When the trial ends, you'll drop back to the free plan — 2 AI actions total, 1 course, and a 30-minute focus cap.`
+          ? `You've completed ${sessionCount} session${sessionCount !== 1 ? 's' : ''} on Pro. That progress is real, and it disappears without Pro. You drop back to 2 AI actions total, 1 course, and a 30-minute focus cap.`
+          : `You've set up ${courseCount} course${courseCount !== 1 ? 's' : ''} on Pro. When the trial ends, you'll drop back to the free plan: 2 AI actions total, 1 course, and a 30-minute focus cap.`
       }
 
       const upgradeUrl = `https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=trial_warning`
@@ -117,7 +118,7 @@ export default async function handler(req, res) {
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your trial ends tomorrow</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-${preheader("Lock in Pro now — $2.99/wk. Your trial ends in less than 24 hours.")}
+${preheader("Lock in Pro now. Your trial ends in less than 24 hours.")}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
@@ -153,11 +154,11 @@ ${preheader("Lock in Pro now — $2.99/wk. Your trial ends in less than 24 hours
           </tr>`).join('')}
         </table>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro is <strong style="color:#111111;">$2.99/week</strong>. Cancel anytime — no commitment, no hassle.
+          Pro is <strong style="color:#111111;">$2.99/week</strong>. Cancel anytime. No commitment, no hassle.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Keep Pro — $2.99/wk</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Keep Pro · $2.99/wk</a>
           </td></tr>
           <tr><td align="center">
             <span style="font-size:12px;color:#9B9B9B;">$2.99/wk · Cancel in account anytime</span>

@@ -99,7 +99,7 @@ ${preheader("You tried Pro. You know what it does. $2.99/wk to get it back.")}
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Trial ended</p>
         <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">Your 3-day Pro trial ended.</h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          ${activityLine} You've seen what Pro does — the AI tutoring, unlimited blueprints, all the study tools.
+          ${activityLine} You've seen what Pro does: the AI tutoring, unlimited blueprints, all the study tools.
         </p>
         <p style="margin:0 0 20px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           Here's what you no longer have:
@@ -107,9 +107,9 @@ ${preheader("You tried Pro. You know what it does. $2.99/wk to get it back.")}
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
           ${[
             ['100 AI actions/month', 'Back to 2 total. Not enough to get through a week.'],
-            ['Unlimited Session Blueprints', 'Now capped. You used them — you know how much they help.'],
+            ['Unlimited Session Blueprints', 'Now capped. You used them. You know how much they help.'],
             ['5-course tracking', 'Back to 1. If you\'re taking more than one class, that\'s a problem.'],
-            ['Focus Mode — no time limit', 'The 30-min cap is back. Pro removes it entirely.'],
+            ['Focus Mode (no time limit)', 'The 30-min cap is back. Pro removes it entirely.'],
           ].map(([feat, desc]) => `
           <tr>
             <td style="padding:10px 0;border-bottom:1px solid #F0EDE8;">
@@ -124,11 +124,11 @@ ${preheader("You tried Pro. You know what it does. $2.99/wk to get it back.")}
           </tr>`).join('')}
         </table>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro is <strong style="color:#111111;">$2.99/week</strong> — less than a coffee. You already know what you get. Cancel anytime from your account.
+          Pro is <strong style="color:#111111;">$2.99/week</strong>, less than a coffee. You already know what you get. Cancel anytime from your account.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Upgrade to Pro — $2.99/wk</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Upgrade to Pro · $2.99/wk</a>
           </td></tr>
           <tr><td align="center">
             <span style="font-size:12px;color:#9B9B9B;">$2.99/wk · Cancel in account anytime</span>
