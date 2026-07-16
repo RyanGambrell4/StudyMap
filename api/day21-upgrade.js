@@ -82,7 +82,7 @@ export default async function handler(req, res) {
           You tried it. You know what it does. You're still studying without it.
         </p>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          At $2.99/week — less than a coffee — the question isn't whether it's worth it. It's whether passing your next exam is worth $2.99 to you.
+          At $2.99/week, less than a coffee, the question isn't whether it's worth it. It's whether passing your next exam is worth $2.99 to you.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;background:#F7F6F3;border-radius:12px;overflow:hidden;">
           <tr><td style="padding:16px 20px;">
@@ -101,7 +101,7 @@ export default async function handler(req, res) {
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Get Pro back — $2.99/wk</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Get Pro back · $2.99/wk</a>
           </td></tr>
           <tr><td align="center">
             <span style="font-size:12px;color:#9B9B9B;">Cancel in account anytime</span>
@@ -113,12 +113,12 @@ export default async function handler(req, res) {
           A semester is roughly 16 weeks. You've used 3 of them on the free plan. That leaves 13 weeks where exams actually matter.
         </p>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro is $2.99/week. For a full 13-week semester, that's $38.87. Split across every session, every AI boost, and every exam — it's less than $3 per week of actually being prepared.
+          Pro is $2.99/week. For a full 13-week semester, that's $38.87. Split across every session, every AI boost, and every exam, it's less than $3 per week of actually being prepared.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
             ['3-day free trial', 'No charge today. Cancel if it doesn\'t click.'],
-            ['Unlimited focus sessions', 'No 30-min cap — study as long as you need'],
+            ['Unlimited focus sessions', 'No 30-min cap. Study as long as you need'],
             ['100 AI actions/month', 'Your tutor for every concept, every course'],
             ['Session Blueprints', 'Know exactly what to study before every session'],
             ['Exam Rescue, Brain Dumps, Cheat Sheets', 'Every tool, every time you need it'],

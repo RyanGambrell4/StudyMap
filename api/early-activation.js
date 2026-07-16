@@ -70,7 +70,7 @@ export default async function handler(req, res) {
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Get started with StudyEdge</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111111;">
-${preheader("Add a course with an exam date. Everything else — your plan, your blueprints, your coach — runs from there.")}
+${preheader("Add a course with an exam date. Everything else runs from there: your plan, your blueprints, your coach.")}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
@@ -87,7 +87,7 @@ ${preheader("Add a course with an exam date. Everything else — your plan, your
           You signed up a couple hours ago. Before you dive in, here's the single most important thing: <strong style="color:#111111;">add a course with a real exam date.</strong>
         </p>
         <p style="margin:0 0 20px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Your study plan, Session Blueprints, Study Coach, and grade tracker are all built around exam dates. Without one, the AI doesn't know what to focus on — or when.
+          Your study plan, Session Blueprints, Study Coach, and grade tracker are all built around exam dates. Without one, the AI doesn't know what to focus on or when.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
@@ -114,7 +114,7 @@ ${preheader("Add a course with an exam date. Everything else — your plan, your
           <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=early_activation_trial" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:700;text-decoration:none;border-radius:8px;padding:11px 24px;">Start free 3-day trial →</a>
         </div>
         <p style="margin:22px 0 0;font-size:14px;color:#6B6B6B;line-height:1.65;">
-          Reply if you have questions — I read them.<br>— Ryan
+          Reply if you have questions. I read them.<br>— Ryan
         </p>
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">

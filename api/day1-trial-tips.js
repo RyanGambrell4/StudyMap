@@ -36,9 +36,9 @@ function pickAudienceCopy({ schoolType, yearLevel }) {
   if (st === 'exam') {
     return {
       audienceLabel: 'exam prep',
-      opener: `You're prepping for a big exam — day 1 of Pro is where the AI Study Coach earns its keep.`,
+      opener: `You're prepping for a big exam. Day 1 of Pro is where the AI Study Coach earns its keep.`,
       tipTitle: 'Do this today (10 minutes)',
-      tipBody: `Add your exam date and drop your prep timeline into the AI Study Coach. It builds a real, week-by-week plan so you're not just cramming the last week — you're covering everything on the exam blueprint.`,
+      tipBody: `Add your exam date and drop your prep timeline into the AI Study Coach. It builds a real, week-by-week plan so you're not just cramming the last week. You'll be covering everything on the exam blueprint.`,
       ctaLabel: 'Build my exam plan',
       ctaHref: 'https://getstudyedge.com/app?tab=coach&utm_source=email&utm_medium=lifecycle&utm_campaign=day1_trial_tips',
     }
@@ -48,10 +48,10 @@ function pickAudienceCopy({ schoolType, yearLevel }) {
     return {
       audienceLabel: 'high school',
       opener: yl.includes('senior')
-        ? `You're a senior — GPA still matters this semester. Day 1 of Pro is when you set the plan.`
+        ? `You're a senior. GPA still matters this semester. Day 1 of Pro is when you set the plan.`
         : `Day 1 of Pro is when you set the plan. High schoolers who front-load this get the biggest lift.`,
       tipTitle: 'Do this today (5 minutes)',
-      tipBody: `Add every class you're currently taking as a course. The AI reads your syllabus, spots the tests, and turns them into concrete study sessions — no more "I'll figure it out tonight".`,
+      tipBody: `Add every class you're currently taking as a course. The AI reads your syllabus, spots the tests, and turns them into concrete study sessions. No more "I'll figure it out tonight".`,
       ctaLabel: 'Add my classes',
       ctaHref: 'https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day1_trial_tips',
     }
@@ -62,10 +62,10 @@ function pickAudienceCopy({ schoolType, yearLevel }) {
   return {
     audienceLabel: 'university',
     opener: isEarlyYear
-      ? `The students who lock in a plan in the first year — that's the group that ends up with the 3.7+ GPA. Day 1 of Pro is where you start.`
+      ? `The students who lock in a plan in the first year are the ones who end up with the 3.7+ GPA. Day 1 of Pro is where you start.`
       : `You know how a semester goes: quiet for 3 weeks, then everything hits at once. Pro is built to keep you in front of that curve.`,
     tipTitle: 'Do this today (5 minutes)',
-    tipBody: `Add your hardest course first — the one where the exam average is 60. Drop in the exam date, and the AI Study Coach will build a real plan around it: what to study, when, and for how long.`,
+    tipBody: `Add your hardest course first, the one where the exam average is 60. Drop in the exam date, and the AI Study Coach will build a real plan around it: what to study, when, and for how long.`,
     ctaLabel: 'Plan my hardest class',
     ctaHref: 'https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day1_trial_tips',
   }
@@ -143,10 +143,10 @@ export default async function handler(req, res) {
 
       const sessionCount = Array.isArray(row.completed_sessions) ? row.completed_sessions.length : 0
       const openerLine = sessionCount === 0
-        ? `You started your Pro trial yesterday. You haven't run a study session yet — that's fine, day 1 is for setup.`
+        ? `You started your Pro trial yesterday. You haven't run a study session yet. That's fine, day 1 is for setup.`
         : sessionCount === 1
-          ? `You logged your first session yesterday. Nice — momentum matters more than volume here.`
-          : `You already logged ${sessionCount} sessions. You're moving fast — here's how to keep the streak going.`
+          ? `You logged your first session yesterday. Nice. Momentum matters more than volume here.`
+          : `You already logged ${sessionCount} sessions. You're moving fast. Here's how to keep the streak going.`
 
       const greeting = firstName ? `Hey ${firstName}` : 'Hey'
 
@@ -154,7 +154,7 @@ export default async function handler(req, res) {
         await resend.emails.send({
           from: 'StudyEdge AI <support@mail.getstudyedge.com>',
           to: email,
-          subject: `${audience.audienceLabel === 'exam prep' ? 'Day 1 of exam prep' : 'Day 1 of your Pro trial'} — do this first`,
+          subject: `${audience.audienceLabel === 'exam prep' ? 'Day 1 of exam prep' : 'Day 1 of your Pro trial'}: do this first`,
           headers: listUnsubscribeHeaders(email),
           tags: [
             { name: 'campaign', value: 'day1_trial_tips' },
@@ -164,7 +164,7 @@ export default async function handler(req, res) {
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Day 1 of your Pro trial</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111111;">
-${preheader(`Day 1: the 5-minute setup step most Pro users skip — and regret.`)}
+${preheader(`Day 1: the 5-minute setup step most Pro users skip. Don't skip it.`)}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
@@ -174,7 +174,7 @@ ${preheader(`Day 1: the 5-minute setup step most Pro users skip — and regret.`
       <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#3B61C4;text-transform:uppercase;">Day 1 · trial in progress</p>
         <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">
-          ${greeting} — day 1 of Pro. Let's use it right.
+          ${greeting}, day 1 of Pro. Let's use it right.
         </h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           ${openerLine}
@@ -197,7 +197,7 @@ ${preheader(`Day 1: the 5-minute setup step most Pro users skip — and regret.`
           </td></tr>
         </table>
         <p style="margin:22px 0 0;font-size:13px;color:#9B9B9B;line-height:1.6;">
-          Stuck on setup? Reply to this email — a real human reads them.
+          Stuck on setup? Reply to this email. A real human reads them.
         </p>
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">

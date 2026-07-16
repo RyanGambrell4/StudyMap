@@ -88,11 +88,11 @@ ${preheader('A friend signed up using your referral link. When they upgrade to P
         Someone used your referral link!
       </h1>
       <p style="margin:0 0 20px;font-size:15px;color:#4b5563;line-height:1.6;">
-        Hey ${firstName} — a friend just signed up for StudyEdge using your referral link. When they upgrade to Pro, you'll both get a free month automatically.
+        Hey ${firstName}, a friend just signed up for StudyEdge using your referral link. When they upgrade to Pro, you'll both get a free month automatically.
       </p>
       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:16px 18px;margin-bottom:20px;">
         <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#16a34a;">How rewards work</p>
-        <p style="margin:0;font-size:13.5px;color:#4b5563;line-height:1.6;">When your friend upgrades to Pro, you'll both get 1 month free — automatically applied to your next billing cycle. Keep sharing to stack rewards.</p>
+        <p style="margin:0;font-size:13.5px;color:#4b5563;line-height:1.6;">When your friend upgrades to Pro, you'll both get 1 month free, automatically applied to your next billing cycle. Keep sharing to stack rewards.</p>
       </div>
       <a href="https://getstudyedge.com/app" style="display:block;text-align:center;background:#3B61C4;color:#fff;font-weight:800;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none;letter-spacing:-0.01em;">
         Open StudyEdge →

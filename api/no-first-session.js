@@ -94,7 +94,7 @@ ${preheader("You set up your study plan yesterday and haven't come back. Everyth
           You signed up for StudyEdge yesterday and went through setup. But you haven't added your first course or started a session.
         </p>
         <p style="margin:0 0 20px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          That's the part that actually works. Your AI study coach, your blueprints, your schedule — none of it runs until you add a course with a real exam date.
+          That's the part that actually works. Your AI study coach, your blueprints, your schedule: none of it runs until you add a course with a real exam date.
         </p>
 
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
@@ -122,7 +122,7 @@ ${preheader("You set up your study plan yesterday and haven't come back. Everyth
           <tr><td style="background:#F4F7FF;border-radius:12px;border:1px solid rgba(59,97,196,0.15);padding:16px 20px;text-align:center;">
             <p style="margin:0 0 6px;font-size:13px;font-weight:600;color:#3B61C4;">Your 3-day free trial is still waiting</p>
             <p style="margin:0 0 12px;font-size:13px;color:#6B6B6B;line-height:1.55;">
-              Try every Pro feature free — unlimited AI tutoring, 5 courses, Session Blueprints on every session. $0 today, $2.99/wk after, cancel any time.
+              Try every Pro feature free: unlimited AI tutoring, 5 courses, Session Blueprints on every session. $0 today, $2.99/wk after, cancel any time.
             </p>
             <a href="${upgradeUrl}" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">Start free trial →</a>
           </td></tr>

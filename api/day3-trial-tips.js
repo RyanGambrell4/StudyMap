@@ -90,34 +90,34 @@ export default async function handler(req, res) {
 
       if (isInactive) {
         inactiveBranch++
-        subject = "Day 3 of your trial — 10 minutes will change how this feels"
+        subject = "Day 3 of your trial: 10 minutes will change how this feels"
         kicker = 'Day 3 · rescue'
         kickerColor = '#E8531A'
-        headline = `${greeting} — you have 4 days of Pro left. Let's actually use one.`
+        headline = `${greeting}, you have 4 days of Pro left. Let's actually use one.`
         lead = `You haven't started a session yet. That's the part that makes it click. Here's the fastest path from "interesting app" to "this is genuinely useful":`
         tipTitle = 'The 10-minute session that changes everything'
-        tipBody = `Add one course with your next exam date. Then tap Session Blueprint. The AI gives you a minute-by-minute plan for exactly what to study and for how long. Do it once — even just 10 minutes — and you'll understand why Pro users say they study more consistently.`
+        tipBody = `Add one course with your next exam date. Then tap Session Blueprint. The AI gives you a minute-by-minute plan for exactly what to study and for how long. Do it once, even just 10 minutes, and you'll understand why Pro users say they study more consistently.`
         ctaLabel = 'Try one session now'
         ctaHref = 'https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day3_trial_rescue'
         ctaSub = '4 days of Pro remaining.'
       } else {
         activeBranch++
         subject = sessionCount >= 3
-          ? `${sessionCount} sessions in 3 days — here's the Pro feature to use next`
+          ? `${sessionCount} sessions in 3 days. Here's the Pro feature to use next`
           : 'Day 3: the Pro feature most students don\'t find on their own'
         kicker = 'Day 3 · next move'
         kickerColor = '#3B61C4'
         headline = sessionCount >= 3
-          ? `${greeting} — ${sessionCount} sessions in 3 days. That puts you in the top 5%.`
-          : `${greeting} — you've started. Here's what to do next.`
+          ? `${greeting}, ${sessionCount} sessions in 3 days. That puts you in the top 5%.`
+          : `${greeting}, you've started. Here's what to do next.`
         lead = sessionCount >= 3
           ? `You've already built more study momentum than most trial users do in a week. There's one more Pro feature worth using before your trial ends.`
-          : `You've logged at least one session. The next one gets easier — especially with this.`
+          : `You've logged at least one session. The next one gets easier, especially with this.`
         tipTitle = 'Try Exam Rescue on your hardest topic'
         tipBody = `Open a course, tap "Exam Rescue" on any topic you're weakest at. Paste in some notes or a concept you're struggling with. The AI identifies the specific gaps in your understanding and gives you a targeted 20-minute review plan. It's the closest thing to having a tutor look at your work and tell you exactly what to focus on.`
         ctaLabel = 'Try Exam Rescue'
         ctaHref = 'https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day3_trial_active'
-        ctaSub = '4 days of Pro remaining — keep everything at $2.99/wk.'
+        ctaSub = '4 days of Pro remaining. Keep everything at $2.99/wk.'
       }
 
       try {
@@ -134,7 +134,7 @@ export default async function handler(req, res) {
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${subject}</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111111;">
-${preheader(isInactive ? 'One 10-minute session is all it takes to go from "set up" to "actually useful."' : 'Day 3: the feature most users discover too late — Exam Rescue.')}
+${preheader(isInactive ? 'One 10-minute session is all it takes to go from "set up" to "actually useful."' : 'Day 3: the feature most users discover too late. Try Exam Rescue.')}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
@@ -162,7 +162,7 @@ ${preheader(isInactive ? 'One 10-minute session is all it takes to go from "set 
           </td></tr>
         </table>
         <p style="margin:22px 0 0;font-size:13px;color:#9B9B9B;line-height:1.6;">
-          Question about Pro or the app? Reply here — I actually read them. — Ryan
+          Question about Pro or the app? Reply here. I actually read them. — Ryan
         </p>
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">

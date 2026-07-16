@@ -15,49 +15,49 @@ const TRIGGER_COPY = {
     subject: 'You hit the AI limit on StudyEdge',
     headline: 'You ran out of free AI questions.',
     what_happened: 'You hit the limit on free AI coaching sessions.',
-    unlock: 'Pro gives you 100 AI actions per month — ask anything about any of your courses, any time.',
+    unlock: 'Pro gives you 100 AI actions per month. Ask anything about any of your courses, any time.',
   },
   'ai-exhausted': {
     subject: 'You hit the AI limit on StudyEdge',
     headline: 'You ran out of free AI questions.',
     what_happened: 'You used up your free AI coaching sessions for this period.',
-    unlock: 'Pro gives you 100 AI actions per month — ask anything about any of your courses, any time.',
+    unlock: 'Pro gives you 100 AI actions per month. Ask anything about any of your courses, any time.',
   },
   'ai-struggle': {
     subject: 'You were trying to work through a tough topic',
     headline: 'You hit the AI limit while drilling a weak spot.',
-    what_happened: 'You were working through a topic you flagged as a struggle — and hit the free AI limit.',
+    what_happened: 'You were working through a topic you flagged as a struggle and hit the free AI limit.',
     unlock: 'Pro gives you 100 AI coaching sessions per month so you can drill weak spots until they stick, not just until you run out.',
   },
   courses: {
     subject: 'You tried to add more courses on StudyEdge',
     headline: 'You tried to add another course.',
     what_happened: 'The free plan covers 1 course. You tried to add more.',
-    unlock: 'Pro gives you up to 5 courses — full study plans, grade tracking, and AI coaching for each one.',
+    unlock: 'Pro gives you up to 5 courses: full study plans, grade tracking, and AI coaching for each one.',
   },
   focusMode: {
     subject: 'You hit your free focus session limit',
     headline: 'You hit your free Focus Mode limit.',
     what_happened: 'You ran out of free Focus Mode time for today.',
-    unlock: 'Pro gives you unlimited Focus Mode sessions — build the daily habit without hitting a cap.',
+    unlock: 'Pro gives you unlimited Focus Mode sessions. Build the daily habit without hitting a cap.',
   },
   blueprints: {
     subject: 'You tried to generate another blueprint on StudyEdge',
     headline: 'You hit the free blueprint limit.',
     what_happened: 'You tried to generate another study session blueprint and hit the free limit.',
-    unlock: 'Pro gives you unlimited session blueprints — so you always have a plan for what to study next.',
+    unlock: 'Pro gives you unlimited session blueprints so you always have a plan for what to study next.',
   },
   examRescue: {
     subject: 'You tried to use Exam Rescue on StudyEdge',
     headline: 'Exam Rescue is a Pro feature.',
-    what_happened: 'You tried to use Exam Rescue — the last-minute exam prep tool.',
+    what_happened: 'You tried to use Exam Rescue, the last-minute exam prep tool.',
     unlock: 'Pro unlocks Exam Rescue so you can generate a focused last-48-hour cram plan for any course.',
   },
   cheatSheet: {
     subject: 'You tried to generate a cheat sheet on StudyEdge',
     headline: 'AI Cheat Sheets are a Pro feature.',
     what_happened: 'You tried to generate an AI-written cheat sheet and hit the free limit.',
-    unlock: 'Pro unlocks unlimited AI cheat sheets — pull the key concepts from any topic in seconds.',
+    unlock: 'Pro unlocks unlimited AI cheat sheets. Pull the key concepts from any topic in seconds.',
   },
 }
 
@@ -65,7 +65,7 @@ const DEFAULT_COPY = {
   subject: 'You hit the free limit on StudyEdge',
   headline: 'You hit the free limit.',
   what_happened: 'You tried to use a Pro feature and hit the free plan limit.',
-  unlock: 'Pro gives you 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions — everything you need to actually stay on top of your coursework.',
+  unlock: 'Pro gives you 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions. Everything you need to actually stay on top of your coursework.',
 }
 
 export default async function handler(req, res) {
@@ -122,7 +122,7 @@ ${preheader(copy.unlock)}
         ${copy.headline}
       </h1>
       <p style="margin:0 0 20px;font-size:15px;color:#4b5563;line-height:1.6;">
-        Hey ${firstName} — ${copy.what_happened}
+        Hey ${firstName}, ${copy.what_happened}
       </p>
 
       <div style="background:#f8f9ff;border:1px solid rgba(59,97,196,0.15);border-left:4px solid #3B61C4;border-radius:12px;padding:16px 18px;margin-bottom:24px;">
@@ -132,7 +132,7 @@ ${preheader(copy.unlock)}
 
       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 18px;margin-bottom:24px;">
         <p style="margin:0;font-size:13.5px;color:#166534;line-height:1.6;">
-          <strong>Try Pro free for 3 days.</strong> No charge during the trial. $2.99/week or $9.99/month after — cancel anytime.
+          <strong>Try Pro free for 3 days.</strong> No charge during the trial. $2.99/week or $9.99/month after. Cancel anytime.
         </p>
       </div>
 

@@ -138,7 +138,7 @@ export default async function handler(req, res) {
         <table cellpadding="0" cellspacing="0" style="width:100%;background:rgba(59,97,196,0.06);border:1px solid rgba(59,97,196,0.18);border-radius:12px;margin-top:22px;">
           <tr><td style="padding:16px 18px;">
             <div style="font-size:14px;font-weight:600;color:#111111;margin-bottom:4px;">${trialUsed ? 'Upgrade to Pro for the final push' : 'Get a session blueprint for every remaining day'}</div>
-            <div style="font-size:13px;color:#6B6B6B;line-height:1.55;margin-bottom:10px;">${trialUsed ? 'Unlimited AI blueprints, Study Coach, and Exam Rescue — make the most of the time you have left.' : 'Pro gives you AI-built session plans, Study Coach, and 100 AI boosts/month for $2.99/wk. Try free for 3 days.'}</div>
+            <div style="font-size:13px;color:#6B6B6B;line-height:1.55;margin-bottom:10px;">${trialUsed ? 'Unlimited AI blueprints, Study Coach, and Exam Rescue. Make the most of the time you have left.' : 'Pro gives you AI-built session plans, Study Coach, and 100 AI boosts/month for $2.99/wk. Try free for 3 days.'}</div>
             <a href="https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=exam_countdown" style="font-size:13px;font-weight:600;color:#3B61C4;text-decoration:none;">${trialUsed ? 'Upgrade to Pro →' : 'Start 3-day free trial →'}</a>
           </td></tr>
         </table>` : ''}

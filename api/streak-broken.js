@@ -73,7 +73,7 @@ export default async function handler(req, res) {
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Restart your streak</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-${preheader(`You had a ${previousStreak}-day streak going. One missed day doesn't undo the habit — here's how to restart.`)}
+${preheader(`You had a ${previousStreak}-day streak going. One missed day doesn't undo the habit. Here's how to restart.`)}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
@@ -118,7 +118,7 @@ ${preheader(`You had a ${previousStreak}-day streak going. One missed day doesn'
               Pro users never hit AI study limits
             </p>
             <p style="margin:0 0 10px;font-size:13px;color:#6B6B6B;line-height:1.55;">
-              Unlimited Brain Dumps, Prep Blasts, and AI Tutor messages — so nothing slows your next streak down.
+              Unlimited Brain Dumps, Prep Blasts, and AI Tutor messages, so nothing slows your next streak down.
             </p>
             <a href="https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=streak_broken" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">
               ${trialUsed ? 'Upgrade to Pro →' : 'Start free trial →'}

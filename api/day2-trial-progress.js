@@ -32,9 +32,9 @@ const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABAS
 function pickAudienceLine({ schoolType, yearLevel }) {
   const st = (schoolType ?? '').toLowerCase()
   const yl = (yearLevel ?? '').toLowerCase()
-  if (st === 'exam') return `Exam prep is a marathon — Pro was built for the last 4 weeks especially.`
+  if (st === 'exam') return `Exam prep is a marathon. Pro was built for the last 4 weeks especially.`
   if (st === 'hs') return `High school GPA compounds. One semester on Pro can shift a transcript real fast.`
-  if (yl.includes('4th') || yl.includes('senior')) return `Senior year — grad school apps are watching this GPA more than any other.`
+  if (yl.includes('4th') || yl.includes('senior')) return `Senior year. Grad school apps are watching this GPA more than any other.`
   return `Semester grades come down to the last 3 weeks. Pro is your setup for those weeks.`
 }
 
@@ -46,9 +46,9 @@ function inactiveBody({ audienceLine, greeting, firstName }) {
     heading: `Trial is halfway done${nameSuffix ? '' : '.'}${firstName ? ' Let\'s not waste it.' : ''}`,
     kicker: 'Day 2 · rescue',
     kickerColor: '#E8531A',
-    lead: `${greeting} — you haven't run a session yet. That's the only thing standing between you and knowing if this actually works for you.`,
+    lead: `${greeting}, you haven't run a session yet. That's the only thing standing between you and knowing if this actually works for you.`,
     tipTitle: 'The 5-minute win',
-    tipBody: `Add one course with the next real exam date. That's it. The AI Study Coach will spin up a specific plan and a Session Blueprint automatically — you'll see in one session whether this is worth $2.99/wk.`,
+    tipBody: `Add one course with the next real exam date. That's it. The AI Study Coach will spin up a specific plan and a Session Blueprint automatically. You'll see in one session whether this is worth $2.99/wk.`,
     tipContext: audienceLine,
     ctaLabel: 'Try one session now',
     ctaHref: 'https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day2_rescue',
@@ -59,19 +59,19 @@ function inactiveBody({ audienceLine, greeting, firstName }) {
 function activeBody({ audienceLine, greeting, firstName, sessionCount }) {
   const strong = sessionCount >= 3
   return {
-    subject: strong ? "You're using Pro like you mean it. One more thing." : 'Nice — day 2 momentum. Try this next.',
+    subject: strong ? "You're using Pro like you mean it. One more thing." : 'Nice. Day 2 momentum. Try this next.',
     heading: strong ? `${sessionCount} sessions in 2 days. You're already on the top 10% curve.` : `You're using it. Let's stack one more win.`,
     kicker: 'Day 2 · momentum',
     kickerColor: '#22C55E',
     lead: strong
-      ? `${greeting} — most Pro users take a week to log ${sessionCount} sessions. You did it in 2 days. That pattern is the whole game.`
-      : `${greeting} — you've run at least one session. That already puts you ahead of most trial users. One more today locks the habit.`,
+      ? `${greeting}, most Pro users take a week to log ${sessionCount} sessions. You did it in 2 days. That pattern is the whole game.`
+      : `${greeting}, you've run at least one session. That already puts you ahead of most trial users. One more today locks the habit.`,
     tipTitle: 'The Pro feature most users miss',
     tipBody: `Open a course, tap "Cheat Sheet" on a topic you're weakest at. The AI pulls the exam-critical formulas + concepts onto one printable page. Bring it to class tomorrow. It compresses hours of note-review into a single scan.`,
     tipContext: audienceLine,
     ctaLabel: 'Generate a cheat sheet',
     ctaHref: 'https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day2_active',
-    ctaSub: 'Trial ends in ~5 days — keep Pro at $2.99/wk.',
+    ctaSub: 'Trial ends in ~5 days. Keep Pro at $2.99/wk.',
   }
 }
 
@@ -194,7 +194,7 @@ ${preheader(isInactive ? 'One 5-minute session will tell you if StudyEdge Pro is
           </td></tr>
         </table>
         <p style="margin:22px 0 0;font-size:13px;color:#9B9B9B;line-height:1.6;">
-          Got a blocker? Reply to this email — I actually read them. — Ryan
+          Got a blocker? Reply to this email. I actually read them. — Ryan
         </p>
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">

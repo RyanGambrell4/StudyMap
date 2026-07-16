@@ -80,17 +80,17 @@ export default async function handler(req, res) {
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Week 2</p>
         <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">You tried Pro. You're back on free.</h1>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          That's fine — but I want to make sure the price was the only thing holding you back, not the product.
+          That's fine. I want to make sure the price was the only thing holding you back, not the product.
         </p>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro is $2.99/wk — less than a coffee. At that price it pays for itself the first time you use it to prep for an exam. Here's what you had during your trial:
+          Pro is $2.99/wk, less than a coffee. At that price it pays for itself the first time you use it to prep for an exam. Here's what you had during your trial:
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
             ['5 courses', 'Your full semester tracked in one place'],
             ['100 AI actions / month', 'Your always-on tutor for every concept'],
             ['Unlimited Session Blueprints', 'A focused plan before every study block'],
-            ['Unlimited Focus sessions', 'No 30-min cap — study as long as you need'],
+            ['Unlimited Focus sessions', 'No 30-min cap. Study as long as you need'],
             ['Cheat Sheets, Brain Dumps, Exam Rescue', 'The full toolkit for any situation'],
           ].map(([feat, detail]) => `
           <tr>
@@ -102,16 +102,16 @@ export default async function handler(req, res) {
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Upgrade to Pro — $2.99/wk</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Upgrade to Pro · $2.99/wk</a>
           </td></tr>
           <tr><td align="center">
             <span style="font-size:12px;color:#9B9B9B;">$2.99/wk · Cancel in account anytime</span>
           </td></tr>
         </table>` : `
-        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#E8531A;text-transform:uppercase;">Two weeks in — still free</p>
+        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#E8531A;text-transform:uppercase;">Two weeks in, still free</p>
         <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">You haven't tried the trial yet. Here's your reminder.</h1>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Two weeks on StudyEdge and you're still capped at 2 AI actions and 1 course. Your trial is still available — Card required, cancel before day 4 and you pay nothing. Here's what it unlocks:
+          Two weeks on StudyEdge and you're still capped at 2 AI actions and 1 course. Your trial is still available. Card required, cancel before day 4 and you pay nothing. Here's what it unlocks:
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[

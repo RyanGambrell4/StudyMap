@@ -103,11 +103,11 @@ export default async function handler(req, res) {
              <strong style="color:#111111;">${upcomingExam.date ?? upcomingExam.dateStr}</strong>.
              Every day you don't study puts you further behind the students who are. Come back today.`
           : `${weeksGone > 1 ? `It's been ${weeksGone} weeks.` : `It's been over a week.`}
-             The students who fall behind in their courses aren't the ones who don't understand the material —
-             they're the ones who lose their rhythm. You still have time to get it back.`
+             The students who fall behind in their courses aren't the ones who don't understand the material.
+             They're the ones who lose their rhythm. You still have time to get it back.`
         bodyPara2 = sessionCount > 0
           ? `You completed ${sessionCount} session${sessionCount !== 1 ? 's' : ''} before you stepped away.
-             That work doesn't disappear — pick up exactly where you left off.`
+             That work doesn't disappear. Pick up exactly where you left off.`
           : null
       } else {
         // 3-6 days: lighter nudge, course-specific
@@ -121,7 +121,7 @@ export default async function handler(req, res) {
           ? `Your <strong style="color:#111111;">${upcomingExam.title ?? 'exam'}</strong>
              on <strong style="color:#111111;">${upcomingExam.date ?? upcomingExam.dateStr}</strong> is coming.
              A short session today is better than cramming later.`
-          : `It's been a few days. Your sessions are still here — and a short study block today
+          : `It's been a few days. Your sessions are still here, and a short study block today
              is enough to rebuild the habit.`
         bodyPara2 = null
       }
@@ -141,8 +141,8 @@ export default async function handler(req, res) {
             <tr><td style="background:#FFF7ED;border-radius:12px;border:1px solid #FED7AA;padding:14px 18px;">
               <p style="margin:0;font-size:13px;color:#92400E;line-height:1.55;">
                 ⚠️ <strong>${upcomingExam.title ?? 'Exam'}</strong> on
-                <strong>${upcomingExam.date ?? upcomingExam.dateStr}</strong> —
-                you have ${Math.max(1, Math.floor((new Date(upcomingExam.date ?? upcomingExam.dateStr).getTime() - now) / 86400000))} days left.
+                <strong>${upcomingExam.date ?? upcomingExam.dateStr}</strong>.
+                You have ${Math.max(1, Math.floor((new Date(upcomingExam.date ?? upcomingExam.dateStr).getTime() - now) / 86400000))} days left.
               </p>
             </td></tr>
           </table>`
@@ -196,7 +196,7 @@ ${preheader(courseNames.length ? `Your ${courseNames[0]} plan is sitting here. $
             </p>
             <p style="margin:0 0 12px;font-size:13px;color:#6B6B6B;line-height:1.55;">
               ${trialUsed
-                ? 'Everything you had during your trial — unlimited AI tutoring, 5 courses, Blueprints every session — back permanently for $2.99/wk.'
+                ? 'Everything you had during your trial: unlimited AI tutoring, 5 courses, Blueprints every session, back permanently for $2.99/wk.'
                 : `Try every Pro feature free for 3 days. Unlimited AI tutoring, Session Blueprints on every study block, 5 courses. $0 today, $2.99/wk after.`}
             </p>
             <a href="https://getstudyedge.com/app?${trialUsed ? 'upgrade=1' : 'signup=1&plan=pro&billing=weekly&trial=1'}&utm_source=email&utm_medium=lifecycle&utm_campaign=re_engage_${tier}_upsell" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">

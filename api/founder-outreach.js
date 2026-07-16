@@ -78,7 +78,7 @@ export default async function handler(req, res) {
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-${preheader('Quick question from the founder — takes 30 seconds.')}
+${preheader('Quick question from the founder. Takes 30 seconds.')}
   <div style="max-width:540px;margin:0 auto;padding:40px 16px;">
     <div style="background:#fff;border-radius:12px;padding:36px 32px;border:1px solid #e5e7eb;">
 
@@ -86,7 +86,7 @@ ${preheader('Quick question from the founder — takes 30 seconds.')}
         Hey ${cap},
       </p>
       <p style="margin:0 0 18px;font-size:15px;color:#374151;line-height:1.7;">
-        I'm Ryan — I built StudyEdge AI. You signed up a few days ago and I wanted to reach out personally.
+        I'm Ryan. I built StudyEdge AI. You signed up a few days ago and I wanted to reach out personally.
       </p>
       <p style="margin:0 0 18px;font-size:15px;color:#374151;line-height:1.7;">
         I noticed you haven't tried the Pro trial yet and I'm genuinely curious: <strong>what held you back?</strong>
@@ -110,7 +110,7 @@ ${preheader('Quick question from the founder — takes 30 seconds.')}
       </div>
 
       <p style="margin:0;font-size:15px;color:#374151;line-height:1.7;">
-        Either way — reply to this email. I'll write back.
+        Either way, reply to this email. I'll write back.
       </p>
       <p style="margin:12px 0 0;font-size:15px;color:#374151;">Ryan</p>
       <p style="margin:4px 0 0;font-size:13px;color:#6b7280;">Founder, StudyEdge AI</p>
