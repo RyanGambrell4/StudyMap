@@ -98,6 +98,7 @@ const DIFFICULTY_COLORS = { Easy: '#059669', Medium: '#D97706', Hard: '#DC2626' 
 function SolutionView({ solution, onBack }) {
   const [revealMode, setRevealMode] = useState(false)
   const [revealedCount, setRevealedCount] = useState(0)
+  const [copyState, setCopyState] = useState('idle') // idle | copied | error
   const allRevealed = !revealMode || revealedCount >= (solution.steps?.length || 0)
 
   const copyAll = () => {
@@ -113,7 +114,9 @@ function SolutionView({ solution, onBack }) {
       solution.keyFormulas?.length ? `\nKey Formulas:\n${solution.keyFormulas.join('\n')}` : '',
       solution.commonMistake ? `\nCommon Mistake: ${solution.commonMistake}` : ''
     ].join('\n')
-    navigator.clipboard.writeText(text).catch(() => {})
+    navigator.clipboard.writeText(text)
+      .then(() => { setCopyState('copied'); setTimeout(() => setCopyState('idle'), 2000) })
+      .catch(() => { setCopyState('error'); setTimeout(() => setCopyState('idle'), 3000) })
   }
 
   return (
@@ -127,10 +130,12 @@ function SolutionView({ solution, onBack }) {
         </button>
         <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#111', flex: 1 }}>Solution</h2>
         <button onClick={copyAll} style={{
-          background: 'none', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 8,
-          padding: '6px 14px', fontSize: 13, cursor: 'pointer', color: '#3B61C4', fontWeight: 600
+          background: copyState === 'copied' ? '#059669' : copyState === 'error' ? 'rgba(220,38,38,0.08)' : 'none',
+          border: copyState === 'idle' ? '1px solid rgba(0,0,0,0.12)' : copyState === 'error' ? '1px solid rgba(220,38,38,0.25)' : 'none',
+          borderRadius: 8, padding: '6px 14px', fontSize: 13, cursor: 'pointer',
+          color: copyState === 'copied' ? '#fff' : copyState === 'error' ? '#DC2626' : '#3B61C4', fontWeight: 600, transition: 'all 0.2s'
         }}>
-          Copy
+          {copyState === 'copied' ? 'Copied' : copyState === 'error' ? 'Copy failed' : 'Copy'}
         </button>
       </div>
 
@@ -285,7 +290,7 @@ function ProblemCard({ item, onClick, onDelete }) {
         onClick={e => { e.stopPropagation(); onDelete(item.id) }}
         style={{
           position: 'absolute', top: 10, right: 10, background: 'none', border: 'none',
-          cursor: 'pointer', color: '#9CA3AF', fontSize: 14, padding: '2px 6px', lineHeight: 1,
+          cursor: 'pointer', color: '#9B9B9B', fontSize: 14, padding: '2px 6px', lineHeight: 1,
           borderRadius: 4
         }}
         title="Delete"
@@ -534,7 +539,7 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
         }}>
           <div style={{ fontSize: 32, marginBottom: 12 }}>fx</div>
           <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>No problems solved yet</div>
-          <div style={{ fontSize: 13 }}>Paste a problem above to get started</div>
+          <div style={{ fontSize: 13 }}>Add your first problem using the button above</div>
         </div>
       )}
     </div>

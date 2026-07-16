@@ -24,6 +24,7 @@ const WORD_COUNTS = [500, 750, 1000, 1500, 2000, 3000, 5000]
 
 function OutlineView({ outline, onBack }) {
   const [copied, setCopied] = useState(false)
+  const [copyError, setCopyError] = useState(false)
 
   const copyAll = () => {
     const lines = [
@@ -44,8 +45,12 @@ function OutlineView({ outline, onBack }) {
     ].filter(Boolean).join('\n')
     navigator.clipboard.writeText(lines).then(() => {
       setCopied(true)
+      setCopyError(false)
       setTimeout(() => setCopied(false), 2000)
-    }).catch(() => {})
+    }).catch(() => {
+      setCopyError(true)
+      setTimeout(() => setCopyError(false), 3000)
+    })
   }
 
   return (
@@ -59,12 +64,12 @@ function OutlineView({ outline, onBack }) {
         </button>
         <h2 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#111', flex: 1 }}>Essay Outline</h2>
         <button onClick={copyAll} style={{
-          background: copied ? '#059669' : 'none',
-          border: copied ? 'none' : '1px solid rgba(0,0,0,0.12)',
+          background: copied ? '#059669' : copyError ? 'rgba(220,38,38,0.08)' : 'none',
+          border: copied ? 'none' : copyError ? '1px solid rgba(220,38,38,0.25)' : '1px solid rgba(0,0,0,0.12)',
           borderRadius: 8, padding: '6px 14px', fontSize: 13, cursor: 'pointer',
-          color: copied ? '#fff' : '#3B61C4', fontWeight: 600, transition: 'all 0.2s'
+          color: copied ? '#fff' : copyError ? '#DC2626' : '#3B61C4', fontWeight: 600, transition: 'all 0.2s'
         }}>
-          {copied ? 'Copied' : 'Copy'}
+          {copied ? 'Copied' : copyError ? 'Copy failed' : 'Copy'}
         </button>
       </div>
 
@@ -151,22 +156,22 @@ function OutlineView({ outline, onBack }) {
 
       {outline.writingTips?.length > 0 && (
         <div style={{
-          background: '#EEF2FF', border: '1px solid #3B61C420', borderRadius: 12, padding: 16, marginBottom: 14
+          background: 'rgba(59,97,196,0.05)', border: '1px solid rgba(59,97,196,0.15)', borderRadius: 12, padding: 16, marginBottom: 14
         }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: '#3B61C4', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Writing Tips</div>
           {outline.writingTips.map((tip, i) => (
-            <div key={i} style={{ fontSize: 13, color: '#1e3a8a', marginBottom: 6, lineHeight: 1.4 }}>- {tip}</div>
+            <div key={i} style={{ fontSize: 13, color: '#3B61C4', marginBottom: 6, lineHeight: 1.4 }}>- {tip}</div>
           ))}
         </div>
       )}
 
       {outline.commonPitfalls?.length > 0 && (
         <div style={{
-          background: '#FEF3C7', border: '1px solid #F59E0B30', borderRadius: 12, padding: 16
+          background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.2)', borderRadius: 12, padding: 16
         }}>
-          <div style={{ fontSize: 12, fontWeight: 700, color: '#92400E', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Watch Out For</div>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#D97706', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Watch Out For</div>
           {outline.commonPitfalls.map((p, i) => (
-            <div key={i} style={{ fontSize: 13, color: '#78350F', marginBottom: 6, lineHeight: 1.4 }}>- {p}</div>
+            <div key={i} style={{ fontSize: 13, color: '#92400E', marginBottom: 6, lineHeight: 1.4 }}>- {p}</div>
           ))}
         </div>
       )}
@@ -207,7 +212,7 @@ function OutlineCard({ item, onClick, onDelete }) {
         onClick={e => { e.stopPropagation(); onDelete(item.id) }}
         style={{
           position: 'absolute', top: 10, right: 10, background: 'none', border: 'none',
-          cursor: 'pointer', color: '#9CA3AF', fontSize: 14, padding: '2px 6px', lineHeight: 1,
+          cursor: 'pointer', color: '#9B9B9B', fontSize: 14, padding: '2px 6px', lineHeight: 1,
           borderRadius: 4
         }}
         title="Delete"
@@ -245,7 +250,7 @@ export default function EssayArchitectView({ userId, onShowPaywall }) {
         body: JSON.stringify({ topic, essayType, wordCount, requirements, courseName, thesis: selectedThesis })
       })
       const json = await res.json()
-      if (!res.ok) throw new Error(json.error || 'Failed')
+      if (!res.ok) throw new Error(json.error || 'Something went wrong. Please try again.')
       setThesisOptions(json.theses)
       setSelectedThesis(json.theses[0])
     } catch (err) {
@@ -511,7 +516,7 @@ export default function EssayArchitectView({ userId, onShowPaywall }) {
           textAlign: 'center', padding: '48px 24px', color: '#6B6B6B',
           border: '2px dashed rgba(0,0,0,0.08)', borderRadius: 14
         }}>
-          <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 12, color: '#d1d5db' }}>A</div>
+          <div style={{ fontSize: 28, fontWeight: 700, marginBottom: 12, color: '#C0C0C0' }}>A</div>
           <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>No outlines yet</div>
           <div style={{ fontSize: 13 }}>Create your first essay outline above</div>
         </div>
