@@ -54,7 +54,7 @@ const TIMELINE = [
     day: 'Today',
     color: '#059669',
     title: 'Full access unlocks',
-    body: 'Every Pro feature: AI Coach, 100 AI actions, unlimited focus, blueprints, flashcards, quizzes, and Grade Hub. $0 today.',
+    body: 'Every Pro feature unlocked: AI Coach, 100 AI actions, unlimited focus, blueprints, flashcards, quizzes, and Grade Hub.',
   },
   {
     day: 'Day 2',
@@ -219,7 +219,7 @@ export default function PrePaywall({ open, trigger, onContinue, onDismiss }) {
 
         {step === 2 && (
           <p style={{ margin: '10px 0 0', textAlign: 'center', fontSize: '0.72rem', color: '#9B9B9B' }}>
-            $0 today · Cancel with one tap · No hidden fees
+            Card required · Cancel anytime · No hidden fees
           </p>
         )}
 
