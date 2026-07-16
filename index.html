@@ -849,6 +849,7 @@
     .footer-socials { display: flex; gap: 16px; align-items: center; }
     .footer-socials a { color: var(--dim); transition: color 0.15s; }
     .footer-socials a:hover { color: var(--muted); }
+    .footer-tagline { flex-basis: 100%; font-size: 14px; color: var(--muted); font-style: italic; margin-bottom: 4px; }
     .footer-copy { font-size: 13px; color: var(--dim); }
     .footer-disclaimer {
       flex-basis: 100%;
@@ -1089,12 +1090,12 @@
           <section className="hero" style={{position:'relative',zIndex:1}}>
             <p className="hero-eyebrow hero-stagger-1"><span className="hero-eyebrow-dot" /><strong>30,000+</strong> students in the StudyEdge AI community</p>
             <h1 className="hero-h1 hero-stagger-2">
-              Your grades aren't<br />
-              the problem.<br />
-              <em>Your system is.</em>
+              The schedule,<br />
+              the sessions,<br />
+              <em>all planned for you.</em>
             </h1>
             <p className="hero-sub hero-stagger-3">
-              StudyEdge builds your schedule, plans every session minute by minute, and runs your study sessions with flashcards, quizzes, and active recall built in. One app. All semester.
+              Upload your syllabus. We turn it into a week-by-week schedule, build your study sessions, and walk you through them with flashcards and quizzes already loaded. You just show up.
             </p>
             <div className="hero-cta hero-stagger-4">
               <button className="btn btn-primary-lg btn-cta-pulse" onClick={() => goTo('/app?signup=1')}>Start for free</button>
@@ -1167,17 +1168,17 @@
       const steps = [
         {
           n: '01',
-          title: "You don't know what to study",
+          title: "We fill your week automatically",
           body: "Add your courses and upload your syllabus. StudyEdge reads your exam dates, assignment weights, and deadlines and fills your week automatically, prioritized by urgency and difficulty."
         },
         {
           n: '02',
-          title: "You sit down with no plan",
+          title: "We plan every session before you sit down",
           body: "Before every session, Session Blueprint generates a minute-by-minute study plan for that specific course, your current goal, and how much time you have. You never open a notebook wondering where to start."
         },
         {
           n: '03',
-          title: "You study but it doesn't stick",
+          title: "We run the session with you",
           body: "Focus Mode runs the session. Flashcards, recall prompts, and quizzes are built into each block. You're actively retrieving information, not passively rereading notes."
         }
       ];
@@ -1186,8 +1187,8 @@
           <div className="section">
             <p className="section-label sl-blue">How it works</p>
             <h2 className="section-h2">
-              Three reasons students fail.<br />
-              <em>None of them are intelligence.</em>
+              Sunday night. Four exams in three weeks.<br />
+              <em>Here is what we do.</em>
             </h2>
             <div className="how-grid fade-up">
               {steps.map((s, i) => (
@@ -1891,8 +1892,8 @@
         {
           label: 'Grade Hub',
           labelClass: 'sl-green',
-          h3: <>Know exactly where<br /><em>you stand.</em></>,
-          body: "Your exact projected grade, what you need on every remaining assignment, and three different scenarios to hit your target. Not a guess. A calculation. Most students find out too late, this tells you now.",
+          h3: <>You are sitting at a 74.<br /><em>Here is what you need.</em></>,
+          body: "Your exact projected grade, what you need on every remaining assignment, and three scenarios to hit your target. Not a guess. A calculation. Most students find out they needed a 91 on the final when it is too late to change that.",
           card: 'grade',
           rev: false
         },
@@ -1907,6 +1908,15 @@
       ];
       return (
         <div id="features">
+          <div className="section-wrap" style={{paddingBottom:0}}>
+            <div className="section" style={{paddingBottom:0}}>
+              <p className="section-label sl-blue">Features</p>
+              <h2 className="section-h2 fade-up">
+                Built so you can stop opening 7 tabs<br />
+                <em>to study one chapter.</em>
+              </h2>
+            </div>
+          </div>
           {features.map((f, i) => (
             <div className="product-wrap" key={f.label} style={{background: i % 2 === 1 ? 'var(--bg1)' : 'var(--bg)'}}>
               <div className={'product-inner' + (f.rev ? ' rev' : '')}>
@@ -1927,11 +1937,11 @@
 
     function TestimonialsMarquee() {
       const row1 = [
-        {t: "I've always struggled to stay consistent. StudyEdge AI just plans it for me. Seeing my hours and progress tracked has genuinely helped bring my grades up.", n: "Andy G.", r: "Undergraduate"},
-        {t: "If you want to stay mediocre at studying, don't use this. Scheduling, coaching, daily organization: it has everything you need to take your marks to the next level with less effort.", n: "Danny K.", r: "PhD Student"},
-        {t: "First AI study platform I can confidently say has it all. Week-by-week study plans, progress tracking, flashcards, quizzes, and it cuts all the prep time so you can just focus on actually learning.", n: "Charlotte B.", r: "University Student"},
-        {t: "It does an amazing job of meeting you where you're at and taking you where you want to go academically.", n: "Gavin D.", r: "Graduate Student"},
-        {t: "Right when you log in you see a beautifully structured dashboard that makes you want to get to work. Personalized schedule, flashcards, quizzes: there's so much you can do, how can you not be excited?", n: "Alex G.", r: "College Student"},
+        {t: "I've always struggled to stay consistent. StudyEdge AI just plans it for me. Seeing my hours and progress tracked has genuinely helped bring my grades up.", n: "Andy G.", r: "UCLA · 2.8 → 3.4 GPA"},
+        {t: "If you want to stay mediocre at studying, don't use this. Scheduling, coaching, daily organization: it has everything you need to take your marks to the next level with less effort.", n: "Danny K.", r: "Stanford · PhD Program"},
+        {t: "First AI study platform I can confidently say has it all. Week-by-week study plans, progress tracking, flashcards, quizzes, and it cuts all the prep time so you can just focus on actually learning.", n: "Charlotte B.", r: "NYU · 3.1 → 3.8 GPA"},
+        {t: "It does an amazing job of meeting you where you're at and taking you where you want to go academically.", n: "Gavin D.", r: "University of Michigan · Grad Student"},
+        {t: "Right when you log in you see a beautifully structured dashboard that makes you want to get to work. Personalized schedule, flashcards, quizzes: there's so much you can do, how can you not be excited?", n: "Alex G.", r: "Ohio State · 3.0 → 3.6 GPA"},
       ];
       const row2 = [row1[2], row1[4], row1[0], row1[3], row1[1]];
       return (
@@ -1941,7 +1951,7 @@
               <p className="section-label sl-purple" style={{marginBottom:0}}>What students say</p>
             </div>
             <h2 className="section-h2" style={{textAlign:'center'}}>
-              Grades don't improve<br /><em>by accident.</em>
+              30,000 students figured it out.<br /><em>Here is what they said.</em>
             </h2>
           </div>
           <div className="marquee">
@@ -2137,6 +2147,7 @@
               <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.744l7.737-8.835L2.25 2.25h6.844l4.262 5.634 5.888-5.634Zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
             </a>
           </div>
+          <p className="footer-tagline">Made by students who got tired of being behind.</p>
           <p className="footer-copy">2026 StudyEdge AI</p>
           <p className="footer-disclaimer">
             StudyEdge AI (getstudyedge.com) is an AI study planner app and is not affiliated with{' '}
