@@ -9,7 +9,7 @@ const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
   border: 'rgba(0,0,0,0.07)', borderStrong: 'rgba(0,0,0,0.12)',
   text: '#111111', textMuted: '#6B6B6B', textDim: '#9B9B9B',
-  accent: '#7C3AED', green: '#16A34A', amber: '#D97706', red: '#DC2626', blue: '#3B61C4',
+  accent: '#3B61C4', green: '#16A34A', amber: '#D97706', red: '#DC2626', blue: '#3B61C4',
 }
 
 const COURSE_COLORS = ['#3B82F6','#8B5CF6','#059669','#D97706','#EC4899','#0891B2']
@@ -119,7 +119,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
       }}>
         {/* Header */}
         <div style={{ padding: '16px 20px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-          <div style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(124,58,237,0.10)', border: '1px solid rgba(124,58,237,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(59,97,196,0.10)', border: '1px solid rgba(59,97,196,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <svg width="16" height="16" fill="none" stroke={D.accent} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
               <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/>
               <circle cx="9" cy="7" r="4"/>
@@ -176,7 +176,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
                 />
               </div>
 
-              <div style={{ padding: '12px 14px', background: 'rgba(124,58,237,0.05)', borderRadius: 10, border: '1px solid rgba(124,58,237,0.14)', marginBottom: 20 }}>
+              <div style={{ padding: '12px 14px', background: 'rgba(59,97,196,0.05)', borderRadius: 10, border: '1px solid rgba(59,97,196,0.14)', marginBottom: 20 }}>
                 <p style={{ margin: 0, fontSize: 12.5, color: D.textMuted, lineHeight: 1.5 }}>
                   Type your explanation as if you were teaching it to a friend who has never heard of it. The AI will score your accuracy, point out gaps, and ask a follow-up to test your real understanding.
                 </p>
@@ -187,7 +187,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
               <button
                 onClick={() => topic.trim() ? setStep('explain') : null}
                 disabled={!topic.trim()}
-                style={{ width: '100%', padding: '13px', background: topic.trim() ? D.accent : 'rgba(124,58,237,0.3)', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: topic.trim() ? 'pointer' : 'default', fontFamily: 'inherit', boxShadow: topic.trim() ? '0 3px 12px rgba(124,58,237,0.35)' : 'none' }}
+                style={{ width: '100%', padding: '13px', background: topic.trim() ? D.accent : 'rgba(59,97,196,0.3)', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: topic.trim() ? 'pointer' : 'default', fontFamily: 'inherit', boxShadow: topic.trim() ? '0 3px 12px rgba(59,97,196,0.35)' : 'none' }}
               >
                 Start explaining
               </button>
@@ -234,7 +234,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
                 <button
                   onClick={submitExplanation}
                   disabled={explanation.trim().length < 10}
-                  style={{ flex: 1, padding: '12px', background: explanation.trim().length >= 10 ? D.accent : 'rgba(124,58,237,0.3)', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: explanation.trim().length >= 10 ? 'pointer' : 'default', fontFamily: 'inherit' }}
+                  style={{ flex: 1, padding: '12px', background: explanation.trim().length >= 10 ? D.accent : 'rgba(59,97,196,0.3)', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: explanation.trim().length >= 10 ? 'pointer' : 'default', fontFamily: 'inherit' }}
                 >
                   Submit explanation
                 </button>
@@ -289,7 +289,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
 
               {/* Follow-up */}
               {result.followUp && (
-                <div style={{ marginBottom: 20, padding: '14px 16px', background: 'rgba(124,58,237,0.05)', borderRadius: 12, border: '1px solid rgba(124,58,237,0.18)' }}>
+                <div style={{ marginBottom: 20, padding: '14px 16px', background: 'rgba(59,97,196,0.05)', borderRadius: 12, border: '1px solid rgba(59,97,196,0.18)' }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: D.accent, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Follow-up question</div>
                   <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: D.text, lineHeight: 1.5 }}>{result.followUp}</p>
                 </div>
@@ -318,7 +318,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
                     {result.followUp && (
                       <button
                         onClick={() => { setFollowUpAnswer(''); setStep('followup') }}
-                        style={{ padding: '12px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(124,58,237,0.30)' }}
+                        style={{ padding: '12px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(59,97,196,0.30)' }}
                       >
                         Answer the follow-up to finish
                       </button>
@@ -345,7 +345,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
           {/* Follow-up */}
           {step === 'followup' && result && (
             <div style={{ padding: 24 }}>
-              <div style={{ padding: '14px 16px', background: 'rgba(124,58,237,0.05)', borderRadius: 12, border: '1px solid rgba(124,58,237,0.18)', marginBottom: 20 }}>
+              <div style={{ padding: '14px 16px', background: 'rgba(59,97,196,0.05)', borderRadius: 12, border: '1px solid rgba(59,97,196,0.18)', marginBottom: 20 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: D.accent, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Follow-up question</div>
                 <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: D.text, lineHeight: 1.5 }}>{result.followUp}</p>
               </div>
@@ -372,7 +372,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
                 <button
                   onClick={submitFollowUp}
                   disabled={!followUpAnswer.trim()}
-                  style={{ flex: 1, padding: '12px', background: followUpAnswer.trim() ? D.accent : 'rgba(124,58,237,0.3)', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: followUpAnswer.trim() ? 'pointer' : 'default', fontFamily: 'inherit' }}
+                  style={{ flex: 1, padding: '12px', background: followUpAnswer.trim() ? D.accent : 'rgba(59,97,196,0.3)', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: followUpAnswer.trim() ? 'pointer' : 'default', fontFamily: 'inherit' }}
                 >
                   Submit answer
                 </button>
@@ -401,7 +401,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
               </div>
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <button onClick={reset} style={{ padding: '12px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(124,58,237,0.30)' }}>
+                <button onClick={reset} style={{ padding: '12px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(59,97,196,0.30)' }}>
                   Try another topic
                 </button>
                 <button onClick={onClose} style={{ padding: '10px', background: 'none', border: 'none', color: D.textDim, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>

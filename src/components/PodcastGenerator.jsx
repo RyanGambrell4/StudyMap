@@ -6,7 +6,7 @@ const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
   border: 'rgba(0,0,0,0.07)', borderStrong: 'rgba(0,0,0,0.12)',
   text: '#111111', textMuted: '#6B6B6B', textDim: '#9B9B9B',
-  accent: '#3B61C4', purple: '#7C3AED',
+  accent: '#3B61C4', teal: '#0D9488',
 }
 
 const PROGRESS_MESSAGES = [
@@ -184,8 +184,8 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
           overflow: 'hidden',
         }}>
           <div style={{ padding: '16px 20px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(124,58,237,0.10)', border: '1px solid rgba(124,58,237,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-              <svg width="16" height="16" fill="none" stroke={D.purple} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <div style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(13,148,136,0.10)', border: '1px solid rgba(13,148,136,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="16" height="16" fill="none" stroke={D.teal} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                 <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
               </svg>
             </div>
@@ -195,8 +195,8 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
             </button>
           </div>
           <div style={{ padding: 28, textAlign: 'center' }}>
-            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-              <svg width="24" height="24" fill="none" stroke={D.purple} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(13,148,136,0.08)', border: '1px solid rgba(13,148,136,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <svg width="24" height="24" fill="none" stroke={D.teal} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                 <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/>
               </svg>
             </div>
@@ -207,7 +207,7 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
             <button
               onClick={() => { onClose(); onShowPaywall?.('unlimited') }}
               style={{
-                background: D.purple, color: '#fff', border: 'none', borderRadius: 10,
+                background: D.teal, color: '#fff', border: 'none', borderRadius: 10,
                 padding: '12px 24px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
                 width: '100%', transition: 'opacity 0.15s',
               }}
@@ -225,8 +225,8 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
   // ── Shared header ─────────────────────────────────────────────────────────────
   const header = (subtitle) => (
     <div style={{ padding: '16px 20px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-      <div style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(124,58,237,0.10)', border: '1px solid rgba(124,58,237,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-        <svg width="16" height="16" fill="none" stroke={D.purple} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+      <div style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(13,148,136,0.10)', border: '1px solid rgba(13,148,136,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+        <svg width="16" height="16" fill="none" stroke={D.teal} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
           <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
         </svg>
       </div>
@@ -267,7 +267,7 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
       <div style={{ textAlign: 'center', padding: '24px 0' }}>
         <div style={{
           width: 56, height: 56, borderRadius: '50%', margin: '0 auto 20px',
-          border: `3px solid ${D.border}`, borderTopColor: D.purple,
+          border: `3px solid ${D.border}`, borderTopColor: D.teal,
           animation: 'spin 0.9s linear infinite',
         }} />
         <div style={{ fontSize: 15, fontWeight: 600, color: D.text, marginBottom: 8 }}>
@@ -280,7 +280,7 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
           {PROGRESS_MESSAGES.map((_, i) => (
             <div key={i} style={{
               width: 6, height: 6, borderRadius: '50%',
-              background: i === msgIdx ? D.purple : D.border,
+              background: i === msgIdx ? D.teal : D.border,
               transition: 'background 0.3s',
             }} />
           ))}
@@ -294,8 +294,8 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
     const days = daysUntil(resetAt)
     return wrapper('Unlimited plan',
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-        <div style={{ background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.15)', borderRadius: 12, padding: '14px 16px' }}>
-          <div style={{ fontSize: 12, fontWeight: 600, color: D.purple, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>
+        <div style={{ background: 'rgba(13,148,136,0.05)', border: '1px solid rgba(13,148,136,0.15)', borderRadius: 12, padding: '14px 16px' }}>
+          <div style={{ fontSize: 12, fontWeight: 600, color: D.teal, textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 4 }}>
             This week's podcast
           </div>
           <div style={{ fontSize: 15, fontWeight: 700, color: D.text }}>{podcast.courseName}</div>
@@ -329,8 +329,8 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
     const days = daysUntil(resetAt)
     return wrapper('Unlimited plan',
       <div style={{ textAlign: 'center', padding: '20px 0' }}>
-        <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
-          <svg width="22" height="22" fill="none" stroke={D.purple} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+        <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(13,148,136,0.08)', border: '1px solid rgba(13,148,136,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+          <svg width="22" height="22" fill="none" stroke={D.teal} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
           </svg>
         </div>
@@ -408,7 +408,7 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
           <button
             onClick={generate}
             style={{
-              background: D.purple, color: '#fff', border: 'none', borderRadius: 12,
+              background: D.teal, color: '#fff', border: 'none', borderRadius: 12,
               padding: '13px 20px', fontSize: 15, fontWeight: 700, cursor: 'pointer',
               width: '100%', transition: 'opacity 0.15s',
             }}
