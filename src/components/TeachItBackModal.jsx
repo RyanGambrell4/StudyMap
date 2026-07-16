@@ -52,7 +52,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Failed')
+      if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
       incrementAIQuery()
       incrementFeatureUsage('teachItBack')
       addWeakTopics(data.missing ?? [])
@@ -84,7 +84,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Failed')
+      if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
       setFinalResult(data)
       setStep('final')
     } catch (e) {

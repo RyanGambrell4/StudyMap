@@ -3,14 +3,14 @@
  *
  * 3-tier model:
  *  Free      → permanent, capped per feature
- *  Trial     → 7-day Pro via Stripe Checkout. Card required upfront; charged after 7 days unless cancelled.
+ *  Trial     → 3-day Pro via Stripe Checkout. Card required upfront; charged after 3 days unless cancelled.
  *  Pro       → Stripe paid (weekly/monthly/annual), 5 courses, 100 AI actions/month
  *  Unlimited → Stripe paid (weekly/monthly/annual), unlimited everything + tutor memory & advanced analytics
  */
 
-// Trial duration: 7 days. Single source of truth for all trial checks.
-export const TRIAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000
-export const TRIAL_DURATION_DAYS = 7
+// Trial duration: 3 days. Single source of truth for all trial checks.
+export const TRIAL_DURATION_MS = 3 * 24 * 60 * 60 * 1000
+export const TRIAL_DURATION_DAYS = 3
 
 import { supabase } from './supabase'
 import { track } from './analytics'
@@ -19,7 +19,7 @@ import { track } from './analytics'
 
 // Free is a one-time preview tier: most premium features are limited to a
 // single lifetime use so users see what each tool does, then hit a real wall
-// that drives them into the 7-day trial.
+// that drives them into the 3-day trial.
 export const FREE_LIMITS = {
   courses:             1,
   aiTutor:             { count: 5,  period: 'total' },
@@ -129,6 +129,13 @@ export function hasUsedTrial() {
 
 export function getTrialDaysRemaining() {
   const sub = getCachedSubscription()
+  // Stripe-backed trial: use currentPeriodEnd (the trial_end Stripe reports)
+  if (sub?.status === 'trialing' && sub?.stripeSubId && sub?.currentPeriodEnd) {
+    const end = new Date(sub.currentPeriodEnd)
+    const msLeft = end.getTime() - Date.now()
+    return Math.max(0, Math.ceil(msLeft / (1000 * 60 * 60 * 24)))
+  }
+  // Legacy DB-only trial
   if (!sub?.trial_activated || !sub?.trial_start_date) return 0
   const start = new Date(sub.trial_start_date)
   const elapsed = (Date.now() - start.getTime()) / (1000 * 60 * 60 * 24)

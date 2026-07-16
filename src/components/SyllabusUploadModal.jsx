@@ -77,7 +77,7 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
       }
       const mapped = events.map((e, i) => ({
         id: `ai-${Date.now()}-${i}`,
-        name: e.name ?? 'Untitled',
+        name: e.name ?? 'Unnamed Event',
         date: e.date ?? '',
         type: EVENT_TYPES.includes(e.type) ? e.type : 'Other',
         weight: e.weight ?? null,
@@ -145,7 +145,7 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
       }
       const mapped = events.map((e, i) => ({
         id: `ai-${Date.now()}-${i}`,
-        name: e.name ?? 'Untitled',
+        name: e.name ?? 'Unnamed Event',
         date: e.date ?? '',
         type: EVENT_TYPES.includes(e.type) ? e.type : 'Other',
         weight: e.weight ?? null,

@@ -238,7 +238,7 @@ ${preheader(daysLeft <= 3 ? `${examTitle}: ${daysLeft} day${daysLeft !== 1 ? 's'
             </table>
             <p style="margin:14px 0 0;font-size:13px;color:#6B6B6B;line-height:1.55;">
               Pro is <strong style="color:#111111;">$2.99/week</strong>.
-              ${trialUsed ? 'You know what you get.' : `Try free for 7 days — no charge until day 8.`}
+              ${trialUsed ? 'You know what you get.' : `Try free for 3 days — no charge until day 8.`}
             </p>
           </td></tr>
         </table>`}
@@ -248,7 +248,7 @@ ${preheader(daysLeft <= 3 ? `${examTitle}: ${daysLeft} day${daysLeft !== 1 ? 's'
             <a href="${upgradeUrl}" style="display:inline-block;background:${urgency.color};color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none;border-radius:12px;padding:14px 36px;">${trialUsed ? 'Upgrade to Pro — $2.99/wk' : ctaLabel}</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12.5px;color:#9B9B9B;">${trialUsed ? '$2.99/wk · Cancel anytime' : '$0 today · $2.99/wk after day 8 · Cancel anytime'}</span>
+            <span style="font-size:12.5px;color:#9B9B9B;">${trialUsed ? '$2.99/wk · Cancel anytime' : 'Card required · $2.99/wk after day 4 · Cancel anytime'}</span>
           </td></tr>
         </table>
 

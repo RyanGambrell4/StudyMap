@@ -184,7 +184,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Failed')
+      if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
       setRepairs(prev => ({ ...prev, [questionIdx]: { loading: false, data, repairSelected: null, repairConfirmed: false } }))
     } catch (e) {
       setRepairs(prev => ({ ...prev, [questionIdx]: { loading: false, error: e.message } }))

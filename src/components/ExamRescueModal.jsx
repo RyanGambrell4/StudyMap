@@ -74,7 +74,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
           }),
         })
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error ?? 'Failed')
+        if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
         incrementAIQuery()
         incrementFeatureUsage('examRescue')
         addStudySession({ tool: 'Exam Rescue', score: null, topic: null, courseName: course?.name || null })

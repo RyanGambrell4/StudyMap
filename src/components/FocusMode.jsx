@@ -1325,7 +1325,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
             {isFree && !showRecallSheet && (
               focusMinutesAllowed <= 0 ? (
                 <div style={{ marginTop: 12, padding: '14px 16px', background: 'rgba(59,97,196,0.05)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 12, textAlign: 'center' }}>
-                  <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: '#1e3a8a' }}>
+                  <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: '#3B61C4' }}>
                     You've hit today's 30-min free limit.
                   </p>
                   <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>{hasUsedTrial() ? 'Upgrade to Pro for unlimited focus sessions, AI tutoring, and full blueprints.' : 'Start your free trial for unlimited focus sessions, AI tutoring, and full blueprints.'}</p>

@@ -95,10 +95,10 @@ ${preheader("That is the hardest part. Every session from here gets easier to st
         ${userPlan === 'free' && !trialUsed ? `
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:14px;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=first_session_trial" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;">Start your free 7-day trial →</a>
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=first_session_trial" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;">Start your free 3-day trial →</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">Card required · $0 today · Cancel before day 8 and pay nothing</span>
+            <span style="font-size:12px;color:#9B9B9B;">Card required · Card required · Cancel before day 4 and pay nothing</span>
           </td></tr>
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-top:6px;">

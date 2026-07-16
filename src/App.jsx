@@ -789,7 +789,7 @@ export default function App() {
         }}>
           <div style={{ flex: 1 }}>
             <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 700, color: '#fff' }}>Unlock unlimited sessions</p>
-            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,.65)' }}>7-day trial — $0 today, $2.99/wk after</p>
+            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,.65)' }}>3-day trial · $2.99/wk after</p>
           </div>
           <button
             onClick={() => { track('trial_nudge_clicked', { source: 'floating_pill' }); openPaywall('trial_nudge') }}
@@ -823,7 +823,7 @@ export default function App() {
           <span style={{ fontSize: 13.5, color: '#fff', fontWeight: 500 }}>
             {hasUsedTrial()
               ? 'Pick up where you left off. No hidden fees.'
-              : 'Your 7-day free trial requires a card — cancel within 7 days and you won\'t be charged.'}
+              : '3-day free trial. Card required. Cancel before day 3 and you won\'t be charged.'}
           </span>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             <button

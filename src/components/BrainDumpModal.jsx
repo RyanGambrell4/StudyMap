@@ -151,7 +151,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
           body: JSON.stringify({ text, courseName: course?.name ?? 'unknown course', topic: topic.trim() || undefined }),
         })
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error ?? 'Failed')
+        if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
         incrementAIQuery()
         incrementFeatureUsage('brainDump')
         addWeakTopics(data.possibleGaps ?? [])
@@ -188,7 +188,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Failed')
+      if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
       const newCards = data.flashcards ?? []
       if (newCards.length > 0) {
         const existing = getCachedStudyTools() ?? {}

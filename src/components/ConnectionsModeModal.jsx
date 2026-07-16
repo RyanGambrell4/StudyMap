@@ -57,7 +57,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Failed')
+      if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
       incrementAIQuery()
       incrementFeatureUsage('connectionsMode')
       setConnections(data.connections ?? [])
@@ -90,7 +90,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Failed')
+      if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
       const updatedScores = [...scores, data]
       setScores(updatedScores)
       latestScoresRef.current = updatedScores

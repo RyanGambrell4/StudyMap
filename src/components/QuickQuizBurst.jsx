@@ -73,7 +73,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
           body: JSON.stringify({ courseName: course?.name ?? 'unknown', topic: topic.trim() || undefined }),
         })
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error ?? 'Failed')
+        if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
         incrementAIQuery()
         incrementFeatureUsage('quizBurst')
         setQuestions(data.questions)
@@ -145,7 +145,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Failed')
+      if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
       setRepairs(prev => ({ ...prev, [questionIdx]: { loading: false, data, repairSelected: null, repairConfirmed: false } }))
     } catch (e) {
       setRepairs(prev => ({ ...prev, [questionIdx]: { loading: false, error: e.message } }))
