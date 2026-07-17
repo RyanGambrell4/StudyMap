@@ -42,7 +42,7 @@ export default async function handler(req, res) {
               },
               {
                 type: 'text',
-                text: 'Extract and clean up all the text from these handwritten notes. Format it as clear, readable study notes with headers and bullet points. Preserve all the information but make it well-organized and easy to read.',
+                text: 'Extract and clean up all the text from these handwritten notes. Format it as clear, readable study notes with headers and bullet points. Preserve all the information but make it well-organized and easy to read. Do not use em dashes.',
                 cache_control: { type: 'ephemeral' },
               },
             ],

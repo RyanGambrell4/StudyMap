@@ -105,7 +105,8 @@ Hard rules:
 - Verbatim questions come first in the array (lowest indices), generated questions fill the rest.
 - Multiple-choice wrong answers must be plausible distractors, not obviously silly.
 - Do not invent facts that contradict the source.
-- "answer" for multiple_choice MUST exactly match one of the strings in "options".`
+- "answer" for multiple_choice MUST exactly match one of the strings in "options".
+- No em dashes in any text field.`
 
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',

@@ -315,6 +315,7 @@ ${isExamMode ? `Phase intent reminder:
 - Phase 3 (Official material focus): work through official prep materials, full-length sections, FL review sessions.
 - Phase 4 (Final crunch): timed mock tests, weak-area re-attack, test-review sessions, taper at the very end.
 ` : ''}
+No em dashes in any text field.
 Output the JSON now.`
 
   try {
