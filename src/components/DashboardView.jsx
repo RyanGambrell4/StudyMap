@@ -1557,6 +1557,12 @@ export default function DashboardView({
                       {todaySessions.length === 1 ? '1 session complete' : `${todaySessions.length} sessions complete`}
                     </p>
                   </div>
+                  {todaySessions.length >= 2 && (
+                    <div style={{ marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 5, background: 'linear-gradient(135deg, rgba(251,146,60,0.12), rgba(239,68,68,0.10))', border: '1px solid rgba(251,146,60,0.3)', borderRadius: 999, padding: '4px 11px', fontSize: 12, fontWeight: 700, color: '#EA580C', flexShrink: 0 }}>
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                      You're on a roll
+                    </div>
+                  )}
                 </div>
                 <p style={{ fontSize: 13, color: D.textMuted, lineHeight: 1.6, marginBottom: 16 }}>
                   The best time to test your recall is right after a session, before the forgetting curve kicks in. A quick Brain Dump now doubles what sticks.
