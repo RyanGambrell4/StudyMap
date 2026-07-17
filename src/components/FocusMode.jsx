@@ -701,6 +701,29 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const [fcFlipped, setFcFlipped] = useState(false)
   const [fcKnown, setFcKnown] = useState(new Set())
   const [fcAnswerState, setFcAnswerState] = useState(null) // 'correct' | 'wrong' | null
+  // Mnemonic state: { [cardIdx]: { mnemonic, type } | 'loading' | 'error' }
+  const [mnemonics, setMnemonics] = useState({})
+
+  const handleGenerateMnemonic = async (cardIdx) => {
+    const card = flashcards[cardIdx]
+    if (!card) return
+    if (!canUseAI()) { onShowPaywall?.('ai'); return }
+    setMnemonics(prev => ({ ...prev, [cardIdx]: 'loading' }))
+    try {
+      const token = await getAccessToken()
+      const res = await fetch('/api/generate-mnemonic', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ concept: card.front, answer: card.back, courseName: session.courseName }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? 'Failed')
+      incrementAIQuery()
+      setMnemonics(prev => ({ ...prev, [cardIdx]: data }))
+    } catch {
+      setMnemonics(prev => ({ ...prev, [cardIdx]: 'error' }))
+    }
+  }
 
   // ── YouTube suggestions ──
   const [ytVideos, setYtVideos] = useState([])
@@ -2049,10 +2072,33 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                             <p className="text-xs mt-4" style={{ color: '#9B9B9B' }}>Tap card to reveal answer</p>
                           </div>
                         ) : (
-                          <div className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center p-6 text-center">
+                          <div className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center p-6 text-center overflow-y-auto">
                             <span className="text-[10px] mb-3 px-2 py-0.5 rounded-full font-bold uppercase tracking-widest" style={{ color: dot, backgroundColor: `${dot}15`, border: `1px solid ${dot}40` }}>Answer</span>
                             <p className="font-semibold leading-relaxed text-base" style={{ color: dot }}>{flashcards[fcIdx]?.back}</p>
-                            <p className="text-xs mt-4" style={{ color: '#9B9B9B' }}>Tap card to flip back</p>
+                            {mnemonics[fcIdx] && mnemonics[fcIdx] !== 'loading' && mnemonics[fcIdx] !== 'error' && (
+                              <div className="mt-3 px-3 py-2 rounded-xl text-left w-full" style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(0,0,0,0.08)' }}>
+                                <p className="text-[10px] font-bold uppercase tracking-widest mb-1" style={{ color: '#9B9B9B' }}>Mnemonic</p>
+                                <p className="text-xs leading-relaxed" style={{ color: '#111111' }}>{mnemonics[fcIdx].mnemonic}</p>
+                              </div>
+                            )}
+                            {mnemonics[fcIdx] !== 'loading' && !mnemonics[fcIdx] && (
+                              <button
+                                onClick={e => { e.stopPropagation(); handleGenerateMnemonic(fcIdx) }}
+                                className="mt-3 text-xs px-3 py-1.5 rounded-full font-medium"
+                                style={{ background: `${dot}18`, border: `1px solid ${dot}35`, color: dot, cursor: 'pointer' }}
+                              >
+                                Generate mnemonic
+                              </button>
+                            )}
+                            {mnemonics[fcIdx] === 'loading' && (
+                              <p className="mt-3 text-xs" style={{ color: '#9B9B9B' }}>Generating...</p>
+                            )}
+                            {mnemonics[fcIdx] === 'error' && (
+                              <button onClick={e => { e.stopPropagation(); setMnemonics(p => ({ ...p, [fcIdx]: null })) }} className="mt-3 text-xs" style={{ color: '#9B9B9B', background: 'none', border: 'none', cursor: 'pointer' }}>
+                                Failed. Retry?
+                              </button>
+                            )}
+                            <p className="text-xs mt-3" style={{ color: '#9B9B9B' }}>Tap card to flip back</p>
                           </div>
                         )}
                       </div>
