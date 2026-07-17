@@ -2,9 +2,9 @@
  * Day 1 trial email (24h after trial start).
  *
  * Fires once for each trialing free-→-Pro user in the 24–36h post-trialUsedAt
- * window. Purpose: fill the silence between trial-started (t=0) and
- * trial-warning (t=48h before end). This is the moment where "did they even
- * try the app?" is decided.
+ * window. Purpose: send tips while the trial is fresh (day 1), before the
+ * trial-warning email fires at t=48h (24h remaining). This is the moment
+ * where "did they even try the app?" is decided.
  *
  * The email is personalized on `plan.schoolType` and `plan.yearLevel` (from
  * onboarding) so the copy reads to their actual context, not generic
@@ -193,7 +193,7 @@ ${preheader(`Day 1: the 5-minute setup step most Pro users skip. Don't skip it.`
             <a href="${audience.ctaHref}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">${audience.ctaLabel}</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">Your trial ends in ~6 days. No charge until then.</span>
+            <span style="font-size:12px;color:#9B9B9B;">Your trial ends in ~2 days. No charge until then.</span>
           </td></tr>
         </table>
         <p style="margin:22px 0 0;font-size:13px;color:#9B9B9B;line-height:1.6;">
