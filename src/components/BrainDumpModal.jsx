@@ -207,7 +207,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
   const timerColor = timerPct > 0.5 ? D.green : timerPct > 0.25 ? D.amber : D.red
 
   return (
-    <div style={{
+    <div role="dialog" aria-modal="true" aria-label="Brain Dump" style={{
       position: 'fixed', inset: 0, zIndex: 400,
       background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,

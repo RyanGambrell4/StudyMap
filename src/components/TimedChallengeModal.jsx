@@ -157,6 +157,7 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
 
   return (
     <div
+      role="dialog" aria-modal="true" aria-label="Timed Challenge"
       style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', zIndex: 9000, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}
       onClick={e => { if (e.target === e.currentTarget) onClose() }}
     >

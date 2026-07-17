@@ -162,7 +162,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
   const timePct = timeLeft / QUESTION_TIME
 
   return (
-    <div style={{
+    <div role="dialog" aria-modal="true" aria-label="Quick Quiz Burst" style={{
       position: 'fixed', inset: 0, zIndex: 400,
       background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,

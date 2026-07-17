@@ -173,7 +173,7 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
   // ── Not unlimited ─────────────────────────────────────────────────────────────
   if (!isUnlimited) {
     return (
-      <div style={{
+      <div role="dialog" aria-modal="true" aria-label="Podcast Generator" style={{
         position: 'fixed', inset: 0, zIndex: 400,
         background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
         display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
@@ -241,7 +241,7 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
   )
 
   const wrapper = (subtitle, children) => (
-    <div style={{
+    <div role="dialog" aria-modal="true" aria-label="Podcast Generator" style={{
       position: 'fixed', inset: 0, zIndex: 400,
       background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,

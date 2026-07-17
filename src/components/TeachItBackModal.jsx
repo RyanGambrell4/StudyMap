@@ -106,7 +106,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
   const scoreColor = result ? (result.score >= 85 ? D.green : result.score >= 60 ? D.amber : D.red) : D.text
 
   return (
-    <div style={{
+    <div role="dialog" aria-modal="true" aria-label="Teach It Back" style={{
       position: 'fixed', inset: 0, zIndex: 400,
       background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,

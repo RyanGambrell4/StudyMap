@@ -28,7 +28,7 @@ export default function AdaptModal({ adaptation, onAccept, onEdit, onDismiss }) 
   const dur = injectedSession?.duration ?? 45
 
   return (
-    <div style={{
+    <div role="dialog" aria-modal="true" aria-label="Adapt plan" style={{
       position: 'fixed', inset: 0, zIndex: 500,
       background: 'rgba(0,0,0,0.38)', backdropFilter: 'blur(6px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center',

@@ -126,7 +126,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
   const lockedTopicCount = isPro ? 0 : (topics?.length ?? 0) - 1
 
   return (
-    <div style={{
+    <div role="dialog" aria-modal="true" aria-label="Exam Rescue" style={{
       position: 'fixed', inset: 0, zIndex: 400,
       background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,

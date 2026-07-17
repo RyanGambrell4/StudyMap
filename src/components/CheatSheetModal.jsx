@@ -100,7 +100,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall }) {
   const lockedCount = isPro ? 0 : visibleTopics.length - 1
 
   return (
-    <div style={{
+    <div role="dialog" aria-modal="true" aria-label="AI Cheat Sheet" style={{
       position: 'fixed', inset: 0, zIndex: 400,
       background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
