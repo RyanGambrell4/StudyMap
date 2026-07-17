@@ -893,7 +893,7 @@ export default function CalendarWeekView({
               style={{ width: '100%', padding: '14px', background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.2)', borderRadius: 12, color: '#16A34A', fontSize: 14, fontWeight: 600, marginBottom: 8, cursor: 'pointer' }}
               onClick={() => { onToggle?.(mobileActionSheet.session.id); setMobileActionSheet(null) }}
             >
-              {completedIds.has(mobileActionSheet.session.id) ? 'Mark incomplete' : 'Mark complete ✓'}
+              {completedIds.has(mobileActionSheet.session.id) ? 'Mark incomplete' : 'Mark complete'}
             </button>
             {onDeleteSession && (
               <button

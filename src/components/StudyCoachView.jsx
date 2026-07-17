@@ -587,7 +587,7 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
 
         {/* Nav */}
         <div style={{ display: 'flex', gap: 10 }}>
-          <button onClick={onBack} style={{ padding: '14px 18px', borderRadius: 11, background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13.5, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 7, cursor: 'pointer' }}>
+          <button onClick={onBack} disabled={loading} style={{ padding: '14px 18px', borderRadius: 11, background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13.5, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 7, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.5 : 1 }}>
             <Icon name="arrowLeft" size={13} /> Edit inputs
           </button>
           <button onClick={onBuild} disabled={loading} style={{ flex: 1, padding: '14px 20px', borderRadius: 11, background: '#3B61C4', color: '#fff', fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: loading ? 'not-allowed' : 'pointer', opacity: loading ? 0.7 : 1, border: 'none' }}>
@@ -984,8 +984,10 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     try {
       const text = await extractText(file)
       setMaterialText(prev => prev + '\n' + text)
-    } catch { /* ignore */ }
-    finally { setMaterialLoading(false) }
+    } catch {
+      setMaterialText(prev => prev)
+      alert('Could not read that file. Try pasting the text directly.')
+    } finally { setMaterialLoading(false) }
   }
 
   const handleBuild = async () => {
