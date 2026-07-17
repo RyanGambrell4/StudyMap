@@ -545,6 +545,86 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   }, [showComplete])
   const [pdfDownloading, setPdfDownloading] = useState(false)
 
+  // ── Ambient sound ──
+  const AMBIENT_MODES = [
+    { id: 'off',   label: 'Off' },
+    { id: 'white', label: 'White noise' },
+    { id: 'brown', label: 'Brown noise' },
+    { id: 'rain',  label: 'Rain' },
+  ]
+  const [ambientMode, setAmbientMode] = useState(() => {
+    try { return localStorage.getItem('fm_ambient') ?? 'off' } catch { return 'off' }
+  })
+  const ambientCtxRef = useRef(null)
+  const ambientSourceRef = useRef(null)
+  const ambientGainRef = useRef(null)
+
+  useEffect(() => {
+    const stopCurrent = () => {
+      try { ambientSourceRef.current?.stop() } catch {}
+      try { ambientCtxRef.current?.close() } catch {}
+      ambientSourceRef.current = null
+      ambientCtxRef.current = null
+      ambientGainRef.current = null
+    }
+    if (ambientMode === 'off' || finished) { stopCurrent(); return }
+    try {
+      const ctx = new (window.AudioContext || window.webkitAudioContext)()
+      ambientCtxRef.current = ctx
+      const sampleRate = ctx.sampleRate
+      const bufLen = sampleRate * 4
+      const buffer = ctx.createBuffer(1, bufLen, sampleRate)
+      const data = buffer.getChannelData(0)
+      if (ambientMode === 'white') {
+        for (let i = 0; i < bufLen; i++) data[i] = Math.random() * 2 - 1
+      } else if (ambientMode === 'brown') {
+        let last = 0
+        for (let i = 0; i < bufLen; i++) {
+          last = (last + 0.02 * (Math.random() * 2 - 1)) / 1.02
+          data[i] = last * 3.5
+        }
+      } else if (ambientMode === 'rain') {
+        let last = 0
+        for (let i = 0; i < bufLen; i++) {
+          last = (last + 0.015 * (Math.random() * 2 - 1)) / 1.015
+          data[i] = last * 4
+        }
+      }
+      const source = ctx.createBufferSource()
+      source.buffer = buffer
+      source.loop = true
+      const gain = ctx.createGain()
+      gain.gain.value = ambientMode === 'white' ? 0.06 : 0.12
+      ambientGainRef.current = gain
+      const filter = ctx.createBiquadFilter()
+      filter.type = 'lowpass'
+      filter.frequency.value = ambientMode === 'rain' ? 900 : ambientMode === 'brown' ? 400 : 8000
+      source.connect(filter)
+      filter.connect(gain)
+      gain.connect(ctx.destination)
+      source.start()
+      ambientSourceRef.current = source
+    } catch {}
+    return stopCurrent
+  }, [ambientMode, finished])
+
+  // Pause/resume audio with session timer
+  useEffect(() => {
+    if (!ambientCtxRef.current) return
+    if (running && ambientCtxRef.current.state === 'suspended') {
+      ambientCtxRef.current.resume().catch(() => {})
+    } else if (!running && ambientCtxRef.current.state === 'running') {
+      ambientCtxRef.current.suspend().catch(() => {})
+    }
+  }, [running])
+
+  const cycleAmbient = () => {
+    const idx = AMBIENT_MODES.findIndex(m => m.id === ambientMode)
+    const next = AMBIENT_MODES[(idx + 1) % AMBIENT_MODES.length].id
+    setAmbientMode(next)
+    try { localStorage.setItem('fm_ambient', next) } catch {}
+  }
+
   // ── Recall check (post-session rating) ──
   const [showRecallSheet, setShowRecallSheet] = useState(false)
   const [recallSlider, setRecallSlider] = useState(50)
@@ -1571,6 +1651,14 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 {Math.max(0, focusMinutesAllowed - Math.floor((totalSec - remaining) / 60))} min left today
               </span>
             )}
+            <button
+              onClick={cycleAmbient}
+              title={`Ambient: ${AMBIENT_MODES.find(m => m.id === ambientMode)?.label}`}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: ambientMode !== 'off' ? '#3B61C4' : '#9B9B9B', background: ambientMode !== 'off' ? 'rgba(59,97,196,0.08)' : 'none', border: ambientMode !== 'off' ? '1px solid rgba(59,97,196,0.2)' : 'none', borderRadius: 6, padding: ambientMode !== 'off' ? '3px 8px' : 0, cursor: 'pointer' }}
+            >
+              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+              {ambientMode !== 'off' && <span>{AMBIENT_MODES.find(m => m.id === ambientMode)?.label}</span>}
+            </button>
             <button onClick={() => { localStorage.removeItem(timerKey); onExit?.() }} className="text-xs transition-colors" style={{ color: '#9B9B9B' }}>Exit</button>
           </div>
         </div>
