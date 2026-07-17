@@ -277,8 +277,9 @@ export default function AuthScreen({ initialMode, onBack }) {
           {/* Form — hidden on signup until user chooses email */}
           <form onSubmit={handleSubmit} style={{ display: mode === 'signup' && !emailFormVisible ? 'none' : 'flex', flexDirection: 'column', gap: 14 }}>
             <div>
-              <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Email</label>
+              <label htmlFor="auth-email" style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Email</label>
               <input
+                id="auth-email"
                 type="email"
                 value={email}
                 onChange={e => setEmail(e.target.value)}
@@ -313,9 +314,10 @@ export default function AuthScreen({ initialMode, onBack }) {
             )}
             {mode !== 'forgot' && !magicLinkMode && (
               <div>
-                <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Password</label>
+                <label htmlFor="auth-password" style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 6 }}>Password</label>
                 <div style={{ position: 'relative' }}>
                   <input
+                    id="auth-password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
                     onChange={e => setPassword(e.target.value)}

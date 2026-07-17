@@ -36,6 +36,9 @@ export default function SessionRatingModal({ session, onSave, onSkip, onShowPayw
 
   return (
     <div
+      role="dialog"
+      aria-modal="true"
+      aria-label="Session rating"
       style={{
         position: 'fixed', inset: 0, zIndex: 3000,
         background: 'rgba(0,0,0,0.35)',

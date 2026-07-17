@@ -453,6 +453,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
 
   // ── Shared backdrop/modal wrapper constants ──────────────────────────────────
   const BACKDROP = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', zIndex: 1000, padding: '16px', overflowY: 'auto' }
+  const BACKDROP_A11Y = { role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Upgrade plan' }
   const MODAL_BASE = { background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '22px', padding: '32px', width: '100%', boxShadow: '0 24px 64px rgba(0,0,0,0.12)', margin: 'auto', position: 'relative' }
   const CLOSE_BTN = { position: 'absolute', top: 16, right: 16, background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px', color: '#9B9B9B', cursor: 'pointer', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }
   const CloseX = () => <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
@@ -468,7 +469,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     ].filter(Boolean)
     return (
       <>
-        <div style={BACKDROP} onClick={e => { if (e.target === e.currentTarget) handleDismiss('backdrop') }}>
+        <div {...BACKDROP_A11Y} style={BACKDROP} onClick={e => { if (e.target === e.currentTarget) handleDismiss('backdrop') }}>
           <div className="pw-modal" style={{ ...MODAL_BASE, maxWidth: 480 }}>
             <button onClick={() => handleDismiss('close_button')} style={CLOSE_BTN} aria-label="Close"><CloseX /></button>
             <div style={{ textAlign: 'center', marginBottom: 24 }}>
@@ -519,7 +520,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
       : 'Still working toward your study goals?'
     return (
       <>
-        <div style={BACKDROP} onClick={e => { if (e.target === e.currentTarget) handleDismiss('backdrop') }}>
+        <div {...BACKDROP_A11Y} style={BACKDROP} onClick={e => { if (e.target === e.currentTarget) handleDismiss('backdrop') }}>
           <div className="pw-modal" style={{ ...MODAL_BASE, maxWidth: 420, textAlign: 'center' }}>
             <button onClick={() => handleDismiss('close_button')} style={CLOSE_BTN} aria-label="Close"><CloseX /></button>
             <div style={{ width: 60, height: 60, background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
@@ -574,7 +575,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     )
     return (
       <>
-        <div style={BACKDROP} onClick={e => { if (e.target === e.currentTarget) setScreen('plans') }}>
+        <div {...BACKDROP_A11Y} style={BACKDROP} onClick={e => { if (e.target === e.currentTarget) setScreen('plans') }}>
           <div className="pw-modal" style={{ ...MODAL_BASE, maxWidth: 420 }}>
             <button onClick={() => setScreen('plans')} style={{ position: 'absolute', top: 16, left: 16, background: 'none', border: 'none', color: '#9B9B9B', cursor: 'pointer', fontSize: '0.82rem', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px' }}>
               <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M19 12H5m7-7l-7 7 7 7" /></svg>
@@ -743,10 +744,11 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             </div>
             {/* Dots */}
             <div style={{ display: 'flex', gap: 4, flexShrink: 0, marginTop: 4 }}>
-              {TESTIMONIALS.map((_, i) => (
+              {TESTIMONIALS.map((t, i) => (
                 <button
                   key={i}
                   onClick={() => setTestimonialIdx(i)}
+                  aria-label={`Show testimonial from ${t.name}`}
                   style={{
                     width: i === testimonialIdx ? 14 : 5, height: 5, borderRadius: 3,
                     background: i === testimonialIdx ? '#3B61C4' : 'rgba(0,0,0,0.12)',
