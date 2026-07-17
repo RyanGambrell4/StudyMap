@@ -433,6 +433,8 @@ export default function OutputView({
   const [showTimedChallenge, setShowTimedChallenge] = useState(false)
   const [pendingDrillTopic, setPendingDrillTopic] = useState(null)
   const [ratingSession, setRatingSession] = useState(null) // session to rate after completion
+  const [ratingReminder, setRatingReminder] = useState(null) // skipped session pending reminder
+  const ratingReminderTimerRef = useRef(null)
 
   // ── First-query nudge listener ────────────────────────────────────────────────
   useEffect(() => {
@@ -1367,9 +1369,35 @@ export default function OutputView({
         <SessionRatingModal
           session={ratingSession}
           onSave={handleRatingSave}
-          onSkip={() => setRatingSession(null)}
+          onSkip={() => {
+            const skipped = ratingSession
+            setRatingSession(null)
+            clearTimeout(ratingReminderTimerRef.current)
+            ratingReminderTimerRef.current = setTimeout(() => setRatingReminder(skipped), 5 * 60 * 1000)
+          }}
           onShowPaywall={onShowPaywall}
         />
+      )}
+
+      {/* ── Session rating reminder pill (shown 5 min after skipping) ── */}
+      {ratingReminder && !ratingSession && (
+        <div style={{ position: 'fixed', bottom: 24, left: '50%', transform: 'translateX(-50%)', zIndex: 2000, display: 'flex', alignItems: 'center', gap: 12, background: '#fff', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 999, padding: '10px 16px 10px 14px', boxShadow: '0 8px 32px rgba(0,0,0,0.12)', whiteSpace: 'nowrap', animation: 'ratingSlideUp 0.28s cubic-bezier(0.34,1.56,0.64,1)' }}>
+          <div style={{ width: 8, height: 8, borderRadius: '50%', background: ratingReminder?.color?.dot ?? '#3B61C4', flexShrink: 0 }} />
+          <span style={{ fontSize: 13, color: '#111', fontWeight: 600 }}>Rate your {ratingReminder?.courseName} session?</span>
+          <button
+            onClick={() => { setRatingSession(ratingReminder); setRatingReminder(null) }}
+            style={{ fontSize: 13, fontWeight: 700, color: '#3B61C4', background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)', borderRadius: 999, padding: '4px 12px', cursor: 'pointer' }}
+          >
+            Rate it
+          </button>
+          <button
+            onClick={() => setRatingReminder(null)}
+            style={{ background: 'none', border: 'none', color: '#9B9B9B', cursor: 'pointer', padding: '2px 4px', fontSize: 13, lineHeight: 1 }}
+            aria-label="Dismiss"
+          >
+            x
+          </button>
+        </div>
       )}
 
       {/* ── Adapt modal (paid users) ── */}
