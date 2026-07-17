@@ -920,7 +920,7 @@ export default function DashboardView({
                 Your study plan is live. Unlock the full picture.
               </p>
               <p style={{ margin: '4px 0 10px', fontSize: 12, color: D.textMuted, lineHeight: 1.55 }}>
-                You generated your first blueprint. The hardest part is done. Unlimited gives you 5 courses, 100 AI coaching sessions/month, and unlimited blueprints. 3-day free trial, then $4.99/wk.
+                You generated your first blueprint. The hardest part is done. Unlimited gives you 5 courses, 100 AI coaching sessions/month, and unlimited blueprints. 7-day free trial, then $4.99/wk.
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 {['5 courses', '100 AI sessions/month', 'Unlimited blueprints'].map(f => (
@@ -937,7 +937,7 @@ export default function DashboardView({
                 disabled={trialBannerLoading}
                 style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
               >
-                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · Cancel anytime'}
+                {trialBannerLoading ? 'Loading…' : 'Start 7-day trial · Cancel anytime'}
               </button>
               <button
                 onClick={() => { localStorage.setItem('se_first_blueprint_cta_dismissed', '1'); setFirstBlueprintCtaDismissed(true); track('first_blueprint_cta_dismissed') }}
@@ -967,8 +967,8 @@ export default function DashboardView({
               </p>
               <p style={{ margin: '3px 0 8px', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
                 {upcomingExam && upcomingExam.days <= 5
-                  ? 'Exam Rescue, Cheat Sheets, and unlimited focus sessions are all included. 3-day free trial, then $4.99/wk.'
-                  : 'Removes the 30-min cap, adds 5 courses, 100 AI coaching sessions/month, and unlimited blueprints. 3-day free trial, then $4.99/wk.'}
+                  ? 'Exam Rescue, Cheat Sheets, and unlimited focus sessions are all included. 7-day free trial, then $4.99/wk.'
+                  : 'Removes the 30-min cap, adds 5 courses, 100 AI coaching sessions/month, and unlimited blueprints. 7-day free trial, then $4.99/wk.'}
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 {['Unlimited sessions', '100 AI actions/month', '5 courses'].map(f => (
@@ -985,7 +985,7 @@ export default function DashboardView({
                 disabled={trialBannerLoading}
                 style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
               >
-                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · Cancel anytime'}
+                {trialBannerLoading ? 'Loading…' : 'Start 7-day trial · Cancel anytime'}
               </button>
               <button onClick={() => { localStorage.setItem('studyedge_trial_card_dismissed_at', String(Date.now())); setTrialCardDismissed(true); track('trial_card_dismissed', { streak }) }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: D.textDim, fontSize: 20, lineHeight: 1, padding: '0 4px', flexShrink: 0 }} aria-label="Dismiss">×</button>
             </div>
@@ -1033,7 +1033,7 @@ export default function DashboardView({
                 You've had {sessionsCount} study sessions. You're actually using this.
               </p>
               <p style={{ margin: '4px 0 0', fontSize: 12, color: D.textMuted, lineHeight: 1.55 }}>
-                Unlock unlimited focus time, 5 courses, and 100 AI coaching sessions/month. 3-day free trial, then $4.99/wk.
+                Unlock unlimited focus time, 5 courses, and 100 AI coaching sessions/month. 7-day free trial, then $4.99/wk.
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
@@ -1042,7 +1042,7 @@ export default function DashboardView({
                 disabled={trialBannerLoading}
                 style={{ background: D.accent, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
               >
-                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · Cancel anytime'}
+                {trialBannerLoading ? 'Loading…' : 'Start 7-day trial · Cancel anytime'}
               </button>
               <button
                 onClick={() => { sessionStorage.setItem('se_session_nudge_dismissed', '1'); setSessionNudgeDismissed(true); track('sessions_nudge_dismissed', { sessions_count: sessionsCount }) }}
@@ -1071,7 +1071,7 @@ export default function DashboardView({
                 You've been on free for {accountAgeDays} days. The trial is still open.
               </p>
               <p style={{ margin: '3px 0 0', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
-                3 days free, then $4.99/wk. Unlimited sessions, 5 courses, 100 AI actions/month. Cancel anytime.
+                7 days free, then $4.99/wk. Unlimited sessions, 5 courses, 100 AI actions/month. Cancel anytime.
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
@@ -1080,7 +1080,7 @@ export default function DashboardView({
                 disabled={trialBannerLoading}
                 style={{ background: D.accent, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', whiteSpace: 'nowrap', opacity: trialBannerLoading ? 0.7 : 1 }}
               >
-                {trialBannerLoading ? 'Loading…' : 'Start 3-day trial · Cancel anytime'}
+                {trialBannerLoading ? 'Loading…' : 'Start 7-day trial · Cancel anytime'}
               </button>
               <button
                 onClick={() => {

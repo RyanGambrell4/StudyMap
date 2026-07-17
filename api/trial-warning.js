@@ -21,11 +21,11 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, skipped: true, reason: 'already_ran_today' })
   }
 
-  // Target users whose trial ends in ~24h: trialUsedAt was 48-72h ago.
-  // 3-day trial = trialUsedAt + 72h. We fire when 24h remains = 48-72h after trialUsedAt.
+  // Target users whose trial ends in ~24h: trialUsedAt was 144-168h ago.
+  // 7-day trial = trialUsedAt + 168h. We fire when 24h remains = 144-168h after trialUsedAt.
   const now = new Date()
-  const windowStart = new Date(now - 72 * 60 * 60 * 1000) // 3 days ago
-  const windowEnd   = new Date(now - 48 * 60 * 60 * 1000) // 2 days ago
+  const windowStart = new Date(now - 168 * 60 * 60 * 1000) // 7 days ago
+  const windowEnd   = new Date(now - 144 * 60 * 60 * 1000) // 6 days ago
 
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
@@ -82,10 +82,10 @@ export default async function handler(req, res) {
           : `You've been paying attention. Here's the honest case.`
         kicker       = 'Trial ending: you\'re engaged'
         heading      = sessionCount >= 3
-          ? `${sessionCount} sessions in 3 days. That's the habit that changes grades.`
+          ? `${sessionCount} sessions in 7 days. That's the habit that changes grades.`
           : `You've read every email. Here's why $2.99 actually makes sense.`
         activityLine = sessionCount >= 3
-          ? `You've logged ${sessionCount} sessions in 3 days. That puts you in the top 10% of trial users. Tomorrow, without Pro, those AI Study Coach plans, Blueprints, and Exam Rescue runs all go away. The 5-course tracking drops back to 1.`
+          ? `You've logged ${sessionCount} sessions in 7 days. That puts you in the top 10% of trial users. Tomorrow, without Pro, those AI Study Coach plans, Blueprints, and Exam Rescue runs all go away. The 5-course tracking drops back to 1.`
 
           : `You've been reading these. You know what Pro does. The honest case: $2.99/week is less than one coffee, and the students who keep it for a full semester consistently pull a GPA tier higher than those who don't.`
       } else if (isZeroActivity) {
@@ -96,7 +96,7 @@ export default async function handler(req, res) {
       } else {
         subject      = `Your Pro trial ends tomorrow.`
         kicker       = 'Trial ending soon'
-        heading      = `Your 3-day Pro trial ends in less than 24 hours.`
+        heading      = `Your 7-day Pro trial ends in less than 24 hours.`
         activityLine = sessionCount > 0
           ? `You've completed ${sessionCount} session${sessionCount !== 1 ? 's' : ''} on Pro. That progress is real, and it disappears without Pro. You drop back to 5 AI actions total, 1 course, and a 30-minute focus cap.`
           : `You've set up ${courseCount} course${courseCount !== 1 ? 's' : ''} on Pro. When the trial ends, you'll drop back to the free plan: 5 AI actions total, 1 course, and a 30-minute focus cap.`

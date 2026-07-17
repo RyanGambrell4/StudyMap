@@ -129,7 +129,7 @@ function Pricing(){
               <button className={`btn ${t.primary?'btn-primary':'btn-ghost'} tier-cta`} onClick={()=>goSignup(t.plan)}>{t.cta}</button>
               {t.primary && (
                 <p style={{textAlign:'center',fontSize:11,color:'var(--text-muted)',marginTop:8,marginBottom:0}}>
-                  ✓ 3-day free trial · cancel anytime
+                  ✓ 7-day free trial · cancel anytime
                 </p>
               )}
             </div>
@@ -192,13 +192,13 @@ function FinalCTA(){
           <div className="cta-grid"/>
           <div className="cta-inner">
             <h2 className="section-title" style={{maxWidth:820,margin:'0 auto'}}>You already know you need a<br/><span className="grad-text">better system.</span></h2>
-            <p className="section-sub" style={{margin:'22px auto 32px',maxWidth:560}}>Start free · explore Pro with a 3-day trial inside the app — no card needed.</p>
+            <p className="section-sub" style={{margin:'22px auto 32px',maxWidth:560}}>Start free · explore Pro with a 7-day trial inside the app.</p>
             <div className="cta-btns">
               <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1&plan=pro&billing=weekly&trial=1'}>Start Free Trial →</button>
             </div>
             <div className="cta-foot">
               <span>✓ Free to start</span>
-              <span>✓ 3-day Pro trial in-app · no card</span>
+              <span>✓ 7-day Pro trial · cancel anytime</span>
               <span>✓ Full Pro access instantly</span>
             </div>
           </div>

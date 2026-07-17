@@ -1,8 +1,9 @@
 /**
  * Day 3 trial email (72h after trial start).
  *
- * Fills the dead zone between day2-trial-progress (48h) and trial-warning (72h).
- * Fires at 72h when the trial ends today, before the trial-warning fires at 24h remaining.
+ * Fires mid-trial (day 3 of 7). With a 7-day trial, this is the midpoint nudge —
+ * users still have ~4 days left. Goal is to drive first meaningful action before
+ * the day-6 warning email fires.
  *
  * Focus: showcase a single high-value feature the user probably hasn't tried yet
  * (Exam Rescue or Brain Dump) with a real use-case scenario. Not a generic feature list.

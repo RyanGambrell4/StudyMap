@@ -170,7 +170,7 @@ export default async function handler(req, res) {
       ? `https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day5_proof_winback`
       : story.ctaHref + (story.ctaHref.includes('?') ? '&signup=1&plan=pro&billing=weekly&trial=1' : '?signup=1&plan=pro&billing=weekly&trial=1')
     const ctaLabel    = trialUsed ? 'Upgrade to Pro · $2.99/wk' : story.ctaLabel
-    const ctaFootnote = trialUsed ? '$2.99/wk · Cancel anytime' : 'Card required · $2.99/wk after 3 days · Cancel anytime'
+    const ctaFootnote = trialUsed ? '$2.99/wk · Cancel anytime' : 'Card required · $2.99/wk after 7 days · Cancel anytime'
 
     try {
       await resend.emails.send({
@@ -221,7 +221,7 @@ ${preheader(story.preheaderText)}
           Pro is <strong style="color:#111111;">$2.99/week</strong>, less than a coffee.
           ${trialUsed
             ? 'You\'ve already seen what it does. Get it back.'
-            : 'Try it free for 3 days. You won\'t be charged until day 4.'}
+            : 'Try it free for 7 days. You won\'t be charged until day 8.'}
         </p>
 
         <table cellpadding="0" cellspacing="0" style="width:100%;">

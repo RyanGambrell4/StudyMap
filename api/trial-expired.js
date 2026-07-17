@@ -22,10 +22,10 @@ export default async function handler(req, res) {
   }
 
   // Target users whose trial ended 1-2 days ago (trialUsedAt was 8-9 days ago).
-  // 3-day trial: trialUsedAt + 72h = trial end. We want 24-48h after that = 96-120h after trialUsedAt.
+  // 7-day trial: trialUsedAt + 168h = trial end. We want 24-48h after that = 192-216h after trialUsedAt.
   const now = new Date()
-  const windowStart = new Date(now - 120 * 60 * 60 * 1000) // 5 days ago (trialUsedAt 96-120h ago → trialEnd 24-48h ago)
-  const windowEnd   = new Date(now - 96 * 60 * 60 * 1000)  // 4 days ago
+  const windowStart = new Date(now - 216 * 60 * 60 * 1000) // 9 days ago (trialUsedAt 192-216h ago → trialEnd 24-48h ago)
+  const windowEnd   = new Date(now - 192 * 60 * 60 * 1000) // 8 days ago
 
   // Pull free users who had a trial (trialUsedAt set) so we can filter by when their trial ended.
   const { data: rows, error } = await supabaseAdmin
@@ -51,8 +51,8 @@ export default async function handler(req, res) {
       const trialUsedDate = new Date(trialUsedAt)
       if (isNaN(trialUsedDate.getTime())) { skipped++; continue }
 
-      // Trial end = trialUsedAt + 3 days. We want 24-48h after trial end.
-      const trialEnd = new Date(trialUsedDate.getTime() + 3 * 24 * 3600 * 1000)
+      // Trial end = trialUsedAt + 7 days. We want 24-48h after trial end.
+      const trialEnd = new Date(trialUsedDate.getTime() + 7 * 24 * 3600 * 1000)
       if (trialEnd < windowStart || trialEnd > windowEnd) { skipped++; continue }
 
       const gate = await canSendUserEmail(row.user_id, { priority: 'normal' })
@@ -97,7 +97,7 @@ ${preheader("You tried Pro. You know what it does. $2.99/wk to get it back.")}
       </td></tr>
       <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">Trial ended</p>
-        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">Your 3-day Pro trial ended.</h1>
+        <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">Your 7-day Pro trial ended.</h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           ${activityLine} You've seen what Pro does: the AI tutoring, unlimited blueprints, all the study tools.
         </p>

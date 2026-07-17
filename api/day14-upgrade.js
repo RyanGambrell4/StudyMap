@@ -111,7 +111,7 @@ export default async function handler(req, res) {
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#E8531A;text-transform:uppercase;">Two weeks in, still free</p>
         <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">You haven't tried the trial yet. Here's your reminder.</h1>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Two weeks on StudyEdge and you're still capped at 5 AI actions and 1 course. Your trial is still available. Card required, cancel before day 4 and you pay nothing. Here's what it unlocks:
+          Two weeks on StudyEdge and you're still capped at 5 AI actions and 1 course. Your trial is still available. Card required, cancel before day 8 and you pay nothing. Here's what it unlocks:
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
@@ -130,10 +130,10 @@ export default async function handler(req, res) {
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;">Start your free 3-day trial →</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;">Start your free 7-day trial →</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">Card required · Cancel before day 4 and pay nothing</span>
+            <span style="font-size:12px;color:#9B9B9B;">Card required · Cancel before day 8 and pay nothing</span>
           </td></tr>
         </table>`
 

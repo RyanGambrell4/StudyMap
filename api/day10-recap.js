@@ -70,8 +70,8 @@ export default async function handler(req, res) {
     const upgradeUrl = trialUsed
       ? `https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day10_winback`
       : `https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day10_recap`
-    const ctaLabel    = trialUsed ? 'Upgrade to Pro · $2.99/wk' : 'Start 3-day free trial'
-    const ctaFootnote = trialUsed ? '$2.99/wk · Cancel anytime' : 'Card required · $2.99/wk after 3 days · Cancel anytime'
+    const ctaLabel    = trialUsed ? 'Upgrade to Pro · $2.99/wk' : 'Start 7-day free trial'
+    const ctaFootnote = trialUsed ? '$2.99/wk · Cancel anytime' : 'Card required · $2.99/wk after 7 days · Cancel anytime'
 
     const activityBlock = sessionCount > 0 || courseCount > 0
       ? `<p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
@@ -151,7 +151,7 @@ ${preheader("10 days in. Here's where you stand and what Pro unlocks for the res
           Pro is <strong style="color:#111111;">$2.99/week</strong>, less than a coffee.
           ${trialUsed
             ? 'You\'ve already seen what it does. Everything you had during your trial, back permanently.'
-            : 'Try it free for 3 days. No charge until day 4. Cancel anytime.'}
+            : 'Try it free for 7 days. No charge until day 8. Cancel anytime.'}
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">

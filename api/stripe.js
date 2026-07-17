@@ -281,7 +281,7 @@ async function sendTrialStartedEmail(toEmail, trialEndTs) {
     await resend.emails.send({
       from: 'StudyEdge AI <support@mail.getstudyedge.com>',
       to: toEmail,
-      subject: 'Your 3-day Pro trial has started.',
+      subject: 'Your 7-day Pro trial has started.',
       headers: listUnsubscribeHeaders(toEmail),
       html: `<!DOCTYPE html>
 <html lang="en">
@@ -300,7 +300,7 @@ ${preheader("You have full Pro access. Here is everything that is now unlocked."
           You have full Pro access.
         </h1>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Your 3-day free trial is active.${endDate ? ` It ends on <strong style="color:#111111;">${endDate}</strong>.` : ''} After that, your card is charged $2.99/week unless you cancel. Here's everything you can use right now:
+          Your 7-day free trial is active.${endDate ? ` It ends on <strong style="color:#111111;">${endDate}</strong>.` : ''} After that, your card is charged $2.99/week unless you cancel. Here's everything you can use right now:
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
@@ -371,7 +371,7 @@ ${preheader("Your trial was cancelled. Your card will not be charged. Your accou
           Your trial was cancelled. No charge.
         </h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Your 3-day trial has been cancelled and your card will not be billed. Your account is now on the free plan.
+          Your 7-day trial has been cancelled and your card will not be billed. Your account is now on the free plan.
         </p>
         <p style="margin:0 0 20px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           You can still use StudyEdge on free. If you change your mind, you can start a new trial anytime.
@@ -394,7 +394,7 @@ ${preheader("Your trial was cancelled. Your card will not be charged. Your accou
             <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Restart trial anytime</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">3-day trial, then $2.99/wk. Cancel before day 4 and you won't be charged.</span>
+            <span style="font-size:12px;color:#9B9B9B;">7-day trial, then $2.99/wk. Cancel before day 8 and you won't be charged.</span>
           </td></tr>
         </table>
       </td></tr>
@@ -545,7 +545,7 @@ export default async function handler(req, res) {
     }
 
     // ── Trial expiry warning (Stripe fires this 3 days before trial ends) ───────
-    // For a 3-day trial this fires at the start — skip it here if more than 36h remain
+    // For a 7-day trial this fires on day 4 — skip it here if more than 36h remain
     // and let the daily cron (trial-warning.js) send the email on the actual last day.
     // Only send if the trial genuinely ends within 36 hours so the copy is right.
     if (event.type === 'customer.subscription.trial_will_end') {
@@ -604,12 +604,12 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
       You were one step away.
     </h1>
     <p style="margin:0 0 20px;font-size:15px;color:#4b5563;line-height:1.6;">
-      You started ${wasTrial ? 'your 3-day free trial' : 'signing up for Pro'} but didn't finish. Your spot is still open. It takes about 30 seconds to complete.
+      You started ${wasTrial ? 'your 7-day free trial' : 'signing up for Pro'} but didn't finish. Your spot is still open. It takes about 30 seconds to complete.
     </p>
     <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 18px;margin-bottom:24px;">
       <p style="margin:0;font-size:13.5px;color:#166534;line-height:1.6;">
         ${wasTrial
-          ? '<strong>Try Pro free for 3 days.</strong> Enter your card to start. You won\'t be charged until day 4. Cancel anytime before then.'
+          ? '<strong>Try Pro free for 7 days.</strong> Enter your card to start. You won\'t be charged until day 8. Cancel anytime before then.'
           : '<strong>Pro is $2.99/week.</strong> 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions. Cancel anytime.'
         }
       </p>
@@ -1078,9 +1078,9 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
 
   // REVENUE-CRITICAL.
   // Trial is available on Pro or Unlimited (all three billing periods). It is a
-  // CARD-REQUIRED 3-day trial: `payment_method_collection: 'always'` below
+  // CARD-REQUIRED 7-day trial: `payment_method_collection: 'always'` below
   // forces Stripe Checkout to collect a card before the trial starts, and
-  // Stripe auto-bills after 3 days unless the user cancels. There is no
+  // Stripe auto-bills after 7 days unless the user cancels. There is no
   // "no-card trial" path anywhere in this product anymore - earlier copy
   // and an old commit (2af08aa, 2026-05-25) assumed otherwise and silently
   // produced 0 new customers for 9 days. Verify with
@@ -1092,7 +1092,7 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
   const subscriptionData = {
     metadata: { user_id: userId },
     ...(wantsTrial && {
-      trial_period_days: 3,
+      trial_period_days: 7,
       trial_settings: { end_behavior: { missing_payment_method: 'cancel' } },
     }),
   }
@@ -1173,8 +1173,8 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
       // highest abandonment anxiety on the trial path. Price varies by plan.
       custom_text: wantsTrial
         ? { submit: { message: plan === 'unlimited'
-            ? "Free for 3 days, then $4.99/week. Cancel anytime in your account before day 4 and you won't be charged."
-            : "Free for 3 days, then $2.99/week. Cancel anytime in your account before day 4 and you won't be charged." } }
+            ? "Free for 7 days, then $4.99/week. Cancel anytime in your account before day 8 and you won't be charged."
+            : "Free for 7 days, then $2.99/week. Cancel anytime in your account before day 8 and you won't be charged." } }
         : undefined,
       success_url: 'https://getstudyedge.com/app?checkout=success',
       cancel_url: 'https://getstudyedge.com/app?checkout=cancelled',

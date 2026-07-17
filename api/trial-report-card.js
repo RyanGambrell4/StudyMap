@@ -1,8 +1,8 @@
 /**
  * Trial report card — fires the moment a trial ends for non-converters.
  *
- * Window: trialUsedAt was 72–96h ago (trial ended 0–24h ago), plan !== 'pro'/'unlimited'.
- * This fills the dead zone between trial-warning (day 2) and trial-expired (day 4-5).
+ * Window: trialUsedAt was 168–192h ago (trial ended 0–24h ago), plan !== 'pro'/'unlimited'.
+ * This fills the dead zone between trial-warning (day 6) and trial-expired (day 8-9).
  * The trial-end moment is the highest-leverage conversion window — the student just
  * lost something real — and the most effective message is their OWN data, not a
  * generic features list.
@@ -39,12 +39,12 @@ export default async function handler(req, res) {
     return res.status(200).json({ ok: true, skipped: true, reason: 'already_ran_today' })
   }
 
-  // Window: trial ended in last 24h = trialUsedAt was 72–96h ago (3-day trial).
-  // trial-warning fires at 48–72h (24h remaining), so this is right after the
+  // Window: trial ended in last 24h = trialUsedAt was 168–192h ago (7-day trial).
+  // trial-warning fires at 144–168h (24h remaining), so this is right after the
   // trial-warning window closes — no overlap.
   const now = new Date()
-  const windowStart = new Date(now - 96 * 60 * 60 * 1000) // 4 days ago
-  const windowEnd   = new Date(now - 72 * 60 * 60 * 1000) // 3 days ago
+  const windowStart = new Date(now - 192 * 60 * 60 * 1000) // 8 days ago
+  const windowEnd   = new Date(now - 168 * 60 * 60 * 1000) // 7 days ago
 
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
@@ -125,7 +125,7 @@ export default async function handler(req, res) {
       if (sessionCount >= 3) {
         subject     = `You logged ${sessionCount} sessions. Here's what you built.`
         heading     = `${sessionCount} sessions. That's a real start. Don't reset it.`
-        lead        = `${greeting}, your 3-day Pro trial just ended. You logged ${sessionCount} session${sessionCount !== 1 ? 's' : ''}. That's more than most trial users ever do. The habit is there. The question is whether you keep it.`
+        lead        = `${greeting}, your 7-day Pro trial just ended. You logged ${sessionCount} session${sessionCount !== 1 ? 's' : ''}. That's more than most trial users ever do. The habit is there. The question is whether you keep it.`
         urgencyNote = `Students who keep studying momentum into week 2 are the ones who finish the semester ahead. The ones who let it break spend the last 3 weeks cramming.`
       } else if (sessionCount > 0) {
         subject     = `Your trial ended. You ran ${sessionCount} session${sessionCount !== 1 ? 's' : ''}.`
@@ -190,7 +190,7 @@ ${preheader(sessionCount >= 3
         <!-- Real data card -->
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:26px;background:#F7F6F3;border-radius:16px;border:1px solid rgba(0,0,0,0.07);">
           <tr><td style="padding:20px 24px 8px;">
-            <p style="margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9B9B9B;text-transform:uppercase;">Your 3-day trial results</p>
+            <p style="margin:0 0 14px;font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9B9B9B;text-transform:uppercase;">Your 7-day trial results</p>
           </td></tr>
 
           <!-- Sessions row -->

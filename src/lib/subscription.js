@@ -8,9 +8,9 @@
  *  Unlimited → Stripe paid (weekly/monthly/annual), unlimited everything + tutor memory & advanced analytics
  */
 
-// Trial duration: 3 days. Single source of truth for all trial checks.
-export const TRIAL_DURATION_MS = 3 * 24 * 60 * 60 * 1000
-export const TRIAL_DURATION_DAYS = 3
+// Trial duration: 7 days. Single source of truth for all trial checks.
+export const TRIAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000
+export const TRIAL_DURATION_DAYS = 7
 
 import { supabase } from './supabase'
 import { track } from './analytics'

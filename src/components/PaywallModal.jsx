@@ -97,7 +97,7 @@ const LIMIT_MESSAGES = {
   'ai-exhausted': {
     tag: "You've used your free AI actions",
     title: 'Keep your tutor on tap.',
-    body: "Pro gives you 100 AI actions a month. Your tutor for every concept this semester. Start the 3-day free trial and pick up exactly where you left off.",
+    body: "Pro gives you 100 AI actions a month. Your tutor for every concept this semester. Start the 7-day free trial and pick up exactly where you left off.",
   },
   tutorMemory: {
     tag: 'Unlimited only · Tutor memory',
@@ -240,7 +240,7 @@ const LIMIT_MESSAGES = {
     body: "$4.99/wk. Unlimited courses, unlimited AI, AI Tutor with session memory, advanced analytics, and every study tool. Cancel anytime.",
   },
   'nav-trial': {
-    tag: 'Try Unlimited, 3-day free trial',
+    tag: 'Try Unlimited, 7-day free trial',
     title: 'Full access. No restrictions.',
     body: "Unlimited courses, unlimited AI actions, AI Tutor with session memory, advanced exam analytics, and every study tool. $4.99/wk after. Cancel anytime.",
   },
@@ -531,7 +531,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 10px', letterSpacing: '-0.4px', lineHeight: 1.2 }}>{question}</h2>
             <p style={{ fontSize: '0.875rem', color: '#6B6B6B', margin: '0 0 28px', lineHeight: 1.55 }}>
               {showTrialCard
-                ? 'Your study plan is still running. Unlock everything - AI tutor, unlimited sessions, and your full schedule - free for 3 days.'
+                ? 'Your study plan is still running. Unlock everything - AI tutor, unlimited sessions, and your full schedule - free for 7 days.'
                 : 'Your study plan is still running. Upgrade to keep your AI tutor, unlimited focus sessions, and full schedule. Everything you need to finish strong.'}
             </p>
             <button
@@ -542,10 +542,10 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               style={{ width: '100%', padding: '14px', background: '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: trialLoading ? 'not-allowed' : 'pointer', letterSpacing: '-0.01em', marginBottom: 10, transition: 'opacity 0.15s', opacity: trialLoading ? 0.75 : 1 }}
               onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.opacity = '0.88' }} onMouseLeave={e => { e.currentTarget.style.opacity = trialLoading ? '0.75' : '1' }}
             >
-              {trialLoading ? 'Loading…' : showTrialCard ? 'Start free 3-day trial →' : 'Yes, keep going →'}
+              {trialLoading ? 'Loading…' : showTrialCard ? 'Start free 7-day trial →' : 'Yes, keep going →'}
             </button>
             {showTrialCard && (
-              <p style={{ fontSize: '0.72rem', color: '#9B9B9B', margin: '-4px 0 10px' }}>3-day free trial · Cancel anytime</p>
+              <p style={{ fontSize: '0.72rem', color: '#9B9B9B', margin: '-4px 0 10px' }}>7-day free trial · Cancel anytime</p>
             )}
             {trialError && (
               <p style={{ fontSize: '0.78rem', color: '#EF4444', margin: '0 0 8px' }}>{trialError}</p>
@@ -697,7 +697,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             </p>
             {!isUnlimitedTrigger && (
               <p style={{ color: '#9B9B9B', fontSize: '0.78rem', margin: 0 }}>
-                3-day Unlimited trial · $4.99/wk after · Cancel anytime
+                7-day Unlimited trial · $4.99/wk after · Cancel anytime
               </p>
             )}
           </div>
@@ -814,10 +814,10 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               textTransform: 'uppercase', letterSpacing: '0.5px',
               marginBottom: '10px',
             }}>
-              3-day free trial · Cancel anytime
+              7-day free trial · Cancel anytime
             </div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 6px', letterSpacing: '-0.3px' }}>
-              Try Unlimited, free for 3 days.
+              Try Unlimited, free for 7 days.
             </h3>
             <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 14px', lineHeight: 1.5 }}>
               Full access starting today. We'll email you the day before your trial ends so nothing catches you off guard.
@@ -853,10 +853,10 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.opacity = '0.88' }}
               onMouseLeave={e => { e.currentTarget.style.opacity = trialLoading ? '0.75' : '1' }}
             >
-              {trialLoading ? 'Loading…' : 'Continue - free for 3 days'}
+              {trialLoading ? 'Loading…' : 'Continue - free for 7 days'}
             </button>
             <p style={{ margin: '10px 0 0', fontSize: '0.72rem', color: '#9B9B9B' }}>
-              3-day free trial · Cancel anytime
+              7-day free trial · Cancel anytime
             </p>
           </div>
         )}
@@ -974,7 +974,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 )}
                 {planId === 'unlimited' && !trialUsed && !trialActive && (
                   <div style={{ fontSize: '0.68rem', color: '#059669', marginTop: '4px', fontWeight: 700 }}>
-                    Card required · 3-day trial · $4.99/wk after
+                    Card required · 7-day trial · $4.99/wk after
                   </div>
                 )}
               </div>
