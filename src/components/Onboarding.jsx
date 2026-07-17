@@ -259,12 +259,27 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
   const profileData = { yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true, courseName: courseName.trim() || null, examDate: examDate || null }
 
+  // Thin fixed progress bar + step label rendered at the top of each step
+  const StepProgress = () => (
+    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50 }}>
+      <div style={{ height: 3, background: 'rgba(255,255,255,0.07)' }}>
+        <div style={{ height: '100%', width: `${(step / 3) * 100}%`, background: 'linear-gradient(90deg, #6B8FFF, #93C5FD)', transition: 'width 0.4s ease', borderRadius: '0 2px 2px 0' }} />
+      </div>
+      <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 10 }}>
+        <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
+          Step {step} of 3
+        </span>
+      </div>
+    </div>
+  )
+
   // ── Step 1: Questions ──────────────────────────────────────────────────────
   if (step === 1) {
     const sc = schoolType ? SCHOOL_COLORS[schoolType] : null
 
     return (
       <div style={{ backgroundColor: '#080C18', minHeight: '100vh', padding: '0', position: 'relative', overflow: 'hidden' }}>
+        <StepProgress />
         <style>{STYLES}</style>
         {showConfetti && <Confetti />}
 
@@ -594,6 +609,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
     return (
       <div style={{ backgroundColor: '#080C18', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 16px', position: 'relative', overflow: 'hidden' }}>
+        <StepProgress />
         <style>{STYLES + `
           @keyframes countdown-bar { from { width: 0% } to { width: 100% } }
           @keyframes fade-up { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: translateY(0) } }
@@ -725,6 +741,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   const step3ExamWord = schoolType === 'exam' ? 'exam' : 'final'
   if (step === 3) return (
     <div style={{ minHeight: '100vh', background: '#080C18', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', position: 'relative', overflow: 'hidden' }}>
+      <StepProgress />
       <style>{STYLES}</style>
       <div style={{ position: 'absolute', top: '-200px', left: '50%', transform: 'translateX(-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(107,53,217,.14) 0%, transparent 65%)', pointerEvents: 'none' }} />
 

@@ -1193,6 +1193,56 @@ export default function DashboardView({
       {/* ── Grid ── */}
       <div className="dash-grid" style={{ padding: '20px 32px 48px', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
 
+        {/* ── Today's mission (new user, 0 sessions completed) ── */}
+        {!hasCompletedFirstSession && courses.length > 0 && (
+          <div style={{
+            gridColumn: 'span 12',
+            background: 'linear-gradient(135deg, #EEF2FF 0%, #F7F6F3 100%)',
+            border: '1px solid rgba(59,97,196,0.18)',
+            borderLeft: '4px solid #3B61C4',
+            borderRadius: 12,
+            padding: '20px 22px',
+            display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap',
+          }}>
+            <div style={{ width: 42, height: 42, background: 'rgba(59,97,196,0.1)', borderRadius: 10, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="20" height="20" fill="none" stroke="#3B61C4" strokeWidth="1.8" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+            </div>
+            <div style={{ flex: 1, minWidth: 200 }}>
+              <p style={{ margin: '0 0 3px', fontWeight: 700, fontSize: 14, color: '#111111' }}>
+                {displaySession ? `Today's first session: ${displaySession.courseName}` : "Your plan is ready. Start your first session."}
+              </p>
+              <p style={{ margin: 0, fontSize: 13, color: '#6B6B6B', lineHeight: 1.5 }}>
+                {displaySession
+                  ? `${displaySession.duration ?? 60} min · ${displaySession.sessionType ?? 'Study Session'} · Open Focus Mode to start the timer and take notes.`
+                  : 'Your AI-generated study plan is live. Open Focus Mode on any session to start learning.'}
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+              {displaySession ? (
+                <button
+                  onClick={() => typeof onStartFocus === 'function' && onStartFocus(displaySession)}
+                  style={{ background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Start Focus Mode
+                </button>
+              ) : (
+                <button
+                  onClick={() => typeof onOpenStudyCoach === 'function' && onOpenStudyCoach(0)}
+                  style={{ background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 8, padding: '9px 18px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+                >
+                  Build my plan
+                </button>
+              )}
+              <button
+                onClick={() => typeof onNavigateToCalendar === 'function' && onNavigateToCalendar()}
+                style={{ background: 'none', color: '#3B61C4', border: '1px solid rgba(59,97,196,0.3)', borderRadius: 8, padding: '9px 14px', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+              >
+                View schedule
+              </button>
+            </div>
+          </div>
+        )}
+
         {/* ── CARS Daily Drill nudge ── */}
         {courses.some(c => /CARS/i.test(c.name)) && (
           <div style={{
