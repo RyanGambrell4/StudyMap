@@ -20,7 +20,7 @@ const TRIGGER_COPY = {
   'ai-exhausted': {
     subject: 'You hit the AI limit on StudyEdge',
     headline: 'You ran out of free AI questions.',
-    what_happened: 'You used up your free AI coaching sessions for this period.',
+    what_happened: 'You used up your 5 free AI coaching sessions.',
     unlock: 'Pro gives you 100 AI actions per month. Ask anything about any of your courses, any time.',
   },
   'ai-struggle': {

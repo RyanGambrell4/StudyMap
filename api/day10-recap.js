@@ -133,7 +133,7 @@ ${preheader("10 days in. Here's where you stand and what Pro unlocks for the res
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
           ${[
-            ['100 AI actions / month', 'Free gives you 2 total. Pro is enough for your entire semester.'],
+            ['100 AI actions / month', 'Free gives you 5 total. Pro is enough for your entire semester.'],
             ['5 courses (not just 1)', 'Track every class you\'re taking with its own plan and schedule.'],
             ['Unlimited Session Blueprints', 'A minute-by-minute plan before every study session, every time.'],
             ['Rebuild plans anytime', 'New exam dates, grade changes, schedule shifts. Your coach adapts.'],
