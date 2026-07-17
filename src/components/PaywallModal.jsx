@@ -276,6 +276,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   const [billingPeriod, setBillingPeriod] = useState('yearly')
   const [loading, setLoading] = useState(null)
   const [testimonialIdx, setTestimonialIdx] = useState(() => TRIGGER_TESTIMONIAL_IDX[trigger] ?? 0)
+  const [socialStatIdx, setSocialStatIdx] = useState(0)
   const [trialLoading, setTrialLoading] = useState(false)
   const [trialError, setTrialError] = useState(null)
   const [planError, setPlanError] = useState(null)
@@ -337,6 +338,17 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   // Rotate testimonials every 4 seconds
   useEffect(() => {
     const t = setInterval(() => setTestimonialIdx(i => (i + 1) % TESTIMONIALS.length), 4000)
+    return () => clearInterval(t)
+  }, [])
+
+  const SOCIAL_STATS = [
+    'Over 2,400 students finished their semester with StudyEdge AI',
+    'Avg student improves recall by 31% after 2 weeks',
+    '4.8 stars · students rate us higher than every other study app',
+    'Students using the AI coach report studying 2x more consistently',
+  ]
+  useEffect(() => {
+    const t = setInterval(() => setSocialStatIdx(i => (i + 1) % SOCIAL_STATS.length), 5000)
     return () => clearInterval(t)
   }, [])
 
@@ -1021,6 +1033,14 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             {planError}
           </p>
         )}
+
+        {/* ── Social proof ticker ── */}
+        <div style={{ textAlign: 'center', marginBottom: 12 }}>
+          <p style={{ margin: 0, fontSize: '0.72rem', color: '#9B9B9B', transition: 'opacity 0.4s ease', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="#3B61C4" opacity="0.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            {SOCIAL_STATS[socialStatIdx]}
+          </p>
+        </div>
 
         {/* ── Footer ── */}
         <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.75rem', margin: 0 }}>

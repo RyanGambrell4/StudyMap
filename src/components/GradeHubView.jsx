@@ -1312,6 +1312,50 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
           ))}
         </div>
 
+        {/* Grade recovery alert: fires when grade is tracked + 10+ pts below target */}
+        {(() => {
+          if (!hasSetup) return null
+          const comps = gradeData?.components ?? []
+          const curr = getCurrentGrade(comps)
+          const target = gradeData?.targetGrade ?? 85
+          const gradedWeight = comps.filter(x => x.graded && x.grade != null).reduce((a, c) => a + (parseFloat(c.weight) || 0), 0)
+          if (curr === null || gradedWeight < 30) return null // not enough data yet
+          const gap = target - curr
+          if (gap < 10) return null // on track
+          const examDays = daysTo(course.examDate)
+          const urgent = examDays !== null && examDays <= 21
+          return (
+            <div style={{
+              marginBottom: 18,
+              background: urgent ? 'rgba(220,38,38,0.05)' : 'rgba(217,119,6,0.05)',
+              border: `1px solid ${urgent ? 'rgba(220,38,38,0.2)' : 'rgba(217,119,6,0.2)'}`,
+              borderLeft: `4px solid ${urgent ? '#DC2626' : '#D97706'}`,
+              borderRadius: 10,
+              padding: '14px 18px',
+              display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+            }}>
+              <div style={{ flex: 1, minWidth: 200 }}>
+                <p style={{ margin: '0 0 3px', fontWeight: 700, fontSize: 13, color: urgent ? '#DC2626' : '#92400E' }}>
+                  {urgent
+                    ? `Grade recovery mode: ${examDays}d to exam, ${gap.toFixed(0)}pts below target`
+                    : `${gap.toFixed(0)} points below your target grade`}
+                </p>
+                <p style={{ margin: 0, fontSize: 12, color: D.muted, lineHeight: 1.5 }}>
+                  {urgent
+                    ? 'Use the Sandbox tab to model exactly what scores you need on remaining work to hit your target.'
+                    : 'Your current grade needs to improve. Check the Sandbox to see what scores would close the gap.'}
+                </p>
+              </div>
+              <button
+                onClick={() => setActiveTab('sandbox')}
+                style={{ background: urgent ? '#DC2626' : '#D97706', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
+              >
+                Open Sandbox
+              </button>
+            </div>
+          )
+        })()}
+
         {/* What-if mode banner */}
         {whatIfMode && (
           <WhatIfBanner
