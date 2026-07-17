@@ -56,7 +56,7 @@ export const TRIAL_LIMITS = PRO_LIMITS
 
 // Legacy - kept for backwards compatibility
 export const PLAN_LIMITS = {
-  free:      { courses: 1,        aiQueries: 2,        aiResetPeriod: 'day'   },
+  free:      { courses: 1,        aiQueries: 5,        aiResetPeriod: 'total' },
   pro:       { courses: 5,        aiQueries: 100,      aiResetPeriod: 'month' },
   unlimited: { courses: Infinity, aiQueries: Infinity, aiResetPeriod: 'month' },
 }

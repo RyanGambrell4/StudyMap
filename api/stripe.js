@@ -379,7 +379,7 @@ ${preheader("Your trial was cancelled. Your card will not be charged. Your accou
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
           ${[
             ['1 course', 'Add one course with full session planning'],
-            ['10 AI study boosts', 'Use AI features up to 10 times total'],
+            ['5 AI sessions', 'Use AI features up to 5 times total'],
             ['Grade tracker', 'Track your progress and target grade'],
           ].map(([feat, detail], i, arr) => `
           <tr>
