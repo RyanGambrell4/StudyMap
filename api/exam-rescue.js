@@ -1,10 +1,7 @@
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { verifyAndCheckAiUsage, verifyAuth } from '../lib/server/usage.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
-
-  const gate = await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
   const {
     courseName,
@@ -20,6 +17,16 @@ export default async function handler(req, res) {
     struggles,
   } = req.body
   if (!courseName) return res.status(400).json({ error: 'Missing courseName' })
+
+  // Schedule step is auto-generated as part of the same session — auth only, no extra credit.
+  if (step === 'schedule') {
+    const auth = await verifyAuth(req)
+    if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
+  } else {
+    const gate = await verifyAndCheckAiUsage(req)
+    if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  }
+
   const safeHours = Math.min(Math.max(Number(hoursAvailable) || 3, 0.5), 72)
 
   const contextParts = []
