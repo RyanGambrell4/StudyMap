@@ -24,8 +24,8 @@ export default async function handler(req, res) {
 
   const streakNum = parseInt(streak, 10) || 1
   const subject = streakNum >= 7
-    ? `Your ${streakNum}-day streak broke — don't let it end here`
-    : `Your study streak broke — here's how to bounce back fast`
+    ? `Your ${streakNum}-day streak broke. Don't let it end here.`
+    : `Your study streak broke. Here's how to bounce back fast.`
 
   try {
     await resend.emails.send({
@@ -48,12 +48,12 @@ ${preheader('One session today resets the streak. It only takes 10 minutes.')}
       <p style="margin:0 0 20px;font-size:15px;color:#4b5563;line-height:1.65;">
         ${streakNum >= 14
           ? `That was an impressive ${streakNum}-day run. Don't let a missed day become a missed week. One session today resets everything.`
-          : `It happens. The students who win aren't the ones who never miss — they're the ones who get back on track within 24 hours.`}
+          : `It happens. The students who win aren't the ones who never miss. They're the ones who get back on track within 24 hours.`}
       </p>
       <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:16px;margin-bottom:22px;">
         <p style="margin:0 0 4px;font-weight:700;font-size:13px;color:#c2410c;">Why get back today?</p>
         <p style="margin:0;font-size:13.5px;color:#92400e;line-height:1.6;">
-          Students who restart within 24 hours rebuild streaks 3× faster. A 10-minute session is all it takes to get the momentum back — and your plan already knows where to pick up.
+          Students who restart within 24 hours rebuild streaks 3x faster. A 10-minute session is all it takes to get the momentum back, and your plan already knows where to pick up.
         </p>
       </div>
       <a href="https://getstudyedge.com/app" style="display:block;text-align:center;background:linear-gradient(135deg,#ea580c,#dc2626);color:#fff;font-weight:800;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none;letter-spacing:-0.01em;margin-bottom:12px;">
