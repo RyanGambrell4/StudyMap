@@ -119,7 +119,7 @@ ${preheader(`${senderName} sent you a study nudge. Don't let them down.`)}
         </h1>
         <p style="margin:0 0 20px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           They took a second to let you know they're rooting for you.
-          Your study plan is still there — pick it up today and keep the momentum going.
+          Your study plan is still there. Pick it up today and keep the momentum going.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           <tr><td align="center">

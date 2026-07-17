@@ -64,25 +64,25 @@ export default async function handler(req, res) {
     const hasActivity = sessionCount > 0 || courseCount > 0
     const activityLine = hasActivity
       ? `You've completed ${sessionCount} study session${sessionCount !== 1 ? 's' : ''} and added ${courseCount} course${courseCount !== 1 ? 's' : ''} in 3 days. That's a real start.`
-      : `You signed up 3 days ago. Most students take a bit to get going — your plan is still here when you're ready.`
+      : `You signed up 3 days ago. Most students take a bit to get going. Your plan is still here when you're ready.`
 
     const upgradeUrl = trialUsed
       ? `https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day3_winback`
       : `https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day3_progress`
-    const ctaLabel    = trialUsed ? 'Upgrade to Pro — $2.99/wk' : 'Start 3-day free trial'
+    const ctaLabel    = trialUsed ? 'Upgrade to Pro · $2.99/wk' : 'Start 3-day free trial'
     const ctaFootnote = trialUsed ? '$2.99/wk · Cancel anytime' : '3-day trial · $2.99/wk after · Cancel anytime'
 
     try {
       await resend.emails.send({
         from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
         to: user.email,
-        subject: hasActivity ? "3 days in — here's what you're still missing" : "Still figuring things out? Let me help.",
+        subject: hasActivity ? "3 days in: here's what you're still missing" : "Still figuring things out? Let me help.",
         headers: listUnsubscribeHeaders(user.email),
         html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>3 days on StudyEdge</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-${preheader("Three days in. Here's what Pro changes — and why free-plan students fall behind.")}
+${preheader("Three days in. Here's what Pro changes, and why free-plan students fall behind.")}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
@@ -94,15 +94,15 @@ ${preheader("Three days in. Here's what Pro changes — and why free-plan studen
         <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">You've been on StudyEdge for 3 days.</h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">${activityLine}</p>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Here's what the free plan doesn't give you — and why it matters now, not later:
+          Here's what the free plan doesn't give you, and why it matters now:
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
           ${[
-            ['100 AI actions / month', 'Free gives you 2 total. Pro is enough for daily use all semester long.'],
-            ['Session Blueprints — every session', 'A minute-by-minute plan before you sit down. Free users guess.'],
+            ['100 AI actions / month', 'Free gives you 5 total. Pro is enough for daily use all semester long.'],
+            ['Session Blueprints (every session)', 'A minute-by-minute plan before you sit down. Free users guess.'],
             ['5 courses', 'Track every class. Free is limited to 1.'],
             ['Study Coach anytime', 'Rebuild your full plan around new exams, grades, or schedule changes.'],
-            ['Brain Dumps, Quiz Bursts, Exam Rescue', 'All the AI tools that actually change how you study — all unlimited.'],
+            ['Brain Dumps, Quiz Bursts, Exam Rescue', 'All the AI tools that actually change how you study. All unlimited.'],
           ].map(([feat, desc]) => `
           <tr>
             <td style="padding:10px 0;border-bottom:1px solid #F0EDE8;">
@@ -112,7 +112,7 @@ ${preheader("Three days in. Here's what Pro changes — and why free-plan studen
           </tr>`).join('')}
         </table>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro is <strong style="color:#111111;">$2.99/week</strong> — less than a coffee. ${trialUsed ? 'Everything you had during your trial, permanently.' : 'Try it free for 3 days. Card required, auto-renews unless you cancel.'}
+          Pro is <strong style="color:#111111;">$2.99/week</strong>, less than a coffee. ${trialUsed ? 'Everything you had during your trial, permanently.' : 'Try it free for 3 days. Card required, auto-renews unless you cancel.'}
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">

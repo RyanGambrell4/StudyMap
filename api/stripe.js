@@ -462,7 +462,7 @@ ${preheader(`One-time ${offer.discountPct}% off code inside. Expires in 24 hours
           <tr><td align="center" style="background:#FFF6F0;border:2px dashed #E8531A;border-radius:12px;padding:22px 24px;">
             <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9B6B4A;text-transform:uppercase;margin-bottom:6px;">Your code</div>
             <div style="font-family:'SF Mono',Menlo,Consolas,monospace;font-size:28px;font-weight:700;color:#E8531A;letter-spacing:0.15em;">${offer.code}</div>
-            <div style="font-size:12px;color:#9B6B4A;margin-top:8px;">Expires ${expiresLabel} — one-time use</div>
+            <div style="font-size:12px;color:#9B6B4A;margin-top:8px;">Expires ${expiresLabel} · one-time use</div>
           </td></tr>
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
@@ -474,7 +474,7 @@ ${preheader(`One-time ${offer.discountPct}% off code inside. Expires in 24 hours
           </td></tr>
         </table>
         <p style="margin:22px 0 0;font-size:13px;color:#9B9B9B;line-height:1.6;">
-          If you're set on skipping Pro entirely, no worries — this offer will quietly expire.
+          If you're set on skipping Pro entirely, no worries. This offer will quietly expire.
         </p>
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">
@@ -590,7 +590,7 @@ export default async function handler(req, res) {
           await resend.emails.send({
             from: 'Ryan at StudyEdge <ryan@getstudyedge.com>',
             to: email,
-            subject: 'You left before finishing — your trial spot is still open',
+            subject: 'You left before finishing. Your trial spot is still open.',
             headers: listUnsubscribeHeaders(userId),
             html: `<!DOCTYPE html>
 <html>
@@ -604,12 +604,12 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
       You were one step away.
     </h1>
     <p style="margin:0 0 20px;font-size:15px;color:#4b5563;line-height:1.6;">
-      You started ${wasTrial ? 'your 3-day free trial' : 'signing up for Pro'} but didn't finish. Your spot is still open — it takes about 30 seconds to complete.
+      You started ${wasTrial ? 'your 3-day free trial' : 'signing up for Pro'} but didn't finish. Your spot is still open. It takes about 30 seconds to complete.
     </p>
     <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 18px;margin-bottom:24px;">
       <p style="margin:0;font-size:13.5px;color:#166534;line-height:1.6;">
         ${wasTrial
-          ? '<strong>Try Pro free for 3 days.</strong> Enter your card to start — you won\'t be charged until day 4. Cancel anytime before then.'
+          ? '<strong>Try Pro free for 3 days.</strong> Enter your card to start. You won\'t be charged until day 4. Cancel anytime before then.'
           : '<strong>Pro is $2.99/week.</strong> 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions. Cancel anytime.'
         }
       </p>
@@ -618,7 +618,7 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
       ${wasTrial ? 'Complete your free trial →' : 'Complete signup →'}
     </a>
     <p style="margin:24px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">
-      Any questions? Just reply — I read every message.
+      Any questions? Just reply. I read every message.
     </p>
     <p style="margin:8px 0 0;font-size:13px;color:#6b7280;">— Ryan, StudyEdge AI</p>
     <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;text-align:center;">
@@ -1173,8 +1173,8 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
       // highest abandonment anxiety on the trial path. Price varies by plan.
       custom_text: wantsTrial
         ? { submit: { message: plan === 'unlimited'
-            ? "Free for 3 days, then $4.99/week. Cancel anytime in your account before day 4 — you won't be charged."
-            : "Free for 3 days, then $2.99/week. Cancel anytime in your account before day 4 — you won't be charged." } }
+            ? "Free for 3 days, then $4.99/week. Cancel anytime in your account before day 4 and you won't be charged."
+            : "Free for 3 days, then $2.99/week. Cancel anytime in your account before day 4 and you won't be charged." } }
         : undefined,
       success_url: 'https://getstudyedge.com/app?checkout=success',
       cancel_url: 'https://getstudyedge.com/app?checkout=cancelled',
