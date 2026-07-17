@@ -42,7 +42,7 @@ export const T = {
 
   // Per-course palette (used as fallbacks when a course doesn't carry its own
   // `color.dot`). Six entries to cycle through.
-  course: ['#3B82F6', '#8B5CF6', '#059669', '#D97706', '#EC4899', '#0891B2'],
+  course: ['#3B82F6', '#6366F1', '#059669', '#D97706', '#EC4899', '#0891B2'],
 
   // Spacing radius
   radius: {
