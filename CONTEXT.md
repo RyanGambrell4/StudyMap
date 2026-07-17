@@ -1,5 +1,5 @@
 # StudyEdge AI — Living Context
-_Last updated by: SEO Agent on 2026-06-10 (43 new pages: Wave A AI category, Wave B panic-study blog, Wave C study science/GPA, Wave D 30 school GPA pages, Wave E vercel.json + sitemap + footer); QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: Quality Sweep Agent on 2026-07-16 (boost nudge email rewrite, double-credit bugs fixed in teach-it-back/connections-mode/exam-rescue, freeBadge fix, em-dash guardrails in 5 more AI prompts, $0 today → card-required in 3 emails, stale AI limit corrections); SEO Agent on 2026-06-10 (43 new pages: Wave A AI category, Wave B panic-study blog, Wave C study science/GPA, Wave D 30 school GPA pages, Wave E vercel.json + sitemap + footer); QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
 
 ---
 
@@ -1385,4 +1385,50 @@ Systematic quality pass across all components, API email files, and public/ SEO 
 ### Remaining known issues
 - `StudyCoachView.jsx` MyPlansView expensive computations lack `useMemo`
 - FocusMode keyboard shortcut useEffect has stale closure (eslint-disable present, complex to fix)
+- `PracticeExamSetup.jsx` gives no feedback when uploaded file extracts < 50 chars
+
+---
+
+## Quality Sweep — 2026-07-16 (continued, background session)
+
+Second pass of autonomous quality improvements on the `teach-it-back-connections` worktree.
+
+### Bugs fixed
+
+**Double-credit consumption in multi-phase AI flows (critical)**
+- `api/teach-it-back.js`: follow-up phase now uses `verifyAuth` only — same session shouldn't charge twice
+- `api/connections-mode.js`: score phase now uses `verifyAuth` only
+- `api/exam-rescue.js`: schedule phase now uses `verifyAuth` only (was auto-triggered, not user-initiated)
+
+**freeBadge showing wrong count in StudyToolsView**
+- Features not in FREE_LIMITS (teachItBack, connectionsMode) returned `remaining: null` but showed "1 left" badge — fixed to show no badge
+
+**Stale AI limit in lifecycle emails**
+- `api/stripe.js` trial cancellation email: "10 AI study boosts" → "5 AI sessions"
+- `src/lib/subscription.js` legacy PLAN_LIMITS.free.aiQueries: 2 → 5 (and period 'day' → 'total')
+
+**$0 today copy — trial requires a card**
+- `api/no-first-session.js`, `api/re-engage.js`: "$0 today, $2.99/wk after" → "Card required. Cancel before day 4 and pay nothing."
+- `api/welcome-email.js`: "$0 today, then $2.99/wk" → "Card required · Cancel before day 4 and pay nothing"
+
+**Em dash in server error message and pro welcome email**
+- `lib/server/rateLimit.js:58`: "Slow down — you're sending requests..." → "Slow down. You're sending requests..."
+- `lib/server/proWelcomeEmail.js`: "● Pro — active" → "● Pro · Active"; heading em dash → comma
+
+**Boost nudge email (lib/server/usage.js)**
+- Wrong count "8 of 10" → correct "4 of 5" (fires when 4 of 5 used)
+- Dark email theme → light theme (matching all other lifecycle emails)
+- "7-day free trial" → "3-day free trial"
+- "$0 today · $2.99/wk after trial" → "Card required · Cancel before day 4 and pay nothing"
+
+### Em dash guardrails added to AI prompts
+- `api/generate-podcast.js`
+- `api/generate-study-tools.js` (quick-quiz and flashcard prompts)
+- `api/essay-outline.js`
+- `api/essay-thesis.js`
+- `api/solve-problem.js`
+
+### Remaining known issues
+- `StudyCoachView.jsx` MyPlansView expensive computations lack `useMemo`
+- FocusMode keyboard shortcut useEffect has stale closure
 - `PracticeExamSetup.jsx` gives no feedback when uploaded file extracts < 50 chars
