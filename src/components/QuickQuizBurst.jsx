@@ -3,6 +3,7 @@ import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
+import { updateMastery } from '../lib/masteryStore'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -120,7 +121,9 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
       if (qIdx + 1 >= questions.length) {
         const finalAnswers = [...answers, { correct: isCorrect, difficulty: q.difficulty, selected: opt }]
         const finalScore = finalAnswers.filter(a => a.correct).length
-        addStudySession({ tool: 'Quiz Burst', score: Math.round((finalScore / questions.length) * 100), topic: topic.trim() || null, courseName: course?.name || null })
+        const quizPct = Math.round((finalScore / questions.length) * 100)
+        addStudySession({ tool: 'Quiz Burst', score: quizPct, topic: topic.trim() || null, courseName: course?.name || null })
+        if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, quizPct, 'quiz')
         setStep('done')
       } else {
         setQIdx(i => i + 1)

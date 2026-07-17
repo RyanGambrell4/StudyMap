@@ -4,6 +4,7 @@ import { fetchWithRetry, aiErrorMessage } from '../lib/utils'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
+import { updateMastery } from '../lib/masteryStore'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -58,6 +59,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
       incrementFeatureUsage('teachItBack')
       addWeakTopics(data.missing ?? [])
       addStudySession({ tool: 'Teach It Back', score: data.score, topic: topic.trim() || null, courseName: course?.name || null })
+      if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, data.score, 'teachItBack')
       setResult(data)
       setStep('result')
     } catch (e) {

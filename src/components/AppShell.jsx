@@ -238,6 +238,25 @@ export default function AppShell({
                   </div>
                 </button>
 
+                {/* Knowledge Map */}
+                <button
+                  onClick={() => { setOpenHub(null); setActiveSection('mastery') }}
+                  style={{ display: 'flex', alignItems: 'flex-start', gap: 12, width: '100%', padding: '12px 14px', borderRadius: 10, background: 'none', border: '1px solid rgba(139,92,246,0.15)', cursor: 'pointer', textAlign: 'left', marginBottom: 10 }}
+                  onMouseEnter={e => e.currentTarget.style.background = 'rgba(139,92,246,0.05)'}
+                  onMouseLeave={e => e.currentTarget.style.background = 'none'}
+                >
+                  <div style={{ width: 32, height: 32, borderRadius: 8, background: 'rgba(139,92,246,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <svg width="15" height="15" fill="none" stroke="#7C3AED" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                      <path d="M9 3a3 3 0 00-3 3 3 3 0 00-3 3v3a3 3 0 003 3v2a3 3 0 003 3 3 3 0 003-3V3z"/>
+                      <path d="M15 3a3 3 0 013 3 3 3 0 013 3v3a3 3 0 01-3 3v2a3 3 0 01-3 3 3 3 0 01-3-3V3z"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, marginBottom: 2 }}>Knowledge Map</div>
+                    <div style={{ fontSize: 11.5, color: MUTED, lineHeight: 1.4 }}>See what you know, topic by topic</div>
+                  </div>
+                </button>
+
                 <div style={{ height: 1, background: BORDER, marginBottom: 8 }} />
 
                 {/* AI Tutor */}
@@ -464,6 +483,7 @@ export default function AppShell({
                   { label: 'Study Coach',                        sub: 'Build your weekly AI plan',   color: ACCENT,    section: 'coach',  iconPath: 'M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z' },
                   { label: isExamMode ? 'Score Tracker' : 'Track Grades', sub: 'Monitor grades and targets', color: '#16A34A', section: 'grades', iconPath: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01' },
                   { label: 'Practice Exam',                      sub: 'Drop a past exam, get a look-alike', color: '#D97706', section: 'practice', iconPath: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z' },
+                  { label: 'Knowledge Map',                      sub: 'See what you know, topic by topic', color: '#7C3AED', section: 'mastery', iconPath: 'M9 3a3 3 0 00-3 3 3 3 0 00-3 3v3a3 3 0 003 3v2a3 3 0 003 3 3 3 0 003-3V3z M15 3a3 3 0 013 3 3 3 0 013 3v3a3 3 0 01-3 3v2a3 3 0 01-3 3 3 3 0 01-3-3V3z' },
                   { label: 'AI Tutor',                           sub: 'Get help on anything',        color: ACCENT,    section: 'tutor',  iconPath: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z' },
                 ].map(({ label, sub, color, section, iconPath }) => (
                   <button key={label} onClick={() => { setMobileHub(null); setActiveSection(section) }}

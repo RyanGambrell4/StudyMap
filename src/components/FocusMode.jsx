@@ -15,6 +15,7 @@ import { useCelebration } from '../utils/useCelebration'
 import { extractText } from '../utils/extractText'
 import AIChatView from './AIChatView'
 import { track } from '../lib/analytics'
+import { updateMastery, getMasteryLevel, getMasteryColor } from '../lib/masteryStore'
 
 function fmt(seconds) {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
@@ -626,6 +627,12 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     try { localStorage.setItem('fm_ambient', next) } catch {}
   }
 
+  const selectAmbient = (modeId) => {
+    setAmbientMode(modeId)
+    try { localStorage.setItem('fm_ambient', modeId) } catch {}
+    setAmbientPopover(false)
+  }
+
   // ── Recall check (post-session rating) ──
   const [showRecallSheet, setShowRecallSheet] = useState(false)
   const [recallSlider, setRecallSlider] = useState(50)
@@ -677,6 +684,18 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const [breakOverlay, setBreakOverlay] = useState(false)
   const [breakRemaining, setBreakRemaining] = useState(BREAK_DURATION)
   const lastBreakCount = useRef(0)
+
+  // ── Mid-session check-in ──
+  const [midCheckIn, setMidCheckIn] = useState(false)
+  const [midCheckInDismissed, setMidCheckInDismissed] = useState(false)
+  const midCheckInShownRef = useRef(false)
+
+  // ── Ambient popover ──
+  const [ambientPopover, setAmbientPopover] = useState(false)
+  const ambientPopoverRef = useRef(null)
+
+  // ── Mastery captured for this session ──
+  const [sessionMasteryUpdated, setSessionMasteryUpdated] = useState(false)
 
   // ── Study tools ──
   const [studyTools] = useState(() => loadStudyTools(session.courseId))
@@ -905,6 +924,40 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     }, 1000)
     return () => clearInterval(t)
   }, [breakOverlay])
+
+  // ── Mid-session check-in at 50% ──
+  useEffect(() => {
+    if (!running || finished || midCheckInShownRef.current || midCheckInDismissed) return
+    const elapsed = totalSec - remaining
+    if (elapsed >= totalSec * 0.5 && totalSec >= 600) {
+      midCheckInShownRef.current = true
+      setMidCheckIn(true)
+    }
+  }, [remaining])
+
+  // ── Close ambient popover on outside click ──
+  useEffect(() => {
+    if (!ambientPopover) return
+    const handler = (e) => {
+      if (ambientPopoverRef.current && !ambientPopoverRef.current.contains(e.target)) {
+        setAmbientPopover(false)
+      }
+    }
+    document.addEventListener('mousedown', handler)
+    return () => document.removeEventListener('mousedown', handler)
+  }, [ambientPopover])
+
+  // ── Update mastery when session completes ──
+  useEffect(() => {
+    if (!finished || sessionMasteryUpdated) return
+    setSessionMasteryUpdated(true)
+    const topic = session.focusArea || session.sessionType
+    if (topic && session.courseId) {
+      const activitiesCount = tabsVisited.size
+      const baseScore = activitiesCount >= 3 ? 72 : activitiesCount === 2 ? 62 : 52
+      updateMastery(topic, session.courseId, baseScore, 'focusSession')
+    }
+  }, [finished])
 
   // ── Recall writing timer ──
   useEffect(() => {
@@ -1320,6 +1373,33 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       {/* Top accent line */}
       <div className="h-1 w-full shrink-0" style={{ background: `linear-gradient(90deg, ${dot}, ${dot}88)` }} />
 
+      {/* ── Mid-session check-in ── */}
+      {midCheckIn && !breakOverlay && !showComplete && (
+        <div className="relative z-10 flex items-center gap-3 px-4 py-2.5 shrink-0" style={{ backgroundColor: 'rgba(59,97,196,0.07)', borderBottom: '1px solid rgba(59,97,196,0.15)', animation: 'recall-slide-up 0.3s ease-out' }}>
+          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#3B61C4' }} />
+          <span className="text-xs font-medium" style={{ color: '#3B61C4' }}>Halfway there. How's the material landing?</span>
+          <div className="ml-auto flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => { setMidCheckIn(false); setMidCheckInDismissed(true); track('focus_midcheckin_good', { course_name: session.courseName }) }}
+              className="text-xs px-3 py-1 rounded-lg font-semibold text-white"
+              style={{ backgroundColor: '#3B61C4' }}
+            >
+              Making progress
+            </button>
+            {onOpenBrainDump && (
+              <button
+                onClick={() => { setMidCheckIn(false); setMidCheckInDismissed(true); track('focus_midcheckin_struggling', { course_name: session.courseName }); onOpenBrainDump?.() }}
+                className="text-xs px-3 py-1 rounded-lg font-medium"
+                style={{ backgroundColor: 'rgba(234,88,12,0.1)', color: '#EA580C', border: '1px solid rgba(234,88,12,0.2)' }}
+              >
+                Need to reinforce
+              </button>
+            )}
+            <button onClick={() => { setMidCheckIn(false); setMidCheckInDismissed(true) }} className="text-xs" style={{ color: '#9B9B9B' }}>x</button>
+          </div>
+        </div>
+      )}
+
       {/* ── Pomodoro break banner ── */}
       {breakBanner && !breakOverlay && (
         <div className="relative z-10 flex items-center gap-3 px-4 py-2.5 shrink-0" style={{ backgroundColor: `${dot}18`, borderBottom: `1px solid ${dot}28` }}>
@@ -1371,48 +1451,91 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
           </div>
 
           <div className="px-6 pb-12 max-w-sm w-full mx-auto">
-            {/* Colored stat cards */}
-            <div className="flex gap-3 mb-5">
-              <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                <p className="text-2xl font-bold font-mono" style={{ color: '#111111' }}>{fmt(Math.max(elapsed, 1))}</p>
-                <p className="text-xs mt-1" style={{ color: '#6B6B6B' }}>Time studied</p>
-              </div>
-              <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                <p className="text-2xl font-bold font-mono" style={{ color: '#3B61C4' }}>{tabsVisited.size}</p>
-                <p className="text-xs mt-1" style={{ color: '#6B6B6B' }}>Activities used</p>
-              </div>
-              {currentStreak > 0 && (
-                <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: '#FFF9F0', border: '1px solid rgba(234,88,12,0.18)', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
-                  <p className="text-2xl font-bold font-mono" style={{ color: '#EA580C' }}>{currentStreak}</p>
-                  <p className="text-xs mt-1" style={{ color: '#9B6A4A' }}>Day streak</p>
-                </div>
-              )}
-            </div>
-
-            {/* Activity chips */}
-            <div className="flex flex-wrap gap-2 mb-6">
-              {[
-                { id: 'recall',     label: 'Active Recall' },
-                { id: 'flashcards', label: 'Flashcards' },
-                { id: 'quiz',       label: 'Quick Quiz' },
-                { id: 'notes',      label: 'Notes' },
-              ].map(({ id, label }) => {
-                const done = tabsVisited.has(id)
-                return (
-                  <div key={id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
-                    style={done
-                      ? { backgroundColor: 'rgba(22,163,74,0.1)', border: '1px solid rgba(22,163,74,0.2)', color: '#16A34A' }
-                      : { backgroundColor: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', color: '#9B9B9B' }}>
-                    {done && (
-                      <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M5 13l4 4L19 7" />
-                      </svg>
+            {/* Stat cards row */}
+            {(() => {
+              const activitiesUsed = tabsVisited.size
+              const retentionPct = activitiesUsed >= 4 ? 88 : activitiesUsed === 3 ? 78 : activitiesUsed === 2 ? 65 : 50
+              const retentionColor = retentionPct >= 75 ? '#059669' : retentionPct >= 60 ? '#D97706' : '#DC2626'
+              const retentionBg = retentionPct >= 75 ? 'rgba(5,150,105,0.07)' : retentionPct >= 60 ? 'rgba(217,119,6,0.07)' : 'rgba(220,38,38,0.07)'
+              const retentionBorder = retentionPct >= 75 ? 'rgba(5,150,105,0.2)' : retentionPct >= 60 ? 'rgba(217,119,6,0.2)' : 'rgba(220,38,38,0.2)'
+              return (
+                <>
+                  <div className="flex gap-3 mb-4">
+                    <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+                      <p className="text-2xl font-bold font-mono" style={{ color: '#111111' }}>{fmt(Math.max(elapsed, 1))}</p>
+                      <p className="text-xs mt-1" style={{ color: '#6B6B6B' }}>Time studied</p>
+                    </div>
+                    <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: retentionBg, border: `1px solid ${retentionBorder}`, boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+                      <p className="text-2xl font-bold font-mono" style={{ color: retentionColor }}>{retentionPct}%</p>
+                      <p className="text-xs mt-1" style={{ color: retentionColor, opacity: 0.8 }}>Est. retention</p>
+                    </div>
+                    {currentStreak > 0 && (
+                      <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: '#FFF9F0', border: '1px solid rgba(234,88,12,0.18)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+                        <p className="text-2xl font-bold font-mono" style={{ color: '#EA580C' }}>{currentStreak}</p>
+                        <p className="text-xs mt-1" style={{ color: '#9B6A4A' }}>Day streak</p>
+                      </div>
                     )}
-                    {label}
                   </div>
-                )
-              })}
-            </div>
+
+                  {/* Activity completion row */}
+                  <div className="rounded-2xl p-4 mb-4" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9B9B9B', margin: '0 0 10px' }}>Activities this session</p>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { id: 'recall',     label: 'Active Recall' },
+                        { id: 'flashcards', label: 'Flashcards' },
+                        { id: 'quiz',       label: 'Quick Quiz' },
+                        { id: 'notes',      label: 'Notes' },
+                      ].map(({ id, label }) => {
+                        const done = tabsVisited.has(id)
+                        return (
+                          <div key={id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
+                            style={done
+                              ? { backgroundColor: 'rgba(22,163,74,0.1)', border: '1px solid rgba(22,163,74,0.2)', color: '#16A34A' }
+                              : { backgroundColor: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', color: '#9B9B9B' }}>
+                            {done && (
+                              <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M5 13l4 4L19 7" />
+                              </svg>
+                            )}
+                            {label}
+                          </div>
+                        )
+                      })}
+                    </div>
+                    {activitiesUsed >= 2 && (
+                      <p style={{ fontSize: 11.5, color: '#6B6B6B', margin: '10px 0 0', lineHeight: 1.5 }}>
+                        {activitiesUsed >= 3 ? 'Multi-modal studying locks in retention. Nice work.' : 'Using 2+ activities increases recall compared to passive reading.'}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Mastery update strip */}
+                  {(session.focusArea || session.sessionType) && session.courseId && (
+                    <div className="rounded-2xl p-4 mb-4" style={{ background: `${dot}08`, border: `1px solid ${dot}22`, boxShadow: '0 1px 4px rgba(0,0,0,0.04)' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                        <div style={{ width: 28, height: 28, borderRadius: 8, background: `${dot}18`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          <svg width="13" height="13" fill="none" stroke={dot} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                            <path d="M12 2a3 3 0 013 3 3 3 0 013 3v3a3 3 0 01-3 3v2a3 3 0 01-3 3 3 3 0 01-3-3V5a3 3 0 013-3z"/>
+                          </svg>
+                        </div>
+                        <div>
+                          <p style={{ fontSize: 12, fontWeight: 700, color: '#111111', margin: 0 }}>Mastery updated</p>
+                          <p style={{ fontSize: 11, color: '#6B6B6B', margin: 0 }}>{session.focusArea || session.sessionType}</p>
+                        </div>
+                        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
+                          <svg width="10" height="10" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                            <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>
+                          </svg>
+                          <span style={{ fontSize: 12, fontWeight: 700, color: '#16A34A' }}>+{activitiesUsed >= 3 ? 12 : activitiesUsed === 2 ? 8 : 5} pts</span>
+                        </div>
+                      </div>
+                      <p style={{ fontSize: 11.5, color: '#6B6B6B', margin: 0 }}>Visible in your Knowledge Map. Complete more sessions to build mastery.</p>
+                    </div>
+                  )}
+                </>
+              )
+            })()}
 
             {/* Exam countdown — shown when exam is within 30 days */}
             {course?.examDate && (() => {
@@ -1709,14 +1832,65 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 {Math.max(0, focusMinutesAllowed - Math.floor((totalSec - remaining) / 60))} min left today
               </span>
             )}
-            <button
-              onClick={cycleAmbient}
-              title={`Ambient: ${AMBIENT_MODES.find(m => m.id === ambientMode)?.label}`}
-              style={{ display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11, color: ambientMode !== 'off' ? '#3B61C4' : '#9B9B9B', background: ambientMode !== 'off' ? 'rgba(59,97,196,0.08)' : 'none', border: ambientMode !== 'off' ? '1px solid rgba(59,97,196,0.2)' : 'none', borderRadius: 6, padding: ambientMode !== 'off' ? '3px 8px' : 0, cursor: 'pointer' }}
-            >
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-              {ambientMode !== 'off' && <span>{AMBIENT_MODES.find(m => m.id === ambientMode)?.label}</span>}
-            </button>
+            {/* Ambient sound selector */}
+            <div className="relative" ref={ambientPopoverRef}>
+              <button
+                onClick={() => setAmbientPopover(p => !p)}
+                title="Ambient sound"
+                style={{
+                  display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11,
+                  color: ambientMode !== 'off' ? '#3B61C4' : '#9B9B9B',
+                  background: ambientMode !== 'off' ? 'rgba(59,97,196,0.08)' : 'rgba(0,0,0,0.04)',
+                  border: ambientMode !== 'off' ? '1px solid rgba(59,97,196,0.2)' : '1px solid rgba(0,0,0,0.08)',
+                  borderRadius: 8, padding: '4px 9px', cursor: 'pointer',
+                }}
+              >
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/>
+                </svg>
+                <span>{ambientMode !== 'off' ? AMBIENT_MODES.find(m => m.id === ambientMode)?.label : 'Sound'}</span>
+              </button>
+              {ambientPopover && (
+                <div style={{
+                  position: 'absolute', top: 'calc(100% + 8px)', right: 0, zIndex: 200,
+                  background: '#FFFFFF', borderRadius: 14, padding: '10px 8px',
+                  boxShadow: '0 8px 32px rgba(0,0,0,0.14)', border: '1px solid rgba(0,0,0,0.08)',
+                  display: 'flex', flexDirection: 'column', gap: 2, minWidth: 160,
+                }}>
+                  <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9B9B9B', margin: '0 6px 6px' }}>Ambient Sound</p>
+                  {AMBIENT_MODES.map(m => {
+                    const icons = {
+                      off: <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="1" y1="1" x2="23" y2="23"/><path d="M9 9v3a3 3 0 005.12 2.12M15 9.34V4a3 3 0 00-5.94-.6"/><path d="M17 16.95A7 7 0 015 12v-2m14 0v2a7 7 0 01-.11 1.23"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>,
+                      white: <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>,
+                      brown: <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0118 0v6"/><path d="M21 19a2 2 0 01-2 2h-1a2 2 0 01-2-2v-3a2 2 0 012-2h3zM3 19a2 2 0 002 2h1a2 2 0 002-2v-3a2 2 0 00-2-2H3z"/></svg>,
+                      rain: <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><line x1="16" y1="13" x2="16" y2="21"/><line x1="8" y1="13" x2="8" y2="21"/><line x1="12" y1="15" x2="12" y2="23"/><path d="M20 16.58A5 5 0 0018 7h-1.26A8 8 0 104 15.25"/></svg>,
+                    }
+                    const active = ambientMode === m.id
+                    return (
+                      <button
+                        key={m.id}
+                        onClick={() => selectAmbient(m.id)}
+                        style={{
+                          display: 'flex', alignItems: 'center', gap: 10, padding: '8px 10px',
+                          borderRadius: 10, border: 'none', cursor: 'pointer', textAlign: 'left', width: '100%',
+                          background: active ? 'rgba(59,97,196,0.08)' : 'transparent',
+                          color: active ? '#3B61C4' : '#1A1A1A',
+                          fontWeight: active ? 600 : 400, fontSize: 13,
+                        }}
+                      >
+                        <span style={{ color: active ? '#3B61C4' : '#9B9B9B', flexShrink: 0 }}>{icons[m.id]}</span>
+                        {m.label}
+                        {active && (
+                          <svg width="10" height="10" fill="none" stroke="#3B61C4" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" style={{ marginLeft: 'auto' }}>
+                            <path d="M5 13l4 4L19 7"/>
+                          </svg>
+                        )}
+                      </button>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
             <button onClick={() => { localStorage.removeItem(timerKey); onExit?.() }} className="text-xs transition-colors" style={{ color: '#9B9B9B' }}>Exit</button>
           </div>
         </div>

@@ -42,6 +42,7 @@ const AccountView    = lazy(() => import('./AccountView'))
 const DiagramsView        = lazy(() => import('./DiagramsView'))
 const ProblemSolverView   = lazy(() => import('./ProblemSolverView'))
 const EssayArchitectView  = lazy(() => import('./EssayArchitectView'))
+const MasteryMapView      = lazy(() => import('./MasteryMapView'))
 import CheatSheetModal from './CheatSheetModal'
 import BrainDumpModal from './BrainDumpModal'
 import ExamRescueModal from './ExamRescueModal'
@@ -1995,6 +1996,15 @@ export default function OutputView({
           <EssayArchitectView
             userId={userId}
             onShowPaywall={onShowPaywall}
+          />
+        )}
+
+        {/* ── Mastery Map ── */}
+        {activeSection === 'mastery' && (
+          <MasteryMapView
+            courses={courses}
+            onOpenBrainDump={() => setShowBrainDump(true)}
+            onDrillTopic={(topic) => { setShowBrainDump(true) }}
           />
         )}
 

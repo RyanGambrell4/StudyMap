@@ -6,6 +6,7 @@ import { transcribeAudio, createRecorder } from '../lib/deepgram'
 import { getCachedStudyTools, saveStudyTools } from '../lib/db'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
+import { updateMastery } from '../lib/masteryStore'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -157,6 +158,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
         incrementFeatureUsage('brainDump')
         addWeakTopics(data.possibleGaps ?? [])
         addStudySession({ tool: 'Brain Dump', score: data.score, topic: topic.trim() || null, courseName: course?.name || null })
+        if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, data.score, 'brainDump')
         setResult(data)
         setStep('result')
         setLoading(false)
