@@ -1157,7 +1157,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     const handler = e => {
       if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return
       if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); setRunning(r => !r) }
-      if (e.key === 'Enter') { e.preventDefault(); handleMarkComplete() }
+      if (e.key === 'Enter') { e.preventDefault(); setRunning(false); setShowComplete(true) }
       if (e.key === 'Escape') { e.preventDefault(); setActiveTab(null) }
       if (e.key === '1') visitTab('recall')
       if (e.key === '2') visitTab('flashcards')

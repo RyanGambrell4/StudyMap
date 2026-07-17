@@ -1,9 +1,8 @@
 /**
  * Day 3 trial email (72h after trial start).
  *
- * Fills the dead zone between day2-trial-progress (48h) and trial-warning (day 6).
- * With the 3-day trial, days 3-5 had zero email coverage — this is the window where
- * users decide if they're going to keep using the product or drift away.
+ * Fills the dead zone between day2-trial-progress (48h) and trial-warning (72h).
+ * Fires at 72h when the trial ends today, before the trial-warning fires at 24h remaining.
  *
  * Focus: showcase a single high-value feature the user probably hasn't tried yet
  * (Exam Rescue or Brain Dump) with a real use-case scenario. Not a generic feature list.
