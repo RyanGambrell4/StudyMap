@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { getAccessToken } from '../lib/supabase'
-import { fetchWithRetry } from '../lib/utils'
+import { fetchWithRetry, aiErrorMessage } from '../lib/utils'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { transcribeAudio, createRecorder } from '../lib/deepgram'
 import { getCachedStudyTools, saveStudyTools } from '../lib/db'
@@ -152,7 +152,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
           body: JSON.stringify({ text, courseName: course?.name ?? 'unknown course', topic: topic.trim() || undefined }),
         })
         const data = await res.json()
-        if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
+        if (!res.ok) throw Object.assign(new Error(aiErrorMessage(res.status, data.error)), { status: res.status })
         incrementAIQuery()
         incrementFeatureUsage('brainDump')
         addWeakTopics(data.possibleGaps ?? [])
@@ -164,7 +164,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
       } catch (e) {
         retries++
         if (retries >= 2) {
-          setError(e.message || 'Something went wrong. Please try again.')
+          setError(aiErrorMessage(e.status, e.message))
           setLoading(false)
           setStep('setup')
         }
@@ -189,7 +189,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
+      if (!res.ok) throw Object.assign(new Error(aiErrorMessage(res.status, data.error)), { status: res.status })
       const newCards = data.flashcards ?? []
       if (newCards.length > 0) {
         const existing = getCachedStudyTools() ?? {}
@@ -197,8 +197,8 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
         await saveStudyTools({ ...existing, flashcards: merged })
         setCardsAdded(newCards.length)
       }
-    } catch {
-      setError('Could not save flashcards. Try again.')
+    } catch (e) {
+      setError(aiErrorMessage(e.status, e.message))
     } finally {
       setIsConvertingCards(false)
     }

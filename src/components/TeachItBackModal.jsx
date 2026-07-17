@@ -1,6 +1,6 @@
 import { useState, useRef } from 'react'
 import { getAccessToken } from '../lib/supabase'
-import { fetchWithRetry } from '../lib/utils'
+import { fetchWithRetry, aiErrorMessage } from '../lib/utils'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
@@ -53,7 +53,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
+      if (!res.ok) throw Object.assign(new Error(aiErrorMessage(res.status, data.error)), { status: res.status })
       incrementAIQuery()
       incrementFeatureUsage('teachItBack')
       addWeakTopics(data.missing ?? [])
@@ -61,7 +61,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
       setResult(data)
       setStep('result')
     } catch (e) {
-      setError(e.message || 'Something went wrong. Please try again.')
+      setError(aiErrorMessage(e.status, e.message))
       setStep('explain')
     }
   }
@@ -85,11 +85,11 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
         }),
       })
       const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
+      if (!res.ok) throw Object.assign(new Error(aiErrorMessage(res.status, data.error)), { status: res.status })
       setFinalResult(data)
       setStep('final')
     } catch (e) {
-      setError(e.message || 'Something went wrong. Please try again.')
+      setError(aiErrorMessage(e.status, e.message))
       setStep('followup')
     }
   }
