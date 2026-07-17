@@ -1897,7 +1897,7 @@ export default function OutputView({
             <div style={{ padding: '48px 32px', maxWidth: 560, margin: '0 auto', textAlign: 'center' }}>
               <h2 style={{ fontSize: 22, fontWeight: 700, color: '#111111', marginBottom: 8 }}>Score Tracker</h2>
               <p style={{ fontSize: 14, color: '#6B6B6B', lineHeight: 1.6, marginBottom: 24 }}>
-                Log your practice test scores over time to track your progress toward your target. Coming soon: score logging, full-length trends, and section-by-section breakdown.
+                Log your practice test scores over time to track your progress toward your target score. Your target scores for each course are shown below.
               </p>
               <div style={{ padding: '16px 20px', borderRadius: 12, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', textAlign: 'left', boxShadow: '0 1px 3px rgba(0,0,0,0.06)' }}>
                 <p style={{ margin: 0, fontSize: 13, color: '#3B61C4', fontWeight: 600, marginBottom: 6 }}>Your target scores</p>

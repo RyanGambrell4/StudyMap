@@ -98,7 +98,7 @@ ${preheader("Your study plan is live — open it and start your first session to
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-top:20px;">
           <tr><td style="background:#F4F7FF;border-radius:12px;border:1px solid rgba(59,97,196,0.15);padding:14px 18px;text-align:center;">
             <p style="margin:0 0 5px;font-size:13px;font-weight:600;color:#3B61C4;">${trialUsed ? 'Unlock your full semester plan with Pro' : 'Your 3-day free trial is waiting'}</p>
-            <p style="margin:0 0 10px;font-size:13px;color:#6B6B6B;line-height:1.55;">${trialUsed ? 'Unlimited AI tutoring, brain dumps, cheat sheets, and practice exams — make the most of every session.' : 'Unlimited study tools, AI tutoring, and more. No card required — just tap to unlock.'}</p>
+            <p style="margin:0 0 10px;font-size:13px;color:#6B6B6B;line-height:1.55;">${trialUsed ? 'Unlimited AI tutoring, brain dumps, cheat sheets, and practice exams — make the most of every session.' : 'Unlimited study tools, AI tutoring, and more. Card required · Cancel anytime before day 4 and pay nothing.'}</p>
             <a href="https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=first_plan" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:600;text-decoration:none;border-radius:8px;padding:10px 22px;">${trialUsed ? 'Upgrade to Pro →' : 'Start free trial →'}</a>
           </td></tr>
         </table>` : ''}
