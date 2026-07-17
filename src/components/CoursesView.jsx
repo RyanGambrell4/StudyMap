@@ -342,7 +342,7 @@ function ImportBand({ onImportSyllabus }) {
         desc="Upload an .ics file to sync your class schedule."
         accept=".ics"
         onFile={() => {}}
-        gradient="linear-gradient(155deg, rgba(232,83,26,0.06) 0%, rgba(139,92,246,0.04) 45%, transparent 100%)"
+        gradient="linear-gradient(155deg, rgba(232,83,26,0.06) 0%, rgba(99,102,241,0.04) 45%, transparent 100%)"
       />
     </div>
   )

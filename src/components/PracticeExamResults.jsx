@@ -274,7 +274,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
             </div>
             <ScoreTrendChart scores={scoreHistory} currentScore={score} />
             {predictedScore !== null && (
-              <div style={{ marginTop: 14, padding: '14px 16px', background: 'rgba(124,92,250,0.06)', border: '1px solid rgba(124,92,250,0.18)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+              <div style={{ marginTop: 14, padding: '14px 16px', background: 'rgba(59,97,196,0.05)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
                 <div>
                   <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#3B61C4', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Predicted real exam score</p>
                   <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6B6B6B' }}>Based on your trend across {scoreHistory.length} practice exams</p>
@@ -287,9 +287,9 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
 
         {/* Upsell card for Pro/Free */}
         {!isUnlimited && (
-          <div style={{ background: 'linear-gradient(135deg, rgba(124,92,250,0.06), rgba(99,102,241,0.06))', border: '1px solid rgba(124,92,250,0.22)', borderRadius: 18, padding: 18, marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+          <div style={{ background: 'linear-gradient(135deg, rgba(59,97,196,0.05), rgba(99,102,241,0.06))', border: '1px solid rgba(59,97,196,0.22)', borderRadius: 18, padding: 18, marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 240 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(124,92,250,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(59,97,196,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
                   <polyline points="16 7 22 7 22 13" />

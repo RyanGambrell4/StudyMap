@@ -936,7 +936,7 @@ function EmailVerificationGate({ email, userId, resendState, onResend, onSignOut
         <div style={{
           width:64, height:64, margin:'0 auto 22px',
           borderRadius:18,
-          background:'linear-gradient(135deg, rgba(107,143,255,.15), rgba(167,139,250,.15))',
+          background:'linear-gradient(135deg, rgba(107,143,255,.15), rgba(59,97,196,0.12))',
           border:'1px solid rgba(107,143,255,.25)',
           display:'flex', alignItems:'center', justifyContent:'center',
           boxShadow:'0 4px 32px rgba(107,143,255,.2)',

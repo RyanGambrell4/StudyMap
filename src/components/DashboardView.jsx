@@ -1157,7 +1157,7 @@ export default function DashboardView({
       {shouldPromptPush && (
         <div style={{ padding: '0 32px 4px' }}>
           <div style={{
-            background: 'linear-gradient(135deg, rgba(107,143,255,0.08), rgba(167,139,250,0.08))',
+            background: 'linear-gradient(135deg, rgba(107,143,255,0.08), rgba(59,97,196,0.06))',
             border: '1px solid rgba(107,143,255,0.2)',
             borderRadius: 10, padding: '12px 16px',
             display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
