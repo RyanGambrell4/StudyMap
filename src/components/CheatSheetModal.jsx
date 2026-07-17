@@ -34,7 +34,7 @@ function Pill({ label, style }) {
   )
 }
 
-export default function CheatSheetModal({ courses, onClose, onShowPaywall }) {
+export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpenQuizBurst }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
@@ -331,6 +331,25 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall }) {
                       </button>
                     </div>
                   </div>
+                </div>
+              )}
+
+              {onOpenQuizBurst && (
+                <div style={{ padding: '16px 24px 8px', textAlign: 'center' }}>
+                  <button
+                    onClick={() => onOpenQuizBurst({ courseIdx, topic: examPrompt.trim() || course?.name || '' })}
+                    style={{
+                      display: 'inline-flex', alignItems: 'center', gap: 7,
+                      padding: '10px 20px', borderRadius: 9,
+                      background: 'rgba(59,97,196,0.07)', border: '1px solid rgba(59,97,196,0.22)',
+                      color: D.blue, fontSize: 13, fontWeight: 700,
+                      cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="9"/><path d="M9.09 9a3 3 0 015.83 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+                    Quiz me on this cheat sheet
+                  </button>
+                  <p style={{ margin: '6px 0 0', fontSize: 11, color: D.textDim }}>Generates a quick quiz from these topics</p>
                 </div>
               )}
             </div>

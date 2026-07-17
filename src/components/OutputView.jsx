@@ -424,6 +424,7 @@ export default function OutputView({
   const [showPodcast, setShowPodcast] = useState(false)
   const [showTeachItBack, setShowTeachItBack] = useState(false)
   const [teachItBackInit, setTeachItBackInit] = useState(null) // { courseIdx, topic } when launched from Brain Dump
+  const [quizBurstInit, setQuizBurstInit] = useState(null) // { courseIdx, topic } when launched from Cheat Sheet
   const [showConnectionsMode, setShowConnectionsMode] = useState(false)
   const [showTimedChallenge, setShowTimedChallenge] = useState(false)
   const [pendingDrillTopic, setPendingDrillTopic] = useState(null)
@@ -2011,6 +2012,7 @@ export default function OutputView({
           userId={userId}
           onClose={() => setShowCheatSheet(false)}
           onShowPaywall={onShowPaywall}
+          onOpenQuizBurst={({ courseIdx, topic }) => { setShowCheatSheet(false); setQuizBurstInit({ courseIdx, topic }); setShowQuizBurst(true) }}
         />
       )}
       {showBrainDump && (
@@ -2035,9 +2037,12 @@ export default function OutputView({
         <QuickQuizBurst
           courses={courses}
           userId={userId}
-          onClose={() => setShowQuizBurst(false)}
+          onClose={() => { setShowQuizBurst(false); setQuizBurstInit(null) }}
           onShowPaywall={onShowPaywall}
           onOpenCheatSheet={() => { setShowQuizBurst(false); setShowCheatSheet(true) }}
+          initialCourseIdx={quizBurstInit?.courseIdx ?? 0}
+          initialTopic={quizBurstInit?.topic ?? ''}
+          autoStart={!!quizBurstInit}
         />
       )}
       {showPodcast && (

@@ -16,12 +16,12 @@ const DIFFICULTY_COLOR = { easy: '#16A34A', medium: '#D97706', hard: '#DC2626' }
 
 const QUESTION_TIME = 10 // seconds per question
 
-export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpenCheatSheet }) {
+export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpenCheatSheet, initialCourseIdx = 0, initialTopic = '', autoStart = false }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
-  const [courseIdx, setCourseIdx] = useState(0)
-  const [topic, setTopic] = useState('')
+  const [courseIdx, setCourseIdx] = useState(initialCourseIdx)
+  const [topic, setTopic] = useState(initialTopic)
   const [step, setStep] = useState('setup') // 'setup' | 'loading' | 'quiz' | 'done'
   const [questions, setQuestions] = useState(null)
   const [qIdx, setQIdx] = useState(0)
@@ -39,6 +39,11 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
   const course = courses[courseIdx] ?? null
   const COURSE_COLORS = ['#3B82F6','#6366F1','#059669','#D97706','#EC4899','#0891B2']
   const courseColor = course?.color?.dot ?? COURSE_COLORS[courseIdx % COURSE_COLORS.length]
+
+  // Auto-start when launched from CheatSheet with a pre-populated topic
+  useEffect(() => {
+    if (autoStart && initialTopic) startQuiz()
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     if (step !== 'quiz' || confirmed) return
@@ -470,7 +475,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                   {hasUsedTrial() ? 'You\'ve used your free quiz. Upgrade to Pro for unlimited daily practice.' : 'You\'ve used your free quiz. Start your free trial for unlimited daily practice.'}
                 </p>
                 <button onClick={() => onShowPaywall?.('quizBurst')} style={{ padding: '10px 20px', background: '#D97706', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                  {hasUsedTrial() ? 'Upgrade to Pro →' : 'Start 3-day free trial →'}
+                  {hasUsedTrial() ? 'Upgrade to Pro →' : 'Start 7-day free trial →'}
                 </button>
               </div>
             )}
