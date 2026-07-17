@@ -720,6 +720,7 @@ export default function DashboardView({
               boxShadow: '0 6px 24px rgba(0,0,0,0.22)',
               animation: 'streak-toast-in 0.35s cubic-bezier(0.34,1.56,0.64,1) both',
               fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap',
+              maxWidth: 'calc(100vw - 32px)',
               border: 'none', cursor: 'pointer', fontFamily: 'inherit',
             }}
           >
@@ -814,14 +815,14 @@ export default function DashboardView({
                   </p>
                 </div>
                 <div style={{ flexShrink: 0, textAlign: 'right' }}>
-                  <div style={{ fontSize: 10, fontWeight: 600, color: D.textDim, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 4 }}>Prep phase</div>
+                  <div style={{ fontSize: 11, fontWeight: 600, color: D.textDim, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 4 }}>Prep phase</div>
                   <div style={{ fontSize: 12, fontWeight: 700, color: accentColor }}>{phases[phase]}</div>
                 </div>
                 {upcomingExam.course.targetScore && (
                   <>
                     <div style={{ width: 1, height: 28, background: D.border, flexShrink: 0 }} />
                     <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                      <div style={{ fontSize: 10, fontWeight: 600, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Target</div>
+                      <div style={{ fontSize: 11, fontWeight: 600, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Target</div>
                       <div style={{ fontSize: 18, fontWeight: 800, color: D.text, letterSpacing: '-0.02em' }}>{upcomingExam.course.targetScore}</div>
                     </div>
                   </>
@@ -1419,7 +1420,7 @@ export default function DashboardView({
           ))}
           <div style={{ margin: '10px 8px 8px', display: 'flex', alignItems: 'center', gap: 8 }}>
             <div style={{ flex: 1, height: 1, background: D.border }} />
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', color: D.textDim, textTransform: 'uppercase' }}>Study Hacks</span>
+            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', color: D.textDim, textTransform: 'uppercase' }}>Study Hacks</span>
             <div style={{ flex: 1, height: 1, background: D.border }} />
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 8, padding: '0 4px' }}>
@@ -1566,7 +1567,7 @@ export default function DashboardView({
                       display: 'flex', flexDirection: 'column', gap: 3,
                     }}
                   >
-                    <div style={{ fontSize: 10, fontWeight: 700, color: D.red, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>AI Coach</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: D.red, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>AI Coach</div>
                     <div style={{ fontSize: 13, fontWeight: 600, color: D.text, lineHeight: 1.3 }}>{topic}</div>
                     <div style={{ fontSize: 11.5, color: D.textDim, marginBottom: 6 }}>{cName}</div>
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
@@ -1602,7 +1603,7 @@ export default function DashboardView({
                       display: 'flex', flexDirection: 'column', gap: 3,
                     }}
                   >
-                    <div style={{ fontSize: 10, fontWeight: 700, color: '#D97706', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Study Tools</div>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: '#D97706', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Study Tools</div>
                     <div style={{ fontSize: 13, fontWeight: 600, color: D.text, lineHeight: 1.3 }}>{topic}</div>
                     <button
                       onClick={() => onDrillTopic?.(topic)}
@@ -1819,7 +1820,7 @@ export default function DashboardView({
                   </div>
                 )
               })}
-              <div style={{ position: 'absolute', left: 0, right: 0, bottom: -2, display: 'flex', justifyContent: 'space-between', fontSize: 10, color: D.textDim }}>
+              <div style={{ position: 'absolute', left: 0, right: 0, bottom: -2, display: 'flex', justifyContent: 'space-between', fontSize: 11, color: D.textDim }}>
                 <span>Today</span><span>+7d</span><span>+14d</span>
               </div>
             </div>

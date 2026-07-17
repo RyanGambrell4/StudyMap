@@ -1685,7 +1685,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 {/* Pause / Resume */}
                 <button
                   onClick={handleTogglePause}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 16px', borderRadius: 10, backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B', fontSize: 13, fontWeight: 500, cursor: 'pointer', lineHeight: 1 }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 18px', borderRadius: 10, backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B', fontSize: 13, fontWeight: 500, cursor: 'pointer', lineHeight: 1 }}
                 >
                   {running ? (
                     <svg width="13" height="13" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
@@ -1700,7 +1700,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 {blocks && nextBlock && (
                   <button
                     onClick={handleSkipBlock}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 16px', borderRadius: 10, backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#9B9B9B', fontSize: 13, fontWeight: 500, cursor: 'pointer', lineHeight: 1 }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 18px', borderRadius: 10, backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#9B9B9B', fontSize: 13, fontWeight: 500, cursor: 'pointer', lineHeight: 1 }}
                   >
                     <span>Skip block</span>
                     <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
@@ -1710,7 +1710,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 {/* Finish / Mark complete */}
                 <button
                   onClick={handleMarkComplete}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '10px 16px', borderRadius: 10, background: `linear-gradient(135deg, ${dot}, ${dot}bb)`, color: '#FFFFFF', fontSize: 13, fontWeight: 600, cursor: 'pointer', lineHeight: 1, boxShadow: `0 2px 14px ${dot}45` }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 18px', borderRadius: 10, background: `linear-gradient(135deg, ${dot}, ${dot}bb)`, color: '#FFFFFF', fontSize: 13, fontWeight: 600, cursor: 'pointer', lineHeight: 1, boxShadow: `0 2px 14px ${dot}45` }}
                 >
                   <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" /></svg>
                   <span>{elapsed > 0 ? `Finish (${fmt(elapsed)})` : 'Finish block'}</span>
