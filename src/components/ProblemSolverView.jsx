@@ -465,7 +465,7 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
                   textAlign: 'center', cursor: 'pointer', color: '#6B6B6B', fontSize: 13
                 }}
               >
-                Click to upload a photo of your problem
+                Tap or drag a photo of your problem here
                 <input ref={fileRef} type="file" accept="image/*" onChange={handleImageChange} style={{ display: 'none' }} />
               </div>
             )}
@@ -537,9 +537,11 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
           textAlign: 'center', padding: '48px 24px', color: '#6B6B6B',
           border: '2px dashed rgba(0,0,0,0.08)', borderRadius: 14
         }}>
-          <div style={{ fontSize: 32, marginBottom: 12 }}>fx</div>
-          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6 }}>No problems solved yet</div>
-          <div style={{ fontSize: 13 }}>Add your first problem using the button above</div>
+          <div style={{ marginBottom: 12 }}>
+            <svg width="36" height="36" fill="none" stroke="rgba(0,0,0,0.20)" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M9 7H6a2 2 0 00-2 2v9a2 2 0 002 2h9a2 2 0 002-2v-3M9 12h6m-3-3v6M16 3l5 5-5 5M21 8H11" strokeLinecap="round" strokeLinejoin="round"/></svg>
+          </div>
+          <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 6, color: '#111111' }}>Paste, type, or snap a photo</div>
+          <div style={{ fontSize: 13 }}>The AI breaks down the solution step by step</div>
         </div>
       )}
     </div>

@@ -486,7 +486,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                   onClick={() => { onClose(); onOpenCheatSheet?.() }}
                   style={{ padding: '12px', background: 'none', border: `1.5px solid rgba(59,97,196,0.30)`, borderRadius: 10, color: D.blue, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
                 >
-                  Study these topics (Cheat Sheet)
+                  Review weak topics with AI Cheat Sheet
                 </button>
               )}
               <button onClick={onClose} style={{ padding: '10px', background: 'none', border: 'none', color: D.textDim, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>

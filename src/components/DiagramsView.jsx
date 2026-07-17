@@ -657,7 +657,7 @@ export default function DiagramsView({ courses, userId, onShowPaywall }) {
               Study Diagrams
             </h1>
             <p style={{ fontSize: 13.5, color: '#6B6B6B', margin: 0 }}>
-              Visualize complex topics with AI-generated diagrams.
+              Turn any concept into a mind map, timeline, or hierarchy in seconds.
             </p>
           </div>
           {diagrams.length > 0 && (
@@ -927,7 +927,7 @@ export default function DiagramsView({ courses, userId, onShowPaywall }) {
 
         {!isPro && (
           <p style={{ textAlign: 'center', fontSize: 12, color: '#9B9B9B', marginTop: 12 }}>
-            Uses 1 AI query. Free plan includes {'{'}5{'}'} per month.
+            Uses 1 AI query. Free plan includes 5 total.
           </p>
         )}
       </div>
