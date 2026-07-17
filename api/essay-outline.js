@@ -48,7 +48,9 @@ Return ONLY a JSON object with this exact structure:
   "suggestedSources": ["type of source 1", "type of source 2"],
   "writingTips": ["tip specific to this essay type and topic"],
   "commonPitfalls": ["pitfall to avoid for this essay type"]
-}`
+}
+
+No em dashes in any field.`
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',

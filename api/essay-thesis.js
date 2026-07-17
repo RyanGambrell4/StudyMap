@@ -18,6 +18,8 @@ Rules:
 - Keep each to one sentence
 - Do not number them or add labels
 
+- No em dashes in any thesis
+
 Return ONLY a JSON array of 3 strings: ["thesis 1", "thesis 2", "thesis 3"]`
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {

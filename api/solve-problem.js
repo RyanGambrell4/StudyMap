@@ -38,7 +38,9 @@ Return ONLY a JSON object with this exact structure:
   "keyFormulas": ["formula1", "formula2"],
   "difficulty": "Easy | Medium | Hard",
   "commonMistake": "one common mistake students make on this type of problem"
-}`
+}
+
+No em dashes in any field.`
   })
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
