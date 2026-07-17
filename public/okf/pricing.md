@@ -10,7 +10,7 @@ last_updated: "2026-06-20"
 ## Free Plan
 
 - **Price:** $0/month — no credit card required
-- **Courses:** Up to 2 courses
+- **Courses:** 1 course
 - **AI Tutor:** 1 action per day
 - **Session Blueprints:** 1 free use
 - **Focus Mode:** 1 free use

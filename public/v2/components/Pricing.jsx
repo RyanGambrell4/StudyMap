@@ -38,7 +38,7 @@ function Pricing(){
       cta:'Start for free', primary:false, plan:null,
       feats:[
         [true,'1 course · full schedule & planner'],
-        [true,'2 AI messages / day'],
+        [true,'5 AI sessions total'],
         [true,'Session Blueprint · 1 free per day'],
         [true,'Brain Dump, Quiz Burst, Exam Rescue · 2 free/week'],
         [true,'Focus Mode · 60 min/day free'],
