@@ -477,8 +477,24 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
   // ── Blueprint blocks ──
   const blocks = blueprint?.blocks ?? null
-  const [blockIdx, setBlockIdx] = useState(0)
-  const [blockRemaining, setBlockRemaining] = useState(() => blocks ? blocks[0].duration * 60 : totalSec)
+  const timerKey = `fm_timer_${session.id}`
+
+  const [blockIdx, setBlockIdx] = useState(() => {
+    if (!blocks) return 0
+    try {
+      const s = JSON.parse(localStorage.getItem(timerKey) ?? 'null')
+      return s?.blockIdx ?? 0
+    } catch { return 0 }
+  })
+  const [blockRemaining, setBlockRemaining] = useState(() => {
+    if (!blocks) return totalSec
+    try {
+      const s = JSON.parse(localStorage.getItem(timerKey) ?? 'null')
+      if (!s) return blocks[0].duration * 60
+      const elapsed = s.wasRunning ? Math.floor((Date.now() - s.savedAt) / 1000) : 0
+      return Math.max(0, (s.blockRemaining ?? blocks[0].duration * 60) - elapsed)
+    } catch { return blocks[0].duration * 60 }
+  })
   const [completedBlocks, setCompletedBlocks] = useState(new Set())
   const [blockTransition, setBlockTransition] = useState(null) // { title, nextTitle, nextInstruction }
   const blockAdvanceRef = useRef(null)
@@ -489,14 +505,32 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const blockPct = currentBlock ? (1 - blockRemaining / (currentBlock.duration * 60)) : 0
 
   // ── Timer ──
-  const [remaining, setRemaining] = useState(totalSec)
-  const [running, setRunning] = useState(true)
+  const [remaining, setRemaining] = useState(() => {
+    try {
+      const s = JSON.parse(localStorage.getItem(timerKey) ?? 'null')
+      if (!s) return totalSec
+      const elapsed = s.wasRunning ? Math.floor((Date.now() - s.savedAt) / 1000) : 0
+      const adj = Math.max(0, s.remaining - elapsed)
+      return adj > 0 ? adj : totalSec
+    } catch { return totalSec }
+  })
+  // Pause on restore so user consciously resumes
+  const [running, setRunning] = useState(() => {
+    try {
+      return !localStorage.getItem(timerKey)
+    } catch { return true }
+  })
   const [finished, setFinished] = useState(false)
   const intervalRef = useRef(null)
 
   // ── Tabs ──
   const [activeTab, setActiveTab] = useState('recall')
   const [tabsVisited, setTabsVisited] = useState(new Set(['recall']))
+
+  // ── Restored from previous session ──
+  const [wasRestored] = useState(() => {
+    try { return !!localStorage.getItem(timerKey) } catch { return false }
+  })
 
   // ── Completion ──
   const [showComplete, setShowComplete] = useState(false)
@@ -683,6 +717,12 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     }
   }, [remaining])
 
+  // ── Persist timer state to localStorage (survives tab close / navigation) ──
+  useEffect(() => {
+    if (finished) { localStorage.removeItem(timerKey); return }
+    localStorage.setItem(timerKey, JSON.stringify({ remaining, blockIdx, blockRemaining, wasRunning: running, savedAt: Date.now() }))
+  }, [remaining, running, finished, blockIdx, blockRemaining])
+
   // ── Timer countdown ──
   useEffect(() => {
     if (!running || finished) return
@@ -798,7 +838,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
   // ── Escape key ──
   useEffect(() => {
-    const handler = e => { if (e.key === 'Escape' && !showComplete) onExit() }
+    const handler = e => { if (e.key === 'Escape' && !showComplete) { localStorage.removeItem(timerKey); onExit?.() } }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [onExit, showComplete])
@@ -1531,7 +1571,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 {Math.max(0, focusMinutesAllowed - Math.floor((totalSec - remaining) / 60))} min left today
               </span>
             )}
-            <button onClick={onExit} className="text-xs transition-colors" style={{ color: '#9B9B9B' }}>Exit</button>
+            <button onClick={() => { localStorage.removeItem(timerKey); onExit?.() }} className="text-xs transition-colors" style={{ color: '#9B9B9B' }}>Exit</button>
           </div>
         </div>
 
@@ -1683,6 +1723,9 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               {/* ── Control buttons ── */}
               <div style={{ display: 'flex', gap: 10, marginTop: 28, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {/* Pause / Resume */}
+                {wasRestored && !running && (
+                  <div style={{ fontSize: 11, color: '#9B9B9B', textAlign: 'center', marginBottom: 4 }}>Session restored. Tap Resume to continue.</div>
+                )}
                 <button
                   onClick={handleTogglePause}
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 18px', borderRadius: 10, backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B', fontSize: 13, fontWeight: 500, cursor: 'pointer', lineHeight: 1 }}
