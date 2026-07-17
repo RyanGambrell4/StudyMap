@@ -1198,6 +1198,16 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
   const hasSetup  = !!(gradeData?.components?.length)
   const gpa       = computeGPA(courses)
 
+  // Quick-answer: "You need X% on remaining work to hit your target"
+  const quickNeed = (() => {
+    if (!hasSetup) return null
+    const comps = gradeData?.components ?? []
+    const target = gradeData?.targetGrade ?? 85
+    const gradedWeight = comps.filter(x => x.graded && x.grade != null).reduce((a, c) => a + (parseFloat(c.weight) || 0), 0)
+    if (gradedWeight < 20) return null
+    return getNeededOnRemaining(comps, target)
+  })()
+
   // Reset what-if mode when switching courses
   const handleSelectCourseWithReset = (idx) => {
     setWhatIfMode(false)
@@ -1299,9 +1309,21 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
             </button>
           </div>
         </div>
-        <p style={{ margin: '6px 0 0', fontSize: 14, color: D.muted, maxWidth: 640 }}>
-          Plan, track, and model every scenario for your final grade, one calculator per course.
-        </p>
+        {quickNeed && (
+          <p style={{ margin: '6px 0 0', fontSize: 13, color: quickNeed.impossible ? D.red : quickNeed.bufferPts > 5 ? D.green : D.muted, fontWeight: quickNeed.impossible || quickNeed.bufferPts > 5 ? 600 : 400 }}>
+            {quickNeed.impossible
+              ? `Target grade may be out of reach on ${clean(course?.name ?? 'this course')} -- check the Sandbox.`
+              : quickNeed.bufferPts > 5
+                ? `You have a ${quickNeed.bufferPts.toFixed(0)}-point buffer on remaining work in ${clean(course?.name ?? 'this course')}.`
+                : `You need ${quickNeed.needed.toFixed(0)}% on remaining work to hit your target in ${clean(course?.name ?? 'this course')}.`
+            }
+          </p>
+        )}
+        {!quickNeed && (
+          <p style={{ margin: '6px 0 0', fontSize: 14, color: D.muted, maxWidth: 640 }}>
+            Plan, track, and model every scenario for your final grade, one calculator per course.
+          </p>
+        )}
       </div>
 
       <div className="gh-content" style={{ padding: '24px 32px 48px', overflowX: 'hidden', maxWidth: '100%' }}>
