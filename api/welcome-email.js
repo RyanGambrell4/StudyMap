@@ -129,7 +129,7 @@ ${preheader("You have 3 days of Pro free. Here's what to do first.")}
             </a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12.5px;color:#9B9B9B;">$0 today, then $2.99/wk. Cancel anytime in your account.</span>
+            <span style="font-size:12.5px;color:#9B9B9B;">Card required · Cancel before day 4 and pay nothing</span>
           </td></tr>
         </table>
       </td></tr>
