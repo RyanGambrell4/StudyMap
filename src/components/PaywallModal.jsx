@@ -270,7 +270,7 @@ const TRIGGER_TESTIMONIAL_IDX = {
 
 // ── Component ─────────────────────────────────────────────────────────────────
 
-export default function PaywallModal({ trigger, onClose, userEmail, userId, currentPlan = 'free', onTrialActivated, sessionsCompleted = 0, coursesCount = 0, primaryCourseName = null }) {
+export default function PaywallModal({ trigger, onClose, userEmail, userId, currentPlan = 'free', onTrialActivated, sessionsCompleted = 0, coursesCount = 0, primaryCourseName = null, urgentExamDays = null }) {
   // Default to yearly — largest weekly-equivalent discount and highest LTV.
   // Users can still switch via the toggle; we're just picking the anchor.
   const [billingPeriod, setBillingPeriod] = useState('yearly')
@@ -701,11 +701,18 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               </svg>
               {msg.tag}
             </div>
+            {urgentExamDays != null && urgentExamDays <= 7 && (
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.22)', borderRadius: 999, padding: '3px 10px', fontSize: '0.7rem', fontWeight: 800, color: '#DC2626', letterSpacing: '0.3px', marginBottom: 8 }}>
+                {urgentExamDays <= 1 ? 'Exam tomorrow' : `${urgentExamDays} days until your exam`}
+              </div>
+            )}
             <h2 style={{ fontSize: '1.3rem', fontWeight: 800, letterSpacing: '-0.4px', color: '#1A1A1A', margin: '0 0 6px' }}>
               {msg.title}
             </h2>
             <p style={{ color: '#6B6B6B', fontSize: '0.875rem', lineHeight: 1.55, margin: '0 0 4px', maxWidth: 420 }}>
-              {msg.body}
+              {urgentExamDays != null && urgentExamDays <= 7
+                ? `You have ${urgentExamDays <= 1 ? 'one day' : `${urgentExamDays} days`} left. ${msg.body}`
+                : msg.body}
             </p>
             {!isUnlimitedTrigger && (
               <p style={{ color: '#9B9B9B', fontSize: '0.78rem', margin: 0 }}>

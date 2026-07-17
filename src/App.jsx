@@ -715,18 +715,27 @@ export default function App() {
       )}
 
       {/* Global paywall modal - rendered at App level so any component can trigger it */}
-      {paywallOpen && (
-        <PaywallModal
-          trigger={paywallTrigger}
-          onClose={() => setPaywallOpen(false)}
-          userEmail={session?.user?.email}
-          userId={session?.user?.id}
-          currentPlan={getActivePlan()}
-          sessionsCompleted={initialCompletedIds?.size ?? 0}
-          coursesCount={courses.length}
-          primaryCourseName={courses[0]?.name ?? null}
-        />
-      )}
+      {paywallOpen && (() => {
+        const todayMs = Date.now()
+        const urgentExamDays = courses.reduce((min, c) => {
+          if (!c.examDate) return min
+          const days = Math.ceil((new Date(c.examDate + 'T12:00:00') - todayMs) / 86400000)
+          return days >= 0 && days <= 14 ? Math.min(min, days) : min
+        }, Infinity)
+        return (
+          <PaywallModal
+            trigger={paywallTrigger}
+            onClose={() => setPaywallOpen(false)}
+            userEmail={session?.user?.email}
+            userId={session?.user?.id}
+            currentPlan={getActivePlan()}
+            sessionsCompleted={initialCompletedIds?.size ?? 0}
+            coursesCount={courses.length}
+            primaryCourseName={courses[0]?.name ?? null}
+            urgentExamDays={urgentExamDays === Infinity ? null : urgentExamDays}
+          />
+        )
+      })()}
 
       {/* Global feedback modal — opened via ⚙︎ menu or `studyedge:open-feedback` event */}
       <FeedbackModal open={feedbackOpen} onClose={() => setFeedbackOpen(false)} />
