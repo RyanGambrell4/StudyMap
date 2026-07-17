@@ -225,7 +225,7 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
 
       {/* Submit confirm dialog */}
       {showSubmitConfirm && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 320, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+        <div role="dialog" aria-modal="true" aria-label="Submit exam" style={{ position: 'fixed', inset: 0, zIndex: 320, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
           <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 420, width: '100%', boxShadow: '0 16px 48px rgba(0,0,0,0.18)' }}>
             <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#1A1A1A' }}>Submit your exam?</h3>
             <p style={{ margin: '8px 0 20px', color: '#6B6B6B', fontSize: 14, lineHeight: 1.55 }}>
