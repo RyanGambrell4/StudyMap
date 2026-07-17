@@ -746,7 +746,7 @@ export default function App() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
         }}>
           <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>
-            📧 Confirm your email to secure your account — check <strong>{session.user.email}</strong>
+            📧 Confirm your email to secure your account. Check <strong>{session.user.email}</strong>
           </span>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
             <button
@@ -765,7 +765,7 @@ export default function App() {
               }}
               style={{ padding: '5px 12px', borderRadius: 6, background: 'rgba(255,255,255,0.15)', border: '1px solid rgba(255,255,255,0.25)', color: '#fff', fontSize: 12, fontWeight: 600, cursor: 'pointer' }}
             >
-              {resendState === 'sending' ? 'Sending…' : resendState === 'sent' ? '✓ Sent' : resendState === 'error' ? 'Failed — retry' : 'Resend email'}
+              {resendState === 'sending' ? 'Sending…' : resendState === 'sent' ? '✓ Sent' : resendState === 'error' ? 'Failed, retry' : 'Resend email'}
             </button>
             <button
               onClick={() => { sessionStorage.setItem('studyedge_email_banner_dismissed', '1'); setEmailBannerDismissed(true); track('email_banner_dismissed', { user_id: session.user.id }) }}
@@ -867,7 +867,7 @@ export default function App() {
           padding: '14px 20px', display: 'flex', alignItems: 'center', gap: 12,
           boxShadow: '0 8px 32px rgba(0,0,0,0.10)', zIndex: 9999, whiteSpace: 'nowrap',
         }}>
-          <span style={{ color: '#1D4ED8', fontSize: 14, fontWeight: 600 }}>Payment received — activating your plan…</span>
+          <span style={{ color: '#1D4ED8', fontSize: 14, fontWeight: 600 }}>Payment received. Activating your plan…</span>
           <button
             onClick={() => setCheckoutProcessing(false)}
             style={{ marginLeft: 8, background: 'none', border: 'none', color: '#9B9B9B', cursor: 'pointer', fontSize: 18, lineHeight: 1 }}
@@ -1008,7 +1008,7 @@ function EmailVerificationGate({ email, userId, resendState, onResend, onSignOut
           onMouseLeave={e => { if (!resendState) { e.currentTarget.style.background='rgba(255,255,255,.06)'; e.currentTarget.style.color='rgba(255,255,255,.6)' } }}
         >
           {resendState === 'sending' ? 'Sending…'
-            : resendState === 'sent'  ? '✓ Resent — check inbox and spam folder'
+            : resendState === 'sent'  ? '✓ Resent. Check inbox and spam folder.'
             : resendState === 'error' ? 'Failed to resend. Try again.'
             : 'Resend confirmation email'}
         </button>
@@ -1039,7 +1039,7 @@ function EmailVerificationGate({ email, userId, resendState, onResend, onSignOut
             <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
             <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
           </svg>
-          Sign in with Google instead — no verification needed
+          Sign in with Google instead. No verification needed.
         </button>
 
         <button
