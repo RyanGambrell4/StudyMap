@@ -752,18 +752,18 @@ function StatRow({ label, value, color, last }) {
 
 // ── My Plans landing view ─────────────────────────────────────────────────────
 function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
-  const savedPlans = courses.map((c, i) => loadCoachPlan(c.id ?? i))
-  const withPlans = courses.map((c, i) => ({ course: c, idx: i, saved: savedPlans[i] })).filter(x => x.saved?.plan)
-  const withoutPlans = courses.map((c, i) => ({ course: c, idx: i, saved: savedPlans[i] })).filter(x => !x.saved?.plan)
+  const savedPlans = useMemo(() => courses.map((c, i) => loadCoachPlan(c.id ?? i)), [courses])
+  const withPlans = useMemo(() => courses.map((c, i) => ({ course: c, idx: i, saved: savedPlans[i] })).filter(x => x.saved?.plan), [courses, savedPlans])
+  const withoutPlans = useMemo(() => courses.map((c, i) => ({ course: c, idx: i, saved: savedPlans[i] })).filter(x => !x.saved?.plan), [courses, savedPlans])
 
-  const totalHours = savedPlans.reduce((acc, p, i) => {
+  const totalHours = useMemo(() => savedPlans.reduce((acc, p) => {
     if (!p?.plan) return acc
     const sessions = p.plan.weeklyFocus?.flatMap(w => w.sessions || []).length || 0
     const sessionLen = p.formData?.sessionLen || p.formData?.sessionMinutes || 60
     return acc + (sessions * sessionLen / 60)
-  }, 0)
+  }, 0), [savedPlans])
 
-  const nextDeadline = (() => {
+  const nextDeadline = useMemo(() => {
     const today = new Date()
     let earliest = null; let earliestCourse = null
     savedPlans.forEach((p, i) => {
@@ -776,7 +776,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
     })
     if (!earliest) return null
     return { days: Math.ceil((earliest - today) / 86400000), course: earliestCourse }
-  })()
+  }, [savedPlans, courses])
 
   const getNearestDeadline = (formData) => {
     if (!formData) return null
