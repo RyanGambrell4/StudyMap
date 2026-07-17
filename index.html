@@ -943,6 +943,73 @@
       padding: 0; margin: -1px; overflow: hidden;
       clip: rect(0,0,0,0); white-space: nowrap; border: 0;
     }
+
+    /* --- Blinking adapted dot --- */
+    @keyframes blink-dot {
+      0%, 100% { opacity: 1; }
+      48% { opacity: 1; }
+      50% { opacity: 0; }
+      98% { opacity: 0; }
+    }
+    .adapted-dot { animation: blink-dot 1.2s ease-in-out infinite; }
+
+    /* --- Pricing trust bar --- */
+    .pricing-trust {
+      display: flex; justify-content: center; gap: 28px;
+      margin-top: 20px; flex-wrap: wrap; padding: 0 4px;
+    }
+    .pricing-trust-item {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 13px; color: var(--muted);
+    }
+    .pricing-trust-item svg { flex-shrink: 0; }
+
+    /* --- FAQ accordion --- */
+    .faq-wrap { border-top: 1px solid var(--border); }
+    .faq-section { padding: 96px 40px; max-width: 1120px; margin: 0 auto; }
+    .faq-list { margin-top: 48px; border-top: 1px solid var(--border); }
+    .faq-item { border-bottom: 1px solid var(--border); }
+    .faq-trigger {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 22px 0; cursor: pointer; gap: 20px; width: 100%;
+      background: none; border: none; text-align: left;
+      font-family: var(--sans); font-size: 16px; font-weight: 600; color: var(--text);
+    }
+    .faq-trigger:hover { color: var(--accent); }
+    .faq-icon { width: 20px; height: 20px; flex-shrink: 0; color: var(--dim); transition: transform 0.3s cubic-bezier(0.16,1,0.3,1), color 0.15s; }
+    .faq-icon.open { transform: rotate(45deg); color: var(--accent); }
+    .faq-a-wrap { overflow: hidden; max-height: 0; transition: max-height 0.4s cubic-bezier(0.16,1,0.3,1); }
+    .faq-a-wrap.open { max-height: 260px; }
+    .faq-a { font-size: 15px; color: var(--muted); line-height: 1.75; padding-bottom: 22px; max-width: 760px; }
+
+    /* --- Email capture --- */
+    .email-wrap { border-top: 1px solid var(--border); background: var(--bg2); }
+    .email-section { padding: 80px 40px; max-width: 640px; margin: 0 auto; text-align: center; }
+    .email-eyebrow { display: inline-flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--accent); background: rgba(59,97,196,0.07); border: 1px solid rgba(59,97,196,0.18); border-radius: 999px; padding: 5px 13px; margin-bottom: 20px; }
+    .email-h2 { font-family: var(--serif); font-weight: 500; font-size: clamp(28px,3.5vw,46px); line-height: 1.15; color: var(--text); margin-bottom: 12px; }
+    .email-h2 em { font-style: italic; color: var(--accent); }
+    .email-sub { font-size: 15px; color: var(--muted); margin-bottom: 28px; line-height: 1.65; }
+    .email-form { display: flex; gap: 8px; max-width: 460px; margin: 0 auto 12px; }
+    .email-input {
+      flex: 1; border: 1px solid var(--border); border-radius: 8px;
+      padding: 12px 16px; font-size: 14px; font-family: var(--sans);
+      background: var(--bg1); color: var(--text); outline: none;
+      transition: border-color 0.15s;
+    }
+    .email-input:focus { border-color: rgba(59,97,196,0.45); }
+    .email-input::placeholder { color: var(--dim); }
+    .email-note { font-size: 12px; color: var(--dim); }
+    .email-success { font-size: 15px; font-weight: 600; color: #059669; display: flex; align-items: center; justify-content: center; gap: 8px; }
+
+    /* --- Mobile hero card --- */
+    .mobile-hero { display: none; }
+    @media (max-width: 768px) {
+      .mobile-hero { display: block; margin: 24px 20px 0; }
+      .email-section { padding: 56px 20px; }
+      .email-form { flex-direction: column; }
+      .faq-section { padding: 64px 20px; }
+      .pricing-trust { gap: 14px; justify-content: flex-start; }
+    }
   </style>
   <script src="/utm-propagate.js" defer></script>
 </head>
@@ -1083,6 +1150,25 @@
     }
 
     function Hero() {
+      const [count, setCount] = useState(0);
+      useEffect(() => {
+        const duration = 1400;
+        const delay = 900;
+        let start = null;
+        let rafId;
+        const tick = (ts) => {
+          if (!start) start = ts;
+          const elapsed = ts - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          setCount(Math.floor(eased * 30000));
+          if (progress < 1) rafId = requestAnimationFrame(tick);
+        };
+        const timer = setTimeout(() => { rafId = requestAnimationFrame(tick); }, delay);
+        return () => { clearTimeout(timer); cancelAnimationFrame(rafId); };
+      }, []);
+      const countLabel = count >= 1000 ? Math.floor(count / 1000) + 'k+' : '    ';
+
       return (
         <div className="hero-outer">
           <div className="hero-aurora" aria-hidden="true">
@@ -1105,7 +1191,7 @@
             <div className="hero-divider" />
             <div className="hero-stats">
               <div className="hero-stat hero-stat-c1">
-                <div className="hero-stat-num" style={{color:'#3B61C4'}}>30k+</div>
+                <div className="hero-stat-num" style={{color:'#3B61C4',fontVariantNumeric:'tabular-nums'}}>{countLabel}</div>
                 <div className="hero-stat-label">Community</div>
               </div>
               <div className="hero-stat hero-stat-c2">
@@ -1206,6 +1292,12 @@
     }
 
     function HeroShowcase() {
+      const [animated, setAnimated] = useState(false);
+      useEffect(() => {
+        const t = setTimeout(() => setAnimated(true), 700);
+        return () => clearTimeout(t);
+      }, []);
+
       const courses = [
         { name: 'PSYC 101, Introduction to Psychology', exam: 'May 15', sessions: '8/10', target: 'A', progress: 78, days: 3, color: '#3B61C4' },
         { name: 'CALC II, Multivariable Calculus', exam: 'May 20', sessions: '6/10', target: 'A', progress: 62, days: 8, color: '#7C5CBF' },
@@ -1293,7 +1385,7 @@
                         <span style={{fontSize:9,fontWeight:700,color:'#1A1A1A'}}>{c.progress}%</span>
                       </div>
                       <div style={{height:3,borderRadius:2,background:'rgba(0,0,0,0.08)'}}>
-                        <div style={{width:c.progress+'%',height:'100%',background:c.color,borderRadius:2}}/>
+                        <div style={{width: animated ? c.progress+'%' : '0%', height:'100%', background:c.color, borderRadius:2, transition:'width 0.9s cubic-bezier(0.16,1,0.3,1) '+(i*0.08)+'s'}}/>
                       </div>
                     </div>
                     <div style={{textAlign:'right',flexShrink:0}}>
@@ -1321,7 +1413,7 @@
                   <span style={{fontWeight:700,color:'#1A1A1A'}}>Session 4</span>
                 </div>
                 <div style={{display:'flex',alignItems:'center',gap:6,background:'rgba(5,150,105,0.08)',border:'1px solid rgba(5,150,105,0.20)',borderRadius:99,padding:'4px 10px'}}>
-                  <span style={{width:6,height:6,borderRadius:'50%',background:'#059669',display:'inline-block'}}></span>
+                  <span className="adapted-dot" style={{width:6,height:6,borderRadius:'50%',background:'#059669',display:'inline-block'}}></span>
                   <span style={{fontSize:9,fontWeight:700,color:'#059669',letterSpacing:'0.04em'}}>PLAN ADAPTED · 2 MIN AGO</span>
                 </div>
               </div>
@@ -1872,6 +1964,86 @@
       );
     }
 
+    function MobileHeroCard() {
+      const [animated, setAnimated] = useState(false);
+      useEffect(() => {
+        const t = setTimeout(() => setAnimated(true), 400);
+        return () => clearTimeout(t);
+      }, []);
+      const courses = [
+        { name: 'PSYC 101', progress: 78, color: '#3B61C4', days: 3 },
+        { name: 'CALC II',  progress: 62, color: '#7C5CBF', days: 8 },
+        { name: 'BIO 1010', progress: 51, color: '#10B981', days: 18 },
+      ];
+      return (
+        <div className="mobile-hero">
+          <div style={{background:'#fff',borderRadius:14,overflow:'hidden',boxShadow:'0 2px 0 rgba(0,0,0,0.04),0 8px 28px rgba(0,0,0,0.10)',fontFamily:'DM Sans,system-ui,sans-serif'}}>
+            {/* Title bar */}
+            <div style={{padding:'10px 14px',borderBottom:'1px solid rgba(0,0,0,0.07)',display:'flex',alignItems:'center',background:'#F7F6F3'}}>
+              <div style={{display:'flex',gap:5,marginRight:12}}>
+                <div style={{width:8,height:8,borderRadius:'50%',background:'#FF5F57'}}/>
+                <div style={{width:8,height:8,borderRadius:'50%',background:'#FEBC2E'}}/>
+                <div style={{width:8,height:8,borderRadius:'50%',background:'#28C840'}}/>
+              </div>
+              <div style={{flex:1,textAlign:'center',fontSize:10,fontWeight:500,color:'#6B6B6B'}}>StudyEdge · Dashboard</div>
+            </div>
+            <div style={{padding:'16px 18px 18px'}}>
+              {/* Date */}
+              <div style={{fontSize:9,fontWeight:700,letterSpacing:'0.12em',color:'#9B9B9B',textTransform:'uppercase',marginBottom:8}}>TUESDAY, MAY 12</div>
+              {/* Up next card */}
+              <div style={{background:'#3B61C4',borderRadius:10,padding:'12px 14px',display:'flex',alignItems:'center',gap:12,marginBottom:14}}>
+                <div style={{background:'rgba(255,255,255,0.15)',borderRadius:7,padding:'8px 10px',textAlign:'center',flexShrink:0}}>
+                  <div style={{fontSize:13,fontWeight:800,color:'#fff',lineHeight:1}}>2:00</div>
+                  <div style={{fontSize:8,fontWeight:700,color:'rgba(255,255,255,0.7)',marginTop:2}}>PM</div>
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  <div style={{fontSize:8,fontWeight:700,letterSpacing:'0.08em',color:'rgba(255,255,255,0.65)',textTransform:'uppercase',marginBottom:3}}>UP NEXT TODAY</div>
+                  <div style={{fontSize:12,fontWeight:700,color:'#fff',marginBottom:2}}>Memory &amp; Perception Sprint</div>
+                  <div style={{fontSize:10,color:'rgba(255,255,255,0.7)'}}>PSYC 101 · Session 4 of 10</div>
+                </div>
+                <button style={{background:'#fff',border:'none',borderRadius:7,padding:'8px 12px',fontSize:11,fontWeight:700,color:'#3B61C4',cursor:'pointer',flexShrink:0}}>Start →</button>
+              </div>
+              {/* Stats row */}
+              <div style={{display:'flex',gap:0,marginBottom:14,borderRadius:8,overflow:'hidden',border:'1px solid rgba(0,0,0,0.07)'}}>
+                {[['STREAK','14d',null],['HOURS','9.5h',null],['FOCUS','87','+8']].map(([label,val,delta],i) => (
+                  <div key={label} style={{flex:1,padding:'10px 10px',borderRight:i<2?'1px solid rgba(0,0,0,0.07)':'none',background:'#FAFAF9'}}>
+                    <div style={{fontSize:7,fontWeight:700,letterSpacing:'0.1em',color:'#9B9B9B',textTransform:'uppercase',marginBottom:4}}>{label}</div>
+                    <div style={{display:'flex',alignItems:'baseline',gap:2}}>
+                      <span style={{fontSize:16,fontWeight:800,color:'#1A1A1A',lineHeight:1}}>{val}</span>
+                      {delta && <span style={{fontSize:8,fontWeight:700,color:'#059669',background:'rgba(5,150,105,0.10)',borderRadius:3,padding:'1px 4px',marginLeft:2}}>{delta}</span>}
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Course bars */}
+              <div style={{display:'flex',flexDirection:'column',gap:0,marginBottom:12}}>
+                {courses.map((c,i) => (
+                  <div key={c.name} style={{display:'flex',alignItems:'center',gap:10,padding:'9px 0',borderBottom:i<courses.length-1?'1px solid rgba(0,0,0,0.06)':'none'}}>
+                    <div style={{width:3,alignSelf:'stretch',background:c.color,borderRadius:2,flexShrink:0}}/>
+                    <div style={{flex:1,minWidth:0}}>
+                      <div style={{fontSize:11,fontWeight:600,color:'#1A1A1A',marginBottom:4}}>{c.name}</div>
+                      <div style={{height:3,borderRadius:2,background:'rgba(0,0,0,0.08)'}}>
+                        <div style={{width: animated ? c.progress+'%' : '0%', height:'100%', background:c.color, borderRadius:2, transition:'width 0.9s cubic-bezier(0.16,1,0.3,1) '+(i*0.1)+'s'}}/>
+                      </div>
+                    </div>
+                    <div style={{textAlign:'right',flexShrink:0}}>
+                      <div style={{fontSize:13,fontWeight:800,color:c.days<=5?'#E87C3E':'#1A1A1A',lineHeight:1}}>{c.days}d</div>
+                      <div style={{fontSize:7,fontWeight:700,color:'#9B9B9B',letterSpacing:'0.08em',textTransform:'uppercase'}}>TO EXAM</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+              {/* Plan adapted badge */}
+              <div style={{display:'flex',alignItems:'center',justifyContent:'center',gap:6,background:'rgba(5,150,105,0.07)',border:'1px solid rgba(5,150,105,0.18)',borderRadius:8,padding:'8px 14px'}}>
+                <span className="adapted-dot" style={{width:6,height:6,borderRadius:'50%',background:'#059669',display:'inline-block'}}></span>
+                <span style={{fontSize:10,fontWeight:700,color:'#059669',letterSpacing:'0.04em'}}>PLAN ADAPTED · 2 MIN AGO</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
     function ProductShowcase() {
       const features = [
         {
@@ -2104,6 +2276,129 @@
               </div>
 
             </div>
+            <div className="pricing-trust">
+              <div className="pricing-trust-item">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="9" width="12" height="9" rx="2"/><path d="M7 9V6a3 3 0 016 0v3"/></svg>
+                Encrypted checkout via Stripe
+              </div>
+              <div className="pricing-trust-item">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 11 8 15 16 6"/></svg>
+                Cancel anytime, no questions asked
+              </div>
+              <div className="pricing-trust-item">
+                <svg width="14" height="14" viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="14" height="14" rx="2"/><line x1="3" y1="9" x2="17" y2="9"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="12" y1="2" x2="12" y2="6"/></svg>
+                Card charged only after trial ends
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    function EmailCapture() {
+      const [email, setEmail] = useState('');
+      const [status, setStatus] = useState('idle');
+
+      const submit = async (e) => {
+        e.preventDefault();
+        if (!email || status === 'loading') return;
+        setStatus('loading');
+        try {
+          const r = await fetch('/api/landing-subscribe', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email }),
+          });
+          if (r.ok) {
+            setStatus('success');
+            if (window.posthog) posthog.capture('landing_email_capture', { email });
+          } else {
+            setStatus('error');
+          }
+        } catch {
+          setStatus('error');
+        }
+      };
+
+      return (
+        <div className="email-wrap">
+          <div className="email-section fade-up">
+            <p className="email-eyebrow">Study smarter</p>
+            <h2 className="email-h2">
+              Weekly tips that actually<br /><em>move your grades.</em>
+            </h2>
+            <p className="email-sub">Study strategies, app updates, and exam prep advice. One email a week. No fluff.</p>
+            {status === 'success' ? (
+              <p className="email-success">
+                <svg width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="#059669" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round"><polyline points="4 11 8 15 16 6"/></svg>
+                You're in. Watch for it in your inbox.
+              </p>
+            ) : (
+              <form className="email-form" onSubmit={submit}>
+                <input
+                  className="email-input"
+                  type="email"
+                  placeholder="your@email.com"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                />
+                <button
+                  type="submit"
+                  className="btn btn-primary"
+                  disabled={status === 'loading'}
+                  style={{padding:'12px 22px',whiteSpace:'nowrap'}}
+                >
+                  {status === 'loading' ? 'Sending...' : 'Get tips'}
+                </button>
+              </form>
+            )}
+            {status === 'error' && <p className="email-note" style={{color:'#E87C3E',marginTop:8}}>Something went wrong. Try again.</p>}
+            {status !== 'error' && status !== 'success' && <p className="email-note">No spam. Unsubscribe anytime.</p>}
+          </div>
+        </div>
+      );
+    }
+
+    function FAQ() {
+      const [open, setOpen] = useState(null);
+      const faqs = [
+        { q: "Is StudyEdge AI free to use?", a: "Yes. The free plan includes 1 course, 2 AI actions per day, and one free use of Session Blueprints, Focus Mode, and the AI Coach. No credit card required. Pro starts at $2.99/week with a 3-day free trial." },
+        { q: "How is it different from Notion, Anki, or Quizlet?", a: "Notion is a blank document. Anki is only flashcards. Quizlet is only quizzes. StudyEdge AI is a complete study system: it builds your schedule, plans every session minute by minute, runs the timer, and has flashcards, quizzes, active recall, an AI tutor, and grade tracking all in one place. No tab-switching." },
+        { q: "Does it work for any major or subject?", a: "Yes. StudyEdge AI works for any college or university subject including STEM, humanities, social sciences, and professional programs. You add your courses and upload your syllabus, and the AI adapts its plans to your specific material and exam timeline." },
+        { q: "Does it generate flashcards automatically?", a: "Yes. StudyEdge AI generates flashcards from your notes, uploaded PDFs, or any topic you enter. Flashcards are built directly into every study session alongside quizzes and active recall prompts, so you don't need a separate app." },
+        { q: "Can it predict my final grade?", a: "Yes. Grade Hub shows your exact projected grade and calculates what you need on every remaining assignment to hit your target. It models three scenarios so you always know where you stand and what to focus on." },
+        { q: "Can I cancel anytime?", a: "Yes. Cancel anytime from your account settings, no questions asked. New Pro subscriptions include a 3-day free trial before any charge is made." },
+        { q: "What happens to my data if I cancel?", a: "Your courses, notes, and study history stay in your account. Your plan downgrades to Free at the end of the billing period. You keep access to everything you built, just with the Free plan limits." },
+      ];
+      return (
+        <div className="faq-wrap">
+          <div className="faq-section">
+            <p className="section-label sl-blue">FAQ</p>
+            <h2 className="section-h2">
+              Questions students ask<br />
+              <em>before they sign up.</em>
+            </h2>
+            <div className="faq-list">
+              {faqs.map((f, i) => (
+                <div className="faq-item" key={i}>
+                  <button
+                    className="faq-trigger"
+                    onClick={() => setOpen(open === i ? null : i)}
+                    aria-expanded={open === i}
+                  >
+                    {f.q}
+                    <svg className={'faq-icon' + (open === i ? ' open' : '')} viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round">
+                      <line x1="10" y1="4" x2="10" y2="16"/>
+                      <line x1="4" y1="10" x2="16" y2="10"/>
+                    </svg>
+                  </button>
+                  <div className={'faq-a-wrap' + (open === i ? ' open' : '')}>
+                    <p className="faq-a">{f.a}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       );
@@ -2185,11 +2480,14 @@
         <div>
           <Nav />
           <Hero />
+          <MobileHeroCard />
           <Outcomes />
           <HowItWorks />
           <ProductShowcase />
           <TestimonialsMarquee />
+          <EmailCapture />
           <Pricing />
+          <FAQ />
           <FinalCTA />
           <Footer />
         </div>
