@@ -173,7 +173,7 @@ export default function DashboardView({
 }) {
   const plan = getActivePlan()
   const { remaining: aiRemaining } = canUseFeature('aiTutor')
-  const aiUsed = aiRemaining !== null ? Math.max(0, 2 - aiRemaining) : 0
+  const aiUsed = aiRemaining !== null ? Math.max(0, 5 - aiRemaining) : 0
   const [trialBannerLoading, setTrialBannerLoading] = useState(false)
 
   const weakSpots = useMemo(() => {
