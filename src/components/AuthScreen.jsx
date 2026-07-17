@@ -20,7 +20,7 @@ export default function AuthScreen({ initialMode, onBack }) {
       billing === 'weekly' ? 'weekly' :
       billing === 'semester' ? 'per semester' :
       'monthly'
-    if (trial === '1') return { text: `3-day free trial · ${planLabel}`, sub: `Full access included. Card required · $4.99/wk after 3 days. Cancel anytime in your account.` }
+    if (trial === '1') return { text: `7-day free trial · ${planLabel}`, sub: `Full access included. Card required · $2.99/wk after 7 days. Cancel anytime in your account.` }
     return { text: `${planLabel} plan`, sub: `Billed ${billingLabel}. Cancel anytime.` }
   })()
 
@@ -214,6 +214,16 @@ export default function AuthScreen({ initialMode, onBack }) {
             }}>
               <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round"><polyline points="5 12 10 17 20 7"/></svg>
               <p style={{ margin: 0, fontSize: 13, fontWeight: 500, color: '#059669' }}>Free forever, no credit card required</p>
+            </div>
+          )}
+
+          {mode === 'signup' && planContext && (
+            <div style={{
+              backgroundColor: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.2)',
+              borderRadius: 12, padding: '10px 14px', marginBottom: 20,
+            }}>
+              <p style={{ margin: 0, fontSize: 13, fontWeight: 600, color: '#3B61C4' }}>{planContext.text}</p>
+              <p style={{ margin: '3px 0 0', fontSize: 12, color: '#6B6B6B' }}>{planContext.sub}</p>
             </div>
           )}
 
