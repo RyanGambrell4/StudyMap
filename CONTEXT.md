@@ -1338,3 +1338,51 @@ Added 18 university landing pages and 1 app gateway page across 4 commits.
 - Pushed to main → auto-deployed to getstudyedge.com via Vercel
 
 Each page follows the UCT template: university-specific H1, eyebrow pill, tailored hero copy, 6 feature cards addressing that university's real challenges, stats strip (500,000+ students / 4.8/5 / 7-day free trial), FAQ with 5 questions in JSON-LD, cross-links to sibling university pages, and full JSON-LD (SoftwareApplication + FAQPage + BreadcrumbList).
+
+---
+
+## Quality Sweep — 2026-07-16 (autonomous background session)
+
+### Summary
+Systematic quality pass across all components, API email files, and public/ SEO pages. No new features — fixes only.
+
+### Key changes
+
+**Free plan copy accuracy (systemic)**
+- `FREE_LIMITS.aiTutor.count = 5` (not 2, not "per day") — all user-facing copy corrected:
+  - `api/day7-milestone.js`, `api/day14-upgrade.js`, `api/day21-upgrade.js`, `api/trial-warning.js`, `api/welcome-email.js`, `api/trial-expired.js`, `api/trial-report-card.js`, `api/stripe.js`, `api/day10-recap.js`, `api/day3-progress.js`
+  - `src/components/AccountView.jsx`, `src/components/DiagramsView.jsx`
+  - `index.html` (JSON-LD + pricing comparison)
+  - 7 public/ SEO pages (studyedge-ai, what-is-studyedge-ai, quizlet-alternative, quizlet-qchat-alternative, ai-study-planner)
+- Free plan courses = 1 (not 2): fixed in studyedge-ai.html, what-is-studyedge-ai.html, quizlet-alternative.html, quizlet-qchat-alternative.html, ai-study-planner.html, public/v2/components/Pricing.jsx, public/okf/pricing.md
+
+**Trial copy accuracy (systemic)**
+- "7-day trial" → "3-day trial" across 54 public/ HTML files (index.html already fixed)
+- "No charge today" → "Card required. Cancel before day 4 and pay nothing." in `api/day21-upgrade.js`
+- Duplicate "Card required · Card required ·" footnote removed from: `api/day21-upgrade.js`, `api/day14-upgrade.js`, `api/day1-tips.js`, `api/early-activation.js`, `api/first-session-email.js`, `api/onboarding-complete.js`, `api/weekly-recap.js`
+
+**Off-brand purple elimination (systemic)**
+- `src/tokens.js` course palette: `#8B5CF6` → `#6366F1`
+- `src/components/GradeHubView.jsx:415` buffer callout: `rgba(139,92,246,...)` → brand blue
+- `src/components/SharedPlanView.jsx`: all `#6366F1`/`#4F46E5` gradients as primary CTA/heading → `#3B61C4`; all `#EEF2FF`/`#C7D2FE` tints → brand-blue equivalents
+- `src/App.jsx` + `src/components/DashboardView.jsx`: `rgba(167,139,250,...)` gradient → brand blue
+- `src/components/PracticeExamResults.jsx`: `rgba(124,92,250,...)` → `rgba(59,97,196,...)`
+- `src/components/CoursesView.jsx`: `rgba(139,92,246,0.04)` → `rgba(99,102,241,0.04)`
+
+**Accessibility (systemic)**
+- Added `role="dialog" aria-modal="true" aria-label="..."` to all feature modal backdrop divs:
+  - `TeachItBackModal`, `ConnectionsModeModal`, `TimedChallengeModal`, `ExamRescueModal`, `AddSessionModal`, `BrainDumpModal`, `QuickQuizBurst`, `AdaptModal`, `SyllabusUploadModal`, `CheatSheetModal`, `PodcastGenerator`
+  - (Previously added: `PaywallModal`, `SessionRatingModal`, `AuthScreen`)
+
+**UX polish**
+- `src/components/PracticeExamResults.jsx`: `'Not quite -- review the explanation above.'` → `'Not quite. Review the explanation below.'`
+- `src/components/CheatSheetModal.jsx`: Added spinner SVG to "Alternative angle" regenerate button loading state
+- `src/components/StudyCoachView.jsx`: "Edit inputs" back button disabled while loading; file upload shows alert on bad file; `EXAM_COURSE_PATTERN` moved to module level
+
+**Em dash sweep**
+- `api/stripe.js`, `api/buddy.js`, `api/streak-broken-trigger.js`, `api/day3-progress.js`, `src/App.jsx` — user-facing em dashes in error/status strings → periods or commas
+
+### Remaining known issues
+- `StudyCoachView.jsx` MyPlansView expensive computations lack `useMemo`
+- FocusMode keyboard shortcut useEffect has stale closure (eslint-disable present, complex to fix)
+- `PracticeExamSetup.jsx` gives no feedback when uploaded file extracts < 50 chars
