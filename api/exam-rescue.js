@@ -20,6 +20,7 @@ export default async function handler(req, res) {
     struggles,
   } = req.body
   if (!courseName) return res.status(400).json({ error: 'Missing courseName' })
+  const safeHours = Math.min(Math.max(Number(hoursAvailable) || 3, 0.5), 72)
 
   const contextParts = []
   if (syllabusText) contextParts.push(`Syllabus:\n${syllabusText.slice(0, 2000)}`)
@@ -38,7 +39,7 @@ export default async function handler(req, res) {
 
 Course: ${courseName}
 Current grade: ${currentGrade || 'unknown'}
-Hours available: ${hoursAvailable || 3}${personalBlock}
+Hours available: ${safeHours}${personalBlock}
 ${context}
 
 Generate 5 ranked topics ordered by (exam likelihood multiplied by current weakness). Prioritize what will move the grade most.
@@ -93,7 +94,7 @@ Rules:
   if (step === 'schedule') {
     const now = new Date()
     const startLabel = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
-    const hours = Number(hoursAvailable) || 3
+    const hours = safeHours
 
     const prompt = `You are an expert academic coach. A student has ${hours} hours starting now (${startLabel}) to study for their ${courseName} exam.${personalBlock}
 
