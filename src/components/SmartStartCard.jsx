@@ -1,6 +1,6 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useEffect } from 'react'
 import { clean } from '../utils/strings'
-import { getWeakestTopics, getMasterySummary } from '../lib/masteryStore'
+import { getWeakestTopics, getMasterySummary, getDueForReview } from '../lib/masteryStore'
 import { getActivePlan } from '../lib/subscription'
 import { track } from '../lib/analytics'
 
@@ -142,6 +142,26 @@ function MissionIcon({ ctaKey, color }) {
   )
 }
 
+// Exact hours countdown display for urgent exam mode
+function HoursCountdown({ examDate }) {
+  const [display, setDisplay] = useState('')
+  useEffect(() => {
+    const update = () => {
+      const diff = new Date(examDate + 'T12:00:00') - new Date()
+      if (diff <= 0) { setDisplay('Exam is today'); return }
+      const h = Math.floor(diff / 3600000)
+      const m = Math.floor((diff % 3600000) / 60000)
+      if (h >= 24) setDisplay(`${Math.ceil(diff / 86400000)} days`)
+      else if (h > 0) setDisplay(`${h}h ${m}m`)
+      else setDisplay(`${m} minutes`)
+    }
+    update()
+    const t = setInterval(update, 30000)
+    return () => clearInterval(t)
+  }, [examDate])
+  return <span>{display}</span>
+}
+
 export default function SmartStartCard({
   courses,
   upcomingExam,
@@ -157,6 +177,7 @@ export default function SmartStartCard({
   onOpenCheatSheet,
   onOpenStudyCoach,
   onShowPaywall,
+  onOpenReviewQueue,
 }) {
   const [hovered, setHovered] = useState(false)
   const plan = getActivePlan()
@@ -188,6 +209,108 @@ export default function SmartStartCard({
   }
 
   const mastery = getMasterySummary()
+  const dueForReview = useMemo(() => getDueForReview(null, 5), [])
+  const isWarRoom = upcomingExam && upcomingExam.days <= 1
+  const weakTopics = useMemo(() => getWeakestTopics(
+    upcomingExam?.course?.id ?? null, 3
+  ).filter(t => t.score < 65), [upcomingExam])
+
+  // ── War Room rendering for exam-day / day-before ──
+  if (isWarRoom) {
+    const examName = clean(upcomingExam.course.name)
+    const isToday = upcomingExam.days === 0
+    return (
+      <div style={{
+        gridColumn: 'span 12',
+        background: '#FFF5F5',
+        border: '1.5px solid rgba(220,38,38,0.3)',
+        borderLeft: '5px solid #DC2626',
+        borderRadius: 16,
+        overflow: 'hidden',
+        boxShadow: '0 4px 24px rgba(220,38,38,0.12)',
+      }}>
+        {/* Red header bar */}
+        <div style={{ background: 'linear-gradient(135deg, #DC2626, #B91C1C)', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#fff', opacity: 0.9, display: 'inline-block', animation: 'smart-pulse 1.4s ease-in-out infinite' }} />
+            <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.9)' }}>
+              {isToday ? 'Exam Day' : 'Exam Tomorrow'}
+            </span>
+          </div>
+          {upcomingExam.course.examDate && (
+            <span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.85)', fontVariantNumeric: 'tabular-nums' }}>
+              <HoursCountdown examDate={upcomingExam.course.examDate} /> remaining
+            </span>
+          )}
+        </div>
+
+        {/* Content */}
+        <div style={{ padding: '18px 20px 20px' }}>
+          <h3 style={{ margin: '0 0 4px', fontSize: 20, fontWeight: 800, color: '#7F1D1D', letterSpacing: -0.4 }}>
+            Final push for {examName}
+          </h3>
+          <p style={{ margin: '0 0 18px', fontSize: 13, color: '#991B1B', lineHeight: 1.55 }}>
+            {isToday
+              ? 'No new material. Review your weakest topics only. Trust what you have prepared.'
+              : 'You have hours left. Drill your weakest topics, review your cheat sheet, and get a good night of sleep.'}
+          </p>
+
+          {/* 3-action row */}
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: weakTopics.length > 0 ? 16 : 0 }}>
+            <button
+              onClick={() => { track('war_room_cta', { action: 'examRescue' }); isPro ? onOpenExamRescue?.() : onShowPaywall?.('examRescue') }}
+              style={{ flex: 1, minWidth: 120, padding: '11px 16px', background: '#DC2626', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 3px 12px rgba(220,38,38,0.35)' }}
+            >
+              Exam Rescue
+            </button>
+            <button
+              onClick={() => { track('war_room_cta', { action: 'brainDump' }); onOpenBrainDump?.() }}
+              style={{ flex: 1, minWidth: 100, padding: '11px 16px', background: 'rgba(185,28,28,0.1)', color: '#B91C1C', border: '1px solid rgba(185,28,28,0.25)', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+            >
+              Brain Dump
+            </button>
+            <button
+              onClick={() => { track('war_room_cta', { action: 'cheatSheet' }); isPro ? onOpenCheatSheet?.() : onShowPaywall?.('cheat-sheet') }}
+              style={{ flex: 1, minWidth: 100, padding: '11px 16px', background: 'rgba(185,28,28,0.1)', color: '#B91C1C', border: '1px solid rgba(185,28,28,0.25)', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+            >
+              Cheat Sheet
+            </button>
+          </div>
+
+          {/* Weak topics to drill */}
+          {weakTopics.length > 0 && (
+            <div style={{ background: 'rgba(220,38,38,0.07)', borderRadius: 10, padding: '12px 14px' }}>
+              <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 700, color: '#991B1B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                Prioritize these topics
+              </p>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                {weakTopics.map((t, i) => (
+                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                    <div style={{ width: 34, height: 20, borderRadius: 6, background: '#DC2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <span style={{ fontSize: 10, fontWeight: 800, color: '#fff' }}>{t.score}</span>
+                    </div>
+                    <span style={{ fontSize: 13, color: '#7F1D1D', fontWeight: 500 }}>{t.topic}</span>
+                    <button
+                      onClick={() => { track('war_room_drill_topic', { topic: t.topic }); onOpenBrainDump?.() }}
+                      style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.12)', border: 'none', borderRadius: 6, padding: '3px 10px', cursor: 'pointer' }}
+                    >
+                      Drill
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+        <style>{`
+          @keyframes smart-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(1.6); }
+          }
+        `}</style>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -294,30 +417,46 @@ export default function SmartStartCard({
         </div>
       </div>
 
-      {/* Mastery teaser strip -- only when there are tracked topics */}
-      {mastery && (
+      {/* Bottom strip: mastery summary + review queue nudge */}
+      {(mastery || dueForReview.length > 0) && (
         <div style={{
           borderTop: `1px solid ${D.border}`,
           padding: '9px 20px',
-          display: 'flex', alignItems: 'center', gap: 16,
+          display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
           background: 'rgba(0,0,0,0.015)',
         }}>
-          <span style={{ fontSize: 11.5, fontWeight: 600, color: D.dim }}>Knowledge map:</span>
-          <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
-            {[
-              { label: 'Strong', count: mastery.strong, color: '#16A34A' },
-              { label: 'In progress', count: mastery.developing, color: '#D97706' },
-              { label: 'Weak', count: mastery.weak, color: '#DC2626' },
-            ].map(({ label, count, color: c }) => count > 0 && (
-              <span key={label} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11.5, color: D.muted }}>
-                <span style={{ width: 7, height: 7, borderRadius: '50%', background: c, display: 'inline-block' }} />
-                <strong style={{ color: c, fontWeight: 700 }}>{count}</strong> {label}
-              </span>
-            ))}
-          </div>
-          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 4 }}>
-            <span style={{ fontSize: 11.5, fontWeight: 600, color: D.blue }}>Avg {mastery.avg}%</span>
-          </div>
+          {mastery && (
+            <>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: D.dim }}>Knowledge map:</span>
+              <div style={{ display: 'flex', gap: 10, alignItems: 'center' }}>
+                {[
+                  { label: 'Strong', count: mastery.strong, color: '#16A34A' },
+                  { label: 'In progress', count: mastery.developing, color: '#D97706' },
+                  { label: 'Weak', count: mastery.weak, color: '#DC2626' },
+                ].map(({ label, count, color: c }) => count > 0 && (
+                  <span key={label} style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 11.5, color: D.muted }}>
+                    <span style={{ width: 7, height: 7, borderRadius: '50%', background: c, display: 'inline-block' }} />
+                    <strong style={{ color: c, fontWeight: 700 }}>{count}</strong> {label}
+                  </span>
+                ))}
+              </div>
+              <span style={{ fontSize: 11.5, fontWeight: 600, color: D.blue }}>Avg {mastery.avg}%</span>
+            </>
+          )}
+          {dueForReview.length > 0 && (
+            <button
+              onClick={() => { track('smart_start_review_queue_nudge'); onOpenReviewQueue?.() }}
+              style={{
+                marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 5,
+                fontSize: 11.5, fontWeight: 700, color: D.red,
+                background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.2)',
+                borderRadius: 7, padding: '4px 11px', cursor: 'pointer',
+              }}
+            >
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: D.red, display: 'inline-block', animation: 'smart-pulse 2s ease-in-out infinite' }} />
+              {dueForReview.length} due for review
+            </button>
+          )}
         </div>
       )}
 

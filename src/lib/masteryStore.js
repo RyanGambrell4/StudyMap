@@ -92,3 +92,50 @@ export function getMasterySummary() {
     weak: all.filter(m => m.score < 40).length,
   }
 }
+
+// Spaced repetition interval in milliseconds based on mastery score.
+// Weak topics need review sooner; strong topics can wait longer.
+function getReviewInterval(score) {
+  if (score < 40) return 1 * 24 * 60 * 60 * 1000   // 1 day
+  if (score < 60) return 2 * 24 * 60 * 60 * 1000   // 2 days
+  if (score < 75) return 4 * 24 * 60 * 60 * 1000   // 4 days
+  return 7 * 24 * 60 * 60 * 1000                    // 7 days
+}
+
+// Returns topics due for review, sorted by urgency (most overdue first).
+export function getDueForReview(courseId = null, limit = 20) {
+  const now = Date.now()
+  const items = courseId ? getMasteryForCourse(courseId) : getAllMastery()
+  return items
+    .map(m => {
+      const interval = getReviewInterval(m.score)
+      const dueAt = (m.lastUpdated ?? 0) + interval
+      const overdueMs = now - dueAt
+      return { ...m, dueAt, overdueMs, isDue: overdueMs >= 0 }
+    })
+    .filter(m => m.isDue)
+    .sort((a, b) => b.overdueMs - a.overdueMs)
+    .slice(0, limit)
+}
+
+// Returns upcoming topics not yet due but due within the next N days.
+export function getUpcomingReviews(courseId = null, withinDays = 3) {
+  const now = Date.now()
+  const cutoff = now + withinDays * 24 * 60 * 60 * 1000
+  const items = courseId ? getMasteryForCourse(courseId) : getAllMastery()
+  return items
+    .map(m => {
+      const interval = getReviewInterval(m.score)
+      const dueAt = (m.lastUpdated ?? 0) + interval
+      return { ...m, dueAt }
+    })
+    .filter(m => m.dueAt > now && m.dueAt <= cutoff)
+    .sort((a, b) => a.dueAt - b.dueAt)
+}
+
+// Summary counts for the review queue badge.
+export function getReviewStats() {
+  const due = getDueForReview()
+  const upcoming = getUpcomingReviews()
+  return { dueCount: due.length, upcomingCount: upcoming.length }
+}

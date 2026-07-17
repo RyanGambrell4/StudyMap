@@ -43,6 +43,7 @@ const DiagramsView        = lazy(() => import('./DiagramsView'))
 const ProblemSolverView   = lazy(() => import('./ProblemSolverView'))
 const EssayArchitectView  = lazy(() => import('./EssayArchitectView'))
 const MasteryMapView      = lazy(() => import('./MasteryMapView'))
+const ReviewQueueView     = lazy(() => import('./ReviewQueueView'))
 import CheatSheetModal from './CheatSheetModal'
 import BrainDumpModal from './BrainDumpModal'
 import ExamRescueModal from './ExamRescueModal'
@@ -1893,6 +1894,7 @@ export default function OutputView({
                 return [...filtered, ...incoming]
               })
             }}
+            onOpenReviewQueue={() => setActiveSection('review')}
           />
         )}
 
@@ -2005,6 +2007,15 @@ export default function OutputView({
             courses={courses}
             onOpenBrainDump={() => setShowBrainDump(true)}
             onDrillTopic={(topic) => { setShowBrainDump(true) }}
+          />
+        )}
+
+        {/* ── Review Queue ── */}
+        {activeSection === 'review' && (
+          <ReviewQueueView
+            courses={courses}
+            onOpenBrainDump={() => setShowBrainDump(true)}
+            onOpenQuizBurst={() => setShowQuizBurst(true)}
           />
         )}
 

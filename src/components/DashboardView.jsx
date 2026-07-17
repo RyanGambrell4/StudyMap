@@ -11,6 +11,7 @@ import { clean } from '../utils/strings'
 import { daysBetween, formatShortDate } from '../utils/dateUtils'
 import { getWeakTopics } from '../lib/weakTopics'
 import SmartStartCard from './SmartStartCard'
+import { getDueForReview, getReviewStats } from '../lib/masteryStore'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
@@ -172,6 +173,7 @@ export default function DashboardView({
   weeklyHourGoal,
   userCreatedAt,
   onRescheduleSession,
+  onOpenReviewQueue,
 }) {
   const plan = getActivePlan()
   const { remaining: aiRemaining } = canUseFeature('aiTutor')
@@ -1219,7 +1221,82 @@ export default function DashboardView({
           onOpenCheatSheet={onOpenCheatSheet}
           onOpenStudyCoach={onOpenStudyCoach}
           onShowPaywall={onShowPaywall}
+          onOpenReviewQueue={onOpenReviewQueue}
         />
+
+        {/* ── Today's Plan Timeline ── */}
+        {(todaySessions.length > 0 || getDueForReview(null, 3).length > 0) && (() => {
+          const dueReviews = getDueForReview(null, 3)
+          const completed = completedIds ?? new Set()
+          const allItems = [
+            ...todaySessions.map(s => ({ type: 'session', id: s.id, label: s.sessionType, sub: clean(s.courseName ?? ''), duration: s.duration, color: s.color?.dot ?? D.blue, done: completed.has(s.id), startTime: s.startTime })),
+            ...dueReviews.map(r => ({ type: 'review', id: r.topic, label: r.topic, sub: 'Review due', color: '#DC2626', done: false, duration: 10 })),
+          ]
+          if (!allItems.length) return null
+          const doneCount = allItems.filter(i => i.done).length
+          return (
+            <div style={{ gridColumn: 'span 12', background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+              {/* Header */}
+              <div style={{ padding: '13px 18px 12px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                  <svg width="13" height="13" fill="none" stroke={D.blue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                  </svg>
+                  <span style={{ fontSize: 13, fontWeight: 700, color: D.text }}>Today's Plan</span>
+                  <span style={{ fontSize: 11.5, color: D.dim }}>{doneCount}/{allItems.length} done</span>
+                </div>
+                {/* Mini progress bar */}
+                <div style={{ width: 80, height: 5, borderRadius: 3, background: 'rgba(0,0,0,0.08)', overflow: 'hidden' }}>
+                  <div style={{ height: '100%', borderRadius: 3, background: D.blue, width: `${allItems.length > 0 ? (doneCount / allItems.length) * 100 : 0}%`, transition: 'width 0.4s ease' }} />
+                </div>
+              </div>
+              {/* Items */}
+              <div style={{ padding: '12px 18px 16px', display: 'flex', flexDirection: 'column', gap: 0 }}>
+                {allItems.map((item, i) => (
+                  <div key={`${item.type}-${item.id}-${i}`} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, paddingBottom: i < allItems.length - 1 ? 14 : 0 }}>
+                    {/* Timeline line + dot */}
+                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, paddingTop: 2 }}>
+                      <div style={{ width: 14, height: 14, borderRadius: '50%', border: `2px solid ${item.done ? item.color : item.color + '50'}`, background: item.done ? item.color : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
+                        {item.done && (
+                          <svg width="7" height="7" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                        )}
+                      </div>
+                      {i < allItems.length - 1 && (
+                        <div style={{ width: 1.5, flex: 1, background: 'rgba(0,0,0,0.1)', marginTop: 3, minHeight: 18 }} />
+                      )}
+                    </div>
+                    {/* Content */}
+                    <div style={{ flex: 1, minWidth: 0, paddingBottom: i < allItems.length - 1 ? 0 : 0 }}>
+                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
+                        <span style={{ fontSize: 13.5, fontWeight: 600, color: item.done ? D.dim : D.text, textDecoration: item.done ? 'line-through' : 'none' }}>
+                          {item.label}
+                        </span>
+                        {item.type === 'review' && (
+                          <span style={{ fontSize: 10.5, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.1)', padding: '1px 6px', borderRadius: 4 }}>Review</span>
+                        )}
+                      </div>
+                      <div style={{ fontSize: 11.5, color: D.dim, marginTop: 1 }}>
+                        {item.sub}{item.duration ? ` · ${item.duration} min` : ''}
+                      </div>
+                    </div>
+                    {/* Action */}
+                    {!item.done && (
+                      <button
+                        onClick={() => {
+                          if (item.type === 'session') { const s = todaySessions.find(x => x.id === item.id); if (s) onStartFocus?.(s) }
+                          else if (item.type === 'review') { onOpenBrainDump?.() }
+                        }}
+                        style={{ flexShrink: 0, fontSize: 11.5, fontWeight: 700, color: '#fff', background: item.color, border: 'none', borderRadius: 7, padding: '4px 12px', cursor: 'pointer' }}
+                      >
+                        {item.type === 'session' ? 'Start' : 'Review'}
+                      </button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )
+        })()}
 
         {/* ── Missed sessions reschedule banner ── */}
         {missedSessions.length > 0 && onRescheduleSession && (

@@ -4,6 +4,7 @@ import { toDateStr, addDays, daysBetween } from '../utils/dateUtils'
 import { getCachedPracticeScores, savePracticeScores, getCachedSessionRecalls, getCachedStudyTools } from '../lib/db'
 import { getDueCards } from '../lib/sm2'
 import { getActivePlan, hasUsedTrial } from '../lib/subscription'
+import { getAllMastery, getMasteryLevel, getMasteryColor, getReviewStats } from '../lib/masteryStore'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
@@ -1247,6 +1248,125 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
           </div>
         </div>
       )}
+
+      {/* ── Mastery + Consistency section ── */}
+      {(() => {
+        const allMastery = getAllMastery()
+        const reviewStats = getReviewStats()
+        if (!allMastery.length) return null
+
+        // Consistency score: session density in past 14 days
+        const now = new Date()
+        const past14 = Array.from({ length: 14 }, (_, i) => {
+          const d = new Date(now); d.setDate(d.getDate() - i)
+          return toDateStr(d)
+        })
+        const completedSet = new Set(completedSessionLog?.map(s => s.date) ?? [])
+        const activeDays = past14.filter(d => completedSet.has(d)).length
+        const consistencyScore = Math.round((activeDays / 14) * 100)
+        const consistencyColor = consistencyScore >= 70 ? D.green : consistencyScore >= 40 ? D.amber : D.pink
+        const consistencyLabel = consistencyScore >= 70 ? 'Excellent' : consistencyScore >= 40 ? 'Building' : 'Getting started'
+
+        // Mastery distribution
+        const strong = allMastery.filter(m => m.score >= 70)
+        const developing = allMastery.filter(m => m.score >= 40 && m.score < 70)
+        const weak = allMastery.filter(m => m.score < 40)
+        const avgScore = Math.round(allMastery.reduce((s, m) => s + m.score, 0) / allMastery.length)
+
+        // Top 5 topics by score for mini-list
+        const topTopics = [...allMastery].sort((a, b) => b.score - a.score).slice(0, 5)
+        const worstTopics = [...allMastery].sort((a, b) => a.score - b.score).slice(0, 5)
+
+        return (
+          <>
+            {/* Mastery overview card */}
+            <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '22px 26px', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 10 }}>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 4 }}>Knowledge Mastery</div>
+                  <div style={{ fontSize: 12.5, color: D.textMuted }}>{allMastery.length} topics tracked across your courses</div>
+                </div>
+                <div style={{ display: 'flex', align: 'center', gap: 6 }}>
+                  {reviewStats.dueCount > 0 && (
+                    <span style={{ fontSize: 11.5, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', padding: '4px 10px', borderRadius: 7 }}>
+                      {reviewStats.dueCount} due for review
+                    </span>
+                  )}
+                  <span style={{ fontSize: 13, fontWeight: 800, color: D.text }}>{avgScore}% avg</span>
+                </div>
+              </div>
+
+              {/* Stacked bar */}
+              <div style={{ display: 'flex', height: 10, borderRadius: 5, overflow: 'hidden', gap: 2, marginBottom: 14 }}>
+                {strong.length > 0 && <div style={{ flex: strong.length, background: D.green, borderRadius: 5 }} />}
+                {developing.length > 0 && <div style={{ flex: developing.length, background: D.amber, borderRadius: 5 }} />}
+                {weak.length > 0 && <div style={{ flex: weak.length, background: D.pink, borderRadius: 5 }} />}
+              </div>
+
+              <div style={{ display: 'flex', gap: 16, marginBottom: 20, flexWrap: 'wrap' }}>
+                {[{ label: 'Strong', items: strong, color: D.green }, { label: 'Developing', items: developing, color: D.amber }, { label: 'Weak', items: weak, color: D.pink }].map(({ label, items, color }) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, display: 'inline-block' }} />
+                    <span style={{ fontSize: 12.5, color: D.textMuted }}><strong style={{ color, fontWeight: 700 }}>{items.length}</strong> {label}</span>
+                  </div>
+                ))}
+              </div>
+
+              {/* Two-column topic lists */}
+              <div className="pv-2col" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: 0 }}>
+                <div>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, color: D.green, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Strongest Topics</div>
+                  {topTopics.map((t, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
+                      <div style={{ width: 34, height: 18, borderRadius: 5, background: getMasteryColor(t.score) + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: 10.5, fontWeight: 800, color: getMasteryColor(t.score) }}>{t.score}</span>
+                      </div>
+                      <span style={{ fontSize: 12.5, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }}>{t.topic}</span>
+                    </div>
+                  ))}
+                </div>
+                <div>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, color: D.pink, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Needs Work</div>
+                  {worstTopics.map((t, i) => (
+                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
+                      <div style={{ width: 34, height: 18, borderRadius: 5, background: getMasteryColor(t.score) + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: 10.5, fontWeight: 800, color: getMasteryColor(t.score) }}>{t.score}</span>
+                      </div>
+                      <span style={{ fontSize: 12.5, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }}>{t.topic}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            {/* Consistency score card */}
+            <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '20px 26px', marginBottom: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
+                <div>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 4 }}>Study Consistency</div>
+                  <div style={{ fontSize: 24, fontWeight: 800, color: consistencyColor, letterSpacing: '-0.02em' }}>
+                    {consistencyScore}%
+                    <span style={{ fontSize: 13, fontWeight: 600, color: D.textMuted, marginLeft: 8 }}>{consistencyLabel}</span>
+                  </div>
+                  <div style={{ fontSize: 12.5, color: D.textMuted, marginTop: 4 }}>{activeDays} of 14 days with at least one completed session</div>
+                </div>
+                {/* 14-day dot calendar */}
+                <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', maxWidth: 200 }}>
+                  {past14.reverse().map((d, i) => {
+                    const done = completedSet.has(d)
+                    const label = new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' })[0]
+                    return (
+                      <div key={d} title={d} style={{ width: 22, height: 22, borderRadius: 6, background: done ? consistencyColor : 'rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <span style={{ fontSize: 9, fontWeight: 700, color: done ? '#fff' : D.textDim }}>{label}</span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </div>
+            </div>
+          </>
+        )
+      })()}
 
       {/* ── Pro upgrade nudge for free users ── */}
       {isFree && (
