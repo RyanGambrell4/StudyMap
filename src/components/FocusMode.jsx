@@ -457,6 +457,15 @@ const TAB_COLORS = {
   ai:         '#3B61C4',
 }
 
+const SESSION_TABS = [
+  { id: 'recall',     label: 'Active Recall', num: 1 },
+  { id: 'flashcards', label: 'Flashcards',    num: 2 },
+  { id: 'quiz',       label: 'Quick Quiz',    num: 3 },
+  { id: 'practice',   label: 'Practice',      num: 4 },
+  { id: 'notes',      label: 'Notes',         num: 5 },
+  { id: 'ai',         label: 'Ask AI',        num: 6 },
+]
+
 export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools, onOpenBrainDump, course, onShowPaywall, userId, learningStyle, currentStreak = 0 }) {
   const totalSec = session.duration * 60
   const isLongSession = session.duration > 45
@@ -1159,15 +1168,6 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     document.addEventListener('keydown', handler)
     return () => document.removeEventListener('keydown', handler)
   }, []) // eslint-disable-line react-hooks/exhaustive-deps
-
-  const SESSION_TABS = [
-    { id: 'recall',     label: 'Active Recall', num: 1 },
-    { id: 'flashcards', label: 'Flashcards',    num: 2 },
-    { id: 'quiz',       label: 'Quick Quiz',    num: 3 },
-    { id: 'practice',   label: 'Practice',      num: 4 },
-    { id: 'notes',      label: 'Notes',         num: 5 },
-    { id: 'ai',         label: 'Ask AI',        num: 6 },
-  ]
 
   // ─── RENDER ─────────────────────────────────────────────────────────────────
   return (

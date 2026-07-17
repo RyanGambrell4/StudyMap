@@ -13,6 +13,8 @@ function loadCoachPlan(courseId) { return getCachedCoachPlan(courseId) }
 function saveCoachPlan(courseId, plan, formData) { dbSaveCoachPlan(courseId, plan, formData) }
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
+const EXAM_COURSE_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
+
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF', bgEl: '#F0EFEC',
   border: 'rgba(0,0,0,0.07)', borderStrong: 'rgba(0,0,0,0.12)',
@@ -927,8 +929,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     dates: [], materials: [], daysPerWeek: 3, sessionLen: 60, style: defaultStyle, includeWeekends: false,
   })
   const [plan, setPlan] = useState(null)
-  const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
-  const isExamMode = form.courseIdx >= 0 && EXAM_PATTERN.test(courses[form.courseIdx]?.name ?? '')
+  const isExamMode = form.courseIdx >= 0 && EXAM_COURSE_PATTERN.test(courses[form.courseIdx]?.name ?? '')
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [pushed, setPushed] = useState(false)
