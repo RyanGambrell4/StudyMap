@@ -532,14 +532,18 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
   const milestones = useMemo(() => {
     const coursesDone = new Set(completedSessions.map(s => s.courseId)).size
     return [
-      { id: 'streak7',     label: '1-week streak',    sub: 'Days in a row',         type: 'streak',    earned: bestStreak >= 7 },
-      { id: 'streak14',    label: '2-week streak',     sub: 'Streak warrior',         type: 'streak',    earned: bestStreak >= 14 },
-      { id: 'focus80',     label: 'Top focus score',   sub: focusScore >= 80 ? 'This week' : 'Score 80+', type: 'focus', earned: focusScore >= 80 },
-      { id: 'sessions50',  label: '50 sessions',       sub: 'Halfway hero',           type: 'sessions',  earned: sessionCount >= 50 },
-      { id: 'sessions100', label: '100 sessions',      sub: 'Century club',           type: 'sessions',  earned: sessionCount >= 100 },
-      { id: 'hours50',     label: '50h studied',       sub: 'Half-century',           type: 'hours',     earned: totalHours >= 50 },
-      { id: 'hours100',    label: '100h studied',      sub: 'Deep work hero',         type: 'hours',     earned: totalHours >= 100 },
-      { id: 'allcourses',  label: 'All courses',       sub: 'Studied every subject',  type: 'diversity', earned: courses.length > 0 && coursesDone >= courses.length },
+      { id: 'sessions1',   label: 'First session',     sub: 'The journey starts',    type: 'sessions',  earned: sessionCount >= 1,   progress: Math.min(1, sessionCount / 1) },
+      { id: 'sessions5',   label: '5 sessions',        sub: 'Building momentum',     type: 'sessions',  earned: sessionCount >= 5,   progress: Math.min(1, sessionCount / 5) },
+      { id: 'streak3',     label: '3-day streak',      sub: 'Habit forming',         type: 'streak',    earned: bestStreak >= 3,     progress: Math.min(1, bestStreak / 3) },
+      { id: 'streak7',     label: '1-week streak',     sub: 'Days in a row',         type: 'streak',    earned: bestStreak >= 7,     progress: Math.min(1, bestStreak / 7) },
+      { id: 'streak14',    label: '2-week streak',     sub: 'Streak warrior',        type: 'streak',    earned: bestStreak >= 14,    progress: Math.min(1, bestStreak / 14) },
+      { id: 'focus80',     label: 'Top focus score',   sub: focusScore >= 80 ? 'This week' : 'Score 80+', type: 'focus', earned: focusScore >= 80, progress: Math.min(1, focusScore / 80) },
+      { id: 'sessions50',  label: '50 sessions',       sub: 'Halfway hero',          type: 'sessions',  earned: sessionCount >= 50,  progress: Math.min(1, sessionCount / 50) },
+      { id: 'sessions100', label: '100 sessions',      sub: 'Century club',          type: 'sessions',  earned: sessionCount >= 100, progress: Math.min(1, sessionCount / 100) },
+      { id: 'hours10',     label: '10h studied',       sub: 'Getting serious',       type: 'hours',     earned: totalHours >= 10,    progress: Math.min(1, totalHours / 10) },
+      { id: 'hours50',     label: '50h studied',       sub: 'Half-century',          type: 'hours',     earned: totalHours >= 50,    progress: Math.min(1, totalHours / 50) },
+      { id: 'hours100',    label: '100h studied',      sub: 'Deep work hero',        type: 'hours',     earned: totalHours >= 100,   progress: Math.min(1, totalHours / 100) },
+      { id: 'allcourses',  label: 'All courses',       sub: 'Studied every subject', type: 'diversity', earned: courses.length > 0 && coursesDone >= courses.length, progress: courses.length > 0 ? coursesDone / courses.length : 0 },
     ]
   }, [bestStreak, focusScore, sessionCount, totalHours, completedSessions, courses])
 
@@ -1107,17 +1111,27 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
               background: m.earned ? `${D.accent}0e` : 'rgba(0,0,0,0.03)',
               border: `1px solid ${m.earned ? `${D.accent}28` : D.border}`,
               borderRadius: 12, padding: '14px 16px',
-              opacity: m.earned ? 1 : 0.4,
+              opacity: m.earned ? 1 : m.progress > 0 ? 0.75 : 0.4,
+              position: 'relative', overflow: 'hidden',
             }}>
+              {/* Background progress fill for in-progress badges */}
+              {!m.earned && m.progress > 0 && (
+                <div style={{ position: 'absolute', bottom: 0, left: 0, height: 2, width: `${m.progress * 100}%`, background: `linear-gradient(90deg, ${D.accent}80, ${D.accent})`, transition: 'width 0.5s ease' }} />
+              )}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
                 <div style={{
                   width: 32, height: 32, borderRadius: 9,
-                  background: m.earned ? `${D.accent}20` : 'rgba(255,255,255,0.05)',
+                  background: m.earned ? `${D.accent}20` : 'rgba(0,0,0,0.05)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                 }}>
                   <MilestoneIcon type={m.type} earned={m.earned} />
                 </div>
                 {m.earned && <div style={{ width: 6, height: 6, borderRadius: '50%', background: D.accent, boxShadow: `0 0 7px ${D.accent}` }} />}
+                {!m.earned && m.progress > 0 && (
+                  <span style={{ fontSize: 10, fontWeight: 700, color: D.accent, background: `${D.accent}12`, border: `1px solid ${D.accent}25`, borderRadius: 999, padding: '1px 7px' }}>
+                    {Math.round(m.progress * 100)}%
+                  </span>
+                )}
               </div>
               <div style={{ fontSize: 13, fontWeight: 700, color: m.earned ? D.text : D.textMuted }}>{m.label}</div>
               <div style={{ fontSize: 11, color: D.textDim, marginTop: 3 }}>{m.sub}</div>
