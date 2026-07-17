@@ -1,5 +1,5 @@
 # StudyEdge AI — Living Context
-_Last updated by: Quality Sweep Agent on 2026-07-16 (boost nudge email rewrite, double-credit bugs fixed in teach-it-back/connections-mode/exam-rescue, freeBadge fix, em-dash guardrails in 5 more AI prompts, $0 today → card-required in 3 emails, stale AI limit corrections); SEO Agent on 2026-06-10 (43 new pages: Wave A AI category, Wave B panic-study blog, Wave C study science/GPA, Wave D 30 school GPA pages, Wave E vercel.json + sitemap + footer); QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: Quality Sweep Agent on 2026-07-16 (second session: DashboardView AI chip visibility bug, floating trial nudge price fix, AuthScreen plan-aware trial price, FocusMode Enter stale closure, stale 7-day trial copy in 4 files); Quality Sweep Agent on 2026-07-16 (boost nudge email rewrite, double-credit bugs fixed in teach-it-back/connections-mode/exam-rescue, freeBadge fix, em-dash guardrails in 5 more AI prompts, $0 today → card-required in 3 emails, stale AI limit corrections); SEO Agent on 2026-06-10 (43 new pages: Wave A AI category, Wave B panic-study blog, Wave C study science/GPA, Wave D 30 school GPA pages, Wave E vercel.json + sitemap + footer); QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
 
 ---
 
@@ -1429,6 +1429,49 @@ Second pass of autonomous quality improvements on the `teach-it-back-connections
 - `api/solve-problem.js`
 
 ### Remaining known issues
-- `StudyCoachView.jsx` MyPlansView expensive computations lack `useMemo`
-- FocusMode keyboard shortcut useEffect has stale closure
 - `PracticeExamSetup.jsx` gives no feedback when uploaded file extracts < 50 chars
+
+---
+
+## Quality Sweep — 2026-07-16 (continued, second background session)
+
+_Continuing from the first background session. Focused on pricing copy accuracy, stale trial timing references, UI bug (AI chip never shown), and a FocusMode stale closure._
+
+### Bugs fixed
+
+**DashboardView AI usage chip never shown (critical)**
+- `src/components/DashboardView.jsx:176`: `aiUsed = max(0, 2 - aiRemaining)` — the constant `2` was wrong (free plan limit is 5). Max value of `aiUsed` was 2, but `showAiChip` requires `aiUsed >= 3`, so the chip was never visible to any free user. Fixed to `max(0, 5 - aiRemaining)`.
+
+**Floating trial nudge showed wrong price**
+- `src/App.jsx:792`: floating trial pill said "$2.99/wk after" but clicking it opens the paywall which calls `activateTrial()` → Unlimited at $4.99/wk. Fixed to "$4.99/wk after".
+
+**AuthScreen trial badge hardcoded wrong price for Pro trial**
+- `src/components/AuthScreen.jsx:23`: trial signup badge always showed "$4.99/wk after 3 days" regardless of plan. Email campaigns link to `plan=pro` trial at $2.99/wk, not Unlimited. Now plan-aware: Pro → $2.99/wk, Unlimited → $4.99/wk.
+
+**FocusMode Enter key didn't stop timer (stale closure)**
+- `src/components/FocusMode.jsx:1160`: keyboard handler called `handleMarkComplete()` via stale closure — `running` state was always the initial value (false), so pressing Enter while timer was running did not stop the timer. Fixed to call `setRunning(false); setShowComplete(true)` directly.
+
+### Stale copy fixed
+
+**day1-trial-tips.js email told users "trial ends in ~6 days"**
+- This was written for the old 7-day trial. At 24h in with a 3-day trial, 2 days remain. Fixed to "~2 days".
+
+**loops.js comment said "7-day trial drip (day 1, day 6, day 7)"**
+- Updated to "3-day trial drip (day 1, day 2, day 3)".
+
+**day3-trial-tips.js comment referenced "trial-warning (day 6)"**
+- There is no day 6 in a 3-day trial. Updated comment to reflect actual timing.
+
+**PrePaywall.jsx stale comment "Day 6 / Day 7 timeline"**
+- The actual TIMELINE array has Today/Day 2/Day 3. Updated comment.
+
+### Verified clean (no issues found)
+- All AI-generating API endpoints have em-dash guardrails
+- All multi-phase APIs (teach-it-back, connections-mode, exam-rescue) use `verifyAuth` for continuation phases
+- DashboardView, AccountView, AIChatView plan feature lists are accurate
+- No "$0 today" claims remain in any email or UI copy
+- No "7-day trial" or "Day 6/Day 7" stale references in email lifecycle files
+
+### Previously fixed (from first session, now resolved)
+- FocusMode keyboard shortcut stale closure (fixed this session)
+- `StudyCoachView.jsx` MyPlansView `useMemo` (fixed in first session)
