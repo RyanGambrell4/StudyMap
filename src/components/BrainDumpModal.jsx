@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { getAccessToken } from '../lib/supabase'
+import { fetchWithRetry } from '../lib/utils'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { transcribeAudio, createRecorder } from '../lib/deepgram'
 import { getCachedStudyTools, saveStudyTools } from '../lib/db'
@@ -145,7 +146,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
     while (retries < 2) {
       try {
         const token = await getAccessToken()
-        const res = await fetch('/api/brain-dump-score', {
+        const res = await fetchWithRetry('/api/brain-dump-score', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({ text, courseName: course?.name ?? 'unknown course', topic: topic.trim() || undefined }),
@@ -176,7 +177,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
     setIsConvertingCards(true)
     try {
       const token = await getAccessToken()
-      const res = await fetch('/api/generate-study-tools', {
+      const res = await fetchWithRetry('/api/generate-study-tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({

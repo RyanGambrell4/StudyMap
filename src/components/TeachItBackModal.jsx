@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { getAccessToken } from '../lib/supabase'
+import { fetchWithRetry } from '../lib/utils'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
@@ -42,7 +43,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
     setError('')
     try {
       const token = await getAccessToken()
-      const res = await fetch('/api/teach-it-back', {
+      const res = await fetchWithRetry('/api/teach-it-back', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -71,7 +72,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
     setError('')
     try {
       const token = await getAccessToken()
-      const res = await fetch('/api/teach-it-back', {
+      const res = await fetchWithRetry('/api/teach-it-back', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({

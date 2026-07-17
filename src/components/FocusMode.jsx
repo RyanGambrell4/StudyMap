@@ -8,6 +8,7 @@ import {
   appendSessionRecall,
 } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
+import { fetchWithRetry } from '../lib/utils'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, getFocusMinutesUsed, incrementFeatureUsage, FREE_LIMITS, hasUsedTrial } from '../lib/subscription'
 import { sliderToRecall } from '../utils/adaptationEngine'
 import { useCelebration } from '../utils/useCelebration'
@@ -711,7 +712,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     setMnemonics(prev => ({ ...prev, [cardIdx]: 'loading' }))
     try {
       const token = await getAccessToken()
-      const res = await fetch('/api/generate-mnemonic', {
+      const res = await fetchWithRetry('/api/generate-mnemonic', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ concept: card.front, answer: card.back, courseName: session.courseName }),
@@ -1003,7 +1004,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     if (!topic) return
     setYtLoading(true)
     try {
-      const res = await fetch('/api/youtube-suggestions', {
+      const res = await fetchWithRetry('/api/youtube-suggestions', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ topic, courseName: currentBlock?.course ?? session.courseName }),
@@ -1026,7 +1027,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     const planStruggles = savedPlan?.struggles ?? []
     try {
       const token = await getAccessToken()
-      const res = await fetch('/api/generate-study-tools', {
+      const res = await fetchWithRetry('/api/generate-study-tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -1107,7 +1108,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     const struggles = savedPlan?.struggles ?? []
     try {
       const token = await getAccessToken()
-      const res = await fetch('/api/generate-study-tools', {
+      const res = await fetchWithRetry('/api/generate-study-tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
@@ -1194,7 +1195,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     const fcStruggles = savedPlanFc?.struggles ?? []
     try {
       const token = await getAccessToken()
-      const res = await fetch('/api/generate-study-tools', {
+      const res = await fetchWithRetry('/api/generate-study-tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
