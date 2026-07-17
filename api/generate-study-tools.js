@@ -60,7 +60,8 @@ Rules:
 - Test conceptual understanding, not just surface definitions
 - All 4 options must be plausible
 - Answer must exactly match one of the options strings
-- Explanations must be 1-2 sentences maximum`
+- Explanations must be 1-2 sentences maximum
+- No em dashes in any field`
 
     const userContent = hasImages
       ? [
@@ -252,7 +253,8 @@ Hard rules:
 - Good backs: "Increases shareholder equity", "Assets minus liabilities", "When price exceeds marginal cost".
 - Bad backs: long explanations, multiple clauses, anything over 25 words unless truly necessary.
 - Generate 15 flashcards and 10 quiz questions (fewer only if the topic is too narrow to support that many - never pad with irrelevant content).
-- Quiz wrong answers must be plausible but clearly wrong if you know the material.`
+- Quiz wrong answers must be plausible but clearly wrong if you know the material.
+- No em dashes in any field.`
 
   const userContentFc = hasImagesFc
     ? [

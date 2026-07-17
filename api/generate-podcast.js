@@ -99,7 +99,7 @@ Format each line EXACTLY like this with no other text or formatting:
 [ALEX]: text here
 [JORDAN]: text here
 
-Output only the lines. No stage directions, no headers, no extra text.`
+Output only the lines. No stage directions, no headers, no extra text. No em dashes.`
 
   const anthropicRes = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
