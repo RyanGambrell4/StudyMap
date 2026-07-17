@@ -234,7 +234,12 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall }) {
                   disabled={loading}
                   style={{ fontSize: 12, fontWeight: 600, color: D.blue, padding: '6px 12px', borderRadius: 7, border: `1px solid rgba(59,97,196,0.25)`, background: 'rgba(59,97,196,0.05)', cursor: 'pointer' }}
                 >
-                  {loading ? 'Regenerating...' : 'Alternative angle'}
+                  {loading ? (
+                    <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
+                      <svg style={{ animation: 'spin 0.8s linear infinite' }} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
+                      Regenerating
+                    </span>
+                  ) : 'Alternative angle'}
                 </button>
               )}
               <button onClick={() => setStep('setup')} style={{ fontSize: 12, color: D.textDim, background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0' }}>

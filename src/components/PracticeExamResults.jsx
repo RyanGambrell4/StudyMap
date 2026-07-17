@@ -459,7 +459,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
                               {repair.repairConfirmed && (
                                 <div style={{ marginTop: 8, padding: '9px 12px', borderRadius: 8, background: repair.repairSelected === rq.answer ? 'rgba(22,163,74,0.07)' : 'rgba(220,38,38,0.06)', border: `1px solid ${repair.repairSelected === rq.answer ? 'rgba(22,163,74,0.20)' : 'rgba(220,38,38,0.18)'}` }}>
                                   <p style={{ margin: '0 0 3px', fontSize: 12.5, fontWeight: 700, color: repair.repairSelected === rq.answer ? '#16A34A' : '#DC2626' }}>
-                                    {repair.repairSelected === rq.answer ? 'Got it.' : 'Not quite -- review the explanation above.'}
+                                    {repair.repairSelected === rq.answer ? 'Got it.' : 'Not quite. Review the explanation below.'}
                                   </p>
                                   <p style={{ margin: 0, fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.5 }}>{rq.explanation}</p>
                                 </div>
