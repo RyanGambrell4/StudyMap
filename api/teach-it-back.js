@@ -1,13 +1,19 @@
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { verifyAndCheckAiUsage, verifyAuth } from '../lib/server/usage.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const gate = await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
-
   const { courseName, topic, explanation, phase, followUpQuestion, followUpAnswer } = req.body
   if (!courseName || !topic || !explanation) return res.status(400).json({ error: 'Missing required fields' })
+
+  // Follow-up is part of the same session — auth only, no extra credit consumed.
+  if (phase === 'followup') {
+    const auth = await verifyAuth(req)
+    if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
+  } else {
+    const gate = await verifyAndCheckAiUsage(req)
+    if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  }
 
   let prompt
 
