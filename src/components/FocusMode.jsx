@@ -1472,16 +1472,50 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               )
             )}
 
-            {/* Recall submitted confirmation */}
-            {recallSubmitted && recallData && (
-              <div className="flex items-center justify-center gap-2 pt-2 pb-1"
-                style={{ color: '#9B9B9B', fontSize: 12 }}>
-                <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                </svg>
-                Recall rated: {recallData.label}
-              </div>
-            )}
+            {/* "What's next?" smart suggestion */}
+            {recallSubmitted && recallData && (() => {
+              const examDays = course?.examDate
+                ? Math.ceil((new Date(course.examDate + 'T12:00:00') - new Date()) / 86400000)
+                : null
+              const lowRecall = recallData.score < 40
+              const urgent = examDays !== null && examDays <= 3
+
+              let icon, suggestion, ctaLabel, ctaAction
+              if (lowRecall && onOpenBrainDump) {
+                icon = '🧠'
+                suggestion = `Your recall score was ${recallData.label.toLowerCase()}. A Brain Dump right now will move what you just studied into long-term memory.`
+                ctaLabel = 'Do a Brain Dump now'
+                ctaAction = handleBrainDump
+              } else if (urgent) {
+                icon = '🎯'
+                suggestion = `${examDays === 0 ? 'Your exam is today.' : `${examDays} day${examDays !== 1 ? 's' : ''} to your exam.`} High-yield review only. No new material.`
+                ctaLabel = 'Back to dashboard'
+                ctaAction = handleBackToDashboard
+              } else if (nextSession) {
+                icon = '⚡'
+                suggestion = `Your next session is ready. Keep the momentum going.`
+                ctaLabel = `Start ${nextSession.courseName} →`
+                ctaAction = handleStartNext
+              } else {
+                icon = '✓'
+                suggestion = `Recall rated: ${recallData.label}. ${recallData.score >= 70 ? 'Strong retention. Rest before reviewing again.' : 'Review this material again in 24-48 hours for best retention.'}`
+                ctaLabel = null
+                ctaAction = null
+              }
+              return (
+                <div style={{ marginTop: 14, padding: '14px 16px', background: lowRecall ? 'rgba(234,88,12,0.06)' : 'rgba(59,97,196,0.05)', border: `1px solid ${lowRecall ? 'rgba(234,88,12,0.18)' : 'rgba(59,97,196,0.14)'}`, borderRadius: 12 }}>
+                  <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', color: lowRecall ? '#EA580C' : '#3B61C4', textTransform: 'uppercase', marginBottom: 6 }}>
+                    What to do next
+                  </div>
+                  <p style={{ margin: '0 0 10px', fontSize: 13, color: '#111111', lineHeight: 1.55 }}>{suggestion}</p>
+                  {ctaAction && (
+                    <button onClick={ctaAction} style={{ fontSize: 12.5, fontWeight: 700, color: '#fff', background: lowRecall ? '#EA580C' : '#3B61C4', border: 'none', borderRadius: 8, padding: '8px 16px', cursor: 'pointer' }}>
+                      {ctaLabel}
+                    </button>
+                  )}
+                </div>
+              )
+            })()}
           </div>
         </div>
 
