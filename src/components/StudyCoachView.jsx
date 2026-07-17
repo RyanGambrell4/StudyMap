@@ -920,7 +920,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle, completedSessions = [], scheduledSessions = [], restDays = [] }) {
+export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle, completedSessions = [], scheduledSessions = [], restDays = [], onOpenExamRescue }) {
   const [step, setStep] = useState(1)
   const defaultStyle = learningStyle ? [learningStyle] : []
   const [form, setForm] = useState({
@@ -1280,6 +1280,33 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     )
   })()
 
+  // Show Exam Rescue nudge when exam is < 7 days away and no plan has been generated yet
+  const urgentExamBanner = (() => {
+    if (!onOpenExamRescue) return null
+    const course = courses[form.courseIdx]
+    if (!course?.examDate || plan) return null // skip if plan already generated
+    const daysLeft = Math.ceil((new Date(course.examDate) - new Date()) / (1000 * 60 * 60 * 24))
+    if (daysLeft > 7 || daysLeft < 0) return null
+    return (
+      <div style={{ marginBottom: 16, padding: '12px 16px', borderRadius: 11, background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.2)', display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ flex: 1, minWidth: 200 }}>
+          <p style={{ margin: '0 0 2px', fontSize: 12.5, fontWeight: 700, color: '#DC2626' }}>
+            {daysLeft === 0 ? 'Exam is today.' : daysLeft === 1 ? 'Exam is tomorrow.' : `Exam in ${daysLeft} days.`}
+          </p>
+          <p style={{ margin: 0, fontSize: 12, color: '#6B6B6B', lineHeight: 1.5 }}>
+            Not enough time for a full study plan. Exam Rescue builds a targeted last-minute attack plan in under a minute.
+          </p>
+        </div>
+        <button
+          onClick={onOpenExamRescue}
+          style={{ background: '#DC2626', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
+        >
+          Open Exam Rescue
+        </button>
+      </div>
+    )
+  })()
+
   if (courses.length === 0) {
     const G = { card: 'rgba(0,0,0,0.04)', border: 'rgba(255,255,255,0.07)', text: 'rgba(255,255,255,0.65)', muted: 'rgba(255,255,255,0.28)', accent: 'rgba(99,102,241,0.5)' }
     const GhostBar = ({ w, color = G.accent }) => (
@@ -1359,6 +1386,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       ) : (
         <div className="sc-page-pad" style={{ padding: '24px 32px 48px', overflowX: 'hidden', maxWidth: '100vw' }}>
           <Stepper step={step} go={setStep} />
+          {urgentExamBanner}
           {gradeGapBanner}
           {step === 1 && (
             <IntakeStep
