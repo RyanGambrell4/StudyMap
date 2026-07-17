@@ -14,15 +14,15 @@ const D = {
 
 const COURSE_COLORS = ['#3B82F6','#6366F1','#059669','#D97706','#EC4899','#0891B2']
 
-export default function TeachItBackModal({ courses, onClose, onShowPaywall }) {
+export default function TeachItBackModal({ courses, onClose, onShowPaywall, initialCourseIdx = 0, initialTopic = '', autoStart = false }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
-  const [courseIdx, setCourseIdx] = useState(0)
-  const [topic, setTopic] = useState('')
+  const [courseIdx, setCourseIdx] = useState(initialCourseIdx)
+  const [topic, setTopic] = useState(initialTopic)
   const [explanation, setExplanation] = useState('')
   const [followUpAnswer, setFollowUpAnswer] = useState('')
-  const [step, setStep] = useState('setup') // setup | explain | evaluating | result | followup | final
+  const [step, setStep] = useState(autoStart && initialTopic ? 'explain' : 'setup') // setup | explain | evaluating | result | followup | final
   const [result, setResult] = useState(null)
   const [finalResult, setFinalResult] = useState(null)
   const [error, setError] = useState('')

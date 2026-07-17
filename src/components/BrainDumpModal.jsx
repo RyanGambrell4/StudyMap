@@ -51,7 +51,7 @@ function ScoreRing({ score }) {
   )
 }
 
-export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDrillGaps }) {
+export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDrillGaps, onOpenTeachItBack }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
@@ -520,6 +520,21 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
               >
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
                 Drill the Gaps
+              </button>
+            )}
+            {result.score < 75 && onOpenTeachItBack && (
+              <button
+                onClick={() => onOpenTeachItBack({ courseIdx, topic: topic.trim() || course?.name || '' })}
+                style={{
+                  width: '100%', padding: '11px', marginBottom: 10,
+                  background: 'rgba(59,97,196,0.07)', border: '1px solid rgba(59,97,196,0.22)', borderRadius: 9,
+                  fontSize: 13, fontWeight: 700, color: D.blue,
+                  cursor: 'pointer', fontFamily: 'inherit',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+                }}
+              >
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.85 2.83 0 114 4L7.5 20.5 2 22l1.5-5.5Z"/></svg>
+                Teach It Back on this topic
               </button>
             )}
             <div style={{ display: 'flex', gap: 10 }}>
