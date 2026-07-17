@@ -1,6 +1,6 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
 
-const COLORS = ['#3B61C4', '#16A34A', '#D97706', '#DC2626', '#8B5CF6', '#0891B2', '#DB2777', '#EA580C']
+const COLORS = ['#3B61C4', '#16A34A', '#D97706', '#DC2626', '#6366F1', '#0891B2', '#DB2777', '#EA580C']
 
 function buildPrompt(diagramType, topic, courseName) {
   const ctx = courseName ? ` (${courseName})` : ''

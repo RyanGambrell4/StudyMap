@@ -12,7 +12,7 @@ const D = {
   accent: '#059669', green: '#16A34A', amber: '#D97706', red: '#DC2626', blue: '#3B61C4',
 }
 
-const COURSE_COLORS = ['#3B82F6','#8B5CF6','#059669','#D97706','#EC4899','#0891B2']
+const COURSE_COLORS = ['#3B82F6','#6366F1','#059669','#D97706','#EC4899','#0891B2']
 
 export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }) {
   const plan = getActivePlan()

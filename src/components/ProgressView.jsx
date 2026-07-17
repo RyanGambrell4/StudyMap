@@ -20,7 +20,7 @@ const D = {
   cyan:         '#0891B2',
   orange:       '#E8531A',
   blue:         '#2563EB',
-  purple:       '#7C3AED',
+  purple:       '#3B61C4',
 }
 
 const COURSE_PALETTE = ['#6366f1','#f472b6','#22d3ee','#fbbf24','#4ade80','#f97316']

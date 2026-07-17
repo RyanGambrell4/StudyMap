@@ -47,7 +47,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall }) {
   const [step, setStep] = useState('setup') // 'setup' | 'result'
 
   const course = courses[courseIdx] ?? null
-  const COURSE_COLORS = ['#3B82F6','#8B5CF6','#059669','#D97706','#EC4899','#0891B2']
+  const COURSE_COLORS = ['#3B82F6','#6366F1','#059669','#D97706','#EC4899','#0891B2']
   const courseColor = course?.color?.dot ?? COURSE_COLORS[courseIdx % COURSE_COLORS.length]
 
   async function generate(regen = 0) {

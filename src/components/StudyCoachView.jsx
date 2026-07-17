@@ -1588,7 +1588,7 @@ function getPhaseColor(label) {
   const l = (label || '').toUpperCase()
   if (l.includes('LEARN')) return '#F97316'
   if (l.includes('SYNTHESIZE') || l.includes('PRACTICE')) return '#34d399'
-  if (l.includes('REVIEW') || l.includes('TEST') || l.includes('EXAM')) return '#8b5cf6'
+  if (l.includes('REVIEW') || l.includes('TEST') || l.includes('EXAM')) return '#D97706'
   return D.accent
 }
 

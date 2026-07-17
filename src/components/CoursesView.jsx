@@ -1106,7 +1106,7 @@ export default function CoursesView({
           const TEMPLATES = [
             { name: 'Biology', difficulty: 'Hard', targetGrade: 'A', dot: '#16A34A' },
             { name: 'Chemistry', difficulty: 'Hard', targetGrade: 'A', dot: '#0891B2' },
-            { name: 'Psychology', difficulty: 'Medium', targetGrade: 'A', dot: '#7C3AED' },
+            { name: 'Psychology', difficulty: 'Medium', targetGrade: 'A', dot: '#6366F1' },
             { name: 'Economics', difficulty: 'Medium', targetGrade: 'A', dot: '#3B61C4' },
             { name: 'Calculus', difficulty: 'Hard', targetGrade: 'B', dot: '#DC2626' },
             { name: 'English', difficulty: 'Easy', targetGrade: 'A', dot: '#D97706' },

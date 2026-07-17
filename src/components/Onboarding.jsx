@@ -16,7 +16,7 @@ const SCHOOL_COLORS = {
 const TIME_COLORS = {
   Morning:   { accent: '#FBBF24', bg: 'rgba(251,191,36,0.1)',  border: 'rgba(251,191,36,0.45)', glow: 'rgba(251,191,36,0.2)' },
   Afternoon: { accent: '#FB923C', bg: 'rgba(251,146,60,0.1)',  border: 'rgba(251,146,60,0.45)', glow: 'rgba(251,146,60,0.2)' },
-  Evening:   { accent: '#A78BFA', bg: 'rgba(167,139,250,0.1)', border: 'rgba(167,139,250,0.45)', glow: 'rgba(167,139,250,0.2)' },
+  Evening:   { accent: '#6366F1', bg: 'rgba(99,102,241,0.1)',  border: 'rgba(99,102,241,0.45)',  glow: 'rgba(99,102,241,0.2)' },
 }
 
 const TIME_ICONS = {
@@ -84,7 +84,7 @@ const clearProgress = ()  => { try { localStorage.removeItem(LS_KEY) } catch {} 
 
 const AVATARS = [
   { initials: 'SK', color: '#6B8FFF' },
-  { initials: 'MR', color: '#A78BFA' },
+  { initials: 'MR', color: '#6366F1' },
   { initials: 'JL', color: '#34D399' },
   { initials: 'AT', color: '#FB923C' },
   { initials: 'CW', color: '#F472B6' },
@@ -139,7 +139,7 @@ const STYLES = `
 
 // ── Confetti burst ────────────────────────────────────────────────────────────
 function Confetti() {
-  const COLORS = ['#6B8FFF','#A78BFA','#FBBF24','#FB923C','#34D399','#F472B6']
+  const COLORS = ['#6B8FFF','#6366F1','#FBBF24','#FB923C','#34D399','#F472B6']
   return (
     <>
       {Array.from({ length: 20 }).map((_, i) => (
@@ -296,7 +296,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
                 Two questions.
               </span>
               <br />
-              <span style={{ background: 'linear-gradient(135deg, #6B8FFF 0%, #A78BFA 55%, #6B8FFF 100%)', backgroundSize: '200% 200%', animation: 'ob-bg-drift 5s ease infinite', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+              <span style={{ background: 'linear-gradient(135deg, #6B8FFF 0%, #93C5FD 55%, #6B8FFF 100%)', backgroundSize: '200% 200%', animation: 'ob-bg-drift 5s ease infinite', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                 Then your plan is live.
               </span>
             </h1>
@@ -642,7 +642,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Your Courses</p>
             {subjects.map((s, i) => (
               <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: i < subjects.length - 1 ? 10 : 0 }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: ['#6B8FFF','#A78BFA','#34D399'][i] }} />
+                <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: ['#6B8FFF','#6366F1','#34D399'][i] }} />
                 <p style={{ color: 'rgba(255,255,255,.85)', fontSize: '0.84rem', fontWeight: 600, flex: 1 }}>{s}</p>
                 <div style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 6, padding: '2px 8px', fontSize: '0.65rem', fontWeight: 700, color: '#34D399', flexShrink: 0 }}>Ready</div>
               </div>

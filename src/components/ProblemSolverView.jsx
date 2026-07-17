@@ -40,7 +40,7 @@ function compressImageToBase64(file, maxDim = 1024, quality = 0.8) {
 
 function SubjectBadge({ subject }) {
   const colors = {
-    Math: '#3B61C4', Physics: '#7C3AED', Chemistry: '#059669',
+    Math: '#3B61C4', Physics: '#3B61C4', Chemistry: '#059669',
     Biology: '#DC2626', 'Computer Science': '#D97706', Economics: '#0891B2',
     Statistics: '#BE185D'
   }

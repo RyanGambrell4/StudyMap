@@ -23,7 +23,7 @@ const YEAR_OPTIONS = ['1st Year', '2nd Year', '3rd Year', '4th Year+']
 
 const EXAM_PRESETS = {
   MCAT: { label: 'MCAT', color: '#6366f1', desc: 'Med school entrance', sections: ['C/P - Chemistry & Physics', 'CARS - Critical Analysis', 'B/B - Biology & Biochemistry', 'P/S - Psychology & Sociology'] },
-  LSAT: { label: 'LSAT', color: '#8b5cf6', desc: 'Law school entrance', sections: ['Logical Reasoning', 'Analytical Reasoning', 'Reading Comprehension'] },
+  LSAT: { label: 'LSAT', color: '#3B61C4', desc: 'Law school entrance', sections: ['Logical Reasoning', 'Analytical Reasoning', 'Reading Comprehension'] },
   CPA:  { label: 'CPA',  color: '#14b8a6', desc: 'Accounting license', sections: ['FAR - Financial Accounting', 'AUD - Auditing & Attestation', 'REG - Tax & Regulation', 'BAR - Business Analysis'] },
   BAR:  { label: 'Bar Exam', color: '#f97316', desc: 'Legal license', sections: ['MBE - Multistate Bar', 'MEE - Multistate Essay', 'MPT - Performance Test'] },
   GRE:  { label: 'GRE',  color: '#ec4899', desc: 'Grad school entrance', sections: ['Verbal Reasoning', 'Quantitative Reasoning', 'Analytical Writing'] },

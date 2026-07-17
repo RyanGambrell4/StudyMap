@@ -12,7 +12,7 @@ const D = {
 }
 
 const MODE_CONFIG = {
-  weakness:         { color: '#8B5CF6', label: 'Weak areas',     desc: 'Focus on closing these gaps' },
+  weakness:         { color: '#3B61C4', label: 'Weak areas',     desc: 'Focus on closing these gaps' },
   'exam-topics':    { color: '#DC2626', label: 'Exam focus',     desc: 'Most likely on your exam' },
   'focus-question': { color: '#3B61C4', label: 'Focus question', desc: 'Answer this before you finish' },
 }

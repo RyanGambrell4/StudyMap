@@ -79,12 +79,12 @@ export default async function handler(req, res) {
     const isPro = plan === 'pro' || plan === 'unlimited'
     const ctaText = isPro ? 'Open AI Coach →' : 'Practice with AI Coach →'
     const upgradeSection = !isPro ? `
-      <div style="margin-top:16px;padding:14px 16px;background:#f5f3ff;border-radius:10px;border:1px solid #ddd6fe;">
-        <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#7c3aed;">Pro tip: Exam Rescue</p>
+      <div style="margin-top:16px;padding:14px 16px;background:#EEF2FF;border-radius:10px;border:1px solid #c7d2fe;">
+        <p style="margin:0 0 6px;font-size:13px;font-weight:700;color:#3B61C4;">Pro tip: Exam Rescue</p>
         <p style="margin:0 0 10px;font-size:13px;color:#4b5563;line-height:1.5;">
           Pro users can run an Exam Rescue on any weak spot. The AI builds a targeted study plan around your exact gaps.
         </p>
-        <a href="https://getstudyedge.com/app" style="font-size:13px;font-weight:700;color:#7c3aed;text-decoration:none;">
+        <a href="https://getstudyedge.com/app" style="font-size:13px;font-weight:700;color:#3B61C4;text-decoration:none;">
           Unlock Exam Rescue →
         </a>
       </div>

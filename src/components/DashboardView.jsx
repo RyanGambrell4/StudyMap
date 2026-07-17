@@ -27,7 +27,7 @@ const D = {
   blue:         '#3B61C4',
 }
 
-const COURSE_COLORS = ['#3B82F6', '#8B5CF6', '#059669', '#D97706', '#EC4899', '#0891B2']
+const COURSE_COLORS = ['#3B82F6', '#6366F1', '#059669', '#D97706', '#EC4899', '#0891B2']
 const courseColor = (idx) => COURSE_COLORS[idx % COURSE_COLORS.length]
 
 // ── Helpers ────────────────────────────────────────────────────────────────────
