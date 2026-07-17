@@ -170,6 +170,7 @@ export default function DashboardView({
   recoveryCoursesIdx = new Set(),
   weeklyHourGoal,
   userCreatedAt,
+  onRescheduleSession,
 }) {
   const plan = getActivePlan()
   const { remaining: aiRemaining } = canUseFeature('aiTutor')
@@ -397,6 +398,14 @@ export default function DashboardView({
   )
 
   const displaySession = uncompletedToday[sessionIdx] ?? uncompletedToday[0] ?? todaySessions[0] ?? null
+
+  // Sessions from the past 3 days that were never completed — show reschedule prompt
+  const missedSessions = useMemo(() => {
+    const cutoff = new Date(todayStr + 'T00:00:00')
+    cutoff.setDate(cutoff.getDate() - 3)
+    const cutoffStr = cutoff.toISOString().split('T')[0]
+    return allSessions.filter(s => s.dateStr >= cutoffStr && s.dateStr < todayStr && !completedIds.has(s.id)).slice(0, 3)
+  }, [allSessions, completedIds, todayStr])
 
   const { weekStart, weekEnd, prevWeekStart, prevWeekEnd } = useMemo(() => {
     const d = new Date(todayStr + 'T12:00:00')
@@ -1239,6 +1248,44 @@ export default function DashboardView({
               >
                 View schedule
               </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── Missed sessions reschedule banner ── */}
+        {missedSessions.length > 0 && onRescheduleSession && (
+          <div style={{
+            gridColumn: 'span 12',
+            background: '#FFFBEB',
+            border: '1px solid rgba(217,119,6,0.2)',
+            borderLeft: '4px solid #D97706',
+            borderRadius: 10,
+            padding: '14px 18px',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+              <svg width="14" height="14" fill="none" stroke="#D97706" strokeWidth="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+              <span style={{ fontSize: 13, fontWeight: 700, color: '#92400E' }}>
+                {missedSessions.length === 1 ? '1 missed session' : `${missedSessions.length} missed sessions`} from the past few days
+              </span>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+              {missedSessions.map(s => {
+                const color = s.color?.dot ?? D.blue
+                return (
+                  <div key={s.id} style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, flexShrink: 0 }} />
+                    <span style={{ fontSize: 13, color: '#92400E', flex: 1, minWidth: 120 }}>
+                      {clean(s.courseName)} · {s.sessionType ?? 'Study Session'} · {s.dateStr}
+                    </span>
+                    <button
+                      onClick={() => onRescheduleSession(s.id, todayStr)}
+                      style={{ background: '#D97706', color: '#fff', border: 'none', borderRadius: 7, padding: '5px 12px', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0 }}
+                    >
+                      Move to today
+                    </button>
+                  </div>
+                )
+              })}
             </div>
           </div>
         )}

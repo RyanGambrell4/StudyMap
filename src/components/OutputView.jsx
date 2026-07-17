@@ -1877,6 +1877,7 @@ export default function OutputView({
             onShowPaywall={onShowPaywall}
             googleEvents={googleEvents}
             onOpenExamRescue={() => { track('feature_opened', { feature: 'exam_rescue', source: 'study_coach_urgent_banner' }); setShowExamRescue(true) }}
+            onRescheduleSession={(sessionId, newDateStr) => { handleSessionMove(sessionId, newDateStr, null, null); track('session_rescheduled', { source: 'dashboard_missed_banner' }) }}
             preferredTime={schedule.preferredTime}
             learningStyle={learningStyle}
             onStartFocus={handleStartFocus}
