@@ -412,7 +412,7 @@ function PlanTab({ course, gradeData, dot, onSave }) {
           </div>
 
           {neededInfo.bufferPts > 0 && !neededInfo.impossible && (
-            <div style={{ padding: 12, borderRadius: 10, background: 'rgba(139,92,246,0.08)', border: '1px solid rgba(139,92,246,0.25)', position: 'relative' }}>
+            <div style={{ padding: 12, borderRadius: 10, background: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.18)', position: 'relative' }}>
               <div style={{ fontSize: 12.5, color: D.text, marginBottom: 8, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
                 You have a <span style={{ color: D.mint, fontWeight: 700, fontFamily: 'inherit' }}>{neededInfo.bufferPts.toFixed(1)}-point</span> buffer on remaining work. Spend it wisely.
               </div>
