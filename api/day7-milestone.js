@@ -101,7 +101,7 @@ ${preheader("One week in. Here's what the free plan can't give you - and what Pr
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
           ${[
-            ['100 AI actions / month', 'Free gives you 2 total. Pro is enough for daily use all semester.'],
+            ['100 AI actions / month', 'Free gives you 5 total. Pro is enough for daily use all semester.'],
             ['5 courses · not just 1', 'Track every class you\'re taking, with its own plan'],
             ['Unlimited Session Blueprints', 'A minute-by-minute plan before every study block'],
             ['AI Study Coach, on demand', 'Rebuild your full multi-week plan any time things change'],

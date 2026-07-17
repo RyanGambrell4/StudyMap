@@ -106,7 +106,7 @@ ${preheader("You tried Pro. You know what it does. $2.99/wk to get it back.")}
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
           ${[
-            ['100 AI actions/month', 'Back to 2 total. Not enough to get through a week.'],
+            ['100 AI actions/month', 'Back to 5 total. Not enough to get through a week.'],
             ['Unlimited Session Blueprints', 'Now capped. You used them. You know how much they help.'],
             ['5-course tracking', 'Back to 1. If you\'re taking more than one class, that\'s a problem.'],
             ['Focus Mode (no time limit)', 'The 30-min cap is back. Pro removes it entirely.'],

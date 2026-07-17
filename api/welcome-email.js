@@ -100,7 +100,7 @@ ${preheader("You have 3 days of Pro free. Here's what to do first.")}
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:28px;">
           ${[
             ['5 courses', 'Free gives you 1'],
-            ['100 AI study boosts / month', 'Free gives you 2 total'],
+            ['100 AI study boosts / month', 'Free gives you 5 total'],
             ['AI Study Coach', 'Personalized multi-week plans'],
             ['Session Blueprints', 'Minute-by-minute session plans'],
             ['Flashcards and quizzes', 'Built into every session'],

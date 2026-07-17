@@ -89,7 +89,7 @@ export default async function handler(req, res) {
             <div style="font-size:13px;font-weight:700;color:#111111;margin-bottom:8px;">What you gave up when your trial ended:</div>
             ${[
               'Unlimited focus sessions (you\'re back to 30 min/day)',
-              '100 AI actions/month → back to 2 total',
+              '100 AI actions/month → back to 5 total',
               '5 courses → back to 1',
               'Exam Rescue, Brain Dumps, unlimited Blueprints',
             ].map(item => `
@@ -117,7 +117,7 @@ export default async function handler(req, res) {
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
-            ['3-day free trial', 'No charge today. Cancel if it doesn\'t click.'],
+            ['3-day free trial', 'Card required. Cancel before day 4 and pay nothing.'],
             ['Unlimited focus sessions', 'No 30-min cap. Study as long as you need'],
             ['100 AI actions/month', 'Your tutor for every concept, every course'],
             ['Session Blueprints', 'Know exactly what to study before every session'],
@@ -135,7 +135,7 @@ export default async function handler(req, res) {
             <a href="${upgradeUrl}" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:15px;font-weight:700;text-decoration:none;border-radius:10px;padding:14px 32px;">Start your free 3-day trial →</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">Card required · Card required · Cancel before day 4 and pay nothing</span>
+            <span style="font-size:12px;color:#9B9B9B;">Card required · Cancel before day 4 and pay nothing</span>
           </td></tr>
         </table>`
 

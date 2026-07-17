@@ -98,8 +98,8 @@ export default async function handler(req, res) {
         kicker       = 'Trial ending soon'
         heading      = `Your 3-day Pro trial ends in less than 24 hours.`
         activityLine = sessionCount > 0
-          ? `You've completed ${sessionCount} session${sessionCount !== 1 ? 's' : ''} on Pro. That progress is real, and it disappears without Pro. You drop back to 2 AI actions total, 1 course, and a 30-minute focus cap.`
-          : `You've set up ${courseCount} course${courseCount !== 1 ? 's' : ''} on Pro. When the trial ends, you'll drop back to the free plan: 2 AI actions total, 1 course, and a 30-minute focus cap.`
+          ? `You've completed ${sessionCount} session${sessionCount !== 1 ? 's' : ''} on Pro. That progress is real, and it disappears without Pro. You drop back to 5 AI actions total, 1 course, and a 30-minute focus cap.`
+          : `You've set up ${courseCount} course${courseCount !== 1 ? 's' : ''} on Pro. When the trial ends, you'll drop back to the free plan: 5 AI actions total, 1 course, and a 30-minute focus cap.`
       }
 
       const upgradeUrl = `https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=trial_warning`

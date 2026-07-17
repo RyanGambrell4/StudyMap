@@ -141,7 +141,7 @@ ${preheader("Your Pro subscription is cancelled. You keep full access until the 
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
           ${[
             ['5 courses', 'Free drops you to 1'],
-            ['100 AI boosts / month', 'Free gives you 2 total'],
+            ['100 AI boosts / month', 'Free gives you 5 total'],
             ['AI Study Coach', 'Multi-week personalized plans'],
             ['Session Blueprints', 'Minute-by-minute session plans'],
             ['Flashcards and quizzes', 'Built into every session'],
@@ -219,7 +219,7 @@ ${preheader("Trial ends tomorrow. Your card gets charged $2.99/wk unless you can
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
           ${[
             ['5 courses', 'Free drops you to 1'],
-            ['100 AI study boosts / month', 'Free gives you 2 total'],
+            ['100 AI study boosts / month', 'Free gives you 5 total'],
             ['AI Study Coach', 'Personalized multi-week plans'],
             ['Session Blueprints', 'Minute-by-minute session plans'],
             ['Flashcards and quizzes', 'Built into every session'],

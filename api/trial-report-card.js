@@ -255,7 +255,7 @@ ${preheader(sessionCount >= 3
         <p style="margin:0 0 12px;font-size:13px;font-weight:700;color:#111111;">What just turned off:</p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:26px;">
           ${[
-            ['100 AI actions/month', sessionCount > 0 ? 'You used these. Now back to 2 total.' : 'Back to 2 total.'],
+            ['100 AI actions/month', sessionCount > 0 ? 'You used these. Now back to 5 total.' : 'Back to 5 total.'],
             ['Unlimited Session Blueprints', 'Capped again. Free plan is too limited for daily use.'],
             [courseCount > 1 ? `${courseCount}-course tracking` : '5-course tracking', 'Back to 1 course. Your other courses go untracked.'],
             ['AI Study Coach (unlimited)', 'The plan that was keeping you on schedule is gone.'],
