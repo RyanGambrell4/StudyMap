@@ -7,7 +7,7 @@ import { track } from '../lib/analytics'
  *
  *   Step 1 — What you'll get   (outcome-focused benefits, big icons)
  *   Step 2 — Social proof      (star rating + count + rotating quotes)
- *   Step 3 — How the trial works (Today / Day 6 / Day 7 timeline)
+ *   Step 3 — How the trial works (Today / Day 2 / Day 3 timeline)
  *
  * The last step's CTA advances into the actual PaywallModal — the parent
  * (PaywallModal) mounts this first, then swaps to the plan grid once the

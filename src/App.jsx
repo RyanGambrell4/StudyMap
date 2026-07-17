@@ -789,7 +789,7 @@ export default function App() {
         }}>
           <div style={{ flex: 1 }}>
             <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 700, color: '#fff' }}>Unlock unlimited sessions</p>
-            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,.65)' }}>3-day trial · $2.99/wk after</p>
+            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,.65)' }}>3-day trial · $4.99/wk after</p>
           </div>
           <button
             onClick={() => { track('trial_nudge_clicked', { source: 'floating_pill' }); openPaywall('trial_nudge') }}
