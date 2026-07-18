@@ -17,6 +17,7 @@ import AIChatView from './AIChatView'
 import { track } from '../lib/analytics'
 import { updateMastery, getMasteryLevel, getMasteryColor, getAllMastery } from '../lib/masteryStore'
 import { recordConfidence } from '../lib/confidenceStore'
+import { generateFollowUpPrompts } from '../lib/followUpPrompts'
 
 function fmt(seconds) {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
@@ -687,6 +688,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const lastBreakCount = useRef(0)
   const [interleavePick, setInterleavePick] = useState(null)
   const [interleaveAnswered, setInterleaveAnswered] = useState(false)
+  const [followUpDone, setFollowUpDone] = useState({})
 
   // ── Mid-session check-in ──
   const [midCheckIn, setMidCheckIn] = useState(false)
@@ -1620,6 +1622,82 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     </div>
                   )}
                 </>
+              )
+            })()}
+
+            {/* Session follow-up — 3 quick self-check prompts to lock in what was studied */}
+            {(session.focusArea || session.sessionType || session.courseName) && (() => {
+              const prompts = generateFollowUpPrompts({
+                topic:       session.focusArea ?? session.sessionType,
+                sessionType: session.sessionType,
+                courseName:  session.courseName,
+              })
+              if (!prompts.length) return null
+              const doneCount = Object.values(followUpDone).filter(Boolean).length
+              return (
+                <div className="rounded-2xl p-4 mb-4" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+                  <style>{`
+                    .fu-item { transition: background 150ms cubic-bezier(0.4,0,0.2,1), border-color 150ms; }
+                    .fu-item:hover { background: rgba(59,97,196,0.04); }
+                    .fu-item:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(59,97,196,0.28); }
+                  `}</style>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10, gap: 8 }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9B9B9B', margin: 0 }}>
+                      Lock it in · self-check
+                    </p>
+                    <span style={{ fontSize: 10.5, fontWeight: 700, color: doneCount === prompts.length ? '#059669' : '#6B6B6B' }}>
+                      {doneCount}/{prompts.length}
+                    </span>
+                  </div>
+                  <p style={{ fontSize: 11.5, color: '#6B6B6B', margin: '0 0 10px', lineHeight: 1.5 }}>
+                    Answer each silently. Tap only if you nailed it without notes.
+                  </p>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {prompts.map((p, i) => {
+                      const done = !!followUpDone[i]
+                      return (
+                        <button
+                          key={i}
+                          className="fu-item"
+                          onClick={() => {
+                            const next = { ...followUpDone, [i]: !done }
+                            setFollowUpDone(next)
+                            if (!done) track('followup_confirmed', { promptIndex: i, courseId: session.courseId, sessionType: session.sessionType })
+                          }}
+                          aria-pressed={done}
+                          style={{
+                            display: 'flex', alignItems: 'flex-start', gap: 10,
+                            padding: '10px 12px', minHeight: 44,
+                            textAlign: 'left',
+                            background: done ? 'rgba(5,150,105,0.06)' : '#FAFAF8',
+                            border: done ? '1px solid rgba(5,150,105,0.28)' : '1px solid rgba(0,0,0,0.05)',
+                            borderRadius: 10, cursor: 'pointer', fontFamily: 'inherit',
+                          }}
+                        >
+                          <div style={{
+                            width: 18, height: 18, flexShrink: 0, marginTop: 1,
+                            borderRadius: 5,
+                            background: done ? '#059669' : '#FFFFFF',
+                            border: done ? '1px solid #059669' : '1.5px solid rgba(0,0,0,0.15)',
+                            display: 'grid', placeItems: 'center',
+                          }}>
+                            {done && (
+                              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
+                                <path d="M5 13l4 4L19 7"/>
+                              </svg>
+                            )}
+                          </div>
+                          <span style={{ fontSize: 13, color: '#111111', lineHeight: 1.45, fontWeight: done ? 600 : 500 }}>{p}</span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {doneCount === prompts.length && (
+                    <p style={{ fontSize: 11.5, color: '#059669', margin: '10px 0 0', fontWeight: 700 }}>
+                      Nailed all three. That's real understanding, not familiarity.
+                    </p>
+                  )}
+                </div>
               )
             })()}
 

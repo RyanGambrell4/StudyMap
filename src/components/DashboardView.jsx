@@ -14,6 +14,9 @@ import SmartStartCard from './SmartStartCard'
 import MomentumCard from './MomentumCard'
 import ComebackCard from './ComebackCard'
 import CrossCourseCard from './CrossCourseCard'
+import ExamCountdownCard from './ExamCountdownCard'
+import StreakGuardCard from './StreakGuardCard'
+import WeeklyRecapCard from './WeeklyRecapCard'
 import { getDueForReview, getReviewStats } from '../lib/masteryStore'
 import { detectComeback } from '../lib/momentum'
 
@@ -1209,6 +1212,32 @@ export default function DashboardView({
 
       {/* ── Grid ── */}
       <div className="dash-grid" style={{ padding: '20px 32px 48px', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
+
+        {/* ── Exam Countdown: prominent whenever an exam is ≤ 14 days out ── */}
+        <ExamCountdownCard
+          courses={courses}
+          onStartFocus={() => displaySession ? onStartFocus?.(displaySession) : onOpenStudyCoach?.()}
+          onOpenExamRescue={onOpenExamRescue}
+          onOpenPracticeExam={onOpenPracticeExam}
+        />
+
+        {/* ── Streak Guard: loss-aversion nudge when today hasn't been studied ── */}
+        <StreakGuardCard
+          streak={streak}
+          completedToday={todaySessions.some(s => completedIds.has(s.id))}
+          todaySessions={todaySessions}
+          freezeCount={freezeCount}
+          onUseFreeze={useFreeze}
+          onStartFocus={onStartFocus}
+        />
+
+        {/* ── Weekly Recap: Monday/Sunday debrief on last week's work ── */}
+        <WeeklyRecapCard
+          completedSessionLog={completedSessions}
+          todayStr={todayStr}
+          onStartFocus={() => displaySession ? onStartFocus?.(displaySession) : onOpenStudyCoach?.()}
+          onOpenProgress={onOpenProgress ?? onNavigateToProgress}
+        />
 
         {/* ── Momentum Score: composite weekly health ── */}
         <MomentumCard
