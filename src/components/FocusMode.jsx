@@ -15,7 +15,8 @@ import { useCelebration } from '../utils/useCelebration'
 import { extractText } from '../utils/extractText'
 import AIChatView from './AIChatView'
 import { track } from '../lib/analytics'
-import { updateMastery, getMasteryLevel, getMasteryColor } from '../lib/masteryStore'
+import { updateMastery, getMasteryLevel, getMasteryColor, getAllMastery } from '../lib/masteryStore'
+import { recordConfidence } from '../lib/confidenceStore'
 
 function fmt(seconds) {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
@@ -684,6 +685,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const [breakOverlay, setBreakOverlay] = useState(false)
   const [breakRemaining, setBreakRemaining] = useState(BREAK_DURATION)
   const lastBreakCount = useRef(0)
+  const [interleavePick, setInterleavePick] = useState(null)
+  const [interleaveAnswered, setInterleaveAnswered] = useState(false)
 
   // ── Mid-session check-in ──
   const [midCheckIn, setMidCheckIn] = useState(false)
@@ -916,6 +919,21 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   useEffect(() => {
     if (!breakOverlay) return
     setBreakRemaining(BREAK_DURATION)
+    // Pick an interleave topic from a course other than this one.
+    const currentCourseId = String(session?.courseId ?? '')
+    const others = getAllMastery().filter(m =>
+      m.topic && String(m.courseId ?? '') !== currentCourseId && m.score != null
+    )
+    if (others.length > 0) {
+      // Weighted toward weaker topics (more educational to revisit).
+      const weighted = others.flatMap(m => Array(Math.max(1, Math.round((100 - m.score) / 10))).fill(m))
+      const pick = weighted[Math.floor(Math.random() * weighted.length)]
+      setInterleavePick(pick)
+      setInterleaveAnswered(false)
+      track('interleave_shown', { topic: pick.topic, score: pick.score })
+    } else {
+      setInterleavePick(null)
+    }
     const t = setInterval(() => {
       setBreakRemaining(r => {
         if (r <= 1) { clearInterval(t); setBreakOverlay(false); setBreakBanner(false); return BREAK_DURATION }
@@ -923,7 +941,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       })
     }, 1000)
     return () => clearInterval(t)
-  }, [breakOverlay])
+  }, [breakOverlay, session?.courseId])
 
   // ── Mid-session check-in at 50% ──
   useEffect(() => {
@@ -1414,16 +1432,84 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
       {/* ── Break overlay ── */}
       {breakOverlay && (
-        <div className="absolute inset-0 z-[110] flex flex-col items-center justify-center" style={{ backgroundColor: '#F7F6F3', isolation: 'isolate' }}>
-          <div className="text-center">
-            <div className="relative flex items-center justify-center mb-10">
-              <div className="w-36 h-36 rounded-full" style={{ backgroundColor: dot, opacity: 0.08, animation: 'breathe 4s ease-in-out infinite' }} />
-              <div className="absolute w-24 h-24 rounded-full" style={{ backgroundColor: dot, opacity: 0.15, animation: 'breathe 4s ease-in-out infinite 0.8s' }} />
-              <div className="absolute w-12 h-12 rounded-full" style={{ backgroundColor: dot }} />
+        <div className="absolute inset-0 z-[110] flex flex-col items-center justify-center overflow-y-auto py-8" style={{ backgroundColor: '#F7F6F3', isolation: 'isolate' }}>
+          <style>{`
+            @keyframes il-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+            .il-btn { transition: transform 150ms cubic-bezier(0.4,0,0.2,1), box-shadow 150ms cubic-bezier(0.4,0,0.2,1), background 150ms; }
+            .il-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(0,0,0,0.08); }
+            .il-btn:active { transform: scale(0.97); }
+            .il-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(59,97,196,0.35); }
+          `}</style>
+          <div className="text-center px-6" style={{ maxWidth: 420 }}>
+            <div className="relative flex items-center justify-center mb-8">
+              <div className="w-32 h-32 rounded-full" style={{ backgroundColor: dot, opacity: 0.08, animation: 'breathe 4s ease-in-out infinite' }} />
+              <div className="absolute w-20 h-20 rounded-full" style={{ backgroundColor: dot, opacity: 0.15, animation: 'breathe 4s ease-in-out infinite 0.8s' }} />
+              <div className="absolute w-10 h-10 rounded-full" style={{ backgroundColor: dot }} />
             </div>
-            <h2 className="text-3xl font-bold mb-2" style={{ color: '#1A1A1A' }}>Take a breath</h2>
-            <p className="text-sm mb-3" style={{ color: '#6B6B6B' }}>Inhale 4s &nbsp;·&nbsp; Hold 4s &nbsp;·&nbsp; Exhale 4s</p>
-            <p className="text-5xl font-mono font-bold mb-8" style={{ color: dot }}>{fmt(breakRemaining)}</p>
+            <h2 className="text-2xl font-bold mb-2" style={{ color: '#1A1A1A' }}>Take a breath</h2>
+            <p className="text-xs mb-2" style={{ color: '#6B6B6B' }}>Inhale 4s &nbsp;·&nbsp; Hold 4s &nbsp;·&nbsp; Exhale 4s</p>
+            <p className="text-4xl font-mono font-bold mb-6" style={{ color: dot }}>{fmt(breakRemaining)}</p>
+
+            {interleavePick && !interleaveAnswered && (
+              <div style={{
+                animation: 'il-fade 400ms cubic-bezier(0.16,1,0.3,1) both',
+                background: '#FFFFFF',
+                border: '1px solid rgba(0,0,0,0.07)',
+                borderRadius: 16,
+                padding: '18px 20px',
+                marginBottom: 16,
+                textAlign: 'left',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.04)',
+              }}>
+                <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#3B61C4', marginBottom: 6 }}>
+                  Interleave · 15-second recall
+                </div>
+                <div style={{ fontSize: 14, fontWeight: 700, color: '#111111', lineHeight: 1.35, marginBottom: 4, textTransform: 'capitalize' }}>
+                  {interleavePick.topic}
+                </div>
+                <div style={{ fontSize: 11.5, color: '#6B6B6B', marginBottom: 14, lineHeight: 1.45 }}>
+                  Rate it from memory. Weak-topic mixing beats staying in one lane.
+                </div>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8 }}>
+                  {[
+                    { rating: 2, label: 'Blank',  color: '#DC2626', bg: 'rgba(220,38,38,0.08)' },
+                    { rating: 3, label: 'Fuzzy',  color: '#D97706', bg: 'rgba(217,119,6,0.08)' },
+                    { rating: 4, label: 'Solid',  color: '#059669', bg: 'rgba(5,150,105,0.08)' },
+                  ].map(({ rating, label, color, bg }) => (
+                    <button
+                      key={rating}
+                      className="il-btn"
+                      onClick={() => {
+                        recordConfidence({ rating, topic: interleavePick.topic, courseId: interleavePick.courseId, source: 'interleave_break' })
+                        track('interleave_answered', { topic: interleavePick.topic, rating })
+                        setInterleaveAnswered(true)
+                      }}
+                      style={{
+                        minHeight: 44,
+                        background: bg,
+                        color, border: `1px solid ${color}30`, borderRadius: 10,
+                        fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
+                        cursor: 'pointer', letterSpacing: '-0.005em',
+                      }}
+                    >{label}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {interleavePick && interleaveAnswered && (
+              <div style={{
+                animation: 'il-fade 400ms cubic-bezier(0.16,1,0.3,1) both',
+                background: 'rgba(5,150,105,0.06)',
+                border: '1px solid rgba(5,150,105,0.2)',
+                borderRadius: 16, padding: '14px 18px', marginBottom: 16,
+                display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center',
+              }}>
+                <svg width="18" height="18" fill="none" stroke="#059669" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                <span style={{ fontSize: 12.5, fontWeight: 700, color: '#059669' }}>Locked in. Enjoy the rest of your break.</span>
+              </div>
+            )}
+
             <button onClick={() => { setBreakOverlay(false); setBreakBanner(false) }} className="text-sm transition-colors" style={{ color: '#9B9B9B' }}>Skip break, keep studying</button>
           </div>
         </div>

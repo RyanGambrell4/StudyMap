@@ -13,6 +13,7 @@ import { getWeakTopics } from '../lib/weakTopics'
 import SmartStartCard from './SmartStartCard'
 import MomentumCard from './MomentumCard'
 import ComebackCard from './ComebackCard'
+import CrossCourseCard from './CrossCourseCard'
 import { getDueForReview, getReviewStats } from '../lib/masteryStore'
 import { detectComeback } from '../lib/momentum'
 
@@ -1216,6 +1217,13 @@ export default function DashboardView({
           completedIds={completedIds}
           todayStr={todayStr}
           onOpenProgress={onOpenProgress ?? onNavigateToProgress}
+        />
+
+        {/* ── Cross-Course Connection: topics shared across 2+ classes ── */}
+        <CrossCourseCard
+          courses={courses}
+          onOpenBrainDump={onOpenBrainDump}
+          onOpenReviewQueue={onOpenReviewQueue}
         />
 
         {/* ── Comeback Mode: warm re-entry when the student's been away ── */}

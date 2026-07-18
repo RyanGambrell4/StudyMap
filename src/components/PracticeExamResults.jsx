@@ -5,6 +5,7 @@ import { useCelebration } from '../utils/useCelebration'
 import { getAccessToken } from '../lib/supabase'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
+import { analyzeExam, SKILL_LABEL, SKILL_HINT, SKILL_COLOR } from '../lib/examAutopsy'
 
 function fmtMs(ms) {
   const total = Math.round(ms / 1000)
@@ -217,6 +218,9 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
     return scoreHistory[scoreHistory.length - 1] - scoreHistory[0]
   }, [scoreHistory])
 
+  const autopsy = useMemo(() => analyzeExam(graded), [graded])
+  const autopsyHasData = autopsy.rows.some(r => r.total > 0)
+
   return (
     <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#F7F6F3', overflowY: 'auto' }}>
       <div style={{ maxWidth: 820, margin: '0 auto', padding: '32px 24px 80px' }}>
@@ -336,6 +340,50 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
                 </div>
               ))}
             </div>
+          </div>
+        )}
+
+        {/* Exam Autopsy — cognitive-skill breakdown */}
+        {autopsyHasData && autoGradedCount >= 3 && (
+          <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: 18 }}>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, gap: 12, flexWrap: 'wrap' }}>
+              <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Exam autopsy · by cognitive skill</p>
+            </div>
+            <p style={{ margin: '0 0 14px', fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.5 }}>
+              Where you actually leak points. Different failure modes need different fixes.
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+              {autopsy.rows.filter(r => r.total > 0).map(r => {
+                const color = SKILL_COLOR[r.skill]
+                const barBg = `${color}18`
+                return (
+                  <div key={r.skill} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', background: '#FAFAF8', borderRadius: 12, border: '1px solid rgba(0,0,0,0.05)' }}>
+                    <div style={{ flex: '0 0 100px' }}>
+                      <div style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.005em' }}>{SKILL_LABEL[r.skill]}</div>
+                      <div style={{ fontSize: 11, color: '#9B9B9B', fontWeight: 600, marginTop: 2 }}>{r.correct}/{r.total}</div>
+                    </div>
+                    <div style={{ flex: 1, position: 'relative', height: 8, background: barBg, borderRadius: 999, overflow: 'hidden' }}>
+                      <div style={{
+                        position: 'absolute', left: 0, top: 0, bottom: 0,
+                        width: `${r.pct}%`, background: color, borderRadius: 999,
+                        transition: 'width 600ms cubic-bezier(0.16,1,0.3,1)',
+                      }}/>
+                    </div>
+                    <div style={{ flex: '0 0 44px', textAlign: 'right', fontSize: 14, fontWeight: 800, color, letterSpacing: '-0.01em' }}>{r.pct}%</div>
+                  </div>
+                )
+              })}
+            </div>
+            {autopsy.insight && (
+              <div style={{ marginTop: 14, padding: '12px 14px', background: `${SKILL_COLOR[autopsy.insight.weakest.skill]}0D`, border: `1px solid ${SKILL_COLOR[autopsy.insight.weakest.skill]}30`, borderRadius: 12 }}>
+                <p style={{ margin: '0 0 4px', fontSize: 12, fontWeight: 800, color: SKILL_COLOR[autopsy.insight.weakest.skill], letterSpacing: '-0.005em' }}>
+                  Fix your {SKILL_LABEL[autopsy.insight.weakest.skill].toLowerCase()} gap first — {autopsy.insight.gap} points behind your {SKILL_LABEL[autopsy.insight.strongest.skill].toLowerCase()}.
+                </p>
+                <p style={{ margin: 0, fontSize: 12.5, color: '#4A4A4A', lineHeight: 1.5 }}>
+                  {SKILL_HINT[autopsy.insight.weakest.skill]}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
