@@ -5,6 +5,7 @@ import { getCachedPracticeScores, savePracticeScores, getCachedSessionRecalls, g
 import { getDueCards } from '../lib/sm2'
 import { getActivePlan, hasUsedTrial } from '../lib/subscription'
 import { getAllMastery, getMasteryLevel, getMasteryColor, getReviewStats } from '../lib/masteryStore'
+import { computeConfidenceGap } from '../lib/confidenceStore'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
@@ -1466,6 +1467,110 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                 </div>
               </div>
             </div>
+
+            {/* Confidence Gap card */}
+            {(() => {
+              const gap = computeConfidenceGap(allMastery)
+              const total = gap.calibrated + gap.overconfident + gap.underconfident
+              if (total < 3) return null
+
+              const overTopics  = gap.topics.filter(t => t.status === 'overconfident').sort((a, b) => b.gap - a.gap).slice(0, 4)
+              const underTopics = gap.topics.filter(t => t.status === 'underconfident').sort((a, b) => a.gap - b.gap).slice(0, 4)
+              const calibratedPct = Math.round((gap.calibrated / total) * 100)
+
+              return (
+                <div style={{
+                  background: D.bgCard,
+                  border: `1px solid ${D.border}`,
+                  borderRadius: 16,
+                  padding: '24px 26px',
+                  marginBottom: 16,
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)',
+                  animation: 'pv-fade-in 300ms cubic-bezier(0.16,1,0.3,1) both',
+                  animationDelay: '120ms',
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 12 }}>
+                    <div>
+                      <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 4 }}>
+                        Confidence vs. Reality
+                      </div>
+                      <div style={{ fontSize: 20, fontWeight: 800, color: D.text, letterSpacing: '-0.02em', lineHeight: 1.15 }}>
+                        {calibratedPct}<span style={{ fontSize: 14, color: D.textMuted, fontWeight: 700, marginLeft: 3 }}>% calibrated</span>
+                      </div>
+                      <div style={{ fontSize: 12.5, color: D.textMuted, marginTop: 2, maxWidth: 460, lineHeight: 1.5 }}>
+                        How your gut match up to how you actually score. Closing the gap is one of the fastest ways to lift real test performance.
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Distribution bar */}
+                  <div style={{ display: 'flex', height: 10, borderRadius: 5, overflow: 'hidden', gap: 2, marginBottom: 12, background: 'rgba(0,0,0,0.04)' }}>
+                    {gap.overconfident > 0  && <div style={{ flex: gap.overconfident,  background: '#DC2626', borderRadius: 5 }} title={`${gap.overconfident} overconfident`} />}
+                    {gap.calibrated > 0     && <div style={{ flex: gap.calibrated,     background: '#16A34A', borderRadius: 5 }} title={`${gap.calibrated} calibrated`} />}
+                    {gap.underconfident > 0 && <div style={{ flex: gap.underconfident, background: '#3B61C4', borderRadius: 5 }} title={`${gap.underconfident} underconfident`} />}
+                  </div>
+
+                  <div style={{ display: 'flex', gap: 20, marginBottom: 20, flexWrap: 'wrap' }}>
+                    {[
+                      { label: 'Overconfident', hint: 'feels solid, isn\'t', count: gap.overconfident,  color: '#DC2626' },
+                      { label: 'Calibrated',    hint: 'feels right',        count: gap.calibrated,     color: '#16A34A' },
+                      { label: 'Underconfident', hint: 'know it, doubt it', count: gap.underconfident, color: '#3B61C4' },
+                    ].map(({ label, hint, count, color }) => (
+                      <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 10, height: 10, borderRadius: 3, background: color, flexShrink: 0 }} />
+                        <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: D.text }}>
+                            <span style={{ color, fontWeight: 800 }}>{count}</span> {label}
+                          </span>
+                          <span style={{ fontSize: 10.5, color: D.textDim, fontWeight: 500 }}>{hint}</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  {(overTopics.length > 0 || underTopics.length > 0) && (
+                    <div className="pv-2col" style={{ gridTemplateColumns: '1fr 1fr', gap: 20, marginBottom: 0 }}>
+                      {overTopics.length > 0 && (
+                        <div>
+                          <div style={{ fontSize: 10.5, fontWeight: 700, color: '#DC2626', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>
+                            Traps · You think you know these
+                          </div>
+                          {overTopics.map((t, i) => (
+                            <div key={i} className="pv-row" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px', marginLeft: -8, marginRight: -8 }}>
+                              <div style={{ minWidth: 46, textAlign: 'right' }}>
+                                <span style={{ fontSize: 11.5, fontWeight: 800, color: '#DC2626', fontVariantNumeric: 'tabular-nums' }}>+{Math.round(t.gap)}</span>
+                              </div>
+                              <span style={{ fontSize: 13, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, fontWeight: 500 }}>{t.topic}</span>
+                              <span style={{ fontSize: 10.5, color: D.textDim, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
+                                felt {Math.round(t.perceived)} · scored {Math.round(t.actual)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {underTopics.length > 0 && (
+                        <div>
+                          <div style={{ fontSize: 10.5, fontWeight: 700, color: '#3B61C4', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>
+                            Wins · Better than you think
+                          </div>
+                          {underTopics.map((t, i) => (
+                            <div key={i} className="pv-row" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px', marginLeft: -8, marginRight: -8 }}>
+                              <div style={{ minWidth: 46, textAlign: 'right' }}>
+                                <span style={{ fontSize: 11.5, fontWeight: 800, color: '#3B61C4', fontVariantNumeric: 'tabular-nums' }}>{Math.round(t.gap)}</span>
+                              </div>
+                              <span style={{ fontSize: 13, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, fontWeight: 500 }}>{t.topic}</span>
+                              <span style={{ fontSize: 10.5, color: D.textDim, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>
+                                felt {Math.round(t.perceived)} · scored {Math.round(t.actual)}
+                              </span>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
           </>
         )
       })()}

@@ -46,6 +46,7 @@ const MasteryMapView      = lazy(() => import('./MasteryMapView'))
 const ReviewQueueView     = lazy(() => import('./ReviewQueueView'))
 import CheatSheetModal from './CheatSheetModal'
 import BrainDumpModal from './BrainDumpModal'
+import ConfidenceTapModal from './ConfidenceTapModal'
 import ExamRescueModal from './ExamRescueModal'
 import QuickQuizBurst from './QuickQuizBurst'
 import PodcastGenerator from './PodcastGenerator'
@@ -421,6 +422,7 @@ export default function OutputView({
   const [showFirstQueryNudge, setShowFirstQueryNudge] = useState(false)
   const [showCheatSheet, setShowCheatSheet] = useState(false)
   const [showBrainDump, setShowBrainDump] = useState(false)
+  const [confidencePrompt, setConfidencePrompt] = useState(null)
   const [showExamRescue, setShowExamRescue] = useState(false)
   const [showQuizBurst, setShowQuizBurst] = useState(false)
   const [showPodcast, setShowPodcast] = useState(false)
@@ -1029,6 +1031,14 @@ export default function OutputView({
             }
           }
         }
+      }
+      // Trigger confidence check after a real session (not just a blueprint)
+      if (sess && sess.courseName) {
+        setConfidencePrompt({
+          topic:    sess.sessionType ?? sess.courseName,
+          courseId: sess.courseId ?? null,
+          source:   'focus_session',
+        })
       }
       return null
     })
@@ -2048,6 +2058,14 @@ export default function OutputView({
           onShowPaywall={onShowPaywall}
           onDrillGaps={(topic) => { setShowBrainDump(false); setPendingDrillTopic(topic); setActiveSection('tools') }}
           onOpenTeachItBack={({ courseIdx, topic }) => { setShowBrainDump(false); setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
+        />
+      )}
+      {confidencePrompt && (
+        <ConfidenceTapModal
+          topic={confidencePrompt.topic}
+          courseId={confidencePrompt.courseId}
+          source={confidencePrompt.source}
+          onClose={() => setConfidencePrompt(null)}
         />
       )}
       {showExamRescue && (

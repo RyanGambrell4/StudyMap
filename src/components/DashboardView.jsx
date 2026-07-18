@@ -11,7 +11,10 @@ import { clean } from '../utils/strings'
 import { daysBetween, formatShortDate } from '../utils/dateUtils'
 import { getWeakTopics } from '../lib/weakTopics'
 import SmartStartCard from './SmartStartCard'
+import MomentumCard from './MomentumCard'
+import ComebackCard from './ComebackCard'
 import { getDueForReview, getReviewStats } from '../lib/masteryStore'
+import { detectComeback } from '../lib/momentum'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
@@ -174,6 +177,7 @@ export default function DashboardView({
   userCreatedAt,
   onRescheduleSession,
   onOpenReviewQueue,
+  onOpenProgress,
 }) {
   const plan = getActivePlan()
   const { remaining: aiRemaining } = canUseFeature('aiTutor')
@@ -1204,6 +1208,31 @@ export default function DashboardView({
 
       {/* ── Grid ── */}
       <div className="dash-grid" style={{ padding: '20px 32px 48px', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
+
+        {/* ── Momentum Score: composite weekly health ── */}
+        <MomentumCard
+          completedSessionLog={completedSessions}
+          allSessions={allSessions}
+          completedIds={completedIds}
+          todayStr={todayStr}
+          onOpenProgress={onOpenProgress ?? onNavigateToProgress}
+        />
+
+        {/* ── Comeback Mode: warm re-entry when the student's been away ── */}
+        {(() => {
+          const comeback = detectComeback(completedSessions ?? [])
+          if (!comeback) return null
+          return (
+            <ComebackCard
+              daysAway={comeback.daysAway}
+              lastSessionDate={comeback.lastSessionDate}
+              courses={courses}
+              onStartFocus={onStartFocus}
+              onOpenBrainDump={onOpenBrainDump}
+              todaySessions={todaySessions}
+            />
+          )
+        })()}
 
         {/* ── Smart Start: today's mission card (always shown when courses exist) ── */}
         <SmartStartCard
