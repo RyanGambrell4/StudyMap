@@ -168,8 +168,13 @@ a:hover{text-decoration:underline}
   <script src="/ph-init.js"></script>
   <script src="/utm-propagate.js" defer></script>
   <link rel="stylesheet" href="/blog/blog.css" />
+<link rel="alternate" type="application/rss+xml" title="StudyEdge AI Blog" href="/blog/feed.xml">
 </head>
 <body>
+<div id="rp" style="position:fixed;top:0;left:0;width:0%;height:3px;background:#3B61C4;z-index:9999;pointer-events:none;" aria-hidden="true"></div>
+<script>
+(function(){var r=document.getElementById('rp');window.addEventListener('scroll',function(){var d=document.documentElement;r.style.width=Math.min(100,d.scrollTop/(d.scrollHeight-d.clientHeight)*100)+'%';},{passive:true});})();
+</script>
 
 <nav class="site-nav">
   <a class="logo" href="/">Study<span>Edge</span> AI</a>
@@ -183,6 +188,16 @@ a:hover{text-decoration:underline}
     <p class="breadcrumb"><a href="/">Home</a> &rsaquo; <a href="/blog">Blog</a> &rsaquo; How to Study for a Test</p>
     <h1>How to Study for a Test: A 5-Step System That Works</h1>
     <p class="meta">Published July 12, 2026 <span class="updated-badge">Updated Jul 2026</span> &middot; 10 min read</p>
+<div class="share-bar" style="display:flex;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap;">
+  <span style="font-size:13px;color:#6B6B6B;font-weight:500;letter-spacing:.02em;">Share:</span>
+  <a href="https://twitter.com/intent/tweet?url=https://getstudyedge.com/blog/how-to-study-for-a-test&amp;text=Study%20Guide%20%7C%20StudyEdge%20AI" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#000;color:#fff;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.738l7.726-8.85L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+    Share on X
+  </a>
+  <button onclick="navigator.clipboard.writeText(window.location.href).then(function(){var b=this;b.textContent='Copied!';setTimeout(function(){b.textContent='Copy link'},2000)}.bind(this))" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#F7F6F3;color:#111111;border:1px solid rgba(0,0,0,0.12);border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;">
+    Copy link
+  </button>
+</div>
   </div>
 </section>
 
@@ -229,7 +244,7 @@ a:hover{text-decoration:underline}
 
     <p>Start with the syllabus. Most professors list exam topics by lecture or week. Cross-reference that against any review sheets or study guides provided, and compare both against previous exams from the same professor if they are available through your university library or course files. Note which topics appear on past exams repeatedly: those are the ones worth 70% of your preparation time.</p>
 
-    <p>Next, assess format. Multiple choice, short answer, problem sets, and essay exams each require a different type of retrieval practice. Multiple choice tests discrimination (can you pick the right answer from plausible options). Essay tests free recall and organization. Problem sets test procedural fluency. Knowing the format before you start shapes which study methods you prioritize in steps 3 and 4.</p>
+    <p>Next, assess format. <a href="/blog/how-to-study-for-multiple-choice-exams">Multiple choice</a>, short answer, problem sets, and essay exams each require a different type of retrieval practice. Multiple choice tests discrimination (can you pick the right answer from plausible options). Essay tests free recall and organization. Problem sets test procedural fluency. Knowing the format before you start shapes which study methods you prioritize in steps 3 and 4.</p>
 
     <p>Finally, note how much time you have. If you have seven days, you can distribute four to five sessions comfortably. If you have two days, you need to work with what is possible. This audit should take no more than 20 minutes and will save hours of misdirected effort.</p>
 
@@ -253,7 +268,7 @@ a:hover{text-decoration:underline}
 
     <h2 id="step-3-active-recall">Step 3: Use Active Recall, Not Re-Reading</h2>
 
-    <p>This is the step where most students leave the most points on the table. Re-reading notes is the default study behavior for the majority of college students, and it is also one of the least effective methods available. Dunlosky et al. (2013) reviewed 10 common study techniques and rated re-reading as low utility. The problem is not that it produces nothing; it is that it trains the wrong skill.</p>
+    <p>This is the step where most students leave the most points on the table. Re-reading notes is the default study behavior for the majority of college students, and it is also one of the <a href="/blog/study-myths">least effective methods available</a>. Dunlosky et al. (2013) reviewed 10 common study techniques and rated re-reading as low utility. The problem is not that it produces nothing; it is that it trains the wrong skill.</p>
 
     <p>Re-reading builds recognition. You see information and your brain confirms it is familiar. On most exams, you need recall: you need to produce information without seeing it first. Those are different cognitive tasks, and training one does very little to train the other. Students routinely feel prepared after re-reading sessions because the material feels familiar when they look at it. Then on the exam, without their notes in front of them, retrieval fails.</p>
 
@@ -262,7 +277,7 @@ a:hover{text-decoration:underline}
     <p>Practically, active recall means: close your notes, ask yourself a question about the material, and attempt to answer it before checking. The formats that work best include:</p>
 
     <ul>
-      <li><strong>Flashcards:</strong> question on one side, answer on the other. Works especially well for definitions, formulas, vocabulary, and discrete facts.</li>
+      <li><strong><a href="/blog/how-to-make-flashcards">Flashcards</a>:</strong> question on one side, answer on the other. Works especially well for definitions, formulas, vocabulary, and discrete facts.</li>
       <li><strong>Question sets:</strong> a written list of retrieval prompts you answer from memory, then check. Faster to create than flashcards for conceptual material.</li>
       <li><strong>Blank-page retrieval:</strong> set a timer, pick a topic, and write everything you know about it without looking at notes. Highly effective for essay exams and conceptual courses.</li>
       <li><strong>Problem-solving from scratch:</strong> for STEM courses, the equivalent of active recall is working through a problem type you have not seen solved recently, without referring to worked examples until you are stuck.</li>
@@ -421,7 +436,7 @@ a:hover{text-decoration:underline}
     </div>
     <div class="faq-item">
       <h3>How do I study faster?</h3>
-      <p>The fastest path to exam-ready knowledge is not reading faster; it is eliminating passive review. Replace re-reading with active recall: convert your notes to questions and answer them without looking. This takes similar time per session but produces dramatically better retention, meaning you need fewer review sessions total. Second, prioritize ruthlessly: focus 70% of your time on the highest-weighted topics. Third, use practice problems for quantitative courses rather than re-reading explanations; working through problems reveals gaps that review alone misses. Finally, use interleaved practice (mixing topics) rather than massed practice (completing all of one topic before moving to the next), which builds more flexible recall.</p>
+      <p>The fastest path to exam-ready knowledge is not reading faster; it is eliminating passive review. Replace re-reading with active recall: convert your notes to questions and answer them without looking. This takes similar time per session but produces dramatically better retention, meaning you need fewer review sessions total. Second, prioritize ruthlessly: focus 70% of your time on the highest-weighted topics. Third, use practice problems for quantitative courses rather than re-reading explanations; working through problems reveals gaps that review alone misses. Finally, use interleaved practice (mixing topics) rather than <a href="/blog/how-to-study-smarter-not-harder">massed practice</a> (completing all of one topic before moving to the next), which builds more flexible recall.</p>
     </div>
     <div class="faq-item">
       <h3>What's the best way to study for a multiple choice test?</h3>
@@ -507,5 +522,33 @@ a:hover{text-decoration:underline}
   <p>&copy; 2026 StudyEdge AI</p>
 </footer>
 
+<style>
+.anchor-link{opacity:0;margin-left:8px;font-size:0.8em;color:#3B61C4;text-decoration:none;vertical-align:middle;transition:opacity .15s;}
+h2:hover .anchor-link{opacity:1;}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded',function(){
+  document.querySelectorAll('h2[id]').forEach(function(h){
+    var a=document.createElement('a');
+    a.href='#'+h.id;
+    a.className='anchor-link';
+    a.setAttribute('aria-label','Link to this section');
+    a.textContent='#';
+    h.appendChild(a);
+  });
+});
+</script>
+<button id="btt" onclick="window.scrollTo({top:0,behavior:'smooth'})" aria-label="Back to top"
+  style="position:fixed;bottom:24px;right:24px;width:44px;height:44px;border-radius:50%;background:#3B61C4;color:#fff;border:none;cursor:pointer;display:none;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(59,97,196,.35);z-index:999;transition:opacity .2s,transform .2s;">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 15l-6-6-6 6"/></svg>
+</button>
+<script>
+(function(){
+  var b=document.getElementById('btt');
+  window.addEventListener('scroll',function(){
+    if(window.scrollY>500){b.style.display='flex';}else{b.style.display='none';}
+  },{passive:true});
+})();
+</script>
 </body>
 </html>
