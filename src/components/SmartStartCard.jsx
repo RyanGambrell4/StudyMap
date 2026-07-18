@@ -142,24 +142,30 @@ function MissionIcon({ ctaKey, color }) {
   )
 }
 
-// Exact hours countdown display for urgent exam mode
-function HoursCountdown({ examDate }) {
-  const [display, setDisplay] = useState('')
+// Live hours/minutes/seconds countdown display for urgent exam mode
+function HoursCountdown({ examDate, showSeconds = false }) {
+  const [parts, setParts] = useState({ h: 0, m: 0, s: 0, days: 0, isNow: false })
   useEffect(() => {
     const update = () => {
-      const diff = new Date(examDate + 'T12:00:00') - new Date()
-      if (diff <= 0) { setDisplay('Exam is today'); return }
-      const h = Math.floor(diff / 3600000)
+      const diff = new Date(examDate + 'T09:00:00') - new Date()
+      if (diff <= 0) { setParts({ h: 0, m: 0, s: 0, days: 0, isNow: true }); return }
+      const days = Math.floor(diff / 86400000)
+      const h = Math.floor((diff % 86400000) / 3600000)
       const m = Math.floor((diff % 3600000) / 60000)
-      if (h >= 24) setDisplay(`${Math.ceil(diff / 86400000)} days`)
-      else if (h > 0) setDisplay(`${h}h ${m}m`)
-      else setDisplay(`${m} minutes`)
+      const s = Math.floor((diff % 60000) / 1000)
+      setParts({ h, m, s, days, isNow: false })
     }
     update()
-    const t = setInterval(update, 30000)
+    const t = setInterval(update, showSeconds ? 1000 : 15000)
     return () => clearInterval(t)
-  }, [examDate])
-  return <span>{display}</span>
+  }, [examDate, showSeconds])
+  if (parts.isNow) return <span>Now</span>
+  if (parts.days > 0) return <span>{parts.days}d {String(parts.h).padStart(2, '0')}h</span>
+  return (
+    <span style={{ fontVariantNumeric: 'tabular-nums' }}>
+      {String(parts.h).padStart(2, '0')}h {String(parts.m).padStart(2, '0')}m{showSeconds ? ` ${String(parts.s).padStart(2, '0')}s` : ''}
+    </span>
+  )
 }
 
 export default function SmartStartCard({
@@ -222,91 +228,244 @@ export default function SmartStartCard({
     return (
       <div style={{
         gridColumn: 'span 12',
-        background: '#FFF5F5',
-        border: '1.5px solid rgba(220,38,38,0.3)',
-        borderLeft: '5px solid #DC2626',
-        borderRadius: 16,
+        position: 'relative',
+        background: 'linear-gradient(160deg, #FFFFFF 0%, #FFF8F8 45%, #FFEEEE 100%)',
+        border: '1px solid rgba(220,38,38,0.18)',
+        borderRadius: 20,
         overflow: 'hidden',
-        boxShadow: '0 4px 24px rgba(220,38,38,0.12)',
+        boxShadow: '0 12px 40px rgba(220,38,38,0.14), 0 2px 8px rgba(220,38,38,0.08)',
       }}>
-        {/* Red header bar */}
-        <div style={{ background: 'linear-gradient(135deg, #DC2626, #B91C1C)', padding: '14px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        {/* Ambient glow behind the header */}
+        <div style={{
+          position: 'absolute', top: -80, right: -80,
+          width: 240, height: 240, borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(220,38,38,0.18) 0%, transparent 65%)',
+          pointerEvents: 'none',
+        }} />
+
+        {/* Top status bar */}
+        <div style={{
+          position: 'relative',
+          padding: '14px 22px',
+          background: 'linear-gradient(90deg, #DC2626, #B91C1C 55%, #991B1B)',
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          gap: 12, flexWrap: 'wrap',
+        }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#fff', opacity: 0.9, display: 'inline-block', animation: 'smart-pulse 1.4s ease-in-out infinite' }} />
-            <span style={{ fontSize: 11, fontWeight: 800, letterSpacing: '0.1em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.9)' }}>
-              {isToday ? 'Exam Day' : 'Exam Tomorrow'}
+            <span style={{
+              width: 10, height: 10, borderRadius: '50%', background: '#fff',
+              display: 'inline-block', animation: 'war-pulse 1.4s ease-in-out infinite',
+              boxShadow: '0 0 12px rgba(255,255,255,0.7)',
+            }} />
+            <span style={{
+              fontSize: 11, fontWeight: 800, letterSpacing: '0.14em', textTransform: 'uppercase',
+              color: '#fff',
+            }}>
+              {isToday ? 'Exam Day · War Room' : 'Exam Tomorrow · War Room'}
             </span>
           </div>
-          {upcomingExam.course.examDate && (
-            <span style={{ fontSize: 12, fontWeight: 700, color: 'rgba(255,255,255,0.85)', fontVariantNumeric: 'tabular-nums' }}>
-              <HoursCountdown examDate={upcomingExam.course.examDate} /> remaining
-            </span>
-          )}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, color: 'rgba(255,255,255,0.9)' }}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+            </svg>
+            {upcomingExam.course.examDate && (
+              <span style={{ fontSize: 13, fontWeight: 700, fontFamily: 'ui-monospace, monospace' }}>
+                <HoursCountdown examDate={upcomingExam.course.examDate} showSeconds={isToday} />
+              </span>
+            )}
+          </div>
         </div>
 
-        {/* Content */}
-        <div style={{ padding: '18px 20px 20px' }}>
-          <h3 style={{ margin: '0 0 4px', fontSize: 20, fontWeight: 800, color: '#7F1D1D', letterSpacing: -0.4 }}>
-            Final push for {examName}
-          </h3>
-          <p style={{ margin: '0 0 18px', fontSize: 13, color: '#991B1B', lineHeight: 1.55 }}>
-            {isToday
-              ? 'No new material. Review your weakest topics only. Trust what you have prepared.'
-              : 'You have hours left. Drill your weakest topics, review your cheat sheet, and get a good night of sleep.'}
-          </p>
+        {/* Hero content */}
+        <div style={{ position: 'relative', padding: '24px 24px 22px' }}>
+          <div style={{ display: 'flex', gap: 20, marginBottom: 20, flexWrap: 'wrap' }}>
+            <div style={{ flex: 1, minWidth: 240 }}>
+              <p style={{
+                fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
+                color: '#DC2626', margin: '0 0 6px',
+              }}>
+                Final Push
+              </p>
+              <h2 style={{
+                margin: '0 0 8px',
+                fontSize: 28, fontWeight: 800, color: '#7F1D1D',
+                letterSpacing: '-0.025em', lineHeight: 1.1,
+              }}>
+                {examName}
+              </h2>
+              <p style={{ margin: 0, fontSize: 14, color: '#991B1B', lineHeight: 1.55, maxWidth: 480 }}>
+                {isToday
+                  ? 'No new material. Review your weakest topics only. Trust what you have prepared.'
+                  : 'Focus on high-yield weaknesses. Sleep is more valuable than one extra hour of study.'}
+              </p>
+            </div>
 
-          {/* 3-action row */}
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', marginBottom: weakTopics.length > 0 ? 16 : 0 }}>
+            {/* Prep readiness meter */}
+            {mastery && (
+              <div style={{
+                minWidth: 140, padding: '12px 16px',
+                background: 'rgba(255,255,255,0.7)',
+                border: '1px solid rgba(220,38,38,0.18)',
+                borderRadius: 14, textAlign: 'center',
+                backdropFilter: 'blur(6px)',
+              }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.08em', color: '#991B1B', textTransform: 'uppercase', marginBottom: 4 }}>
+                  Prep Readiness
+                </div>
+                <div style={{ fontSize: 34, fontWeight: 800, color: mastery.avg >= 70 ? '#059669' : mastery.avg >= 50 ? '#D97706' : '#DC2626', letterSpacing: '-0.03em', lineHeight: 1, fontFamily: 'ui-monospace, monospace' }}>
+                  {mastery.avg}%
+                </div>
+                <div style={{ fontSize: 11, color: '#991B1B', marginTop: 4 }}>
+                  {mastery.strong} strong · {mastery.weak} weak
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Actions grid */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: weakTopics.length > 0 ? 20 : 0 }}>
             <button
+              className="ss-btn"
               onClick={() => { track('war_room_cta', { action: 'examRescue' }); isPro ? onOpenExamRescue?.() : onShowPaywall?.('examRescue') }}
-              style={{ flex: 1, minWidth: 120, padding: '11px 16px', background: '#DC2626', color: '#fff', border: 'none', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer', boxShadow: '0 3px 12px rgba(220,38,38,0.35)' }}
+              style={{
+                minHeight: 52,
+                padding: '12px 18px',
+                background: 'linear-gradient(135deg, #DC2626, #991B1B)',
+                color: '#fff', border: 'none', borderRadius: 12,
+                fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                fontFamily: 'inherit',
+                boxShadow: '0 6px 18px rgba(220,38,38,0.35)',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                transition: 'transform 150ms ease, box-shadow 150ms ease',
+              }}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+              onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               Exam Rescue
             </button>
             <button
+              className="ss-btn"
               onClick={() => { track('war_room_cta', { action: 'brainDump' }); onOpenBrainDump?.() }}
-              style={{ flex: 1, minWidth: 100, padding: '11px 16px', background: 'rgba(185,28,28,0.1)', color: '#B91C1C', border: '1px solid rgba(185,28,28,0.25)', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+              style={{
+                minHeight: 52,
+                padding: '12px 18px',
+                background: '#FFFFFF', color: '#B91C1C',
+                border: '1.5px solid rgba(185,28,28,0.28)',
+                borderRadius: 12,
+                fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                fontFamily: 'inherit',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                transition: 'transform 150ms ease, background 150ms ease',
+              }}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(220,38,38,0.06)'}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = '#FFFFFF' }}
             >
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
               Brain Dump
             </button>
             <button
+              className="ss-btn"
               onClick={() => { track('war_room_cta', { action: 'cheatSheet' }); isPro ? onOpenCheatSheet?.() : onShowPaywall?.('cheat-sheet') }}
-              style={{ flex: 1, minWidth: 100, padding: '11px 16px', background: 'rgba(185,28,28,0.1)', color: '#B91C1C', border: '1px solid rgba(185,28,28,0.25)', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
+              style={{
+                minHeight: 52,
+                padding: '12px 18px',
+                background: '#FFFFFF', color: '#B91C1C',
+                border: '1.5px solid rgba(185,28,28,0.28)',
+                borderRadius: 12,
+                fontSize: 14, fontWeight: 700, cursor: 'pointer',
+                fontFamily: 'inherit',
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                transition: 'transform 150ms ease, background 150ms ease',
+              }}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+              onMouseEnter={e => e.currentTarget.style.background = 'rgba(220,38,38,0.06)'}
+              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = '#FFFFFF' }}
             >
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="14 2 14 8 20 8"/><path d="M20 22H4a2 2 0 01-2-2V4a2 2 0 012-2h10l6 6v12a2 2 0 01-2 2z"/></svg>
               Cheat Sheet
             </button>
           </div>
 
-          {/* Weak topics to drill */}
+          {/* Prioritized weak topics */}
           {weakTopics.length > 0 && (
-            <div style={{ background: 'rgba(220,38,38,0.07)', borderRadius: 10, padding: '12px 14px' }}>
-              <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 700, color: '#991B1B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>
-                Prioritize these topics
-              </p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {weakTopics.map((t, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                    <div style={{ width: 34, height: 20, borderRadius: 6, background: '#DC2626', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      <span style={{ fontSize: 10, fontWeight: 800, color: '#fff' }}>{t.score}</span>
+            <div style={{
+              background: 'rgba(255,255,255,0.72)',
+              border: '1px solid rgba(220,38,38,0.18)',
+              borderRadius: 14, padding: '14px 16px',
+              backdropFilter: 'blur(6px)',
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#991B1B', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+                  Priority · drill these first
+                </p>
+                <span style={{ fontSize: 11, color: '#991B1B', opacity: 0.7 }}>Lowest mastery in this course</span>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                {weakTopics.map((t, i) => {
+                  const pct = Math.max(6, t.score)
+                  return (
+                    <div key={i} style={{
+                      display: 'flex', alignItems: 'center', gap: 12,
+                      padding: '8px 10px',
+                      background: '#FFFFFF',
+                      border: '1px solid rgba(220,38,38,0.1)',
+                      borderRadius: 10,
+                    }}>
+                      <div style={{
+                        width: 38, height: 22, borderRadius: 6,
+                        background: `linear-gradient(90deg, #DC2626, #B91C1C)`,
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        boxShadow: '0 2px 6px rgba(220,38,38,0.3)',
+                      }}>
+                        <span style={{ fontSize: 11, fontWeight: 800, color: '#fff', fontFamily: 'ui-monospace, monospace' }}>{t.score}</span>
+                      </div>
+                      <div style={{ flex: 1, minWidth: 0 }}>
+                        <div style={{ fontSize: 13.5, color: '#7F1D1D', fontWeight: 600, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {t.topic}
+                        </div>
+                        <div style={{ marginTop: 4, height: 4, background: 'rgba(220,38,38,0.12)', borderRadius: 2, overflow: 'hidden' }}>
+                          <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #DC2626, #F87171)', borderRadius: 2 }} />
+                        </div>
+                      </div>
+                      <button
+                        className="ss-btn"
+                        onClick={() => { track('war_room_drill_topic', { topic: t.topic }); onOpenBrainDump?.() }}
+                        style={{
+                          minHeight: 36, minWidth: 60,
+                          padding: '6px 14px',
+                          fontSize: 12, fontWeight: 700, color: '#fff',
+                          background: '#DC2626', border: 'none', borderRadius: 8,
+                          cursor: 'pointer',
+                          boxShadow: '0 2px 8px rgba(220,38,38,0.3)',
+                          transition: 'transform 150ms ease',
+                        }}
+                        onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
+                        onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+                      >
+                        Drill
+                      </button>
                     </div>
-                    <span style={{ fontSize: 13, color: '#7F1D1D', fontWeight: 500 }}>{t.topic}</span>
-                    <button
-                      onClick={() => { track('war_room_drill_topic', { topic: t.topic }); onOpenBrainDump?.() }}
-                      style={{ marginLeft: 'auto', fontSize: 11, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.12)', border: 'none', borderRadius: 6, padding: '3px 10px', cursor: 'pointer' }}
-                    >
-                      Drill
-                    </button>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}
         </div>
+
         <style>{`
-          @keyframes smart-pulse {
-            0%, 100% { opacity: 1; transform: scale(1); }
-            50% { opacity: 0.4; transform: scale(1.6); }
+          @keyframes war-pulse {
+            0%, 100% { opacity: 1; transform: scale(1); box-shadow: 0 0 12px rgba(255,255,255,0.7); }
+            50% { opacity: 0.5; transform: scale(1.5); box-shadow: 0 0 20px rgba(255,255,255,0.4); }
           }
+          .ss-btn { transition: transform 150ms cubic-bezier(0.4,0,0.2,1), box-shadow 150ms cubic-bezier(0.4,0,0.2,1); }
+          .ss-btn:hover { transform: translateY(-1px); }
+          .ss-btn:active { transform: scale(0.97); }
+          .ss-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(220,38,38,0.4); }
         `}</style>
       </div>
     )
@@ -376,9 +535,11 @@ export default function SmartStartCard({
         {/* CTA group */}
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
           <button
+            className="smart-btn"
             onClick={handleCta}
             style={{
               display: 'flex', alignItems: 'center', gap: 7,
+              minHeight: 44,
               padding: '11px 20px',
               background: color,
               color: '#fff',
@@ -389,11 +550,8 @@ export default function SmartStartCard({
               cursor: 'pointer',
               fontFamily: 'inherit',
               boxShadow: `0 3px 14px ${color}35`,
-              transition: 'transform 0.15s ease, box-shadow 0.15s ease',
               whiteSpace: 'nowrap',
             }}
-            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
-            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
           >
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
             {cta}
@@ -403,13 +561,15 @@ export default function SmartStartCard({
           <div style={{ display: 'flex', gap: 6 }}>
             {ctaKey !== 'quizBurst' && (
               <button onClick={() => { track('smart_start_secondary', { action: 'quizBurst' }); onOpenQuizBurst?.() }}
-                style={{ fontSize: 11.5, fontWeight: 600, color: D.dim, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, borderRadius: 7, padding: '5px 11px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                className="smart-btn"
+                style={{ fontSize: 11.5, fontWeight: 600, color: D.dim, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, borderRadius: 7, padding: '6px 12px', minHeight: 32, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
                 Quiz Burst
               </button>
             )}
             {ctaKey !== 'brainDump' && (
               <button onClick={() => { track('smart_start_secondary', { action: 'brainDump' }); onOpenBrainDump?.() }}
-                style={{ fontSize: 11.5, fontWeight: 600, color: D.dim, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, borderRadius: 7, padding: '5px 11px', cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                className="smart-btn"
+                style={{ fontSize: 11.5, fontWeight: 600, color: D.dim, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, borderRadius: 7, padding: '6px 12px', minHeight: 32, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
                 Brain Dump
               </button>
             )}
@@ -445,12 +605,13 @@ export default function SmartStartCard({
           )}
           {dueForReview.length > 0 && (
             <button
+              className="smart-btn"
               onClick={() => { track('smart_start_review_queue_nudge'); onOpenReviewQueue?.() }}
               style={{
-                marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 5,
-                fontSize: 11.5, fontWeight: 700, color: D.red,
+                marginLeft: 'auto', display: 'inline-flex', alignItems: 'center', gap: 6,
+                minHeight: 32, fontSize: 11.5, fontWeight: 700, color: D.red,
                 background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.2)',
-                borderRadius: 7, padding: '4px 11px', cursor: 'pointer',
+                borderRadius: 7, padding: '5px 12px', cursor: 'pointer', fontFamily: 'inherit',
               }}
             >
               <span style={{ width: 6, height: 6, borderRadius: '50%', background: D.red, display: 'inline-block', animation: 'smart-pulse 2s ease-in-out infinite' }} />
@@ -465,6 +626,10 @@ export default function SmartStartCard({
           0%, 100% { opacity: 1; transform: scale(1); }
           50% { opacity: 0.5; transform: scale(1.6); }
         }
+        .smart-btn { transition: transform 150ms cubic-bezier(0.4,0,0.2,1), box-shadow 150ms cubic-bezier(0.4,0,0.2,1); }
+        .smart-btn:hover { transform: translateY(-1px); }
+        .smart-btn:active { transform: scale(0.97); }
+        .smart-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(59,97,196,0.35); }
       `}</style>
     </div>
   )

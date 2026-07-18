@@ -1228,71 +1228,146 @@ export default function DashboardView({
         {(todaySessions.length > 0 || getDueForReview(null, 3).length > 0) && (() => {
           const dueReviews = getDueForReview(null, 3)
           const completed = completedIds ?? new Set()
+          const nowMs = Date.now()
+          const parseStart = (t) => {
+            if (!t) return null
+            const m = /^(\d{1,2}):(\d{2})(?:\s*(AM|PM))?$/i.exec(String(t).trim())
+            if (!m) return null
+            let h = parseInt(m[1], 10)
+            const mm = parseInt(m[2], 10)
+            const ap = m[3]?.toUpperCase()
+            if (ap === 'PM' && h < 12) h += 12
+            if (ap === 'AM' && h === 12) h = 0
+            const d = new Date(); d.setHours(h, mm, 0, 0)
+            return d.getTime()
+          }
           const allItems = [
-            ...todaySessions.map(s => ({ type: 'session', id: s.id, label: s.sessionType, sub: clean(s.courseName ?? ''), duration: s.duration, color: s.color?.dot ?? D.blue, done: completed.has(s.id), startTime: s.startTime })),
+            ...todaySessions.map(s => {
+              const startMs = parseStart(s.startTime)
+              const overdue = !completed.has(s.id) && startMs && startMs + (s.duration ?? 30) * 60 * 1000 < nowMs
+              return { type: 'session', id: s.id, label: s.sessionType, sub: clean(s.courseName ?? ''), duration: s.duration, color: s.color?.dot ?? D.blue, done: completed.has(s.id), startTime: s.startTime, overdue }
+            }),
             ...dueReviews.map(r => ({ type: 'review', id: r.topic, label: r.topic, sub: 'Review due', color: '#DC2626', done: false, duration: 10 })),
           ]
           if (!allItems.length) return null
           const doneCount = allItems.filter(i => i.done).length
+          const pct = allItems.length > 0 ? Math.round((doneCount / allItems.length) * 100) : 0
           return (
-            <div style={{ gridColumn: 'span 12', background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+            <div style={{ gridColumn: 'span 12', background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 16, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)' }}>
+              <style>{`
+                @keyframes tp-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+                .tp-row { transition: background 150ms cubic-bezier(0.4,0,0.2,1); }
+                .tp-row:hover { background: rgba(0,0,0,0.02); }
+                .tp-btn { transition: transform 150ms cubic-bezier(0.4,0,0.2,1), box-shadow 150ms cubic-bezier(0.4,0,0.2,1); }
+                .tp-btn:hover { transform: translateY(-1px); }
+                .tp-btn:active { transform: scale(0.97); }
+                .tp-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(59,97,196,0.35); }
+              `}</style>
               {/* Header */}
-              <div style={{ padding: '13px 18px 12px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                  <svg width="13" height="13" fill="none" stroke={D.blue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                    <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-                  </svg>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: D.text }}>Today's Plan</span>
-                  <span style={{ fontSize: 11.5, color: D.dim }}>{doneCount}/{allItems.length} done</span>
+              <div style={{ padding: '16px 20px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(59,97,196,0.1)', display: 'grid', placeItems: 'center', flexShrink: 0 }}>
+                    <svg width="14" height="14" fill="none" stroke={D.blue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+                      <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column' }}>
+                    <span style={{ fontSize: 14, fontWeight: 700, color: D.text, letterSpacing: '-0.01em' }}>Today's Plan</span>
+                    <span style={{ fontSize: 11.5, color: D.textMuted, marginTop: 1 }}>{doneCount} of {allItems.length} complete</span>
+                  </div>
                 </div>
-                {/* Mini progress bar */}
-                <div style={{ width: 80, height: 5, borderRadius: 3, background: 'rgba(0,0,0,0.08)', overflow: 'hidden' }}>
-                  <div style={{ height: '100%', borderRadius: 3, background: D.blue, width: `${allItems.length > 0 ? (doneCount / allItems.length) * 100 : 0}%`, transition: 'width 0.4s ease' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                  <span style={{ fontSize: 11, fontWeight: 700, color: D.textMuted, fontVariantNumeric: 'tabular-nums' }}>{pct}%</span>
+                  <div style={{ width: 96, height: 6, borderRadius: 4, background: 'rgba(0,0,0,0.06)', overflow: 'hidden' }}>
+                    <div style={{ height: '100%', borderRadius: 4, background: pct === 100 ? D.green : D.blue, width: `${pct}%`, transition: 'width 400ms cubic-bezier(0.16,1,0.3,1)' }} />
+                  </div>
                 </div>
               </div>
               {/* Items */}
-              <div style={{ padding: '12px 18px 16px', display: 'flex', flexDirection: 'column', gap: 0 }}>
-                {allItems.map((item, i) => (
-                  <div key={`${item.type}-${item.id}-${i}`} style={{ display: 'flex', alignItems: 'flex-start', gap: 12, paddingBottom: i < allItems.length - 1 ? 14 : 0 }}>
-                    {/* Timeline line + dot */}
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, paddingTop: 2 }}>
-                      <div style={{ width: 14, height: 14, borderRadius: '50%', border: `2px solid ${item.done ? item.color : item.color + '50'}`, background: item.done ? item.color : 'transparent', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 0.2s' }}>
-                        {item.done && (
-                          <svg width="7" height="7" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+              <div style={{ padding: '8px 12px 12px', display: 'flex', flexDirection: 'column' }}>
+                {allItems.map((item, i) => {
+                  const dotColor = item.overdue ? D.amber : item.color
+                  return (
+                    <div
+                      key={`${item.type}-${item.id}-${i}`}
+                      className="tp-row"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: 12,
+                        padding: '8px',
+                        borderRadius: 10,
+                        minHeight: 56,
+                        animation: `tp-fade-in 300ms cubic-bezier(0.16,1,0.3,1) both`,
+                        animationDelay: `${i * 40}ms`,
+                        position: 'relative',
+                      }}
+                    >
+                      {/* Timeline line + dot */}
+                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', flexShrink: 0, alignSelf: 'stretch', position: 'relative', width: 16 }}>
+                        <div style={{ width: 14, height: 14, borderRadius: '50%', border: `2px solid ${item.done ? item.color : dotColor + '80'}`, background: item.done ? item.color : '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', transition: 'all 200ms cubic-bezier(0.4,0,0.2,1)', boxShadow: item.done ? `0 0 0 3px ${item.color}20` : 'none', flexShrink: 0, marginTop: 8 }}>
+                          {item.done && (
+                            <svg width="7" height="7" fill="none" stroke="#fff" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7"/></svg>
+                          )}
+                        </div>
+                        {i < allItems.length - 1 && (
+                          <div style={{ width: 2, flex: 1, background: 'rgba(0,0,0,0.08)', marginTop: 2, borderRadius: 1 }} />
                         )}
                       </div>
-                      {i < allItems.length - 1 && (
-                        <div style={{ width: 1.5, flex: 1, background: 'rgba(0,0,0,0.1)', marginTop: 3, minHeight: 18 }} />
+                      {/* Content */}
+                      <div style={{ flex: 1, minWidth: 0, paddingRight: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: 14, fontWeight: 600, color: item.done ? D.textDim : D.text, textDecoration: item.done ? 'line-through' : 'none', letterSpacing: '-0.005em' }}>
+                            {item.label}
+                          </span>
+                          {item.type === 'review' && !item.done && (
+                            <span style={{ fontSize: 10, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.1)', padding: '2px 7px', borderRadius: 4, letterSpacing: '0.02em', textTransform: 'uppercase' }}>Review</span>
+                          )}
+                          {item.overdue && !item.done && (
+                            <span style={{ fontSize: 10, fontWeight: 700, color: '#D97706', background: 'rgba(217,119,6,0.1)', padding: '2px 7px', borderRadius: 4, letterSpacing: '0.02em', textTransform: 'uppercase' }}>Overdue</span>
+                          )}
+                        </div>
+                        <div style={{ fontSize: 12, color: D.textMuted, marginTop: 2, display: 'flex', alignItems: 'center', gap: 6 }}>
+                          {item.startTime && (
+                            <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 500 }}>{item.startTime}</span>
+                          )}
+                          {item.startTime && item.sub && <span style={{ color: 'rgba(0,0,0,0.2)' }}>·</span>}
+                          {item.sub && <span>{item.sub}</span>}
+                          {item.duration && <span style={{ color: 'rgba(0,0,0,0.2)' }}>·</span>}
+                          {item.duration && <span>{item.duration} min</span>}
+                        </div>
+                      </div>
+                      {/* Action */}
+                      {!item.done && (
+                        <button
+                          className="tp-btn"
+                          onClick={() => {
+                            if (item.type === 'session') { const s = todaySessions.find(x => x.id === item.id); if (s) onStartFocus?.(s) }
+                            else if (item.type === 'review') { onOpenBrainDump?.() }
+                          }}
+                          style={{
+                            flexShrink: 0,
+                            minHeight: 40,
+                            minWidth: 88,
+                            padding: '0 16px',
+                            fontSize: 12.5,
+                            fontWeight: 700,
+                            color: '#fff',
+                            background: item.color,
+                            border: 'none',
+                            borderRadius: 8,
+                            cursor: 'pointer',
+                            fontFamily: 'inherit',
+                            letterSpacing: '-0.005em',
+                            boxShadow: `0 2px 6px ${item.color}30`,
+                          }}
+                        >
+                          {item.type === 'session' ? 'Start' : 'Review'}
+                        </button>
                       )}
                     </div>
-                    {/* Content */}
-                    <div style={{ flex: 1, minWidth: 0, paddingBottom: i < allItems.length - 1 ? 0 : 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-                        <span style={{ fontSize: 13.5, fontWeight: 600, color: item.done ? D.dim : D.text, textDecoration: item.done ? 'line-through' : 'none' }}>
-                          {item.label}
-                        </span>
-                        {item.type === 'review' && (
-                          <span style={{ fontSize: 10.5, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.1)', padding: '1px 6px', borderRadius: 4 }}>Review</span>
-                        )}
-                      </div>
-                      <div style={{ fontSize: 11.5, color: D.dim, marginTop: 1 }}>
-                        {item.sub}{item.duration ? ` · ${item.duration} min` : ''}
-                      </div>
-                    </div>
-                    {/* Action */}
-                    {!item.done && (
-                      <button
-                        onClick={() => {
-                          if (item.type === 'session') { const s = todaySessions.find(x => x.id === item.id); if (s) onStartFocus?.(s) }
-                          else if (item.type === 'review') { onOpenBrainDump?.() }
-                        }}
-                        style={{ flexShrink: 0, fontSize: 11.5, fontWeight: 700, color: '#fff', background: item.color, border: 'none', borderRadius: 7, padding: '4px 12px', cursor: 'pointer' }}
-                      >
-                        {item.type === 'session' ? 'Start' : 'Review'}
-                      </button>
-                    )}
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )

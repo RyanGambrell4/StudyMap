@@ -246,7 +246,7 @@ function ScoreLineChart({ entries, color }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-export default function ProgressView({ courses, allSessions, completedIds, completedSessionLog = [], todayStr, onShowPaywall }) {
+export default function ProgressView({ courses, allSessions, completedIds, completedSessionLog = [], todayStr, onShowPaywall, onOpenReviewQueue, onOpenBrainDump }) {
   const [period, setPeriod] = useState('Term')
   const isFree = getActivePlan() === 'free'
   const trialUsed = hasUsedTrial()
@@ -1255,7 +1255,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
         const reviewStats = getReviewStats()
         if (!allMastery.length) return null
 
-        // Consistency score: session density in past 14 days
+        // Consistency: session density in past 14 days
         const now = new Date()
         const past14 = Array.from({ length: 14 }, (_, i) => {
           const d = new Date(now); d.setDate(d.getDate() - i)
@@ -1267,72 +1267,132 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
         const consistencyColor = consistencyScore >= 70 ? D.green : consistencyScore >= 40 ? D.amber : D.pink
         const consistencyLabel = consistencyScore >= 70 ? 'Excellent' : consistencyScore >= 40 ? 'Building' : 'Getting started'
 
+        // Streak within window (consecutive most-recent days with a session)
+        let currentStreak = 0
+        for (let i = 0; i < past14.length; i++) {
+          if (completedSet.has(past14[i])) currentStreak++
+          else break
+        }
+
+        // Best streak in window
+        let bestStreak = 0, run = 0
+        past14.slice().reverse().forEach(d => {
+          if (completedSet.has(d)) { run++; if (run > bestStreak) bestStreak = run }
+          else run = 0
+        })
+
         // Mastery distribution
         const strong = allMastery.filter(m => m.score >= 70)
         const developing = allMastery.filter(m => m.score >= 40 && m.score < 70)
         const weak = allMastery.filter(m => m.score < 40)
         const avgScore = Math.round(allMastery.reduce((s, m) => s + m.score, 0) / allMastery.length)
 
-        // Top 5 topics by score for mini-list
         const topTopics = [...allMastery].sort((a, b) => b.score - a.score).slice(0, 5)
         const worstTopics = [...allMastery].sort((a, b) => a.score - b.score).slice(0, 5)
 
         return (
           <>
+            <style>{`
+              @keyframes pv-fade-in { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+              .pv-row { transition: background 150ms cubic-bezier(0.4,0,0.2,1); border-radius: 8px; }
+              .pv-row:hover { background: rgba(0,0,0,0.025); }
+              .pv-drill { transition: all 150ms cubic-bezier(0.4,0,0.2,1); opacity: 0; }
+              .pv-row:hover .pv-drill, .pv-row:focus-within .pv-drill { opacity: 1; }
+              .pv-drill:hover { transform: translateX(2px); }
+              .pv-drill:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(220,38,38,0.3); opacity: 1; }
+              .pv-heatdot { transition: transform 150ms cubic-bezier(0.4,0,0.2,1); cursor: default; }
+              .pv-heatdot:hover { transform: scale(1.15); z-index: 1; }
+              .pv-cta { transition: all 150ms cubic-bezier(0.4,0,0.2,1); }
+              .pv-cta:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(220,38,38,0.25); }
+              .pv-cta:active { transform: scale(0.97); }
+              .pv-cta:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(220,38,38,0.35); }
+            `}</style>
+
             {/* Mastery overview card */}
-            <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '22px 26px', marginBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 18, flexWrap: 'wrap', gap: 10 }}>
+            <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 16, padding: '24px 26px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)', animation: 'pv-fade-in 300ms cubic-bezier(0.16,1,0.3,1) both' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20, flexWrap: 'wrap', gap: 12 }}>
                 <div>
                   <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 4 }}>Knowledge Mastery</div>
-                  <div style={{ fontSize: 12.5, color: D.textMuted }}>{allMastery.length} topics tracked across your courses</div>
+                  <div style={{ fontSize: 20, fontWeight: 800, color: D.text, letterSpacing: '-0.02em', lineHeight: 1.15 }}>
+                    {avgScore}<span style={{ fontSize: 14, color: D.textMuted, fontWeight: 700, marginLeft: 3 }}>% avg</span>
+                  </div>
+                  <div style={{ fontSize: 12.5, color: D.textMuted, marginTop: 2 }}>{allMastery.length} topics tracked</div>
                 </div>
-                <div style={{ display: 'flex', align: 'center', gap: 6 }}>
-                  {reviewStats.dueCount > 0 && (
-                    <span style={{ fontSize: 11.5, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.2)', padding: '4px 10px', borderRadius: 7 }}>
-                      {reviewStats.dueCount} due for review
-                    </span>
-                  )}
-                  <span style={{ fontSize: 13, fontWeight: 800, color: D.text }}>{avgScore}% avg</span>
-                </div>
+                {reviewStats.dueCount > 0 && onOpenReviewQueue && (
+                  <button
+                    onClick={onOpenReviewQueue}
+                    className="pv-cta"
+                    style={{ fontSize: 12, fontWeight: 700, color: '#fff', background: '#DC2626', border: 'none', padding: '8px 14px', borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 6, minHeight: 36, boxShadow: '0 2px 6px rgba(220,38,38,0.3)' }}
+                  >
+                    {reviewStats.dueCount} due for review
+                    <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                  </button>
+                )}
               </div>
 
-              {/* Stacked bar */}
-              <div style={{ display: 'flex', height: 10, borderRadius: 5, overflow: 'hidden', gap: 2, marginBottom: 14 }}>
-                {strong.length > 0 && <div style={{ flex: strong.length, background: D.green, borderRadius: 5 }} />}
-                {developing.length > 0 && <div style={{ flex: developing.length, background: D.amber, borderRadius: 5 }} />}
-                {weak.length > 0 && <div style={{ flex: weak.length, background: D.pink, borderRadius: 5 }} />}
+              {/* Stacked bar with proper labeled legend */}
+              <div style={{ display: 'flex', height: 10, borderRadius: 5, overflow: 'hidden', gap: 2, marginBottom: 12, background: 'rgba(0,0,0,0.04)' }}>
+                {strong.length > 0 && <div style={{ flex: strong.length, background: D.green, borderRadius: 5 }} title={`${strong.length} strong`} />}
+                {developing.length > 0 && <div style={{ flex: developing.length, background: D.amber, borderRadius: 5 }} title={`${developing.length} developing`} />}
+                {weak.length > 0 && <div style={{ flex: weak.length, background: D.pink, borderRadius: 5 }} title={`${weak.length} weak`} />}
               </div>
 
-              <div style={{ display: 'flex', gap: 16, marginBottom: 20, flexWrap: 'wrap' }}>
-                {[{ label: 'Strong', items: strong, color: D.green }, { label: 'Developing', items: developing, color: D.amber }, { label: 'Weak', items: weak, color: D.pink }].map(({ label, items, color }) => (
-                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: color, display: 'inline-block' }} />
-                    <span style={{ fontSize: 12.5, color: D.textMuted }}><strong style={{ color, fontWeight: 700 }}>{items.length}</strong> {label}</span>
+              <div style={{ display: 'flex', gap: 20, marginBottom: 22, flexWrap: 'wrap' }}>
+                {[
+                  { label: 'Strong', hint: '70+', items: strong, color: D.green },
+                  { label: 'Developing', hint: '40–69', items: developing, color: D.amber },
+                  { label: 'Weak', hint: '<40', items: weak, color: D.pink },
+                ].map(({ label, hint, items, color }) => (
+                  <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    <span style={{ width: 10, height: 10, borderRadius: 3, background: color, display: 'inline-block', flexShrink: 0 }} />
+                    <div style={{ display: 'flex', flexDirection: 'column', lineHeight: 1.2 }}>
+                      <span style={{ fontSize: 13, fontWeight: 700, color: D.text }}>
+                        <span style={{ color, fontWeight: 800 }}>{items.length}</span> {label}
+                      </span>
+                      <span style={{ fontSize: 10.5, color: D.textDim, fontWeight: 500, letterSpacing: '-0.005em' }}>{hint}</span>
+                    </div>
                   </div>
                 ))}
               </div>
 
               {/* Two-column topic lists */}
-              <div className="pv-2col" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: 0 }}>
+              <div className="pv-2col" style={{ gridTemplateColumns: '1fr 1fr', marginBottom: 0, gap: 20 }}>
                 <div>
-                  <div style={{ fontSize: 10.5, fontWeight: 700, color: D.green, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Strongest Topics</div>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, color: D.green, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                    Strongest Topics
+                  </div>
                   {topTopics.map((t, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
-                      <div style={{ width: 34, height: 18, borderRadius: 5, background: getMasteryColor(t.score) + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontSize: 10.5, fontWeight: 800, color: getMasteryColor(t.score) }}>{t.score}</span>
+                    <div key={i} className="pv-row" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px', marginLeft: -8, marginRight: -8 }}>
+                      <div style={{ width: 38, height: 22, borderRadius: 6, background: getMasteryColor(t.score) + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: 11, fontWeight: 800, color: getMasteryColor(t.score), fontVariantNumeric: 'tabular-nums' }}>{t.score}</span>
                       </div>
-                      <span style={{ fontSize: 12.5, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }}>{t.topic}</span>
+                      <span style={{ fontSize: 13, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, fontWeight: 500 }}>{t.topic}</span>
                     </div>
                   ))}
                 </div>
                 <div>
-                  <div style={{ fontSize: 10.5, fontWeight: 700, color: D.pink, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Needs Work</div>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, color: D.pink, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 5 }}>
+                    <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 9v3.5m0 3v.5m-9 2h18L12 3 3 18z"/></svg>
+                    Needs Work
+                  </div>
                   {worstTopics.map((t, i) => (
-                    <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 7 }}>
-                      <div style={{ width: 34, height: 18, borderRadius: 5, background: getMasteryColor(t.score) + '18', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontSize: 10.5, fontWeight: 800, color: getMasteryColor(t.score) }}>{t.score}</span>
+                    <div key={i} className="pv-row" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px', marginLeft: -8, marginRight: -8 }}>
+                      <div style={{ width: 38, height: 22, borderRadius: 6, background: getMasteryColor(t.score) + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <span style={{ fontSize: 11, fontWeight: 800, color: getMasteryColor(t.score), fontVariantNumeric: 'tabular-nums' }}>{t.score}</span>
                       </div>
-                      <span style={{ fontSize: 12.5, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 180 }}>{t.topic}</span>
+                      <span style={{ fontSize: 13, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, fontWeight: 500 }}>{t.topic}</span>
+                      {onOpenBrainDump && (
+                        <button
+                          className="pv-drill"
+                          onClick={onOpenBrainDump}
+                          title={`Drill "${t.topic}" with Brain Dump`}
+                          style={{ fontSize: 10.5, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.08)', border: 'none', padding: '4px 8px', borderRadius: 6, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 3, flexShrink: 0, letterSpacing: '0.02em', textTransform: 'uppercase' }}
+                        >
+                          Drill
+                          <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                        </button>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -1340,27 +1400,69 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
             </div>
 
             {/* Consistency score card */}
-            <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '20px 26px', marginBottom: 16 }}>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 12 }}>
-                <div>
-                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 4 }}>Study Consistency</div>
-                  <div style={{ fontSize: 24, fontWeight: 800, color: consistencyColor, letterSpacing: '-0.02em' }}>
-                    {consistencyScore}%
-                    <span style={{ fontSize: 13, fontWeight: 600, color: D.textMuted, marginLeft: 8 }}>{consistencyLabel}</span>
+            <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 16, padding: '24px 26px', marginBottom: 16, boxShadow: '0 2px 8px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04)', animation: 'pv-fade-in 300ms cubic-bezier(0.16,1,0.3,1) both', animationDelay: '60ms' }}>
+              <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', flexWrap: 'wrap', gap: 20 }}>
+                <div style={{ flex: 1, minWidth: 220 }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 6 }}>Study Consistency</div>
+                  <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 4 }}>
+                    <span style={{ fontSize: 32, fontWeight: 800, color: consistencyColor, letterSpacing: '-0.03em', lineHeight: 1, fontVariantNumeric: 'tabular-nums' }}>{consistencyScore}%</span>
+                    <span style={{ fontSize: 13, fontWeight: 700, color: D.text, letterSpacing: '-0.005em' }}>{consistencyLabel}</span>
                   </div>
-                  <div style={{ fontSize: 12.5, color: D.textMuted, marginTop: 4 }}>{activeDays} of 14 days with at least one completed session</div>
-                </div>
-                {/* 14-day dot calendar */}
-                <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap', maxWidth: 200 }}>
-                  {past14.reverse().map((d, i) => {
-                    const done = completedSet.has(d)
-                    const label = new Date(d + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short' })[0]
-                    return (
-                      <div key={d} title={d} style={{ width: 22, height: 22, borderRadius: 6, background: done ? consistencyColor : 'rgba(0,0,0,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <span style={{ fontSize: 9, fontWeight: 700, color: done ? '#fff' : D.textDim }}>{label}</span>
+                  <div style={{ fontSize: 12.5, color: D.textMuted, marginTop: 6 }}>
+                    {activeDays} of the last 14 days had at least one completed session
+                  </div>
+
+                  {/* Streak indicators */}
+                  <div style={{ display: 'flex', gap: 8, marginTop: 14, flexWrap: 'wrap' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 8, background: currentStreak > 0 ? 'rgba(217,119,6,0.08)' : 'rgba(0,0,0,0.03)', border: `1px solid ${currentStreak > 0 ? 'rgba(217,119,6,0.2)' : D.border}` }}>
+                      <svg width="12" height="12" fill={currentStreak > 0 ? D.amber : D.textDim} stroke="none" viewBox="0 0 24 24">
+                        <path d="M13.5.67s.74 2.65.74 4.8c0 2.06-1.35 3.73-3.41 3.73-2.07 0-3.63-1.67-3.63-3.73l.03-.36C5.21 7.51 4 10.62 4 14c0 4.42 3.58 8 8 8s8-3.58 8-8C20 8.61 17.41 3.8 13.5.67zM11.71 19c-1.78 0-3.22-1.4-3.22-3.14 0-1.62 1.05-2.76 2.81-3.12 1.77-.36 3.6-1.21 4.62-2.58.39 1.29.59 2.65.59 4.04 0 2.65-2.15 4.8-4.8 4.8z"/>
+                      </svg>
+                      <span style={{ fontSize: 12, fontWeight: 700, color: currentStreak > 0 ? '#92400E' : D.textMuted }}>
+                        {currentStreak}-day streak
+                      </span>
+                    </div>
+                    {bestStreak > currentStreak && (
+                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 10px', borderRadius: 8, background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}` }}>
+                        <svg width="12" height="12" fill="none" stroke={D.textMuted} strokeWidth="2" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+                        <span style={{ fontSize: 12, fontWeight: 600, color: D.textMuted }}>Best in window: {bestStreak}d</span>
                       </div>
-                    )
-                  })}
+                    )}
+                  </div>
+                </div>
+
+                {/* 14-day heatmap with rich tooltips */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
+                  <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase' }}>Last 14 days</div>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(7, 26px)', gap: 5 }}>
+                    {past14.slice().reverse().map((d) => {
+                      const done = completedSet.has(d)
+                      const dt = new Date(d + 'T12:00:00')
+                      const isToday = d === todayStr
+                      const label = dt.toLocaleDateString('en-US', { weekday: 'short' })[0]
+                      const fullDate = dt.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
+                      const tooltip = `${fullDate} — ${done ? 'Completed a session' : 'No session'}${isToday ? ' (today)' : ''}`
+                      return (
+                        <div
+                          key={d}
+                          className="pv-heatdot"
+                          title={tooltip}
+                          style={{
+                            width: 26,
+                            height: 26,
+                            borderRadius: 6,
+                            background: done ? consistencyColor : 'rgba(0,0,0,0.05)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: isToday ? `0 0 0 2px ${D.bgCard}, 0 0 0 3px ${consistencyColor}` : 'none',
+                          }}
+                        >
+                          <span style={{ fontSize: 9.5, fontWeight: 700, color: done ? '#fff' : D.textDim, fontVariantNumeric: 'tabular-nums' }}>{label}</span>
+                        </div>
+                      )
+                    })}
+                  </div>
                 </div>
               </div>
             </div>

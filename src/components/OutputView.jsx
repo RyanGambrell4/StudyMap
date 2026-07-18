@@ -1847,6 +1847,8 @@ export default function OutputView({
             completedSessionLog={completedSessionLog}
             todayStr={todayStr}
             onShowPaywall={onShowPaywall}
+            onOpenReviewQueue={() => setActiveSection('review')}
+            onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump', source: 'progress_needs_work' }); setShowBrainDump(true) }}
           />
         )}
 
