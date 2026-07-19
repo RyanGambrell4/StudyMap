@@ -470,7 +470,7 @@ const SESSION_TABS = [
   { id: 'ai',         label: 'Ask AI',        num: 6 },
 ]
 
-export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools, onOpenBrainDump, course, onShowPaywall, userId, learningStyle, currentStreak = 0 }) {
+export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools, onOpenBrainDump, course, onShowPaywall, userId, learningStyle, currentStreak = 0, onOpenTeachItBack }) {
   const totalSec = session.duration * 60
   const isLongSession = session.duration > 45
   const todayStr = new Date().toISOString().split('T')[0]
@@ -1841,11 +1841,21 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     What to do next
                   </div>
                   <p style={{ margin: '0 0 10px', fontSize: 13, color: '#111111', lineHeight: 1.55 }}>{suggestion}</p>
-                  {ctaAction && (
-                    <button onClick={ctaAction} style={{ fontSize: 12.5, fontWeight: 700, color: '#fff', background: lowRecall ? '#EA580C' : '#3B61C4', border: 'none', borderRadius: 8, padding: '8px 16px', cursor: 'pointer' }}>
-                      {ctaLabel}
-                    </button>
-                  )}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+                    {ctaAction && (
+                      <button onClick={ctaAction} style={{ fontSize: 12.5, fontWeight: 700, color: '#fff', background: lowRecall ? '#EA580C' : '#3B61C4', border: 'none', borderRadius: 8, padding: '8px 16px', cursor: 'pointer' }}>
+                        {ctaLabel}
+                      </button>
+                    )}
+                    {lowRecall && onOpenTeachItBack && (
+                      <button
+                        onClick={() => onOpenTeachItBack({ topic: session.sessionType || '' })}
+                        style={{ fontSize: 12.5, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.22)', borderRadius: 8, padding: '8px 16px', cursor: 'pointer' }}
+                      >
+                        Teach It Back instead
+                      </button>
+                    )}
+                  </div>
                 </div>
               )
             })()}

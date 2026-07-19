@@ -1340,6 +1340,7 @@ export default function OutputView({
           nextSession={allSessions.find(s => s.dateStr >= todayStr && !completedIds.has(s.id) && s.id !== focusSession.id) ?? null}
           onGoToTools={() => setActiveSection('tools')}
           onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump', source: 'focus_complete' }); setShowBrainDump(true) }}
+          onOpenTeachItBack={({ topic }) => { const idx = Math.max(0, courses.findIndex((_, i) => i === focusSession.courseId)); setTeachItBackInit({ courseIdx: idx, topic }); setShowTeachItBack(true) }}
           course={courses[focusSession.courseId] ?? null}
           onShowPaywall={onShowPaywall}
           userId={userId}
