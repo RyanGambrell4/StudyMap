@@ -6,6 +6,7 @@ import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
 import { updateMastery, getWeakestTopics, getMastery } from '../lib/masteryStore'
 import { getCachedStudyTools } from '../lib/db'
+import { track } from '../lib/analytics'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -105,6 +106,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
       setSessionCount((prevEntry?.count ?? 0) + 1)
       if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, data.score, 'teachItBack')
       window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'teachItBack' } }))
+      track('teach_it_back_scored', { score: data.score, topic: topic.trim() || null, plan, hasFollowUp: Boolean(data.followUp) })
       setResult(data)
       setStep('result')
     } catch (e) {
@@ -133,6 +135,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
       })
       const data = await res.json()
       if (!res.ok) throw Object.assign(new Error(aiErrorMessage(res.status, data.error)), { status: res.status })
+      track('teach_it_back_followup_scored', { understood: data.understood })
       setFinalResult(data)
       setStep('final')
     } catch (e) {
@@ -142,6 +145,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
   }
 
   function reset() {
+    track('teach_it_back_retry')
     setStep('setup')
     setTopic('')
     setExplanation('')
@@ -426,7 +430,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
                       <>
                         {nextWeak && (
                           <button
-                            onClick={() => { setTopic(nextWeak.topic); setExplanation(''); setResult(null); setStep('explain') }}
+                            onClick={() => { track('teach_it_back_next_weak_topic', { topic: nextWeak.topic }); setTopic(nextWeak.topic); setExplanation(''); setResult(null); setStep('explain') }}
                             style={{ padding: '12px', background: '#7C3AED', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(124,58,237,0.30)' }}
                           >
                             Next weak topic: {nextWeak.topic}
@@ -459,7 +463,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
                         )}
                         {nextWeak && (
                           <button
-                            onClick={() => { setTopic(nextWeak.topic); setExplanation(''); setResult(null); setStep('explain') }}
+                            onClick={() => { track('teach_it_back_next_weak_topic', { topic: nextWeak.topic }); setTopic(nextWeak.topic); setExplanation(''); setResult(null); setStep('explain') }}
                             style={{ padding: '11px', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 10, color: '#7C3AED', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                           >
                             Try next weak topic: {nextWeak.topic}
@@ -552,7 +556,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                     {nextWeak && (
                       <button
-                        onClick={() => { setTopic(nextWeak.topic); setExplanation(''); setResult(null); setFinalResult(null); setPrevMasteryScore(null); setStep('explain') }}
+                        onClick={() => { track('teach_it_back_next_weak_topic', { topic: nextWeak.topic }); setTopic(nextWeak.topic); setExplanation(''); setResult(null); setFinalResult(null); setPrevMasteryScore(null); setStep('explain') }}
                         style={{ padding: '12px', background: '#7C3AED', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(124,58,237,0.30)' }}
                       >
                         Next weak topic: {nextWeak.topic}

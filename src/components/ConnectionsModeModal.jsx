@@ -3,6 +3,7 @@ import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { getCachedStudyTools } from '../lib/db'
 import { addStudySession } from '../lib/studyHistory'
+import { track } from '../lib/analytics'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -60,6 +61,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
       if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
       incrementAIQuery()
       incrementFeatureUsage('connectionsMode')
+      track('connections_generated', { cardCount: data.connections?.length ?? 0, plan, usingFlashcards: concepts.length > 0 })
       setConnections(data.connections ?? [])
       setCardIdx(0)
       setScores([])
@@ -91,6 +93,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
+      track('connections_answer_scored', { score: data.score, cardNumber: cardIdx + 1 })
       const updatedScores = [...scores, data]
       setScores(updatedScores)
       latestScoresRef.current = updatedScores
@@ -107,6 +110,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
       const finalAvg = finalScores.length ? Math.round(finalScores.reduce((s, r) => s + r.score, 0) / finalScores.length) : 0
       addStudySession({ tool: 'Connections', score: finalAvg, topic: null, courseName: course?.name || null })
       window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'connections' } }))
+      track('connections_session_complete', { avgScore: finalAvg, cardCount: totalCards })
       setStep('done')
     } else {
       setCardIdx(i => i + 1)
@@ -116,6 +120,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
   }
 
   function reset() {
+    track('connections_retry')
     setStep('setup')
     setConnections([])
     setCardIdx(0)
@@ -342,7 +347,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
                 if (!weakConn?.conceptA) return null
                 return (
                   <button
-                    onClick={() => { onClose(); onOpenTeachItBack({ courseIdx, topic: weakConn.conceptA }) }}
+                    onClick={() => { track('connections_to_teach_it_back', { topic: weakConn.conceptA }); onClose(); onOpenTeachItBack({ courseIdx, topic: weakConn.conceptA }) }}
                     style={{ marginBottom: 10, padding: '12px', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.25)', borderRadius: 10, color: '#7C3AED', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                   >
                     Teach It Back: {weakConn.conceptA}
