@@ -1403,6 +1403,7 @@ export default function DashboardView({
           onStartFocus={() => displaySession ? onStartFocus?.(displaySession) : onOpenStudyCoach?.()}
           onOpenExamRescue={onOpenExamRescue}
           onOpenPracticeExam={onOpenPracticeExam}
+          onOpenTeachItBack={onOpenTeachItBack}
         />
 
         {/* ── Streak Guard: loss-aversion nudge when today hasn't been studied ── */}
@@ -1478,6 +1479,7 @@ export default function DashboardView({
               courses={courses}
               onStartFocus={onStartFocus}
               onOpenBrainDump={onOpenBrainDump}
+              onOpenTeachItBack={onOpenTeachItBack}
               todaySessions={todaySessions}
             />
           )

@@ -13,7 +13,7 @@ const D = {
 
 // Warm re-entry card. Shown when the student has been away 3+ days.
 // Deliberately guilt-free copy and a smaller session ask.
-export default function ComebackCard({ daysAway, lastSessionDate, courses, onStartFocus, onOpenBrainDump, todaySessions = [] }) {
+export default function ComebackCard({ daysAway, lastSessionDate, courses, onStartFocus, onOpenBrainDump, onOpenTeachItBack, todaySessions = [] }) {
   const easiestTopic = useMemo(() => {
     // Prefer a topic they were doing well on — a confidence win.
     const weakest = getWeakestTopics(null, 20)
@@ -150,6 +150,21 @@ export default function ComebackCard({ daysAway, lastSessionDate, courses, onSta
           >
             Just 5-minute recall
           </button>
+          {onOpenTeachItBack && (
+            <button
+              className="cb-btn"
+              onClick={() => { track('comeback_teach_it_back', { daysAway }); onOpenTeachItBack({}) }}
+              style={{
+                minHeight: 36, padding: '0 14px',
+                background: 'rgba(124,58,237,0.07)', color: '#7C3AED',
+                border: '1px solid rgba(124,58,237,0.25)', borderRadius: 10,
+                fontSize: 12, fontWeight: 600, fontFamily: 'inherit',
+                cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              Teach It Back
+            </button>
+          )}
         </div>
       </div>
     </div>

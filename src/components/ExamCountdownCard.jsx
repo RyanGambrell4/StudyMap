@@ -51,7 +51,7 @@ function urgencyCopy(daysLeft, readiness) {
   return `${daysLeft} days out. Steady sessions now cost less than a panic later.`
 }
 
-export default function ExamCountdownCard({ courses = [], onStartFocus, onOpenExamRescue, onOpenPracticeExam }) {
+export default function ExamCountdownCard({ courses = [], onStartFocus, onOpenExamRescue, onOpenPracticeExam, onOpenTeachItBack }) {
   const [dismissed, setDismissed] = useState(false)
 
   const nextExam = useMemo(() => {
@@ -197,6 +197,22 @@ export default function ExamCountdownCard({ courses = [], onStartFocus, onOpenEx
                 : 'Study now'}
             <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
+          {topWeak && onOpenTeachItBack && (
+            <button
+              className="ec-btn"
+              onClick={() => { track('exam_countdown_teach_it_back', { courseId: nextExam.idx, topic: topWeak.topic, days }); onOpenTeachItBack({ courseIdx: nextExam.idx, topic: topWeak.topic }) }}
+              style={{
+                minHeight: 42, padding: '0 14px',
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: 'rgba(124,58,237,0.07)', color: '#7C3AED',
+                border: '1px solid rgba(124,58,237,0.22)', borderRadius: 10,
+                fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
+                cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              Teach It Back
+            </button>
+          )}
           <button
             className="ec-dismiss"
             onClick={() => { track('exam_countdown_dismiss', { courseId: nextExam.idx, days }); setDismissed(true) }}
