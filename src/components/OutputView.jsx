@@ -1975,7 +1975,6 @@ export default function OutputView({
               })
             }}
             onOpenReviewQueue={() => setActiveSection('review')}
-            onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
           />
         )}
 
@@ -2109,7 +2108,6 @@ export default function OutputView({
               setQuizBurstInit({ courseIdx: idx >= 0 ? idx : 0, topic: topic ?? '' })
               setShowQuizBurst(true)
             }}
-            onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
           />
         )}
 

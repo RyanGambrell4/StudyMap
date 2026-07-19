@@ -610,7 +610,7 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
 }
 
 // ── Step 3: Plan ──────────────────────────────────────────────────────────────
-function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error, onStartFocus, struggles, onSaveStruggles, pendingHardNotes, onWeekCheckIn, onOpenTeachItBack }) {
+function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error, onStartFocus, struggles, onSaveStruggles, pendingHardNotes, onWeekCheckIn }) {
   const course = courses[form.courseIdx]
   const color = course?.color?.dot || D.accent
   const sessionLen = form.sessionLen || 60
@@ -671,7 +671,6 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
             courseName={course?.name ?? ''}
             dot={color}
             onSave={onSaveStruggles}
-            onOpenTeachItBack={onOpenTeachItBack}
             courseIdx={form.courseIdx}
           />
         )}
@@ -922,7 +921,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle, completedSessions = [], scheduledSessions = [], restDays = [], onOpenExamRescue, onOpenTeachItBack }) {
+export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle, completedSessions = [], scheduledSessions = [], restDays = [], onOpenExamRescue }) {
   const [step, setStep] = useState(1)
   const defaultStyle = learningStyle ? [learningStyle] : []
   const [form, setForm] = useState({
@@ -1421,7 +1420,6 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
                 const courseId = courses[form.courseIdx]?.id ?? form.courseIdx
                 saveCoachPlanStruggles(courseId, updated)
               }}
-              onOpenTeachItBack={onOpenTeachItBack}
               pendingHardNotes={(() => {
                 const course = courses[form.courseIdx]
                 const courseId = course?.id ?? form.courseIdx
@@ -1447,7 +1445,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
 // ── Struggle Tracker ──────────────────────────────────────────────────────────
 function uid8() { return Math.random().toString(36).slice(2, 10) }
 
-function StruggleTracker({ struggles, courseId, courseName, dot, onSave, onOpenTeachItBack, courseIdx }) {
+function StruggleTracker({ struggles, courseId, courseName, dot, onSave, courseIdx }) {
   const [open, setOpen] = useState(false)
   const [showResolved, setShowResolved] = useState(false)
   const [text, setText] = useState('')
@@ -1527,14 +1525,6 @@ function StruggleTracker({ struggles, courseId, courseName, dot, onSave, onOpenT
                     </div>
                   </div>
                   <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
-                    {onOpenTeachItBack && (
-                      <button
-                        onClick={() => onOpenTeachItBack({ courseIdx: courseIdx ?? 0, topic: s.text })}
-                        style={{ fontSize: 11.5, fontWeight: 600, color: '#7C3AED', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}
-                      >
-                        Teach It
-                      </button>
-                    )}
                     <button
                       onClick={() => handleResolve(s.id)}
                       style={{ fontSize: 11.5, fontWeight: 600, color: D.mint, background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.2)', borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}
