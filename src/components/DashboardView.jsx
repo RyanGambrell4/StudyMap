@@ -638,7 +638,7 @@ export default function DashboardView({
     if (weekHours > 0 && deltaHours > 0) {
       return `You're up ${deltaHours}h from last week. Keep the momentum. Consistency beats intensity every time.`
     }
-    return `Stay consistent with your sessions. Small daily progress compounds into big results at exam time.`
+    return `Stay consistent with your sessions. Regular study time is what moves the needle at exam time.`
   }, [upcomingExam, upcomingDeadlines, weekHours, deltaHours, todayStr])
 
   const aiCoachMessage = useMemo(() => {
@@ -712,7 +712,7 @@ export default function DashboardView({
           </h2>
           <p style={{ color: D.textMuted, fontSize: 14.5, lineHeight: 1.65, margin: '0 0 28px', maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
             {isExamMode
-              ? 'Add a section with its test date and we\'ll build your full prep plan automatically.'
+              ? 'Add a section with its test date to build your full prep plan.'
               : 'Add a course with its exam date and your AI study plan builds itself in under a minute.'}
           </p>
 
@@ -733,7 +733,7 @@ export default function DashboardView({
             {[
               { step: '1', label: isExamMode ? 'Name + test date' : 'Name + exam date' },
               { step: '2', label: 'Your weaknesses' },
-              { step: '3', label: 'AI builds the plan' },
+              { step: '3', label: 'Plan is ready' },
             ].map((s, i) => (
               <div key={s.step} style={{ display: 'flex', alignItems: 'center' }}>
                 <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, minWidth: 80 }}>
@@ -1034,7 +1034,7 @@ export default function DashboardView({
             <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#DC2626', marginBottom: 2 }}>Grade Recovery Mode Active</div>
               <div style={{ fontSize: 12.5, color: D.textMuted }}>
-                Extra weekly sessions scheduled for <strong>{[...recoveryCoursesIdx].map(i => courses[i]?.name).filter(Boolean).join(', ')}</strong>. Your grades are below target and we're helping close the gap.
+                Extra weekly sessions scheduled for <strong>{[...recoveryCoursesIdx].map(i => courses[i]?.name).filter(Boolean).join(', ')}</strong>. Your grades are below target -- extra sessions are added to close the gap.
               </div>
             </div>
             <button
