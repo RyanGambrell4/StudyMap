@@ -2188,7 +2188,6 @@ export default function OutputView({
           onClose={() => { setShowBrainDump(false); setBrainDumpInit(null) }}
           onShowPaywall={onShowPaywall}
           onDrillGaps={(topic) => { setShowBrainDump(false); setBrainDumpInit(null); setPendingDrillTopic(topic); setActiveSection('tools') }}
-          onOpenTeachItBack={({ courseIdx, topic }) => { setShowBrainDump(false); setBrainDumpInit(null); setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
         />
       )}
       {confidencePrompt && (
@@ -2222,7 +2221,6 @@ export default function OutputView({
           onClose={() => { setShowQuizBurst(false); setQuizBurstInit(null) }}
           onShowPaywall={onShowPaywall}
           onOpenCheatSheet={() => { setShowQuizBurst(false); setShowCheatSheet(true) }}
-          onOpenTeachItBack={({ courseIdx, topic }) => { setShowQuizBurst(false); setQuizBurstInit(null); setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
           initialCourseIdx={quizBurstInit?.courseIdx ?? 0}
           initialTopic={quizBurstInit?.topic ?? ''}
           autoStart={!!quizBurstInit}
