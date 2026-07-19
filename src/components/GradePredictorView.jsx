@@ -3,6 +3,7 @@ import Spinner from './ui/spinner'
 import { getAccessToken } from '../lib/supabase'
 import { clean } from '../utils/strings'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
+import { track } from '../lib/analytics'
 
 const TEXT = '#111111'
 const MUTED = '#6B6B6B'
@@ -91,6 +92,7 @@ export default function GradePredictorView({ courses, onEditCourse, userId, onSh
       const pred = data.prediction
       setPrediction(pred)
       setView('results')
+      track('grade_predicted', { predictedGrade: pred?.predictedGrade ?? null })
       await incrementAIQuery()
       const gradeData = {
         components: components.map(c => ({ name: c.name.trim(), weight: parseFloat(c.weight) || 0, type: c.type, earnedGrade: c.earnedGrade !== '' && c.earnedGrade !== null ? parseFloat(c.earnedGrade) : null })),
