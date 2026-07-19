@@ -155,7 +155,7 @@ export default function OnboardingTour({ onReady }) {
         element: '#tour-nav-tools',
         popover: {
           title: 'Brain Training Hub',
-          description: 'Hover here for Flashcards, Quizzes, Brain Dump, Quiz Burst, and Exam Rescue. Upload your notes and instantly generate study materials.',
+          description: 'Hover here for Flashcards, Brain Dump, Quiz Burst, Teach It Back, and Exam Rescue. Upload your notes and instantly generate study materials.',
           side: 'bottom',
           align: 'start',
         },
