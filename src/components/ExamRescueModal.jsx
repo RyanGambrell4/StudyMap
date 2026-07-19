@@ -222,7 +222,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
             >
               {loading ? (
                 <><Spinner size="xs" color="#fff" track="rgba(255,255,255,0.3)" />Building rescue plan...</>
-              ) : 'Build my rescue plan'}
+              ) : 'Build rescue plan'}
             </button>
 
             {!isPro && (() => {

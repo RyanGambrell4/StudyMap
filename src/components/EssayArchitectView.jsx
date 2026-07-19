@@ -466,7 +466,7 @@ export default function EssayArchitectView({ userId, onShowPaywall }) {
                   cursor: loading ? 'not-allowed' : 'pointer'
                 }}
               >
-                {loading ? 'Building outline...' : 'Generate Outline'}
+                {loading ? 'Building outline...' : 'Build outline'}
               </button>
             </div>
           </div>

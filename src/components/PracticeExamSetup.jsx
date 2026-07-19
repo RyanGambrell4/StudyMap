@@ -202,7 +202,7 @@ export default function PracticeExamSetup({ courses, onBack, onStart, onShowPayw
         </button>
 
         <h1 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 800, color: D.text, letterSpacing: '-0.02em' }}>Set up your exam</h1>
-        <p style={{ margin: '0 0 32px', fontSize: 14, color: D.muted }}>Configure your practice exam below, then hit Generate.</p>
+        <p style={{ margin: '0 0 32px', fontSize: 14, color: D.muted }}>Set your options below, then generate.</p>
 
         {error && (
           <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '10px 14px', marginBottom: 20, color: '#dc2626', fontSize: 13 }}>{error}</div>

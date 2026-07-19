@@ -59,7 +59,7 @@ export default function QuickStartCard({ courses = [], todayStr, onQuickStart })
               Study now · one-tap
             </div>
             <div style={{ fontSize: 15, fontWeight: 800, color: D.text, letterSpacing: '-0.015em', lineHeight: 1.3 }}>
-              Pick a time. We picked the topic.
+              Pick a time. Topic already chosen.
             </div>
           </div>
         </div>
