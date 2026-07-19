@@ -162,7 +162,7 @@ ${preheader(isInactive ? 'One 10-minute session is all it takes to go from "set 
           </td></tr>
         </table>
         <p style="margin:22px 0 0;font-size:13px;color:#9B9B9B;line-height:1.6;">
-          Question about Pro or the app? Reply here. I actually read them. — Ryan
+          Question about Pro or the app? Reply here. I actually read them. Ryan
         </p>
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">

@@ -129,7 +129,7 @@ ${preheader("You set up your study plan yesterday and haven't come back. Everyth
         </table>` : ''}
 
         <p style="margin:20px 0 0;font-size:14px;color:#6B6B6B;line-height:1.65;">
-          — Ryan
+          Ryan
         </p>
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">

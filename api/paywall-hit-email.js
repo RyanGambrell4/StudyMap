@@ -144,7 +144,7 @@ ${preheader(copy.unlock)}
       <p style="margin:24px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">
         If you have any questions about whether Pro is right for you, just reply to this email. I read every reply.
       </p>
-      <p style="margin:8px 0 0;font-size:13px;color:#6b7280;">— Ryan, StudyEdge AI</p>
+      <p style="margin:8px 0 0;font-size:13px;color:#6b7280;">Ryan, StudyEdge AI</p>
 
       <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;text-align:center;">
         StudyEdge AI · <a href="https://getstudyedge.com/unsubscribe?uid=${userId}" style="color:#9ca3af;">Unsubscribe</a>

@@ -253,7 +253,7 @@ ${preheader(daysLeft <= 3 ? `${examTitle}: ${daysLeft} day${daysLeft !== 1 ? 's'
         </table>
 
         <p style="margin:26px 0 0;font-size:13.5px;color:#9B9B9B;line-height:1.6;">
-          Reply if you want help building your study plan for this exam. — Ryan
+          Reply if you want help building your study plan for this exam. Ryan
         </p>
       </td></tr>
 

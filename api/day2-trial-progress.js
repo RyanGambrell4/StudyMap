@@ -194,7 +194,7 @@ ${preheader(isInactive ? 'One 5-minute session will tell you if StudyEdge Pro is
           </td></tr>
         </table>
         <p style="margin:22px 0 0;font-size:13px;color:#9B9B9B;line-height:1.6;">
-          Got a blocker? Reply to this email. I actually read them. — Ryan
+          Got a blocker? Reply to this email. I actually read them. Ryan
         </p>
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">

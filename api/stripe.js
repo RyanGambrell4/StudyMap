@@ -620,7 +620,7 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
     <p style="margin:24px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">
       Any questions? Just reply. I read every message.
     </p>
-    <p style="margin:8px 0 0;font-size:13px;color:#6b7280;">— Ryan, StudyEdge AI</p>
+    <p style="margin:8px 0 0;font-size:13px;color:#6b7280;">Ryan, StudyEdge AI</p>
     <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;text-align:center;">
       StudyEdge AI · <a href="https://getstudyedge.com/unsubscribe?uid=${userId}" style="color:#9ca3af;">Unsubscribe</a>
     </p>

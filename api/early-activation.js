@@ -84,7 +84,7 @@ ${preheader("Add a course with an exam date. Everything else runs from there: yo
           The one thing that makes StudyEdge actually work.
         </h1>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          You signed up a couple hours ago. Before you dive in, here's the single most important thing: <strong style="color:#111111;">add a course with a real exam date.</strong>
+          You signed up a couple hours ago. The single most important thing to do first: <strong style="color:#111111;">add a course with a real exam date.</strong>
         </p>
         <p style="margin:0 0 20px;font-size:15px;color:#6B6B6B;line-height:1.65;">
           Your study plan, Session Blueprints, Study Coach, and grade tracker are all built around exam dates. Without one, the AI doesn't know what to focus on or when.
@@ -114,7 +114,7 @@ ${preheader("Add a course with an exam date. Everything else runs from there: yo
           <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=early_activation_trial" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:700;text-decoration:none;border-radius:8px;padding:11px 24px;">Start free 7-day trial →</a>
         </div>
         <p style="margin:22px 0 0;font-size:14px;color:#6B6B6B;line-height:1.65;">
-          Reply if you have questions. I read them.<br>— Ryan
+          Reply if you have questions. I read them.<br>Ryan
         </p>
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">
