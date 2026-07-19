@@ -2185,6 +2185,7 @@ export default function OutputView({
           userId={userId}
           onClose={() => setShowExamRescue(false)}
           onShowPaywall={onShowPaywall}
+          onOpenTeachItBack={({ courseIdx, topic }) => { setShowExamRescue(false); setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
         />
       )}
       {showQuizBurst && (
