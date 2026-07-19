@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { fetchWithRetry, aiErrorMessage } from '../lib/utils'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
@@ -28,7 +28,27 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
   const [result, setResult] = useState(null)
   const [finalResult, setFinalResult] = useState(null)
   const [error, setError] = useState('')
+  const [displayScore, setDisplayScore] = useState(0)
   const textareaRef = useRef(null)
+  const scoreTimerRef = useRef(null)
+
+  // Animate score from 0 to result.score over ~900ms when result arrives
+  useEffect(() => {
+    if (!result?.score) return
+    const target = result.score
+    const duration = 900
+    const start = performance.now()
+    clearInterval(scoreTimerRef.current)
+    scoreTimerRef.current = setInterval(() => {
+      const elapsed = performance.now() - start
+      const progress = Math.min(elapsed / duration, 1)
+      // ease-out cubic
+      const eased = 1 - Math.pow(1 - progress, 3)
+      setDisplayScore(Math.round(eased * target))
+      if (progress >= 1) clearInterval(scoreTimerRef.current)
+    }, 16)
+    return () => clearInterval(scoreTimerRef.current)
+  }, [result?.score])
 
   const course = courses[courseIdx] ?? null
   const courseColor = course?.color?.dot ?? COURSE_COLORS[courseIdx % COURSE_COLORS.length]
@@ -258,10 +278,24 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
             <div style={{ padding: 24 }}>
               {/* Score */}
               <div style={{ textAlign: 'center', marginBottom: 24 }}>
-                <div style={{ fontSize: 56, fontWeight: 900, color: scoreColor, letterSpacing: -3, lineHeight: 1 }}>
-                  {result.score}%
+                <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center', justifyContent: 'center', marginBottom: 8 }}>
+                  <svg width="120" height="120" viewBox="0 0 120 120" style={{ position: 'absolute' }}>
+                    <circle cx="60" cy="60" r="52" fill="none" stroke="rgba(0,0,0,0.06)" strokeWidth="8"/>
+                    <circle
+                      cx="60" cy="60" r="52" fill="none"
+                      stroke={scoreColor} strokeWidth="8"
+                      strokeDasharray={`${2 * Math.PI * 52}`}
+                      strokeDashoffset={`${2 * Math.PI * 52 * (1 - displayScore / 100)}`}
+                      strokeLinecap="round"
+                      transform="rotate(-90 60 60)"
+                      style={{ transition: 'stroke-dashoffset 0.05s linear' }}
+                    />
+                  </svg>
+                  <div style={{ fontSize: 44, fontWeight: 900, color: scoreColor, letterSpacing: -2, lineHeight: 1, width: 120, height: 120, display: 'flex', alignItems: 'center', justifyContent: 'center', fontVariantNumeric: 'tabular-nums' }}>
+                    {displayScore}%
+                  </div>
                 </div>
-                <div style={{ fontSize: 14, color: D.textMuted, marginTop: 8, lineHeight: 1.5 }}>{result.verdict}</div>
+                <div style={{ fontSize: 14, color: D.textMuted, marginTop: 4, lineHeight: 1.5 }}>{result.verdict}</div>
               </div>
 
               {/* What you got right */}
