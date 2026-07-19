@@ -25,7 +25,7 @@ export default function ComebackCard({ daysAway, lastSessionDate, courses, onSta
   const message = daysAway >= 10
     ? "It's been a while. That's okay. Getting back is the whole battle."
     : daysAway >= 7
-    ? "A week off. No guilt. Let's just start with something small."
+    ? "A week off. No guilt. Start small and build back up."
     : "Life happens. Nothing lost. One small session and you're rolling again."
 
   const primary = todaySessions.length > 0
@@ -93,7 +93,7 @@ export default function ComebackCard({ daysAway, lastSessionDate, courses, onSta
             Welcome back
           </div>
           <h3 style={{ margin: '0 0 6px', fontSize: 20, fontWeight: 800, color: D.text, letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-            {daysAway} days is nothing. Let's ease back in.
+            {daysAway} days away. Pick up where you left off.
           </h3>
           <p style={{ margin: 0, fontSize: 13.5, color: D.muted, lineHeight: 1.55, maxWidth: 520 }}>
             {message}

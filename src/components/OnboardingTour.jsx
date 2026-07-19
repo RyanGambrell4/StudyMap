@@ -116,7 +116,7 @@ export default function OnboardingTour({ onReady }) {
       {
         popover: {
           title: 'Welcome to StudyEdge AI',
-          description: "Let's show you around in 60 seconds. You can skip this any time.",
+          description: "Quick tour, 60 seconds. You can skip this any time.",
           showButtons: ['next', 'close'],
         },
       },
@@ -166,7 +166,7 @@ export default function OnboardingTour({ onReady }) {
           title: "You're all set.",
           description: 'Start by adding your first course. Press the + Course button on the dashboard. It takes 30 seconds.',
           showButtons: ['previous', 'next'],
-          nextBtnText: "Let's go",
+          nextBtnText: "Get started",
         },
       },
     ]

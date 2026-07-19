@@ -101,7 +101,7 @@ export default function PrepBlastScreen({ session, course, onDismiss, userId }) 
       ) : error ? (
         <div style={{ width: '100%', maxWidth: 400, background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 16, padding: '28px 24px' }}>
           <div style={{ fontSize: 15, fontWeight: 700, color: D.text, marginBottom: 6 }}>Couldn't load session brief</div>
-          <p style={{ fontSize: 13, color: D.muted, lineHeight: 1.6, margin: '0 0 20px' }}>Something went wrong reaching the AI. You can retry or go straight into your session.</p>
+          <p style={{ fontSize: 13, color: D.muted, lineHeight: 1.6, margin: '0 0 20px' }}>Couldn't load the session brief. You can retry or go straight in.</p>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => setRetryCount(c => c + 1)} style={{ flex: 1, padding: '11px', background: courseColor, border: 'none', borderRadius: 10, color: '#fff', fontSize: 13.5, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
               Retry

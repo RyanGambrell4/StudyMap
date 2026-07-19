@@ -517,7 +517,7 @@ function CoachQuestion({ n, question, form, setForm, field }) {
           <button onClick={() => setAnswered(true)} style={{ padding: '0 12px', borderRadius: 8, flexShrink: 0, color: D.dim, fontSize: 12, cursor: 'pointer' }}>Skip</button>
         </div>
       )}
-      {answered && <div style={{ fontSize: 11.5, color: D.mint, marginLeft: 32, marginTop: 4 }}>{draft.trim() ? 'Saved' : 'Skipped, noted'}</div>}
+      {answered && <div style={{ fontSize: 11.5, color: D.mint, marginLeft: 32, marginTop: 4 }}>{draft.trim() ? 'Saved' : 'Skipped'}</div>}
     </div>
   )
 }
@@ -579,7 +579,7 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
           <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
               <Icon name="msg" size={14} color={D.indigo} />
-              <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', color: D.indigo, textTransform: 'uppercase' }}>Before I build: a few gaps</span>
+              <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', color: D.indigo, textTransform: 'uppercase' }}>A few quick questions</span>
             </div>
             <div style={{ fontSize: 12.5, color: D.muted, marginBottom: 16 }}>You can skip any of these. The plan will just note they weren't provided.</div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -600,7 +600,7 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
                 Building your plan…
               </>
             ) : (
-              <><Icon name="sparkles" size={14} /> Build my plan, only from what I've shared</>
+              <><Icon name="sparkles" size={14} /> Build my plan</>
             )}
           </button>
         </div>
@@ -1542,7 +1542,7 @@ function StruggleTracker({ struggles, courseId, courseName, dot, onSave, courseI
 
           {active.length === 0 && (
             <div style={{ padding: '20px 0', textAlign: 'center', color: D.dim, fontSize: 13 }}>
-              Nothing logged yet. Add topics that felt hard or unclear -- the AI coach uses these to tailor your sessions.
+              Nothing logged yet. Add topics that felt hard or unclear -- the coach uses these to tailor your sessions.
             </div>
           )}
 
@@ -1986,7 +1986,6 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form, onStartFoc
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '16px 20px' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
             <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>What You'll Master: Your {plan.priorityTopics?.length} Topic{plan.priorityTopics?.length !== 1 ? 's' : ''}</span>
-            {struggles && <span className="sc-topic-struggles-hint" style={{ fontSize: 11, color: D.dim }}>From your list, nothing added</span>}
           </div>
           <div className="sc-topics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
             {plan.priorityTopics?.map((topic, i) => {
@@ -2190,7 +2189,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form, onStartFoc
                               border: 'none',
                             }}
                           >
-                            Submit and update next sessions
+                            Update plan
                           </button>
                         </div>
                       )
@@ -2284,14 +2283,14 @@ function SessionCard({ session, wi, si, checked, onCheck, struggles, onStartFocu
           </div>
           {session.studyMethod && (
             <div>
-              <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', color: D.dim, textTransform: 'uppercase', marginBottom: 3 }}>Deliverable</div>
+              <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', color: D.dim, textTransform: 'uppercase', marginBottom: 3 }}>Method</div>
               <div style={{ fontSize: 12.5, color: D.muted, lineHeight: 1.4 }}>{session.studyMethod}</div>
             </div>
           )}
         </div>
         {session.keyTopics?.length > 0 && (
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: isStruggle ? 8 : 0 }}>
-            <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', color: D.dim, textTransform: 'uppercase', marginRight: 2 }}>Technique</span>
+            <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', color: D.dim, textTransform: 'uppercase', marginRight: 2 }}>Topics</span>
             {session.keyTopics.map((t, i) => <span key={i} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 5, background: 'rgba(0,0,0,0.04)', border: `1px solid rgba(255,255,255,0.1)`, color: D.muted }}>{t}</span>)}
           </div>
         )}
