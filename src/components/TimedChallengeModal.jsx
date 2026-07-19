@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react'
 import Spinner from './ui/spinner'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
 import { addStudySession } from '../lib/studyHistory'
+import { track } from '../lib/analytics'
 
 const D = {
   bg: '#F7F6F3',
@@ -149,6 +150,7 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
     const isNewPB = savePB(courseKey, { score, correct, total, date: new Date().toISOString() })
     addStudySession({ tool: 'Time Attack', score, topic: topic.trim() || null, courseName: course?.name || null })
     window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'timeAttack' } }))
+    track('time_attack_complete', { score, topic: topic.trim() || null, isNewPB, plan: getActivePlan() })
     doneStatsRef.current = { correct, total, score, isNewPB }
   }, [step])
   const doneStats = step === 'done' ? doneStatsRef.current : null
