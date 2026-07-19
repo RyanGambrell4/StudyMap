@@ -6,6 +6,7 @@ import { getAccessToken } from '../lib/supabase'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
 import { analyzeExam, SKILL_LABEL, SKILL_HINT, SKILL_COLOR } from '../lib/examAutopsy'
+import { track } from '../lib/analytics'
 
 function fmtMs(ms) {
   const total = Math.round(ms / 1000)
@@ -159,6 +160,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
     if (weakTopics.length) addWeakTopics(weakTopics.map(([t]) => t))
     addStudySession({ tool: 'Practice Exam', score: score ?? null, topic: null, courseName: courseName || null })
     window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'practiceExam' } }))
+    track('practice_exam_complete', { score: score ?? null, questionCount: graded.length, weakTopicCount: weakTopics.length, plan: getActivePlan() })
   }, [])
 
   const hasShortAnswer = graded.some(g => g.correct === null)
