@@ -469,6 +469,17 @@ export default function DashboardView({
     () => allSessions.filter(s => s.dateStr >= weekStart && s.dateStr <= weekEnd && completedIds.has(s.id)),
     [allSessions, completedIds, weekStart, weekEnd]
   )
+
+  // Last 7 days: array of { dateStr, dayLabel, studied } for the activity dot row
+  const last7Days = useMemo(() => {
+    const completedDates = new Set((completedSessions ?? []).map(s => s.dateStr))
+    return Array.from({ length: 7 }, (_, i) => {
+      const d = new Date(todayStr + 'T12:00:00')
+      d.setDate(d.getDate() - 6 + i)
+      const ds = d.toISOString().split('T')[0]
+      return { dateStr: ds, dayLabel: ['S','M','T','W','T','F','S'][d.getDay()], studied: completedDates.has(ds), isToday: ds === todayStr }
+    })
+  }, [completedSessions, todayStr])
   const thisWeekScheduled = useMemo(
     () => allSessions.filter(s => s.dateStr >= weekStart && s.dateStr <= weekEnd).length,
     [allSessions, weekStart, weekEnd]
@@ -2186,7 +2197,28 @@ export default function DashboardView({
               </div>
             ))}
           </div>
-          <div style={{ marginTop: 16 }}>
+          {/* 7-day activity dots */}
+          <div style={{ marginTop: 14, paddingTop: 14, borderTop: `1px solid ${D.border}` }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+              <span style={{ fontSize: 11, fontWeight: 600, color: D.textDim }}>Last 7 days</span>
+              <span style={{ fontSize: 11, color: D.textDim }}>{last7Days.filter(d => d.studied).length} of 7 active</span>
+            </div>
+            <div style={{ display: 'flex', gap: 6, justifyContent: 'space-between' }}>
+              {last7Days.map(({ dateStr, dayLabel, studied, isToday }) => (
+                <div key={dateStr} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4, flex: 1 }}>
+                  <div style={{
+                    width: '100%', aspectRatio: '1', maxWidth: 28, borderRadius: 6,
+                    background: studied ? (isToday ? D.green : `${D.green}CC`) : isToday ? 'rgba(0,0,0,0.08)' : 'rgba(0,0,0,0.04)',
+                    border: isToday ? `2px solid ${studied ? D.green : 'rgba(0,0,0,0.15)'}` : '2px solid transparent',
+                    transition: 'background 0.3s ease',
+                  }} />
+                  <span style={{ fontSize: 9.5, fontWeight: isToday ? 700 : 500, color: isToday ? D.text : D.textDim, letterSpacing: '0.02em' }}>{dayLabel}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div style={{ marginTop: 14 }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11, color: D.textDim, marginBottom: 6 }}>
               <span style={{ fontWeight: 600 }}>Weekly goal</span>
               <span style={{ color: onPace ? D.green : D.amber, fontWeight: 600 }}>{weekHours} of {weeklyGoalHours}h</span>
