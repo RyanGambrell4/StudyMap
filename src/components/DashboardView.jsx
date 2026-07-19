@@ -452,6 +452,10 @@ export default function DashboardView({
     [allSessions, completedIds, prevWeekStart, prevWeekEnd]
   )
 
+  const todayMins = useMemo(
+    () => allSessions.filter(s => s.dateStr === todayStr && completedIds.has(s.id)).reduce((a, s) => a + (s.duration ?? 0), 0),
+    [allSessions, completedIds, todayStr]
+  )
   const weekHours = Math.round(thisWeekDone.reduce((a, s) => a + (s.duration ?? 0), 0) / 60 * 10) / 10
   const prevWeekHours = Math.round(prevWeekDone.reduce((a, s) => a + (s.duration ?? 0), 0) / 60 * 10) / 10
   const weekSessionCount = thisWeekDone.length
@@ -2060,7 +2064,7 @@ export default function DashboardView({
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {[
               { label: 'Study streak',  value: streak,         unit: streak === 1 ? 'day' : 'days', delta: streak,        positive: streak > 0,       icon: <IcoFlame color="#F97316" />,  iconBg: 'rgba(249,115,22,0.1)',  iconColor: '#F97316', subtext: daysToNextMilestone === 1 ? `${nextStreakMilestone}-day streak tomorrow` : daysToNextMilestone === 2 ? `${daysToNextMilestone} days to ${nextStreakMilestone}-day streak` : freezeCount > 0 ? `${freezeCount} freeze${freezeCount !== 1 ? 's' : ''} available` : null },
-              { label: 'Hours studied', value: weekHours,      unit: 'hrs',                          delta: deltaHours,    positive: deltaHours >= 0,  icon: <IcoClock color={D.blue} />,   iconBg: 'rgba(59,97,196,0.1)',   iconColor: D.blue },
+              { label: 'Hours studied', value: weekHours,      unit: 'hrs',                          delta: deltaHours,    positive: deltaHours >= 0,  icon: <IcoClock color={D.blue} />,   iconBg: 'rgba(59,97,196,0.1)',   iconColor: D.blue, subtext: todayMins > 0 ? `${todayMins} min today` : null, subtextColor: D.blue },
               { label: 'Sessions done', value: weekSessionCount, unit: '',                           delta: deltaSessions, positive: deltaSessions >= 0, icon: <IcoCheck color={D.green} />, iconBg: 'rgba(22,163,74,0.1)',   iconColor: D.green },
             ].map((stat, i) => (
               <div key={stat.label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 0', borderBottom: i < 2 ? `1px solid ${D.border}` : 'none' }}>
@@ -2069,7 +2073,7 @@ export default function DashboardView({
                 </div>
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 13, color: D.textMuted }}>{stat.label}</div>
-                  {stat.subtext && <div style={{ fontSize: 11, color: '#F97316', fontWeight: 600, marginTop: 1 }}>{stat.subtext}</div>}
+                  {stat.subtext && <div style={{ fontSize: 11, color: stat.subtextColor ?? '#F97316', fontWeight: 600, marginTop: 1 }}>{stat.subtext}</div>}
                 </div>
                 <div style={{ display: 'flex', alignItems: 'baseline', gap: 4 }}>
                   <span style={{ fontSize: 24, fontWeight: 800, color: D.text, letterSpacing: -0.5 }}>{stat.value}</span>
