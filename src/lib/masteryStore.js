@@ -27,6 +27,7 @@ export function updateMastery(topic, courseId, score, source) {
   const key = makeKey(topic, courseId)
   const data = load()
   const prev = data[key]
+  const prevHistory = prev?.history ?? []
   data[key] = {
     topic: topic.trim(),
     courseId: courseId ?? null,
@@ -35,6 +36,7 @@ export function updateMastery(topic, courseId, score, source) {
     lastUpdated: Date.now(),
     source,
     count: (prev?.count ?? 0) + 1,
+    history: [...prevHistory, score].slice(-6),
   }
   save(data)
 }

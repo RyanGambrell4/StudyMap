@@ -16,6 +16,24 @@ const D = {
 
 const COURSE_COLORS = ['#3B82F6','#6366F1','#059669','#D97706','#EC4899','#0891B2']
 
+function ScoreSparkline({ history, color }) {
+  if (!history || history.length < 2) return null
+  const W = 80, H = 24, pad = 4
+  const min = 0, max = 100
+  const xs = history.map((_, i) => pad + (i / (history.length - 1)) * (W - pad * 2))
+  const ys = history.map(s => H - pad - ((s - min) / (max - min)) * (H - pad * 2))
+  const d = xs.map((x, i) => `${i === 0 ? 'M' : 'L'}${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ')
+  return (
+    <svg width={W} height={H} style={{ overflow: 'visible' }}>
+      <polyline fill="none" stroke={`${color}40`} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" points={xs.map((x, i) => `${x.toFixed(1)},${ys[i].toFixed(1)}`).join(' ')}/>
+      <path fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" d={d}/>
+      {xs.map((x, i) => (
+        <circle key={i} cx={x} cy={ys[i]} r={i === history.length - 1 ? 3.5 : 2} fill={i === history.length - 1 ? color : '#fff'} stroke={color} strokeWidth="1.5"/>
+      ))}
+    </svg>
+  )
+}
+
 export default function TeachItBackModal({ courses, onClose, onShowPaywall, initialCourseIdx = 0, initialTopic = '', autoStart = false }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
@@ -336,6 +354,18 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
                         <path d={up ? 'M12 19V5M5 12l7-7 7 7' : 'M12 5v14M5 12l7 7 7-7'} />
                       </svg>
                       {up ? '+' : ''}{delta}% vs last session
+                    </div>
+                  )
+                })()}
+                {(() => {
+                  const courseId = course?.id ?? null
+                  const entry = topic.trim() ? getMastery(topic.trim(), courseId) : null
+                  const history = entry?.history ?? []
+                  if (history.length < 2) return null
+                  return (
+                    <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center' }}>
+                      <span style={{ fontSize: 11, color: D.textDim, fontWeight: 600 }}>Score trend</span>
+                      <ScoreSparkline history={history} color={scoreColor}/>
                     </div>
                   )
                 })()}
