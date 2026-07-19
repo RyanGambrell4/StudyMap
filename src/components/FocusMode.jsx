@@ -663,6 +663,17 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       session_type: session.sessionType,
       tabs_used: [...tabsVisited],
     })
+    try {
+      localStorage.setItem('se_last_session', JSON.stringify({
+        courseId: session.courseId,
+        courseName: session.courseName,
+        sessionType: session.sessionType,
+        elapsedMinutes,
+        recallScore: score,
+        recallLabel: label,
+        completedAt: Date.now(),
+      }))
+    } catch {}
     onComplete(session.id, elapsed, data)
   }
 
@@ -676,6 +687,17 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       course_name: session.courseName,
       session_type: session.sessionType,
     })
+    try {
+      localStorage.setItem('se_last_session', JSON.stringify({
+        courseId: session.courseId,
+        courseName: session.courseName,
+        sessionType: session.sessionType,
+        elapsedMinutes,
+        recallScore: null,
+        recallLabel: null,
+        completedAt: Date.now(),
+      }))
+    } catch {}
     onComplete(session.id, elapsed, null)
   }
 

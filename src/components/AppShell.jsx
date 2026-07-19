@@ -2,6 +2,7 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { getActivePlan, isTrialActive, hasUsedTrial, getTrialDaysRemaining } from '../lib/subscription'
 import { getCachedStudyTools } from '../lib/db'
 import { getDueCards } from '../lib/sm2'
+import { getReviewStats } from '../lib/masteryStore'
 import OnboardingTour from './OnboardingTour'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -78,6 +79,8 @@ export default function AppShell({
     if (!saved?.flashcards?.length) return 0
     return getDueCards(saved.flashcards).length
   }, [])
+
+  const reviewDueCount = useMemo(() => getReviewStats().dueCount, [])
   const isTrialing = isTrialActive()
   const daysLeft = isTrialing ? getTrialDaysRemaining() : null
   const [trialBannerDismissed, setTrialBannerDismissed] = useState(
@@ -175,6 +178,14 @@ export default function AppShell({
               onMouseLeave={e => { if (!isStrategyActive) e.currentTarget.style.color = MUTED }}
             >
               Strategy
+              {reviewDueCount > 0 && (
+                <span style={{
+                  fontSize: 10, fontWeight: 800, padding: '1px 6px', borderRadius: 999,
+                  background: '#DC2626', color: '#fff', lineHeight: 1.5, marginLeft: 2,
+                }}>
+                  {reviewDueCount > 9 ? '9+' : reviewDueCount}
+                </span>
+              )}
               {/* stacked-lines hint */}
               <svg style={{ width: 10, height: 10, opacity: 0.45 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
@@ -269,8 +280,15 @@ export default function AppShell({
                       <path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/>
                     </svg>
                   </div>
-                  <div>
-                    <div style={{ fontSize: 13, fontWeight: 600, color: TEXT, marginBottom: 2 }}>Review Queue</div>
+                  <div style={{ flex: 1 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 2 }}>
+                      <span style={{ fontSize: 13, fontWeight: 600, color: TEXT }}>Review Queue</span>
+                      {reviewDueCount > 0 && (
+                        <span style={{ fontSize: 10, fontWeight: 800, padding: '1px 7px', borderRadius: 999, background: '#DC2626', color: '#fff', lineHeight: 1.5 }}>
+                          {reviewDueCount > 9 ? '9+' : reviewDueCount} due
+                        </span>
+                      )}
+                    </div>
                     <div style={{ fontSize: 11.5, color: MUTED, lineHeight: 1.4 }}>Spaced repetition for what you've learned</div>
                   </div>
                 </button>
@@ -599,10 +617,15 @@ export default function AppShell({
           </button>
           {/* Strategy */}
           <button onClick={() => setMobileHub(h => h === 'strategy' ? null : 'strategy')}
-            style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '10px 0', background: 'transparent', border: 'none', cursor: 'pointer' }}>
-            <svg style={{ width: 18, height: 18, color: (isStrategyActive || mobileHub === 'strategy') ? ACCENT : MUTED }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={(isStrategyActive || mobileHub === 'strategy') ? 2.5 : 2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-            </svg>
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '10px 0', background: 'transparent', border: 'none', cursor: 'pointer', position: 'relative' }}>
+            <div style={{ position: 'relative' }}>
+              <svg style={{ width: 18, height: 18, color: (isStrategyActive || mobileHub === 'strategy') ? ACCENT : MUTED }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={(isStrategyActive || mobileHub === 'strategy') ? 2.5 : 2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              {reviewDueCount > 0 && (
+                <span style={{ position: 'absolute', top: -3, right: -5, width: 8, height: 8, borderRadius: '50%', background: '#DC2626', border: '1.5px solid #fff', display: 'block' }} />
+              )}
+            </div>
             <span style={{ fontSize: 9, fontWeight: 500, color: (isStrategyActive || mobileHub === 'strategy') ? ACCENT : MUTED }}>Strategy</span>
           </button>
           {/* Brain Training */}

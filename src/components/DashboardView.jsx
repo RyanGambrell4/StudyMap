@@ -230,6 +230,17 @@ export default function DashboardView({
       setTrialBannerLoading(false)
     }
   }
+  // ── Post-session debrief: shown up to 2h after a focus session completes ──
+  const [lastSession, setLastSession] = useState(() => {
+    try {
+      const raw = JSON.parse(localStorage.getItem('se_last_session') ?? 'null')
+      if (!raw || Date.now() - raw.completedAt > 2 * 60 * 60 * 1000) return null
+      return raw
+    } catch { return null }
+  })
+  const [debriefDismissed, setDebriefDismissed] = useState(false)
+  const showDebrief = !!(lastSession && !debriefDismissed)
+
   const [aiChipDismissed, setAiChipDismissed] = useState(
     () => sessionStorage.getItem('studyedge_ai_chip_dismissed') === '1'
   )
@@ -890,6 +901,68 @@ export default function DashboardView({
           {subtitle}
         </p>
       </div>
+
+      {/* ── Post-session debrief strip ── */}
+      {showDebrief && lastSession && (
+        <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
+          <style>{`
+            @keyframes debrief-in { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+          `}</style>
+          <div style={{
+            background: 'linear-gradient(135deg, rgba(22,163,74,0.05), rgba(22,163,74,0.09))',
+            border: '1px solid rgba(22,163,74,0.22)',
+            borderLeft: '4px solid #16A34A',
+            borderRadius: 10,
+            padding: '14px 18px',
+            display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
+            animation: 'debrief-in 350ms cubic-bezier(0.16,1,0.3,1)',
+          }}>
+            {/* Check icon */}
+            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(22,163,74,0.12)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <svg width="17" height="17" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>
+            </div>
+            <div style={{ flex: 1, minWidth: 180 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: D.text }}>
+                Session complete: {lastSession.sessionType ?? 'Study Session'}
+              </p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: D.textMuted, lineHeight: 1.4 }}>
+                {lastSession.elapsedMinutes} min
+                {lastSession.courseName ? ` · ${lastSession.courseName}` : ''}
+                {lastSession.recallScore != null ? (
+                  <span style={{ marginLeft: 8, fontWeight: 600, color: lastSession.recallScore >= 70 ? D.green : lastSession.recallScore >= 40 ? D.amber : D.red }}>
+                    · {lastSession.recallScore}% recall
+                  </span>
+                ) : null}
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap', alignItems: 'center' }}>
+              <button
+                onClick={() => { setDebriefDismissed(true); onOpenBrainDump?.() }}
+                style={{ background: '#16A34A', border: 'none', borderRadius: 7, padding: '7px 13px', fontSize: 12, fontWeight: 700, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                Brain Dump
+              </button>
+              {onOpenQuizBurst && (
+                <button
+                  onClick={() => { setDebriefDismissed(true); onOpenQuizBurst?.() }}
+                  style={{ background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.22)', borderRadius: 7, padding: '7px 13px', fontSize: 12, fontWeight: 600, color: D.amber, cursor: 'pointer', whiteSpace: 'nowrap' }}
+                >
+                  Quiz Burst
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  localStorage.removeItem('se_last_session')
+                  setDebriefDismissed(true)
+                  track('debrief_dismissed')
+                }}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: D.textDim, fontSize: 18, lineHeight: 1, padding: '0 4px', flexShrink: 0 }}
+                aria-label="Dismiss"
+              >×</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ── Exam countdown banner ── */}
       {isExamMode && upcomingExam && (() => {
