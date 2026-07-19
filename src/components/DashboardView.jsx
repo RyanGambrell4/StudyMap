@@ -1462,6 +1462,7 @@ export default function DashboardView({
           courses={courses}
           onOpenBrainDump={onOpenBrainDump}
           onOpenReviewQueue={onOpenReviewQueue}
+          onOpenTeachItBack={onOpenTeachItBack}
         />
 
         {/* ── Comeback Mode: warm re-entry when the student's been away ── */}

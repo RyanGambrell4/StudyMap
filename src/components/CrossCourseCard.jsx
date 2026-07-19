@@ -51,7 +51,7 @@ function ConnectionSpine({ courses }) {
   )
 }
 
-export default function CrossCourseCard({ courses = [], onOpenBrainDump, onOpenReviewQueue }) {
+export default function CrossCourseCard({ courses = [], onOpenBrainDump, onOpenReviewQueue, onOpenTeachItBack }) {
   const [dismissed, setDismissed] = useState(false)
   const connections = useMemo(() => findCrossCourseConnections(courses), [courses])
   const top = connections[0]
@@ -143,6 +143,26 @@ export default function CrossCourseCard({ courses = [], onOpenBrainDump, onOpenR
             Drill it once
             <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
+          {onOpenTeachItBack && (
+            <button
+              className="cc-btn"
+              onClick={() => {
+                const courseIdx = Math.max(0, courses.findIndex(c => c.id === top.courses[0]?.courseId || c.name === top.courses[0]?.courseName))
+                track('cross_course_teach_it_back', { token: top.token })
+                onOpenTeachItBack({ courseIdx, topic: top.token })
+              }}
+              style={{
+                minHeight: 40, padding: '0 14px',
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: 'rgba(124,58,237,0.07)', color: '#7C3AED',
+                border: '1px solid rgba(124,58,237,0.22)', borderRadius: 10,
+                fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
+                cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              Teach It Back
+            </button>
+          )}
           <button
             className="cc-dismiss"
             onClick={() => { track('cross_course_dismiss', { token: top.token }); setDismissed(true) }}
