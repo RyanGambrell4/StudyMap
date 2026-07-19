@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { QUICK_PRESETS, pickTarget } from '../lib/quickStart'
 import { track } from '../lib/analytics'
 import { clean } from '../utils/strings'
+import { getWeakestTopics } from '../lib/masteryStore'
 
 const D = {
   bg:      '#FFFFFF',
@@ -20,7 +21,7 @@ function PresetIcon({ id, color }) {
   return null
 }
 
-export default function QuickStartCard({ courses = [], todayStr, onQuickStart }) {
+export default function QuickStartCard({ courses = [], todayStr, onQuickStart, onOpenTeachItBack }) {
   // Precompute the target for each preset so we can show a helpful subtitle
   // (course + topic) on each button.
   const targets = useMemo(() => {
@@ -114,6 +115,22 @@ export default function QuickStartCard({ courses = [], todayStr, onQuickStart })
             )
           })}
         </div>
+        {onOpenTeachItBack && (() => {
+          const weak = getWeakestTopics(null, 1)[0]
+          if (!weak || weak.score >= 75) return null
+          const courseIdx = courses.findIndex(c => String(c.id) === String(weak.courseId))
+          return (
+            <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center' }}>
+              <span style={{ fontSize: 12, color: D.dim }}>Or:</span>
+              <button
+                onClick={() => { track('quick_start_teach_it_back', { topic: weak.topic }); onOpenTeachItBack({ courseIdx: Math.max(0, courseIdx), topic: weak.topic }) }}
+                style={{ fontSize: 12.5, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.18)', borderRadius: 8, padding: '5px 12px', cursor: 'pointer' }}
+              >
+                Teach It Back: {clean(weak.topic)} ({weak.score}%)
+              </button>
+            </div>
+          )
+        })()}
       </div>
     </div>
   )

@@ -1426,6 +1426,7 @@ export default function DashboardView({
             if (typeof onQuickStart === 'function') onQuickStart(s)
             else onStartFocus?.(s)
           }}
+          onOpenTeachItBack={onOpenTeachItBack}
         />
 
         {/* ── Weekly Goal: hours target with progress ring + insight ── */}
