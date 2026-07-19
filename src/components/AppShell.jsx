@@ -1,5 +1,6 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
 import { getActivePlan, isTrialActive, hasUsedTrial, getTrialDaysRemaining } from '../lib/subscription'
+import { track } from '../lib/analytics'
 import { getCachedStudyTools } from '../lib/db'
 import { getDueCards } from '../lib/sm2'
 import { getReviewStats } from '../lib/masteryStore'
@@ -48,6 +49,7 @@ export default function AppShell({
 
   const isStrategyActive = STRATEGY_SECTIONS.includes(activeSection)
   const isBrainActive    = BRAIN_SECTIONS.includes(activeSection)
+  const navTo = useCallback((section) => { track('nav_section_opened', { section }); setActiveSection(section) }, [setActiveSection])
 
   useEffect(() => { window.scrollTo(0, 0) }, [activeSection])
 
@@ -143,7 +145,7 @@ export default function AppShell({
           {/* ── Home (icon only, no label) ── */}
           <button
             id="tour-nav-dashboard"
-            onClick={() => setActiveSection('dashboard')}
+            onClick={() => navTo('dashboard')}
             title="Dashboard"
             style={{ ...navBtnBase(activeSection === 'dashboard'), padding: '0 16px' }}
             onMouseEnter={e => { if (activeSection !== 'dashboard') e.currentTarget.style.color = TEXT }}
@@ -157,7 +159,7 @@ export default function AppShell({
           {/* ── Schedule ── */}
           <button
             id="tour-nav-calendar"
-            onClick={() => setActiveSection('calendar')}
+            onClick={() => navTo('calendar')}
             style={navBtnBase(activeSection === 'calendar')}
             onMouseEnter={e => { if (activeSection !== 'calendar') e.currentTarget.style.color = TEXT }}
             onMouseLeave={e => { if (activeSection !== 'calendar') e.currentTarget.style.color = MUTED }}
@@ -196,7 +198,7 @@ export default function AppShell({
               <div style={{ position: 'absolute', top: '100%', left: 0, width: 256, background: '#FFFFFF', border: `1px solid ${BORDER}`, borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.12)', padding: 12, zIndex: 200 }}>
                 {/* Study Coach */}
                 <button
-                  onClick={() => { setOpenHub(null); setActiveSection('coach') }}
+                  onClick={() => { setOpenHub(null); navTo('coach') }}
                   style={{ display: 'flex', alignItems: 'flex-start', gap: 12, width: '100%', padding: '12px 14px', borderRadius: 10, background: 'none', border: '1px solid rgba(59,97,196,0.15)', cursor: 'pointer', textAlign: 'left', marginBottom: 8 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(59,97,196,0.05)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
@@ -215,7 +217,7 @@ export default function AppShell({
                 {/* Track Grades */}
                 <button
                   id="tour-nav-grades"
-                  onClick={() => { setOpenHub(null); setActiveSection('grades') }}
+                  onClick={() => { setOpenHub(null); navTo('grades') }}
                   style={{ display: 'flex', alignItems: 'flex-start', gap: 12, width: '100%', padding: '12px 14px', borderRadius: 10, background: 'none', border: '1px solid rgba(22,163,74,0.15)', cursor: 'pointer', textAlign: 'left', marginBottom: 10 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(22,163,74,0.05)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
@@ -233,7 +235,7 @@ export default function AppShell({
 
                 {/* Practice Exam */}
                 <button
-                  onClick={() => { setOpenHub(null); setActiveSection('practice') }}
+                  onClick={() => { setOpenHub(null); navTo('practice') }}
                   style={{ display: 'flex', alignItems: 'flex-start', gap: 12, width: '100%', padding: '12px 14px', borderRadius: 10, background: 'none', border: '1px solid rgba(217,119,6,0.15)', cursor: 'pointer', textAlign: 'left', marginBottom: 10 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(217,119,6,0.05)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
@@ -251,7 +253,7 @@ export default function AppShell({
 
                 {/* Knowledge Map */}
                 <button
-                  onClick={() => { setOpenHub(null); setActiveSection('mastery') }}
+                  onClick={() => { setOpenHub(null); navTo('mastery') }}
                   style={{ display: 'flex', alignItems: 'flex-start', gap: 12, width: '100%', padding: '12px 14px', borderRadius: 10, background: 'none', border: '1px solid rgba(139,92,246,0.15)', cursor: 'pointer', textAlign: 'left', marginBottom: 8 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(139,92,246,0.05)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
@@ -270,7 +272,7 @@ export default function AppShell({
 
                 {/* Review Queue */}
                 <button
-                  onClick={() => { setOpenHub(null); setActiveSection('review') }}
+                  onClick={() => { setOpenHub(null); navTo('review') }}
                   style={{ display: 'flex', alignItems: 'flex-start', gap: 12, width: '100%', padding: '12px 14px', borderRadius: 10, background: 'none', border: '1px solid rgba(220,38,38,0.15)', cursor: 'pointer', textAlign: 'left', marginBottom: 10 }}
                   onMouseEnter={e => e.currentTarget.style.background = 'rgba(220,38,38,0.04)'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
@@ -297,7 +299,7 @@ export default function AppShell({
 
                 {/* AI Tutor */}
                 <button
-                  onClick={() => { setOpenHub(null); setActiveSection('tutor') }}
+                  onClick={() => { setOpenHub(null); navTo('tutor') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '8px 14px', borderRadius: 8, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
                   onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
@@ -343,7 +345,7 @@ export default function AppShell({
             {openHub === 'brainTraining' && (
               <div style={{ position: 'absolute', top: '100%', left: 0, width: 220, background: '#FFFFFF', border: `1px solid ${BORDER}`, borderRadius: 12, boxShadow: '0 8px 32px rgba(0,0,0,0.12)', padding: '6px 0', zIndex: 200 }}>
                 <button
-                  onClick={() => { setOpenHub(null); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
+                  onClick={() => { setOpenHub(null); track('nav_section_opened', { section: 'tools' }); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '9px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
                   onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
@@ -355,7 +357,7 @@ export default function AppShell({
                 </button>
                 <div style={{ height: 1, background: BORDER, margin: '4px 0' }} />
                 <button
-                  onClick={() => { setOpenHub(null); setActiveSection('diagrams') }}
+                  onClick={() => { setOpenHub(null); navTo('diagrams') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
                   onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
@@ -366,7 +368,7 @@ export default function AppShell({
                   <span style={{ fontSize: 13, color: MUTED, fontWeight: 500, flex: 1 }}>Study Diagrams</span>
                 </button>
                 <button
-                  onClick={() => { setOpenHub(null); setActiveSection('problem-solver') }}
+                  onClick={() => { setOpenHub(null); navTo('problem-solver') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
                   onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
@@ -377,7 +379,7 @@ export default function AppShell({
                   <span style={{ fontSize: 13, color: MUTED, fontWeight: 500, flex: 1 }}>STEM Problem Solver</span>
                 </button>
                 <button
-                  onClick={() => { setOpenHub(null); setActiveSection('essay-architect') }}
+                  onClick={() => { setOpenHub(null); navTo('essay-architect') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
                   onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
@@ -523,7 +525,7 @@ export default function AppShell({
                   { label: 'Review Queue',                       sub: 'Spaced repetition for what you know', color: '#DC2626', section: 'review',  iconPath: 'M12 2L2 7l10 5 10-5-10-5z M2 17l10 5 10-5 M2 12l10 5 10-5' },
                   { label: 'AI Tutor',                           sub: 'Get help on anything',        color: ACCENT,    section: 'tutor',  iconPath: 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z' },
                 ].map(({ label, sub, color, section, iconPath }) => (
-                  <button key={label} onClick={() => { setMobileHub(null); setActiveSection(section) }}
+                  <button key={label} onClick={() => { setMobileHub(null); navTo(section) }}
                     style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', borderRadius: 10, background: `${color}06`, border: `1px solid ${color}15`, cursor: 'pointer', textAlign: 'left', width: '100%' }}>
                     <div style={{ width: 32, height: 32, borderRadius: 8, background: `${color}15`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <svg width="15" height="15" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d={iconPath}/></svg>
@@ -538,7 +540,7 @@ export default function AppShell({
             ) : (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <button
-                  onClick={() => { setMobileHub(null); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
+                  onClick={() => { setMobileHub(null); track('nav_section_opened', { section: 'tools' }); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
                   <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -548,7 +550,7 @@ export default function AppShell({
                   <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
                 </button>
                 <button
-                  onClick={() => { setMobileHub(null); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
+                  onClick={() => { setMobileHub(null); track('nav_section_opened', { section: 'tools' }); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
                   <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -563,7 +565,7 @@ export default function AppShell({
                   <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
                 </button>
                 <button
-                  onClick={() => { setMobileHub(null); setActiveSection('diagrams') }}
+                  onClick={() => { setMobileHub(null); navTo('diagrams') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
                   <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -573,7 +575,7 @@ export default function AppShell({
                   <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
                 </button>
                 <button
-                  onClick={() => { setMobileHub(null); setActiveSection('problem-solver') }}
+                  onClick={() => { setMobileHub(null); navTo('problem-solver') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
                   <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -583,7 +585,7 @@ export default function AppShell({
                   <svg style={{ width: 12, height: 12, color: '#C0C0C0' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7"/></svg>
                 </button>
                 <button
-                  onClick={() => { setMobileHub(null); setActiveSection('essay-architect') }}
+                  onClick={() => { setMobileHub(null); navTo('essay-architect') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
                   <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -600,7 +602,7 @@ export default function AppShell({
         {/* Tab bar */}
         <div style={{ display: 'flex' }}>
           {/* Home */}
-          <button onClick={() => { setMobileHub(null); setActiveSection('dashboard') }}
+          <button onClick={() => { setMobileHub(null); navTo('dashboard') }}
             style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '10px 0', background: 'transparent', border: 'none', cursor: 'pointer' }}>
             <svg style={{ width: 18, height: 18, color: activeSection === 'dashboard' ? ACCENT : MUTED }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={activeSection === 'dashboard' ? 2.5 : 2} d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
@@ -608,7 +610,7 @@ export default function AppShell({
             <span style={{ fontSize: 9, fontWeight: 500, color: activeSection === 'dashboard' ? ACCENT : MUTED }}>Home</span>
           </button>
           {/* Schedule */}
-          <button onClick={() => { setMobileHub(null); setActiveSection('calendar') }}
+          <button onClick={() => { setMobileHub(null); navTo('calendar') }}
             style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '10px 0', background: 'transparent', border: 'none', cursor: 'pointer' }}>
             <svg style={{ width: 18, height: 18, color: activeSection === 'calendar' ? ACCENT : MUTED }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={activeSection === 'calendar' ? 2.5 : 2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />

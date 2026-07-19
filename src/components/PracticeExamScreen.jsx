@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { track } from '../lib/analytics'
 
 function fmtTime(seconds) {
   if (seconds < 0) seconds = 0
@@ -36,8 +37,18 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
     submittedRef.current = true
     recordCurrentQuestionTime()
     const questionTimings = questions.map((q, i) => ({ id: q.id ?? `q${i + 1}`, topic: q.topic ?? 'General', question: q.question, timeMs: timingsRef.current[i] ?? 0 }))
+    const finalAnswers = override ?? answers
+    const answeredCount = finalAnswers.filter(a => a && a.trim().length).length
+    track('practice_exam_submitted', {
+      questionCount: total,
+      answeredCount,
+      unansweredCount: total - answeredCount,
+      timed: timerMinutes != null,
+      timeElapsedSec: Math.round((Date.now() - startedAt.current) / 1000),
+      courseName: courseName ?? null,
+    })
     onSubmit({
-      answers: override ?? answers,
+      answers: finalAnswers,
       timeMs: Date.now() - startedAt.current,
       questionTimings,
     })
@@ -82,7 +93,7 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
       {/* Top bar */}
       <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(0,0,0,0.07)', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0 }}>
-          <button onClick={onExit} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B6B6B', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, padding: 4 }}>
+          <button onClick={() => { track('practice_exam_exited', { questionCount: total, answeredCount: answered, idx }); onExit() }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B6B6B', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, padding: 4 }}>
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             Exit
           </button>
