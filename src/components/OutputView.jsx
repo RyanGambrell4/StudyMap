@@ -984,6 +984,25 @@ export default function OutputView({
     setFocusSession(blueprintSession)
     setBlueprintSession(null)
   }, [blueprintSession])
+  // Quick-start bypasses the Blueprint screen entirely. Cuts session-start
+  // taps from 4-6 to 1-2. Free-plan gating still applies via FocusMode's
+  // internal daily-minutes cap.
+  const handleQuickStart = useCallback((session) => {
+    if (!session) return
+    if (getActivePlan() === 'free' && !canUseFocusMinutes(1)) {
+      onShowPaywall?.('focus')
+      return
+    }
+    track('quick_start_launched', {
+      preset:      session.id?.split('-')[1] ?? null,
+      duration:    session.duration,
+      sessionType: session.sessionType,
+      courseId:    session.courseId,
+      hasFocusArea: Boolean(session.focusArea),
+    })
+    setActiveBlueprint(null)
+    setFocusSession(session)
+  }, [onShowPaywall])
   const handleBlueprintExit = useCallback(() => { setBlueprintSession(null); setActiveBlueprint(null) }, [])
   const handleFocusComplete = useCallback((id, elapsed, recallData) => {
     setCompletedIds(prev => new Set([...prev, id]))
@@ -1575,6 +1594,7 @@ export default function OutputView({
             weeksWithAll={weeksWithAll}
             onToggle={handleToggle}
             onStartFocus={handleStartFocus}
+            onQuickStart={handleQuickStart}
             nextSession={nextSession}
             allComplete={allComplete}
             onImportSyllabus={() => setSyllabusModalCourse(-1)}

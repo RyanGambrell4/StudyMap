@@ -6,6 +6,7 @@ import { getDueCards } from '../lib/sm2'
 import { getActivePlan, hasUsedTrial } from '../lib/subscription'
 import { getAllMastery, getMasteryLevel, getMasteryColor, getReviewStats } from '../lib/masteryStore'
 import { computeConfidenceGap } from '../lib/confidenceStore'
+import { computeMomentumHistory, momentumColor } from '../lib/momentum'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
@@ -1572,6 +1573,105 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
               )
             })()}
           </>
+        )
+      })()}
+
+      {/* ── Momentum history: 8-week trend of the composite score ── */}
+      {(() => {
+        const history = computeMomentumHistory({
+          completedSessionLog,
+          allSessions,
+          completedIds,
+          weeks: 8,
+        })
+        const nonZeroWeeks = history.filter(h => h.sessions > 0).length
+        if (nonZeroWeeks < 2) return null
+        const W = 640, H = 160, PAD_L = 32, PAD_R = 16, PAD_T = 18, PAD_B = 28
+        const innerW = W - PAD_L - PAD_R
+        const innerH = H - PAD_T - PAD_B
+        const n = history.length
+        const x = (i) => PAD_L + (i * innerW) / (n - 1)
+        const y = (v) => PAD_T + innerH - (v / 100) * innerH
+        const points = history.map((h, i) => `${x(i)},${y(h.score)}`).join(' ')
+        const areaPoints = `${PAD_L},${PAD_T + innerH} ${points} ${PAD_L + innerW},${PAD_T + innerH}`
+        const current = history[n - 1]
+        const first = history[0]
+        const trendDelta = current.score - first.score
+        const trendColor = trendDelta > 4 ? '#16A34A' : trendDelta < -4 ? '#DC2626' : '#6B6B6B'
+        const monthShort = (dateStr) => {
+          const d = new Date(dateStr + 'T12:00:00')
+          return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
+        }
+        const currentColor = momentumColor(current.score)
+        return (
+          <div style={{
+            background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)',
+            borderRadius: 16, padding: '20px 22px',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.04)',
+            marginTop: 14,
+          }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, marginBottom: 4, flexWrap: 'wrap' }}>
+              <div>
+                <div style={{ fontSize: 10.5, fontWeight: 700, color: '#9B9B9B', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 3 }}>
+                  Momentum history · {history.length} weeks
+                </div>
+                <div style={{ fontSize: 22, fontWeight: 800, color: '#111111', letterSpacing: '-0.02em', lineHeight: 1.1, fontVariantNumeric: 'tabular-nums' }}>
+                  {current.score}
+                  <span style={{ fontSize: 13, color: '#6B6B6B', fontWeight: 700, marginLeft: 6 }}>momentum</span>
+                </div>
+              </div>
+              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12, fontWeight: 700, color: trendColor, background: `${trendColor}12`, padding: '4px 10px', borderRadius: 8, fontVariantNumeric: 'tabular-nums' }}>
+                {trendDelta > 0 ? '+' : ''}{trendDelta} vs 8 weeks ago
+              </div>
+            </div>
+            <p style={{ margin: '0 0 12px', fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.5, maxWidth: 500 }}>
+              Consistency, mastery velocity, and completion rate blended into one score, computed weekly.
+            </p>
+            <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block' }} aria-label="Momentum trend">
+              <defs>
+                <linearGradient id="mh-fill" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor={currentColor} stopOpacity="0.28"/>
+                  <stop offset="100%" stopColor={currentColor} stopOpacity="0"/>
+                </linearGradient>
+              </defs>
+              {[0, 25, 50, 75, 100].map(v => (
+                <g key={v}>
+                  <line x1={PAD_L} x2={PAD_L + innerW} y1={y(v)} y2={y(v)} stroke="rgba(0,0,0,0.05)" strokeDasharray={v === 50 ? '0' : '3 4'} strokeWidth={v === 50 ? 1 : 1}/>
+                  {(v === 0 || v === 50 || v === 100) && (
+                    <text x={PAD_L - 8} y={y(v) + 3.5} textAnchor="end" fontSize="9.5" fill="#9B9B9B" fontWeight="600">{v}</text>
+                  )}
+                </g>
+              ))}
+              <polygon points={areaPoints} fill="url(#mh-fill)"/>
+              <polyline points={points} fill="none" stroke={currentColor} strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round"/>
+              {history.map((h, i) => {
+                const isLast = i === n - 1
+                const dim = h.sessions === 0
+                return (
+                  <g key={i}>
+                    <circle cx={x(i)} cy={y(h.score)} r={isLast ? 5 : 3.5}
+                      fill={isLast ? currentColor : dim ? '#F7F6F3' : '#fff'}
+                      stroke={dim ? '#D4D4D4' : currentColor} strokeWidth="2"/>
+                    {(i === 0 || isLast || i === Math.floor(n / 2)) && (
+                      <text x={x(i)} y={H - 8} textAnchor="middle" fontSize="10" fill="#9B9B9B" fontWeight="600">
+                        {monthShort(h.weekEnd)}
+                      </text>
+                    )}
+                  </g>
+                )
+              })}
+            </svg>
+            <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 11, color: '#9B9B9B', fontWeight: 600, flexWrap: 'wrap' }}>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#F7F6F3', border: '1px solid #D4D4D4' }}/>
+                Week without sessions
+              </span>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: currentColor }}/>
+                This week
+              </span>
+            </div>
+          </div>
         )
       })()}
 

@@ -18,6 +18,9 @@ import ExamCountdownCard from './ExamCountdownCard'
 import StreakGuardCard from './StreakGuardCard'
 import WeeklyRecapCard from './WeeklyRecapCard'
 import WelcomeOverlay from './WelcomeOverlay'
+import QuickStartCard from './QuickStartCard'
+import WeeklyGoalCard from './WeeklyGoalCard'
+import { buildQuickSession, QUICK_PRESETS } from '../lib/quickStart'
 import { getDueForReview, getReviewStats } from '../lib/masteryStore'
 import { detectComeback } from '../lib/momentum'
 
@@ -152,6 +155,7 @@ export default function DashboardView({
   weeksWithAll,
   onToggle,
   onStartFocus,
+  onQuickStart,
   nextSession,
   allComplete,
   onImportSyllabus,
@@ -1285,6 +1289,31 @@ export default function DashboardView({
           freezeCount={freezeCount}
           onUseFreeze={useFreeze}
           onStartFocus={onStartFocus}
+        />
+
+        {/* ── Quick Start: one-tap session presets that skip Blueprint ── */}
+        <QuickStartCard
+          courses={courses}
+          todayStr={todayStr}
+          onQuickStart={(preset) => {
+            const s = buildQuickSession(preset, courses, todayStr)
+            if (!s) return
+            if (typeof onQuickStart === 'function') onQuickStart(s)
+            else onStartFocus?.(s)
+          }}
+        />
+
+        {/* ── Weekly Goal: hours target with progress ring + insight ── */}
+        <WeeklyGoalCard
+          completedSessionLog={completedSessions}
+          todayStr={todayStr}
+          onQuickStart={() => {
+            const preset = QUICK_PRESETS.find(p => p.id === 'recall') ?? QUICK_PRESETS[0]
+            const s = buildQuickSession(preset, courses, todayStr)
+            if (!s) return
+            if (typeof onQuickStart === 'function') onQuickStart(s)
+            else onStartFocus?.(s)
+          }}
         />
 
         {/* ── Weekly Recap: Monday/Sunday debrief on last week's work ── */}

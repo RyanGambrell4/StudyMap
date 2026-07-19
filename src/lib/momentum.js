@@ -99,6 +99,56 @@ export function momentumColor(score) {
   return '#DC2626'
 }
 
+// Momentum trend across the last N weeks (default 8). Each point is the
+// momentum for the 14-day window ending on that Sunday. Returns [{ weekEnd,
+// score, sessions }] oldest → newest. Only meaningful for the ProgressView
+// history chart — mastery velocity is approximate here because we cannot
+// re-derive historical topic scores, so we substitute a naive
+// consistency-weighted proxy based on the sessions that landed inside each
+// window. Good enough for a trend line; not for calibration.
+export function computeMomentumHistory({ completedSessionLog = [], allSessions = [], completedIds, weeks = 8 } = {}) {
+  const now = new Date()
+  now.setHours(12, 0, 0, 0)
+  // Move `now` to the coming Sunday (end-of-week anchor for readability).
+  const dow = now.getDay()
+  const daysToSunday = dow === 0 ? 0 : 7 - dow
+  const anchor = new Date(now); anchor.setDate(now.getDate() + daysToSunday)
+
+  const completedSet = completedIds instanceof Set ? completedIds : new Set(completedIds ?? [])
+  const rows = []
+  for (let i = weeks - 1; i >= 0; i--) {
+    const weekEnd = new Date(anchor); weekEnd.setDate(anchor.getDate() - i * 7)
+    const weekEndStr = toDateStr(weekEnd)
+    const windowStart = new Date(weekEnd); windowStart.setDate(weekEnd.getDate() - 13)
+    const windowStartStr = toDateStr(windowStart)
+
+    const windowSessions = completedSessionLog.filter(s => {
+      const ds = s.date ?? s.dateStr
+      return ds && ds >= windowStartStr && ds <= weekEndStr
+    })
+    const activeDays = new Set(windowSessions.map(s => s.date ?? s.dateStr)).size
+    const consistency = Math.round((activeDays / 14) * 100)
+
+    const eligible = allSessions.filter(s => s.date && s.date >= windowStartStr && s.date <= weekEndStr)
+    const completion = eligible.length > 0
+      ? Math.round((eligible.filter(s => completedSet.has(s.id)).length / eligible.length) * 100)
+      : 50
+
+    // Velocity proxy: average recall score across sessions in the window
+    // (scaled to a 0-100 velocity band centered at 50).
+    const withRecall = windowSessions.filter(s => typeof s.recallScore === 'number')
+    let velocity = 50
+    if (withRecall.length > 0) {
+      const avg = withRecall.reduce((a, s) => a + s.recallScore, 0) / withRecall.length
+      velocity = Math.max(0, Math.min(100, Math.round(avg)))
+    }
+
+    const score = Math.round(consistency * 0.45 + velocity * 0.30 + completion * 0.25)
+    rows.push({ weekEnd: weekEndStr, score, sessions: windowSessions.length })
+  }
+  return rows
+}
+
 // Detect "comeback" state: no sessions in the last 3+ days but had sessions before.
 export function detectComeback(completedSessionLog = []) {
   if (!completedSessionLog.length) return null
