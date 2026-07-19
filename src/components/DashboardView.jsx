@@ -179,7 +179,6 @@ export default function DashboardView({
   onOpenBrainDump,
   onOpenExamRescue,
   onOpenQuizBurst,
-  onOpenTeachItBack,
   onOpenPodcast,
   completedSessions,
   recoveryCoursesIdx = new Set(),
@@ -1470,7 +1469,6 @@ export default function DashboardView({
           courses={courses}
           onOpenBrainDump={onOpenBrainDump}
           onOpenReviewQueue={onOpenReviewQueue}
-          onOpenTeachItBack={onOpenTeachItBack}
         />
 
         {/* ── Comeback Mode: warm re-entry when the student's been away ── */}

@@ -1635,7 +1635,6 @@ export default function OutputView({
             }}
             onOpenExamRescue={() => { track('feature_opened', { feature: 'exam_rescue' }); setShowExamRescue(true) }}
             onOpenQuizBurst={() => { track('feature_opened', { feature: 'quiz_burst' }); setShowQuizBurst(true) }}
-            onOpenTeachItBack={() => { track('feature_opened', { feature: 'teach_it_back', source: 'dashboard_all_done' }); setShowTeachItBack(true) }}
             onOpenPodcast={() => { track('feature_opened', { feature: 'podcast' }); setShowPodcast(true) }}
             completedSessions={completedSessionLog}
           />
