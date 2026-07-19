@@ -27,6 +27,7 @@ export default function StreakGuardCard({
   freezeCount = 0,
   onUseFreeze,
   onStartFocus,
+  onOpenTeachItBack,
 }) {
   const [dismissed, setDismissed] = useState(() => {
     if (typeof window === 'undefined') return false
@@ -136,6 +137,23 @@ export default function StreakGuardCard({
 
         {/* Actions */}
         <div className="sg-actions" style={{ display: 'flex', gap: 8, flexShrink: 0, alignSelf: 'center', alignItems: 'center' }}>
+          {onOpenTeachItBack && (
+            <button
+              className="sg-ghost"
+              onClick={() => { track('streak_guard_teach_it_back', { streak }); onOpenTeachItBack({}) }}
+              style={{
+                minHeight: 40, padding: '0 12px',
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: 'rgba(124,58,237,0.07)', color: '#7C3AED',
+                border: '1px solid rgba(124,58,237,0.22)', borderRadius: 10,
+                fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
+                cursor: 'pointer',
+                transition: 'background 150ms cubic-bezier(0.4,0,0.2,1)',
+              }}
+            >
+              Teach It Back
+            </button>
+          )}
           {freezeCount > 0 && (
             <button
               className="sg-ghost"

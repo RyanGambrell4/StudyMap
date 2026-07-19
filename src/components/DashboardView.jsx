@@ -1421,6 +1421,7 @@ export default function DashboardView({
           freezeCount={freezeCount}
           onUseFreeze={useFreeze}
           onStartFocus={onStartFocus}
+          onOpenTeachItBack={onOpenTeachItBack}
         />
 
         {/* ── Quick Start: one-tap session presets that skip Blueprint ── */}
