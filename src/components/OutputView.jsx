@@ -2152,6 +2152,7 @@ export default function OutputView({
           onClose={() => setShowCheatSheet(false)}
           onShowPaywall={onShowPaywall}
           onOpenQuizBurst={({ courseIdx, topic }) => { setShowCheatSheet(false); setQuizBurstInit({ courseIdx, topic }); setShowQuizBurst(true) }}
+          onOpenTeachItBack={({ courseIdx, topic }) => { setShowCheatSheet(false); setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
         />
       )}
       {showBrainDump && (
