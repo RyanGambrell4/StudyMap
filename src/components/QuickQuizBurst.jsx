@@ -17,7 +17,7 @@ const DIFFICULTY_COLOR = { easy: '#16A34A', medium: '#D97706', hard: '#DC2626' }
 
 const QUESTION_TIME = 10 // seconds per question
 
-export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpenCheatSheet, initialCourseIdx = 0, initialTopic = '', autoStart = false }) {
+export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpenCheatSheet, onOpenTeachItBack, initialCourseIdx = 0, initialTopic = '', autoStart = false }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
@@ -489,6 +489,14 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
               >
                 Go again
               </button>
+              {missedQuestions.length > 0 && onOpenTeachItBack && (
+                <button
+                  onClick={() => { onOpenTeachItBack({ courseIdx, topic: topic.trim() || '' }); onClose() }}
+                  style={{ padding: '12px', background: 'rgba(124,58,237,0.08)', border: '1.5px solid rgba(124,58,237,0.25)', borderRadius: 10, color: '#7C3AED', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                >
+                  Teach It Back to fix your gaps
+                </button>
+              )}
               {onOpenCheatSheet && (
                 <button
                   onClick={() => { onClose(); onOpenCheatSheet?.() }}
