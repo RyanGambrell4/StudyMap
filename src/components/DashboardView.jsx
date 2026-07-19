@@ -1417,7 +1417,7 @@ export default function DashboardView({
         {/* ── Streak Guard: loss-aversion nudge when today hasn't been studied ── */}
         <StreakGuardCard
           streak={streak}
-          completedToday={todaySessions.some(s => completedIds.has(s.id))}
+          completedToday={todaySessions.some(s => completedIds.has(s.id)) || lastCompletedDate === todayStr}
           todaySessions={todaySessions}
           freezeCount={freezeCount}
           onUseFreeze={useFreeze}
