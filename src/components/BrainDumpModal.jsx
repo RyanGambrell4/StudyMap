@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { fetchWithRetry, aiErrorMessage } from '../lib/utils'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
@@ -6,7 +6,7 @@ import { transcribeAudio, createRecorder } from '../lib/deepgram'
 import { getCachedStudyTools, saveStudyTools } from '../lib/db'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
-import { updateMastery } from '../lib/masteryStore'
+import { updateMastery, getWeakestTopics } from '../lib/masteryStore'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -59,7 +59,12 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
 
   const [courseIdx, setCourseIdx] = useState(initialCourseIdx)
   const [topic, setTopic] = useState(initialTopic)
-  const [timerDuration, setTimerDuration] = useState(60) // seconds
+  const [timerDuration, setTimerDuration] = useState(60)
+
+  const suggestedTopics = useMemo(() => {
+    const course = courses[courseIdx] ?? null
+    return getWeakestTopics(course?.id ?? null, 3).filter(t => t.score < 80).map(t => t.topic)
+  }, [courseIdx, courses])
   const [step, setStep] = useState('setup') // 'setup' | 'timer' | 'scoring' | 'result'
   const [text, setText] = useState('')
   const [timeLeft, setTimeLeft] = useState(60)
@@ -274,6 +279,26 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
                 placeholder={`e.g. Cellular respiration, Chapter 5, Midterm material`}
                 style={{ width: '100%', boxSizing: 'border-box', padding: '11px 14px', borderRadius: 10, border: `1px solid ${D.borderStrong}`, fontSize: 14, color: D.text, background: D.bg, outline: 'none', fontFamily: 'inherit' }}
               />
+              {!topic.trim() && suggestedTopics.length > 0 && (
+                <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 11, color: D.textDim, alignSelf: 'center', flexShrink: 0 }}>Try:</span>
+                  {suggestedTopics.map(t => (
+                    <button
+                      key={t}
+                      onClick={() => setTopic(t)}
+                      style={{
+                        padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+                        color: D.blue, background: 'rgba(59,97,196,0.08)',
+                        border: '1px solid rgba(59,97,196,0.18)',
+                        cursor: 'pointer', textTransform: 'capitalize',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160,
+                      }}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             <div style={{ marginBottom: 24 }}>

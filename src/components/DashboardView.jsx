@@ -2106,21 +2106,6 @@ export default function DashboardView({
                       >
                         Ask Coach →
                       </button>
-                      {onOpenTeachItBack && (
-                        <button
-                          onClick={() => {
-                            const idx = courses.findIndex(c => (c.name ?? '').toLowerCase() === (cName ?? '').toLowerCase())
-                            onOpenTeachItBack({ courseIdx: idx >= 0 ? idx : 0, topic })
-                          }}
-                          style={{
-                            fontSize: 11.5, fontWeight: 700, color: '#7C3AED',
-                            background: 'none', border: 'none', cursor: 'pointer',
-                            padding: 0, textAlign: 'left',
-                          }}
-                        >
-                          Teach It →
-                        </button>
-                      )}
                     </div>
                   </div>
                 ))}
