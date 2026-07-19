@@ -1,483 +1,521 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
-    <title>StudyEdge AI Blog</title>
+    <title>StudyEdge AI Blog -- Evidence-Based Study Guides</title>
     <link>https://getstudyedge.com/blog</link>
-    <description>Evidence-based study guides, exam prep strategies, and research-backed techniques to help students study smarter.</description>
+    <description>Evidence-based study techniques, exam prep guides, and GPA strategies from StudyEdge AI. Backed by cognitive science research.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 17 Jul 2026 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 19 Jul 2026 12:00:00 +0000</lastBuildDate>
     <atom:link href="https://getstudyedge.com/blog/feed.xml" rel="self" type="application/rss+xml" />
-    <managingEditor>hello@getstudyedge.com (StudyEdge AI)</managingEditor>
-    <webMaster>hello@getstudyedge.com (StudyEdge AI)</webMaster>
-    <ttl>1440</ttl>
     <image>
-      <url>https://getstudyedge.com/og-image.png</url>
+      <url>https://getstudyedge.com/favicon.png</url>
       <title>StudyEdge AI Blog</title>
       <link>https://getstudyedge.com/blog</link>
     </image>
 
-    <item>
-      <title>Does Music Help You Study? What the Research Says</title>
-      <link>https://getstudyedge.com/blog/how-to-study-with-music</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-with-music</guid>
-      <description>Background music raises arousal but reduces working memory by 10-15% on complex tasks. Here is when music helps, when it hurts, and what to play.</description>
-      <pubDate>Fri, 17 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Read a Textbook Effectively</title>
-      <link>https://getstudyedge.com/blog/how-to-read-a-textbook</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-read-a-textbook</guid>
-      <description>Students who use active reading strategies remember 60% more than passive readers. Here is the textbook reading system that turns pages into retained knowledge.</description>
-      <pubDate>Fri, 17 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>7 Study Habits That Are Actually Hurting Your Grades</title>
-      <link>https://getstudyedge.com/blog/study-myths</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/study-myths</guid>
-      <description>Re-reading and highlighting are the 2 most popular study habits in college. Research rates both as low utility. Here are 7 myths debunking them.</description>
-      <pubDate>Fri, 17 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Multiple Choice Exams: The System That Works</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-multiple-choice-exams</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-multiple-choice-exams</guid>
-      <description>Multiple choice exams test recognition, not just recall. Students who drill practice MCQs score 20-30% higher. Here is the system that actually works.</description>
-      <pubDate>Fri, 17 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Make Flashcards That Actually Work: The Evidence-Based Method</title>
-      <link>https://getstudyedge.com/blog/how-to-make-flashcards</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-make-flashcards</guid>
-      <description>Most flashcards are made wrong -- one-sided, too long, never reviewed with spaced repetition. Here is the method that improves retention by up to 50%.</description>
-      <pubDate>Fri, 17 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study Smarter, Not Harder: 8 Evidence-Based Strategies</title>
-      <link>https://getstudyedge.com/blog/how-to-study-smarter-not-harder</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-smarter-not-harder</guid>
-      <description>Students who use active recall score 43% higher on delayed tests. These 8 science-backed strategies get you more retention per hour -- no grind required.</description>
-      <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>Spaced Repetition: The Science Behind Why It Works (and How to Use It)</title>
-      <link>https://getstudyedge.com/blog/spaced-repetition-study-technique</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/spaced-repetition-study-technique</guid>
-      <description>80% of new material is forgotten within 24 hours without review. Learn the spaced repetition system that 4x your retention with the same study time.</description>
-      <pubDate>Wed, 15 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Nursing School</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-nursing-school</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-nursing-school</guid>
-      <description>The NCLEX first-time national pass rate is 78%. Nursing school study system: pharmacology, pathophysiology, and clinical decision-making that prepares you to beat the average.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Macroeconomics</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-macroeconomics</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-macroeconomics</guid>
-      <description>Most macro exams are 60-70% graphing and model application. How to master AD-AS, IS-LM, and fiscal and monetary policy models with a problem-first study approach.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>ACT Study Guide (2026) -- How to Prep for Every Section</title>
-      <link>https://getstudyedge.com/blog/act-study-guide</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/act-study-guide</guid>
-      <description>The ACT has 4 sections and a 2 hour 55 minute time limit. Complete 2026 guide: section strategies, realistic timeline, and practice plan for each score band.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for English Literature</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-english-literature</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-english-literature</guid>
-      <description>Most English lit essays are graded on argument quality -- not plot recall. Build a quote bank, track themes, and write strong thesis statements under time pressure.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Criminal Justice</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-criminal-justice</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-criminal-justice</guid>
-      <description>Criminal justice covers 3 distinct disciplines -- law, sociology, and policy -- each requiring a different study approach. How to build a system for all 3.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Spanish (and Any Foreign Language)</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-spanish</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-spanish</guid>
-      <description>Language learning requires 30 minutes daily -- cramming produces 90% forgetting within a week. System for Spanish vocabulary, grammar, speaking practice, and writing fluency.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for History -- What Actually Works</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-history</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-history</guid>
-      <description>History exams typically require 3-5 essay arguments under 50-minute time limits. How to master dates, causation, and argument structure -- the system for history courses.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Accounting</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-accounting</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-accounting</guid>
-      <description>Accounting students who drill 10+ problems daily outscore those who re-read by a full letter. Study system: debits, credits, T-accounts, and exam pattern recognition.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Computer Science</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-computer-science</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-computer-science</guid>
-      <description>CS exams test code production from scratch -- not recognition. 70% of exam points require writing code under time pressure. Study system: write first, read after.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Sociology</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-sociology</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-sociology</guid>
-      <description>Sociology exams test theoretical frameworks, not common sense -- most students fail to distinguish the 3 major perspectives. How to master theories, thinkers, and research.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Political Science</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-political-science</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-political-science</guid>
-      <description>Poli sci exams are 60%+ analytical argument. How to master American government, comparative politics, and IR -- fact frameworks first, then analytical essay practice.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Business Courses</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-business</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-business</guid>
-      <description>Business majors take 40+ courses across 5 discipline areas before graduation. Study system for strategy, finance, organizational behavior, and case-based courses.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Chemistry</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-chemistry</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-chemistry</guid>
-      <description>Solving 3+ practice problems per concept raises chemistry grades by a full letter. Method for gen chem: intuition first, then problem sets -- not memorization.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Marketing</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-marketing</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-marketing</guid>
-      <description>Marketing students master 15+ frameworks by graduation. Study system: frameworks first, case application second, then practice brand analyses under timed exam conditions.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Philosophy</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-philosophy</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-philosophy</guid>
-      <description>Philosophy grades argument quality, not trivia recall. System for reading dense texts, mapping argument chains, and writing analytical essays under 45-minute time pressure.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Finance</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-finance</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-finance</guid>
-      <description>Finance students who solve 5 practice problems per concept outscore re-readers by a full letter. Study system for corporate finance, financial modeling, and valuations.</description>
-      <pubDate>Mon, 13 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>Subject Study Guides -- How to Study for Every Course</title>
-      <link>https://getstudyedge.com/blog/subject-guides</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/subject-guides</guid>
-      <description>Study guides for 20+ college subjects -- each discipline needs its own method. Guides for chemistry, biology, calculus, CS, history, psychology, and 15 more courses.</description>
-      <pubDate>Wed, 01 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>GPA and Grades -- How to Raise Your GPA and Get Better Grades</title>
-      <link>https://getstudyedge.com/blog/gpa-grades</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/gpa-grades</guid>
-      <description>Attending every class raises your odds of an A by 3x. Guides for raising GPA after a bad semester, getting As in any class, and what GPA graduate programs require.</description>
-      <pubDate>Wed, 01 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>Study Techniques -- Evidence-Based Methods That Work</title>
-      <link>https://getstudyedge.com/blog/study-techniques</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/study-techniques</guid>
-      <description>Only 2 of 10 popular study techniques earn 'high utility' ratings in research. Guides for active recall, spaced repetition, Pomodoro, and what actually works in college.</description>
-      <pubDate>Wed, 01 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>Exam Prep -- How to Study for Finals, Midterms, and Tests</title>
-      <link>https://getstudyedge.com/blog/exam-prep</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/exam-prep</guid>
-      <description>Students who start exam prep 2 weeks out score a full letter grade higher. Complete guides for finals, cramming, test anxiety, and standardized test strategies.</description>
-      <pubDate>Wed, 01 Jul 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>Best Note-Taking Apps for College Students (2026)</title>
-      <link>https://getstudyedge.com/blog/best-note-taking-apps-for-college-students</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/best-note-taking-apps-for-college-students</guid>
-      <description>Students who review structured notes within 24 hours retain 80% more. The best note-taking apps for 2026 -- Notion, Obsidian, GoodNotes, OneNote -- ranked and compared.</description>
-      <pubDate>Mon, 22 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>Best Flashcard Apps for College Students (2026)</title>
-      <link>https://getstudyedge.com/blog/best-flashcard-apps-for-college</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/best-flashcard-apps-for-college</guid>
-      <description>Spaced repetition can cut study time by up to 50%. The 6 best flashcard apps for college compared: StudyEdge AI, Anki, Quizlet, Brainscape, Cram, and Remnote.</description>
-      <pubDate>Sun, 21 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>Time Management Tips for College Students</title>
-      <link>https://getstudyedge.com/blog/time-management-tips-for-college-students</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/time-management-tips-for-college-students</guid>
-      <description>College students lose 3 hours daily to unstructured time. A weekly time-block system for managing a full course load without the Sunday anxiety spiral.</description>
-      <pubDate>Sun, 14 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Use AI for Studying</title>
-      <link>https://getstudyedge.com/blog/how-to-use-ai-for-studying</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-use-ai-for-studying</guid>
-      <description>AI study tools improve test scores by up to 20%. What AI does well, where it fails, and the traps that cause students to get worse grades by relying on it wrong.</description>
-      <pubDate>Sun, 14 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Prepare for Midterms in College</title>
-      <link>https://getstudyedge.com/blog/how-to-prepare-for-midterms</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-prepare-for-midterms</guid>
-      <description>Students who begin midterm prep 2 weeks out score a full letter grade higher on average. A triage guide for managing multiple exams without scrambling.</description>
-      <pubDate>Sun, 14 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Memorize Notes Fast</title>
-      <link>https://getstudyedge.com/blog/how-to-memorize-notes-fast</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-memorize-notes-fast</guid>
-      <description>Re-reading your notes is 3x less effective than active recall. Faster techniques: close-and-recite, spaced retrieval, chunking, and the teach-it-back method.</description>
-      <pubDate>Wed, 10 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study the Night Before an Exam</title>
-      <link>https://getstudyedge.com/blog/how-to-study-the-night-before-an-exam</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-the-night-before-an-exam</guid>
-      <description>Sleep improves recall more than last-minute cramming. Hour-by-hour guide: what to review the night before an exam, what to skip, and exactly when to stop.</description>
-      <pubDate>Wed, 10 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Cram for an Exam: The Honest Guide</title>
-      <link>https://getstudyedge.com/blog/how-to-cram-for-an-exam</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-cram-for-an-exam</guid>
-      <description>Active recall beats re-reading 3-to-1. How to cram effectively: triage what matters, structure your session in 25-minute blocks, and know when to sleep instead.</description>
-      <pubDate>Wed, 10 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Focus While Studying: 12 Techniques</title>
-      <link>https://getstudyedge.com/blog/how-to-focus-while-studying</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-focus-while-studying</guid>
-      <description>One interruption costs 23 minutes of focused work. Learn proven focus strategies for college: Pomodoro timing, study environment setup, and phone management.</description>
-      <pubDate>Wed, 10 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Overcome Test Anxiety</title>
-      <link>https://getstudyedge.com/blog/how-to-overcome-test-anxiety</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-overcome-test-anxiety</guid>
-      <description>20% of students experience severe test anxiety. Evidence-based techniques: expressive writing, 4-7-8 breathing, and reframing that reduce cortisol before exams.</description>
-      <pubDate>Wed, 10 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>Cornell Note-Taking Method: How It Works</title>
-      <link>https://getstudyedge.com/blog/cornell-note-taking-method</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/cornell-note-taking-method</guid>
-      <description>Cornell notes improve recall by 40% vs. standard notes. How the cue-column method works, how to review it correctly, and how to pair it with active recall.</description>
-      <pubDate>Tue, 09 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Pull an All-Nighter and Still Function</title>
-      <link>https://getstudyedge.com/blog/how-to-pull-an-all-nighter</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-pull-an-all-nighter</guid>
-      <description>Losing 1 night of sleep cuts memory consolidation by 40%. How to pull an all-nighter: session structure, caffeine strategy, what to eat, and when sleep wins instead.</description>
-      <pubDate>Tue, 09 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Multiple Exams in One Week</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-multiple-exams-in-one-week</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-multiple-exams-in-one-week</guid>
-      <description>3 exams in 5 days: triage ruthlessly, not equally. How to distribute study hours, sequence sessions by exam difficulty, and avoid reviewing the wrong material under pressure.</description>
-      <pubDate>Tue, 09 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Calculus: Intuition First</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-calculus</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-calculus</guid>
-      <description>Practice problems outscore note re-reading 3-to-1 in calculus. Method for Calc 1-3: intuition first, type-specific drills, then timed mixed sets before the exam.</description>
-      <pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for GRE: Real-World Prep Plan</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-the-gre</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-the-gre</guid>
-      <description>Average GRE prep takes 1-3 months and 100+ study hours to hit a target score. Practical guide: sections that decide your score, what to drill, and a full prep plan.</description>
-      <pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for SAT: Real-World Prep Plan</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-the-sat</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-the-sat</guid>
-      <description>The average SAT score is 1020 out of 1600. Practical guide: which sections decide your score, the gap between 1200 and 1400, and a realistic prep plan for each band.</description>
-      <pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Anatomy and Physiology</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-anatomy-and-physiology</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-anatomy-and-physiology</guid>
-      <description>A&amp;P students memorize 200+ muscles, 206 bones, and thousands of physiological pathways. Study system for every unit: visual chunking, spaced retrieval, and active recall.</description>
-      <pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Statistics</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-statistics</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-statistics</guid>
-      <description>Stats students who practice 5 problems per concept outscore definition-memorizers by a full letter. System for regression, hypothesis testing, and probability.</description>
-      <pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for GMAT: Real-World Prep Plan</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-the-gmat</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-the-gmat</guid>
-      <description>Average GMAT test-takers study 150-200 hours over 3-6 months. Practical guide: which sections decide your score, what to drill, and how to structure your prep plan.</description>
-      <pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Biology Without Burning Out</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-biology</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-biology</guid>
-      <description>Biology courses require 3,000+ new terms per semester. Study system for college bio: active recall, spaced review, and concept maps -- not rote repetition.</description>
-      <pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Physics</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-physics</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-physics</guid>
-      <description>Physics students who practice 5 problems per concept outscore equation-memorizers by a full letter. Study system for calc-based and algebra-based physics: problem-first.</description>
-      <pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for NCLEX: Real-World Prep Plan</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-the-nclex</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-the-nclex</guid>
-      <description>The NCLEX first-time national pass rate is 78%. Practical guide: how the adaptive format works, which content areas to prioritize, and a 4-week prep plan.</description>
-      <pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for LSAT: Real-World Prep Plan</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-the-lsat</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-the-lsat</guid>
-      <description>The average LSAT taker studies 150-300 hours before hitting their target score. Guide: which section (LR) decides your score, what to drill, and a realistic prep plan.</description>
-      <pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Microeconomics</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-microeconomics</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-microeconomics</guid>
-      <description>Micro exams are 65-75% graph-based. Study system for supply-demand, elasticity, market structures, and game theory: graph fluency first, then problem sets, not memorization.</description>
-      <pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for USMLE Step 1</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-usmle-step-1</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-usmle-step-1</guid>
-      <description>The average USMLE Step 1 score is 232; most residencies target 240+. Practical guide: study plan, which systems to prioritize, and how to use Anki and UWorld.</description>
-      <pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Biochemistry</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-biochemistry</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-biochemistry</guid>
-      <description>Biochemistry covers 20+ metabolic pathways to master by exam time. Study system: mechanism-first understanding, not rote memorization, plus spaced retrieval for enzymes.</description>
-      <pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Psychology</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-psychology</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-psychology</guid>
-      <description>Intro psych has 500+ vocabulary terms and dozens of competing theories to master. Study system for every psych course: term recall, study design, and theory comparison.</description>
-      <pubDate>Mon, 01 Jun 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Organic Chemistry</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-organic-chemistry</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-organic-chemistry</guid>
-      <description>Orgo covers 200+ named reactions across 2 semesters. The mechanism-first study system: understand why reactions happen, group by pattern, then drill problems.</description>
-      <pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>MCAT Study Schedule: How to Plan 6 Months Out</title>
-      <link>https://getstudyedge.com/blog/mcat-study-schedule-6-months</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/mcat-study-schedule-6-months</guid>
-      <description>The MCAT requires 300-500 hours of prep on average. Week-by-week 6-month schedule: when to switch from content review to full-length practice, and how to adjust by section.</description>
-      <pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Stop Procrastinating When Studying</title>
-      <link>https://getstudyedge.com/blog/how-to-stop-procrastinating-when-studying</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-stop-procrastinating-when-studying</guid>
-      <description>Procrastination is caused by unclear tasks, not laziness. Make study sessions specific, small, and pre-decided -- then the brain stops avoiding them.</description>
-      <pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Raise Your GPA After a Bad Semester</title>
-      <link>https://getstudyedge.com/blog/how-to-raise-your-gpa-after-a-bad-semester</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-raise-your-gpa-after-a-bad-semester</guid>
-      <description>GPA recovers faster than you think. Realistic plan: grade math, class triage, study system overhaul, and how to raise your GPA by 0.3 or more in one semester.</description>
-      <pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>Best Study Schedule for College Students</title>
-      <link>https://getstudyedge.com/blog/best-study-schedule-for-college-students</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/best-study-schedule-for-college-students</guid>
-      <description>Students with fixed study schedules retain 30% more than reactive studiers. The 7 blocks every plan needs and the 4 mistakes that kill schedules by week 2.</description>
-      <pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Balance a Heavy Course Load</title>
-      <link>https://getstudyedge.com/blog/how-to-balance-a-heavy-course-load</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-balance-a-heavy-course-load</guid>
-      <description>18 credits requires 54+ weekly study hours by standard academic estimates. How to survive a heavy course load: triage, time-blocking, protecting sleep, and knowing what to drop.</description>
-      <pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study With ADHD in College</title>
-      <link>https://getstudyedge.com/blog/how-to-study-with-adhd-in-college</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-with-adhd-in-college</guid>
-      <description>ADHD affects 1 in 10 college students. Planning systems that work: short sessions, externalized task lists, body doubling, and ADHD-friendly study tools.</description>
-      <pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>What GPA Do You Need for Medical School?</title>
-      <link>https://getstudyedge.com/blog/what-gpa-do-you-need-for-medical-school</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/what-gpa-do-you-need-for-medical-school</guid>
-      <description>The average US medical school accepts students with a 3.73 GPA. Real numbers for MD vs. DO admissions, BCPM vs. overall, and what to do if you're below the average.</description>
-      <pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Get an A in Any Class</title>
-      <link>https://getstudyedge.com/blog/how-to-get-an-a-in-any-class</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-get-an-a-in-any-class</guid>
-      <description>Active recall beats re-reading 3-to-1. The A-student system: grade math, session blueprints, Sunday review, and consistency -- not cramming and motivation.</description>
-      <pubDate>Sat, 23 May 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Study for Finals Week</title>
-      <link>https://getstudyedge.com/blog/how-to-study-for-finals-week</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-finals-week</guid>
-      <description>Spaced review prevents 80% forgetting. Triage your finals, plan each session using active recall, and avoid the last-minute burnout spiral in finals week.</description>
-      <pubDate>Wed, 20 May 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>How to Improve Your Grades in College</title>
-      <link>https://getstudyedge.com/blog/how-to-improve-your-grades-in-college</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-improve-your-grades-in-college</guid>
-      <description>Attending every class raises your odds of an A by 3x. What actually moves grades: attendance, note timing, office hours, and a weekly active recall system.</description>
-      <pubDate>Mon, 18 May 2026 00:00:00 +0000</pubDate>
-    </item>
-    <item>
-      <title>5 Study Techniques That Actually Work</title>
-      <link>https://getstudyedge.com/blog/best-study-techniques-science</link>
-      <guid isPermaLink="true">https://getstudyedge.com/blog/best-study-techniques-science</guid>
-      <description>Only 2 of 10 common study techniques earn 'high utility' in research. Here are the ones that actually work -- and why re-reading and highlighting fall short.</description>
-      <pubDate>Sun, 17 May 2026 00:00:00 +0000</pubDate>
-    </item>
-
+  <item>
+    <title>Does Music Help You Study? What the Research Says</title>
+    <link>https://getstudyedge.com/blog/how-to-study-with-music</link>
+    <description>Background music raises arousal but reduces working memory by 10-15% on complex tasks. Here is when music helps, when it hurts, and what to play.</description>
+    <pubDate>Fri, 17 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-with-music</guid>
+  </item>
+  <item>
+    <title>How to Read a Textbook Effectively</title>
+    <link>https://getstudyedge.com/blog/how-to-read-a-textbook</link>
+    <description>Students who use active reading strategies remember 60% more than passive readers. Here is the textbook reading system that turns pages into retained knowledge.</description>
+    <pubDate>Fri, 17 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-read-a-textbook</guid>
+  </item>
+  <item>
+    <title>7 Study Habits That Are Actually Hurting Your Grades</title>
+    <link>https://getstudyedge.com/blog/study-myths</link>
+    <description>Re-reading and highlighting are the 2 most popular study habits in college. Research rates both as low utility. Here are 7 myths debunking them.</description>
+    <pubDate>Fri, 17 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/study-myths</guid>
+  </item>
+  <item>
+    <title>How to Study for Multiple Choice Exams: The System That Works</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-multiple-choice-exams</link>
+    <description>Multiple choice exams test recognition, not just recall. Students who drill practice MCQs score 20-30% higher. Here is the system that actually works.</description>
+    <pubDate>Fri, 17 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-multiple-choice-exams</guid>
+  </item>
+  <item>
+    <title>How to Make Flashcards That Actually Work: The Evidence-Based Method</title>
+    <link>https://getstudyedge.com/blog/how-to-make-flashcards</link>
+    <description>Most flashcards are made wrong -- one-sided, too long, never reviewed with spaced repetition. Here is the method that improves retention by up to 50%.</description>
+    <pubDate>Fri, 17 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-make-flashcards</guid>
+  </item>
+  <item>
+    <title>How to Study Smarter, Not Harder: 8 Evidence-Based Strategies</title>
+    <link>https://getstudyedge.com/blog/how-to-study-smarter-not-harder</link>
+    <description>Students who use active recall score 43% higher on delayed tests. These 8 science-backed strategies get you more retention per hour -- no grind required.</description>
+    <pubDate>Wed, 15 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-smarter-not-harder</guid>
+  </item>
+  <item>
+    <title>Spaced Repetition: The Science Behind Why It Works (and How to Use It)</title>
+    <link>https://getstudyedge.com/blog/spaced-repetition-study-technique</link>
+    <description>80% of new material is forgotten within 24 hours without review. Learn the spaced repetition system that 4x your retention with the same study time.</description>
+    <pubDate>Wed, 15 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/spaced-repetition-study-technique</guid>
+  </item>
+  <item>
+    <title>How to Study for Nursing School</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-nursing-school</link>
+    <description>The NCLEX first-time national pass rate is 78%. Nursing school study system: pharmacology, pathophysiology, and clinical decision-making that prepares you to beat the average.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-nursing-school</guid>
+  </item>
+  <item>
+    <title>How to Study for Macroeconomics</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-macroeconomics</link>
+    <description>Most macro exams are 60-70% graphing and model application. How to master AD-AS, IS-LM, and fiscal and monetary policy models with a problem-first study approach.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-macroeconomics</guid>
+  </item>
+  <item>
+    <title>ACT Study Guide (2026) -- How to Prep for Every Section</title>
+    <link>https://getstudyedge.com/blog/act-study-guide</link>
+    <description>The ACT has 4 sections and a 2 hour 55 minute time limit. Complete 2026 guide: section strategies, realistic timeline, and practice plan for each score band.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/act-study-guide</guid>
+  </item>
+  <item>
+    <title>How to Study for English Literature</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-english-literature</link>
+    <description>Most English lit essays are graded on argument quality -- not plot recall. Build a quote bank, track themes, and write strong thesis statements under time pressure.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-english-literature</guid>
+  </item>
+  <item>
+    <title>How to Study for Criminal Justice</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-criminal-justice</link>
+    <description>Criminal justice covers 3 distinct disciplines -- law, sociology, and policy -- each requiring a different study approach. How to build a system for all 3.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-criminal-justice</guid>
+  </item>
+  <item>
+    <title>How to Study for Spanish (and Any Foreign Language)</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-spanish</link>
+    <description>Language learning requires 30 minutes daily -- cramming produces 90% forgetting within a week. System for Spanish vocabulary, grammar, speaking practice, and writing fluency.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-spanish</guid>
+  </item>
+  <item>
+    <title>How to Study for History -- What Actually Works</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-history</link>
+    <description>History exams typically require 3-5 essay arguments under 50-minute time limits. How to master dates, causation, and argument structure -- the system for history courses.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-history</guid>
+  </item>
+  <item>
+    <title>How to Study for Accounting</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-accounting</link>
+    <description>Accounting students who drill 10+ problems daily outscore those who re-read by a full letter. Study system: debits, credits, T-accounts, and exam pattern recognition.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-accounting</guid>
+  </item>
+  <item>
+    <title>How to Study for Computer Science</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-computer-science</link>
+    <description>CS exams test code production from scratch -- not recognition. 70% of exam points require writing code under time pressure. Study system: write first, read after.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-computer-science</guid>
+  </item>
+  <item>
+    <title>How to Study for Sociology</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-sociology</link>
+    <description>Sociology exams test theoretical frameworks, not common sense -- most students fail to distinguish the 3 major perspectives. How to master theories, thinkers, and research.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-sociology</guid>
+  </item>
+  <item>
+    <title>How to Study for Political Science</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-political-science</link>
+    <description>Poli sci exams are 60%+ analytical argument. How to master American government, comparative politics, and IR -- fact frameworks first, then analytical essay practice.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-political-science</guid>
+  </item>
+  <item>
+    <title>How to Study for Business Courses</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-business</link>
+    <description>Business majors take 40+ courses across 5 discipline areas before graduation. Study system for strategy, finance, organizational behavior, and case-based courses.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-business</guid>
+  </item>
+  <item>
+    <title>How to Study for Chemistry</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-chemistry</link>
+    <description>Solving 3+ practice problems per concept raises chemistry grades by a full letter. Method for gen chem: intuition first, then problem sets -- not memorization.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-chemistry</guid>
+  </item>
+  <item>
+    <title>How to Study for Marketing</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-marketing</link>
+    <description>Marketing students master 15+ frameworks by graduation. Study system: frameworks first, case application second, then practice brand analyses under timed exam conditions.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-marketing</guid>
+  </item>
+  <item>
+    <title>How to Study for Philosophy</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-philosophy</link>
+    <description>Philosophy grades argument quality, not trivia recall. System for reading dense texts, mapping argument chains, and writing analytical essays under 45-minute time pressure.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-philosophy</guid>
+  </item>
+  <item>
+    <title>How to Study for Finance</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-finance</link>
+    <description>Finance students who solve 5 practice problems per concept outscore re-readers by a full letter. Study system for corporate finance, financial modeling, and valuations.</description>
+    <pubDate>Mon, 13 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-finance</guid>
+  </item>
+  <item>
+    <title>How to Take Notes in College: 4 Methods That Work in Lectures</title>
+    <link>https://getstudyedge.com/blog/how-to-take-notes-in-college</link>
+    <description>Reviewing notes within 24 hours improves retention by 80%. 4 note-taking methods for college and how to convert passive notes into active study material.</description>
+    <pubDate>Sun, 12 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-take-notes-in-college</guid>
+  </item>
+  <item>
+    <title>How to Study for a Test: A 5-Step System That Works</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-a-test</link>
+    <description>Most students start studying 1-2 days before a test. This 5-step, week-out system using active recall and spaced practice transfers to actual exam performance.</description>
+    <pubDate>Sun, 12 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-a-test</guid>
+  </item>
+  <item>
+    <title>How to Memorize Things: 7 Techniques That Actually Work</title>
+    <link>https://getstudyedge.com/blog/how-to-memorize-things</link>
+    <description>Working memory holds just 7 items at once (Miller, 1956). These 7 encoding techniques help you bypass that limit and build long-term memory for any subject.</description>
+    <pubDate>Sun, 12 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-memorize-things</guid>
+  </item>
+  <item>
+    <title>Study Schedule Tips: How to Build a Schedule That Survives Week 2</title>
+    <link>https://getstudyedge.com/blog/study-schedule-tips</link>
+    <description>Students with written study schedules complete 3x more sessions weekly than reactive studiers. How to build a schedule that holds up: time-blocking, Sunday review, and spacing.</description>
+    <pubDate>Sun, 12 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/study-schedule-tips</guid>
+  </item>
+  <item>
+    <title>How to Study Effectively: A Science-Backed System That Actually Works</title>
+    <link>https://getstudyedge.com/blog/how-to-study-effectively</link>
+    <description>Students who use the testing effect score 50% higher on delayed exams. A 5-step system using active recall and spaced practice you can start today.</description>
+    <pubDate>Sun, 12 Jul 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-effectively</guid>
+  </item>
+  <item>
+    <title>Active Recall: The Study Technique That Actually Improves Grades (Science Explained)</title>
+    <link>https://getstudyedge.com/blog/active-recall-study-technique</link>
+    <description>Active recall improves retention by 50% vs. re-reading. Learn the retrieval practice technique that cognitive scientists rate #1 for long-term exam performance.</description>
+    <pubDate>Sun, 28 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/active-recall-study-technique</guid>
+  </item>
+  <item>
+    <title>The Pomodoro Technique for College Students: A No-BS Guide (2026)</title>
+    <link>https://getstudyedge.com/blog/pomodoro-technique-for-studying</link>
+    <description>25-minute focus blocks, 5-minute breaks. Learn how the Pomodoro technique reduces procrastination and pairs with spaced repetition to improve exam scores.</description>
+    <pubDate>Sun, 28 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/pomodoro-technique-for-studying</guid>
+  </item>
+  <item>
+    <title>ChatGPT vs StudyEdge AI for Studying (2026): Which Is Better for College?</title>
+    <link>https://getstudyedge.com/blog/chatgpt-vs-studyedge-for-studying</link>
+    <description>ChatGPT has no spaced repetition; StudyEdge AI schedules review sessions automatically. Real 2026 comparison: flashcards, practice exams, study planning, and retention.</description>
+    <pubDate>Sat, 27 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/chatgpt-vs-studyedge-for-studying</guid>
+  </item>
+  <item>
+    <title>Best Study Apps for College Students (2026): What Actually Works</title>
+    <link>https://getstudyedge.com/blog/best-study-apps-for-college-students</link>
+    <description>AI study tools improve test scores by 20%. Best apps for college 2026 -- tested and ranked: flashcards, AI tutors, note-taking, focus timers, and GPA calculators.</description>
+    <pubDate>Sat, 27 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/best-study-apps-for-college-students</guid>
+  </item>
+  <item>
+    <title>Best Note-Taking Apps for College Students (2026)</title>
+    <link>https://getstudyedge.com/blog/best-note-taking-apps-for-college-students</link>
+    <description>Students who review structured notes within 24 hours retain 80% more. The best note-taking apps for 2026 -- Notion, Obsidian, GoodNotes, OneNote -- ranked and compared.</description>
+    <pubDate>Mon, 22 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/best-note-taking-apps-for-college-students</guid>
+  </item>
+  <item>
+    <title>Anki vs Quizlet vs StudyEdge AI (2026): Full Comparison for College Students</title>
+    <link>https://getstudyedge.com/blog/anki-vs-quizlet-vs-studyedge</link>
+    <description>Anki is free, Quizlet AI costs $7.99/month. 2026 comparison of all three: spaced repetition quality, AI features, ease of use, and which one fits your study style.</description>
+    <pubDate>Mon, 22 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/anki-vs-quizlet-vs-studyedge</guid>
+  </item>
+  <item>
+    <title>Best Flashcard Apps for College Students (2026)</title>
+    <link>https://getstudyedge.com/blog/best-flashcard-apps-for-college</link>
+    <description>Spaced repetition can cut study time by up to 50%. The 6 best flashcard apps for college compared: StudyEdge AI, Anki, Quizlet, Brainscape, Cram, and Remnote.</description>
+    <pubDate>Sun, 21 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/best-flashcard-apps-for-college</guid>
+  </item>
+  <item>
+    <title>Time Management Tips for College Students</title>
+    <link>https://getstudyedge.com/blog/time-management-tips-for-college-students</link>
+    <description>College students lose 3 hours daily to unstructured time. A weekly time-block system for managing a full course load without the Sunday anxiety spiral.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/time-management-tips-for-college-students</guid>
+  </item>
+  <item>
+    <title>How to Study for Organic Chemistry</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-organic-chemistry</link>
+    <description>Orgo covers 200+ named reactions across 2 semesters. The mechanism-first study system: understand why reactions happen, group by pattern, then drill problems.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-organic-chemistry</guid>
+  </item>
+  <item>
+    <title>How to Study for Calculus: Intuition First</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-calculus</link>
+    <description>Practice problems outscore note re-reading 3-to-1 in calculus. Method for Calc 1-3: intuition first, type-specific drills, then timed mixed sets before the exam.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-calculus</guid>
+  </item>
+  <item>
+    <title>MCAT Study Schedule: How to Plan 6 Months Out</title>
+    <link>https://getstudyedge.com/blog/mcat-study-schedule-6-months</link>
+    <description>The MCAT requires 300-500 hours of prep on average. Week-by-week 6-month schedule: when to switch from content review to full-length practice, and how to adjust by section.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/mcat-study-schedule-6-months</guid>
+  </item>
+  <item>
+    <title>How to Study for GRE: Real-World Prep Plan</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-the-gre</link>
+    <description>Average GRE prep takes 1-3 months and 100+ study hours to hit a target score. Practical guide: sections that decide your score, what to drill, and a full prep plan.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-the-gre</guid>
+  </item>
+  <item>
+    <title>Cornell Note-Taking Method: How It Works</title>
+    <link>https://getstudyedge.com/blog/cornell-note-taking-method</link>
+    <description>Cornell notes improve recall by 40% vs. standard notes. How the cue-column method works, how to review it correctly, and how to pair it with active recall.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/cornell-note-taking-method</guid>
+  </item>
+  <item>
+    <title>How to Memorize Notes Fast</title>
+    <link>https://getstudyedge.com/blog/how-to-memorize-notes-fast</link>
+    <description>Re-reading your notes is 3x less effective than active recall. Faster techniques: close-and-recite, spaced retrieval, chunking, and the teach-it-back method.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-memorize-notes-fast</guid>
+  </item>
+  <item>
+    <title>How to Use AI for Studying</title>
+    <link>https://getstudyedge.com/blog/how-to-use-ai-for-studying</link>
+    <description>AI study tools improve test scores by up to 20%. What AI does well, where it fails, and the traps that cause students to get worse grades by relying on it wrong.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-use-ai-for-studying</guid>
+  </item>
+  <item>
+    <title>How to Prepare for Midterms in College</title>
+    <link>https://getstudyedge.com/blog/how-to-prepare-for-midterms</link>
+    <description>Students who begin midterm prep 2 weeks out score a full letter grade higher on average. A triage guide for managing multiple exams without scrambling.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-prepare-for-midterms</guid>
+  </item>
+  <item>
+    <title>How to Stop Procrastinating When Studying</title>
+    <link>https://getstudyedge.com/blog/how-to-stop-procrastinating-when-studying</link>
+    <description>Procrastination is caused by unclear tasks, not laziness. Make study sessions specific, small, and pre-decided -- then the brain stops avoiding them.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-stop-procrastinating-when-studying</guid>
+  </item>
+  <item>
+    <title>How to Raise Your GPA After a Bad Semester</title>
+    <link>https://getstudyedge.com/blog/how-to-raise-your-gpa-after-a-bad-semester</link>
+    <description>GPA recovers faster than you think. Realistic plan: grade math, class triage, study system overhaul, and how to raise your GPA by 0.3 or more in one semester.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-raise-your-gpa-after-a-bad-semester</guid>
+  </item>
+  <item>
+    <title>Best Study Schedule for College Students</title>
+    <link>https://getstudyedge.com/blog/best-study-schedule-for-college-students</link>
+    <description>Students with fixed study schedules retain 30% more than reactive studiers. The 7 blocks every plan needs and the 4 mistakes that kill schedules by week 2.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/best-study-schedule-for-college-students</guid>
+  </item>
+  <item>
+    <title>How to Balance a Heavy Course Load</title>
+    <link>https://getstudyedge.com/blog/how-to-balance-a-heavy-course-load</link>
+    <description>18 credits requires 54+ weekly study hours by standard academic estimates. How to survive a heavy course load: triage, time-blocking, protecting sleep, and knowing what to drop.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-balance-a-heavy-course-load</guid>
+  </item>
+  <item>
+    <title>How to Study for SAT: Real-World Prep Plan</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-the-sat</link>
+    <description>The average SAT score is 1020 out of 1600. Practical guide: which sections decide your score, the gap between 1200 and 1400, and a realistic prep plan for each band.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-the-sat</guid>
+  </item>
+  <item>
+    <title>How to Study for Anatomy and Physiology</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-anatomy-and-physiology</link>
+    <description>A&amp;P students memorize 200+ muscles, 206 bones, and thousands of physiological pathways. Study system for every unit: visual chunking, spaced retrieval, and active recall.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-anatomy-and-physiology</guid>
+  </item>
+  <item>
+    <title>How to Pull an All-Nighter and Still Function</title>
+    <link>https://getstudyedge.com/blog/how-to-pull-an-all-nighter</link>
+    <description>Losing 1 night of sleep cuts memory consolidation by 40%. How to pull an all-nighter: session structure, caffeine strategy, what to eat, and when sleep wins instead.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-pull-an-all-nighter</guid>
+  </item>
+  <item>
+    <title>How to Study for Statistics</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-statistics</link>
+    <description>Stats students who practice 5 problems per concept outscore definition-memorizers by a full letter. System for regression, hypothesis testing, and probability.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-statistics</guid>
+  </item>
+  <item>
+    <title>How to Study With ADHD in College</title>
+    <link>https://getstudyedge.com/blog/how-to-study-with-adhd-in-college</link>
+    <description>ADHD affects 1 in 10 college students. Planning systems that work: short sessions, externalized task lists, body doubling, and ADHD-friendly study tools.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-with-adhd-in-college</guid>
+  </item>
+  <item>
+    <title>How to Study for GMAT: Real-World Prep Plan</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-the-gmat</link>
+    <description>Average GMAT test-takers study 150-200 hours over 3-6 months. Practical guide: which sections decide your score, what to drill, and how to structure your prep plan.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-the-gmat</guid>
+  </item>
+  <item>
+    <title>How to Study for Biology Without Burning Out</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-biology</link>
+    <description>Biology courses require 3,000+ new terms per semester. Study system for college bio: active recall, spaced review, and concept maps -- not rote repetition.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-biology</guid>
+  </item>
+  <item>
+    <title>How to Study for Physics</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-physics</link>
+    <description>Physics students who practice 5 problems per concept outscore equation-memorizers by a full letter. Study system for calc-based and algebra-based physics: problem-first.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-physics</guid>
+  </item>
+  <item>
+    <title>How to Study the Night Before an Exam</title>
+    <link>https://getstudyedge.com/blog/how-to-study-the-night-before-an-exam</link>
+    <description>Sleep improves recall more than last-minute cramming. Hour-by-hour guide: what to review the night before an exam, what to skip, and exactly when to stop.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-the-night-before-an-exam</guid>
+  </item>
+  <item>
+    <title>How to Study for Multiple Exams in One Week</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-multiple-exams-in-one-week</link>
+    <description>3 exams in 5 days: triage ruthlessly, not equally. How to distribute study hours, sequence sessions by exam difficulty, and avoid reviewing the wrong material under pressure.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-multiple-exams-in-one-week</guid>
+  </item>
+  <item>
+    <title>How to Study for NCLEX: Real-World Prep Plan</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-the-nclex</link>
+    <description>The NCLEX first-time national pass rate is 78%. Practical guide: how the adaptive format works, which content areas to prioritize, and a 4-week prep plan.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-the-nclex</guid>
+  </item>
+  <item>
+    <title>How to Study for LSAT: Real-World Prep Plan</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-the-lsat</link>
+    <description>The average LSAT taker studies 150-300 hours before hitting their target score. Guide: which section (LR) decides your score, what to drill, and a realistic prep plan.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-the-lsat</guid>
+  </item>
+  <item>
+    <title>What GPA Do You Need for Medical School?</title>
+    <link>https://getstudyedge.com/blog/what-gpa-do-you-need-for-medical-school</link>
+    <description>The average US medical school accepts students with a 3.73 GPA. Real numbers for MD vs. DO admissions, BCPM vs. overall, and what to do if you're below the average.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/what-gpa-do-you-need-for-medical-school</guid>
+  </item>
+  <item>
+    <title>5 Study Techniques That Actually Work</title>
+    <link>https://getstudyedge.com/blog/best-study-techniques-science</link>
+    <description>Only 2 of 10 common study techniques earn 'high utility' in research. Here are the ones that actually work -- and why re-reading and highlighting fall short.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/best-study-techniques-science</guid>
+  </item>
+  <item>
+    <title>How to Cram for an Exam: The Honest Guide</title>
+    <link>https://getstudyedge.com/blog/how-to-cram-for-an-exam</link>
+    <description>Active recall beats re-reading 3-to-1. How to cram effectively: triage what matters, structure your session in 25-minute blocks, and know when to sleep instead.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-cram-for-an-exam</guid>
+  </item>
+  <item>
+    <title>How to Study for Microeconomics</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-microeconomics</link>
+    <description>Micro exams are 65-75% graph-based. Study system for supply-demand, elasticity, market structures, and game theory: graph fluency first, then problem sets, not memorization.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-microeconomics</guid>
+  </item>
+  <item>
+    <title>How to Study for USMLE Step 1</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-usmle-step-1</link>
+    <description>The average USMLE Step 1 score is 232; most residencies target 240+. Practical guide: study plan, which systems to prioritize, and how to use Anki and UWorld.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-usmle-step-1</guid>
+  </item>
+  <item>
+    <title>How to Improve Your Grades in College</title>
+    <link>https://getstudyedge.com/blog/how-to-improve-your-grades-in-college</link>
+    <description>Attending every class raises your odds of an A by 3x. What actually moves grades: attendance, note timing, office hours, and a weekly active recall system.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-improve-your-grades-in-college</guid>
+  </item>
+  <item>
+    <title>How to Focus While Studying: 12 Techniques</title>
+    <link>https://getstudyedge.com/blog/how-to-focus-while-studying</link>
+    <description>One interruption costs 23 minutes of focused work. Learn proven focus strategies for college: Pomodoro timing, study environment setup, and phone management.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-focus-while-studying</guid>
+  </item>
+  <item>
+    <title>How to Study for Biochemistry</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-biochemistry</link>
+    <description>Biochemistry covers 20+ metabolic pathways to master by exam time. Study system: mechanism-first understanding, not rote memorization, plus spaced retrieval for enzymes.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-biochemistry</guid>
+  </item>
+  <item>
+    <title>How to Study for Finals Week</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-finals-week</link>
+    <description>Spaced review prevents 80% forgetting. Triage your finals, plan each session using active recall, and avoid the last-minute burnout spiral in finals week.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-finals-week</guid>
+  </item>
+  <item>
+    <title>How to Get an A in Any Class</title>
+    <link>https://getstudyedge.com/blog/how-to-get-an-a-in-any-class</link>
+    <description>Active recall beats re-reading 3-to-1. The A-student system: grade math, session blueprints, Sunday review, and consistency -- not cramming and motivation.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-get-an-a-in-any-class</guid>
+  </item>
+  <item>
+    <title>How to Study for Psychology</title>
+    <link>https://getstudyedge.com/blog/how-to-study-for-psychology</link>
+    <description>Intro psych has 500+ vocabulary terms and dozens of competing theories to master. Study system for every psych course: term recall, study design, and theory comparison.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-study-for-psychology</guid>
+  </item>
+  <item>
+    <title>How to Overcome Test Anxiety</title>
+    <link>https://getstudyedge.com/blog/how-to-overcome-test-anxiety</link>
+    <description>20% of students experience severe test anxiety. Evidence-based techniques: expressive writing, 4-7-8 breathing, and reframing that reduce cortisol before exams.</description>
+    <pubDate>Fri, 19 Jun 2026 12:00:00 +0000</pubDate>
+    <guid isPermaLink="true">https://getstudyedge.com/blog/how-to-overcome-test-anxiety</guid>
+  </item>
   </channel>
 </rss>
