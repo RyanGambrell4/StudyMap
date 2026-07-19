@@ -1236,7 +1236,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
       {aiInsights.length > 0 && (
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '22px 26px' }}>
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 4 }}>AI INSIGHTS &nbsp;·&nbsp; THIS WEEK</div>
+            <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 4 }}>INSIGHTS &nbsp;·&nbsp; THIS WEEK</div>
             <div style={{ fontSize: 12.5, color: D.textMuted }}>Based on your sessions this week</div>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 14 }}>
