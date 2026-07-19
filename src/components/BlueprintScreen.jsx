@@ -262,7 +262,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
                   className="w-full py-4 rounded-2xl font-bold text-white text-base transition-all"
                   style={{ backgroundColor: dot }}
                 >
-                  Build My Session Plan
+                  Build session plan
                 </button>
               )}
 

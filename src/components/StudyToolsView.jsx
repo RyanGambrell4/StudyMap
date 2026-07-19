@@ -1061,7 +1061,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             {audioFileName && !isTranscribingAudio && pastedText.length > 50 && (
               <p style={{ fontSize: 11.5, color: '#16a34a', marginTop: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Transcribed: <strong>{audioFileName}</strong>. {pastedText.trim().split(/\s+/).length.toLocaleString()} words. Click "Generate with AI" below.
+                Transcribed: <strong>{audioFileName}</strong>. {pastedText.trim().split(/\s+/).length.toLocaleString()} words. Click "Generate flashcards" below.
               </p>
             )}
           </div>
@@ -1119,7 +1119,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
             {youtubeTitle && !isImportingYoutube && (
               <p style={{ fontSize: 11.5, color: '#16a34a', marginTop: 6, display: 'flex', alignItems: 'center', gap: 5 }}>
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                Imported: <strong>{youtubeTitle}</strong>. Transcript ready. Click "Generate with AI" below.
+                Imported: <strong>{youtubeTitle}</strong>. Transcript ready. Click "Generate flashcards" below.
               </p>
             )}
           </div>
@@ -1176,7 +1176,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 className="flex-1 text-white font-bold py-3 rounded-xl text-sm flex items-center justify-center gap-2 transition-opacity hover:opacity-90"
                 style={{ background: '#3B61C4', boxShadow: '0 4px 16px rgba(59,97,196,0.3)' }}
               >
-                Generate with AI
+                Generate flashcards
               </button>
               {quiz.length > 0 && (
                 <div className="flex flex-col gap-1.5">
