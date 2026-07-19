@@ -82,6 +82,27 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
     } catch { return null }
   })()
 
+  const difficultyForecast = (() => {
+    if (!blueprint) return null
+    let score = 0
+    if (daysLeft !== null && daysLeft <= 3) score += 3
+    else if (daysLeft !== null && daysLeft <= 7) score += 2
+    else if (daysLeft !== null && daysLeft <= 14) score += 1
+    const hardTypes = ['Full Length Exam', 'Practice Passage Block', 'practice-problems', 'Active Recall Drill']
+    if (hardTypes.some(t => sessionType?.toLowerCase().includes(t.toLowerCase()))) score += 2
+    else if (sessionType?.toLowerCase().includes('recall') || sessionType?.toLowerCase().includes('quiz')) score += 1
+    const courseSessions = (completedSessions ?? []).filter(s => s.courseName === session.courseName)
+    const recentRecalls = courseSessions.filter(s => s.recallScore != null).slice(-5).map(s => s.recallScore)
+    if (recentRecalls.length) {
+      const avg = recentRecalls.reduce((a, b) => a + b, 0) / recentRecalls.length
+      if (avg < 50) score += 2
+      else if (avg < 70) score += 1
+    }
+    if (score >= 5) return { label: 'High intensity', color: '#DC2626', bg: 'rgba(220,38,38,0.08)', border: 'rgba(220,38,38,0.2)' }
+    if (score >= 3) return { label: 'Moderate', color: '#D97706', bg: 'rgba(217,119,6,0.08)', border: 'rgba(217,119,6,0.2)' }
+    return { label: 'Light session', color: '#16A34A', bg: 'rgba(22,163,74,0.08)', border: 'rgba(22,163,74,0.2)' }
+  })()
+
   const handleGenerate = async () => {
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setLoading(true)
@@ -257,7 +278,14 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
 
           {blueprint && (
             <div>
-              <h2 className="text-2xl font-bold mb-2 leading-tight" style={{ color: '#1A1A1A' }}>{blueprint.sessionTitle}</h2>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8, flexWrap: 'wrap' }}>
+                <h2 className="text-2xl font-bold leading-tight" style={{ color: '#1A1A1A', margin: 0 }}>{blueprint.sessionTitle}</h2>
+                {difficultyForecast && (
+                  <span style={{ fontSize: 11, fontWeight: 700, color: difficultyForecast.color, background: difficultyForecast.bg, border: `1px solid ${difficultyForecast.border}`, borderRadius: 999, padding: '3px 9px', letterSpacing: '0.02em', whiteSpace: 'nowrap' }}>
+                    {difficultyForecast.label}
+                  </span>
+                )}
+              </div>
               <p className="text-sm leading-relaxed mb-6" style={{ color: '#6B6B6B' }}>{blueprint.objective}</p>
 
               {/* Visual session bar */}
