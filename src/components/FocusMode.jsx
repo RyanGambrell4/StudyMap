@@ -974,12 +974,13 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   // ── Mid-session check-in at 50% ──
   useEffect(() => {
     if (!running || finished || midCheckInShownRef.current || midCheckInDismissed) return
+    if (activeTab === 'quiz' || activeTab === 'flashcards') return
     const elapsed = totalSec - remaining
     if (elapsed >= totalSec * 0.5 && totalSec >= 600) {
       midCheckInShownRef.current = true
       setMidCheckIn(true)
     }
-  }, [remaining])
+  }, [remaining, activeTab])
 
   // ── Close ambient popover on outside click ──
   useEffect(() => {

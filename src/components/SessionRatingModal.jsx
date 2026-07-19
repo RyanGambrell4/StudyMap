@@ -84,7 +84,7 @@ export default function SessionRatingModal({ session, onSave, onSkip, onShowPayw
             background: 'rgba(22,163,74,0.1)', border: '1px solid rgba(22,163,74,0.2)',
             padding: '3px 9px', borderRadius: 999,
           }}>
-            Session complete ✓
+            Session complete
           </div>
         </div>
 
@@ -183,7 +183,7 @@ export default function SessionRatingModal({ session, onSave, onSkip, onShowPayw
               onClick={() => onShowPaywall?.('study-hacks')}
               style={{ fontSize: 13, fontWeight: 700, color: D.accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
             >
-              {trialUsed ? 'Upgrade to Pro →' : 'Start 7-day free trial →'}
+              {trialUsed ? 'Upgrade to Pro →' : 'Start 3-day free trial →'}
             </button>
           </div>
         )}

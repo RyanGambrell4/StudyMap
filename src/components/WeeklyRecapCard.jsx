@@ -125,7 +125,7 @@ export default function WeeklyRecapCard({ completedSessionLog = [], todayStr, on
               Weekly recap · {fmtDateShort(recap.weekStart)} – {fmtDateShort(recap.weekEnd)}
             </div>
             <div style={{ fontSize: 16, fontWeight: 800, color: D.text, letterSpacing: '-0.015em', lineHeight: 1.35 }}>
-              {vibe ?? 'Here is your week in one card.'}
+              {vibe ?? 'No sessions logged yet this week. Today is a good day to start.'}
             </div>
           </div>
           <button
@@ -166,18 +166,15 @@ export default function WeeklyRecapCard({ completedSessionLog = [], todayStr, on
           <div className="wr-cta-group" style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             {onOpenProgress && (
               <button
-                className="wr-ghost"
                 onClick={() => { track('weekly_recap_open_progress'); onOpenProgress() }}
                 style={{
-                  minHeight: 40, padding: '0 14px',
-                  background: 'transparent', color: D.brand,
-                  border: `1px solid ${D.brand}30`, borderRadius: 10,
-                  fontSize: 12.5, fontWeight: 700, fontFamily: 'inherit',
-                  cursor: 'pointer', letterSpacing: '-0.005em',
-                  transition: 'background 150ms cubic-bezier(0.4,0,0.2,1)',
+                  background: 'none', border: 'none', color: D.brand,
+                  fontSize: 12.5, fontWeight: 600, fontFamily: 'inherit',
+                  cursor: 'pointer', padding: '0 4px', textDecoration: 'underline',
+                  textDecorationColor: `${D.brand}50`, textUnderlineOffset: 3,
                 }}
               >
-                See full progress
+                See progress
               </button>
             )}
             <button

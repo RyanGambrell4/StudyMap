@@ -343,13 +343,13 @@ export default function SmartStartCard({
             )}
           </div>
 
-          {/* Actions grid */}
-          <div className="ss-war-actions" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: weakTopics.length > 0 ? 20 : 0 }}>
+          {/* Actions */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: weakTopics.length > 0 ? 20 : 0 }}>
             <button
               className="ss-btn"
               onClick={() => { track('war_room_cta', { action: 'examRescue' }); isPro ? onOpenExamRescue?.() : onShowPaywall?.('examRescue') }}
               style={{
-                minHeight: 52,
+                width: '100%', minHeight: 52,
                 padding: '12px 18px',
                 background: 'linear-gradient(135deg, #DC2626, #991B1B)',
                 color: '#fff', border: 'none', borderRadius: 12,
@@ -359,57 +359,55 @@ export default function SmartStartCard({
                 display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
                 transition: 'transform 150ms ease, box-shadow 150ms ease',
               }}
-              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.98)'}
               onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
               onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'}
             >
               <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
               Exam Rescue
             </button>
-            <button
-              className="ss-btn"
-              onClick={() => { track('war_room_cta', { action: 'brainDump' }); onOpenBrainDump?.() }}
-              style={{
-                minHeight: 52,
-                padding: '12px 18px',
-                background: '#FFFFFF', color: '#B91C1C',
-                border: '1.5px solid rgba(185,28,28,0.28)',
-                borderRadius: 12,
-                fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                fontFamily: 'inherit',
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                transition: 'transform 150ms ease, background 150ms ease',
-              }}
-              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
-              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(220,38,38,0.06)'}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = '#FFFFFF' }}
-            >
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
-              Brain Dump
-            </button>
-            <button
-              className="ss-btn"
-              onClick={() => { track('war_room_cta', { action: 'cheatSheet' }); isPro ? onOpenCheatSheet?.() : onShowPaywall?.('cheat-sheet') }}
-              style={{
-                minHeight: 52,
-                padding: '12px 18px',
-                background: '#FFFFFF', color: '#B91C1C',
-                border: '1.5px solid rgba(185,28,28,0.28)',
-                borderRadius: 12,
-                fontSize: 14, fontWeight: 700, cursor: 'pointer',
-                fontFamily: 'inherit',
-                display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-                transition: 'transform 150ms ease, background 150ms ease',
-              }}
-              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
-              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-              onMouseEnter={e => e.currentTarget.style.background = 'rgba(220,38,38,0.06)'}
-              onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; e.currentTarget.style.background = '#FFFFFF' }}
-            >
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="14 2 14 8 20 8"/><path d="M20 22H4a2 2 0 01-2-2V4a2 2 0 012-2h10l6 6v12a2 2 0 01-2 2z"/></svg>
-              Cheat Sheet
-            </button>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+              <button
+                className="ss-btn"
+                onClick={() => { track('war_room_cta', { action: 'brainDump' }); onOpenBrainDump?.() }}
+                style={{
+                  minHeight: 40,
+                  padding: '9px 14px',
+                  background: '#FFFFFF', color: '#B91C1C',
+                  border: '1.5px solid rgba(185,28,28,0.28)',
+                  borderRadius: 10,
+                  fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  transition: 'background 150ms ease',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(220,38,38,0.06)'}
+                onMouseLeave={e => e.currentTarget.style.background = '#FFFFFF'}
+              >
+                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/></svg>
+                Brain Dump
+              </button>
+              <button
+                className="ss-btn"
+                onClick={() => { track('war_room_cta', { action: 'cheatSheet' }); isPro ? onOpenCheatSheet?.() : onShowPaywall?.('cheat-sheet') }}
+                style={{
+                  minHeight: 40,
+                  padding: '9px 14px',
+                  background: '#FFFFFF', color: '#B91C1C',
+                  border: '1.5px solid rgba(185,28,28,0.28)',
+                  borderRadius: 10,
+                  fontSize: 13, fontWeight: 600, cursor: 'pointer',
+                  fontFamily: 'inherit',
+                  display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+                  transition: 'background 150ms ease',
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = 'rgba(220,38,38,0.06)'}
+                onMouseLeave={e => e.currentTarget.style.background = '#FFFFFF'}
+              >
+                <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><polyline points="14 2 14 8 20 8"/><path d="M20 22H4a2 2 0 01-2-2V4a2 2 0 012-2h10l6 6v12a2 2 0 01-2 2z"/></svg>
+                Cheat Sheet
+              </button>
+            </div>
           </div>
 
           {/* Prioritized weak topics */}
