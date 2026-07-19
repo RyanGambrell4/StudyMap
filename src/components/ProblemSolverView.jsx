@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react'
 import { canUseAI, incrementAIQuery } from '../lib/subscription.js'
 import { getAccessToken } from '../lib/supabase.js'
+import { track } from '../lib/analytics'
 
 const STORAGE_KEY = 'studyedge_problems'
 
@@ -362,6 +363,7 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
 
       incrementAIQuery()
       window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'problemSolver' } }))
+      track('problem_solver_used')
       const entry = {
         id: Date.now().toString(),
         problem: problemText,

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { canUseAI, incrementAIQuery } from '../lib/subscription.js'
 import { getAccessToken } from '../lib/supabase.js'
+import { track } from '../lib/analytics'
 
 const STORAGE_KEY = 'studyedge_outlines'
 
@@ -283,6 +284,7 @@ export default function EssayArchitectView({ userId, onShowPaywall }) {
 
       incrementAIQuery()
       window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'essayArchitect' } }))
+      track('essay_outline_generated', { topic: topic || null })
       const entry = {
         id: Date.now().toString(),
         topic,
