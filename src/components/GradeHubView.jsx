@@ -1171,7 +1171,7 @@ function WhatIfTrackTab({ course, gradeData, dot }) {
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
-export default function GradeHubView({ courses, onEditCourse, userId, onShowPaywall, initialCourseIdx = 0, onSyncToCalendar, onOpenTeachItBack }) {
+export default function GradeHubView({ courses, onEditCourse, userId, onShowPaywall, initialCourseIdx = 0, onSyncToCalendar }) {
   const plan = getActivePlan()
 
   const [activeCourseIdx, setActiveCourseIdx] = useState(() =>
@@ -1369,17 +1369,6 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
                 </p>
               </div>
               <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
-                {onOpenTeachItBack && (
-                  <button
-                    onClick={() => {
-                      const idx = courses?.findIndex((_, i) => i === courseIdx) ?? 0
-                      onOpenTeachItBack({ courseIdx: Math.max(0, idx) })
-                    }}
-                    style={{ background: 'rgba(124,58,237,0.09)', color: '#7C3AED', border: '1px solid rgba(124,58,237,0.25)', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
-                  >
-                    Teach It Back
-                  </button>
-                )}
                 <button
                   onClick={() => setActiveTab('sandbox')}
                   style={{ background: urgent ? '#DC2626' : '#D97706', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}

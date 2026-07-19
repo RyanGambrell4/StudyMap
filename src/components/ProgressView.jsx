@@ -248,7 +248,7 @@ function ScoreLineChart({ entries, color }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-export default function ProgressView({ courses, allSessions, completedIds, completedSessionLog = [], todayStr, onShowPaywall, onOpenReviewQueue, onOpenBrainDump, onOpenTeachItBack }) {
+export default function ProgressView({ courses, allSessions, completedIds, completedSessionLog = [], todayStr, onShowPaywall, onOpenReviewQueue, onOpenBrainDump }) {
   const [period, setPeriod] = useState('Term')
   const isFree = getActivePlan() === 'free'
   const trialUsed = hasUsedTrial()
@@ -1386,17 +1386,6 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                           <span style={{ fontSize: 11, fontWeight: 800, color: getMasteryColor(t.score), fontVariantNumeric: 'tabular-nums' }}>{t.score}</span>
                         </div>
                         <span style={{ fontSize: 13, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, fontWeight: 500 }}>{t.topic}</span>
-                        {onOpenTeachItBack && (
-                          <button
-                            className="pv-drill"
-                            onClick={() => onOpenTeachItBack({ courseIdx, topic: t.topic })}
-                            title={`Teach It Back: "${t.topic}"`}
-                            style={{ fontSize: 10.5, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.08)', border: 'none', padding: '4px 8px', borderRadius: 6, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 3, flexShrink: 0, letterSpacing: '0.02em', textTransform: 'uppercase' }}
-                          >
-                            Teach
-                            <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-                          </button>
-                        )}
                         {onOpenBrainDump && (
                           <button
                             className="pv-drill"

@@ -1926,7 +1926,6 @@ export default function OutputView({
             onShowPaywall={onShowPaywall}
             onOpenReviewQueue={() => setActiveSection('review')}
             onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump', source: 'progress_needs_work' }); setShowBrainDump(true) }}
-            onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
           />
         )}
 
@@ -2003,7 +2002,6 @@ export default function OutputView({
             userId={userId}
             onShowPaywall={onShowPaywall}
             initialCourseIdx={gradesCourseIdx}
-            onOpenTeachItBack={({ courseIdx, topic } = {}) => { setTeachItBackInit({ courseIdx: courseIdx ?? gradesCourseIdx, topic: topic ?? '' }); setShowTeachItBack(true) }}
             onSyncToCalendar={incoming => {
               setManualSessions(prev => {
                 // Remove any previously synced coach-plan sessions for these course/week combos
