@@ -2004,6 +2004,7 @@ export default function OutputView({
             userId={userId}
             onShowPaywall={onShowPaywall}
             initialCourseIdx={gradesCourseIdx}
+            onOpenTeachItBack={({ courseIdx, topic } = {}) => { setTeachItBackInit({ courseIdx: courseIdx ?? gradesCourseIdx, topic: topic ?? '' }); setShowTeachItBack(true) }}
             onSyncToCalendar={incoming => {
               setManualSessions(prev => {
                 // Remove any previously synced coach-plan sessions for these course/week combos
