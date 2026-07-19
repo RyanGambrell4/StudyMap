@@ -2230,6 +2230,7 @@ export default function OutputView({
           courses={courses}
           onClose={() => setShowConnectionsMode(false)}
           onShowPaywall={onShowPaywall}
+          onOpenTeachItBack={({ courseIdx, topic }) => { setShowConnectionsMode(false); setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
         />
       )}
       {showTimedChallenge && (

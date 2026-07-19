@@ -14,7 +14,7 @@ const D = {
 
 const COURSE_COLORS = ['#3B82F6','#6366F1','#059669','#D97706','#EC4899','#0891B2']
 
-export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }) {
+export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, onOpenTeachItBack }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
@@ -334,6 +334,20 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
                 })}
               </div>
 
+              {(() => {
+                if (!onOpenTeachItBack || avgScore >= 80 || !scores.length || !connections.length) return null
+                const weakestIdx = scores.reduce((best, s, i) => s.score < scores[best].score ? i : best, 0)
+                const weakConn = connections[weakestIdx]
+                if (!weakConn?.conceptA) return null
+                return (
+                  <button
+                    onClick={() => { onClose(); onOpenTeachItBack({ courseIdx, topic: weakConn.conceptA }) }}
+                    style={{ marginBottom: 10, padding: '12px', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.25)', borderRadius: 10, color: '#7C3AED', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+                  >
+                    Teach It Back: {weakConn.conceptA}
+                  </button>
+                )
+              })()}
               <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <button onClick={reset} style={{ padding: '12px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(5,150,105,0.30)' }}>
                   Go again
