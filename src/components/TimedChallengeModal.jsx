@@ -40,7 +40,7 @@ function savePB(courseKey, record) {
   } catch { return false }
 }
 
-export default function TimedChallengeModal({ courses, userId, onClose, onShowPaywall, onOpenTeachItBack }) {
+export default function TimedChallengeModal({ courses, userId, onClose, onShowPaywall }) {
   const [step, setStep] = useState('setup') // 'setup' | 'loading' | 'active' | 'done'
   const [selectedCourse, setSelectedCourse] = useState(courses.length > 0 ? 0 : -1)
   const [topic, setTopic] = useState('')
@@ -347,14 +347,6 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
                   style={{ width: '100%', padding: '11px', borderRadius: 11, background: 'transparent', border: `1.5px solid ${D.accent}`, color: D.accent, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
                 >
                   Drill this topic
-                </button>
-              )}
-              {doneStats.score < 80 && topic.trim() && onOpenTeachItBack && (
-                <button
-                  onClick={() => { onClose(); onOpenTeachItBack({ courseIdx: selectedCourse, topic: topic.trim() }) }}
-                  style={{ width: '100%', padding: '11px', borderRadius: 11, background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.25)', color: '#7C3AED', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
-                >
-                  Teach It Back instead
                 </button>
               )}
               <button

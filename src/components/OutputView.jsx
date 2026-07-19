@@ -58,7 +58,7 @@ import TimedChallengeModal from './TimedChallengeModal'
 import SessionRatingModal from './SessionRatingModal'
 
 // ─── TutorView ────────────────────────────────────────────────────────────────
-function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateToCoach, initialMessage, paywallTrigger = 'ai', onOpenTeachItBack }) {
+function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateToCoach, initialMessage, paywallTrigger = 'ai' }) {
   const [selectedCourse, setSelectedCourse] = useState(courses.length > 0 ? 0 : -1)
   const course = courses[selectedCourse] ?? null
 
@@ -132,7 +132,6 @@ function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateTo
             onNavigateToCoach={onNavigateToCoach}
             initialMessage={initialMessage}
             paywallTrigger={paywallTrigger}
-            onOpenTeachItBack={onOpenTeachItBack}
             courseIdx={selectedCourse}
           />
         </div>
@@ -1343,7 +1342,6 @@ export default function OutputView({
           nextSession={allSessions.find(s => s.dateStr >= todayStr && !completedIds.has(s.id) && s.id !== focusSession.id) ?? null}
           onGoToTools={() => setActiveSection('tools')}
           onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump', source: 'focus_complete' }); setShowBrainDump(true) }}
-          onOpenTeachItBack={({ topic }) => { const idx = Math.max(0, courses.findIndex((_, i) => i === focusSession.courseId)); setTeachItBackInit({ courseIdx: idx, topic }); setShowTeachItBack(true) }}
           course={courses[focusSession.courseId] ?? null}
           onShowPaywall={onShowPaywall}
           userId={userId}
@@ -1401,11 +1399,6 @@ export default function OutputView({
             ratingReminderTimerRef.current = setTimeout(() => setRatingReminder(skipped), 5 * 60 * 1000)
           }}
           onShowPaywall={onShowPaywall}
-          onOpenTeachItBack={({ courseIdx, topic }) => {
-            setRatingSession(null)
-            setTeachItBackInit({ courseIdx, topic })
-            setShowTeachItBack(true)
-          }}
         />
       )}
 
@@ -2034,7 +2027,6 @@ export default function OutputView({
             initialMessage={tutorPrefill}
             paywallTrigger={tutorPrefill ? 'ai-struggle' : 'ai'}
             key={tutorPrefill ?? 'default'}
-            onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
           />
         )}
 
@@ -2243,7 +2235,6 @@ export default function OutputView({
           courses={courses}
           onClose={() => setShowConnectionsMode(false)}
           onShowPaywall={onShowPaywall}
-          onOpenTeachItBack={({ courseIdx, topic }) => { setShowConnectionsMode(false); setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
         />
       )}
       {showTimedChallenge && (
@@ -2252,7 +2243,6 @@ export default function OutputView({
           userId={userId}
           onClose={() => setShowTimedChallenge(false)}
           onShowPaywall={onShowPaywall}
-          onOpenTeachItBack={({ courseIdx, topic }) => { setShowTimedChallenge(false); setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
         />
       )}
     </>
