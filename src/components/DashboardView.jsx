@@ -1411,7 +1411,6 @@ export default function DashboardView({
           onStartFocus={() => displaySession ? onStartFocus?.(displaySession) : onOpenStudyCoach?.()}
           onOpenExamRescue={onOpenExamRescue}
           onOpenPracticeExam={onOpenPracticeExam}
-          onOpenTeachItBack={onOpenTeachItBack}
         />
 
         {/* ── Streak Guard: loss-aversion nudge when today hasn't been studied ── */}
@@ -1422,7 +1421,6 @@ export default function DashboardView({
           freezeCount={freezeCount}
           onUseFreeze={useFreeze}
           onStartFocus={onStartFocus}
-          onOpenTeachItBack={onOpenTeachItBack}
         />
 
         {/* ── Quick Start: one-tap session presets that skip Blueprint ── */}
@@ -1435,7 +1433,6 @@ export default function DashboardView({
             if (typeof onQuickStart === 'function') onQuickStart(s)
             else onStartFocus?.(s)
           }}
-          onOpenTeachItBack={onOpenTeachItBack}
         />
 
         {/* ── Weekly Goal: hours target with progress ring + insight ── */}
@@ -1457,7 +1454,6 @@ export default function DashboardView({
           todayStr={todayStr}
           onStartFocus={() => displaySession ? onStartFocus?.(displaySession) : onOpenStudyCoach?.()}
           onOpenProgress={onOpenProgress ?? onNavigateToProgress}
-          onOpenTeachItBack={onOpenTeachItBack}
         />
 
         {/* ── Momentum Score: composite weekly health ── */}
@@ -1467,7 +1463,6 @@ export default function DashboardView({
           completedIds={completedIds}
           todayStr={todayStr}
           onOpenProgress={onOpenProgress ?? onNavigateToProgress}
-          onOpenTeachItBack={onOpenTeachItBack}
         />
 
         {/* ── Cross-Course Connection: topics shared across 2+ classes ── */}
@@ -1489,7 +1484,6 @@ export default function DashboardView({
               courses={courses}
               onStartFocus={onStartFocus}
               onOpenBrainDump={onOpenBrainDump}
-              onOpenTeachItBack={onOpenTeachItBack}
               todaySessions={todaySessions}
             />
           )
@@ -1512,7 +1506,6 @@ export default function DashboardView({
           onOpenStudyCoach={onOpenStudyCoach}
           onShowPaywall={onShowPaywall}
           onOpenReviewQueue={onOpenReviewQueue}
-          onOpenTeachItBack={onOpenTeachItBack}
         />
 
         {/* ── Today's Plan Timeline ── */}
