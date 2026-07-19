@@ -106,6 +106,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
       const finalScores = latestScoresRef.current.length ? latestScoresRef.current : scores
       const finalAvg = finalScores.length ? Math.round(finalScores.reduce((s, r) => s + r.score, 0) / finalScores.length) : 0
       addStudySession({ tool: 'Connections', score: finalAvg, topic: null, courseName: course?.name || null })
+      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'connections' } }))
       setStep('done')
     } else {
       setCardIdx(i => i + 1)

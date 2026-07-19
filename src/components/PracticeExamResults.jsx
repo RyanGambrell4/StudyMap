@@ -158,6 +158,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
   useEffect(() => {
     if (weakTopics.length) addWeakTopics(weakTopics.map(([t]) => t))
     addStudySession({ tool: 'Practice Exam', score: score ?? null, topic: null, courseName: courseName || null })
+    window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'practiceExam' } }))
   }, [])
 
   const hasShortAnswer = graded.some(g => g.correct === null)
