@@ -426,12 +426,10 @@ ${summary?.trim() ? `
 </html>`
 
   const win = window.open('', '_blank', 'width=1000,height=860')
-  if (!win) {
-    alert('Allow pop-ups for StudyEdge AI to export your notes.')
-    return
-  }
+  if (!win) return false
   win.document.write(html)
   win.document.close()
+  return true
 }
 
 const ENCOURAGE = [
@@ -548,6 +546,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     }
   }, [showComplete])
   const [pdfDownloading, setPdfDownloading] = useState(false)
+  const [pdfPopupBlocked, setPdfPopupBlocked] = useState(false)
 
   // ── Ambient sound ──
   const AMBIENT_MODES = [
@@ -1389,12 +1388,14 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
   const handleDownloadPDF = async () => {
     setPdfDownloading(true)
+    setPdfPopupBlocked(false)
     try {
-      await generatePDF({
+      const ok = await generatePDF({
         courseName: session.courseName, dateStr: todayStr, sessionType: session.sessionType,
         recallText, concepts: notesConcepts, main: notesMain, summary: notesSummary,
       })
-    } catch { /* PDF generation failed - ignore */ }
+      if (ok === false) setPdfPopupBlocked(true)
+    } catch { /* ignore */ }
     finally { setPdfDownloading(false) }
   }
 
@@ -1779,6 +1780,11 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     </svg>
                     {pdfDownloading ? 'Generating PDF…' : 'Download Session Notes'}
                   </button>
+                )}
+                {pdfPopupBlocked && (
+                  <p style={{ margin: '6px 0 0', fontSize: 12, color: '#DC2626' }}>
+                    Pop-ups are blocked. Allow pop-ups for this site, then try again.
+                  </p>
                 )}
               </div>
             )}

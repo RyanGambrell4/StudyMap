@@ -301,7 +301,7 @@ function CoachRail({ form, confidence, course }) {
 }
 
 // ── Step 1: Intake ────────────────────────────────────────────────────────────
-function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, onMaterialFile, onNext }) {
+function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, materialError, onMaterialFile, onNext }) {
   const update = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const course = courses[form.courseIdx]
   const _EXAM_PAT = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
@@ -405,6 +405,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
             onExtract={onMaterialFile}
             loading={materialLoading}
           />
+          {materialError && <p style={{ margin: '6px 0 0', fontSize: 12, color: '#DC2626' }}>{materialError}</p>}
         </FieldBlock>
 
         {/* Cadence */}
@@ -941,6 +942,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   // Material extraction
   const [materialText, setMaterialText] = useState('')
   const [materialLoading, setMaterialLoading] = useState(false)
+  const [materialError, setMaterialError] = useState('')
 
   // Load saved plan when course changes
   useEffect(() => {
@@ -984,12 +986,12 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
 
   const handleMaterialFile = async (file) => {
     setMaterialLoading(true)
+    setMaterialError('')
     try {
       const text = await extractText(file)
       setMaterialText(prev => prev + '\n' + text)
     } catch {
-      setMaterialText(prev => prev)
-      alert('Could not read that file. Try pasting the text directly.')
+      setMaterialError('Could not read that file. Try pasting the text directly.')
     } finally { setMaterialLoading(false) }
   }
 
@@ -1397,6 +1399,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
               form={form} setForm={setForm} courses={courses}
               cachedStruggles={cachedStruggles}
               materialLoading={materialLoading}
+              materialError={materialError}
               onMaterialFile={handleMaterialFile}
               onNext={() => setStep(2)}
             />
