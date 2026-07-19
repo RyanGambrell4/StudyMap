@@ -1687,7 +1687,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#2563EB', marginBottom: 4 }}>
-                {trialUsed ? 'Upgrade to Pro' : 'Start your 3-day free trial'}
+                {trialUsed ? 'Upgrade to Pro' : 'Start your 7-day free trial'}
               </div>
               <div style={{ fontSize: 12.5, color: D.textMuted, lineHeight: 1.55 }}>
                 Unlock unlimited Brain Dumps, Practice Exams, AI Tutor, and more so every score shows up here.
