@@ -2238,6 +2238,7 @@ export default function OutputView({
           userId={userId}
           onClose={() => setShowTimedChallenge(false)}
           onShowPaywall={onShowPaywall}
+          onOpenTeachItBack={({ courseIdx, topic }) => { setShowTimedChallenge(false); setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
         />
       )}
     </>

@@ -1458,6 +1458,7 @@ export default function DashboardView({
           completedIds={completedIds}
           todayStr={todayStr}
           onOpenProgress={onOpenProgress ?? onNavigateToProgress}
+          onOpenTeachItBack={onOpenTeachItBack}
         />
 
         {/* ── Cross-Course Connection: topics shared across 2+ classes ── */}
