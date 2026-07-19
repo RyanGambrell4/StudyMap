@@ -27,6 +27,7 @@ export default function StreakGuardCard({
   freezeCount = 0,
   onUseFreeze,
   onStartFocus,
+  onOpenTeachItBack,
 }) {
   const [dismissed, setDismissed] = useState(() => {
     if (typeof window === 'undefined') return false
@@ -174,6 +175,22 @@ export default function StreakGuardCard({
             {isUrgent ? 'Protect it now' : 'Start 10-min session'}
             <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
           </button>
+          {onOpenTeachItBack && (
+            <button
+              className="sg-ghost"
+              onClick={() => { track('streak_guard_teach_it_back', { streak }); onOpenTeachItBack({}) }}
+              style={{
+                minHeight: 40, padding: '0 12px',
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: 'rgba(124,58,237,0.07)', color: '#7C3AED',
+                border: '1px solid rgba(124,58,237,0.2)', borderRadius: 10,
+                fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
+                cursor: 'pointer', whiteSpace: 'nowrap',
+              }}
+            >
+              Teach It Back
+            </button>
+          )}
           <button
             className="sg-dismiss"
             onClick={handleDismiss}
