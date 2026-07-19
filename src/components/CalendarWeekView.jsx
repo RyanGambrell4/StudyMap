@@ -1,5 +1,6 @@
 import { useMemo, useState, useEffect, useRef, useCallback } from 'react'
 import { clean } from '../utils/strings'
+import { track } from '../lib/analytics'
 
 const HOUR_HEIGHT = 56
 const START_HOUR  = 6
@@ -134,6 +135,7 @@ export default function CalendarWeekView({
       if ((e.key === 'Delete' || e.key === 'Backspace') && selectedSessionId && onDeleteSession) {
         // Don't fire if user is typing in an input
         if (['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName)) return
+        track('session_deleted', { source: 'keyboard' })
         onDeleteSession(selectedSessionId)
         setSelectedSessionId(null)
       }
@@ -425,7 +427,7 @@ export default function CalendarWeekView({
           <span className="text-sm font-medium tracking-tight" style={{ color: '#6B6B6B' }}>{weekLabel}</span>
           {onAddSession && (
             <button
-              onClick={() => onAddSession(activeDayStr)}
+              onClick={() => { track('session_add_clicked', { source: 'week_header', dateStr: activeDayStr }); onAddSession(activeDayStr) }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{ color: '#3B61C4', border: '1px solid rgba(59,97,196,0.25)', backgroundColor: 'rgba(59,97,196,0.06)' }}
             >
@@ -535,7 +537,7 @@ export default function CalendarWeekView({
                   : isRest
                   ? { background: 'rgba(107,114,128,0.15)', color: '#9CA3AF', textDecoration: 'line-through' }
                   : { color: '#6B6B6B' }}
-                onClick={() => onAddSession && onAddSession(col.dateStr)}
+                onClick={() => { if (onAddSession) { track('session_add_clicked', { source: 'day_header', dateStr: col.dateStr }); onAddSession(col.dateStr) } }}
               >
                 {dayNum}
               </div>
@@ -841,7 +843,7 @@ export default function CalendarWeekView({
                       <button
                         style={{ position: 'absolute', top: 2, right: 2, width: 14, height: 14, borderRadius: '50%', background: 'rgba(0,0,0,0.5)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, zIndex: 10 }}
                         onPointerDown={e => { e.stopPropagation(); e.preventDefault() }}
-                        onClick={e => { e.stopPropagation(); onDeleteSession(ev.id); setSelectedSessionId(null) }}
+                        onClick={e => { e.stopPropagation(); track('session_deleted', { source: 'hover_button' }); onDeleteSession(ev.id); setSelectedSessionId(null) }}
                         title="Delete session"
                       >
                         <svg width="8" height="8" viewBox="0 0 8 8" fill="none">
@@ -898,7 +900,7 @@ export default function CalendarWeekView({
             {onDeleteSession && (
               <button
                 style={{ width: '100%', padding: '14px', background: 'rgba(220,38,38,0.06)', border: '1px solid rgba(220,38,38,0.15)', borderRadius: 12, color: '#DC2626', fontSize: 14, fontWeight: 600, marginBottom: 8, cursor: 'pointer' }}
-                onClick={() => { onDeleteSession(mobileActionSheet.session.id); setMobileActionSheet(null) }}
+                onClick={() => { track('session_deleted', { source: 'mobile_sheet' }); onDeleteSession(mobileActionSheet.session.id); setMobileActionSheet(null) }}
               >
                 Delete session
               </button>
