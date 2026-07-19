@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { getActivePlan, getCachedSubscription, hasUsedTrial } from '../lib/subscription'
 import { getAccessToken } from '../lib/supabase'
+import { track } from '../lib/analytics'
 
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
@@ -175,6 +176,7 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
       setResetAt(data.usage?.resetAt ?? null)
       setStep('done')
       window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'podcast' } }))
+      track('podcast_generated', { plan: getActivePlan() })
     } catch (e) {
       setError(e.message || 'Generation failed. Please try again.')
       setStep('error')

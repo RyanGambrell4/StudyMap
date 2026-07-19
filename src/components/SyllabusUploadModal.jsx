@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
+import { track } from '../lib/analytics'
 import Spinner from './ui/spinner'
 import { extractText } from '../utils/extractText'
 
@@ -339,7 +340,7 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
             <>
               <button onClick={onClose} style={{ padding: '10px 16px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
               <button
-                onClick={() => onConfirm(items, selectedCourseIdx)}
+                onClick={() => { track('syllabus_events_confirmed', { eventCount: items.length, source: activeTab }); onConfirm(items, selectedCourseIdx) }}
                 disabled={items.length === 0}
                 style={{ flex: 1, padding: '10px', background: '#3B61C4', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer', opacity: items.length === 0 ? 0.4 : 1 }}
               >
