@@ -576,7 +576,7 @@ function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onS
   }, [])
 
   const VALUE_PROPS = [
-    { title: 'AI Study Coach', body: 'Builds your week-by-week plan for every course' },
+    { title: 'Study Coach', body: 'Builds your week-by-week plan for every course' },
     { title: 'Session Blueprints', body: 'A specific plan before every study block' },
     { title: 'Focus Mode', body: 'Timed sessions that lock you in and track streaks' },
   ]
