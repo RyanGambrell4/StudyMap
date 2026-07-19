@@ -52,9 +52,12 @@ function ConnectionSpine({ courses }) {
 }
 
 export default function CrossCourseCard({ courses = [], onOpenBrainDump, onOpenReviewQueue, onOpenTeachItBack }) {
-  const [dismissed, setDismissed] = useState(false)
   const connections = useMemo(() => findCrossCourseConnections(courses), [courses])
   const top = connections[0]
+  const [dismissed, setDismissed] = useState(() => {
+    if (!top) return false
+    try { return localStorage.getItem(`se_cc_dismissed_${top.token}`) === '1' } catch { return false }
+  })
 
   if (!top || dismissed) return null
 
@@ -128,7 +131,7 @@ export default function CrossCourseCard({ courses = [], onOpenBrainDump, onOpenR
         <div className="cc-actions" style={{ display: 'flex', gap: 8, flexShrink: 0, alignSelf: 'center', alignItems: 'center' }}>
           <button
             className="cc-btn"
-            onClick={() => { track('cross_course_drill', { token: top.token, courseCount: top.courses.length }); onOpenBrainDump?.() }}
+            onClick={() => { track('cross_course_drill', { token: top.token, courseCount: top.courses.length }); onOpenBrainDump?.(top.token) }}
             style={{
               minHeight: 40, padding: '0 16px',
               display: 'inline-flex', alignItems: 'center', gap: 6,
@@ -165,7 +168,11 @@ export default function CrossCourseCard({ courses = [], onOpenBrainDump, onOpenR
           )}
           <button
             className="cc-dismiss"
-            onClick={() => { track('cross_course_dismiss', { token: top.token }); setDismissed(true) }}
+            onClick={() => {
+              track('cross_course_dismiss', { token: top.token })
+              try { localStorage.setItem(`se_cc_dismissed_${top.token}`, '1') } catch {}
+              setDismissed(true)
+            }}
             title="Dismiss"
             style={{
               width: 32, height: 32, minHeight: 32,

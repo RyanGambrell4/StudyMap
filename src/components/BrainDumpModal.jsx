@@ -53,12 +53,12 @@ function ScoreRing({ score }) {
   )
 }
 
-export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDrillGaps, onOpenTeachItBack }) {
+export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDrillGaps, onOpenTeachItBack, initialTopic = '', initialCourseIdx = 0 }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
-  const [courseIdx, setCourseIdx] = useState(0)
-  const [topic, setTopic] = useState('')
+  const [courseIdx, setCourseIdx] = useState(initialCourseIdx)
+  const [topic, setTopic] = useState(initialTopic)
   const [timerDuration, setTimerDuration] = useState(60) // seconds
   const [step, setStep] = useState('setup') // 'setup' | 'timer' | 'scoring' | 'result'
   const [text, setText] = useState('')

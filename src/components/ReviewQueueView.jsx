@@ -400,13 +400,13 @@ export default function ReviewQueueView({ courses, onOpenBrainDump, onOpenQuizBu
   const displayed = tab === 'due' ? dueItems : upcomingItems
   const overdueByADay = dueItems.filter(i => i.overdueMs > 86400000).length
 
-  const handleDrill = (topic) => {
+  const handleDrill = (topic, courseId) => {
     track('review_queue_drill', { topic, source: 'brain_dump' })
-    onOpenBrainDump?.()
+    onOpenBrainDump?.(topic, courseId)
   }
-  const handleQuiz = (topic) => {
+  const handleQuiz = (topic, courseId) => {
     track('review_queue_drill', { topic, source: 'quiz' })
-    onOpenQuizBurst?.()
+    onOpenQuizBurst?.(topic, courseId)
   }
   const handleTeachItBack = (topic, courseId) => {
     track('review_queue_teach_it_back', { topic })
@@ -549,33 +549,35 @@ export default function ReviewQueueView({ courses, onOpenBrainDump, onOpenQuizBu
           ))}
       </div>
 
-      {/* How it works */}
-      <div style={{
-        marginTop: S[5],
-        padding: `${S[4]}px ${S[5]}px`,
-        borderRadius: R.lg,
-        background: C.accentSoft,
-        border: `1px solid ${C.accentRing}`,
-        display: 'flex', gap: S[3], alignItems: 'flex-start',
-      }}>
+      {/* How it works — only shown until the user has seen a topic (then they know) */}
+      {(dueItems.length === 0 && upcomingItems.length === 0) && (
         <div style={{
-          width: 32, height: 32, borderRadius: R.md, flexShrink: 0,
-          background: `${C.accent}18`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          marginTop: S[5],
+          padding: `${S[4]}px ${S[5]}px`,
+          borderRadius: R.lg,
+          background: C.accentSoft,
+          border: `1px solid ${C.accentRing}`,
+          display: 'flex', gap: S[3], alignItems: 'flex-start',
         }}>
-          <svg width="16" height="16" fill="none" stroke={C.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-          </svg>
+          <div style={{
+            width: 32, height: 32, borderRadius: R.md, flexShrink: 0,
+            background: `${C.accent}18`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          }}>
+            <svg width="16" height="16" fill="none" stroke={C.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+          </div>
+          <div>
+            <p style={{ fontSize: 12, fontWeight: 700, color: C.accent, margin: `0 0 ${S[1]}px`, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
+              How this works
+            </p>
+            <p style={{ fontSize: 13, color: C.textMuted, margin: 0, lineHeight: 1.6 }}>
+              Review intervals scale with your mastery. Weak topics come back in 1 day, developing in 2 to 4 days, strong in 7 days. Each review updates your score and pushes the next review further out.
+            </p>
+          </div>
         </div>
-        <div>
-          <p style={{ fontSize: 12, fontWeight: 700, color: C.accent, margin: `0 0 ${S[1]}px`, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-            How this works
-          </p>
-          <p style={{ fontSize: 13, color: C.textMuted, margin: 0, lineHeight: 1.6 }}>
-            Review intervals scale with your mastery. Weak topics come back in 1 day, developing in 2 to 4 days, strong in 7 days. Each review updates your score and pushes the next review further out.
-          </p>
-        </div>
-      </div>
+      )}
     </div>
   )
 }

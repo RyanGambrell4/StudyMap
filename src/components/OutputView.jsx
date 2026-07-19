@@ -426,6 +426,7 @@ export default function OutputView({
   const [showFirstQueryNudge, setShowFirstQueryNudge] = useState(false)
   const [showCheatSheet, setShowCheatSheet] = useState(false)
   const [showBrainDump, setShowBrainDump] = useState(false)
+  const [brainDumpInit, setBrainDumpInit] = useState(null) // { topic, courseIdx }
   const [confidencePrompt, setConfidencePrompt] = useState(null)
   const [showExamRescue, setShowExamRescue] = useState(false)
   const [showQuizBurst, setShowQuizBurst] = useState(false)
@@ -1631,7 +1632,14 @@ export default function OutputView({
             pendingAdaptation={pendingAdaptation}
             onShowAdaptModal={() => setShowAdaptModal(true)}
             onOpenCheatSheet={() => { track('feature_opened', { feature: 'cheat_sheet' }); setShowCheatSheet(true) }}
-            onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump' }); setShowBrainDump(true) }}
+            onOpenBrainDump={(topic) => {
+              track('feature_opened', { feature: 'brain_dump' })
+              if (topic) {
+                const idx = courses.findIndex(c => String(c.id) === String(topic)) // topic is sometimes courseId
+                setBrainDumpInit({ topic: typeof topic === 'string' ? topic : '', courseIdx: idx >= 0 ? idx : 0 })
+              }
+              setShowBrainDump(true)
+            }}
             onOpenExamRescue={() => { track('feature_opened', { feature: 'exam_rescue' }); setShowExamRescue(true) }}
             onOpenQuizBurst={() => { track('feature_opened', { feature: 'quiz_burst' }); setShowQuizBurst(true) }}
             onOpenTeachItBack={() => { track('feature_opened', { feature: 'teach_it_back', source: 'dashboard_all_done' }); setShowTeachItBack(true) }}
@@ -2090,8 +2098,16 @@ export default function OutputView({
         {activeSection === 'review' && (
           <ReviewQueueView
             courses={courses}
-            onOpenBrainDump={() => setShowBrainDump(true)}
-            onOpenQuizBurst={() => setShowQuizBurst(true)}
+            onOpenBrainDump={(topic, courseId) => {
+              const idx = courseId != null ? courses.findIndex(c => String(c.id) === String(courseId)) : 0
+              setBrainDumpInit({ topic: topic ?? '', courseIdx: idx >= 0 ? idx : 0 })
+              setShowBrainDump(true)
+            }}
+            onOpenQuizBurst={(topic, courseId) => {
+              const idx = courseId != null ? courses.findIndex(c => String(c.id) === String(courseId)) : 0
+              setQuizBurstInit({ courseIdx: idx >= 0 ? idx : 0, topic: topic ?? '' })
+              setShowQuizBurst(true)
+            }}
             onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
           />
         )}
@@ -2165,10 +2181,12 @@ export default function OutputView({
         <BrainDumpModal
           courses={courses}
           userId={userId}
-          onClose={() => setShowBrainDump(false)}
+          initialTopic={brainDumpInit?.topic ?? ''}
+          initialCourseIdx={brainDumpInit?.courseIdx ?? 0}
+          onClose={() => { setShowBrainDump(false); setBrainDumpInit(null) }}
           onShowPaywall={onShowPaywall}
-          onDrillGaps={(topic) => { setShowBrainDump(false); setPendingDrillTopic(topic); setActiveSection('tools') }}
-          onOpenTeachItBack={({ courseIdx, topic }) => { setShowBrainDump(false); setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
+          onDrillGaps={(topic) => { setShowBrainDump(false); setBrainDumpInit(null); setPendingDrillTopic(topic); setActiveSection('tools') }}
+          onOpenTeachItBack={({ courseIdx, topic }) => { setShowBrainDump(false); setBrainDumpInit(null); setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
         />
       )}
       {confidencePrompt && (
