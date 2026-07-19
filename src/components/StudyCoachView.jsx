@@ -1542,7 +1542,7 @@ function StruggleTracker({ struggles, courseId, courseName, dot, onSave, courseI
 
           {active.length === 0 && (
             <div style={{ padding: '20px 0', textAlign: 'center', color: D.dim, fontSize: 13 }}>
-              No active struggles logged. Great work. Add anything that felt hard or confusing.
+              Nothing logged yet. Add topics that felt hard or unclear -- the AI coach uses these to tailor your sessions.
             </div>
           )}
 

@@ -3,6 +3,7 @@ import { canAddCourse, getActivePlan, getPlanLimits, hasUsedTrial } from '../lib
 import { clean } from '../utils/strings'
 import EmptyState from './ui/empty-state'
 import { saveExamContext } from '../lib/db'
+import { track } from '../lib/analytics'
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const D = {
@@ -743,7 +744,7 @@ function CourseRow({ course, idx, expanded, onToggle, sessions, completedIds, sy
           <span style={{ fontSize: 13, color: '#fca5a5' }}>Delete <strong>{clean(course.name)}</strong>? This can't be undone.</span>
           <div style={{ display: 'flex', gap: 8 }}>
             <button onClick={() => setConfirmDelete(false)} style={{ padding: '6px 14px', fontSize: 12, fontWeight: 500, color: D.muted, border: `1px solid ${D.border}`, borderRadius: 8, cursor: 'pointer', background: 'none' }}>Cancel</button>
-            <button onClick={() => { onDelete(); setConfirmDelete(false) }} style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, color: '#fff', background: '#dc2626', borderRadius: 8, cursor: 'pointer', border: 'none' }}>Delete</button>
+            <button onClick={() => { track('course_deleted', { courseName: course.name }); onDelete(); setConfirmDelete(false) }} style={{ padding: '6px 14px', fontSize: 12, fontWeight: 600, color: '#fff', background: '#dc2626', borderRadius: 8, cursor: 'pointer', border: 'none' }}>Delete</button>
           </div>
         </div>
       )}
@@ -1065,6 +1066,7 @@ export default function CoursesView({
   }
 
   const handleAddCourse = (course) => {
+    track('course_added', { courseCount: courses.length + 1, plan: getActivePlan() })
     onAddCourse?.(course)
     flashToast(`${course.name} added`)
   }

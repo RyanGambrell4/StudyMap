@@ -4,6 +4,7 @@ import { canUseFeature, incrementFeatureUsage, getActivePlan } from '../lib/subs
 import { getCachedCoachPlan, getCachedPracticeExams } from '../lib/db'
 import { extractText } from '../utils/extractText'
 import Spinner from './ui/spinner'
+import { track } from '../lib/analytics'
 
 const D = {
   bg: '#F7F6F3',
@@ -157,6 +158,8 @@ export default function PracticeExamSetup({ courses, onBack, onStart, onShowPayw
       if (!data.questions?.length) throw new Error('No questions returned. Try different source material.')
 
       if (plan === 'free') incrementFeatureUsage('practiceExam')
+
+      track('practice_exam_started', { questionCount: data.questions.length, courseName: selectedCourse.name, timed: timerOn, plan })
 
       onStart({
         questions: data.questions,
