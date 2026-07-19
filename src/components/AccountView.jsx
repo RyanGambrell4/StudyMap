@@ -95,11 +95,14 @@ export default function AccountView({
 
   const [canceling, setCanceling] = useState(false)
   const [canceled, setCanceled] = useState(false)
+  const [cancelError, setCancelError] = useState('')
   const [trialStarting, setTrialStarting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [deleteError, setDeleteError] = useState(null)
   const [portalLoading, setPortalLoading] = useState(false)
+  const [portalError, setPortalError] = useState('')
+  const [smsError, setSmsError] = useState('')
 
   const handleStartTrial = async () => {
     if (trialStarting) return
@@ -189,7 +192,7 @@ export default function AccountView({
       track('billing_portal_opened', { plan: getActivePlan() })
       window.location.href = data.url
     } catch (err) {
-      alert(err.message)
+      setPortalError(err.message ?? 'Could not open billing portal. Try again.')
       setPortalLoading(false)
     }
   }
@@ -223,7 +226,7 @@ export default function AccountView({
       track('trial_cancelled')
       setCanceled(true)
     } catch {
-      alert('Something went wrong. Please try again or contact support@getstudyedge.com.')
+      setCancelError('Something went wrong. Please try again or contact support@getstudyedge.com.')
     } finally {
       setCanceling(false)
     }
@@ -241,9 +244,9 @@ export default function AccountView({
         },
         body: JSON.stringify({ phone: smsPhone, enabled: true }),
       })
-      if (res.ok) { track('sms_opted_in'); setSmsEnabled(true); setSmsEdit(false) }
-      else { const d = await res.json(); alert(d.error ?? 'Failed to save') }
-    } catch { alert('Something went wrong') }
+      if (res.ok) { track('sms_opted_in'); setSmsEnabled(true); setSmsEdit(false); setSmsError('') }
+      else { const d = await res.json(); setSmsError(d.error ?? 'Failed to save. Please try again.') }
+    } catch { setSmsError('Something went wrong. Please try again.') }
     finally { setSmsSaving(false) }
   }
 
@@ -374,6 +377,7 @@ export default function AccountView({
                   {canceling ? 'Canceling…' : 'Cancel trial'}
                 </button>
               </div>
+              {cancelError && <p style={{ margin: '8px 0 0', fontSize: 12, color: '#DC2626' }}>{cancelError}</p>}
             ) : (
               <p style={{ marginBottom: 14, fontSize: 12, color: '#059669', fontWeight: 600 }}>
                 Trial canceled. Your free access has ended.
@@ -482,6 +486,7 @@ export default function AccountView({
             {portalLoading ? 'Opening…' : 'Manage subscription'}
           </button>
         )}
+        {portalError && <p style={{ margin: '8px 0 0', fontSize: 12, color: '#DC2626' }}>{portalError}</p>}
       </div>
 
       {/* Referral card */}
@@ -554,6 +559,7 @@ export default function AccountView({
                   {smsSaving ? 'Saving…' : 'Save'}
                 </button>
               </div>
+              {smsError && <p style={{ margin: '6px 0 0', fontSize: 12, color: '#DC2626' }}>{smsError}</p>}
             )}
           </div>
           <button
