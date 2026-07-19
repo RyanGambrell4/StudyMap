@@ -152,6 +152,66 @@
 }
 </script>
 <link rel="alternate" type="application/rss+xml" title="StudyEdge AI Blog" href="/blog/feed.xml">
+<style>
+@media print {
+  /* Hide non-content elements */
+  nav, header .nav-cta, #btt, #rp, .share-bar, .inline-cta,
+  .blog-cta-section, .author-bio-section footer,
+  .blog-footer, .site-footer, .nav-container,
+  .reading-progress, button, .b-card .pill,
+  .related-posts, .sidebar, aside { display: none !important; }
+
+  /* Reset page */
+  * { box-shadow: none !important; text-shadow: none !important; }
+  body { background: #fff !important; color: #111 !important;
+         font-family: Georgia, serif; font-size: 11pt; line-height: 1.6; margin: 0; }
+  a { color: #111 !important; text-decoration: underline; }
+  a[href]::after { content: " (" attr(href) ")"; font-size: 9pt; color: #555; }
+  a[href^="#"]::after, a[href^="javascript"]::after { content: ""; }
+
+  /* Article layout */
+  .article-body, .article-container, main { max-width: 100% !important; width: 100% !important; padding: 0 !important; }
+  h1 { font-size: 20pt; margin-bottom: 8pt; page-break-after: avoid; }
+  h2 { font-size: 14pt; margin-top: 18pt; margin-bottom: 6pt; page-break-after: avoid; color: #111 !important; border-bottom: 1pt solid #ccc; padding-bottom: 4pt; }
+  h3 { font-size: 12pt; margin-top: 12pt; page-break-after: avoid; color: #111 !important; }
+  p { orphans: 3; widows: 3; margin: 0 0 8pt; }
+  img { max-width: 100% !important; page-break-inside: avoid; }
+  table { border-collapse: collapse; width: 100%; page-break-inside: avoid; font-size: 9pt; }
+  th, td { border: 1pt solid #ccc; padding: 4pt 6pt; text-align: left; }
+  th { background: #f0f0f0 !important; font-weight: bold; }
+  ul, ol { margin: 0 0 8pt; padding-left: 20pt; }
+  li { margin-bottom: 3pt; }
+
+  /* Key takeaways box */
+  .key-takeaways { border: 1.5pt solid #3B61C4 !important; background: #f5f7ff !important;
+                   padding: 10pt !important; margin-bottom: 14pt; page-break-inside: avoid; }
+  .key-takeaways h2, .key-takeaways h3 { color: #3B61C4 !important; font-size: 12pt; margin-top: 0; border: none; }
+
+  /* Stat highlights */
+  .stat-highlight { border-left: 3pt solid #3B61C4; padding-left: 10pt; margin: 10pt 0; page-break-inside: avoid; }
+
+  /* Pull quotes */
+  .pull-quote { border: 1pt solid #ccc; padding: 8pt; margin: 10pt 0; font-style: italic; page-break-inside: avoid; }
+
+  /* Step blocks */
+  .step-block { border: 1pt solid #ddd; padding: 8pt; margin: 8pt 0; page-break-inside: avoid; }
+
+  /* FAQ */
+  .faq-section { page-break-before: always; }
+  .faq-item { page-break-inside: avoid; margin-bottom: 10pt; }
+
+  /* Print attribution footer */
+  .article-body::after {
+    content: "From getstudyedge.com -- AI-powered study tools that work.";
+    display: block; margin-top: 20pt; padding-top: 8pt;
+    border-top: 1pt solid #ccc; font-size: 9pt; color: #555;
+  }
+
+  /* Page breaks */
+  .faq-section, .sources-section { page-break-before: auto; }
+  section { page-break-inside: avoid; }
+}
+</style>
 </head>
 <body>
 
@@ -328,6 +388,48 @@
     </div>
   </div>
 </section>
+
+<div class="inline-email-capture" style="background:#f0f4ff;border:1.5px solid rgba(59,97,196,.2);border-radius:12px;padding:24px 28px;margin:36px 0;text-align:center;">
+  <p style="font-size:12px;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;color:#3B61C4;margin:0 0 8px;">Free from StudyEdge</p>
+  <p style="font-size:18px;font-weight:700;color:#111;margin:0 0 6px;">Get weekly study research in plain English</p>
+  <p style="font-size:14px;color:#555;margin:0 0 18px;">Evidence-based study tips, exam tactics, and cognitive science findings delivered once a week. No filler.</p>
+  <form class="inline-email-form" onsubmit="return inlineSubscribe(this, event)" style="display:flex;gap:8px;max-width:400px;margin:0 auto;">
+    <input type="email" placeholder="your@email.com" required
+      style="flex:1;padding:10px 13px;border:1.5px solid rgba(59,97,196,.3);border-radius:7px;font-size:14px;outline:none;background:#fff;color:#111;" />
+    <button type="submit"
+      style="padding:10px 18px;background:#3B61C4;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;">
+      Subscribe
+    </button>
+  </form>
+  <p class="inline-email-msg" style="display:none;margin-top:10px;font-size:13px;font-weight:600;color:#3B61C4;"></p>
+</div>
+<script>
+function inlineSubscribe(form, e) {
+  e.preventDefault();
+  var email = form.querySelector('input[type="email"]').value.trim();
+  var btn = form.querySelector('button');
+  var msg = form.parentElement.querySelector('.inline-email-msg');
+  btn.disabled = true; btn.textContent = 'Subscribing...';
+  fetch('/api/landing-subscribe', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ email: email })
+  }).then(function(r) {
+    msg.style.display = 'block';
+    if (r.ok) {
+      msg.textContent = 'You are in. Check your inbox.';
+      form.style.display = 'none';
+    } else {
+      msg.style.color = '#c00'; msg.textContent = 'Something went wrong. Try again.';
+      btn.disabled = false; btn.textContent = 'Subscribe';
+    }
+  }).catch(function() {
+    msg.style.display = 'block'; msg.style.color = '#c00';
+    msg.textContent = 'Something went wrong. Try again.';
+    btn.disabled = false; btn.textContent = 'Subscribe';
+  });
+  return false;
+}
+</script>
 
 <section class="author-bio-section">
   <div class="container" style="max-width:760px;">

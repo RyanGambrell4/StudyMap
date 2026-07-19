@@ -1476,6 +1476,51 @@
   </div>
 </section>
 
+<section style="background:#f0f4ff;border-top:1px solid rgba(59,97,196,.12);border-bottom:1px solid rgba(59,97,196,.12);padding:52px 20px;">
+  <div style="max-width:520px;margin:0 auto;text-align:center;">
+    <p style="font-size:12px;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;color:#3B61C4;margin:0 0 10px;">Free Study Research</p>
+    <h2 style="font-size:26px;font-weight:800;color:#111;margin:0 0 10px;line-height:1.2;">Get the research without the reading</h2>
+    <p style="font-size:15px;color:#555;margin:0 0 24px;line-height:1.5;">One email a week. Cognitive science findings, study method breakdowns, and exam-prep tactics -- all in plain English. No filler, no motivation quotes.</p>
+    <form id="blog-sub-form" onsubmit="return blogSubscribe(event)" style="display:flex;gap:8px;max-width:420px;margin:0 auto;">
+      <input id="blog-sub-email" type="email" placeholder="your@email.com" required
+        style="flex:1;padding:12px 14px;border:1.5px solid rgba(59,97,196,.3);border-radius:8px;font-size:15px;outline:none;background:#fff;color:#111;" />
+      <button type="submit" id="blog-sub-btn"
+        style="padding:12px 22px;background:#3B61C4;color:#fff;border:none;border-radius:8px;font-size:15px;font-weight:600;cursor:pointer;white-space:nowrap;">
+        Subscribe
+      </button>
+    </form>
+    <p id="blog-sub-msg" style="display:none;margin-top:14px;color:#3B61C4;font-size:14px;font-weight:600;"></p>
+    <p style="font-size:12px;color:#999;margin:12px 0 0;">No spam. Unsubscribe anytime.</p>
+  </div>
+</section>
+<script>
+function blogSubscribe(e) {
+  e.preventDefault();
+  var email = document.getElementById('blog-sub-email').value.trim();
+  var btn = document.getElementById('blog-sub-btn');
+  var msg = document.getElementById('blog-sub-msg');
+  btn.disabled = true; btn.textContent = 'Subscribing...';
+  fetch('/api/landing-subscribe', {
+    method: 'POST', headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({ email: email })
+  }).then(function(r) {
+    msg.style.display = 'block';
+    if (r.ok) {
+      msg.textContent = 'You are in. Check your inbox for a confirmation.';
+      document.getElementById('blog-sub-form').style.display = 'none';
+    } else {
+      msg.style.color = '#c00'; msg.textContent = 'Something went wrong. Try again.';
+      btn.disabled = false; btn.textContent = 'Subscribe';
+    }
+  }).catch(function() {
+    msg.style.display = 'block'; msg.style.color = '#c00';
+    msg.textContent = 'Something went wrong. Try again.';
+    btn.disabled = false; btn.textContent = 'Subscribe';
+  });
+  return false;
+}
+</script>
+
 <footer class="site-footer">
   <div class="footer-links">
     <strong style="display:block;width:100%;color:var(--muted);font-size:11px;letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px;font-weight:700;">Topic Hubs</strong>
