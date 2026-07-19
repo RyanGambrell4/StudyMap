@@ -5,6 +5,7 @@ import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeat
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
 import { updateMastery, getWeakestTopics, getMastery } from '../lib/masteryStore'
+import { getCachedStudyTools } from '../lib/db'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -218,11 +219,20 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
                 <div style={{ fontSize: 11, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>What do you want to explain?</div>
                 {(() => {
                   const courseId = courses[courseIdx]?.id ?? null
-                  const suggestions = getWeakestTopics(courseId, 4).filter(w => w.score < 75)
+                  const masteryWeak = getWeakestTopics(courseId, 4).filter(w => w.score < 75)
+                  // When there's no mastery data yet, suggest terms from flashcards
+                  const flashcardSuggestions = masteryWeak.length === 0 && !topic.trim()
+                    ? (getCachedStudyTools()?.flashcards ?? [])
+                        .map(c => c.front).filter(Boolean)
+                        .slice(0, 4)
+                        .map(t => ({ topic: t }))
+                    : []
+                  const suggestions = masteryWeak.length > 0 ? masteryWeak : flashcardSuggestions
+                  const label = masteryWeak.length > 0 ? 'Weak spots:' : 'From your notes:'
                   if (!suggestions.length || topic.trim()) return null
                   return (
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
-                      <span style={{ fontSize: 11, color: D.textDim, alignSelf: 'center', marginRight: 2 }}>Weak spots:</span>
+                      <span style={{ fontSize: 11, color: D.textDim, alignSelf: 'center', marginRight: 2 }}>{label}</span>
                       {suggestions.map(w => (
                         <button
                           key={w.topic}
