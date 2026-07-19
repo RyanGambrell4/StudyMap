@@ -1312,7 +1312,7 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
         {quickNeed && (
           <p style={{ margin: '6px 0 0', fontSize: 13, color: quickNeed.impossible ? D.red : quickNeed.bufferPts > 5 ? D.green : D.muted, fontWeight: quickNeed.impossible || quickNeed.bufferPts > 5 ? 600 : 400 }}>
             {quickNeed.impossible
-              ? `Target grade may be out of reach on ${clean(course?.name ?? 'this course')} -- check the Sandbox.`
+              ? `Target grade may be out of reach on ${clean(course?.name ?? 'this course')}. Check the Sandbox.`
               : quickNeed.bufferPts > 5
                 ? `You have a ${quickNeed.bufferPts.toFixed(0)}-point buffer on remaining work in ${clean(course?.name ?? 'this course')}.`
                 : `You need ${quickNeed.needed.toFixed(0)}% on remaining work to hit your target in ${clean(course?.name ?? 'this course')}.`
