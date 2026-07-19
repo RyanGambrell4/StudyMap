@@ -86,13 +86,13 @@ export default function MomentumCard({ completedSessionLog = [], allSessions = [
     : <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="11" width="14" height="2" rx="1"/></svg>
 
   const insight = (() => {
-    if (current.score >= 80) return 'You are locked in. Protect the streak.'
-    if (delta >= 8)          return `Up ${delta} this week. Momentum is building.`
-    if (delta <= -8)         return `Down ${Math.abs(delta)} this week. One session today resets it.`
-    if (current.consistency < 40) return 'Consistency is the fastest lever. Aim for a session today.'
-    if (current.velocity < 40)    return 'Scores are dipping. A short recall drill lifts velocity fast.'
-    if (current.completion < 50)  return 'Sessions are getting skipped. Try a smaller block first.'
-    return 'Steady week. Small wins compound.'
+    if (current.score >= 80) return 'Strong week. Keep the pace going.'
+    if (delta >= 8)          return `Up ${delta} this week. Keep it going.`
+    if (delta <= -8)         return `Down ${Math.abs(delta)} this week. One session today turns it around.`
+    if (current.consistency < 40) return 'Session frequency is low. Get one in today.'
+    if (current.velocity < 40)    return 'Scores are dipping. A short recall drill sharpens things fast.'
+    if (current.completion < 50)  return 'Sessions are getting skipped. Try a shorter block today.'
+    return 'Steady week. Consistent reps add up.'
   })()
 
   return (
