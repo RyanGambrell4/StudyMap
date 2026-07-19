@@ -26,6 +26,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
   const [recording, setRecording] = useState(false)
   const [recorderRef] = useState(() => ({ current: null }))
   const [tutorMemoryNudgeDismissed, setTutorMemoryNudgeDismissed] = useState(false)
+  const [isResumedSession, setIsResumedSession] = useState(false)
 
   const hasTutorMemory = canUseUnlimitedFeature('tutorMemory')
 
@@ -50,9 +51,12 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
     // Restore messages from this session so history survives tab switches
     try {
       const saved = sessionStorage.getItem(`se_chat_${courseId}`)
-      setMessages(saved ? JSON.parse(saved) : [])
+      const parsed = saved ? JSON.parse(saved) : []
+      setMessages(parsed)
+      setIsResumedSession(parsed.length > 0)
     } catch {
       setMessages([])
+      setIsResumedSession(false)
     }
     if (initialMessage) setInput(initialMessage)
     const cached = getCachedCoachPlan(courseId)
@@ -273,6 +277,26 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
 
       {/* Messages */}
       <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+        {isResumedSession && messages.length > 0 && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', background: hasTutorMemory ? 'rgba(5,150,105,0.05)' : 'rgba(0,0,0,0.03)', border: `1px solid ${hasTutorMemory ? 'rgba(5,150,105,0.15)' : 'rgba(0,0,0,0.07)'}`, borderRadius: 10, marginBottom: 4 }}>
+            <svg width="12" height="12" fill="none" stroke={hasTutorMemory ? '#059669' : '#9B9B9B'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            <span style={{ fontSize: 12, color: hasTutorMemory ? '#059669' : '#9B9B9B', fontWeight: 500, flex: 1 }}>
+              {hasTutorMemory
+                ? `Tutor remembers this full session (${messages.length} messages)`
+                : messages.length > 10
+                  ? `Continuing session · tutor sees the last 10 of ${messages.length} messages`
+                  : `Continuing from your last session`}
+            </span>
+            {!hasTutorMemory && messages.length > 10 && (
+              <button
+                onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'tutorMemory' } }))}
+                style={{ fontSize: 11, fontWeight: 700, color: '#3B61C4', background: 'none', border: 'none', cursor: 'pointer', padding: 0, whiteSpace: 'nowrap' }}
+              >
+                Upgrade for full memory
+              </button>
+            )}
+          </div>
+        )}
         {messages.length === 0 && (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', flex: 1, minHeight: 200, textAlign: 'center', padding: '24px 0' }}>
             <div style={{ width: 48, height: 48, borderRadius: 14, background: 'rgba(59,97,196,0.1)', border: '1px solid rgba(59,97,196,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 12 }}>
