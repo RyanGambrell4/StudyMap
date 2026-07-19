@@ -301,6 +301,14 @@ export default function CalendarMonthView({
               icon={(<svg width="18" height="18" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.75} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>)}
               headline="Nothing scheduled"
               sub="No sessions or events on this day."
+              action={onAddSession && (
+                <button
+                  onClick={() => onAddSession(expandedDayStr)}
+                  style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid rgba(59,97,196,0.25)', background: 'rgba(59,97,196,0.06)', color: '#3B61C4', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}
+                >
+                  + Add session
+                </button>
+              )}
             />
           ) : (
             <div className="space-y-1.5">
