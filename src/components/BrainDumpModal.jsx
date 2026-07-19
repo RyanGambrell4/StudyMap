@@ -159,6 +159,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
         addWeakTopics(data.possibleGaps ?? [])
         addStudySession({ tool: 'Brain Dump', score: data.score, topic: topic.trim() || null, courseName: course?.name || null })
         if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, data.score, 'brainDump')
+        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'brainDump' } }))
         setResult(data)
         setStep('result')
         setLoading(false)

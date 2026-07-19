@@ -103,6 +103,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
       if (prevEntry?.count >= 1) setPrevMasteryScore(prevEntry.score)
       setSessionCount((prevEntry?.count ?? 0) + 1)
       if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, data.score, 'teachItBack')
+      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'teachItBack' } }))
       setResult(data)
       setStep('result')
     } catch (e) {

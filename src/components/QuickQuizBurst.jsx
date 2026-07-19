@@ -124,6 +124,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
         const quizPct = Math.round((finalScore / questions.length) * 100)
         addStudySession({ tool: 'Quiz Burst', score: quizPct, topic: topic.trim() || null, courseName: course?.name || null })
         if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, quizPct, 'quiz')
+        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'quizBurst' } }))
         setStep('done')
       } else {
         setQIdx(i => i + 1)

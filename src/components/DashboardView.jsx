@@ -435,6 +435,14 @@ export default function DashboardView({
     if (hasCompletedToday) recordCompletion(todayStr)
   }, [completedIds])
 
+  // Tool sessions (Brain Dump, Teach It Back, Quiz Burst, etc.) also count toward the streak.
+  // Modals dispatch this event on success; we record completion so the streak stays alive.
+  useEffect(() => {
+    const handler = () => recordCompletion(todayStr)
+    window.addEventListener('studyedge:tool-session-complete', handler)
+    return () => window.removeEventListener('studyedge:tool-session-complete', handler)
+  }, [todayStr, recordCompletion])
+
   const handleToggle = (id) => {
     if (!completedIds.has(id)) celebrate('light')
     onToggle(id)

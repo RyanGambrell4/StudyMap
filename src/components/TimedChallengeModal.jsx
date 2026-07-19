@@ -148,6 +148,7 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
     const score = total > 0 ? Math.round((correct / total) * 100) : 0
     const isNewPB = savePB(courseKey, { score, correct, total, date: new Date().toISOString() })
     addStudySession({ tool: 'Time Attack', score, topic: topic.trim() || null, courseName: course?.name || null })
+    window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'timeAttack' } }))
     doneStatsRef.current = { correct, total, score, isNewPB }
   }, [step])
   const doneStats = step === 'done' ? doneStatsRef.current : null
