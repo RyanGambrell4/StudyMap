@@ -675,8 +675,8 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
                 <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>AI Study Coach</p>
                 <p style={{ color: 'rgba(255,255,255,.78)', fontSize: '0.82rem', lineHeight: 1.55 }}>
                   {daysToExam && trimmedCourse
-                    ? `"Your ${trimmedCourse} ${examWord} is in ${daysToExam} days. I've built ${timeLabel.toLowerCase()} sessions around what matters most. Start your Blueprint today and you'll walk in ready."`
-                    : `"I've scheduled your ${timeLabel.toLowerCase()} sessions across all ${subjects.length} courses. Start with ${subjects[0]} first. It has the most material to cover."`}
+                    ? `"Your ${trimmedCourse} ${examWord} is in ${daysToExam} days. ${timeLabel} sessions are built around what matters most. Start your Blueprint today and you'll walk in ready."`
+                    : `"${timeLabel} sessions are scheduled across all ${subjects.length} courses. Start with ${subjects[0]} first -- it has the most material to cover."`}
                 </p>
               </div>
             </div>

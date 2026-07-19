@@ -379,9 +379,9 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
         </div>
 
         {/* Dates */}
-        <FieldBlock icon="calendar" color={D.violet} label="Upcoming deadlines" hint="Exam, quiz, or project dates. Add them and I'll anchor the plan around them.">
+        <FieldBlock icon="calendar" color={D.violet} label="Upcoming deadlines" hint="Exam, quiz, or project dates. The plan is anchored around these.">
           {dates.length === 0 && (
-            <div style={{ fontSize: 12.5, color: D.dim, fontStyle: 'italic', marginBottom: 8 }}>None yet. The plan will simply cover the weeks you tell me to.</div>
+            <div style={{ fontSize: 12.5, color: D.dim, fontStyle: 'italic', marginBottom: 8 }}>None yet. The plan covers the weeks you specify.</div>
           )}
           {dates.map((d, i) => (
             <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 160px 32px', gap: 8, marginBottom: 8 }}>
@@ -443,7 +443,7 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
         </div>
 
         {/* Learning style */}
-        <FieldBlock icon="lightbulb" color={D.mint} label="How you learn best" hint="Pick any that apply. I'll lean into them.">
+        <FieldBlock icon="lightbulb" color={D.mint} label="How you learn best" hint="Pick any that apply. The plan leans into these.">
           <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
             {['Active recall','Spaced repetition','Practice problems','Teaching others','Visual diagrams','Reading + notes','Flashcards','Watching lectures'].map(t => {
               const list = form.style || []
@@ -464,10 +464,10 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
           onClick={onNext}
           style={{ width: '100%', padding: '14px 20px', borderRadius: 11, background: canProceed ? '#3B61C4' : 'rgba(0,0,0,0.04)', color: canProceed ? '#fff' : D.dim, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: canProceed ? 'pointer' : 'not-allowed', border: 'none' }}
         >
-          Review what I've got <Icon name="arrow" size={14} />
+          Review my input <Icon name="arrow" size={14} />
         </button>
         {!canProceed && (
-          <div style={{ fontSize: 11.5, color: D.dim, textAlign: 'center' }}>Pick a course and share at least one goal or topic so I have something to work with.</div>
+          <div style={{ fontSize: 11.5, color: D.dim, textAlign: 'center' }}>Pick a course and share at least one goal or topic to continue.</div>
         )}
       </div>
 
@@ -885,7 +885,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
             <span style={{ fontSize: 15, fontWeight: 700, color: D.text }}>No plan yet</span>
             <span style={{ fontSize: 11.5, fontWeight: 600, color: D.muted, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, borderRadius: 999, padding: '2px 9px' }}>{withoutPlans.length}</span>
-            <span style={{ fontSize: 12.5, color: D.dim }}>Start a plan and I'll only use what you tell me</span>
+            <span style={{ fontSize: 12.5, color: D.dim }}>Only uses what you share</span>
           </div>
           <div className="sc-plans-cards">
             {withoutPlans.map(({ course, idx }) => {
@@ -906,7 +906,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
                     </div>
                   </div>
                   <p style={{ fontSize: 12.5, color: D.dim, lineHeight: 1.55, margin: 0, fontStyle: 'italic' }}>
-                    Share your topics, goals, and deadlines. I'll build a week-by-week plan from exactly what you give me.
+                    Share your topics, goals, and deadlines. A week-by-week plan is built from exactly what you give it.
                   </p>
                   <button onClick={() => onBuildPlan(idx)} style={{ background: 'none', border: 'none', padding: 0, color: D.indigo, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', marginTop: 'auto' }}>
                     Build Plan →
@@ -1359,8 +1359,8 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
             <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(232,83,26,0.1)', border: '1px solid rgba(232,83,26,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
               <Icon name="sparkles" size={24} color="#3B61C4" />
             </div>
-            <h2 style={{ color: '#111111', fontSize: 20, fontWeight: 700, letterSpacing: -0.4, margin: '0 0 10px' }}>Your AI study plan is one step away.</h2>
-            <p style={{ color: '#6B6B6B', fontSize: 14, lineHeight: 1.65, margin: '0 0 28px' }}>Add at least one course, then come back here. The AI Coach builds a personalized week-by-week plan around your exam dates and schedule.</p>
+            <h2 style={{ color: '#111111', fontSize: 20, fontWeight: 700, letterSpacing: -0.4, margin: '0 0 10px' }}>Your study plan is one step away.</h2>
+            <p style={{ color: '#6B6B6B', fontSize: 14, lineHeight: 1.65, margin: '0 0 28px' }}>Add at least one course, then come back here. The coach builds a week-by-week plan around your exam dates and schedule.</p>
             <button
               onClick={onNavigateToCourses}
               style={{ width: '100%', background: D.accent, color: '#fff', fontSize: 14, fontWeight: 700, padding: '13px 24px', borderRadius: 10, border: 'none', cursor: 'pointer', boxShadow: '0 8px 24px rgba(59,97,196,0.3)', letterSpacing: -0.2 }}

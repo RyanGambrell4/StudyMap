@@ -435,10 +435,10 @@ ${summary?.trim() ? `
 }
 
 const ENCOURAGE = [
-  'Great session! Every minute you put in compounds into exam-day confidence.',
-  'Solid work. Consistent sessions like this are what separate top performers.',
-  "You showed up and did the work. That's what matters most.",
-  'Another session in the books. Your future self thanks you.',
+  'You put in the time. That adds up.',
+  'Consistent reps are how it sticks. Good session.',
+  "You showed up and did the work. That's what matters.",
+  'Session done. Every one of these counts.',
 ]
 
 const ACTIVITY_COLORS = {
@@ -2630,8 +2630,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                       </p>
                       <p className="font-semibold" style={{ color: dot }}>
                         {quizAnswers.filter(a => a.correct).length === quizQuestions.length ? 'Perfect score!'
-                          : quizAnswers.filter(a => a.correct).length >= quizQuestions.length * 0.8 ? 'Great work!'
-                          : 'Keep reviewing!'}
+                          : quizAnswers.filter(a => a.correct).length >= quizQuestions.length * 0.8 ? 'Solid score'
+                          : 'Keep reviewing'}
                       </p>
                     </div>
                     <div className="space-y-2.5 mb-5">

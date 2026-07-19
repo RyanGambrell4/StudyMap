@@ -281,7 +281,7 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
             <div style={{ padding: 24 }}>
               <div style={{ marginBottom: 20 }}>
                 <p style={{ color: '#1A1A1A', fontWeight: 600, fontSize: 15, margin: '0 0 4px' }}>
-                  We found <span style={{ color: '#3B61C4' }}>{items.length}</span> event{items.length !== 1 ? 's' : ''} in your syllabus.
+                  Found <span style={{ color: '#3B61C4' }}>{items.length}</span> event{items.length !== 1 ? 's' : ''} in your syllabus.
                 </p>
                 <p style={{ color: '#6B6B6B', fontSize: 13, margin: '0 0 6px' }}>Review and edit before adding to your calendar.</p>
                 <button onClick={() => { setStep('input'); setItems([]); setError('') }} style={{ background: 'none', border: 'none', color: '#9B9B9B', fontSize: 12, cursor: 'pointer', textDecoration: 'underline', padding: 0 }}>Start over</button>

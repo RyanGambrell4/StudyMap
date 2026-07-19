@@ -86,7 +86,7 @@ export default function AdaptModal({ adaptation, onAccept, onEdit, onDismiss }) 
             animation: phase >= 1 ? 'adapt-fade 0.3s ease 0.1s both' : 'none',
           }}>
             <h3 style={{ margin: '0 0 6px', fontSize: 17, fontWeight: 700, color: '#111111', letterSpacing: -0.3 }}>
-              We updated your plan
+              Plan updated
             </h3>
             <p style={{ margin: '0 0 20px', fontSize: 14, color: '#6B6B6B', lineHeight: 1.55 }}>
               {reason}
