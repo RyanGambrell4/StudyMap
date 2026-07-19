@@ -11,7 +11,10 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
   const plan = getActivePlan()
   const isFree = plan === 'free'
 
-  const chatKey = courseId != null ? `se_chat_${courseId}` : null
+  // Namespace by userId so switching accounts on the same device doesn't leak
+  // the previous user's chat. Falls back to `anon` for pre-login screens.
+  const chatKey = courseId != null ? `se_chat_v2_${userId ?? 'anon'}_${courseId}` : null
+  const legacyChatKey = courseId != null ? `se_chat_${courseId}` : null
 
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
@@ -48,12 +51,21 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
       setMessages([])
       return
     }
-    // Restore messages from this session so history survives tab switches
+    // Restore chat history — prefer persistent localStorage, migrate any
+    // leftover sessionStorage entries from the pre-persistence build.
     try {
-      const saved = sessionStorage.getItem(`se_chat_${courseId}`)
-      const parsed = saved ? JSON.parse(saved) : []
-      setMessages(parsed)
-      setIsResumedSession(parsed.length > 0)
+      let raw = localStorage.getItem(chatKey)
+      if (!raw && legacyChatKey) {
+        const legacy = sessionStorage.getItem(legacyChatKey)
+        if (legacy) {
+          raw = legacy
+          try { localStorage.setItem(chatKey, legacy) } catch {}
+          try { sessionStorage.removeItem(legacyChatKey) } catch {}
+        }
+      }
+      const parsed = raw ? JSON.parse(raw) : []
+      setMessages(Array.isArray(parsed) ? parsed : [])
+      setIsResumedSession(Array.isArray(parsed) && parsed.length > 0)
     } catch {
       setMessages([])
       setIsResumedSession(false)
@@ -73,11 +85,12 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
     }
   }, [courseId])
 
-  // Persist messages to sessionStorage after each completed exchange
+  // Persist messages to localStorage after each completed exchange so
+  // history survives refresh. Cap at ~50 messages to bound storage.
   useEffect(() => {
     if (!loading && messages.length > 0 && chatKey) {
       try {
-        sessionStorage.setItem(chatKey, JSON.stringify(messages.slice(-50)))
+        localStorage.setItem(chatKey, JSON.stringify(messages.slice(-50)))
       } catch {}
     }
   }, [messages, loading, chatKey])

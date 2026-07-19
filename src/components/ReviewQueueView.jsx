@@ -1,9 +1,11 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import {
   getDueForReview, getUpcomingReviews, getMasteryColor, getMasteryLevel, getMasteryTrend, getReviewStats,
 } from '../lib/masteryStore'
 import { track } from '../lib/analytics'
 import { color as C, space as S, radius as R, motion as M, shadow as SH, touch as T, focusRing } from '../lib/designTokens'
+import { useCelebration } from '../utils/useCelebration'
+import { recordReviewClear, getWeeklyClears } from '../lib/reviewClears'
 
 // ── Formatters ──────────────────────────────────────────────────────────────
 function timeAgo(ts) {
@@ -236,46 +238,102 @@ function StatCard({ label, value, sublabel, tint, urgent, onClick }) {
 }
 
 // ── Empty state ─────────────────────────────────────────────────────────────
-function EmptyState({ tab, onOpenBrainDump }) {
+function EmptyState({ tab, onOpenBrainDump, justCleared = false, weeklyClears = 0 }) {
   if (tab === 'due') {
+    const badge = justCleared ? 'Queue cleared' : 'All caught up'
+    const headline = justCleared
+      ? 'Nice. You just cleared the queue.'
+      : 'You are all caught up'
+    const bodyCopy = justCleared
+      ? `That's ${weeklyClears} clear${weeklyClears !== 1 ? 's' : ''} this week. Spaced repetition compounds — the topics you just reviewed will stay sharp for longer.`
+      : 'Every topic in your Knowledge Map is well within its review window. Come back later or add new topics with a Brain Dump.'
     return (
-      <div style={{ padding: `${S[16]}px ${S[6]}px`, textAlign: 'center' }}>
+      <div style={{ padding: `${S[16]}px ${S[6]}px`, textAlign: 'center', position: 'relative' }}>
+        <style>{`
+          @keyframes rq-rise { from { opacity: 0; transform: translateY(8px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
+          @keyframes rq-glow { 0%,100% { opacity: 0.55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } }
+          @keyframes rq-ring { from { transform: scale(0.4); opacity: 0.9; } to { transform: scale(1.6); opacity: 0; } }
+        `}</style>
         <div style={{
-          width: 80, height: 80, borderRadius: R['2xl'],
-          background: `linear-gradient(135deg, ${C.success}18, ${C.success}08)`,
-          border: `1px solid ${C.success}25`,
+          position: 'relative',
+          width: 96, height: 96, borderRadius: R['2xl'],
+          background: `linear-gradient(135deg, ${C.success}22, ${C.success}0A)`,
+          border: `1px solid ${C.success}35`,
           display: 'flex', alignItems: 'center', justifyContent: 'center',
           margin: `0 auto ${S[5]}px`,
           boxShadow: SH.glow(C.success),
+          animation: justCleared ? 'rq-rise 500ms cubic-bezier(0.16,1,0.3,1) both' : 'none',
         }}>
-          <svg width="36" height="36" fill="none" stroke={C.success} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+          {justCleared && (
+            <>
+              <span aria-hidden style={{
+                position: 'absolute', inset: -6, borderRadius: R['2xl'],
+                border: `2px solid ${C.success}`, animation: 'rq-ring 1400ms ease-out 200ms',
+                pointerEvents: 'none',
+              }}/>
+              <span aria-hidden style={{
+                position: 'absolute', inset: -12, borderRadius: '50%',
+                background: `radial-gradient(circle, ${C.success}30 0%, transparent 65%)`,
+                animation: 'rq-glow 2.6s ease-in-out infinite',
+                pointerEvents: 'none',
+              }}/>
+            </>
+          )}
+          <svg width="42" height="42" fill="none" stroke={C.success} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" style={{ position: 'relative' }}>
             <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
           </svg>
         </div>
-        <h3 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: '0 0 8px', letterSpacing: '-0.02em' }}>
-          You are all caught up
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 6,
+          padding: '4px 12px', marginBottom: 10,
+          background: `${C.success}14`, border: `1px solid ${C.success}30`,
+          borderRadius: 999,
+          fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
+          color: C.success,
+        }}>
+          <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.success }}/>
+          {badge}
+        </div>
+        <h3 style={{ fontSize: 22, fontWeight: 800, color: C.text, margin: '0 0 8px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
+          {headline}
         </h3>
-        <p style={{ fontSize: 14, color: C.textMuted, margin: '0 auto', maxWidth: 380, lineHeight: 1.55 }}>
-          Every topic in your Knowledge Map is well within its review window. Come back later or add new topics with a Brain Dump.
+        <p style={{ fontSize: 14, color: C.textMuted, margin: '0 auto', maxWidth: 420, lineHeight: 1.6 }}>
+          {bodyCopy}
         </p>
+        {justCleared && weeklyClears >= 2 && (
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 8,
+            marginTop: S[4], padding: '8px 14px',
+            background: '#FAFAF8', border: `1px solid ${C.border ?? 'rgba(0,0,0,0.07)'}`,
+            borderRadius: 10,
+            fontSize: 12.5, fontWeight: 700, color: C.text,
+          }}>
+            <svg width="14" height="14" fill="none" stroke={C.success} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            {weeklyClears} clears this week · you're building a real habit
+          </div>
+        )}
         {onOpenBrainDump && (
-          <button
-            onClick={onOpenBrainDump}
-            style={{
-              marginTop: S[5], minHeight: T.min,
-              padding: `${S[3]}px ${S[5]}px`,
-              fontSize: 13.5, fontWeight: 700,
-              color: C.textInverse, background: C.accent,
-              border: 'none', borderRadius: R.md,
-              cursor: 'pointer', fontFamily: 'inherit',
-              boxShadow: SH.glow(C.accent),
-              transition: `transform ${M.fast}ms ${M.easing}`,
-            }}
-            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
-            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            Add a new topic
-          </button>
+          <div style={{ marginTop: S[5] }}>
+            <button
+              onClick={onOpenBrainDump}
+              style={{
+                minHeight: T.min,
+                padding: `${S[3]}px ${S[5]}px`,
+                fontSize: 13.5, fontWeight: 700,
+                color: C.textInverse, background: C.accent,
+                border: 'none', borderRadius: R.md,
+                cursor: 'pointer', fontFamily: 'inherit',
+                boxShadow: SH.glow(C.accent),
+                transition: `transform ${M.fast}ms ${M.easing}`,
+              }}
+              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
+              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+            >
+              {justCleared ? 'Capture new topics' : 'Add a new topic'}
+            </button>
+          </div>
         )}
       </div>
     )
@@ -316,6 +374,28 @@ export default function ReviewQueueView({ courses, onOpenBrainDump, onOpenQuizBu
   const dueItems = useMemo(() => getDueForReview(courseId), [courseId])
   const upcomingItems = useMemo(() => getUpcomingReviews(courseId, 7), [courseId])
   const stats = useMemo(() => getReviewStats(), [])
+
+  // Fire a celebration the moment the due queue drops from >0 to 0.
+  // Guarded so re-renders and course-filter flips don't retrigger.
+  const celebrate = useCelebration()
+  const prevDueCountRef = useRef(dueItems.length)
+  const [justCleared, setJustCleared] = useState(false)
+  const [weeklyClears, setWeeklyClears] = useState(() => getWeeklyClears())
+  useEffect(() => {
+    const prev = prevDueCountRef.current
+    if (prev > 0 && dueItems.length === 0 && courseId === null) {
+      const result = recordReviewClear()
+      setWeeklyClears(result.weeklyClears)
+      if (result.recorded) {
+        setJustCleared(true)
+        celebrate('medium')
+        track('review_queue_cleared', { weeklyClears: result.weeklyClears, clearedCount: prev })
+        const t = setTimeout(() => setJustCleared(false), 8000)
+        return () => clearTimeout(t)
+      }
+    }
+    prevDueCountRef.current = dueItems.length
+  }, [dueItems.length, courseId, celebrate])
 
   const displayed = tab === 'due' ? dueItems : upcomingItems
   const overdueByADay = dueItems.filter(i => i.overdueMs > 86400000).length
@@ -456,7 +536,7 @@ export default function ReviewQueueView({ courses, onOpenBrainDump, onOpenQuizBu
         boxShadow: SH.md,
       }}>
         {displayed.length === 0
-          ? <EmptyState tab={tab} onOpenBrainDump={onOpenBrainDump} />
+          ? <EmptyState tab={tab} onOpenBrainDump={onOpenBrainDump} justCleared={justCleared} weeklyClears={weeklyClears} />
           : displayed.map((item, i) => (
             <TopicCard
               key={`${item.topic}-${item.courseId}-${i}`}

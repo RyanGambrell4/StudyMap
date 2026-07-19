@@ -27,6 +27,8 @@ import CalendarWeekView from './CalendarWeekView'
 import AddSessionModal from './AddSessionModal'
 import AppShell from './AppShell'
 import DashboardView from './DashboardView'
+import CommandPalette from './CommandPalette'
+import { QUICK_PRESETS, buildQuickSession } from '../lib/quickStart'
 import { useSessionReminders } from '../utils/useSessionReminders'
 import { useStreak } from '../utils/useStreak'
 import { getAccessToken } from '../lib/supabase'
@@ -2096,6 +2098,51 @@ export default function OutputView({
         </div>
 
       </AppShell>
+
+      {/* Global Cmd+K command palette — mounts once at the top of the tree */}
+      <CommandPalette actions={(() => {
+        const nav = (section) => () => setActiveSection(section)
+        const preset = (id) => () => {
+          const p = QUICK_PRESETS.find(x => x.id === id)
+          if (!p) return
+          const s = buildQuickSession(p, courses, todayStr)
+          if (s) handleQuickStart(s)
+        }
+        const list = [
+          { id: 'qs-recall', group: 'Start', label: 'Start 5-min recall',      hint: 'Weakest topic · one tap', run: preset('recall'), keywords: 'quick start recall memory' },
+          { id: 'qs-review', group: 'Start', label: 'Start 15-min review',     hint: 'Mid-band topic',           run: preset('review'), keywords: 'quick start review refresh' },
+          { id: 'qs-deep',   group: 'Start', label: 'Start 25-min deep dive',  hint: 'Weakest topic',            run: preset('deep'),   keywords: 'quick start deep dive pomodoro' },
+          { id: 'qs-exam',   group: 'Start', label: 'Start 45-min exam prep',  hint: 'Course with next exam',    run: preset('exam'),   keywords: 'quick start exam prep cram' },
+          { id: 'nav-dashboard', group: 'Navigate', label: 'Dashboard',        hint: 'Home base',                run: nav('dashboard'), keywords: 'home main today plan' },
+          { id: 'nav-calendar',  group: 'Navigate', label: 'Calendar',         hint: 'Weekly + monthly view',    run: nav('calendar'),  keywords: 'schedule week month' },
+          { id: 'nav-progress',  group: 'Navigate', label: 'Progress',         hint: 'Mastery, momentum, gaps',  run: nav('progress'),  keywords: 'stats mastery growth' },
+          { id: 'nav-courses',   group: 'Navigate', label: 'Courses',          hint: 'Manage your classes',      run: nav('courses'),   keywords: 'classes subjects add course' },
+          { id: 'nav-grades',    group: 'Navigate', label: 'Grade Hub',        hint: 'Track and predict grades', run: nav('grades'),    keywords: 'gpa recovery target' },
+          { id: 'nav-review',    group: 'Navigate', label: 'Review Queue',     hint: 'Spaced repetition',        run: nav('review'),    keywords: 'spaced repetition due topics' },
+          { id: 'nav-tutor',     group: 'Navigate', label: 'AI Tutor',         hint: 'Ask anything',             run: nav('tutor'),     keywords: 'ai chat tutor question help' },
+          { id: 'nav-coach',     group: 'Navigate', label: 'Study Coach',      hint: 'AI-built weekly plan',     run: nav('coach'),     keywords: 'plan schedule coach ai' },
+          { id: 'nav-tools',     group: 'Navigate', label: 'Study Tools',      hint: 'Flashcards, quizzes...',   run: nav('tools'),     keywords: 'tools flashcards quiz notes' },
+          { id: 'nav-practice',  group: 'Navigate', label: 'Practice Exams',   hint: 'Full-length practice',     run: nav('practice'),  keywords: 'practice exam test' },
+          { id: 'nav-mastery',   group: 'Navigate', label: 'Knowledge Map',    hint: 'Mastery topology',         run: nav('mastery'),   keywords: 'knowledge map topics graph' },
+          { id: 'nav-account',   group: 'Navigate', label: 'Account',          hint: 'Plan + settings',          run: nav('account'),   keywords: 'settings billing profile plan subscription' },
+          { id: 't-braindump',   group: 'Tools',    label: 'Brain Dump',       hint: '15-min recall drill',       run: () => { track('feature_opened', { feature: 'brain_dump', source: 'cmdk' }); setShowBrainDump(true) }, keywords: 'brain dump recall write' },
+          { id: 't-cheatsheet',  group: 'Tools',    label: 'AI Cheat Sheet',   hint: 'One-page summary',          run: () => { track('feature_opened', { feature: 'cheat_sheet', source: 'cmdk' }); setShowCheatSheet(true) }, keywords: 'cheat sheet summary condense' },
+          { id: 't-rescue',      group: 'Tools',    label: 'Exam Rescue',      hint: 'Last-mile prep',            run: () => { track('feature_opened', { feature: 'exam_rescue', source: 'cmdk' }); setShowExamRescue(true) }, keywords: 'exam rescue cram save last minute' },
+          { id: 't-quiz',        group: 'Tools',    label: 'Quiz Burst',       hint: '5-minute quick quiz',       run: () => { track('feature_opened', { feature: 'quiz_burst', source: 'cmdk' }); setShowQuizBurst(true) }, keywords: 'quiz burst quick test' },
+        ]
+        courses?.forEach((c, i) => {
+          if (!c?.name) return
+          list.push({
+            id: `course-${i}`,
+            group: 'Courses',
+            label: `Open ${clean(c.name)}`,
+            hint: c.examDate ? `Exam ${c.examDate}` : null,
+            keywords: `course ${c.name}`,
+            run: () => { setActiveSection('courses') },
+          })
+        })
+        return list
+      })()}/>
 
       {showCheatSheet && (
         <CheatSheetModal
