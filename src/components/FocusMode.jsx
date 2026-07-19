@@ -1841,7 +1841,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 ctaAction = handleBackToDashboard
               } else if (nextSession) {
                 icon = '⚡'
-                suggestion = `Your next session is ready. Keep the momentum going.`
+                suggestion = `Your next session is ready.`
                 ctaLabel = `Start ${nextSession.courseName} →`
                 ctaAction = handleStartNext
               } else {
@@ -1910,7 +1910,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 How well did you retain this?
               </p>
               <p style={{ fontSize: 13, color: '#9B9B9B', margin: '0 0 24px' }}>
-                Your rating helps us adapt your plan.
+                Your rating adapts your plan.
               </p>
 
               {/* Slider */}
