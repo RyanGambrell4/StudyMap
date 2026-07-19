@@ -87,7 +87,7 @@ export default function MomentumCard({ completedSessionLog = [], allSessions = [
 
   const insight = (() => {
     if (current.score >= 80) return 'You are locked in. Protect the streak.'
-    if (delta >= 8)          return `Up ${delta} this week — momentum is building.`
+    if (delta >= 8)          return `Up ${delta} this week. Momentum is building.`
     if (delta <= -8)         return `Down ${Math.abs(delta)} this week. One session today resets it.`
     if (current.consistency < 40) return 'Consistency is the fastest lever. Aim for a session today.'
     if (current.velocity < 40)    return 'Scores are dipping. A short recall drill lifts velocity fast.'

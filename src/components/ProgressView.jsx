@@ -1446,7 +1446,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                       const isToday = d === todayStr
                       const label = dt.toLocaleDateString('en-US', { weekday: 'short' })[0]
                       const fullDate = dt.toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })
-                      const tooltip = `${fullDate} — ${done ? 'Completed a session' : 'No session'}${isToday ? ' (today)' : ''}`
+                      const tooltip = `${fullDate}: ${done ? 'Completed a session' : 'No session'}${isToday ? ' (today)' : ''}`
                       return (
                         <div
                           key={d}

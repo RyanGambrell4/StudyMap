@@ -51,7 +51,7 @@ function vibeLine({ sessionCount, activeDayCount, deltaMinutes, avgRecall }) {
   if (avgRecall !== null && avgRecall >= 75) return `Fewer sessions, but quality recall. Depth over quantity worked this week.`
   if (deltaMinutes < -30) return `Down ${fmtHours(Math.abs(deltaMinutes))} from the week before. This week is a fresh start.`
   if (activeDayCount <= 2) return `Two days in. A short daily session beats one big weekend push.`
-  return `You showed up. Now compound it — one more day this week.`
+  return `You showed up. One more day this week locks it in.`
 }
 
 export default function WeeklyRecapCard({ completedSessionLog = [], todayStr, onStartFocus, onOpenProgress }) {

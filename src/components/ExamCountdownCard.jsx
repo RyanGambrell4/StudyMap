@@ -38,7 +38,7 @@ function computeCourseReadiness(courseId, syllabusTopicCount = 0) {
 
 function urgencyCopy(daysLeft, readiness) {
   if (daysLeft === 0) return `Exam day. Warm-up with your weakest topic, then trust the work.`
-  if (daysLeft === 1) return `One day out. Skip new content — recall + fix your gaps.`
+  if (daysLeft === 1) return `One day out. Skip new content. Recall only and fix your gaps.`
   if (daysLeft <= 3) {
     if (readiness < 60) return `${daysLeft} days out and readiness is thin. Focus every session on your weakest 3 topics.`
     return `${daysLeft} days out. Time to run practice exams under a clock.`
@@ -47,7 +47,7 @@ function urgencyCopy(daysLeft, readiness) {
     if (readiness < 50) return `One week out. Cut breadth, go deep on the gaps.`
     return `One week out. Alternate practice exams with weak-topic drills.`
   }
-  if (readiness < 40) return `${daysLeft} days out. Start now — momentum beats cramming.`
+  if (readiness < 40) return `${daysLeft} days out. Start now. Momentum beats cramming.`
   return `${daysLeft} days out. Steady sessions now cost less than a panic later.`
 }
 

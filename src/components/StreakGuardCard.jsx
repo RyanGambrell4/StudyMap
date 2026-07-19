@@ -130,7 +130,7 @@ export default function StreakGuardCard({
           <div style={{ fontSize: 12.5, color: D.muted, lineHeight: 1.5, maxWidth: 480 }}>
             {isUrgent
               ? `A 10-minute recall session keeps it alive. You've come too far to reset now.`
-              : `${hoursLeft}h until midnight. Any session — even 10 minutes — locks in the day.`}
+              : `${hoursLeft}h until midnight. Even 10 minutes locks in the day.`}
           </div>
         </div>
 
