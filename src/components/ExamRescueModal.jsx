@@ -20,7 +20,7 @@ const PRIORITY_STYLE = {
 }
 const BLOCK_COLORS = { study: '#3B61C4', buffer: '#16A34A' }
 
-export default function ExamRescueModal({ courses, onClose, onShowPaywall, onOpenTeachItBack }) {
+export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
@@ -263,14 +263,6 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall, onOpe
                       <div style={{ fontSize: 13, color: D.textMuted, lineHeight: 1.5, marginBottom: 4 }}>{t.why}</div>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4 }}>
                         <span style={{ fontSize: 11.5, color: D.textDim }}>~{t.estimatedMinutes} min</span>
-                        {onOpenTeachItBack && (
-                          <button
-                            onClick={() => { onClose?.(); onOpenTeachItBack({ courseIdx, topic: t.name }) }}
-                            style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 6, padding: '2px 9px', cursor: 'pointer' }}
-                          >
-                            Teach It Back
-                          </button>
-                        )}
                       </div>
                     </div>
                   </div>

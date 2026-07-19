@@ -34,7 +34,7 @@ function Pill({ label, style }) {
   )
 }
 
-export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpenQuizBurst, onOpenTeachItBack }) {
+export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpenQuizBurst }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
@@ -282,14 +282,6 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
                     <div style={{ fontSize: 13, color: D.textMuted, lineHeight: 1.5, marginBottom: 6 }}>{topic.whyLikely}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                       <span style={{ fontSize: 11.5, color: D.textDim }}>~{topic.estimatedMinutes} min to review</span>
-                      {onOpenTeachItBack && topic.readiness !== 'Strong' && (
-                        <button
-                          onClick={() => { onClose?.(); onOpenTeachItBack({ courseIdx, topic: topic.name }) }}
-                          style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 6, padding: '2px 9px', cursor: 'pointer' }}
-                        >
-                          Teach It Back
-                        </button>
-                      )}
                     </div>
                   </div>
                 </div>

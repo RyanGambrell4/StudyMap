@@ -2176,7 +2176,6 @@ export default function OutputView({
           onClose={() => setShowCheatSheet(false)}
           onShowPaywall={onShowPaywall}
           onOpenQuizBurst={({ courseIdx, topic }) => { setShowCheatSheet(false); setQuizBurstInit({ courseIdx, topic }); setShowQuizBurst(true) }}
-          onOpenTeachItBack={({ courseIdx, topic }) => { setShowCheatSheet(false); setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
         />
       )}
       {showBrainDump && (
@@ -2211,7 +2210,6 @@ export default function OutputView({
           userId={userId}
           onClose={() => setShowExamRescue(false)}
           onShowPaywall={onShowPaywall}
-          onOpenTeachItBack={({ courseIdx, topic }) => { setShowExamRescue(false); setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
         />
       )}
       {showQuizBurst && (
