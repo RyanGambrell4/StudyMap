@@ -9,6 +9,7 @@ import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, hasUsedTrial } from '../lib/subscription'
 import { findSimilarCards } from '../lib/embeddings'
 import { useCelebration } from '../utils/useCelebration'
+import { track } from '../lib/analytics'
 
 function loadSaved() {
   return getCachedStudyTools()
@@ -476,6 +477,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       setKnownSet(new Set())
       setAlmostSet(new Set())
       setReviewSet(new Set())
+      track('flashcards_generated', { cardCount: cards.length, quizCount: q.length, plan: getActivePlan() })
       setMode('flashcards')
       saveStudyTools({
         flashcards: cards,
@@ -542,6 +544,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     const isLastSm2 = cardIdx === flashcards.length - 1
     if (isLastSm2 && !deckDoneRef.current) {
       deckDoneRef.current = true
+      track('flashcard_deck_complete', { cardCount: flashcards.length, plan: getActivePlan() })
       setTimeout(() => celebrate('medium'), 300)
     } else if (!isLastSm2) {
       deckDoneRef.current = false
@@ -555,6 +558,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     const next = [...answers, correct]
     setAnswers(next)
     if (questionIdx + 1 >= quiz.length) {
+      const finalScore = Math.round(([...answers, correct].filter(Boolean).length / quiz.length) * 100)
+      track('flashcard_quiz_complete', { score: finalScore, questionCount: quiz.length, plan: getActivePlan() })
       setQuizDone(true)
     } else {
       setQuestionIdx(i => i + 1)
@@ -607,6 +612,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       if (!res.ok) throw new Error(data.error ?? 'Generation failed')
       const questions = (data.questions ?? []).map(q => ({ ...q, type: 'mc' }))
       if (!questions.length) throw new Error('No questions returned. Try a different topic.')
+      track('drill_generated', { questionCount: questions.length, topic: drillTopic.trim(), plan: getActivePlan() })
       setDrillQuiz(questions)
       await incrementAIQuery()
     } catch (e) {
@@ -1484,6 +1490,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                   const next = [...drillAnswers, correct]
                   setDrillAnswers(next)
                   if (drillQuestionIdx + 1 >= drillQuiz.length) {
+                    track('drill_complete', { score: Math.round(([...drillAnswers, correct].filter(Boolean).length / drillQuiz.length) * 100), questionCount: drillQuiz.length, plan: getActivePlan() })
                     setDrillDone(true)
                   } else {
                     setDrillQuestionIdx(i => i + 1)
