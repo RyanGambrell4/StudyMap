@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase, getAccessToken } from '../lib/supabase'
 import { getReferralLink } from '../lib/referral'
+import { track } from '../lib/analytics'
 
 export default function ReferralCard() {
   const [userId, setUserId] = useState(null)
@@ -29,6 +30,7 @@ export default function ReferralCard() {
   const link = getReferralLink(userId)
 
   const handleCopy = () => {
+    track('referral_link_copied')
     navigator.clipboard.writeText(link).then(() => {
       setCopied(true)
       setTimeout(() => setCopied(false), 2000)
@@ -84,6 +86,7 @@ export default function ReferralCard() {
         <a
           href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`I've been using StudyEdge AI to build my study schedule and it's actually helped. Try it free: ${link}`)}`}
           target="_blank" rel="noopener noreferrer"
+          onClick={() => track('referral_shared', { channel: 'twitter' })}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)',
@@ -95,6 +98,7 @@ export default function ReferralCard() {
         <a
           href={`https://wa.me/?text=${encodeURIComponent(`Use my link to try StudyEdge AI free. It builds your entire study schedule in 60 seconds: ${link}`)}`}
           target="_blank" rel="noopener noreferrer"
+          onClick={() => track('referral_shared', { channel: 'whatsapp' })}
           style={{
             display: 'inline-flex', alignItems: 'center', gap: 6,
             background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)',
