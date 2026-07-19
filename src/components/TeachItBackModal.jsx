@@ -4,7 +4,7 @@ import { fetchWithRetry, aiErrorMessage } from '../lib/utils'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
-import { updateMastery, getWeakestTopics } from '../lib/masteryStore'
+import { updateMastery, getWeakestTopics, getMastery } from '../lib/masteryStore'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -26,6 +26,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
   const [followUpAnswer, setFollowUpAnswer] = useState('')
   const [step, setStep] = useState(autoStart && initialTopic ? 'explain' : 'setup') // setup | explain | evaluating | result | followup | final
   const [result, setResult] = useState(null)
+  const [prevMasteryScore, setPrevMasteryScore] = useState(null)
   const [finalResult, setFinalResult] = useState(null)
   const [error, setError] = useState('')
   const [displayScore, setDisplayScore] = useState(0)
@@ -79,6 +80,8 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
       incrementFeatureUsage('teachItBack')
       addWeakTopics(data.missing ?? [])
       addStudySession({ tool: 'Teach It Back', score: data.score, topic: topic.trim() || null, courseName: course?.name || null })
+      const prevEntry = topic.trim() ? getMastery(topic.trim(), course?.id ?? null) : null
+      if (prevEntry?.count >= 1) setPrevMasteryScore(prevEntry.score)
       if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, data.score, 'teachItBack')
       setResult(data)
       setStep('result')
@@ -122,6 +125,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
     setExplanation('')
     setFollowUpAnswer('')
     setResult(null)
+    setPrevMasteryScore(null)
     setFinalResult(null)
     setError('')
   }
@@ -315,6 +319,20 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
                   </div>
                 </div>
                 <div style={{ fontSize: 14, color: D.textMuted, marginTop: 4, lineHeight: 1.5 }}>{result.verdict}</div>
+                {prevMasteryScore != null && (() => {
+                  const blended = Math.round(prevMasteryScore * 0.6 + result.score * 0.4)
+                  const delta = blended - prevMasteryScore
+                  if (Math.abs(delta) < 2) return null
+                  const up = delta > 0
+                  return (
+                    <div style={{ marginTop: 8, display: 'inline-flex', alignItems: 'center', gap: 5, fontSize: 12.5, fontWeight: 700, color: up ? D.green : D.red, background: up ? 'rgba(22,163,74,0.07)' : 'rgba(220,38,38,0.07)', border: `1px solid ${up ? 'rgba(22,163,74,0.2)' : 'rgba(220,38,38,0.2)'}`, borderRadius: 8, padding: '3px 10px' }}>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                        <path d={up ? 'M12 19V5M5 12l7-7 7 7' : 'M12 5v14M5 12l7 7 7-7'} />
+                      </svg>
+                      {up ? '+' : ''}{delta}% vs last session
+                    </div>
+                  )
+                })()}
               </div>
 
               {/* What you got right */}
