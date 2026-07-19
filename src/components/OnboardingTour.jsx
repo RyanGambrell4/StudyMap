@@ -135,7 +135,7 @@ export default function OnboardingTour({ onReady }) {
         element: '#tour-nav-calendar',
         popover: {
           title: 'Your Study Schedule',
-          description: 'Your sessions are auto-scheduled around your courses and deadlines. Add sessions manually or let the AI fill your week.',
+          description: 'Your sessions are auto-scheduled around your courses and deadlines. Add sessions manually or let the schedule fill in around your week.',
           side: 'bottom',
           align: 'start',
         },
@@ -145,7 +145,7 @@ export default function OnboardingTour({ onReady }) {
         element: '#tour-nav-coach',
         popover: {
           title: 'Strategy Hub',
-          description: 'Hover here to access the AI Study Coach, Grade Tracker, and AI Tutor. Generate a full week-by-week study plan, track your grades, or get help on any topic.',
+          description: 'Hover here to access the Study Coach, Grade Tracker, and Tutor. Build a week-by-week study plan, track your grades, or get help on any topic.',
           side: 'bottom',
           align: 'start',
         },
@@ -155,7 +155,7 @@ export default function OnboardingTour({ onReady }) {
         element: '#tour-nav-tools',
         popover: {
           title: 'Brain Training Hub',
-          description: 'Hover here for Flashcards, Brain Dump, Quiz Burst, Teach It Back, and Exam Rescue. Upload your notes and instantly generate study materials.',
+          description: 'Hover here for Flashcards, Brain Dump, Quiz Burst, Teach It Back, and Exam Rescue. Upload your notes and generate study materials instantly.',
           side: 'bottom',
           align: 'start',
         },
