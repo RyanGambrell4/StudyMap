@@ -2141,6 +2141,7 @@ export default function OutputView({
           { id: 't-cheatsheet',  group: 'Tools',    label: 'AI Cheat Sheet',   hint: 'One-page summary',          run: () => { track('feature_opened', { feature: 'cheat_sheet', source: 'cmdk' }); setShowCheatSheet(true) }, keywords: 'cheat sheet summary condense' },
           { id: 't-rescue',      group: 'Tools',    label: 'Exam Rescue',      hint: 'Last-mile prep',            run: () => { track('feature_opened', { feature: 'exam_rescue', source: 'cmdk' }); setShowExamRescue(true) }, keywords: 'exam rescue cram save last minute' },
           { id: 't-quiz',        group: 'Tools',    label: 'Quiz Burst',       hint: '5-minute quick quiz',       run: () => { track('feature_opened', { feature: 'quiz_burst', source: 'cmdk' }); setShowQuizBurst(true) }, keywords: 'quiz burst quick test' },
+          { id: 't-connections', group: 'Tools',    label: 'Connections',      hint: 'Explain links between concepts', run: () => { track('feature_opened', { feature: 'connections_mode', source: 'cmdk' }); setShowConnectionsMode(true) }, keywords: 'connections relate link concepts relationships' },
         ]
         courses?.forEach((c, i) => {
           if (!c?.name) return
