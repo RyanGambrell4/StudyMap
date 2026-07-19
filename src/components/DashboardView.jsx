@@ -297,6 +297,15 @@ export default function DashboardView({
     currentStreak > 1 &&
     !streakBannerDismissed
   )
+  // Streak is "at risk" when user hasn't studied today, has a streak of 2+,
+  // it's after 6pm, and the streak isn't already broken.
+  const isStreakAtRisk = !!(
+    !isStreakBroken &&
+    currentStreak >= 2 &&
+    lastCompletedDate !== todayStr &&
+    new Date().getHours() >= 18 &&
+    !streakBannerDismissed
+  )
   const [sessionIdx, setSessionIdx] = useState(0)
   const [upNextHovered, setUpNextHovered] = useState(false)
   const [startBtnHovered, setStartBtnHovered] = useState(false)
@@ -1136,6 +1145,30 @@ export default function DashboardView({
       )}
 
       {/* ── Broken streak recovery banner ── */}
+      {isStreakAtRisk && !isStreakBroken && (
+        <div style={{ padding: '0 32px 4px' }}>
+          <div style={{ background: '#FFF7ED', border: '1px solid rgba(251,146,60,0.25)', borderLeft: '4px solid #FB923C', borderRadius: 10, padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+            <IcoFlame color="#FB923C" />
+            <div style={{ flex: 1, minWidth: 180 }}>
+              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#9A3412' }}>
+                Your {currentStreak}-day streak is at risk.
+              </p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: '#C2410C', lineHeight: 1.4 }}>
+                Study before midnight to keep it going.
+              </p>
+            </div>
+            {uncompletedToday.length > 0 && (
+              <button
+                onClick={() => { track('streak_risk_cta_clicked', { streak: currentStreak }); onStartFocus?.(uncompletedToday[0]) }}
+                style={{ background: '#FB923C', border: 'none', borderRadius: 8, padding: '7px 14px', fontSize: 12, fontWeight: 700, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                Study now →
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {isStreakBroken && (
         <div style={{ padding: '0 32px 4px' }}>
           <div style={{
