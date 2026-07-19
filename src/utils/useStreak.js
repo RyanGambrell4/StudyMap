@@ -72,7 +72,8 @@ export function useStreak() {
         ? prev.currentStreak + 1
         : 1
 
-      const next = { lastCompletedDate: todayStr, currentStreak: newStreak }
+      const newPersonalBest = Math.max(prev.personalBest ?? 0, newStreak)
+      const next = { lastCompletedDate: todayStr, currentStreak: newStreak, personalBest: newPersonalBest }
       try { localStorage.setItem(STORAGE_KEY, JSON.stringify(next)) } catch {}
       saveStreak(next).catch(() => {})
       return next
@@ -105,5 +106,6 @@ export function useStreak() {
     recordCompletion,
     freezeCount,
     useFreeze,
+    personalBest: data.personalBest ?? data.currentStreak,
   }
 }

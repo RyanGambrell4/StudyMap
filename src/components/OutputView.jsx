@@ -1395,6 +1395,11 @@ export default function OutputView({
             ratingReminderTimerRef.current = setTimeout(() => setRatingReminder(skipped), 5 * 60 * 1000)
           }}
           onShowPaywall={onShowPaywall}
+          onOpenTeachItBack={({ courseIdx, topic }) => {
+            setRatingSession(null)
+            setTeachItBackInit({ courseIdx, topic })
+            setShowTeachItBack(true)
+          }}
         />
       )}
 

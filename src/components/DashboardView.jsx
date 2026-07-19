@@ -278,7 +278,7 @@ export default function DashboardView({
     }
   }, [showSevenDayBanner]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const { currentStreak, lastCompletedDate, recordCompletion, freezeCount, useFreeze } = useStreak()
+  const { currentStreak, lastCompletedDate, recordCompletion, freezeCount, useFreeze, personalBest } = useStreak()
   const { shouldPrompt: shouldPromptPush, requestAndSubscribe, dismiss: dismissPush } = usePushNotifications(userId)
   const celebrate = useCelebration()
   const streak = currentStreak
@@ -451,6 +451,10 @@ export default function DashboardView({
   const thisWeekDone = useMemo(
     () => allSessions.filter(s => s.dateStr >= weekStart && s.dateStr <= weekEnd && completedIds.has(s.id)),
     [allSessions, completedIds, weekStart, weekEnd]
+  )
+  const thisWeekScheduled = useMemo(
+    () => allSessions.filter(s => s.dateStr >= weekStart && s.dateStr <= weekEnd).length,
+    [allSessions, weekStart, weekEnd]
   )
   const prevWeekDone = useMemo(
     () => allSessions.filter(s => s.dateStr >= prevWeekStart && s.dateStr <= prevWeekEnd && completedIds.has(s.id)),
@@ -1974,6 +1978,21 @@ export default function DashboardView({
                       >
                         Ask Coach →
                       </button>
+                      {onOpenTeachItBack && (
+                        <button
+                          onClick={() => {
+                            const idx = courses.findIndex(c => (c.name ?? '').toLowerCase() === (cName ?? '').toLowerCase())
+                            onOpenTeachItBack({ courseIdx: idx >= 0 ? idx : 0, topic })
+                          }}
+                          style={{
+                            fontSize: 11.5, fontWeight: 700, color: '#7C3AED',
+                            background: 'none', border: 'none', cursor: 'pointer',
+                            padding: 0, textAlign: 'left',
+                          }}
+                        >
+                          Teach It →
+                        </button>
+                      )}
                     </div>
                   </div>
                 ))}
@@ -2101,9 +2120,9 @@ export default function DashboardView({
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
             {[
-              { label: 'Study streak',  value: streak,         unit: streak === 1 ? 'day' : 'days', delta: streak,        positive: streak > 0,       icon: <IcoFlame color="#F97316" />,  iconBg: 'rgba(249,115,22,0.1)',  iconColor: '#F97316', subtext: daysToNextMilestone === 1 ? `${nextStreakMilestone}-day streak tomorrow` : daysToNextMilestone === 2 ? `${daysToNextMilestone} days to ${nextStreakMilestone}-day streak` : freezeCount > 0 ? `${freezeCount} freeze${freezeCount !== 1 ? 's' : ''} available` : null },
+              { label: 'Study streak',  value: streak,         unit: streak === 1 ? 'day' : 'days', delta: streak,        positive: streak > 0,       icon: <IcoFlame color="#F97316" />,  iconBg: 'rgba(249,115,22,0.1)',  iconColor: '#F97316', subtext: streak >= 3 && streak === personalBest ? 'Personal best!' : personalBest > streak && personalBest >= 3 ? `Best: ${personalBest}d` : daysToNextMilestone === 1 ? `${nextStreakMilestone}-day streak tomorrow` : daysToNextMilestone === 2 ? `${daysToNextMilestone} days to ${nextStreakMilestone}-day streak` : freezeCount > 0 ? `${freezeCount} freeze${freezeCount !== 1 ? 's' : ''} available` : null, subtextColor: streak >= 3 && streak === personalBest ? '#D97706' : undefined },
               { label: 'Hours studied', value: weekHours,      unit: 'hrs',                          delta: deltaHours,    positive: deltaHours >= 0,  icon: <IcoClock color={D.blue} />,   iconBg: 'rgba(59,97,196,0.1)',   iconColor: D.blue, subtext: todayMins > 0 ? `${todayMins} min today` : null, subtextColor: D.blue },
-              { label: 'Sessions done', value: weekSessionCount, unit: '',                           delta: deltaSessions, positive: deltaSessions >= 0, icon: <IcoCheck color={D.green} />, iconBg: 'rgba(22,163,74,0.1)',   iconColor: D.green },
+              { label: 'Sessions done', value: weekSessionCount, unit: '',                           delta: deltaSessions, positive: deltaSessions >= 0, icon: <IcoCheck color={D.green} />, iconBg: 'rgba(22,163,74,0.1)',   iconColor: D.green, subtext: thisWeekScheduled > weekSessionCount ? `${weekSessionCount} of ${thisWeekScheduled} planned` : thisWeekScheduled > 0 && weekSessionCount >= thisWeekScheduled ? 'All caught up' : null, subtextColor: thisWeekScheduled > weekSessionCount ? D.amber : D.green },
             ].map((stat, i) => (
               <div key={stat.label} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '13px 0', borderBottom: i < 2 ? `1px solid ${D.border}` : 'none' }}>
                 <div style={{ width: 30, height: 30, borderRadius: 8, background: stat.iconBg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, color: stat.iconColor }}>
