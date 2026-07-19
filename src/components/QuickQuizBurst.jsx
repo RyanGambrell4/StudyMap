@@ -505,7 +505,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                   {hasUsedTrial() ? 'You\'ve used your free quiz. Upgrade to Pro for unlimited daily practice.' : 'You\'ve used your free quiz. Start your free trial for unlimited daily practice.'}
                 </p>
                 <button onClick={() => onShowPaywall?.('quizBurst')} style={{ padding: '10px 20px', background: '#D97706', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}>
-                  {hasUsedTrial() ? 'Upgrade to Pro →' : 'Start 3-day free trial →'}
+                  {hasUsedTrial() ? 'Upgrade to Pro →' : 'Start 7-day free trial →'}
                 </button>
               </div>
             )}

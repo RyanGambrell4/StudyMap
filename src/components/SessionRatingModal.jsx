@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { getActivePlan, hasUsedTrial } from '../lib/subscription'
+import { track } from '../lib/analytics'
 
 const D = {
   bg:     '#FFFFFF',
@@ -28,6 +29,7 @@ export default function SessionRatingModal({ session, onSave, onSkip, onShowPayw
   const handleSave = async () => {
     if (!rating) return
     setSaving(true)
+    track('session_rated', { rating, courseName: session?.courseName ?? null, sessionType: session?.sessionType ?? null, hasNotes: Boolean(hardNotes.trim()), plan: getActivePlan() })
     await onSave(rating, hardNotes.trim())
     setSaving(false)
   }
@@ -183,7 +185,7 @@ export default function SessionRatingModal({ session, onSave, onSkip, onShowPayw
               onClick={() => onShowPaywall?.('study-hacks')}
               style={{ fontSize: 13, fontWeight: 700, color: D.accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
             >
-              {trialUsed ? 'Upgrade to Pro →' : 'Start 3-day free trial →'}
+              {trialUsed ? 'Upgrade to Pro →' : 'Start 7-day free trial →'}
             </button>
           </div>
         )}

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { track } from '../lib/analytics'
 
 /**
  * AdaptModal
@@ -140,7 +141,7 @@ export default function AdaptModal({ adaptation, onAccept, onEdit, onDismiss }) 
               animation: 'adapt-fade 0.3s ease forwards',
             }}>
               <button
-                onClick={onAccept}
+                onClick={() => { track('adapt_accepted', { courseName: injectedSession?.courseName ?? null, sessionType: injectedSession?.sessionType ?? null }); onAccept() }}
                 style={{
                   width: '100%', padding: '12px 0',
                   background: dot, color: '#fff',
@@ -158,7 +159,7 @@ export default function AdaptModal({ adaptation, onAccept, onEdit, onDismiss }) 
 
               <div style={{ display: 'flex', gap: 10 }}>
                 <button
-                  onClick={() => onEdit(injectedSession)}
+                  onClick={() => { track('adapt_edited', { courseName: injectedSession?.courseName ?? null }); onEdit(injectedSession) }}
                   style={{
                     flex: 1, padding: '10px 0',
                     background: '#F7F6F3',
@@ -173,7 +174,7 @@ export default function AdaptModal({ adaptation, onAccept, onEdit, onDismiss }) 
                   Edit session
                 </button>
                 <button
-                  onClick={onDismiss}
+                  onClick={() => { track('adapt_dismissed', { courseName: injectedSession?.courseName ?? null }); onDismiss() }}
                   style={{
                     flex: 1, padding: '10px 0',
                     background: 'transparent',
