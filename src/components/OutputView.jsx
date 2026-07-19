@@ -2009,6 +2009,7 @@ export default function OutputView({
           <PracticeExamView
             courses={courses}
             onShowPaywall={onShowPaywall}
+            onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
           />
         )}
 

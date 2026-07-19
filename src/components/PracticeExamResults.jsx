@@ -93,7 +93,7 @@ function ScoreTrendChart({ scores, currentScore }) {
   )
 }
 
-export default function PracticeExamResults({ questions, answers, timeMs, questionTimings = [], courseId, courseName, onRetake, onClose }) {
+export default function PracticeExamResults({ questions, answers, timeMs, questionTimings = [], courseId, courseName, onRetake, onClose, onOpenTeachItBack }) {
   const graded = useMemo(() => questions.map((q, i) => {
     const given = answers[i] ?? ''
     const correct = q.type === 'multiple_choice' ? gradeMc(q, given) : gradeShort(q, given)
@@ -336,7 +336,17 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
               {weakTopics.map(([topic, s]) => (
                 <div key={topic} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
                   <span style={{ fontSize: 14, color: '#1A1A1A', fontWeight: 600 }}>{topic}</span>
-                  <span style={{ fontSize: 13, color: '#DC2626', fontWeight: 700 }}>{s.missed}/{s.total} missed</span>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {onOpenTeachItBack && (
+                      <button
+                        onClick={() => onOpenTeachItBack(topic)}
+                        style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 6, padding: '3px 9px', cursor: 'pointer' }}
+                      >
+                        Teach It
+                      </button>
+                    )}
+                    <span style={{ fontSize: 13, color: '#DC2626', fontWeight: 700 }}>{s.missed}/{s.total} missed</span>
+                  </div>
                 </div>
               ))}
             </div>

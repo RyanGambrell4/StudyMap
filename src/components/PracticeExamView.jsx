@@ -14,7 +14,7 @@ const D = {
   border: 'rgba(0,0,0,0.07)',
 }
 
-export default function PracticeExamView({ courses = [], onShowPaywall }) {
+export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTeachItBack }) {
   const [subview, setSubview] = useState('landing') // 'landing' | 'setup' | 'taking' | 'results'
   const [examCourse, setExamCourse] = useState(null)
   const [examQuestions, setExamQuestions] = useState([])
@@ -103,6 +103,10 @@ export default function PracticeExamView({ courses = [], onShowPaywall }) {
         courseName={examCourse?.name ?? null}
         onRetake={handleRetake}
         onClose={closeToLanding}
+        onOpenTeachItBack={onOpenTeachItBack ? (topic) => {
+          const courseIdx = Math.max(0, courses.findIndex(c => String(c.id) === String(examCourse?.id)))
+          onOpenTeachItBack({ courseIdx, topic })
+        } : null}
       />
     )
   }
