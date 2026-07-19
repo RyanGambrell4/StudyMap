@@ -3,6 +3,7 @@ import Spinner from './ui/spinner'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
 import { getCachedCoachPlan } from '../lib/db'
+import { track } from '../lib/analytics'
 
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
@@ -56,6 +57,7 @@ export default function PrepBlastScreen({ session, course, onDismiss, userId }) 
         })
         const data = await res.json()
         if (!res.ok) throw new Error(data.error)
+        track('prep_blast_generated', { mode, courseName: session.courseName, sessionType: session.sessionType, plan })
         incrementAIQuery()
         setBlast(data)
         setError(false)

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react'
 import Spinner from './ui/spinner'
 import { getCachedCoachPlan, saveCoachPlan, getCachedStudyTools } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
+import { track } from '../lib/analytics'
 
 const ACTIVITY_COLORS = {
   'review':           { border: '#3B82F6', bg: '#EFF6FF', label: 'Review' },
@@ -145,6 +146,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to generate blueprint')
+      track('blueprint_generated', { courseName: session.courseName, sessionType, blockCount: data.blocks?.length ?? 0, plan: getActivePlan() })
       setBlueprint(data)
       incrementAIQuery()
     } catch (e) {
@@ -347,7 +349,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
               </button>
 
               <button
-                onClick={() => onStartSession(blueprint)}
+                onClick={() => { track('blueprint_session_started', { courseName: session.courseName }); onStartSession(blueprint) }}
                 className="w-full py-4 rounded-2xl font-bold text-white text-base"
                 style={{ backgroundColor: dot }}
               >

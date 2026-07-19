@@ -159,7 +159,7 @@ export default function MomentumCard({ completedSessionLog = [], allSessions = [
         {onOpenProgress && (
           <button
             className="mm-btn mm-cta"
-            onClick={onOpenProgress}
+            onClick={() => { track('momentum_progress_clicked', { score: current.score }); onOpenProgress() }}
             style={{
               minHeight: 40,
               padding: '0 14px',
