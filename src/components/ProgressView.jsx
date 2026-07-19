@@ -1,4 +1,5 @@
 import { useMemo, useState, useEffect, Fragment } from 'react'
+import { track } from '../lib/analytics'
 import { clean } from '../utils/strings'
 import { toDateStr, addDays, daysBetween } from '../utils/dateUtils'
 import { getCachedPracticeScores, savePracticeScores, getCachedSessionRecalls, getCachedStudyTools } from '../lib/db'
@@ -281,6 +282,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
     const s = parseFloat(scoreForm.score)
     if (isNaN(s)) return setScoreFormErr('Enter a valid score.')
     const entry = { id: Date.now().toString(), date: scoreForm.date, sectionName: scoreForm.sectionName, score: s, notes: scoreForm.notes, isOfficial: scoreForm.isOfficial }
+    track('practice_score_logged', { sectionName: scoreForm.sectionName, isOfficial: scoreForm.isOfficial, plan: getActivePlan() })
     setPracticeScores(prev => [...prev, entry])
     setScoreForm({ date: todayStr, sectionName: '', score: '', notes: '', isOfficial: false })
     setShowScoreForm(false)
@@ -647,7 +649,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
           {/* Period toggle */}
           <div style={{ display: 'flex', gap: 2, background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 10, padding: 3 }}>
             {['1w','4w','12w','Term'].map(p => (
-              <button key={p} onClick={() => setPeriod(p)} style={{
+              <button key={p} onClick={() => { track('progress_period_changed', { period: p }); setPeriod(p) }} style={{
                 padding: '5px 14px', borderRadius: 7, fontSize: 12, fontWeight: 600,
                 background: period === p ? D.accent : 'transparent',
                 color: period === p ? '#fff' : D.textMuted,
