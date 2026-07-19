@@ -217,7 +217,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
 
             {!isPro && (
               <div style={{ textAlign: 'center', fontSize: 12, color: D.textDim, marginTop: 12 }}>
-                Free: topic 1 only. <button onClick={() => onShowPaywall?.('study-hacks')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>{hasUsedTrial() ? 'Upgrade for all 10' : 'Start free trial for all 10'}</button>
+                You'll see 1 topic on the free plan. <button onClick={() => onShowPaywall?.('study-hacks')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>{hasUsedTrial() ? 'Upgrade to see all 10' : 'See all 10 with Pro'}</button>
               </div>
             )}
           </div>
@@ -242,7 +242,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
                       <svg style={{ animation: 'spin 0.8s linear infinite' }} width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83"/></svg>
                       Regenerating
                     </span>
-                  ) : 'Alternative angle'}
+                  ) : 'Refresh topics'}
                 </button>
               )}
               <button onClick={() => setStep('setup')} style={{ fontSize: 12, color: D.textDim, background: 'none', border: 'none', cursor: 'pointer', padding: '6px 0' }}>
@@ -320,7 +320,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
                         Unlock {lockedCount} more topic{lockedCount !== 1 ? 's' : ''}
                       </div>
                       <div style={{ fontSize: 13, color: D.textMuted, marginBottom: 16, lineHeight: 1.5 }}>
-                        Pro shows all 10 topics and lets you regenerate anytime.
+                        See all 10 topics ranked by exam likelihood, and refresh anytime for a new angle.
                       </div>
                       <button
                         onClick={() => onShowPaywall?.('study-hacks')}

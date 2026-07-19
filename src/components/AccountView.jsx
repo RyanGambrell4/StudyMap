@@ -608,7 +608,7 @@ export default function AccountView({
             </svg>
             <div style={{ flex: 1 }}>
               <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#111111' }}>Send Feedback</p>
-              <p style={{ margin: '2px 0 0', fontSize: 12, color: '#9B9B9B' }}>Tell Ryan what's confusing, broken, or missing</p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: '#9B9B9B' }}>Share what's working or what could be better</p>
             </div>
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9B9B9B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 5l7 7-7 7" /></svg>
           </button>

@@ -390,7 +390,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
             {autopsy.insight && (
               <div style={{ marginTop: 14, padding: '12px 14px', background: `${SKILL_COLOR[autopsy.insight.weakest.skill]}0D`, border: `1px solid ${SKILL_COLOR[autopsy.insight.weakest.skill]}30`, borderRadius: 12 }}>
                 <p style={{ margin: '0 0 4px', fontSize: 12, fontWeight: 800, color: SKILL_COLOR[autopsy.insight.weakest.skill], letterSpacing: '-0.005em' }}>
-                  Fix your {SKILL_LABEL[autopsy.insight.weakest.skill].toLowerCase()} gap first — {autopsy.insight.gap} points behind your {SKILL_LABEL[autopsy.insight.strongest.skill].toLowerCase()}.
+                  Fix your {SKILL_LABEL[autopsy.insight.weakest.skill].toLowerCase()} gap first. You're {autopsy.insight.gap} points behind your {SKILL_LABEL[autopsy.insight.strongest.skill].toLowerCase()}.
                 </p>
                 <p style={{ margin: 0, fontSize: 12.5, color: '#4A4A4A', lineHeight: 1.5 }}>
                   {SKILL_HINT[autopsy.insight.weakest.skill]}
