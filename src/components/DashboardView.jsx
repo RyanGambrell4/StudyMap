@@ -633,10 +633,10 @@ export default function DashboardView({
     if (upcomingDeadlines.length > 0) {
       const d = upcomingDeadlines[0]
       const days = daysBetween(todayStr, d.date)
-      if (days <= 3) return `${clean(d.name)} is due ${days === 0 ? 'today' : days === 1 ? 'tomorrow' : `in ${days} days`}. Consider prioritizing this in your next session.`
+      if (days <= 3) return `${clean(d.name)} is due ${days === 0 ? 'today' : days === 1 ? 'tomorrow' : `in ${days} days`}. Prioritize it in your next session.`
     }
     if (weekHours > 0 && deltaHours > 0) {
-      return `You're up ${deltaHours}h from last week. Keep the momentum. Consistency beats intensity every time.`
+      return `You're up ${deltaHours}h from last week. Keep it going.`
     }
     return `Stay consistent with your sessions. Regular study time is what moves the needle at exam time.`
   }, [upcomingExam, upcomingDeadlines, weekHours, deltaHours, todayStr])
