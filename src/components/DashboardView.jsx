@@ -1805,14 +1805,6 @@ export default function DashboardView({
                   >
                     Quiz Burst
                   </button>
-                  {onOpenTeachItBack && (
-                    <button
-                      onClick={e => { e.stopPropagation(); onOpenTeachItBack?.() }}
-                      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: '#3B61C4', background: 'rgba(59,97,196,0.07)', border: '1px solid rgba(59,97,196,0.2)', cursor: 'pointer' }}
-                    >
-                      Teach It Back
-                    </button>
-                  )}
                 </div>
               </div>
             ) : displaySession ? (

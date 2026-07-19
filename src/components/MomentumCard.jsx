@@ -1,6 +1,5 @@
 import { useMemo } from 'react'
 import { computeMomentum, computeMomentumLastWeek, momentumLabel, momentumColor } from '../lib/momentum'
-import { getWeakestTopics } from '../lib/masteryStore'
 import { track } from '../lib/analytics'
 
 const D = {
@@ -66,13 +65,11 @@ function Bar({ label, value, color }) {
   )
 }
 
-export default function MomentumCard({ completedSessionLog = [], allSessions = [], completedIds, todayStr, onOpenProgress, onOpenTeachItBack }) {
+export default function MomentumCard({ completedSessionLog = [], allSessions = [], completedIds, todayStr, onOpenProgress }) {
   const { current, previous } = useMemo(() => ({
     current: computeMomentum({ completedSessionLog, allSessions, completedIds, todayStr }),
     previous: computeMomentumLastWeek({ completedSessionLog, allSessions, completedIds, todayStr }),
   }), [completedSessionLog, allSessions, completedIds, todayStr])
-
-  const topWeak = useMemo(() => getWeakestTopics(null, 1)[0] ?? null, [])
 
   // Hide if we truly have no signal to compute against.
   if (!completedSessionLog.length && !allSessions.length) return null
@@ -176,22 +173,6 @@ export default function MomentumCard({ completedSessionLog = [], allSessions = [
           >
             View progress
             <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-          </button>
-        )}
-        {current.velocity < 40 && onOpenTeachItBack && (
-          <button
-            className="mm-btn"
-            onClick={() => { track('momentum_teach_it_back', { velocity: current.velocity, topic: topWeak?.topic }); onOpenTeachItBack(topWeak ? { topic: topWeak.topic } : {}) }}
-            style={{
-              minHeight: 38, padding: '0 12px',
-              display: 'inline-flex', alignItems: 'center', gap: 6,
-              background: 'rgba(124,58,237,0.07)', color: '#7C3AED',
-              border: '1px solid rgba(124,58,237,0.22)', borderRadius: 10,
-              fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
-              cursor: 'pointer', whiteSpace: 'nowrap',
-            }}
-          >
-            Teach It Back
           </button>
         )}
       </div>
