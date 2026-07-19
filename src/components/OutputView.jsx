@@ -1963,6 +1963,7 @@ export default function OutputView({
               })
             }}
             onOpenReviewQueue={() => setActiveSection('review')}
+            onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
           />
         )}
 
