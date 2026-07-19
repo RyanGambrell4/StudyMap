@@ -1092,7 +1092,7 @@ export default function CoursesView({
           <p style={{ margin: '6px 0 0', fontSize: 14, color: D.muted, maxWidth: 640 }}>
             {isExamMode
               ? 'Track your exam sections and build your prep plan around your test date.'
-              : 'Organize every class: pull in syllabi, schedules, and let the AI map your semester.'}
+              : 'Organize every class: pull in syllabi, schedules, and map your full semester.'}
           </p>
         </div>
         <button
@@ -1118,7 +1118,7 @@ export default function CoursesView({
           return (
             <div style={{ marginBottom: 28 }}>
               <div style={{ marginBottom: 14 }}>
-                <p style={{ margin: '0 0 4px', color: D.text, fontWeight: 700, fontSize: 15 }}>Add your courses to get started</p>
+                <p style={{ margin: '0 0 4px', color: D.text, fontWeight: 700, fontSize: 15 }}>Add your courses to build your plan</p>
                 <p style={{ margin: 0, color: D.textMuted, fontSize: 13 }}>Pick from common courses below, or click <strong>Add Course</strong> to set up your own.</p>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: 10 }}>
