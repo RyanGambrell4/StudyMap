@@ -73,6 +73,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
         if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
         incrementAIQuery()
         addStudySession({ tool: 'AI Cheat Sheet', score: null, topic: examPrompt.trim() || null, courseName: course?.name || null })
+        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'cheatSheet' } }))
         setResult(data)
         setStep('result')
         setLoading(false)

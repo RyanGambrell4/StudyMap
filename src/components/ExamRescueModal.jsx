@@ -78,6 +78,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall, onOpe
         incrementAIQuery()
         incrementFeatureUsage('examRescue')
         addStudySession({ tool: 'Exam Rescue', score: null, topic: null, courseName: course?.name || null })
+        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'examRescue' } }))
         setTopics(data.topics)
         setStep('topics')
         setLoading(false)
