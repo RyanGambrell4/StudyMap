@@ -769,4 +769,7 @@
   <url><loc>https://getstudyedge.com/blog/how-to-read-a-textbook</loc><lastmod>2026-07-18</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
   <url><loc>https://getstudyedge.com/blog/how-to-study-with-music</loc><lastmod>2026-07-18</lastmod><changefreq>monthly</changefreq><priority>0.85</priority></url>
 
+  <!-- Statistics hub — 2026-07-18: linkable data page for backlinks -->
+  <url><loc>https://getstudyedge.com/study-statistics</loc><lastmod>2026-07-18</lastmod><changefreq>monthly</changefreq><priority>0.90</priority></url>
+
 </urlset>
