@@ -54,7 +54,7 @@ function vibeLine({ sessionCount, activeDayCount, deltaMinutes, avgRecall }) {
   return `You showed up. Now compound it — one more day this week.`
 }
 
-export default function WeeklyRecapCard({ completedSessionLog = [], todayStr, onStartFocus, onOpenProgress }) {
+export default function WeeklyRecapCard({ completedSessionLog = [], todayStr, onStartFocus, onOpenProgress, onOpenTeachItBack }) {
   const [dismissed, setDismissed] = useState(() => {
     if (typeof window === 'undefined') return false
     // Dismissed key is per-week so the card doesn't re-appear after dismissal
@@ -164,6 +164,22 @@ export default function WeeklyRecapCard({ completedSessionLog = [], todayStr, on
               : `Every session counted this week.`}
           </div>
           <div className="wr-cta-group" style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+            {recap.avgRecall !== null && recap.avgRecall < 60 && onOpenTeachItBack && (
+              <button
+                className="wr-ghost"
+                onClick={() => { track('weekly_recap_teach_it_back', { avgRecall: recap.avgRecall }); onOpenTeachItBack({}) }}
+                style={{
+                  minHeight: 40, padding: '0 12px',
+                  background: 'rgba(124,58,237,0.07)', color: '#7C3AED',
+                  border: '1px solid rgba(124,58,237,0.2)', borderRadius: 10,
+                  fontSize: 12, fontWeight: 700, fontFamily: 'inherit',
+                  cursor: 'pointer', whiteSpace: 'nowrap',
+                  transition: 'background 150ms cubic-bezier(0.4,0,0.2,1)',
+                }}
+              >
+                Teach It Back
+              </button>
+            )}
             {onOpenProgress && (
               <button
                 className="wr-ghost"

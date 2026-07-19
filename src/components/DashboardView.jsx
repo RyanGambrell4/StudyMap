@@ -1457,6 +1457,7 @@ export default function DashboardView({
           todayStr={todayStr}
           onStartFocus={() => displaySession ? onStartFocus?.(displaySession) : onOpenStudyCoach?.()}
           onOpenProgress={onOpenProgress ?? onNavigateToProgress}
+          onOpenTeachItBack={onOpenTeachItBack}
         />
 
         {/* ── Momentum Score: composite weekly health ── */}
