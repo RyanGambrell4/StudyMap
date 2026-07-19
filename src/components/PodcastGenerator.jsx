@@ -174,6 +174,7 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
       setPodcast(data.podcast)
       setResetAt(data.usage?.resetAt ?? null)
       setStep('done')
+      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'podcast' } }))
     } catch (e) {
       setError(e.message || 'Generation failed. Please try again.')
       setStep('error')

@@ -454,23 +454,47 @@ export default function SmartStartCard({
                           <div style={{ height: '100%', width: `${pct}%`, background: 'linear-gradient(90deg, #DC2626, #F87171)', borderRadius: 2 }} />
                         </div>
                       </div>
-                      <button
-                        className="ss-btn"
-                        onClick={() => { track('war_room_drill_topic', { topic: t.topic }); onOpenBrainDump?.() }}
-                        style={{
-                          minHeight: 36, minWidth: 60,
-                          padding: '6px 14px',
-                          fontSize: 12, fontWeight: 700, color: '#fff',
-                          background: '#DC2626', border: 'none', borderRadius: 8,
-                          cursor: 'pointer',
-                          boxShadow: '0 2px 8px rgba(220,38,38,0.3)',
-                          transition: 'transform 150ms ease',
-                        }}
-                        onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
-                        onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-                      >
-                        Drill
-                      </button>
+                      <div style={{ display: 'flex', gap: 6, flexShrink: 0 }}>
+                        <button
+                          className="ss-btn"
+                          onClick={() => { track('war_room_drill_topic', { topic: t.topic }); onOpenBrainDump?.() }}
+                          style={{
+                            minHeight: 36, minWidth: 54,
+                            padding: '6px 12px',
+                            fontSize: 12, fontWeight: 700, color: '#fff',
+                            background: '#DC2626', border: 'none', borderRadius: 8,
+                            cursor: 'pointer',
+                            boxShadow: '0 2px 8px rgba(220,38,38,0.3)',
+                            transition: 'transform 150ms ease',
+                          }}
+                          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
+                          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+                        >
+                          Drill
+                        </button>
+                        {onOpenTeachItBack && (
+                          <button
+                            className="ss-btn"
+                            onClick={() => {
+                              track('war_room_teach_it_back', { topic: t.topic })
+                              const idx = courses?.findIndex(c => String(c.id) === String(t.courseId)) ?? -1
+                              onOpenTeachItBack({ courseIdx: Math.max(0, idx), topic: t.topic })
+                            }}
+                            style={{
+                              minHeight: 36, minWidth: 54,
+                              padding: '6px 12px',
+                              fontSize: 12, fontWeight: 700, color: '#7C3AED',
+                              background: 'rgba(124,58,237,0.09)', border: '1px solid rgba(124,58,237,0.25)',
+                              borderRadius: 8, cursor: 'pointer', fontFamily: 'inherit',
+                              transition: 'transform 150ms ease',
+                            }}
+                            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
+                            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+                          >
+                            Teach
+                          </button>
+                        )}
+                      </div>
                     </div>
                   )
                 })}
