@@ -28,8 +28,8 @@ function fmtDateShort(dateStr) {
 
 function Stat({ label, value, color = D.text }) {
   return (
-    <div style={{
-      flex: '1 1 90px', minWidth: 90,
+    <div className="wr-stat" style={{
+      flex: '1 1 90px', minWidth: 0,
       padding: '10px 12px',
       background: '#FAFAF8',
       border: '1px solid rgba(0,0,0,0.05)',
@@ -82,7 +82,7 @@ export default function WeeklyRecapCard({ completedSessionLog = [], todayStr, on
   }
 
   return (
-    <div style={{
+    <div className="wr-card" style={{
       gridColumn: 'span 12',
       background: `linear-gradient(135deg, ${D.bg} 0%, ${D.brandSoft} 100%)`,
       border: `1px solid ${D.brand}22`,
@@ -102,12 +102,25 @@ export default function WeeklyRecapCard({ completedSessionLog = [], todayStr, on
         .wr-ghost:focus-visible { outline: none; box-shadow: 0 0 0 3px ${D.brand}30; }
         .wr-dismiss:hover { background: rgba(0,0,0,0.05); }
         .wr-dismiss:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,0.15); }
+        .wr-stats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
+        @media (max-width: 640px) {
+          .wr-stats { grid-template-columns: repeat(3, 1fr); }
+        }
+        @media (max-width: 480px) {
+          .wr-card { padding: 14px 16px !important; }
+          .wr-stats { grid-template-columns: repeat(2, 1fr); }
+          .wr-head-body { min-width: 0 !important; flex: 1 1 100% !important; }
+          .wr-foot { flex-direction: column !important; align-items: stretch !important; }
+          .wr-foot .wr-copy { width: 100%; min-width: 0 !important; }
+          .wr-foot .wr-cta-group { width: 100%; flex-wrap: wrap; }
+          .wr-foot .wr-cta-group > * { flex: 1; justify-content: center; }
+        }
       `}</style>
 
       <div style={{ animation: 'wr-fade 400ms cubic-bezier(0.16,1,0.3,1) both' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 12, flexWrap: 'wrap' }}>
-          <div style={{ flex: 1, minWidth: 200 }}>
+          <div className="wr-head-body" style={{ flex: 1, minWidth: 0 }}>
             <div style={{ fontSize: 10.5, fontWeight: 700, color: D.brand, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>
               Weekly recap · {fmtDateShort(recap.weekStart)} – {fmtDateShort(recap.weekEnd)}
             </div>
@@ -133,7 +146,7 @@ export default function WeeklyRecapCard({ completedSessionLog = [], todayStr, on
         </div>
 
         {/* Stat row */}
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginBottom: 14 }}>
+        <div className="wr-stats" style={{ marginBottom: 14 }}>
           <Stat label="Sessions" value={recap.sessionCount} />
           <Stat label="Time studied" value={fmtHours(recap.totalMinutes)} />
           <Stat label="Active days" value={`${recap.activeDayCount}/7`} />
@@ -144,13 +157,13 @@ export default function WeeklyRecapCard({ completedSessionLog = [], todayStr, on
         </div>
 
         {/* Top course + CTAs */}
-        <div style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}>
-          <div style={{ fontSize: 12.5, color: D.muted, lineHeight: 1.5, flex: 1, minWidth: 220 }}>
+        <div className="wr-foot" style={{ display: 'flex', gap: 10, alignItems: 'center', flexWrap: 'wrap', justifyContent: 'space-between' }}>
+          <div className="wr-copy" style={{ fontSize: 12.5, color: D.muted, lineHeight: 1.5, flex: 1, minWidth: 0 }}>
             {recap.topCourse
               ? <>Most time in <span style={{ color: D.text, fontWeight: 700 }}>{recap.topCourse.name}</span> · {fmtHours(recap.topCourse.minutes)}</>
               : `Every session counted this week.`}
           </div>
-          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
+          <div className="wr-cta-group" style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             {onOpenProgress && (
               <button
                 className="wr-ghost"

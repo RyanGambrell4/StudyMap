@@ -84,7 +84,7 @@ export default function ExamCountdownCard({ courses = [], onStartFocus, onOpenEx
   const urgencyLabel = days <= 3 ? 'Sprint week' : days <= 7 ? 'Home stretch' : 'On the clock'
 
   return (
-    <div style={{
+    <div className="ec-card" style={{
       gridColumn: 'span 12',
       background: `linear-gradient(135deg, ${D.bg} 0%, ${urgencyColor}0A 100%)`,
       border: `1px solid ${urgencyColor}25`,
@@ -106,9 +106,16 @@ export default function ExamCountdownCard({ courses = [], onStartFocus, onOpenEx
         .ec-ghost:focus-visible { outline: none; box-shadow: 0 0 0 3px ${urgencyColor}30; }
         .ec-dismiss:hover { background: rgba(0,0,0,0.05); }
         .ec-dismiss:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,0.15); }
+        @media (max-width: 480px) {
+          .ec-card { padding: 14px 16px !important; gap: 12px !important; }
+          .ec-inner { gap: 12px !important; }
+          .ec-body { min-width: 0 !important; flex: 1 1 100% !important; }
+          .ec-actions { width: 100%; flex-wrap: wrap; }
+          .ec-actions .ec-btn { flex: 1; justify-content: center; }
+        }
       `}</style>
 
-      <div style={{ animation: 'ec-fade 400ms cubic-bezier(0.16,1,0.3,1) both', display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
+      <div className="ec-inner" style={{ animation: 'ec-fade 400ms cubic-bezier(0.16,1,0.3,1) both', display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
         {/* Big countdown number */}
         <div style={{
           flexShrink: 0,
@@ -129,7 +136,7 @@ export default function ExamCountdownCard({ courses = [], onStartFocus, onOpenEx
         </div>
 
         {/* Text */}
-        <div style={{ flex: 1, minWidth: 240 }}>
+        <div className="ec-body" style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 10.5, fontWeight: 700, color: urgencyColor, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>
             Exam countdown · {urgencyLabel}
           </div>
@@ -163,7 +170,7 @@ export default function ExamCountdownCard({ courses = [], onStartFocus, onOpenEx
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignSelf: 'center', alignItems: 'center' }}>
+        <div className="ec-actions" style={{ display: 'flex', gap: 8, flexShrink: 0, alignSelf: 'center', alignItems: 'center' }}>
           <button
             className="ec-btn"
             onClick={() => {

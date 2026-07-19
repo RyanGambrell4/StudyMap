@@ -62,7 +62,7 @@ export default function CrossCourseCard({ courses = [], onOpenBrainDump, onOpenR
   const description = `You are studying "${top.token}" in ${top.courses.length} classes. Drill it once and every one of them levels up.`
 
   return (
-    <div style={{
+    <div className="cc-card" style={{
       gridColumn: 'span 12',
       background: `linear-gradient(135deg, ${D.bgCard} 0%, rgba(124,58,237,0.04) 100%)`,
       border: `1px solid ${D.purple}22`,
@@ -84,6 +84,12 @@ export default function CrossCourseCard({ courses = [], onOpenBrainDump, onOpenR
         .cc-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(124,58,237,0.35); }
         .cc-dismiss:hover { background: rgba(0,0,0,0.05); }
         .cc-dismiss:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,0.15); }
+        @media (max-width: 480px) {
+          .cc-card { padding: 14px 16px !important; gap: 12px !important; }
+          .cc-body { min-width: 0 !important; flex: 1 1 100% !important; }
+          .cc-actions { width: 100%; }
+          .cc-actions .cc-btn { flex: 1; justify-content: center; }
+        }
       `}</style>
 
       <div style={{ animation: 'cc-fade 400ms cubic-bezier(0.16,1,0.3,1) both', display: 'flex', gap: 18, alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
@@ -102,7 +108,7 @@ export default function CrossCourseCard({ courses = [], onOpenBrainDump, onOpenR
         </div>
 
         {/* Text */}
-        <div style={{ flex: 1, minWidth: 240 }}>
+        <div className="cc-body" style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 10.5, fontWeight: 700, color: D.purple, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>
             Cross-course connection
           </div>
@@ -119,7 +125,7 @@ export default function CrossCourseCard({ courses = [], onOpenBrainDump, onOpenR
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignSelf: 'center', alignItems: 'center' }}>
+        <div className="cc-actions" style={{ display: 'flex', gap: 8, flexShrink: 0, alignSelf: 'center', alignItems: 'center' }}>
           <button
             className="cc-btn"
             onClick={() => { track('cross_course_drill', { token: top.token, courseCount: top.courses.length }); onOpenBrainDump?.() }}

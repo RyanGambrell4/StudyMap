@@ -226,7 +226,7 @@ export default function SmartStartCard({
     const examName = clean(upcomingExam.course.name)
     const isToday = upcomingExam.days === 0
     return (
-      <div style={{
+      <div className="ss-war" style={{
         gridColumn: 'span 12',
         position: 'relative',
         background: 'linear-gradient(160deg, #FFFFFF 0%, #FFF8F8 45%, #FFEEEE 100%)',
@@ -235,6 +235,15 @@ export default function SmartStartCard({
         overflow: 'hidden',
         boxShadow: '0 12px 40px rgba(220,38,38,0.14), 0 2px 8px rgba(220,38,38,0.08)',
       }}>
+        <style>{`
+          @media (max-width: 480px) {
+            .ss-war-hero { padding: 18px 16px !important; }
+            .ss-war-body { min-width: 0 !important; flex: 1 1 100% !important; }
+            .ss-war-body h2 { font-size: 22px !important; }
+            .ss-war-meter { min-width: 0 !important; width: 100%; }
+            .ss-war-actions { grid-template-columns: 1fr !important; }
+          }
+        `}</style>
         {/* Ambient glow behind the header */}
         <div style={{
           position: 'absolute', top: -80, right: -80,
@@ -277,9 +286,9 @@ export default function SmartStartCard({
         </div>
 
         {/* Hero content */}
-        <div style={{ position: 'relative', padding: '24px 24px 22px' }}>
+        <div className="ss-war-hero" style={{ position: 'relative', padding: '24px 24px 22px' }}>
           <div style={{ display: 'flex', gap: 20, marginBottom: 20, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 240 }}>
+            <div className="ss-war-body" style={{ flex: 1, minWidth: 0 }}>
               <p style={{
                 fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
                 color: '#DC2626', margin: '0 0 6px',
@@ -302,7 +311,7 @@ export default function SmartStartCard({
 
             {/* Prep readiness meter */}
             {mastery && (
-              <div style={{
+              <div className="ss-war-meter" style={{
                 minWidth: 140, padding: '12px 16px',
                 background: 'rgba(255,255,255,0.7)',
                 border: '1px solid rgba(220,38,38,0.18)',
@@ -323,7 +332,7 @@ export default function SmartStartCard({
           </div>
 
           {/* Actions grid */}
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: weakTopics.length > 0 ? 20 : 0 }}>
+          <div className="ss-war-actions" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', gap: 10, marginBottom: weakTopics.length > 0 ? 20 : 0 }}>
             <button
               className="ss-btn"
               onClick={() => { track('war_room_cta', { action: 'examRescue' }); isPro ? onOpenExamRescue?.() : onShowPaywall?.('examRescue') }}
@@ -510,7 +519,7 @@ export default function SmartStartCard({
       </div>
 
       {/* Main content row */}
-      <div style={{ padding: '12px 20px 16px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
+      <div className="ss-row" style={{ padding: '12px 20px 16px', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
 
         {/* Icon tile */}
         <div style={{
@@ -523,7 +532,7 @@ export default function SmartStartCard({
         </div>
 
         {/* Text block */}
-        <div style={{ flex: 1, minWidth: 200 }}>
+        <div className="ss-body" style={{ flex: 1, minWidth: 0 }}>
           <h3 style={{ margin: '0 0 4px', fontSize: 17, fontWeight: 700, color: D.text, letterSpacing: -0.3, lineHeight: 1.25 }}>
             {headline}
           </h3>
@@ -533,7 +542,7 @@ export default function SmartStartCard({
         </div>
 
         {/* CTA group */}
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
+        <div className="ss-cta-group" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
           <button
             className="smart-btn"
             onClick={handleCta}
@@ -630,6 +639,13 @@ export default function SmartStartCard({
         .smart-btn:hover { transform: translateY(-1px); }
         .smart-btn:active { transform: scale(0.97); }
         .smart-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(59,97,196,0.35); }
+        @media (max-width: 480px) {
+          .ss-row { padding: 12px 16px 16px !important; gap: 12px !important; }
+          .ss-body { flex: 1 1 100% !important; min-width: 0 !important; }
+          .ss-cta-group { width: 100%; align-items: stretch !important; }
+          .ss-cta-group > button:first-child { width: 100%; justify-content: center; }
+          .ss-cta-group > div { flex-wrap: wrap; justify-content: center; }
+        }
       `}</style>
     </div>
   )

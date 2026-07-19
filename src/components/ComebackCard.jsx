@@ -33,7 +33,7 @@ export default function ComebackCard({ daysAway, lastSessionDate, courses, onSta
     : { label: '15-min recall on your best topic', action: () => { track('comeback_micro_start'); onOpenBrainDump?.() } }
 
   return (
-    <div style={{
+    <div className="cb-card" style={{
       gridColumn: 'span 12',
       background: 'linear-gradient(135deg, #FFFFFF 0%, #F0FDF4 100%)',
       border: '1px solid rgba(22,163,74,0.2)',
@@ -56,6 +56,13 @@ export default function ComebackCard({ daysAway, lastSessionDate, courses, onSta
         .cb-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(22,163,74,0.4); }
         .cb-ghost:hover { background: rgba(22,163,74,0.06); }
         .cb-ghost:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(22,163,74,0.3); }
+        @media (max-width: 480px) {
+          .cb-card { padding: 16px 16px !important; }
+          .cb-row  { gap: 12px !important; }
+          .cb-body { min-width: 0 !important; flex: 1 1 100% !important; }
+          .cb-actions { flex-direction: row !important; width: 100%; flex-wrap: wrap; }
+          .cb-actions > * { flex: 1 1 100%; }
+        }
       `}</style>
 
       {/* Ambient wash */}
@@ -66,7 +73,7 @@ export default function ComebackCard({ daysAway, lastSessionDate, courses, onSta
         animation: 'cb-drift 40s linear infinite',
       }}/>
 
-      <div style={{ position: 'relative', display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap', animation: 'cb-fade 400ms cubic-bezier(0.16,1,0.3,1) both' }}>
+      <div className="cb-row" style={{ position: 'relative', display: 'flex', gap: 20, alignItems: 'center', flexWrap: 'wrap', animation: 'cb-fade 400ms cubic-bezier(0.16,1,0.3,1) both' }}>
         {/* Icon */}
         <div style={{
           width: 56, height: 56, borderRadius: 14,
@@ -81,7 +88,7 @@ export default function ComebackCard({ daysAway, lastSessionDate, courses, onSta
         </div>
 
         {/* Text */}
-        <div style={{ flex: 1, minWidth: 240 }}>
+        <div className="cb-body" style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 10.5, fontWeight: 700, color: '#15803D', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>
             Welcome back
           </div>
@@ -109,7 +116,7 @@ export default function ComebackCard({ daysAway, lastSessionDate, courses, onSta
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0, alignItems: 'stretch' }}>
+        <div className="cb-actions" style={{ display: 'flex', flexDirection: 'column', gap: 8, flexShrink: 0, alignItems: 'stretch' }}>
           <button
             className="cb-btn"
             onClick={() => { track('comeback_primary_cta', { daysAway }); primary.action() }}

@@ -64,7 +64,7 @@ export default function StreakGuardCard({
   }
 
   return (
-    <div style={{
+    <div className="sg-card" style={{
       gridColumn: 'span 12',
       background: `linear-gradient(135deg, ${D.bg} 0%, ${color}0D 100%)`,
       border: `1px solid ${color}30`,
@@ -86,9 +86,16 @@ export default function StreakGuardCard({
         .sg-ghost:focus-visible { outline: none; box-shadow: 0 0 0 3px ${color}30; }
         .sg-dismiss:hover { background: rgba(0,0,0,0.05); }
         .sg-dismiss:focus-visible { outline: none; box-shadow: 0 0 0 3px rgba(0,0,0,0.15); }
+        @media (max-width: 480px) {
+          .sg-card { padding: 14px 16px !important; gap: 12px !important; }
+          .sg-inner { gap: 12px !important; }
+          .sg-body { min-width: 0 !important; flex: 1 1 100% !important; }
+          .sg-actions { width: 100%; flex-wrap: wrap; }
+          .sg-actions .sg-btn { flex: 1; justify-content: center; }
+        }
       `}</style>
 
-      <div style={{ animation: 'sg-fade 400ms cubic-bezier(0.16,1,0.3,1) both', display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
+      <div className="sg-inner" style={{ animation: 'sg-fade 400ms cubic-bezier(0.16,1,0.3,1) both', display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap', flex: 1 }}>
         {/* Flame icon with streak number */}
         <div style={{
           flexShrink: 0,
@@ -111,7 +118,7 @@ export default function StreakGuardCard({
         </div>
 
         {/* Text */}
-        <div style={{ flex: 1, minWidth: 220 }}>
+        <div className="sg-body" style={{ flex: 1, minWidth: 0 }}>
           <div style={{ fontSize: 10.5, fontWeight: 700, color, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 4 }}>
             {isUrgent ? 'Streak at risk' : 'Streak guard'}
           </div>
@@ -128,7 +135,7 @@ export default function StreakGuardCard({
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignSelf: 'center', alignItems: 'center' }}>
+        <div className="sg-actions" style={{ display: 'flex', gap: 8, flexShrink: 0, alignSelf: 'center', alignItems: 'center' }}>
           {freezeCount > 0 && (
             <button
               className="sg-ghost"

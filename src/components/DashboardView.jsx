@@ -17,6 +17,7 @@ import CrossCourseCard from './CrossCourseCard'
 import ExamCountdownCard from './ExamCountdownCard'
 import StreakGuardCard from './StreakGuardCard'
 import WeeklyRecapCard from './WeeklyRecapCard'
+import WelcomeOverlay from './WelcomeOverlay'
 import { getDueForReview, getReviewStats } from '../lib/masteryStore'
 import { detectComeback } from '../lib/momentum'
 
@@ -618,8 +619,25 @@ export default function DashboardView({
           'Session blueprints for every study block',
           'Grade tracker that catches drops early',
         ]
+    const emailFirstName = (() => {
+      if (!userEmail || typeof userEmail !== 'string') return null
+      const local = userEmail.split('@')[0]
+      if (!local) return null
+      const first = local.split(/[._-]/)[0]
+      if (!first || first.length < 2 || first.length > 20) return null
+      if (!/^[a-zA-Z]+$/.test(first)) return null
+      return first.charAt(0).toUpperCase() + first.slice(1).toLowerCase()
+    })()
     return (
       <div style={{ minHeight: '100vh', background: D.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 24px' }}>
+        <WelcomeOverlay
+          firstName={emailFirstName}
+          isExamMode={isExamMode}
+          onStart={() => {
+            track('welcome_overlay_start_click', { source: 'dashboard_empty' })
+            onNavigateToCourses?.()
+          }}
+        />
         <div style={{ maxWidth: 420, width: '100%', textAlign: 'center' }}>
           <h2 style={{ color: D.text, fontSize: 26, fontWeight: 700, letterSpacing: -0.5, margin: '0 0 10px', lineHeight: 1.2 }}>
             {isExamMode ? 'One section to get started.' : 'One course to get started.'}

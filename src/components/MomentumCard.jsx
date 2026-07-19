@@ -95,7 +95,7 @@ export default function MomentumCard({ completedSessionLog = [], allSessions = [
   })()
 
   return (
-    <div style={{
+    <div className="mm-card" style={{
       gridColumn: 'span 12',
       background: D.bgCard,
       border: `1px solid ${D.border}`,
@@ -115,6 +115,11 @@ export default function MomentumCard({ completedSessionLog = [], allSessions = [
         .mm-btn:hover { transform: translateY(-1px); }
         .mm-btn:active { transform: scale(0.97); }
         .mm-btn:focus-visible { outline: none; box-shadow: 0 0 0 3px ${color}40; }
+        @media (max-width: 480px) {
+          .mm-card { gap: 12px !important; padding: 14px 16px !important; }
+          .mm-body { min-width: 0 !important; flex: 1 1 100% !important; }
+          .mm-cta  { width: 100%; justify-content: center; align-self: stretch !important; }
+        }
       `}</style>
 
       {/* Ring */}
@@ -123,7 +128,7 @@ export default function MomentumCard({ completedSessionLog = [], allSessions = [
       </div>
 
       {/* Header + insight */}
-      <div style={{ flex: 1, minWidth: 220, display: 'flex', flexDirection: 'column', gap: 6, animation: 'mm-fade 400ms cubic-bezier(0.16,1,0.3,1) both', animationDelay: '80ms' }}>
+      <div className="mm-body" style={{ flex: 1, minWidth: 0, display: 'flex', flexDirection: 'column', gap: 6, animation: 'mm-fade 400ms cubic-bezier(0.16,1,0.3,1) both', animationDelay: '80ms' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
           <span style={{ fontSize: 15, fontWeight: 800, color, letterSpacing: '-0.01em' }}>{label}</span>
           <span style={{
@@ -151,7 +156,7 @@ export default function MomentumCard({ completedSessionLog = [], allSessions = [
 
       {onOpenProgress && (
         <button
-          className="mm-btn"
+          className="mm-btn mm-cta"
           onClick={onOpenProgress}
           style={{
             flexShrink: 0,
