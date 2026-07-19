@@ -18,7 +18,7 @@ const D = {
  *   onSave(rating, hardNotes) - called with rating (1-5) and optional struggle text
  *   onSkip()    - dismissed without rating
  */
-export default function SessionRatingModal({ session, onSave, onSkip, onShowPaywall, onOpenTeachItBack }) {
+export default function SessionRatingModal({ session, onSave, onSkip, onShowPaywall }) {
   const [rating, setRating] = useState(null)
   const [hardNotes, setHardNotes] = useState('')
   const [saving, setSaving] = useState(false)
@@ -127,25 +127,6 @@ export default function SessionRatingModal({ session, onSave, onSkip, onShowPayw
             )
           })}
         </div>
-
-        {/* Teach It Back nudge — only appears on Rough / Hard ratings */}
-        {rating !== null && rating <= 2 && onOpenTeachItBack && (
-          <div style={{ marginBottom: 16, padding: '10px 14px', background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.15)', borderRadius: 10, display: 'flex', alignItems: 'center', gap: 12 }}>
-            <div style={{ flex: 1 }}>
-              <div style={{ fontSize: 12.5, fontWeight: 700, color: '#5B21B6', marginBottom: 2 }}>Try Teach It Back</div>
-              <div style={{ fontSize: 12, color: D.muted, lineHeight: 1.4 }}>Explain the topic out loud. The AI finds exactly where you're fuzzy.</div>
-            </div>
-            <button
-              onClick={() => {
-                onOpenTeachItBack({ courseIdx: session?.courseId ?? 0, topic: session?.sessionType ?? '' })
-                onSkip?.()
-              }}
-              style={{ padding: '7px 13px', background: '#5B21B6', color: '#fff', border: 'none', borderRadius: 8, fontSize: 12, fontWeight: 700, cursor: 'pointer', whiteSpace: 'nowrap', fontFamily: 'inherit', flexShrink: 0 }}
-            >
-              Try it
-            </button>
-          </div>
-        )}
 
         {/* Struggle text */}
         <div style={{ marginBottom: 20 }}>
