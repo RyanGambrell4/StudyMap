@@ -497,14 +497,29 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
                 <p style={{ margin: 0, fontSize: 14, color: D.text, lineHeight: 1.6 }}>{finalResult.feedback}</p>
               </div>
 
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <button onClick={reset} style={{ padding: '12px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(59,97,196,0.30)' }}>
-                  Try another topic
-                </button>
-                <button onClick={onClose} style={{ padding: '10px', background: 'none', border: 'none', color: D.textDim, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
-                  Done
-                </button>
-              </div>
+              {(() => {
+                const courseId = courses[courseIdx]?.id ?? null
+                const nextWeak = getWeakestTopics(courseId, 6)
+                  .filter(w => w.score < 75 && w.topic.toLowerCase() !== topic.toLowerCase())[0]
+                return (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    {nextWeak && (
+                      <button
+                        onClick={() => { setTopic(nextWeak.topic); setExplanation(''); setResult(null); setFinalResult(null); setPrevMasteryScore(null); setStep('explain') }}
+                        style={{ padding: '12px', background: '#7C3AED', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(124,58,237,0.30)' }}
+                      >
+                        Next weak topic: {nextWeak.topic}
+                      </button>
+                    )}
+                    <button onClick={reset} style={{ padding: '12px', background: nextWeak ? 'none' : D.accent, border: nextWeak ? `1px solid ${D.border}` : 'none', borderRadius: 10, color: nextWeak ? D.textMuted : '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: nextWeak ? 'none' : '0 3px 12px rgba(59,97,196,0.30)' }}>
+                      Try another topic
+                    </button>
+                    <button onClick={onClose} style={{ padding: '10px', background: 'none', border: 'none', color: D.textDim, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>
+                      Done
+                    </button>
+                  </div>
+                )
+              })()}
             </div>
           )}
 
