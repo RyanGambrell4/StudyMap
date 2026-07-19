@@ -282,6 +282,7 @@ export default function EssayArchitectView({ userId, onShowPaywall }) {
       if (!res.ok) throw new Error(json.error || 'Failed to generate outline')
 
       incrementAIQuery()
+      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'essayArchitect' } }))
       const entry = {
         id: Date.now().toString(),
         topic,

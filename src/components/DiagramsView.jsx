@@ -636,6 +636,7 @@ export default function DiagramsView({ courses, userId, onShowPaywall }) {
       saveDiagram(entry)
       await incrementAIQuery()
       track('diagram_generated', { type: diagramType, hasCourseName: !!courseName })
+      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'diagrams' } }))
 
       setActiveDiagram(entry)
       setMode('view')

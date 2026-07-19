@@ -361,6 +361,7 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
       if (!res.ok) throw new Error(json.error || 'Failed to solve problem')
 
       incrementAIQuery()
+      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'problemSolver' } }))
       const entry = {
         id: Date.now().toString(),
         problem: problemText,
