@@ -2073,6 +2073,7 @@ export default function OutputView({
             courses={courses}
             onOpenBrainDump={() => setShowBrainDump(true)}
             onDrillTopic={(topic) => { setShowBrainDump(true) }}
+            onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
           />
         )}
 

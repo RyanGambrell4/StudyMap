@@ -61,7 +61,7 @@ function ScoreBar({ score, color }) {
   )
 }
 
-function TopicCard({ entry, onDrill }) {
+function TopicCard({ entry, onDrill, onTeachItBack }) {
   const [hovered, setHovered] = useState(false)
   const color = getMasteryColor(entry.score)
   const level = getMasteryLevel(entry.score)
@@ -137,17 +137,32 @@ function TopicCard({ entry, onDrill }) {
         </div>
 
         {hovered && (
-          <button
-            onClick={() => onDrill?.(entry.topic)}
-            style={{
-              fontSize: 11.5, fontWeight: 700, color: D.blue,
-              background: 'rgba(59,97,196,0.08)', border: `1px solid rgba(59,97,196,0.2)`,
-              borderRadius: 7, padding: '4px 11px', cursor: 'pointer', fontFamily: 'inherit',
-              whiteSpace: 'nowrap', transition: 'all 0.15s',
-            }}
-          >
-            Drill this
-          </button>
+          <div style={{ display: 'flex', gap: 6 }}>
+            <button
+              onClick={() => onDrill?.(entry.topic)}
+              style={{
+                fontSize: 11.5, fontWeight: 700, color: D.blue,
+                background: 'rgba(59,97,196,0.08)', border: `1px solid rgba(59,97,196,0.2)`,
+                borderRadius: 7, padding: '4px 11px', cursor: 'pointer', fontFamily: 'inherit',
+                whiteSpace: 'nowrap', transition: 'all 0.15s',
+              }}
+            >
+              Drill this
+            </button>
+            {entry.score < 75 && onTeachItBack && (
+              <button
+                onClick={() => onTeachItBack?.(entry.topic, entry.courseId)}
+                style={{
+                  fontSize: 11.5, fontWeight: 700, color: '#7C3AED',
+                  background: 'rgba(124,58,237,0.08)', border: `1px solid rgba(124,58,237,0.2)`,
+                  borderRadius: 7, padding: '4px 11px', cursor: 'pointer', fontFamily: 'inherit',
+                  whiteSpace: 'nowrap', transition: 'all 0.15s',
+                }}
+              >
+                Teach It
+              </button>
+            )}
+          </div>
         )}
       </div>
     </div>
@@ -203,7 +218,7 @@ const FILTER_OPTIONS = [
   { id: 'strong',     label: 'Strong' },
 ]
 
-export default function MasteryMapView({ courses, onOpenBrainDump, onDrillTopic }) {
+export default function MasteryMapView({ courses, onOpenBrainDump, onDrillTopic, onOpenTeachItBack }) {
   const [sort, setSort] = useState('score-asc')
   const [filter, setFilter] = useState('all')
   const [search, setSearch] = useState('')
@@ -259,6 +274,12 @@ export default function MasteryMapView({ courses, onOpenBrainDump, onDrillTopic 
     track('mastery_map_drill_clicked', { topic })
     onDrillTopic?.(topic)
     onOpenBrainDump?.()
+  }
+
+  const handleTeachItBack = (topic, courseId) => {
+    track('mastery_map_teach_it_back_clicked', { topic })
+    const idx = (courses ?? []).findIndex(c => (c.name ?? '').toLowerCase() === (courseId ?? '').toLowerCase())
+    onOpenTeachItBack?.({ courseIdx: idx >= 0 ? idx : 0, topic })
   }
 
   return (
@@ -417,6 +438,7 @@ export default function MasteryMapView({ courses, onOpenBrainDump, onDrillTopic 
                 key={`${entry.courseId}::${entry.topic}`}
                 entry={entry}
                 onDrill={handleDrill}
+                onTeachItBack={onOpenTeachItBack ? handleTeachItBack : null}
               />
             ))}
           </div>
