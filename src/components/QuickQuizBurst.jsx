@@ -283,7 +283,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                   onClick={!canQuiz ? () => onShowPaywall?.('quizBurst') : startQuiz}
                   style={{ width: '100%', padding: '13px', background: !canQuiz ? D.blue : D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: !canQuiz ? `0 3px 12px rgba(59,97,196,0.30)` : `0 3px 12px rgba(232,83,26,0.35)` }}
                 >
-                  {!canQuiz ? (hasUsedTrial() ? 'Upgrade to Pro →' : 'Start free trial →') : 'Start burst'}
+                  {!canQuiz ? (hasUsedTrial() ? 'Upgrade to Pro →' : 'Start free trial →') : 'Start quiz'}
                 </button>
               )
             })()}
@@ -293,7 +293,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                 onClick={startQuiz}
                 style={{ width: '100%', padding: '13px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 3px 12px rgba(232,83,26,0.35)` }}
               >
-                Start burst
+                Start quiz
               </button>
             )}
 
@@ -521,7 +521,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                   onClick={() => { onClose(); onOpenCheatSheet?.() }}
                   style={{ padding: '12px', background: 'none', border: `1.5px solid rgba(59,97,196,0.30)`, borderRadius: 10, color: D.blue, fontSize: 14, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
                 >
-                  Review weak topics with AI Cheat Sheet
+                  Review weak spots
                 </button>
               )}
               <button onClick={onClose} style={{ padding: '10px', background: 'none', border: 'none', color: D.textDim, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit' }}>

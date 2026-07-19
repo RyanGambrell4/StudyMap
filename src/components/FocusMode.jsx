@@ -1452,7 +1452,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       )}
 
       {/* ── Pomodoro break banner ── */}
-      {breakBanner && !breakOverlay && (
+      {breakBanner && !breakOverlay && !blockTransition && (
         <div className="relative z-10 flex items-center gap-3 px-4 py-2.5 shrink-0" style={{ backgroundColor: `${dot}18`, borderBottom: `1px solid ${dot}28` }}>
           <div className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ backgroundColor: dot }} />
           <span className="text-xs" style={{ color: '#4B4B4B' }}>5-minute break recommended. You've been studying for 25 minutes</span>
@@ -2232,7 +2232,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               {/* Block transition */}
               {blockTransition && (
                 <div style={{ marginTop: 16, padding: '10px 18px', borderRadius: 10, backgroundColor: `${blockColor}10`, border: `1px solid ${blockColor}28`, textAlign: 'center', maxWidth: 380 }}>
-                  <p style={{ fontSize: 13, fontWeight: 600, color: blockColor }}>Block complete ✓ &nbsp;·&nbsp; Next: {blockTransition.nextTitle}</p>
+                  <p style={{ fontSize: 13, fontWeight: 600, color: blockColor }}>Block complete · Next: {blockTransition.nextTitle}</p>
                   <p style={{ fontSize: 12, color: '#6B6B6B', marginTop: 4 }}>{blockTransition.nextInstruction}</p>
                 </div>
               )}

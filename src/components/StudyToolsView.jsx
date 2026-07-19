@@ -446,7 +446,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
     setIsGenerating(true)
     setGenerateError('')
-    setLoadingMessage('Our AI is reading your notes and generating study materials…')
+    setLoadingMessage('Reading your notes and building study materials...')
     const activeCourse = selectedCourse !== null ? courses[selectedCourse] : null
     const activePlan = activeCourse?.id ? getCachedCoachPlan(activeCourse.id) : null
     const fcEmphasis = activePlan?.formData?.emphasisTopics ?? activePlan?.formData?.topics?.join(', ') ?? null
