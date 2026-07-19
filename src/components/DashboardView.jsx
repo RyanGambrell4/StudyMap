@@ -1792,14 +1792,6 @@ export default function DashboardView({
                   >
                     Brain Dump →
                   </button>
-                  {onOpenTeachItBack && (
-                    <button
-                      onClick={e => { e.stopPropagation(); track('feature_opened', { feature: 'teach_it_back', source: 'dashboard_all_done' }); onOpenTeachItBack({}) }}
-                      style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: '#7C3AED', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.2)', cursor: 'pointer' }}
-                    >
-                      Teach It Back
-                    </button>
-                  )}
                   <button
                     onClick={e => { e.stopPropagation(); onOpenQuizBurst?.() }}
                     style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: D.amber, background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.2)', cursor: 'pointer' }}
