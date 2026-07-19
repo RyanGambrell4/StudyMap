@@ -95,6 +95,7 @@ export default function AccountView({
 
   const [canceling, setCanceling] = useState(false)
   const [canceled, setCanceled] = useState(false)
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false)
   const [cancelError, setCancelError] = useState('')
   const [trialStarting, setTrialStarting] = useState(false)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
@@ -198,7 +199,6 @@ export default function AccountView({
   }
 
   const handleCancelTrial = async () => {
-    if (!confirm('Cancel your free trial?\n\nYou\'ll move to the free plan immediately.')) return
     setCanceling(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -350,34 +350,65 @@ export default function AccountView({
               </div>
             )}
             {!canceled ? (
-              <div style={{ display: 'flex', gap: 8, marginBottom: 14, flexWrap: 'wrap' }}>
-                <button
-                  onClick={() => onShowPaywall?.('ai')}
-                  style={{
-                    flex: 1, padding: '10px',
-                    background: '#3B61C4', border: 'none', borderRadius: 10,
-                    color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer',
-                    minWidth: 140,
-                  }}
-                >
-                  Upgrade to Unlimited →
-                </button>
-                <button
-                  onClick={handleCancelTrial}
-                  disabled={canceling}
-                  style={{
-                    padding: '10px 14px',
-                    background: 'none', border: '1px solid rgba(0,0,0,0.10)',
-                    borderRadius: 10,
-                    fontSize: 12, color: '#9B9B9B',
-                    cursor: canceling ? 'not-allowed' : 'pointer',
-                    opacity: canceling ? 0.5 : 1,
-                  }}
-                >
-                  {canceling ? 'Canceling…' : 'Cancel trial'}
-                </button>
+              <div style={{ marginBottom: 14 }}>
+                {!showCancelConfirm ? (
+                  <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                    <button
+                      onClick={() => onShowPaywall?.('ai')}
+                      style={{
+                        flex: 1, padding: '10px',
+                        background: '#3B61C4', border: 'none', borderRadius: 10,
+                        color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer',
+                        minWidth: 140,
+                      }}
+                    >
+                      Upgrade to Unlimited →
+                    </button>
+                    <button
+                      onClick={() => setShowCancelConfirm(true)}
+                      style={{
+                        padding: '10px 14px',
+                        background: 'none', border: '1px solid rgba(0,0,0,0.10)',
+                        borderRadius: 10,
+                        fontSize: 12, color: '#9B9B9B',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cancel trial
+                    </button>
+                  </div>
+                ) : (
+                  <div style={{ padding: '12px 14px', background: '#FEF2F2', border: '1px solid rgba(220,38,38,0.15)', borderRadius: 10 }}>
+                    <p style={{ margin: '0 0 10px', fontSize: 13, color: '#111', fontWeight: 600 }}>Cancel your trial?</p>
+                    <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>You'll move to the free plan immediately and lose access to pro features.</p>
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <button
+                        onClick={handleCancelTrial}
+                        disabled={canceling}
+                        style={{
+                          padding: '8px 14px', background: '#DC2626', border: 'none', borderRadius: 8,
+                          color: '#fff', fontSize: 12, fontWeight: 600,
+                          cursor: canceling ? 'not-allowed' : 'pointer',
+                          opacity: canceling ? 0.6 : 1,
+                        }}
+                      >
+                        {canceling ? 'Canceling…' : 'Yes, cancel'}
+                      </button>
+                      <button
+                        onClick={() => { setShowCancelConfirm(false); setCancelError('') }}
+                        disabled={canceling}
+                        style={{
+                          padding: '8px 14px', background: 'none', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 8,
+                          fontSize: 12, color: '#6B6B6B', cursor: 'pointer',
+                        }}
+                      >
+                        Never mind
+                      </button>
+                    </div>
+                    {cancelError && <p style={{ margin: '8px 0 0', fontSize: 12, color: '#DC2626' }}>{cancelError}</p>}
+                  </div>
+                )}
               </div>
-              {cancelError && <p style={{ margin: '8px 0 0', fontSize: 12, color: '#DC2626' }}>{cancelError}</p>}
             ) : (
               <p style={{ marginBottom: 14, fontSize: 12, color: '#059669', fontWeight: 600 }}>
                 Trial canceled. Your free access has ended.
