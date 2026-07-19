@@ -928,7 +928,11 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
   // ── Auto-show complete ──
   useEffect(() => {
-    if (finished) { const t = setTimeout(() => setShowComplete(true), 1200); return () => clearTimeout(t) }
+    if (finished) {
+      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'focusMode' } }))
+      const t = setTimeout(() => setShowComplete(true), 1200)
+      return () => clearTimeout(t)
+    }
   }, [finished])
 
   // ── Pomodoro banner ──
@@ -1057,7 +1061,11 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     setTabsVisited(prev => new Set([...prev, tab]))
     track('focus_tab_opened', { tab, course_name: session.courseName, session_type: session.sessionType })
   }
-  const handleMarkComplete = () => { if (running) setRunning(false); setShowComplete(true) }
+  const handleMarkComplete = () => {
+    if (running) setRunning(false)
+    window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'focusMode' } }))
+    setShowComplete(true)
+  }
   const handleTogglePause = () => {
     const willPause = running
     setRunning(r => !r)
@@ -1396,7 +1404,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     const handler = e => {
       if (e.target.tagName === 'TEXTAREA' || e.target.tagName === 'INPUT') return
       if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); setRunning(r => !r) }
-      if (e.key === 'Enter') { e.preventDefault(); setRunning(false); setShowComplete(true) }
+      if (e.key === 'Enter') { e.preventDefault(); handleMarkComplete() }
       if (e.key === 'Escape') { e.preventDefault(); setActiveTab(null) }
       if (e.key === '1') visitTab('recall')
       if (e.key === '2') visitTab('flashcards')
