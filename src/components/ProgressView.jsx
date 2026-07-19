@@ -248,7 +248,7 @@ function ScoreLineChart({ entries, color }) {
 }
 
 // ══════════════════════════════════════════════════════════════════════════════
-export default function ProgressView({ courses, allSessions, completedIds, completedSessionLog = [], todayStr, onShowPaywall, onOpenReviewQueue, onOpenBrainDump }) {
+export default function ProgressView({ courses, allSessions, completedIds, completedSessionLog = [], todayStr, onShowPaywall, onOpenReviewQueue, onOpenBrainDump, onOpenTeachItBack }) {
   const [period, setPeriod] = useState('Term')
   const isFree = getActivePlan() === 'free'
   const trialUsed = hasUsedTrial()
@@ -1378,25 +1378,39 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                     <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><path d="M12 9v3.5m0 3v.5m-9 2h18L12 3 3 18z"/></svg>
                     Needs Work
                   </div>
-                  {worstTopics.map((t, i) => (
-                    <div key={i} className="pv-row" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px', marginLeft: -8, marginRight: -8 }}>
-                      <div style={{ width: 38, height: 22, borderRadius: 6, background: getMasteryColor(t.score) + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <span style={{ fontSize: 11, fontWeight: 800, color: getMasteryColor(t.score), fontVariantNumeric: 'tabular-nums' }}>{t.score}</span>
+                  {worstTopics.map((t, i) => {
+                    const courseIdx = Math.max(0, (courses ?? []).findIndex(c => String(c.id) === String(t.courseId)))
+                    return (
+                      <div key={i} className="pv-row" style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '6px 8px', marginLeft: -8, marginRight: -8 }}>
+                        <div style={{ width: 38, height: 22, borderRadius: 6, background: getMasteryColor(t.score) + '18', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          <span style={{ fontSize: 11, fontWeight: 800, color: getMasteryColor(t.score), fontVariantNumeric: 'tabular-nums' }}>{t.score}</span>
+                        </div>
+                        <span style={{ fontSize: 13, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, fontWeight: 500 }}>{t.topic}</span>
+                        {onOpenTeachItBack && (
+                          <button
+                            className="pv-drill"
+                            onClick={() => onOpenTeachItBack({ courseIdx, topic: t.topic })}
+                            title={`Teach It Back: "${t.topic}"`}
+                            style={{ fontSize: 10.5, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.08)', border: 'none', padding: '4px 8px', borderRadius: 6, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 3, flexShrink: 0, letterSpacing: '0.02em', textTransform: 'uppercase' }}
+                          >
+                            Teach
+                            <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                          </button>
+                        )}
+                        {onOpenBrainDump && (
+                          <button
+                            className="pv-drill"
+                            onClick={onOpenBrainDump}
+                            title={`Drill "${t.topic}" with Brain Dump`}
+                            style={{ fontSize: 10.5, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.08)', border: 'none', padding: '4px 8px', borderRadius: 6, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 3, flexShrink: 0, letterSpacing: '0.02em', textTransform: 'uppercase' }}
+                          >
+                            Drill
+                            <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+                          </button>
+                        )}
                       </div>
-                      <span style={{ fontSize: 13, color: D.text, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1, fontWeight: 500 }}>{t.topic}</span>
-                      {onOpenBrainDump && (
-                        <button
-                          className="pv-drill"
-                          onClick={onOpenBrainDump}
-                          title={`Drill "${t.topic}" with Brain Dump`}
-                          style={{ fontSize: 10.5, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.08)', border: 'none', padding: '4px 8px', borderRadius: 6, cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 3, flexShrink: 0, letterSpacing: '0.02em', textTransform: 'uppercase' }}
-                        >
-                          Drill
-                          <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2.5" viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-                        </button>
-                      )}
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               </div>
             </div>

@@ -1918,6 +1918,7 @@ export default function OutputView({
             onShowPaywall={onShowPaywall}
             onOpenReviewQueue={() => setActiveSection('review')}
             onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump', source: 'progress_needs_work' }); setShowBrainDump(true) }}
+            onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
           />
         )}
 
