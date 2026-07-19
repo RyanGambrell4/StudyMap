@@ -64,16 +64,23 @@ export default async function handler(req, res) {
   const greetingName = firstName ? firstName.split(' ')[0] : null
   const headline = greetingName ? `Welcome, ${greetingName}.` : 'Welcome to StudyEdge.'
 
+  // Simple 50/50 A/B split using last char of userId (or timestamp) as a deterministic coin flip.
+  // Variant B has a more curiosity-driven subject line vs. A's direct value proposition.
+  const abSeed = userId ? userId.charCodeAt(userId.length - 1) : Date.now()
+  const abVariant = abSeed % 2 === 0 ? 'a' : 'b'
+  const subject = abVariant === 'a'
+    ? (greetingName ? `${greetingName}, you're in. Pro is free for 7 days.` : "You're in. Pro is free for 7 days.")
+    : (greetingName ? `${greetingName}, your AI study tutor is ready.` : 'Your AI study tutor is ready.')
+
   try {
     await resend.emails.send({
       from: 'StudyEdge AI <support@mail.getstudyedge.com>',
       to: email,
-      subject: greetingName
-        ? `${greetingName}, you're in. Pro is free for 7 days.`
-        : "You're in. Pro is free for 7 days.",
+      subject,
       headers: listUnsubscribeHeaders(email),
       tags: [
         { name: 'campaign', value: 'welcome' },
+        { name: 'ab_variant', value: abVariant },
         ...(userId ? [{ name: 'user_id', value: userId }] : []),
       ],
       html: `<!DOCTYPE html>
