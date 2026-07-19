@@ -4,7 +4,7 @@ import { fetchWithRetry, aiErrorMessage } from '../lib/utils'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
-import { updateMastery } from '../lib/masteryStore'
+import { updateMastery, getWeakestTopics } from '../lib/masteryStore'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -190,6 +190,25 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
 
               <div style={{ marginBottom: 24 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>What do you want to explain?</div>
+                {(() => {
+                  const courseId = courses[courseIdx]?.id ?? null
+                  const suggestions = getWeakestTopics(courseId, 4).filter(w => w.score < 75)
+                  if (!suggestions.length || topic.trim()) return null
+                  return (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginBottom: 10 }}>
+                      <span style={{ fontSize: 11, color: D.textDim, alignSelf: 'center', marginRight: 2 }}>Weak spots:</span>
+                      {suggestions.map(w => (
+                        <button
+                          key={w.topic}
+                          onClick={() => setTopic(w.topic)}
+                          style={{ fontSize: 12, fontWeight: 600, color: '#7C3AED', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 7, padding: '4px 10px', cursor: 'pointer' }}
+                        >
+                          {w.topic}
+                        </button>
+                      ))}
+                    </div>
+                  )
+                })()}
                 <input
                   value={topic}
                   onChange={e => setTopic(e.target.value)}
