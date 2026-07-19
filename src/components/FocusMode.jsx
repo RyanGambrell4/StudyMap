@@ -1994,7 +1994,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               {/* Paywall hint for free users */}
               {getActivePlan() === 'free' && (
                 <p style={{ fontSize: 11.5, color: '#9B9B9B', textAlign: 'center', marginTop: 14 }}>
-                  {hasUsedTrial() ? 'Upgrade to Pro to let your plan adapt based on this rating.' : 'Start your free trial to let your plan adapt based on this rating.'}
+                  {hasUsedTrial() ? 'Upgrade to Pro to let your plan adapt based on this rating.' : 'Start your 7-day free trial to let your plan adapt based on this rating.'}
                 </p>
               )}
             </div>

@@ -420,7 +420,7 @@ export default function AccountView({
                 opacity: trialStarting ? 0.7 : 1,
               }}
             >
-              {trialStarting ? 'Loading…' : 'Start Free Trial →'}
+              {trialStarting ? 'Loading…' : 'Start 7-Day Free Trial →'}
             </button>
           </div>
         )}

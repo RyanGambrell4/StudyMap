@@ -62,7 +62,7 @@ export default function CrossCourseCard({ courses = [], onOpenBrainDump, onOpenR
   if (!top || dismissed) return null
 
   const primaryTopic = top.courses[0].topic
-  const description = `You are studying "${top.token}" in ${top.courses.length} classes. Drill it once and every one of them levels up.`
+  const description = `You are studying "${top.token}" in ${top.courses.length} classes. One drill session sharpens it across all of them.`
 
   return (
     <div className="cc-card" style={{

@@ -468,7 +468,7 @@ export default function AppShell({
                 onClick={(e) => { e.stopPropagation(); onOpenPaywall?.('nav-trial') }}
                 style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ACCENT, border: 'none', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
               >
-                Start Free Trial
+                Start 7-Day Trial
               </button>
             ) : plan !== 'free' ? (
               <span style={{ fontSize: 11, fontWeight: 700, color: plan === 'unlimited' ? '#16A34A' : ACCENT }}>{planLabel}</span>
