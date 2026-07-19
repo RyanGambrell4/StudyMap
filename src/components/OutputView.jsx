@@ -1288,7 +1288,7 @@ export default function OutputView({
               </svg>
             </div>
             <h2 style={{ color: '#1A1A1A', fontSize: 22, fontWeight: 800, letterSpacing: '-0.5px', marginBottom: 8 }}>
-              Your AI tutor is working.
+              Your tutor is working.
             </h2>
             <p style={{ color: '#6B6B6B', fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
               You've used 1 of your 5 free AI questions. Pro gives you <strong style={{ color: '#3B61C4' }}>100 per month</strong> - enough to cover every course, all semester. {hasUsedTrial() ? 'From $2.99/wk.' : '7-day free trial. Cancel anytime.'}
@@ -2131,7 +2131,7 @@ export default function OutputView({
           { id: 'nav-grades',    group: 'Navigate', label: 'Grade Hub',        hint: 'Track and predict grades', run: nav('grades'),    keywords: 'gpa recovery target' },
           { id: 'nav-review',    group: 'Navigate', label: 'Review Queue',     hint: 'Spaced repetition',        run: nav('review'),    keywords: 'spaced repetition due topics' },
           { id: 'nav-tutor',     group: 'Navigate', label: 'AI Tutor',         hint: 'Ask anything',             run: nav('tutor'),     keywords: 'ai chat tutor question help' },
-          { id: 'nav-coach',     group: 'Navigate', label: 'Study Coach',      hint: 'AI-built weekly plan',     run: nav('coach'),     keywords: 'plan schedule coach ai' },
+          { id: 'nav-coach',     group: 'Navigate', label: 'Study Coach',      hint: 'Week-by-week study plan',  run: nav('coach'),     keywords: 'plan schedule coach ai' },
           { id: 'nav-tools',     group: 'Navigate', label: 'Study Tools',      hint: 'Flashcards, quizzes...',   run: nav('tools'),            keywords: 'tools flashcards quiz notes' },
           { id: 'nav-practice',  group: 'Navigate', label: 'Practice Exams',   hint: 'Full-length practice',     run: nav('practice'),         keywords: 'practice exam test' },
           { id: 'nav-mastery',   group: 'Navigate', label: 'Knowledge Map',    hint: 'Mastery topology',         run: nav('mastery'),          keywords: 'knowledge map topics graph' },

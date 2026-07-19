@@ -1876,7 +1876,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form, onStartFoc
       {/* Overview header */}
       <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '20px 22px', overflow: 'hidden', overflowX: 'hidden' }}>
         <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase', marginBottom: 10 }}>
-          Your Personalized Plan
+          Your Study Plan
         </div>
         <div className="sc-plan-header-row" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
           <div className="sc-plan-text" style={{ flex: 1, minWidth: 0 }}>
