@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { getActivePlan, getCachedSubscription, initSubscription, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession, activateTrial } from '../lib/subscription'
 import { supabase } from '../lib/supabase'
+import { track } from '../lib/analytics'
 import ReferralCard from './ReferralCard'
 
 const PLAN_INFO = {
@@ -185,6 +186,7 @@ export default function AccountView({
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Failed to open billing portal')
+      track('billing_portal_opened', { plan: getActivePlan() })
       window.location.href = data.url
     } catch (err) {
       alert(err.message)
@@ -218,6 +220,7 @@ export default function AccountView({
         if (error) throw new Error('Failed')
         initSubscription(session.user.id, cancelled)
       }
+      track('trial_cancelled')
       setCanceled(true)
     } catch {
       alert('Something went wrong. Please try again or contact support@getstudyedge.com.')
@@ -238,7 +241,7 @@ export default function AccountView({
         },
         body: JSON.stringify({ phone: smsPhone, enabled: true }),
       })
-      if (res.ok) { setSmsEnabled(true); setSmsEdit(false) }
+      if (res.ok) { track('sms_opted_in'); setSmsEnabled(true); setSmsEdit(false) }
       else { const d = await res.json(); alert(d.error ?? 'Failed to save') }
     } catch { alert('Something went wrong') }
     finally { setSmsSaving(false) }
