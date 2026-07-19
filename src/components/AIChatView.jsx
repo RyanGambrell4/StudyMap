@@ -7,7 +7,7 @@ import { getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial, incr
 import { transcribeAudio, createRecorder } from '../lib/deepgram'
 import { track } from '../lib/analytics'
 
-export default function AIChatView({ courseId, courseName, examDate, targetGrade, userId, learningStyle, onShowPaywall, onNavigateToCoach, initialMessage = null, paywallTrigger = 'ai' }) {
+export default function AIChatView({ courseId, courseName, examDate, targetGrade, userId, learningStyle, onShowPaywall, onNavigateToCoach, initialMessage = null, paywallTrigger = 'ai', onOpenTeachItBack, courseIdx = 0 }) {
   const plan = getActivePlan()
   const isFree = plan === 'free'
 
@@ -272,7 +272,15 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
           <span style={{ flex: 1, fontSize: 13, color: '#92400E', fontWeight: 500, minWidth: 0 }}>
             <strong style={{ color: '#B45309' }}>{flagBanner}</strong> flagged as a struggle. Added to your coach plan focus areas.
           </span>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
+          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0, flexWrap: 'wrap' }}>
+            {onOpenTeachItBack && (
+              <button
+                onClick={() => { setFlagBanner(null); onOpenTeachItBack({ courseIdx, topic: flagBanner }) }}
+                style={{ fontSize: 12, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.08)', border: '1px solid rgba(124,58,237,0.22)', borderRadius: 8, padding: '5px 11px', cursor: 'pointer', whiteSpace: 'nowrap' }}
+              >
+                Teach It Back
+              </button>
+            )}
             {onNavigateToCoach && (
               <button
                 onClick={() => { setFlagBanner(null); onNavigateToCoach() }}

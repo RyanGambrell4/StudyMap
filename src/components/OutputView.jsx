@@ -58,7 +58,7 @@ import TimedChallengeModal from './TimedChallengeModal'
 import SessionRatingModal from './SessionRatingModal'
 
 // ─── TutorView ────────────────────────────────────────────────────────────────
-function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateToCoach, initialMessage, paywallTrigger = 'ai' }) {
+function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateToCoach, initialMessage, paywallTrigger = 'ai', onOpenTeachItBack }) {
   const [selectedCourse, setSelectedCourse] = useState(courses.length > 0 ? 0 : -1)
   const course = courses[selectedCourse] ?? null
 
@@ -132,6 +132,8 @@ function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateTo
             onNavigateToCoach={onNavigateToCoach}
             initialMessage={initialMessage}
             paywallTrigger={paywallTrigger}
+            onOpenTeachItBack={onOpenTeachItBack}
+            courseIdx={selectedCourse}
           />
         </div>
       )}
@@ -2025,6 +2027,7 @@ export default function OutputView({
             initialMessage={tutorPrefill}
             paywallTrigger={tutorPrefill ? 'ai-struggle' : 'ai'}
             key={tutorPrefill ?? 'default'}
+            onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
           />
         )}
 
