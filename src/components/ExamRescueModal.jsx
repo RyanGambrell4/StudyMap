@@ -4,6 +4,7 @@ import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { addStudySession } from '../lib/studyHistory'
 import { daysBetween } from '../utils/dateUtils'
+import { track } from '../lib/analytics'
 
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
@@ -79,6 +80,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
         incrementFeatureUsage('examRescue')
         addStudySession({ tool: 'Exam Rescue', score: null, topic: null, courseName: course?.name || null })
         window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'examRescue' } }))
+        track('exam_rescue_generated', { topicCount: data.topics?.length ?? 0, courseName: course?.name || null, plan: getActivePlan() })
         setTopics(data.topics)
         setStep('topics')
         setLoading(false)

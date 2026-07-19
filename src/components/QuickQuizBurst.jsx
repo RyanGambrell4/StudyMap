@@ -4,6 +4,7 @@ import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeat
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
 import { updateMastery, getWeakestTopics } from '../lib/masteryStore'
+import { track } from '../lib/analytics'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -129,6 +130,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
         addStudySession({ tool: 'Quiz Burst', score: quizPct, topic: topic.trim() || null, courseName: course?.name || null })
         if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, quizPct, 'quiz')
         window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'quizBurst' } }))
+        track('quiz_burst_complete', { score: quizPct, topic: topic.trim() || null, plan: getActivePlan(), questionCount: questions.length })
         setStep('done')
       } else {
         setQIdx(i => i + 1)

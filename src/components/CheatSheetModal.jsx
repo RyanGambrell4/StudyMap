@@ -3,6 +3,7 @@ import Spinner from './ui/spinner'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, hasUsedTrial } from '../lib/subscription'
 import { addStudySession } from '../lib/studyHistory'
+import { track } from '../lib/analytics'
 
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
@@ -74,6 +75,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
         incrementAIQuery()
         addStudySession({ tool: 'AI Cheat Sheet', score: null, topic: examPrompt.trim() || null, courseName: course?.name || null })
         window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'cheatSheet' } }))
+        track('cheat_sheet_generated', { topic: examPrompt.trim() || null, plan: getActivePlan() })
         setResult(data)
         setStep('result')
         setLoading(false)

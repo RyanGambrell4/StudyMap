@@ -7,6 +7,7 @@ import { getCachedStudyTools, saveStudyTools } from '../lib/db'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
 import { updateMastery, getWeakestTopics } from '../lib/masteryStore'
+import { track } from '../lib/analytics'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -165,6 +166,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
         addStudySession({ tool: 'Brain Dump', score: data.score, topic: topic.trim() || null, courseName: course?.name || null })
         if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, data.score, 'brainDump')
         window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'brainDump' } }))
+        track('brain_dump_scored', { score: data.score, topic: topic.trim() || null, plan: getActivePlan() })
         setResult(data)
         setStep('result')
         setLoading(false)
