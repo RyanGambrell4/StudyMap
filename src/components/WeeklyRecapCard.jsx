@@ -125,7 +125,7 @@ export default function WeeklyRecapCard({ completedSessionLog = [], todayStr, on
               Weekly recap · {fmtDateShort(recap.weekStart)} – {fmtDateShort(recap.weekEnd)}
             </div>
             <div style={{ fontSize: 16, fontWeight: 800, color: D.text, letterSpacing: '-0.015em', lineHeight: 1.35 }}>
-              {vibe ?? 'No sessions logged yet this week. Today is a good day to start.'}
+              {vibe ?? 'No sessions this week yet. Open a session to get started.'}
             </div>
           </div>
           <button

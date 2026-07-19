@@ -650,10 +650,10 @@ export default function DashboardView({
     }
     if (upcomingDeadlines.length > 0) {
       const d = upcomingDeadlines[0]
-      return `Work on ${clean(d.name)} in your next session. Break it into 25-minute blocks to make steady progress without burnout.`
+      return `Work on ${clean(d.name)} in your next session. Break it into 25-minute blocks to make steady progress.`
     }
     if (weekSessionCount === 0) {
-      return `Start your first session of the week today. Even 30 minutes of focused study builds the habit that carries you through exams.`
+      return `Start your first session of the week today. Even 30 minutes makes a difference.`
     }
     return `Open your next scheduled session and spend the first 10 minutes on active recall before reviewing your notes.`
   }, [upcomingExam, upcomingDeadlines, weekSessionCount])
@@ -662,7 +662,7 @@ export default function DashboardView({
     const parts = []
     if (todaySessions.length > 0) parts.push(`${todaySessions.length} session${todaySessions.length > 1 ? 's' : ''} on the schedule`)
     if (upcomingExam && upcomingExam.days <= 14) parts.push(`${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}`)
-    if (!parts.length) return 'Keep up the momentum. Every session counts.'
+    if (!parts.length) return 'Keep the momentum going.'
     return parts.join('. ') + '.'
   }, [todaySessions, upcomingExam])
 
