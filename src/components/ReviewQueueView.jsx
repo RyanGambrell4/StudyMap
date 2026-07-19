@@ -137,7 +137,7 @@ function TopicCard({ item, onDrill, onQuiz, isDue }) {
       </div>
 
       {/* Actions */}
-      <div style={{ display: 'flex', gap: S[2], flexShrink: 0, opacity: hovered ? 1 : 0.65, transition: `opacity ${M.fast}ms ${M.easing}` }}>
+      <div style={{ display: 'flex', gap: S[2], flexShrink: 0 }}>
         <button
           onClick={() => onDrill?.(item.topic, item.courseId)}
           aria-label={`Brain Dump: ${item.topic}`}
