@@ -1,3 +1,5 @@
+import { track } from '../lib/analytics'
+
 const TEXT = '#111111'
 const MUTED = '#6B6B6B'
 const DIM = '#9B9B9B'
@@ -63,7 +65,7 @@ export default function StudyNowCard({ nextSession, completedIds, onStartFocus }
         </div>
 
         <button
-          onClick={() => onStartFocus(nextSession)}
+          onClick={() => { track('study_now_start', { sessionType: nextSession.sessionType, isToday, isTomorrow }); onStartFocus(nextSession) }}
           style={{
             flexShrink: 0, display: 'flex', alignItems: 'center', gap: 10, padding: '12px 20px',
             borderRadius: 12, fontWeight: 700, color: '#fff', fontSize: 13.5, cursor: 'pointer',
