@@ -5,8 +5,9 @@ import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan, saveCoachPlanStru
 import { extractText } from '../utils/extractText'
 import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, canUseFeature, incrementFeatureUsage, hasUsedTrial, getActivePlan } from '../lib/subscription'
 import { getCurrentGrade, letterGrade, TARGET_OPTIONS } from '../utils/gradeCalc'
+import { track } from '../lib/analytics'
 
 // ── DB helpers ────────────────────────────────────────────────────────────────
 function loadCoachPlan(courseId) { return getCachedCoachPlan(courseId) }
@@ -1057,6 +1058,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       setPlan(data)
       const courseId = course.id ?? form.courseIdx
       saveCoachPlan(courseId, data, { ...form, sessionMinutes: form.sessionLen, importantDates: form.dates, emphasisTopics: form.topics?.join(', ') })
+      track('study_plan_generated', { plan: getActivePlan(), weekCount: data.weeks?.length ?? 0 })
       await incrementAIQuery()
       await incrementFeatureUsage('coachPlan')
       setStep(3)
@@ -1229,6 +1231,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     })
 
     if (onPushToSchedule && calSessions.length) onPushToSchedule(calSessions)
+    track('study_plan_pushed', { sessionCount: calSessions.length })
     setPushed(true)
   }
 
