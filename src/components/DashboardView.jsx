@@ -945,7 +945,7 @@ export default function DashboardView({
             </div>
             <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap', alignItems: 'center' }}>
               <button
-                onClick={() => { setDebriefDismissed(true); onOpenBrainDump?.() }}
+                onClick={() => { setDebriefDismissed(true); onOpenBrainDump?.(lastSession?.courseId) }}
                 style={{ background: '#16A34A', border: 'none', borderRadius: 7, padding: '7px 13px', fontSize: 12, fontWeight: 700, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}
               >
                 Brain Dump

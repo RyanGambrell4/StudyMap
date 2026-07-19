@@ -1,9 +1,9 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
-import { updateMastery } from '../lib/masteryStore'
+import { updateMastery, getWeakestTopics } from '../lib/masteryStore'
 import Spinner from './ui/spinner'
 
 const D = {
@@ -40,6 +40,10 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
   const course = courses[courseIdx] ?? null
   const COURSE_COLORS = ['#3B82F6','#6366F1','#059669','#D97706','#EC4899','#0891B2']
   const courseColor = course?.color?.dot ?? COURSE_COLORS[courseIdx % COURSE_COLORS.length]
+
+  const suggestedTopics = useMemo(() => {
+    return getWeakestTopics(course?.id ?? null, 3).filter(t => t.score < 80).map(t => t.topic)
+  }, [courseIdx, courses]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Auto-start when launched from CheatSheet with a pre-populated topic
   useEffect(() => {
@@ -237,6 +241,26 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
             <div style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Focus topic (optional)</div>
               <input value={topic} onChange={e => setTopic(e.target.value)} placeholder="e.g. Cell signaling, Chapter 4, Mitosis" style={{ width: '100%', boxSizing: 'border-box', padding: '11px 14px', borderRadius: 10, border: `1px solid ${D.borderStrong}`, fontSize: 14, color: D.text, background: D.bg, outline: 'none', fontFamily: 'inherit' }} />
+              {!topic.trim() && suggestedTopics.length > 0 && (
+                <div style={{ marginTop: 8, display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                  <span style={{ fontSize: 11, color: D.textDim, alignSelf: 'center', flexShrink: 0 }}>Try:</span>
+                  {suggestedTopics.map(t => (
+                    <button
+                      key={t}
+                      onClick={() => setTopic(t)}
+                      style={{
+                        padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600,
+                        color: D.accent, background: 'rgba(232,83,26,0.08)',
+                        border: '1px solid rgba(232,83,26,0.18)',
+                        cursor: 'pointer', textTransform: 'capitalize',
+                        whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160,
+                      }}
+                    >
+                      {t}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
 
             {error && <div style={{ fontSize: 13, color: D.red, marginBottom: 16, padding: '10px 14px', background: 'rgba(220,38,38,0.06)', borderRadius: 8 }}>{error}</div>}
