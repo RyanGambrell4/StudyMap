@@ -1790,12 +1790,12 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                   <p style={{ margin: '0 0 10px', fontSize: 13, fontWeight: 600, color: '#3B61C4' }}>
                     You've hit today's 30-min free limit.
                   </p>
-                  <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>{hasUsedTrial() ? 'Upgrade to Pro for unlimited focus sessions, AI tutoring, and full blueprints.' : 'Start your free trial for unlimited focus sessions, AI tutoring, and full blueprints.'}</p>
+                  <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>{hasUsedTrial() ? 'Upgrade to Pro for unlimited focus sessions, AI tutoring, and full blueprints.' : 'Start your 7-day free trial for unlimited focus sessions, AI tutoring, and full blueprints.'}</p>
                   <button
                     onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'focus-limit' } }))}
                     style={{ padding: '10px 20px', background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 8, fontSize: 13, fontWeight: 700, cursor: 'pointer' }}
                   >
-                    {hasUsedTrial() ? 'Upgrade to Pro →' : 'Start free trial →'}
+                    {hasUsedTrial() ? 'Upgrade to Pro →' : 'Start 7-day free trial →'}
                   </button>
                 </div>
               ) : (

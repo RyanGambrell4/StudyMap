@@ -332,7 +332,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
                           boxShadow: '0 3px 12px rgba(59,97,196,0.35)',
                         }}
                       >
-                        {hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial →'}
+                        {hasUsedTrial() ? 'Upgrade to Pro' : 'Start 7-day free trial →'}
                       </button>
                     </div>
                   </div>

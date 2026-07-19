@@ -332,7 +332,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
                 <div style={{ textAlign: 'center', fontSize: 12, color: D.textDim, marginTop: 12 }}>
                   {remaining !== null && remaining > 0
                     ? <>{1 - remaining} of 1 brain dump used · <button onClick={() => onShowPaywall?.('study-hacks')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>Upgrade for full breakdown</button></>
-                    : <>{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'} for unlimited brain dumps · <button onClick={() => onShowPaywall?.('brainDump')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>Unlock now</button></>
+                    : <>{hasUsedTrial() ? 'Upgrade to Pro' : 'Start 7-day free trial'} for unlimited brain dumps · <button onClick={() => onShowPaywall?.('brainDump')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>Unlock now</button></>
                   }
                 </div>
               )
@@ -504,7 +504,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
                   <div style={{ fontSize: 14, fontWeight: 700, color: D.text }}>Full breakdown is Pro</div>
                   <div style={{ fontSize: 13, color: D.textMuted, textAlign: 'center', padding: '0 24px' }}>See category scores, gaps, and grade projection.</div>
                   <button onClick={() => onShowPaywall?.('brainDump')} style={{ background: D.blue, border: 'none', borderRadius: 9, padding: '10px 22px', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(59,97,196,0.35)' }}>
-                    {hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial →'}
+                    {hasUsedTrial() ? 'Upgrade to Pro' : 'Start 7-day free trial →'}
                   </button>
                 </div>
               </div>

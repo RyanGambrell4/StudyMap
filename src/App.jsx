@@ -804,7 +804,7 @@ export default function App() {
             onClick={() => { track('trial_nudge_clicked', { source: 'floating_pill' }); openPaywall('trial_nudge') }}
             style={{ background: 'rgba(255,255,255,.2)', border: '1px solid rgba(255,255,255,.3)', borderRadius: 8, color: '#fff', fontSize: 12, fontWeight: 700, padding: '6px 10px', cursor: 'pointer', whiteSpace: 'nowrap', flexShrink: 0, fontFamily: 'inherit' }}
           >
-            Start free trial →
+            Start 7-day free trial →
           </button>
           <button
             onClick={() => { sessionStorage.setItem('studyedge_trial_nudge_dismissed', '1'); setTrialNudgeDismissed(true); track('trial_nudge_dismissed') }}

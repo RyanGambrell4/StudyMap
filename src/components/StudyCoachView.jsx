@@ -734,7 +734,7 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
               onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'coach-plan-result' } }))}
               style={{ width: '100%', padding: '9px', borderRadius: 8, background: D.accent, color: '#fff', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', border: 'none' }}
             >
-              {hasUsedTrial() ? 'Upgrade to Pro →' : 'Start free trial →'}
+              {hasUsedTrial() ? 'Upgrade to Pro →' : 'Start 7-day free trial →'}
             </button>
           </div>
         )}

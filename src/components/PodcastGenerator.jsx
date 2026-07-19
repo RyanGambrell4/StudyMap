@@ -231,7 +231,7 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
               onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }}
               onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}
             >
-              {hasUsedTrial() ? 'Upgrade to Unlimited' : 'Start free trial'}
+              {hasUsedTrial() ? 'Upgrade to Unlimited' : 'Start 7-day free trial'}
             </button>
           </div>
         </div>

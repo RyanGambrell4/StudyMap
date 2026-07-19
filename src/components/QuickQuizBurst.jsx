@@ -271,7 +271,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
               const { allowed: canQuiz, remaining } = canUseFeature('quizBurst')
               return !canQuiz ? (
                 <div style={{ fontSize: 13, color: D.amber, marginBottom: 16, padding: '10px 14px', background: 'rgba(217,119,6,0.08)', borderRadius: 8, border: '1px solid rgba(217,119,6,0.20)' }}>
-                  You've used your free Quiz Burst. {hasUsedTrial() ? 'Upgrade to Pro' : 'Start your free trial'} for unlimited.
+                  You've used your free Quiz Burst. {hasUsedTrial() ? 'Upgrade to Pro' : 'Start your 7-day free trial'} for unlimited.
                 </div>
               ) : null
             })()}
@@ -283,7 +283,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                   onClick={!canQuiz ? () => onShowPaywall?.('quizBurst') : startQuiz}
                   style={{ width: '100%', padding: '13px', background: !canQuiz ? D.blue : D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: !canQuiz ? `0 3px 12px rgba(59,97,196,0.30)` : `0 3px 12px rgba(232,83,26,0.35)` }}
                 >
-                  {!canQuiz ? (hasUsedTrial() ? 'Upgrade to Pro →' : 'Start free trial →') : 'Start quiz'}
+                  {!canQuiz ? (hasUsedTrial() ? 'Upgrade to Pro →' : 'Start 7-day free trial →') : 'Start quiz'}
                 </button>
               )
             })()}
@@ -302,7 +302,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
               return remaining !== null && remaining > 0 ? (
                 <div style={{ textAlign: 'center', fontSize: 12, color: D.textDim, marginTop: 12 }}>
                   {1 - remaining} of 1 quiz burst used
-                  {' · '}<button onClick={() => onShowPaywall?.('quizBurst')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>{hasUsedTrial() ? 'Upgrade to Pro' : 'Start free trial'}</button>
+                  {' · '}<button onClick={() => onShowPaywall?.('quizBurst')} style={{ color: D.blue, fontWeight: 600, background: 'none', border: 'none', cursor: 'pointer', padding: 0, fontSize: 12 }}>{hasUsedTrial() ? 'Upgrade to Pro' : 'Start 7-day trial'}</button>
                 </div>
               ) : null
             })()}

@@ -833,7 +833,7 @@ export default function DashboardView({
             <IcoFlame color="#F97316" />
             <span>{streakToast}-day streak!</span>
             <span style={{ fontWeight: 500, color: '#93C5FD', fontSize: 13 }}>
-              {hasUsedTrial() ? 'Upgrade to keep it going →' : 'Start free trial →'}
+              {hasUsedTrial() ? 'Upgrade to keep it going →' : 'Start 7-day free trial →'}
             </span>
           </button>
         ) : (
@@ -890,7 +890,7 @@ export default function DashboardView({
             </span>
             {aiChipTrialEligible ? (
               <button onClick={handleStartTrial} disabled={trialBannerLoading} style={{ fontSize: 12, fontWeight: 700, color: D.blue, background: 'none', border: 'none', cursor: trialBannerLoading ? 'not-allowed' : 'pointer', padding: 0, opacity: trialBannerLoading ? 0.7 : 1 }}>
-                {trialBannerLoading ? 'Loading…' : 'Start free trial →'}
+                {trialBannerLoading ? 'Loading…' : 'Start 7-day trial →'}
               </button>
             ) : (
               <button onClick={() => onShowPaywall?.('ai')} style={{ fontSize: 12, fontWeight: 700, color: D.accent, background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}>Upgrade</button>
