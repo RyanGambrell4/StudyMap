@@ -114,13 +114,23 @@ function computeMission({ courses, upcomingExam, weakSpots, todaySessions, compl
     }
   }
 
-  // 7. Default: stay consistent
+  // 7. Default: stay consistent, personalize with last session if recent
+  const lastSess = (() => {
+    try {
+      const raw = JSON.parse(localStorage.getItem('se_last_session') ?? 'null')
+      if (!raw || Date.now() - raw.completedAt > 6 * 60 * 60 * 1000) return null
+      return raw
+    } catch { return null }
+  })()
+  const defaultContext = lastSess?.courseName
+    ? `You studied ${lastSess.courseName} recently. A quick Quiz Burst will lock in what you covered.`
+    : 'A 10-minute Quiz Burst is the fastest way to lock in knowledge from your last session.'
   return {
     priority: 'low',
     color: D.blue,
     eyebrow: streak > 1 ? `${streak}-day streak` : 'Ready to study',
     headline: streak > 2 ? 'Keep the streak alive.' : 'Start your session.',
-    context: 'A 10-minute Quiz Burst on any topic is the fastest way to lock in knowledge from your last session.',
+    context: defaultContext,
     cta: 'Quick Quiz Burst',
     ctaKey: 'quizBurst',
     meta: null,
@@ -202,13 +212,7 @@ export default function SmartStartCard({
     coachPlans,
   }), [courses, upcomingExam, weakSpots, todaySessions, completedIds, streak, coachPlans])
 
-  const { color, eyebrow, headline, context, cta, ctaKey, meta, topic, missionCourseId, missionCourseName } = mission
-
-  const missionCourseIdx = useMemo(() => {
-    if (missionCourseId != null) return Math.max(0, courses.findIndex(c => String(c.id) === String(missionCourseId)))
-    if (missionCourseName) return Math.max(0, courses.findIndex(c => c.name === missionCourseName))
-    return 0
-  }, [courses, missionCourseId, missionCourseName])
+  const { color, eyebrow, headline, context, cta, ctaKey, meta } = mission
 
   const handleCta = () => {
     track('smart_start_cta_clicked', { cta_key: ctaKey, priority: mission.priority })
@@ -550,8 +554,8 @@ export default function SmartStartCard({
           </p>
         </div>
 
-        {/* CTA group */}
-        <div className="ss-cta-group" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
+        {/* CTA */}
+        <div className="ss-cta-group" style={{ display: 'flex', flexShrink: 0 }}>
           <button
             className="smart-btn"
             onClick={handleCta}
@@ -574,31 +578,6 @@ export default function SmartStartCard({
             <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>
             {cta}
           </button>
-
-          {/* Secondary quick actions */}
-          <div style={{ display: 'flex', gap: 6 }}>
-            {ctaKey !== 'quizBurst' && (
-              <button onClick={() => { track('smart_start_secondary', { action: 'quizBurst' }); onOpenQuizBurst?.() }}
-                className="smart-btn"
-                style={{ fontSize: 11.5, fontWeight: 600, color: D.dim, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, borderRadius: 7, padding: '6px 12px', minHeight: 32, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
-                Quiz Burst
-              </button>
-            )}
-            {ctaKey !== 'brainDump' && (
-              <button onClick={() => { track('smart_start_secondary', { action: 'brainDump' }); onOpenBrainDump?.() }}
-                className="smart-btn"
-                style={{ fontSize: 11.5, fontWeight: 600, color: D.dim, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, borderRadius: 7, padding: '6px 12px', minHeight: 32, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
-                Brain Dump
-              </button>
-            )}
-            {ctaKey === 'brainDump' && topic && onOpenTeachItBack && (
-              <button onClick={() => { track('smart_start_secondary', { action: 'teachItBack', topic }); onOpenTeachItBack({ courseIdx: missionCourseIdx, topic }) }}
-                className="smart-btn"
-                style={{ fontSize: 11.5, fontWeight: 600, color: '#7C3AED', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 7, padding: '6px 12px', minHeight: 32, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
-                Teach It Back
-              </button>
-            )}
-          </div>
         </div>
       </div>
 
