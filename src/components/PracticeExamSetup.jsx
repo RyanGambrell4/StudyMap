@@ -261,6 +261,9 @@ export default function PracticeExamSetup({ courses, onBack, onStart, onShowPayw
                   </>
                 )}
               </div>
+              {error && !extractedText && (
+                <p style={{ margin: '6px 0 0', fontSize: 12, color: '#DC2626' }}>{error}</p>
+              )}
             </>
           )}
 
