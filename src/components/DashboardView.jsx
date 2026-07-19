@@ -1497,6 +1497,7 @@ export default function DashboardView({
           onOpenStudyCoach={onOpenStudyCoach}
           onShowPaywall={onShowPaywall}
           onOpenReviewQueue={onOpenReviewQueue}
+          onOpenTeachItBack={onOpenTeachItBack}
         />
 
         {/* ── Today's Plan Timeline ── */}

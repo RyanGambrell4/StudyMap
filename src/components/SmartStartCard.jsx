@@ -79,6 +79,7 @@ function computeMission({ courses, upcomingExam, weakSpots, todaySessions, compl
       ctaKey: 'brainDump',
       meta: streak > 0 ? `${streak}-day streak` : null,
       topic: masteryWeakest.topic,
+      missionCourseId: masteryWeakest.courseId ?? null,
     }
   }
 
@@ -95,6 +96,7 @@ function computeMission({ courses, upcomingExam, weakSpots, todaySessions, compl
       ctaKey: 'brainDump',
       meta: streak > 0 ? `${streak}-day streak` : null,
       topic: w.topic,
+      missionCourseName: w.courseName,
     }
   }
 
@@ -184,6 +186,7 @@ export default function SmartStartCard({
   onOpenStudyCoach,
   onShowPaywall,
   onOpenReviewQueue,
+  onOpenTeachItBack,
 }) {
   const [hovered, setHovered] = useState(false)
   const plan = getActivePlan()
@@ -199,7 +202,13 @@ export default function SmartStartCard({
     coachPlans,
   }), [courses, upcomingExam, weakSpots, todaySessions, completedIds, streak, coachPlans])
 
-  const { color, eyebrow, headline, context, cta, ctaKey, meta, topic } = mission
+  const { color, eyebrow, headline, context, cta, ctaKey, meta, topic, missionCourseId, missionCourseName } = mission
+
+  const missionCourseIdx = useMemo(() => {
+    if (missionCourseId != null) return Math.max(0, courses.findIndex(c => String(c.id) === String(missionCourseId)))
+    if (missionCourseName) return Math.max(0, courses.findIndex(c => c.name === missionCourseName))
+    return 0
+  }, [courses, missionCourseId, missionCourseName])
 
   const handleCta = () => {
     track('smart_start_cta_clicked', { cta_key: ctaKey, priority: mission.priority })
@@ -580,6 +589,13 @@ export default function SmartStartCard({
                 className="smart-btn"
                 style={{ fontSize: 11.5, fontWeight: 600, color: D.dim, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, borderRadius: 7, padding: '6px 12px', minHeight: 32, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
                 Brain Dump
+              </button>
+            )}
+            {ctaKey === 'brainDump' && topic && onOpenTeachItBack && (
+              <button onClick={() => { track('smart_start_secondary', { action: 'teachItBack', topic }); onOpenTeachItBack({ courseIdx: missionCourseIdx, topic }) }}
+                className="smart-btn"
+                style={{ fontSize: 11.5, fontWeight: 600, color: '#7C3AED', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 7, padding: '6px 12px', minHeight: 32, cursor: 'pointer', fontFamily: 'inherit', whiteSpace: 'nowrap' }}>
+                Teach It Back
               </button>
             )}
           </div>
