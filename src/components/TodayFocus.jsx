@@ -1,3 +1,5 @@
+import { track } from '../lib/analytics'
+
 const TEXT = '#111111'
 const MUTED = '#6B6B6B'
 const DIM = '#9B9B9B'
@@ -24,7 +26,7 @@ export default function TodayFocus({ nextSession, onStartFocus }) {
         </div>
         <div>
           <p style={{ margin: 0, fontWeight: 700, color: '#166534', fontSize: 15 }}>All sessions complete!</p>
-          <p style={{ margin: '3px 0 0', fontSize: 13.5, color: MUTED }}>You've finished every scheduled session. Incredible work.</p>
+          <p style={{ margin: '3px 0 0', fontSize: 13.5, color: MUTED }}>Every session for this week is done. Schedule more when you're ready.</p>
         </div>
       </div>
     )
@@ -63,7 +65,7 @@ export default function TodayFocus({ nextSession, onStartFocus }) {
         </div>
 
         <button
-          onClick={() => onStartFocus(nextSession)}
+          onClick={() => { track('today_focus_start', { sessionType: nextSession.sessionType, when: whenLabel }); onStartFocus(nextSession) }}
           style={{
             flexShrink: 0, display: 'flex', alignItems: 'center', gap: 8, padding: '12px 20px',
             borderRadius: 12, fontWeight: 700, color: '#fff', fontSize: 13.5, cursor: 'pointer',
