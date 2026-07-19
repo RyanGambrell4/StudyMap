@@ -772,4 +772,46 @@
   <!-- Statistics hub — 2026-07-18: linkable data page for backlinks -->
   <url><loc>https://getstudyedge.com/study-statistics</loc><lastmod>2026-07-18</lastmod><changefreq>monthly</changefreq><priority>0.90</priority></url>
 
+  <url>
+    <loc>https://getstudyedge.com/blog/feynman-technique</loc>
+    <lastmod>2026-07-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/blog/mind-mapping-for-studying</loc>
+    <lastmod>2026-07-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/blog/how-to-study-while-working-full-time</loc>
+    <lastmod>2026-07-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/blog/study-groups-vs-solo-studying</loc>
+    <lastmod>2026-07-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/blog/how-to-study-for-the-bar-exam</loc>
+    <lastmod>2026-07-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/blog/retrieval-practice-vs-rereading</loc>
+    <lastmod>2026-07-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://getstudyedge.com/blog/editorial-policy</loc>
+    <lastmod>2026-07-19</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
 </urlset>

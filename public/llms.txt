@@ -65,40 +65,87 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - Blog: https://getstudyedge.com/blog
 - About: https://getstudyedge.com/about
 
-## Top blog posts (51 posts total — full list at https://getstudyedge.com/blog)
+## Top blog posts (78 posts total -- full list at https://getstudyedge.com/blog)
 
-- How to Study for a Test (5-Step System): https://getstudyedge.com/blog/how-to-study-for-a-test
-- How to Memorize Things (7 Techniques): https://getstudyedge.com/blog/how-to-memorize-things
-- How to Take Notes in College: https://getstudyedge.com/blog/how-to-take-notes-in-college
-- How to Study Effectively (Science-Backed System): https://getstudyedge.com/blog/how-to-study-effectively
-- Study Schedule Tips That Actually Stick: https://getstudyedge.com/blog/study-schedule-tips
-- Active Recall: The Study Technique That Works: https://getstudyedge.com/blog/active-recall-study-technique
-- The 5 Study Techniques That Actually Work (Research-Backed): https://getstudyedge.com/blog/best-study-techniques-science
-- How to Study for Finals Week Without Burning Out: https://getstudyedge.com/blog/how-to-study-for-finals-week
-- MCAT Study Schedule (6 Months): https://getstudyedge.com/blog/mcat-study-schedule-6-months
-- How to Study for Organic Chemistry: https://getstudyedge.com/blog/how-to-study-for-organic-chemistry
-- How to Study with ADHD in College: https://getstudyedge.com/blog/how-to-study-with-adhd-in-college
-- Cornell Note-Taking Method: https://getstudyedge.com/blog/cornell-note-taking-method
-- How to Raise Your GPA After a Bad Semester: https://getstudyedge.com/blog/how-to-raise-your-gpa-after-a-bad-semester
-- Pomodoro Technique for Studying: https://getstudyedge.com/blog/pomodoro-technique-for-studying
-- How to Stop Procrastinating When Studying: https://getstudyedge.com/blog/how-to-stop-procrastinating-when-studying
-- How to Focus While Studying (12 Techniques): https://getstudyedge.com/blog/how-to-focus-while-studying
-- How to Get an A in Any Class: https://getstudyedge.com/blog/how-to-get-an-a-in-any-class
+- 7 Study Habits That Are Actually Hurting Your Grades: https://getstudyedge.com/blog/study-myths
+- ACT Study Guide (2026) -- How to Prep for Every Section: https://getstudyedge.com/blog/act-study-guide
+- Active Recall: The Study Technique That Actually Improves Grades (Science Explained): https://getstudyedge.com/blog/active-recall-study-technique
+- Anki vs Quizlet vs StudyEdge AI (2026): Full Comparison for College Students: https://getstudyedge.com/blog/anki-vs-quizlet-vs-studyedge
+- Best Flashcard Apps for College Students (2026): https://getstudyedge.com/blog/best-flashcard-apps-for-college
+- Best Note-Taking Apps for College Students (2026): https://getstudyedge.com/blog/best-note-taking-apps-for-college-students
+- Best Study Apps for College Students (2026): What Actually Works: https://getstudyedge.com/blog/best-study-apps-for-college-students
 - Best Study Schedule for College Students: https://getstudyedge.com/blog/best-study-schedule-for-college-students
+- ChatGPT vs StudyEdge AI for Studying (2026): Which Is Better for College Students?: https://getstudyedge.com/blog/chatgpt-vs-studyedge-for-studying
+- Cornell Note Taking Method: How It Works and Why It Actually Helps: https://getstudyedge.com/blog/cornell-note-taking-method
+- Does Music Help You Study? What the Research Actually Says: https://getstudyedge.com/blog/how-to-study-with-music
+- How to Actually Improve Your Grades in College: https://getstudyedge.com/blog/how-to-improve-your-grades-in-college
 - How to Balance a Heavy Course Load: https://getstudyedge.com/blog/how-to-balance-a-heavy-course-load
-- How to Prepare for Midterms: https://getstudyedge.com/blog/how-to-prepare-for-midterms
-- Time Management Tips for College Students: https://getstudyedge.com/blog/time-management-tips-for-college-students
-- How to Use AI for Studying: https://getstudyedge.com/blog/how-to-use-ai-for-studying
-- ChatGPT vs StudyEdge AI for Studying: https://getstudyedge.com/blog/chatgpt-vs-studyedge-for-studying
-- Anki vs Quizlet vs StudyEdge AI: https://getstudyedge.com/blog/anki-vs-quizlet-vs-studyedge
-- Best Study Apps for College Students (2026): https://getstudyedge.com/blog/best-study-apps-for-college-students
-- How to Study for USMLE Step 1: https://getstudyedge.com/blog/how-to-study-for-usmle-step-1
-- How to Study for Biology: https://getstudyedge.com/blog/how-to-study-for-biology
+- How to Cram for an Exam: The Honest, Practical Guide: https://getstudyedge.com/blog/how-to-cram-for-an-exam
+- How to Focus While Studying: 12 Techniques That Actually Work: https://getstudyedge.com/blog/how-to-focus-while-studying
+- How to Get an A in Any Class: https://getstudyedge.com/blog/how-to-get-an-a-in-any-class
+- How to Make Flashcards That Actually Work: The Evidence-Based Method: https://getstudyedge.com/blog/how-to-make-flashcards
+- How to Memorize Notes Fast: What Actually Sticks: https://getstudyedge.com/blog/how-to-memorize-notes-fast
+- How to Memorize Things: 7 Techniques That Actually Work: https://getstudyedge.com/blog/how-to-memorize-things
+- How to Overcome Test Anxiety: What Research Actually Says: https://getstudyedge.com/blog/how-to-overcome-test-anxiety
+- How to Prepare for Midterms in College: https://getstudyedge.com/blog/how-to-prepare-for-midterms
+- How to Pull an All-Nighter (and Actually Function the Next Day): https://getstudyedge.com/blog/how-to-pull-an-all-nighter
+- How to Raise Your GPA After a Bad Semester: https://getstudyedge.com/blog/how-to-raise-your-gpa-after-a-bad-semester
+- How to Read a Textbook Effectively: The System That Works: https://getstudyedge.com/blog/how-to-read-a-textbook
+- How to Stop Procrastinating When Studying: https://getstudyedge.com/blog/how-to-stop-procrastinating-when-studying
+- How to Study Effectively: A Science-Backed System That Actually Works: https://getstudyedge.com/blog/how-to-study-effectively
+- How to Study Smarter, Not Harder: 8 Evidence-Based Strategies: https://getstudyedge.com/blog/how-to-study-smarter-not-harder
+- How to Study While Working Full-Time: A Realistic System: https://getstudyedge.com/blog/how-to-study-while-working-full-time
+- How to Study With ADHD in College: https://getstudyedge.com/blog/how-to-study-with-adhd-in-college
+- How to Study for Accounting: https://getstudyedge.com/blog/how-to-study-for-accounting
 - How to Study for Anatomy and Physiology: https://getstudyedge.com/blog/how-to-study-for-anatomy-and-physiology
+- How to Study for Biochemistry: https://getstudyedge.com/blog/how-to-study-for-biochemistry
+- How to Study for Biology: https://getstudyedge.com/blog/how-to-study-for-biology
+- How to Study for Business Courses: https://getstudyedge.com/blog/how-to-study-for-business
 - How to Study for Calculus: https://getstudyedge.com/blog/how-to-study-for-calculus
+- How to Study for Chemistry: https://getstudyedge.com/blog/how-to-study-for-chemistry
+- How to Study for Computer Science: https://getstudyedge.com/blog/how-to-study-for-computer-science
+- How to Study for Criminal Justice: https://getstudyedge.com/blog/how-to-study-for-criminal-justice
+- How to Study for English Literature: https://getstudyedge.com/blog/how-to-study-for-english-literature
+- How to Study for Finals Week Without Burning Out: https://getstudyedge.com/blog/how-to-study-for-finals-week
+- How to Study for Finance: https://getstudyedge.com/blog/how-to-study-for-finance
+- How to Study for GMAT: https://getstudyedge.com/blog/how-to-study-for-the-gmat
+- How to Study for GRE: https://getstudyedge.com/blog/how-to-study-for-the-gre
+- How to Study for History -- What Actually Works: https://getstudyedge.com/blog/how-to-study-for-history
+- How to Study for LSAT: https://getstudyedge.com/blog/how-to-study-for-the-lsat
+- How to Study for Macroeconomics: https://getstudyedge.com/blog/how-to-study-for-macroeconomics
+- How to Study for Marketing: https://getstudyedge.com/blog/how-to-study-for-marketing
+- How to Study for Microeconomics: https://getstudyedge.com/blog/how-to-study-for-microeconomics
+- How to Study for Multiple Choice Exams: The System That Works: https://getstudyedge.com/blog/how-to-study-for-multiple-choice-exams
+- How to Study for Multiple Exams in One Week: https://getstudyedge.com/blog/how-to-study-for-multiple-exams-in-one-week
+- How to Study for NCLEX: https://getstudyedge.com/blog/how-to-study-for-the-nclex
+- How to Study for Nursing School: https://getstudyedge.com/blog/how-to-study-for-nursing-school
+- How to Study for Organic Chemistry: https://getstudyedge.com/blog/how-to-study-for-organic-chemistry
+- How to Study for Philosophy: https://getstudyedge.com/blog/how-to-study-for-philosophy
 - How to Study for Physics: https://getstudyedge.com/blog/how-to-study-for-physics
-- How to Overcome Test Anxiety: https://getstudyedge.com/blog/how-to-overcome-test-anxiety
-- How to Cram for an Exam: https://getstudyedge.com/blog/how-to-cram-for-an-exam
+- How to Study for Political Science: https://getstudyedge.com/blog/how-to-study-for-political-science
+- How to Study for Psychology: https://getstudyedge.com/blog/how-to-study-for-psychology
+- How to Study for SAT: https://getstudyedge.com/blog/how-to-study-for-the-sat
+- How to Study for Sociology: https://getstudyedge.com/blog/how-to-study-for-sociology
+- How to Study for Spanish (and Any Foreign Language): https://getstudyedge.com/blog/how-to-study-for-spanish
+- How to Study for Statistics: https://getstudyedge.com/blog/how-to-study-for-statistics
+- How to Study for USMLE Step 1: https://getstudyedge.com/blog/how-to-study-for-usmle-step-1
+- How to Study for a Test: A 5-Step System That Works: https://getstudyedge.com/blog/how-to-study-for-a-test
+- How to Study for the Bar Exam: A 10-Week Study Plan: https://getstudyedge.com/blog/how-to-study-for-the-bar-exam
+- How to Study the Night Before an Exam: https://getstudyedge.com/blog/how-to-study-the-night-before-an-exam
+- How to Take Notes in College: 4 Methods That Work in Lectures: https://getstudyedge.com/blog/how-to-take-notes-in-college
+- How to Use AI for Studying: What Actually Works: https://getstudyedge.com/blog/how-to-use-ai-for-studying
+- MCAT Study Schedule: How to Plan 6 Months Out: https://getstudyedge.com/blog/mcat-study-schedule-6-months
+- Mind Mapping for Studying: Does It Actually Work?: https://getstudyedge.com/blog/mind-mapping-for-studying
+- Retrieval Practice vs. Re-Reading: Why One Works and One Doesn't: https://getstudyedge.com/blog/retrieval-practice-vs-rereading
+- Spaced Repetition: The Science Behind Why It Works (and How to Use It): https://getstudyedge.com/blog/spaced-repetition-study-technique
+- Study Groups vs. Solo Studying: What the Research Says: https://getstudyedge.com/blog/study-groups-vs-solo-studying
+- Study Schedule Tips: How to Build a Schedule That Survives Week 2: https://getstudyedge.com/blog/study-schedule-tips
+- The 5 Study Techniques That Actually Work (According to Research): https://getstudyedge.com/blog/best-study-techniques-science
+- The Feynman Technique: How to Learn Anything by Teaching It Back: https://getstudyedge.com/blog/feynman-technique
+- The Pomodoro Technique for College Students: A No-BS Guide (2026): https://getstudyedge.com/blog/pomodoro-technique-for-studying
+- Time Management Tips for College Students That Actually Work: https://getstudyedge.com/blog/time-management-tips-for-college-students
+- What GPA Do You Need for Medical School?: https://getstudyedge.com/blog/what-gpa-do-you-need-for-medical-school
+
 
 ## Machine-readable files
 
@@ -107,6 +154,8 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - Product details: https://getstudyedge.com/okf/product.md
 - Audience and use cases: https://getstudyedge.com/okf/audience.md
 - Tools and calculators: https://getstudyedge.com/okf/tools.md
+
+- Editorial Policy: https://getstudyedge.com/blog/editorial-policy
 
 ## Contact
 
