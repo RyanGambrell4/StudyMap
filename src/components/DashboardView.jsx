@@ -315,7 +315,9 @@ export default function DashboardView({
   const [upNextHovered, setUpNextHovered] = useState(false)
   const [startBtnHovered, setStartBtnHovered] = useState(false)
   const [streakToast, setStreakToast] = useState(null)
+  const [sessionMilestoneToast, setSessionMilestoneToast] = useState(null)
   const STREAK_MILESTONES = [3, 7, 14, 30, 60, 100]
+  const SESSION_MILESTONES = [10, 25, 50, 100, 250, 500]
 
   const nextStreakMilestone = STREAK_MILESTONES.find(m => m > streak)
   const daysToNextMilestone = nextStreakMilestone ? nextStreakMilestone - streak : null
@@ -369,6 +371,21 @@ export default function DashboardView({
       }
     }
   }, [streak])
+
+  // Show a toast on session count milestones (10, 25, 50, 100, 250)
+  useEffect(() => {
+    const count = completedSessions?.length ?? 0
+    if (count === 0) return
+    const hit = SESSION_MILESTONES.find(m => m === count)
+    if (!hit) return
+    const key = `se_session_milestone_${hit}`
+    if (sessionStorage.getItem(key)) return
+    sessionStorage.setItem(key, '1')
+    setSessionMilestoneToast(hit)
+    track('session_milestone_shown', { sessions: hit })
+    const timer = setTimeout(() => setSessionMilestoneToast(null), 5000)
+    return () => clearTimeout(timer)
+  }, [completedSessions?.length]) // eslint-disable-line react-hooks/exhaustive-deps
 
   // ── This-week performance stats (for dashboard nudge) ─────────────────────
   const weekPerf = useMemo(() => {
@@ -807,6 +824,25 @@ export default function DashboardView({
             <span style={{ fontWeight: 400, color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>Keep it up</span>
           </div>
         )
+      )}
+
+      {/* ── Session count milestone toast ── */}
+      {sessionMilestoneToast && !streakToast && (
+        <div style={{
+          position: 'fixed', top: 20, left: '50%',
+          transform: 'translateX(-50%)',
+          background: '#1A1A1A', color: '#fff',
+          padding: '11px 20px', borderRadius: 999, zIndex: 9999,
+          display: 'flex', alignItems: 'center', gap: 8,
+          boxShadow: '0 6px 24px rgba(0,0,0,0.22)',
+          animation: 'streak-toast-in 0.35s cubic-bezier(0.34,1.56,0.64,1) both',
+          fontSize: 14, fontWeight: 700, whiteSpace: 'nowrap',
+          pointerEvents: 'none',
+        }}>
+          <IcoCheck color="#4ade80" />
+          <span>{sessionMilestoneToast} sessions completed!</span>
+          <span style={{ fontWeight: 400, color: 'rgba(255,255,255,0.7)', fontSize: 13 }}>Keep going</span>
+        </div>
       )}
 
       {/* ── Header ── */}
@@ -2036,10 +2072,9 @@ export default function DashboardView({
           {courses.map((course, idx) => {
             const color = course.color?.dot ?? courseColor(idx)
             const last = lastSessionPerCourse[idx]
-            const lastLabel = last ? (() => {
-              const d = daysBetween(last.dateStr, todayStr)
-              return d === 0 ? 'today' : d === 1 ? 'yesterday' : `${d}d ago`
-            })() : null
+            const lastDaysAgo = last ? daysBetween(last.dateStr, todayStr) : null
+            const lastLabel = lastDaysAgo !== null ? (lastDaysAgo === 0 ? 'today' : lastDaysAgo === 1 ? 'yesterday' : `${lastDaysAgo}d ago`) : null
+            const neglectColor = lastDaysAgo === null ? D.red : lastDaysAgo >= 5 ? D.red : lastDaysAgo >= 3 ? D.amber : D.textDim
             const hrs = hoursPerCourse[idx] ?? 0
             const recall = avgRecallPerCourse[idx]
             const readiness = computeReadiness(course, last, todayStr)
@@ -2056,7 +2091,7 @@ export default function DashboardView({
                 <div style={{ width: 5, height: 26, background: color, borderRadius: 3 }} />
                 <div>
                   <div style={{ fontSize: 13.5, fontWeight: 600, color: D.text }}>{clean(course.name)}</div>
-                  <div style={{ fontSize: 11.5, color: D.textDim, marginTop: 2 }}>
+                  <div style={{ fontSize: 11.5, color: neglectColor, marginTop: 2 }}>
                     {lastLabel ? `Last studied ${lastLabel}` : 'No sessions yet'}
                   </div>
                 </div>
