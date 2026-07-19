@@ -1625,7 +1625,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     </div>
                     {activitiesUsed >= 2 && (
                       <p style={{ fontSize: 11.5, color: '#6B6B6B', margin: '10px 0 0', lineHeight: 1.5 }}>
-                        {activitiesUsed >= 3 ? 'Multi-modal studying locks in retention. Nice work.' : 'Using 2+ activities increases recall compared to passive reading.'}
+                        {activitiesUsed >= 3 ? 'Multi-modal studying locks in retention.' : 'Using 2+ activities increases recall compared to passive reading.'}
                       </p>
                     )}
                   </div>
