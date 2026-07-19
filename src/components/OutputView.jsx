@@ -2083,6 +2083,7 @@ export default function OutputView({
             courses={courses}
             onOpenBrainDump={() => setShowBrainDump(true)}
             onOpenQuizBurst={() => setShowQuizBurst(true)}
+            onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
           />
         )}
 
@@ -2121,6 +2122,13 @@ export default function OutputView({
           courseId={confidencePrompt.courseId}
           source={confidencePrompt.source}
           onClose={() => setConfidencePrompt(null)}
+          onSubmitted={(rating) => {
+            if (rating <= 2 && confidencePrompt.topic) {
+              const idx = courses.findIndex(c => String(c.id) === String(confidencePrompt.courseId))
+              setTeachItBackInit({ courseIdx: idx >= 0 ? idx : 0, topic: confidencePrompt.topic })
+              setShowTeachItBack(true)
+            }
+          }}
         />
       )}
       {showExamRescue && (

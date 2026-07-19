@@ -77,7 +77,7 @@ function TrendPill({ trend }) {
 }
 
 // ── Topic card ──────────────────────────────────────────────────────────────
-function TopicCard({ item, onDrill, onQuiz, isDue }) {
+function TopicCard({ item, onDrill, onQuiz, onTeachItBack, isDue }) {
   const [hovered, setHovered] = useState(false)
   const level = getMasteryLevel(item.score)
   const col = getMasteryColor(item.score)
@@ -174,6 +174,26 @@ function TopicCard({ item, onDrill, onQuiz, isDue }) {
         >
           Quiz
         </button>
+        {item.score < 75 && onTeachItBack && (
+          <button
+            onClick={() => onTeachItBack?.(item.topic, item.courseId)}
+            aria-label={`Teach It Back: ${item.topic}`}
+            style={{
+              minHeight: T.min, minWidth: T.min,
+              padding: `${S[2]}px ${S[3]}px`,
+              fontSize: 12.5, fontWeight: 700,
+              color: '#7C3AED', background: 'rgba(124,58,237,0.08)',
+              border: '1px solid rgba(124,58,237,0.2)',
+              borderRadius: R.md,
+              cursor: 'pointer',
+              transition: `background ${M.fast}ms ${M.easing}`,
+            }}
+            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
+            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            Teach It
+          </button>
+        )}
       </div>
     </div>
   )
@@ -284,7 +304,7 @@ function EmptyState({ tab, onOpenBrainDump }) {
 }
 
 // ── Main view ───────────────────────────────────────────────────────────────
-export default function ReviewQueueView({ courses, onOpenBrainDump, onOpenQuizBurst }) {
+export default function ReviewQueueView({ courses, onOpenBrainDump, onOpenQuizBurst, onOpenTeachItBack }) {
   const [courseFilter, setCourseFilter] = useState('all')
   const [tab, setTab] = useState('due')
 
@@ -307,6 +327,11 @@ export default function ReviewQueueView({ courses, onOpenBrainDump, onOpenQuizBu
   const handleQuiz = (topic) => {
     track('review_queue_drill', { topic, source: 'quiz' })
     onOpenQuizBurst?.()
+  }
+  const handleTeachItBack = (topic, courseId) => {
+    track('review_queue_teach_it_back', { topic })
+    const idx = (courses ?? []).findIndex(c => (c.name ?? '').toLowerCase() === (courseId ?? '').toLowerCase())
+    onOpenTeachItBack?.({ courseIdx: idx >= 0 ? idx : 0, topic })
   }
 
   return (
@@ -439,6 +464,7 @@ export default function ReviewQueueView({ courses, onOpenBrainDump, onOpenQuizBu
               isDue={tab === 'due'}
               onDrill={handleDrill}
               onQuiz={handleQuiz}
+              onTeachItBack={onOpenTeachItBack ? handleTeachItBack : null}
             />
           ))}
       </div>
