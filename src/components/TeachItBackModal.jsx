@@ -27,6 +27,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
   const [step, setStep] = useState(autoStart && initialTopic ? 'explain' : 'setup') // setup | explain | evaluating | result | followup | final
   const [result, setResult] = useState(null)
   const [prevMasteryScore, setPrevMasteryScore] = useState(null)
+  const [sessionCount, setSessionCount] = useState(null)
   const [finalResult, setFinalResult] = useState(null)
   const [error, setError] = useState('')
   const [displayScore, setDisplayScore] = useState(0)
@@ -82,6 +83,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
       addStudySession({ tool: 'Teach It Back', score: data.score, topic: topic.trim() || null, courseName: course?.name || null })
       const prevEntry = topic.trim() ? getMastery(topic.trim(), course?.id ?? null) : null
       if (prevEntry?.count >= 1) setPrevMasteryScore(prevEntry.score)
+      setSessionCount((prevEntry?.count ?? 0) + 1)
       if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, data.score, 'teachItBack')
       setResult(data)
       setStep('result')
@@ -126,6 +128,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
     setFollowUpAnswer('')
     setResult(null)
     setPrevMasteryScore(null)
+    setSessionCount(null)
     setFinalResult(null)
     setError('')
   }
@@ -319,6 +322,9 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
                   </div>
                 </div>
                 <div style={{ fontSize: 14, color: D.textMuted, marginTop: 4, lineHeight: 1.5 }}>{result.verdict}</div>
+                {sessionCount > 1 && (
+                  <div style={{ marginTop: 6, fontSize: 11.5, color: D.textDim }}>Session {sessionCount} on this topic</div>
+                )}
                 {prevMasteryScore != null && (() => {
                   const blended = Math.round(prevMasteryScore * 0.6 + result.score * 0.4)
                   const delta = blended - prevMasteryScore
