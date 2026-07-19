@@ -29,6 +29,20 @@ function daysUntil(isoString) {
   return Math.max(0, days)
 }
 
+function timeUntil(isoString) {
+  if (!isoString) return null
+  const diff = new Date(isoString).getTime() - Date.now()
+  if (diff <= 0) return null
+  const totalHours = Math.floor(diff / (1000 * 60 * 60))
+  const days = Math.floor(totalHours / 24)
+  const hours = totalHours % 24
+  if (days === 0 && hours === 0) return 'less than an hour'
+  if (days === 0) return `${hours}h`
+  if (days === 1 && hours > 0) return `1 day, ${hours}h`
+  if (hours === 0) return `${days} day${days !== 1 ? 's' : ''}`
+  return `${days} day${days !== 1 ? 's' : ''}, ${hours}h`
+}
+
 function AudioPlayer({ url }) {
   const audioRef = useRef(null)
   const [playing, setPlaying] = useState(false)
@@ -292,6 +306,7 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
   // ── Done ──────────────────────────────────────────────────────────────────────
   if (step === 'done' && podcast) {
     const days = daysUntil(resetAt)
+    const timeLeft = timeUntil(resetAt)
     return wrapper('Unlimited plan',
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         <div style={{ background: 'rgba(13,148,136,0.05)', border: '1px solid rgba(13,148,136,0.15)', borderRadius: 12, padding: '14px 16px' }}>
@@ -311,8 +326,8 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
         <div style={{ background: D.bg, borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'center', gap: 10 }}>
           <svg width="14" height="14" fill="none" stroke={D.textMuted} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
           <span style={{ fontSize: 12.5, color: D.textMuted }}>
-            {days != null && days > 0
-              ? `Next podcast available in ${days} day${days === 1 ? '' : 's'}`
+            {timeLeft
+              ? `Next podcast available in ${timeLeft}`
               : 'Your next podcast is available now'}
           </span>
         </div>
@@ -326,7 +341,8 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
 
   // ── Limited (used this week, no cached audio) ─────────────────────────────────
   if (step === 'limited') {
-    const days = daysUntil(resetAt)
+    const timeLeft = timeUntil(resetAt)
+    const resetDate = resetAt ? new Date(resetAt).toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' }) : null
     return wrapper('Unlimited plan',
       <div style={{ textAlign: 'center', padding: '20px 0' }}>
         <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(13,148,136,0.08)', border: '1px solid rgba(13,148,136,0.18)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
@@ -335,10 +351,16 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
           </svg>
         </div>
         <div style={{ fontSize: 16, fontWeight: 700, color: D.text, marginBottom: 8 }}>Podcast used this week</div>
-        <div style={{ fontSize: 14, color: D.textMuted, lineHeight: 1.6 }}>
+        <div style={{ fontSize: 14, color: D.textMuted, lineHeight: 1.6, marginBottom: timeLeft ? 12 : 0 }}>
           You get one study podcast per week. Come back{' '}
-          {days != null && days > 0 ? `in ${days} day${days === 1 ? '' : 's'}` : 'soon'} for a fresh one.
+          {timeLeft ? `in ${timeLeft}` : 'soon'} for a fresh one.
         </div>
+        {timeLeft && resetDate && (
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, background: 'rgba(13,148,136,0.06)', border: '1px solid rgba(13,148,136,0.15)', borderRadius: 999, padding: '5px 13px', fontSize: 12.5, fontWeight: 600, color: D.teal }}>
+            <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            Resets {resetDate}
+          </div>
+        )}
       </div>
     )
   }
