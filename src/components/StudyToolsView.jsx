@@ -702,7 +702,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           },
           {
             label: 'Flashcards',
-            desc: 'AI-generated cards from your notes with spaced repetition.',
+            desc: 'Cards built from your notes, served on a spaced-repetition schedule.',
             color: '#3B61C4',
             icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>,
             onClick: () => setMode('upload'),
@@ -729,7 +729,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           },
           {
             label: 'Lecture Audio',
-            desc: 'Upload a recorded lecture (mp3, m4a, wav) and AI builds your study materials.',
+            desc: 'Upload a recorded lecture (mp3, m4a, wav) to generate flashcards and a quiz.',
             color: '#0EA5E9',
             icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2M12 19v4M8 23h8"/></svg>,
             onClick: () => { setAudioError(''); setMode('upload'); audioInputRef.current?.click() },
@@ -747,14 +747,14 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           },
           {
             label: 'Study Coach',
-            desc: 'Personalized AI study plan built around your schedule and exams.',
+            desc: 'Week-by-week study plan built around your schedule and exams.',
             color: '#0891B2',
             icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>,
             onClick: () => onNavigateToCoach?.(),
           },
           {
             label: 'Teach It Back',
-            desc: 'Type out an explanation of any concept. AI scores your understanding and pushes back.',
+            desc: 'Type out an explanation of any concept. Your understanding is scored and a follow-up tests it.',
             color: '#3B61C4',
             icon: <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>,
             onClick: () => onOpenTeachItBack?.(),
