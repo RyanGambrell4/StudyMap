@@ -1502,7 +1502,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                         {calibratedPct}<span style={{ fontSize: 14, color: D.textMuted, fontWeight: 700, marginLeft: 3 }}>% calibrated</span>
                       </div>
                       <div style={{ fontSize: 12.5, color: D.textMuted, marginTop: 2, maxWidth: 460, lineHeight: 1.5 }}>
-                        How your gut match up to how you actually score. Closing the gap is one of the fastest ways to lift real test performance.
+                        How your gut feeling matches your actual scores. Closing this gap is one of the fastest ways to improve real test performance.
                       </div>
                     </div>
                   </div>
@@ -1687,7 +1687,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
             <div>
               <div style={{ fontSize: 13, fontWeight: 700, color: '#2563EB', marginBottom: 4 }}>
-                {trialUsed ? 'Upgrade to Pro' : 'Start your 7-day free trial'}
+                {trialUsed ? 'Upgrade to Pro' : 'Start your 3-day free trial'}
               </div>
               <div style={{ fontSize: 12.5, color: D.textMuted, lineHeight: 1.55 }}>
                 Unlock unlimited Brain Dumps, Practice Exams, AI Tutor, and more so every score shows up here.

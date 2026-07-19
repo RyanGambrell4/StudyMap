@@ -14,7 +14,7 @@ export default function StudyNowCard({ nextSession, completedIds, onStartFocus }
         </div>
         <div>
           <p style={{ margin: 0, fontWeight: 700, color: '#166534', fontSize: 15 }}>All sessions complete!</p>
-          <p style={{ margin: '3px 0 0', fontSize: 13.5, color: MUTED }}>You've finished every scheduled session. Incredible work.</p>
+          <p style={{ margin: '3px 0 0', fontSize: 13.5, color: MUTED }}>Every session for this week is done. Schedule more when you're ready.</p>
         </div>
       </div>
     )
@@ -39,7 +39,7 @@ export default function StudyNowCard({ nextSession, completedIds, onStartFocus }
       <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 20, flexWrap: 'wrap' }}>
         <div style={{ flex: 1, minWidth: 0 }}>
           <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 700, color: DIM, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-            {isFinal ? 'Priority Session' : 'Ready to get ahead?'}
+            {isFinal ? 'Priority Session' : isToday ? 'Up next' : 'Coming up'}
           </p>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap', marginBottom: 4 }}>
             <div style={{ width: 12, height: 12, borderRadius: '50%', flexShrink: 0, background: nextSession.color.dot }} />
