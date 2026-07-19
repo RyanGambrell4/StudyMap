@@ -225,7 +225,7 @@ function EmptyState({ tab, onOpenBrainDump, justCleared = false, weeklyClears = 
       ? 'Nice. You just cleared the queue.'
       : 'You are all caught up'
     const bodyCopy = justCleared
-      ? `That's ${weeklyClears} clear${weeklyClears !== 1 ? 's' : ''} this week. Spaced repetition compounds — the topics you just reviewed will stay sharp for longer.`
+      ? `That's ${weeklyClears} clear${weeklyClears !== 1 ? 's' : ''} this week. Spaced repetition compounds. The topics you just reviewed will stay sharp for longer.`
       : 'Every topic in your Knowledge Map is well within its review window. Come back later or add new topics with a Brain Dump.'
     return (
       <div style={{ padding: `${S[16]}px ${S[6]}px`, textAlign: 'center', position: 'relative' }}>

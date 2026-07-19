@@ -149,7 +149,7 @@ export default function WelcomeOverlay({ firstName, isExamMode = false, onStart,
           {greeting}
         </h2>
         <p style={{ margin: '0 0 22px', textAlign: 'center', fontSize: 14.5, color: D.muted, lineHeight: 1.55 }}>
-          Your account is ready. One course, one exam date — that's all it takes to get your first plan.
+          Your account is ready. One course, one exam date. That's all it takes to get your first plan.
         </p>
 
         {/* What you get */}

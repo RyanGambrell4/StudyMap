@@ -291,7 +291,7 @@ ${preheader(sessionCount >= 3
         </table>
 
         <p style="margin:28px 0 0;font-size:14px;color:#9B9B9B;line-height:1.65;">
-          Reply if you want to talk through whether Pro is right for where you are in your semester. I'll actually respond. — Ryan
+          Reply if you want to talk through whether Pro is right for where you are in your semester. I'll actually respond. Ryan
         </p>
 
       </td></tr>

@@ -23,9 +23,9 @@ export default function ComebackCard({ daysAway, lastSessionDate, courses, onSta
   const primaryCourse = courses?.[0]
 
   const message = daysAway >= 10
-    ? "It's been a while — that's okay. Getting back is the whole battle."
+    ? "It's been a while. That's okay. Getting back is the whole battle."
     : daysAway >= 7
-    ? "A week off. No guilt — let's just start with something small."
+    ? "A week off. No guilt. Let's just start with something small."
     : "Life happens. Nothing lost. One small session and you're rolling again."
 
   const primary = todaySessions.length > 0
