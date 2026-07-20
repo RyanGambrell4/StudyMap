@@ -669,6 +669,8 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
       onClick={e => { if (e.target === e.currentTarget) handleDismiss('backdrop') }}
     >
       <style>{`
+        @keyframes pw-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .pw-modal { animation: pw-in 260ms cubic-bezier(0.16,1,0.3,1) both; }
         @media (max-width: 600px) {
           .pw-modal { padding: 20px 16px !important; border-radius: 16px !important; }
           .pw-cards { grid-template-columns: 1fr !important; }
