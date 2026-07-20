@@ -3,6 +3,7 @@ import Spinner from './ui/spinner'
 import EmptyState from './ui/empty-state'
 import { getAccessToken } from '../lib/supabase'
 import { clean } from '../utils/strings'
+import { track } from '../lib/analytics'
 
 const HOUR_HEIGHT = 56
 const START_HOUR = 6
@@ -72,6 +73,7 @@ export default function CalendarDayView({
   conflictMap = new Map(),
   onSessionMove,
   onAddSession,
+  onStartFocus,
   theme = 'light',
 }) {
   const tv = theme_vars(theme === 'dark')
@@ -499,6 +501,17 @@ export default function CalendarDayView({
                       </p>
                     )}
                   </div>
+                  {onStartFocus && isToday && !done && height > 32 && (
+                    <button
+                      onPointerDown={e => e.stopPropagation()}
+                      onClick={e => { e.stopPropagation(); track('calendar_session_start', { source: 'day_view' }); onStartFocus(s) }}
+                      className="shrink-0 mt-0.5"
+                      title="Start session"
+                      style={{ width: 18, height: 18, borderRadius: '50%', background: s.color.dot, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
+                    >
+                      <svg width="8" height="8" viewBox="0 0 24 24" fill="white"><path d="M8 5v14l11-7z"/></svg>
+                    </button>
+                  )}
                   {gcalConnected && height > 38 && (
                     <button
                       onPointerDown={e => e.stopPropagation()}

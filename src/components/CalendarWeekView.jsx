@@ -112,6 +112,7 @@ export default function CalendarWeekView({
   onBulkRescheduleWeek,
   plan = 'free',
   onShowPaywall,
+  onStartFocus,
   theme = 'light',
 }) {
   const tv = theme_vars(theme === 'dark')
@@ -838,6 +839,20 @@ export default function CalendarWeekView({
                       )}
                     </div>
 
+                    {/* Start button - desktop hover for today's uncompleted sessions */}
+                    {(isHovered || isSelected) && onStartFocus && col.dateStr === todayStr && !done && (
+                      <button
+                        style={{ position: 'absolute', top: 2, right: onDeleteSession ? 18 : 2, width: 14, height: 14, borderRadius: '50%', background: ev.color.dot, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, zIndex: 10 }}
+                        onPointerDown={e => { e.stopPropagation(); e.preventDefault() }}
+                        onClick={e => { e.stopPropagation(); track('calendar_session_start', { source: 'week_view_hover' }); onStartFocus(ev) }}
+                        title="Start session"
+                      >
+                        <svg width="7" height="7" viewBox="0 0 24 24" fill="white">
+                          <path d="M8 5v14l11-7z"/>
+                        </svg>
+                      </button>
+                    )}
+
                     {/* Delete button - desktop hover */}
                     {(isHovered || isSelected) && onDeleteSession && (
                       <button
@@ -891,6 +906,14 @@ export default function CalendarWeekView({
               {mobileActionSheet.session.courseName}
             </p>
             <p style={{ fontSize: 11.5, color: '#9B9B9B', marginBottom: 20, fontWeight: 500 }}>{mobileActionSheet.session.sessionType}</p>
+            {onStartFocus && mobileActionSheet.session.dateStr === todayStr && !completedIds.has(mobileActionSheet.session.id) && (
+              <button
+                style={{ width: '100%', padding: '14px', background: mobileActionSheet.session.color?.dot ?? '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontSize: 14, fontWeight: 700, marginBottom: 8, cursor: 'pointer' }}
+                onClick={() => { track('calendar_session_start', { source: 'mobile_sheet' }); onStartFocus(mobileActionSheet.session); setMobileActionSheet(null) }}
+              >
+                Start session
+              </button>
+            )}
             <button
               style={{ width: '100%', padding: '14px', background: 'rgba(22,163,74,0.08)', border: '1px solid rgba(22,163,74,0.2)', borderRadius: 12, color: '#16A34A', fontSize: 14, fontWeight: 600, marginBottom: 8, cursor: 'pointer' }}
               onClick={() => { onToggle?.(mobileActionSheet.session.id); setMobileActionSheet(null) }}

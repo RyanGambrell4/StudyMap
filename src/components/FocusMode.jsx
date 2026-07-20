@@ -711,6 +711,9 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   const [interleaveAnswered, setInterleaveAnswered] = useState(false)
   const [followUpDone, setFollowUpDone] = useState({})
 
+  // ── Exit confirmation ──
+  const [showExitConfirm, setShowExitConfirm] = useState(false)
+
   // ── Mid-session check-in ──
   const [midCheckIn, setMidCheckIn] = useState(false)
   const [midCheckInDismissed, setMidCheckInDismissed] = useState(false)
@@ -1041,10 +1044,20 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
   // ── Escape key ──
   useEffect(() => {
-    const handler = e => { if (e.key === 'Escape' && !showComplete) { localStorage.removeItem(timerKey); onExit?.() } }
+    const handler = e => {
+      if (e.key === 'Escape' && !showComplete) {
+        const elapsedSec = totalSec - remaining
+        if (!finished && elapsedSec > 120) {
+          setShowExitConfirm(prev => !prev)
+        } else {
+          localStorage.removeItem(timerKey)
+          onExit?.()
+        }
+      }
+    }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
-  }, [onExit, showComplete])
+  }, [onExit, showComplete, remaining, totalSec, finished])
 
   // ── Derived ──
   const elapsed = totalSec - remaining
@@ -1426,6 +1439,29 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       <div className="h-1 w-full shrink-0" style={{ background: `linear-gradient(90deg, ${dot}, ${dot}88)` }} />
 
       {/* ── Mid-session check-in ── */}
+      {showExitConfirm && !showComplete && (
+        <div className="relative z-20 flex items-center gap-3 px-4 py-2.5 shrink-0" style={{ backgroundColor: 'rgba(220,38,38,0.06)', borderBottom: '1px solid rgba(220,38,38,0.15)', animation: 'recall-slide-up 0.2s ease-out' }}>
+          <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#DC2626' }} />
+          <span className="text-xs font-medium" style={{ color: '#DC2626' }}>End this session early?</span>
+          <div className="ml-auto flex items-center gap-2 shrink-0">
+            <button
+              onClick={() => setShowExitConfirm(false)}
+              className="text-xs px-3 py-1 rounded-lg font-semibold text-white"
+              style={{ backgroundColor: '#3B61C4' }}
+            >
+              Keep studying
+            </button>
+            <button
+              onClick={() => { localStorage.removeItem(timerKey); onExit?.() }}
+              className="text-xs px-3 py-1 rounded-lg font-medium"
+              style={{ backgroundColor: 'rgba(220,38,38,0.1)', color: '#DC2626', border: '1px solid rgba(220,38,38,0.2)' }}
+            >
+              End session
+            </button>
+          </div>
+        </div>
+      )}
+
       {midCheckIn && !breakOverlay && !showComplete && (
         <div className="relative z-10 flex items-center gap-3 px-4 py-2.5 shrink-0" style={{ backgroundColor: 'rgba(59,97,196,0.07)', borderBottom: '1px solid rgba(59,97,196,0.15)', animation: 'recall-slide-up 0.3s ease-out' }}>
           <div className="w-2 h-2 rounded-full shrink-0" style={{ backgroundColor: '#3B61C4' }} />
@@ -2090,7 +2126,21 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 </div>
               )}
             </div>
-            <button onClick={() => { localStorage.removeItem(timerKey); onExit?.() }} className="text-xs transition-colors" style={{ color: '#9B9B9B' }}>Exit</button>
+            <button
+              onClick={() => {
+                const elapsedSec = totalSec - remaining
+                if (!finished && elapsedSec > 120) {
+                  setShowExitConfirm(prev => !prev)
+                } else {
+                  localStorage.removeItem(timerKey)
+                  onExit?.()
+                }
+              }}
+              className="text-xs transition-colors"
+              style={{ color: '#9B9B9B' }}
+            >
+              Exit
+            </button>
           </div>
         </div>
 

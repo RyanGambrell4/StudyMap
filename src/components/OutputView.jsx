@@ -1832,6 +1832,7 @@ export default function OutputView({
                 conflictMap={conflictMap}
                 onSessionMove={handleSessionMove}
                 onAddSession={setAddSessionDayStr}
+                onStartFocus={handleStartFocus}
               />
             )}
 
@@ -1876,6 +1877,7 @@ export default function OutputView({
                 onBulkRescheduleWeek={handleBulkRescheduleWeek}
                 plan={getActivePlan()}
                 onShowPaywall={onShowPaywall}
+                onStartFocus={handleStartFocus}
               />
             )}
           </div>
