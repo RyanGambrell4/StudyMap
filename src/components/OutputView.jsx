@@ -99,7 +99,7 @@ function TutorView({ courses, userId, onShowPaywall, learningStyle, onNavigateTo
             </div>
             <div>
               <p style={{ fontSize: 15, fontWeight: 700, color: '#111', margin: '0 0 4px' }}>No courses yet</p>
-              <p style={{ fontSize: 13, color: '#9B9B9B', margin: 0, maxWidth: 220, lineHeight: 1.5 }}>Add a course to unlock your AI tutor and get personalized help for every topic.</p>
+              <p style={{ fontSize: 13, color: '#9B9B9B', margin: 0, maxWidth: 220, lineHeight: 1.5 }}>Add a course to use the tutor. Ask it anything related to what you're studying.</p>
             </div>
             {onNavigateToCoach && (
               <button

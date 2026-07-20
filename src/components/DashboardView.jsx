@@ -1905,7 +1905,7 @@ export default function DashboardView({
             <Label color={D.blue}>Quick actions</Label>
           </div>
           {[
-            { icon: <IcoBrain />, color: D.blue,    label: 'Study Coach',    sub: 'AI-powered weekly plan',   onClick: () => typeof onOpenStudyCoach === 'function' && onOpenStudyCoach(0) },
+            { icon: <IcoBrain />, color: D.blue,    label: 'Study Coach',    sub: 'Week-by-week study plan',  onClick: () => typeof onOpenStudyCoach === 'function' && onOpenStudyCoach(0) },
             { icon: <IcoGrad />,  color: D.green,   label: 'Grade Hub',      sub: 'Track grades and targets', onClick: () => typeof onNavigateToGrades === 'function' && onNavigateToGrades(0) },
             { icon: <IcoCards />, color: '#3B61C4', label: 'Flashcards',     sub: 'Test your knowledge',      onClick: () => typeof onNavigateToTools === 'function' && onNavigateToTools() },
           ].map((a, i) => (
