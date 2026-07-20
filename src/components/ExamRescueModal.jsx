@@ -138,9 +138,9 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
         background: D.bgCard, borderRadius: 20, width: '100%', maxWidth: 580,
         maxHeight: '92vh', display: 'flex', flexDirection: 'column',
         boxShadow: '0 24px 64px rgba(0,0,0,0.14)', border: `1px solid ${D.border}`,
-        overflow: 'hidden',
+        overflow: 'hidden', animation: 'modal-in 260ms cubic-bezier(0.16,1,0.3,1) both',
       }}>
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+        <style>{`@keyframes modal-in{from{opacity:0;transform:translateY(10px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}} @keyframes spin{to{transform:rotate(360deg)}}`}</style>
 
         {/* Header */}
         <div style={{ padding: '20px 24px 16px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0 }}>

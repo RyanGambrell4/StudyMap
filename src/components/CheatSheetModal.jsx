@@ -113,8 +113,9 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
         maxHeight: '90vh', display: 'flex', flexDirection: 'column',
         boxShadow: '0 24px 64px rgba(0,0,0,0.14)',
         border: `1px solid ${D.border}`,
-        overflow: 'hidden',
+        overflow: 'hidden', animation: 'cs-in 260ms cubic-bezier(0.16,1,0.3,1) both',
       }}>
+        <style>{`@keyframes cs-in{from{opacity:0;transform:translateY(10px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}}`}</style>
         {/* Header */}
         <div style={{
           padding: '20px 24px 16px',

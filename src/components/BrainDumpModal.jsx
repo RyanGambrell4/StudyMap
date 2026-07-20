@@ -227,9 +227,10 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
         background: D.bgCard, borderRadius: 20, width: '100%', maxWidth: 540,
         maxHeight: '92vh', display: 'flex', flexDirection: 'column',
         boxShadow: '0 24px 64px rgba(0,0,0,0.14)', border: `1px solid ${D.border}`,
-        overflow: 'hidden',
+        overflow: 'hidden', animation: 'bd-in 260ms cubic-bezier(0.16,1,0.3,1) both',
       }}>
         <style>{`
+          @keyframes bd-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
           @keyframes spin { to { transform: rotate(360deg) } }
           @keyframes score-in { from { transform: scale(0.8); opacity: 0 } to { transform: scale(1); opacity: 1 } }
           @keyframes countdown-pulse { 0%,100%{opacity:1} 50%{opacity:0.6} }

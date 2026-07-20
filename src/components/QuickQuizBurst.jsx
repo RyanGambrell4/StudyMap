@@ -183,14 +183,15 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
     }}>
       <div style={{
-        background: D.bgCard, borderRadius: 20, width: '100%', maxWidth: 520,
+        borderRadius: 20, width: '100%', maxWidth: 520,
         maxHeight: '92vh', display: 'flex', flexDirection: 'column',
         boxShadow: '0 24px 64px rgba(0,0,0,0.14)', border: `1px solid ${D.border}`,
         overflow: 'hidden',
         transition: 'background 0.2s ease',
         background: flash === 'correct' ? 'rgba(22,163,74,0.04)' : flash === 'wrong' ? 'rgba(220,38,38,0.04)' : D.bgCard,
+        animation: 'modal-in 260ms cubic-bezier(0.16,1,0.3,1) both',
       }}>
-        <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes bar-in{from{width:0}}`}</style>
+        <style>{`@keyframes modal-in{from{opacity:0;transform:translateY(10px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}} @keyframes spin{to{transform:rotate(360deg)}} @keyframes bar-in{from{width:0}}`}</style>
 
         {/* Header */}
         <div style={{ padding: '16px 20px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
