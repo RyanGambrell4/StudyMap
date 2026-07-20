@@ -219,7 +219,7 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
             </div>
             <div style={{ fontSize: 17, fontWeight: 700, color: D.text, marginBottom: 8 }}>Unlimited plan required</div>
             <div style={{ fontSize: 14, color: D.textMuted, lineHeight: 1.6, marginBottom: 24 }}>
-              Study podcasts are a premium feature. Upgrade to Unlimited to generate a personalized audio review of your course material each week.
+              Study podcasts are a premium feature. Upgrade to Unlimited to generate a weekly audio review built from your course material.
             </div>
             <button
               onClick={() => { onClose(); onShowPaywall?.('unlimited') }}
