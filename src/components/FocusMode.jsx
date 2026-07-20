@@ -1588,13 +1588,18 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       {/* ── Session complete screen ── */}
       {showComplete && (
         <>
-        <div className="absolute inset-0 z-[105] flex flex-col overflow-y-auto" style={{ backgroundColor: '#F7F6F3' }}>
+        <div className="absolute inset-0 z-[105] flex flex-col overflow-y-auto" style={{ backgroundColor: '#F7F6F3', animation: 'sc-enter 320ms cubic-bezier(0.16,1,0.3,1) both' }}>
+          <style>{`
+            @keyframes sc-enter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+            @keyframes sc-check { 0% { opacity: 0; transform: scale(0.5); } 60% { transform: scale(1.12); } 100% { opacity: 1; transform: scale(1); } }
+            @keyframes sc-card { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+          `}</style>
           {/* Tinted gradient overlay - separate element so base bg stays fully opaque */}
           <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(160deg, ${dot}28 0%, transparent 55%)` }} />
           {/* Hero header */}
           <div className="flex flex-col items-center pt-14 pb-10 px-6 shrink-0">
             {/* Glowing check circle */}
-            <div className="relative mb-6">
+            <div className="relative mb-6" style={{ animation: 'sc-check 500ms cubic-bezier(0.34,1.3,0.64,1) 100ms both' }}>
               <div className="absolute inset-0 rounded-full" style={{ backgroundColor: dot, opacity: 0.2, transform: 'scale(2)', filter: 'blur(16px)' }} />
               <div className="relative w-20 h-20 rounded-full flex items-center justify-center" style={{ background: `linear-gradient(135deg, ${dot}, ${dot}bb)`, boxShadow: `0 8px 32px ${dot}55` }}>
                 <svg width="38" height="38" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1602,8 +1607,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 </svg>
               </div>
             </div>
-            <h2 className="text-3xl font-bold text-center mb-2" style={{ color: '#1A1A1A' }}>Session Complete</h2>
-            <p className="text-center text-sm leading-relaxed max-w-xs" style={{ color: '#6B6B6B' }}>{encourageMsg}</p>
+            <h2 className="text-3xl font-bold text-center mb-2" style={{ color: '#1A1A1A', animation: 'sc-card 400ms ease 200ms both' }}>Session Complete</h2>
+            <p className="text-center text-sm leading-relaxed max-w-xs" style={{ color: '#6B6B6B', animation: 'sc-card 400ms ease 280ms both' }}>{encourageMsg}</p>
           </div>
 
           <div className="px-6 pb-12 max-w-sm w-full mx-auto">
@@ -1617,16 +1622,16 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               return (
                 <>
                   <div className="flex gap-3 mb-4">
-                    <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+                    <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', animation: 'sc-card 380ms ease 350ms both' }}>
                       <p className="text-2xl font-bold font-mono" style={{ color: '#111111' }}>{fmt(Math.max(elapsed, 1))}</p>
                       <p className="text-xs mt-1" style={{ color: '#6B6B6B' }}>Time studied</p>
                     </div>
-                    <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: retentionBg, border: `1px solid ${retentionBorder}`, boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+                    <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: retentionBg, border: `1px solid ${retentionBorder}`, boxShadow: '0 1px 4px rgba(0,0,0,0.05)', animation: 'sc-card 380ms ease 420ms both' }}>
                       <p className="text-2xl font-bold font-mono" style={{ color: retentionColor }}>{retentionPct}%</p>
                       <p className="text-xs mt-1" style={{ color: retentionColor, opacity: 0.8 }}>Est. retention</p>
                     </div>
                     {currentStreak > 0 && (
-                      <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: '#FFF9F0', border: '1px solid rgba(234,88,12,0.18)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+                      <div className="flex-1 rounded-2xl p-4 text-center" style={{ background: '#FFF9F0', border: '1px solid rgba(234,88,12,0.18)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', animation: 'sc-card 380ms ease 490ms both' }}>
                         <p className="text-2xl font-bold font-mono" style={{ color: '#EA580C' }}>{currentStreak}</p>
                         <p className="text-xs mt-1" style={{ color: '#9B6A4A' }}>Day streak</p>
                       </div>
@@ -1634,7 +1639,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                   </div>
 
                   {/* Activity completion row */}
-                  <div className="rounded-2xl p-4 mb-4" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}>
+                  <div className="rounded-2xl p-4 mb-4" style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', boxShadow: '0 1px 4px rgba(0,0,0,0.05)', animation: 'sc-card 380ms ease 520ms both' }}>
                     <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#9B9B9B', margin: '0 0 10px' }}>Activities this session</p>
                     <div className="flex flex-wrap gap-2">
                       {[
