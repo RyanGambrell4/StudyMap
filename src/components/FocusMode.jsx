@@ -2385,7 +2385,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                       </>
                     ) : (
                       <div className="rounded-2xl p-5 text-center" style={{ backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)' }}>
-                        <p className="text-sm" style={{ color: '#9B9B9B' }}>Upload course notes in <span className="font-medium" style={{ color: dot }}>Study Tools</span> to unlock personalized recall checks.</p>
+                        <p className="text-sm" style={{ color: '#9B9B9B' }}>Upload course notes in <span className="font-medium" style={{ color: dot }}>Study Tools</span> to enable recall checks from your own material.</p>
                       </div>
                     )}
                   </div>

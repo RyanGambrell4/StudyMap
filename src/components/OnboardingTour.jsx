@@ -125,7 +125,7 @@ export default function OnboardingTour({ onReady }) {
         element: '#tour-nav-dashboard',
         popover: {
           title: 'Your Daily Dashboard',
-          description: "See what's up next today, track your streak, and get an AI-generated study brief every morning.",
+          description: "See what's up next today, track your streak, and get a daily study brief every morning.",
           side: 'bottom',
           align: 'start',
         },
