@@ -225,7 +225,8 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
   const autopsyHasData = autopsy.rows.some(r => r.total > 0)
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#F7F6F3', overflowY: 'auto' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#F7F6F3', overflowY: 'auto', animation: 'per-enter 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
+      <style>{`@keyframes per-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }`}</style>
       <div style={{ maxWidth: 820, margin: '0 auto', padding: '32px 24px 80px' }}>
 
         {/* Header */}

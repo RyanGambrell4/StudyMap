@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Spinner from './ui/spinner'
 import { getCachedCoachPlan, saveCoachPlan, getCachedStudyTools } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
@@ -32,13 +32,32 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
   const [focus, setFocus] = useState('')
   const [blueprint, setBlueprint] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [loadingMsgIdx, setLoadingMsgIdx] = useState(0)
   const [error, setError] = useState('')
   const [coachBanner, setCoachBanner] = useState(null)
+  const inputRef = useRef(null)
+
+  const LOADING_MSGS = [
+    'Building your session blueprint…',
+    'Analyzing your course content…',
+    'Structuring your study intervals…',
+    'Personalizing your plan…',
+  ]
 
   const isExamMode = EXAM_PATTERN.test(session.courseName ?? '')
   const [sessionType, setSessionType] = useState(
     isExamMode ? (EXAM_SESSION_TYPES.find(t => t.toLowerCase().includes((session.studyMethod ?? '').toLowerCase().split(' ')[0])) ?? EXAM_SESSION_TYPES[0]) : (session.studyMethod || session.sessionType || 'Review')
   )
+
+  useEffect(() => {
+    setTimeout(() => inputRef.current?.focus(), 300)
+  }, [])
+
+  useEffect(() => {
+    if (!loading) { setLoadingMsgIdx(0); return }
+    const id = setInterval(() => setLoadingMsgIdx(i => (i + 1) % LOADING_MSGS.length), 2000)
+    return () => clearInterval(id)
+  }, [loading])
 
   useEffect(() => {
     if (session.focusArea) {
@@ -159,7 +178,12 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
   const totalDuration = blueprint?.blocks?.reduce((s, b) => s + b.duration, 0) ?? session.duration
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#F7F6F3' }}>
+    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#F7F6F3', animation: 'bp-enter 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
+      <style>{`
+        @keyframes bp-enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes bp-block { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes bp-msg { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+      `}</style>
       {/* Top accent */}
       <div className="h-0.5 w-full shrink-0" style={{ backgroundColor: dot }} />
 
@@ -237,6 +261,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
 
               <label className="block text-xs uppercase tracking-widest font-bold mb-2" style={{ color: '#9B9B9B' }}>What do you want to focus on today?</label>
               <input
+                ref={inputRef}
                 type="text"
                 value={focus}
                 onChange={e => setFocus(e.target.value)}
@@ -253,7 +278,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
               {loading ? (
                 <div className="flex flex-col items-center gap-4 py-12">
                   <Spinner size="lg" color={dot} track={`${dot}20`} />
-                  <p className="font-medium" style={{ color: '#111111' }}>Building your session blueprint…</p>
+                  <p key={loadingMsgIdx} className="font-medium" style={{ color: '#111111', animation: 'bp-msg 0.3s ease both' }}>{LOADING_MSGS[loadingMsgIdx]}</p>
                   <p className="text-xs text-center max-w-xs" style={{ color: '#9B9B9B' }}>Designing structured intervals for {session.courseName}</p>
                 </div>
               ) : (
@@ -327,6 +352,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
                         borderBottom: '1px solid rgba(0,0,0,0.07)',
                         borderLeft: `3px solid ${ac.border}`,
                         paddingLeft: 16,
+                        animation: `bp-block 300ms cubic-bezier(0.16,1,0.3,1) ${i * 55}ms both`,
                       }}
                     >
                       <div className="flex items-center gap-2 mb-1">

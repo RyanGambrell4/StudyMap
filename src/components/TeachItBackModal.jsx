@@ -165,11 +165,12 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
       background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
     }}>
+      <style>{`@keyframes tib-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }`}</style>
       <div style={{
         background: D.bgCard, borderRadius: 20, width: '100%', maxWidth: 540,
         maxHeight: '92vh', display: 'flex', flexDirection: 'column',
         boxShadow: '0 24px 64px rgba(0,0,0,0.14)', border: `1px solid ${D.border}`,
-        overflow: 'hidden',
+        overflow: 'hidden', animation: 'tib-in 260ms cubic-bezier(0.16,1,0.3,1) both',
       }}>
         {/* Header */}
         <div style={{ padding: '16px 20px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>

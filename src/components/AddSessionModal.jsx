@@ -74,7 +74,8 @@ export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }
 
   return (
     <div role="dialog" aria-modal="true" aria-label="Add study session" style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(6px)' }}>
-      <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 20, width: '100%', maxWidth: 360, boxShadow: '0 16px 48px rgba(0,0,0,0.12)', padding: 20 }}>
+      <style>{`@keyframes asm-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }`}</style>
+      <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 20, width: '100%', maxWidth: 360, boxShadow: '0 16px 48px rgba(0,0,0,0.12)', padding: 20, animation: 'asm-in 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
           <h3 style={{ color: '#1A1A1A', fontWeight: 700, fontSize: 15, margin: 0 }}>{mode === 'event' ? 'Add Event' : 'Add Session'}</h3>
           <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', padding: 4 }}>
