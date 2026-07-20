@@ -317,7 +317,7 @@ export default function AuthScreen({ initialMode, onBack }) {
             )}
             {mode === 'signup' && magicLinkMode && (
               <div style={{ backgroundColor: '#EEF2FF', border: '1px solid #C7D2FE', borderRadius: 10, padding: '10px 14px', fontSize: 13, color: '#3730A3', lineHeight: 1.5 }}>
-                We'll email you a one-click link. No password needed. Click it to confirm and sign in instantly.
+                A one-click sign-in link will be sent to your email. No password needed. Click it to confirm and sign in.
                 <button type="button" onClick={() => setMagicLinkMode(false)} style={{ display: 'block', marginTop: 6, background: 'none', border: 'none', fontSize: 12, color: '#6366F1', cursor: 'pointer', padding: 0, fontWeight: 500 }}>
                   ← Set a password instead
                 </button>
