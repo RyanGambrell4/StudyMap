@@ -528,7 +528,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
                 <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
               <p style={{ fontSize: '0.8rem', color: '#8AABFF', fontWeight: 600, margin: 0 }}>
-                {courseName.trim() ? `All set. Your ${courseName.trim()} plan is ready to build.` : 'All set. Your personalized study plan is ready to build.'}
+                {courseName.trim() ? `All set. Your ${courseName.trim()} plan is ready to build.` : 'All set. Your study plan is ready to build.'}
               </p>
             </div>
           )}

@@ -185,7 +185,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
                 }}
               />
               <div style={{ fontSize: 12, color: D.textDim, marginTop: 6 }}>
-                The more specific, the more personalized your cheat sheet.
+                The more specific, the better the cheat sheet.
               </div>
             </div>
 
