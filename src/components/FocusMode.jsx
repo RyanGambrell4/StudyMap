@@ -1828,24 +1828,20 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               const lowRecall = recallData.score < 40
               const urgent = examDays !== null && examDays <= 3
 
-              let icon, suggestion, ctaLabel, ctaAction
+              let suggestion, ctaLabel, ctaAction
               if (lowRecall && onOpenBrainDump) {
-                icon = '🧠'
                 suggestion = `Your recall score was ${recallData.label.toLowerCase()}. A Brain Dump right now will move what you just studied into long-term memory.`
                 ctaLabel = 'Do a Brain Dump now'
                 ctaAction = handleBrainDump
               } else if (urgent) {
-                icon = '🎯'
                 suggestion = `${examDays === 0 ? 'Your exam is today.' : `${examDays} day${examDays !== 1 ? 's' : ''} to your exam.`} High-yield review only. No new material.`
                 ctaLabel = 'Back to dashboard'
                 ctaAction = handleBackToDashboard
               } else if (nextSession) {
-                icon = '⚡'
                 suggestion = `Your next session is ready.`
                 ctaLabel = `Start ${nextSession.courseName} →`
                 ctaAction = handleStartNext
               } else {
-                icon = '✓'
                 suggestion = `Recall rated: ${recallData.label}. ${recallData.score >= 70 ? 'Strong retention. Rest before reviewing again.' : 'Review this material again in 24-48 hours for best retention.'}`
                 ctaLabel = null
                 ctaAction = null

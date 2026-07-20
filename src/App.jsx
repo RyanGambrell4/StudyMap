@@ -755,7 +755,7 @@ export default function App() {
           display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap',
         }}>
           <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.9)', fontWeight: 500 }}>
-            📧 Confirm your email to secure your account. Check <strong>{session.user.email}</strong>
+            Confirm your email to secure your account. Check <strong>{session.user.email}</strong>
           </span>
           <div style={{ display: 'flex', gap: 8, flexShrink: 0, alignItems: 'center' }}>
             <button
@@ -987,12 +987,12 @@ function EmailVerificationGate({ email, userId, resendState, onResend, onSignOut
             Can't find it?
           </p>
           {[
-            { icon: '📁', text: 'Check your spam or junk folder' },
-            { icon: '⏱',  text: 'It can take up to 2 minutes to arrive' },
-            { icon: '📧', text: 'Look for an email from StudyEdge AI' },
-          ].map(({ icon, text }) => (
+            'Check your spam or junk folder',
+            'It can take up to 2 minutes to arrive',
+            'Look for an email from StudyEdge AI',
+          ].map((text) => (
             <div key={text} style={{ display:'flex', alignItems:'center', gap:10, marginBottom:10 }}>
-              <span style={{ fontSize:14, flexShrink:0 }}>{icon}</span>
+              <span style={{ width:5, height:5, borderRadius:'50%', background:'rgba(255,255,255,.3)', flexShrink:0 }} />
               <span style={{ fontSize:13, color:'rgba(255,255,255,.55)' }}>{text}</span>
             </div>
           ))}
