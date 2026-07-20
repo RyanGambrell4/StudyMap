@@ -295,8 +295,21 @@ export default function CalendarDayView({
 
   const hasAllDay = allDayBlocks.length > 0 || allDayGoogleBlocks.length > 0
 
+  const touchRef = useRef(null)
+  const handleTouchStart = e => { touchRef.current = { x: e.touches[0].clientX, y: e.touches[0].clientY } }
+  const handleTouchEnd = e => {
+    if (!touchRef.current) return
+    const dx = e.changedTouches[0].clientX - touchRef.current.x
+    const dy = e.changedTouches[0].clientY - touchRef.current.y
+    if (Math.abs(dx) > Math.abs(dy) && Math.abs(dx) > 60) {
+      if (dx > 0) onPrev?.()
+      else onNext?.()
+    }
+    touchRef.current = null
+  }
+
   return (
-    <div className="select-none">
+    <div className="select-none" onTouchStart={handleTouchStart} onTouchEnd={handleTouchEnd}>
       {/* ── Day nav ── */}
       <div className="flex items-center justify-between mb-3 pb-3" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
         <div className="flex items-center gap-2">

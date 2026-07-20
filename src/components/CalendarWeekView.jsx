@@ -421,8 +421,10 @@ export default function CalendarWeekView({
     }
   }, [onSessionMove, onToggle])
 
+  const weekSwipe = makeSwipeHandlers(onPrevWeek, onNextWeek, 70)
+
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col" onTouchStart={weekSwipe.onTouchStart} onTouchEnd={weekSwipe.onTouchEnd}>
       {/* ── Week nav ── */}
       <div className="flex items-center justify-between mb-4 pb-3" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
         <div className="flex items-center gap-2">
