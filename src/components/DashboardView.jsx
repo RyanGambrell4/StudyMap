@@ -713,7 +713,7 @@ export default function DashboardView({
           <p style={{ color: D.textMuted, fontSize: 14.5, lineHeight: 1.65, margin: '0 0 28px', maxWidth: 340, marginLeft: 'auto', marginRight: 'auto' }}>
             {isExamMode
               ? 'Add a section with its test date to build your full prep plan.'
-              : 'Add a course with its exam date and your AI study plan builds itself in under a minute.'}
+              : 'Add a course with its exam date and a study plan is built in under a minute.'}
           </p>
 
           {/* What you get preview */}
