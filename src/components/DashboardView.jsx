@@ -105,11 +105,16 @@ function Label({ children, color }) {
 // ── Card ──────────────────────────────────────────────────────────────────────
 function Card({ children, style, onClick, glowColor }) {
   const [hovered, setHovered] = useState(false)
+  const [pressed, setPressed] = useState(false)
   const gc = glowColor || null
   return (
     <div
       onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+      onMouseLeave={() => { setHovered(false); setPressed(false) }}
+      onMouseDown={() => onClick && setPressed(true)}
+      onMouseUp={() => setPressed(false)}
+      onTouchStart={() => onClick && setPressed(true)}
+      onTouchEnd={() => setPressed(false)}
       onClick={onClick}
       style={{
         background: D.bgCard,
@@ -119,7 +124,8 @@ function Card({ children, style, onClick, glowColor }) {
           ? gc ? `0 6px 28px ${gc}20, 0 2px 8px rgba(0,0,0,0.06)` : '0 6px 20px rgba(0,0,0,0.09)'
           : '0 1px 3px rgba(0,0,0,0.07)',
         cursor: onClick ? 'pointer' : undefined,
-        transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
+        transition: 'box-shadow 0.2s ease, border-color 0.2s ease, transform 0.1s ease',
+        transform: pressed ? 'scale(0.985)' : 'scale(1)',
         ...style,
       }}
     >
@@ -794,6 +800,12 @@ export default function DashboardView({
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
         @keyframes dash-pulse { 0%,100%{opacity:0.5;transform:scale(1)} 50%{opacity:1;transform:scale(1.3)} }
         @keyframes streak-toast-in { from { opacity:0; transform:translateX(-50%) translateY(-16px); } to { opacity:1; transform:translateX(-50%) translateY(0); } }
+        .dash-ghost-btn { transition: background 0.12s, color 0.12s, transform 0.1s !important; border-radius: 6px !important; }
+        .dash-ghost-btn:hover { background: rgba(0,0,0,0.05) !important; color: #111111 !important; }
+        .dash-ghost-btn:active { transform: scale(0.95) !important; background: rgba(0,0,0,0.08) !important; }
+        .dash-link-btn { transition: color 0.12s, transform 0.1s !important; }
+        .dash-link-btn:hover { color: #3B61C4 !important; text-decoration: underline; }
+        .dash-link-btn:active { transform: scale(0.95) !important; }
         @media (max-width: 767px) {
           .dash-header { padding: 20px 16px 6px !important; }
           .dash-grid { grid-template-columns: 1fr !important; padding: 12px 16px 90px !important; gap: 12px !important; }
@@ -1833,8 +1845,8 @@ export default function DashboardView({
                   >
                     <IcoPlay /> Start session
                   </button>
-                  <button onClick={(e) => { e.stopPropagation(); handleToggle(displaySession.id) }} style={{ fontSize: 13, color: D.textMuted, padding: '8px 4px', background: 'none', border: 'none', cursor: 'pointer' }}>Mark done</button>
-                  <button onClick={(e) => { e.stopPropagation(); setSessionIdx(i => (i + 1) % Math.max(uncompletedToday.length, 1)) }} style={{ fontSize: 13, color: D.textMuted, padding: '8px 4px', background: 'none', border: 'none', cursor: 'pointer' }}>Skip</button>
+                  <button onClick={(e) => { e.stopPropagation(); handleToggle(displaySession.id) }} className="dash-ghost-btn" style={{ fontSize: 13, color: D.textMuted, padding: '6px 8px', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Mark done</button>
+                  <button onClick={(e) => { e.stopPropagation(); setSessionIdx(i => (i + 1) % Math.max(uncompletedToday.length, 1)) }} className="dash-ghost-btn" style={{ fontSize: 13, color: D.textMuted, padding: '6px 8px', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Skip</button>
                   <div className="dash-pomodoro" style={{ marginLeft: 'auto', fontSize: 11, color: D.textDim, display: 'flex', alignItems: 'center', gap: 5 }}>
                     <IcoZap /> Pomodoro · 25 + 5
                   </div>
@@ -1947,7 +1959,11 @@ export default function DashboardView({
                   cursor: 'pointer', width: '100%', transition: 'background 0.12s, border-color 0.12s',
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = `${a.color}15`; e.currentTarget.style.borderColor = `${a.color}35` }}
-                onMouseLeave={e => { e.currentTarget.style.background = `${a.color}08`; e.currentTarget.style.borderColor = `${a.color}18` }}
+                onMouseLeave={e => { e.currentTarget.style.background = `${a.color}08`; e.currentTarget.style.borderColor = `${a.color}18`; e.currentTarget.style.transform = 'scale(1)' }}
+                onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.96)' }}
+                onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
+                onTouchStart={e => { e.currentTarget.style.transform = 'scale(0.96)' }}
+                onTouchEnd={e => { e.currentTarget.style.transform = 'scale(1)' }}
               >
                 <div style={{ width: 30, height: 30, borderRadius: 8, background: `${a.color}15`, border: `1px solid ${a.color}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', color: a.color }}>
                   {a.icon}
@@ -1967,7 +1983,9 @@ export default function DashboardView({
               textAlign: 'left',
             }}
             onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,97,196,0.08)' }}
-            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(59,97,196,0.04)' }}
+            onMouseLeave={e => { e.currentTarget.style.background = 'rgba(59,97,196,0.04)'; e.currentTarget.style.transform = 'scale(1)' }}
+            onMouseDown={e => { e.currentTarget.style.transform = 'scale(0.98)' }}
+            onMouseUp={e => { e.currentTarget.style.transform = 'scale(1)' }}
           >
             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
             <div style={{ flex: 1, fontSize: 12, color: '#6B6B6B' }}>
@@ -2080,6 +2098,7 @@ export default function DashboardView({
                     <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
                       <button
                         onClick={() => onDrillTopic?.(topic)}
+                        className="dash-link-btn"
                         style={{
                           fontSize: 11.5, fontWeight: 700, color: D.blue,
                           background: 'none', border: 'none', cursor: 'pointer',
@@ -2090,6 +2109,7 @@ export default function DashboardView({
                       </button>
                       <button
                         onClick={() => onNavigateToTutor?.(`I need help with ${topic}. I've been getting this wrong in my ${cName} quizzes. Can you quiz me on it and explain what I'm missing?`)}
+                        className="dash-link-btn"
                         style={{
                           fontSize: 11.5, fontWeight: 700, color: D.red,
                           background: 'none', border: 'none', cursor: 'pointer',
@@ -2114,6 +2134,7 @@ export default function DashboardView({
                     <div style={{ fontSize: 13, fontWeight: 600, color: D.text, lineHeight: 1.3 }}>{topic}</div>
                     <button
                       onClick={() => onDrillTopic?.(topic)}
+                      className="dash-link-btn"
                       style={{
                         fontSize: 11.5, fontWeight: 700, color: D.blue,
                         background: 'none', border: 'none', cursor: 'pointer',
