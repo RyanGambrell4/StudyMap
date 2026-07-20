@@ -252,7 +252,7 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
 
               {activeTab === 'url' && (
                 <div>
-                  <p style={{ color: '#6B6B6B', fontSize: 13, margin: '0 0 12px' }}>Paste a link to your syllabus page and we'll extract the dates automatically.</p>
+                  <p style={{ color: '#6B6B6B', fontSize: 13, margin: '0 0 12px' }}>Paste a link to your syllabus page to extract dates automatically.</p>
                   <input
                     type="url"
                     placeholder="https://university.edu/syllabus..."

@@ -49,7 +49,7 @@ export default class ErrorBoundary extends Component {
             </svg>
             <h2 style={{ fontSize: 18, fontWeight: 700, color: '#111', marginBottom: 8 }}>Something went wrong</h2>
             <p style={{ fontSize: 13, color: '#6B6B6B', marginBottom: 20 }}>
-              We've been notified and are looking into it. Try refreshing the page.
+              This error has been reported. Try refreshing the page.
             </p>
             <button
               onClick={() => window.location.reload()}

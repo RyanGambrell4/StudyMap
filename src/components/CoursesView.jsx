@@ -332,7 +332,7 @@ function ImportBand({ onImportSyllabus }) {
       <ImportCard
         icon="file" color="#6366f1" eyebrow="Quick Import"
         title="Import syllabus"
-        desc="Drop a PDF or paste a link: we'll extract dates, weights, and topics."
+        desc="Drop a PDF or paste a link to extract dates, weights, and topics."
         accept=".pdf,.docx,.png,.jpg"
         onFile={file => onImportSyllabus?.(-1, file)}
         gradient="linear-gradient(155deg, rgba(232,83,26,0.06) 0%, rgba(99,102,241,0.04) 45%, transparent 100%)"
@@ -627,7 +627,7 @@ function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, gra
           </div>
           <div style={{ flex: 1 }}>
             <div style={{ fontSize: 13.5, fontWeight: 600, color: D.text, marginBottom: 2 }}>No syllabus yet</div>
-            <div style={{ fontSize: 12, color: D.muted }}>Import one and we'll pull in every date, weight, and deadline.</div>
+            <div style={{ fontSize: 12, color: D.muted }}>Import one to pull in every date, weight, and deadline.</div>
           </div>
           <button onClick={() => onImportSyllabus?.(idx)} style={{ padding: '8px 14px', borderRadius: 8, background: 'rgba(99,102,241,0.18)', border: '1px solid rgba(232,83,26,0.25)', color: D.text, fontSize: 12.5, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
             <Icon name="upload" size={12} /> Import syllabus
@@ -822,7 +822,7 @@ function ExamSetupModal({ courseCount, onClose, onAdd, onOpenStudyCoach }) {
           {step === 1 && (
             <>
               <div style={{ fontSize: 16, fontWeight: 700, color: D.text, marginBottom: 6 }}>Which exam are you preparing for?</div>
-              <div style={{ fontSize: 13, color: D.muted, marginBottom: 20 }}>We'll load all sections and build your plan around your test date.</div>
+              <div style={{ fontSize: 13, color: D.muted, marginBottom: 20 }}>Sections are loaded and the plan is built around your test date.</div>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                 {EXAM_LIST.map(e => (
                   <button key={e.key} onClick={() => setExam(e.key)} style={{ padding: '16px', borderRadius: 12, textAlign: 'left', background: exam === e.key ? 'rgba(232,83,26,0.1)' : 'rgba(0,0,0,0.04)', border: `1px solid ${exam === e.key ? 'rgba(232,83,26,0.4)' : D.border}`, cursor: 'pointer', transition: 'all 0.15s', boxShadow: exam === e.key ? '0 0 0 3px rgba(232,83,26,0.08)' : 'none' }}>
@@ -837,7 +837,7 @@ function ExamSetupModal({ courseCount, onClose, onAdd, onOpenStudyCoach }) {
           {step === 2 && preset && (
             <>
               <div style={{ fontSize: 16, fontWeight: 700, color: D.text, marginBottom: 6 }}>Exam details</div>
-              <div style={{ fontSize: 13, color: D.muted, marginBottom: 20 }}>We'll use this to structure your timeline and set clear targets.</div>
+              <div style={{ fontSize: 13, color: D.muted, marginBottom: 20 }}>Used to structure your prep timeline and score targets.</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div><Label>When is your exam? <span style={{ color: D.orange }}>*</span></Label><input type="date" className="cv-input" min={todayStr} value={testDate} onChange={e => setTestDate(e.target.value)} /></div>
                 <div><Label>Target score <span style={{ color: D.dim, fontWeight: 400 }}>(optional)</span></Label><input type="text" className="cv-input" placeholder={preset.scoreLabel} value={targetScore} onChange={e => setTargetScore(e.target.value)} /></div>
@@ -849,7 +849,7 @@ function ExamSetupModal({ courseCount, onClose, onAdd, onOpenStudyCoach }) {
           {step === 3 && (
             <>
               <div style={{ fontSize: 16, fontWeight: 700, color: D.text, marginBottom: 6 }}>Study availability</div>
-              <div style={{ fontSize: 13, color: D.muted, marginBottom: 20 }}>We'll build your entire prep schedule around these numbers.</div>
+              <div style={{ fontSize: 13, color: D.muted, marginBottom: 20 }}>Your prep schedule is built around these numbers.</div>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                 <div><Label>Hours available to study per day</Label><input type="number" className="cv-input" min="1" max="12" placeholder="e.g. 4" value={hoursPerDay} onChange={e => setHoursPerDay(e.target.value)} /></div>
                 <div>

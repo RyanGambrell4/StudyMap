@@ -203,7 +203,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
           {!blueprint && (
             <div>
               <h1 className="text-2xl font-bold mb-1" style={{ color: '#1A1A1A' }}>Session Blueprint</h1>
-              <p className="text-sm mb-6" style={{ color: '#9B9B9B' }}>Your session, mapped out before you start. Tell us what you're working with and we'll build the plan.</p>
+              <p className="text-sm mb-6" style={{ color: '#9B9B9B' }}>Your session, mapped out before you start. Enter what you're working on to generate the plan.</p>
 
               {coachBanner && (
                 <div className="flex items-start gap-2.5 rounded-xl px-3.5 py-2.5 mb-4" style={{ backgroundColor: `${dot}12`, border: `1px solid ${dot}30` }}>
