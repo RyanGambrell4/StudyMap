@@ -394,8 +394,22 @@ export default function AppShell({
           </div>
         </nav>
 
-        {/* Right side: settings + avatar */}
+        {/* Right side: search + settings + avatar */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginLeft: 'auto', flexShrink: 0 }}>
+          {/* Command palette trigger */}
+          <button
+            onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true, bubbles: true }))}
+            title="Search commands (⌘K)"
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 30, padding: '0 10px', borderRadius: 7, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer', color: MUTED, fontSize: 12, fontWeight: 500, transition: 'all 0.12s' }}
+            onMouseEnter={e => { e.currentTarget.style.background = '#F0EFEC'; e.currentTarget.style.color = TEXT }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#F7F6F3'; e.currentTarget.style.color = MUTED }}
+          >
+            <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <span style={{ letterSpacing: '-0.01em' }}>Search</span>
+            <kbd style={{ fontSize: 10, fontWeight: 700, color: '#B0B0B0', background: '#FFFFFF', border: `1px solid ${BORDER}`, borderRadius: 4, padding: '1px 5px', fontFamily: 'ui-monospace, monospace', letterSpacing: 0 }}>⌘K</kbd>
+          </button>
           <div ref={settingsRef} style={{ position: 'relative' }}>
             <button
               onClick={() => setSettingsOpen(v => !v)}
