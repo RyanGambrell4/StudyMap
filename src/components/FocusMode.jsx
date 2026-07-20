@@ -2191,23 +2191,52 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
             </div>
           ) : (
             <>
-              {/* Huge timer */}
-              <div
-                style={{
-                  fontSize: 'clamp(4.5rem, 14vw, 8.5rem)',
-                  fontWeight: 800,
-                  fontFamily: '"SF Mono", "Fira Code", ui-monospace, monospace',
-                  letterSpacing: '-0.03em',
-                  lineHeight: 1,
-                  color: running ? '#1A1A1A' : '#9B9B9B',
-                  textShadow: running ? `0 0 80px ${dot}35` : 'none',
-                  transition: 'color 0.3s, text-shadow 0.3s',
-                  userSelect: 'none',
-                  tabularNums: true,
-                }}
-              >
-                {fmt(blocks ? blockRemaining : remaining)}
-              </div>
+              {/* Huge timer with progress ring */}
+              {(() => {
+                const R = 130
+                const C = 2 * Math.PI * R
+                const sessionProgress = totalSec > 0 ? Math.min(1, elapsed / totalSec) : 0
+                const blockProgress = blocks && currentBlock ? Math.min(1, 1 - blockRemaining / (currentBlock.duration * 60)) : 0
+                const ringProgress = blocks ? blockProgress : sessionProgress
+                const dash = C * ringProgress
+                return (
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 300, height: 300 }}>
+                    <svg
+                      width="300" height="300"
+                      style={{ position: 'absolute', top: 0, left: 0, transform: 'rotate(-90deg)' }}
+                      aria-hidden="true"
+                    >
+                      <circle cx="150" cy="150" r={R} fill="none" stroke={`${dot}18`} strokeWidth="3" />
+                      <circle
+                        cx="150" cy="150" r={R}
+                        fill="none"
+                        stroke={dot}
+                        strokeWidth="3"
+                        strokeLinecap="round"
+                        strokeDasharray={`${dash} ${C - dash}`}
+                        strokeDashoffset="0"
+                        style={{ transition: 'stroke-dasharray 1s linear' }}
+                      />
+                    </svg>
+                    <div
+                      style={{
+                        fontSize: 'clamp(3.2rem, 11vw, 6rem)',
+                        fontWeight: 800,
+                        fontFamily: '"SF Mono", "Fira Code", ui-monospace, monospace',
+                        letterSpacing: '-0.03em',
+                        lineHeight: 1,
+                        color: running ? '#1A1A1A' : '#9B9B9B',
+                        textShadow: running ? `0 0 80px ${dot}35` : 'none',
+                        transition: 'color 0.3s, text-shadow 0.3s',
+                        userSelect: 'none',
+                        position: 'relative',
+                      }}
+                    >
+                      {fmt(blocks ? blockRemaining : remaining)}
+                    </div>
+                  </div>
+                )
+              })()}
 
               {/* Sub-label */}
               <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, fontSize: 12, color: '#9B9B9B' }}>
