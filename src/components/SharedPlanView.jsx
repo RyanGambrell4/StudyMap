@@ -166,7 +166,7 @@ export default function SharedPlanView() {
           border: '1px solid rgba(59,97,196,0.18)',
         }}>
           <div style={{ fontSize: 18, fontWeight: 800, color: '#111111', marginBottom: 8, letterSpacing: '-0.2px' }}>
-            Generate your own AI study plan
+            Create your own study plan
           </div>
           <p style={{ fontSize: 14, color: '#475569', margin: '0 0 18px', lineHeight: 1.6 }}>
             Upload your syllabus and get a week-by-week plan built around your courses in 30 seconds.

@@ -1213,7 +1213,7 @@ export default function OutputView({
           body: JSON.stringify({
             userId,
             title: gcalTitle,
-            description: s.isEvent ? undefined : 'StudyEdge AI study session',
+            description: s.isEvent ? undefined : 'StudyEdge study session',
             startDateTime: startISO,
             endDateTime: endISO,
             date: startISO ? undefined : s.dateStr,
