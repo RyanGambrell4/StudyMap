@@ -260,7 +260,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
 
               <div style={{ padding: '12px 14px', background: 'rgba(59,97,196,0.05)', borderRadius: 10, border: '1px solid rgba(59,97,196,0.14)', marginBottom: 20 }}>
                 <p style={{ margin: 0, fontSize: 12.5, color: D.textMuted, lineHeight: 1.5 }}>
-                  Explain it as if you were teaching a friend who's never heard of it. Your explanation is scored for accuracy, gaps are flagged, and a follow-up question tests your real understanding.
+                  Explain it as if you were teaching a friend who's never heard of it. We score your explanation for accuracy, flag the gaps, and ask a follow-up to test what actually stuck.
                 </p>
               </div>
 

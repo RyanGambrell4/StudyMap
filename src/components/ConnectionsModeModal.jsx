@@ -198,7 +198,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
 
               <div style={{ padding: '12px 14px', background: 'rgba(5,150,105,0.05)', borderRadius: 10, border: '1px solid rgba(5,150,105,0.15)', marginBottom: 20 }}>
                 <p style={{ margin: 0, fontSize: 12.5, color: D.textMuted, lineHeight: 1.5 }}>
-                  Generates 5 pairs of related concepts from your course and asks you to explain the connection between them. Your answer is scored and the key relationship is revealed.
+                  Generates 5 pairs of related concepts from your course and asks you to explain the connection between them. We score your answer and show you the key relationship.
                   {getCachedStudyTools()?.flashcards?.length > 0 && (
                     <span style={{ color: D.accent, fontWeight: 600 }}> Using your {getCachedStudyTools().flashcards.length} saved flashcards.</span>
                   )}
