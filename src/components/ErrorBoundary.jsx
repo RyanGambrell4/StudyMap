@@ -12,6 +12,22 @@ export default class ErrorBoundary extends Component {
   }
 
   componentDidCatch(error, info) {
+    const isChunkError =
+      error?.name === 'ChunkLoadError' ||
+      /Loading chunk \d+ failed/.test(error?.message ?? '') ||
+      /Failed to fetch dynamically imported module/.test(error?.message ?? '') ||
+      /error loading dynamically imported module/.test(error?.message ?? '')
+
+    if (isChunkError) {
+      const key = 'studyedge_chunk_reload_at'
+      const last = Number(sessionStorage.getItem(key) ?? 0)
+      if (Date.now() - last > 10_000) {
+        sessionStorage.setItem(key, String(Date.now()))
+        window.location.reload()
+        return
+      }
+    }
+
     captureError(error, { componentStack: info.componentStack })
   }
 
