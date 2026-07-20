@@ -1510,6 +1510,10 @@ export default function OutputView({
         </div>
       )}
 
+      <style>{`
+        @keyframes ov-toast { from { opacity: 0; transform: translateX(-50%) translateY(-8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+      `}</style>
+
       {gcalToast && (
         <div style={{
           position: 'fixed', top: 20, left: '50%', transform: 'translateX(-50%)',
@@ -1518,7 +1522,7 @@ export default function OutputView({
           background: gcalToast === 'connected' ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)',
           border: `1px solid ${gcalToast === 'connected' ? 'rgba(16,185,129,0.4)' : 'rgba(239,68,68,0.4)'}`,
           color: gcalToast === 'connected' ? '#34d399' : '#f87171',
-          backdropFilter: 'blur(8px)',
+          backdropFilter: 'blur(8px)', animation: 'ov-toast 0.25s ease-out both',
         }}>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
             <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
@@ -1538,7 +1542,7 @@ export default function OutputView({
           padding: '10px 20px', borderRadius: 12, fontSize: '0.875rem', fontWeight: 600,
           background: 'rgba(245,158,11,0.15)', border: '1px solid rgba(245,158,11,0.4)',
           color: '#D97706', backdropFilter: 'blur(8px)', whiteSpace: 'nowrap',
-          display: 'flex', alignItems: 'center', gap: 6,
+          display: 'flex', alignItems: 'center', gap: 6, animation: 'ov-toast 0.25s ease-out both',
         }}>
           <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{flexShrink:0}}>
             <path d="M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.41 0zM12 9v4M12 17h.01"/>

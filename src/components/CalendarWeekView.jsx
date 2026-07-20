@@ -818,7 +818,7 @@ export default function CalendarWeekView({
                       opacity: isDragging ? 0.25 : done ? 0.38 : 1,
                       cursor: isDragging ? 'grabbing' : 'grab',
                       touchAction: 'pan-y',
-                      transition: 'outline 0.1s',
+                      transition: 'outline 0.1s, opacity 0.25s ease',
                     }}
                     onPointerDown={e => {
                       // On pointer devices only (not touch), handle drag

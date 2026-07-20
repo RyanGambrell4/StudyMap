@@ -493,6 +493,7 @@ export default function CalendarDayView({
                   opacity: isDragging ? 0.25 : done ? 0.38 : 1,
                   cursor: isDragging ? 'grabbing' : 'grab',
                   touchAction: 'none',
+                  transition: 'opacity 0.25s ease',
                 }}
                 onPointerDown={e => handleSessionPointerDown(e, s)}
               >
