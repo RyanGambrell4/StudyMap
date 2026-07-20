@@ -113,6 +113,7 @@ export default function CalendarWeekView({
   plan = 'free',
   onShowPaywall,
   onStartFocus,
+  onGoToToday,
   theme = 'light',
 }) {
   const tv = theme_vars(theme === 'dark')
@@ -423,15 +424,26 @@ export default function CalendarWeekView({
     <div className="flex flex-col">
       {/* ── Week nav ── */}
       <div className="flex items-center justify-between mb-4 pb-3" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
-        <button onClick={onPrevWeek}
-          className="flex items-center gap-1.5 transition-colors text-sm"
-          style={{ color: '#9B9B9B' }}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-          </svg>
-          Prev week
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={onPrevWeek}
+            className="flex items-center gap-1.5 transition-colors text-sm"
+            style={{ color: '#9B9B9B' }}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+            </svg>
+            Prev
+          </button>
+          {onGoToToday && mondayStr !== getWeekMonday(todayStr) && (
+            <button
+              onClick={() => { track('calendar_goto_today', {}); onGoToToday() }}
+              className="text-xs font-semibold px-2.5 py-1 rounded-lg transition-all"
+              style={{ color: '#3B61C4', backgroundColor: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)' }}
+            >
+              Today
+            </button>
+          )}
+        </div>
         <div className="flex items-center gap-3">
           <span className="text-sm font-medium tracking-tight" style={{ color: '#6B6B6B' }}>{weekLabel}</span>
           {onAddSession && (
@@ -476,7 +488,7 @@ export default function CalendarWeekView({
           className="flex items-center gap-1.5 transition-colors text-sm"
           style={{ color: '#9B9B9B' }}
         >
-          Next week
+          Next
           <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5l7 7-7 7" />
           </svg>

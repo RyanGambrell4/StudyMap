@@ -1827,6 +1827,7 @@ export default function OutputView({
                 onToggle={handleToggle}
                 onPrev={handlePrevDay}
                 onNext={handleNextDay}
+                onGoToToday={() => setActiveDayStr(todayStr)}
                 googleEvents={googleEvents}
                 userId={userId}
                 gcalConnected={gcalConnected}
@@ -1879,6 +1880,7 @@ export default function OutputView({
                 plan={getActivePlan()}
                 onShowPaywall={onShowPaywall}
                 onStartFocus={handleStartFocus}
+                onGoToToday={() => setActiveDayStr(todayStr)}
               />
             )}
           </div>

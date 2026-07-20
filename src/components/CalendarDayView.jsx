@@ -67,6 +67,7 @@ export default function CalendarDayView({
   onToggle,
   onPrev,
   onNext,
+  onGoToToday,
   googleEvents = [],
   userId,
   gcalConnected = false,
@@ -297,16 +298,27 @@ export default function CalendarDayView({
     <div className="select-none">
       {/* ── Day nav ── */}
       <div className="flex items-center justify-between mb-3 pb-3" style={{ borderBottom: `1px solid ${tv.gridLine}` }}>
-        <button
-          onClick={onPrev}
-          className="flex items-center gap-1.5 transition-colors text-sm"
-          style={{ color: '#9B9B9B' }}
-        >
-          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
-          </svg>
-          Prev
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onPrev}
+            className="flex items-center gap-1.5 transition-colors text-sm"
+            style={{ color: '#9B9B9B' }}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M15 19l-7-7 7-7" />
+            </svg>
+            Prev
+          </button>
+          {onGoToToday && !isToday && (
+            <button
+              onClick={() => { track('calendar_goto_today', { view: 'day' }); onGoToToday() }}
+              className="text-xs font-semibold px-2.5 py-1 rounded-lg transition-all"
+              style={{ color: '#3B61C4', backgroundColor: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)' }}
+            >
+              Today
+            </button>
+          )}
+        </div>
 
         <div className="text-center">
           <p className="text-sm font-medium tracking-tight" style={{ color: isToday ? '#3B61C4' : '#1A1A1A' }}>
