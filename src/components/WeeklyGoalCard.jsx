@@ -67,8 +67,8 @@ export default function WeeklyGoalCard({ completedSessionLog = [], todayStr, onQ
     if (state === 'crushed') return `Goal crushed. ${fmtMinutes(progress.minutes - goalMinutes)} above target and the week isn't over.`
     if (state === 'ahead')   return `${pct}% of the way there. Coast is in sight.`
     if (state === 'ontrack') return `Right on pace. ${fmtMinutes(remainingMin)} to go across ${daysLeft} day${daysLeft !== 1 ? 's' : ''}.`
-    if (state === 'behind')  return `You need about ${fmtMinutes(paceMinPerDay)} a day to hit ${goal.hours}h. Doable if you start today.`
-    return `Behind pace. ${fmtMinutes(paceMinPerDay)} today would put you back in the game.`
+    if (state === 'behind')  return `About ${fmtMinutes(paceMinPerDay)}/day to reach ${goal.hours}h this week.`
+    return `Behind pace. ${fmtMinutes(paceMinPerDay)} today closes the gap.`
   })()
 
   useEffect(() => {
