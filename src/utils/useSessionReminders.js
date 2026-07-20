@@ -74,7 +74,7 @@ export function useSessionReminders(allSessions, completedIds, todayStr) {
         const timeLabel = minutesLeft <= 1 ? 'now' : `in ${minutesLeft} minutes`
 
         try {
-          new Notification('Time to study 📚', {
+          new Notification('Time to study', {
             body: `${session.courseName}: ${session.sessionType} starts ${timeLabel}`,
             tag: notifId,
           })
