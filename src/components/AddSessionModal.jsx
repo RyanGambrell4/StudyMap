@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { track } from '../lib/analytics'
 
 const SESSION_TYPES = ['Custom Study', 'Review', 'Practice', 'Reading', 'Notes', 'Problem Set', 'Flashcards', 'Other']
 
@@ -35,6 +36,7 @@ export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }
       const title = eventTitle.trim()
       if (!title) { setError('Give your event a name'); return }
 
+      track('calendar_event_added', { duration: dur, hasStartTime: !!startTime })
       onConfirm({
         id: `event-${selectedDate}-${Date.now()}`,
         dateStr: selectedDate,
@@ -52,6 +54,7 @@ export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }
     }
 
     const course = courses[courseIdx]
+    track('manual_session_added', { sessionType, duration: dur, hasStartTime: !!startTime })
     onConfirm({
       id: `manual-${selectedDate}-${Date.now()}`,
       dateStr: selectedDate,
