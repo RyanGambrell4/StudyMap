@@ -113,6 +113,7 @@ export default function CalendarWeekView({
   plan = 'free',
   onShowPaywall,
   onStartFocus,
+  onQuickStart,
   onGoToToday,
   theme = 'light',
 }) {
@@ -864,7 +865,7 @@ export default function CalendarWeekView({
                       <button
                         style={{ position: 'absolute', top: 2, right: onDeleteSession ? 18 : 2, width: 14, height: 14, borderRadius: '50%', background: ev.color.dot, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0, zIndex: 10 }}
                         onPointerDown={e => { e.stopPropagation(); e.preventDefault() }}
-                        onClick={e => { e.stopPropagation(); track('calendar_session_start', { source: 'week_view_hover' }); onStartFocus(ev) }}
+                        onClick={e => { e.stopPropagation(); track('calendar_session_start', { source: 'week_view_hover' }); onQuickStart ? onQuickStart(ev) : onStartFocus(ev) }}
                         title="Start session"
                       >
                         <svg width="7" height="7" viewBox="0 0 24 24" fill="white">
@@ -929,7 +930,7 @@ export default function CalendarWeekView({
             {onStartFocus && mobileActionSheet.session.dateStr === todayStr && !completedIds.has(mobileActionSheet.session.id) && (
               <button
                 style={{ width: '100%', padding: '14px', background: mobileActionSheet.session.color?.dot ?? '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontSize: 14, fontWeight: 700, marginBottom: 8, cursor: 'pointer' }}
-                onClick={() => { track('calendar_session_start', { source: 'mobile_sheet' }); onStartFocus(mobileActionSheet.session); setMobileActionSheet(null) }}
+                onClick={() => { track('calendar_session_start', { source: 'mobile_sheet' }); (onQuickStart ?? onStartFocus)(mobileActionSheet.session); setMobileActionSheet(null) }}
               >
                 Start session
               </button>

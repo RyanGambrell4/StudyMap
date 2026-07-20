@@ -1839,6 +1839,7 @@ export default function OutputView({
                 onSessionMove={handleSessionMove}
                 onAddSession={setAddSessionDayStr}
                 onStartFocus={handleStartFocus}
+                onQuickStart={handleQuickStart}
               />
             )}
 
@@ -1884,6 +1885,7 @@ export default function OutputView({
                 plan={getActivePlan()}
                 onShowPaywall={onShowPaywall}
                 onStartFocus={handleStartFocus}
+                onQuickStart={handleQuickStart}
                 onGoToToday={() => setActiveDayStr(todayStr)}
               />
             )}

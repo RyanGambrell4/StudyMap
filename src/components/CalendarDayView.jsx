@@ -75,6 +75,7 @@ export default function CalendarDayView({
   onSessionMove,
   onAddSession,
   onStartFocus,
+  onQuickStart,
   theme = 'light',
 }) {
   const tv = theme_vars(theme === 'dark')
@@ -525,7 +526,7 @@ export default function CalendarDayView({
                   {onStartFocus && isToday && !done && height > 32 && (
                     <button
                       onPointerDown={e => e.stopPropagation()}
-                      onClick={e => { e.stopPropagation(); track('calendar_session_start', { source: 'day_view' }); onStartFocus(s) }}
+                      onClick={e => { e.stopPropagation(); track('calendar_session_start', { source: 'day_view' }); onQuickStart ? onQuickStart(s) : onStartFocus(s) }}
                       className="shrink-0 mt-0.5"
                       title="Start session"
                       style={{ width: 18, height: 18, borderRadius: '50%', background: s.color.dot, border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 0 }}
