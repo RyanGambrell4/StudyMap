@@ -187,6 +187,7 @@ export default function DashboardView({
   onRescheduleSession,
   onOpenReviewQueue,
   onOpenProgress,
+  onOpenPracticeExam,
 }) {
   const plan = getActivePlan()
   const { remaining: aiRemaining } = canUseFeature('aiTutor')
