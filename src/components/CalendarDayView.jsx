@@ -84,6 +84,7 @@ export default function CalendarDayView({
   // ── Drag state ──
   const dragRef    = useRef(null)
   const colDivRef  = useRef(null)
+  const nowLineRef = useRef(null)
   const [ghost, setGhost] = useState(null)
   // ghost: { startMin, endMin, color, courseName, sessionId }
   const [nowPx, setNowPx]               = useState(() =>
@@ -94,6 +95,13 @@ export default function CalendarDayView({
     const update = () => setNowPx(((nowMinutes() - START_HOUR * 60) / 60) * HOUR_HEIGHT)
     const id = setInterval(update, 30000)
     return () => clearInterval(id)
+  }, [])
+
+  // Auto-scroll to current time on mount when viewing today
+  useEffect(() => {
+    if (nowLineRef.current) {
+      setTimeout(() => nowLineRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150)
+    }
   }, [])
 
   const todayStr     = new Date().toISOString().split('T')[0]
@@ -415,7 +423,7 @@ export default function CalendarDayView({
 
           {/* Red current-time indicator */}
           {showRedLine && (
-            <div className="absolute left-0 right-0 z-20 pointer-events-none" style={{ top: nowPx }}>
+            <div ref={nowLineRef} className="absolute left-0 right-0 z-20 pointer-events-none" style={{ top: nowPx }}>
               <div className="absolute bg-red-500 rounded-full"
                 style={{ width: 8, height: 8, top: -3.5, left: -1 }} />
               <div className="w-full" style={{ height: 1.5, background: 'rgba(239,68,68,0.75)' }} />

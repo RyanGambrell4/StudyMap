@@ -2332,7 +2332,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
               {/* Keyboard hint */}
               <p style={{ fontSize: 11, color: '#9B9B9B', marginTop: 16 }}>
-                [Space] pause &nbsp;·&nbsp; [↵] finish &nbsp;·&nbsp; [1–5] tools &nbsp;·&nbsp; [Esc] close panel
+                [Space] pause &nbsp;·&nbsp; [↵] finish &nbsp;·&nbsp; [1–5] tools &nbsp;·&nbsp; [Esc] exit
               </p>
             </>
           )}

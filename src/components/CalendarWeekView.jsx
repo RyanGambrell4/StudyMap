@@ -126,6 +126,13 @@ export default function CalendarWeekView({
     return () => clearInterval(id)
   }, [])
 
+  // Auto-scroll to current time on mount when viewing the current week
+  useEffect(() => {
+    if (nowLineRef.current) {
+      setTimeout(() => nowLineRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150)
+    }
+  }, [])
+
   const [hoveredSessionId, setHoveredSessionId] = useState(null)
   const [selectedSessionId, setSelectedSessionId] = useState(null)
   const [mobileActionSheet, setMobileActionSheet] = useState(null) // { session }
@@ -160,6 +167,7 @@ export default function CalendarWeekView({
   const colDivRefs  = useRef([])
   const columnsRef  = useRef([])
   const [ghost, setGhost] = useState(null)
+  const nowLineRef  = useRef(null)
 
   const todayStr  = new Date().toISOString().split('T')[0]
   const mondayStr = getWeekMonday(activeDayStr)
@@ -688,7 +696,7 @@ export default function CalendarWeekView({
 
               {/* Red current-time line */}
               {showRedLine && colIdx === todayColIdx && (
-                <div className="absolute left-0 right-0 z-20 pointer-events-none" style={{ top: nowPx }}>
+                <div ref={colIdx === 0 ? nowLineRef : undefined} className="absolute left-0 right-0 z-20 pointer-events-none" style={{ top: nowPx }}>
                   {colIdx === 0 && (
                     <div className="absolute bg-red-500 rounded-full"
                       style={{ width: 8, height: 8, top: -3.5, left: -1 }} />
