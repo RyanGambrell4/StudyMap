@@ -1433,7 +1433,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
   // ─── RENDER ─────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#F7F6F3' }}>
+    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#F7F6F3', animation: 'fm-enter 280ms cubic-bezier(0.16,1,0.3,1) both' }}>
       <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(180deg, ${dot}22 0%, transparent 28%)`, zIndex: 0 }} />
       {/* Top accent line */}
       <div className="h-1 w-full shrink-0" style={{ background: `linear-gradient(90deg, ${dot}, ${dot}88)` }} />
@@ -3017,6 +3017,10 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       </div>
 
       <style>{`
+        @keyframes fm-enter {
+          from { opacity: 0; transform: translateY(12px); }
+          to   { opacity: 1; transform: translateY(0); }
+        }
         @keyframes breathe {
           0%, 100% { transform: scale(1); }
           50% { transform: scale(1.3); }
