@@ -1271,8 +1271,8 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
   }, [gradeData, course, activeCourseIdx, onSyncToCalendar])
 
   return (
-    <div style={{ background: D.bg, minHeight: '100vh', overflowX: 'hidden', maxWidth: '100vw', backgroundImage: 'none' }}>
-      <style>{GH_STYLE}{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+    <div style={{ background: D.bg, minHeight: '100vh', overflowX: 'hidden', maxWidth: '100vw', backgroundImage: 'none', animation: 'gh-in 280ms cubic-bezier(0.16,1,0.3,1) both' }}>
+      <style>{GH_STYLE}{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes gh-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
       {/* Header */}
       <div className="gh-header" style={{ padding: '28px 32px 20px', borderBottom: `1px solid ${D.border}` }}>

@@ -264,6 +264,10 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
 
   return (
     <div className="flex flex-col h-full">
+      <style>{`
+        @keyframes bounce { 0%,100% { transform: translateY(-30%); animation-timing-function: cubic-bezier(0.8,0,1,1); } 50% { transform: translateY(0); animation-timing-function: cubic-bezier(0,0,0.2,1); } }
+        @keyframes chat-in { from { opacity: 0; transform: translateY(5px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+      `}</style>
 
       {/* Flag banner */}
       {flagBanner && (
@@ -347,7 +351,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
         )}
 
         {messages.map((msg, i) => (
-          <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+          <div key={i} style={{ display: 'flex', justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start', animation: 'chat-in 200ms ease both' }}>
             <div
               style={{
                 maxWidth: '82%', padding: '10px 14px', borderRadius: 18, fontSize: 14, lineHeight: 1.6,

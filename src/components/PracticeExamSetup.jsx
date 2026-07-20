@@ -186,7 +186,8 @@ export default function PracticeExamSetup({ courses, onBack, onStart, onShowPayw
   )
 
   return (
-    <div style={{ minHeight: '100%', background: D.bg, padding: '32px 24px 80px' }}>
+    <div style={{ minHeight: '100%', background: D.bg, padding: '32px 24px 80px', animation: 'pes-in 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
+      <style>{`@keyframes pes-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }`}</style>
       <div style={{ maxWidth: 660, margin: '0 auto' }}>
 
         {/* Back nav */}

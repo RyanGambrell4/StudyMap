@@ -1512,6 +1512,7 @@ export default function OutputView({
 
       <style>{`
         @keyframes ov-toast { from { opacity: 0; transform: translateX(-50%) translateY(-8px); } to { opacity: 1; transform: translateX(-50%) translateY(0); } }
+        @keyframes ov-section-enter { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
       `}</style>
 
       {gcalToast && (
@@ -1647,7 +1648,7 @@ export default function OutputView({
 
         {/* ── Calendar ── */}
         {activeSection === 'calendar' && (
-          <div className="px-4 py-6 max-w-7xl mx-auto">
+          <div className="px-4 py-6 max-w-7xl mx-auto" style={{ animation: 'ov-section-enter 200ms ease both' }}>
             {/* Recovery banner */}
             {recoveryCoursesIdx.size > 0 && (
               <div style={{

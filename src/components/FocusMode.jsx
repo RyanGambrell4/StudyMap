@@ -2317,7 +2317,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
               {/* Block transition */}
               {blockTransition && (
-                <div style={{ marginTop: 16, padding: '10px 18px', borderRadius: 10, backgroundColor: `${blockColor}10`, border: `1px solid ${blockColor}28`, textAlign: 'center', maxWidth: 380 }}>
+                <div style={{ marginTop: 16, padding: '12px 20px', borderRadius: 12, backgroundColor: `${blockColor}10`, border: `1px solid ${blockColor}28`, textAlign: 'center', maxWidth: 380, animation: 'recall-slide-up 0.3s cubic-bezier(0.16,1,0.3,1) both' }}>
                   <p style={{ fontSize: 13, fontWeight: 600, color: blockColor }}>Block complete · Next: {blockTransition.nextTitle}</p>
                   <p style={{ fontSize: 12, color: '#6B6B6B', marginTop: 4 }}>{blockTransition.nextInstruction}</p>
                 </div>
