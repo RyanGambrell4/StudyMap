@@ -628,7 +628,7 @@ export default function DashboardView({
 
   const aiMessage = useMemo(() => {
     if (upcomingExam && upcomingExam.days <= 7) {
-      return `${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. Add focused review sessions this week to stay on track.`
+      return `${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. Add focused review sessions this week.`
     }
     if (upcomingDeadlines.length > 0) {
       const d = upcomingDeadlines[0]
@@ -638,7 +638,7 @@ export default function DashboardView({
     if (weekHours > 0 && deltaHours > 0) {
       return `You're up ${deltaHours}h from last week. Keep it going.`
     }
-    return `Stay consistent with your sessions. Regular study time is what moves the needle at exam time.`
+    return `Regular study time is what moves the needle at exam time.`
   }, [upcomingExam, upcomingDeadlines, weekHours, deltaHours, todayStr])
 
   const aiCoachMessage = useMemo(() => {

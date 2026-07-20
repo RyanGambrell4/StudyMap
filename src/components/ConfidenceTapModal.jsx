@@ -84,7 +84,7 @@ export default function ConfidenceTapModal({ topic, courseId, source = 'session'
               </svg>
             </div>
             <div style={{ fontSize: 15, fontWeight: 700, color: D.text, letterSpacing: '-0.01em' }}>Locked in</div>
-            <div style={{ fontSize: 12.5, color: D.muted, marginTop: 4 }}>We'll show you if reality matches later.</div>
+            <div style={{ fontSize: 12.5, color: D.muted, marginTop: 4 }}>Your actual results will be compared to this.</div>
           </div>
         ) : (
           <>
@@ -95,7 +95,7 @@ export default function ConfidenceTapModal({ topic, courseId, source = 'session'
               How well do you know it?
             </h3>
             <p style={{ margin: '0 0 20px', fontSize: 13, color: D.muted, lineHeight: 1.55 }}>
-              {topic ? `Rate your grip on ${topic}. We'll check reality against this later.` : "Rate your grip on this material. We'll check reality later."}
+              {topic ? `Rate your grip on ${topic}. Compared against your actual results later.` : "Rate your grip on this material. Compared against your actual results later."}
             </p>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 8 }}>
