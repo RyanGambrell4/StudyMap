@@ -527,7 +527,8 @@ export default function AppShell({
 
         {/* Mobile hub sheet - slides up above the tab bar */}
         {mobileHub && (
-          <div style={{ borderTop: `1px solid ${BORDER}`, background: '#FFFFFF', padding: 16 }}>
+          <div style={{ borderTop: `1px solid ${BORDER}`, background: '#FFFFFF', padding: 16, animation: 'mob-hub-slide 0.2s cubic-bezier(0.16,1,0.3,1)' }}>
+            <style>{`@keyframes mob-hub-slide { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
             {mobileHub === 'strategy' ? (
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                 <p style={{ margin: '0 0 6px', fontSize: 10, fontWeight: 700, color: MUTED, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Strategy</p>
