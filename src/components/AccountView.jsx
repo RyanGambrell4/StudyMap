@@ -574,23 +574,25 @@ export default function AccountView({
               </button>
             </div>
             {smsEdit && (
-              <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
-                <input
-                  type="tel"
-                  placeholder="+1XXXXXXXXXX"
-                  value={smsPhone}
-                  onChange={e => setSmsPhone(e.target.value)}
-                  style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13 }}
-                />
-                <button
-                  onClick={handleSaveSms}
-                  disabled={smsSaving}
-                  style={{ padding: '8px 14px', background: '#3B61C4', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
-                >
-                  {smsSaving ? 'Saving…' : 'Save'}
-                </button>
-              </div>
-              {smsError && <p style={{ margin: '6px 0 0', fontSize: 12, color: '#DC2626' }}>{smsError}</p>}
+              <>
+                <div style={{ marginTop: 10, display: 'flex', gap: 8 }}>
+                  <input
+                    type="tel"
+                    placeholder="+1XXXXXXXXXX"
+                    value={smsPhone}
+                    onChange={e => setSmsPhone(e.target.value)}
+                    style={{ flex: 1, padding: '8px 10px', borderRadius: 8, border: '1px solid rgba(0,0,0,0.12)', fontSize: 13 }}
+                  />
+                  <button
+                    onClick={handleSaveSms}
+                    disabled={smsSaving}
+                    style={{ padding: '8px 14px', background: '#3B61C4', border: 'none', borderRadius: 8, color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer' }}
+                  >
+                    {smsSaving ? 'Saving…' : 'Save'}
+                  </button>
+                </div>
+                {smsError && <p style={{ margin: '6px 0 0', fontSize: 12, color: '#DC2626' }}>{smsError}</p>}
+              </>
             )}
           </div>
           <button
