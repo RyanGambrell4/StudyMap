@@ -627,7 +627,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
 
           <h2 style={{ textAlign: 'center', marginBottom: 6, fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
             <span style={{ background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              Here's your personalized plan.
+              Your study plan is ready.
             </span>
           </h2>
           <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.83rem', textAlign: 'center', marginBottom: 24 }}>
@@ -770,7 +770,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             </span>
           )}
           <span style={{ display: 'block', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-            {step3DaysToExam && step3Course ? "Here's your plan. Free for 7 days." : 'Free for 7 days.'}
+            {step3DaysToExam && step3Course ? "Your plan is ready. Free for 7 days." : 'Free for 7 days.'}
           </span>
         </h1>
         <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.9rem', textAlign: 'center', marginBottom: 28, lineHeight: 1.65 }}>
