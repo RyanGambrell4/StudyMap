@@ -93,6 +93,7 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setError('')
     setStep('loading')
+    track('time_attack_started', { courseName, topic: topic.trim() || null })
     try {
       const token = await getAccessToken()
       const res = await fetch('/api/timed-challenge', {
@@ -112,6 +113,7 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
       setStep('active')
       await incrementAIQuery()
     } catch (e) {
+      track('time_attack_error', { error: e.message ?? 'unknown' })
       setError(e.message)
       setStep('setup')
     }
