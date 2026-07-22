@@ -635,7 +635,14 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div className="px-6 py-8 max-w-3xl mx-auto">
+    <div className="px-6 py-8 max-w-3xl mx-auto" style={{ animation: 'stv-in 220ms cubic-bezier(0.16,1,0.3,1) both' }}>
+      <style>{`
+        @keyframes stv-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes stv-card { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .stv-tool-btn { transition: border-color 0.15s, transform 0.1s, box-shadow 0.15s !important; }
+        .stv-tool-btn:hover { border-color: rgba(0,0,0,0.14) !important; box-shadow: 0 2px 8px rgba(0,0,0,0.06) !important; }
+        .stv-tool-btn:active { transform: scale(0.97) !important; }
+      `}</style>
 
       {/* Always-mounted hidden inputs (must be outside mode conditionals so refs work from hub) */}
       <input
@@ -835,10 +842,10 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               </div>
             )}
 
-            {hubSections.map(({ id, label, keys }) => {
+            {hubSections.map(({ id, label, keys }, sIdx) => {
               const sectionTools = keys.map(k => toolsByLabel[k]).filter(Boolean)
               return (
-                <div key={id} style={{ marginBottom: 20 }}>
+                <div key={id} style={{ marginBottom: 20, animation: `stv-in 260ms ease ${sIdx * 60}ms both` }}>
                   <p style={{ fontSize: 10.5, fontWeight: 700, color: '#9B9B9B', letterSpacing: '0.07em', textTransform: 'uppercase', margin: '0 0 8px' }}>{label}</p>
                   <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
                     {sectionTools.map(({ label: lbl, desc, color, icon, onClick, pro, badge, badgeColor }) => {
@@ -850,9 +857,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                         <button
                           key={lbl}
                           onClick={onClick}
-                          style={{ display: 'flex', alignItems: 'flex-start', gap: 10, width: '100%', textAlign: 'left', padding: '12px 12px', borderRadius: 12, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', cursor: 'pointer', transition: 'border-color 0.15s', fontFamily: 'inherit' }}
-                          onMouseEnter={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.14)' }}
-                          onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)' }}
+                          className="stv-tool-btn"
+                          style={{ display: 'flex', alignItems: 'flex-start', gap: 10, width: '100%', textAlign: 'left', padding: '12px 12px', borderRadius: 12, background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', cursor: 'pointer', fontFamily: 'inherit' }}
                         >
                           <div style={{ width: 38, height: 38, borderRadius: 9, background: `${color}12`, display: 'flex', alignItems: 'center', justifyContent: 'center', color, flexShrink: 0, marginTop: 1 }}>
                             {icon}
