@@ -1120,10 +1120,10 @@ export default function DashboardView({
                 Your study plan is live. Unlock the full picture.
               </p>
               <p style={{ margin: '4px 0 10px', fontSize: 12, color: D.textMuted, lineHeight: 1.55 }}>
-                You generated your first blueprint. The hardest part is done. Unlimited gives you 5 courses, 100 AI coaching sessions/month, and unlimited blueprints. 7-day free trial, then $4.99/wk.
+                You generated your first blueprint. The hardest part is done. Unlimited gives you unlimited courses, 100 AI sessions/month, and unlimited blueprints. 7-day free trial, then $4.99/wk.
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                {['5 courses', '100 AI sessions/month', 'Unlimited blueprints'].map(f => (
+                {['Unlimited courses', '100 AI sessions/month', 'Unlimited blueprints'].map(f => (
                   <span key={f} style={{ fontSize: 11, fontWeight: 600, color: D.blue, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                     <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                     {f}
@@ -1168,10 +1168,10 @@ export default function DashboardView({
               <p style={{ margin: '3px 0 8px', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
                 {upcomingExam && upcomingExam.days <= 5
                   ? 'Exam Rescue, Cheat Sheets, and unlimited focus sessions are all included. 7-day free trial, then $4.99/wk.'
-                  : 'Removes the 30-min cap, adds 5 courses, 100 AI coaching sessions/month, and unlimited blueprints. 7-day free trial, then $4.99/wk.'}
+                  : 'Removes the 30-min cap, adds unlimited courses, 100 AI sessions/month, and unlimited blueprints. 7-day free trial, then $4.99/wk.'}
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                {['Unlimited sessions', '100 AI actions/month', '5 courses'].map(f => (
+                {['Unlimited sessions', '100 AI actions/month', 'Unlimited courses'].map(f => (
                   <span key={f} style={{ fontSize: 11, fontWeight: 600, color: D.blue, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                     <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                     {f}
