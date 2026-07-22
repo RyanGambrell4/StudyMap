@@ -1,6 +1,7 @@
 import { useMemo } from 'react'
 import EmptyState from './ui/empty-state'
 import { clean } from '../utils/strings'
+import { track } from '../lib/analytics'
 
 const DAY_NAMES = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
 function theme_vars(dark) {
@@ -267,7 +268,7 @@ export default function CalendarMonthView({
             <div className="flex items-center gap-3">
               {onAddSession && (
                 <button
-                  onClick={() => onAddSession(expandedDayStr)}
+                  onClick={() => { track('session_add_clicked', { source: 'month_view_expanded', dateStr: expandedDayStr }); onAddSession(expandedDayStr) }}
                   className="flex items-center gap-1 text-[11px] font-medium px-2 py-1 rounded-lg transition-all"
                   style={{ color: '#3B61C4', border: '1px solid rgba(59,97,196,0.25)', backgroundColor: 'rgba(59,97,196,0.06)' }}
                 >
@@ -278,7 +279,7 @@ export default function CalendarMonthView({
                 </button>
               )}
               <button
-                onClick={() => onDayClick(expandedDayStr)}
+                onClick={() => { track('calendar_day_view_opened', { source: 'month_view', dateStr: expandedDayStr }); onDayClick(expandedDayStr) }}
                 className="text-[11px] transition-colors"
                 style={{ color: '#3B61C4' }}
               >
@@ -303,7 +304,7 @@ export default function CalendarMonthView({
               sub="No sessions or events on this day."
               action={onAddSession && (
                 <button
-                  onClick={() => onAddSession(expandedDayStr)}
+                  onClick={() => { track('session_add_clicked', { source: 'month_view_empty_state', dateStr: expandedDayStr }); onAddSession(expandedDayStr) }}
                   style={{ padding: '6px 14px', borderRadius: 8, border: '1px solid rgba(59,97,196,0.25)', background: 'rgba(59,97,196,0.06)', color: '#3B61C4', fontSize: 12.5, fontWeight: 600, cursor: 'pointer' }}
                 >
                   + Add session
