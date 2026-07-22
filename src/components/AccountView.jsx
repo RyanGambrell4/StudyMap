@@ -251,7 +251,15 @@ export default function AccountView({
   }
 
   return (
-    <div style={{ padding: '24px 20px', maxWidth: 560, margin: '0 auto', background: '#F7F6F3', minHeight: '100%' }}>
+    <div style={{ padding: '24px 20px', maxWidth: 560, margin: '0 auto', background: '#F7F6F3', minHeight: '100%', animation: 'av-in 280ms cubic-bezier(0.16,1,0.3,1) both' }}>
+      <style>{`
+        @keyframes av-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .av-row-btn { transition: background 0.12s, transform 0.1s !important; border-radius: 8px !important; }
+        .av-row-btn:hover { background: rgba(0,0,0,0.03) !important; }
+        .av-row-btn:active { background: rgba(0,0,0,0.06) !important; transform: scale(0.99) !important; }
+        .av-cta-btn { transition: opacity 0.15s, transform 0.1s !important; }
+        .av-cta-btn:active { transform: scale(0.98) !important; }
+      `}</style>
       <h1 style={{ fontSize: 28, fontWeight: 700, color: '#111111', marginBottom: 20 }}>Account</h1>
 
       {/* Profile card */}
@@ -532,9 +540,10 @@ export default function AccountView({
           {onConnectGoogleCalendar && (
             <button
               onClick={googleCalendarConnected ? undefined : onConnectGoogleCalendar}
+              className="av-row-btn"
               style={{
                 display: 'flex', alignItems: 'center', gap: 14,
-                padding: '12px 0',
+                padding: '12px 4px',
                 background: 'none', border: 'none',
                 borderBottom: '1px solid rgba(0,0,0,0.06)',
                 cursor: 'pointer', textAlign: 'left', width: '100%',
@@ -597,9 +606,10 @@ export default function AccountView({
           </div>
           <button
             onClick={onImportSyllabus}
+            className="av-row-btn"
             style={{
               display: 'flex', alignItems: 'center', gap: 14,
-              padding: '12px 0',
+              padding: '12px 4px',
               background: 'none', border: 'none',
               borderBottom: '1px solid rgba(0,0,0,0.06)',
               cursor: 'pointer', textAlign: 'left', width: '100%',
@@ -616,9 +626,10 @@ export default function AccountView({
           </button>
           <button
             onClick={onEditPlan}
+            className="av-row-btn"
             style={{
               display: 'flex', alignItems: 'center', gap: 14,
-              padding: '12px 0',
+              padding: '12px 4px',
               background: 'none', border: 'none',
               borderBottom: '1px solid rgba(0,0,0,0.06)',
               cursor: 'pointer', textAlign: 'left', width: '100%',
@@ -635,9 +646,10 @@ export default function AccountView({
           </button>
           <button
             onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-feedback'))}
+            className="av-row-btn"
             style={{
               display: 'flex', alignItems: 'center', gap: 14,
-              padding: '12px 0',
+              padding: '12px 4px',
               background: 'none', border: 'none',
               cursor: 'pointer', textAlign: 'left', width: '100%',
             }}
@@ -659,6 +671,7 @@ export default function AccountView({
         {onSignOut && (
           <button
             onClick={onSignOut}
+            className="av-cta-btn"
             style={{
               width: '100%', padding: '11px',
               background: 'none', border: '1px solid rgba(239,68,68,0.25)',

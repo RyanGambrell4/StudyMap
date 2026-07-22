@@ -61,7 +61,7 @@ function ScoreBar({ score, color }) {
   )
 }
 
-function TopicCard({ entry, onDrill, onTeachItBack }) {
+function TopicCard({ entry, onDrill, onTeachItBack, idx }) {
   const [hovered, setHovered] = useState(false)
   const color = getMasteryColor(entry.score)
   const level = getMasteryLevel(entry.score)
@@ -81,6 +81,7 @@ function TopicCard({ entry, onDrill, onTeachItBack }) {
         transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
         display: 'flex', flexDirection: 'column', gap: 10,
         position: 'relative', overflow: 'hidden',
+        animation: `mmv-card 280ms ease ${Math.min(idx ?? 0, 12) * 45}ms both`,
       }}
     >
       {/* Level badge */}
@@ -140,11 +141,12 @@ function TopicCard({ entry, onDrill, onTeachItBack }) {
           <div style={{ display: 'flex', gap: 6 }}>
             <button
               onClick={() => onDrill?.(entry.topic)}
+              className="mastery-action-btn"
               style={{
                 fontSize: 11.5, fontWeight: 700, color: D.blue,
                 background: 'rgba(59,97,196,0.08)', border: `1px solid rgba(59,97,196,0.2)`,
                 borderRadius: 7, padding: '4px 11px', cursor: 'pointer', fontFamily: 'inherit',
-                whiteSpace: 'nowrap', transition: 'all 0.15s',
+                whiteSpace: 'nowrap',
               }}
             >
               Drill this
@@ -152,11 +154,12 @@ function TopicCard({ entry, onDrill, onTeachItBack }) {
             {entry.score < 75 && onTeachItBack && (
               <button
                 onClick={() => onTeachItBack?.(entry.topic, entry.courseId)}
+                className="mastery-action-btn"
                 style={{
                   fontSize: 11.5, fontWeight: 700, color: '#7C3AED',
                   background: 'rgba(124,58,237,0.08)', border: `1px solid rgba(124,58,237,0.2)`,
                   borderRadius: 7, padding: '4px 11px', cursor: 'pointer', fontFamily: 'inherit',
-                  whiteSpace: 'nowrap', transition: 'all 0.15s',
+                  whiteSpace: 'nowrap',
                 }}
               >
                 Teach It
@@ -283,15 +286,19 @@ export default function MasteryMapView({ courses, onOpenBrainDump, onDrillTopic,
   }
 
   return (
-    <div style={{ minHeight: '100vh', background: D.bg }}>
+    <div style={{ minHeight: '100vh', background: D.bg, animation: 'mmv-in 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+        @keyframes mmv-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes mmv-card { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
         .mastery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
         @media (max-width: 600px) { .mastery-grid { grid-template-columns: 1fr; } }
         .mastery-filter-btn { background: none; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 6px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
         .mastery-filter-btn.active { background: #3B61C4; color: #fff; border-color: #3B61C4; }
         .mastery-sort-btn { background: none; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; color: #6B6B6B; transition: all 0.15s; white-space: nowrap; }
         .mastery-sort-btn.active { border-color: #3B61C4; color: #3B61C4; background: rgba(59,97,196,0.06); }
+        .mastery-action-btn { transition: transform 0.1s !important; }
+        .mastery-action-btn:active { transform: scale(0.93) !important; }
       `}</style>
 
       {/* Header */}
@@ -433,10 +440,11 @@ export default function MasteryMapView({ courses, onOpenBrainDump, onDrillTopic,
           </div>
         ) : (
           <div className="mastery-grid">
-            {filtered.map(entry => (
+            {filtered.map((entry, idx) => (
               <TopicCard
                 key={`${entry.courseId}::${entry.topic}`}
                 entry={entry}
+                idx={idx}
                 onDrill={handleDrill}
                 onTeachItBack={onOpenTeachItBack ? handleTeachItBack : null}
               />
