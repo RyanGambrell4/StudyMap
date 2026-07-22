@@ -3,6 +3,7 @@ import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery } from '../lib/subscription'
 import Spinner from './ui/spinner'
 import { extractText } from '../utils/extractText'
+import { track } from '../lib/analytics'
 
 // onClose(): cancel
 // onStart({ questions, courseName, timerMinutes }): launch exam screen
@@ -38,6 +39,7 @@ export default function PracticeExamModal({ course, onStart, onClose, onShowPayw
         return
       }
       setExtractedText(text)
+      track('practice_exam_file_uploaded', { fileType: f.name?.split('.').pop()?.toLowerCase() ?? 'unknown', charCount: text.length })
     } catch (e) {
       setError(e.message ?? 'Failed to read file.')
       setExtractedText('')
@@ -60,6 +62,7 @@ export default function PracticeExamModal({ course, onStart, onClose, onShowPayw
       return
     }
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
+    track('practice_exam_generate_started', { source: activeTab, examLength: length, timed: timerOn, courseName: course?.name ?? null })
     setGenerating(true)
     try {
       setLoadingMsg('Extracting questions from your materials…')

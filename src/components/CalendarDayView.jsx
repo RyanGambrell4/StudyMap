@@ -164,8 +164,10 @@ export default function CalendarDayView({
         }),
       })
       setGcalAdded(prev => new Set([...prev, session.id]))
+      track('gcal_session_added', { sessionType: session.sessionType, hasStartTime: !!session.startTime, fromCoachPlan: !!session.fromCoachPlan })
     } catch (e) {
       setGcalFailed(prev => new Set([...prev, session.id]))
+      track('gcal_session_add_failed', {})
     } finally {
       setAddingToGcal(null)
     }
@@ -344,7 +346,7 @@ export default function CalendarDayView({
         <div className="flex items-center gap-2">
           {onAddSession && (
             <button
-              onClick={() => onAddSession(dayStr)}
+              onClick={() => { track('session_add_clicked', { source: 'day_view_header', dateStr: dayStr }); onAddSession(dayStr) }}
               className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
               style={{ color: '#3B61C4', border: '1px solid rgba(59,97,196,0.25)', backgroundColor: 'rgba(59,97,196,0.05)' }}
             >
@@ -433,7 +435,7 @@ export default function CalendarDayView({
           style={{ borderLeft: `1px solid ${tv.gridLine}`, height: TOTAL_HOURS * HOUR_HEIGHT }}
           onClick={e => {
             if (e.target !== colDivRef.current) return
-            if (onAddSession) onAddSession(dayStr)
+            if (onAddSession) { track('session_add_clicked', { source: 'day_view_grid_click', dateStr: dayStr }); onAddSession(dayStr) }
           }}
         >
           {/* Hour lines */}
@@ -618,7 +620,7 @@ export default function CalendarDayView({
                 sub="This day is free. Enjoy it or add a session."
                 action={onAddSession && (
                   <button
-                    onClick={() => onAddSession(dayStr)}
+                    onClick={() => { track('session_add_clicked', { source: 'day_view_empty_state', dateStr: dayStr }); onAddSession(dayStr) }}
                     style={{
                       pointerEvents: 'auto',
                       padding: '8px 16px',
