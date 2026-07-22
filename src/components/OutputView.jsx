@@ -914,7 +914,7 @@ export default function OutputView({
           date: dateStr,
           name: `${count} flashcard${count > 1 ? 's' : ''} ${isDue ? 'due' : 'scheduled'}`,
           type: 'Spaced Review',
-          color: { dot: '#6366F1' },
+          color: { dot: '#3B61C4' },
         })
       })
     }

@@ -15,7 +15,7 @@ const ACTIVITY_COLORS = {
 }
 
 function activityColor(activity) {
-  return ACTIVITY_COLORS[activity] ?? { border: '#6366F1', bg: '#EEF2FF', label: activity }
+  return ACTIVITY_COLORS[activity] ?? { border: '#3B61C4', bg: 'rgba(59,97,196,0.08)', label: activity }
 }
 
 const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
@@ -82,7 +82,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
     } catch {}
   }, [])
 
-  const dot = session.color?.dot ?? '#6366F1'
+  const dot = session.color?.dot ?? '#3B61C4'
 
   const todayStr = new Date().toISOString().split('T')[0]
   // Past exam dates return null so we don't render a misleading "Exam today" badge

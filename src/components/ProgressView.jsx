@@ -845,7 +845,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ height: 6, borderRadius: 3, background: 'rgba(0,0,0,0.07)', overflow: 'hidden' }}>
-                          <div style={{ height: '100%', width: `${((total - 472) / 56) * 100}%`, background: 'linear-gradient(90deg, #6366f1, #818cf8)', borderRadius: 3 }} />
+                          <div style={{ height: '100%', width: `${((total - 472) / 56) * 100}%`, background: '#3B61C4', borderRadius: 3 }} />
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: 4 }}>
                           {mcatSections.map((s, i) => (
