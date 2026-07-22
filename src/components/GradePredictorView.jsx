@@ -69,6 +69,7 @@ export default function GradePredictorView({ courses, onEditCourse, userId, onSh
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setLoading(true)
     setError('')
+    track('grade_predict_started', { courseName: course?.name ?? null, componentCount: components.length, targetGrade })
     try {
       const token = await getAccessToken()
       const payload = {
@@ -101,6 +102,7 @@ export default function GradePredictorView({ courses, onEditCourse, userId, onSh
       }
       onEditCourse(courseIdx, { ...course, gradeData })
     } catch (e) {
+      track('grade_predict_error', { error: e.message ?? 'unknown' })
       setError(e.message)
     } finally {
       setLoading(false)
