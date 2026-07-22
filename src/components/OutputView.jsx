@@ -495,7 +495,7 @@ export default function OutputView({
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
   const isExamMode = courses.some(c => EXAM_PATTERN.test(c.name))
 
-  const [dashboardV2] = useState(() => localStorage.getItem('se_dashboard_v2') === '1')
+  const [dashboardV2] = useState(() => localStorage.getItem('se_dashboard_v2') !== '0')
   const [assignments, setAssignments] = useState(() => initialAssignments ?? [])
   const [logGradeId, setLogGradeId] = useState(null)
   const [gradeInput, setGradeInput] = useState('')
