@@ -1233,7 +1233,7 @@ export default function DashboardView({
                 You've had {sessionsCount} study sessions. You're actually using this.
               </p>
               <p style={{ margin: '4px 0 0', fontSize: 12, color: D.textMuted, lineHeight: 1.55 }}>
-                Unlock unlimited focus time, 5 courses, and 100 AI coaching sessions/month. 7-day free trial, then $4.99/wk.
+                Unlock unlimited focus time, unlimited courses, and 100 AI sessions/month. 7-day free trial, then $4.99/wk.
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
@@ -1271,7 +1271,7 @@ export default function DashboardView({
                 You've been on free for {accountAgeDays} days. The trial is still open.
               </p>
               <p style={{ margin: '3px 0 0', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
-                7 days free, then $4.99/wk. Unlimited sessions, 5 courses, 100 AI actions/month. Cancel anytime.
+                7 days free, then $4.99/wk. Unlimited sessions, unlimited courses, 100 AI actions/month. Cancel anytime.
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
