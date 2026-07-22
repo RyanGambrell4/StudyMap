@@ -185,7 +185,7 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
                     <path d="M17 2l5 5-5 5"/>
                   </svg>
                 ),
-                label: 'Personalized using your course data, grades, and past exams',
+                label: 'Built from your course data, grades, and past exams',
               },
             ].map(({ icon, label }) => (
               <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
