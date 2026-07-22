@@ -56,6 +56,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
     setLoading(true)
     setError('')
     setResult(null)
+    if (!regen) track('cheat_sheet_started', { courseName: course?.name ?? null })
 
     let retries = 0
     while (retries < 2) {
@@ -83,6 +84,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
       } catch (e) {
         retries++
         if (retries >= 2) {
+          track('cheat_sheet_error', { error: e.message ?? 'unknown' })
           setError(e.message || 'Something went wrong. Please try again.')
           setLoading(false)
         }

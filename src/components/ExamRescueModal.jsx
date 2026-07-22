@@ -59,6 +59,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
     if (!canRescue) { onShowPaywall?.('examRescue'); return }
     setLoading(true)
     setError('')
+    track('exam_rescue_started', { courseName: course?.name ?? null, plan: getActivePlan() })
 
     let retries = 0
     while (retries < 2) {
@@ -90,6 +91,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
       } catch (e) {
         retries++
         if (retries >= 2) {
+          track('exam_rescue_error', { error: e.message ?? 'unknown' })
           setError(e.message || 'Something went wrong. Please try again.')
           setLoading(false)
         }
