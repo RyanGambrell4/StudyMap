@@ -1138,6 +1138,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setQuizLoading(true); setQuizError(''); setQuizQuestions(null)
     setQuizAnswers([]); setQuizIdx(0); setQuizSelected(null); setQuizConfirmed(false); setQuizDone(false)
+    track('focus_quiz_started', { course_name: session.courseName, session_type: session.sessionType })
     const savedPlan = getCachedCoachPlan(session.courseId)
     const professorEmphasis = savedPlan?.formData?.emphasisTopics ?? savedPlan?.formData?.topics?.join(', ') ?? null
     const planStruggles = savedPlan?.struggles ?? []
@@ -1173,8 +1174,10 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       setQuizQuestions(data.questions)
       incrementAIQuery()
       track('focus_quiz_generated', { course_name: session.courseName, question_count: data.questions?.length ?? 0 })
-    } catch (e) { setQuizError(e.message) }
-    finally { setQuizLoading(false) }
+    } catch (e) {
+      track('focus_quiz_error', { error: e.message ?? 'unknown' })
+      setQuizError(e.message)
+    } finally { setQuizLoading(false) }
   }
 
   const handleConfirmAnswer = () => {
@@ -1306,6 +1309,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       return
     }
     setFcGenerating(true); setFcGenerateError('')
+    track('focus_flashcards_started', { course_name: session.courseName, session_type: session.sessionType })
     const savedPlanFc = getCachedCoachPlan(session.courseId)
     const fcProfessorEmphasis = savedPlanFc?.formData?.emphasisTopics ?? savedPlanFc?.formData?.topics?.join(', ') ?? null
     const fcStruggles = savedPlanFc?.struggles ?? []
@@ -1331,8 +1335,10 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       incrementAIQuery()
       track('focus_flashcards_generated', { course_name: session.courseName, count: data.flashcards?.length ?? 0 })
       setFcIdx(0); setFcFlipped(false); setFcKnown(new Set())
-    } catch (e) { setFcGenerateError(e.message) }
-    finally { setFcGenerating(false) }
+    } catch (e) {
+      track('focus_flashcards_error', { error: e.message ?? 'unknown' })
+      setFcGenerateError(e.message)
+    } finally { setFcGenerating(false) }
   }
 
   // ── File/image upload for quiz & flashcard generators ─────────────────────────
