@@ -612,6 +612,7 @@ export default function DiagramsView({ courses, userId, onShowPaywall }) {
 
     setIsGenerating(true)
     setGenerateError('')
+    track('diagram_started', { type: diagramType, hasCourse: selectedCourse !== null })
 
     try {
       const token = await getAccessToken()
@@ -642,6 +643,7 @@ export default function DiagramsView({ courses, userId, onShowPaywall }) {
       setMode('view')
       setTopic('')
     } catch (err) {
+      track('diagram_error', { error: err.message ?? 'unknown' })
       setGenerateError(err.message ?? 'Failed to generate diagram. Please try again.')
     } finally {
       setIsGenerating(false)

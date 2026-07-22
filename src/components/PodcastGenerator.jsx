@@ -152,6 +152,7 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
     setStep('generating')
     setError('')
     setMsgIdx(0)
+    track('podcast_started', { courseName: selectedCourse.name })
 
     timerRef.current = setInterval(() => {
       setMsgIdx(i => Math.min(i + 1, PROGRESS_MESSAGES.length - 1))
@@ -178,6 +179,7 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
       window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'podcast' } }))
       track('podcast_generated', { plan: getActivePlan() })
     } catch (e) {
+      track('podcast_error', { error: e.message ?? 'unknown' })
       setError(e.message || 'Generation failed. Please try again.')
       setStep('error')
     } finally {

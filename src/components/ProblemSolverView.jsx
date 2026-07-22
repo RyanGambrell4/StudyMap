@@ -334,6 +334,7 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
     if (!problemText.trim() && !imageFile) { setError('Enter a problem or upload an image.'); return }
     setLoading(true)
     setError('')
+    track('problem_solver_started', { subject, hasImage: !!imageFile, hasText: !!problemText.trim() })
 
     try {
       let imageBase64 = null
@@ -377,6 +378,7 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
       setActiveProblem(entry)
       setMode('result')
     } catch (err) {
+      track('problem_solver_error', { error: err.message ?? 'unknown' })
       setError(err.message || 'Something went wrong.')
     } finally {
       setLoading(false)

@@ -268,6 +268,7 @@ export default function EssayArchitectView({ userId, onShowPaywall }) {
     if (!topic.trim()) { setError('Enter an essay topic.'); return }
     setLoading(true)
     setError('')
+    track('essay_outline_started', { essayType, wordCount, hasThesis: !!selectedThesis })
 
     try {
       const token = await getAccessToken()
@@ -299,6 +300,7 @@ export default function EssayArchitectView({ userId, onShowPaywall }) {
       setActiveOutline(entry)
       setMode('result')
     } catch (err) {
+      track('essay_outline_error', { error: err.message ?? 'unknown' })
       setError(err.message || 'Something went wrong.')
     } finally {
       setLoading(false)
