@@ -186,9 +186,11 @@ function OutlineCard({ item, onClick, onDelete }) {
     <div style={{ position: 'relative' }}>
       <div
         onClick={onClick}
+        className="ea-card"
         style={{
           background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12,
-          padding: 16, cursor: 'pointer', transition: 'box-shadow 0.15s'
+          padding: 16, cursor: 'pointer',
+          transition: 'box-shadow 0.15s, transform 0.1s',
         }}
         onMouseEnter={e => e.currentTarget.style.boxShadow = '0 2px 12px rgba(0,0,0,0.08)'}
         onMouseLeave={e => e.currentTarget.style.boxShadow = 'none'}
@@ -305,7 +307,8 @@ export default function EssayArchitectView({ userId, onShowPaywall }) {
 
   if (mode === 'result' && activeOutline) {
     return (
-      <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px 40px' }}>
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px 40px', animation: 'ea-in 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
+        <style>{`@keyframes ea-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
         <OutlineView outline={activeOutline.outline} onBack={() => { setMode('hub'); setActiveOutline(null) }} />
       </div>
     )
@@ -313,7 +316,8 @@ export default function EssayArchitectView({ userId, onShowPaywall }) {
 
   if (mode === 'create') {
     return (
-      <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px 40px' }}>
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px 40px', animation: 'ea-in 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
+        <style>{`@keyframes ea-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
           <button onClick={() => setMode('hub')} style={{
             background: 'none', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 8,
@@ -476,7 +480,14 @@ export default function EssayArchitectView({ userId, onShowPaywall }) {
   }
 
   return (
-    <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px 40px' }}>
+    <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px 40px', animation: 'ea-in 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
+      <style>{`
+        @keyframes ea-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .ea-create-btn { transition: filter 0.12s, transform 0.1s !important; }
+        .ea-create-btn:hover { filter: brightness(1.06) !important; }
+        .ea-create-btn:active { transform: scale(0.99) !important; }
+        .ea-card:active { transform: scale(0.99) !important; }
+      `}</style>
       <div style={{ marginBottom: 28 }}>
         <h1 style={{ fontSize: 24, fontWeight: 800, color: '#111', margin: '0 0 6px' }}>Essay Architect</h1>
         <p style={{ fontSize: 14, color: '#6B6B6B', margin: 0 }}>
@@ -486,6 +497,7 @@ export default function EssayArchitectView({ userId, onShowPaywall }) {
 
       <button
         onClick={() => { setMode('create'); setTopic(''); setRequirements(''); setCourseName(''); setError(''); setThesisOptions(null); setSelectedThesis(null) }}
+        className="ea-create-btn"
         style={{
           width: '100%', background: '#3B61C4', color: '#fff', border: 'none',
           borderRadius: 12, padding: '16px', fontSize: 15, fontWeight: 600,

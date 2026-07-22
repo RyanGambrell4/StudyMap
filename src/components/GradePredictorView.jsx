@@ -116,7 +116,12 @@ export default function GradePredictorView({ courses, onEditCourse, userId, onSh
   }
 
   return (
-    <div style={{ padding: '24px 16px', maxWidth: 672, margin: '0 auto' }}>
+    <div style={{ padding: '24px 16px', maxWidth: 672, margin: '0 auto', animation: 'gp-in 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
+      <style>{`
+        @keyframes gp-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        .gp-course-btn { transition: border-color 0.12s, background 0.12s, transform 0.1s !important; }
+        .gp-course-btn:active { transform: scale(0.96) !important; }
+      `}</style>
       {/* Header */}
       <div style={{ marginBottom: 20 }}>
         <h1 style={{ margin: '0 0 4px', fontSize: 22, fontWeight: 800, color: TEXT, letterSpacing: '-0.4px' }}>Grade Predictor</h1>
@@ -133,6 +138,7 @@ export default function GradePredictorView({ courses, onEditCourse, userId, onSh
               <button
                 key={i}
                 onClick={() => handleCourseChange(i)}
+                className="gp-course-btn"
                 style={{
                   display: 'flex', alignItems: 'center', gap: 8, padding: '8px 14px', borderRadius: 10,
                   fontSize: 13, fontWeight: 500, cursor: 'pointer', fontFamily: 'inherit',
@@ -297,7 +303,8 @@ function ResultsCard({ prediction, course, dot, targetGrade, onEdit }) {
   const gapAbs = Math.abs(gap).toFixed(1)
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, animation: 'gp-in 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
+      <style>{`@keyframes gp-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
       <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 16, padding: '20px' }}>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
