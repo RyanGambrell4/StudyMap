@@ -148,6 +148,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
     setStep('scoring')
     setLoading(true)
     setError('')
+    track('brain_dump_started', { topic: topic.trim() || null, courseName: course?.name ?? null })
 
     let retries = 0
     while (retries < 2) {
@@ -174,6 +175,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
       } catch (e) {
         retries++
         if (retries >= 2) {
+          track('brain_dump_error', { error: e.message ?? 'unknown' })
           setError(aiErrorMessage(e.status, e.message))
           setLoading(false)
           setStep('setup')

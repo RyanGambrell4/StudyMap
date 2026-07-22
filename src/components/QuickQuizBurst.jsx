@@ -73,6 +73,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setStep('loading')
     setError('')
+    track('quiz_burst_started', { topic: topic.trim() || null, courseName: course?.name ?? null })
 
     let retries = 0
     while (retries < 2) {
@@ -99,6 +100,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
       } catch (e) {
         retries++
         if (retries >= 2) {
+          track('quiz_burst_error', { error: e.message ?? 'unknown' })
           setError(e.message || 'Something went wrong. Please try again.')
           setStep('setup')
         }
