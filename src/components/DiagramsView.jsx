@@ -651,7 +651,13 @@ export default function DiagramsView({ courses, userId, onShowPaywall }) {
   // ── Hub ──────────────────────────────────────────────────────────────────────
   if (mode === 'hub') {
     return (
-      <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 20px' }}>
+      <div style={{ maxWidth: 720, margin: '0 auto', padding: '24px 20px', animation: 'dv-in 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
+        <style>{`
+          @keyframes dv-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+          .dv-list-item { transition: border-color 0.15s, transform 0.1s, box-shadow 0.15s !important; }
+          .dv-list-item:hover { border-color: rgba(0,0,0,0.14) !important; box-shadow: 0 2px 8px rgba(0,0,0,0.05) !important; }
+          .dv-list-item:active { transform: scale(0.99) !important; }
+        `}</style>
         <div style={{ display: 'flex', alignItems: 'flex-end', justifyContent: 'space-between', marginBottom: 20 }}>
           <div>
             <h1 style={{ fontSize: 22, fontWeight: 800, color: '#111111', margin: '0 0 4px', letterSpacing: '-0.02em' }}>
@@ -697,6 +703,7 @@ export default function DiagramsView({ courses, userId, onShowPaywall }) {
                 <button
                   key={d.id}
                   onClick={() => { setActiveDiagram(d); setMode('view') }}
+                  className="dv-list-item"
                   style={{
                     display: 'flex', alignItems: 'center', gap: 14,
                     width: '100%', textAlign: 'left',
@@ -705,11 +712,8 @@ export default function DiagramsView({ courses, userId, onShowPaywall }) {
                     background: '#FFFFFF',
                     border: '1px solid rgba(0,0,0,0.07)',
                     cursor: 'pointer',
-                    transition: 'border-color 0.15s',
                     fontFamily: 'inherit',
                   }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(0,0,0,0.14)'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(0,0,0,0.07)'}
                 >
                   <div style={{
                     width: 40, height: 40, borderRadius: 10,
@@ -753,7 +757,8 @@ export default function DiagramsView({ courses, userId, onShowPaywall }) {
   // ── Create ───────────────────────────────────────────────────────────────────
   if (mode === 'create') {
     return (
-      <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px' }}>
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '24px 20px', animation: 'dv-in 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
+        <style>{`@keyframes dv-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 28 }}>
           <button
@@ -941,7 +946,8 @@ export default function DiagramsView({ courses, userId, onShowPaywall }) {
     const typeLabel = TYPE_LABELS[activeDiagram.type] ?? activeDiagram.type
 
     return (
-      <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 20px' }}>
+      <div style={{ maxWidth: 760, margin: '0 auto', padding: '24px 20px', animation: 'dv-in 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
+        <style>{`@keyframes dv-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: 12, marginBottom: 20 }}>
           <button

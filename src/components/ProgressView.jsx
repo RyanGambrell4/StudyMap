@@ -625,9 +625,13 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
   return (
     <div className="pv-outer" style={{ background: D.bg, minHeight: '100%', color: D.text, fontFamily: "'Inter', system-ui, sans-serif", padding: '28px 32px' }}>
       <style>{`
+        @keyframes pv-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pv-stat { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
+        .pv-outer { animation: pv-in 260ms cubic-bezier(0.16,1,0.3,1) both; }
         .pv-stat-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-bottom:16px; }
         .pv-milestone-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:10px; }
         .pv-2col { display:grid; gap:14px; margin-bottom:16px; }
+        .pv-period-btn:active { transform: scale(0.94) !important; }
         @media (max-width:640px) {
           .pv-outer { padding:18px 14px !important; }
           .pv-stat-grid { grid-template-columns:1fr 1fr !important; }
@@ -649,11 +653,11 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
           {/* Period toggle */}
           <div style={{ display: 'flex', gap: 2, background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 10, padding: 3 }}>
             {['1w','4w','12w','Term'].map(p => (
-              <button key={p} onClick={() => { track('progress_period_changed', { period: p }); setPeriod(p) }} style={{
+              <button key={p} className="pv-period-btn" onClick={() => { track('progress_period_changed', { period: p }); setPeriod(p) }} style={{
                 padding: '5px 14px', borderRadius: 7, fontSize: 12, fontWeight: 600,
                 background: period === p ? D.accent : 'transparent',
                 color: period === p ? '#fff' : D.textMuted,
-                border: 'none', cursor: 'pointer', transition: 'background 0.15s',
+                border: 'none', cursor: 'pointer', transition: 'background 0.15s, transform 0.1s',
               }}>{p}</button>
             ))}
           </div>
@@ -888,8 +892,8 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
             color: D.purple, delta: null,
             spark: sparklines.focusArr,
           },
-        ].map(({ label, value, unit, sub, color, delta, spark }) => (
-          <div key={label} style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '18px 20px' }}>
+        ].map(({ label, value, unit, sub, color, delta, spark }, cardIdx) => (
+          <div key={label} style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '18px 20px', animation: `pv-stat 280ms ease ${cardIdx * 70}ms both` }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 10 }}>
               <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.08em', color: D.textMuted, textTransform: 'uppercase' }}>{label}</span>
               {delta && <span style={{ fontSize: 10.5, fontWeight: 700, color, background: `${color}18`, borderRadius: 5, padding: '2px 7px' }}>^ {delta}</span>}
