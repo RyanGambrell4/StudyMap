@@ -1367,6 +1367,10 @@
         {
             "source": "/ap-psychology-study-schedule",
             "destination": "/ap-psychology-study-schedule.html"
+        },
+        {
+            "source": "/study-statistics",
+            "destination": "/study-statistics.html"
         }
     ]
 }
