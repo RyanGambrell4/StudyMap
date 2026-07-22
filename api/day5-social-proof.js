@@ -43,7 +43,7 @@ function pickStory(schoolType, yearLevel) {
         <table cellpadding="0" cellspacing="0" style="width:100%;margin:6px 0 22px;">
           <tr><td style="background:#F4F7FF;border-left:3px solid #3B61C4;border-radius:0 10px 10px 0;padding:16px 20px;">
             <p style="margin:0;font-size:15px;color:#111111;line-height:1.65;font-style:italic;">"I stopped reviewing what I already knew. The app kept pointing me to the stuff I kept getting wrong. That's what changed."</p>
-            <p style="margin:8px 0 0;font-size:12px;color:#9B9B9B;font-weight:600;letter-spacing:0.04em;">— Maya, nursing student, passed NCLEX on second attempt</p>
+            <p style="margin:8px 0 0;font-size:12px;color:#9B9B9B;font-weight:600;letter-spacing:0.04em;">Maya, nursing student, passed NCLEX on second attempt</p>
           </td></tr>
         </table>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.72;">
@@ -70,7 +70,7 @@ function pickStory(schoolType, yearLevel) {
         <table cellpadding="0" cellspacing="0" style="width:100%;margin:6px 0 22px;">
           <tr><td style="background:#F4F7FF;border-left:3px solid #3B61C4;border-radius:0 10px 10px 0;padding:16px 20px;">
             <p style="margin:0;font-size:15px;color:#111111;line-height:1.65;font-style:italic;">"I wasn't smarter. I just knew exactly what to study before I sat down. The Blueprint told me what to do so I didn't waste the hour."</p>
-            <p style="margin:8px 0 0;font-size:12px;color:#9B9B9B;font-weight:600;letter-spacing:0.04em;">— Jake, high school junior, GPA up from 3.1 to 3.7 in one semester</p>
+            <p style="margin:8px 0 0;font-size:12px;color:#9B9B9B;font-weight:600;letter-spacing:0.04em;">Jake, high school junior, GPA up from 3.1 to 3.7 in one semester</p>
           </td></tr>
         </table>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.72;">
@@ -100,7 +100,7 @@ function pickStory(schoolType, yearLevel) {
       <table cellpadding="0" cellspacing="0" style="width:100%;margin:6px 0 22px;">
         <tr><td style="background:#F4F7FF;border-left:3px solid #3B61C4;border-radius:0 10px 10px 0;padding:16px 20px;">
           <p style="margin:0;font-size:15px;color:#111111;line-height:1.65;font-style:italic;">"I actually knew what I didn't know. Brain Dump showed me I understood the reactions but kept getting the mechanisms wrong. I spent the last 3 days just drilling mechanisms."</p>
-          <p style="margin:8px 0 0;font-size:12px;color:#9B9B9B;font-weight:600;letter-spacing:0.04em;">— Emma, sophomore, 68% → 84% on her organic chem retake</p>
+          <p style="margin:8px 0 0;font-size:12px;color:#9B9B9B;font-weight:600;letter-spacing:0.04em;">Emma, sophomore, 68% to 84% on her organic chem retake</p>
         </td></tr>
       </table>
       <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.72;">
