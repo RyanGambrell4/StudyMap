@@ -1006,6 +1006,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     setError('')
     setPlan(null)
     setPushed(false)
+    track('study_plan_started', { courseName: courses[form.courseIdx]?.name ?? null, plan: getActivePlan(), daysPerWeek: form.daysPerWeek })
 
     try {
       const token = await getAccessToken()
@@ -1066,6 +1067,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       setStep(3)
       setUiMode('viewing')
     } catch (e) {
+      track('study_plan_error', { error: e.message ?? 'unknown' })
       setError(e.message)
       setStep(3) // Show error in step 3
     } finally {
