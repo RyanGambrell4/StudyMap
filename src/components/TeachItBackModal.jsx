@@ -84,6 +84,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
 
     setStep('evaluating')
     setError('')
+    track('teach_it_back_started', { topic: topic.trim() || null, courseName: course?.name ?? null, plan })
     try {
       const token = await getAccessToken()
       const res = await fetchWithRetry('/api/teach-it-back', {
@@ -110,6 +111,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
       setResult(data)
       setStep('result')
     } catch (e) {
+      track('teach_it_back_error', { error: e.message ?? 'unknown' })
       setError(aiErrorMessage(e.status, e.message))
       setStep('explain')
     }

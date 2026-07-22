@@ -41,6 +41,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
 
     setStep('generating')
     setError('')
+    track('connections_started', { courseName: course?.name ?? null, plan })
 
     const cached = getCachedStudyTools()
     const flashcards = cached?.flashcards ?? []
@@ -68,6 +69,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
       setAnswer('')
       setStep('cards')
     } catch (e) {
+      track('connections_error', { error: e.message ?? 'unknown' })
       setError(e.message || 'Something went wrong. Please try again.')
       setStep('setup')
     }
