@@ -1660,7 +1660,7 @@ export default function OutputView({
             onOpenBrainDump={(topic) => {
               track('feature_opened', { feature: 'brain_dump' })
               if (topic) {
-                const idx = courses.findIndex(c => String(c.id) === String(topic)) // topic is sometimes courseId
+                const idx = courses.findIndex(c => String(c.id) === String(topic))
                 setBrainDumpInit({ topic: typeof topic === 'string' ? topic : '', courseIdx: idx >= 0 ? idx : 0 })
               }
               setShowBrainDump(true)
