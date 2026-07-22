@@ -448,6 +448,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     setIsGenerating(true)
     setGenerateError('')
     setLoadingMessage('Reading your notes and building study materials...')
+    track('flashcards_started', { hasCourse: selectedCourse !== null, source: uploadedFile ? 'file' : pastedText ? 'paste' : 'youtube' })
     const activeCourse = selectedCourse !== null ? courses[selectedCourse] : null
     const activePlan = activeCourse?.id ? getCachedCoachPlan(activeCourse.id) : null
     const fcEmphasis = activePlan?.formData?.emphasisTopics ?? activePlan?.formData?.topics?.join(', ') ?? null
@@ -489,7 +490,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       // Track AI query usage
       await incrementAIQuery()
     } catch (err) {
-      console.error('Generation error:', err)
+      track('flashcards_error', { error: err.message ?? 'unknown' })
       setGenerateError(err.message ?? 'Failed to generate study materials. Please try again.')
     } finally {
       setIsGenerating(false)
@@ -594,6 +595,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     setDrillQuestionIdx(0)
     setDrillAnswers([])
     setDrillDone(false)
+    track('drill_started', { topic: drillTopic.trim(), hasCourse: drillCourse !== null })
     try {
       const token = await getAccessToken()
       const res = await fetch('/api/generate-study-tools', {
@@ -616,6 +618,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
       setDrillQuiz(questions)
       await incrementAIQuery()
     } catch (e) {
+      track('drill_error', { error: e.message ?? 'unknown' })
       setDrillError(e.message)
     } finally {
       setDrillGenerating(false)
