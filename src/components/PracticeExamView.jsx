@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { getCachedPracticeExams, savePracticeExam } from '../lib/db'
 import { getActivePlan, canUseFeature } from '../lib/subscription'
+import { track } from '../lib/analytics'
 import PracticeExamSetup from './PracticeExamSetup'
 import PracticeExamScreen from './PracticeExamScreen'
 import PracticeExamResults from './PracticeExamResults'
@@ -63,6 +64,7 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
   }
 
   const handleRetake = () => {
+    track('practice_exam_retake', { questionCount: examQuestions.length, courseName: examCourse?.name ?? null })
     setExamAnswers(examQuestions.map(() => ''))
     setExamTimeMs(0)
     setQuestionTimings([])
@@ -212,6 +214,7 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
                 <button
                   onClick={() => {
                     if (!canStart) { onShowPaywall?.('practice_exam'); return }
+                    track('practice_exam_start_clicked', { plan, courseCount: courses.length })
                     setSubview('setup')
                   }}
                   style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '13px 24px', background: D.accent, border: 'none', borderRadius: 11, color: '#fff', fontWeight: 700, fontSize: 14.5, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em', transition: 'opacity 0.15s' }}
