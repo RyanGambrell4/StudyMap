@@ -450,7 +450,7 @@ function StatStrip({ streak, weeklyMinutes, weeklyGoalHours, sessionsThisWeek, i
         {isNewUser ? (
           <>
             <div style={{ flex: 1, height: 6, background: '#EAECF0', borderRadius: 3, minWidth: 60 }} />
-            <span style={{ fontSize: 13, color: T.dim, flexShrink: 0 }}>Weekly goal — not set yet</span>
+            <span style={{ fontSize: 13, color: T.dim, flexShrink: 0 }}>Weekly goal: not set yet</span>
           </>
         ) : (
           <>
@@ -498,7 +498,7 @@ function CourseRow({ course, idx, todayStr, recall, onClick }) {
   } else if (days !== null && days > 7 && days <= 21) {
     status = recall != null ? `${days} days · recall ${recall}%` : `${days} days to exam`
   } else if (recall != null && recall < 60) {
-    status = `Recall ${recall}% — needs work`
+    status = `Recall ${recall}%. Needs work.`
   }
 
   return (
@@ -913,7 +913,7 @@ export default function DashboardViewV2({
   const subline = doneForToday
     ? "Today's work is in the bank."
     : isNewUser
-    ? "Let's get you set up — two minutes, tops."
+    ? "Let's get you set up. Two minutes, tops."
     : 'One focused session today keeps you on pace.'
 
   // Responsive outer padding

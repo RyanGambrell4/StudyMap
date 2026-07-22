@@ -118,7 +118,7 @@ export default function ConfidenceTapModal({ topic, courseId, source = 'session'
                       cursor: 'pointer',
                       fontFamily: 'inherit',
                     }}
-                    aria-label={`${r.value} out of 5 — ${r.label}`}
+                    aria-label={`${r.value} out of 5, ${r.label}`}
                   >
                     <span style={{
                       fontSize: 16, fontWeight: 800,
