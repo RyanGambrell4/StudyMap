@@ -27,6 +27,7 @@ import CalendarWeekView from './CalendarWeekView'
 import AddSessionModal from './AddSessionModal'
 import AppShell from './AppShell'
 import DashboardView from './DashboardView'
+import DashboardViewV2 from './DashboardViewV2'
 import CommandPalette from './CommandPalette'
 import { QUICK_PRESETS, buildQuickSession } from '../lib/quickStart'
 import { useSessionReminders } from '../utils/useSessionReminders'
@@ -494,6 +495,7 @@ export default function OutputView({
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
   const isExamMode = courses.some(c => EXAM_PATTERN.test(c.name))
 
+  const [dashboardV2] = useState(() => localStorage.getItem('se_dashboard_v2') === '1')
   const [assignments, setAssignments] = useState(() => initialAssignments ?? [])
   const [logGradeId, setLogGradeId] = useState(null)
   const [gradeInput, setGradeInput] = useState('')
@@ -1591,7 +1593,32 @@ export default function OutputView({
         )}
 
         {/* ── Dashboard ── */}
-        {activeSection === 'dashboard' && (
+        {activeSection === 'dashboard' && (dashboardV2 ? (
+          <DashboardViewV2
+            courses={courses}
+            todayStr={todayStr}
+            allSessions={allSessions}
+            syllabusEventsByDate={syllabusEventsByDate}
+            completedIds={completedIds}
+            nextSession={nextSession}
+            allComplete={allComplete}
+            completedSessions={completedSessionLog}
+            weeklyHourGoal={schedule?.hoursPerWeek ?? 10}
+            assignments={assignments}
+            onStartFocus={handleStartFocus}
+            onNavigateToCourses={() => setActiveSection('courses')}
+            onNavigateToCalendar={(dateStr) => {
+              if (dateStr) { setActiveDayStr(dateStr); setViewMode('day') }
+              setActiveSection('calendar')
+            }}
+            onNavigateToGrades={(idx) => { setGradesCourseIdx(idx); setActiveSection('grades') }}
+            onNavigateToTools={() => setActiveSection('tools')}
+            onOpenQuizBurst={() => { track('feature_opened', { feature: 'quiz_burst' }); setShowQuizBurst(true) }}
+            onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump' }); setShowBrainDump(true) }}
+            onOpenPodcast={() => { track('feature_opened', { feature: 'podcast' }); setShowPodcast(true) }}
+            onShowPaywall={onShowPaywall}
+          />
+        ) : (
           <DashboardView
             courses={courses}
             todayStr={todayStr}
@@ -1644,7 +1671,7 @@ export default function OutputView({
             onOpenPracticeExam={() => setActiveSection('practice')}
             completedSessions={completedSessionLog}
           />
-        )}
+        ))}
 
         {/* ── Calendar ── */}
         {activeSection === 'calendar' && (
