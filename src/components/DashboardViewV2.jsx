@@ -3,7 +3,6 @@ import { useStreak } from '../utils/useStreak'
 import { getWeeklyGoal, computeWeeklyProgress } from '../lib/weeklyGoal'
 import { getMasteryForCourse, getDueForReview } from '../lib/masteryStore'
 import { daysBetween } from '../utils/dateUtils'
-import MissionControlCard from './MissionControlCard'
 import { track } from '../lib/analytics'
 
 // ── Design tokens (from handoff doc — do not deviate) ─────────────────────────
@@ -753,7 +752,6 @@ export default function DashboardViewV2({
   onOpenPodcast,
   onShowPaywall,
   onOpenSessionBundle,
-  onOpenCourseDiagnostic,
 }) {
   // Inject Source Serif 4 font once
   useEffect(() => {
@@ -946,25 +944,6 @@ export default function DashboardViewV2({
           </div>
           <div style={{ fontSize: 14.5, color: T.muted, marginTop: 12 }}>{subline}</div>
         </div>
-
-        {/* Mission Control — one card per active course. Wave 4: surfaces
-            everything Waves 1-3 wrote (mastery deltas, coach micro-updates,
-            weak topics, gaps closed, session count) so the dashboard reflects
-            actual student state instead of just today's schedule. */}
-        {!isNewUser && courses.length > 0 && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-            {courses.slice(0, 3).map((c, i) => (
-              <MissionControlCard
-                key={c.id ?? i}
-                course={c}
-                todayStr={todayStr}
-                onStartBundle={() => onOpenSessionBundle?.()}
-                onStartDiagnostic={(course) => onOpenCourseDiagnostic?.(course)}
-                onOpenQuizBurst={({ topic }) => onOpenQuizBurst?.({ courseIdx: i, topic })}
-              />
-            ))}
-          </div>
-        )}
 
         {/* Exam banner (≤7 days, normal state only) */}
         {examBannerCourse && !isNewUser && (

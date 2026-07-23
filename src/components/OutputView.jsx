@@ -1643,7 +1643,6 @@ export default function OutputView({
             onOpenPodcast={() => { track('feature_opened', { feature: 'podcast' }); setShowPodcast(true) }}
             onShowPaywall={onShowPaywall}
             onOpenSessionBundle={() => { track('feature_opened', { feature: 'session_bundle' }); setShowSessionBundle(true) }}
-            onOpenCourseDiagnostic={(c) => { track('feature_opened', { feature: 'course_diagnostic', courseName: c?.name }); setDiagnosticCourse(c) }}
           />
         ) : (
           <DashboardView
