@@ -52,6 +52,10 @@ import BrainDumpModal from './BrainDumpModal'
 import ConfidenceTapModal from './ConfidenceTapModal'
 import ExamRescueModal from './ExamRescueModal'
 import QuickQuizBurst from './QuickQuizBurst'
+import SessionBundle from './SessionBundle'
+import CourseDiagnostic from './CourseDiagnostic'
+import DeckAddedToast from './DeckAddedToast'
+import { emitMicroUpdateFromEvent } from '../lib/coachMicroUpdates'
 import PodcastGenerator from './PodcastGenerator'
 import TeachItBackModal from './TeachItBackModal'
 import ConnectionsModeModal from './ConnectionsModeModal'
@@ -430,6 +434,8 @@ export default function OutputView({
   const [confidencePrompt, setConfidencePrompt] = useState(null)
   const [showExamRescue, setShowExamRescue] = useState(false)
   const [showQuizBurst, setShowQuizBurst] = useState(false)
+  const [showSessionBundle, setShowSessionBundle] = useState(false)
+  const [diagnosticCourse, setDiagnosticCourse] = useState(null)
   const [showPodcast, setShowPodcast] = useState(false)
   const [showTeachItBack, setShowTeachItBack] = useState(false)
   const [teachItBackInit, setTeachItBackInit] = useState(null) // { courseIdx, topic } when launched from Brain Dump
@@ -490,6 +496,25 @@ export default function OutputView({
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [])
+
+  // After every completed study session, compute a coach-plan micro-update
+  // that names what just moved and what the plan is re-weighting toward.
+  // Persisted per course; the Study Coach view shows the last N as a
+  // "Recent adaptations" banner so the plan feels alive.
+  useEffect(() => {
+    const handler = (e) => {
+      const detail = e.detail ?? {}
+      // The tool events don't currently carry courseId — resolve from the
+      // most-recently-updated course we know about. Best-effort; if we can't
+      // pinpoint, we still fire against every course with recent activity.
+      for (const c of courses) {
+        try { emitMicroUpdateFromEvent({ tool: detail.tool, courseId: c.id, courseName: c.name }) } catch {}
+      }
+      window.dispatchEvent(new CustomEvent('studyedge:coach-micro-updated'))
+    }
+    window.addEventListener('studyedge:tool-session-complete', handler)
+    return () => window.removeEventListener('studyedge:tool-session-complete', handler)
+  }, [courses])
   // ─────────────────────────────────────────────────────────────────────────────
 
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
@@ -1613,10 +1638,12 @@ export default function OutputView({
             }}
             onNavigateToGrades={(idx) => { setGradesCourseIdx(idx); setActiveSection('grades') }}
             onNavigateToTools={() => setActiveSection('tools')}
-            onOpenQuizBurst={() => { track('feature_opened', { feature: 'quiz_burst' }); setShowQuizBurst(true) }}
+            onOpenQuizBurst={(init) => { track('feature_opened', { feature: 'quiz_burst' }); if (init) setQuizBurstInit(init); setShowQuizBurst(true) }}
             onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump' }); setShowBrainDump(true) }}
             onOpenPodcast={() => { track('feature_opened', { feature: 'podcast' }); setShowPodcast(true) }}
             onShowPaywall={onShowPaywall}
+            onOpenSessionBundle={() => { track('feature_opened', { feature: 'session_bundle' }); setShowSessionBundle(true) }}
+            onOpenCourseDiagnostic={(c) => { track('feature_opened', { feature: 'course_diagnostic', courseName: c?.name }); setDiagnosticCourse(c) }}
           />
         ) : (
           <DashboardView
@@ -1967,6 +1994,9 @@ export default function OutputView({
             userId={userId}
             onShowPaywall={onShowPaywall}
             learningStyle={learningStyle}
+            yearLevel={yearLevel}
+            schoolType={schoolType}
+            assignments={assignments}
             onNavigateToCoach={() => { if (getActivePlan() === 'free') { onShowPaywall?.('coach'); return } setActiveSection('coach') }}
             onOpenCheatSheet={() => setShowCheatSheet(true)}
             onOpenBrainDump={() => setShowBrainDump(true)}
@@ -1976,6 +2006,7 @@ export default function OutputView({
             onOpenTeachItBack={() => setShowTeachItBack(true)}
             onOpenConnectionsMode={() => setShowConnectionsMode(true)}
             onOpenTimeAttack={() => setShowTimedChallenge(true)}
+            onOpenSessionBundle={() => setShowSessionBundle(true)}
             initialDrillTopic={pendingDrillTopic}
             onDrillTopicConsumed={() => setPendingDrillTopic(null)}
           />
@@ -2051,6 +2082,7 @@ export default function OutputView({
             courses={courses}
             onShowPaywall={onShowPaywall}
             onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
+            onOpenQuizBurst={({ courseIdx, topic }) => { setQuizBurstInit({ courseIdx, topic }); setShowQuizBurst(true) }}
           />
         )}
 
@@ -2092,6 +2124,10 @@ export default function OutputView({
             courses={courses}
             userId={userId}
             onShowPaywall={onShowPaywall}
+            learningStyle={learningStyle}
+            yearLevel={yearLevel}
+            schoolType={schoolType}
+            assignments={assignments}
           />
         )}
 
@@ -2109,6 +2145,11 @@ export default function OutputView({
           <EssayArchitectView
             userId={userId}
             onShowPaywall={onShowPaywall}
+            courses={courses}
+            learningStyle={learningStyle}
+            yearLevel={yearLevel}
+            schoolType={schoolType}
+            assignments={assignments}
           />
         )}
 
@@ -2207,6 +2248,10 @@ export default function OutputView({
           onClose={() => setShowCheatSheet(false)}
           onShowPaywall={onShowPaywall}
           onOpenQuizBurst={({ courseIdx, topic }) => { setShowCheatSheet(false); setQuizBurstInit({ courseIdx, topic }); setShowQuizBurst(true) }}
+          learningStyle={learningStyle}
+          yearLevel={yearLevel}
+          schoolType={schoolType}
+          assignments={assignments}
         />
       )}
       {showBrainDump && (
@@ -2218,6 +2263,10 @@ export default function OutputView({
           onClose={() => { setShowBrainDump(false); setBrainDumpInit(null) }}
           onShowPaywall={onShowPaywall}
           onDrillGaps={(topic) => { setShowBrainDump(false); setBrainDumpInit(null); setPendingDrillTopic(topic); setActiveSection('tools') }}
+          learningStyle={learningStyle}
+          yearLevel={yearLevel}
+          schoolType={schoolType}
+          assignments={assignments}
         />
       )}
       {confidencePrompt && (
@@ -2243,6 +2292,30 @@ export default function OutputView({
           onShowPaywall={onShowPaywall}
         />
       )}
+      {showSessionBundle && (
+        <SessionBundle
+          courses={courses}
+          userId={userId}
+          onClose={() => setShowSessionBundle(false)}
+          onShowPaywall={onShowPaywall}
+          learningStyle={learningStyle}
+          yearLevel={yearLevel}
+          schoolType={schoolType}
+          assignments={assignments}
+        />
+      )}
+      {diagnosticCourse && (
+        <CourseDiagnostic
+          course={diagnosticCourse}
+          learningStyle={learningStyle}
+          yearLevel={yearLevel}
+          schoolType={schoolType}
+          assignments={assignments}
+          onClose={() => setDiagnosticCourse(null)}
+          onComplete={() => setDiagnosticCourse(null)}
+        />
+      )}
+      <DeckAddedToast onReview={() => setActiveSection('tools')} />
       {showQuizBurst && (
         <QuickQuizBurst
           courses={courses}
@@ -2253,6 +2326,10 @@ export default function OutputView({
           initialCourseIdx={quizBurstInit?.courseIdx ?? 0}
           initialTopic={quizBurstInit?.topic ?? ''}
           autoStart={!!quizBurstInit}
+          learningStyle={learningStyle}
+          yearLevel={yearLevel}
+          schoolType={schoolType}
+          assignments={assignments}
         />
       )}
       {showPodcast && (
@@ -2278,6 +2355,10 @@ export default function OutputView({
           courses={courses}
           onClose={() => setShowConnectionsMode(false)}
           onShowPaywall={onShowPaywall}
+          learningStyle={learningStyle}
+          yearLevel={yearLevel}
+          schoolType={schoolType}
+          assignments={assignments}
         />
       )}
       {showTimedChallenge && (

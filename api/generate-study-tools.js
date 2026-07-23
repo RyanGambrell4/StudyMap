@@ -1,4 +1,5 @@
 import { verifyAndCheckAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { buildContextBlock, contextGuardrails } from '../lib/server/courseContextPrompt.js'
 
 export default async function handler(req, res) {
   try {
@@ -15,8 +16,13 @@ export default async function handler(req, res) {
   const gate = isPredict ? await verifyAuth(req) : await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { text, mode, courseName, sessionType, topic, images, professorEmphasis, struggles, learningStyle } = req.body;
+  const { text, mode, courseName, sessionType, topic, images, professorEmphasis, struggles, learningStyle, courseContext } = req.body;
   const safeImages = Array.isArray(images) ? images.slice(0, 6).filter(i => i?.data && i?.media_type) : []
+  const ctx = courseContext ?? { courseName }
+  const ctxBlock = buildContextBlock(ctx)
+  const ctxGuardrails = contextGuardrails(ctx, {
+    invention: 'When source material is thin, prefer the syllabus, emphasis topics, and weak topics from the context above. Only fall back to canonical course knowledge as a last resort.',
+  })
 
   // ── quick-quiz mode (replaces the old generate-quick-quiz endpoint) ──────────
   if (mode === 'quick-quiz') {
@@ -41,6 +47,8 @@ export default async function handler(req, res) {
 
     const prompt = `You are making a quiz for a student studying ${courseName}${sessionType ? ` (${sessionType} session)` : ''}.
 
+${ctxBlock}
+
 ${emphasisLine}${struggleLine}${scopeLine}${sourceLine}${imageLine}Generate exactly 5 multiple choice questions.
 
 ${hasTopic ? 'EVERY question must directly test the topic above. Do not drift to other material. If a source was provided, the questions must come from content that is inside the source AND inside the topic.' : ''}
@@ -61,7 +69,9 @@ Rules:
 - All 4 options must be plausible
 - Answer must exactly match one of the options strings
 - Explanations must be 1-2 sentences maximum
-- No em dashes in any field`
+- No em dashes in any field
+
+${ctxGuardrails}`
 
     const userContent = hasImages
       ? [
@@ -226,16 +236,19 @@ Rules:
     ? 'This student learns through reading/writing - include cards that test organized summaries and written explanations.\n\n'
     : ''
 
-  const fcPrompt = `You are an expert study coach building flashcards + a quiz.
+  const fcPrompt = `You are an expert study coach building flashcards + a quiz for a specific student.
+
+${ctxBlock}
 
 ${emphasisFc}${struggleFc}${styleFc}${scopeFc}${sourceFc}${imagesFc}Generate exactly this JSON structure with no extra text:
 {
   "flashcards": [
-    {"front": "clear question about a key concept", "back": "concise answer - a few words or 1 short sentence", "topic": "topic name"}
+    {"front": "clear question about a key concept", "back": "concise answer - a few words or 1 short sentence", "topic": "topic name", "isWeakTopic": false, "reviewFirst": false}
   ],
   "quiz": [
-    {"question": "question text", "type": "multiple_choice", "options": ["A", "B", "C", "D"], "answer": "correct option text", "explanation": "why this is correct"}
-  ]
+    {"question": "question text", "type": "multiple_choice", "options": ["A", "B", "C", "D"], "answer": "correct option text", "explanation": "why this is correct", "topic": "topic name"}
+  ],
+  "startHere": "Optional one-line hint pointing to which flashcard or topic the student should review first, tied to a weak topic or past miss. Omit if no strong signal."
 }
 
 ${hasTopicFc ? 'EVERY flashcard and quiz question MUST stay strictly inside the requested topic. Do not produce any card that goes outside it. If the topic is narrow, produce fewer but deeper cards - quality over quantity.' : ''}
@@ -254,7 +267,10 @@ Hard rules:
 - Bad backs: long explanations, multiple clauses, anything over 25 words unless truly necessary.
 - Generate 15 flashcards and 10 quiz questions (fewer only if the topic is too narrow to support that many - never pad with irrelevant content).
 - Quiz wrong answers must be plausible but clearly wrong if you know the material.
-- No em dashes in any field.`
+- Set isWeakTopic=true and reviewFirst=true on any flashcard whose topic matches a weak topic, recent miss, or struggle from the context above. Aim for at least 3 cards flagged when weak topics exist.
+- No em dashes in any field.
+
+${ctxGuardrails}`
 
   const userContentFc = hasImagesFc
     ? [

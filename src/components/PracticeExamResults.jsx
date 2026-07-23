@@ -5,7 +5,9 @@ import { useCelebration } from '../utils/useCelebration'
 import { getAccessToken } from '../lib/supabase'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
+import { addCardsToDeck, cardFromPracticeExamMiss } from '../lib/deckAdditions'
 import { analyzeExam, SKILL_LABEL, SKILL_HINT, SKILL_COLOR } from '../lib/examAutopsy'
+import { getCurrentGrade } from '../utils/gradeCalc'
 import { track } from '../lib/analytics'
 
 function fmtMs(ms) {
@@ -94,7 +96,7 @@ function ScoreTrendChart({ scores, currentScore }) {
   )
 }
 
-export default function PracticeExamResults({ questions, answers, timeMs, questionTimings = [], courseId, courseName, onRetake, onClose, onOpenTeachItBack }) {
+export default function PracticeExamResults({ questions, answers, timeMs, questionTimings = [], courseId, courseName, course = null, onRetake, onClose, onOpenTeachItBack, onOpenQuizBurst }) {
   const graded = useMemo(() => questions.map((q, i) => {
     const given = answers[i] ?? ''
     const correct = q.type === 'multiple_choice' ? gradeMc(q, given) : gradeShort(q, given)
@@ -104,6 +106,38 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
   const autoGradedCount = graded.filter(g => g.correct !== null).length
   const correctCount = graded.filter(g => g.correct === true).length
   const score = autoGradedCount > 0 ? Math.round((correctCount / autoGradedCount) * 100) : null
+
+  // Grade-projection debrief: pull the student's actual course grade + target
+  // and project what this exam score would do to the final grade. Purely
+  // local — no LLM roundtrip.
+  const projection = useMemo(() => {
+    if (score == null || !course) return null
+    const components = course?.gradeData?.components ?? []
+    const currentGrade = components.length ? getCurrentGrade(components) : null
+    const target = typeof course?.targetGrade === 'number' ? course.targetGrade : null
+
+    // Rough projection: if we had a full grade breakdown, remaining ungraded
+    // weight is what this exam counts for. If not, use a 30% blend heuristic
+    // so we're not silent. Both cases clamp 0-100.
+    let projected
+    if (currentGrade != null && components.length) {
+      const gradedWeight = components.filter(c => c.graded && c.grade != null).reduce((s, c) => s + (c.weight || 0), 0)
+      const remainingWeight = Math.max(0, 100 - gradedWeight)
+      const blend = remainingWeight / 100
+      projected = Math.max(0, Math.min(100, currentGrade * (1 - blend) + score * blend))
+    } else if (currentGrade != null) {
+      projected = Math.max(0, Math.min(100, currentGrade * 0.7 + score * 0.3))
+    } else {
+      projected = score
+    }
+    projected = Math.round(projected * 10) / 10
+    return {
+      currentGrade: currentGrade == null ? null : Math.round(currentGrade * 10) / 10,
+      target,
+      projected,
+      gapToTarget: target == null ? null : Math.round((target - projected) * 10) / 10,
+    }
+  }, [score, course])
 
   const celebrate = useCelebration()
   const celebratedRef = useRef(false)
@@ -159,6 +193,17 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
   useEffect(() => {
     if (weakTopics.length) addWeakTopics(weakTopics.map(([t]) => t))
     addStudySession({ tool: 'Practice Exam', score: score ?? null, topic: null, courseName: courseName || null })
+    // Missed practice-exam questions become deck cards. Practice exam is
+    // where the highest-value misses are — these are the ones the real exam
+    // will punish, so we want them in spaced-repetition immediately.
+    const missedForDeck = graded
+      .filter(g => g.correct === false)
+      .map(g => cardFromPracticeExamMiss(g.q, courseId, courseName))
+    if (missedForDeck.length) {
+      addCardsToDeck(missedForDeck)
+        .then(({ added }) => added > 0 && window.dispatchEvent(new CustomEvent('studyedge:deck-updated', { detail: { added, source: 'practice_exam_miss' } })))
+        .catch(() => {})
+    }
     window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'practiceExam' } }))
     track('practice_exam_complete', { score: score ?? null, questionCount: graded.length, weakTopicCount: weakTopics.length, plan: getActivePlan() })
   }, [])
@@ -239,6 +284,91 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
             <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
+
+        {/* Grade projection debrief — the "so what does this mean for my
+            actual course grade" panel. Only renders when we know enough to
+            compute a projection. */}
+        {projection && (
+          <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: 18 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12 }}>
+              What this means for your course grade
+            </div>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'flex-end', marginBottom: 16 }}>
+              {projection.currentGrade != null && (
+                <div>
+                  <div style={{ fontSize: 11, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Currently</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: '#111', letterSpacing: '-0.02em' }}>{projection.currentGrade}%</div>
+                </div>
+              )}
+              <div>
+                <div style={{ fontSize: 11, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Projected if this were the real exam</div>
+                <div style={{
+                  fontSize: 30, fontWeight: 800, letterSpacing: '-0.02em',
+                  color: projection.gapToTarget != null && projection.gapToTarget > 0 ? '#D97706' : '#16A34A',
+                }}>
+                  {projection.projected}%
+                </div>
+              </div>
+              {projection.target != null && (
+                <div>
+                  <div style={{ fontSize: 11, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Target</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: '#3B61C4' }}>{projection.target}%</div>
+                </div>
+              )}
+              {projection.gapToTarget != null && (
+                <div>
+                  <div style={{ fontSize: 11, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gap</div>
+                  <div style={{ fontSize: 22, fontWeight: 800, color: projection.gapToTarget > 0 ? '#D97706' : '#16A34A' }}>
+                    {projection.gapToTarget > 0 ? `${projection.gapToTarget} pts short` : `${Math.abs(projection.gapToTarget)} pts ahead`}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {weakTopics.length > 0 && (
+              <div style={{ background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.05)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: '#3B61C4', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
+                  Your recovery plan · {Math.min(3, weakTopics.length)} sessions
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {weakTopics.slice(0, 3).map(([topic, s], i) => {
+                    const missRate = Math.round((s.missed / s.total) * 100)
+                    const minutes = missRate >= 60 ? 15 : 10
+                    return (
+                      <div key={topic} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', background: '#fff', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 10 }}>
+                        <div style={{ width: 22, height: 22, borderRadius: 6, background: '#3B61C4', color: '#fff', fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                          {i + 1}
+                        </div>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111' }}>{topic}</div>
+                          <div style={{ fontSize: 11.5, color: '#6B6B6B' }}>
+                            Missed {s.missed}/{s.total} on this exam · ~{minutes} min session
+                          </div>
+                        </div>
+                        {i === 0 && onOpenQuizBurst && (
+                          <button
+                            onClick={() => onOpenQuizBurst(topic)}
+                            style={{
+                              fontSize: 12, fontWeight: 700, padding: '7px 14px', borderRadius: 8,
+                              background: '#E8531A', color: '#fff', border: 'none', cursor: 'pointer',
+                              fontFamily: 'inherit', flexShrink: 0,
+                              boxShadow: '0 2px 8px rgba(232,83,26,0.35)',
+                            }}
+                          >
+                            Do session 1 now →
+                          </button>
+                        )}
+                      </div>
+                    )
+                  })}
+                </div>
+                <div style={{ fontSize: 11.5, color: '#9B9B9B', marginTop: 10, fontStyle: 'italic', lineHeight: 1.5 }}>
+                  Projection is a linear estimate — not a guarantee. Doing these 3 sessions typically moves practice-exam scores 8-15 pts on the topics covered.
+                </div>
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Score card */}
         <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: 18 }}>

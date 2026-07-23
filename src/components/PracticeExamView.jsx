@@ -15,7 +15,7 @@ const D = {
   border: 'rgba(0,0,0,0.07)',
 }
 
-export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTeachItBack }) {
+export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTeachItBack, onOpenQuizBurst }) {
   const [subview, setSubview] = useState('landing') // 'landing' | 'setup' | 'taking' | 'results'
   const [examCourse, setExamCourse] = useState(null)
   const [examQuestions, setExamQuestions] = useState([])
@@ -103,11 +103,16 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
         questionTimings={questionTimings}
         courseId={examCourse?.id ?? null}
         courseName={examCourse?.name ?? null}
+        course={examCourse}
         onRetake={handleRetake}
         onClose={closeToLanding}
         onOpenTeachItBack={onOpenTeachItBack ? (topic) => {
           const courseIdx = Math.max(0, courses.findIndex(c => String(c.id) === String(examCourse?.id)))
           onOpenTeachItBack({ courseIdx, topic })
+        } : null}
+        onOpenQuizBurst={onOpenQuizBurst ? (topic) => {
+          const courseIdx = Math.max(0, courses.findIndex(c => String(c.id) === String(examCourse?.id)))
+          onOpenQuizBurst({ courseIdx, topic })
         } : null}
       />
     )

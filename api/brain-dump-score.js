@@ -1,5 +1,6 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
 import { tracedCall } from '../lib/server/langfuse.js'
+import { buildContextBlock, contextGuardrails } from '../lib/server/courseContextPrompt.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -7,65 +8,69 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { text, courseName, topic, targetGrade, examDate, daysUntilExam, learningStyle } = req.body
-  if (!text || !courseName) return res.status(400).json({ error: 'Missing required fields' })
+  const { text, courseName, topic, courseContext } = req.body
+  const ctx = courseContext ?? { courseName }
+  const resolvedName = ctx.courseName ?? courseName
+  if (!text || !resolvedName) return res.status(400).json({ error: 'Missing required fields' })
 
   const wordCount = text.trim().split(/\s+/).length
+  const contextBlock = buildContextBlock(ctx)
+  const guardrails = contextGuardrails(ctx, {
+    invention: 'When you name a gap, the concept MUST appear either in the syllabus events, coach-plan emphasis, weak topics, or be a canonical concept for this course. Do not invent professor-specific jargon.',
+  })
 
-  // Resolve days-until-exam from explicit field or computed from examDate.
-  let resolvedDays = typeof daysUntilExam === 'number' && Number.isFinite(daysUntilExam) ? daysUntilExam : null
-  if (resolvedDays === null && examDate) {
-    const todayStr = new Date().toISOString().split('T')[0]
-    resolvedDays = Math.max(0, Math.round((new Date(examDate + 'T12:00:00') - new Date(todayStr + 'T12:00:00')) / 86400000))
-  }
+  // Prior brain dumps for the same course, if any, so we can measure change
+  // over time. Study history entries look like { tool, score, topic, dateStr }.
+  const priorDumps = (ctx.recentSessions ?? [])
+    .filter(s => s.tool === 'Brain Dump' && typeof s.score === 'number')
+    .slice(0, 3)
+  const priorSummary = priorDumps.length
+    ? `Prior brain dumps in this course: ${priorDumps.map(p => `${p.score}% (${p.dateStr}${p.topic ? `, ${p.topic}` : ''})`).join('; ')}`
+    : 'No prior brain dumps for this course yet.'
 
-  const personalLines = []
-  if (targetGrade) {
-    personalLines.push(`Target grade: ${targetGrade}.${String(targetGrade).toUpperCase() === 'A' ? ' Hold them to an A standard.' : ''}`)
-  }
-  if (resolvedDays !== null) {
-    personalLines.push(`Days until exam: ${resolvedDays}.${resolvedDays < 7 ? ' Be candid about gaps; this is exam week.' : ''}`)
-  }
-  if (learningStyle) {
-    personalLines.push(`Learning style: ${learningStyle}. Frame each gap description so it matches this style (e.g., visual = missing diagrams/structure, practice = missing applied examples, reading = missing written articulation).`)
-  }
-  const personalBlock = personalLines.length ? `\n${personalLines.join('\n')}\n` : ''
+  const prompt = `You are the student's academic coach scoring a brain dump exercise for ${resolvedName}.
 
-  const prompt = `You are an expert academic coach scoring a student's brain dump exercise.
+${contextBlock}
 
-Course: ${courseName}
-Topic: ${topic || 'general course material'}${personalBlock}
-Student brain dump (${wordCount} words written under time pressure):
+${priorSummary}
+Focus topic for this dump: ${topic || 'general course material'}
+
+Student brain dump (${wordCount} words, written under time pressure):
 ---
 ${text.slice(0, 3000)}
 ---
 
-Score this brain dump fairly but rigorously. The student was under time pressure so reward conceptual coverage and accuracy over completeness.
+Score it fairly but rigorously. Reward conceptual coverage and accuracy over completeness.
 
-Return ONLY valid JSON with no other text:
+Return ONLY valid JSON:
 {
   "score": 71,
   "categories": {
-    "Concepts": { "score": 7, "gap": "Mitosis checkpoints not mentioned" },
-    "Application": { "score": 6, "gap": "No real-world examples or problem-solving shown" },
-    "Detail": { "score": 8, "gap": "Cell cycle timing values missing" },
-    "Connections": { "score": 5, "gap": "Link between DNA replication and mitosis unclear" }
+    "Concepts": { "score": 7, "gap": "Specific concept not mentioned that appears in the syllabus/emphasis" },
+    "Application": { "score": 6, "gap": "Missing worked example or scenario" },
+    "Detail": { "score": 8, "gap": "Missing specific numerical or defining detail" },
+    "Connections": { "score": 5, "gap": "Missing link between two related course concepts" }
   },
   "gradeProjection": "trending toward B territory",
   "studyTimeToUpgrade": 35,
   "upgradeTarget": "B+",
-  "possibleGaps": ["Mitosis checkpoints", "S-phase duration", "Cyclin-CDK complexes"]
+  "possibleGaps": ["3 specific topics they likely didn't cover, drawn from syllabus/emphasis/weak topics"],
+  "syllabusCoverage": "One sentence naming which syllabus topics the dump did or did not touch. Omit if syllabus is empty.",
+  "changeSincePrior": "One sentence comparing to prior brain dumps — 'up 8 points on Concepts, flat on Connections'. Omit if no prior dumps.",
+  "learningStyleTip": "One sentence with the single action the student should take next, framed for their learning style."
 }
 
 Rules:
-- score: specific integer, never divisible by 5 or 10 (e.g. 67, 71, 83, never 70, 75, 80)
-- category scores: integers 1 to 10, should vary meaningfully
-- gap: one specific concept or detail they did not clearly address
-- gradeProjection: use hedged language like "trending toward" or "tracking toward", never a definitive claim
-- studyTimeToUpgrade: realistic minutes of focused review to reach upgradeTarget
-- upgradeTarget: one grade tier above the current projection
-- possibleGaps: exactly 3 specific topics they likely did not cover, framed as possibilities not certainties
-- No em dashes in any field`
+- score: specific integer, never divisible by 5 or 10 (e.g. 67, 71, 83).
+- category scores: integers 1-10, should vary meaningfully.
+- gap: one specific concept or detail they didn't clearly address (grounded in the context, not generic).
+- gradeProjection: hedged ("trending toward", "tracking toward"). No definitive claims.
+- studyTimeToUpgrade: realistic minutes of focused review to reach upgradeTarget.
+- upgradeTarget: one grade tier above the current projection.
+- possibleGaps: exactly 3 specific topics grounded in the context above.
+- No em dashes anywhere.
+
+${guardrails}`
 
   try {
     const data = await tracedCall({
@@ -73,7 +78,7 @@ Rules:
       userId: gate.userId,
       model: 'claude-haiku-4-5-20251001',
       input: { messages: [{ role: 'user', content: prompt }] },
-      maxTokens: 800,
+      maxTokens: 1000,
       call: () => fetch('https://api.anthropic.com/v1/messages', {
         method: 'POST',
         headers: {
@@ -84,7 +89,7 @@ Rules:
         },
         body: JSON.stringify({
           model: 'claude-haiku-4-5-20251001',
-          max_tokens: 800,
+          max_tokens: 1000,
           messages: [{ role: 'user', content: [{ type: 'text', text: prompt, cache_control: { type: 'ephemeral' } }] }],
         }),
       }).then(r => r.json()),

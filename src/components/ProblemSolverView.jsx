@@ -313,6 +313,34 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const fileRef = useRef()
+  // Wave 2 — solve mode picker (walkthrough vs. Socratic hints vs. diagnose
+  // the student's own work) + a second upload slot for a photo of the
+  // student's attempt.
+  const [solveMode, setSolveMode] = useState('solution') // 'solution' | 'socratic' | 'diagnose'
+  const [workImageFile, setWorkImageFile] = useState(null)
+  const [workImagePreview, setWorkImagePreview] = useState(null)
+  const workFileRef = useRef()
+  // Socratic session state
+  const [socraticHints, setSocraticHints] = useState([]) // [{ hint, expectedResponseShape }]
+  const [socraticReplies, setSocraticReplies] = useState([]) // student replies aligned to hints
+  const [socraticDraft, setSocraticDraft] = useState('')
+  const [socraticDone, setSocraticDone] = useState(false)
+  const [socraticFinal, setSocraticFinal] = useState(null)
+  const [diagnosis, setDiagnosis] = useState(null)
+
+  const handleWorkImageChange = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setWorkImageFile(file)
+    const reader = new FileReader()
+    reader.onload = (ev) => setWorkImagePreview(ev.target.result)
+    reader.readAsDataURL(file)
+  }
+  const clearWorkImage = () => {
+    setWorkImageFile(null)
+    setWorkImagePreview(null)
+    if (workFileRef.current) workFileRef.current.value = ''
+  }
 
   const handleImageChange = (e) => {
     const file = e.target.files?.[0]
@@ -329,42 +357,80 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
     if (fileRef.current) fileRef.current.value = ''
   }
 
+  async function callSolveApi(body) {
+    const token = await getAccessToken()
+    const res = await fetch('/api/solve-problem', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+      body: JSON.stringify(body),
+    })
+    const json = await res.json()
+    if (!res.ok) throw new Error(json.error || 'Failed to solve problem')
+    return json
+  }
+
   const handleSolve = async () => {
     if (!canUseAI()) { onShowPaywall?.('pro'); return }
     if (!problemText.trim() && !imageFile) { setError('Enter a problem or upload an image.'); return }
     setLoading(true)
     setError('')
-    track('problem_solver_started', { subject, hasImage: !!imageFile, hasText: !!problemText.trim() })
+    track('problem_solver_started', { subject, hasImage: !!imageFile, hasText: !!problemText.trim(), solveMode })
 
     try {
       let imageBase64 = null
+      let studentWorkImage = null
       let mediaType = 'image/jpeg'
-      if (imageFile) {
-        imageBase64 = await compressImageToBase64(imageFile)
+      if (imageFile) imageBase64 = await compressImageToBase64(imageFile)
+      if (workImageFile) studentWorkImage = await compressImageToBase64(workImageFile)
+
+      // Diagnose mode requires the student's own work image.
+      if (solveMode === 'diagnose' && !studentWorkImage) {
+        setError('Upload a photo of your own attempt so I can see where you got stuck.')
+        setLoading(false)
+        return
       }
 
-      const token = await getAccessToken()
-
-      const res = await fetch('/api/solve-problem', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          problem: problemText,
-          imageBase64,
-          mediaType,
-          subject: subject === 'Auto-detect' ? '' : subject
-        })
+      const json = await callSolveApi({
+        problem: problemText,
+        imageBase64,
+        mediaType,
+        studentWorkImage,
+        studentWorkMediaType: mediaType,
+        subject: subject === 'Auto-detect' ? '' : subject,
+        mode: solveMode,
       })
-
-      const json = await res.json()
-      if (!res.ok) throw new Error(json.error || 'Failed to solve problem')
 
       incrementAIQuery()
       window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'problemSolver' } }))
-      track('problem_solver_used')
+      track('problem_solver_used', { solveMode })
+
+      // ── Socratic mode ────────────────────────────────────────────────────
+      if (solveMode === 'socratic') {
+        setSocraticHints([{ hint: json.nextHint, expected: json.expectedResponseShape }])
+        setSocraticReplies([])
+        setSocraticDraft('')
+        setSocraticDone(!!json.atFinalStep && !!json.finalAnswerReveal)
+        setSocraticFinal(json.atFinalStep ? json.finalAnswerReveal : null)
+        setActiveProblem({
+          id: Date.now().toString(), problem: problemText, hasImage: !!imageFile,
+          socratic: true, createdAt: new Date().toISOString(),
+        })
+        setMode('socratic')
+        return
+      }
+
+      // ── Diagnose mode ────────────────────────────────────────────────────
+      if (solveMode === 'diagnose') {
+        setDiagnosis(json)
+        setActiveProblem({
+          id: Date.now().toString(), problem: problemText, hasImage: !!imageFile,
+          diagnosis: json, createdAt: new Date().toISOString(),
+        })
+        setMode('diagnose')
+        return
+      }
+
+      // ── Solution mode (existing) ─────────────────────────────────────────
       const entry = {
         id: Date.now().toString(),
         problem: problemText,
@@ -385,10 +451,155 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
     }
   }
 
+  const handleSocraticSubmit = async () => {
+    if (!socraticDraft.trim()) return
+    const reply = socraticDraft.trim()
+    setLoading(true)
+    setError('')
+    try {
+      let imageBase64 = imageFile ? await compressImageToBase64(imageFile) : null
+      const json = await callSolveApi({
+        problem: problemText,
+        imageBase64,
+        subject: subject === 'Auto-detect' ? '' : subject,
+        mode: 'socratic',
+        priorHints: socraticHints.map(h => h.hint),
+        lastStudentReply: reply,
+      })
+      incrementAIQuery()
+      setSocraticReplies(prev => [...prev, { reply, reactedTo: json.reactToReply, wasCorrect: json.wasReplyCorrect }])
+      setSocraticHints(prev => [...prev, { hint: json.nextHint, expected: json.expectedResponseShape }])
+      setSocraticDraft('')
+      if (json.atFinalStep && json.finalAnswerReveal) {
+        setSocraticDone(true)
+        setSocraticFinal(json.finalAnswerReveal)
+      }
+    } catch (err) {
+      setError(err.message || 'Something went wrong.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
   if (mode === 'result' && activeProblem) {
     return (
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px 40px' }}>
         <SolutionView solution={activeProblem.solution} onBack={() => { setMode('hub'); setActiveProblem(null) }} />
+      </div>
+    )
+  }
+
+  if (mode === 'socratic' && activeProblem) {
+    return (
+      <div style={{ maxWidth: 640, margin: '0 auto', padding: '0 16px 40px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <button onClick={() => { setMode('hub'); setActiveProblem(null); setSocraticHints([]); setSocraticReplies([]); setSocraticDone(false); setSocraticFinal(null) }} style={{ background: 'none', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 8, padding: '6px 14px', fontSize: 13, cursor: 'pointer', color: '#6B6B6B' }}>Back</button>
+          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#111', flex: 1 }}>Socratic tutor</h2>
+        </div>
+        <div style={{ padding: 16, background: 'rgba(59,97,196,0.05)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 12, marginBottom: 16, fontSize: 13.5, color: '#111', lineHeight: 1.55 }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, color: '#3B61C4', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 4 }}>Problem</div>
+          {problemText || '(from image)'}
+        </div>
+
+        {socraticHints.map((h, i) => (
+          <div key={i} style={{ marginBottom: 14 }}>
+            <div style={{ padding: '12px 14px', background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderLeft: '3px solid #3B61C4', borderRadius: 10, fontSize: 13.5, color: '#111', lineHeight: 1.5 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: '#3B61C4', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 6 }}>Hint {i + 1}</div>
+              {h.hint}
+              {h.expected && (
+                <div style={{ marginTop: 6, fontSize: 11.5, color: '#9B9B9B', fontStyle: 'italic' }}>
+                  Looking for: {h.expected}
+                </div>
+              )}
+            </div>
+            {socraticReplies[i] && (
+              <div style={{ marginTop: 8, padding: '10px 14px', background: socraticReplies[i].wasCorrect === false ? 'rgba(220,38,38,0.05)' : 'rgba(22,163,74,0.05)', border: `1px solid ${socraticReplies[i].wasCorrect === false ? 'rgba(220,38,38,0.18)' : 'rgba(22,163,74,0.18)'}`, borderRadius: 10 }}>
+                <div style={{ fontSize: 12, fontWeight: 700, color: '#6B6B6B', marginBottom: 4 }}>You said: <span style={{ color: '#111', fontWeight: 500 }}>{socraticReplies[i].reply}</span></div>
+                <div style={{ fontSize: 12.5, color: socraticReplies[i].wasCorrect === false ? '#DC2626' : '#16A34A', lineHeight: 1.5 }}>{socraticReplies[i].reactedTo}</div>
+              </div>
+            )}
+          </div>
+        ))}
+
+        {!socraticDone && (
+          <div style={{ marginTop: 8 }}>
+            <textarea
+              value={socraticDraft}
+              onChange={e => setSocraticDraft(e.target.value)}
+              placeholder="Your next step…"
+              rows={3}
+              style={{ width: '100%', boxSizing: 'border-box', padding: '11px 14px', border: '1.5px solid rgba(0,0,0,0.12)', borderRadius: 10, fontSize: 14, color: '#111', fontFamily: 'inherit', resize: 'vertical', outline: 'none' }}
+            />
+            <button
+              onClick={handleSocraticSubmit}
+              disabled={loading || !socraticDraft.trim()}
+              style={{ marginTop: 8, width: '100%', padding: '12px', background: loading ? '#9B9B9B' : '#3B61C4', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit' }}
+            >
+              {loading ? 'Reading your answer…' : 'Send'}
+            </button>
+            {error && <div style={{ marginTop: 8, fontSize: 12.5, color: '#DC2626' }}>{error}</div>}
+          </div>
+        )}
+
+        {socraticDone && (
+          <div style={{ marginTop: 16, padding: 18, background: 'rgba(22,163,74,0.06)', border: '1px solid rgba(22,163,74,0.22)', borderRadius: 12 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#16A34A', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 6 }}>You solved it</div>
+            <div style={{ fontSize: 15, fontWeight: 700, color: '#111', marginBottom: 8 }}>Final answer: {socraticFinal}</div>
+            <div style={{ fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.5 }}>You worked through this yourself — you'll remember it far longer than if I'd just shown you.</div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  if (mode === 'diagnose' && diagnosis) {
+    return (
+      <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px 40px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+          <button onClick={() => { setMode('hub'); setDiagnosis(null); clearWorkImage() }} style={{ background: 'none', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 8, padding: '6px 14px', fontSize: 13, cursor: 'pointer', color: '#6B6B6B' }}>Back</button>
+          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#111', flex: 1 }}>Your work, diagnosed</h2>
+        </div>
+
+        {diagnosis.missingWorkImage ? (
+          <div style={{ padding: 16, background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.22)', borderRadius: 10, fontSize: 13.5, color: '#111' }}>
+            I couldn't see your work image. Upload it again and try one more time.
+          </div>
+        ) : (
+          <>
+            <div style={{ padding: 16, background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.20)', borderRadius: 12, marginBottom: 14 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: '#DC2626', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 6 }}>
+                First error · {diagnosis.firstWrongStep} · {(diagnosis.misstepType || '').replace('_', ' ')}
+              </div>
+              <div style={{ fontSize: 13, color: '#6B6B6B', marginBottom: 8, lineHeight: 1.5 }}>
+                <strong style={{ color: '#111' }}>You wrote:</strong> {diagnosis.whatTheyDid}
+              </div>
+              <div style={{ fontSize: 13.5, color: '#111', lineHeight: 1.55 }}>
+                <strong style={{ color: '#DC2626' }}>Why it's wrong:</strong> {diagnosis.whyItsWrong}
+              </div>
+            </div>
+
+            <div style={{ padding: 16, background: 'rgba(59,97,196,0.05)', border: '1px solid rgba(59,97,196,0.20)', borderRadius: 12, marginBottom: 14, fontSize: 13.5, color: '#111', lineHeight: 1.55 }}>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: '#3B61C4', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 6 }}>Small push</div>
+              {diagnosis.smallPush}
+            </div>
+
+            {Array.isArray(diagnosis.correctPathFromHere) && diagnosis.correctPathFromHere.length > 0 && (
+              <details style={{ padding: 14, background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, marginBottom: 14 }}>
+                <summary style={{ fontSize: 12.5, fontWeight: 700, color: '#6B6B6B', cursor: 'pointer' }}>
+                  Show me the correct path from here (only after I try)
+                </summary>
+                <ol style={{ marginTop: 10, paddingLeft: 22, color: '#111', fontSize: 13, lineHeight: 1.6 }}>
+                  {diagnosis.correctPathFromHere.map((s, i) => (
+                    <li key={i}><strong>{s.action}</strong> — {s.work}</li>
+                  ))}
+                </ol>
+                {diagnosis.wouldFinalAnswerBe && (
+                  <div style={{ marginTop: 8, fontSize: 13, fontWeight: 700, color: '#16A34A' }}>Final answer: {diagnosis.wouldFinalAnswerBe}</div>
+                )}
+              </details>
+            )}
+          </>
+        )}
       </div>
     )
   }
@@ -409,6 +620,34 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
         <div style={{
           background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, padding: 20, marginBottom: 16
         }}>
+          <label style={{ fontSize: 13, fontWeight: 600, color: '#111', display: 'block', marginBottom: 10 }}>
+            How do you want help?
+          </label>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8, marginBottom: 22 }}>
+            {[
+              { id: 'solution', label: 'Walk me through it', hint: 'Full step-by-step solution' },
+              { id: 'socratic', label: 'Socratic hints', hint: 'One question at a time. I solve it.' },
+              { id: 'diagnose', label: 'Diagnose my work', hint: 'Upload your attempt. Find my error.' },
+            ].map(opt => {
+              const active = solveMode === opt.id
+              return (
+                <button
+                  key={opt.id}
+                  onClick={() => setSolveMode(opt.id)}
+                  style={{
+                    padding: '10px 10px', borderRadius: 10, textAlign: 'left', cursor: 'pointer',
+                    border: active ? '1.5px solid #3B61C4' : '1px solid rgba(0,0,0,0.10)',
+                    background: active ? 'rgba(59,97,196,0.06)' : '#fff',
+                    color: '#111', fontFamily: 'inherit',
+                  }}
+                >
+                  <div style={{ fontSize: 12.5, fontWeight: 700, color: active ? '#3B61C4' : '#111', marginBottom: 3 }}>{opt.label}</div>
+                  <div style={{ fontSize: 10.5, color: '#6B6B6B', lineHeight: 1.35 }}>{opt.hint}</div>
+                </button>
+              )
+            })}
+          </div>
+
           <label style={{ fontSize: 13, fontWeight: 600, color: '#111', display: 'block', marginBottom: 8 }}>
             Subject
           </label>
@@ -446,7 +685,7 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
 
           <div style={{ marginTop: 14 }}>
             <label style={{ fontSize: 13, fontWeight: 600, color: '#111', display: 'block', marginBottom: 8 }}>
-              Upload Image (optional)
+              Upload problem image (optional)
             </label>
             {imagePreview ? (
               <div style={{ position: 'relative', display: 'inline-block' }}>
@@ -475,6 +714,28 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
               </div>
             )}
           </div>
+
+          {solveMode === 'diagnose' && (
+            <div style={{ marginTop: 18, padding: 14, background: 'rgba(220,38,38,0.03)', border: '1px solid rgba(220,38,38,0.15)', borderRadius: 12 }}>
+              <label style={{ fontSize: 13, fontWeight: 700, color: '#DC2626', display: 'block', marginBottom: 4 }}>
+                Photo of YOUR attempt (required)
+              </label>
+              <div style={{ fontSize: 12, color: '#6B6B6B', marginBottom: 10, lineHeight: 1.45 }}>
+                So I can see where YOU went wrong, not just what the correct path is.
+              </div>
+              {workImagePreview ? (
+                <div style={{ position: 'relative', display: 'inline-block' }}>
+                  <img src={workImagePreview} alt="" style={{ maxWidth: 280, maxHeight: 180, borderRadius: 8, display: 'block', border: '1px solid rgba(0,0,0,0.1)' }} />
+                  <button onClick={clearWorkImage} style={{ position: 'absolute', top: -8, right: -8, width: 22, height: 22, borderRadius: '50%', background: '#111', color: '#fff', border: 'none', cursor: 'pointer', fontSize: 12 }}>x</button>
+                </div>
+              ) : (
+                <div onClick={() => workFileRef.current?.click()} style={{ border: '2px dashed rgba(220,38,38,0.30)', borderRadius: 10, padding: '20px', textAlign: 'center', cursor: 'pointer', color: '#6B6B6B', fontSize: 13 }}>
+                  Tap or drag a photo of your handwritten work
+                  <input ref={workFileRef} type="file" accept="image/*" onChange={handleWorkImageChange} style={{ display: 'none' }} />
+                </div>
+              )}
+            </div>
+          )}
         </div>
 
         {error && (
@@ -492,7 +753,9 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
             cursor: loading ? 'not-allowed' : 'pointer'
           }}
         >
-          {loading ? 'Solving...' : 'Solve Problem'}
+          {loading
+            ? (solveMode === 'socratic' ? 'Reading the problem…' : solveMode === 'diagnose' ? 'Reading your work…' : 'Solving…')
+            : (solveMode === 'socratic' ? 'Start Socratic session' : solveMode === 'diagnose' ? 'Diagnose my work' : 'Solve Problem')}
         </button>
       </div>
     )

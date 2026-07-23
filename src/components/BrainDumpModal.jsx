@@ -7,6 +7,11 @@ import { getCachedStudyTools, saveStudyTools } from '../lib/db'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
 import { updateMastery, getWeakestTopics } from '../lib/masteryStore'
+import { hydrateCourseContext } from '../lib/courseContext'
+import { recordBrainDumpGaps } from '../lib/brainDumpGaps'
+import { pickSmartTopic, pickSmartCourse } from '../lib/smartDefault'
+import { getLastSessionBridge } from '../lib/lastSessionBridge'
+import GapCloser from './GapCloser'
 import { track } from '../lib/analytics'
 import Spinner from './ui/spinner'
 
@@ -54,17 +59,32 @@ function ScoreRing({ score }) {
   )
 }
 
-export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDrillGaps, initialTopic = '', initialCourseIdx = 0 }) {
+export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDrillGaps, initialTopic = '', initialCourseIdx = 0, autoStart = false, learningStyle = null, yearLevel = null, firstName = null, schoolType = null, assignments = [] }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
-  const [courseIdx, setCourseIdx] = useState(initialCourseIdx)
+  const initialSmartCourse = useMemo(() =>
+    initialCourseIdx || pickSmartCourse(courses).index
+  , [initialCourseIdx, courses]) // eslint-disable-line react-hooks/exhaustive-deps
+  const [courseIdx, setCourseIdx] = useState(initialSmartCourse)
   const [topic, setTopic] = useState(initialTopic)
   const [timerDuration, setTimerDuration] = useState(60)
+  const [showManual, setShowManual] = useState(false)
 
   const suggestedTopics = useMemo(() => {
     const course = courses[courseIdx] ?? null
     return getWeakestTopics(course?.id ?? null, 3).filter(t => t.score < 80).map(t => t.topic)
+  }, [courseIdx, courses])
+
+  const smart = useMemo(() => {
+    const c = courses[courseIdx] ?? null
+    const ctx = hydrateCourseContext(c, { firstName, yearLevel, learningStyle, schoolType, assignments })
+    return pickSmartTopic(c, ctx)
+  }, [courseIdx, courses]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const bridge = useMemo(() => {
+    const c = courses[courseIdx] ?? null
+    return getLastSessionBridge({ courseId: c?.id ?? null, courseName: c?.name ?? null, currentTool: 'Brain Dump' })
   }, [courseIdx, courses])
   const [step, setStep] = useState('setup') // 'setup' | 'timer' | 'scoring' | 'result'
   const [text, setText] = useState('')
@@ -77,6 +97,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
   const [bdRecorderRef] = useState(() => ({ current: null }))
   const [isConvertingCards, setIsConvertingCards] = useState(false)
   const [cardsAdded, setCardsAdded] = useState(0)
+  const [closedGaps, setClosedGaps] = useState({}) // { gap: 'closed' | 'review' | 'skip' | 'partial', score? }
   const intervalRef = useRef(null)
   const textareaRef = useRef(null)
 
@@ -100,6 +121,17 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
     }, 1000)
     return () => clearInterval(intervalRef.current)
   }, [running])
+
+  // When launched from Session Bundle Mode with a smart topic pre-filled,
+  // skip the setup screen entirely.
+  useEffect(() => {
+    if (autoStart && (initialTopic || smart?.topic) && step === 'setup') {
+      if (!topic && smart?.topic) setTopic(smart.topic)
+      const t = setTimeout(() => startTimer(initialTopic || smart?.topic), 30)
+      return () => clearTimeout(t)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoStart])
 
   const handleBdMicToggle = async () => {
     if (bdRecording) {
@@ -128,9 +160,10 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
     }
   }
 
-  function startTimer() {
+  function startTimer(overrideTopic = null) {
     const { allowed: canBrainDump } = canUseFeature('brainDump')
     if (!canBrainDump) { onShowPaywall?.('brainDump'); return }
+    if (overrideTopic && overrideTopic !== topic) setTopic(overrideTopic)
     setTimeLeft(timerDuration)
     setRunning(true)
     setStep('timer')
@@ -154,16 +187,32 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
     while (retries < 2) {
       try {
         const token = await getAccessToken()
+        const courseContext = hydrateCourseContext(course, {
+          firstName, yearLevel, learningStyle, schoolType, assignments,
+        })
         const res = await fetchWithRetry('/api/brain-dump-score', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ text, courseName: course?.name ?? 'unknown course', topic: topic.trim() || undefined }),
+          body: JSON.stringify({
+            text,
+            courseName: course?.name ?? 'unknown course',
+            topic: topic.trim() || undefined,
+            courseContext,
+          }),
         })
         const data = await res.json()
         if (!res.ok) throw Object.assign(new Error(aiErrorMessage(res.status, data.error)), { status: res.status })
         incrementAIQuery()
         incrementFeatureUsage('brainDump')
         addWeakTopics(data.possibleGaps ?? [])
+        // Persist the gaps this dump surfaced so other features (Connections,
+        // Cheat Sheet, Quiz Burst) can prioritize them next time.
+        recordBrainDumpGaps({
+          courseId: course?.id ?? null,
+          topic: topic.trim() || null,
+          gaps: data.possibleGaps ?? [],
+          score: data.score,
+        })
         addStudySession({ tool: 'Brain Dump', score: data.score, topic: topic.trim() || null, courseName: course?.name || null })
         if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, data.score, 'brainDump')
         window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'brainDump' } }))
@@ -259,7 +308,45 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
         {/* Setup */}
         {step === 'setup' && (
           <div style={{ padding: 24, overflowY: 'auto' }}>
-            {courses.length > 0 && (
+            {bridge && (
+              <div style={{ marginBottom: 16, padding: '10px 14px', background: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 10 }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, color: '#3B61C4', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 3 }}>Since your last session</div>
+                <div style={{ fontSize: 12.5, color: D.text, lineHeight: 1.45 }}>{bridge.line}</div>
+              </div>
+            )}
+            {smart?.topic && !showManual && !initialTopic && (
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, color: D.textDim, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 10 }}>
+                  Best pick for you right now
+                </div>
+                <div style={{ padding: '18px 20px', background: `linear-gradient(135deg, rgba(5,150,105,0.08) 0%, rgba(5,150,105,0.02) 100%)`, border: `1px solid rgba(5,150,105,0.25)`, borderRadius: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: courseColor }} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: D.textMuted }}>{course?.name}</span>
+                  </div>
+                  <div style={{ fontSize: 18, fontWeight: 800, color: D.text, marginBottom: 4, letterSpacing: -0.3 }}>
+                    Brain dump on {smart.topic}
+                  </div>
+                  <div style={{ fontSize: 12.5, color: D.textMuted, marginBottom: 14 }}>
+                    {smart.reason} · {timerDuration}s of everything you know
+                  </div>
+                  <button
+                    onClick={() => startTimer(smart.topic)}
+                    style={{ width: '100%', padding: '13px', background: '#059669', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(5,150,105,0.35)' }}
+                  >
+                    Start {timerDuration}s brain dump
+                  </button>
+                </div>
+                <button
+                  onClick={() => setShowManual(true)}
+                  style={{ marginTop: 12, width: '100%', padding: '8px', fontSize: 12.5, color: D.textDim, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}
+                >
+                  Or pick something else / change timer ▾
+                </button>
+              </div>
+            )}
+
+            {(showManual || !smart?.topic || initialTopic) && courses.length > 0 && (
               <div style={{ marginBottom: 20 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>Course</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -277,7 +364,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
               </div>
             )}
 
-            <div style={{ marginBottom: 20 }}>
+            {(showManual || !smart?.topic || initialTopic) && <div style={{ marginBottom: 20 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>Topic (optional)</div>
               <input
                 value={topic} onChange={e => setTopic(e.target.value)}
@@ -304,9 +391,9 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
                   ))}
                 </div>
               )}
-            </div>
+            </div>}
 
-            <div style={{ marginBottom: 24 }}>
+            {(showManual || !smart?.topic || initialTopic) && <div style={{ marginBottom: 24 }}>
               <div style={{ fontSize: 11, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>Timer duration</div>
               <div style={{ display: 'flex', gap: 8 }}>
                 {[60, 90, 120].map(s => (
@@ -321,13 +408,13 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
                   </button>
                 ))}
               </div>
-            </div>
+            </div>}
 
             {error && <div style={{ fontSize: 13, color: D.red, marginBottom: 16, padding: '10px 14px', background: 'rgba(220,38,38,0.06)', borderRadius: 8 }}>{error}</div>}
 
-            <button onClick={startTimer} style={{ width: '100%', padding: '13px', background: '#059669', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(5,150,105,0.35)' }}>
+            {(showManual || !smart?.topic || initialTopic) && <button onClick={() => startTimer()} style={{ width: '100%', padding: '13px', background: '#059669', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(5,150,105,0.35)' }}>
               Start brain dump
-            </button>
+            </button>}
 
             {!isPro && (() => {
               const { remaining } = canUseFeature('brainDump')
@@ -460,21 +547,86 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
                   </div>
                 </div>
 
-                {result.possibleGaps?.length > 0 && (
-                  <div style={{ marginBottom: 20, padding: '14px 16px', background: 'rgba(220,38,38,0.04)', borderRadius: 10, border: '1px solid rgba(220,38,38,0.12)' }}>
-                    <div style={{ fontSize: 11, fontWeight: 700, color: D.red, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>Possible gaps</div>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                      {result.possibleGaps.map((g, i) => (
-                        <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 13, color: D.textMuted }}>
-                          <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.red, flexShrink: 0 }} />
-                          {g}
+                {result.possibleGaps?.length > 0 && (() => {
+                  const brainDumpContext = hydrateCourseContext(course, {
+                    firstName, yearLevel, learningStyle, schoolType, assignments,
+                  })
+                  const closedCount = Object.values(closedGaps).filter(s => s === 'closed' || s === 'skip').length
+                  return (
+                    <div style={{ marginBottom: 20 }}>
+                      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
+                        <div style={{ fontSize: 11, fontWeight: 700, color: D.red, textTransform: 'uppercase', letterSpacing: '0.07em' }}>
+                          Close these gaps
                         </div>
-                      ))}
+                        {closedCount > 0 && (
+                          <div style={{ fontSize: 11, fontWeight: 700, color: D.green }}>
+                            {closedCount} / {result.possibleGaps.length} handled
+                          </div>
+                        )}
+                      </div>
+                      <div style={{ fontSize: 12, color: D.textDim, marginBottom: 12, lineHeight: 1.5 }}>
+                        These are areas you didn't mention. Close one now (3 quick questions), add to your review deck, or mark as known.
+                      </div>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                        {result.possibleGaps.map((g, i) => {
+                          const status = closedGaps[g]
+                          return (
+                            <div
+                              key={i}
+                              style={{
+                                padding: '12px 14px', borderRadius: 10,
+                                background: status === 'closed' ? 'rgba(22,163,74,0.04)'
+                                  : status === 'review' ? 'rgba(59,97,196,0.04)'
+                                  : status === 'skip' ? 'rgba(0,0,0,0.02)'
+                                  : status === 'partial' ? 'rgba(217,119,6,0.04)'
+                                  : 'rgba(220,38,38,0.03)',
+                                border: `1px solid ${status === 'closed' ? 'rgba(22,163,74,0.20)'
+                                  : status === 'review' ? 'rgba(59,97,196,0.20)'
+                                  : status === 'skip' ? 'rgba(0,0,0,0.06)'
+                                  : status === 'partial' ? 'rgba(217,119,6,0.20)'
+                                  : 'rgba(220,38,38,0.15)'}`,
+                              }}
+                            >
+                              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 8 }}>
+                                <span style={{ width: 6, height: 6, borderRadius: '50%', background: status === 'closed' ? D.green : status === 'review' ? D.blue : status === 'skip' ? D.textDim : D.red, flexShrink: 0 }} />
+                                <span style={{ fontSize: 13.5, fontWeight: 600, color: D.text, textDecoration: status === 'skip' ? 'line-through' : 'none' }}>
+                                  {g}
+                                </span>
+                              </div>
+                              <GapCloser
+                                gap={g}
+                                courseId={course?.id ?? null}
+                                courseName={course?.name ?? null}
+                                courseContext={brainDumpContext}
+                                onFinished={(topic, score) => setClosedGaps(prev => ({ ...prev, [topic]: score >= 67 ? 'closed' : 'partial', score }))}
+                                onDismiss={(topic, kind) => setClosedGaps(prev => ({ ...prev, [topic]: kind }))}
+                              />
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
-                    <div style={{ fontSize: 11, color: D.textDim, marginTop: 8 }}>These are areas you may know but didn't mention. Worth a quick check.</div>
+                  )
+                })()}
+
+                {result.changeSincePrior && (
+                  <div style={{ padding: '10px 14px', background: 'rgba(22,163,74,0.06)', borderRadius: 10, border: '1px solid rgba(22,163,74,0.18)', marginBottom: 12 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: D.green, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Change since last dump</div>
+                    <div style={{ fontSize: 13, color: D.text, lineHeight: 1.45 }}>{result.changeSincePrior}</div>
                   </div>
                 )}
-
+                {result.syllabusCoverage && (
+                  <div style={{ padding: '10px 14px', background: 'rgba(59,97,196,0.05)', borderRadius: 10, border: '1px solid rgba(59,97,196,0.15)', marginBottom: 12 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: D.blue, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Syllabus coverage</div>
+                    <div style={{ fontSize: 13, color: D.text, lineHeight: 1.45 }}>{result.syllabusCoverage}</div>
+                  </div>
+                )}
+                {result.learningStyleTip && (
+                  <div style={{ padding: '10px 14px', background: 'rgba(217,119,6,0.06)', borderRadius: 10, border: '1px solid rgba(217,119,6,0.18)', marginBottom: 12 }}>
+                    <div style={{ fontSize: 11, fontWeight: 700, color: D.amber, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>Do this next</div>
+                    <div style={{ fontSize: 13, color: D.text, lineHeight: 1.45 }}>{result.learningStyleTip}</div>
+                  </div>
+                )}
                 <div style={{ padding: '14px 16px', background: 'rgba(59,97,196,0.04)', borderRadius: 10, border: '1px solid rgba(59,97,196,0.15)', marginBottom: 20 }}>
                   <div style={{ fontSize: 13, color: D.textMuted }}>
                     Study <strong style={{ color: D.blue }}>{result.studyTimeToUpgrade} min</strong> of focused review to reach <strong style={{ color: D.blue }}>{result.upgradeTarget}</strong> territory.
@@ -561,7 +713,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
               <button onClick={onClose} style={{ width: '100%', padding: '12px', background: D.blue, border: 'none', borderRadius: 9, fontSize: 14, fontWeight: 700, color: '#fff', cursor: 'pointer', fontFamily: 'inherit' }}>
                 Done
               </button>
-              <button onClick={() => { setStep('setup'); setResult(null); setText(''); setError(''); setCardsAdded(0) }} style={{ background: 'none', border: 'none', fontSize: 12.5, fontWeight: 600, color: D.textMuted, cursor: 'pointer', padding: '4px', fontFamily: 'inherit', textDecoration: 'underline', textDecorationColor: 'rgba(0,0,0,0.2)', textUnderlineOffset: 3 }}>
+              <button onClick={() => { setStep('setup'); setResult(null); setText(''); setError(''); setCardsAdded(0); setClosedGaps({}) }} style={{ background: 'none', border: 'none', fontSize: 12.5, fontWeight: 600, color: D.textMuted, cursor: 'pointer', padding: '4px', fontFamily: 'inherit', textDecoration: 'underline', textDecorationColor: 'rgba(0,0,0,0.2)', textUnderlineOffset: 3 }}>
                 Run again
               </button>
             </div>

@@ -1,4 +1,5 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { buildContextBlock, contextGuardrails } from '../lib/server/courseContextPrompt.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -6,49 +7,57 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { courseName, syllabusText, recallHistory, coachPlan, examPrompt, regenerate } = req.body
-  if (!courseName && !examPrompt) return res.status(400).json({ error: 'Missing course context' })
-
-  const contextParts = []
-  if (syllabusText) contextParts.push(`Syllabus and notes:\n${syllabusText.slice(0, 4000)}`)
-  if (recallHistory?.length) contextParts.push(`Student recall history (topics and scores):\n${JSON.stringify(recallHistory).slice(0, 1000)}`)
-  if (coachPlan) contextParts.push(`Study coach focus areas:\n${coachPlan.slice(0, 1000)}`)
-  if (examPrompt) contextParts.push(`Student exam description: "${examPrompt}"`)
+  const { courseName, examPrompt, regenerate, courseContext } = req.body
+  const ctx = courseContext ?? { courseName }
+  const resolvedName = ctx.courseName ?? courseName
+  if (!resolvedName && !examPrompt) return res.status(400).json({ error: 'Missing course context' })
 
   const angle = regenerate === 2
-    ? 'a contrarian angle focusing on concepts students typically overlook but professors love to test'
+    ? 'Recompute the ranking from a contrarian angle: surface topics students commonly under-review that this professor still tests. Cross-reference the emphasis and syllabus signals for hints.'
     : regenerate === 1
-      ? 'an alternative perspective emphasizing connections between topics and applied knowledge'
-      : 'the most likely exam topics based on all available context'
+      ? 'Recompute the ranking emphasizing cross-topic connections and applied problems drawn from the coach plan and syllabus.'
+      : 'Rank the most likely exam topics using ALL context signals below. Weight = syllabus mention density × recent quiz-miss rate × proximity to exam date × professor emphasis.'
 
-  const prompt = `You are an expert academic coach. A student is preparing for their ${courseName} exam.
+  const contextBlock = buildContextBlock(ctx)
+  const guardrails = contextGuardrails(ctx, {
+    invention: 'If the context only contains a course name (no syllabus, coach plan, or mastery data), return topics that are canonical for a course of this name at this year-level, and mark examLikelihood as "Medium" for all of them. Do NOT invent professor names or fake syllabus weeks.',
+  })
 
-${contextParts.length ? `Context:\n${contextParts.join('\n\n')}` : 'No course context uploaded yet. Use your knowledge of this subject to generate likely exam topics.'}
+  const prompt = `You are the student's academic coach preparing a personalized cheat sheet for their ${resolvedName} exam.
 
-Generate ${angle}.
+${contextBlock}
 
-Return ONLY valid JSON with no other text:
+${examPrompt ? `Student's own exam description: "${examPrompt}"` : ''}
+
+Task: ${angle}
+
+Return ONLY valid JSON, no other text:
 {
   "topics": [
     {
       "rank": 1,
       "name": "Topic Name",
-      "whyLikely": "One specific sentence explaining why this appears on exams for this course",
-      "examLikelihood": "High",
-      "readiness": "Weak",
-      "estimatedMinutes": 12
+      "whyLikely": "One concrete sentence citing the specific signal (e.g. 'Appears on 3 syllabus weeks and student missed 62% on last practice exam').",
+      "examLikelihood": "High" | "Medium",
+      "readiness": "Strong" | "Moderate" | "Weak",
+      "readinessReason": "One short phrase citing the mastery score or a recent miss (e.g. 'mastery 34/100, missed Photosynthesis quiz Mar 3'). Omit if only course name is known.",
+      "estimatedMinutes": 12,
+      "priorityAction": "One concrete action (e.g. 'Do 10 practice problems on gel electrophoresis', 'Rewrite Bloom's timeline from memory'). Should tie to the student's learning style if known.",
+      "grounding": "syllabus" | "weak_topic" | "past_miss" | "emphasis" | "coach_plan" | "canonical"
     }
   ],
-  "totalMinutes": 90
+  "totalMinutes": 90,
+  "topPickReason": "One sentence saying which topic returns the most exam-point ROI in the next 30 min and why."
 }
 
 Rules:
-- Exactly 10 topics ranked 1 to 10 by exam probability
-- examLikelihood: "High" or "Medium" only
-- readiness: "Strong", "Moderate", or "Weak" based on recall history if available, otherwise "Moderate"
-- estimatedMinutes: realistic review time per topic, 5 to 30 minutes each
-- whyLikely must be specific and concrete, not generic filler
-- No em dashes in any text field`
+- Exactly 10 topics ranked by exam probability × student weakness (weakest known topics rank higher, all else equal).
+- Every 'whyLikely' MUST cite a real signal from the context above — do not write generic filler.
+- Set readiness from mastery scores when available: <40 = Weak, 40-69 = Moderate, 70+ = Strong. Only fall back to "Moderate" when no mastery data exists.
+- estimatedMinutes: 5-30 per topic, realistic to actually complete.
+- No em dashes anywhere.
+
+${guardrails}`
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -61,7 +70,7 @@ Rules:
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2000,
+        max_tokens: 2400,
         messages: [{ role: 'user', content: [{ type: 'text', text: prompt, cache_control: { type: 'ephemeral' } }] }],
       }),
     })

@@ -1,8 +1,12 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import Spinner from './ui/spinner'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, hasUsedTrial } from '../lib/subscription'
 import { addStudySession } from '../lib/studyHistory'
+import { hydrateCourseContext } from '../lib/courseContext'
+import { getLastSessionBridge } from '../lib/lastSessionBridge'
+import { pickSmartCourse } from '../lib/smartDefault'
+import { updateMastery } from '../lib/masteryStore'
 import { track } from '../lib/analytics'
 
 const D = {
@@ -35,21 +39,33 @@ function Pill({ label, style }) {
   )
 }
 
-export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpenQuizBurst }) {
+export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpenQuizBurst, learningStyle = null, yearLevel = null, firstName = null, schoolType = null, assignments = [] }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
-  const [courseIdx, setCourseIdx] = useState(0)
+  // Auto-select the highest-value course (closest exam within 14d, or the
+  // one with the biggest unaddressed gap) so the modal opens pointed at the
+  // right course rather than courses[0].
+  const initialSmartCourse = useMemo(() => pickSmartCourse(courses).index, [courses])
+  const [courseIdx, setCourseIdx] = useState(initialSmartCourse)
   const [examPrompt, setExamPrompt] = useState('')
+  const [showManual, setShowManual] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
   const [regenerateCount, setRegenerateCount] = useState(0)
   const [step, setStep] = useState('setup') // 'setup' | 'result'
+  const [timeBudget, setTimeBudget] = useState(45) // minutes
+  const [checkedTopics, setCheckedTopics] = useState({}) // { topicName: true }
+  const [planStartTs, setPlanStartTs] = useState(null)
 
   const course = courses[courseIdx] ?? null
   const COURSE_COLORS = ['#3B82F6','#6366F1','#059669','#D97706','#EC4899','#0891B2']
   const courseColor = course?.color?.dot ?? COURSE_COLORS[courseIdx % COURSE_COLORS.length]
+
+  const bridge = useMemo(() =>
+    getLastSessionBridge({ courseId: course?.id ?? null, courseName: course?.name ?? null, currentTool: 'AI Cheat Sheet' })
+  , [courseIdx, courses]) // eslint-disable-line react-hooks/exhaustive-deps
 
   async function generate(regen = 0) {
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
@@ -62,6 +78,9 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
     while (retries < 2) {
       try {
         const token = await getAccessToken()
+        const courseContext = hydrateCourseContext(course, {
+          firstName, yearLevel, learningStyle, schoolType, assignments,
+        })
         const res = await fetch('/api/cheat-sheet', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -69,6 +88,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
             courseName: course?.name ?? examPrompt,
             examPrompt: examPrompt || undefined,
             regenerate: regen,
+            courseContext,
           }),
         })
         const data = await res.json()
@@ -103,6 +123,42 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
   const visibleTopics = result?.topics ?? []
   const freeTopics = isPro ? visibleTopics : visibleTopics.slice(0, 1)
   const lockedCount = isPro ? 0 : visibleTopics.length - 1
+
+  // Slice the ranked topics into "fits in your time budget" (planTopics) and
+  // "if you have more time" (overflowTopics) using estimatedMinutes. Runs on
+  // the Pro-visible slice; free users see only the highest-ROI topic anyway.
+  const planTopics = []
+  const overflowTopics = []
+  let cumulative = 0
+  for (const t of freeTopics) {
+    const cost = typeof t.estimatedMinutes === 'number' ? t.estimatedMinutes : 10
+    if (cumulative + cost <= timeBudget || planTopics.length === 0) {
+      planTopics.push(t)
+      cumulative += cost
+    } else {
+      overflowTopics.push(t)
+    }
+  }
+  const planMinutes = cumulative
+
+  function toggleTopicChecked(topic) {
+    setCheckedTopics(prev => {
+      const key = topic.name
+      const wasChecked = prev[key]
+      const next = { ...prev, [key]: !wasChecked }
+      // Ticking a topic bumps its mastery by 10 (bounded blend inside the
+      // store) so future features know the student actually reviewed it.
+      if (!wasChecked) {
+        updateMastery(topic.name, course?.id ?? null, 78, 'cheat_sheet_reviewed')
+        track('cheat_sheet_topic_checked', { topic: topic.name })
+      }
+      return next
+    })
+    if (planStartTs == null) setPlanStartTs(Date.now())
+  }
+
+  const elapsedMin = planStartTs ? Math.max(0, Math.floor((Date.now() - planStartTs) / 60000)) : 0
+  const checkedCount = planTopics.filter(t => checkedTopics[t.name]).length
 
   return (
     <div role="dialog" aria-modal="true" aria-label="AI Cheat Sheet" style={{
@@ -145,7 +201,53 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
         {/* Setup step */}
         {step === 'setup' && (
           <div style={{ padding: '24px', overflowY: 'auto' }}>
-            {courses.length > 0 && (
+            {course && !showManual && (
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, color: D.textDim, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 10 }}>
+                  Best pick for you right now
+                </div>
+                <div style={{ padding: '18px 20px', background: `linear-gradient(135deg, ${D.blue}0F 0%, ${D.blue}05 100%)`, border: `1px solid ${D.blue}33`, borderRadius: 14 }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: courseColor }} />
+                    <span style={{ fontSize: 12, fontWeight: 700, color: D.textMuted }}>{course.name}</span>
+                  </div>
+                  <div style={{ fontSize: 17, fontWeight: 800, color: D.text, marginBottom: 4, letterSpacing: -0.3 }}>
+                    Personalized exam cheat sheet
+                  </div>
+                  <div style={{ fontSize: 12.5, color: D.textMuted, marginBottom: 14 }}>
+                    {(() => {
+                      const parts = []
+                      if (course.examDate) {
+                        const days = Math.max(0, Math.ceil((new Date(course.examDate + 'T12:00:00') - Date.now()) / 86400000))
+                        parts.push(`${days}d until your exam`)
+                      }
+                      parts.push('ranked by what you actually need to review')
+                      return parts.join(' · ')
+                    })()}
+                  </div>
+                  <button
+                    onClick={() => generate(0)}
+                    disabled={loading}
+                    style={{ width: '100%', padding: '13px', background: loading ? D.textDim : D.blue, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: loading ? 'default' : 'pointer', fontFamily: 'inherit', boxShadow: `0 3px 12px rgba(59,97,196,0.35)`, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}
+                  >
+                    {loading ? (<><Spinner size="xs" color="#fff" track="rgba(255,255,255,0.3)" /> Generating your cheat sheet…</>) : 'Generate cheat sheet'}
+                  </button>
+                </div>
+                <button
+                  onClick={() => setShowManual(true)}
+                  style={{ marginTop: 12, width: '100%', padding: '8px', fontSize: 12.5, color: D.textDim, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}
+                >
+                  Or pick a different course / add exam details ▾
+                </button>
+              </div>
+            )}
+            {bridge && (
+              <div style={{ marginBottom: 16, padding: '10px 14px', background: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 10 }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, color: D.blue, letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 3 }}>Since your last session</div>
+                <div style={{ fontSize: 12.5, color: D.text, lineHeight: 1.45 }}>{bridge.line}</div>
+              </div>
+            )}
+            {showManual && courses.length > 0 && (
               <div style={{ marginBottom: 20 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>Select course</div>
                 <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -170,27 +272,29 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
               </div>
             )}
 
-            <div style={{ marginBottom: 20 }}>
-              <div style={{ fontSize: 11, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
-                {courses.length > 0 ? 'Describe your exam (optional)' : 'Describe your exam'}
+            {showManual && (
+              <div style={{ marginBottom: 20 }}>
+                <div style={{ fontSize: 11, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 8 }}>
+                  {courses.length > 0 ? 'Describe your exam (optional)' : 'Describe your exam'}
+                </div>
+                <textarea
+                  value={examPrompt}
+                  onChange={e => setExamPrompt(e.target.value)}
+                  placeholder="e.g. Cell biology final covering chapters 8-14, focus on mitosis and protein synthesis"
+                  style={{
+                    width: '100%', boxSizing: 'border-box',
+                    padding: '12px 14px', borderRadius: 10,
+                    border: `1px solid ${D.borderStrong}`,
+                    fontSize: 14, color: D.text, lineHeight: 1.5,
+                    background: D.bg, outline: 'none', resize: 'vertical',
+                    minHeight: 80, fontFamily: 'inherit',
+                  }}
+                />
+                <div style={{ fontSize: 12, color: D.textDim, marginTop: 6 }}>
+                  The more specific, the better the cheat sheet.
+                </div>
               </div>
-              <textarea
-                value={examPrompt}
-                onChange={e => setExamPrompt(e.target.value)}
-                placeholder="e.g. Cell biology final covering chapters 8-14, focus on mitosis and protein synthesis"
-                style={{
-                  width: '100%', boxSizing: 'border-box',
-                  padding: '12px 14px', borderRadius: 10,
-                  border: `1px solid ${D.borderStrong}`,
-                  fontSize: 14, color: D.text, lineHeight: 1.5,
-                  background: D.bg, outline: 'none', resize: 'vertical',
-                  minHeight: 80, fontFamily: 'inherit',
-                }}
-              />
-              <div style={{ fontSize: 12, color: D.textDim, marginTop: 6 }}>
-                The more specific, the better the cheat sheet.
-              </div>
-            </div>
+            )}
 
             {error && (
               <div style={{ fontSize: 13, color: D.red, marginBottom: 16, padding: '10px 14px', background: 'rgba(220,38,38,0.06)', borderRadius: 8, border: '1px solid rgba(220,38,38,0.15)' }}>
@@ -198,25 +302,27 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
               </div>
             )}
 
-            <button
-              onClick={() => generate(0)}
-              disabled={loading || (!course && !examPrompt.trim())}
-              style={{
-                width: '100%', padding: '13px',
-                background: loading ? D.textDim : D.blue,
-                border: 'none', borderRadius: 10, color: '#fff',
-                fontSize: 14, fontWeight: 700, cursor: loading ? 'default' : 'pointer',
-                fontFamily: 'inherit', transition: 'opacity 0.15s',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
-              }}
-            >
-              {loading ? (
-                <>
-                  <Spinner size="xs" color="#fff" track="rgba(255,255,255,0.3)" />
-                  Generating your cheat sheet...
-                </>
-              ) : 'Generate cheat sheet'}
-            </button>
+            {showManual && (
+              <button
+                onClick={() => generate(0)}
+                disabled={loading || (!course && !examPrompt.trim())}
+                style={{
+                  width: '100%', padding: '13px',
+                  background: loading ? D.textDim : D.blue,
+                  border: 'none', borderRadius: 10, color: '#fff',
+                  fontSize: 14, fontWeight: 700, cursor: loading ? 'default' : 'pointer',
+                  fontFamily: 'inherit', transition: 'opacity 0.15s',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                }}
+              >
+                {loading ? (
+                  <>
+                    <Spinner size="xs" color="#fff" track="rgba(255,255,255,0.3)" />
+                    Generating your cheat sheet...
+                  </>
+                ) : 'Generate cheat sheet'}
+              </button>
+            )}
 
             {!isPro && (
               <div style={{ textAlign: 'center', fontSize: 12, color: D.textDim, marginTop: 12 }}>
@@ -230,9 +336,28 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
         {step === 'result' && result && (
           <div style={{ overflowY: 'auto', flex: 1 }}>
             {/* Summary bar */}
-            <div style={{ padding: '14px 24px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', gap: 12, background: D.bg }}>
-              <div style={{ flex: 1, fontSize: 13, color: D.textMuted }}>
-                <span style={{ color: D.text, fontWeight: 700 }}>{result.totalMinutes} min</span> total review time
+            <div style={{ padding: '14px 24px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', gap: 12, background: D.bg, flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: 180, fontSize: 13, color: D.textMuted }}>
+                <span style={{ color: D.text, fontWeight: 700 }}>{planMinutes} min</span> plan · {checkedCount}/{planTopics.length} done{elapsedMin > 0 ? ` · ${elapsedMin} min in` : ''}
+                {result.topPickReason && (
+                  <div style={{ fontSize: 12, color: D.blue, marginTop: 4, fontWeight: 600 }}>
+                    Highest ROI: {result.topPickReason}
+                  </div>
+                )}
+              </div>
+              <div style={{ display: 'flex', gap: 4, background: '#FFFFFF', border: `1px solid ${D.border}`, borderRadius: 8, padding: 3 }}>
+                {[30, 45, 60, 90].map(b => (
+                  <button
+                    key={b}
+                    onClick={() => setTimeBudget(b)}
+                    style={{
+                      fontSize: 11.5, fontWeight: 700, padding: '4px 9px', borderRadius: 5,
+                      background: timeBudget === b ? D.blue : 'transparent',
+                      color: timeBudget === b ? '#fff' : D.textMuted,
+                      border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >{b}m</button>
+                ))}
               </div>
               {isPro && regenerateCount < 2 && (
                 <button
@@ -257,25 +382,35 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
             <div style={{ padding: '0 0 24px' }}>
               <style>{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes pill-pulse{0%,100%{opacity:0.5}50%{opacity:1}}`}</style>
 
-              {freeTopics.map((topic, i) => (
+              {planTopics.map((topic, i) => {
+                const isChecked = !!checkedTopics[topic.name]
+                return (
                 <div key={i} style={{
                   padding: '16px 24px',
                   borderBottom: `1px solid ${D.border}`,
                   display: 'flex', alignItems: 'flex-start', gap: 14,
                   transition: 'background 0.12s',
+                  opacity: isChecked ? 0.55 : 1,
                 }}
                   onMouseEnter={e => { e.currentTarget.style.background = 'rgba(59,97,196,0.02)' }}
                   onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
                 >
-                  <div style={{
-                    width: 26, height: 26, borderRadius: 7, flexShrink: 0,
-                    background: i === 0 ? `${courseColor}15` : 'rgba(0,0,0,0.04)',
-                    border: `1px solid ${i === 0 ? `${courseColor}30` : D.border}`,
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: 11, fontWeight: 800, color: i === 0 ? courseColor : D.textDim,
-                  }}>
-                    {topic.rank}
-                  </div>
+                  <button
+                    onClick={() => toggleTopicChecked(topic)}
+                    aria-label={isChecked ? `Uncheck ${topic.name}` : `Mark ${topic.name} reviewed`}
+                    style={{
+                      width: 26, height: 26, borderRadius: 7, flexShrink: 0,
+                      background: isChecked ? D.green : (i === 0 ? `${courseColor}15` : 'rgba(0,0,0,0.04)'),
+                      border: isChecked ? `1px solid ${D.green}` : `1px solid ${i === 0 ? `${courseColor}30` : D.border}`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      fontSize: 11, fontWeight: 800, color: isChecked ? '#fff' : (i === 0 ? courseColor : D.textDim),
+                      cursor: 'pointer', fontFamily: 'inherit',
+                    }}
+                  >
+                    {isChecked
+                      ? <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                      : topic.rank}
+                  </button>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginBottom: 4 }}>
                       <span style={{ fontSize: 14, fontWeight: 700, color: D.text }}>{topic.name}</span>
@@ -285,12 +420,55 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
                       </div>
                     </div>
                     <div style={{ fontSize: 13, color: D.textMuted, lineHeight: 1.5, marginBottom: 6 }}>{topic.whyLikely}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                    {topic.readinessReason && (
+                      <div style={{ fontSize: 12, color: D.textDim, marginBottom: 6, fontStyle: 'italic' }}>
+                        {topic.readinessReason}
+                      </div>
+                    )}
+                    {topic.priorityAction && (
+                      <div style={{ fontSize: 12.5, color: D.text, marginBottom: 6, background: 'rgba(59,97,196,0.05)', padding: '6px 10px', borderRadius: 6, borderLeft: `3px solid ${D.blue}` }}>
+                        <strong style={{ color: D.blue, fontSize: 10.5, letterSpacing: '0.06em' }}>DO THIS: </strong>
+                        {topic.priorityAction}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
                       <span style={{ fontSize: 11.5, color: D.textDim }}>~{topic.estimatedMinutes} min to review</span>
+                      {onOpenQuizBurst && !isChecked && (
+                        <button
+                          onClick={() => onOpenQuizBurst({ courseIdx, topic: topic.name })}
+                          style={{
+                            fontSize: 11.5, fontWeight: 700, padding: '3px 9px', borderRadius: 6,
+                            background: 'rgba(232,83,26,0.08)', border: '1px solid rgba(232,83,26,0.22)',
+                            color: '#E8531A', cursor: 'pointer', fontFamily: 'inherit',
+                          }}
+                        >
+                          Start {Math.max(2, Math.min(topic.estimatedMinutes || 5, 15))}-min sprint →
+                        </button>
+                      )}
                     </div>
                   </div>
                 </div>
-              ))}
+              )})}
+
+              {overflowTopics.length > 0 && (
+                <details style={{ padding: '14px 24px', borderTop: `1px solid ${D.border}` }}>
+                  <summary style={{ fontSize: 12.5, fontWeight: 700, color: D.textMuted, cursor: 'pointer', letterSpacing: '0.03em', textTransform: 'uppercase' }}>
+                    If you have more time ({overflowTopics.length} more topic{overflowTopics.length === 1 ? '' : 's'}, ~{overflowTopics.reduce((s, t) => s + (t.estimatedMinutes || 10), 0)} min)
+                  </summary>
+                  <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 8 }}>
+                    {overflowTopics.map((topic, i) => (
+                      <div key={i} style={{ padding: '8px 10px', background: 'rgba(0,0,0,0.02)', border: `1px solid ${D.border}`, borderRadius: 8 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 3 }}>
+                          <span style={{ fontSize: 10.5, fontWeight: 700, color: D.textDim, padding: '1px 6px', background: 'rgba(0,0,0,0.04)', borderRadius: 4 }}>#{topic.rank}</span>
+                          <span style={{ fontSize: 13, fontWeight: 700, color: D.text }}>{topic.name}</span>
+                          <span style={{ fontSize: 11, color: D.textDim, marginLeft: 'auto' }}>~{topic.estimatedMinutes}m</span>
+                        </div>
+                        <div style={{ fontSize: 12, color: D.textMuted, lineHeight: 1.4 }}>{topic.whyLikely}</div>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              )}
 
               {/* Paywall overlay for locked topics */}
               {lockedCount > 0 && (

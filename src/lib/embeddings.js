@@ -55,6 +55,57 @@ export async function deduplicateFlashcards(cards, threshold = 0.90) {
 }
 
 /**
+ * Filter out newCards that are semantically too close to any card in
+ * existingCards. Returns the subset of newCards to keep, tagged with the
+ * existing card they matched when dropped.
+ *
+ * Fails open — if the embeddings API is unavailable, all newCards pass
+ * through so we never block generation.
+ */
+export async function dedupeAgainstExisting(newCards, existingCards, threshold = 0.90) {
+  if (!newCards.length || !existingCards.length) {
+    return { kept: newCards, dropped: [] }
+  }
+
+  try {
+    const texts = [
+      ...newCards.map(c => c.front ?? c.question ?? c.term ?? ''),
+      ...existingCards.map(c => c.front ?? c.question ?? c.term ?? ''),
+    ]
+    const res = await fetch('/api/embeddings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ texts }),
+    })
+    if (!res.ok) return { kept: newCards, dropped: [] }
+    const { embeddings } = await res.json()
+    if (!embeddings?.length) return { kept: newCards, dropped: [] }
+
+    const newEmbeds = embeddings.slice(0, newCards.length)
+    const existingEmbeds = embeddings.slice(newCards.length)
+
+    const kept = []
+    const dropped = []
+    for (let i = 0; i < newCards.length; i++) {
+      let matchIdx = -1
+      let matchScore = 0
+      for (let j = 0; j < existingCards.length; j++) {
+        const sim = cosineSim(newEmbeds[i], existingEmbeds[j])
+        if (sim >= threshold && sim > matchScore) {
+          matchScore = sim
+          matchIdx = j
+        }
+      }
+      if (matchIdx === -1) kept.push(newCards[i])
+      else dropped.push({ card: newCards[i], matchedFront: existingCards[matchIdx].front, similarity: matchScore })
+    }
+    return { kept, dropped }
+  } catch {
+    return { kept: newCards, dropped: [] }
+  }
+}
+
+/**
  * Find cards similar to a given query (for search/suggestions)
  */
 export async function findSimilarCards(query, cards, topK = 3) {

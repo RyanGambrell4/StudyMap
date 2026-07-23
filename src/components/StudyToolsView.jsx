@@ -7,8 +7,10 @@ import { getToolSessionsThisWeek, getStudyHistory } from '../lib/studyHistory'
 import { sm2, sortCardsByDue, getDueCards } from '../lib/sm2'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, hasUsedTrial } from '../lib/subscription'
-import { findSimilarCards } from '../lib/embeddings'
+import { findSimilarCards, dedupeAgainstExisting } from '../lib/embeddings'
+import { getDeckHealth, labelForSource } from '../lib/deckHealth'
 import { useCelebration } from '../utils/useCelebration'
+import { hydrateCourseContext } from '../lib/courseContext'
 import { track } from '../lib/analytics'
 
 function loadSaved() {
@@ -17,6 +19,7 @@ function loadSaved() {
 
 // ── Flashcard ──────────────────────────────────────────────────────────────────
 function Flashcard({ card, flipped, onFlip }) {
+  const isWeak = card?.isWeakTopic || card?.reviewFirst
   return (
     <div
       className="w-full cursor-pointer select-none"
@@ -25,7 +28,12 @@ function Flashcard({ card, flipped, onFlip }) {
     >
       <div className={`fc-inner${flipped ? ' fc-flipped' : ''}`} style={{ minHeight: 220 }}>
         {/* Front */}
-        <div className="fc-face bg-white border border-[#E5E5E5] rounded-2xl flex flex-col items-center justify-center p-8 gap-3">
+        <div className="fc-face bg-white border border-[#E5E5E5] rounded-2xl flex flex-col items-center justify-center p-8 gap-3 relative">
+          {isWeak && (
+            <span style={{ position: 'absolute', top: 12, right: 12, fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', color: '#DC2626', background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.25)', borderRadius: 999, padding: '2px 8px' }}>
+              REVIEW FIRST
+            </span>
+          )}
           <span className="text-xs font-semibold uppercase tracking-widest text-[#6B6B6B]">Concept</span>
           <p className="text-[#111111] text-xl font-bold text-center leading-snug">{card.front}</p>
           <span className="text-[#9B9B9B] text-xs mt-2">Tap to reveal answer</span>
@@ -188,7 +196,7 @@ function QuizQuestion({ question, onAnswer }) {
 }
 
 // ── Main view ─────────────────────────────────────────────────────────────────
-export default function StudyToolsView({ courses, userId, onShowPaywall, onNavigateToCoach, learningStyle, onOpenCheatSheet, onOpenBrainDump, onOpenExamRescue, onOpenQuizBurst, onOpenPodcast, onOpenTeachItBack, onOpenConnectionsMode, onOpenTimeAttack, initialDrillTopic, onDrillTopicConsumed }) {
+export default function StudyToolsView({ courses, userId, onShowPaywall, onNavigateToCoach, learningStyle, yearLevel = null, firstName = null, schoolType = null, assignments = [], onOpenCheatSheet, onOpenBrainDump, onOpenExamRescue, onOpenQuizBurst, onOpenPodcast, onOpenTeachItBack, onOpenConnectionsMode, onOpenTimeAttack, onOpenSessionBundle, initialDrillTopic, onDrillTopicConsumed }) {
   const fileInputRef = useRef(null)
   const scanInputRef = useRef(null)
   const [dragging, setDragging] = useState(false)
@@ -220,6 +228,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
   const [mode, setMode] = useState('hub') // 'hub' | 'upload' | 'flashcards' | 'quiz'
   const [flashcards, setFlashcards] = useState([])
   const [quiz, setQuiz] = useState([])
+  const [startHere, setStartHere] = useState('')
   const [isGenerating, setIsGenerating] = useState(false)
   const [loadingMessage, setLoadingMessage] = useState('')
   const [generateError, setGenerateError] = useState('')
@@ -453,6 +462,11 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     const activePlan = activeCourse?.id ? getCachedCoachPlan(activeCourse.id) : null
     const fcEmphasis = activePlan?.formData?.emphasisTopics ?? activePlan?.formData?.topics?.join(', ') ?? null
     const fcStruggles = activePlan?.struggles ?? []
+    // Full context so the API can flag weak-topic flashcards as review-first,
+    // pull terminology from the syllabus, and dedupe against past cards.
+    const courseContext = hydrateCourseContext(activeCourse, {
+      firstName, yearLevel, learningStyle, schoolType, assignments,
+    })
     try {
       const token = await getAccessToken()
       const response = await fetch('/api/generate-study-tools', {
@@ -464,15 +478,46 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           professorEmphasis: fcEmphasis || null,
           struggles: fcStruggles.length ? fcStruggles : null,
           learningStyle: learningStyle ?? null,
+          courseContext,
         }),
       })
       const data = await response.json()
       if (!response.ok) throw new Error(data.error ?? `API returned ${response.status}`)
       if (!data.flashcards?.length) throw new Error('No flashcards returned')
-      const cards = sortCardsByDue(data.flashcards)
+      // Dedupe against flashcards already generated for this course so the
+      // student doesn't see the same "define mitosis" card three sessions
+      // in a row. Fails open — never blocks the deck from appearing.
+      const priorSaved = getCachedStudyTools()
+      const priorCards = (priorSaved?.flashcards ?? []).filter(c =>
+        !activeCourse || priorSaved?.courseIdx === selectedCourse
+      )
+      const rawCards = data.flashcards ?? []
+      let uniqueCards = rawCards
+      let dropped = []
+      if (priorCards.length && rawCards.length) {
+        const result = await dedupeAgainstExisting(rawCards, priorCards, 0.90)
+        uniqueCards = result.kept
+        dropped = result.dropped
+      }
+      // If dedup left us with too few cards, fall back to the full raw set —
+      // better to show a mostly-fresh deck than an anemic one.
+      if (uniqueCards.length < Math.min(6, rawCards.length)) uniqueCards = rawCards
+
+      // Weak-topic cards front of deck so the student closes real gaps first,
+      // regardless of SM-2 due dates. The rest keeps SM-2 order.
+      const weakFirst = [
+        ...uniqueCards.filter(c => c.isWeakTopic || c.reviewFirst),
+        ...uniqueCards.filter(c => !(c.isWeakTopic || c.reviewFirst)),
+      ]
+      const cards = sortCardsByDue(weakFirst)
       const q = data.quiz ?? []
       setFlashcards(cards)
       setQuiz(q)
+      const startHint = data.startHere ?? ''
+      const dedupHint = dropped.length > 0
+        ? `Dropped ${dropped.length} card${dropped.length === 1 ? '' : 's'} you already have. ${startHint}`.trim()
+        : startHint
+      setStartHere(dedupHint)
       setCardIdx(0)
       setFlipped(false)
       setKnownSet(new Set())
@@ -598,6 +643,9 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     track('drill_started', { topic: drillTopic.trim(), hasCourse: drillCourse !== null })
     try {
       const token = await getAccessToken()
+      const drillContext = hydrateCourseContext(course, {
+        firstName, yearLevel, learningStyle, schoolType, assignments,
+      })
       const res = await fetch('/api/generate-study-tools', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -608,6 +656,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
           professorEmphasis: drillEmphasis || null,
           struggles: drillStruggles.length ? drillStruggles : null,
           learningStyle: learningStyle ?? null,
+          courseContext: drillContext,
         }),
       })
       const data = await res.json()
@@ -810,6 +859,100 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
             <h1 style={{ fontSize: 22, fontWeight: 800, color: '#111111', margin: '0 0 4px', letterSpacing: '-0.02em' }}>Study Tools</h1>
             <p style={{ fontSize: 13.5, color: '#6B6B6B', margin: '0 0 22px' }}>Pick a tool, pick a topic, and go.</p>
+
+            {(() => {
+              const health = getDeckHealth()
+              if (health.total === 0) return null
+              const primaryColor = health.dueToday >= 5 ? '#DC2626'
+                : health.dueToday > 0 ? '#D97706'
+                : '#16A34A'
+              return (
+                <div style={{ marginBottom: 22, background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, padding: '16px 18px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: primaryColor }} />
+                      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: '#9B9B9B', textTransform: 'uppercase' }}>Deck Health</div>
+                    </div>
+                    <button
+                      onClick={() => setMode('flashcards')}
+                      disabled={!flashcards.length}
+                      style={{
+                        fontSize: 12, fontWeight: 700,
+                        padding: '6px 12px', borderRadius: 7,
+                        background: flashcards.length ? primaryColor : 'transparent',
+                        color: flashcards.length ? '#fff' : '#9B9B9B',
+                        border: flashcards.length ? 'none' : '1px solid rgba(0,0,0,0.12)',
+                        cursor: flashcards.length ? 'pointer' : 'default', fontFamily: 'inherit',
+                      }}
+                    >
+                      {flashcards.length ? 'Review now →' : 'No deck yet'}
+                    </button>
+                  </div>
+
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
+                    {[
+                      { label: 'Total', value: health.total, color: '#111' },
+                      { label: 'Due today', value: health.dueToday, color: primaryColor, emphasized: true },
+                      { label: 'Stale (14d+)', value: health.stale, color: '#D97706' },
+                      { label: 'Sticky misses', value: health.consistentlyMissed, color: '#DC2626' },
+                    ].map(cell => (
+                      <div key={cell.label} style={{
+                        padding: '10px 12px', borderRadius: 10,
+                        background: cell.emphasized ? `${cell.color}0F` : '#F7F6F3',
+                        border: cell.emphasized ? `1px solid ${cell.color}33` : '1px solid rgba(0,0,0,0.05)',
+                      }}>
+                        <div style={{ fontSize: 22, fontWeight: 800, color: cell.color, letterSpacing: '-0.02em' }}>{cell.value}</div>
+                        <div style={{ fontSize: 10.5, color: '#6B6B6B', fontWeight: 600, marginTop: 1 }}>{cell.label}</div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div style={{ fontSize: 12.5, color: '#111', lineHeight: 1.5, marginBottom: health.topicBreakdown.length ? 12 : 0 }}>
+                    <strong style={{ color: primaryColor }}>Do this next:</strong> {health.recommendedAction}
+                  </div>
+
+                  {health.topicBreakdown.length > 0 && (
+                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                      {health.topicBreakdown.map(t => (
+                        <span key={t.topic} style={{
+                          fontSize: 11.5, padding: '4px 10px', borderRadius: 999,
+                          background: t.dueNow > 0 ? 'rgba(220,38,38,0.06)' : '#F7F6F3',
+                          border: `1px solid ${t.dueNow > 0 ? 'rgba(220,38,38,0.20)' : 'rgba(0,0,0,0.07)'}`,
+                          color: t.dueNow > 0 ? '#DC2626' : '#6B6B6B', fontWeight: 600,
+                        }}>
+                          {t.topic}{t.dueNow > 0 ? ` · ${t.dueNow} due` : ` · ${t.count}`}
+                        </span>
+                      ))}
+                    </div>
+                  )}
+
+                  {health.fromMisses > 0 && health.newestSource && (
+                    <div style={{ marginTop: 10, fontSize: 11.5, color: '#9B9B9B' }}>
+                      {health.fromMisses} card{health.fromMisses === 1 ? '' : 's'} auto-added this month — most recently from {labelForSource(health.newestSource)}.
+                    </div>
+                  )}
+                </div>
+              )
+            })()}
+
+            {onOpenSessionBundle && courses.length > 0 && (
+              <div style={{ marginBottom: 22, padding: '18px 20px', borderRadius: 14, background: 'linear-gradient(135deg, #111111 0%, #1F1F1F 100%)', color: '#fff', boxShadow: '0 8px 24px rgba(0,0,0,0.18)', position: 'relative', overflow: 'hidden' }}>
+                <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(232,83,26,0.20)', filter: 'blur(40px)' }} />
+                <div style={{ position: 'relative' }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#F97316', marginBottom: 8 }}>Session Bundle</div>
+                  <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.3, marginBottom: 4 }}>Start a 15-min session</div>
+                  <div style={{ fontSize: 13, color: 'rgba(255,255,255,0.72)', lineHeight: 1.5, marginBottom: 14 }}>
+                    One tap. We pick your weakest topic, run a brain dump, quiz you on it, and show what you moved. No setup.
+                  </div>
+                  <button
+                    onClick={onOpenSessionBundle}
+                    style={{ padding: '11px 20px', background: '#E8531A', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(232,83,26,0.45)' }}
+                  >
+                    Start now →
+                  </button>
+                </div>
+              </div>
+            )}
 
             {recentSessions.length > 0 && (
               <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: '12px 14px', marginBottom: 20 }}>
@@ -1305,6 +1448,13 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               </div>
             )}
           </div>
+
+          {startHere && cardIdx === 0 && (
+            <div style={{ padding: '10px 14px', background: 'rgba(220,38,38,0.05)', border: '1px solid rgba(220,38,38,0.18)', borderRadius: 10, fontSize: 13, color: '#7F1D1D', lineHeight: 1.45 }}>
+              <strong style={{ fontSize: 10.5, letterSpacing: '0.06em', color: '#DC2626' }}>START HERE · </strong>
+              {startHere}
+            </div>
+          )}
 
           {/* Progress bar */}
           <div>

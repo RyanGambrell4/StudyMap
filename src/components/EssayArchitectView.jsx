@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { canUseAI, incrementAIQuery } from '../lib/subscription.js'
 import { getAccessToken } from '../lib/supabase.js'
+import { hydrateCourseContext } from '../lib/courseContext'
 import { track } from '../lib/analytics'
 
 const STORAGE_KEY = 'studyedge_outlines'
@@ -23,7 +24,215 @@ const ESSAY_TYPES = [
 
 const WORD_COUNTS = [500, 750, 1000, 1500, 2000, 3000, 5000]
 
-function OutlineView({ outline, onBack }) {
+// SectionDraftView — the drafting partner. Student writes their draft of one
+// section on the left; on submit, AI review renders on the right with hits,
+// misses, evidence gaps, concrete edits, and rubric-aligned scoring.
+function SectionDraftView({ section, sectionIdx, outline, onBack, buildContext, courseName, requirements }) {
+  const [draft, setDraft] = useState('')
+  const [review, setReview] = useState(null)
+  const [wordCount, setWordCount] = useState(0)
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
+  const [copied, setCopied] = useState(false)
+
+  const targetWords = section?.wordAllocation ?? null
+
+  // Live word count while typing.
+  const updateDraft = (v) => {
+    setDraft(v)
+    setWordCount(v.trim() ? v.trim().split(/\s+/).length : 0)
+  }
+
+  const requestReview = async () => {
+    if (!draft.trim()) return
+    setLoading(true)
+    setError('')
+    try {
+      const token = await getAccessToken()
+      const res = await fetch('/api/essay-review-section', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          sectionName: section?.name,
+          sectionPurpose: section?.purpose,
+          sectionPoints: section?.points ?? [],
+          draft,
+          thesis: outline?.thesis,
+          essayType: outline?.essayType,
+          wordAllocation: targetWords,
+          requirements,
+          courseContext: buildContext(courseName),
+        }),
+      })
+      const json = await res.json()
+      if (!res.ok) throw new Error(json.error || 'Failed to review')
+      incrementAIQuery()
+      setReview(json.review)
+      track('essay_section_reviewed', { section: section?.name, wordCount: json.wordCount })
+    } catch (e) {
+      setError(e.message || 'Something went wrong.')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const copyDraft = () => {
+    navigator.clipboard.writeText(draft).then(() => {
+      setCopied(true)
+      setTimeout(() => setCopied(false), 1500)
+    }).catch(() => {})
+  }
+
+  const wcColor = targetWords == null ? '#6B6B6B'
+    : Math.abs(wordCount - targetWords) <= targetWords * 0.15 ? '#16A34A'
+    : Math.abs(wordCount - targetWords) <= targetWords * 0.30 ? '#D97706'
+    : '#DC2626'
+
+  return (
+    <div style={{ maxWidth: 900, margin: '0 auto' }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 20 }}>
+        <button onClick={onBack} style={{ background: 'none', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 8, padding: '6px 14px', fontSize: 13, cursor: 'pointer', color: '#6B6B6B' }}>Back to outline</button>
+        <div style={{ flex: 1 }}>
+          <h2 style={{ margin: 0, fontSize: 18, fontWeight: 800, color: '#111' }}>Drafting {section?.name}</h2>
+          <div style={{ fontSize: 12, color: '#6B6B6B', marginTop: 2 }}>{section?.purpose}</div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: review ? '1fr 1fr' : '1fr', gap: 16 }}>
+        <div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Your draft</div>
+            <div style={{ fontSize: 12, fontWeight: 700, color: wcColor }}>
+              {wordCount}{targetWords ? ` / ~${targetWords} w` : ' w'}
+            </div>
+          </div>
+          <textarea
+            value={draft}
+            onChange={e => updateDraft(e.target.value)}
+            placeholder={`Start with your topic sentence. Aim for roughly ${targetWords ?? 200} words.`}
+            style={{
+              width: '100%', boxSizing: 'border-box',
+              minHeight: 320, padding: 14, borderRadius: 12,
+              border: '1.5px solid rgba(0,0,0,0.12)',
+              fontSize: 14, color: '#111', background: '#fff',
+              fontFamily: 'inherit', lineHeight: 1.6, resize: 'vertical', outline: 'none',
+            }}
+          />
+          {section?.points?.length > 0 && (
+            <div style={{ marginTop: 10, padding: '10px 12px', background: '#F7F6F3', borderRadius: 8, fontSize: 11.5, color: '#6B6B6B', lineHeight: 1.6 }}>
+              <strong style={{ color: '#111' }}>Outline points to hit:</strong>
+              <ul style={{ margin: '4px 0 0 18px', padding: 0 }}>
+                {section.points.map((p, i) => <li key={i}>{p}</li>)}
+              </ul>
+            </div>
+          )}
+          {error && <div style={{ marginTop: 10, fontSize: 12.5, color: '#DC2626' }}>{error}</div>}
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            <button
+              onClick={requestReview}
+              disabled={loading || wordCount < 30}
+              style={{ flex: 1, padding: '12px', background: loading || wordCount < 30 ? '#9B9B9B' : '#3B61C4', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: loading || wordCount < 30 ? 'default' : 'pointer', fontFamily: 'inherit' }}
+            >
+              {loading ? 'Reading your draft…' : review ? 'Re-review after edits' : 'Get feedback'}
+            </button>
+            <button
+              onClick={copyDraft}
+              disabled={!draft.trim()}
+              style={{ padding: '12px 16px', background: 'none', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 10, color: '#6B6B6B', fontSize: 13, fontWeight: 600, cursor: draft.trim() ? 'pointer' : 'default', fontFamily: 'inherit' }}
+            >
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+          </div>
+          {wordCount < 30 && !loading && (
+            <div style={{ marginTop: 8, fontSize: 11.5, color: '#9B9B9B', textAlign: 'center' }}>
+              Write at least 30 words to get feedback.
+            </div>
+          )}
+        </div>
+
+        {review && (
+          <div>
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Review</div>
+              <div style={{ fontSize: 20, fontWeight: 800, color: review.overallScore >= 75 ? '#16A34A' : review.overallScore >= 55 ? '#D97706' : '#DC2626' }}>
+                {review.overallScore}
+              </div>
+            </div>
+            <div style={{ padding: '10px 12px', background: '#3B61C40A', border: '1px solid #3B61C422', borderRadius: 10, fontSize: 12.5, color: '#111', marginBottom: 12, lineHeight: 1.5 }}>
+              <strong style={{ color: '#3B61C4' }}>Next step: </strong>{review.nextStep}
+            </div>
+
+            {review.hits?.length > 0 && (
+              <div style={{ padding: 12, background: 'rgba(22,163,74,0.04)', border: '1px solid rgba(22,163,74,0.18)', borderRadius: 10, marginBottom: 10 }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, color: '#16A34A', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 6 }}>What's working</div>
+                {review.hits.map((h, i) => (
+                  <div key={i} style={{ fontSize: 12.5, color: '#111', marginBottom: 4, lineHeight: 1.45 }}>· {h}</div>
+                ))}
+              </div>
+            )}
+
+            {review.misses?.length > 0 && (
+              <div style={{ padding: 12, background: 'rgba(220,38,38,0.04)', border: '1px solid rgba(220,38,38,0.18)', borderRadius: 10, marginBottom: 10 }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, color: '#DC2626', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 6 }}>Gaps</div>
+                {review.misses.map((m, i) => (
+                  <div key={i} style={{ fontSize: 12.5, color: '#111', marginBottom: 4, lineHeight: 1.45 }}>· {m}</div>
+                ))}
+              </div>
+            )}
+
+            {review.evidenceGaps?.length > 0 && (
+              <div style={{ padding: 12, background: 'rgba(217,119,6,0.04)', border: '1px solid rgba(217,119,6,0.22)', borderRadius: 10, marginBottom: 10 }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, color: '#D97706', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 6 }}>Claims needing sources</div>
+                {review.evidenceGaps.map((g, i) => (
+                  <div key={i} style={{ fontSize: 12.5, color: '#111', marginBottom: 6, lineHeight: 1.45 }}>
+                    <div style={{ fontStyle: 'italic', color: '#6B6B6B' }}>"{g.claim}"</div>
+                    <div style={{ marginTop: 2 }}>→ needs <strong>{g.needsSource}</strong></div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {review.concreteEdits?.length > 0 && (
+              <div style={{ padding: 12, background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, marginBottom: 10 }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, color: '#3B61C4', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 8 }}>Suggested edits</div>
+                {review.concreteEdits.map((e, i) => (
+                  <div key={i} style={{ marginBottom: 10, paddingBottom: 8, borderBottom: i < review.concreteEdits.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none' }}>
+                    <div style={{ fontSize: 12, color: '#DC2626', textDecoration: 'line-through', lineHeight: 1.5 }}>{e.original}</div>
+                    <div style={{ fontSize: 12.5, color: '#16A34A', fontWeight: 600, marginTop: 3, lineHeight: 1.5 }}>{e.revised}</div>
+                    <div style={{ fontSize: 11, color: '#6B6B6B', marginTop: 3, fontStyle: 'italic' }}>{e.why}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {review.rubricAlignment?.length > 0 && (
+              <div style={{ padding: 12, background: 'rgba(124,58,237,0.05)', border: '1px solid rgba(124,58,237,0.22)', borderRadius: 10, marginBottom: 10 }}>
+                <div style={{ fontSize: 10.5, fontWeight: 700, color: '#7C3AED', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 8 }}>Rubric alignment</div>
+                {review.rubricAlignment.map((r, i) => (
+                  <div key={i} style={{ marginBottom: 8 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12, marginBottom: 3 }}>
+                      <span style={{ fontWeight: 700, color: '#111' }}>{r.criterion}</span>
+                      <span style={{ fontWeight: 700, color: r.score >= 75 ? '#16A34A' : r.score >= 55 ? '#D97706' : '#DC2626' }}>{r.score}</span>
+                    </div>
+                    <div style={{ fontSize: 11.5, color: '#6B6B6B', lineHeight: 1.4 }}>{r.assessment}</div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {review.wordCountAdvice && (
+              <div style={{ padding: '10px 12px', background: '#F7F6F3', borderRadius: 8, fontSize: 12, color: '#6B6B6B', lineHeight: 1.4 }}>
+                <strong>Word count:</strong> {review.wordCountAdvice}
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+function OutlineView({ outline, onBack, onDraftSection }) {
   const [copied, setCopied] = useState(false)
   const [copyError, setCopyError] = useState(false)
 
@@ -120,6 +329,19 @@ function OutlineView({ outline, onBack }) {
                   <div style={{ fontSize: 13, color: '#111', lineHeight: 1.5 }}>{point}</div>
                 </div>
               ))}
+              {onDraftSection && (
+                <button
+                  onClick={() => onDraftSection(section, i)}
+                  style={{
+                    marginTop: 12, padding: '8px 14px', borderRadius: 8,
+                    background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.22)',
+                    color: '#3B61C4', fontSize: 12.5, fontWeight: 700, cursor: 'pointer',
+                    fontFamily: 'inherit',
+                  }}
+                >
+                  Draft this section →
+                </button>
+              )}
             </div>
           </div>
         ))}
@@ -168,11 +390,22 @@ function OutlineView({ outline, onBack }) {
 
       {outline.commonPitfalls?.length > 0 && (
         <div style={{
-          background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.2)', borderRadius: 12, padding: 16
+          background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.2)', borderRadius: 12, padding: 16, marginBottom: 14
         }}>
           <div style={{ fontSize: 12, fontWeight: 700, color: '#D97706', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Watch Out For</div>
           {outline.commonPitfalls.map((p, i) => (
             <div key={i} style={{ fontSize: 13, color: '#92400E', marginBottom: 6, lineHeight: 1.4 }}>- {p}</div>
+          ))}
+        </div>
+      )}
+
+      {outline.gapsToFillBeforeWriting?.length > 0 && (
+        <div style={{
+          background: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.2)', borderRadius: 12, padding: 16
+        }}>
+          <div style={{ fontSize: 12, fontWeight: 700, color: '#3B61C4', marginBottom: 10, textTransform: 'uppercase', letterSpacing: '0.04em' }}>Look These Up Before Drafting</div>
+          {outline.gapsToFillBeforeWriting.map((g, i) => (
+            <div key={i} style={{ fontSize: 13, color: '#3B61C4', marginBottom: 6, lineHeight: 1.4 }}>- {g}</div>
           ))}
         </div>
       )}
@@ -226,10 +459,20 @@ function OutlineCard({ item, onClick, onDelete }) {
   )
 }
 
-export default function EssayArchitectView({ userId, onShowPaywall }) {
+export default function EssayArchitectView({ userId, onShowPaywall, courses = [], learningStyle = null, yearLevel = null, firstName = null, schoolType = null, assignments = [] }) {
+  // If the user's typed courseName matches one of their real courses, pull
+  // the full context from it. Otherwise send a minimal context so the API
+  // still gets student profile info like learning style + year level.
+  const buildContext = (name) => {
+    const matched = name?.trim()
+      ? courses.find(c => c.name?.trim().toLowerCase() === name.trim().toLowerCase())
+      : null
+    return hydrateCourseContext(matched, { firstName, yearLevel, learningStyle, schoolType, assignments })
+  }
   const [mode, setMode] = useState('hub')
   const [outlines, setOutlines] = useState(loadOutlines)
   const [activeOutline, setActiveOutline] = useState(null)
+  const [draftingSection, setDraftingSection] = useState(null) // { section, index }
   const [topic, setTopic] = useState('')
   const [essayType, setEssayType] = useState('argumentative')
   const [wordCount, setWordCount] = useState(1000)
@@ -250,7 +493,7 @@ export default function EssayArchitectView({ userId, onShowPaywall }) {
       const res = await fetch('/api/essay-thesis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ topic, essayType, wordCount, requirements, courseName, thesis: selectedThesis })
+        body: JSON.stringify({ topic, essayType, wordCount, requirements, courseName, thesis: selectedThesis, courseContext: buildContext(courseName) })
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Something went wrong. Please try again.')
@@ -279,11 +522,15 @@ export default function EssayArchitectView({ userId, onShowPaywall }) {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ topic, essayType, wordCount, requirements, courseName, thesis: selectedThesis })
+        body: JSON.stringify({ topic, essayType, wordCount, requirements, courseName, thesis: selectedThesis, courseContext: buildContext(courseName) })
       })
 
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Failed to generate outline')
+      if (json.needsMoreContext) {
+        setError(json.message || 'Add your assignment prompt so the outline matches your professor\'s actual ask.')
+        return
+      }
 
       incrementAIQuery()
       window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'essayArchitect' } }))
@@ -307,11 +554,31 @@ export default function EssayArchitectView({ userId, onShowPaywall }) {
     }
   }
 
+  if (mode === 'drafting' && activeOutline && draftingSection) {
+    return (
+      <div style={{ maxWidth: 1024, margin: '0 auto', padding: 12 }}>
+        <SectionDraftView
+          section={draftingSection.section}
+          sectionIdx={draftingSection.index}
+          outline={activeOutline.outline}
+          buildContext={buildContext}
+          courseName={courseName || activeOutline.outline?.courseName}
+          requirements={requirements}
+          onBack={() => { setDraftingSection(null); setMode('result') }}
+        />
+      </div>
+    )
+  }
+
   if (mode === 'result' && activeOutline) {
     return (
       <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 16px 40px', animation: 'ea-in 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
         <style>{`@keyframes ea-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-        <OutlineView outline={activeOutline.outline} onBack={() => { setMode('hub'); setActiveOutline(null) }} />
+        <OutlineView
+          outline={activeOutline.outline}
+          onBack={() => { setMode('hub'); setActiveOutline(null) }}
+          onDraftSection={(section, index) => { setDraftingSection({ section, index }); setMode('drafting') }}
+        />
       </div>
     )
   }

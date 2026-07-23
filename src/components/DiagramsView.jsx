@@ -1,7 +1,12 @@
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useMemo } from 'react'
 import Spinner from './ui/spinner'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, hasUsedTrial } from '../lib/subscription'
+import { hydrateCourseContext } from '../lib/courseContext'
+import { pickSmartTopic, pickSmartCourse } from '../lib/smartDefault'
+import { getLastSessionBridge } from '../lib/lastSessionBridge'
+import { updateMastery } from '../lib/masteryStore'
+import { addStudySession } from '../lib/studyHistory'
 import { track } from '../lib/analytics'
 
 // ── Storage ───────────────────────────────────────────────────────────────────
@@ -566,19 +571,303 @@ function EmptyHub({ onCreate }) {
   )
 }
 
+// ── Diagram Practice Mode ─────────────────────────────────────────────────────
+// Turn a static diagram into a recall drill: blank ~30% of the labels and
+// let the student fill them in. Scores by exact + close-match. Feeds mastery.
+
+function collectPracticeSlots(diagram) {
+  // Walk the diagram tree and return every leaf-ish string label as a slot.
+  // We only blank labels — never blank the root/center concept so the
+  // student has an anchor.
+  const slots = []
+  if (!diagram) return slots
+  if (diagram.type === 'mindmap' && Array.isArray(diagram.branches)) {
+    diagram.branches.forEach((b, bi) => {
+      if (Array.isArray(b.children)) {
+        b.children.forEach((c, ci) => slots.push({ id: `mm-${bi}-${ci}`, path: ['branches', bi, 'children', ci], answer: c }))
+      }
+    })
+  } else if (diagram.type === 'flowchart' && Array.isArray(diagram.steps)) {
+    diagram.steps.forEach((s, i) => {
+      if (s.type !== 'start' && s.type !== 'end' && s.label) {
+        slots.push({ id: `fc-${i}`, path: ['steps', i, 'label'], answer: s.label })
+      }
+    })
+  } else if (diagram.type === 'timeline' && Array.isArray(diagram.events)) {
+    diagram.events.forEach((e, i) => {
+      if (e.title) slots.push({ id: `tl-${i}`, path: ['events', i, 'title'], answer: e.title })
+    })
+  } else if (diagram.type === 'comparison' && Array.isArray(diagram.attributes)) {
+    diagram.attributes.forEach((a, ai) => {
+      if (Array.isArray(a.values)) a.values.forEach((v, vi) => slots.push({ id: `cp-${ai}-${vi}`, path: ['attributes', ai, 'values', vi], answer: v }))
+    })
+  } else if (diagram.type === 'hierarchy' && diagram.root) {
+    const walk = (node, path) => {
+      if (Array.isArray(node.children)) {
+        node.children.forEach((child, i) => {
+          if (child.label) slots.push({ id: `h-${[...path, i].join('-')}`, path: [...path, i, 'label'], answer: child.label })
+          walk(child, [...path, i, 'children'])
+        })
+      }
+    }
+    walk(diagram.root, ['root', 'children'])
+  }
+  return slots
+}
+
+function normalizeLabel(s) {
+  return String(s ?? '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+}
+
+function DiagramPractice({ diagram, title, courseId, courseName, onExit }) {
+  const slots = useMemo(() => collectPracticeSlots(diagram), [diagram])
+  const blanks = useMemo(() => {
+    if (!slots.length) return new Set()
+    const target = Math.max(3, Math.min(Math.round(slots.length * 0.30), 12))
+    // Deterministic shuffle by hashing id so re-render doesn't reshuffle.
+    const shuffled = [...slots].sort((a, b) => a.id.localeCompare(b.id))
+    return new Set(shuffled.slice(0, target).map(s => s.id))
+  }, [slots])
+
+  const [inputs, setInputs] = useState({}) // { slotId: string }
+  const [checked, setChecked] = useState(false)
+
+  const graded = useMemo(() => {
+    if (!checked) return []
+    return [...blanks].map(id => {
+      const slot = slots.find(s => s.id === id)
+      if (!slot) return null
+      const student = normalizeLabel(inputs[id] ?? '')
+      const answer = normalizeLabel(slot.answer)
+      const exact = student === answer && student.length > 0
+      const partial = !exact && student.length > 2 && answer.includes(student)
+      return { id, answer: slot.answer, student: inputs[id] ?? '', exact, partial }
+    }).filter(Boolean)
+  }, [checked, inputs, blanks, slots])
+
+  const correctCount = graded.filter(g => g.exact).length
+  const partialCount = graded.filter(g => g.partial).length
+  const scorePct = graded.length ? Math.round(((correctCount + partialCount * 0.5) / graded.length) * 100) : 0
+
+  const handleGrade = useCallback(() => {
+    setChecked(true)
+    const total = blanks.size || 1
+    const filled = Object.values(inputs).filter(v => (v ?? '').trim().length > 0).length
+    const score = Math.round(((correctCount + partialCount * 0.5) / total) * 100)
+    // Only credit mastery if the student actually attempted 2/3 of the blanks
+    if (filled >= total * 0.66 && title) {
+      updateMastery(title, courseId, score, 'diagram_practice')
+      addStudySession({ tool: 'Diagram Practice', score, topic: title, courseName: courseName || null })
+    }
+    track('diagram_practice_graded', { score, filledPct: total ? filled / total : 0, blanks: total })
+  }, [inputs, blanks, correctCount, partialCount, title, courseId, courseName])
+
+  if (slots.length < 3) {
+    return (
+      <div style={{ padding: 20, textAlign: 'center', color: '#6B6B6B', fontSize: 13 }}>
+        This diagram doesn't have enough labels to practice with. Try another.
+        <div style={{ marginTop: 12 }}>
+          <button onClick={onExit} style={{ padding: '8px 16px', border: '1px solid rgba(0,0,0,0.12)', background: '#fff', borderRadius: 8, cursor: 'pointer' }}>Back to diagram</button>
+        </div>
+      </div>
+    )
+  }
+
+  // Render each slot: filled label or blank input. Rest of the tree renders
+  // as static labels so context is preserved.
+  const renderNode = (label, id) => {
+    if (blanks.has(id)) {
+      const g = graded.find(x => x.id === id)
+      const color = g ? (g.exact ? '#16A34A' : g.partial ? '#D97706' : '#DC2626') : '#3B61C4'
+      return (
+        <div style={{ display: 'inline-block', minWidth: 120 }}>
+          <input
+            value={inputs[id] ?? ''}
+            onChange={e => setInputs(prev => ({ ...prev, [id]: e.target.value }))}
+            disabled={checked}
+            placeholder="?"
+            style={{
+              width: '100%', padding: '6px 10px', fontSize: 12.5, fontWeight: 600,
+              border: `1.5px solid ${color}`, borderRadius: 6,
+              background: g && !g.exact ? `${color}0F` : '#fff',
+              color: '#111', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
+            }}
+          />
+          {g && !g.exact && (
+            <div style={{ fontSize: 10.5, color, marginTop: 2, fontWeight: 700 }}>
+              Answer: {g.answer}
+            </div>
+          )}
+        </div>
+      )
+    }
+    return <span>{label}</span>
+  }
+
+  // Compact tree renderer per diagram type — kept text-only for the practice
+  // pass so the input fields are unambiguous.
+  const renderTree = () => {
+    if (diagram.type === 'mindmap') {
+      return (
+        <div>
+          <div style={{ fontSize: 16, fontWeight: 800, color: '#111', marginBottom: 14 }}>{diagram.center}</div>
+          {diagram.branches.map((b, bi) => (
+            <div key={bi} style={{ marginBottom: 14, padding: '10px 12px', borderRadius: 10, background: `${b.color ?? '#3B61C4'}0A`, border: `1px solid ${b.color ?? '#3B61C4'}22` }}>
+              <div style={{ fontSize: 13, fontWeight: 700, color: b.color ?? '#3B61C4', marginBottom: 6 }}>{b.label}</div>
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+                {b.children?.map((c, ci) => (
+                  <div key={ci}>{renderNode(c, `mm-${bi}-${ci}`)}</div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+    if (diagram.type === 'flowchart') {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {diagram.steps.map((s, i) => (
+            <div key={i} style={{ padding: '10px 12px', borderRadius: 10, background: '#fff', border: '1px solid rgba(0,0,0,0.08)' }}>
+              <div style={{ fontSize: 10.5, fontWeight: 700, color: '#9B9B9B', letterSpacing: '0.06em', textTransform: 'uppercase' }}>{s.type}</div>
+              <div style={{ fontSize: 13, color: '#111', marginTop: 4 }}>{renderNode(s.label, `fc-${i}`)}</div>
+            </div>
+          ))}
+        </div>
+      )
+    }
+    if (diagram.type === 'timeline') {
+      return (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+          {diagram.events.map((e, i) => (
+            <div key={i} style={{ padding: '10px 12px', borderRadius: 10, background: '#fff', border: '1px solid rgba(0,0,0,0.08)' }}>
+              <div style={{ fontSize: 11, fontWeight: 700, color: '#3B61C4' }}>{e.period}</div>
+              <div style={{ fontSize: 13, color: '#111', margin: '4px 0 4px' }}>{renderNode(e.title, `tl-${i}`)}</div>
+              {e.description && <div style={{ fontSize: 12, color: '#6B6B6B', lineHeight: 1.45 }}>{e.description}</div>}
+            </div>
+          ))}
+        </div>
+      )
+    }
+    if (diagram.type === 'comparison') {
+      return (
+        <div style={{ overflowX: 'auto' }}>
+          <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 12.5 }}>
+            <thead>
+              <tr>
+                <th style={{ padding: 8, borderBottom: '1px solid rgba(0,0,0,0.08)', textAlign: 'left' }}></th>
+                {diagram.items.map((item, ii) => (
+                  <th key={ii} style={{ padding: 8, borderBottom: '1px solid rgba(0,0,0,0.08)', textAlign: 'left', color: '#3B61C4' }}>{item}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {diagram.attributes.map((a, ai) => (
+                <tr key={ai}>
+                  <td style={{ padding: 8, borderBottom: '1px solid rgba(0,0,0,0.04)', fontWeight: 700, color: '#111' }}>{a.name}</td>
+                  {a.values.map((v, vi) => (
+                    <td key={vi} style={{ padding: 8, borderBottom: '1px solid rgba(0,0,0,0.04)', color: '#111' }}>{renderNode(v, `cp-${ai}-${vi}`)}</td>
+                  ))}
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )
+    }
+    if (diagram.type === 'hierarchy') {
+      const walk = (node, path, depth = 0) => (
+        <div style={{ marginLeft: depth * 16 }}>
+          <div style={{ fontSize: 13, color: '#111', padding: '4px 0' }}>
+            {depth === 0 ? <strong>{node.label}</strong> : renderNode(node.label, `h-${path.join('-')}`)}
+            {node.note && <span style={{ fontSize: 11, color: '#9B9B9B', marginLeft: 6 }}>— {node.note}</span>}
+          </div>
+          {Array.isArray(node.children) && node.children.map((c, i) => walk(c, [...path, i], depth + 1))}
+        </div>
+      )
+      return walk(diagram.root, [], 0)
+    }
+    return null
+  }
+
+  return (
+    <div>
+      <div style={{ padding: 20, background: '#FAFAF9', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 16, marginBottom: 14 }}>
+        {renderTree()}
+      </div>
+
+      {!checked ? (
+        <button
+          onClick={handleGrade}
+          disabled={Object.values(inputs).filter(v => (v ?? '').trim().length > 0).length === 0}
+          style={{
+            width: '100%', padding: '13px',
+            background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 10,
+            fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+            boxShadow: '0 3px 12px rgba(59,97,196,0.35)',
+          }}
+        >
+          Check my answers
+        </button>
+      ) : (
+        <div style={{ padding: 16, borderRadius: 12, background: scorePct >= 70 ? 'rgba(22,163,74,0.05)' : 'rgba(217,119,6,0.05)', border: `1px solid ${scorePct >= 70 ? 'rgba(22,163,74,0.22)' : 'rgba(217,119,6,0.22)'}` }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: scorePct >= 70 ? '#16A34A' : '#D97706', letterSpacing: '0.07em', textTransform: 'uppercase' }}>Practice result</div>
+            <div style={{ fontSize: 22, fontWeight: 800, color: scorePct >= 70 ? '#16A34A' : '#D97706' }}>{scorePct}%</div>
+          </div>
+          <div style={{ fontSize: 13, color: '#111', marginBottom: 10, lineHeight: 1.5 }}>
+            {correctCount} exact · {partialCount} close · {blanks.size - correctCount - partialCount} missed.
+            {title ? ` Mastery on ${title} updated.` : ''}
+          </div>
+          <div style={{ display: 'flex', gap: 8 }}>
+            <button
+              onClick={() => { setInputs({}); setChecked(false) }}
+              style={{ flex: 1, padding: '11px', background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 9, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              Try again (new blanks)
+            </button>
+            <button
+              onClick={onExit}
+              style={{ padding: '11px 16px', background: 'none', border: '1px solid rgba(0,0,0,0.12)', borderRadius: 9, color: '#6B6B6B', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+            >
+              Back to diagram
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
 // ── Main Component ────────────────────────────────────────────────────────────
 
-export default function DiagramsView({ courses, userId, onShowPaywall }) {
+export default function DiagramsView({ courses, userId, onShowPaywall, learningStyle = null, yearLevel = null, firstName = null, schoolType = null, assignments = [] }) {
   const [mode, setMode] = useState('hub')  // 'hub' | 'create' | 'view'
   const [diagrams, setDiagrams] = useState(() => loadDiagrams())
   const [activeDiagram, setActiveDiagram] = useState(null) // { id, title, type, courseName, diagram }
+  const [practicing, setPracticing] = useState(false)
 
   // Create form state
   const [topic, setTopic] = useState('')
   const [diagramType, setDiagramType] = useState('mindmap')
-  const [selectedCourse, setSelectedCourse] = useState(null)
+  const initialSmartCourse = useMemo(() =>
+    courses.length ? pickSmartCourse(courses).index : null
+  , [courses])
+  const [selectedCourse, setSelectedCourse] = useState(initialSmartCourse)
   const [isGenerating, setIsGenerating] = useState(false)
   const [generateError, setGenerateError] = useState('')
+
+  const smart = useMemo(() => {
+    const c = selectedCourse != null ? courses[selectedCourse] : null
+    if (!c) return null
+    const ctx = hydrateCourseContext(c, { firstName, yearLevel, learningStyle, schoolType, assignments })
+    return pickSmartTopic(c, ctx)
+  }, [selectedCourse, courses]) // eslint-disable-line react-hooks/exhaustive-deps
+
+  const bridge = useMemo(() => {
+    const c = selectedCourse != null ? courses[selectedCourse] : null
+    return getLastSessionBridge({ courseId: c?.id ?? null, courseName: c?.name ?? null, currentTool: 'Diagram' })
+  }, [selectedCourse, courses])
 
   const plan = getActivePlan()
   const isPro = plan === 'pro' || plan === 'unlimited' || plan === 'trial'
@@ -616,11 +905,15 @@ export default function DiagramsView({ courses, userId, onShowPaywall }) {
 
     try {
       const token = await getAccessToken()
-      const courseName = selectedCourse !== null ? courses[selectedCourse]?.name : null
+      const course = selectedCourse !== null ? courses[selectedCourse] : null
+      const courseName = course?.name ?? null
+      const courseContext = hydrateCourseContext(course, {
+        firstName, yearLevel, learningStyle, schoolType, assignments,
+      })
       const res = await fetch('/api/generate-diagram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ topic: topic.trim(), diagramType, courseName }),
+        body: JSON.stringify({ topic: topic.trim(), diagramType, courseName, courseContext }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Generation failed')
@@ -781,6 +1074,31 @@ export default function DiagramsView({ courses, userId, onShowPaywall }) {
             New Diagram
           </h1>
         </div>
+
+        {bridge && (
+          <div style={{ marginBottom: 16, padding: '10px 14px', background: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 10 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 700, color: '#3B61C4', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 3 }}>Since your last session</div>
+            <div style={{ fontSize: 12.5, color: '#111', lineHeight: 1.45 }}>{bridge.line}</div>
+          </div>
+        )}
+        {smart?.topic && !topic.trim() && (
+          <div style={{ marginBottom: 24 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 700, color: '#9B9B9B', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 10 }}>Best pick for you right now</div>
+            <div style={{ padding: '18px 20px', background: 'linear-gradient(135deg, rgba(59,97,196,0.08) 0%, rgba(59,97,196,0.02) 100%)', border: '1px solid rgba(59,97,196,0.25)', borderRadius: 14 }}>
+              <div style={{ fontSize: 12, fontWeight: 700, color: '#6B6B6B', marginBottom: 4 }}>{courses[selectedCourse]?.name}</div>
+              <div style={{ fontSize: 18, fontWeight: 800, color: '#111', marginBottom: 4, letterSpacing: -0.3 }}>Diagram {smart.topic}</div>
+              <div style={{ fontSize: 12.5, color: '#6B6B6B', marginBottom: 14 }}>{smart.reason} · rendered as a {DIAGRAM_TYPES.find(d => d.id === diagramType)?.label ?? diagramType}</div>
+              <button
+                onClick={() => { setTopic(smart.topic); setTimeout(() => handleGenerate(), 30) }}
+                disabled={isGenerating}
+                style={{ width: '100%', padding: '13px', background: isGenerating ? '#9B9B9B' : '#3B61C4', border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: isGenerating ? 'default' : 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(59,97,196,0.35)' }}
+              >
+                {isGenerating ? 'Generating…' : `Generate diagram`}
+              </button>
+            </div>
+            <div style={{ fontSize: 12.5, color: '#9B9B9B', textAlign: 'center', marginTop: 10 }}>Or type your own topic below ▾</div>
+          </div>
+        )}
 
         {/* Topic input */}
         <div style={{ marginBottom: 24 }}>
@@ -990,6 +1308,21 @@ export default function DiagramsView({ courses, userId, onShowPaywall }) {
           {/* Actions */}
           <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
             <button
+              onClick={() => setPracticing(p => !p)}
+              title="Practice mode"
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '7px 12px', borderRadius: 9,
+                background: practicing ? '#3B61C4' : 'rgba(59,97,196,0.08)',
+                color: practicing ? '#fff' : '#3B61C4',
+                border: practicing ? 'none' : '1px solid rgba(59,97,196,0.22)',
+                fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
+              }}
+            >
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+              {practicing ? 'Studying' : 'Practice'}
+            </button>
+            <button
               onClick={() => {
                 setTopic(activeDiagram.title)
                 setDiagramType(activeDiagram.type)
@@ -1027,16 +1360,26 @@ export default function DiagramsView({ courses, userId, onShowPaywall }) {
           </div>
         </div>
 
-        {/* Diagram */}
-        <div style={{
-          background: '#FAFAF9',
-          border: '1px solid rgba(0,0,0,0.07)',
-          borderRadius: 16,
-          padding: '28px 24px',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-        }}>
-          <DiagramRenderer diagram={activeDiagram.diagram} />
-        </div>
+        {/* Diagram — or Practice mode */}
+        {practicing ? (
+          <DiagramPractice
+            diagram={activeDiagram.diagram}
+            title={activeDiagram.title}
+            courseName={activeDiagram.courseName}
+            courseId={courses.find(c => c.name === activeDiagram.courseName)?.id ?? null}
+            onExit={() => setPracticing(false)}
+          />
+        ) : (
+          <div style={{
+            background: '#FAFAF9',
+            border: '1px solid rgba(0,0,0,0.07)',
+            borderRadius: 16,
+            padding: '28px 24px',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+          }}>
+            <DiagramRenderer diagram={activeDiagram.diagram} />
+          </div>
+        )}
 
         {/* Create another */}
         <div style={{ marginTop: 20, textAlign: 'center' }}>

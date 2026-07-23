@@ -7,6 +7,7 @@ import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, canUseFeature, incrementFeatureUsage, hasUsedTrial, getActivePlan } from '../lib/subscription'
 import { getCurrentGrade, letterGrade, TARGET_OPTIONS } from '../utils/gradeCalc'
+import { getCoachMicroUpdates, relativeTime as microRelativeTime } from '../lib/coachMicroUpdates'
 import { track } from '../lib/analytics'
 
 // ── DB helpers ────────────────────────────────────────────────────────────────
@@ -656,6 +657,16 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
 
   const showBanner = !hardNoteDismissed && pendingHardNotes?.length > 0
 
+  // Recent adaptations feed — populated by coachMicroUpdates.js after every
+  // study session. Re-read whenever the coach-updated event fires so the
+  // banner is live.
+  const [microUpdates, setMicroUpdates] = useState(() => getCoachMicroUpdates(course?.id ?? null, 3))
+  useEffect(() => {
+    const refresh = () => setMicroUpdates(getCoachMicroUpdates(course?.id ?? null, 3))
+    window.addEventListener('studyedge:coach-micro-updated', refresh)
+    return () => window.removeEventListener('studyedge:coach-micro-updated', refresh)
+  }, [course?.id])
+
   return (
     <div className="sc-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: 24, alignItems: 'flex-start' }}>
       <div>
@@ -665,6 +676,31 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
             onUpdate={handleBannerUpdate}
             onDismiss={handleBannerDismiss}
           />
+        )}
+        {microUpdates.length > 0 && (
+          <div style={{ marginBottom: 16, padding: '14px 16px', background: D.bgCard, border: `1px solid ${D.border}`, borderLeft: `3px solid ${color}`, borderRadius: 10 }}>
+            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.08em', color: D.muted, textTransform: 'uppercase', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
+              <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: color, animation: 'sc-pulse 2s ease-in-out infinite' }} />
+              <span>Recent adaptations</span>
+            </div>
+            <style>{`@keyframes sc-pulse{0%,100%{opacity:1}50%{opacity:0.4}}`}</style>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+              {microUpdates.map((u, i) => (
+                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
+                  <span style={{
+                    fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 6,
+                    flexShrink: 0, minWidth: 44, textAlign: 'center',
+                    color: u.direction === 'up' ? '#16A34A' : u.direction === 'down' ? '#DC2626' : D.muted,
+                    background: u.direction === 'up' ? 'rgba(22,163,74,0.10)' : u.direction === 'down' ? 'rgba(220,38,38,0.10)' : 'rgba(0,0,0,0.05)',
+                    border: `1px solid ${u.direction === 'up' ? 'rgba(22,163,74,0.25)' : u.direction === 'down' ? 'rgba(220,38,38,0.25)' : 'rgba(0,0,0,0.08)'}`,
+                  }}>
+                    {microRelativeTime(u.ts)}
+                  </span>
+                  <div style={{ flex: 1, fontSize: 13, color: D.text, lineHeight: 1.5 }}>{u.line}</div>
+                </div>
+              ))}
+            </div>
+          </div>
         )}
         {onSaveStruggles && (
           <StruggleTracker

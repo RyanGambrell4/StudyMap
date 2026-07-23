@@ -1,8 +1,13 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useMemo } from 'react'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { getCachedStudyTools } from '../lib/db'
 import { addStudySession } from '../lib/studyHistory'
+import { hydrateCourseContext } from '../lib/courseContext'
+import { updateMastery } from '../lib/masteryStore'
+import { pickSmartCourse } from '../lib/smartDefault'
+import { getLastSessionBridge } from '../lib/lastSessionBridge'
+import { addCardsToDeck, cardFromConnectionMiss } from '../lib/deckAdditions'
 import { track } from '../lib/analytics'
 import Spinner from './ui/spinner'
 
@@ -15,11 +20,97 @@ const D = {
 
 const COURSE_COLORS = ['#3B82F6','#6366F1','#059669','#D97706','#EC4899','#0891B2']
 
-export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }) {
+// ── Visual concept-pair diagram ────────────────────────────────────────────
+// Two circles joined by an arrow. In cross-course mode the origin course
+// shows above each node so the bridge is legible. On reveal, the arrow's
+// hover-label carries the ideal relationship the student was supposed to
+// see, making the shape memorable.
+
+const BRIDGE_LABELS = {
+  'cause-effect': 'CAUSE → EFFECT',
+  'sub-category': 'CATEGORY → SUBTYPE',
+  'contrast': 'CONTRAST',
+  'analogous-mechanism': 'ANALOGOUS MECHANISM',
+  'shared-principle': 'SHARED PRINCIPLE',
+  'temporal-sequence': 'BEFORE → AFTER',
+}
+
+function ConnectionDiagram({ conceptA, conceptB, originA, originB, bridgeType, idealAnswer, revealed }) {
+  const D = {
+    node: '#059669', nodeBg: 'rgba(5,150,105,0.08)', nodeBorder: 'rgba(5,150,105,0.30)',
+    arrow: revealed ? '#059669' : '#9B9B9B',
+    text: '#111111', muted: '#6B6B6B',
+  }
+  const bridgeLabel = bridgeType ? BRIDGE_LABELS[bridgeType] ?? bridgeType.toUpperCase() : null
+  const isCross = originA && originB && originA !== originB
+
+  return (
+    <div style={{ background: '#FAFAF9', borderRadius: 14, padding: '20px 16px', border: '1px solid rgba(0,0,0,0.07)' }}>
+      {isCross && (
+        <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.08em', color: '#7C3AED', textTransform: 'uppercase', textAlign: 'center', marginBottom: 12 }}>
+          Cross-course bridge ✦
+        </div>
+      )}
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 90px 1fr', gap: 6, alignItems: 'center' }}>
+        {/* Node A */}
+        <div style={{ textAlign: 'center' }}>
+          {originA && <div style={{ fontSize: 10, fontWeight: 700, color: '#6B6B6B', marginBottom: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{originA}</div>}
+          <div style={{ padding: '12px 10px', borderRadius: 12, background: D.nodeBg, border: `1.5px solid ${D.nodeBorder}`, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: D.text, lineHeight: 1.3 }}>{conceptA}</div>
+          </div>
+        </div>
+
+        {/* Arrow */}
+        <div style={{ textAlign: 'center' }}>
+          {bridgeLabel && (
+            <div style={{ fontSize: 9.5, fontWeight: 700, color: revealed ? '#059669' : '#9B9B9B', marginBottom: 4, letterSpacing: '0.08em' }}>
+              {bridgeLabel}
+            </div>
+          )}
+          <svg width="100%" height="24" viewBox="0 0 80 24" style={{ maxWidth: 90 }}>
+            <line x1="4" y1="12" x2="72" y2="12" stroke={D.arrow} strokeWidth="2" strokeDasharray={revealed ? '0' : '4 3'} />
+            <polygon points="70,6 78,12 70,18" fill={D.arrow} />
+          </svg>
+          {revealed && (
+            <div style={{ fontSize: 10.5, color: '#059669', fontWeight: 700, marginTop: 4 }}>REVEALED</div>
+          )}
+        </div>
+
+        {/* Node B */}
+        <div style={{ textAlign: 'center' }}>
+          {originB && <div style={{ fontSize: 10, fontWeight: 700, color: '#6B6B6B', marginBottom: 4, letterSpacing: '0.06em', textTransform: 'uppercase' }}>{originB}</div>}
+          <div style={{ padding: '12px 10px', borderRadius: 12, background: D.nodeBg, border: `1.5px solid ${D.nodeBorder}`, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <div style={{ fontSize: 13, fontWeight: 700, color: D.text, lineHeight: 1.3 }}>{conceptB}</div>
+          </div>
+        </div>
+      </div>
+
+      {revealed && idealAnswer && (
+        <div style={{ marginTop: 14, padding: '10px 12px', background: 'rgba(5,150,105,0.06)', borderRadius: 10, border: '1px solid rgba(5,150,105,0.22)' }}>
+          <div style={{ fontSize: 10.5, fontWeight: 700, color: '#059669', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 4 }}>The bridge</div>
+          <div style={{ fontSize: 12.5, color: '#111', lineHeight: 1.5 }}>{idealAnswer}</div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, learningStyle = null, yearLevel = null, firstName = null, schoolType = null, assignments = [] }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
-  const [courseIdx, setCourseIdx] = useState(0)
+  const initialSmartCourse = useMemo(() => pickSmartCourse(courses).index, [courses])
+  const [courseIdx, setCourseIdx] = useState(initialSmartCourse)
+  const [showManual, setShowManual] = useState(false)
+  // Cross-course mode is only meaningful when the student actually has 2+
+  // courses to pool from. Otherwise the toggle disappears.
+  const canCrossCourse = courses.length >= 2
+  const [crossCourse, setCrossCourse] = useState(false)
+
+  const bridge = useMemo(() => {
+    const c = courses[courseIdx] ?? null
+    return getLastSessionBridge({ courseId: c?.id ?? null, courseName: c?.name ?? null, currentTool: 'Connections' })
+  }, [courseIdx, courses])
   const [step, setStep] = useState('setup') // setup | generating | cards | scoring | done
   const [connections, setConnections] = useState([])
   const [cardIdx, setCardIdx] = useState(0)
@@ -46,6 +137,17 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
     const cached = getCachedStudyTools()
     const flashcards = cached?.flashcards ?? []
     const concepts = flashcards.map(c => c.front).filter(Boolean)
+    const courseContext = hydrateCourseContext(course, {
+      firstName, yearLevel, learningStyle, schoolType, assignments,
+    })
+    // Cross-course pool: hydrate context for every OTHER course so the API
+    // can pair concepts across the student's whole curriculum. No generic
+    // AI can do this — it needs the same student's other course data.
+    const extraCourseContexts = crossCourse
+      ? courses
+          .filter((_, i) => i !== courseIdx)
+          .map(c => hydrateCourseContext(c, { firstName, yearLevel, learningStyle, schoolType, assignments }))
+      : []
 
     try {
       const token = await getAccessToken()
@@ -56,10 +158,18 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
           phase: 'generate',
           courseName: course?.name ?? 'this course',
           concepts: concepts.length ? concepts : undefined,
+          courseContext,
+          crossCourse,
+          extraCourseContexts,
         }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
+      if (data.needsMoreContext) {
+        setError('Not enough course material yet to make real connections. Add a syllabus or run Study Tools first.')
+        setStep('setup')
+        return
+      }
       incrementAIQuery()
       incrementFeatureUsage('connectionsMode')
       track('connections_generated', { cardCount: data.connections?.length ?? 0, plan, usingFlashcards: concepts.length > 0 })
@@ -81,6 +191,9 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
     setError('')
     try {
       const token = await getAccessToken()
+      const courseContext = hydrateCourseContext(course, {
+        firstName, yearLevel, learningStyle, schoolType, assignments,
+      })
       const res = await fetch('/api/connections-mode', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
@@ -91,11 +204,30 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
           conceptB: current.conceptB,
           question: current.question,
           answer: answer.trim(),
+          courseContext,
         }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
       track('connections_answer_scored', { score: data.score, cardNumber: cardIdx + 1 })
+      // Feed the mastery store so this session actually moves the needle in
+      // the student's other features (cheat sheet ranking, quiz burst focus).
+      if (data.gapTopic) updateMastery(data.gapTopic, course?.id ?? null, data.score ?? 0, 'connections')
+      if (current.conceptA) updateMastery(current.conceptA, course?.id ?? null, data.score ?? 0, 'connections')
+      if (current.conceptB) updateMastery(current.conceptB, course?.id ?? null, data.score ?? 0, 'connections')
+      // Failed connections (<70) auto-add to the deck so the student sees
+      // this same relationship again in flashcard form. Studies show
+      // spaced-repetition on the exact miss is the fastest way to lock it in.
+      if ((data.score ?? 0) < 70) {
+        addCardsToDeck([cardFromConnectionMiss(current, course?.id ?? null, course?.name ?? null)], { courseIdx })
+          .then(({ added }) => {
+            if (added > 0) {
+              track('deck_auto_added', { source: 'connection_miss', count: added })
+              window.dispatchEvent(new CustomEvent('studyedge:deck-updated', { detail: { added, source: 'connection_miss' } }))
+            }
+          })
+          .catch(() => {})
+      }
       const updatedScores = [...scores, data]
       setScores(updatedScores)
       latestScoresRef.current = updatedScores
@@ -181,7 +313,76 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
           {/* Setup */}
           {step === 'setup' && (
             <div style={{ padding: 24 }}>
-              {courses.length > 0 && (
+              {bridge && (
+                <div style={{ marginBottom: 16, padding: '10px 14px', background: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 10 }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, color: '#3B61C4', letterSpacing: '0.06em', textTransform: 'uppercase', marginBottom: 3 }}>Since your last session</div>
+                  <div style={{ fontSize: 12.5, color: D.text, lineHeight: 1.45 }}>{bridge.line}</div>
+                </div>
+              )}
+              {course && !showManual && (
+                <div style={{ marginBottom: 20 }}>
+                  <div style={{ fontSize: 10.5, fontWeight: 700, color: D.textDim, letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 10 }}>Best pick for you right now</div>
+                  <div style={{ padding: '18px 20px', background: 'linear-gradient(135deg, rgba(5,150,105,0.08) 0%, rgba(5,150,105,0.02) 100%)', border: '1px solid rgba(5,150,105,0.25)', borderRadius: 14 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: courseColor }} />
+                      <span style={{ fontSize: 12, fontWeight: 700, color: D.textMuted }}>{course.name}</span>
+                    </div>
+                    <div style={{ fontSize: 18, fontWeight: 800, color: D.text, marginBottom: 4, letterSpacing: -0.3 }}>
+                      {crossCourse ? '5 pairs across all your courses' : '5 concept pairs from this course'}
+                    </div>
+                    <div style={{ fontSize: 12.5, color: D.textMuted, marginBottom: 12 }}>
+                      {crossCourse
+                        ? `Bridges ${course.name} with your ${courses.length - 1} other course${courses.length - 1 === 1 ? '' : 's'}. No generic AI has this.`
+                        : 'Prioritized around your weak topics · you\'ll explain each link, we\'ll score it'}
+                    </div>
+
+                    {canCrossCourse && (
+                      <div style={{ display: 'flex', gap: 6, marginBottom: 14, padding: 3, background: 'rgba(0,0,0,0.04)', borderRadius: 8 }}>
+                        <button
+                          onClick={() => setCrossCourse(false)}
+                          style={{
+                            flex: 1, padding: '7px 8px', borderRadius: 6,
+                            background: !crossCourse ? '#FFFFFF' : 'transparent',
+                            border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                            fontSize: 12, fontWeight: 700,
+                            color: !crossCourse ? D.text : D.textMuted,
+                            boxShadow: !crossCourse ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                          }}
+                        >
+                          In-course
+                        </button>
+                        <button
+                          onClick={() => setCrossCourse(true)}
+                          style={{
+                            flex: 1, padding: '7px 8px', borderRadius: 6,
+                            background: crossCourse ? '#FFFFFF' : 'transparent',
+                            border: 'none', cursor: 'pointer', fontFamily: 'inherit',
+                            fontSize: 12, fontWeight: 700,
+                            color: crossCourse ? D.accent : D.textMuted,
+                            boxShadow: crossCourse ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+                          }}
+                        >
+                          Cross-course ✦
+                        </button>
+                      </div>
+                    )}
+
+                    <button
+                      onClick={generate}
+                      style={{ width: '100%', padding: '13px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(5,150,105,0.35)' }}
+                    >
+                      Find my connections
+                    </button>
+                  </div>
+                  <button
+                    onClick={() => setShowManual(true)}
+                    style={{ marginTop: 12, width: '100%', padding: '8px', fontSize: 12.5, color: D.textDim, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}
+                  >
+                    Or pick a different course ▾
+                  </button>
+                </div>
+              )}
+              {showManual && courses.length > 0 && (
                 <div style={{ marginBottom: 20 }}>
                   <div style={{ fontSize: 11, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 10 }}>Course</div>
                   <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
@@ -199,23 +400,27 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
                 </div>
               )}
 
-              <div style={{ padding: '12px 14px', background: 'rgba(5,150,105,0.05)', borderRadius: 10, border: '1px solid rgba(5,150,105,0.15)', marginBottom: 20 }}>
-                <p style={{ margin: 0, fontSize: 12.5, color: D.textMuted, lineHeight: 1.5 }}>
-                  Generates 5 pairs of related concepts from your course and asks you to explain the connection between them. We score your answer and show you the key relationship.
-                  {getCachedStudyTools()?.flashcards?.length > 0 && (
-                    <span style={{ color: D.accent, fontWeight: 600 }}> Using your {getCachedStudyTools().flashcards.length} saved flashcards.</span>
-                  )}
-                </p>
-              </div>
+              {showManual && (
+                <div style={{ padding: '12px 14px', background: 'rgba(5,150,105,0.05)', borderRadius: 10, border: '1px solid rgba(5,150,105,0.15)', marginBottom: 20 }}>
+                  <p style={{ margin: 0, fontSize: 12.5, color: D.textMuted, lineHeight: 1.5 }}>
+                    Generates 5 pairs of related concepts from your course and asks you to explain the connection between them. We score your answer and show you the key relationship.
+                    {getCachedStudyTools()?.flashcards?.length > 0 && (
+                      <span style={{ color: D.accent, fontWeight: 600 }}> Using your {getCachedStudyTools().flashcards.length} saved flashcards.</span>
+                    )}
+                  </p>
+                </div>
+              )}
 
               {error && <div style={{ fontSize: 13, color: D.red, marginBottom: 16, padding: '10px 14px', background: 'rgba(220,38,38,0.06)', borderRadius: 8 }}>{error}</div>}
 
-              <button
-                onClick={generate}
-                style={{ width: '100%', padding: '13px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(5,150,105,0.35)' }}
-              >
-                Find connections
-              </button>
+              {showManual && (
+                <button
+                  onClick={generate}
+                  style={{ width: '100%', padding: '13px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(5,150,105,0.35)' }}
+                >
+                  Find connections
+                </button>
+              )}
             </div>
           )}
 
@@ -230,17 +435,19 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
           {/* Cards */}
           {step === 'cards' && current && (
             <div style={{ padding: 24 }}>
-              {/* Concept pair */}
-              <div style={{ background: D.bg, borderRadius: 14, padding: '20px', border: `1px solid ${D.border}`, marginBottom: 20, textAlign: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, marginBottom: 10 }}>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: D.text, padding: '5px 12px', borderRadius: 8, background: 'rgba(5,150,105,0.08)', border: '1px solid rgba(5,150,105,0.18)' }}>{current.conceptA}</span>
-                  <svg width="18" height="18" fill="none" stroke={D.textDim} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                    <path d="M8 6l4-4 4 4M16 18l-4 4-4-4M12 2v20"/>
-                  </svg>
-                  <span style={{ fontSize: 14, fontWeight: 700, color: D.text, padding: '5px 12px', borderRadius: 8, background: 'rgba(5,150,105,0.08)', border: '1px solid rgba(5,150,105,0.18)' }}>{current.conceptB}</span>
-                </div>
-                <p style={{ margin: 0, fontSize: 15, fontWeight: 600, color: D.text, lineHeight: 1.5 }}>{current.question}</p>
-              </div>
+              {/* Visual concept pair — two nodes joined by a labeled arrow.
+                  In cross-course mode we tag each node with its origin course
+                  so the student sees the bridge. */}
+              <ConnectionDiagram
+                conceptA={current.conceptA}
+                conceptB={current.conceptB}
+                originA={current.conceptAOrigin}
+                originB={current.conceptBOrigin}
+                bridgeType={current.bridgeType}
+                idealAnswer={null}
+                revealed={false}
+              />
+              <p style={{ margin: '12px 0 20px', fontSize: 15, fontWeight: 600, color: D.text, lineHeight: 1.5, textAlign: 'center' }}>{current.question}</p>
 
               <div style={{ marginBottom: 6 }}>
                 <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 700, color: D.textDim, textTransform: 'uppercase', letterSpacing: '0.07em' }}>Your answer</p>
@@ -282,12 +489,18 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall }
             const sc = scoreColor(latest.score)
             return (
               <div style={{ padding: 24 }}>
-                {/* Concept pair recap */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 16, flexWrap: 'wrap' }}>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: D.text }}>{current.conceptA}</span>
-                  <span style={{ fontSize: 12, color: D.textDim }}>and</span>
-                  <span style={{ fontSize: 13, fontWeight: 700, color: D.text }}>{current.conceptB}</span>
-                </div>
+                {/* Concept pair recap — same visual pattern as the question,
+                    but with the arrow now labeled with the ideal relationship
+                    so the student sees the shape of the answer. */}
+                <ConnectionDiagram
+                  conceptA={current.conceptA}
+                  conceptB={current.conceptB}
+                  originA={current.conceptAOrigin}
+                  originB={current.conceptBOrigin}
+                  bridgeType={current.bridgeType}
+                  idealAnswer={latest.keyRelationship}
+                  revealed={true}
+                />
 
                 {/* Score */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '16px 18px', background: D.bg, borderRadius: 14, border: `1px solid ${D.border}`, marginBottom: 14 }}>
