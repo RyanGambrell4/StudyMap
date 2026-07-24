@@ -32,13 +32,18 @@ export const T = {
   accent:       '#3B61C4',
   accentGlow:   'rgba(59,97,196,0.2)',
   accentSoft:   'rgba(59,97,196,0.08)',
+  onAccent:     '#FFFFFF',   // text/icon color for surfaces filled with `accent`
 
   // Status
   mint:         '#16A34A',   // success / on-track
   orange:       '#E8531A',   // warning / streak (legacy accent in some palettes)
   amber:        '#D97706',   // caution
   pink:         '#DC2626',   // error / negative
+  pinkSoft:     'rgba(220,38,38,0.10)',   // subtle red-tinted surface (urgent chip bg)
   sky:          '#2563EB',   // info
+
+  // Overlay (behind modals)
+  overlay:      'rgba(16,20,28,0.45)',
 
   // Per-course palette (used as fallbacks when a course doesn't carry its own
   // `color.dot`). Six entries to cycle through.

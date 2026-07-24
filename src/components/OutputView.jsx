@@ -17,6 +17,7 @@ import {
   getCachedStudyTools,
 } from '../lib/db'
 import { runAdaptation } from '../utils/adaptationEngine'
+import { crossCreditByTopic, markSessionComplete } from './coach/planStore'
 import AdaptModal from './AdaptModal'
 import FocusMode from './FocusMode'
 import BlueprintScreen from './BlueprintScreen'
@@ -39,6 +40,7 @@ const ProgressView   = lazy(() => import('./ProgressView'))
 const StudyToolsView   = lazy(() => import('./StudyToolsView'))
 const StudyToolsViewV2 = lazy(() => import('./StudyToolsViewV2'))
 const StudyCoachView = lazy(() => import('./StudyCoachView'))
+const CoachRoot      = lazy(() => import('./coach/CoachRoot'))
 const PracticeExamView = lazy(() => import('./PracticeExamView'))
 import AIChatView from './AIChatView'
 const GradeHubView   = lazy(() => import('./GradeHubView'))
@@ -524,6 +526,12 @@ export default function OutputView({
   const [dashboardV2] = useState(() => localStorage.getItem('se_dashboard_v2') !== '0')
   // V2 tools hub — same flag semantics as dashboardV2 so the redesigns ship together.
   const [toolsV2] = useState(() => localStorage.getItem('se_tools_v2') !== '0')
+  // V2 Study Coach — DISABLED by default. Opt-in per user via
+  // `localStorage.se_coach_v2 = '1'`. Flip the default to `!== '0'` (matching
+  // se_dashboard_v2) to release for everyone.
+  const [coachV2] = useState(() => localStorage.getItem('se_coach_v2') === '1')
+  // Bumps after cross-credit fires so CoachRoot re-reads the plan cache.
+  const [coachPlanTick, setCoachPlanTick] = useState(0)
   const [assignments, setAssignments] = useState(() => initialAssignments ?? [])
   const [logGradeId, setLogGradeId] = useState(null)
   const [gradeInput, setGradeInput] = useState('')
@@ -1059,6 +1067,33 @@ export default function OutputView({
         saveCompletedSession(record)
         track('session_completed', { courseId: sess.courseId, courseName: sess.courseName, sessionType: sess.sessionType, studyMethod: sess.studyMethod ?? null, elapsedSeconds: record.elapsedSeconds, recallScore: recallData?.score ?? null })
 
+        // Coach v2 completion routing.
+        //   • Plan-originated session: mark THAT plan session complete.
+        //     Cross-credit MUST NOT run — would double-count against another
+        //     matching session in the same plan.
+        //   • Standalone session: run one idempotent cross-credit scan against
+        //     the plan for `sess.courseId` (topic match, earliest incomplete,
+        //     at most one mark, silent no-op when nothing matches).
+        // Both paths are guarded by the coach v2 flag so v1 behaviour is
+        // untouched when the flag is opted out of.
+        if (coachV2) {
+          (async () => {
+            try {
+              if (sess.planSessionId && sess.planCourseId) {
+                const r = await markSessionComplete(sess.planCourseId, sess.planSessionId)
+                if (r.changed) setCoachPlanTick(t => t + 1)
+              } else {
+                const coachCourseId = courses[sess.courseId]?.id
+                const topic = sess.focusArea || sess.sessionType || sess.topic
+                if (coachCourseId && topic) {
+                  const r = await crossCreditByTopic(coachCourseId, topic)
+                  if (r.credited) setCoachPlanTick(t => t + 1)
+                }
+              }
+            } catch (_) { /* silent — completion succeeds regardless */ }
+          })()
+        }
+
         // First-session email -- fires once per user after their very first session.
         const priorSessions = getCachedCompletedSessions().filter(s => s.id !== record.id)
         if (userId && priorSessions.length === 0) {
@@ -1098,7 +1133,7 @@ export default function OutputView({
       return null
     })
     setActiveBlueprint(null)
-  }, [courses])
+  }, [courses, coachV2])
   const handleFocusStartNext = useCallback((id, _elapsed, nextSess) => {
     setCompletedIds(prev => new Set([...prev, id]))
     setBlueprintSession(nextSess)
@@ -2033,7 +2068,16 @@ export default function OutputView({
         ))}
 
         {/* ── Study Coach ── */}
-        {activeSection === 'coach' && (
+        {activeSection === 'coach' && (coachV2 ? (
+          <CoachRoot
+            courses={courses}
+            assignments={assignments}
+            scheduleHasData={Boolean(schedule?.hoursPerWeek || schedule?.preferredTime)}
+            onEditCourse={onEditCourse}
+            onStartFocus={handleStartFocus}
+            planTick={coachPlanTick}
+          />
+        ) : (
           <StudyCoachView
             courses={courses}
             userId={userId}
@@ -2057,7 +2101,7 @@ export default function OutputView({
             }}
             onOpenReviewQueue={() => setActiveSection('review')}
           />
-        )}
+        ))}
 
         {/* ── Grade Hub / Score Tracker ── */}
         {activeSection === 'grades' && (
