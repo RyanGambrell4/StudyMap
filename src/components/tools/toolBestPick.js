@@ -91,7 +91,14 @@ export function computeBestPick(toolId, courses) {
     const cached = getCachedStudyTools()
     const count = toolId === 'flashcards' ? cached?.flashcards?.length ?? 0 : cached?.quiz?.length ?? 0
     if (count > 0) {
-      return { course, courseIdx, topic: cached?.fileLabel ?? 'Your last set', contextLine: `${count} ${toolId === 'flashcards' ? 'cards' : 'questions'} ready` }
+      const unit = toolId === 'flashcards' ? 'cards' : 'questions'
+      const noun = toolId === 'flashcards' ? 'deck' : 'quiz set'
+      // Topic headline should read like a topic name ("Quadratic equations")
+      // not a raw PDF filename ("02M_Perloff_8008884_02_Micro_C02.pdf").
+      const topic = course?.name ? `Your ${course.name} ${noun}` : `Your ${noun}`
+      const source = prettySourceLabel(cached?.fileLabel)
+      const contextLine = source ? `${count} ${unit} ready · from ${source}` : `${count} ${unit} ready`
+      return { course, courseIdx, topic, contextLine, source: cached?.fileLabel ?? null }
     }
     return { course, courseIdx, topic: '', contextLine: 'No cards yet — upload material first', requiresUpload: true }
   }
@@ -148,4 +155,23 @@ function daysUntilExam(examDate) {
   const target = new Date(examDate + 'T12:00:00').getTime()
   const now = Date.now()
   return Math.ceil((target - now) / 86400000)
+}
+
+// Turn a raw upload filename ("02M_Perloff_8008884_02_Micro_C02.pdf") into a
+// short, human-friendly source label ("Perloff Micro C02") that can sit in
+// a context line without dominating the modal.
+function prettySourceLabel(fileLabel) {
+  if (!fileLabel) return null
+  if (fileLabel === 'Pasted notes') return 'pasted notes'
+  // Strip extension
+  let s = fileLabel.replace(/\.(pdf|docx|pptx|txt|md|mp3|m4a|wav|webm|ogg|aac|flac)$/i, '')
+  // Underscores/hyphens → spaces
+  s = s.replace(/[_\-]+/g, ' ')
+  // Drop long numeric IDs (5+ digit runs) and orphan short numeric runs
+  s = s.replace(/\b\d{5,}\b/g, '').replace(/\b0*\d{1,4}\b(?=\s|$)/g, '').trim()
+  // Collapse whitespace
+  s = s.replace(/\s+/g, ' ').trim()
+  if (!s) return 'your upload'
+  // Truncate for the context line
+  return s.length > 36 ? s.slice(0, 33).trim() + '…' : s
 }
