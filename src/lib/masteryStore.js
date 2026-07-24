@@ -95,6 +95,16 @@ export function getMasterySummary() {
   }
 }
 
+// Average mastery score (0-100) for one course, or all courses if courseId is null.
+// Returns null when no mastery entries exist yet — callers should hide the
+// recall delta line in the results screen in that case.
+export function getAverageMastery(courseId = null) {
+  const items = courseId ? getMasteryForCourse(courseId) : getAllMastery()
+  const scored = items.filter(m => m.score != null)
+  if (!scored.length) return null
+  return Math.round(scored.reduce((s, m) => s + m.score, 0) / scored.length)
+}
+
 // Spaced repetition interval in milliseconds based on mastery score.
 // Weak topics need review sooner; strong topics can wait longer.
 function getReviewInterval(score) {

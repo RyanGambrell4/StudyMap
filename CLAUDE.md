@@ -17,10 +17,31 @@ Read `AGENTS_SPEC.md` before running any agent task. It contains the full app co
 - Loops.so (marketing automation)
 
 ## Design System (non-negotiable)
-- bg `#F7F6F3`, card `#FFFFFF`, border `rgba(0,0,0,0.07)`, accent `#3B61C4`, text `#111111`, muted `#6B6B6B`
+
+**Source of truth: `src/theme/tokens.js`** — import from there, never hard-code hexes in components.
+
+**V2 tokens (current, ship going forward):**
+- `bg` `#F7F8FA` · `card` `#FFFFFF` · `border` `rgba(0,0,0,0.07)`
+- `text` `#1C1B18` · `muted` `#5C5952` · `dim` `#6E6B64`
+- `blue` `#3452D9` (primary CTA) · `blueHov` `#2A43B8` · `blueBg` `rgba(52,82,217,0.08)`
+- `red` `#D64545` (urgency, e.g. Exam Rescue) · `redBg` `rgba(214,69,69,0.08)`
+- `neutral` `#696E78` · `neutralBg` `#EFF1F4` (segmented control track, chip background)
+- `amber` `#8A6A2E` · `amberBg` `rgba(232,177,74,0.18)` · `green` `#10A56E` · `greenBg` `rgba(16,165,110,0.10)`
+- Fonts: `SERIF` = `'Source Serif 4', Georgia, serif` (headlines only), `SANS` = `'Inter', system-ui, sans-serif` (everything else)
+- `COURSE_COLORS`: 6-entry palette of `{dot, halo}` pairs; use `courseColor(idx)` to pick one deterministically per course
+
+**Deprecated V1 tokens (still present in older component files, do NOT introduce in new code):**
+- ~~bg `#F7F6F3` · accent `#3B61C4` · text `#111111` · muted `#6B6B6B`~~
+- Older modals (QuickQuizBurst, BrainDumpModal, TeachItBackModal, etc.) still declare a local `D` object with the old palette. Do not port those values into new components. When touching an older modal for other reasons, migrate its local `D` object to import from `src/theme/tokens.js`.
+
+**Rules:**
 - **Light theme only.** Any `dark:` Tailwind class is a bug.
 - No emojis in UI. No em dashes in copy.
 - Push to `main` = Vercel auto-deploys to getstudyedge.com
+
+**V2 redesign feature flags** (both default ON — set to `'0'` in `localStorage` to opt out):
+- `se_dashboard_v2` → `DashboardViewV2` in the Dashboard section.
+- `se_tools_v2` → `StudyToolsViewV2` in the Study Tools section.
 
 ## Pricing (live source of truth: `PRICING_SPEC.md`)
 - Free / Pro / Unlimited tiers

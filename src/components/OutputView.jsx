@@ -36,7 +36,8 @@ import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, hasUsedTrial, canUseFeature } from '../lib/subscription'
 const CoursesView    = lazy(() => import('./CoursesView'))
 const ProgressView   = lazy(() => import('./ProgressView'))
-const StudyToolsView = lazy(() => import('./StudyToolsView'))
+const StudyToolsView   = lazy(() => import('./StudyToolsView'))
+const StudyToolsViewV2 = lazy(() => import('./StudyToolsViewV2'))
 const StudyCoachView = lazy(() => import('./StudyCoachView'))
 const PracticeExamView = lazy(() => import('./PracticeExamView'))
 import AIChatView from './AIChatView'
@@ -521,6 +522,8 @@ export default function OutputView({
   const isExamMode = courses.some(c => EXAM_PATTERN.test(c.name))
 
   const [dashboardV2] = useState(() => localStorage.getItem('se_dashboard_v2') !== '0')
+  // V2 tools hub — same flag semantics as dashboardV2 so the redesigns ship together.
+  const [toolsV2] = useState(() => localStorage.getItem('se_tools_v2') !== '0')
   const [assignments, setAssignments] = useState(() => initialAssignments ?? [])
   const [logGradeId, setLogGradeId] = useState(null)
   const [gradeInput, setGradeInput] = useState('')
@@ -1987,7 +1990,25 @@ export default function OutputView({
         )}
 
         {/* ── Study Tools ── */}
-        {activeSection === 'tools' && (
+        {activeSection === 'tools' && (toolsV2 ? (
+          <StudyToolsViewV2
+            courses={courses}
+            userId={userId}
+            onShowPaywall={onShowPaywall}
+            learningStyle={learningStyle}
+            onNavigateToCoach={() => { if (getActivePlan() === 'free') { onShowPaywall?.('coach'); return } setActiveSection('coach') }}
+            onOpenCheatSheet={() => setShowCheatSheet(true)}
+            onOpenBrainDump={(preset) => { if (preset?.topic || preset?.courseIdx != null) setBrainDumpInit({ courseIdx: preset.courseIdx ?? 0, topic: preset.topic ?? '' }); setShowBrainDump(true) }}
+            onOpenExamRescue={() => setShowExamRescue(true)}
+            onOpenQuizBurst={(preset) => { if (preset?.topic || preset?.courseIdx != null) setQuizBurstInit({ courseIdx: preset.courseIdx ?? 0, topic: preset.topic ?? '' }); setShowQuizBurst(true) }}
+            onOpenPodcast={() => setShowPodcast(true)}
+            onOpenTeachItBack={(preset) => { if (preset?.topic || preset?.courseIdx != null) setTeachItBackInit({ courseIdx: preset.courseIdx ?? 0, topic: preset.topic ?? '' }); setShowTeachItBack(true) }}
+            onOpenConnectionsMode={() => setShowConnectionsMode(true)}
+            onOpenTimeAttack={() => setShowTimedChallenge(true)}
+            initialDrillTopic={pendingDrillTopic}
+            onDrillTopicConsumed={() => setPendingDrillTopic(null)}
+          />
+        ) : (
           <StudyToolsView
             courses={courses}
             userId={userId}
@@ -2009,7 +2030,7 @@ export default function OutputView({
             initialDrillTopic={pendingDrillTopic}
             onDrillTopicConsumed={() => setPendingDrillTopic(null)}
           />
-        )}
+        ))}
 
         {/* ── Study Coach ── */}
         {activeSection === 'coach' && (
