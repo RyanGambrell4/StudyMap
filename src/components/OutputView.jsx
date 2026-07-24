@@ -526,10 +526,9 @@ export default function OutputView({
   const [dashboardV2] = useState(() => localStorage.getItem('se_dashboard_v2') !== '0')
   // V2 tools hub — same flag semantics as dashboardV2 so the redesigns ship together.
   const [toolsV2] = useState(() => localStorage.getItem('se_tools_v2') !== '0')
-  // V2 Study Coach — DISABLED by default. Opt-in per user via
-  // `localStorage.se_coach_v2 = '1'`. Flip the default to `!== '0'` (matching
-  // se_dashboard_v2) to release for everyone.
-  const [coachV2] = useState(() => localStorage.getItem('se_coach_v2') === '1')
+  // V2 Study Coach — same flag semantics as dashboardV2 so the redesigns
+  // ship together. Opt out per user via `localStorage.se_coach_v2 = '0'`.
+  const [coachV2] = useState(() => localStorage.getItem('se_coach_v2') !== '0')
   // Bumps after cross-credit fires so CoachRoot re-reads the plan cache.
   const [coachPlanTick, setCoachPlanTick] = useState(0)
   const [assignments, setAssignments] = useState(() => initialAssignments ?? [])
