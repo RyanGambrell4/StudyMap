@@ -391,7 +391,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
   return (
     <div role="dialog" aria-modal="true" aria-label="Quick Quiz Burst" style={{
       position: 'fixed', inset: 0, zIndex: 400,
-      background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)',
+      background: 'rgba(28,27,24,0.35)', backdropFilter: 'blur(6px)',
       display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
     }}>
       <div style={{
@@ -400,7 +400,9 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
         boxShadow: '0 24px 64px rgba(0,0,0,0.14)', border: `1px solid ${D.border}`,
         overflow: 'hidden',
         transition: 'background 0.2s ease',
-        background: flash === 'correct' ? 'rgba(22,163,74,0.04)' : flash === 'wrong' ? 'rgba(220,38,38,0.04)' : D.bgCard,
+        // Opaque tinted whites — semi-transparent rgba() here would let the
+        // dark backdrop bleed through the modal card during answer flash.
+        background: flash === 'correct' ? '#F0FDF4' : flash === 'wrong' ? '#FEF2F2' : D.bgCard,
         animation: 'modal-in 260ms cubic-bezier(0.16,1,0.3,1) both',
       }}>
         <style>{`@keyframes modal-in{from{opacity:0;transform:translateY(10px) scale(0.98)}to{opacity:1;transform:translateY(0) scale(1)}} @keyframes spin{to{transform:rotate(360deg)}} @keyframes bar-in{from{width:0}}`}</style>
