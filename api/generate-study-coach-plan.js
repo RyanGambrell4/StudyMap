@@ -1,4 +1,10 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import {
+  ANTI_GUESSING_RULES,
+  NO_STUDENT_CONTENT_DIRECTIVE,
+  isGroundedInStudent,
+  isMethodOnly,
+} from '../lib/server/coachAntiGuessing.js'
 
 // ─── Calendar helpers ────────────────────────────────────────────────────────
 // LLMs are unreliable at calendar math (Monday of week N, weeks-until-exam,
@@ -107,8 +113,24 @@ function buildPhaseMap(totalWeeks) {
 // Force the parsed plan onto the deterministic scaffold so dates, week count,
 // and session count per week are always sound regardless of what the model
 // returned. Content (focusArea, goal, keyTopics, studyMethod) is preserved.
-function repairPlan(plan, scaffold, sessionsPerWeek, sessionMinutes, phaseMap) {
+function repairPlan(plan, scaffold, sessionsPerWeek, sessionMinutes, phaseMap, studentTextBag = '') {
   const incoming = Array.isArray(plan?.weeklyFocus) ? plan.weeklyFocus : []
+  // Per-invocation copy of neutral traps so concurrent requests don't
+  // drain a shared pool.
+  const neutralTraps = [
+    'Cramming without retrieval practice',
+    'Skipping cumulative review across weeks',
+    'Passive rereading instead of active recall',
+  ]
+  // Predicate used to scrub any keyTopics / priorityTopics that the model
+  // invented despite the system prompt. If the term does not appear in the
+  // student's raw text at all AND is not obviously method language, drop it.
+  const passTopic = (t) => {
+    const s = String(t || '').trim()
+    if (!s) return false
+    if (studentTextBag && isGroundedInStudent(s, studentTextBag)) return true
+    return isMethodOnly(s)
+  }
   const weeklyFocus = scaffold.weeks.map((w, i) => {
     const src = incoming[i] || {}
     let sessions = Array.isArray(src.sessions) ? src.sessions.slice(0, sessionsPerWeek) : []
@@ -137,9 +159,20 @@ function repairPlan(plan, scaffold, sessionsPerWeek, sessionMinutes, phaseMap) {
       theme: typeof src.theme === 'string' && src.theme.trim() ? src.theme.trim() : defaultTheme,
       sessions: sessions.map((s, j) => ({
         sessionLabel: s.sessionLabel || `Session ${j + 1}`,
-        focusArea: String(s.focusArea || '').trim() || 'Review priority topic',
+        // Focus area: keep as-is if grounded in student text OR method-only;
+        // otherwise degrade to the neutral "Active recall on this week's material".
+        focusArea: (() => {
+          const raw = String(s.focusArea || '').trim()
+          if (!raw) return 'Active recall on this week\'s material'
+          if (studentTextBag && (isGroundedInStudent(raw, studentTextBag) || isMethodOnly(raw))) return raw
+          if (!studentTextBag && isMethodOnly(raw)) return raw
+          return 'Active recall on this week\'s material'
+        })(),
         goal: String(s.goal || '').trim() || 'Retrieve and apply key concepts',
-        keyTopics: Array.isArray(s.keyTopics) ? s.keyTopics.slice(0, 4).map((t) => String(t).slice(0, 60)) : [],
+        // keyTopics: filter out anything the student never mentioned.
+        keyTopics: Array.isArray(s.keyTopics)
+          ? s.keyTopics.slice(0, 4).map((t) => String(t).slice(0, 60)).filter(passTopic)
+          : [],
         studyMethod: String(s.studyMethod || 'Active recall').trim() || 'Active recall',
         duration: Number.isFinite(Number(s.duration)) ? Number(s.duration) : sessionMinutes,
         ...(s.sessionType ? { sessionType: String(s.sessionType) } : {}),
@@ -150,11 +183,29 @@ function repairPlan(plan, scaffold, sessionsPerWeek, sessionMinutes, phaseMap) {
   return {
     summary: typeof plan?.summary === 'string' ? plan.summary.trim() : '',
     weeklyFocus,
+    // priorityTopics MUST be grounded in student text. If the student named
+    // zero topics, this is empty — better than fabricated. Method-only entries
+    // are dropped too (priorityTopics is for topics, not methods).
     priorityTopics: Array.isArray(plan?.priorityTopics)
-      ? plan.priorityTopics.slice(0, 5).map((t) => String(t).slice(0, 60))
+      ? plan.priorityTopics
+          .slice(0, 5)
+          .map((t) => String(t).slice(0, 60))
+          .filter(t => studentTextBag ? isGroundedInStudent(t, studentTextBag) : false)
       : [],
+    // warningZones are generic study-method traps only. Anything that looks
+    // like subject matter gets replaced with a neutral method trap.
     warningZones: Array.isArray(plan?.warningZones)
-      ? plan.warningZones.slice(0, 3).map((t) => String(t).slice(0, 90))
+      ? plan.warningZones
+          .slice(0, 3)
+          .map((t) => {
+            const raw = String(t).slice(0, 90).trim()
+            if (!raw) return null
+            if (isMethodOnly(raw)) return raw
+            // Not method-like — swap for a neutral trap so we never leak
+            // fabricated subject content into the warning list.
+            return neutralTraps.shift() ?? 'Passive rereading instead of active recall'
+          })
+          .filter(Boolean)
       : [],
   }
 }
@@ -255,10 +306,11 @@ Hard rules you ALWAYS follow:
 - keyTopics: 2–4 specific items, ≤ 4 words each.
 - studyMethod: pick ONE concrete technique per session. Allowed vocabulary: "Active recall", "Spaced retrieval", "Practice problems", "Mixed problem set", "Concept map", "Feynman explanation", "Flashcards", "Worked examples", "Past exam questions", "Timed drill", "Cumulative review", "Mock test", "Test review".
 - sessionType: include one of: "New content", "Retrieval", "Practice", "Cumulative review", "Weak area", "Mock test", "Test review".
-- warningZones: 3 items, ≤ 10 words each - common student traps for this kind of plan.
-- priorityTopics: exactly 5, ≤ 5 words each, ordered by what matters most to hit the goal.
+- warningZones: 3 items, ≤ 10 words each. MUST be generic study-method traps only (e.g., "Cramming without retrieval practice", "Skipping cumulative review", "Passive rereading over active recall"). NEVER subject-specific.
+- priorityTopics: up to 5 items, ≤ 5 words each. Each item MUST appear (case-insensitive) in the student inputs below. Fewer items is better than fabricated items. If the student named zero topics, priorityTopics MUST be an empty array.
+- keyTopics per session: each entry MUST appear (case-insensitive) in the student inputs below. Emit an empty array rather than invent.
 
-If the student did not provide any topics or materials, do NOT invent course-specific subject matter. In that case, focusArea/keyTopics/priorityTopics MUST describe study methods or activities, not invented content (e.g. "Active recall on this week's lecture", "Build flashcards from notes"). It is better to be generic-but-true than specific-but-fabricated.
+${ANTI_GUESSING_RULES}
 
 Return JSON in exactly this shape:
 {
@@ -303,7 +355,7 @@ ${gradeGap != null && gradeGap < 0 ? `GRADE ALERT: student is ${Math.abs(gradeGa
 ${weakAreas?.length ? `Graded components currently below 70%: ${weakAreas.join(', ')}.` : ''}
 ${recallLine}
 
-${ungrounded ? 'NOTE: The student gave no specific topics or course materials. You MUST use generic study-method language, not invented subject matter (see system rule).' : ''}
+${ungrounded ? NO_STUDENT_CONTENT_DIRECTIVE : ''}
 ${courseMaterials ? `Course material the student uploaded (use to ground specific topics; do not exceed the actual content):\n${String(courseMaterials).slice(0, 8000)}` : ''}
 
 WEEK SCAFFOLD - generate exactly one weeklyFocus object per row below, in order, copying startDate and endDate verbatim. In exam mode, the theme must start with the locked phase label.
@@ -352,7 +404,19 @@ Output the JSON now.`
       throw new Error('Could not parse plan JSON: ' + e.message)
     }
 
-    const plan = repairPlan(raw, scaffold, sessionsPerWeek, sessionLen, phaseMap)
+    // Bag of every string the student contributed. Used by repairPlan to
+    // scrub any keyTopics / priorityTopics / focusArea that the model
+    // invented despite the anti-guessing rules.
+    const studentTextBag = [
+      goal,
+      emphasisTopics,
+      courseMaterials,
+      Array.isArray(struggles) ? struggles.join('\n') : struggles,
+      Array.isArray(weakAreas) ? weakAreas.join('\n') : weakAreas,
+      strengths,
+    ].filter(Boolean).join('\n')
+
+    const plan = repairPlan(raw, scaffold, sessionsPerWeek, sessionLen, phaseMap, studentTextBag)
     res.status(200).json(plan)
   } catch (error) {
     console.error('Study coach plan error:', error)

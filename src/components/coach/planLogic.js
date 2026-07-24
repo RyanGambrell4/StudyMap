@@ -1,6 +1,15 @@
 // Coach v2 plan generation, why-lines, trust-line, extra-reps flags,
 // grade-gap logic, and countdown clamping.
 //
+// HARD PRODUCT RULE — enforced at generation time by assertNoGuessing():
+//   Everything the Study Coach shows must come from the student's own
+//   inputs: pasted topic text, extracted text from uploaded PDFs/DOCX/PPTX,
+//   syllabus events, marked struggles, prior recall scores, or completed
+//   session records. The coach must NEVER emit subject-specific content
+//   (subtopics, terminology, chapter names, focus areas) derived from the
+//   course name alone. If the student's inputs are silent on a topic, that
+//   topic does not exist for this plan.
+//
 // Zero-guessing rules (design spec):
 //   • No fabricated data, ever. Fallbacks are UI states, not invented content.
 //   • Session titles come only from the student's input, that course's
@@ -46,6 +55,34 @@ function assertAllowed(toolId) {
     throw new Error(`[coach] toolId "${toolId}" is not in the allowed whitelist`)
   }
   return toolId
+}
+
+// Hard runtime guard for the no-guessing rule. Called at the end of
+// generatePlan. Every session title, topic, and topic-chip name MUST be
+// present (case-insensitive, whitespace-collapsed) in the student's raw
+// input universe. Throws immediately if a violation is found so bugs
+// surface in dev and Sentry-style monitoring instead of being invisibly
+// rendered to a student.
+function assertNoGuessing(v2, studentInputUniverse) {
+  const bag = String(studentInputUniverse || '')
+    .toLowerCase()
+    .replace(/\s+/g, ' ')
+    .trim()
+  if (!bag) {
+    throw new Error('[coach] generatePlan called with no student input; refusing to emit content')
+  }
+  const check = (label, value) => {
+    const v = String(value || '').toLowerCase().replace(/\s+/g, ' ').trim()
+    if (!v) return
+    if (!bag.includes(v)) {
+      throw new Error(`[coach] no-guessing invariant violated: ${label} "${value}" is not present in student inputs`)
+    }
+  }
+  v2.weeks.forEach(w => w.sessions.forEach(s => {
+    check('session.title', s.title)
+    check('session.topic', s.topic)
+  }))
+  v2.topics.forEach(t => check('plan.topics[].name', t.name))
 }
 
 // ── Extra reps + why-lines (Coach-scoped <60 threshold) ───────────────────────
@@ -241,7 +278,7 @@ export function generatePlan(inputs) {
     }
   })
 
-  return {
+  const v2 = {
     version: 2,
     courseId,
     courseName,
@@ -255,6 +292,12 @@ export function generatePlan(inputs) {
     weeks: weeksOut,
     lastRebalancedAt: null,
   }
+  // Runtime enforcement of the no-guessing rule. Universe = every string
+  // the student contributed: raw text + struggle list. If any emitted
+  // title/topic isn't present here, throw before the plan is returned.
+  const studentInputUniverse = [topicsText, ...(struggles || [])].join('\n')
+  assertNoGuessing(v2, studentInputUniverse)
+  return v2
 }
 
 // Split raw student text into unique topic phrases. Lines, semicolons,

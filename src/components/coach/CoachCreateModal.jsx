@@ -12,6 +12,7 @@ import {
 import { saveInitialV2Plan, todayIso } from './planStore'
 import { pickSmartCourse } from '../../lib/smartDefault'
 import { getMasteryForCourse } from '../../lib/masteryStore'
+import { extractText } from '../../utils/extractText'
 
 const LABEL = { fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: T.dim }
 const PILL = {
@@ -72,6 +73,9 @@ export default function CoachCreateModal({
   const [availEditing, setAvailEditing] = useState(false)
 
   const [topicsText, setTopicsText] = useState('')
+  const [uploads, setUploads] = useState([])       // [{ name, size, text, topicsExtracted }]
+  const [uploadError, setUploadError] = useState('')
+  const [uploadLoading, setUploadLoading] = useState(false)
   const [step, setStep] = useState('create')      // 'create' | 'review'
   const [reviewTopics, setReviewTopics] = useState([])  // [{name, extra}]
   const [saving, setSaving] = useState(false)
@@ -85,11 +89,11 @@ export default function CoachCreateModal({
     if (!course) return { uploads: false, practice: false, schedule: false }
     const practiceCount = getMasteryForCourse(course.id).length
     return {
-      uploads: false,
+      uploads: uploads.length > 0,
       practice: practiceCount > 0,
       schedule: !!scheduleHasData,
     }
-  }, [course, scheduleHasData])
+  }, [course, scheduleHasData, uploads.length])
 
   const trustLine = buildTrustLine(trustSignals)
 
@@ -125,11 +129,17 @@ export default function CoachCreateModal({
     }
   }
 
+  // Merge student-typed text with the text extracted from every uploaded
+  // file. Extraction is straight pass-through — extractTopics only splits
+  // and dedupes; it does not invent. Upload text is what the student
+  // literally uploaded, so it counts as student-provided content.
+  const combinedRawText = () => [topicsText, ...uploads.map(u => u.text)].filter(Boolean).join('\n')
+
   const goReview = () => {
     setError('')
-    const topics = extractTopics(topicsText, [])
+    const topics = extractTopics(combinedRawText(), [])
     if (!topics.length) {
-      setError('Add at least one topic so I have something to build around.')
+      setError('Add at least one topic — type them, or upload your syllabus or notes.')
       return
     }
     const flagged = extraRepsTopicsFromRecall(course.id)
@@ -139,6 +149,35 @@ export default function CoachCreateModal({
     })))
     setStep('review')
   }
+
+  // Extract text from a dropped/picked file. Errors surface as a small
+  // inline message; never blocks the modal. Duplicate file names are
+  // deduped.
+  const handleFiles = async (fileList) => {
+    setUploadError('')
+    if (!fileList?.length) return
+    setUploadLoading(true)
+    const next = [...uploads]
+    for (const file of fileList) {
+      if (next.some(u => u.name === file.name && u.size === file.size)) continue
+      try {
+        const text = await extractText(file)
+        // Cap per-file text at 20k chars so a giant PDF doesn't dominate the
+        // topic list. Real syllabi are much smaller than this; the cap is a
+        // safety net, not a content decision.
+        const capped = String(text || '').slice(0, 20000)
+        // Count extracted topic-like lines just for the trust chip display.
+        const topicsExtracted = extractTopics(capped, []).length
+        next.push({ name: file.name, size: file.size, text: capped, topicsExtracted })
+      } catch (err) {
+        setUploadError(err?.message ?? `Could not read ${file.name}.`)
+      }
+    }
+    setUploads(next)
+    setUploadLoading(false)
+  }
+
+  const removeUpload = (name) => setUploads(prev => prev.filter(u => u.name !== name))
 
   const toggleExtra = (i) => {
     setReviewTopics(prev => prev.map((t, j) => j === i ? { ...t, extra: !t.extra } : t))
@@ -158,6 +197,9 @@ export default function CoachCreateModal({
         courseName: course.name,
         examDateIso: examDate || null,
         todayIso: todayIso(),
+        // Feed the reviewed topic list back in as canonical input. Every
+        // session title in the generated plan will be one of these strings
+        // verbatim — no invention, no derivation from course name.
         topicsText: reviewTopics.map(t => t.name).join('\n'),
         struggles,
         daysPerWeek,
@@ -195,7 +237,7 @@ export default function CoachCreateModal({
         sessionLen,
         style: [],
         includeWeekends: true,
-        materials: [],
+        materials: uploads.map(u => ({ name: u.name, size: u.size })),
       }
       await saveInitialV2Plan(course.id, v2, legacyPlan, legacyFormData)
       onPlanSaved?.(course.id, v2)
@@ -245,6 +287,11 @@ export default function CoachCreateModal({
           setAvailEditing={setAvailEditing}
           topicsText={topicsText}
           setTopicsText={setTopicsText}
+          uploads={uploads}
+          uploadError={uploadError}
+          uploadLoading={uploadLoading}
+          onFiles={handleFiles}
+          onRemoveUpload={removeUpload}
           trustLine={trustLine}
           onNext={goReview}
           onClose={onClose}
@@ -411,6 +458,18 @@ function CreateStep(p) {
               lineHeight: 1.5, resize: 'vertical', outline: 'none',
               background: T.bgCard, fontFamily: 'inherit',
             }}
+          />
+        </div>
+
+        {/* Uploads: syllabus / notes / slides. Extracted text feeds topic
+            extraction verbatim — no AI enrichment. */}
+        <div style={{ marginTop: 12 }}>
+          <UploadPicker
+            uploads={p.uploads}
+            loading={p.uploadLoading}
+            error={p.uploadError}
+            onFiles={p.onFiles}
+            onRemove={p.onRemoveUpload}
           />
         </div>
 
@@ -609,4 +668,65 @@ function formatDate(iso) {
   if (!iso) return ''
   const d = new Date(iso + 'T12:00:00')
   return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric' })
+}
+
+function UploadPicker({ uploads, loading, error, onFiles, onRemove }) {
+  return (
+    <div>
+      <label
+        style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          border: `1px dashed ${T.border}`, borderRadius: T.radius.md,
+          padding: '8px 12px', fontSize: 12.5, color: T.muted,
+          cursor: loading ? 'default' : 'pointer',
+          background: T.bgEl,
+          opacity: loading ? 0.7 : 1,
+        }}
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+          <path d="M12 4v12m0 0l-4-4m4 4l4-4M4 20h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
+        {loading ? 'Reading…' : 'Add syllabus or notes'}
+        <input
+          type="file"
+          accept=".pdf,.docx,.pptx"
+          multiple
+          disabled={loading}
+          onChange={(e) => { onFiles([...e.target.files]); e.target.value = '' }}
+          style={{ display: 'none' }}
+        />
+      </label>
+      {uploads.length > 0 && (
+        <div style={{ marginTop: 8, display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+          {uploads.map(u => (
+            <span
+              key={u.name}
+              style={{
+                display: 'inline-flex', alignItems: 'center', gap: 6,
+                background: T.bgCard, border: `1px solid ${T.border}`,
+                borderRadius: T.radius.full, padding: '4px 8px 4px 10px',
+                fontSize: 12, color: T.text,
+              }}
+            >
+              {u.name}
+              <span style={{ fontSize: 10.5, color: T.dim }}>{u.topicsExtracted} topics</span>
+              <button
+                onClick={() => onRemove(u.name)}
+                aria-label={`Remove ${u.name}`}
+                style={{
+                  background: 'none', border: 'none', color: T.dim,
+                  cursor: 'pointer', padding: 0, lineHeight: 1, fontFamily: 'inherit',
+                  fontSize: 14,
+                }}
+              >×</button>
+            </span>
+          ))}
+        </div>
+      )}
+      {error && <div style={{ marginTop: 6, fontSize: 12, color: T.pink }}>{error}</div>}
+      <div style={{ marginTop: 6, fontSize: 11.5, color: T.dim }}>
+        PDF, DOCX, or PPTX. Only what you upload becomes plan content.
+      </div>
+    </div>
+  )
 }

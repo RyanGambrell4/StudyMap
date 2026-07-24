@@ -1358,10 +1358,13 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
         <div style={{ width: w, height: '100%', background: color, borderRadius: 3 }} />
       </div>
     )
+    // Ghost preview is a locked-out visual demo behind the paywall gate.
+    // Every string here must be generic and method-only — no fabricated
+    // subject content, no course names (per the coach anti-guessing rule).
     const fakeWeeks = [
-      { label: 'Week 1–2', title: 'Content Foundation', tasks: ['Read Ch. 1–4', 'Active recall drills', 'Concept mapping'], pct: '100%', color: '#4ade80' },
-      { label: 'Week 3–4', title: 'Practice Problems',  tasks: ['Problem sets A–C', 'Timed quizzes x3', 'Review mistakes'],  pct: '60%',  color: '#6366f1' },
-      { label: 'Week 5–6', title: 'Exam Prep',          tasks: ['Past papers x2', 'Weak-area review', 'Formula sheet'],     pct: '20%',  color: '#f59e0b' },
+      { label: 'Week 1–2', title: 'Foundation', tasks: ['Active recall drills', 'Concept mapping', 'Cumulative review'], pct: '100%', color: '#4ade80' },
+      { label: 'Week 3–4', title: 'Practice',   tasks: ['Timed problem sets', 'Mixed retrieval', 'Review mistakes'],     pct: '60%',  color: '#6366f1' },
+      { label: 'Week 5–6', title: 'Exam prep',  tasks: ['Mock tests', 'Weak-area drills', 'Consolidation notes'],       pct: '20%',  color: '#f59e0b' },
     ]
     return (
       <div style={{ position: 'relative', minHeight: '100vh', background: D.bg, overflow: 'hidden' }}>
@@ -1369,7 +1372,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
         <div style={{ filter: 'blur(3px)', opacity: 0.45, pointerEvents: 'none', userSelect: 'none', padding: '28px 32px' }}>
           <div style={{ marginBottom: 20 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: G.muted, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>8-Week Study Plan</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: G.text, letterSpacing: -0.5, marginBottom: 4 }}>Organic Chemistry · 83% on track</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: G.text, letterSpacing: -0.5, marginBottom: 4 }}>Your course · 83% on track</div>
             <GhostBar w="62%" />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
