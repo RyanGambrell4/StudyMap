@@ -1371,6 +1371,87 @@
         {
             "source": "/study-statistics",
             "destination": "/study-statistics.html"
+        },
+        {
+            "source": "/free-study-tools",
+            "destination": "/free-study-tools.html"
+        },
+        {
+            "source": "/best-study-app-by-university",
+            "destination": "/best-study-app-by-university.html"
+        },
+        {
+            "source": "/best-study-app-by-major",
+            "destination": "/best-study-app-by-major.html"
+        },
+        {
+            "source": "/blog/feynman-technique",
+            "destination": "/blog/feynman-technique.html"
+        },
+        {
+            "source": "/blog/how-to-make-flashcards",
+            "destination": "/blog/how-to-make-flashcards.html"
+        },
+        {
+            "source": "/blog/how-to-read-a-textbook",
+            "destination": "/blog/how-to-read-a-textbook.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-multiple-choice-exams",
+            "destination": "/blog/how-to-study-for-multiple-choice-exams.html"
+        },
+        {
+            "source": "/blog/how-to-study-for-the-bar-exam",
+            "destination": "/blog/how-to-study-for-the-bar-exam.html"
+        },
+        {
+            "source": "/blog/how-to-study-smarter-not-harder",
+            "destination": "/blog/how-to-study-smarter-not-harder.html"
+        },
+        {
+            "source": "/blog/how-to-study-while-working-full-time",
+            "destination": "/blog/how-to-study-while-working-full-time.html"
+        },
+        {
+            "source": "/blog/how-to-study-with-music",
+            "destination": "/blog/how-to-study-with-music.html"
+        },
+        {
+            "source": "/blog/mind-mapping-for-studying",
+            "destination": "/blog/mind-mapping-for-studying.html"
+        },
+        {
+            "source": "/blog/retrieval-practice-vs-rereading",
+            "destination": "/blog/retrieval-practice-vs-rereading.html"
+        },
+        {
+            "source": "/blog/spaced-repetition-study-technique",
+            "destination": "/blog/spaced-repetition-study-technique.html"
+        },
+        {
+            "source": "/blog/study-groups-vs-solo-studying",
+            "destination": "/blog/study-groups-vs-solo-studying.html"
+        },
+        {
+            "source": "/blog/study-myths",
+            "destination": "/blog/study-myths.html"
+        }
+    ],
+    "redirects": [
+        {
+            "source": "/privacy.html",
+            "destination": "/privacy",
+            "permanent": true
+        },
+        {
+            "source": "/studyedge-ai.html",
+            "destination": "/studyedge-ai",
+            "permanent": true
+        },
+        {
+            "source": "/blog/",
+            "destination": "/blog",
+            "permanent": true
         }
     ]
 }
