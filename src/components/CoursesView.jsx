@@ -352,7 +352,7 @@ function ImportBand({ onImportSyllabus }) {
 // ── Add course modal ──────────────────────────────────────────────────────────
 function AddCoursePanel({ courseCount, onClose, onAdd, onStartSyllabusOnboarding }) {
   const todayStr = new Date().toISOString().split('T')[0]
-  const syllabusFlag = typeof localStorage !== 'undefined' && localStorage.getItem('se_syllabus_onboarding') === '1'
+  const syllabusFlag = typeof localStorage !== 'undefined' && localStorage.getItem('se_syllabus_onboarding') !== '0'
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
   const [examDate, setExamDate] = useState('')
@@ -588,7 +588,7 @@ function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, gra
     ? Math.round(loggedGrades.reduce((s, g) => s + g.loggedGrade * g.weight, 0) / loggedGrades.reduce((s, g) => s + g.weight, 0) * 10) / 10
     : null
   const color = course.color?.dot || D.accent
-  const syllabusFlag = typeof localStorage !== 'undefined' && localStorage.getItem('se_syllabus_onboarding') === '1'
+  const syllabusFlag = typeof localStorage !== 'undefined' && localStorage.getItem('se_syllabus_onboarding') !== '0'
   const syllabusFileRef = useRef(null)
   const triggerSyllabusUpload = () => {
     if (syllabusFlag && onStartSyllabusOnboarding) syllabusFileRef.current?.click()

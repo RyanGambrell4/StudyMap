@@ -1004,7 +1004,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       const text = await extractText(file)
       setMaterialText(prev => prev + '\n' + text)
       // Detect syllabus-like documents — only when flag is on
-      const syllabusFlag = typeof localStorage !== 'undefined' && localStorage.getItem('se_syllabus_onboarding') === '1'
+      const syllabusFlag = typeof localStorage !== 'undefined' && localStorage.getItem('se_syllabus_onboarding') !== '0'
       if (syllabusFlag && onStartSyllabusOnboarding) {
         const lower = text.toLowerCase()
         const syllabusSignals = ['course syllabus', 'grading policy', 'office hours', 'course schedule', 'learning objectives', 'exam date', 'midterm', 'final exam', 'due date', 'assignment weight', 'grade breakdown', 'credit hours']

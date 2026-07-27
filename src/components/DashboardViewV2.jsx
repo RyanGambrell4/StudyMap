@@ -881,7 +881,7 @@ export default function DashboardViewV2({
 
   // Hero mode
   const isNewUser = courses.length === 0
-  const syllabusOnboardingFlag = typeof localStorage !== 'undefined' && localStorage.getItem('se_syllabus_onboarding') === '1'
+  const syllabusOnboardingFlag = typeof localStorage !== 'undefined' && localStorage.getItem('se_syllabus_onboarding') !== '0'
   const [showManualSetup, setShowManualSetup] = useState(false)
   const doneForToday = useMemo(() => {
     if (isNewUser) return false
