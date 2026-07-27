@@ -846,6 +846,8 @@ export default function DashboardViewV2({
   syllabusOnboardingLoading,
   syllabusOnboardingError,
   onClearSyllabusError,
+  syllabusRegistryWarning,
+  onClearRegistryWarning,
 }) {
   // Inject Source Serif 4 font once
   useEffect(() => {
@@ -1040,6 +1042,16 @@ export default function DashboardViewV2({
           </div>
           <div style={{ fontSize: 14.5, color: T.muted, marginTop: 12 }}>{subline}</div>
         </div>
+
+        {/* Registry write warning — shown when syllabus onboarding completed but file couldn't be saved to materials */}
+        {syllabusRegistryWarning && (
+          <div style={{ padding: '10px 14px', borderRadius: 10, background: 'rgba(138,106,46,0.08)', border: `1px solid rgba(138,106,46,0.2)`, fontSize: 13, color: T.amber, display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+            <span style={{ flex: 1 }}>Your syllabus could not be saved to your materials library. Your course and dates are set up. You can re-upload the file from the Courses tab.</span>
+            <button onClick={onClearRegistryWarning} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T.muted, padding: 0, lineHeight: 1, flexShrink: 0 }}>
+              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+          </div>
+        )}
 
         {/* Exam banner (≤7 days, normal state only) */}
         {examBannerCourse && !isNewUser && (

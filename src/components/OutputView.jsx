@@ -23,6 +23,7 @@ import FocusMode from './FocusMode'
 import BlueprintScreen from './BlueprintScreen'
 import SyllabusUploadModal from './SyllabusUploadModal'
 import SyllabusOnboardingModal from './SyllabusOnboardingModal'
+import { addUpload } from '../lib/uploadRegistry'
 import CalendarMonthView from './CalendarMonthView'
 import CalendarDayView from './CalendarDayView'
 import CalendarWeekView from './CalendarWeekView'
@@ -533,8 +534,10 @@ export default function OutputView({
   // Syllabus onboarding (parse-syllabus flow)
   const [syllabusOnboardingData, setSyllabusOnboardingData] = useState(null)
   const [syllabusOnboardingScopeIdx, setSyllabusOnboardingScopeIdx] = useState(null)
+  const [syllabusOnboardingFile, setSyllabusOnboardingFile] = useState(null)
   const [syllabusOnboardingLoading, setSyllabusOnboardingLoading] = useState(false)
   const [syllabusOnboardingError, setSyllabusOnboardingError] = useState('')
+  const [syllabusRegistryWarning, setSyllabusRegistryWarning] = useState(false)
 
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('studyedge_view_mode') ?? 'week')
   const todayStr = new Date().toISOString().split('T')[0]
@@ -1176,6 +1179,7 @@ export default function OutputView({
     setSyllabusOnboardingError('')
     setSyllabusOnboardingLoading(true)
     setSyllabusOnboardingScopeIdx(courseIdx)
+    setSyllabusOnboardingFile(file)
     try {
       const { extractText } = await import('../utils/extractText')
       const text = await extractText(file)
@@ -1233,7 +1237,6 @@ export default function OutputView({
           ? { ...course.classSchedule, syllabusExtracted: result.classMeetings }
           : course.classSchedule,
       }
-      onEditCourse(courseIdx, courseObj)
     } else {
       // Creating a new course
       const colorDot = COURSE_COLORS[courses.length % COURSE_COLORS.length]
@@ -1252,9 +1255,30 @@ export default function OutputView({
           ? { syllabusExtracted: result.classMeetings }
           : undefined,
       }
-      onAddCourse(courseObj)
       courseIdx = courses.length  // new course will be appended
       course = courseObj
+    }
+
+    // Registry write: store the syllabus file BEFORE the fan-out so re-upload
+    // diffing has the original. uploadId is stored on the course for later diff.
+    // Non-blocking: a failure shows a warning but does not abort course setup.
+    let syllabusUploadId = null
+    if (syllabusOnboardingFile) {
+      try {
+        const upload = await addUpload(courseObj.id, syllabusOnboardingFile, { kind: 'syllabus' })
+        syllabusUploadId = upload?.id ?? null
+      } catch (err) {
+        console.warn('[syllabus-onboarding] registry write failed:', err)
+        setSyllabusRegistryWarning(true)
+      }
+    }
+    if (syllabusUploadId) courseObj = { ...courseObj, syllabusUploadId }
+
+    // Save the course now that the registry write has been attempted
+    if (syllabusOnboardingScopeIdx !== null && courses[syllabusOnboardingScopeIdx]) {
+      onEditCourse(syllabusOnboardingScopeIdx, courseObj)
+    } else {
+      onAddCourse(courseObj)
     }
 
     // Save confirmed dates as syllabus events (deduplicate by date+name)
@@ -1344,11 +1368,13 @@ export default function OutputView({
 
     setSyllabusOnboardingData(null)
     setSyllabusOnboardingScopeIdx(null)
+    setSyllabusOnboardingFile(null)
     track('syllabus_onboarding_completed', {
       skipPlan,
       examCount: result.exams?.length ?? 0,
       topicCount: result.topics?.length ?? 0,
       hasGrading: (result.gradeComponents?.length ?? 0) > 0,
+      registryWriteOk: !!syllabusUploadId,
     })
     setActiveSection('dashboard')
   }
@@ -1822,6 +1848,8 @@ export default function OutputView({
             syllabusOnboardingLoading={syllabusOnboardingLoading}
             syllabusOnboardingError={syllabusOnboardingError}
             onClearSyllabusError={() => setSyllabusOnboardingError('')}
+            syllabusRegistryWarning={syllabusRegistryWarning}
+            onClearRegistryWarning={() => setSyllabusRegistryWarning(false)}
           />
         ) : (
           <DashboardView
