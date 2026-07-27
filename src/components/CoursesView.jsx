@@ -352,6 +352,7 @@ function ImportBand({ onImportSyllabus }) {
 // ── Add course modal ──────────────────────────────────────────────────────────
 function AddCoursePanel({ courseCount, onClose, onAdd, onStartSyllabusOnboarding }) {
   const todayStr = new Date().toISOString().split('T')[0]
+  const syllabusFlag = typeof localStorage !== 'undefined' && localStorage.getItem('se_syllabus_onboarding') === '1'
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
   const [examDate, setExamDate] = useState('')
@@ -431,42 +432,40 @@ function AddCoursePanel({ courseCount, onClose, onAdd, onStartSyllabusOnboarding
             <div><Label>Target grade</Label><SegmentedControl options={GRADE_OPTIONS} value={targetGrade} onChange={setTargetGrade} /></div>
           </div>
 
-          {/* Import syllabus */}
-          <input
-            ref={syllabusRef}
-            type="file"
-            accept=".pdf,.docx,.pptx"
-            style={{ display: 'none' }}
-            onChange={e => {
-              const file = e.target.files[0]
-              if (!file) return
-              if (onStartSyllabusOnboarding) {
-                onClose()
-                onStartSyllabusOnboarding(file, null)
-              } else {
-                setSyllabusFile(file)
-              }
-            }}
-          />
-          <AddonToggle
-            active={syllabusOpen}
-            onToggle={() => { setSyllabusOpen(x => !x); if (syllabusFile && syllabusOpen) setSyllabusFile(null) }}
-            icon="file" color="#6366f1"
-            title="Import syllabus"
-            subtitle="Upload a PDF and I'll extract dates, topics, and weights"
-          >
-            {syllabusOpen && (
-              <div style={{ padding: '12px 14px 14px', borderTop: `1px solid ${D.border}`, display: 'flex', flexDirection: 'column', gap: 10 }}>
-                <button onClick={() => syllabusRef.current?.click()} style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(232,83,26,0.08)', border: '1px solid rgba(232,83,26,0.25)', color: D.text, fontSize: 13, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
-                  <Icon name="upload" size={14} color={D.indigo} />
-                  {syllabusFile ? syllabusFile.name : 'Choose file (PDF, DOCX, or PPTX)'}
-                </button>
-                {onStartSyllabusOnboarding && (
-                  <div style={{ fontSize: 11.5, color: D.dim }}>Uploading a syllabus skips manual setup and fills in your course automatically.</div>
+          {/* Import syllabus — only shown when se_syllabus_onboarding flag is on */}
+          {syllabusFlag && onStartSyllabusOnboarding && (
+            <>
+              <input
+                ref={syllabusRef}
+                type="file"
+                accept=".pdf,.docx,.pptx"
+                style={{ display: 'none' }}
+                onChange={e => {
+                  const file = e.target.files[0]
+                  if (!file) return
+                  onClose()
+                  onStartSyllabusOnboarding(file, null)
+                }}
+              />
+              <AddonToggle
+                active={syllabusOpen}
+                onToggle={() => { setSyllabusOpen(x => !x); if (syllabusFile && syllabusOpen) setSyllabusFile(null) }}
+                icon="file" color="#6366f1"
+                title="Import syllabus"
+                subtitle="Upload a PDF and I'll extract dates, topics, and weights"
+              >
+                {syllabusOpen && (
+                  <div style={{ padding: '12px 14px 14px', borderTop: `1px solid ${D.border}`, display: 'flex', flexDirection: 'column', gap: 10 }}>
+                    <button onClick={() => syllabusRef.current?.click()} style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(232,83,26,0.08)', border: '1px solid rgba(232,83,26,0.25)', color: D.text, fontSize: 13, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                      <Icon name="upload" size={14} color={D.indigo} />
+                      {syllabusFile ? syllabusFile.name : 'Choose file (PDF, DOCX, or PPTX)'}
+                    </button>
+                    <div style={{ fontSize: 11.5, color: D.dim }}>Uploading a syllabus skips manual setup and fills in your course automatically.</div>
+                  </div>
                 )}
-              </div>
-            )}
-          </AddonToggle>
+              </AddonToggle>
+            </>
+          )}
 
           {/* Class schedule */}
           <ClassScheduleSection value={classSchedule} onChange={setClassSchedule} />
@@ -589,9 +588,10 @@ function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, gra
     ? Math.round(loggedGrades.reduce((s, g) => s + g.loggedGrade * g.weight, 0) / loggedGrades.reduce((s, g) => s + g.weight, 0) * 10) / 10
     : null
   const color = course.color?.dot || D.accent
+  const syllabusFlag = typeof localStorage !== 'undefined' && localStorage.getItem('se_syllabus_onboarding') === '1'
   const syllabusFileRef = useRef(null)
   const triggerSyllabusUpload = () => {
-    if (onStartSyllabusOnboarding) syllabusFileRef.current?.click()
+    if (syllabusFlag && onStartSyllabusOnboarding) syllabusFileRef.current?.click()
     else onImportSyllabus?.(idx)
   }
 
@@ -625,8 +625,8 @@ function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, gra
         </Section>
       )}
 
-      {/* Hidden file input for syllabus onboarding */}
-      {onStartSyllabusOnboarding && (
+      {/* Hidden file input for syllabus onboarding — only mounted when flag is on */}
+      {syllabusFlag && onStartSyllabusOnboarding && (
         <input
           ref={syllabusFileRef}
           type="file"
