@@ -87,11 +87,23 @@ const PRICE_TO_PLAN = {
 }
 
 // ── PostHog server-side capture ──────────────────────────────────────────────
-// Fires events from this server (e.g. checkout_success) so funnel data isn't
-// lost when the browser navigates away before posthog-js can flush.
+// Fires events from this server so funnel data isn't lost when the browser
+// navigates away before posthog-js can flush.
+//
+// Requires POSTHOG_API_KEY (plain runtime env var, NOT VITE_POSTHOG_KEY).
+// VITE_POSTHOG_KEY is a build-time Vite replacement — process.env.VITE_POSTHOG_KEY
+// is undefined at Vercel function runtime. Set POSTHOG_API_KEY = phc_... in
+// Vercel project settings → Environment Variables → all environments.
 async function posthogCapture(event, distinctId, properties = {}) {
-  const key = process.env.POSTHOG_API_KEY || process.env.VITE_POSTHOG_KEY
-  if (!key || !distinctId) return
+  const key = process.env.POSTHOG_API_KEY
+  if (!key) {
+    console.error('[posthog] POSTHOG_API_KEY is not set — server-side analytics are being silently dropped. Add POSTHOG_API_KEY to Vercel environment variables.')
+    return
+  }
+  if (!distinctId) {
+    console.warn('[posthog] posthogCapture called without distinctId — event dropped:', event)
+    return
+  }
   const host = process.env.POSTHOG_HOST || 'https://us.i.posthog.com'
   try {
     await fetch(`${host}/i/v0/e/`, {
@@ -642,6 +654,31 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
       return res.status(200).json({ received: true })
     }
 
+    // ── checkout.session.completed ──────────────────────────────────────────
+    // Fires when the user completes the Stripe Checkout form (card entered, submitted).
+    // Subscription events follow asynchronously. This handler exists to capture
+    // one-time/non-subscription flows if they're ever added, and to give an early
+    // signal that a real checkout (not just a button click) completed on Stripe's side.
+    if (event.type === 'checkout.session.completed') {
+      const completedSession = event.data.object
+      const userId = completedSession.metadata?.user_id
+      const wasTrial = completedSession.metadata?.trial === '1'
+      if (userId) {
+        await posthogCapture('checkout_session_completed', userId, {
+          stripe_session_id: completedSession.id,
+          is_trial: wasTrial,
+          payment_status: completedSession.payment_status,
+          amount_total: completedSession.amount_total,
+          currency: completedSession.currency?.toUpperCase() ?? 'USD',
+        })
+      }
+      await supabaseAdmin
+        .from('stripe_idempotency')
+        .insert({ event_id: eventId, processed_at: new Date().toISOString() })
+        .then(({ error }) => { if (error) console.error('[stripe] Failed to record checkout.session.completed event', error) })
+      return res.status(200).json({ received: true })
+    }
+
     if (
       event.type === 'customer.subscription.created' ||
       event.type === 'customer.subscription.updated' ||
@@ -892,6 +929,37 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
           if (authUser?.user?.email) {
             await sendTrialStartedEmail(authUser.user.email, sub.trial_end ?? null)
           }
+        }
+
+        // ── subscription_activated — single source of truth for conversion ────
+        // Fires on customer.subscription.created for both trials and direct-paid signups.
+        // Use this event in PostHog funnels instead of checkout_success / trial_activated
+        // to get one clean count of "someone activated a subscription."
+        // Also includes first_touch attribution data if it was saved to user_data at signup.
+        if (event.type === 'customer.subscription.created') {
+          const firstTouch = existing?.subscription?.first_touch ?? null
+          await posthogCapture('subscription_activated', userId, {
+            plan: planInfo.plan,
+            billing_period: planInfo.billingPeriod,
+            is_trial: sub.status === 'trialing',
+            stripe_sub_id: sub.id,
+            ...(sub.status === 'active' && revenueDollars !== null && {
+              $revenue: revenueDollars,
+              $revenue_currency: revenueCurrency,
+            }),
+            ...(sub.status === 'trialing' && revenueDollars !== null && {
+              expected_revenue: revenueDollars,
+              revenue_currency: revenueCurrency,
+            }),
+            ...(firstTouch && {
+              initial_source_referrer: firstTouch.referrer,
+              initial_source_referring_domain: firstTouch.referring_domain,
+              initial_source_utm_source: firstTouch.utm_source,
+              initial_source_utm_medium: firstTouch.utm_medium,
+              initial_source_utm_campaign: firstTouch.utm_campaign,
+              initial_source_landing_path: firstTouch.landing_path,
+            }),
+          })
         }
       } catch (err) {
         console.error('[stripe webhook] DB error:', err)
@@ -1180,9 +1248,25 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
       cancel_url: 'https://getstudyedge.com/app?checkout=cancelled',
     })
 
+    // checkout_started fires here — after the Stripe session actually exists.
+    // Client fires checkout_button_clicked on CTA click; this is the honest conversion signal.
+    if (userId) {
+      posthogCapture('checkout_started', userId, {
+        plan,
+        billing_period: billingPeriod,
+        is_trial: wantsTrial,
+        stripe_session_id: session.id,
+      }).catch(() => {})
+    }
+
     return res.status(200).json({ url: session.url })
   } catch (err) {
     console.error('[stripe checkout] Error:', err)
-    return res.status(500).json({ error: 'Failed to create checkout session' })
+    return res.status(500).json({
+      error: 'Failed to create checkout session',
+      stripe_error_code: err.code ?? null,
+      stripe_error_type: err.type ?? null,
+      stripe_decline_code: err.decline_code ?? null,
+    })
   }
 }

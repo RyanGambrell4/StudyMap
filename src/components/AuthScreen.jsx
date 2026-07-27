@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
+import { getFirstTouch } from '../lib/firstTouch'
 
 export default function AuthScreen({ initialMode, onBack }) {
   const isMobile = window.innerWidth <= 767
@@ -86,6 +87,14 @@ export default function AuthScreen({ initialMode, onBack }) {
         if (plan === 'pro' || plan === 'unlimited') preserve.set('plan', plan)
         if (['weekly', 'monthly', 'yearly', 'semester'].includes(billing)) preserve.set('billing', billing)
         if (trial === '1') preserve.set('trial', '1')
+        // Thread first-touch UTMs through the confirmation link so they survive email
+        // round-trips where the link opens in a different browser or email client WebView.
+        // These land back in the URL when the user clicks the link, and App.jsx's
+        // captureFirstTouch() / registerOnce() picks them up if no cookie exists yet.
+        const ft = getFirstTouch()
+        if (ft?.utm_source) preserve.set('utm_source', ft.utm_source)
+        if (ft?.utm_medium) preserve.set('utm_medium', ft.utm_medium)
+        if (ft?.utm_campaign) preserve.set('utm_campaign', ft.utm_campaign)
         const qs = preserve.toString()
         const emailRedirectTo = `${window.location.origin}/app${qs ? '?' + qs : ''}`
 
