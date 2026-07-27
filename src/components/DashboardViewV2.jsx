@@ -4,7 +4,37 @@ import { getWeeklyGoal, computeWeeklyProgress } from '../lib/weeklyGoal'
 import { getMasteryForCourse, getDueForReview } from '../lib/masteryStore'
 import { daysBetween } from '../utils/dateUtils'
 import { track } from '../lib/analytics'
-import { T, SERIF, SANS, COURSE_COLORS, courseColor } from '../theme/tokens'
+
+// ── Design tokens (from handoff doc — do not deviate) ─────────────────────────
+const T = {
+  bg:        '#F7F8FA',
+  card:      '#FFFFFF',
+  border:    'rgba(0,0,0,0.07)',
+  text:      '#1C1B18',
+  muted:     '#5C5952',
+  dim:       '#6E6B64',
+  blue:      '#3452D9',
+  blueHov:   '#2A43B8',
+  red:       '#D64545',
+  redBg:     'rgba(214,69,69,0.08)',
+  amber:     '#8A6A2E',
+  amberBg:   'rgba(232,177,74,0.18)',
+  neutral:   '#696E78',
+  neutralBg: '#EFF1F4',
+}
+
+const SERIF = "'Source Serif 4', Georgia, serif"
+const SANS  = "'Inter', system-ui, sans-serif"
+
+const COURSE_COLORS = [
+  { dot: '#8B5CF6', halo: 'rgba(139,92,246,0.15)' },
+  { dot: '#10A56E', halo: 'rgba(16,165,110,0.15)' },
+  { dot: '#3B62E8', halo: 'rgba(59,98,232,0.15)' },
+  { dot: '#F59E0B', halo: 'rgba(245,158,11,0.15)' },
+  { dot: '#EC4899', halo: 'rgba(236,72,153,0.15)' },
+  { dot: '#0891B2', halo: 'rgba(8,145,178,0.15)' },
+]
+const courseColor = (idx) => COURSE_COLORS[idx % COURSE_COLORS.length]
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function greeting() {
@@ -318,6 +348,97 @@ function HeroDone({ streak, weeklyMinutes, weeklyGoalHours, nextSession }) {
   )
 }
 
+// ── Hero: Syllabus drop (flag: se_syllabus_onboarding) ───────────────────────
+function HeroSyllabusDrop({ onDropSyllabus, loading, error, onClearError, onSetupManually }) {
+  const [dragging, setDragging] = useState(false)
+  const fileRef = { current: null }
+  const inputRef = (el) => { fileRef.current = el }
+
+  const handleFile = (file) => {
+    if (!file) return
+    const ext = file.name.split('.').pop().toLowerCase()
+    if (!['pdf', 'docx', 'pptx'].includes(ext)) {
+      return
+    }
+    onDropSyllabus?.(file)
+  }
+
+  const handleDrop = (e) => {
+    e.preventDefault()
+    setDragging(false)
+    handleFile(e.dataTransfer.files?.[0])
+  }
+
+  return (
+    <div style={{ background: T.card, border: `1px solid ${T.border}`, borderRadius: 16, padding: '36px 40px', boxShadow: '0 12px 32px rgba(23,30,55,0.10),0 4px 12px rgba(23,30,55,0.06)' }}>
+      <div style={{ fontFamily: SERIF, fontSize: 22, fontWeight: 500, lineHeight: 1.25, marginBottom: 8 }}>
+        Drop your syllabus and I'll set everything up.
+      </div>
+      <div style={{ fontSize: 14, color: T.muted, marginBottom: 24, lineHeight: 1.5 }}>
+        Dates, topics, and a first study plan, all from one file.
+      </div>
+
+      {error && (
+        <div style={{ marginBottom: 16, padding: '10px 14px', borderRadius: 10, background: 'rgba(214,69,69,0.08)', border: '1px solid rgba(214,69,69,0.2)', fontSize: 13, color: T.red, display: 'flex', alignItems: 'flex-start', gap: 8 }}>
+          <span style={{ flex: 1 }}>{error}</span>
+          <button onClick={onClearError} style={{ background: 'none', border: 'none', cursor: 'pointer', color: T.muted, padding: 0, lineHeight: 1 }}>
+            <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+          </button>
+        </div>
+      )}
+
+      <div
+        onDrop={handleDrop}
+        onDragOver={e => { e.preventDefault(); setDragging(true) }}
+        onDragLeave={() => setDragging(false)}
+        onClick={() => !loading && fileRef.current?.click()}
+        style={{
+          display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 12,
+          padding: '36px 24px', borderRadius: 14,
+          border: `2px dashed ${dragging ? T.blue : 'rgba(0,0,0,0.14)'}`,
+          background: dragging ? 'rgba(52,82,217,0.04)' : '#FAFAF8',
+          cursor: loading ? 'default' : 'pointer',
+          transition: 'border-color 0.15s, background 0.15s',
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="file"
+          accept=".pdf,.docx,.pptx"
+          style={{ display: 'none' }}
+          onChange={e => handleFile(e.target.files?.[0])}
+        />
+        {loading ? (
+          <>
+            <div style={{ width: 28, height: 28, borderRadius: '50%', border: `3px solid ${T.blue}`, borderTopColor: 'transparent', animation: 'spin 0.8s linear infinite' }} />
+            <div style={{ fontSize: 14, color: T.blue, fontWeight: 600 }}>Reading your syllabus...</div>
+            <style>{`@keyframes spin{to{transform:rotate(360deg)}}`}</style>
+          </>
+        ) : (
+          <>
+            <div style={{ width: 48, height: 48, borderRadius: 14, background: dragging ? 'rgba(52,82,217,0.1)' : 'rgba(0,0,0,0.05)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="24" height="24" fill="none" stroke={dragging ? T.blue : '#9B9B9B'} strokeWidth={1.5} viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: 14.5, fontWeight: 600, color: dragging ? T.blue : T.text }}>{dragging ? 'Drop to upload' : 'Drop your syllabus here'}</div>
+              <div style={{ fontSize: 13, color: T.muted, marginTop: 3 }}>or click to browse  PDF, DOCX, or PPTX</div>
+            </div>
+          </>
+        )}
+      </div>
+
+      <button
+        onClick={onSetupManually}
+        style={{ display: 'block', margin: '16px auto 0', background: 'none', border: 'none', cursor: 'pointer', fontSize: 13, color: T.muted, textDecoration: 'underline', textUnderlineOffset: 2 }}
+      >
+        Set up manually instead
+      </button>
+    </div>
+  )
+}
+
 // ── Hero: New user ────────────────────────────────────────────────────────────
 function SetupRow({ step, onClick }) {
   const [hov, setHov] = useState(false)
@@ -420,7 +541,7 @@ function StatStrip({ streak, weeklyMinutes, weeklyGoalHours, sessionsThisWeek, i
         {isNewUser ? (
           <>
             <div style={{ flex: 1, height: 6, background: '#EAECF0', borderRadius: 3, minWidth: 60 }} />
-            <span style={{ fontSize: 13, color: T.dim, flexShrink: 0 }}>Weekly goal: not set yet</span>
+            <span style={{ fontSize: 13, color: T.dim, flexShrink: 0 }}>Weekly goal — not set yet</span>
           </>
         ) : (
           <>
@@ -468,7 +589,7 @@ function CourseRow({ course, idx, todayStr, recall, onClick }) {
   } else if (days !== null && days > 7 && days <= 21) {
     status = recall != null ? `${days} days · recall ${recall}%` : `${days} days to exam`
   } else if (recall != null && recall < 60) {
-    status = `Recall ${recall}%. Needs work.`
+    status = `Recall ${recall}% — needs work`
   }
 
   return (
@@ -721,7 +842,10 @@ export default function DashboardViewV2({
   onOpenBrainDump,
   onOpenPodcast,
   onShowPaywall,
-  onOpenSessionBundle,
+  onDropSyllabus,
+  syllabusOnboardingLoading,
+  syllabusOnboardingError,
+  onClearSyllabusError,
 }) {
   // Inject Source Serif 4 font once
   useEffect(() => {
@@ -755,6 +879,8 @@ export default function DashboardViewV2({
 
   // Hero mode
   const isNewUser = courses.length === 0
+  const syllabusOnboardingFlag = typeof localStorage !== 'undefined' && localStorage.getItem('se_syllabus_onboarding') === '1'
+  const [showManualSetup, setShowManualSetup] = useState(false)
   const doneForToday = useMemo(() => {
     if (isNewUser) return false
     const todaySessions = allSessions.filter(s => s.dateStr === todayStr)
@@ -884,7 +1010,7 @@ export default function DashboardViewV2({
   const subline = doneForToday
     ? "Today's work is in the bank."
     : isNewUser
-    ? "Let's get you set up. Two minutes, tops."
+    ? "Let's get you set up — two minutes, tops."
     : 'One focused session today keeps you on pace.'
 
   // Responsive outer padding
@@ -921,7 +1047,15 @@ export default function DashboardViewV2({
         )}
 
         {/* Hero */}
-        {isNewUser ? (
+        {isNewUser && syllabusOnboardingFlag && !showManualSetup ? (
+          <HeroSyllabusDrop
+            onDropSyllabus={onDropSyllabus}
+            loading={syllabusOnboardingLoading}
+            error={syllabusOnboardingError}
+            onClearError={onClearSyllabusError}
+            onSetupManually={() => setShowManualSetup(true)}
+          />
+        ) : isNewUser ? (
           <HeroNewUser setupSteps={setupSteps} onStepClick={handleStepClick} />
         ) : doneForToday ? (
           <HeroDone

@@ -350,7 +350,7 @@ function ImportBand({ onImportSyllabus }) {
 }
 
 // ── Add course modal ──────────────────────────────────────────────────────────
-function AddCoursePanel({ courseCount, onClose, onAdd }) {
+function AddCoursePanel({ courseCount, onClose, onAdd, onStartSyllabusOnboarding }) {
   const todayStr = new Date().toISOString().split('T')[0]
   const [name, setName] = useState('')
   const [code, setCode] = useState('')
@@ -432,21 +432,38 @@ function AddCoursePanel({ courseCount, onClose, onAdd }) {
           </div>
 
           {/* Import syllabus */}
-          <input ref={syllabusRef} type="file" accept=".pdf,.docx,.png,.jpg" style={{ display: 'none' }} onChange={e => { if (e.target.files[0]) setSyllabusFile(e.target.files[0]) }} />
+          <input
+            ref={syllabusRef}
+            type="file"
+            accept=".pdf,.docx,.pptx"
+            style={{ display: 'none' }}
+            onChange={e => {
+              const file = e.target.files[0]
+              if (!file) return
+              if (onStartSyllabusOnboarding) {
+                onClose()
+                onStartSyllabusOnboarding(file, null)
+              } else {
+                setSyllabusFile(file)
+              }
+            }}
+          />
           <AddonToggle
             active={syllabusOpen}
             onToggle={() => { setSyllabusOpen(x => !x); if (syllabusFile && syllabusOpen) setSyllabusFile(null) }}
             icon="file" color="#6366f1"
             title="Import syllabus"
-            subtitle="Drop a PDF or paste a link: we'll extract dates, weights, and topics"
+            subtitle="Upload a PDF and I'll extract dates, topics, and weights"
           >
             {syllabusOpen && (
               <div style={{ padding: '12px 14px 14px', borderTop: `1px solid ${D.border}`, display: 'flex', flexDirection: 'column', gap: 10 }}>
                 <button onClick={() => syllabusRef.current?.click()} style={{ padding: '10px 14px', borderRadius: 8, background: 'rgba(232,83,26,0.08)', border: '1px solid rgba(232,83,26,0.25)', color: D.text, fontSize: 13, fontWeight: 500, display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
                   <Icon name="upload" size={14} color={D.indigo} />
-                  {syllabusFile ? syllabusFile.name : 'Choose file (PDF, DOCX, image)'}
+                  {syllabusFile ? syllabusFile.name : 'Choose file (PDF, DOCX, or PPTX)'}
                 </button>
-                <div style={{ fontSize: 11.5, color: D.dim }}>You can also import after adding the course from the Courses page.</div>
+                {onStartSyllabusOnboarding && (
+                  <div style={{ fontSize: 11.5, color: D.dim }}>Uploading a syllabus skips manual setup and fills in your course automatically.</div>
+                )}
               </div>
             )}
           </AddonToggle>
@@ -565,13 +582,18 @@ function EditCoursePanel({ course, onClose, onSave }) {
 }
 
 // ── Expanded course content ───────────────────────────────────────────────────
-function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, grades, todayStr, threshold, onImportSyllabus, onOpenStudyCoach, onNavigateToGradeHub }) {
+function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, grades, todayStr, threshold, onImportSyllabus, onStartSyllabusOnboarding, onOpenStudyCoach, onNavigateToGradeHub }) {
   const completed = sessions.filter(s => completedIds.has(s.id)).length
   const loggedGrades = grades.filter(g => g.loggedGrade !== null)
   const avgGrade = loggedGrades.length
     ? Math.round(loggedGrades.reduce((s, g) => s + g.loggedGrade * g.weight, 0) / loggedGrades.reduce((s, g) => s + g.weight, 0) * 10) / 10
     : null
   const color = course.color?.dot || D.accent
+  const syllabusFileRef = useRef(null)
+  const triggerSyllabusUpload = () => {
+    if (onStartSyllabusOnboarding) syllabusFileRef.current?.click()
+    else onImportSyllabus?.(idx)
+  }
 
   return (
     <div className="cv-expanded" style={{ padding: '4px 20px 20px', borderTop: `1px solid ${D.border}` }}>
@@ -603,9 +625,24 @@ function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, gra
         </Section>
       )}
 
+      {/* Hidden file input for syllabus onboarding */}
+      {onStartSyllabusOnboarding && (
+        <input
+          ref={syllabusFileRef}
+          type="file"
+          accept=".pdf,.docx,.pptx"
+          style={{ display: 'none' }}
+          onChange={e => {
+            const file = e.target.files?.[0]
+            if (file) onStartSyllabusOnboarding(file, idx)
+            e.target.value = ''
+          }}
+        />
+      )}
+
       {/* Syllabus events */}
       {syllabusEvts.length > 0 ? (
-        <Section title="Syllabus events" icon="file" color={color} action={{ label: 'Re-import', icon: 'sync', onClick: () => onImportSyllabus?.(idx) }}>
+        <Section title="Syllabus events" icon="file" color={color} action={{ label: 'Add syllabus', icon: 'sync', onClick: triggerSyllabusUpload }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 8 }}>
             {syllabusEvts.sort((a, b) => (a.date || '').localeCompare(b.date || '')).map(ev => (
               <div key={ev.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px', background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, borderLeft: `3px solid ${typeColor(ev.type)}`, borderRadius: 8 }}>
@@ -629,8 +666,8 @@ function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, gra
             <div style={{ fontSize: 13.5, fontWeight: 600, color: D.text, marginBottom: 2 }}>No syllabus yet</div>
             <div style={{ fontSize: 12, color: D.muted }}>Import one to pull in every date, weight, and deadline.</div>
           </div>
-          <button onClick={() => onImportSyllabus?.(idx)} style={{ padding: '8px 14px', borderRadius: 8, background: 'rgba(99,102,241,0.18)', border: '1px solid rgba(232,83,26,0.25)', color: D.text, fontSize: 12.5, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-            <Icon name="upload" size={12} /> Import syllabus
+          <button onClick={triggerSyllabusUpload} style={{ padding: '8px 14px', borderRadius: 8, background: 'rgba(99,102,241,0.18)', border: '1px solid rgba(232,83,26,0.25)', color: D.text, fontSize: 12.5, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+            <Icon name="upload" size={12} /> Add syllabus
           </button>
         </div>
       )}
@@ -673,7 +710,7 @@ function CourseExpanded({ course, idx, sessions, completedIds, syllabusEvts, gra
 }
 
 // ── Course row ────────────────────────────────────────────────────────────────
-function CourseRow({ course, idx, expanded, onToggle, sessions, completedIds, syllabusEvts, grades, todayStr, threshold, onImportSyllabus, onOpenStudyCoach, onEdit, onDelete, onNavigateToGradeHub, latestScore }) {
+function CourseRow({ course, idx, expanded, onToggle, sessions, completedIds, syllabusEvts, grades, todayStr, threshold, onImportSyllabus, onStartSyllabusOnboarding, onOpenStudyCoach, onEdit, onDelete, onNavigateToGradeHub, latestScore }) {
   const color = course.color?.dot || D.accent
   const completed = sessions.filter(s => completedIds.has(s.id)).length
   const pct = sessions.length ? Math.round((completed / sessions.length) * 100) : 0
@@ -754,7 +791,9 @@ function CourseRow({ course, idx, expanded, onToggle, sessions, completedIds, sy
         <CourseExpanded
           course={course} idx={idx} sessions={sessions} completedIds={completedIds}
           syllabusEvts={syllabusEvts} grades={grades} todayStr={todayStr} threshold={threshold}
-          onImportSyllabus={onImportSyllabus} onOpenStudyCoach={onOpenStudyCoach}
+          onImportSyllabus={onImportSyllabus}
+          onStartSyllabusOnboarding={onStartSyllabusOnboarding}
+          onOpenStudyCoach={onOpenStudyCoach}
           onNavigateToGradeHub={onNavigateToGradeHub}
         />
       )}
@@ -968,6 +1007,7 @@ export default function CoursesView({
   assignments,
   onLogGrade,
   onImportSyllabus,
+  onStartSyllabusOnboarding,
   onAddCourse,
   onEditCourse,
   onDeleteCourse,
@@ -1223,6 +1263,7 @@ export default function CoursesView({
                 syllabusEvts={syllabusEvts} grades={grades}
                 todayStr={todayStr} threshold={threshold}
                 onImportSyllabus={onImportSyllabus}
+                onStartSyllabusOnboarding={onStartSyllabusOnboarding}
                 onOpenStudyCoach={onOpenStudyCoach}
                 onEdit={() => setEditingIdx(idx)}
                 onDelete={() => { onDeleteCourse?.(idx); if (expandedIdx === idx) setExpandedIdx(null) }}
@@ -1248,6 +1289,7 @@ export default function CoursesView({
           courseCount={courses.length}
           onClose={() => setShowAddPanel(false)}
           onAdd={handleAddCourse}
+          onStartSyllabusOnboarding={onStartSyllabusOnboarding}
         />
       )}
       {showExamSetup && (

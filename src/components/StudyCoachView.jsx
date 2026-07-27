@@ -7,7 +7,6 @@ import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, canUseFeature, incrementFeatureUsage, hasUsedTrial, getActivePlan } from '../lib/subscription'
 import { getCurrentGrade, letterGrade, TARGET_OPTIONS } from '../utils/gradeCalc'
-import { getCoachMicroUpdates, relativeTime as microRelativeTime } from '../lib/coachMicroUpdates'
 import { track } from '../lib/analytics'
 
 // ── DB helpers ────────────────────────────────────────────────────────────────
@@ -302,7 +301,7 @@ function CoachRail({ form, confidence, course }) {
 }
 
 // ── Step 1: Intake ────────────────────────────────────────────────────────────
-function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, materialError, onMaterialFile, onNext }) {
+function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, materialError, onMaterialFile, onNext, syllabusHintFile, onSyllabusHint }) {
   const update = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const course = courses[form.courseIdx]
   const _EXAM_PAT = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
@@ -407,6 +406,17 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
             loading={materialLoading}
           />
           {materialError && <p style={{ margin: '6px 0 0', fontSize: 12, color: '#DC2626' }}>{materialError}</p>}
+          {syllabusHintFile && onSyllabusHint && (
+            <div style={{ marginTop: 8, padding: '8px 12px', borderRadius: 8, background: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.18)', fontSize: 12.5, color: '#3452D9', display: 'flex', alignItems: 'center', gap: 6 }}>
+              This looks like a syllabus.{' '}
+              <button
+                onClick={() => onSyllabusHint(syllabusHintFile)}
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3452D9', fontSize: 12.5, fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 2, padding: 0 }}
+              >
+                Want me to pull the dates too?
+              </button>
+            </div>
+          )}
         </FieldBlock>
 
         {/* Cadence */}
@@ -657,16 +667,6 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
 
   const showBanner = !hardNoteDismissed && pendingHardNotes?.length > 0
 
-  // Recent adaptations feed — populated by coachMicroUpdates.js after every
-  // study session. Re-read whenever the coach-updated event fires so the
-  // banner is live.
-  const [microUpdates, setMicroUpdates] = useState(() => getCoachMicroUpdates(course?.id ?? null, 3))
-  useEffect(() => {
-    const refresh = () => setMicroUpdates(getCoachMicroUpdates(course?.id ?? null, 3))
-    window.addEventListener('studyedge:coach-micro-updated', refresh)
-    return () => window.removeEventListener('studyedge:coach-micro-updated', refresh)
-  }, [course?.id])
-
   return (
     <div className="sc-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: 24, alignItems: 'flex-start' }}>
       <div>
@@ -676,31 +676,6 @@ function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error,
             onUpdate={handleBannerUpdate}
             onDismiss={handleBannerDismiss}
           />
-        )}
-        {microUpdates.length > 0 && (
-          <div style={{ marginBottom: 16, padding: '14px 16px', background: D.bgCard, border: `1px solid ${D.border}`, borderLeft: `3px solid ${color}`, borderRadius: 10 }}>
-            <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.08em', color: D.muted, textTransform: 'uppercase', marginBottom: 10, display: 'flex', alignItems: 'center', gap: 6 }}>
-              <span style={{ display: 'inline-block', width: 6, height: 6, borderRadius: '50%', background: color, animation: 'sc-pulse 2s ease-in-out infinite' }} />
-              <span>Recent adaptations</span>
-            </div>
-            <style>{`@keyframes sc-pulse{0%,100%{opacity:1}50%{opacity:0.4}}`}</style>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {microUpdates.map((u, i) => (
-                <div key={i} style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
-                  <span style={{
-                    fontSize: 11, fontWeight: 700, padding: '2px 7px', borderRadius: 6,
-                    flexShrink: 0, minWidth: 44, textAlign: 'center',
-                    color: u.direction === 'up' ? '#16A34A' : u.direction === 'down' ? '#DC2626' : D.muted,
-                    background: u.direction === 'up' ? 'rgba(22,163,74,0.10)' : u.direction === 'down' ? 'rgba(220,38,38,0.10)' : 'rgba(0,0,0,0.05)',
-                    border: `1px solid ${u.direction === 'up' ? 'rgba(22,163,74,0.25)' : u.direction === 'down' ? 'rgba(220,38,38,0.25)' : 'rgba(0,0,0,0.08)'}`,
-                  }}>
-                    {microRelativeTime(u.ts)}
-                  </span>
-                  <div style={{ flex: 1, fontSize: 13, color: D.text, lineHeight: 1.5 }}>{u.line}</div>
-                </div>
-              ))}
-            </div>
-          </div>
         )}
         {onSaveStruggles && (
           <StruggleTracker
@@ -959,7 +934,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle, completedSessions = [], scheduledSessions = [], restDays = [], onOpenExamRescue }) {
+export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle, completedSessions = [], scheduledSessions = [], restDays = [], onOpenExamRescue, onStartSyllabusOnboarding }) {
   const [step, setStep] = useState(1)
   const defaultStyle = learningStyle ? [learningStyle] : []
   const [form, setForm] = useState({
@@ -979,6 +954,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   const [materialText, setMaterialText] = useState('')
   const [materialLoading, setMaterialLoading] = useState(false)
   const [materialError, setMaterialError] = useState('')
+  const [syllabusHintFile, setSyllabusHintFile] = useState(null)
 
   // Load saved plan when course changes
   useEffect(() => {
@@ -1023,9 +999,17 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   const handleMaterialFile = async (file) => {
     setMaterialLoading(true)
     setMaterialError('')
+    setSyllabusHintFile(null)
     try {
       const text = await extractText(file)
       setMaterialText(prev => prev + '\n' + text)
+      // Detect syllabus-like documents by checking for typical syllabus keywords
+      if (onStartSyllabusOnboarding) {
+        const lower = text.toLowerCase()
+        const syllabusSignals = ['course syllabus', 'grading policy', 'office hours', 'course schedule', 'learning objectives', 'exam date', 'midterm', 'final exam', 'due date', 'assignment weight', 'grade breakdown', 'credit hours']
+        const matchCount = syllabusSignals.filter(s => lower.includes(s)).length
+        if (matchCount >= 2) setSyllabusHintFile(file)
+      }
     } catch {
       setMaterialError('Could not read that file. Try pasting the text directly.')
     } finally { setMaterialLoading(false) }
@@ -1042,7 +1026,6 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     setError('')
     setPlan(null)
     setPushed(false)
-    track('study_plan_started', { courseName: courses[form.courseIdx]?.name ?? null, plan: getActivePlan(), daysPerWeek: form.daysPerWeek })
 
     try {
       const token = await getAccessToken()
@@ -1103,7 +1086,6 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       setStep(3)
       setUiMode('viewing')
     } catch (e) {
-      track('study_plan_error', { error: e.message ?? 'unknown' })
       setError(e.message)
       setStep(3) // Show error in step 3
     } finally {
@@ -1358,13 +1340,10 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
         <div style={{ width: w, height: '100%', background: color, borderRadius: 3 }} />
       </div>
     )
-    // Ghost preview is a locked-out visual demo behind the paywall gate.
-    // Every string here must be generic and method-only — no fabricated
-    // subject content, no course names (per the coach anti-guessing rule).
     const fakeWeeks = [
-      { label: 'Week 1–2', title: 'Foundation', tasks: ['Active recall drills', 'Concept mapping', 'Cumulative review'], pct: '100%', color: '#4ade80' },
-      { label: 'Week 3–4', title: 'Practice',   tasks: ['Timed problem sets', 'Mixed retrieval', 'Review mistakes'],     pct: '60%',  color: '#6366f1' },
-      { label: 'Week 5–6', title: 'Exam prep',  tasks: ['Mock tests', 'Weak-area drills', 'Consolidation notes'],       pct: '20%',  color: '#f59e0b' },
+      { label: 'Week 1–2', title: 'Content Foundation', tasks: ['Read Ch. 1–4', 'Active recall drills', 'Concept mapping'], pct: '100%', color: '#4ade80' },
+      { label: 'Week 3–4', title: 'Practice Problems',  tasks: ['Problem sets A–C', 'Timed quizzes x3', 'Review mistakes'],  pct: '60%',  color: '#6366f1' },
+      { label: 'Week 5–6', title: 'Exam Prep',          tasks: ['Past papers x2', 'Weak-area review', 'Formula sheet'],     pct: '20%',  color: '#f59e0b' },
     ]
     return (
       <div style={{ position: 'relative', minHeight: '100vh', background: D.bg, overflow: 'hidden' }}>
@@ -1372,7 +1351,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
         <div style={{ filter: 'blur(3px)', opacity: 0.45, pointerEvents: 'none', userSelect: 'none', padding: '28px 32px' }}>
           <div style={{ marginBottom: 20 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: G.muted, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>8-Week Study Plan</div>
-            <div style={{ fontSize: 22, fontWeight: 700, color: G.text, letterSpacing: -0.5, marginBottom: 4 }}>Your course · 83% on track</div>
+            <div style={{ fontSize: 22, fontWeight: 700, color: G.text, letterSpacing: -0.5, marginBottom: 4 }}>Organic Chemistry · 83% on track</div>
             <GhostBar w="62%" />
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
@@ -1443,6 +1422,12 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
               materialError={materialError}
               onMaterialFile={handleMaterialFile}
               onNext={() => setStep(2)}
+              syllabusHintFile={syllabusHintFile}
+              onSyllabusHint={onStartSyllabusOnboarding ? (file) => {
+                const courseIdx = form.courseIdx >= 0 ? form.courseIdx : null
+                onStartSyllabusOnboarding(file, courseIdx)
+                setSyllabusHintFile(null)
+              } : null}
             />
           )}
           {step === 2 && (
