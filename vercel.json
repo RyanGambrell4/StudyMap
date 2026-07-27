@@ -157,6 +157,14 @@
         {
             "path": "/api/struggle-digest",
             "schedule": "0 11 * * 1"
+        },
+        {
+            "path": "/api/no-course-24h",
+            "schedule": "0 */3 * * *"
+        },
+        {
+            "path": "/api/email-dispatcher",
+            "schedule": "0 */2 * * *"
         }
     ],
     "rewrites": [

@@ -3,6 +3,8 @@ import { Resend } from 'resend'
 import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 import { acquireCronLock } from '../lib/server/cronLock.js'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
+import { isEnabled } from '../lib/server/featureFlags.js'
+import { enqueueEmail } from '../lib/server/emailQueue.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -59,7 +61,13 @@ export default async function handler(req, res) {
     // Skip users who are already engaged
     if (sessionCount > 0 || courseCount > 0) { skipped++; continue }
 
-    const gate = await canSendUserEmail(user.id, { priority: 'high' })
+    if (await isEnabled('lifecycle_v2', user.id)) {
+      await enqueueEmail(user.id, 'no-first-session', 4, { email: user.email })
+      sent++
+      continue
+    }
+
+    const gate = await canSendUserEmail(user.id, { priority: 'high', email: user.email })
     if (!gate.ok) { skipped++; continue }
 
     const trialUsed = !!(row?.subscription?.trialUsedAt || row?.subscription?.trial_activated)
