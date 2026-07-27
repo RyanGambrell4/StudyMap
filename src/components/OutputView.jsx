@@ -9,6 +9,7 @@ import {
   saveSyllabusEvents,
   saveManualSessions,
   getCachedCoachPlan,
+  saveCoachPlan as dbSaveCoachPlan,
   getCachedCompletedSessions,
   saveCompletedSession,
   removeCompletedSession,
@@ -17,11 +18,12 @@ import {
   getCachedStudyTools,
 } from '../lib/db'
 import { runAdaptation } from '../utils/adaptationEngine'
-import { crossCreditByTopic, markSessionComplete } from './coach/planStore'
 import AdaptModal from './AdaptModal'
 import FocusMode from './FocusMode'
 import BlueprintScreen from './BlueprintScreen'
 import SyllabusUploadModal from './SyllabusUploadModal'
+import SyllabusOnboardingModal from './SyllabusOnboardingModal'
+import { addUpload } from '../lib/uploadRegistry'
 import CalendarMonthView from './CalendarMonthView'
 import CalendarDayView from './CalendarDayView'
 import CalendarWeekView from './CalendarWeekView'
@@ -37,10 +39,8 @@ import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, hasUsedTrial, canUseFeature } from '../lib/subscription'
 const CoursesView    = lazy(() => import('./CoursesView'))
 const ProgressView   = lazy(() => import('./ProgressView'))
-const StudyToolsView   = lazy(() => import('./StudyToolsView'))
-const StudyToolsViewV2 = lazy(() => import('./StudyToolsViewV2'))
+const StudyToolsView = lazy(() => import('./StudyToolsView'))
 const StudyCoachView = lazy(() => import('./StudyCoachView'))
-const CoachRoot      = lazy(() => import('./coach/CoachRoot'))
 const PracticeExamView = lazy(() => import('./PracticeExamView'))
 import AIChatView from './AIChatView'
 const GradeHubView   = lazy(() => import('./GradeHubView'))
@@ -55,10 +55,6 @@ import BrainDumpModal from './BrainDumpModal'
 import ConfidenceTapModal from './ConfidenceTapModal'
 import ExamRescueModal from './ExamRescueModal'
 import QuickQuizBurst from './QuickQuizBurst'
-import SessionBundle from './SessionBundle'
-import CourseDiagnostic from './CourseDiagnostic'
-import DeckAddedToast from './DeckAddedToast'
-import { emitMicroUpdateFromEvent } from '../lib/coachMicroUpdates'
 import PodcastGenerator from './PodcastGenerator'
 import TeachItBackModal from './TeachItBackModal'
 import ConnectionsModeModal from './ConnectionsModeModal'
@@ -437,8 +433,6 @@ export default function OutputView({
   const [confidencePrompt, setConfidencePrompt] = useState(null)
   const [showExamRescue, setShowExamRescue] = useState(false)
   const [showQuizBurst, setShowQuizBurst] = useState(false)
-  const [showSessionBundle, setShowSessionBundle] = useState(false)
-  const [diagnosticCourse, setDiagnosticCourse] = useState(null)
   const [showPodcast, setShowPodcast] = useState(false)
   const [showTeachItBack, setShowTeachItBack] = useState(false)
   const [teachItBackInit, setTeachItBackInit] = useState(null) // { courseIdx, topic } when launched from Brain Dump
@@ -499,38 +493,12 @@ export default function OutputView({
     window.addEventListener('popstate', onPop)
     return () => window.removeEventListener('popstate', onPop)
   }, [])
-
-  // After every completed study session, compute a coach-plan micro-update
-  // that names what just moved and what the plan is re-weighting toward.
-  // Persisted per course; the Study Coach view shows the last N as a
-  // "Recent adaptations" banner so the plan feels alive.
-  useEffect(() => {
-    const handler = (e) => {
-      const detail = e.detail ?? {}
-      // The tool events don't currently carry courseId — resolve from the
-      // most-recently-updated course we know about. Best-effort; if we can't
-      // pinpoint, we still fire against every course with recent activity.
-      for (const c of courses) {
-        try { emitMicroUpdateFromEvent({ tool: detail.tool, courseId: c.id, courseName: c.name }) } catch {}
-      }
-      window.dispatchEvent(new CustomEvent('studyedge:coach-micro-updated'))
-    }
-    window.addEventListener('studyedge:tool-session-complete', handler)
-    return () => window.removeEventListener('studyedge:tool-session-complete', handler)
-  }, [courses])
   // ─────────────────────────────────────────────────────────────────────────────
 
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
   const isExamMode = courses.some(c => EXAM_PATTERN.test(c.name))
 
   const [dashboardV2] = useState(() => localStorage.getItem('se_dashboard_v2') !== '0')
-  // V2 tools hub — same flag semantics as dashboardV2 so the redesigns ship together.
-  const [toolsV2] = useState(() => localStorage.getItem('se_tools_v2') !== '0')
-  // V2 Study Coach — same flag semantics as dashboardV2 so the redesigns
-  // ship together. Opt out per user via `localStorage.se_coach_v2 = '0'`.
-  const [coachV2] = useState(() => localStorage.getItem('se_coach_v2') !== '0')
-  // Bumps after cross-credit fires so CoachRoot re-reads the plan cache.
-  const [coachPlanTick, setCoachPlanTick] = useState(0)
   const [assignments, setAssignments] = useState(() => initialAssignments ?? [])
   const [logGradeId, setLogGradeId] = useState(null)
   const [gradeInput, setGradeInput] = useState('')
@@ -562,6 +530,14 @@ export default function OutputView({
   const [syllabusEvents, setSyllabusEvents] = useState(() => getCachedSyllabusEvents() ?? [])
   const [syllabusModalCourse, setSyllabusModalCourse] = useState(null)
   const [syllabusInitialFile, setSyllabusInitialFile] = useState(null)
+
+  // Syllabus onboarding (parse-syllabus flow)
+  const [syllabusOnboardingData, setSyllabusOnboardingData] = useState(null)
+  const [syllabusOnboardingScopeIdx, setSyllabusOnboardingScopeIdx] = useState(null)
+  const [syllabusOnboardingFile, setSyllabusOnboardingFile] = useState(null)
+  const [syllabusOnboardingLoading, setSyllabusOnboardingLoading] = useState(false)
+  const [syllabusOnboardingError, setSyllabusOnboardingError] = useState('')
+  const [syllabusRegistryWarning, setSyllabusRegistryWarning] = useState(false)
 
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('studyedge_view_mode') ?? 'week')
   const todayStr = new Date().toISOString().split('T')[0]
@@ -1066,33 +1042,6 @@ export default function OutputView({
         saveCompletedSession(record)
         track('session_completed', { courseId: sess.courseId, courseName: sess.courseName, sessionType: sess.sessionType, studyMethod: sess.studyMethod ?? null, elapsedSeconds: record.elapsedSeconds, recallScore: recallData?.score ?? null })
 
-        // Coach v2 completion routing.
-        //   • Plan-originated session: mark THAT plan session complete.
-        //     Cross-credit MUST NOT run — would double-count against another
-        //     matching session in the same plan.
-        //   • Standalone session: run one idempotent cross-credit scan against
-        //     the plan for `sess.courseId` (topic match, earliest incomplete,
-        //     at most one mark, silent no-op when nothing matches).
-        // Both paths are guarded by the coach v2 flag so v1 behaviour is
-        // untouched when the flag is opted out of.
-        if (coachV2) {
-          (async () => {
-            try {
-              if (sess.planSessionId && sess.planCourseId) {
-                const r = await markSessionComplete(sess.planCourseId, sess.planSessionId)
-                if (r.changed) setCoachPlanTick(t => t + 1)
-              } else {
-                const coachCourseId = courses[sess.courseId]?.id
-                const topic = sess.focusArea || sess.sessionType || sess.topic
-                if (coachCourseId && topic) {
-                  const r = await crossCreditByTopic(coachCourseId, topic)
-                  if (r.credited) setCoachPlanTick(t => t + 1)
-                }
-              }
-            } catch (_) { /* silent — completion succeeds regardless */ }
-          })()
-        }
-
         // First-session email -- fires once per user after their very first session.
         const priorSessions = getCachedCompletedSessions().filter(s => s.id !== record.id)
         if (userId && priorSessions.length === 0) {
@@ -1132,7 +1081,7 @@ export default function OutputView({
       return null
     })
     setActiveBlueprint(null)
-  }, [courses, coachV2])
+  }, [courses])
   const handleFocusStartNext = useCallback((id, _elapsed, nextSess) => {
     setCompletedIds(prev => new Set([...prev, id]))
     setBlueprintSession(nextSess)
@@ -1222,6 +1171,212 @@ export default function OutputView({
       })),
     ])
     setSyllabusModalCourse(null)
+  }
+
+  // ── Syllabus onboarding (parse-syllabus flow) ─────────────────────────────
+
+  const handleStartSyllabusOnboarding = async (file, courseIdx = null) => {
+    setSyllabusOnboardingError('')
+    setSyllabusOnboardingLoading(true)
+    setSyllabusOnboardingScopeIdx(courseIdx)
+    setSyllabusOnboardingFile(file)
+    try {
+      const { extractText } = await import('../utils/extractText')
+      const text = await extractText(file)
+      if (!text || text.trim().length < 50) throw new Error("Couldn't read text from that file.")
+
+      const token = await getAccessToken()
+      const res = await fetch('/api/parse-syllabus', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ text }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? `Parse failed (${res.status})`)
+
+      if (!data.isSyllabus) {
+        setSyllabusOnboardingError("I couldn't find course dates in this file. Try a different file or set up manually.")
+        setSyllabusOnboardingLoading(false)
+        return
+      }
+      setSyllabusOnboardingData(data)
+    } catch (err) {
+      setSyllabusOnboardingError(err.message ?? 'Something went wrong. Try again.')
+    } finally {
+      setSyllabusOnboardingLoading(false)
+    }
+  }
+
+  const handleSyllabusOnboardingCommit = async (result, skipPlan) => {
+    if (!canUseAI()) { onShowPaywall?.('ai'); return }
+
+    const COURSE_COLORS = ['#3B82F6', '#6366F1', '#059669', '#D97706', '#EC4899', '#0891B2']
+    const NEUTRAL_COLOR = { name: 'neutral', dot: '#64748b' }
+
+    // Derive examDate compat field from nearest future exam
+    const today = new Date().toISOString().split('T')[0]
+    const futureExams = (result.exams ?? []).filter(e => e.date >= today).sort((a, b) => a.date.localeCompare(b.date))
+    const nearestExamDate = futureExams[0]?.date ?? null
+
+    let courseObj
+    let courseIdx = syllabusOnboardingScopeIdx
+    let course
+
+    if (courseIdx !== null && courses[courseIdx]) {
+      // Updating an existing course
+      course = courses[courseIdx]
+      courseObj = {
+        ...course,
+        name: result.courseName || course.name,
+        code: result.courseCode || course.code || '',
+        examDate: nearestExamDate || course.examDate,
+        exams: result.exams ?? [],
+        topics: result.topics ?? [],
+        gradeComponents: result.gradeComponents ?? [],
+        classSchedule: result.classMeetings?.length
+          ? { ...course.classSchedule, syllabusExtracted: result.classMeetings }
+          : course.classSchedule,
+      }
+    } else {
+      // Creating a new course
+      const colorDot = COURSE_COLORS[courses.length % COURSE_COLORS.length]
+      courseObj = {
+        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+        name: result.courseName || 'New Course',
+        code: result.courseCode || '',
+        examDate: nearestExamDate || '',
+        difficulty: 'Medium',
+        targetGrade: 'A',
+        color: { name: 'custom', dot: colorDot },
+        exams: result.exams ?? [],
+        topics: result.topics ?? [],
+        gradeComponents: result.gradeComponents ?? [],
+        classSchedule: result.classMeetings?.length
+          ? { syllabusExtracted: result.classMeetings }
+          : undefined,
+      }
+      courseIdx = courses.length  // new course will be appended
+      course = courseObj
+    }
+
+    // Registry write: store the syllabus file BEFORE the fan-out so re-upload
+    // diffing has the original. uploadId is stored on the course for later diff.
+    // Non-blocking: a failure shows a warning but does not abort course setup.
+    let syllabusUploadId = null
+    if (syllabusOnboardingFile) {
+      try {
+        const upload = await addUpload(courseObj.id, syllabusOnboardingFile, { kind: 'syllabus' })
+        syllabusUploadId = upload?.id ?? null
+      } catch (err) {
+        console.warn('[syllabus-onboarding] registry write failed:', err)
+        setSyllabusRegistryWarning(true)
+      }
+    }
+    if (syllabusUploadId) courseObj = { ...courseObj, syllabusUploadId }
+
+    // Save the course now that the registry write has been attempted
+    if (syllabusOnboardingScopeIdx !== null && courses[syllabusOnboardingScopeIdx]) {
+      onEditCourse(syllabusOnboardingScopeIdx, courseObj)
+    } else {
+      onAddCourse(courseObj)
+    }
+
+    // Save confirmed dates as syllabus events (deduplicate by date+name)
+    const existingKeys = new Set(syllabusEvents.map(e => `${e.date}|${(e.name ?? e.title ?? '').toLowerCase()}`))
+    const courseColor = courseObj.color ?? NEUTRAL_COLOR
+    const newEvents = []
+
+    ;(result.exams ?? []).forEach(e => {
+      const key = `${e.date}|${e.name.toLowerCase()}`
+      if (existingKeys.has(key)) return
+      existingKeys.add(key)
+      newEvents.push({
+        id: `syl-onboard-exam-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+        name: e.name,
+        date: e.date,
+        type: 'Exam',
+        weight: e.weight ?? null,
+        notes: null,
+        sourceSnippet: e.sourceSnippet,
+        courseIdx,
+        courseName: courseObj.name,
+        color: courseColor,
+      })
+    })
+
+    ;(result.dueDates ?? []).forEach(d => {
+      const key = `${d.date}|${(d.title ?? '').toLowerCase()}`
+      if (existingKeys.has(key)) return
+      existingKeys.add(key)
+      newEvents.push({
+        id: `syl-onboard-due-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
+        name: d.title,
+        date: d.date,
+        type: d.type ?? 'Assignment',
+        weight: d.weight ?? null,
+        notes: null,
+        sourceSnippet: d.sourceSnippet,
+        courseIdx,
+        courseName: courseObj.name,
+        color: courseColor,
+      })
+    })
+
+    if (newEvents.length) {
+      setSyllabusEvents(prev => [...prev, ...newEvents])
+    }
+
+    // Generate first study plan unless skipping
+    if (!skipPlan) {
+      try {
+        incrementAIQuery()
+        const topicStr = (result.topics ?? [])
+          .slice(0, 30)
+          .map(t => t.title)
+          .join(', ')
+        const importantDates = (result.exams ?? []).map(e => ({ label: e.name, date: e.date }))
+        const token = await getAccessToken()
+        const res = await fetch('/api/generate-study-coach-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            courseName: courseObj.name,
+            goal: 'Do well in this course',
+            emphasisTopics: topicStr || undefined,
+            importantDates,
+            daysPerWeek: schedule?.daysPerWeek ?? 3,
+            sessionMinutes: 60,
+            learningStyle,
+          }),
+        })
+        const plan = await res.json()
+        if (res.ok && plan.weeklyFocus) {
+          const formData = {
+            courseName: courseObj.name,
+            goal: 'Do well in this course',
+            emphasisTopics: topicStr,
+            importantDates,
+            sessionMinutes: 60,
+          }
+          dbSaveCoachPlan(courseObj.id, plan, formData)
+          setCoachPlans(prev => ({ ...prev, [courseObj.id]: { ...plan, formData } }))
+        }
+      } catch {
+        // Plan generation failure is non-fatal; student can generate later from coach
+      }
+    }
+
+    setSyllabusOnboardingData(null)
+    setSyllabusOnboardingScopeIdx(null)
+    setSyllabusOnboardingFile(null)
+    track('syllabus_onboarding_completed', {
+      skipPlan,
+      examCount: result.exams?.length ?? 0,
+      topicCount: result.topics?.length ?? 0,
+      hasGrading: (result.gradeComponents?.length ?? 0) > 0,
+      registryWriteOk: !!syllabusUploadId,
+    })
+    setActiveSection('dashboard')
   }
 
   const handleAddManualSession = rawSession => {
@@ -1435,6 +1590,16 @@ export default function OutputView({
           onConfirm={(items, selectedCourseIdx) => handleSyllabusConfirm(selectedCourseIdx, items)}
           onClose={() => { setSyllabusModalCourse(null); setSyllabusInitialFile(null) }}
           onShowPaywall={onShowPaywall}
+        />
+      )}
+
+      {syllabusOnboardingData && (
+        <SyllabusOnboardingModal
+          parsedData={syllabusOnboardingData}
+          existingCourse={syllabusOnboardingScopeIdx !== null ? courses[syllabusOnboardingScopeIdx] ?? null : null}
+          onConfirm={(result) => handleSyllabusOnboardingCommit(result, false)}
+          onSkipPlan={(result) => handleSyllabusOnboardingCommit(result, true)}
+          onClose={() => { setSyllabusOnboardingData(null); setSyllabusOnboardingScopeIdx(null) }}
         />
       )}
 
@@ -1675,11 +1840,16 @@ export default function OutputView({
             }}
             onNavigateToGrades={(idx) => { setGradesCourseIdx(idx); setActiveSection('grades') }}
             onNavigateToTools={() => setActiveSection('tools')}
-            onOpenQuizBurst={(init) => { track('feature_opened', { feature: 'quiz_burst' }); if (init) setQuizBurstInit(init); setShowQuizBurst(true) }}
+            onOpenQuizBurst={() => { track('feature_opened', { feature: 'quiz_burst' }); setShowQuizBurst(true) }}
             onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump' }); setShowBrainDump(true) }}
             onOpenPodcast={() => { track('feature_opened', { feature: 'podcast' }); setShowPodcast(true) }}
             onShowPaywall={onShowPaywall}
-            onOpenSessionBundle={() => { track('feature_opened', { feature: 'session_bundle' }); setShowSessionBundle(true) }}
+            onDropSyllabus={(file) => handleStartSyllabusOnboarding(file, null)}
+            syllabusOnboardingLoading={syllabusOnboardingLoading}
+            syllabusOnboardingError={syllabusOnboardingError}
+            onClearSyllabusError={() => setSyllabusOnboardingError('')}
+            syllabusRegistryWarning={syllabusRegistryWarning}
+            onClearRegistryWarning={() => setSyllabusRegistryWarning(false)}
           />
         ) : (
           <DashboardView
@@ -1999,6 +2169,7 @@ export default function OutputView({
             assignments={assignments}
             onLogGrade={id => { setLogGradeId(id); setGradeInput('') }}
             onImportSyllabus={(idx, file) => { setSyllabusInitialFile(file ?? null); setSyllabusModalCourse(idx ?? -1) }}
+            onStartSyllabusOnboarding={handleStartSyllabusOnboarding}
             onAddCourse={onAddCourse}
             onEditCourse={onEditCourse}
             onDeleteCourse={onDeleteCourse}
@@ -2024,33 +2195,12 @@ export default function OutputView({
         )}
 
         {/* ── Study Tools ── */}
-        {activeSection === 'tools' && (toolsV2 ? (
-          <StudyToolsViewV2
-            courses={courses}
-            userId={userId}
-            onShowPaywall={onShowPaywall}
-            learningStyle={learningStyle}
-            onNavigateToCoach={() => { if (getActivePlan() === 'free') { onShowPaywall?.('coach'); return } setActiveSection('coach') }}
-            onOpenCheatSheet={() => setShowCheatSheet(true)}
-            onOpenBrainDump={(preset) => { if (preset?.topic || preset?.courseIdx != null) setBrainDumpInit({ courseIdx: preset.courseIdx ?? 0, topic: preset.topic ?? '' }); setShowBrainDump(true) }}
-            onOpenExamRescue={() => setShowExamRescue(true)}
-            onOpenQuizBurst={(preset) => { if (preset?.topic || preset?.courseIdx != null) setQuizBurstInit({ courseIdx: preset.courseIdx ?? 0, topic: preset.topic ?? '' }); setShowQuizBurst(true) }}
-            onOpenPodcast={() => setShowPodcast(true)}
-            onOpenTeachItBack={(preset) => { if (preset?.topic || preset?.courseIdx != null) setTeachItBackInit({ courseIdx: preset.courseIdx ?? 0, topic: preset.topic ?? '' }); setShowTeachItBack(true) }}
-            onOpenConnectionsMode={() => setShowConnectionsMode(true)}
-            onOpenTimeAttack={() => setShowTimedChallenge(true)}
-            initialDrillTopic={pendingDrillTopic}
-            onDrillTopicConsumed={() => setPendingDrillTopic(null)}
-          />
-        ) : (
+        {activeSection === 'tools' && (
           <StudyToolsView
             courses={courses}
             userId={userId}
             onShowPaywall={onShowPaywall}
             learningStyle={learningStyle}
-            yearLevel={yearLevel}
-            schoolType={schoolType}
-            assignments={assignments}
             onNavigateToCoach={() => { if (getActivePlan() === 'free') { onShowPaywall?.('coach'); return } setActiveSection('coach') }}
             onOpenCheatSheet={() => setShowCheatSheet(true)}
             onOpenBrainDump={() => setShowBrainDump(true)}
@@ -2060,23 +2210,13 @@ export default function OutputView({
             onOpenTeachItBack={() => setShowTeachItBack(true)}
             onOpenConnectionsMode={() => setShowConnectionsMode(true)}
             onOpenTimeAttack={() => setShowTimedChallenge(true)}
-            onOpenSessionBundle={() => setShowSessionBundle(true)}
             initialDrillTopic={pendingDrillTopic}
             onDrillTopicConsumed={() => setPendingDrillTopic(null)}
           />
-        ))}
+        )}
 
         {/* ── Study Coach ── */}
-        {activeSection === 'coach' && (coachV2 ? (
-          <CoachRoot
-            courses={courses}
-            assignments={assignments}
-            scheduleHasData={Boolean(schedule?.hoursPerWeek || schedule?.preferredTime)}
-            onEditCourse={onEditCourse}
-            onStartFocus={handleStartFocus}
-            planTick={coachPlanTick}
-          />
-        ) : (
+        {activeSection === 'coach' && (
           <StudyCoachView
             courses={courses}
             userId={userId}
@@ -2099,8 +2239,9 @@ export default function OutputView({
               })
             }}
             onOpenReviewQueue={() => setActiveSection('review')}
+            onStartSyllabusOnboarding={handleStartSyllabusOnboarding}
           />
-        ))}
+        )}
 
         {/* ── Grade Hub / Score Tracker ── */}
         {activeSection === 'grades' && (
@@ -2145,7 +2286,6 @@ export default function OutputView({
             courses={courses}
             onShowPaywall={onShowPaywall}
             onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
-            onOpenQuizBurst={({ courseIdx, topic }) => { setQuizBurstInit({ courseIdx, topic }); setShowQuizBurst(true) }}
           />
         )}
 
@@ -2187,10 +2327,6 @@ export default function OutputView({
             courses={courses}
             userId={userId}
             onShowPaywall={onShowPaywall}
-            learningStyle={learningStyle}
-            yearLevel={yearLevel}
-            schoolType={schoolType}
-            assignments={assignments}
           />
         )}
 
@@ -2208,11 +2344,6 @@ export default function OutputView({
           <EssayArchitectView
             userId={userId}
             onShowPaywall={onShowPaywall}
-            courses={courses}
-            learningStyle={learningStyle}
-            yearLevel={yearLevel}
-            schoolType={schoolType}
-            assignments={assignments}
           />
         )}
 
@@ -2311,10 +2442,6 @@ export default function OutputView({
           onClose={() => setShowCheatSheet(false)}
           onShowPaywall={onShowPaywall}
           onOpenQuizBurst={({ courseIdx, topic }) => { setShowCheatSheet(false); setQuizBurstInit({ courseIdx, topic }); setShowQuizBurst(true) }}
-          learningStyle={learningStyle}
-          yearLevel={yearLevel}
-          schoolType={schoolType}
-          assignments={assignments}
         />
       )}
       {showBrainDump && (
@@ -2326,10 +2453,6 @@ export default function OutputView({
           onClose={() => { setShowBrainDump(false); setBrainDumpInit(null) }}
           onShowPaywall={onShowPaywall}
           onDrillGaps={(topic) => { setShowBrainDump(false); setBrainDumpInit(null); setPendingDrillTopic(topic); setActiveSection('tools') }}
-          learningStyle={learningStyle}
-          yearLevel={yearLevel}
-          schoolType={schoolType}
-          assignments={assignments}
         />
       )}
       {confidencePrompt && (
@@ -2355,30 +2478,6 @@ export default function OutputView({
           onShowPaywall={onShowPaywall}
         />
       )}
-      {showSessionBundle && (
-        <SessionBundle
-          courses={courses}
-          userId={userId}
-          onClose={() => setShowSessionBundle(false)}
-          onShowPaywall={onShowPaywall}
-          learningStyle={learningStyle}
-          yearLevel={yearLevel}
-          schoolType={schoolType}
-          assignments={assignments}
-        />
-      )}
-      {diagnosticCourse && (
-        <CourseDiagnostic
-          course={diagnosticCourse}
-          learningStyle={learningStyle}
-          yearLevel={yearLevel}
-          schoolType={schoolType}
-          assignments={assignments}
-          onClose={() => setDiagnosticCourse(null)}
-          onComplete={() => setDiagnosticCourse(null)}
-        />
-      )}
-      <DeckAddedToast onReview={() => setActiveSection('tools')} />
       {showQuizBurst && (
         <QuickQuizBurst
           courses={courses}
@@ -2389,10 +2488,6 @@ export default function OutputView({
           initialCourseIdx={quizBurstInit?.courseIdx ?? 0}
           initialTopic={quizBurstInit?.topic ?? ''}
           autoStart={!!quizBurstInit}
-          learningStyle={learningStyle}
-          yearLevel={yearLevel}
-          schoolType={schoolType}
-          assignments={assignments}
         />
       )}
       {showPodcast && (
@@ -2418,10 +2513,6 @@ export default function OutputView({
           courses={courses}
           onClose={() => setShowConnectionsMode(false)}
           onShowPaywall={onShowPaywall}
-          learningStyle={learningStyle}
-          yearLevel={yearLevel}
-          schoolType={schoolType}
-          assignments={assignments}
         />
       )}
       {showTimedChallenge && (
