@@ -408,7 +408,8 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
 
   const handleStartTrial = async () => {
     track('paywall_cta_click', { plan_clicked: 'unlimited', billing_period: 'weekly', trigger_feature: trigger, is_trial: true })
-    track('trial_started', { plan: 'unlimited', billing_period: 'weekly', source: trigger })
+    // trial_started removed — trial_activated fires server-side from the Stripe webhook when the
+    // subscription is actually created (customer.subscription.created with status=trialing).
     setTrialLoading(true)
     setTrialError(null)
     try {

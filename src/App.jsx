@@ -5,6 +5,7 @@ import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasU
 import { useTheme } from './utils/useTheme'
 import { initAnalytics, identifyUser, resetUser, track, register, registerOnce } from './lib/analytics'
 import { captureReferralParam, getStoredReferrer, clearStoredReferrer } from './lib/referral'
+import { captureFirstTouch, getFirstTouch, firstTouchPostHogProps } from './lib/firstTouch'
 import { captureUtmForOnboarding } from './lib/utmPersonalize'
 import SharedPlanView from './components/SharedPlanView'
 import AuthScreen from './components/AuthScreen'
@@ -21,6 +22,9 @@ export default function App() {
   useEffect(() => {
     initAnalytics()
     captureReferralParam()
+    // Capture first-touch attribution before anything can overwrite it.
+    // captureFirstTouch() is a no-op if the record already exists.
+    captureFirstTouch()
     // Snapshot utm params before Supabase's PKCE flow clears the query
     // string. Onboarding reads this back to pre-select schoolType/yearLevel
     // for users coming from targeted campaigns (e.g. r/mcat, r/premed).
@@ -30,6 +34,7 @@ export default function App() {
     register({ surface: 'app' })
     // Stamp acquisition info onto the user permanently, even pre-signup,
     // so every later event can be sliced by source/UTM in PostHog.
+    // registerOnce ensures this is never overwritten by a later session.
     const sp = new URLSearchParams(window.location.search)
     registerOnce({
       utm_source: sp.get('utm_source'),
@@ -39,6 +44,9 @@ export default function App() {
       utm_term: sp.get('utm_term'),
       referrer: document.referrer || null,
       landing_path: window.location.pathname,
+      // Also register the stored first-touch as initial_source_* person properties
+      // so they survive email confirmation round-trips and OAuth redirects.
+      ...firstTouchPostHogProps(),
     })
   }, [])
   const [session, setSession]   = useState(undefined) // undefined = still checking
@@ -95,6 +103,12 @@ export default function App() {
 
   // ── Checkout cancel banner ─────────────────────────────────────────────────
   const [showCheckoutCancelBanner, setShowCheckoutCancelBanner] = useState(false)
+
+  // Prevents createCheckoutSession from firing more than once per checkoutIntent.
+  // Without this guard the render-path handler would re-fire on every re-render
+  // while the async call is in flight (every onAuthStateChange, state update, etc).
+  const checkoutIntentFiredRef = useRef(false)
+  const [checkoutRedirecting, setCheckoutRedirecting] = useState(false)
 
   // Capture checkout intent on mount before Supabase PKCE exchange clears the URL.
   // `promo` is used by the trial-cancel comeback offer email — that link deep-links
@@ -180,15 +194,51 @@ export default function App() {
         // Supabase sets created_at and last_sign_in_at simultaneously on signup (<30s apart).
         // On every subsequent sign-in last_sign_in_at is bumped to now, widening the gap.
         const isFreshSignup = createdAtMs > 0 && lastSignInMs > 0 && (lastSignInMs - createdAtMs) < 30 * 1000
+        const firstTouch = getFirstTouch()
         identifyUser(session.user.id, {
           email: session.user.email,
           signup_date: createdAtIso,
           auth_provider: session.user.app_metadata?.provider ?? 'email',
           name: session.user.user_metadata?.name ?? null,
+          // $set_once semantics: PostHog ignores these if already set on the person profile.
+          ...(isFreshSignup && firstTouch && {
+            initial_source_referrer:         firstTouch.referrer,
+            initial_source_referring_domain: firstTouch.referring_domain,
+            initial_source_utm_source:       firstTouch.utm_source,
+            initial_source_utm_medium:       firstTouch.utm_medium,
+            initial_source_utm_campaign:     firstTouch.utm_campaign,
+            initial_source_landing_path:     firstTouch.landing_path,
+          }),
         })
         register({ auth_provider: session.user.app_metadata?.provider ?? 'email' })
         track('user_signed_in', { fresh_signup: !!isFreshSignup, auth_provider: session.user.app_metadata?.provider ?? 'email' })
-        if (isFreshSignup) track('signup_completed', { auth_provider: session.user.app_metadata?.provider ?? 'email' })
+        if (isFreshSignup) {
+          track('signup_completed', {
+            auth_provider: session.user.app_metadata?.provider ?? 'email',
+            ...(firstTouch && {
+              initial_source_referrer:         firstTouch.referrer,
+              initial_source_referring_domain: firstTouch.referring_domain,
+              initial_source_utm_source:       firstTouch.utm_source,
+              initial_source_utm_medium:       firstTouch.utm_medium,
+              initial_source_utm_campaign:     firstTouch.utm_campaign,
+              initial_source_landing_path:     firstTouch.landing_path,
+            }),
+          })
+          // Persist first_touch to Supabase so the Stripe webhook can include it
+          // in subscription_activated without depending on client-side localStorage.
+          if (firstTouch) {
+            supabase.from('user_data').select('subscription').eq('user_id', session.user.id).maybeSingle()
+              .then(({ data }) => {
+                if (data?.subscription?.first_touch) return
+                const merged = { ...(data?.subscription ?? {}), first_touch: firstTouch }
+                return supabase.from('user_data').upsert(
+                  { user_id: session.user.id, subscription: merged, updated_at: new Date().toISOString() },
+                  { onConflict: 'user_id' }
+                )
+              })
+              .catch(() => {})
+          }
+        }
         // Welcome email - only on actual signup, not every login.
         // Fresh signups have created_at within ~minutes of now AND have not received it before (localStorage flag).
         const welcomeKey = `studyedge_welcome_sent_${session.user.id}`
@@ -284,10 +334,34 @@ export default function App() {
     })
   }, [session?.user?.id])
 
+  // ── Checkout intent → Stripe redirect ────────────────────────────────────
+  // Runs exactly once per intent: ref guard prevents re-entry on re-renders.
+  // Must wait for session + dbReady so plan status is known before calling Stripe.
+  useEffect(() => {
+    if (!checkoutIntent || !session?.user?.id || !dbReady) return
+    if (checkoutIntentFiredRef.current) return
+    if (getActivePlan() !== 'free') { setCheckoutIntent(null); return }
+    checkoutIntentFiredRef.current = true
+    setCheckoutRedirecting(true)
+    window.history.replaceState({}, '', window.location.pathname)
+
+    const opts = checkoutIntent.trial ? { trial: true } : { promo: checkoutIntent.promo }
+    const plan = checkoutIntent.trial ? 'pro' : checkoutIntent.plan
+    const billing = checkoutIntent.trial ? 'weekly' : checkoutIntent.billing
+
+    createCheckoutSession(plan, billing, session.user.email, session.user.id, opts)
+      .then(result => {
+        if (result?.alreadySubscribed || !result) { setCheckoutIntent(null); setCheckoutRedirecting(false); return }
+        window.location.href = result
+      })
+  }, [checkoutIntent, session?.user?.id, dbReady])
+
   // ── Checkout success handler ───────────────────────────────────────────────
   // Stripe webhooks are async: the DB may not reflect the new plan for a few
   // seconds after redirect. Poll until plan != 'free' (up to 10s) so the UI
   // shows the correct plan instead of 'free' while the webhook is in-flight.
+  // NOTE: conversion analytics (checkout_success / trial_activated) are emitted
+  // server-side from the Stripe webhook only. This poll is UX-only.
   useEffect(() => {
     if (!session?.user || !dbReady) return
     const params = new URLSearchParams(window.location.search)
@@ -303,7 +377,6 @@ export default function App() {
       try { await refreshSubscription(session.user.id) } catch (e) { console.error('[checkout success] refresh failed:', e) }
       const plan = getActivePlan()
       if (plan !== 'free') {
-        track('checkout_success', { plan })
         identifyUser(session.user.id, { plan })
         setCheckoutProcessing(false)
         setCheckoutSuccess(true)
@@ -662,27 +735,13 @@ export default function App() {
     )
   }
 
-  // ── Checkout intent handler (all paths go through Stripe) ───────────────
-  if (checkoutIntent && getActivePlan() === 'free') {
-    window.history.replaceState({}, '', window.location.pathname)
-    if (checkoutIntent.trial) {
-      createCheckoutSession('pro', 'weekly', session.user.email, session.user.id, { trial: true }).then(result => {
-        if (result?.alreadySubscribed) { setCheckoutIntent(null); return }
-        if (!result) { setCheckoutIntent(null); return }
-        window.location.href = result
-      })
-    } else {
-      createCheckoutSession(checkoutIntent.plan, checkoutIntent.billing, session.user.email, session.user.id, { promo: checkoutIntent.promo }).then(result => {
-        if (result?.alreadySubscribed) { setCheckoutIntent(null); return }
-        if (!result) { setCheckoutIntent(null); return }
-        window.location.href = result
-      })
-    }
+  // Spinner while checkout redirect is in flight (intent resolved by useEffect above).
+  if (checkoutRedirecting) {
     return (
       <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F6F3' }}>
         <div style={{ textAlign: 'center' }}>
           <Spinner size="md" style={{ display: 'block', margin: '0 auto 12px' }} />
-          <p style={{ color: '#6B6B6B', fontSize: 14 }}>{checkoutIntent.trial ? 'Activating your free trial…' : 'Redirecting to checkout…'}</p>
+          <p style={{ color: '#6B6B6B', fontSize: 14 }}>{checkoutIntent?.trial ? 'Activating your free trial…' : 'Redirecting to checkout…'}</p>
         </div>
       </div>
     )

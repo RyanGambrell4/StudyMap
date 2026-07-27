@@ -363,7 +363,9 @@ export function incrementAIQuery() {
 // Pass opts.trial: true to create a 3-day Stripe trial (card collected upfront).
 
 export async function createCheckoutSession(plan, billingPeriod, userEmail, userId, opts = {}) {
-  track('checkout_started', { plan, billingPeriod, trial: !!opts.trial, has_promo: !!opts.promo })
+  // checkout_button_clicked = honest name for what happened (CTA was clicked, API call is starting).
+  // checkout_started fires server-side from api/stripe.js only when the Stripe session is created.
+  track('checkout_button_clicked', { plan, billingPeriod, trial: !!opts.trial, has_promo: !!opts.promo })
   try {
     const res = await fetch('/api/stripe', {
       method: 'POST',
@@ -380,7 +382,14 @@ export async function createCheckoutSession(plan, billingPeriod, userEmail, user
 
     if (!res.ok || !data.url) {
       console.error('[subscription] Checkout session error:', data.error)
-      track('checkout_error', { plan, billingPeriod, trial: !!opts.trial, reason: data.error ?? 'api_error', status: res.status })
+      track('checkout_error', {
+        plan, billingPeriod, trial: !!opts.trial,
+        reason: data.error ?? 'api_error',
+        status: res.status,
+        stripe_error_code: data.stripe_error_code ?? null,
+        stripe_error_type: data.stripe_error_type ?? null,
+        stripe_decline_code: data.stripe_decline_code ?? null,
+      })
       return null
     }
 

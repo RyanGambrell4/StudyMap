@@ -422,6 +422,36 @@
         first_landing_path: window.location.pathname,
       });
     })();
+    // First-touch attribution: write original source to localStorage once, never overwrite.
+    // The app SPA reads this back and attaches it to signup_completed and subscription_activated.
+    // This survives email confirmation round-trips on the SAME device/browser.
+    // For cross-device/browser, UTMs are threaded through the confirmation link URL (see AuthScreen.jsx).
+    (function() {
+      var KEY = 'se_first_touch_v1';
+      try {
+        if (!localStorage.getItem(KEY)) {
+          var sp = new URLSearchParams(window.location.search);
+          var ref = document.referrer || null;
+          var domain = null;
+          if (ref) { try { domain = new URL(ref).hostname; } catch(e) {} }
+          var record = {
+            referrer: ref,
+            referring_domain: domain,
+            utm_source:   sp.get('utm_source')   || null,
+            utm_medium:   sp.get('utm_medium')   || null,
+            utm_campaign: sp.get('utm_campaign') || null,
+            utm_content:  sp.get('utm_content')  || null,
+            utm_term:     sp.get('utm_term')     || null,
+            landing_path: window.location.pathname,
+            landing_url:  window.location.href,
+            timestamp:    new Date().toISOString(),
+          };
+          if (record.referrer || record.utm_source || record.utm_medium) {
+            localStorage.setItem(KEY, JSON.stringify(record));
+          }
+        }
+      } catch(e) {}
+    })();
   </script>
 
   <!-- PostHog: scroll depth tracking (25/50/75/100%) -->
