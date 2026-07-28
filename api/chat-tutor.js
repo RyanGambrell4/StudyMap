@@ -1,5 +1,7 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
 import { logAiCall } from '../lib/server/axiom.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -14,6 +16,7 @@ export default async function handler(req, res) {
     messages,
     tutorMemory,
     courseName,
+    courseId: bodyCourseId,
     examDate,
     targetGrade,
     coachPlan,
@@ -28,8 +31,30 @@ export default async function handler(req, res) {
     currentGradePct,
     brainDumpGaps,
     upcomingDeadlines,
-  } = req.body
-  if (!messages?.length || !courseName) return res.status(400).json({ error: 'Missing required fields' })
+  } = req.body || {}
+  if (!messages?.length) return res.status(400).json({ error: 'Missing messages' })
+
+  let courseId = bodyCourseId
+  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+
+  // Extract the latest user message once — we use it for both the topic
+  // hint into getCourseContext (so materials retrieval targets what the
+  // student is actually asking about) and the Wolfram Alpha pattern check.
+  const latestUserMessage = messages.filter(m => m.role === 'user').slice(-1)[0]?.content ?? ''
+
+  let brain
+  try {
+    brain = await getCourseContext(gate.userId, courseId, {
+      topic: typeof latestUserMessage === 'string' ? latestUserMessage.slice(0, 200) : null,
+      request: req,
+    })
+  } catch (err) {
+    console.error('[chat-tutor] getCourseContext failed', err)
+    return res.status(400).json({ error: String(err?.message || err) })
+  }
+  const resolvedCourseName = brain.identity?.name || courseName
+  const serverContextBlock = formatCourseContextForPrompt(brain)
 
   let planContext = ''
   if (coachPlan?.weeklyFocus?.length) {
@@ -77,7 +102,12 @@ export default async function handler(req, res) {
   }
   const personalBlock = personalLines.length ? personalLines.join('\n') + '\n' : ''
 
-  const systemPrompt = `You are a focused study tutor for ${courseName}. The student has an exam on ${examDate ?? 'an upcoming date'} and their goal is ${targetGrade ?? 'to do well'}.
+  const systemPrompt = `You are a focused study tutor for ${resolvedCourseName}. The student has an exam on ${examDate ?? 'an upcoming date'} and their goal is ${targetGrade ?? 'to do well'}.
+
+${ANTI_GUESSING_RULES}
+
+${serverContextBlock}
+
 ${personalBlock}${planContext ? `Their current study plan covers:\n${planContext}` : ''}
 ${strugglesStr ? `Topics they have previously struggled with (spend extra time here): ${strugglesStr}` : ''}
 ${professorEmphasis ? `Professor emphasizes these topics (high exam priority): ${professorEmphasis}` : ''}
@@ -93,7 +123,6 @@ Only include this line when the student is clearly struggling. Otherwise omit it
   // Cap at 60 messages as a server-side safety net so a runaway client can't
   // blow the context window.
   const recentMessages = tutorMemory === true ? messages.slice(-60) : messages.slice(-10)
-  const latestUserMessage = recentMessages.filter(m => m.role === 'user').slice(-1)[0]?.content ?? ''
 
   // Try Wolfram Alpha for math/science/calculation queries
   let wolframContext = ''
