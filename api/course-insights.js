@@ -1,4 +1,6 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -6,29 +8,31 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { courseName, gradeComponents, completedSessions, weakTopics, examDate, targetScore } = req.body
-  if (!courseName) return res.status(400).json({ error: 'Missing courseName' })
+  const { courseName, courseId: bodyCourseId, targetScore, weakTopics: legacyWeak } = req.body || {}
 
-  const gradeStr = gradeComponents?.length
-    ? gradeComponents.map(c => `${c.name} (${c.weight}% weight${c.grade != null ? `, current: ${c.grade}%` : ', ungraded'})`).join(', ')
-    : 'No grade data'
+  let courseId = bodyCourseId
+  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
 
-  const sessionCount = Array.isArray(completedSessions) ? completedSessions.length : 0
-  const recentSessions = Array.isArray(completedSessions)
-    ? completedSessions.slice(-5).map(s => `${s.dateStr}: ${s.sessionType ?? 'Review'} (${s.duration ?? 60}min)`).join(', ')
-    : 'none'
+  let brain
+  try {
+    brain = await getCourseContext(gate.userId, courseId, { request: req })
+  } catch (err) {
+    console.error('[course-insights] getCourseContext failed', err)
+    return res.status(400).json({ error: String(err?.message || err) })
+  }
 
-  const weakStr = Array.isArray(weakTopics) && weakTopics.length ? weakTopics.slice(0, 5).join(', ') : 'none identified'
+  const contextBlock = formatCourseContextForPrompt(brain)
+  const legacyWeakLine = Array.isArray(legacyWeak) && legacyWeak.length
+    ? `\nCLIENT-DERIVED weak topics (mastery store): ${legacyWeak.slice(0, 5).join(', ')}\n`
+    : ''
+  const targetLine = targetScore ? `\nStudent's stated target score: ${targetScore}\n` : ''
 
   const prompt = `You are a study analytics engine. Analyze this student's course performance and generate actionable insights.
 
-Course: ${courseName}
-Grade breakdown: ${gradeStr}
-Total sessions completed: ${sessionCount}
-Recent sessions: ${recentSessions}
-Weak topics from recall: ${weakStr}
-${examDate ? `Exam date: ${examDate}` : ''}
-${targetScore ? `Target score: ${targetScore}` : ''}
+${ANTI_GUESSING_RULES}
+
+${contextBlock}${legacyWeakLine}${targetLine}
 
 Return ONLY valid JSON:
 {
@@ -41,7 +45,8 @@ Return ONLY valid JSON:
   "insight": "<one sharp sentence about what this student most needs to do differently right now>"
 }
 
-No em dashes. Be specific to the course and data - not generic advice.`
+No em dashes. Be specific to the course and data - not generic advice.
+If the context has no session history, set gradeTrajectory to 'unknown' and healthLabel to something honest like 'Not Enough Data'. Do not manufacture a trajectory from thin air.`
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
