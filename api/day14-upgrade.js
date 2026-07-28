@@ -49,7 +49,7 @@ export default async function handler(req, res) {
 
     const { data: row, error: rowError } = await supabaseAdmin
       .from('user_data')
-      .select('subscription')
+      .select('subscription, completed_sessions')
       .eq('user_id', user.id)
       .maybeSingle()
 
@@ -64,7 +64,12 @@ export default async function handler(req, res) {
     const plan = activeStatuses.includes(sub.status) ? (sub.plan ?? 'free') : 'free'
     if (plan !== 'free') { skipped++; continue }
 
-    const gate = await canSendUserEmail(user.id, { priority: 'normal' })
+    // Never pitch Pro to users who have never started a session. They have not
+    // seen the product work. The no-first-session cron handles this cohort.
+    const sessionCount = Array.isArray(row?.completed_sessions) ? row.completed_sessions.length : 0
+    if (sessionCount === 0) { skipped++; continue }
+
+    const gate = await canSendUserEmail(user.id, { priority: 'normal', email: user.email })
     if (!gate.ok) { skipped++; continue }
 
     const trialUsed = !!(sub.trialUsedAt || sub.trial_activated)

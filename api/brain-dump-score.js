@@ -1,6 +1,8 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
 import { tracedCall } from '../lib/server/langfuse.js'
-import { buildContextBlock, contextGuardrails } from '../lib/server/courseContextPrompt.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -8,29 +10,41 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { text, courseName, topic, courseContext } = req.body
-  const ctx = courseContext ?? { courseName }
-  const resolvedName = ctx.courseName ?? courseName
-  if (!text || !resolvedName) return res.status(400).json({ error: 'Missing required fields' })
+  const { text, courseName, courseId: bodyCourseId, topic, courseContext: legacyCtx } = req.body || {}
+  if (!text) return res.status(400).json({ error: 'Missing required fields' })
 
+  let courseId = bodyCourseId
+  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+
+  let brain
+  try {
+    brain = await getCourseContext(gate.userId, courseId, { topic: topic || null, request: req })
+  } catch (err) {
+    console.error('[brain-dump-score] getCourseContext failed', err)
+    return res.status(400).json({ error: String(err?.message || err) })
+  }
+
+  const resolvedName = brain.identity?.name || courseName || 'this course'
   const wordCount = text.trim().split(/\s+/).length
-  const contextBlock = buildContextBlock(ctx)
-  const guardrails = contextGuardrails(ctx, {
-    invention: 'When you name a gap, the concept MUST appear either in the syllabus events, coach-plan emphasis, weak topics, or be a canonical concept for this course. Do not invent professor-specific jargon.',
-  })
+  const contextBlock = formatCourseContextForPrompt(brain)
 
-  // Prior brain dumps for the same course, if any, so we can measure change
-  // over time. Study history entries look like { tool, score, topic, dateStr }.
-  const priorDumps = (ctx.recentSessions ?? [])
+  // Prior brain-dump scores from client-passed recentSessions (score history
+  // isn't persisted server-side). Text-only history is on brain.sessions.brainDumps.
+  const priorDumps = (legacyCtx?.recentSessions ?? [])
     .filter(s => s.tool === 'Brain Dump' && typeof s.score === 'number')
     .slice(0, 3)
   const priorSummary = priorDumps.length
-    ? `Prior brain dumps in this course: ${priorDumps.map(p => `${p.score}% (${p.dateStr}${p.topic ? `, ${p.topic}` : ''})`).join('; ')}`
-    : 'No prior brain dumps for this course yet.'
+    ? `Prior brain-dump scores in this course: ${priorDumps.map(p => `${p.score}% (${p.dateStr}${p.topic ? `, ${p.topic}` : ''})`).join('; ')}`
+    : 'No prior brain-dump scores tracked for this course yet.'
+
+  const supplementBlock = buildClientSupplementBlock(legacyCtx)
 
   const prompt = `You are the student's academic coach scoring a brain dump exercise for ${resolvedName}.
 
-${contextBlock}
+${ANTI_GUESSING_RULES}
+
+${contextBlock}${supplementBlock}
 
 ${priorSummary}
 Focus topic for this dump: ${topic || 'general course material'}
@@ -68,9 +82,8 @@ Rules:
 - studyTimeToUpgrade: realistic minutes of focused review to reach upgradeTarget.
 - upgradeTarget: one grade tier above the current projection.
 - possibleGaps: exactly 3 specific topics grounded in the context above.
-- No em dashes anywhere.
-
-${guardrails}`
+- When you name a gap, the concept MUST appear either in the syllabus events, coach-plan emphasis, weak topics, or be a canonical concept for this course. Do not invent professor-specific jargon.
+- No em dashes anywhere.`
 
   try {
     const data = await tracedCall({

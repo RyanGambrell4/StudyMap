@@ -2,6 +2,8 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 import { verifyAuth } from '../lib/server/usage.js'
+import { isEnabled } from '../lib/server/featureFlags.js'
+import { enqueueEmail } from '../lib/server/emailQueue.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -29,6 +31,12 @@ export default async function handler(req, res) {
   }
 
   const courseNames = Array.isArray(courses) ? courses.filter(Boolean).slice(0, 5) : []
+
+  if (userId && await isEnabled('lifecycle_v2', userId)) {
+    await enqueueEmail(userId, 'first-plan', 7, { email, firstName, courseNames })
+    return res.status(200).json({ ok: true, queued: true })
+  }
+
   const greeting = firstName ? `Hey ${firstName.split(' ')[0]}` : 'Hey there'
   const courseLine = courseNames.length
     ? `We built it around: <strong style="color:#111111;">${courseNames.join(', ')}</strong>.`

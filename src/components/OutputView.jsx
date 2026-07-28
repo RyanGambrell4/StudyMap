@@ -406,7 +406,7 @@ function LogGradeModal({ logGradeId, assignments, courses, gradeInput, setGradeI
 export default function OutputView({
   courses, schedule, learningStyle, yearLevel, schoolType,
   initialCompletedIds, initialAssignments, onSavePlan, onEditPlan, onSignOut, onAddCourse, onEditCourse, onDeleteCourse,
-  userEmail, userId, onShowPaywall,
+  userEmail, userId, onShowPaywall, openSyllabusOnMount,
 }) {
   const result = useMemo(
     () => generateSchedule(courses, schedule, learningStyle, yearLevel),
@@ -530,6 +530,7 @@ export default function OutputView({
   const [syllabusEvents, setSyllabusEvents] = useState(() => getCachedSyllabusEvents() ?? [])
   const [syllabusModalCourse, setSyllabusModalCourse] = useState(null)
   const [syllabusInitialFile, setSyllabusInitialFile] = useState(null)
+  useEffect(() => { if (openSyllabusOnMount) setSyllabusModalCourse(-1) }, []) // eslint-disable-line react-hooks/exhaustive-deps
 
   // Syllabus onboarding (parse-syllabus flow)
   const [syllabusOnboardingData, setSyllabusOnboardingData] = useState(null)

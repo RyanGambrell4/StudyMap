@@ -2,6 +2,8 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 import { verifyAuth } from '../lib/server/usage.js'
+import { isEnabled } from '../lib/server/featureFlags.js'
+import { enqueueEmail } from '../lib/server/emailQueue.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -42,6 +44,11 @@ export default async function handler(req, res) {
     }
     userPlan = row?.subscription?.plan ?? 'free'
     trialUsed = !!(row?.subscription?.trialUsedAt)
+  }
+
+  if (userId && await isEnabled('lifecycle_v2', userId)) {
+    await enqueueEmail(userId, 'onboarding-complete', 7, { email, firstName, yearLevel, learningStyle, preferredTime })
+    return res.status(200).json({ ok: true, queued: true })
   }
 
   const greeting = firstName ? `Hi ${firstName.split(' ')[0]}` : 'You\'re set'

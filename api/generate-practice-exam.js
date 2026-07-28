@@ -1,4 +1,6 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 
 const MIN_LEN = 10
 const MAX_LEN = 30
@@ -15,6 +17,7 @@ export default async function handler(req, res) {
       text,
       description,
       courseName,
+      courseId: bodyCourseId,
       examLength,
       context,
       personalization,
@@ -25,6 +28,19 @@ export default async function handler(req, res) {
       weakTopics,
     } = req.body ?? {}
     const length = Math.max(MIN_LEN, Math.min(MAX_LEN, Number(examLength) || 10))
+
+    let courseId = bodyCourseId
+    if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+    if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+
+    let brain
+    try {
+      brain = await getCourseContext(gate.userId, courseId, { request: req })
+    } catch (err) {
+      console.error('[generate-practice-exam] getCourseContext failed', err)
+      return res.status(400).json({ error: String(err?.message || err) })
+    }
+    const courseContextBlock = formatCourseContextForPrompt(brain)
 
     const hasText = typeof text === 'string' && text.trim().length >= 50
     const hasDescription = typeof description === 'string' && description.trim().length >= 30
@@ -58,6 +74,10 @@ export default async function handler(req, res) {
     ].filter(Boolean).join('\n\n')
 
     const prompt = `You are an expert exam designer building a realistic practice exam.
+
+${ANTI_GUESSING_RULES}
+
+${courseContextBlock}
 
 ${courseLine}${personalizationLine}${personalContextLine}${contextLine}
 ${sourceSection}

@@ -1,5 +1,7 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
-import { buildContextBlock, contextGuardrails } from '../lib/server/courseContextPrompt.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 
 const COLORS = ['#3B61C4', '#16A34A', '#D97706', '#DC2626', '#6366F1', '#0891B2', '#DB2777', '#EA580C']
 
@@ -78,21 +80,32 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { topic, diagramType, courseName, courseContext } = req.body
+  const { topic, diagramType, courseName, courseId: bodyCourseId, courseContext: legacyCtx } = req.body || {}
   if (!topic?.trim()) return res.status(400).json({ error: 'Topic is required' })
 
   const schema = schemaFor(diagramType, topic.trim())
   if (!schema) return res.status(400).json({ error: 'Invalid diagram type' })
 
-  const ctx = courseContext ?? { courseName }
-  const contextBlock = buildContextBlock(ctx)
-  const guardrails = contextGuardrails(ctx, {
-    invention: 'Prefer terminology and definitions that show up in the syllabus events, emphasis topics, or weak-topic list. Do NOT invent professor-specific jargon.',
-  })
+  let courseId = bodyCourseId
+  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+
+  let brain
+  try {
+    brain = await getCourseContext(gate.userId, courseId, { topic: topic.trim(), request: req })
+  } catch (err) {
+    console.error('[generate-diagram] getCourseContext failed', err)
+    return res.status(400).json({ error: String(err?.message || err) })
+  }
+
+  const contextBlock = formatCourseContextForPrompt(brain)
+  const supplementBlock = buildClientSupplementBlock(legacyCtx)
 
   const prompt = `You are drawing a study diagram for a specific student.
 
-${contextBlock}
+${ANTI_GUESSING_RULES}
+
+${contextBlock}${supplementBlock}
 
 DIAGRAM TOPIC: "${topic.trim()}"
 
@@ -103,8 +116,7 @@ Grounding requirements:
 - Node/branch labels should use the same wording as the student's syllabus or coach plan when possible.
 - Where a node matches one of the student's weak topics or recent quiz misses, flag it (isWeakSpot=true, weakStepId, or confuseNote).
 - If the topic isn't clearly in the course's material, still return a good general diagram but keep it broad, and skip the weak-spot callouts.
-
-${guardrails}`
+- Prefer terminology and definitions that show up in the syllabus events, emphasis topics, or weak-topic list. Do NOT invent professor-specific jargon.`
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {

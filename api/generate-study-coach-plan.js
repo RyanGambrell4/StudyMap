@@ -5,6 +5,7 @@ import {
   isGroundedInStudent,
   isMethodOnly,
 } from '../lib/server/coachAntiGuessing.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 
 // ─── Calendar helpers ────────────────────────────────────────────────────────
 // LLMs are unreliable at calendar math (Monday of week N, weeks-until-exam,
@@ -222,6 +223,7 @@ export default async function handler(req, res) {
 
   const {
     courseName,
+    courseId: bodyCourseId,
     goal,
     emphasisTopics,
     importantDates,
@@ -238,10 +240,24 @@ export default async function handler(req, res) {
     courseRecallScores,
   } = req.body || {}
 
-  if (!courseName || !goal) return res.status(400).json({ error: 'Missing required fields' })
+  if (!goal) return res.status(400).json({ error: 'Missing goal' })
+
+  let courseId = bodyCourseId
+  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+
+  let brain
+  try {
+    brain = await getCourseContext(gate.userId, courseId, { topic: emphasisTopics || null, request: req })
+  } catch (err) {
+    console.error('[generate-study-coach-plan] getCourseContext failed', err)
+    return res.status(400).json({ error: String(err?.message || err) })
+  }
+  const resolvedCourseName = brain.identity?.name || courseName
+  const serverContextBlock = formatCourseContextForPrompt(brain)
 
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|Reading Comprehension|FAR|AUD|REG|MBE|MEE|MPT|Verbal Reasoning|Quantitative Reasoning|Analytical Writing|Quantitative|Data Insights/i
-  const isExamMode = EXAM_PATTERN.test(courseName)
+  const isExamMode = EXAM_PATTERN.test(resolvedCourseName)
 
   const sessionsPerWeek = Math.max(1, Math.min(7, Number(daysPerWeek) || (isExamMode ? 5 : 3)))
   const sessionLen = Math.max(15, Math.min(240, Number(sessionMinutes) || (isExamMode ? 90 : 60)))
@@ -338,10 +354,14 @@ Return JSON in exactly this shape:
   "warningZones": ["trap 1", "trap 2", "trap 3"]
 }`
 
-  // Dynamic per-student payload.
+  // Dynamic per-student payload. Server-assembled course context is layered
+  // above the user's form inputs so struggles from struggle_topics, deadlines
+  // from syllabus_events, and uploads from course_uploads all contribute.
   const userPrompt = `MODE: ${isExamMode ? 'High-stakes licensing/admissions exam' : 'University course'}
 
-Course / section: ${courseName}
+${serverContextBlock}
+
+Course / section: ${resolvedCourseName}
 Student's goal (verbatim): ${goal}
 Sessions per week: ${sessionsPerWeek}
 Session length: ${sessionLen} minutes

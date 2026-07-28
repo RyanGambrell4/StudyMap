@@ -3,6 +3,8 @@ import { Resend } from 'resend'
 import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 import { acquireCronLock } from '../lib/server/cronLock.js'
+import { isEnabled } from '../lib/server/featureFlags.js'
+import { enqueueEmail } from '../lib/server/emailQueue.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -55,7 +57,7 @@ export default async function handler(req, res) {
       const tier = daysSinceSession >= 7 ? 'long' : 'short'
 
       // Rate-limit: low priority (>= 5 days since last email of any kind)
-      const gate = await canSendUserEmail(row.user_id, { priority: 'low' })
+      const gate = await canSendUserEmail(row.user_id, { priority: 'low', email })
       if (!gate.ok) { skipped++; continue }
 
       let email
@@ -85,6 +87,12 @@ export default async function handler(req, res) {
 
       const firstName = email.split('@')[0].split('.')[0]
       const firstName2 = firstName.charAt(0).toUpperCase() + firstName.slice(1)
+
+      if (await isEnabled('lifecycle_v2', row.user_id)) {
+        await enqueueEmail(row.user_id, 're-engage', 6, { email })
+        sent++
+        continue
+      }
 
       // Build content based on tier
       let subject, headline, bodyPara1, bodyPara2

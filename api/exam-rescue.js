@@ -1,10 +1,13 @@
 import { verifyAndCheckAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   const {
     courseName,
+    courseId: bodyCourseId,
     currentGrade,
     hoursAvailable,
     step,
@@ -15,17 +18,25 @@ export default async function handler(req, res) {
     targetGrade,
     learningStyle,
     struggles,
-  } = req.body
-  if (!courseName) return res.status(400).json({ error: 'Missing courseName' })
+  } = req.body || {}
 
   // Schedule step is auto-generated as part of the same session — auth only, no extra credit.
-  if (step === 'schedule') {
-    const auth = await verifyAuth(req)
-    if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
-  } else {
-    const gate = await verifyAndCheckAiUsage(req)
-    if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const gate = step === 'schedule' ? await verifyAuth(req) : await verifyAndCheckAiUsage(req)
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
+  let courseId = bodyCourseId
+  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+
+  let brain
+  try {
+    brain = await getCourseContext(gate.userId, courseId, { request: req })
+  } catch (err) {
+    console.error('[exam-rescue] getCourseContext failed', err)
+    return res.status(400).json({ error: String(err?.message || err) })
   }
+  const resolvedName = brain.identity?.name || courseName
+  const courseContextBlock = formatCourseContextForPrompt(brain)
 
   const safeHours = Math.min(Math.max(Number(hoursAvailable) || 3, 0.5), 72)
 
@@ -44,7 +55,11 @@ export default async function handler(req, res) {
   if (step === 'topics' || !step) {
     const prompt = `You are an expert academic coach helping a student prepare for an urgent exam.
 
-Course: ${courseName}
+${ANTI_GUESSING_RULES}
+
+${courseContextBlock}
+
+Course: ${resolvedName}
 Current grade: ${currentGrade || 'unknown'}
 Hours available: ${safeHours}${personalBlock}
 ${context}
@@ -103,7 +118,12 @@ Rules:
     const startLabel = now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true })
     const hours = safeHours
 
-    const prompt = `You are an expert academic coach. A student has ${hours} hours starting now (${startLabel}) to study for their ${courseName} exam.${personalBlock}
+    const prompt = `You are an expert academic coach. A student has ${hours} hours starting now (${startLabel}) to study for their ${resolvedName} exam.
+
+${ANTI_GUESSING_RULES}
+
+${courseContextBlock}
+${personalBlock}
 
 Topics to cover in priority order:
 ${(topics || []).map((t, i) => `${i + 1}. ${t.name} (${t.priority}, about ${t.estimatedMinutes} min)`).join('\n')}

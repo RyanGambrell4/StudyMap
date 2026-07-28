@@ -1,5 +1,40 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
-import { buildContextBlock, contextGuardrails } from '../lib/server/courseContextPrompt.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
+
+// pickFocus reads server-derivable signals from the CourseContext object,
+// and client-derived quiz-miss / mastery signals from the optional legacy
+// courseContext body param when the client passes them.
+function pickFocus(topic, brain, legacyCtx) {
+  const trimmedTopic = typeof topic === 'string' ? topic.trim() : ''
+  if (trimmedTopic) return { label: trimmedTopic, detail: 'student-selected focus topic' }
+
+  const firstMiss = legacyCtx?.recentQuizMisses?.[0]
+  if (firstMiss?.topic) {
+    return { label: firstMiss.topic, detail: `student scored ${firstMiss.score}% on this last time — target it again` }
+  }
+  const weakest = legacyCtx?.weakTopics?.[0]
+  if (weakest?.topic) {
+    return { label: weakest.topic, detail: `mastery ${weakest.score}/100 — student's weakest topic in this course` }
+  }
+  const struggle = brain.topics?.items?.find(t => t.isStruggle)
+  if (struggle) return { label: struggle.name, detail: 'flagged as a struggle topic' }
+  const emphasis = brain.plan?.emphasisTopics?.[0]
+  if (emphasis) return { label: emphasis, detail: 'listed in professor emphasis' }
+  const week = brain.plan?.weeklyFocus?.[0]?.theme || brain.plan?.weeklyFocus?.[0]?.keyTopics?.[0]
+  if (week) return { label: week, detail: 'current week of the coach plan' }
+  return { label: 'general course material', detail: null }
+}
+
+function summarizeGrounding(questions) {
+  const buckets = {}
+  for (const q of questions ?? []) {
+    const g = q.grounding ?? 'course_name_only'
+    buckets[g] = (buckets[g] ?? 0) + 1
+  }
+  return buckets
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -7,26 +42,29 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { courseName, topic, courseContext } = req.body
-  if (!courseName && !courseContext?.courseName) {
-    return res.status(400).json({ error: 'Missing courseName' })
+  const { courseName, courseId: bodyCourseId, topic, courseContext: legacyCtx } = req.body || {}
+  let courseId = bodyCourseId
+  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+
+  let brain
+  try {
+    brain = await getCourseContext(gate.userId, courseId, { topic: topic || null, request: req })
+  } catch (err) {
+    console.error('[quiz-burst] getCourseContext failed', err)
+    return res.status(400).json({ error: String(err?.message || err) })
   }
 
-  const ctx = courseContext ?? { courseName }
-  const resolvedName = ctx.courseName ?? courseName
-
-  // Choose the 5-question focus. Priority: explicit topic → most recent
-  // quiz miss → weakest mastery topic → coach plan emphasis → general.
-  const focus = pickFocus(topic, ctx)
-
-  const contextBlock = buildContextBlock(ctx)
-  const guardrails = contextGuardrails(ctx, {
-    invention: 'If the context above does not contain enough material to write a specific question, write the question at a general-course level and set "grounding":"course_name_only" on that question. Never invent syllabus items, textbook page numbers, or professor names.',
-  })
+  const resolvedName = brain.identity?.name || courseName
+  const focus = pickFocus(topic, brain, legacyCtx)
+  const contextBlock = formatCourseContextForPrompt(brain)
+  const supplementBlock = buildClientSupplementBlock(legacyCtx)
 
   const prompt = `You are writing a Quick Quiz Burst for a specific student. This student's course context is below — every question you write must be defensibly grounded in it.
 
-${contextBlock}
+${ANTI_GUESSING_RULES}
+
+${contextBlock}${supplementBlock}
 
 QUIZ FOCUS: ${focus.label}
 ${focus.detail ? `Detail: ${focus.detail}` : ''}
@@ -59,7 +97,8 @@ For EACH question return this exact shape:
 
 Return ONLY a JSON array of 5 objects, nothing else.
 
-${guardrails}
+Rules:
+- If the context above does not contain enough material to write a specific question, write the question at a general-course level and set "grounding":"course_name_only" on that question. Never invent syllabus items, textbook page numbers, or professor names.
 - All 4 options must be plausible distractors
 - answer must exactly match one option string including the letter prefix
 - Test conceptual understanding and application, not vocabulary trivia
@@ -100,32 +139,4 @@ ${guardrails}
     console.error('[quiz-burst]', e)
     return res.status(500).json({ error: 'Failed to generate quiz. Please try again.' })
   }
-}
-
-function pickFocus(topic, ctx) {
-  const trimmedTopic = typeof topic === 'string' ? topic.trim() : ''
-  if (trimmedTopic) return { label: trimmedTopic, detail: 'student-selected focus topic' }
-
-  const firstMiss = ctx.recentQuizMisses?.[0]
-  if (firstMiss?.topic) {
-    return { label: firstMiss.topic, detail: `student scored ${firstMiss.score}% on this last time — target it again` }
-  }
-  const weakest = ctx.weakTopics?.[0]
-  if (weakest?.topic) {
-    return { label: weakest.topic, detail: `mastery ${weakest.score}/100 — student's weakest topic in this course` }
-  }
-  const emphasis = ctx.emphasisTopics?.[0]
-  if (emphasis) return { label: emphasis, detail: 'listed in professor emphasis' }
-  const week = ctx.weeklyFocus?.theme
-  if (week) return { label: week, detail: 'current week of the coach plan' }
-  return { label: 'general course material', detail: null }
-}
-
-function summarizeGrounding(questions) {
-  const buckets = {}
-  for (const q of questions ?? []) {
-    const g = q.grounding ?? 'course_name_only'
-    buckets[g] = (buckets[g] ?? 0) + 1
-  }
-  return buckets
 }

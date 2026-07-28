@@ -6,6 +6,7 @@ import {
   NO_STUDENT_CONTENT_DIRECTIVE,
   hasStudentContent,
 } from '../lib/server/coachAntiGuessing.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -18,6 +19,7 @@ export default async function handler(req, res) {
 
   const {
     courseName,
+    courseId: bodyCourseId,
     sessionType,
     durationMinutes,
     examDate,
@@ -33,11 +35,25 @@ export default async function handler(req, res) {
     recentRecallAvg,
     currentGradePct,
     preferredTime,
-  } = req.body
-  if (!courseName || !durationMinutes) return res.status(400).json({ error: 'Missing required fields' })
+  } = req.body || {}
+  if (!durationMinutes) return res.status(400).json({ error: 'Missing durationMinutes' })
+
+  let courseId = bodyCourseId
+  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+
+  let brain
+  try {
+    brain = await getCourseContext(gate.userId, courseId, { topic: studentFocus || null, request: req })
+  } catch (err) {
+    console.error('[session-blueprint] getCourseContext failed', err)
+    return res.status(400).json({ error: String(err?.message || err) })
+  }
+  const resolvedCourseName = brain.identity?.name || courseName
+  const serverContextBlock = formatCourseContextForPrompt(brain)
 
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|Reading Comprehension|FAR|AUD|REG|MBE|MEE|MPT|Verbal Reasoning|Quantitative Reasoning|Analytical Writing|Quantitative|Data Insights/i
-  const isExamMode = EXAM_PATTERN.test(courseName)
+  const isExamMode = EXAM_PATTERN.test(resolvedCourseName)
 
   // Grounding check. If the student supplied NO topic/upload/focus/emphasis,
   // we skip the AI call entirely and return a neutral structural blueprint.
@@ -105,7 +121,9 @@ export default async function handler(req, res) {
 
 ${ANTI_GUESSING_RULES}
 
-Section: ${courseName}
+${serverContextBlock}
+
+Section: ${resolvedCourseName}
 Session type: ${sessionType || 'Content Review'}
 Total duration: ${durationMinutes} minutes
 ${examLine}
@@ -151,7 +169,9 @@ Rules:
 
 ${ANTI_GUESSING_RULES}
 
-Course: ${courseName}
+${serverContextBlock}
+
+Course: ${resolvedCourseName}
 Session type: ${sessionType}
 Total duration: ${durationMinutes} minutes
 ${examLine}

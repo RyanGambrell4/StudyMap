@@ -52,6 +52,7 @@ export default function App() {
   const [session, setSession]   = useState(undefined) // undefined = still checking
   const [dbReady, setDbReady]   = useState(false)
   const [showOutput, setShowOutput]   = useState(false)
+  const [openSyllabusOnMount]   = useState(() => new URLSearchParams(window.location.search).get('upload') === 'syllabus')
   const [courses, setCourses]         = useState([])
   const [schedule, setSchedule]       = useState({ hoursPerWeek: 15, preferredTime: 'Morning' })
   const [learningStyle, setLearningStyle]   = useState(null)
@@ -768,6 +769,7 @@ export default function App() {
           userId={session.user.id}
           userCreatedAt={session.user.created_at ?? null}
           onShowPaywall={openPaywall}
+          openSyllabusOnMount={openSyllabusOnMount}
         />
       ) : (
         <Onboarding onComplete={handleOnboardingComplete} userEmail={session.user.email} userId={session.user.id} />

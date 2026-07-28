@@ -1,21 +1,32 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
-import { buildContextBlock, contextGuardrails } from '../lib/server/courseContextPrompt.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { topic, essayType, wordCount, requirements, courseName, courseContext } = req.body
+  const { topic, essayType, wordCount, requirements, courseName, courseId: bodyCourseId } = req.body || {}
   if (!topic?.trim()) return res.status(400).json({ error: 'Topic is required' })
 
-  const ctx = courseContext ?? { courseName }
-  const contextBlock = buildContextBlock(ctx)
-  const guardrails = contextGuardrails(ctx, {
-    invention: 'If the student has not provided an assignment prompt or specific requirements, pick angles that match the course level (year, learning style, professor emphasis). Do NOT invent that the professor is looking for anything specific.',
-  })
+  let courseId = bodyCourseId
+  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+
+  let brain
+  try {
+    brain = await getCourseContext(gate.userId, courseId, { topic: topic.trim(), request: req })
+  } catch (err) {
+    console.error('[essay-thesis] getCourseContext failed', err)
+    return res.status(400).json({ error: String(err?.message || err) })
+  }
+
+  const contextBlock = formatCourseContextForPrompt(brain)
 
   const prompt = `Generate exactly 3 strong, distinct thesis statements for a ${essayType || 'academic'} essay.
+
+${ANTI_GUESSING_RULES}
 
 ${contextBlock}
 
@@ -27,11 +38,10 @@ Rules:
 - Each thesis takes a clear, arguable position that fits this course level and any listed emphasis topics.
 - Each of the 3 must attack the topic from a meaningfully different angle.
 - Keep each to one sentence, no numbering or labels.
+- If the student has not provided an assignment prompt or specific requirements, pick angles that match the course level (year, learning style, professor emphasis). Do NOT invent that the professor is looking for anything specific.
 - No em dashes anywhere.
 
-Return ONLY a JSON array of 3 strings: ["thesis 1", "thesis 2", "thesis 3"]
-
-${guardrails}`
+Return ONLY a JSON array of 3 strings: ["thesis 1", "thesis 2", "thesis 3"]`
 
   const response = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
