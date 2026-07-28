@@ -1,5 +1,25 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
-import { buildContextBlock, contextGuardrails } from '../lib/server/courseContextPrompt.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { buildContextBlock } from '../lib/server/courseContextPrompt.js'
+
+// Fields the client derives from its local mastery / quiz-history store that
+// the server does not yet persist. When the client passes them in
+// `courseContext`, we render them as a supplement so the AI still sees them.
+const CLIENT_ONLY_FIELDS = ['weakTopics', 'strongTopics', 'recentQuizMisses', 'brainDumpGaps']
+
+function pickSupplement(courseContext) {
+  if (!courseContext || typeof courseContext !== 'object') return null
+  const out = {}
+  let any = false
+  for (const f of CLIENT_ONLY_FIELDS) {
+    if (Array.isArray(courseContext[f]) && courseContext[f].length) {
+      out[f] = courseContext[f]
+      any = true
+    }
+  }
+  return any ? out : null
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -7,25 +27,37 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { courseName, examPrompt, regenerate, courseContext } = req.body
-  const ctx = courseContext ?? { courseName }
-  const resolvedName = ctx.courseName ?? courseName
-  if (!resolvedName && !examPrompt) return res.status(400).json({ error: 'Missing course context' })
+  const { courseName, courseId: bodyCourseId, examPrompt, regenerate, courseContext: legacyCtx } = req.body || {}
+  let courseId = bodyCourseId
+  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
 
+  let brain
+  try {
+    brain = await getCourseContext(gate.userId, courseId, { topic: examPrompt || null, request: req })
+  } catch (err) {
+    console.error('[cheat-sheet] getCourseContext failed', err)
+    return res.status(400).json({ error: String(err?.message || err) })
+  }
+
+  const resolvedName = brain.identity?.name || courseName || 'this course'
+  const supplement = pickSupplement(legacyCtx)
+  const supplementBlock = supplement
+    ? '\n\nCLIENT-DERIVED SIGNALS (mastery scores, quiz misses — not persisted server-side yet):\n' + buildContextBlock(supplement)
+    : ''
   const angle = regenerate === 2
     ? 'Recompute the ranking from a contrarian angle: surface topics students commonly under-review that this professor still tests. Cross-reference the emphasis and syllabus signals for hints.'
     : regenerate === 1
       ? 'Recompute the ranking emphasizing cross-topic connections and applied problems drawn from the coach plan and syllabus.'
       : 'Rank the most likely exam topics using ALL context signals below. Weight = syllabus mention density × recent quiz-miss rate × proximity to exam date × professor emphasis.'
 
-  const contextBlock = buildContextBlock(ctx)
-  const guardrails = contextGuardrails(ctx, {
-    invention: 'If the context only contains a course name (no syllabus, coach plan, or mastery data), return topics that are canonical for a course of this name at this year-level, and mark examLikelihood as "Medium" for all of them. Do NOT invent professor names or fake syllabus weeks.',
-  })
+  const contextBlock = formatCourseContextForPrompt(brain)
 
   const prompt = `You are the student's academic coach preparing a personalized cheat sheet for their ${resolvedName} exam.
 
-${contextBlock}
+${ANTI_GUESSING_RULES}
+
+${contextBlock}${supplementBlock}
 
 ${examPrompt ? `Student's own exam description: "${examPrompt}"` : ''}
 
@@ -55,9 +87,8 @@ Rules:
 - Every 'whyLikely' MUST cite a real signal from the context above — do not write generic filler.
 - Set readiness from mastery scores when available: <40 = Weak, 40-69 = Moderate, 70+ = Strong. Only fall back to "Moderate" when no mastery data exists.
 - estimatedMinutes: 5-30 per topic, realistic to actually complete.
-- No em dashes anywhere.
-
-${guardrails}`
+- If the context only contains a course name (no syllabus, coach plan, or mastery data), return topics that are canonical for a course of this name at this year-level, and mark examLikelihood as "Medium" for all of them. Do NOT invent professor names or fake syllabus weeks.
+- No em dashes anywhere.`
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
