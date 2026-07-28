@@ -1,75 +1,125 @@
 import { verifyAndCheckAiUsage, verifyAuth } from '../lib/server/usage.js'
-import { buildContextBlock, contextGuardrails } from '../lib/server/courseContextPrompt.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { buildContextBlock } from '../lib/server/courseContextPrompt.js'
+
+const CLIENT_ONLY_FIELDS = ['weakTopics', 'strongTopics', 'recentQuizMisses', 'brainDumpGaps']
+function pickSupplement(courseContext) {
+  if (!courseContext || typeof courseContext !== 'object') return null
+  const out = {}
+  let any = false
+  for (const f of CLIENT_ONLY_FIELDS) {
+    if (Array.isArray(courseContext[f]) && courseContext[f].length) {
+      out[f] = courseContext[f]; any = true
+    }
+  }
+  return any ? out : null
+}
+
+// Pull concept candidates out of a CourseContext + optional legacy ctx.
+function conceptsFrom(brain, legacyCtx) {
+  const out = new Set()
+  if (brain?.plan?.emphasisTopics) brain.plan.emphasisTopics.forEach(t => t && out.add(String(t)))
+  if (brain?.plan?.weeklyFocus?.length) {
+    for (const wk of brain.plan.weeklyFocus) {
+      for (const t of (wk?.keyTopics || [])) if (t) out.add(String(t))
+    }
+  }
+  if (brain?.deadlines?.items?.length) {
+    for (const d of brain.deadlines.items) if (d?.title) out.add(String(d.title))
+  }
+  if (brain?.topics?.items?.length) {
+    for (const t of brain.topics.items) if (t?.name) out.add(String(t.name))
+  }
+  if (legacyCtx?.weakTopics) for (const t of legacyCtx.weakTopics) if (t?.topic) out.add(String(t.topic))
+  return out
+}
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   const {
-    phase, courseName, concepts, conceptA, conceptB, question, answer,
-    courseContext,
-    // Wave 3: cross-course mode. When set, extraCourseContexts is an array
-    // of hydrated CourseContext objects for the student's OTHER courses,
-    // and the endpoint must generate concept pairs that span courses.
+    phase,
+    courseName,
+    courseId: bodyCourseId,
+    concepts,
+    conceptA, conceptB, question, answer,
+    courseContext: legacyCtx,
     crossCourse = false,
+    extraCourseIds = [],
     extraCourseContexts = [],
-  } = req.body
-  const ctx = courseContext ?? { courseName }
-  const resolvedName = ctx.courseName ?? courseName
-  if (!phase || !resolvedName) return res.status(400).json({ error: 'Missing required fields' })
+  } = req.body || {}
 
-  if (phase === 'score') {
-    const auth = await verifyAuth(req)
-    if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
-  } else {
-    const gate = await verifyAndCheckAiUsage(req)
-    if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  if (!phase) return res.status(400).json({ error: 'Missing required fields' })
+
+  const gate = phase === 'score' ? await verifyAuth(req) : await verifyAndCheckAiUsage(req)
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
+  let courseId = bodyCourseId
+  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+
+  let brain
+  try {
+    brain = await getCourseContext(gate.userId, courseId, { request: req })
+  } catch (err) {
+    console.error('[connections-mode] getCourseContext failed', err)
+    return res.status(400).json({ error: String(err?.message || err) })
   }
+  const resolvedName = brain.identity?.name || courseName || 'this course'
+  const contextBlock = formatCourseContextForPrompt(brain)
+  const supplement = pickSupplement(legacyCtx)
+  const supplementBlock = supplement
+    ? '\n\nCLIENT-DERIVED SIGNALS (mastery scores, quiz misses — not persisted server-side yet):\n' + buildContextBlock(supplement)
+    : ''
 
   let prompt
 
   if (phase === 'generate') {
-    // Assemble the pool of concepts we know are relevant. In-course mode
-    // pulls only from THIS course. Cross-course mode also pulls from every
-    // other course context the client supplied, tagged with its origin
-    // course name — so the model can build interdisciplinary pairs.
+    // Pool: home course + optional cross-course, each loaded server-side per
+    // courseId with per-course isolation enforced by getCourseContext.
     const conceptsByCourse = new Map()
-    const addToCourse = (courseName, arr) => {
-      if (!arr) return
-      const bucket = conceptsByCourse.get(courseName) ?? new Set()
-      arr.forEach(t => { if (t) bucket.add(String(t)) })
-      conceptsByCourse.set(courseName, bucket)
+    conceptsByCourse.set(resolvedName, conceptsFrom(brain, legacyCtx))
+    if (Array.isArray(concepts)) {
+      const home = conceptsByCourse.get(resolvedName)
+      for (const c of concepts) if (c) home.add(String(c))
     }
-    // Home course concepts
-    addToCourse(resolvedName, ctx.emphasisTopics)
-    addToCourse(resolvedName, concepts)
-    addToCourse(resolvedName, ctx.weeklyFocus?.keyTopics)
-    addToCourse(resolvedName, (ctx.syllabusEvents ?? []).map(e => e.title))
-    addToCourse(resolvedName, (ctx.weakTopics ?? []).map(t => t.topic))
 
-    // Cross-course additions
-    if (crossCourse && Array.isArray(extraCourseContexts)) {
-      for (const other of extraCourseContexts) {
-        const name = other?.courseName
-        if (!name || name === resolvedName) continue
-        addToCourse(name, other.emphasisTopics)
-        addToCourse(name, other.weeklyFocus?.keyTopics)
-        addToCourse(name, (other.syllabusEvents ?? []).map(e => e.title))
-        addToCourse(name, (other.weakTopics ?? []).map(t => t.topic))
+    if (crossCourse) {
+      // Prefer server-side load by extraCourseIds (safe, isolated). Fall back
+      // to client-passed extraCourseContexts if no ids provided.
+      if (Array.isArray(extraCourseIds) && extraCourseIds.length) {
+        for (const otherId of extraCourseIds) {
+          if (!otherId || String(otherId) === String(courseId)) continue
+          try {
+            const other = await getCourseContext(gate.userId, otherId, { request: req })
+            const name = other.identity?.name || `course-${otherId}`
+            conceptsByCourse.set(name, conceptsFrom(other, null))
+          } catch (err) {
+            console.warn('[connections-mode] extra course load failed', otherId, err?.message)
+          }
+        }
+      } else if (Array.isArray(extraCourseContexts)) {
+        for (const other of extraCourseContexts) {
+          const name = other?.courseName
+          if (!name || name === resolvedName) continue
+          const bag = new Set()
+          for (const t of (other.emphasisTopics || [])) if (t) bag.add(String(t))
+          for (const t of (other.weeklyFocus?.keyTopics || [])) if (t) bag.add(String(t))
+          for (const e of (other.syllabusEvents || [])) if (e?.title) bag.add(String(e.title))
+          for (const t of (other.weakTopics || [])) if (t?.topic) bag.add(String(t.topic))
+          conceptsByCourse.set(name, bag)
+        }
       }
     }
 
     const poolBlock = [...conceptsByCourse.entries()]
       .map(([course, set]) => {
-        const concepts = [...set].slice(0, crossCourse ? 12 : 30)
-        return concepts.length ? `${course}:\n${concepts.map(c => `  - ${c}`).join('\n')}` : null
+        const list = [...set].slice(0, crossCourse ? 12 : 30)
+        return list.length ? `${course}:\n${list.map(c => `  - ${c}`).join('\n')}` : null
       })
       .filter(Boolean)
       .join('\n\n')
-
-    const contextBlock = buildContextBlock(ctx)
-    const guardrails = contextGuardrails(ctx, {
-      invention: 'If the concept pool is empty or too small to form real pairs, return an empty "connections" array and set "needsMoreContext": true with a short "reason" string. Do NOT invent generic textbook pairs.',
-    })
 
     const modeBanner = crossCourse
       ? `CROSS-COURSE MODE: build pairs where conceptA and conceptB come from DIFFERENT courses. The whole point is to help the student see the same idea across their curriculum. If cross-course pairs aren't feasible (e.g. only one course has concepts), fall back to in-course pairs and set "fellBackToSingleCourse": true.`
@@ -77,7 +127,9 @@ export default async function handler(req, res) {
 
     prompt = `You are generating Connections Mode cards. ${modeBanner}
 
-${contextBlock}
+${ANTI_GUESSING_RULES}
+
+${contextBlock}${supplementBlock}
 
 CONCEPT POOL BY COURSE (draw pairs only from these — you may lightly rephrase):
 ${poolBlock || '(pool is empty — refuse to invent, return needsMoreContext: true)'}
@@ -107,18 +159,17 @@ Rules:
 - Choose pairs that are causally linked, commonly confused, or thematically related in ways students miss.
 - Never pair a concept with itself or an obvious synonym.
 - bridgeType names the SHAPE of the relationship so the student can learn to spot patterns.
-- No em dashes anywhere.
-
-${guardrails}`
+- If the concept pool is empty or too small to form real pairs, return an empty "connections" array and set "needsMoreContext": true with a short "reason" string. Do NOT invent generic textbook pairs.
+- No em dashes anywhere.`
   } else if (phase === 'score') {
     if (!conceptA || !conceptB || question === undefined || answer === undefined)
       return res.status(400).json({ error: 'Missing fields for score phase' })
 
-    const contextBlock = buildContextBlock(ctx)
-
     prompt = `A ${resolvedName} student was asked about the relationship between "${conceptA}" and "${conceptB}".
 
-${contextBlock}
+${ANTI_GUESSING_RULES}
+
+${contextBlock}${supplementBlock}
 
 Question: "${question}"
 Student's answer: "${answer || '(left blank)'}"
