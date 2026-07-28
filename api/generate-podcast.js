@@ -1,5 +1,7 @@
 import { verifyAuth } from '../lib/server/usage.js'
 import { createClient } from '@supabase/supabase-js'
+import { getCourseContext, formatCourseContextForPrompt } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 
 let _client = null
 function getAdminClient() {
@@ -80,8 +82,23 @@ export default async function handler(req, res) {
     })
   }
 
+  // Layer the server-assembled course context on top of the session-notes
+  // content. Podcast content stays notes-driven; context adds tone/framing
+  // grounding (student's exam date, weak areas, learning style).
+  let podcastContextBlock = ''
+  try {
+    const brain = await getCourseContext(userId, courseId, { request: req })
+    podcastContextBlock = formatCourseContextForPrompt(brain)
+  } catch (err) {
+    console.warn('[podcast] getCourseContext failed, continuing with notes only', err?.message)
+  }
+
   // Generate dialogue script with Claude Haiku
   const scriptPrompt = `You are producing an engaging audio study podcast for a college student preparing for an exam.
+
+${ANTI_GUESSING_RULES}
+
+${podcastContextBlock}
 
 Course: ${courseName || 'this course'}
 
