@@ -1,4 +1,6 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -6,19 +8,37 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { courseName, sessionType, duration, recallText, notes, weakTopics } = req.body
-  if (!courseName) return res.status(400).json({ error: 'Missing courseName' })
+  const { courseName, courseId: bodyCourseId, sessionType, duration, recallText, notes, weakTopics: legacyWeak } = req.body || {}
 
+  let courseId = bodyCourseId
+  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+
+  let brain
+  try {
+    brain = await getCourseContext(gate.userId, courseId, { topic: sessionType || null, request: req })
+  } catch (err) {
+    console.error('[session-debrief] getCourseContext failed', err)
+    return res.status(400).json({ error: String(err?.message || err) })
+  }
+
+  const resolvedName = brain.identity?.name || courseName
+  const contextBlock = formatCourseContextForPrompt(brain)
   const hasRecall = recallText && recallText.trim().length > 20
   const hasNotes = notes && notes.trim().length > 10
-  const weakStr = Array.isArray(weakTopics) && weakTopics.length ? weakTopics.slice(0, 5).join(', ') : 'none on record'
+  const legacyWeakLine = Array.isArray(legacyWeak) && legacyWeak.length
+    ? `\nCLIENT-DERIVED weak topics (mastery store): ${legacyWeak.slice(0, 5).join(', ')}\n`
+    : ''
 
   const prompt = `You are a study coach analyzing a just-completed study session. Give the student a sharp, personalized debrief.
 
-Course: ${courseName}
+${ANTI_GUESSING_RULES}
+
+${contextBlock}${legacyWeakLine}
+
+Course: ${resolvedName}
 Session type: ${sessionType ?? 'Review'}
 Duration: ${duration ?? 60} minutes
-Known weak topics: ${weakStr}
 ${hasRecall ? `Student's recall attempt:\n"${recallText.slice(0, 800)}"` : 'No recall text submitted.'}
 ${hasNotes ? `Student's notes:\n"${notes.slice(0, 400)}"` : ''}
 
