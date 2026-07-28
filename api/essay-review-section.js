@@ -1,20 +1,10 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
-import { buildContextBlock, contextGuardrails } from '../lib/server/courseContextPrompt.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 
 // Section-by-section drafting partner. Takes the student's draft of one
 // outline section and returns targeted feedback + concrete edits + evidence
 // gaps + rubric-aligned scoring when a rubric is provided.
-//
-// Body:
-//   sectionName          (required) - e.g. "Body Paragraph 1"
-//   sectionPurpose       (required) - the purpose line from the outline
-//   sectionPoints        (required) - the outline's bullet points for this section
-//   draft                (required) - the student's actual written paragraph(s)
-//   thesis                          - the essay's thesis (grounding)
-//   essayType                       - argumentative | analytical | etc
-//   wordAllocation                  - target words for this section
-//   requirements                    - assignment prompt / rubric criteria
-//   courseContext                   - hydrated CourseContext (student profile)
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -30,23 +20,33 @@ export default async function handler(req, res) {
     essayType,
     wordAllocation,
     requirements,
-    courseContext,
-  } = req.body
+    courseName,
+    courseId: bodyCourseId,
+  } = req.body || {}
 
   if (!sectionName || !draft?.trim()) {
     return res.status(400).json({ error: 'sectionName and draft are required' })
   }
 
-  const ctx = courseContext ?? {}
-  const contextBlock = buildContextBlock(ctx)
-  const guardrails = contextGuardrails(ctx, {
-    invention: 'Do NOT invent facts, citations, or sources. If the student references a source, take them at their word — flag it only if it looks structurally inconsistent (wrong century, contradictory data). If they need a specific type of source, name the TYPE not a fake title.',
-  })
+  let courseId = bodyCourseId
+  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
 
+  let brain
+  try {
+    brain = await getCourseContext(gate.userId, courseId, { topic: sectionPurpose || sectionName || null, request: req })
+  } catch (err) {
+    console.error('[essay-review-section] getCourseContext failed', err)
+    return res.status(400).json({ error: String(err?.message || err) })
+  }
+
+  const contextBlock = formatCourseContextForPrompt(brain)
   const wordCount = draft.trim().split(/\s+/).length
   const wordDelta = wordAllocation ? wordCount - wordAllocation : null
 
   const prompt = `You are the student's writing coach. You've read their outline and now they've drafted ONE section. Give feedback like a real editor: specific, kind, actionable. Not vague praise.
+
+${ANTI_GUESSING_RULES}
 
 ${contextBlock}
 
@@ -91,9 +91,8 @@ Rules:
 - concreteEdits: at least 2, at most 5. Real sentences.
 - evidenceGaps: only include claims that ACTUALLY need a source (assertions of fact, statistics, causal claims). Empty array if none.
 - rubricAlignment: only populated if requirements contained rubric criteria. Empty array otherwise.
-- No em dashes anywhere.
-
-${guardrails}`
+- Do NOT invent facts, citations, or sources. If the student references a source, take them at their word — flag it only if it looks structurally inconsistent (wrong century, contradictory data). If they need a specific type of source, name the TYPE not a fake title.
+- No em dashes anywhere.`
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
