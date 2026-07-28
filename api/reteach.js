@@ -1,5 +1,7 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
-import { buildContextBlock, contextGuardrails } from '../lib/server/courseContextPrompt.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { buildContextBlock } from '../lib/server/courseContextPrompt.js'
 
 // Re-explain a concept in a different mode. Called by the ExplainAs component
 // whenever the student taps "30-sec" / "Visual" / "Worked example" or the
@@ -7,10 +9,12 @@ import { buildContextBlock, contextGuardrails } from '../lib/server/courseContex
 // is meant to be a paragraph, not an essay.
 //
 // Body:
-//   concept:     string    - the thing to re-teach (question text, topic name, etc.)
+//   concept:     string    - the thing to re-teach
 //   context:     string    - what the student already saw / their answer / the setup
 //   mode:        'short' | 'visual' | 'example' | 'confused'
-//   courseContext: hydrated CourseContext (optional but strongly recommended)
+//   courseId:    string    - preferred: stable course id; loads full server context
+//   courseName:  string    - fallback: resolved to courseId via unique-name match
+//   courseContext: object  - legacy client-passed context (still honored if provided)
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -18,17 +22,31 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { concept, context, mode, courseContext, priorExplanation } = req.body
+  const { concept, context, mode, priorExplanation, courseId: bodyCourseId, courseName, courseContext: legacyCtx } = req.body || {}
   if (!concept?.trim()) return res.status(400).json({ error: 'concept is required' })
 
   const modeInstruction = MODE_INSTRUCTIONS[mode] ?? MODE_INSTRUCTIONS.short
-  const ctx = courseContext ?? {}
-  const contextBlock = buildContextBlock(ctx)
-  const guardrails = contextGuardrails(ctx, {
-    invention: 'Do not invent professor-specific rules, page numbers, or citations. If you use an analogy, keep it common-knowledge.',
-  })
+
+  let contextBlock = ''
+  let courseId = bodyCourseId
+  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+
+  if (courseId) {
+    try {
+      const brain = await getCourseContext(gate.userId, courseId, { topic: concept.trim(), request: req })
+      contextBlock = formatCourseContextForPrompt(brain)
+    } catch (err) {
+      console.error('[reteach] getCourseContext failed, continuing without course context', err)
+    }
+  } else if (legacyCtx && typeof legacyCtx === 'object') {
+    // Reteach is often called from a courseless surface. Honor client-passed
+    // context as a fallback rather than refusing.
+    contextBlock = buildContextBlock(legacyCtx)
+  }
 
   const prompt = `You are the student's tutor, re-explaining a concept in a specific mode. Every word must earn its place — students bounce off long walls of text.
+
+${ANTI_GUESSING_RULES}
 
 ${contextBlock}
 
@@ -39,7 +57,7 @@ ${priorExplanation ? `PRIOR EXPLANATION (that didn't land): ${priorExplanation.t
 MODE: ${mode ?? 'short'}
 ${modeInstruction}
 
-${guardrails}
+Do not invent professor-specific rules, page numbers, or citations. If you use an analogy, keep it common-knowledge.
 
 Return ONLY JSON, no other text:
 {
