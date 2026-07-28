@@ -1,20 +1,7 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
-import { buildContextBlock } from '../lib/server/courseContextPrompt.js'
-
-const CLIENT_ONLY_FIELDS = ['weakTopics', 'strongTopics', 'recentQuizMisses', 'brainDumpGaps']
-function pickSupplement(courseContext) {
-  if (!courseContext || typeof courseContext !== 'object') return null
-  const out = {}
-  let any = false
-  for (const f of CLIENT_ONLY_FIELDS) {
-    if (Array.isArray(courseContext[f]) && courseContext[f].length) {
-      out[f] = courseContext[f]; any = true
-    }
-  }
-  return any ? out : null
-}
+import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 
 const COLORS = ['#3B61C4', '#16A34A', '#D97706', '#DC2626', '#6366F1', '#0891B2', '#DB2777', '#EA580C']
 
@@ -112,10 +99,7 @@ export default async function handler(req, res) {
   }
 
   const contextBlock = formatCourseContextForPrompt(brain)
-  const supplement = pickSupplement(legacyCtx)
-  const supplementBlock = supplement
-    ? '\n\nCLIENT-DERIVED SIGNALS (mastery scores, quiz misses — not persisted server-side yet):\n' + buildContextBlock(supplement)
-    : ''
+  const supplementBlock = buildClientSupplementBlock(legacyCtx)
 
   const prompt = `You are drawing a study diagram for a specific student.
 

@@ -1,25 +1,7 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
-import { buildContextBlock } from '../lib/server/courseContextPrompt.js'
-
-// Fields the client derives from its local mastery / quiz-history store that
-// the server does not yet persist. When the client passes them in
-// `courseContext`, we render them as a supplement so the AI still sees them.
-const CLIENT_ONLY_FIELDS = ['weakTopics', 'strongTopics', 'recentQuizMisses', 'brainDumpGaps']
-
-function pickSupplement(courseContext) {
-  if (!courseContext || typeof courseContext !== 'object') return null
-  const out = {}
-  let any = false
-  for (const f of CLIENT_ONLY_FIELDS) {
-    if (Array.isArray(courseContext[f]) && courseContext[f].length) {
-      out[f] = courseContext[f]
-      any = true
-    }
-  }
-  return any ? out : null
-}
+import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -41,10 +23,7 @@ export default async function handler(req, res) {
   }
 
   const resolvedName = brain.identity?.name || courseName || 'this course'
-  const supplement = pickSupplement(legacyCtx)
-  const supplementBlock = supplement
-    ? '\n\nCLIENT-DERIVED SIGNALS (mastery scores, quiz misses — not persisted server-side yet):\n' + buildContextBlock(supplement)
-    : ''
+  const supplementBlock = buildClientSupplementBlock(legacyCtx)
   const angle = regenerate === 2
     ? 'Recompute the ranking from a contrarian angle: surface topics students commonly under-review that this professor still tests. Cross-reference the emphasis and syllabus signals for hints.'
     : regenerate === 1

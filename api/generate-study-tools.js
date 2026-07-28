@@ -1,20 +1,7 @@
 import { verifyAndCheckAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
-import { buildContextBlock } from '../lib/server/courseContextPrompt.js'
-
-const CLIENT_ONLY_FIELDS = ['weakTopics', 'strongTopics', 'recentQuizMisses', 'brainDumpGaps']
-function pickSupplement(courseContext) {
-  if (!courseContext || typeof courseContext !== 'object') return null
-  const out = {}
-  let any = false
-  for (const f of CLIENT_ONLY_FIELDS) {
-    if (Array.isArray(courseContext[f]) && courseContext[f].length) {
-      out[f] = courseContext[f]; any = true
-    }
-  }
-  return any ? out : null
-}
+import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 
 export default async function handler(req, res) {
   try {
@@ -50,10 +37,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: String(err?.message || err) })
     }
     ctxBlock = ANTI_GUESSING_RULES + '\n\n' + formatCourseContextForPrompt(brain)
-    const supplement = pickSupplement(legacyCtx)
-    if (supplement) {
-      supplementBlock = '\n\nCLIENT-DERIVED SIGNALS (mastery scores, quiz misses — not persisted server-side yet):\n' + buildContextBlock(supplement)
-    }
+    supplementBlock = buildClientSupplementBlock(legacyCtx)
   }
 
   // ── quick-quiz mode (replaces the old generate-quick-quiz endpoint) ──────────

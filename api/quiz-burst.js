@@ -1,7 +1,7 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
-import { buildContextBlock } from '../lib/server/courseContextPrompt.js'
+import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 
 // pickFocus reads server-derivable signals from the CourseContext object,
 // and client-derived quiz-miss / mastery signals from the optional legacy
@@ -25,19 +25,6 @@ function pickFocus(topic, brain, legacyCtx) {
   const week = brain.plan?.weeklyFocus?.[0]?.theme || brain.plan?.weeklyFocus?.[0]?.keyTopics?.[0]
   if (week) return { label: week, detail: 'current week of the coach plan' }
   return { label: 'general course material', detail: null }
-}
-
-const CLIENT_ONLY_FIELDS = ['weakTopics', 'strongTopics', 'recentQuizMisses', 'brainDumpGaps']
-function pickSupplement(courseContext) {
-  if (!courseContext || typeof courseContext !== 'object') return null
-  const out = {}
-  let any = false
-  for (const f of CLIENT_ONLY_FIELDS) {
-    if (Array.isArray(courseContext[f]) && courseContext[f].length) {
-      out[f] = courseContext[f]; any = true
-    }
-  }
-  return any ? out : null
 }
 
 function summarizeGrounding(questions) {
@@ -71,10 +58,7 @@ export default async function handler(req, res) {
   const resolvedName = brain.identity?.name || courseName
   const focus = pickFocus(topic, brain, legacyCtx)
   const contextBlock = formatCourseContextForPrompt(brain)
-  const supplement = pickSupplement(legacyCtx)
-  const supplementBlock = supplement
-    ? '\n\nCLIENT-DERIVED SIGNALS (mastery scores, quiz misses — not persisted server-side yet):\n' + buildContextBlock(supplement)
-    : ''
+  const supplementBlock = buildClientSupplementBlock(legacyCtx)
 
   const prompt = `You are writing a Quick Quiz Burst for a specific student. This student's course context is below — every question you write must be defensibly grounded in it.
 

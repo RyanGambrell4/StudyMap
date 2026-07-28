@@ -2,20 +2,7 @@ import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
 import { tracedCall } from '../lib/server/langfuse.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
-import { buildContextBlock } from '../lib/server/courseContextPrompt.js'
-
-const CLIENT_ONLY_FIELDS = ['weakTopics', 'strongTopics', 'recentQuizMisses', 'brainDumpGaps', 'recentSessions']
-function pickSupplement(courseContext) {
-  if (!courseContext || typeof courseContext !== 'object') return null
-  const out = {}
-  let any = false
-  for (const f of CLIENT_ONLY_FIELDS) {
-    if (Array.isArray(courseContext[f]) && courseContext[f].length) {
-      out[f] = courseContext[f]; any = true
-    }
-  }
-  return any ? out : null
-}
+import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -51,10 +38,7 @@ export default async function handler(req, res) {
     ? `Prior brain-dump scores in this course: ${priorDumps.map(p => `${p.score}% (${p.dateStr}${p.topic ? `, ${p.topic}` : ''})`).join('; ')}`
     : 'No prior brain-dump scores tracked for this course yet.'
 
-  const supplement = pickSupplement(legacyCtx)
-  const supplementBlock = supplement
-    ? '\n\nCLIENT-DERIVED SIGNALS (mastery scores, quiz misses — not persisted server-side yet):\n' + buildContextBlock(supplement)
-    : ''
+  const supplementBlock = buildClientSupplementBlock(legacyCtx)
 
   const prompt = `You are the student's academic coach scoring a brain dump exercise for ${resolvedName}.
 
