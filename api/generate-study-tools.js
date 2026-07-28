@@ -1,5 +1,20 @@
 import { verifyAndCheckAiUsage, verifyAuth } from '../lib/server/usage.js'
-import { buildContextBlock, contextGuardrails } from '../lib/server/courseContextPrompt.js'
+import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { buildContextBlock } from '../lib/server/courseContextPrompt.js'
+
+const CLIENT_ONLY_FIELDS = ['weakTopics', 'strongTopics', 'recentQuizMisses', 'brainDumpGaps']
+function pickSupplement(courseContext) {
+  if (!courseContext || typeof courseContext !== 'object') return null
+  const out = {}
+  let any = false
+  for (const f of CLIENT_ONLY_FIELDS) {
+    if (Array.isArray(courseContext[f]) && courseContext[f].length) {
+      out[f] = courseContext[f]; any = true
+    }
+  }
+  return any ? out : null
+}
 
 export default async function handler(req, res) {
   try {
@@ -16,13 +31,30 @@ export default async function handler(req, res) {
   const gate = isPredict ? await verifyAuth(req) : await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { text, mode, courseName, sessionType, topic, images, professorEmphasis, struggles, learningStyle, courseContext } = req.body;
+  const { text, mode, courseName, courseId: bodyCourseId, sessionType, topic, images, professorEmphasis, struggles, learningStyle, courseContext: legacyCtx } = req.body;
   const safeImages = Array.isArray(images) ? images.slice(0, 6).filter(i => i?.data && i?.media_type) : []
-  const ctx = courseContext ?? { courseName }
-  const ctxBlock = buildContextBlock(ctx)
-  const ctxGuardrails = contextGuardrails(ctx, {
-    invention: 'When source material is thin, prefer the syllabus, emphasis topics, and weak topics from the context above. Only fall back to canonical course knowledge as a last resort.',
-  })
+
+  // predict-grade mode does simple math on request-body components; no
+  // course context needed. Load context only for AI-generating modes.
+  let ctxBlock = ''
+  let supplementBlock = ''
+  if (mode !== 'predict-grade') {
+    let courseId = bodyCourseId
+    if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+    if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+    let brain
+    try {
+      brain = await getCourseContext(gate.userId, courseId, { topic: topic || null, request: req })
+    } catch (err) {
+      console.error('[generate-study-tools] getCourseContext failed', err)
+      return res.status(400).json({ error: String(err?.message || err) })
+    }
+    ctxBlock = ANTI_GUESSING_RULES + '\n\n' + formatCourseContextForPrompt(brain)
+    const supplement = pickSupplement(legacyCtx)
+    if (supplement) {
+      supplementBlock = '\n\nCLIENT-DERIVED SIGNALS (mastery scores, quiz misses — not persisted server-side yet):\n' + buildContextBlock(supplement)
+    }
+  }
 
   // ── quick-quiz mode (replaces the old generate-quick-quiz endpoint) ──────────
   if (mode === 'quick-quiz') {
@@ -47,7 +79,7 @@ export default async function handler(req, res) {
 
     const prompt = `You are making a quiz for a student studying ${courseName}${sessionType ? ` (${sessionType} session)` : ''}.
 
-${ctxBlock}
+${ctxBlock}${supplementBlock}
 
 ${emphasisLine}${struggleLine}${scopeLine}${sourceLine}${imageLine}Generate exactly 5 multiple choice questions.
 
@@ -69,9 +101,8 @@ Rules:
 - All 4 options must be plausible
 - Answer must exactly match one of the options strings
 - Explanations must be 1-2 sentences maximum
-- No em dashes in any field
-
-${ctxGuardrails}`
+- When source material is thin, prefer the syllabus, emphasis topics, and weak topics from the context above. Only fall back to canonical course knowledge as a last resort.
+- No em dashes in any field`
 
     const userContent = hasImages
       ? [
@@ -238,7 +269,7 @@ Rules:
 
   const fcPrompt = `You are an expert study coach building flashcards + a quiz for a specific student.
 
-${ctxBlock}
+${ctxBlock}${supplementBlock}
 
 ${emphasisFc}${struggleFc}${styleFc}${scopeFc}${sourceFc}${imagesFc}Generate exactly this JSON structure with no extra text:
 {
@@ -268,9 +299,8 @@ Hard rules:
 - Generate 15 flashcards and 10 quiz questions (fewer only if the topic is too narrow to support that many - never pad with irrelevant content).
 - Quiz wrong answers must be plausible but clearly wrong if you know the material.
 - Set isWeakTopic=true and reviewFirst=true on any flashcard whose topic matches a weak topic, recent miss, or struggle from the context above. Aim for at least 3 cards flagged when weak topics exist.
-- No em dashes in any field.
-
-${ctxGuardrails}`
+- When source material is thin, prefer the syllabus, emphasis topics, and weak topics from the context above. Only fall back to canonical course knowledge as a last resort.
+- No em dashes in any field.`
 
   const userContentFc = hasImagesFc
     ? [
