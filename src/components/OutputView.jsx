@@ -51,6 +51,7 @@ const ProblemSolverView   = lazy(() => import('./ProblemSolverView'))
 const EssayArchitectView  = lazy(() => import('./EssayArchitectView'))
 const MasteryMapView      = lazy(() => import('./MasteryMapView'))
 const ReviewQueueView     = lazy(() => import('./ReviewQueueView'))
+const SemesterView        = lazy(() => import('./SemesterView'))
 import CheatSheetModal from './CheatSheetModal'
 import BrainDumpModal from './BrainDumpModal'
 import ConfidenceTapModal from './ConfidenceTapModal'
@@ -2364,6 +2365,14 @@ export default function OutputView({
             onOpenBrainDump={() => setShowBrainDump(true)}
             onDrillTopic={(topic) => { setShowBrainDump(true) }}
             onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
+          />
+        )}
+
+        {/* ── My Semester ── */}
+        {activeSection === 'semester' && (
+          <SemesterView
+            courses={courses}
+            userId={userId}
           />
         )}
 

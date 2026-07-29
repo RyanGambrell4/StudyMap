@@ -1185,6 +1185,25 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
     setActiveCourseIdx(idx)
   }, [initialCourseIdx])
 
+  // Fire-and-forget baseline capture for each course that has any graded component.
+  // Server is idempotent (ON CONFLICT DO NOTHING) so calling this on every mount is safe.
+  useEffect(() => {
+    const coursesWithGrades = courses.filter(c => {
+      const comps = c.gradeData?.components ?? []
+      return comps.some(x => x && x.graded && x.grade != null)
+    })
+    if (!coursesWithGrades.length) return
+    getAccessToken().then(token => {
+      coursesWithGrades.forEach(c => {
+        fetch('/api/capture-grade-baseline', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ courseId: String(c.id) }),
+        }).catch(() => {})
+      })
+    }).catch(() => {})
+  }, [])
+
   if (plan === 'free') return <LockedState onShowPaywall={onShowPaywall} />
   if (!courses.length) return (
     <div style={{ padding: '60px 32px', textAlign: 'center' }}>

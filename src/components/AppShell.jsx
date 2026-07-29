@@ -392,6 +392,17 @@ export default function AppShell({
               </div>
             )}
           </div>
+
+          {/* ── My Semester ── */}
+          <button
+            onClick={() => navTo('semester')}
+            style={navBtnBase(activeSection === 'semester')}
+            onMouseEnter={e => { if (activeSection !== 'semester') e.currentTarget.style.color = TEXT }}
+            onMouseLeave={e => { if (activeSection !== 'semester') e.currentTarget.style.color = MUTED }}
+          >
+            My Semester
+          </button>
+
         </nav>
 
         {/* Right side: search + settings + avatar */}
@@ -657,6 +668,14 @@ export default function AppShell({
               )}
             </div>
             <span style={{ fontSize: 9, fontWeight: 500, color: (isBrainActive || mobileHub === 'brainTraining') ? ACCENT : MUTED }}>Tools</span>
+          </button>
+          {/* My Semester */}
+          <button onClick={() => { setMobileHub(null); navTo('semester') }}
+            style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, padding: '10px 0', background: 'transparent', border: 'none', cursor: 'pointer' }}>
+            <svg style={{ width: 18, height: 18, color: activeSection === 'semester' ? ACCENT : MUTED }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={activeSection === 'semester' ? 2.5 : 2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+            </svg>
+            <span style={{ fontSize: 9, fontWeight: 500, color: activeSection === 'semester' ? ACCENT : MUTED }}>Semester</span>
           </button>
           {/* Account */}
           <button onClick={() => { setMobileHub(null); onNavigateToAccount?.() }}
