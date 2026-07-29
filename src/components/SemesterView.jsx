@@ -75,12 +75,234 @@ function Spinner() {
   )
 }
 
+// SVG icon helpers -- all 20x20, stroke-only, matching app icon language
+const Icon = {
+  document: (
+    <svg width="20" height="20" fill="none" stroke={D.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+      <path d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+    </svg>
+  ),
+  checklist: (
+    <svg width="20" height="20" fill="none" stroke={D.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+      <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/>
+    </svg>
+  ),
+  questionMark: (
+    <svg width="20" height="20" fill="none" stroke={D.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+      <path d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+    </svg>
+  ),
+  layers: (
+    <svg width="20" height="20" fill="none" stroke={D.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+      <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+    </svg>
+  ),
+  presentationChart: (
+    <svg width="20" height="20" fill="none" stroke={D.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+      <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18"/>
+    </svg>
+  ),
+  inbox: (
+    <svg width="20" height="20" fill="none" stroke={D.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+      <path d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>
+    </svg>
+  ),
+  paperClip: (
+    <svg width="20" height="20" fill="none" stroke={D.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+      <path d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"/>
+    </svg>
+  ),
+  academicCap: (
+    <svg width="20" height="20" fill="none" stroke={D.muted} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+      <path d="M12 14l9-5-9-5-9 5 9 5z"/><path d="M12 14l6.16-3.422a12.083 12.083 0 01.665 6.479A11.952 11.952 0 0012 20.055a11.952 11.952 0 00-6.824-2.998 12.078 12.078 0 01.665-6.479L12 14z"/>
+    </svg>
+  ),
+}
+
 function EmptyState({ icon, title, body }) {
   return (
     <div style={{ textAlign: 'center', padding: '32px 16px' }}>
-      <div style={{ fontSize: 28, marginBottom: 8 }}>{icon}</div>
+      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 10 }}>{icon}</div>
       <div style={{ fontSize: 14, fontWeight: 600, color: D.text, marginBottom: 4 }}>{title}</div>
-      {body && <div style={{ fontSize: 12, color: D.muted }}>{body}</div>}
+      {body && <div style={{ fontSize: 12, color: D.muted, maxWidth: 280, margin: '0 auto' }}>{body}</div>}
+    </div>
+  )
+}
+
+// ── Practice exam retake (Layer 3, interactive) ───────────────────────────────
+
+function PracticeExamRetake({ artifact }) {
+  const { payload, course_id: courseId, course_name: courseName } = artifact
+  const questions = Array.isArray(payload?.questions) ? payload.questions : []
+
+  const [selected, setSelected] = useState({})   // questionIdx -> selectedOptionText
+  const [graded, setGraded]     = useState(null) // null until submitted
+  const [submitted, setSubmitted] = useState(false)
+
+  const mcQuestions = questions.filter(q => Array.isArray(q.options) && q.options.length > 0)
+  const hasAny      = mcQuestions.length > 0
+
+  const handleSubmit = useCallback(async () => {
+    if (submitted) return
+    setSubmitted(true)
+
+    const results = questions.map((q, i) => {
+      const isMc = Array.isArray(q.options) && q.options.length > 0
+      if (!isMc) return { q, correct: null }
+      const given  = selected[i] ?? null
+      const correct = given !== null && given === q.answer
+      return { q, given, correct }
+    })
+    setGraded(results)
+
+    // Write fresh topic_signals -- same format as PracticeExamResults
+    const signals = results
+      .map(({ q, correct }) => {
+        if (correct === null) return null
+        const topic = typeof q.topic === 'string' ? q.topic.trim() : ''
+        if (!topic) return null
+        return {
+          signalType: 'practice_exam_answer',
+          courseId,
+          courseName,
+          topic,
+          rawScore: correct ? 1 : 0,
+          metadata: { question_type: q.type || null, source_type: q.sourceType || null },
+        }
+      })
+      .filter(Boolean)
+      .slice(0, 50)
+
+    if (signals.length && typeof courseId === 'string' && courseId) {
+      try {
+        const token = await getAccessToken()
+        fetch('/api/record-signals', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ signals }),
+        }).catch(() => {})
+      } catch (_) {}
+    }
+
+    track('semester_practice_exam_retake', { questionCount: questions.length, signalCount: signals.length })
+  }, [questions, selected, submitted, courseId, courseName])
+
+  const handleReset = () => {
+    setSelected({})
+    setGraded(null)
+    setSubmitted(false)
+  }
+
+  if (!hasAny) {
+    return <EmptyState icon={Icon.questionMark} title="No gradable questions" body="This exam has only short-answer questions and cannot be auto-graded here." />
+  }
+
+  const score = graded
+    ? Math.round((graded.filter(g => g.correct === true).length / graded.filter(g => g.correct !== null).length) * 100)
+    : null
+
+  return (
+    <div>
+      {payload.focus && (
+        <div style={{ fontSize: 12, color: D.muted, marginBottom: 16, fontStyle: 'italic' }}>Focus: {payload.focus}</div>
+      )}
+
+      {graded && (
+        <div style={{ marginBottom: 20, padding: '14px 16px', borderRadius: 10, background: score >= 70 ? `${D.green}08` : `${D.amber}08`, border: `1px solid ${score >= 70 ? D.green : D.amber}25`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div>
+            <div style={{ fontSize: 20, fontWeight: 800, color: score >= 70 ? D.green : D.amber }}>{score}%</div>
+            <div style={{ fontSize: 11, color: D.muted }}>
+              {graded.filter(g => g.correct === true).length} of {graded.filter(g => g.correct !== null).length} correct
+            </div>
+          </div>
+          <button
+            onClick={handleReset}
+            style={{ fontSize: 12, fontWeight: 600, color: D.blue, padding: '6px 12px', borderRadius: 7, border: `1px solid ${D.blue}30`, background: `${D.blue}06`, cursor: 'pointer', fontFamily: 'inherit' }}
+          >
+            Retake
+          </button>
+        </div>
+      )}
+
+      {questions.map((q, i) => {
+        const isMc      = Array.isArray(q.options) && q.options.length > 0
+        const result    = graded ? graded[i] : null
+        const isCorrect = result?.correct === true
+        const isWrong   = result?.correct === false
+
+        return (
+          <div key={i} style={{ marginBottom: 20, padding: '14px 16px', borderRadius: 10, background: D.bgCard, border: `1px solid ${graded ? (isCorrect ? D.green : isWrong ? D.red : D.border) : D.border}30` }}>
+            <div style={{ fontSize: 13, fontWeight: 600, color: D.text, marginBottom: 10, lineHeight: 1.5 }}>
+              <span style={{ color: D.dim, marginRight: 6 }}>Q{i + 1}.</span>{q.question}
+            </div>
+
+            {isMc && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginBottom: 10 }}>
+                {q.options.map((opt, oi) => {
+                  const isSelected = selected[i] === opt
+                  const isAnswer   = opt === q.answer
+                  let bg     = '#F7F6F3'
+                  let border = D.border
+                  let color  = D.muted
+                  if (graded) {
+                    if (isAnswer)   { bg = `${D.green}10`; border = `${D.green}40`; color = D.green }
+                    else if (isSelected && !isAnswer) { bg = `${D.red}08`; border = `${D.red}30`; color = D.red }
+                  } else if (isSelected) {
+                    bg = `${D.blue}08`; border = `${D.blue}30`; color = D.blue
+                  }
+                  return (
+                    <button
+                      key={oi}
+                      disabled={!!graded}
+                      onClick={() => setSelected(prev => ({ ...prev, [i]: opt }))}
+                      style={{
+                        fontSize: 13, color, padding: '8px 12px', borderRadius: 7,
+                        background: bg, border: `1px solid ${border}`,
+                        cursor: graded ? 'default' : 'pointer', textAlign: 'left',
+                        fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 8,
+                      }}
+                    >
+                      <span style={{ width: 18, height: 18, borderRadius: '50%', border: `1.5px solid ${isSelected && !graded ? D.blue : D.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, background: isSelected && !graded ? D.blue : 'transparent' }}>
+                        {isSelected && !graded && <span style={{ width: 6, height: 6, borderRadius: '50%', background: '#fff' }} />}
+                        {graded && isAnswer && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={D.green} strokeWidth="3"><polyline points="20 6 9 17 4 12"/></svg>}
+                        {graded && isSelected && !isAnswer && <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke={D.red} strokeWidth="3"><path d="M6 18L18 6M6 6l12 12"/></svg>}
+                      </span>
+                      {String.fromCharCode(65 + oi)}. {opt}
+                    </button>
+                  )
+                })}
+              </div>
+            )}
+
+            {!isMc && (
+              <div style={{ fontSize: 12, color: D.dim, fontStyle: 'italic', marginBottom: 8 }}>Short answer</div>
+            )}
+
+            {(graded || !isMc) && q.answer && (
+              <div style={{ fontSize: 12, color: D.green, fontWeight: 600, marginBottom: 4 }}>Answer: {q.answer}</div>
+            )}
+            {q.explanation && graded && (
+              <div style={{ fontSize: 12, color: D.muted, lineHeight: 1.5 }}>{q.explanation}</div>
+            )}
+          </div>
+        )
+      })}
+
+      {!graded && (
+        <button
+          onClick={handleSubmit}
+          disabled={Object.keys(selected).length === 0}
+          style={{
+            width: '100%', padding: '12px', borderRadius: 10, fontSize: 14, fontWeight: 700,
+            background: Object.keys(selected).length > 0 ? D.blue : D.border,
+            color: Object.keys(selected).length > 0 ? '#fff' : D.muted,
+            border: 'none', cursor: Object.keys(selected).length > 0 ? 'pointer' : 'default',
+            fontFamily: 'inherit', transition: 'background 0.15s',
+          }}
+        >
+          Grade My Answers
+        </button>
+      )}
     </div>
   )
 }
@@ -89,7 +311,11 @@ function EmptyState({ icon, title, body }) {
 
 function ArtifactRenderer({ artifact }) {
   const { artifact_type: type, payload } = artifact
-  if (!payload) return <EmptyState icon="?" title="No content" />
+  if (!payload) return <EmptyState icon={Icon.document} title="No content stored" />
+
+  if (type === 'practice_exam') {
+    return <PracticeExamRetake artifact={artifact} />
+  }
 
   if (type === 'cheat_sheet') {
     const topics = Array.isArray(payload.planTopics) ? payload.planTopics : []
@@ -100,7 +326,7 @@ function ArtifactRenderer({ artifact }) {
             <strong>Highest ROI:</strong> {payload.topPickReason}
           </div>
         )}
-        {topics.length === 0 && <EmptyState icon="?" title="No topics found" />}
+        {topics.length === 0 && <EmptyState icon={Icon.checklist} title="No topics found" />}
         {topics.map((t, i) => (
           <div key={i} style={{ padding: '12px 0', borderBottom: `1px solid ${D.border}` }}>
             <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 8, marginBottom: 4 }}>
@@ -116,7 +342,7 @@ function ArtifactRenderer({ artifact }) {
             </div>
             {t.whyLikely && <p style={{ margin: '0 0 4px', fontSize: 13, color: D.muted, lineHeight: 1.5 }}>{t.whyLikely}</p>}
             {t.priorityAction && (
-              <div style={{ fontSize: 12, color: D.text, padding: '6px 10px', borderRadius: 6, background: `${D.blue}06`, borderLeft: `3px solid ${D.blue}` }}>
+              <div style={{ fontSize: 12.5, color: D.text, padding: '6px 10px', borderRadius: 6, background: `${D.blue}06`, borderLeft: `3px solid ${D.blue}` }}>
                 {t.priorityAction}
               </div>
             )}
@@ -126,14 +352,14 @@ function ArtifactRenderer({ artifact }) {
     )
   }
 
-  if (type === 'practice_exam' || type === 'quiz_burst') {
+  if (type === 'quiz_burst') {
     const questions = Array.isArray(payload.questions) ? payload.questions : []
     return (
       <div>
         {payload.focus && (
           <div style={{ fontSize: 12, color: D.muted, marginBottom: 16, fontStyle: 'italic' }}>Focus: {payload.focus}</div>
         )}
-        {questions.length === 0 && <EmptyState icon="?" title="No questions found" />}
+        {questions.length === 0 && <EmptyState icon={Icon.questionMark} title="No questions found" />}
         {questions.map((q, i) => (
           <div key={i} style={{ marginBottom: 20, padding: '14px 16px', borderRadius: 10, background: D.bgCard, border: `1px solid ${D.border}` }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: D.text, marginBottom: 10, lineHeight: 1.5 }}>
@@ -164,7 +390,7 @@ function ArtifactRenderer({ artifact }) {
     const flashcards = Array.isArray(payload.flashcards) ? payload.flashcards : []
     return (
       <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-        {flashcards.length === 0 && <EmptyState icon="?" title="No flashcards found" />}
+        {flashcards.length === 0 && <EmptyState icon={Icon.layers} title="No flashcards stored" />}
         {flashcards.map((fc, i) => (
           <div key={i} style={{ padding: '12px 14px', borderRadius: 10, background: D.bgCard, border: `1px solid ${D.border}` }}>
             <div style={{ fontSize: 13, fontWeight: 600, color: D.text, marginBottom: 6 }}>{fc.front}</div>
@@ -244,7 +470,7 @@ function ArtifactRenderer({ artifact }) {
               <div style={{ fontSize: 11, color: D.muted, marginTop: 2 }}>Knowledge Score</div>
             </div>
           )}
-          {payload.gradeProjection !== undefined && payload.gradeProjection !== null && (
+          {payload.gradeProjection != null && (
             <div style={{ padding: '12px 14px', borderRadius: 10, background: D.bgCard, border: `1px solid ${D.border}`, textAlign: 'center' }}>
               <div style={{ fontSize: 24, fontWeight: 800, color: D.green }}>{payload.gradeProjection}%</div>
               <div style={{ fontSize: 11, color: D.muted, marginTop: 2 }}>Grade Projection</div>
@@ -264,7 +490,7 @@ function ArtifactRenderer({ artifact }) {
             ))}
           </div>
         )}
-        {payload.possibleGaps && Array.isArray(payload.possibleGaps) && payload.possibleGaps.length > 0 && (
+        {Array.isArray(payload.possibleGaps) && payload.possibleGaps.length > 0 && (
           <div style={{ marginBottom: 16 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: D.dim, textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>Possible Gaps</div>
             {payload.possibleGaps.map((gap, i) => (
@@ -284,7 +510,7 @@ function ArtifactRenderer({ artifact }) {
 
   if (type === 'diagram') {
     const d = payload.diagram
-    if (!d) return <EmptyState icon="?" title="Diagram not available" />
+    if (!d) return <EmptyState icon={Icon.presentationChart} title="Diagram not available" />
     const dtype = d.type || payload.diagramType || 'diagram'
     return (
       <div>
@@ -356,7 +582,6 @@ function ArtifactRenderer({ artifact }) {
     )
   }
 
-  // fallback
   return (
     <pre style={{ fontSize: 12, color: D.muted, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
       {JSON.stringify(payload, null, 2)}
@@ -393,7 +618,6 @@ function ArtifactView({ artifactId, onBack }) {
       }
     }
     load()
-    return () => { cancelled = true }
   }, [artifactId])
 
   return (
@@ -464,19 +688,15 @@ function CourseView({ courseId, courses, onBack, onOpenArtifact }) {
     track('semester_course_opened', { courseId })
   }, [courseId])
 
-  const course = data?.course
+  const course   = data?.course
   const artifacts = data?.artifacts ?? []
-  const uploads = data?.uploads ?? []
-  const mastery = data?.mastery ?? []
+  const uploads   = data?.uploads ?? []
+  const mastery   = data?.mastery ?? []
 
   const typesPresent = [...new Set(artifacts.map(a => a.artifact_type))]
-  const filtered = typeFilter === 'all' ? artifacts : artifacts.filter(a => a.artifact_type === typeFilter)
+  const filtered     = typeFilter === 'all' ? artifacts : artifacts.filter(a => a.artifact_type === typeFilter)
 
-  const masteryColor = (score) => {
-    if (score >= 80) return D.green
-    if (score >= 50) return D.amber
-    return D.red
-  }
+  const masteryColor = (score) => score >= 80 ? D.green : score >= 50 ? D.amber : D.red
 
   return (
     <div style={{ paddingBottom: 80 }}>
@@ -493,7 +713,6 @@ function CourseView({ courseId, courses, onBack, onOpenArtifact }) {
 
       {course && (
         <>
-          {/* Course header */}
           <div style={{ padding: '0 16px 16px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
               {course.color && (
@@ -528,7 +747,6 @@ function CourseView({ courseId, courses, onBack, onOpenArtifact }) {
             </div>
           </div>
 
-          {/* Tabs */}
           <div style={{ display: 'flex', padding: '0 16px 12px', gap: 6, borderBottom: `1px solid ${D.border}`, marginBottom: 16 }}>
             {[
               { id: 'artifacts', label: 'Made for You' },
@@ -551,10 +769,8 @@ function CourseView({ courseId, courses, onBack, onOpenArtifact }) {
             ))}
           </div>
 
-          {/* Made for You */}
           {activeTab === 'artifacts' && (
             <div style={{ padding: '0 16px' }}>
-              {/* Type filter chips */}
               {typesPresent.length > 1 && (
                 <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 14 }}>
                   <button
@@ -579,7 +795,7 @@ function CourseView({ courseId, courses, onBack, onOpenArtifact }) {
                 </div>
               )}
               {filtered.length === 0 && (
-                <EmptyState icon="✨" title="Nothing yet" body="AI-generated study assets will appear here." />
+                <EmptyState icon={Icon.inbox} title="Nothing yet" body="AI-generated study assets will appear here as you use StudyEdge AI." />
               )}
               {filtered.map(a => (
                 <button
@@ -605,11 +821,10 @@ function CourseView({ courseId, courses, onBack, onOpenArtifact }) {
             </div>
           )}
 
-          {/* From You */}
           {activeTab === 'uploads' && (
             <div style={{ padding: '0 16px' }}>
               {uploads.length === 0 && (
-                <EmptyState icon="📎" title="No uploads" body="Files you've shared with StudyEdge AI appear here." />
+                <EmptyState icon={Icon.paperClip} title="No uploads" body="Files you share with StudyEdge AI will appear here." />
               )}
               {uploads.map(u => (
                 <div key={u.id} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '12px 14px', marginBottom: 8, borderRadius: 10, background: D.bgCard, border: `1px solid ${D.border}` }}>
@@ -625,11 +840,10 @@ function CourseView({ courseId, courses, onBack, onOpenArtifact }) {
             </div>
           )}
 
-          {/* What You Know */}
           {activeTab === 'mastery' && (
             <div style={{ padding: '0 16px' }}>
               {mastery.length === 0 && (
-                <EmptyState icon="🧠" title="No mastery data yet" body="Complete quizzes and brain dumps to build your knowledge map." />
+                <EmptyState icon={Icon.academicCap} title="No mastery data yet" body="Complete quizzes and brain dumps to build your knowledge map." />
               )}
               {mastery.map((m, i) => (
                 <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px', marginBottom: 6, borderRadius: 10, background: D.bgCard, border: `1px solid ${D.border}` }}>
@@ -655,14 +869,47 @@ function colorDot(color) {
   return <span style={{ width: 10, height: 10, borderRadius: '50%', background: color, display: 'inline-block', marginRight: 6, flexShrink: 0 }} />
 }
 
+function SemesterStartState() {
+  return (
+    <div style={{ padding: '0 16px' }}>
+      <div style={{ padding: '28px 24px', borderRadius: 14, background: D.bgCard, border: `1px solid ${D.border}`, textAlign: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: 16 }}>
+          <div style={{ width: 48, height: 48, borderRadius: 14, background: `${D.blue}10`, border: `1px solid ${D.blue}20`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <svg width="22" height="22" fill="none" stroke={D.blue} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+            </svg>
+          </div>
+        </div>
+        <div style={{ fontSize: 17, fontWeight: 700, color: D.text, marginBottom: 8 }}>Your record starts here</div>
+        <div style={{ fontSize: 13, color: D.muted, lineHeight: 1.6, maxWidth: 300, margin: '0 auto', marginBottom: 20 }}>
+          Every cheat sheet, practice exam, and brain dump you generate gets saved here. Add courses to your plan and start studying to build your semester record.
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, textAlign: 'left', maxWidth: 280, margin: '0 auto' }}>
+          {[
+            { path: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z', label: 'Generate a cheat sheet before your next exam' },
+            { path: 'M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4', label: 'Take a practice exam and see what you actually know' },
+            { path: 'M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z', label: 'Brain dump before a study session to close gaps' },
+          ].map((step, i) => (
+            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: `${D.blue}08`, border: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                <svg width="13" height="13" fill="none" stroke={D.blue} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d={step.path}/></svg>
+              </div>
+              <span style={{ fontSize: 12, color: D.muted, lineHeight: 1.4 }}>{step.label}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function SemesterView({ courses: localCourses, userId }) {
   const [data, setData] = useState(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // Navigation state
-  const [activeCourseId, setActiveCourseId] = useState(null)   // Layer 2
-  const [activeArtifactId, setActiveArtifactId] = useState(null) // Layer 3
+  const [activeCourseId, setActiveCourseId]     = useState(null)
+  const [activeArtifactId, setActiveArtifactId] = useState(null)
 
   useEffect(() => {
     let cancelled = false
@@ -687,25 +934,11 @@ export default function SemesterView({ courses: localCourses, userId }) {
     track('semester_view_opened')
   }, [])
 
-  const openCourse = useCallback((courseId) => {
-    setActiveCourseId(courseId)
-    setActiveArtifactId(null)
-  }, [])
+  const openCourse   = useCallback((courseId) => { setActiveCourseId(courseId); setActiveArtifactId(null) }, [])
+  const openArtifact = useCallback((artifactId) => { setActiveArtifactId(artifactId) }, [])
+  const backToSemester = useCallback(() => { setActiveCourseId(null); setActiveArtifactId(null) }, [])
+  const backToCourse   = useCallback(() => { setActiveArtifactId(null) }, [])
 
-  const openArtifact = useCallback((artifactId) => {
-    setActiveArtifactId(artifactId)
-  }, [])
-
-  const backToSemester = useCallback(() => {
-    setActiveCourseId(null)
-    setActiveArtifactId(null)
-  }, [])
-
-  const backToCourse = useCallback(() => {
-    setActiveArtifactId(null)
-  }, [])
-
-  // Layer 3
   if (activeArtifactId) {
     return (
       <div style={{ maxWidth: 680, margin: '0 auto' }}>
@@ -715,7 +948,6 @@ export default function SemesterView({ courses: localCourses, userId }) {
     )
   }
 
-  // Layer 2
   if (activeCourseId) {
     return (
       <div style={{ maxWidth: 680, margin: '0 auto' }}>
@@ -730,7 +962,6 @@ export default function SemesterView({ courses: localCourses, userId }) {
     )
   }
 
-  // Layer 1
   const semesterCourses = data?.courses ?? []
   const totals = data?.totals ?? {}
 
@@ -738,19 +969,17 @@ export default function SemesterView({ courses: localCourses, userId }) {
     <div style={{ maxWidth: 680, margin: '0 auto', padding: '0 0 80px' }}>
       <style>{`@keyframes sem-spin{to{transform:rotate(360deg)}}`}</style>
 
-      {/* Header */}
       <div style={{ padding: '24px 16px 16px' }}>
         <h1 style={{ margin: '0 0 4px', fontSize: 24, fontWeight: 800, color: D.text }}>My Semester</h1>
         <p style={{ margin: 0, fontSize: 13, color: D.muted }}>Everything StudyEdge AI has learned and built for you this semester</p>
       </div>
 
-      {/* Totals bar */}
-      {!loading && !error && (
+      {!loading && !error && totals.assets > 0 && (
         <div style={{ display: 'flex', gap: 10, padding: '0 16px 20px', flexWrap: 'wrap' }}>
           {[
-            { label: 'Assets Created', value: totals.assets ?? 0, color: D.blue },
+            { label: 'Assets Created', value: totals.assets ?? 0,   color: D.blue },
             { label: 'Study Sessions',  value: totals.sessions ?? 0, color: D.green },
-            { label: 'Weeks In',        value: totals.weeksIn ?? 0, color: D.amber },
+            { label: 'Weeks In',        value: totals.weeksIn ?? 0,  color: D.amber },
           ].map(stat => (
             <div key={stat.label} style={{ flex: 1, minWidth: 90, padding: '10px 12px', borderRadius: 10, background: D.bgCard, border: `1px solid ${D.border}`, textAlign: 'center' }}>
               <div style={{ fontSize: 22, fontWeight: 800, color: stat.color }}>{stat.value}</div>
@@ -763,17 +992,14 @@ export default function SemesterView({ courses: localCourses, userId }) {
       {loading && <Spinner />}
       {error && <div style={{ padding: '16px', color: D.red, fontSize: 13 }}>{error}</div>}
 
-      {/* Course cards */}
-      {!loading && !error && semesterCourses.length === 0 && (
-        <EmptyState icon="📚" title="No courses yet" body="Add courses to your plan to see your semester overview here." />
-      )}
+      {!loading && !error && semesterCourses.length === 0 && <SemesterStartState />}
 
       {semesterCourses.map(course => (
         <button
           key={course.id}
           onClick={() => openCourse(course.id)}
           style={{
-            display: 'block', width: '100%', textAlign: 'left',
+            display: 'block', textAlign: 'left',
             margin: '0 16px 12px', width: 'calc(100% - 32px)',
             padding: '16px', borderRadius: 12, background: D.bgCard,
             border: `1px solid ${D.border}`, cursor: 'pointer',
@@ -783,7 +1009,6 @@ export default function SemesterView({ courses: localCourses, userId }) {
           onMouseEnter={e => { e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)' }}
           onMouseLeave={e => { e.currentTarget.style.boxShadow = '0 1px 3px rgba(0,0,0,0.04)' }}
         >
-          {/* Course name row */}
           <div style={{ display: 'flex', alignItems: 'center', marginBottom: 8 }}>
             {colorDot(course.color)}
             <span style={{ fontSize: 15, fontWeight: 700, color: D.text, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{course.name}</span>
@@ -791,7 +1016,6 @@ export default function SemesterView({ courses: localCourses, userId }) {
             <svg width="14" height="14" fill="none" stroke={D.dim} strokeWidth="2" viewBox="0 0 24 24" style={{ marginLeft: 8, flexShrink: 0 }}><path d="M9 5l7 7-7 7"/></svg>
           </div>
 
-          {/* Grade + delta */}
           {course.currentGrade !== null && (
             <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
               <span style={{ fontSize: 13, fontWeight: 700, color: D.text }}>{course.currentGrade}%</span>
@@ -800,14 +1024,12 @@ export default function SemesterView({ courses: localCourses, userId }) {
             </div>
           )}
 
-          {/* Stats row */}
           <div style={{ display: 'flex', gap: 12 }}>
             <span style={{ fontSize: 11, color: D.muted }}>{course.assetCount} asset{course.assetCount !== 1 ? 's' : ''}</span>
             <span style={{ fontSize: 11, color: D.muted }}>{course.sessionCount} session{course.sessionCount !== 1 ? 's' : ''}</span>
             <span style={{ fontSize: 11, color: D.muted }}>{course.topicCount} topic{course.topicCount !== 1 ? 's' : ''}</span>
           </div>
 
-          {/* Next deadline */}
           {course.nextDeadline && (
             <div style={{ marginTop: 10, display: 'flex', alignItems: 'center', gap: 6, padding: '6px 10px', borderRadius: 7, background: `${D.amber}08`, border: `1px solid ${D.amber}20` }}>
               <svg width="11" height="11" fill="none" stroke={D.amber} strokeWidth="2" viewBox="0 0 24 24"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
