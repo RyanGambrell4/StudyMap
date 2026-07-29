@@ -325,56 +325,8 @@
             "destination": "/blog/index.html"
         },
         {
-            "source": "/blog/how-to-study-for-finals-week",
-            "destination": "/blog/how-to-study-for-finals-week.html"
-        },
-        {
-            "source": "/blog/active-recall-study-technique",
-            "destination": "/blog/active-recall-study-technique.html"
-        },
-        {
-            "source": "/blog/how-to-improve-your-grades-in-college",
-            "destination": "/blog/how-to-improve-your-grades-in-college.html"
-        },
-        {
-            "source": "/blog/best-study-techniques-science",
-            "destination": "/blog/best-study-techniques-science.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-organic-chemistry",
-            "destination": "/blog/how-to-study-for-organic-chemistry.html"
-        },
-        {
-            "source": "/blog/how-to-raise-your-gpa-after-a-bad-semester",
-            "destination": "/blog/how-to-raise-your-gpa-after-a-bad-semester.html"
-        },
-        {
-            "source": "/blog/best-study-schedule-for-college-students",
-            "destination": "/blog/best-study-schedule-for-college-students.html"
-        },
-        {
-            "source": "/blog/how-to-get-an-a-in-any-class",
-            "destination": "/blog/how-to-get-an-a-in-any-class.html"
-        },
-        {
-            "source": "/blog/mcat-study-schedule-6-months",
-            "destination": "/blog/mcat-study-schedule-6-months.html"
-        },
-        {
-            "source": "/blog/how-to-stop-procrastinating-when-studying",
-            "destination": "/blog/how-to-stop-procrastinating-when-studying.html"
-        },
-        {
-            "source": "/blog/how-to-study-with-adhd-in-college",
-            "destination": "/blog/how-to-study-with-adhd-in-college.html"
-        },
-        {
-            "source": "/blog/what-gpa-do-you-need-for-medical-school",
-            "destination": "/blog/what-gpa-do-you-need-for-medical-school.html"
-        },
-        {
-            "source": "/blog/how-to-balance-a-heavy-course-load",
-            "destination": "/blog/how-to-balance-a-heavy-course-load.html"
+            "source": "/blog/:slug",
+            "destination": "/blog/:slug.html"
         },
         {
             "source": "/final-exam-calculator",
@@ -477,26 +429,6 @@
             "destination": "/socratic-alternative.html"
         },
         {
-            "source": "/blog/how-to-pull-an-all-nighter",
-            "destination": "/blog/how-to-pull-an-all-nighter.html"
-        },
-        {
-            "source": "/blog/cornell-note-taking-method",
-            "destination": "/blog/cornell-note-taking-method.html"
-        },
-        {
-            "source": "/blog/pomodoro-technique-for-studying",
-            "destination": "/blog/pomodoro-technique-for-studying.html"
-        },
-        {
-            "source": "/blog/how-to-take-notes-in-college",
-            "destination": "/blog/how-to-take-notes-in-college.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-multiple-exams-in-one-week",
-            "destination": "/blog/how-to-study-for-multiple-exams-in-one-week.html"
-        },
-        {
             "source": "/best-ai-for-students",
             "destination": "/best-ai-for-students.html"
         },
@@ -515,26 +447,6 @@
         {
             "source": "/chatgpt-alternative-for-students",
             "destination": "/chatgpt-alternative-for-students.html"
-        },
-        {
-            "source": "/blog/how-to-cram-for-an-exam",
-            "destination": "/blog/how-to-cram-for-an-exam.html"
-        },
-        {
-            "source": "/blog/how-to-study-the-night-before-an-exam",
-            "destination": "/blog/how-to-study-the-night-before-an-exam.html"
-        },
-        {
-            "source": "/blog/how-to-focus-while-studying",
-            "destination": "/blog/how-to-focus-while-studying.html"
-        },
-        {
-            "source": "/blog/how-to-memorize-notes-fast",
-            "destination": "/blog/how-to-memorize-notes-fast.html"
-        },
-        {
-            "source": "/blog/how-to-overcome-test-anxiety",
-            "destination": "/blog/how-to-overcome-test-anxiety.html"
         },
         {
             "source": "/how-to-get-a-4-0-gpa-in-college",
@@ -787,94 +699,6 @@
         {
             "source": "/best-study-app-for-florida-state-students",
             "destination": "/best-study-app-for-florida-state-students.html"
-        },
-        {
-            "source": "/blog/anki-vs-quizlet-vs-studyedge",
-            "destination": "/blog/anki-vs-quizlet-vs-studyedge.html"
-        },
-        {
-            "source": "/blog/best-flashcard-apps-for-college",
-            "destination": "/blog/best-flashcard-apps-for-college.html"
-        },
-        {
-            "source": "/blog/best-note-taking-apps-for-college-students",
-            "destination": "/blog/best-note-taking-apps-for-college-students.html"
-        },
-        {
-            "source": "/blog/best-study-apps-for-college-students",
-            "destination": "/blog/best-study-apps-for-college-students.html"
-        },
-        {
-            "source": "/blog/chatgpt-vs-studyedge-for-studying",
-            "destination": "/blog/chatgpt-vs-studyedge-for-studying.html"
-        },
-        {
-            "source": "/blog/how-to-prepare-for-midterms",
-            "destination": "/blog/how-to-prepare-for-midterms.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-anatomy-and-physiology",
-            "destination": "/blog/how-to-study-for-anatomy-and-physiology.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-biochemistry",
-            "destination": "/blog/how-to-study-for-biochemistry.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-biology",
-            "destination": "/blog/how-to-study-for-biology.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-calculus",
-            "destination": "/blog/how-to-study-for-calculus.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-microeconomics",
-            "destination": "/blog/how-to-study-for-microeconomics.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-physics",
-            "destination": "/blog/how-to-study-for-physics.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-psychology",
-            "destination": "/blog/how-to-study-for-psychology.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-statistics",
-            "destination": "/blog/how-to-study-for-statistics.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-the-gmat",
-            "destination": "/blog/how-to-study-for-the-gmat.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-the-gre",
-            "destination": "/blog/how-to-study-for-the-gre.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-the-lsat",
-            "destination": "/blog/how-to-study-for-the-lsat.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-the-nclex",
-            "destination": "/blog/how-to-study-for-the-nclex.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-the-sat",
-            "destination": "/blog/how-to-study-for-the-sat.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-usmle-step-1",
-            "destination": "/blog/how-to-study-for-usmle-step-1.html"
-        },
-        {
-            "source": "/blog/how-to-use-ai-for-studying",
-            "destination": "/blog/how-to-use-ai-for-studying.html"
-        },
-        {
-            "source": "/blog/time-management-tips-for-college-students",
-            "destination": "/blog/time-management-tips-for-college-students.html"
         },
         {
             "source": "/best-study-app-for-chemistry-majors",
@@ -1197,14 +1021,6 @@
             "destination": "/what-gpa-do-you-need-for-stanford.html"
         },
         {
-            "source": "/blog/how-to-study-effectively",
-            "destination": "/blog/how-to-study-effectively.html"
-        },
-        {
-            "source": "/blog/study-schedule-tips",
-            "destination": "/blog/study-schedule-tips.html"
-        },
-        {
             "source": "/notion-alternative",
             "destination": "/notion-alternative.html"
         },
@@ -1219,22 +1035,6 @@
         {
             "source": "/is-a-3-7-gpa-good",
             "destination": "/is-a-3-7-gpa-good.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-a-test",
-            "destination": "/blog/how-to-study-for-a-test.html"
-        },
-        {
-            "source": "/blog/how-to-memorize-things",
-            "destination": "/blog/how-to-memorize-things.html"
-        },
-        {
-            "source": "/blog/how-to-take-notes-in-college",
-            "destination": "/blog/how-to-take-notes-in-college.html"
-        },
-        {
-            "source": "/blog/how-to-memorize-notes-fast",
-            "destination": "/blog/how-to-memorize-notes-fast.html"
         },
         {
             "source": "/is-a-2-0-gpa-good",
@@ -1257,34 +1057,6 @@
             "destination": "/is-a-4-0-gpa-good.html"
         },
         {
-            "source": "/blog/how-to-study-for-chemistry",
-            "destination": "/blog/how-to-study-for-chemistry.html"
-        },
-        {
-            "source": "/blog/act-study-guide",
-            "destination": "/blog/act-study-guide.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-history",
-            "destination": "/blog/how-to-study-for-history.html"
-        },
-        {
-            "source": "/blog/study-techniques",
-            "destination": "/blog/study-techniques.html"
-        },
-        {
-            "source": "/blog/exam-prep",
-            "destination": "/blog/exam-prep.html"
-        },
-        {
-            "source": "/blog/subject-guides",
-            "destination": "/blog/subject-guides.html"
-        },
-        {
-            "source": "/blog/gpa-grades",
-            "destination": "/blog/gpa-grades.html"
-        },
-        {
             "source": "/is-a-3-6-gpa-good",
             "destination": "/is-a-3-6-gpa-good.html"
         },
@@ -1299,58 +1071,6 @@
         {
             "source": "/is-a-2-7-gpa-good",
             "destination": "/is-a-2-7-gpa-good.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-sociology",
-            "destination": "/blog/how-to-study-for-sociology.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-accounting",
-            "destination": "/blog/how-to-study-for-accounting.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-english-literature",
-            "destination": "/blog/how-to-study-for-english-literature.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-macroeconomics",
-            "destination": "/blog/how-to-study-for-macroeconomics.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-political-science",
-            "destination": "/blog/how-to-study-for-political-science.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-criminal-justice",
-            "destination": "/blog/how-to-study-for-criminal-justice.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-marketing",
-            "destination": "/blog/how-to-study-for-marketing.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-business",
-            "destination": "/blog/how-to-study-for-business.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-finance",
-            "destination": "/blog/how-to-study-for-finance.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-philosophy",
-            "destination": "/blog/how-to-study-for-philosophy.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-spanish",
-            "destination": "/blog/how-to-study-for-spanish.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-computer-science",
-            "destination": "/blog/how-to-study-for-computer-science.html"
-        },
-        {
-            "source": "/blog/how-to-study-for-nursing-school",
-            "destination": "/blog/how-to-study-for-nursing-school.html"
         },
         {
             "source": "/ap-chemistry-study-schedule",
@@ -1409,56 +1129,48 @@
             "destination": "/best-study-app-by-major.html"
         },
         {
-            "source": "/blog/feynman-technique",
-            "destination": "/blog/feynman-technique.html"
+            "source": "/apush-study-schedule",
+            "destination": "/apush-study-schedule.html"
         },
         {
-            "source": "/blog/how-to-make-flashcards",
-            "destination": "/blog/how-to-make-flashcards.html"
+            "source": "/best-study-apps",
+            "destination": "/best-study-apps.html"
         },
         {
-            "source": "/blog/how-to-read-a-textbook",
-            "destination": "/blog/how-to-read-a-textbook.html"
+            "source": "/best-time-to-study-quiz",
+            "destination": "/best-time-to-study-quiz.html"
         },
         {
-            "source": "/blog/how-to-study-for-multiple-choice-exams",
-            "destination": "/blog/how-to-study-for-multiple-choice-exams.html"
+            "source": "/cornell-notes-template",
+            "destination": "/cornell-notes-template.html"
         },
         {
-            "source": "/blog/how-to-study-for-the-bar-exam",
-            "destination": "/blog/how-to-study-for-the-bar-exam.html"
+            "source": "/flashcard-converter",
+            "destination": "/flashcard-converter.html"
         },
         {
-            "source": "/blog/how-to-study-smarter-not-harder",
-            "destination": "/blog/how-to-study-smarter-not-harder.html"
+            "source": "/grad-school-gpa-requirements",
+            "destination": "/grad-school-gpa-requirements.html"
         },
         {
-            "source": "/blog/how-to-study-while-working-full-time",
-            "destination": "/blog/how-to-study-while-working-full-time.html"
+            "source": "/how-students-study-report-2026",
+            "destination": "/how-students-study-report-2026.html"
         },
         {
-            "source": "/blog/how-to-study-with-music",
-            "destination": "/blog/how-to-study-with-music.html"
+            "source": "/pomodoro-timer",
+            "destination": "/pomodoro-timer.html"
         },
         {
-            "source": "/blog/mind-mapping-for-studying",
-            "destination": "/blog/mind-mapping-for-studying.html"
+            "source": "/scholarship-gpa-requirements",
+            "destination": "/scholarship-gpa-requirements.html"
         },
         {
-            "source": "/blog/retrieval-practice-vs-rereading",
-            "destination": "/blog/retrieval-practice-vs-rereading.html"
+            "source": "/spaced-repetition-vs-cramming",
+            "destination": "/spaced-repetition-vs-cramming.html"
         },
         {
-            "source": "/blog/spaced-repetition-study-technique",
-            "destination": "/blog/spaced-repetition-study-technique.html"
-        },
-        {
-            "source": "/blog/study-groups-vs-solo-studying",
-            "destination": "/blog/study-groups-vs-solo-studying.html"
-        },
-        {
-            "source": "/blog/study-myths",
-            "destination": "/blog/study-myths.html"
+            "source": "/study-hours-by-major",
+            "destination": "/study-hours-by-major.html"
         }
     ],
     "redirects": [
