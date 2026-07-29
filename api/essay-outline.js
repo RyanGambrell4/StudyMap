@@ -1,6 +1,7 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { saveArtifact } from '../lib/server/artifactWriter.js'
 
 // Server-side variant of hasRichContext: enough grounding to write a real
 // outline, not a generic one. Deliberately conservative — if the student
@@ -129,6 +130,18 @@ Rules:
   } catch {
     return res.status(500).json({ error: 'Invalid JSON from AI' })
   }
+
+  const resolvedName = brain.identity?.name || courseName || 'this course'
+  saveArtifact({
+    userId: gate.userId,
+    courseId,
+    courseName: resolvedName,
+    artifactType: 'essay_outline',
+    title: `${topic.slice(0, 60)} Outline`,
+    topic: topic.slice(0, 200),
+    payload: { outline, essayType, wordCount, requirements: requirements?.slice(0, 1000) },
+  }).then(w => { if (!w.ok) console.warn('[essay-outline] saveArtifact failed', w.error) })
+    .catch(err => console.warn('[essay-outline] saveArtifact threw', err?.message))
 
   return res.status(200).json({ outline })
 }

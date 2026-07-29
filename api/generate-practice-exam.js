@@ -1,6 +1,7 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { saveArtifact } from '../lib/server/artifactWriter.js'
 
 const MIN_LEN = 10
 const MAX_LEN = 30
@@ -194,6 +195,20 @@ Hard rules:
         }
       })
 
+    const resolvedName = brain.identity?.name || courseName || 'this course'
+    const artifactTitle = desc
+      ? `${desc.slice(0, 55)} Practice Exam`
+      : `${resolvedName} Practice Exam`
+    saveArtifact({
+      userId: gate.userId,
+      courseId,
+      courseName: resolvedName,
+      artifactType: 'practice_exam',
+      title: artifactTitle,
+      topic: desc?.slice(0, 200) || null,
+      payload: { questions: normalized },
+    }).then(w => { if (!w.ok) console.warn('[generate-practice-exam] saveArtifact failed', w.error) })
+      .catch(err2 => console.warn('[generate-practice-exam] saveArtifact threw', err2?.message))
     return res.status(200).json({ questions: normalized })
 
   } catch (err) {

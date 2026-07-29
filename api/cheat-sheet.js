@@ -2,6 +2,7 @@ import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
+import { saveArtifact } from '../lib/server/artifactWriter.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -91,6 +92,19 @@ Rules:
     const last = content.lastIndexOf('}')
     if (first === -1 || last === -1) throw new Error('Malformed AI response')
     const result = JSON.parse(content.slice(first, last + 1))
+    const artifactTitle = examPrompt
+      ? `${examPrompt.slice(0, 60)} Cheat Sheet`
+      : `${resolvedName} Cheat Sheet`
+    saveArtifact({
+      userId: gate.userId,
+      courseId,
+      courseName: resolvedName,
+      artifactType: 'cheat_sheet',
+      title: artifactTitle,
+      topic: examPrompt || null,
+      payload: result,
+    }).then(w => { if (!w.ok) console.warn('[cheat-sheet] saveArtifact failed', w.error) })
+      .catch(err => console.warn('[cheat-sheet] saveArtifact threw', err?.message))
     return res.status(200).json(result)
   } catch (e) {
     console.error('[cheat-sheet]', e)

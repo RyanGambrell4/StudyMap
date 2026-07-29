@@ -2,6 +2,7 @@ import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
+import { saveArtifact } from '../lib/server/artifactWriter.js'
 
 // pickFocus reads server-derivable signals from the CourseContext object,
 // and client-derived quiz-miss / mastery signals from the optional legacy
@@ -129,12 +130,23 @@ Rules:
     const last = content.lastIndexOf(']')
     if (first === -1 || last === -1) throw new Error('Malformed AI response')
     const questions = JSON.parse(content.slice(first, last + 1))
-    return res.status(200).json({
+    const payload = {
       questions,
       focus: focus.label,
       groundingSummary: summarizeGrounding(questions),
       courseName: resolvedName,
-    })
+    }
+    saveArtifact({
+      userId: gate.userId,
+      courseId,
+      courseName: resolvedName,
+      artifactType: 'quiz_burst',
+      title: `${focus.label} Quiz Burst`,
+      topic: focus.label || null,
+      payload,
+    }).then(w => { if (!w.ok) console.warn('[quiz-burst] saveArtifact failed', w.error) })
+      .catch(err => console.warn('[quiz-burst] saveArtifact threw', err?.message))
+    return res.status(200).json(payload)
   } catch (e) {
     console.error('[quiz-burst]', e)
     return res.status(500).json({ error: 'Failed to generate quiz. Please try again.' })

@@ -2,6 +2,7 @@ import { verifyAndCheckAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
+import { saveArtifact } from '../lib/server/artifactWriter.js'
 
 export default async function handler(req, res) {
   try {
@@ -25,10 +26,13 @@ export default async function handler(req, res) {
   // course context needed. Load context only for AI-generating modes.
   let ctxBlock = ''
   let supplementBlock = ''
+  let resolvedCourseId = bodyCourseId || null
+  let resolvedCourseName = courseName || 'Unknown Course'
   if (mode !== 'predict-grade') {
     let courseId = bodyCourseId
     if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
     if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+    resolvedCourseId = courseId
     let brain
     try {
       brain = await getCourseContext(gate.userId, courseId, { topic: topic || null, request: req })
@@ -36,6 +40,7 @@ export default async function handler(req, res) {
       console.error('[generate-study-tools] getCourseContext failed', err)
       return res.status(400).json({ error: String(err?.message || err) })
     }
+    resolvedCourseName = brain.identity?.name || courseName || 'Unknown Course'
     ctxBlock = ANTI_GUESSING_RULES + '\n\n' + formatCourseContextForPrompt(brain)
     supplementBlock = buildClientSupplementBlock(legacyCtx)
   }
@@ -373,6 +378,18 @@ Hard rules:
       } catch { /* fail open */ }
     }
 
+    if (resolvedCourseId) {
+      saveArtifact({
+        userId: gate.userId,
+        courseId: resolvedCourseId,
+        courseName: resolvedCourseName,
+        artifactType: 'flashcard_set',
+        title: topic ? `${String(topic).slice(0, 60)} Flashcards` : `${resolvedCourseName} Flashcards`,
+        topic: topic ? String(topic).slice(0, 200) : null,
+        payload: { flashcards: parsed.flashcards, quiz: parsed.quiz, startHere: parsed.startHere },
+      }).then(w => { if (!w.ok) console.warn('[generate-study-tools] saveArtifact failed', w.error) })
+        .catch(err2 => console.warn('[generate-study-tools] saveArtifact threw', err2?.message))
+    }
     res.status(200).json(parsed);
   } catch (error) {
     console.error('API error:', error);

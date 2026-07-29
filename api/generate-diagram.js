@@ -2,6 +2,7 @@ import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
+import { saveArtifact } from '../lib/server/artifactWriter.js'
 
 const COLORS = ['#3B61C4', '#16A34A', '#D97706', '#DC2626', '#6366F1', '#0891B2', '#DB2777', '#EA580C']
 
@@ -142,6 +143,17 @@ Grounding requirements:
     if (first === -1 || last === -1) throw new Error('Malformed AI response')
 
     const diagram = JSON.parse(content.slice(first, last + 1))
+    const resolvedName = brain.identity?.name || courseName || 'this course'
+    saveArtifact({
+      userId: gate.userId,
+      courseId,
+      courseName: resolvedName,
+      artifactType: 'diagram',
+      title: `${topic.trim()} Diagram`,
+      topic: topic.trim(),
+      payload: { diagram, diagramType },
+    }).then(w => { if (!w.ok) console.warn('[generate-diagram] saveArtifact failed', w.error) })
+      .catch(err => console.warn('[generate-diagram] saveArtifact threw', err?.message))
     return res.status(200).json({ diagram })
   } catch (e) {
     console.error('[generate-diagram]', e)

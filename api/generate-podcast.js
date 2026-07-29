@@ -2,6 +2,7 @@ import { verifyAuth } from '../lib/server/usage.js'
 import { createClient } from '@supabase/supabase-js'
 import { getCourseContext, formatCourseContextForPrompt } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { saveArtifact } from '../lib/server/artifactWriter.js'
 
 let _client = null
 function getAdminClient() {
@@ -230,6 +231,17 @@ Output only the lines. No stage directions, no headers, no extra text. No em das
     .eq('user_id', userId)
 
   if (writeErr) console.error('[podcast] Subscription update failed', writeErr)
+
+  saveArtifact({
+    userId,
+    courseId,
+    courseName: courseName || 'Unknown Course',
+    artifactType: 'podcast',
+    title: `${courseName || 'Study'} Podcast`,
+    topic: null,
+    payload: { script, audioUrl: publicUrl, segments },
+  }).then(w => { if (!w.ok) console.warn('[podcast] saveArtifact failed', w.error) })
+    .catch(err => console.warn('[podcast] saveArtifact threw', err?.message))
 
   return res.status(200).json({
     podcast: podcastEntry,

@@ -4,6 +4,7 @@ import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from 
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { recordTopicSignal } from '../lib/server/topicSignals.js'
+import { saveArtifact } from '../lib/server/artifactWriter.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -140,6 +141,29 @@ Rules:
         }
       }))
     }
+
+    saveArtifact({
+      userId: gate.userId,
+      courseId,
+      courseName: resolvedName,
+      artifactType: 'brain_dump',
+      title: topic ? `${topic} Brain Dump` : 'Brain Dump',
+      topic: topic || null,
+      payload: {
+        score: result.score,
+        categories: result.categories,
+        gradeProjection: result.gradeProjection,
+        studyTimeToUpgrade: result.studyTimeToUpgrade,
+        upgradeTarget: result.upgradeTarget,
+        possibleGaps: result.possibleGaps,
+        syllabusCoverage: result.syllabusCoverage,
+        changeSincePrior: result.changeSincePrior,
+        learningStyleTip: result.learningStyleTip,
+        text_excerpt: String(text || '').slice(0, 2000),
+        wordCount,
+      },
+    }).then(w => { if (!w.ok) console.warn('[brain-dump-score] saveArtifact failed', w.error) })
+      .catch(err => console.warn('[brain-dump-score] saveArtifact threw', err?.message))
 
     return res.status(200).json(result)
   } catch (e) {
