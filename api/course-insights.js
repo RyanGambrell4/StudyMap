@@ -23,16 +23,27 @@ export default async function handler(req, res) {
   }
 
   const contextBlock = formatCourseContextForPrompt(brain)
-  const legacyWeakLine = Array.isArray(legacyWeak) && legacyWeak.length
-    ? `\nCLIENT-DERIVED weak topics (mastery store): ${legacyWeak.slice(0, 5).join(', ')}\n`
-    : ''
+
+  // Prefer server-derived weak topics from brain.topics mastery; fall back
+  // to the legacy client-supplied list only when the server has no
+  // mastery data yet (v1.1 will drop the client field entirely).
+  const serverWeak = (brain?.topics?.items ?? [])
+    .filter(t => typeof t.mastery === 'number' && t.mastery < 60)
+    .sort((a, b) => (a.mastery ?? 999) - (b.mastery ?? 999))
+    .slice(0, 5)
+    .map(t => `${t.name} (${t.mastery}/100)`)
+  const weakLine = serverWeak.length
+    ? `\nSERVER-DERIVED weak topics (mastery < 60, decayed): ${serverWeak.join(', ')}\n`
+    : (Array.isArray(legacyWeak) && legacyWeak.length
+        ? `\nCLIENT-DERIVED weak topics (fallback): ${legacyWeak.slice(0, 5).join(', ')}\n`
+        : '')
   const targetLine = targetScore ? `\nStudent's stated target score: ${targetScore}\n` : ''
 
   const prompt = `You are a study analytics engine. Analyze this student's course performance and generate actionable insights.
 
 ${ANTI_GUESSING_RULES}
 
-${contextBlock}${legacyWeakLine}${targetLine}
+${contextBlock}${weakLine}${targetLine}
 
 Return ONLY valid JSON:
 {

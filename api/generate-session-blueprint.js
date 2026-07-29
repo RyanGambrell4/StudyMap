@@ -52,13 +52,27 @@ export default async function handler(req, res) {
   const resolvedCourseName = brain.identity?.name || courseName
   const serverContextBlock = formatCourseContextForPrompt(brain)
 
+  // Server-derived weak topics from the mastery merged into brain.topics.
+  // Fixes the client-side BlueprintScreen.jsx TODO that was waiting on
+  // topic-level recall tracking. Prefer server data; the client
+  // `weakTopics` body field is retained as a fallback while mastery is
+  // still accumulating for a given user (v1.1 removal).
+  const serverWeakTopics = (brain?.topics?.items ?? [])
+    .filter(t => typeof t.mastery === 'number' && t.mastery < 60)
+    .sort((a, b) => (a.mastery ?? 999) - (b.mastery ?? 999))
+    .slice(0, 5)
+    .map(t => t.name)
+  const effectiveWeakTopics = serverWeakTopics.length
+    ? serverWeakTopics
+    : (Array.isArray(weakTopics) ? weakTopics : [])
+
   const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|Reading Comprehension|FAR|AUD|REG|MBE|MEE|MPT|Verbal Reasoning|Quantitative Reasoning|Analytical Writing|Quantitative|Data Insights/i
   const isExamMode = EXAM_PATTERN.test(resolvedCourseName)
 
   // Grounding check. If the student supplied NO topic/upload/focus/emphasis,
   // we skip the AI call entirely and return a neutral structural blueprint.
   // The AI is never asked to invent subject content from courseName alone.
-  const grounded = hasStudentContent(uploadedTopics, studentFocus, professorEmphasis, struggles, weakTopics)
+  const grounded = hasStudentContent(uploadedTopics, studentFocus, professorEmphasis, struggles, effectiveWeakTopics)
 
   const todayStr = new Date().toISOString().split('T')[0]
   const rawDaysUntilExam = examDate
@@ -76,8 +90,9 @@ export default async function handler(req, res) {
     ? `Days until exam: ${daysUntilExam}`
     : 'No exam scheduled - design a normal study session, do NOT use exam-day language.'
 
-  const recallContext = weakTopics?.length
-    ? `\n\nIMPORTANT - This student's weak areas (recall score < 60%): ${weakTopics.join(', ')}. Prioritize these topics and allocate more time to active recall and practice problems for them.`
+  const weakTopicSource = serverWeakTopics.length ? 'server mastery (< 60)' : 'student-supplied'
+  const recallContext = effectiveWeakTopics.length
+    ? `\n\nIMPORTANT - This student's weak areas (${weakTopicSource}): ${effectiveWeakTopics.join(', ')}. Prioritize these topics and allocate more time to active recall and practice problems for them.`
     : ''
 
   const experienceContext = completedCount > 0

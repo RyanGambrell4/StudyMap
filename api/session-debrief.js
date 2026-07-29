@@ -26,15 +26,26 @@ export default async function handler(req, res) {
   const contextBlock = formatCourseContextForPrompt(brain)
   const hasRecall = recallText && recallText.trim().length > 20
   const hasNotes = notes && notes.trim().length > 10
-  const legacyWeakLine = Array.isArray(legacyWeak) && legacyWeak.length
-    ? `\nCLIENT-DERIVED weak topics (mastery store): ${legacyWeak.slice(0, 5).join(', ')}\n`
-    : ''
+
+  // Next-session priority is driven by the lowest-mastery topic with
+  // recent evidence. Server-derived list takes precedence over the
+  // legacy client field (v1.1 will drop the client field).
+  const serverWeak = (brain?.topics?.items ?? [])
+    .filter(t => typeof t.mastery === 'number' && t.mastery < 60)
+    .sort((a, b) => (a.mastery ?? 999) - (b.mastery ?? 999))
+    .slice(0, 5)
+    .map(t => `${t.name} (${t.mastery}/100${t.trend && t.trend !== 'new' ? `, trend ${t.trend}` : ''})`)
+  const weakLine = serverWeak.length
+    ? `\nSERVER-DERIVED weak topics (lowest-mastery first): ${serverWeak.join('; ')}\n`
+    : (Array.isArray(legacyWeak) && legacyWeak.length
+        ? `\nCLIENT-DERIVED weak topics (fallback): ${legacyWeak.slice(0, 5).join(', ')}\n`
+        : '')
 
   const prompt = `You are a study coach analyzing a just-completed study session. Give the student a sharp, personalized debrief.
 
 ${ANTI_GUESSING_RULES}
 
-${contextBlock}${legacyWeakLine}
+${contextBlock}${weakLine}
 
 Course: ${resolvedName}
 Session type: ${sessionType ?? 'Review'}
