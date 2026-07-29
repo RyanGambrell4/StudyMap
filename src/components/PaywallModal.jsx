@@ -293,8 +293,6 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     }
     return 'plans'
   })
-  const [pendingPlan, setPendingPlan] = useState(null) // { planId, billingPeriod } for trust screen
-
   const trialUsed = hasUsedTrial()
   const trialActive = isTrialActive()
   const isUnlimitedTrigger = UNLIMITED_ONLY_TRIGGERS.has(trigger)
@@ -342,7 +340,6 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   }, [])
 
   const SOCIAL_STATS = [
-    'Over 2,400 students finished their semester with StudyEdge AI',
     'Avg student improves recall by 31% after 2 weeks',
     '4.8 stars · students rate us higher than every other study app',
     'Students using the AI coach report studying 2x more consistently',
@@ -407,7 +404,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   }, [onClose, trigger, showPrePaywall])
 
   const handleStartTrial = async () => {
-    track('paywall_cta_click', { plan_clicked: 'unlimited', billing_period: 'weekly', trigger_feature: trigger, is_trial: true })
+    track('paywall_cta_click', { plan_clicked: 'pro', billing_period: 'weekly', trigger_feature: trigger, is_trial: true })
     // trial_started removed — trial_activated fires server-side from the Stripe webhook when the
     // subscription is actually created (customer.subscription.created with status=trialing).
     setTrialLoading(true)
@@ -423,27 +420,17 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     }
   }
 
-  // Route paid plan clicks through the trust interstitial (Feature 3).
-  // Actual Stripe call happens in handleConfirmCheckout after user sees trust screen.
-  const handleSelectPlan = (planId) => {
+  const handleSelectPlan = async (planId) => {
     track('paywall_cta_click', { plan_clicked: planId, billing_period: billingPeriod, trigger_feature: trigger, is_trial: false })
     setPlanError(null)
-    setPendingPlan({ planId, billingPeriod })
-    setScreen('trust')
-  }
-
-  const handleConfirmCheckout = async () => {
-    if (!pendingPlan) return
-    track('trust_screen_confirmed', { plan: pendingPlan.planId, billing: pendingPlan.billingPeriod, trigger_feature: trigger })
-    setLoading(pendingPlan.planId)
+    setLoading(planId)
     try {
-      const url = await createCheckoutSession(pendingPlan.planId, pendingPlan.billingPeriod, userEmail, userId)
-      if (!url) { setPlanError('Checkout failed. No charge was made. Please try again.'); setScreen('plans'); return }
+      const url = await createCheckoutSession(planId, billingPeriod, userEmail, userId)
+      if (!url) { setPlanError('Checkout failed. No charge was made. Please try again.'); return }
       if (url?.alreadySubscribed) { onClose(); return }
       window.location.href = url
     } catch {
       setPlanError('Checkout failed. No charge was made. Please try again.')
-      setScreen('plans')
     } finally {
       setLoading(null)
     }
@@ -571,83 +558,6 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             <button onClick={() => { track('commitment_no', { trigger_feature: trigger }); handleDismiss('commitment_no') }} style={{ width: '100%', background: 'none', border: 'none', padding: '8px', color: '#C0C0C0', fontSize: '0.78rem', cursor: 'pointer', fontFamily: 'inherit' }}>
               Not right now
             </button>
-          </div>
-        </div>
-        <PaywallExitGift open={exitGiftOpen} trigger={trigger} onDismiss={handleGiftDismiss} />
-        <PrePaywall open={showPrePaywall} trigger={trigger} onContinue={handlePrePaywallContinue} onDismiss={handlePrePaywallDismiss} />
-      </>
-    )
-  }
-
-  // ── Feature 3: Trust interstitial (before Stripe checkout) ───────────────────
-  if (screen === 'trust') {
-    const plan = PLANS[pendingPlan?.planId]
-    const price = plan?.prices?.[pendingPlan?.billingPeriod]
-    const CardBadge = ({ label, bg, color = '#fff' }) => (
-      <div style={{ background: bg, borderRadius: 6, padding: '5px 9px', fontSize: '10px', fontWeight: 900, color, fontFamily: 'Arial, sans-serif', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 3 }}>{label}</div>
-    )
-    return (
-      <>
-        <div {...BACKDROP_A11Y} style={BACKDROP} onClick={e => { if (e.target === e.currentTarget) setScreen('plans') }}>
-          <div className="pw-modal" style={{ ...MODAL_BASE, maxWidth: 420 }}>
-            <button onClick={() => setScreen('plans')} style={{ position: 'absolute', top: 16, left: 16, background: 'none', border: 'none', color: '#9B9B9B', cursor: 'pointer', fontSize: '0.82rem', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px' }}>
-              <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M19 12H5m7-7l-7 7 7 7" /></svg>
-              Back
-            </button>
-            <div style={{ textAlign: 'center', paddingTop: 20, marginBottom: 20 }}>
-              <div style={{ width: 56, height: 56, background: 'rgba(5,150,105,0.08)', border: '1px solid rgba(5,150,105,0.2)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-                <svg width="24" height="24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
-                </svg>
-              </div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Secure checkout</h2>
-              <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: 0 }}>Powered by Stripe, trusted by millions of businesses</p>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-              <CardBadge label="VISA" bg="#1A1F71" />
-              <div style={{ background: '#1a1a1a', borderRadius: 6, padding: '5px 8px', display: 'flex', alignItems: 'center', gap: 0 }}>
-                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#EB001B' }} />
-                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#F79E1B', marginLeft: -7, opacity: 0.9 }} />
-              </div>
-              <CardBadge label="AMEX" bg="#007BC1" />
-              <div style={{ background: '#000', borderRadius: 6, padding: '5px 8px', display: 'flex', alignItems: 'center', gap: 3 }}>
-                <svg width="11" height="13" viewBox="0 0 814 1000" fill="white"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-42.8-170.3-135.8C63 465.9 50.9 364.3 50.9 264.2c0-154.9 101-236.8 199.2-236.8 74.3 0 136.3 47.3 183.3 47.3 44.3 0 114.3-50.2 196.6-50.2 30.5 0 109.3 2.6 166.3 74.1zM506.7 85.2C516.3 72.4 527 51.5 527 30.6c0-3.2-.3-6.5-.9-9.7-21.7 2.6-47.8 14.8-64 32.8-10.5 11.6-22.9 31.5-22.9 54.2 0 3.5.6 7 .9 8.1 1.3.3 3.2.6 5.2.6 19.7 0 44.3-12.3 61.4-31.4z" /></svg>
-                <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', fontFamily: 'Arial, sans-serif' }}>Pay</span>
-              </div>
-            </div>
-            <div style={{ background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, padding: '14px 16px', marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {['256-bit SSL encryption on all data', 'Cancel anytime in 2 clicks from your account', 'No surprise charges. Full control over your plan.'].map(item => (
-                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.82rem', color: '#1A1A1A' }}>
-                  <Checkmark />
-                  {item}
-                </div>
-              ))}
-            </div>
-            {plan && (
-              <div style={{ background: 'linear-gradient(135deg, rgba(59,97,196,0.06), rgba(124,58,237,0.06))', border: '1.5px solid rgba(59,97,196,0.15)', borderRadius: 14, padding: '14px 16px', marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 3 }}>Starting plan</div>
-                  <div style={{ fontSize: '1rem', fontWeight: 800, color: '#1A1A1A', letterSpacing: '-0.2px' }}>{plan.name}</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#3B61C4' }}>{price}</div>
-                  <div style={{ fontSize: '0.68rem', color: '#9B9B9B', fontWeight: 500 }}>billed {pendingPlan.billingPeriod}</div>
-                </div>
-              </div>
-            )}
-            <button
-              onClick={handleConfirmCheckout}
-              disabled={!!loading}
-              style={{ width: '100%', padding: '14px', background: '#059669', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: loading ? 'not-allowed' : 'pointer', letterSpacing: '-0.01em', marginBottom: 10, opacity: loading ? 0.7 : 1, transition: 'opacity 0.15s' }}
-              onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = '0.88' }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = loading ? '0.7' : '1' }}
-            >
-              {loading ? 'Loading…' : 'Continue to checkout →'}
-            </button>
-            {planError && <p style={{ textAlign: 'center', color: '#DC2626', fontSize: '0.78rem', margin: '0 0 8px', fontWeight: 500 }}>{planError}</p>}
-            <p style={{ textAlign: 'center', fontSize: '0.72rem', color: '#9B9B9B', margin: 0 }}>
-              You'll enter payment details on Stripe's secure checkout page
-            </p>
           </div>
         </div>
         <PaywallExitGift open={exitGiftOpen} trigger={trigger} onDismiss={handleGiftDismiss} />
@@ -951,8 +861,8 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 boxShadow: isPrimary ? '0 8px 24px rgba(0,0,0,0.06)' : 'none',
               }}
             >
-              {/* Most popular / Required badge — always on Unlimited */}
-              {isPrimary && visiblePlanIds.length > 1 && (
+              {/* Most popular badge on Pro; Required badge on Unlimited for unlimited-only triggers */}
+              {((planId === 'pro' && !isUnlimitedTrigger) || (planId === 'unlimited' && isUnlimitedTrigger)) && visiblePlanIds.length > 1 && (
                 <div style={{
                   position: 'absolute', top: 12, right: 12,
                   fontSize: '0.62rem', fontWeight: 800, color: '#fff',
@@ -994,9 +904,9 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                     {plan.subPrices[billingPeriod]}
                   </div>
                 )}
-                {planId === 'unlimited' && !trialUsed && !trialActive && (
+                {planId === 'pro' && !trialUsed && !trialActive && (
                   <div style={{ fontSize: '0.68rem', color: '#059669', marginTop: '4px', fontWeight: 700 }}>
-                    Card required · 7-day trial · $4.99/wk after
+                    Card required · 7-day trial · $2.99/wk after
                   </div>
                 )}
               </div>
