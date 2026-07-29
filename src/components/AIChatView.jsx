@@ -212,7 +212,11 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
           fetch('/api/log-struggle', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ courseName, topic: finalFlaggedTopic }),
+            body: JSON.stringify({
+              courseName,
+              topic: finalFlaggedTopic,
+              courseId: typeof courseId === 'string' ? courseId : null,
+            }),
           }).catch(() => {})
         })
       }

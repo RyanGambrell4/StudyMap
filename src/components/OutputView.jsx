@@ -24,6 +24,7 @@ import BlueprintScreen from './BlueprintScreen'
 import SyllabusUploadModal from './SyllabusUploadModal'
 import SyllabusOnboardingModal from './SyllabusOnboardingModal'
 import { addUpload } from '../lib/uploadRegistry'
+import { courseIdentityPatch } from '../lib/courseIdentity'
 import CalendarMonthView from './CalendarMonthView'
 import CalendarDayView from './CalendarDayView'
 import CalendarWeekView from './CalendarWeekView'
@@ -1026,11 +1027,11 @@ export default function OutputView({
     setCompletedIds(prev => new Set([...prev, id]))
     setFocusSession(sess => {
       if (sess) {
+        const identity = courseIdentityPatch(sess.courseId, sess.courseName, courses)
         const record = {
           id: sess.id,
           dateStr: sess.dateStr,
-          courseId: sess.courseId,
-          courseName: sess.courseName,
+          ...identity,
           sessionType: sess.sessionType ?? null,
           duration: sess.duration,
           elapsedSeconds: (typeof elapsed === 'number' && elapsed > 0) ? elapsed : null,
@@ -1101,7 +1102,8 @@ export default function OutputView({
         n.add(id)
         const sess = allSessions.find(s => s.id === id)
         if (sess) {
-          const record = { id: sess.id, dateStr: sess.dateStr, courseId: sess.courseId, courseName: sess.courseName, duration: sess.duration }
+          const identity = courseIdentityPatch(sess.courseId, sess.courseName, courses)
+          const record = { id: sess.id, dateStr: sess.dateStr, ...identity, duration: sess.duration }
           setCompletedSessionLog(prev => {
             const filtered = prev.filter(s => s.id !== record.id)
             return [...filtered, record].slice(-500)
@@ -1113,30 +1115,32 @@ export default function OutputView({
       }
       return n
     })
-  }, [allSessions])
+  }, [allSessions, courses])
 
   const handleRatingSave = useCallback(async (rating, hardNotes) => {
     if (!ratingSession) return
     const sess = ratingSession
     setRatingSession(null)
     // Update completed session record with rating + hard_notes
+    const identity = courseIdentityPatch(sess.courseId, sess.courseName, courses)
     const record = {
       id: sess.id,
       dateStr: sess.dateStr,
-      courseId: sess.courseId,
-      courseName: sess.courseName,
+      ...identity,
       duration: sess.duration,
       rating,
       hard_notes: hardNotes || null,
     }
     saveCompletedSession(record)
-    // Store hard note as pending feedback for the coach plan
+    // Store hard note as pending feedback for the coach plan.
+    // Preserve the legacy numeric-index call signature for coach_plans -- that
+    // storage is keyed independently and out of scope for this fix.
     if (hardNotes) {
       try {
         await saveCoachPlanHardNote(sess.courseId, hardNotes, sess.sessionType || 'session')
       } catch (_) {}
     }
-  }, [ratingSession])
+  }, [ratingSession, courses])
 
   const handleLogGrade = () => {
     const score = parseFloat(gradeInput)
@@ -1161,12 +1165,14 @@ export default function OutputView({
   const handleSyllabusConfirm = (courseIdx, items) => {
     const NEUTRAL = { name: 'neutral', bg: '#64748B', dot: '#64748b' }
     const course = courseIdx !== null ? courses[courseIdx] : null
+    const stableCourseId = course?.id ?? null
     setSyllabusEvents(prev => [
       ...prev,
       ...items.map(e => ({
         ...e,
         id: `syl-${courseIdx ?? 'all'}-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
         courseIdx,
+        courseId: stableCourseId,
         courseName: course?.name ?? 'General',
         color: course?.color ?? NEUTRAL,
       })),
@@ -1300,6 +1306,7 @@ export default function OutputView({
         notes: null,
         sourceSnippet: e.sourceSnippet,
         courseIdx,
+        courseId: courseObj.id ?? null,
         courseName: courseObj.name,
         color: courseColor,
       })
@@ -1318,6 +1325,7 @@ export default function OutputView({
         notes: null,
         sourceSnippet: d.sourceSnippet,
         courseIdx,
+        courseId: courseObj.id ?? null,
         courseName: courseObj.name,
         color: courseColor,
       })
@@ -1563,6 +1571,7 @@ export default function OutputView({
           onGoToTools={() => setActiveSection('tools')}
           onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump', source: 'focus_complete' }); setShowBrainDump(true) }}
           course={courses[focusSession.courseId] ?? null}
+          courses={courses}
           onShowPaywall={onShowPaywall}
           userId={userId}
           learningStyle={learningStyle}

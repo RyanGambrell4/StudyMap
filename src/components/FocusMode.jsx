@@ -7,6 +7,7 @@ import {
   saveNotes as dbSaveNotes,
   appendSessionRecall,
 } from '../lib/db'
+import { courseIdentityPatch } from '../lib/courseIdentity'
 import { getAccessToken } from '../lib/supabase'
 import { fetchWithRetry } from '../lib/utils'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, getFocusMinutesUsed, incrementFeatureUsage, FREE_LIMITS, hasUsedTrial } from '../lib/subscription'
@@ -42,8 +43,9 @@ function loadNotes(courseId, dateStr) {
   return getCachedNotes(courseId, dateStr)
 }
 
-function appendRecall(courseId, courseName, sessionType, text) {
-  appendSessionRecall({ courseId, courseName, sessionType, text, timestamp: Date.now() })
+function appendRecall(courseId, courseName, sessionType, text, courses) {
+  const identity = courseIdentityPatch(courseId, courseName, courses)
+  appendSessionRecall({ ...identity, sessionType, text, timestamp: Date.now() })
 }
 
 function generatePDF({ courseName, dateStr, sessionType, recallText, concepts, main, summary }) {
@@ -468,7 +470,7 @@ const SESSION_TABS = [
   { id: 'ai',         label: 'Ask AI',        num: 6 },
 ]
 
-export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools, onOpenBrainDump, course, onShowPaywall, userId, learningStyle, currentStreak = 0 }) {
+export default function FocusMode({ session, blueprint, onComplete, onExit, nextSession, onStartNext, onGoToTools, onOpenBrainDump, course, courses = [], onShowPaywall, userId, learningStyle, currentStreak = 0 }) {
   const totalSec = session.duration * 60
   const isLongSession = session.duration > 45
   const todayStr = new Date().toISOString().split('T')[0]
@@ -1112,7 +1114,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   }
 
   const handleCheckYourself = () => {
-    if (recallText.trim()) appendRecall(session.courseId, session.courseName, session.sessionType, recallText)
+    if (recallText.trim()) appendRecall(session.courseId, session.courseName, session.sessionType, recallText, courses)
     setRecallSaved(true); setShowRecallCards(true); setRcIdx(0); setRcFlipped(false)
   }
 
@@ -1195,7 +1197,11 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
           fetch('/api/log-struggle', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-            body: JSON.stringify({ courseName: session.courseName, topic }),
+            body: JSON.stringify({
+              courseName: session.courseName,
+              topic,
+              courseId: courseIdentityPatch(session.courseId, session.courseName, courses).courseId,
+            }),
           }).catch(() => {})
         })
       }
@@ -2387,7 +2393,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
             {/* AIChatView stays mounted */}
             <div className={activeTab === 'ai' ? 'flex-1 flex flex-col overflow-hidden h-full' : 'hidden'}>
               <AIChatView
-                courseId={session.courseId}
+                courseId={courseIdentityPatch(session.courseId, session.courseName, courses).courseId ?? session.courseId}
                 courseName={session.courseName}
                 examDate={course?.examDate ?? null}
                 targetGrade={course?.targetGrade ?? null}

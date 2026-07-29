@@ -18,7 +18,7 @@ export default async function handler(req, res) {
   const userData = await userRes.json()
   if (!userData?.id) return res.status(401).json({ error: 'Unauthorized' })
 
-  const { courseName, topic } = req.body ?? {}
+  const { courseName, topic, courseId } = req.body ?? {}
 
   if (!courseName || typeof courseName !== 'string' || !courseName.trim()) {
     return res.status(400).json({ error: 'courseName is required' })
@@ -30,12 +30,23 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'topic must be shorter than 200 characters' })
   }
 
-  const { error } = await supabase.from('struggle_topics').upsert({
+  // courseId is optional. Same pass-through contract as log-struggle: the
+  // client resolves the stable plan.courses[].id and we just store it.
+  const stableCourseId = typeof courseId === 'string' && courseId.trim()
+    ? courseId.trim().slice(0, 120)
+    : null
+
+  const row = {
     user_id: userData.id,
     course_name: courseName.trim(),
     topic: topic.trim(),
     flagged_at: new Date().toISOString(),
-  }, { onConflict: 'user_id,course_name,topic' })
+  }
+  if (stableCourseId) row.course_id = stableCourseId
+
+  const { error } = await supabase.from('struggle_topics').upsert(row, {
+    onConflict: 'user_id,course_name,topic',
+  })
 
   if (error) {
     console.error('[flag-struggle] supabase error:', error)

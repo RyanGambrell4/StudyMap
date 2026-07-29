@@ -11,20 +11,27 @@ export default async function handler(req, res) {
   const userId = await verifyAuth(req)
   if (!userId) return res.status(401).json({ error: 'Unauthorized' })
 
-  const { courseName, topic } = req.body
+  const { courseName, topic, courseId } = req.body
   if (!courseName || !topic) return res.status(400).json({ error: 'courseName and topic required' })
+
+  // courseId is optional. The client resolves the stable plan.courses[].id
+  // when it has one and passes it through. We store it verbatim and let
+  // courseContext.js validate on read. Not re-resolved server-side: that
+  // would require a plan lookup on every write and duplicate work the
+  // client already did.
+  const stableCourseId = typeof courseId === 'string' && courseId ? courseId.slice(0, 120) : null
+
+  const row = {
+    user_id: userId,
+    course_name: courseName.slice(0, 120),
+    topic: topic.slice(0, 120),
+    flagged_at: new Date().toISOString(),
+  }
+  if (stableCourseId) row.course_id = stableCourseId
 
   const { error } = await supabaseAdmin
     .from('struggle_topics')
-    .upsert(
-      {
-        user_id: userId,
-        course_name: courseName.slice(0, 120),
-        topic: topic.slice(0, 120),
-        flagged_at: new Date().toISOString(),
-      },
-      { onConflict: 'user_id,course_name,topic' }
-    )
+    .upsert(row, { onConflict: 'user_id,course_name,topic' })
 
   if (error) {
     console.error('[log-struggle] DB error:', error)
