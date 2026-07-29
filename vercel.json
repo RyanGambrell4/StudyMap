@@ -1377,6 +1377,22 @@
             "destination": "/ap-psychology-study-schedule.html"
         },
         {
+            "source": "/ap-score-calculator",
+            "destination": "/ap-score-calculator.html"
+        },
+        {
+            "source": "/ap-biology-study-schedule",
+            "destination": "/ap-biology-study-schedule.html"
+        },
+        {
+            "source": "/ap-calculus-ab-study-schedule",
+            "destination": "/ap-calculus-ab-study-schedule.html"
+        },
+        {
+            "source": "/ap-exam-study-schedule-templates",
+            "destination": "/ap-exam-study-schedule-templates.html"
+        },
+        {
             "source": "/study-statistics",
             "destination": "/study-statistics.html"
         },
