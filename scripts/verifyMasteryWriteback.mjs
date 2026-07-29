@@ -81,8 +81,8 @@ section('1. Per-course scoping (no leakage across courses)')
   assert(!courseAMastery.some(m => m.key === 'quantum tunneling'), 'Course A: no topics from Course B leaked in', courseAMastery.map(m => m.key))
 
   // Prove that computeTopicMastery groups only by topic_key so if the loader
-  // is broken (mixes courses), the compute layer would happily merge them —
-  // this is by design; the SQL WHERE clause is the guarantee. We surface
+  // is broken (mixes courses), the compute layer would happily merge them.
+  // This is by design; the SQL WHERE clause is the guarantee. We surface
   // this as documentation.
   const mixedRows = [
     ...courseARows,
