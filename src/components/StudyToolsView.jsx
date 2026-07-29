@@ -850,90 +850,9 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
         return (
           <div>
-            {contentReadyCount > 0 && (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '4px 11px', borderRadius: 999, background: '#DCFCE7', marginBottom: 12 }}>
-                <div style={{ width: 6, height: 6, borderRadius: 999, background: '#16A34A' }} />
-                <span style={{ fontSize: 11.5, fontWeight: 600, color: '#15803D' }}>{contentReadyCount} tool{contentReadyCount !== 1 ? 's' : ''} have content ready</span>
-              </div>
-            )}
-
             <h1 style={{ fontSize: 22, fontWeight: 800, color: '#111111', margin: '0 0 4px', letterSpacing: '-0.02em' }}>Study Tools</h1>
             <p style={{ fontSize: 13.5, color: '#6B6B6B', margin: '0 0 22px' }}>Pick a tool, pick a topic, and go.</p>
 
-            {(() => {
-              const health = getDeckHealth()
-              if (health.total === 0) return null
-              const primaryColor = health.dueToday >= 5 ? '#DC2626'
-                : health.dueToday > 0 ? '#D97706'
-                : '#16A34A'
-              return (
-                <div style={{ marginBottom: 22, background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, padding: '16px 18px' }}>
-                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                      <span style={{ width: 8, height: 8, borderRadius: '50%', background: primaryColor }} />
-                      <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: '#9B9B9B', textTransform: 'uppercase' }}>Deck Health</div>
-                    </div>
-                    <button
-                      onClick={() => setMode('flashcards')}
-                      disabled={!flashcards.length}
-                      style={{
-                        fontSize: 12, fontWeight: 700,
-                        padding: '6px 12px', borderRadius: 7,
-                        background: flashcards.length ? primaryColor : 'transparent',
-                        color: flashcards.length ? '#fff' : '#9B9B9B',
-                        border: flashcards.length ? 'none' : '1px solid rgba(0,0,0,0.12)',
-                        cursor: flashcards.length ? 'pointer' : 'default', fontFamily: 'inherit',
-                      }}
-                    >
-                      {flashcards.length ? 'Review now →' : 'No deck yet'}
-                    </button>
-                  </div>
-
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 10, marginBottom: 14 }}>
-                    {[
-                      { label: 'Total', value: health.total, color: '#111' },
-                      { label: 'Due today', value: health.dueToday, color: primaryColor, emphasized: true },
-                      { label: 'Stale (14d+)', value: health.stale, color: '#D97706' },
-                      { label: 'Sticky misses', value: health.consistentlyMissed, color: '#DC2626' },
-                    ].map(cell => (
-                      <div key={cell.label} style={{
-                        padding: '10px 12px', borderRadius: 10,
-                        background: cell.emphasized ? `${cell.color}0F` : '#F7F6F3',
-                        border: cell.emphasized ? `1px solid ${cell.color}33` : '1px solid rgba(0,0,0,0.05)',
-                      }}>
-                        <div style={{ fontSize: 22, fontWeight: 800, color: cell.color, letterSpacing: '-0.02em' }}>{cell.value}</div>
-                        <div style={{ fontSize: 10.5, color: '#6B6B6B', fontWeight: 600, marginTop: 1 }}>{cell.label}</div>
-                      </div>
-                    ))}
-                  </div>
-
-                  <div style={{ fontSize: 12.5, color: '#111', lineHeight: 1.5, marginBottom: health.topicBreakdown.length ? 12 : 0 }}>
-                    <strong style={{ color: primaryColor }}>Do this next:</strong> {health.recommendedAction}
-                  </div>
-
-                  {health.topicBreakdown.length > 0 && (
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-                      {health.topicBreakdown.map(t => (
-                        <span key={t.topic} style={{
-                          fontSize: 11.5, padding: '4px 10px', borderRadius: 999,
-                          background: t.dueNow > 0 ? 'rgba(220,38,38,0.06)' : '#F7F6F3',
-                          border: `1px solid ${t.dueNow > 0 ? 'rgba(220,38,38,0.20)' : 'rgba(0,0,0,0.07)'}`,
-                          color: t.dueNow > 0 ? '#DC2626' : '#6B6B6B', fontWeight: 600,
-                        }}>
-                          {t.topic}{t.dueNow > 0 ? ` · ${t.dueNow} due` : ` · ${t.count}`}
-                        </span>
-                      ))}
-                    </div>
-                  )}
-
-                  {health.fromMisses > 0 && health.newestSource && (
-                    <div style={{ marginTop: 10, fontSize: 11.5, color: '#9B9B9B' }}>
-                      {health.fromMisses} card{health.fromMisses === 1 ? '' : 's'} auto-added this month — most recently from {labelForSource(health.newestSource)}.
-                    </div>
-                  )}
-                </div>
-              )
-            })()}
 
             {onOpenSessionBundle && courses.length > 0 && (
               <div style={{ marginBottom: 22, padding: '18px 20px', borderRadius: 14, background: 'linear-gradient(135deg, #111111 0%, #1F1F1F 100%)', color: '#fff', boxShadow: '0 8px 24px rgba(0,0,0,0.18)', position: 'relative', overflow: 'hidden' }}>
