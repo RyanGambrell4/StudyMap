@@ -3,6 +3,7 @@ import { tracedCall } from '../lib/server/langfuse.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
+import { recordTopicSignal } from '../lib/server/topicSignals.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -113,6 +114,33 @@ Rules:
     const last = content.lastIndexOf('}')
     if (first === -1 || last === -1) throw new Error('Malformed AI response')
     const result = JSON.parse(content.slice(first, last + 1))
+
+    // Persist each named possibleGap as a brain_dump_gap topic signal.
+    // Fire-and-forget style: signal-write failures are logged but never
+    // block the user-facing response. courseId here is the stable string
+    // resolved above; we never pass a numeric index.
+    const gaps = Array.isArray(result?.possibleGaps) ? result.possibleGaps : []
+    if (gaps.length && courseId) {
+      const overallScore = typeof result?.score === 'number' ? result.score : null
+      await Promise.all(gaps.slice(0, 5).map(async (gapTopic) => {
+        if (!gapTopic || typeof gapTopic !== 'string') return
+        const write = await recordTopicSignal({
+          userId: gate.userId,
+          courseId,
+          courseName: resolvedName,
+          topic: gapTopic,
+          signalType: 'brain_dump_gap',
+          metadata: {
+            overall_score: overallScore,
+            source_topic: topic || null,
+          },
+        })
+        if (!write.ok) {
+          console.error('[brain-dump-score] recordTopicSignal failed', write)
+        }
+      }))
+    }
+
     return res.status(200).json(result)
   } catch (e) {
     console.error('[brain-dump-score]', e)
