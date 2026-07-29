@@ -1210,13 +1210,54 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
   const handleNextQuestion = () => {
     if (quizIdx + 1 >= quizQuestions.length) {
-      const allAnswers = [...quizAnswers, { correct: quizSelected === quizQuestions[quizIdx].answer }]
+      const finalQ = quizQuestions[quizIdx]
+      const finalCorrect = quizSelected === finalQ.answer
+      const allAnswers = [...quizAnswers, { correct: finalCorrect, question: finalQ }]
       const correctCount = allAnswers.filter(a => a.correct).length
       track('focus_quiz_completed', {
         course_name: session.courseName,
         score_pct: Math.round((correctCount / quizQuestions.length) * 100),
         question_count: quizQuestions.length,
       })
+
+      // Batch one topic_signal per graded question. Topics come from the
+      // server (api/quiz-burst per-question .topic field), so the server
+      // trusts the labeling; only correctness was decided in the browser,
+      // which is why record-signals lands these as
+      // client_graded_server_generated at weight 0.8.
+      if (session?.courseName) {
+        const identity = courseIdentityPatch(session.courseId, session.courseName, courses)
+        if (identity.courseId) {
+          const signals = allAnswers
+            .map(a => {
+              const q = a?.question
+              if (!q || typeof q.topic !== 'string' || !q.topic.trim()) return null
+              return {
+                signalType: 'quiz_answer',
+                courseId: identity.courseId,
+                courseName: session.courseName,
+                topic: q.topic,
+                rawScore: a.correct ? 1 : 0,
+                metadata: {
+                  grounding: q.grounding || null,
+                  difficulty: q.difficulty || null,
+                  root_cause_type: q.rootCauseType || null,
+                },
+              }
+            })
+            .filter(Boolean)
+          if (signals.length) {
+            getAccessToken().then(token => {
+              fetch('/api/record-signals', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ signals }),
+              }).catch(() => {})
+            })
+          }
+        }
+      }
+
       setQuizDone(true)
     } else { setQuizIdx(i => i + 1); setQuizSelected(null); setQuizConfirmed(false) }
   }

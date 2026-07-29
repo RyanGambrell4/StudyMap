@@ -205,6 +205,42 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
         .catch(() => {})
     }
     window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'practiceExam' } }))
+
+    // Batch one topic_signal per auto-graded question with a topic.
+    // Short-answer items (correct === null, not auto-graded) are skipped
+    // because we have no reliable score for them. Fire-and-forget: the
+    // POST is not awaited and its failure never blocks the results UI.
+    if (typeof courseId === 'string' && courseId && courseName) {
+      const signals = graded
+        .map(g => {
+          if (g.correct === null) return null
+          const topic = typeof g.q?.topic === 'string' ? g.q.topic.trim() : ''
+          if (!topic) return null
+          return {
+            signalType: 'practice_exam_answer',
+            courseId,
+            courseName,
+            topic,
+            rawScore: g.correct === true ? 1 : 0,
+            metadata: {
+              question_type: g.q?.type || null,
+              source_type: g.q?.sourceType || null,
+            },
+          }
+        })
+        .filter(Boolean)
+        .slice(0, 50)
+      if (signals.length) {
+        getAccessToken().then(token => {
+          fetch('/api/record-signals', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+            body: JSON.stringify({ signals }),
+          }).catch(() => {})
+        })
+      }
+    }
+
     track('practice_exam_complete', { score: score ?? null, questionCount: graded.length, weakTopicCount: weakTopics.length, plan: getActivePlan() })
   }, [])
 

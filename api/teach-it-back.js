@@ -1,18 +1,25 @@
 import { verifyAndCheckAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { recordTopicSignal } from '../lib/server/topicSignals.js'
+import { resolveCourseId } from '../lib/server/courseContext.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const { courseName, topic, explanation, phase, followUpQuestion, followUpAnswer } = req.body
+  const { courseName, courseId: bodyCourseId, topic, explanation, phase, followUpQuestion, followUpAnswer } = req.body
   if (!courseName || !topic || !explanation) return res.status(400).json({ error: 'Missing required fields' })
 
-  // Follow-up is part of the same session — auth only, no extra credit consumed.
+  // Follow-up is part of the same session, auth only, no extra credit consumed.
+  // For the initial phase we resolve userId from the AI usage gate; follow-up
+  // phase does not persist a signal so we do not need userId here.
+  let userId = null
   if (phase === 'followup') {
     const auth = await verifyAuth(req)
     if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
+    userId = auth.userId
   } else {
     const gate = await verifyAndCheckAiUsage(req)
     if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+    userId = gate.userId
   }
 
   let prompt
@@ -73,7 +80,35 @@ Rules:
     const first = content.indexOf('{')
     const last = content.lastIndexOf('}')
     if (first === -1 || last === -1) throw new Error('Malformed AI response')
-    return res.status(200).json(JSON.parse(content.slice(first, last + 1)))
+    const result = JSON.parse(content.slice(first, last + 1))
+
+    // Persist a teach_it_back signal ONLY on the initial phase. Follow-up
+    // is a second-chance clarification; a low follow-up should not
+    // double-count as a fresh weak signal. courseId must be a stable
+    // string; if the caller only knows courseName we resolve it here.
+    if (phase !== 'followup' && userId && typeof result?.score === 'number') {
+      let courseId = typeof bodyCourseId === 'string' ? bodyCourseId : null
+      if (!courseId) {
+        try { courseId = await resolveCourseId(userId, courseName) } catch { courseId = null }
+      }
+      if (courseId) {
+        const write = await recordTopicSignal({
+          userId,
+          courseId,
+          courseName,
+          topic,
+          signalType: 'teach_it_back',
+          rawScore: Math.max(0, Math.min(1, result.score / 100)),
+          metadata: {
+            verdict: typeof result?.verdict === 'string' ? result.verdict.slice(0, 200) : null,
+            missing_count: Array.isArray(result?.missing) ? result.missing.length : 0,
+          },
+        })
+        if (!write.ok) console.error('[teach-it-back] recordTopicSignal failed', write)
+      }
+    }
+
+    return res.status(200).json(result)
   } catch (e) {
     console.error('[teach-it-back]', e)
     return res.status(500).json({ error: 'Failed to evaluate. Please try again.' })

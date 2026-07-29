@@ -1,4 +1,6 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { recordTopicSignal } from '../lib/server/topicSignals.js'
+import { resolveCourseId } from '../lib/server/courseContext.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -6,7 +8,7 @@ export default async function handler(req, res) {
   const gate = await verifyAndCheckAiUsage(req)
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
-  const { courseName, topic, wrongQuestion, wrongAnswer, correctAnswer, existingExplanation } = req.body
+  const { courseName, courseId: bodyCourseId, topic, wrongQuestion, wrongAnswer, correctAnswer, existingExplanation } = req.body
   if (!courseName || !wrongQuestion || !correctAnswer)
     return res.status(400).json({ error: 'Missing required fields' })
 
@@ -57,6 +59,33 @@ Rules:
     const last = content.lastIndexOf('}')
     if (first === -1 || last === -1) throw new Error('Malformed AI response')
     const result = JSON.parse(content.slice(first, last + 1))
+
+    // Presence of a misconception is a weak-signal for the topic. Fixed
+    // low score at full weight (see SIGNAL_TYPE_SCORE_RULES). Skip if
+    // topic is 'General' or missing (nothing to attach mastery to).
+    const topicToRecord = topic && String(topic).trim() && String(topic).trim().toLowerCase() !== 'general'
+      ? String(topic).trim()
+      : null
+    if (topicToRecord) {
+      let courseId = typeof bodyCourseId === 'string' ? bodyCourseId : null
+      if (!courseId) {
+        try { courseId = await resolveCourseId(gate.userId, courseName) } catch { courseId = null }
+      }
+      if (courseId) {
+        const write = await recordTopicSignal({
+          userId: gate.userId,
+          courseId,
+          courseName,
+          topic: topicToRecord,
+          signalType: 'repair_misconception',
+          metadata: {
+            diagnosis: typeof result?.diagnosis === 'string' ? result.diagnosis.slice(0, 200) : null,
+          },
+        })
+        if (!write.ok) console.error('[repair-misconception] recordTopicSignal failed', write)
+      }
+    }
+
     return res.status(200).json(result)
   } catch (e) {
     console.error('[repair-misconception]', e)

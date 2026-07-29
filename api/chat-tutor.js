@@ -56,6 +56,19 @@ export default async function handler(req, res) {
   const resolvedCourseName = brain.identity?.name || courseName
   const serverContextBlock = formatCourseContextForPrompt(brain)
 
+  // Direct probe hint from mastery. The topics block in serverContextBlock
+  // already carries per-topic mastery; this line surfaces the shortlist so
+  // the tutor can proactively steer toward weak areas rather than waiting
+  // for the student to ask.
+  const weakestTopics = (brain?.topics?.items ?? [])
+    .filter(t => typeof t.mastery === 'number' && t.mastery < 60)
+    .sort((a, b) => (a.mastery ?? 999) - (b.mastery ?? 999))
+    .slice(0, 3)
+    .map(t => t.name)
+  const weakestProbeLine = weakestTopics.length
+    ? `Student is currently weakest at: ${weakestTopics.join(', ')}. When relevant to what they are asking, connect the answer to one of these and offer a short check-for-understanding.`
+    : ''
+
   let planContext = ''
   if (coachPlan?.weeklyFocus?.length) {
     planContext = coachPlan.weeklyFocus
@@ -109,6 +122,7 @@ ${ANTI_GUESSING_RULES}
 ${serverContextBlock}
 
 ${personalBlock}${planContext ? `Their current study plan covers:\n${planContext}` : ''}
+${weakestProbeLine}
 ${strugglesStr ? `Topics they have previously struggled with (spend extra time here): ${strugglesStr}` : ''}
 ${professorEmphasis ? `Professor emphasizes these topics (high exam priority): ${professorEmphasis}` : ''}
 ${strengths ? `Areas they are already solid on (brief review only): ${strengths}` : ''}
