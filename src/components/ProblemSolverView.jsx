@@ -77,7 +77,7 @@ function StepCard({ step }) {
       <div style={{ padding: '12px 16px', background: '#fff' }}>
         <div style={{
           fontFamily: 'monospace', fontSize: 14, color: '#111', lineHeight: 1.6,
-          background: '#F7F6F3', borderRadius: 6, padding: '10px 14px', marginBottom: step.note ? 10 : 0
+          background: '#F7F8FA', borderRadius: 6, padding: '10px 14px', marginBottom: step.note ? 10 : 0
         }}>
           {step.work}
         </div>
@@ -229,7 +229,7 @@ function SolutionView({ solution, onBack }) {
           <div style={{ fontSize: 12, color: '#6B6B6B', marginBottom: 10, fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>Key Formulas Used</div>
           {solution.keyFormulas.map((f, i) => (
             <div key={i} style={{
-              fontFamily: 'monospace', fontSize: 13, color: '#3B61C4', background: '#F7F6F3',
+              fontFamily: 'monospace', fontSize: 13, color: '#3B61C4', background: '#F7F8FA',
               borderRadius: 6, padding: '6px 10px', marginBottom: 6
             }}>
               {f}
@@ -679,7 +679,7 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
             style={{
               width: '100%', minHeight: 120, borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)',
               padding: '12px 14px', fontSize: 14, resize: 'vertical', fontFamily: 'inherit',
-              color: '#111', background: '#F7F6F3', boxSizing: 'border-box', outline: 'none'
+              color: '#111', background: '#F7F8FA', boxSizing: 'border-box', outline: 'none'
             }}
           />
 

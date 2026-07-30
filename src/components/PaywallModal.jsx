@@ -505,7 +505,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 ))}
               </div>
             ) : (
-              <div style={{ background: '#F7F6F3', borderRadius: 14, padding: 16, marginBottom: 20, textAlign: 'center', fontSize: '0.85rem', color: '#6B6B6B' }}>
+              <div style={{ background: '#F7F8FA', borderRadius: 14, padding: 16, marginBottom: 20, textAlign: 'center', fontSize: '0.85rem', color: '#6B6B6B' }}>
                 Your courses and study plan are saved and ready when you upgrade.
               </div>
             )}
@@ -615,7 +615,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                 <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', fontFamily: 'Arial, sans-serif' }}>Pay</span>
               </div>
             </div>
-            <div style={{ background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, padding: '14px 16px', marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
+            <div style={{ background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, padding: '14px 16px', marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
               {['256-bit SSL encryption on all data', 'Cancel anytime in 2 clicks from your account', 'No surprise charges. Full control over your plan.'].map(item => (
                 <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.82rem', color: '#1A1A1A' }}>
                   <Checkmark />
@@ -737,7 +737,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
 
         {/* ── Social proof bar ── */}
         <div style={{
-          background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)',
+          background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.07)',
           borderRadius: '12px', padding: '12px 16px', marginBottom: '18px',
           display: 'flex', flexDirection: 'column', gap: '10px',
         }}>
@@ -897,7 +897,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
         {/* ── Billing period toggle ── */}
         <div style={{
           display: 'flex', gap: '4px',
-          background: '#F7F6F3',
+          background: '#F7F8FA',
           border: '1px solid rgba(0,0,0,0.07)',
           borderRadius: '12px', padding: '4px',
           marginBottom: '14px',

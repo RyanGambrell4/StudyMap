@@ -395,7 +395,7 @@ function LogGradeModal({ logGradeId, assignments, courses, gradeInput, setGradeI
         />
         {gradeError && <p style={{ color: '#dc2626', fontSize: 12, margin: '0 0 12px' }}>{gradeError}</p>}
         <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
-          <button onClick={onClose} style={{ flex: 1, background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', color: '#6B6B6B', fontWeight: 600, padding: '10px', borderRadius: 10, fontSize: 14, cursor: 'pointer' }}>Cancel</button>
+          <button onClick={onClose} style={{ flex: 1, background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.08)', color: '#6B6B6B', fontWeight: 600, padding: '10px', borderRadius: 10, fontSize: 14, cursor: 'pointer' }}>Cancel</button>
           <button onClick={onSave} style={{ flex: 1, background: '#3B61C4', border: 'none', color: '#fff', fontWeight: 700, padding: '10px', borderRadius: 10, fontSize: 14, cursor: 'pointer' }}>Save Grade</button>
         </div>
       </div>

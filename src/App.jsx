@@ -569,7 +569,7 @@ export default function App() {
       <div style={{
         minHeight: '100vh', display: 'flex', flexDirection: 'column',
         alignItems: 'center', justifyContent: 'center',
-        backgroundColor: '#F7F6F3', gap: 24,
+        backgroundColor: '#F7F8FA', gap: 24,
       }}>
         <style>{`
           @keyframes se-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.85)} }
@@ -659,7 +659,7 @@ export default function App() {
     // hold with a spinner. onAuthStateChange will fire and we'll render.
     if (inOAuthCallback || hasStoredSession) {
       return (
-        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F7F6F3' }}>
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F7F8FA' }}>
           <div className="text-center space-y-4">
             <Spinner size="md" className="mx-auto" />
             <p className="text-sm" style={{ color: '#6B6B6B' }}>Signing you in…</p>
@@ -671,7 +671,7 @@ export default function App() {
     // No auth intent - send them to the real landing page
     window.location.href = '/'
     return (
-      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F7F6F3' }}>
+      <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#F7F8FA' }}>
         <Spinner size="md" />
       </div>
     )
@@ -693,7 +693,7 @@ export default function App() {
       }
     }
     return (
-      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#F7F6F3' }}>
+      <div className="min-h-screen flex items-center justify-center px-4" style={{ backgroundColor: '#F7F8FA' }}>
         <div className="w-full max-w-sm">
           <div className="flex items-center justify-center gap-2.5 mb-10">
             <img src="/favicon.png" alt="StudyEdge AI" className="w-9 h-9 rounded-xl" style={{ objectFit: 'contain' }} />
@@ -739,7 +739,7 @@ export default function App() {
   // Spinner while checkout redirect is in flight (intent resolved by useEffect above).
   if (checkoutRedirecting) {
     return (
-      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F6F3' }}>
+      <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#F7F8FA' }}>
         <div style={{ textAlign: 'center' }}>
           <Spinner size="md" style={{ display: 'block', margin: '0 auto 12px' }} />
           <p style={{ color: '#6B6B6B', fontSize: 14 }}>{checkoutIntent?.trial ? 'Activating your free trial…' : 'Redirecting to checkout…'}</p>

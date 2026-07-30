@@ -251,7 +251,7 @@ export default function AccountView({
   }
 
   return (
-    <div style={{ padding: '24px 20px', maxWidth: 560, margin: '0 auto', background: '#F7F6F3', minHeight: '100%', animation: 'av-in 280ms cubic-bezier(0.16,1,0.3,1) both' }}>
+    <div style={{ padding: '24px 20px', maxWidth: 560, margin: '0 auto', background: '#F7F8FA', minHeight: '100%', animation: 'av-in 280ms cubic-bezier(0.16,1,0.3,1) both' }}>
       <style>{`
         @keyframes av-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
         .av-row-btn { transition: background 0.12s, transform 0.1s !important; border-radius: 8px !important; }
@@ -307,7 +307,7 @@ export default function AccountView({
             { label: 'Study streak', value: `${progressStats.streak}d`, sub: progressStats.streak === 0 ? 'Start today' : 'in a row' },
             { label: 'Avg recall', value: progressStats.avgRecall != null ? `${progressStats.avgRecall}%` : '-', sub: progressStats.avgRecall != null ? 'across sessions' : 'No data yet' },
           ].map(({ label, value, sub, primary }) => (
-            <div key={label} style={{ background: '#F7F6F3', borderRadius: 10, padding: '12px 14px', border: '1px solid rgba(0,0,0,0.07)' }}>
+            <div key={label} style={{ background: '#F7F8FA', borderRadius: 10, padding: '12px 14px', border: '1px solid rgba(0,0,0,0.07)' }}>
               <p style={{ margin: '0 0 3px', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{label}</p>
               <p style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 700, color: primary ? '#3B61C4' : '#111111', letterSpacing: '-0.02em' }}>{value}</p>
               <p style={{ margin: 0, fontSize: 11, color: '#6B6B6B' }}>{sub}</p>

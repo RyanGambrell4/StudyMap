@@ -189,7 +189,7 @@ export default function FeedbackModal({ open, onClose }) {
                   background: 'none', border: 'none', color: MUTED, cursor: 'pointer', borderRadius: 8,
                   flexShrink: 0, marginLeft: 8,
                 }}
-                onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
+                onMouseEnter={e => e.currentTarget.style.background = '#F7F8FA'}
                 onMouseLeave={e => e.currentTarget.style.background = 'none'}
               >
                 <svg width="16" height="16" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">

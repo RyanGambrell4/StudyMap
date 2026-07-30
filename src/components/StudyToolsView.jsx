@@ -1252,13 +1252,13 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 <div className="flex flex-col gap-1.5">
                   <button
                     onClick={() => handleGenerateQuiz(false)}
-                    className="bg-white hover:bg-[#F7F6F3] border border-[#E5E5E5] text-[#6B6B6B] font-semibold py-2 px-4 rounded-xl text-xs transition-colors"
+                    className="bg-white hover:bg-[#F7F8FA] border border-[#E5E5E5] text-[#6B6B6B] font-semibold py-2 px-4 rounded-xl text-xs transition-colors"
                   >
                     Quiz
                   </button>
                   <button
                     onClick={() => handleGenerateQuiz(true)}
-                    className="bg-white hover:bg-[#F7F6F3] border border-amber-300 text-amber-600 font-semibold py-2 px-4 rounded-xl text-xs transition-colors"
+                    className="bg-white hover:bg-[#F7F8FA] border border-amber-300 text-amber-600 font-semibold py-2 px-4 rounded-xl text-xs transition-colors"
                   >
                     Timed
                   </button>
@@ -1336,7 +1336,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
               style={{
                 width: '100%', padding: '8px 12px', borderRadius: 8,
                 border: '1px solid rgba(0,0,0,0.1)', fontSize: 13,
-                background: '#F7F6F3', boxSizing: 'border-box',
+                background: '#F7F8FA', boxSizing: 'border-box',
               }}
             />
             {searchResults !== null && (
@@ -1619,7 +1619,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                       </button>
                       <button
                         onClick={() => { setDrillQuiz([]); setDrillAnswers([]); setDrillDone(false); setDrillQuestionIdx(0); setDrillTopic('') }}
-                        className="flex-1 bg-white hover:bg-[#F7F6F3] border border-[#E5E5E5] text-[#6B6B6B] font-semibold py-3 rounded-xl text-sm transition-colors"
+                        className="flex-1 bg-white hover:bg-[#F7F8FA] border border-[#E5E5E5] text-[#6B6B6B] font-semibold py-3 rounded-xl text-sm transition-colors"
                       >
                         New Topic
                       </button>
@@ -1750,7 +1750,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                 </button>
                 <button
                   onClick={() => { setCardIdx(0); setFlipped(false); setMode('flashcards') }}
-                  className="flex-1 bg-white hover:bg-[#F7F6F3] border border-[#E5E5E5] text-[#6B6B6B] font-semibold py-3 rounded-xl text-sm transition-colors"
+                  className="flex-1 bg-white hover:bg-[#F7F8FA] border border-[#E5E5E5] text-[#6B6B6B] font-semibold py-3 rounded-xl text-sm transition-colors"
                 >
                   Back to Flashcards
                 </button>

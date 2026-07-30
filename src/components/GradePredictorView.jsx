@@ -9,7 +9,7 @@ const TEXT = '#111111'
 const MUTED = '#6B6B6B'
 const DIM = '#9B9B9B'
 const BORDER = 'rgba(0,0,0,0.08)'
-const BG = '#F7F6F3'
+const BG = '#F7F8FA'
 
 const COMPONENT_TYPES = ['Exam', 'Quiz', 'Homework', 'Project', 'Lab', 'Participation', 'Other']
 const TARGET_GRADES = ['A', 'B', 'C', 'Pass/Fail']
@@ -21,7 +21,7 @@ const STATUS_CONFIG = {
 }
 
 const fieldStyle = {
-  width: '100%', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.10)',
+  width: '100%', background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.10)',
   borderRadius: 8, padding: '8px 10px', fontSize: 13, color: TEXT,
   outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box',
 }
@@ -332,11 +332,11 @@ function ResultsCard({ prediction, course, dot, targetGrade, onEdit }) {
 
         {/* Metric grid */}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 20 }}>
-          <div style={{ background: '#F7F6F3', borderRadius: 10, padding: '12px 14px' }}>
+          <div style={{ background: '#F7F8FA', borderRadius: 10, padding: '12px 14px' }}>
             <p style={{ margin: '0 0 3px', fontSize: 10, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Predicted Final</p>
             <p style={{ margin: 0, fontSize: 18, fontWeight: 800, color: TEXT }}>{prediction.predictedGrade?.toFixed(1)}%</p>
           </div>
-          <div style={{ background: '#F7F6F3', borderRadius: 10, padding: '12px 14px' }}>
+          <div style={{ background: '#F7F8FA', borderRadius: 10, padding: '12px 14px' }}>
             <p style={{ margin: '0 0 3px', fontSize: 10, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Needed on Remaining</p>
             <p style={{ margin: 0, fontSize: 18, fontWeight: 800, color: (prediction.gradeNeededOnRemaining ?? 0) > 100 ? '#EF4444' : TEXT }}>
               {prediction.gradeNeededOnRemaining !== null && prediction.gradeNeededOnRemaining !== undefined
@@ -388,7 +388,7 @@ function ResultsCard({ prediction, course, dot, targetGrade, onEdit }) {
         <button
           onClick={onEdit}
           style={{ width: '100%', padding: '11px', borderRadius: 12, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', background: 'none', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B' }}
-          onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
+          onMouseEnter={e => e.currentTarget.style.background = '#F7F8FA'}
           onMouseLeave={e => e.currentTarget.style.background = 'none'}
         >
           Update Grades

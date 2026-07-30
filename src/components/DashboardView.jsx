@@ -26,7 +26,7 @@ import { detectComeback } from '../lib/momentum'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
-  bg:           '#F7F6F3',
+  bg:           '#F7F8FA',
   bgCard:       '#FFFFFF',
   border:       'rgba(0,0,0,0.07)',
   borderStrong: 'rgba(0,0,0,0.12)',

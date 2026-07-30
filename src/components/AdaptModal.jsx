@@ -162,14 +162,14 @@ export default function AdaptModal({ adaptation, onAccept, onEdit, onDismiss }) 
                   onClick={() => { track('adapt_edited', { courseName: injectedSession?.courseName ?? null }); onEdit(injectedSession) }}
                   style={{
                     flex: 1, padding: '10px 0',
-                    background: '#F7F6F3',
+                    background: '#F7F8FA',
                     border: '1px solid rgba(0,0,0,0.09)',
                     borderRadius: 11, fontSize: 13, fontWeight: 600,
                     color: '#4B4B4B', cursor: 'pointer', fontFamily: 'inherit',
                     transition: 'background 0.12s',
                   }}
                   onMouseEnter={e => { e.currentTarget.style.background = '#EFEDE9' }}
-                  onMouseLeave={e => { e.currentTarget.style.background = '#F7F6F3' }}
+                  onMouseLeave={e => { e.currentTarget.style.background = '#F7F8FA' }}
                 >
                   Edit session
                 </button>

@@ -306,7 +306,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
   const autopsyHasData = autopsy.rows.some(r => r.total > 0)
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#F7F6F3', overflowY: 'auto', animation: 'per-enter 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#F7F8FA', overflowY: 'auto', animation: 'per-enter 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
       <style>{`@keyframes per-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }`}</style>
       <div style={{ maxWidth: 820, margin: '0 auto', padding: '32px 24px 80px' }}>
 
@@ -362,7 +362,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
             </div>
 
             {weakTopics.length > 0 && (
-              <div style={{ background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.05)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
+              <div style={{ background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.05)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
                 <div style={{ fontSize: 11, fontWeight: 700, color: '#3B61C4', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
                   Your recovery plan · {Math.min(3, weakTopics.length)} sessions
                 </div>
@@ -722,7 +722,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
 
         {/* Actions */}
         <div style={{ display: 'flex', gap: 10, marginTop: 24, justifyContent: 'flex-end' }}>
-          <button onClick={onClose} style={{ padding: '12px 18px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, color: '#1A1A1A', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Back to Practice Exams</button>
+          <button onClick={onClose} style={{ padding: '12px 18px', background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, color: '#1A1A1A', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Back to Practice Exams</button>
           <button onClick={onRetake} style={{ padding: '12px 22px', background: '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Retake</button>
         </div>
       </div>

@@ -11,7 +11,7 @@ import { computeMomentumHistory, momentumColor } from '../lib/momentum'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
-  bg:           '#F7F6F3',
+  bg:           '#F7F8FA',
   bgCard:       '#FFFFFF',
   border:       'rgba(0,0,0,0.07)',
   text:         '#111111',
@@ -1659,7 +1659,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                 return (
                   <g key={i}>
                     <circle cx={x(i)} cy={y(h.score)} r={isLast ? 5 : 3.5}
-                      fill={isLast ? currentColor : dim ? '#F7F6F3' : '#fff'}
+                      fill={isLast ? currentColor : dim ? '#F7F8FA' : '#fff'}
                       stroke={dim ? '#D4D4D4' : currentColor} strokeWidth="2"/>
                     {(i === 0 || isLast || i === Math.floor(n / 2)) && (
                       <text x={x(i)} y={H - 8} textAnchor="middle" fontSize="10" fill="#9B9B9B" fontWeight="600">
@@ -1672,7 +1672,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
             </svg>
             <div style={{ display: 'flex', gap: 12, marginTop: 8, fontSize: 11, color: '#9B9B9B', fontWeight: 600, flexWrap: 'wrap' }}>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#F7F6F3', border: '1px solid #D4D4D4' }}/>
+                <span style={{ width: 8, height: 8, borderRadius: '50%', background: '#F7F8FA', border: '1px solid #D4D4D4' }}/>
                 Week without sessions
               </span>
               <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5 }}>

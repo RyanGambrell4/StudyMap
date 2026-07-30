@@ -5,7 +5,7 @@ import { getActivePlan } from '../lib/subscription'
 import { track } from '../lib/analytics'
 
 const D = {
-  bg:       '#F7F6F3',
+  bg:       '#F7F8FA',
   bgCard:   '#FFFFFF',
   border:   'rgba(0,0,0,0.07)',
   text:     '#111111',

@@ -12,7 +12,7 @@ import { track } from '../lib/analytics'
 import Spinner from './ui/spinner'
 
 const D = {
-  bg: '#F7F6F3', bgCard: '#FFFFFF',
+  bg: '#F7F8FA', bgCard: '#FFFFFF',
   border: 'rgba(0,0,0,0.07)', borderStrong: 'rgba(0,0,0,0.12)',
   text: '#111111', textMuted: '#6B6B6B', textDim: '#9B9B9B',
   accent: '#059669', green: '#16A34A', amber: '#D97706', red: '#DC2626', blue: '#3B61C4',

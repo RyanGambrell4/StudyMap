@@ -305,7 +305,7 @@ function StepSocial({ quoteIdx, setQuoteIdx }) {
       </div>
 
       <div style={{
-        background: 'linear-gradient(135deg, #F7F6F3, #FAFAF9)',
+        background: 'linear-gradient(135deg, #F7F8FA, #FAFAF9)',
         border: '1px solid rgba(0,0,0,0.06)',
         borderRadius: 14,
         padding: '20px 22px',

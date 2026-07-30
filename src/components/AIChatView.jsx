@@ -377,8 +377,8 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
                     h2: ({ children }) => <h2 style={{ fontSize: 14, fontWeight: 700, marginBottom: 4, marginTop: 8 }}>{children}</h2>,
                     h3: ({ children }) => <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 4, marginTop: 6 }}>{children}</h3>,
                     code: ({ inline, children }) => inline
-                      ? <code style={{ background: '#F7F6F3', padding: '1px 5px', borderRadius: 4, fontSize: 12, fontFamily: 'monospace' }}>{children}</code>
-                      : <pre style={{ background: '#F7F6F3', borderRadius: 8, padding: '10px 12px', margin: '8px 0', overflowX: 'auto', fontSize: 12, fontFamily: 'monospace', whiteSpace: 'pre' }}>{children}</pre>,
+                      ? <code style={{ background: '#F7F8FA', padding: '1px 5px', borderRadius: 4, fontSize: 12, fontFamily: 'monospace' }}>{children}</code>
+                      : <pre style={{ background: '#F7F8FA', borderRadius: 8, padding: '10px 12px', margin: '8px 0', overflowX: 'auto', fontSize: 12, fontFamily: 'monospace', whiteSpace: 'pre' }}>{children}</pre>,
                     blockquote: ({ children }) => <blockquote style={{ borderLeft: '2px solid #3B61C4', paddingLeft: 10, fontStyle: 'italic', color: '#6B6B6B', margin: '4px 0' }}>{children}</blockquote>,
                     strong: ({ children }) => <strong style={{ fontWeight: 600 }}>{children}</strong>,
                     hr: () => <hr style={{ border: 'none', borderTop: '1px solid rgba(0,0,0,0.07)', margin: '8px 0' }} />,
@@ -466,7 +466,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
           placeholder={`Ask about ${courseName}…`}
           rows={1}
           style={{
-            flex: 1, background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 12,
+            flex: 1, background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 12,
             padding: '10px 14px', color: '#111111', fontSize: 14, resize: 'none',
             lineHeight: 1.5, outline: 'none', maxHeight: 120, fontFamily: 'inherit',
             transition: 'border-color 0.15s, box-shadow 0.15s',

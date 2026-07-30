@@ -344,7 +344,7 @@ function ComparisonRenderer({ diagram }) {
                 color: '#9B9B9B',
                 textTransform: 'uppercase',
                 letterSpacing: '0.06em',
-                background: '#F7F6F3',
+                background: '#F7F8FA',
                 borderBottom: '2px solid rgba(0,0,0,0.08)',
                 width: 140,
                 minWidth: 120,
