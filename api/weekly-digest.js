@@ -1,11 +1,9 @@
-import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 import { acquireCronLock } from '../lib/server/cronLock.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
-
+import { supabaseAdmin } from '../lib/server/supabaseAdmin.js'
 function buildDigestHtml({ name, email, stats, courses, weekAhead, isFree = false, trialUsed = false }) {
   const firstName = (name ?? email ?? 'there').split(' ')[0]
   const totalMin  = stats?.totalMinutes ?? 0

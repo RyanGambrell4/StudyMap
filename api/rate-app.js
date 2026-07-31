@@ -13,11 +13,9 @@
  * with retention / conversion.
  */
 
-import { createClient } from '@supabase/supabase-js'
 import { verifyAuth } from '../lib/server/usage.js'
 
-const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
-
+import { supabaseAdmin } from '../lib/server/supabaseAdmin.js'
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 

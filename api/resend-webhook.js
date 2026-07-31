@@ -19,14 +19,11 @@
  */
 
 import { createHmac, timingSafeEqual } from 'crypto'
-import { createClient } from '@supabase/supabase-js'
-
 export const config = {
   api: { bodyParser: false },
 }
 
-const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
-
+import { supabaseAdmin } from '../lib/server/supabaseAdmin.js'
 // ─── Svix signature verification ────────────────────────────────────────────
 // Spec: https://docs.svix.com/receiving/verifying-payloads/how-manual
 function verifySignature(rawBody, headers, secret) {

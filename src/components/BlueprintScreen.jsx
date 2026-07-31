@@ -163,8 +163,16 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
           completedCount,
         }),
       })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error ?? 'Failed to generate blueprint')
+      const raw = await res.text()
+      let data
+      try { data = raw ? JSON.parse(raw) : {} } catch { data = { error: raw?.slice(0, 200) } }
+      if (!res.ok) {
+        const msg = data.error
+          || (res.status === 504 ? 'The request timed out. Try again.'
+            : res.status >= 500 ? 'The server had a problem generating your plan. Try again.'
+            : `Failed to generate blueprint (status ${res.status})`)
+        throw new Error(msg)
+      }
       track('blueprint_generated', { courseName: session.courseName, sessionType, blockCount: data.blocks?.length ?? 0, plan: getActivePlan() })
       setBlueprint(data)
       incrementAIQuery()

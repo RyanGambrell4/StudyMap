@@ -2,11 +2,9 @@
 // GET /api/list-uploads?courseId=X          -> metadata list (no text)
 // GET /api/list-uploads?courseId=X&full=1   -> includes extracted_text
 // GET /api/list-uploads?uploadId=Y          -> single row with extracted_text
-import { createClient } from '@supabase/supabase-js'
 import { verifyAuth } from '../lib/server/usage.js'
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
-
+import { supabaseAdmin as supabase } from '../lib/server/supabaseAdmin.js'
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).end()
 

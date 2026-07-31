@@ -1,9 +1,6 @@
 // Flag a topic the student is struggling with from the AI tutor.
 // Mirrors the sms-opt-in.js pattern: Bearer auth + Supabase upsert.
-import { createClient } from '@supabase/supabase-js'
-
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
-
+import { supabaseAdmin as supabase } from '../lib/server/supabaseAdmin.js'
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 

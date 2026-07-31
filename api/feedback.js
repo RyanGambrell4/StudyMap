@@ -12,11 +12,10 @@
  * can act on the friction that's blocking conversion.
  */
 
-import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { verifyAuth } from '../lib/server/usage.js'
 
-const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
+import { supabaseAdmin } from '../lib/server/supabaseAdmin.js'
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 const MAX_MESSAGE_LEN = 4000

@@ -1,9 +1,7 @@
-import { createClient } from '@supabase/supabase-js'
 import webpush from 'web-push'
 import { acquireCronLock } from '../lib/server/cronLock.js'
 
-const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
-
+import { supabaseAdmin } from '../lib/server/supabaseAdmin.js'
 export const config = { maxDuration: 60 }
 
 // Initialise VAPID — requires VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, VAPID_EMAIL env vars.

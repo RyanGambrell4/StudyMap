@@ -9,6 +9,17 @@ import {
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 
 export default async function handler(req, res) {
+  try {
+    return await handleBlueprint(req, res)
+  } catch (err) {
+    console.error('[session-blueprint] Unhandled error:', err)
+    if (!res.headersSent) {
+      return res.status(500).json({ error: err?.message || 'Internal server error' })
+    }
+  }
+}
+
+async function handleBlueprint(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   const contentLength = parseInt(req.headers['content-length'] || '0')

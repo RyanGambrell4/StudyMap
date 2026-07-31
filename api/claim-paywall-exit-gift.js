@@ -13,11 +13,9 @@
  *   - Auth required (bearer token → verifyAuth)
  */
 
-import { createClient } from '@supabase/supabase-js'
 import { verifyAuth } from '../lib/server/usage.js'
 
-const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
-
+import { supabaseAdmin } from '../lib/server/supabaseAdmin.js'
 const BONUS_AI_ACTIONS = 5
 
 export default async function handler(req, res) {

@@ -20,15 +20,13 @@
  * Color and CTA urgency scales with proximity.
  */
 
-import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 import { acquireCronLock } from '../lib/server/cronLock.js'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
-
+import { supabaseAdmin } from '../lib/server/supabaseAdmin.js'
 function examHash(title, date) {
   const raw = `${(title ?? '').toLowerCase().replace(/\s+/g, '_')}_${date ?? ''}`
   let h = 0
