@@ -6,15 +6,24 @@
 //
 // Mutations (per post, in order):
 //   1. Inject Newsreader font <link> into <head> if not already present.
+//      Deduplicate stale google-fonts preconnect pairs while doing it.
 //   2. Delete <div class="author-avatar">XX</div> from .author-bio.
 //   3. Insert <p class="editorial-note"> under .author-desc linking to
 //      /blog/editorial-policy if not already present.
 //   4. Add data-ph-event / data-post-slug / UTM params to every signup CTA
 //      anchor pointing at /app?signup=1&plan=pro&billing=weekly&trial=1.
-//      - .inline-cta anchors -> data-ph-event="blog_cta_mid"
-//      - .blog-cta-section, .cta-section, .post-cta, .related-links anchors
-//          -> data-ph-event="blog_cta_end"
-//      - .site-nav / .nav-cta anchors are left alone (nav, not article CTA).
+//      - .inline-cta anchors                 -> data-ph-event="blog_cta_mid"
+//      - .blog-cta-section, .cta-section,
+//        .post-cta, .cta-block anchors        -> data-ph-event="blog_cta_end"
+//      - .related-links, .site-nav, .nav-cta -> left alone (not article CTA).
+//   5. Delete the .share-bar block from the hero (plan: no share widgets).
+//   6. Delete the .inline-email-capture block (newsletter fragment) +
+//      its inlineSubscribe <script> sibling.
+//   7. Delete the .proof-strip block and its 4px-padded outer wrapper
+//      (trust strip fragment; plan: reads as noise).
+//   8. Reorder end-of-post sections to: FAQ, sources, citation.
+//      (author-bio, final CTA, related, footer come after and were already
+//      in that relative order.)
 //
 // Safety rails:
 //   - Dry-run by default. Pass --execute to write files.
@@ -150,6 +159,7 @@ function processFile(filename) {
     const lastBlogCta = before.lastIndexOf('class="blog-cta-section"');
     const lastCtaSection = before.lastIndexOf('class="cta-section"');
     const lastPostCta = before.lastIndexOf('class="post-cta"');
+    const lastCtaBlock = before.lastIndexOf('class="cta-block"');
     const lastRelated = before.lastIndexOf('class="related-links"');
     const lastAuthorBio = before.lastIndexOf('class="author-bio"');
     const lastFaqSection = before.lastIndexOf('class="faq-section"');
@@ -166,6 +176,7 @@ function processFile(filename) {
       { pos: lastBlogCta, kind: 'end' },
       { pos: lastCtaSection, kind: 'end' },
       { pos: lastPostCta, kind: 'end' },
+      { pos: lastCtaBlock, kind: 'end' },
       { pos: lastRelated, kind: 'skip' },       // related-links: don't tag
       { pos: lastAuthorBio, kind: 'skip' },     // author-bio: don't tag
       { pos: lastFaqSection, kind: 'faq' },     // faq mid-post inline anchor
@@ -195,6 +206,125 @@ function processFile(filename) {
 
   if (midCount) mutations.push(`cta-mid-annotated(${midCount})`);
   if (endCount) mutations.push(`cta-end-annotated(${endCount})`);
+
+  // ── 5. Delete .share-bar block from hero ──────────────────────────────────
+  //   Cornell-style share bar sits above H1 and violates the "no share
+  //   widgets" rule. Regex targets only <div class="share-bar" ...>
+  //   through its closing </div>. Depth-1 (contains inner <a> and <button>
+  //   but no nested <div>).
+  {
+    const before = html;
+    html = html.replace(
+      /[ \t]*<div\s+class="share-bar"[^>]*>[\s\S]*?<\/div>\s*\n?/g,
+      ''
+    );
+    if (html !== before) mutations.push('share-bar-removed');
+  }
+
+  // ── 6. Delete .inline-email-capture block + adjacent <script> ─────────────
+  //   Newsletter fragment (legacy `.inline-email-capture`) and its inlineSubscribe
+  //   handler. Both go together.
+  {
+    const before = html;
+    html = html.replace(
+      /[ \t]*<div\s+class="inline-email-capture"[^>]*>[\s\S]*?<\/div>\s*(?:<script[^>]*>[\s\S]*?<\/script>\s*)?\n?/g,
+      ''
+    );
+    if (html !== before) mutations.push('newsletter-removed');
+  }
+
+  // ── 7. Delete .proof-strip and its outer wrapper div ──────────────────────
+  //   Trust strip reads as noise (3-day / 2 min / AI / check). Removed.
+  //   Wrapper has inline style `background:var(--bg,#F7F6F3);padding:4px 24px 0;`
+  //   containing a container div wrapping .proof-strip. Matches the whole
+  //   thing including the wrapper.
+  {
+    const before = html;
+    html = html.replace(
+      /[ \t]*<div\s+style="background:var\(--bg[^"]*"\s*>\s*<div\s+style="max-width:760px[^"]*"\s*>\s*<div\s+class="proof-strip">[\s\S]*?<\/div>\s*<\/div>\s*<\/div>\s*\n?/g,
+      ''
+    );
+    // Fallback: any bare .proof-strip left over gets stripped too.
+    html = html.replace(
+      /[ \t]*<div\s+class="proof-strip">[\s\S]*?<\/div>\s*\n?/g,
+      ''
+    );
+    if (html !== before) mutations.push('proof-strip-removed');
+  }
+
+  // ── 8. Reorder end-of-post sections: FAQ, sources, citation ───────────────
+  //   Current order in Template B: citation (.how-to-cite) -> sources
+  //   (section.sources-section) -> FAQ (section.faq-section).
+  //   Ryan wants: FAQ, sources, citation.
+  //   Extract each of the three blocks by their outer tags, then re-emit
+  //   in the wanted order at the position where the earliest of the three
+  //   appears.
+  {
+    const citationRe = /<div\s+class="how-to-cite"[^>]*>[\s\S]*?<\/div>\s*\n?/;
+    const sourcesRe = /<section\s+class="sources-section"[\s\S]*?<\/section>\s*\n?/;
+    const faqRe = /<section\s+class="faq-section"[^>]*>[\s\S]*?<\/section>\s*\n?/;
+
+    const citation = html.match(citationRe);
+    const sources = html.match(sourcesRe);
+    const faq = html.match(faqRe);
+
+    // Only reorder if all three are present AND at least one is out of order.
+    if (citation && sources && faq) {
+      const cPos = html.indexOf(citation[0]);
+      const sPos = html.indexOf(sources[0]);
+      const fPos = html.indexOf(faq[0]);
+      const wanted = [
+        { pos: fPos, block: faq[0] },
+        { pos: sPos, block: sources[0] },
+        { pos: cPos, block: citation[0] },
+      ];
+      // If already in FAQ->sources->citation order (fPos < sPos < cPos), skip.
+      const currentOrder = [fPos, sPos, cPos];
+      const sortedOrder = [...currentOrder].sort((a, b) => a - b);
+      const alreadyWanted = fPos < sPos && sPos < cPos;
+
+      if (!alreadyWanted) {
+        // Remove all three, then insert wanted sequence at earliest position.
+        const anchor = Math.min(cPos, sPos, fPos);
+        html = html.replace(citationRe, '');
+        html = html.replace(sourcesRe, '');
+        html = html.replace(faqRe, '');
+        const combined = wanted.map((w) => w.block).join('');
+        // Insert at anchor. Anchor may have shifted due to prior removals;
+        // just prepend at the anchor position of the ORIGINAL html by
+        // finding a stable landmark. Use the closing of the article body,
+        // .container.post-body or article.article. Fall back to before
+        // the first of author/final-cta/related.
+        const insertPointRe =
+          /(<section\s+class="author-bio-section")|(<div\s+class="cta-block")|(<section\s+class="blog-cta-section")|(<div\s+class="post-cta")|(<section\s+class="related-links")|(<footer\s+class="site-footer")/;
+        const m2 = html.match(insertPointRe);
+        if (m2) {
+          html = html.replace(insertPointRe, combined + m2[0]);
+          mutations.push('end-sections-reordered');
+        } else {
+          // Safe fallback: restore original order if we can't find an insert point.
+          html = html.replace(/(<\/article>|<\/body>)/, combined + '$1');
+          mutations.push('end-sections-reordered(fallback)');
+        }
+      }
+    }
+  }
+
+  // ── 9. Preconnect dedupe ──────────────────────────────────────────────────
+  //   Collapse duplicate <link rel="preconnect" href="https://fonts.googleapis.com">
+  //   pairs down to a single pair. Idempotent.
+  {
+    const before = html;
+    const preconnectPair =
+      /<link\s+rel="preconnect"\s+href="https:\/\/fonts\.googleapis\.com"[^>]*>\s*<link\s+rel="preconnect"\s+href="https:\/\/fonts\.gstatic\.com"\s+crossorigin[^>]*>\s*/g;
+    const matches = html.match(preconnectPair);
+    if (matches && matches.length > 1) {
+      // Keep the first, drop the rest.
+      let first = true;
+      html = html.replace(preconnectPair, () => (first ? (first = false, matches[0]) : ''));
+      mutations.push('preconnect-deduped');
+    }
+  }
 
   return {
     filename,

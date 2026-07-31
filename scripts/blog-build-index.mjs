@@ -149,8 +149,8 @@ const body = `<body>
 
 <section class="blog-index-hero">
   <div class="container">
-    <h1>Study tips for college, written like a real editorial</h1>
-    <p>Evidence-based guides on study techniques, exam prep, GPA math, and the AI tools that actually help. ${cards.length} pieces, updated as the research changes.</p>
+    <h1>Study tips for college</h1>
+    <p>Evidence-based guides on study techniques, exam prep, and GPA math. ${cards.length} pieces, updated as the research changes.</p>
   </div>
 </section>
 

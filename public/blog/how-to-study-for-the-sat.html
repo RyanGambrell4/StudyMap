@@ -28,9 +28,7 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Inter:wght@400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;0,6..72,600;1,6..72,400;1,6..72,500&family=Inter:wght@400;500;600;700&display=swap">
   <link rel="stylesheet" href="/seo.css" />
   <link rel="stylesheet" href="/blog/blog.css" />
 
@@ -258,17 +256,7 @@
 <section class="post-hero">
   <div class="container">
     <div class="post-meta"><a href="/blog">Blog</a> &middot; Test Prep &middot; June 1, 2026 <span class="updated-badge">Updated Jul 2026</span> &middot; 10 min read</div>
-<div class="share-bar" style="display:flex;align-items:center;gap:10px;margin-top:18px;flex-wrap:wrap;">
-  <span style="font-size:13px;color:#6B6B6B;font-weight:500;letter-spacing:.02em;">Share:</span>
-  <a href="https://twitter.com/intent/tweet?url=https://getstudyedge.com/blog/how-to-study-for-the-sat&amp;text=How%20to%20Study%20for%20SAT%3A%20Real-World%20Prep%20Plan%20%7C%20StudyEdge%20AI" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#000;color:#fff;border-radius:6px;font-size:13px;font-weight:500;text-decoration:none;">
-    <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.738l7.726-8.85L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-    Share on X
-  </a>
-  <button onclick="navigator.clipboard.writeText(window.location.href).then(function(){var b=this;b.textContent='Copied!';setTimeout(function(){b.textContent='Copy link'},2000)}.bind(this))" style="display:inline-flex;align-items:center;gap:6px;padding:6px 14px;background:#F7F6F3;color:#111111;border:1px solid rgba(0,0,0,0.12);border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;font-family:inherit;">
-    Copy link
-  </button>
-</div>
-    <h1>How to Study for SAT</h1>
+<h1>How to Study for SAT</h1>
     <p class="post-intro">The Digital SAT runs 2 hours 14 minutes, is adaptive at the section level, and covers Reading and Writing plus Math. Here is how to prep over 8 to 16 weeks depending on starting score and target.</p>
   </div>
 </section>
@@ -406,48 +394,6 @@
   </div>
 </section>
 
-<div class="inline-email-capture" style="background:#f0f4ff;border:1.5px solid rgba(59,97,196,.2);border-radius:12px;padding:24px 28px;margin:36px 0;text-align:center;">
-  <p style="font-size:12px;font-weight:700;letter-spacing:0.10em;text-transform:uppercase;color:#3B61C4;margin:0 0 8px;">Free from StudyEdge</p>
-  <p style="font-size:18px;font-weight:700;color:#111;margin:0 0 6px;">Get weekly study research in plain English</p>
-  <p style="font-size:14px;color:#555;margin:0 0 18px;">Evidence-based study tips, exam tactics, and cognitive science findings delivered once a week. No filler.</p>
-  <form class="inline-email-form" onsubmit="return inlineSubscribe(this, event)" style="display:flex;gap:8px;max-width:400px;margin:0 auto;">
-    <input type="email" placeholder="your@email.com" required
-      style="flex:1;padding:10px 13px;border:1.5px solid rgba(59,97,196,.3);border-radius:7px;font-size:14px;outline:none;background:#fff;color:#111;" />
-    <button type="submit"
-      style="padding:10px 18px;background:#3B61C4;color:#fff;border:none;border-radius:7px;font-size:14px;font-weight:600;cursor:pointer;white-space:nowrap;">
-      Subscribe
-    </button>
-  </form>
-  <p class="inline-email-msg" style="display:none;margin-top:10px;font-size:13px;font-weight:600;color:#3B61C4;"></p>
-</div>
-<script>
-function inlineSubscribe(form, e) {
-  e.preventDefault();
-  var email = form.querySelector('input[type="email"]').value.trim();
-  var btn = form.querySelector('button');
-  var msg = form.parentElement.querySelector('.inline-email-msg');
-  btn.disabled = true; btn.textContent = 'Subscribing...';
-  fetch('/api/landing-subscribe', {
-    method: 'POST', headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({ email: email })
-  }).then(function(r) {
-    msg.style.display = 'block';
-    if (r.ok) {
-      msg.textContent = 'You are in. Check your inbox.';
-      form.style.display = 'none';
-    } else {
-      msg.style.color = '#c00'; msg.textContent = 'Something went wrong. Try again.';
-      btn.disabled = false; btn.textContent = 'Subscribe';
-    }
-  }).catch(function() {
-    msg.style.display = 'block'; msg.style.color = '#c00';
-    msg.textContent = 'Something went wrong. Try again.';
-    btn.disabled = false; btn.textContent = 'Subscribe';
-  });
-  return false;
-}
-</script>
-
 <section class="author-bio-section">
   <div class="container" style="max-width:760px;">
     <div class="author-bio">
@@ -461,25 +407,13 @@ function inlineSubscribe(form, e) {
   </div>
 </section>
 
-<div style="background:var(--bg,#F7F6F3);padding:4px 24px 0;">
-  <div style="max-width:760px;margin:0 auto;">
-    <div class="proof-strip">
-      <div class="proof-item"><span class="proof-num">3-day</span> free trial</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">2 min</span> to your first study plan</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">AI</span> flashcards from your notes</div>
-      <div class="proof-divider"></div>
-      <div class="proof-item"><span class="proof-num">✓</span> cancel anytime</div>
-    </div>
-  </div>
 </div>
 <section class="section" style="padding-top:0;">
   <div class="container">
     <div class="cta-block">
       <h2 id="sat-prep-is-a-long-game-run-it-on-a-real-system">SAT prep is a long game. Run it on a real system.</h2>
       <p>StudyEdge AI builds your SAT schedule, runs spaced retrieval, and re-plans as your practice scores move.</p>
-      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1" class="btn btn-primary btn-lg">Try StudyEdge AI Free</a>
+      <a href="/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=blog&utm_medium=cta&utm_campaign=how-to-study-for-the-sat&utm_content=blog_cta_end" data-ph-event="blog_cta_end" data-post-slug="how-to-study-for-the-sat" class="btn btn-primary btn-lg">Try StudyEdge AI Free</a>
       <p class="cta-fine">3-day free trial · Cancel anytime.</p>
     </div>
   </div>

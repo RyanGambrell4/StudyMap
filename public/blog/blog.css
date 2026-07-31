@@ -254,31 +254,8 @@ h1.hero {
   letter-spacing: 0.01em;
 }
 
-.share-bar {
-  margin-top: 20px !important;
-  padding-top: 16px;
-  border-top: 1px solid var(--rule-soft);
-  gap: 8px !important;
-}
-.share-bar > span { font-size: 12px !important; color: var(--ink-mute) !important; }
-.share-bar > a[href*="twitter.com"] {
-  background: var(--ink) !important;
-  color: #FFFFFF !important;
-  padding: 5px 12px !important;
-  border-radius: 6px !important;
-  font-size: 12.5px !important;
-  font-weight: 500 !important;
-}
-.share-bar > button {
-  background: transparent !important;
-  color: var(--ink-2) !important;
-  border: 1px solid var(--rule) !important;
-  padding: 5px 12px !important;
-  border-radius: 6px !important;
-  font-size: 12.5px !important;
-  font-family: var(--sans) !important;
-  font-weight: 500 !important;
-}
+/* Share bar removed per redesign brief (belt-and-suspenders with rewriter). */
+.share-bar { display: none !important; }
 
 /* ── Article body ─────────────────────────────────────────────────────────── */
 
@@ -653,37 +630,53 @@ article img:not(:first-of-type) {
 .callout-success { border-color: var(--green) !important; background: var(--green-bg) !important; }
 .callout-tip     { border-color: var(--brand) !important; background: var(--brand-bg) !important; }
 
-/* ── Verdict box (solid ink, no gradient) ────────────────────────────────── */
+/* ── Verdict box (lighter, editorial, always labelled) ───────────────────── */
+/* Class name preserved for BlogPosting speakable selector.                   */
 
 .verdict-box {
-  background: var(--ink) !important;
+  background: var(--brand-bg) !important;
   background-image: none !important;
-  color: #FFFFFF !important;
-  border-radius: var(--radius) !important;
-  padding: 24px 28px !important;
+  color: var(--ink) !important;
+  border: 0 !important;
+  border-left: 3px solid var(--brand) !important;
+  border-radius: 0 var(--radius) var(--radius) 0 !important;
+  padding: 20px 24px !important;
   margin: 32px 0 !important;
-  overflow: hidden;
+  overflow: visible !important;
   position: relative;
 }
 .verdict-box::after { content: none !important; }
+.verdict-box::before {
+  content: "Verdict";
+  display: block;
+  font-family: var(--serif);
+  font-style: italic;
+  font-weight: 500;
+  font-size: 14px;
+  color: var(--brand);
+  margin: 0 0 6px;
+  letter-spacing: 0;
+}
+.verdict-box:has(h3)::before { content: none; }
 .verdict-box h3 {
   font-family: var(--serif) !important;
   font-style: italic !important;
   font-weight: 500 !important;
-  font-size: 15px !important;
-  color: rgba(255, 255, 255, 0.6) !important;
-  margin: 0 0 10px !important;
+  font-size: 14px !important;
+  color: var(--brand) !important;
+  margin: 0 0 6px !important;
   text-transform: none !important;
   letter-spacing: 0 !important;
 }
 .verdict-box p {
   font-family: var(--sans) !important;
-  font-size: 17px !important;
-  color: #FFFFFF !important;
-  line-height: 1.55 !important;
+  font-size: 16px !important;
+  color: var(--ink) !important;
+  line-height: 1.6 !important;
   margin: 0 !important;
   opacity: 1 !important;
 }
+.verdict-box p + p { margin-top: 8px !important; }
 
 /* ── Pull quote ───────────────────────────────────────────────────────────── */
 
@@ -713,15 +706,37 @@ article img:not(:first-of-type) {
   margin-top: 12px;
 }
 
-/* ── Stat highlights ──────────────────────────────────────────────────────── */
+/* ── Stat highlights (dual-mode) ──────────────────────────────────────────── */
+/* Corpus has TWO variants of .stat-highlight:                                 */
+/*   A) Grid of 3 .stat-item cells with .stat-number + .stat-label (11 posts)  */
+/*   B) Bare prose block with only text content (60 posts, e.g. cornell)       */
+/* Default = editorial callout (variant B). :has(.stat-item) upgrades to grid. */
 
 .stat-highlight {
+  display: block !important;
+  background: var(--card) !important;
+  border: 1px solid var(--rule) !important;
+  border-left: 3px solid var(--brand) !important;
+  border-radius: 0 var(--radius) var(--radius) 0 !important;
+  padding: 18px 22px !important;
+  margin: 28px 0 !important;
+  font-family: var(--sans) !important;
+  font-size: 15.5px !important;
+  color: var(--ink) !important;
+  line-height: 1.65 !important;
+  box-shadow: none !important;
+}
+.stat-highlight:has(.stat-item) {
   display: grid !important;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 0 !important;
-  margin: 28px 0 !important;
-  border-top: 1px solid var(--rule);
-  border-bottom: 1px solid var(--rule);
+  background: transparent !important;
+  border: 0 !important;
+  border-top: 1px solid var(--rule) !important;
+  border-bottom: 1px solid var(--rule) !important;
+  border-left: 0 !important;
+  border-radius: 0 !important;
+  padding: 0 !important;
 }
 .stat-item {
   background: transparent !important;
@@ -754,7 +769,7 @@ article img:not(:first-of-type) {
   letter-spacing: 0 !important;
 }
 @media (max-width: 640px) {
-  .stat-highlight { grid-template-columns: 1fr 1fr; }
+  .stat-highlight:has(.stat-item) { grid-template-columns: 1fr 1fr; }
   .stat-item:nth-child(3) { border-left: 0 !important; border-top: 1px solid var(--rule); grid-column: 1 / -1; }
 }
 
@@ -845,9 +860,45 @@ article img:not(:first-of-type) {
   margin: 0 !important;
 }
 
-/* ── Inline mid-post CTA (flat, editorial) ───────────────────────────────── */
+/* ── ONE CTA component, five entry classes ───────────────────────────────── */
+/* Every signup CTA block uses one of these classes; all render identical:    */
+/*   .inline-cta              mid-post, universal                             */
+/*   .post-cta                end-of-post, Template B                         */
+/*   .cta-block               inside section.section, end-of-post             */
+/*   section.blog-cta-section end-of-post, Template A                         */
+/*   section.cta-section      end-of-post, one post                           */
+/* Flat editorial: no background, ink hairline top+bottom, italic eyebrow,    */
+/* serif headline, ink-2 body, solid brand button, quiet fine print.          */
 
-.inline-cta {
+/* Neutralize the outer section.section around .cta-block */
+section.section:has(> .container > .cta-block) {
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+}
+section.section:has(> .container > .cta-block) > .container {
+  padding: 0 24px !important;
+  max-width: var(--measure) !important;
+  margin: 0 auto !important;
+}
+
+/* Outer section wrappers keep mobile side padding; inner container is the CTA */
+section.blog-cta-section,
+section.cta-section {
+  background: var(--page) !important;
+  background-image: none !important;
+  padding: 40px 24px !important;
+  border: 0 !important;
+  color: var(--ink) !important;
+  text-align: left !important;
+}
+
+/* THE COMPONENT */
+.inline-cta,
+.post-cta,
+.cta-block,
+section.blog-cta-section > .container,
+section.cta-section > .container {
   background: transparent !important;
   background-image: none !important;
   border: 0 !important;
@@ -855,15 +906,30 @@ article img:not(:first-of-type) {
   border-bottom: 1px solid var(--ink) !important;
   border-radius: 0 !important;
   padding: 28px 0 !important;
-  margin: 48px 0 !important;
+  margin: 40px auto !important;
+  max-width: var(--measure) !important;
   text-align: left !important;
   color: var(--ink) !important;
   overflow: visible !important;
   position: relative;
+  box-shadow: none !important;
 }
-.inline-cta::before, .inline-cta::after { content: none !important; }
+.inline-cta::before, .inline-cta::after,
+.post-cta::before, .post-cta::after,
+.cta-block::before, .cta-block::after { content: none !important; }
+
+/* Eyebrow */
 .inline-cta .inline-cta-eyebrow,
-.inline-cta p.inline-cta-eyebrow {
+.inline-cta p.inline-cta-eyebrow,
+.post-cta .eyebrow,
+.cta-block .eyebrow,
+section.blog-cta-section .eyebrow,
+section.cta-section .eyebrow {
+  display: inline-block !important;
+  background: transparent !important;
+  border: 0 !important;
+  padding: 0 !important;
+  border-radius: 0 !important;
   font-family: var(--serif) !important;
   font-style: italic !important;
   font-weight: 500 !important;
@@ -874,30 +940,64 @@ article img:not(:first-of-type) {
   margin: 0 0 8px !important;
   position: static !important;
 }
-.inline-cta h3 {
+.blog-cta-section .eyebrow::before,
+.cta-section .eyebrow::before,
+.post-cta .eyebrow::before,
+.cta-block .eyebrow::before { content: none !important; }
+
+/* Headline (h2 or h3 depending on variant) */
+.inline-cta h3,
+.post-cta h3,
+.cta-block h3,
+.blog-cta-section h2,
+.cta-section h2,
+.cta-block h2,
+.post-cta h2 {
   font-family: var(--serif) !important;
-  font-weight: 600 !important;
-  font-size: 24px !important;
+  font-weight: 500 !important;
+  font-size: clamp(22px, 3vw, 28px) !important;
   color: var(--ink) !important;
   letter-spacing: -0.01em !important;
   margin: 0 0 10px !important;
   line-height: 1.2 !important;
+  padding: 0 !important;
+  border: 0 !important;
+  text-align: left !important;
   position: static !important;
 }
-.inline-cta p:not(.inline-cta-eyebrow):not(.cta-fine) {
+.inline-cta h3::before,
+.post-cta h3::before,
+.cta-block h3::before,
+.blog-cta-section h2::before,
+.cta-section h2::before,
+.cta-block h2::before,
+.post-cta h2::before { content: none !important; counter-increment: none !important; }
+
+/* Body copy */
+.inline-cta p:not(.inline-cta-eyebrow):not(.cta-fine):not(.eyebrow),
+.post-cta p:not(.cta-fine):not(.eyebrow),
+.cta-block p:not(.cta-fine):not(.eyebrow),
+.blog-cta-section p:not(.cta-fine):not(.eyebrow),
+.cta-section p:not(.cta-fine):not(.eyebrow) {
   font-family: var(--sans) !important;
   font-size: 16px !important;
   color: var(--ink-2) !important;
-  margin: 0 0 20px !important;
-  max-width: none !important;
+  margin: 0 0 18px !important;
+  max-width: 560px !important;
   line-height: 1.6 !important;
+  opacity: 1 !important;
   position: static !important;
 }
-.inline-cta .btn-white,
-.inline-cta a.btn-white {
+
+/* Button (single treatment for every anchor variant) */
+.inline-cta .btn-white, .inline-cta a.btn-white,
+.post-cta .btn, .post-cta a.btn, .post-cta .btn-primary, .post-cta a.btn-primary, .post-cta .btn-lg,
+.cta-block .btn, .cta-block a.btn, .cta-block .btn-primary, .cta-block a.btn-primary, .cta-block .btn-lg,
+.blog-cta-section .btn, .blog-cta-section a.btn, .blog-cta-section .btn-primary, .blog-cta-section a.btn-primary, .blog-cta-section .btn-lg, .blog-cta-section .cta-btn,
+.cta-section .btn, .cta-section a.btn, .cta-section .btn-primary, .cta-section a.btn-primary, .cta-section .btn-lg, .cta-section .cta-btn {
   display: inline-flex !important;
-  align-items: center;
-  gap: 6px;
+  align-items: center !important;
+  gap: 6px !important;
   background: var(--brand) !important;
   color: #FFFFFF !important;
   font-family: var(--sans) !important;
@@ -913,95 +1013,34 @@ article img:not(:first-of-type) {
   box-shadow: none !important;
   transform: none !important;
 }
-.inline-cta .btn-white:hover,
-.inline-cta a.btn-white:hover {
+.inline-cta .btn-white:hover, .inline-cta a.btn-white:hover,
+.post-cta .btn:hover, .post-cta a.btn:hover, .post-cta .btn-primary:hover, .post-cta a.btn-primary:hover,
+.cta-block .btn:hover, .cta-block a.btn:hover, .cta-block .btn-primary:hover, .cta-block a.btn-primary:hover,
+.blog-cta-section .btn:hover, .blog-cta-section a.btn:hover, .blog-cta-section .btn-primary:hover, .blog-cta-section a.btn-primary:hover, .blog-cta-section .cta-btn:hover,
+.cta-section .btn:hover, .cta-section a.btn:hover, .cta-section .btn-primary:hover, .cta-section a.btn-primary:hover, .cta-section .cta-btn:hover {
   background: var(--brand-ink) !important;
   color: #FFFFFF !important;
+  text-decoration: none !important;
   box-shadow: none !important;
   transform: none !important;
-  text-decoration: none !important;
 }
-.inline-cta .cta-fine {
+
+/* Fine print (styled and inline-styled variants) */
+.inline-cta .cta-fine,
+.post-cta .cta-fine,
+.post-cta > p[style*="font-size:13px"],
+.cta-block .cta-fine,
+.blog-cta-section .cta-fine,
+.cta-section .cta-fine {
   font-family: var(--sans) !important;
   font-size: 12.5px !important;
   color: var(--ink-mute) !important;
   margin: 12px 0 0 !important;
   position: static !important;
-}
-
-/* ── Bottom CTA section (flat, editorial) ────────────────────────────────── */
-
-section.blog-cta-section,
-section.cta-section,
-.post-cta {
-  background: var(--card) !important;
-  background-image: none !important;
-  color: var(--ink) !important;
-  border-top: 1px solid var(--rule) !important;
-  border-bottom: 1px solid var(--rule) !important;
-  padding: 64px 24px !important;
-  text-align: left !important;
-}
-section.blog-cta-section .container,
-section.cta-section .container {
-  max-width: var(--measure) !important;
-  margin: 0 auto;
-  padding: 0 !important;
-}
-.post-cta {
-  max-width: var(--measure) !important;
-  margin: 32px auto !important;
-  padding: 32px 24px !important;
-}
-.blog-cta-section .eyebrow,
-.cta-section .eyebrow,
-.post-cta .eyebrow {
-  display: inline-block !important;
-  background: transparent !important;
-  border: 0 !important;
-  padding: 0 !important;
-  border-radius: 0 !important;
-  font-family: var(--serif) !important;
-  font-style: italic !important;
-  font-weight: 500 !important;
-  font-size: 15px !important;
-  color: var(--brand) !important;
-  text-transform: none !important;
-  letter-spacing: 0 !important;
-  margin: 0 0 12px !important;
-}
-.blog-cta-section .eyebrow::before,
-.cta-section .eyebrow::before,
-.post-cta .eyebrow::before { content: none !important; }
-
-.blog-cta-section h2,
-.cta-section h2,
-.post-cta h2 {
-  font-family: var(--serif) !important;
-  font-weight: 500 !important;
-  font-size: clamp(28px, 4.5vw, 40px) !important;
-  color: var(--ink) !important;
-  letter-spacing: -0.015em !important;
-  margin: 0 0 14px !important;
-  line-height: 1.12 !important;
-  padding: 0 !important;
-  border: 0 !important;
-  text-align: left !important;
-}
-.blog-cta-section h2::before,
-.cta-section h2::before,
-.post-cta h2::before { content: none !important; counter-increment: none !important; }
-.blog-cta-section p,
-.cta-section p,
-.post-cta p {
-  font-family: var(--sans) !important;
-  font-size: 17px !important;
-  color: var(--ink-2) !important;
-  max-width: 560px !important;
-  margin: 0 0 24px !important;
-  line-height: 1.6 !important;
   opacity: 1 !important;
 }
+
+/* Button-row wrapper (blog-cta-section variant) */
 .cta-btn-row {
   display: flex !important;
   gap: 12px !important;
@@ -1009,45 +1048,9 @@ section.cta-section .container {
   flex-wrap: wrap;
   margin: 0 !important;
 }
-.blog-cta-section .cta-fine,
-.cta-section .cta-fine,
-.post-cta .cta-fine {
-  font-family: var(--sans) !important;
-  font-size: 13px !important;
-  color: var(--ink-mute) !important;
-  margin: 12px 0 0 !important;
-  opacity: 1 !important;
-}
-.blog-cta-section .btn-primary,
-.blog-cta-section .cta-btn,
-.cta-section .cta-btn,
-.post-cta .btn-primary,
-.post-cta .btn {
-  display: inline-flex !important;
-  align-items: center;
-  background: var(--brand) !important;
-  color: #FFFFFF !important;
-  font-family: var(--sans) !important;
-  font-size: 15px !important;
-  font-weight: 600 !important;
-  padding: 12px 22px !important;
-  border-radius: 8px !important;
-  border: 0 !important;
-  text-decoration: none !important;
-  box-shadow: none !important;
-  transition: background-color 0.15s !important;
-}
-.blog-cta-section .btn-primary:hover,
-.blog-cta-section .cta-btn:hover,
-.cta-section .cta-btn:hover,
-.post-cta .btn-primary:hover,
-.post-cta .btn:hover {
-  background: var(--brand-ink) !important;
-  color: #FFFFFF !important;
-  text-decoration: none !important;
-}
+
 .cta-badges {
-  display: flex; gap: 20px; flex-wrap: wrap;
+  display: flex !important; gap: 20px !important; flex-wrap: wrap;
   margin-top: 20px !important; justify-content: flex-start !important;
 }
 .cta-badge { font-family: var(--sans) !important; font-size: 13px !important; color: var(--ink-mute) !important; font-weight: 500 !important; }
@@ -1061,27 +1064,10 @@ section.cta-section .container {
   margin-right: 4px;
 }
 
-.proof-strip {
-  display: flex !important; gap: 24px !important; flex-wrap: wrap;
-  background: transparent !important;
-  border: 0 !important;
-  border-top: 1px solid var(--rule) !important;
-  padding: 20px 0 !important;
-  margin: 40px 0 0 !important;
-  box-shadow: none !important;
-  border-radius: 0 !important;
-  justify-content: flex-start !important;
-}
-.proof-item { font-family: var(--sans) !important; font-size: 13.5px !important; color: var(--ink-2) !important; font-weight: 500 !important; }
-.proof-num {
-  font-family: var(--serif) !important;
-  font-weight: 500 !important;
-  font-size: 17px !important;
-  color: var(--ink) !important;
-  letter-spacing: -0.01em !important;
-  margin-right: 4px;
-}
-.proof-divider { display: none !important; }
+/* Trust strip and newsletter: removed per redesign brief (belt-and-suspenders). */
+.proof-strip,
+.inline-email-capture { display: none !important; }
+.proof-item, .proof-num, .proof-divider { display: none !important; }
 
 /* ── FAQ section ──────────────────────────────────────────────────────────── */
 
