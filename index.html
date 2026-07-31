@@ -382,7 +382,7 @@
     });
     // Tag every event with the landing-site source so it's easy to split
     // marketing-site traffic from in-app traffic in PostHog.
-    posthog.register({ surface: 'marketing' });
+    posthog.register({ surface: 'marketing', page_version: 'a-fixes' });
     // Capture UTM/referrer once per user so they stick to the profile forever.
     (function(){
       var sp = new URLSearchParams(window.location.search);
@@ -1075,7 +1075,7 @@
         </section>
         <section id="brand">
           <h2>Looking for StudyEdge AI? You're in the right place, getstudyedge.com</h2>
-          <p>StudyEdge AI is the app at getstudyedge.com, seen on TikTok and used by 30,000+ college and high school students. We are the AI study planner with Session Blueprints, Focus Mode, AI Study Coach, Brain Dump, Exam Rescue, and Quiz Burst. Log in or create a free account below.</p>
+          <p>StudyEdge AI is the app at getstudyedge.com, followed by 30,000+ college and high school students on TikTok. We are the AI study planner with Session Blueprints, Focus Mode, AI Study Coach, Brain Dump, Exam Rescue, and Quiz Burst. Log in or create a free account below.</p>
           <p>Common searches that bring students here: "StudyEdge AI", "studyedge ai app", "getstudyedge", "studyedge login", "study edge ai", "studyedge ai review", "studyedge ai tiktok".</p>
           <a href="/login">Log In to StudyEdge AI</a>
           <a href="/app?signup=1" onclick="posthog && posthog.capture('landing_cta_clicked', {page:'homepage', cta_text:'Create Free Account', destination:'/app?signup=1'})">Create Free Account</a>
@@ -1125,9 +1125,10 @@
   <script type="text/babel">
     const { useState, useEffect } = React;
 
-    const goTo = (path) => {
+    const goTo = (path, eventName) => {
       if (path && (path.includes('/app') || path.includes('signup'))) {
-        posthog && posthog.capture('landing_cta_clicked', { page: 'homepage', destination: path });
+        const name = eventName || 'landing_cta_clicked';
+        posthog && posthog.capture(name, { page: 'homepage', destination: path });
       }
       window.location.href = path;
     };
@@ -1147,7 +1148,7 @@
           </ul>
           <div className="nav-actions">
             <span className="nav-signin" onClick={() => goTo('/app?login=1')}>Sign in</span>
-            <button className="btn btn-primary" onClick={() => goTo('/app?signup=1')}>Start free</button>
+            <button className="btn btn-primary" onClick={() => goTo('/app?signup=1', 'nav_start_free')}>Start free</button>
           </div>
         </nav>
       );
@@ -1179,24 +1180,24 @@
             <div className="hero-aurora-layer"></div>
           </div>
           <section className="hero" style={{position:'relative',zIndex:1}}>
-            <p className="hero-eyebrow hero-stagger-1"><span className="hero-eyebrow-dot" /><strong>30,000+</strong> students in the StudyEdge AI community</p>
+            <p className="hero-eyebrow hero-stagger-1"><span className="hero-eyebrow-dot" /><strong>30,000+</strong> students follow StudyEdge AI</p>
             <h1 className="hero-h1 hero-stagger-2">
               Your grades aren't<br />
               the problem.<br />
               <em>Your system is.</em>
             </h1>
             <p className="hero-sub hero-stagger-3">
-              StudyEdge builds your schedule, plans every session minute by minute, and runs your study sessions with flashcards, quizzes, and active recall built in. One app. All semester.
+              StudyEdge AI builds your schedule, plans every session minute by minute, and runs your study sessions with flashcards, quizzes, and active recall built in. One app. All semester.
             </p>
             <div className="hero-cta hero-stagger-4">
-              <button className="btn btn-primary-lg btn-cta-pulse" onClick={() => goTo('/app?signup=1')}>Start for free</button>
+              <button className="btn btn-primary-lg btn-cta-pulse" onClick={() => goTo('/app?signup=1', 'hero_start_free')}>Start for free</button>
               <p className="hero-fine">No credit card required. Free plan available.</p>
             </div>
             <div className="hero-divider" />
             <div className="hero-stats">
               <div className="hero-stat hero-stat-c1">
                 <div className="hero-stat-num" style={{color:'#3B61C4',fontVariantNumeric:'tabular-nums'}}>{countLabel}</div>
-                <div className="hero-stat-label">Community</div>
+                <div className="hero-stat-label">Followers</div>
               </div>
               <div className="hero-stat hero-stat-c2">
                 <div className="hero-stat-num" style={{color:'#059669'}}>Free</div>
@@ -1221,7 +1222,7 @@
           metric: 'finally consistent',
           metricClass: 'om-blue',
           bg: 'rgba(59,97,196,0.04)',
-          claim: "I've always struggled to stay consistent, then StudyEdge just planned everything for me. I didn't have to think, I just had to show up. My hours went up, my grades went up, and for the first time I actually felt in control of my semester.",
+          claim: "I've always struggled to stay consistent, then StudyEdge AI just planned everything for me. I didn't have to think, I just had to show up. My hours went up, my grades went up, and for the first time I actually felt in control of my semester.",
           who: 'Andy G., Undergraduate'
         },
         {
@@ -1260,7 +1261,7 @@
         {
           n: '01',
           title: "We fill your week automatically",
-          body: "Add your courses and upload your syllabus. StudyEdge reads your exam dates, assignment weights, and deadlines and fills your week automatically, prioritized by urgency and difficulty."
+          body: "Add your courses and upload your syllabus. StudyEdge AI reads your exam dates, assignment weights, and deadlines and fills your week automatically, prioritized by urgency and difficulty."
         },
         {
           n: '02',
@@ -1332,7 +1333,7 @@
         <div style={{background:'#F7F6F3',display:'flex',alignItems:'flex-start',position:'relative',padding:'44px 20px 52px',gap:0}}>
           {/* LEFT WINDOW, Dashboard */}
           <div style={{flex:'0 0 570px',background:'#fff',borderRadius:16,boxShadow:'0 2px 0 rgba(0,0,0,0.04),0 8px 28px rgba(0,0,0,0.09),0 28px 70px rgba(0,0,0,0.07)',overflow:'hidden',position:'relative',zIndex:1,fontFamily:'DM Sans,system-ui,sans-serif'}}>
-            <TitleBar title="StudyEdge · Dashboard" />
+            <TitleBar title="StudyEdge AI · Dashboard" />
             <div style={{padding:'24px 28px 24px'}}>
               {/* Date + greeting */}
               <div style={{fontSize:10,fontWeight:700,letterSpacing:'0.12em',color:'#9B9B9B',textTransform:'uppercase',marginBottom:10}}>TUESDAY, MAY 12</div>
@@ -1404,7 +1405,7 @@
 
           {/* RIGHT WINDOW, AI Study Coach */}
           <div style={{flex:'0 0 580px',background:'#fff',borderRadius:16,boxShadow:'0 2px 0 rgba(0,0,0,0.04),0 12px 40px rgba(0,0,0,0.14),0 40px 100px rgba(0,0,0,0.10)',overflow:'hidden',position:'relative',zIndex:2,marginLeft:-60,marginTop:-22,fontFamily:'DM Sans,system-ui,sans-serif'}}>
-            <TitleBar title="StudyEdge · AI Study Coach" />
+            <TitleBar title="StudyEdge AI · AI Study Coach" />
             <div style={{padding:'22px 28px 0'}}>
               {/* Breadcrumb + adapted badge */}
               <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:16}}>
@@ -1654,7 +1655,7 @@
               <div style={{width:10,height:10,borderRadius:'50%',background:'#FEBC2E'}}/>
               <div style={{width:10,height:10,borderRadius:'50%',background:'#28C840'}}/>
             </div>
-            <div style={{flex:1,textAlign:'center',fontSize:11,fontWeight:500,color:'#6B6B6B'}}>StudyEdge · AI Study Coach</div>
+            <div style={{flex:1,textAlign:'center',fontSize:11,fontWeight:500,color:'#6B6B6B'}}>StudyEdge AI · AI Study Coach</div>
           </div>
           {/* Course header */}
           <div style={{padding:'11px 20px',borderBottom:'1px solid rgba(0,0,0,0.07)',display:'flex',alignItems:'center',justifyContent:'space-between'}}>
@@ -1942,7 +1943,7 @@
               <div style={{width:10, height:10, borderRadius:'50%', background:'#FEBC2E'}} />
               <div style={{width:10, height:10, borderRadius:'50%', background:'#28C840'}} />
             </div>
-            <div style={{flex:1, textAlign:'center', fontSize:11, fontWeight:500, color:'#6B6B6B'}}>StudyEdge · Grade Hub</div>
+            <div style={{flex:1, textAlign:'center', fontSize:11, fontWeight:500, color:'#6B6B6B'}}>StudyEdge AI · Grade Hub</div>
           </div>
           {/* Course header */}
           <div style={{padding:'12px 24px', borderBottom:'1px solid rgba(0,0,0,0.07)', display:'flex', alignItems:'center', justifyContent:'space-between'}}>
@@ -1989,7 +1990,7 @@
                 <div style={{width:8,height:8,borderRadius:'50%',background:'#FEBC2E'}}/>
                 <div style={{width:8,height:8,borderRadius:'50%',background:'#28C840'}}/>
               </div>
-              <div style={{flex:1,textAlign:'center',fontSize:10,fontWeight:500,color:'#6B6B6B'}}>StudyEdge · Dashboard</div>
+              <div style={{flex:1,textAlign:'center',fontSize:10,fontWeight:500,color:'#6B6B6B'}}>StudyEdge AI · Dashboard</div>
             </div>
             <div style={{padding:'16px 18px 18px'}}>
               {/* Date */}
@@ -2128,7 +2129,7 @@
               <p className="section-label sl-purple" style={{marginBottom:0}}>What students say</p>
             </div>
             <h2 className="section-h2" style={{textAlign:'center'}}>
-              30,000 students figured it out.<br /><em>Here is what they said.</em>
+              Real students figured it out.<br /><em>Here is what they said.</em>
             </h2>
           </div>
           <div className="marquee">
@@ -2179,7 +2180,7 @@
       const displayPrice = (planKey) => PRICE_TABLE[planKey][bill];
       const unitLabel = bill === 'weekly' ? '/wk' : bill === 'monthly' ? '/mo' : '/yr';
 
-      const goSignup = (plan) => {
+      const goSignup = (plan, eventName) => {
         const qs = new URLSearchParams({ signup: '1' });
         if (plan) {
           qs.set('plan', plan);
@@ -2187,7 +2188,8 @@
           if (plan === 'pro') qs.set('trial', '1');
         }
         const dest = '/app?' + qs.toString();
-        posthog && posthog.capture('landing_cta_clicked', {
+        const name = eventName || 'landing_cta_clicked';
+        posthog && posthog.capture(name, {
           page: 'homepage',
           cta_text: plan === 'pro' ? 'Start free trial' : plan === 'unlimited' ? 'Get Unlimited' : 'Start for free',
           plan: plan || 'free',
@@ -2235,7 +2237,7 @@
                   <li className="pf"><span className="pf-dot" /><span>Focus Mode timer</span></li>
                   <li className="pf"><span className="pf-dot" /><span>Syllabus import</span></li>
                 </ul>
-                <button className="btn btn-ghost btn-block" onClick={() => goSignup(null)}>Start for free</button>
+                <button className="btn btn-ghost btn-block" onClick={() => goSignup(null, 'pricing_free')}>Start for free</button>
               </div>
 
               <div className="pricing-cell featured pricing-elevated">
@@ -2256,7 +2258,7 @@
                   <li className="pf em"><span className="pf-dot" /><span>Smart Calendar sync</span></li>
                   <li className="pf em"><span className="pf-dot" /><span>Syllabus import for all courses</span></li>
                 </ul>
-                <button className="btn btn-primary btn-block" style={{padding:'14px'}} onClick={() => goSignup('pro')}>Start free trial</button>
+                <button className="btn btn-primary btn-block" style={{padding:'14px'}} onClick={() => goSignup('pro', 'pricing_pro')}>Start free trial</button>
                 <p style={{textAlign:'center', fontSize:12, color:'var(--dim)', marginTop:10}}>3-day free trial, cancel anytime</p>
               </div>
 
@@ -2275,7 +2277,7 @@
                   <li className="pf em"><span className="pf-dot" /><span>Advanced exam analytics</span></li>
                   <li className="pf em"><span className="pf-dot" /><span>Predicted exam score</span></li>
                 </ul>
-                <button className="btn btn-dark btn-block" style={{padding:'14px'}} onClick={() => goSignup('unlimited')}>Get Unlimited</button>
+                <button className="btn btn-dark btn-block" style={{padding:'14px'}} onClick={() => goSignup('unlimited', 'pricing_unlimited')}>Get Unlimited</button>
                 <p style={{textAlign:'center', fontSize:12, color:'var(--dim)', marginTop:10}}>Cancel anytime</p>
               </div>
 
@@ -2416,7 +2418,7 @@
             Your semester isn't going<br />to <em style={{color:'rgba(255,255,255,0.68)'}}>plan itself.</em>
           </h2>
           <p className="finalcta-sub">3-day free trial · Cancel anytime · Takes three minutes to set up.</p>
-          <button className="btn-cta-white" onClick={() => goTo('/app?signup=1&plan=pro&billing=weekly&trial=1')}>Start Free Trial</button>
+          <button className="btn-cta-white" onClick={() => goTo('/app?signup=1&plan=pro&billing=weekly&trial=1', 'final_cta')}>Start Free Trial</button>
         </div>
       );
     }

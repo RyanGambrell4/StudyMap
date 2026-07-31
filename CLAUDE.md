@@ -101,7 +101,7 @@ Run the StudyEdge Email agent. Read EMAIL_AGENT_SPEC.md and AGENTS_SPEC.md first
 **Spec:** `LANDING_AGENT_SPEC.md`
 **What it does:** Continuously improves getstudyedge.com's landing page for conversion and visual quality. Audits the biggest weakness each run and implements it.
 **Key context:**
-- Landing page lives in `src/components/LandingPage.jsx`
+- Landing page lives in the root `index.html` (embedded React via Babel, ~2500 lines). `src/components/LandingPage.jsx` is legacy dead code — do NOT edit it and do NOT import it back into `App.jsx`.
 - Landing page is INTENTIONALLY DARK (`#060614` bg) — do NOT convert to light theme
 - This is the exception to the light-only rule — landing page dark theme is by design
 - CTA `goTrial()` must always point to `/app?signup=1&plan=pro&billing=weekly&trial=1`
