@@ -9,7 +9,6 @@ import { captureFirstTouch, getFirstTouch, firstTouchPostHogProps } from './lib/
 import { captureUtmForOnboarding } from './lib/utmPersonalize'
 import SharedPlanView from './components/SharedPlanView'
 import AuthScreen from './components/AuthScreen'
-import LandingPage from './components/LandingPage'
 import Spinner from './components/ui/spinner'
 import Onboarding from './components/Onboarding'
 import OutputView from './components/OutputView'
