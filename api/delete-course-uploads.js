@@ -2,11 +2,9 @@
 //   POST { courseId, uploadId? }
 // If uploadId is provided, deletes just that one row (must belong to caller).
 // Otherwise, deletes every upload for the given course.
-import { createClient } from '@supabase/supabase-js'
 import { verifyAuth } from '../lib/server/usage.js'
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
-
+import { supabaseAdmin as supabase } from '../lib/server/supabaseAdmin.js'
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 

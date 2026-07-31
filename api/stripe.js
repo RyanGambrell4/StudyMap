@@ -13,7 +13,6 @@
  */
 
 import Stripe from 'stripe'
-import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { onTrialEndingSoon, onUpgraded, onChurned } from '../lib/server/loops.js'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
@@ -42,11 +41,7 @@ function checkoutRateLimit(ip) {
   return entry.count > limit
 }
 
-const supabaseAdmin = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
-)
-
+import { supabaseAdmin } from '../lib/server/supabaseAdmin.js'
 // ── Stripe price IDs ──────────────────────────────────────────────────────────
 // 6 new price IDs (Pro/Unlimited × Weekly/Monthly/Annual). Created manually in
 // the Stripe dashboard - env vars override the placeholder strings below.

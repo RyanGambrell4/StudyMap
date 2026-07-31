@@ -1,11 +1,9 @@
 // Persistent per-course upload registry writer.
 // Client extracts text browser-side (extractText.js), POSTs metadata + text here,
 // we insert a row in course_uploads. No raw files are stored server-side.
-import { createClient } from '@supabase/supabase-js'
 import { verifyAuth } from '../lib/server/usage.js'
 
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
-
+import { supabaseAdmin as supabase } from '../lib/server/supabaseAdmin.js'
 const ALLOWED_TYPES = ['pdf', 'docx', 'pptx', 'txt', 'md']
 const ALLOWED_KINDS = ['material', 'syllabus']
 const MAX_CHARS = 200000
