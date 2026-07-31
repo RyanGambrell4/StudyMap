@@ -1452,6 +1452,11 @@
             "source": "/blog/",
             "destination": "/blog",
             "permanent": true
+        },
+        {
+            "source": "/studge",
+            "destination": "/",
+            "permanent": true
         }
     ]
 }
