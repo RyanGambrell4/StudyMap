@@ -26,7 +26,7 @@ College and university students at any level (freshman through graduate). Works 
 ## Key Pages
 
 - [Home](https://getstudyedge.com/) — Main landing page
-- [Pricing](https://getstudyedge.com/studyedge-ai.html#pricing) — Plan options and pricing
+- [Pricing](https://getstudyedge.com/pricing) — Plan options and pricing
 - [GPA Calculator](https://getstudyedge.com/gpa-calculator) — Free GPA calculator
 - [Grade Calculator](https://getstudyedge.com/grade-calculator) — What score do I need on the final?
 - [AI Study Coach](https://getstudyedge.com/ai-study-coach) — Personalized AI study planning

@@ -68,7 +68,7 @@
 
   <!-- Open Graph -->
   <meta property="og:type" content="website" />
-  <meta property="og:url" content="https://getstudyedge.com" />
+  <meta property="og:url" content="https://getstudyedge.com/" />
   <meta property="og:title" content="StudyEdge AI: Stop cramming. Start executing." />
   <meta property="og:description" content="AI that builds your study schedule, coaches every session, tracks your grades, and tells you exactly where to focus. Every course. All semester." />
   <meta property="og:image" content="https://getstudyedge.com/og-hero-v1.png" />
@@ -107,40 +107,7 @@
     "name": "StudyEdge AI",
     "alternateName": ["StudyEdge AI", "getstudyedge.com", "getstudyedge"],
     "url": "https://getstudyedge.com/",
-    "description": "The complete AI study system for university students at getstudyedge.com. Build your study schedule, generate flashcards, track your grades, and get AI coaching for every exam.",
-    "potentialAction": {
-      "@type": "SearchAction",
-      "target": {
-        "@type": "EntryPoint",
-        "urlTemplate": "https://getstudyedge.com/app?q={search_term_string}"
-      },
-      "query-input": "required name=search_term_string"
-    }
-  }
-  </script>
-
-  <!-- SiteNavigationElement: helps Google show sitelinks on brand searches -->
-  <script type="application/ld+json">
-  {
-    "@context": "https://schema.org",
-    "@type": "ItemList",
-    "name": "StudyEdge AI Site Navigation",
-    "itemListElement": [
-      {
-        "@type": "SiteLinksSearchBox",
-        "target": "https://getstudyedge.com/app?signup=1",
-        "potentialAction": { "@type": "SearchAction", "target": "https://getstudyedge.com/app" }
-      },
-      { "@type": "ListItem", "position": 1, "name": "Sign Up Free", "url": "https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1" },
-      { "@type": "ListItem", "position": 2, "name": "Log In", "url": "https://getstudyedge.com/app" },
-      { "@type": "ListItem", "position": 3, "name": "Pricing", "url": "https://getstudyedge.com/pricing" },
-      { "@type": "ListItem", "position": 4, "name": "AI Study Coach", "url": "https://getstudyedge.com/ai-study-coach" },
-      { "@type": "ListItem", "position": 5, "name": "GPA Calculator", "url": "https://getstudyedge.com/gpa-calculator" },
-      { "@type": "ListItem", "position": 6, "name": "About", "url": "https://getstudyedge.com/about" },
-      { "@type": "ListItem", "position": 7, "name": "Best Study Apps by University", "url": "https://getstudyedge.com/best-study-apps" },
-      { "@type": "ListItem", "position": 8, "name": "GPA Requirements by School", "url": "https://getstudyedge.com/gpa-requirements" },
-      { "@type": "ListItem", "position": 9, "name": "Blog", "url": "https://getstudyedge.com/blog" }
-    ]
+    "description": "The complete AI study system for university students at getstudyedge.com. Build your study schedule, generate flashcards, track your grades, and get AI coaching for every exam."
   }
   </script>
 
@@ -149,10 +116,17 @@
   {
     "@context": "https://schema.org",
     "@type": "WebApplication",
+    "@id": "https://getstudyedge.com/#webapp",
     "browserRequirements": "Requires JavaScript. Requires HTML5.",
     "name": "StudyEdge AI",
     "url": "https://getstudyedge.com/",
-    "logo": "https://getstudyedge.com/favicon.png",
+    "image": {
+      "@type": "ImageObject",
+      "url": "https://getstudyedge.com/og-hero-v1.png",
+      "width": 1200,
+      "height": 630
+    },
+    "creator": { "@id": "https://getstudyedge.com/#organization" },
     "description": "The complete AI study system for students. One app for your schedule, AI-generated flashcards, AI tutor, active recall, session coaching, and grade tracking, built to raise your GPA.",
     "applicationCategory": "EducationApplication",
     "operatingSystem": "Web",

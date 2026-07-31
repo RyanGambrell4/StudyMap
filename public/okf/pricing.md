@@ -1,7 +1,7 @@
 ---
 title: StudyEdge AI — Pricing
 description: Current pricing tiers for StudyEdge AI study planner app
-url: https://getstudyedge.com/studyedge-ai.html#pricing
+url: https://getstudyedge.com/pricing
 last_updated: "2026-06-20"
 ---
 
@@ -48,7 +48,7 @@ last_updated: "2026-06-20"
 ## Sign Up
 
 - Trial sign-up: https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1
-- Pricing page: https://getstudyedge.com/studyedge-ai.html#pricing
+- Pricing page: https://getstudyedge.com/pricing
 
 ## Related Pages
 
