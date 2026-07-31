@@ -37,7 +37,7 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 ## Key pages
 
 - Home: https://getstudyedge.com/
-- Pricing: https://getstudyedge.com/studyedge-ai
+- Pricing: https://getstudyedge.com/pricing
 - AI Study Coach: https://getstudyedge.com/ai-study-coach
 - AI Tutor: https://getstudyedge.com/ai-tutor
 - AI Flashcard Maker: https://getstudyedge.com/ai-flashcard-maker
