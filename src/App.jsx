@@ -410,7 +410,7 @@ export default function App() {
     window.location.href = '/'
   }
 
-  const handleOnboardingComplete = ({ yearLevel: yl, learningStyle: ls, preferredTime, schoolType: st, emailDigest, durationMs, trialTaken }) => {
+  const handleOnboardingComplete = ({ yearLevel: yl, learningStyle: ls, preferredTime, schoolType: st, emailDigest, durationMs, trialTaken, redirectTo }) => {
     setYearLevel(yl)
     setLearningStyle(ls)
     setSchoolType(st ?? null)
@@ -441,12 +441,17 @@ export default function App() {
       trial_taken: !!trialTaken,
       school_type: st ?? null,
     })
-    // Post-onboarding email - fire once per user
+    // Post-onboarding email - fire once per user.
+    // keepalive so the request still goes out when the trial path immediately
+    // navigates to Stripe Checkout. The dedupe key is written up front (and rolled
+    // back if the request never leaves) because the .then never runs post-redirect.
     if (session?.user?.email) {
       const key = `studyedge_onboarding_email_${session.user.id}`
       if (!localStorage.getItem(key)) {
+        localStorage.setItem(key, '1')
         fetch('/api/onboarding-complete', {
           method: 'POST',
+          keepalive: true,
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
             email: session.user.email,
@@ -456,8 +461,35 @@ export default function App() {
             learningStyle: ls,
             preferredTime,
           }),
-        }).then(() => localStorage.setItem(key, '1')).catch(() => {})
+        }).catch(() => localStorage.removeItem(key))
       }
+    }
+
+    // Trial path: we are about to leave for Stripe Checkout, so OutputView never
+    // mounts and its save-on-mount effect never persists the plan. Write it here or
+    // the user returns from a successful payment to an empty `plan` row, which drops
+    // them back on onboarding step 1. Navigating only after the write settles also
+    // gives posthog-js a moment to flush onboarding_completed.
+    if (redirectTo) {
+      let navigated = false
+      const goToCheckout = () => {
+        if (navigated) return
+        navigated = true
+        window.location.href = redirectTo
+      }
+      // A stalled write must never strand someone who just pressed "Start trial",
+      // so Checkout wins after 2s regardless of whether the plan finished saving.
+      const failsafe = setTimeout(goToCheckout, 2000)
+      savePlan({
+        courses: [],
+        schedule: { hoursPerWeek: 15, preferredTime },
+        learningStyle: ls,
+        yearLevel: yl,
+        schoolType: st ?? null,
+        completedIds: [],
+        assignments: [],
+        savedAt: Date.now(),
+      }).finally(() => { clearTimeout(failsafe); goToCheckout() })
     }
   }
 
