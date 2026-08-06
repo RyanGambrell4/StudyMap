@@ -829,9 +829,19 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             track('trial_cta_clicked', { source: 'onboarding' })
             setTrialLoading(true)
             setTrialError(null)
-            const url = await activateTrial(userId, userEmail)
-            if (url) {
-              window.location.href = url
+            const result = await activateTrial(userId, userEmail)
+            // Route the redirect through completeWith so the trial path finishes
+            // onboarding exactly like the skip path does. Without this the user
+            // left for Stripe mid-onboarding: onboarding_completed never fired
+            // (which pinned the onboarded -> checkout funnel at 0% and paged the
+            // daily revenue heartbeat every morning), the plan was never persisted,
+            // and they landed back on step 1 after paying.
+            if (typeof result === 'string' && result) {
+              completeWith(profileData, { trialTaken: true, redirectTo: result })
+            } else if (result?.alreadySubscribed) {
+              // Nothing to buy - createCheckoutSession returns this object (not a
+              // URL) for an existing subscriber. Finish onboarding, don't redirect.
+              completeWith(profileData, { trialTaken: true })
             } else {
               setTrialLoading(false)
               setTrialError('Something went wrong starting your trial. Please try again.')

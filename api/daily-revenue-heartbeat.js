@@ -5,9 +5,23 @@
 //      a) 7d avg >= 0.5/day AND 0 customers in 48h (statistically unusual), OR
 //      b) 7d avg >= 0.1/day AND 0 customers in 7d (definitely broken).
 //      At low volume (avg < 0.5/day) a single dry 48h period is normal; don't cry wolf.
-//   2. PostHog: signup → onboarding_completed → checkout_started funnel.
+//   2. PostHog: signup → onboarding_completed → checkout_button_clicked → checkout_started.
 //      email_confirmed is NOT part of the funnel — email gate is soft (users bypass it).
-//      Alert fires if signups > 10 AND onboarding→checkout rate < 20%.
+//      Three distinct alerts, because "nobody clicked" and "clicks go nowhere" need
+//      opposite responses (CRO work vs. page-someone-now):
+//        a) Checkout broken: >= 3 checkout_button_clicked but 0 checkout_started in 24h.
+//           Volume-independent — clicks that never produce a Stripe session are never
+//           normal. This is the signature of the 2026-05-25 incident.
+//        b) Funnel zero: a full 7d with >= 20 onboards and not one checkout.
+//        c) Funnel regression: the 7d onboard→checkout rate fell below half its own
+//           preceding-21d baseline.
+//      Note what is deliberately absent: a fixed conversion target. Until 2026-08-06 this
+//      cron paged whenever onboarding→checkout came in under 20%, gated on signups >= 10 —
+//      a gate on the wrong variable, since 20% is a rate whose denominator is *onboards*.
+//      Worse, the real steady-state rate is ~5%, so the condition was permanently true and
+//      the alert fired every morning regardless of app health. An alert that is always on
+//      is not an alert. These three test for change and breakage instead; the absolute rate
+//      is still reported in the email body as a number worth watching.
 //
 // Background: on 2026-05-25 a one-line change in src/App.jsx skipped Stripe Checkout
 // for trial signups. The bug shipped silently for 9 days. This cron prevents that.
@@ -26,6 +40,17 @@ const POSTHOG_PROJECT_ID = process.env.POSTHOG_PROJECT_ID || '412740'
 const POSTHOG_PERSONAL_API_KEY = process.env.POSTHOG_PERSONAL_API_KEY
 
 const DAY_MS = 24 * 60 * 60 * 1000
+
+// Minimum sample sizes before a rate is worth paging on. The funnel gate applies to
+// 7d onboarding_completed (the denominator of the onboarded→checkout rate), not to signups.
+// At a true 20% conversion rate, 0 successes in 20 trials has p ≈ 1.2% — low enough that
+// tripping the alert means something. The same test over a single day (n ≈ 3-8) is coin-flip
+// noise, which is why this cron paged every morning while nothing was actually wrong.
+const MIN_FUNNEL_DENOM    = 20
+const MIN_CLICKS_TO_TRUST = 3
+// How far the 7d conversion rate must fall below its own 21d baseline to count as a
+// regression rather than week-to-week wobble.
+const REGRESSION_FACTOR   = 0.5
 
 export const config = { maxDuration: 60 }
 
@@ -46,6 +71,7 @@ export default async function handler(req, res) {
   const last48h = now - 86400 * 2
   const last7d  = now - 86400 * 7
   const last14d = now - 86400 * 14
+  const last28d = now - 86400 * 28
 
   // ── Stripe ────────────────────────────────────────────────────────────────
   let customersLast24h = 0
@@ -122,25 +148,53 @@ export default async function handler(req, res) {
   let phEmailConfirmed = null
   let phOnboarded      = null
   let phTrialSkipped   = null
-  let phCheckout       = null
+  let phClicks         = null   // checkout_button_clicked (client, CTA press)
+  let phCheckoutErr    = null   // checkout_error (client, session creation failed)
+  let phCheckout       = null   // checkout_started (server, Stripe session exists)
   let phActiveUsers    = null
   let phRate           = null   // signup → checkout
-  let phOnboardRate    = null   // onboarding → checkout (the real funnel)
+  let phOnboardRate    = null   // onboarding → checkout (the real funnel), 24h
+  let phReachRate      = null   // signup → onboarding (the top-of-funnel leak), 24h
+  let phOnboarded7d    = null
+  let phCheckout7d     = null
+  let phOnboardRate7d  = null   // onboarding → checkout over 7d — what the CRO alert tests
+  let phOnboarded28d   = null
+  let phCheckout28d    = null
+  let phPrevOnboarded  = null
+  let phPrevCheckout   = null
+  let phBaselineRate   = null   // same rate over the preceding 21d (28d minus the last 7d)
   let phErr            = null
 
   if (POSTHOG_PERSONAL_API_KEY) {
     try {
-      ;[phSignups, phEmailConfirmed, phOnboarded, phTrialSkipped, phCheckout, phActiveUsers] =
+      ;[phSignups, phEmailConfirmed, phOnboarded, phTrialSkipped, phClicks, phCheckoutErr, phCheckout, phActiveUsers,
+        phOnboarded7d, phCheckout7d, phOnboarded28d, phCheckout28d] =
         await Promise.all([
           posthogCount('signup_completed', last24h),
           posthogCount('email_confirmed', last24h),
           posthogCount('onboarding_completed', last24h),
           posthogCount('trial_skipped', last24h),
+          posthogCount('checkout_button_clicked', last24h),
+          posthogCount('checkout_error', last24h),
           posthogCount('checkout_started', last24h),
           posthogDistinctCount(last24h),
+          // 7-day window: the CRO rate needs a denominator big enough to mean
+          // something. A single day yields ~3-8 onboards, where 0 conversions is
+          // ordinary luck rather than evidence of a broken offer.
+          posthogCount('onboarding_completed', last7d),
+          posthogCount('checkout_started', last7d),
+          // 28-day window, used only to derive the preceding-21d baseline below.
+          posthogCount('onboarding_completed', last28d),
+          posthogCount('checkout_started', last28d),
         ])
       if (phSignups > 0) phRate = phCheckout / phSignups
+      if (phSignups > 0) phReachRate = phOnboarded / phSignups
       if (phOnboarded > 0) phOnboardRate = phCheckout / phOnboarded
+      if (phOnboarded7d > 0) phOnboardRate7d = phCheckout7d / phOnboarded7d
+      // Baseline = the 21 days BEFORE the current 7d window, so the two never overlap.
+      phPrevOnboarded = (phOnboarded28d ?? 0) - (phOnboarded7d ?? 0)
+      phPrevCheckout  = (phCheckout28d  ?? 0) - (phCheckout7d  ?? 0)
+      if (phPrevOnboarded > 0) phBaselineRate = phPrevCheckout / phPrevOnboarded
     } catch (err) {
       phErr = err.message || String(err)
       console.error('[heartbeat] PostHog error:', err)
@@ -162,20 +216,60 @@ export default async function handler(req, res) {
   }
   if (stripeErr) reasons.push(`Stripe API error: ${stripeErr}`)
 
-  // Funnel: use onboarding → checkout, NOT email_confirmed (email gate is soft — bypassed by design)
-  const funnelAlert =
-    phSignups !== null && phSignups >= 10 &&
-    phOnboardRate !== null && phOnboardRate < 0.20
-  if (funnelAlert) {
+  // Checkout breakage: the CTA is being pressed but no Stripe session is coming out.
+  // Deliberately volume-independent — a handful of clicks that produce zero sessions is
+  // never normal, and this is exactly how the 2026-05-25 trial-bypass presented.
+  const checkoutBroken =
+    phClicks !== null && phClicks >= MIN_CLICKS_TO_TRUST &&
+    phCheckout !== null && phCheckout === 0
+  if (checkoutBroken) {
+    reasons.push(
+      `Checkout is not starting: ${phClicks} checkout_button_clicked but 0 checkout_started in 24h` +
+      (phCheckoutErr ? ` (${phCheckoutErr} checkout_error)` : '') +
+      `. Users are pressing the button and no Stripe session is being created. ` +
+      `Check /api/stripe logs, STRIPE_SECRET_KEY, and the price IDs. ` +
+      `Note: checkout_started is emitted server-side and needs POSTHOG_API_KEY set in Vercel — ` +
+      `if that env var is missing this count reads 0 even when checkout works.`
+    )
+  }
+
+  // Funnel: onboarding → checkout, NOT email_confirmed (email gate is soft — bypassed by design).
+  //
+  // This deliberately does NOT test the rate against a fixed target. The previous version paged
+  // whenever onboarded→checkout came in under 20%, but StudyEdge's actual steady-state rate is
+  // nearer 5% (roughly 1 checkout per 20 onboards). A threshold the product has never met is a
+  // condition that is permanently true, which makes it a KPI, not an alert — it fired every
+  // morning and taught the reader to ignore the whole email. What follows tests for CHANGE:
+  //   - funnelZero:       a full week with adequate traffic and not one checkout.
+  //   - funnelRegression: the 7d rate collapsed to under half the preceding 21d baseline.
+  // Both are suppressed when checkoutBroken already fired — same symptom, and that alert names
+  // the actual cause. Absolute conversion is still reported in the email as a number to watch.
+  const funnelZero =
+    !checkoutBroken &&
+    phOnboarded7d !== null && phOnboarded7d >= MIN_FUNNEL_DENOM &&
+    phCheckout7d === 0
+  if (funnelZero) {
+    reasons.push(
+      `Zero checkouts in 7 days: ${phOnboarded7d} users completed onboarding and not one reached ` +
+      `Stripe Checkout. Walk /app?signup=1&plan=pro&billing=weekly&trial=1 end-to-end.`
+    )
+  }
+
+  const funnelRegression =
+    !checkoutBroken && !funnelZero &&
+    phOnboarded7d !== null && phOnboarded7d >= MIN_FUNNEL_DENOM &&
+    phPrevOnboarded !== null && phPrevOnboarded >= MIN_FUNNEL_DENOM &&
+    phBaselineRate !== null && phBaselineRate > 0 &&
+    phOnboardRate7d !== null && phOnboardRate7d < phBaselineRate * REGRESSION_FACTOR
+  if (funnelRegression) {
     let hint = 'Check that Stripe Checkout is being called after the trial offer step.'
     if (phTrialSkipped !== null && phOnboarded > 0 && phTrialSkipped / phOnboarded > 0.60) {
-      hint = `${Math.round(phTrialSkipped / phOnboarded * 100)}% of users who finished onboarding skipped the trial — improve the trial offer CRO.`
-    } else if (phOnboarded > 0 && phCheckout / phOnboarded < 0.15) {
-      hint = `Only ${Math.round(phCheckout / phOnboarded * 100)}% of users who completed onboarding started checkout. The trial offer page may not be rendering or the Stripe session is failing.`
+      hint = `${Math.round(phTrialSkipped / phOnboarded * 100)}% of users who finished onboarding skipped the trial (24h) — look at the trial offer step.`
     }
     reasons.push(
-      `Funnel drop: ${phSignups} signups → ${phOnboarded} onboarded → ${phCheckout} checkout ` +
-      `(${Math.round((phOnboardRate ?? 0) * 100)}% onboard→checkout, threshold 20%). ${hint}`
+      `Onboard→checkout conversion halved: ${(phOnboardRate7d * 100).toFixed(1)}% over the last 7d ` +
+      `(${phCheckout7d}/${phOnboarded7d}) vs ${(phBaselineRate * 100).toFixed(1)}% over the prior 21d ` +
+      `(${phPrevCheckout}/${phPrevOnboarded}). ${hint}`
     )
   }
 
@@ -193,7 +287,10 @@ export default async function handler(req, res) {
     activeSubCount, trialingSubCount,
     mrr, revenueLast24h,
     phSignups, phEmailConfirmed, phOnboarded, phTrialSkipped, phCheckout,
-    phActiveUsers, phRate, phOnboardRate,
+    phClicks, phCheckoutErr,
+    phActiveUsers, phRate, phOnboardRate, phReachRate,
+    phOnboarded7d, phCheckout7d, phOnboardRate7d,
+    phPrevOnboarded, phPrevCheckout, phBaselineRate,
     phErr,
     generatedAt: new Date().toISOString(),
   })
@@ -214,7 +311,10 @@ export default async function handler(req, res) {
     avg7d, avg14d, mrr, revenueLast24h,
     trialsLast24h, trialsLast7d, activeSubCount, trialingSubCount,
     phSignups, phEmailConfirmed, phOnboarded, phTrialSkipped, phCheckout,
-    phActiveUsers, phRate, phOnboardRate,
+    phClicks, phCheckoutErr,
+    phActiveUsers, phRate, phOnboardRate, phReachRate,
+    phOnboarded7d, phCheckout7d, phOnboardRate7d,
+    phPrevOnboarded, phPrevCheckout, phBaselineRate,
   })
 }
 
@@ -332,7 +432,14 @@ function renderEmail(d) {
     ${row('↳ email_confirmed (informational — soft gate)', fmt(d.phEmailConfirmed), '#9B9B9B', true)}
     ${row('↳ onboarding_completed', fmt(d.phOnboarded), '#6B6B6B', true)}
     ${row('↳ trial_skipped', fmt(d.phTrialSkipped), '#6B6B6B', true)}
+    ${row('checkout_button_clicked', fmt(d.phClicks), color(d.phClicks, 1, 0))}
+    ${row('↳ checkout_error', fmt(d.phCheckoutErr), d.phCheckoutErr ? red : '#6B6B6B', true)}
     ${row('checkout_started', fmt(d.phCheckout), color(d.phCheckout, 1, 0))}
+    ${row(
+      'Conversion: signup → onboarded',
+      pct(d.phReachRate),
+      d.phReachRate == null ? '#6B6B6B' : d.phReachRate >= 0.50 ? green : d.phReachRate >= 0.30 ? amber : red
+    )}
     ${row(
       'Conversion: signup → checkout',
       pct(d.phRate),
@@ -343,10 +450,23 @@ function renderEmail(d) {
       pct(d.phOnboardRate),
       d.phOnboardRate == null ? '#6B6B6B' : d.phOnboardRate >= 0.30 ? green : d.phOnboardRate >= 0.15 ? amber : red
     )}
+    ${row(
+      `Conversion: onboarded → checkout (7d, ${fmt(d.phCheckout7d)}/${fmt(d.phOnboarded7d)})`,
+      pct(d.phOnboardRate7d),
+      '#111'
+    )}
+    ${row(
+      `↳ baseline, prior 21d (${fmt(d.phPrevCheckout)}/${fmt(d.phPrevOnboarded)}) — alert compares against this`,
+      pct(d.phBaselineRate),
+      '#9B9B9B',
+      true
+    )}
   </table>
 
   <p style="font-size:12px;color:#9B9B9B;margin-top:6px;line-height:1.5">
     ℹ️ email_confirmed is shown for reference only. The app uses a soft email gate — users reach onboarding without confirming, so this count is intentionally low.
+    <br>Conversion is reported, not alerted on against a fixed target — the funnel alert fires only when a full 7d with ${MIN_FUNNEL_DENOM}+ onboards produces zero checkouts, or when the 7d rate falls below half its prior-21d baseline.
+    Breakage is caught separately and immediately: ${MIN_CLICKS_TO_TRUST}+ checkout_button_clicked with 0 checkout_started pages regardless of volume.
   </p>
 
   ${d.phErr ? `<p style="color:${red};font-size:12px;margin:8px 0 0">PostHog query failed: ${escHtml(d.phErr)}</p>` : ''}
