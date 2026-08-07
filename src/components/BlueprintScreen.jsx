@@ -178,7 +178,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
   const totalDuration = blueprint?.blocks?.reduce((s, b) => s + b.duration, 0) ?? session.duration
 
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#F7F6F3', animation: 'bp-enter 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
+    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#F7F8FA', animation: 'bp-enter 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
       <style>{`
         @keyframes bp-enter { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
         @keyframes bp-block { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }

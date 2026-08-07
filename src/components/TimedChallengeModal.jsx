@@ -6,7 +6,7 @@ import { addStudySession } from '../lib/studyHistory'
 import { track } from '../lib/analytics'
 
 const D = {
-  bg: '#F7F6F3',
+  bg: '#F7F8FA',
   card: '#FFFFFF',
   border: 'rgba(0,0,0,0.07)',
   accent: '#3B61C4',

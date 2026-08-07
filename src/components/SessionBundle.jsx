@@ -18,7 +18,7 @@ import { track } from '../lib/analytics'
 //   4. Wrap — mastery delta, cards added, "do it again tomorrow?"
 
 const D = {
-  bg: '#F7F6F3', bgCard: '#FFFFFF',
+  bg: '#F7F8FA', bgCard: '#FFFFFF',
   border: 'rgba(0,0,0,0.07)',
   text: '#111111', textMuted: '#6B6B6B', textDim: '#9B9B9B',
   green: '#16A34A', accent: '#E8531A', blue: '#3B61C4',

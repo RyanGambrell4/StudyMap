@@ -7,7 +7,7 @@ import { track } from '../lib/analytics'
 
 // ── Design tokens ────────────────────────────────────────────────────────────
 const D = {
-  bg: '#F7F6F3', bgCard: '#FFFFFF', bgEl: '#F0EFEC',
+  bg: '#F7F8FA', bgCard: '#FFFFFF', bgEl: '#F0EFEC',
   border: 'rgba(0,0,0,0.07)', borderStrong: 'rgba(0,0,0,0.12)',
   text: '#111111', muted: '#6B6B6B', dim: '#9B9B9B',
   accent: '#E8531A', glow: 'rgba(232,83,26,0.2)',

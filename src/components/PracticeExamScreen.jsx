@@ -88,7 +88,7 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
   const progressPct = ((idx + 1) / total) * 100
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#F7F6F3', display: 'flex', flexDirection: 'column' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#F7F8FA', display: 'flex', flexDirection: 'column' }}>
 
       {/* Top bar */}
       <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(0,0,0,0.07)', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
@@ -104,7 +104,7 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
           {secondsLeft !== null && (
-            <div style={{ background: secondsLeft < 60 ? '#fef2f2' : '#F7F6F3', border: `1px solid ${secondsLeft < 60 ? '#fecaca' : 'rgba(0,0,0,0.08)'}`, borderRadius: 10, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
+            <div style={{ background: secondsLeft < 60 ? '#fef2f2' : '#F7F8FA', border: `1px solid ${secondsLeft < 60 ? '#fecaca' : 'rgba(0,0,0,0.08)'}`, borderRadius: 10, padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 6 }}>
               <svg width="14" height="14" fill="none" stroke={secondsLeft < 60 ? '#dc2626' : '#6B6B6B'} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
               <span style={{ fontVariantNumeric: 'tabular-nums', fontWeight: 700, fontSize: 13, color: secondsLeft < 60 ? '#dc2626' : '#1A1A1A' }}>{fmtTime(secondsLeft)}</span>
             </div>
@@ -209,7 +209,7 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
             <button
               onClick={() => navigateTo(Math.max(0, idx - 1))}
               disabled={idx === 0}
-              style={{ padding: '10px 16px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: idx === 0 ? '#9B9B9B' : '#1A1A1A', fontWeight: 600, fontSize: 13, cursor: idx === 0 ? 'not-allowed' : 'pointer' }}
+              style={{ padding: '10px 16px', background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: idx === 0 ? '#9B9B9B' : '#1A1A1A', fontWeight: 600, fontSize: 13, cursor: idx === 0 ? 'not-allowed' : 'pointer' }}
             >Previous</button>
 
             {idx < total - 1 ? (
@@ -243,7 +243,7 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
               You've answered {answered} of {total} questions.{!allAnswered && ' Unanswered questions will be marked incorrect.'}
             </p>
             <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end' }}>
-              <button onClick={() => setShowSubmitConfirm(false)} style={{ padding: '10px 16px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Keep going</button>
+              <button onClick={() => setShowSubmitConfirm(false)} style={{ padding: '10px 16px', background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Keep going</button>
               <button onClick={() => finalize()} style={{ padding: '10px 20px', background: '#3B61C4', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Submit</button>
             </div>
           </div>

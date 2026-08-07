@@ -86,7 +86,7 @@ export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }
         </div>
 
         {/* Mode toggle */}
-        <div style={{ display: 'flex', gap: 4, background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: 4, marginBottom: 16 }}>
+        <div style={{ display: 'flex', gap: 4, background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: 4, marginBottom: 16 }}>
           {[['session', 'Study Session'], ['event', 'Event']].map(([m, label]) => (
             <button
               key={m}
@@ -146,7 +146,7 @@ export default function AddSessionModal({ dateStr, courses, onConfirm, onClose }
         </div>
 
         <div style={{ display: 'flex', gap: 10, marginTop: 16 }}>
-          <button onClick={onClose} style={{ flex: 1, background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', color: '#6B6B6B', fontWeight: 600, padding: '10px', borderRadius: 10, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+          <button onClick={onClose} style={{ flex: 1, background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.08)', color: '#6B6B6B', fontWeight: 600, padding: '10px', borderRadius: 10, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
           <button onClick={handleSave} style={{ flex: 1, background: '#3B61C4', border: 'none', color: '#fff', fontWeight: 700, padding: '10px', borderRadius: 10, fontSize: 13, cursor: 'pointer' }}>
             {mode === 'event' ? 'Add Event' : 'Add Session'}
           </button>

@@ -116,7 +116,99 @@ export function getDefenseFloor(components, currentGrade) {
   }
 }
 
-// Auto-generate three scenario paths to hit targetGrade
+// ── Grade Hub Plan tab math ───────────────────────────────────────────────────
+//
+// One pass over the components that produces every figure the Plan tab shows,
+// so the hero number, the cushion bar and the footer stats can never disagree
+// with each other. Formulas are transcribed from design/grade-hub/:
+//
+//   earned        = Σ graded   (grade × weight / 100)      points banked
+//   lost          = Σ graded   ((100 − grade) × weight/100) points gone forever
+//   remaining     = Σ ungraded (weight)                     points still on the table
+//   maxAchievable = 100 − lost = earned + remaining
+//   neededAvg     = (targetCutoff − earned) / remaining × 100
+//   cushion       = maxAchievable − targetCutoff
+//
+// Cushion is measured against the best grade still reachable, not against 100.
+// Target is reachable iff cushion >= 0.
+//
+// Point values are normalised onto a 100-point course so the cushion bar's
+// segments always sum to 100 even when saved weights do not (older rows can
+// pre-date the weights-must-total-100 rule). With weights summing to 100 the
+// scale factor is 1 and the arithmetic is exactly as written above.
+export function computeGradeMath(components, targetCutoff) {
+  const comps = (components ?? []).filter(Boolean)
+  const isGraded = c => c.graded && c.grade !== null && c.grade !== undefined
+
+  const totalWeight = comps.reduce((s, c) => s + (parseFloat(c.weight) || 0), 0)
+  const graded   = comps.filter(isGraded)
+  const ungraded = comps.filter(c => !isGraded(c))
+
+  const empty = {
+    hasComponents: comps.length > 0,
+    totalWeight, componentCount: comps.length, gradedCount: graded.length,
+    earned: 0, lost: 0, remaining: 0, maxAchievable: 0,
+    neededAvg: null, rawNeededAvg: null, cushion: null, shortfall: 0,
+    residualLost: 0, currentAverage: null, finalAverage: null,
+    impossible: false, allGraded: false,
+  }
+  if (!comps.length || totalWeight <= 0) return empty
+
+  const scale = 100 / totalWeight
+  const earned    = graded.reduce((s, c) => s + (c.grade * c.weight / 100), 0) * scale
+  const lost      = graded.reduce((s, c) => s + ((100 - c.grade) * c.weight / 100), 0) * scale
+  const remaining = ungraded.reduce((s, c) => s + (parseFloat(c.weight) || 0), 0) * scale
+  const maxAchievable = 100 - lost
+
+  const allGraded = remaining <= 0
+  // Weighted average of graded work only. Equals the final grade once
+  // everything is graded, which is what the all-graded hero shows.
+  const currentAverage = getCurrentGrade(comps)
+
+  const rawNeededAvg = allGraded ? null : (targetCutoff - earned) / remaining * 100
+  const cushion      = maxAchievable - targetCutoff
+  const impossible   = !allGraded && cushion < 0
+
+  // In the impossible state the shortfall is carved out of the lost segment, so
+  // earned + remaining + shortfall + residualLost still totals 100.
+  const shortfall    = impossible ? -cushion : 0
+  const residualLost = Math.max(0, lost - shortfall)
+
+  return {
+    hasComponents: true,
+    totalWeight, componentCount: comps.length, gradedCount: graded.length,
+    earned, lost, remaining, maxAchievable,
+    // Displayed hero number is clamped to a sane range; rawNeededAvg keeps the
+    // true value so callers can detect "over 100" without a second calculation.
+    neededAvg: allGraded ? null : Math.min(Math.max(rawNeededAvg, 0), 100),
+    rawNeededAvg,
+    cushion, shortfall, residualLost,
+    currentAverage,
+    finalAverage: allGraded ? currentAverage : null,
+    impossible, allGraded,
+  }
+}
+
+// Highest target from TARGET_OPTIONS that is still reachable, with the average
+// it would take. Powers the "Retarget to B" action on the impossible state.
+export function bestAchievableTarget(components, maxAchievable) {
+  const reachable = TARGET_OPTIONS
+    .filter(o => o.value <= maxAchievable)
+    .sort((a, b) => b.value - a.value)[0]
+  if (!reachable) return null
+  const math = computeGradeMath(components, reachable.value)
+  return { ...reachable, neededAvg: math.neededAvg }
+}
+
+// Auto-generate three ways to spend the remaining work and still land on the
+// target. All three hit the same weighted average; they differ only in how the
+// effort is distributed, which is the whole point of showing three.
+//
+// Each shaped path trades against an anchor: the heaviest outstanding
+// component, which is nearly always the final. Weight is a proxy for "the big
+// one at the end" and is the best signal available, because components carry no
+// due date today. Once they do, the anchor should be the chronologically last
+// component instead, so a light final does not get treated as the main event.
 export function generateScenarioPaths(components, targetGrade) {
   const graded = components.filter(c => c.graded && c.grade !== null && c.grade !== undefined)
   const ungraded = components.filter(c => !c.graded || c.grade === null || c.grade === undefined)
@@ -130,44 +222,46 @@ export function generateScenarioPaths(components, targetGrade) {
   const rawNeeded = (targetGrade * totalWeight - earnedPoints) / remainingWeight
   if (rawNeeded > 100) return [{ name: 'Target Unreachable', scores: {}, possible: false, description: 'Mathematically impossible to hit this target.' }]
 
-  const needed = Math.max(0, rawNeeded)
-  const clamp = v => Math.max(0, Math.min(100, Math.round(v * 10) / 10))
+  const flat = Math.max(0, rawNeeded)
+  const round1 = v => Math.round(v * 10) / 10
+  const clamp01 = v => Math.max(0, Math.min(100, v))
 
-  // Path 1: Consistent - same score on everything
-  const consistent = {}
-  ungraded.forEach(c => { consistent[c.id] = clamp(needed) })
+  const anchor = ungraded.reduce((best, c) => ((c.weight || 0) >= (best.weight || 0) ? c : best), ungraded[0])
+  const rest = ungraded.filter(c => c.id !== anchor.id)
+  const restWeight = rest.reduce((s, c) => s + (c.weight || 0), 0)
 
-  // Path 2: Strong Finish - lower on early, higher on last component
-  const strong = {}
-  if (ungraded.length === 1) {
-    strong[ungraded[0].id] = clamp(needed)
-  } else {
-    const last = ungraded[ungraded.length - 1]
-    const rest = ungraded.slice(0, -1)
-    const restWeight = rest.reduce((s, c) => s + c.weight, 0)
-    const lastBoost = Math.min(needed + 12, 100)
-    const restNeeded = restWeight > 0 ? (targetGrade * totalWeight - earnedPoints - lastBoost * last.weight) / restWeight : needed
-    last && (strong[last.id] = clamp(lastBoost))
-    rest.forEach(c => { strong[c.id] = clamp(restNeeded) })
+  const flatScores = () => {
+    const s = {}
+    ungraded.forEach(c => { s[c.id] = round1(clamp01(flat)) })
+    return s
   }
 
-  // Path 3: Front-Loaded - higher on first, lower on last
-  const front = {}
-  if (ungraded.length === 1) {
-    front[ungraded[0].id] = clamp(needed)
-  } else {
-    const first = ungraded[0]
-    const rest = ungraded.slice(1)
-    const restWeight = rest.reduce((s, c) => s + c.weight, 0)
-    const firstBoost = Math.min(needed + 12, 100)
-    const restNeeded = restWeight > 0 ? (targetGrade * totalWeight - earnedPoints - firstBoost * first.weight) / restWeight : needed
-    front[first.id] = clamp(firstBoost)
-    rest.forEach(c => { front[c.id] = clamp(restNeeded) })
+  // Move every non-anchor component `offset` points off the flat average and
+  // let the anchor absorb the difference, so the weighted total still lands
+  // exactly on target. Negative offset finishes strong, positive front-loads.
+  //
+  //   anchorScore = flat - offset * (restWeight / anchorWeight)
+  //
+  // The offset is capped so neither side is asked for a score below 0 or above
+  // 100: a path that requires a perfect paper is not a strategy.
+  const shaped = offset => {
+    if (!rest.length || restWeight === 0 || !anchor.weight) return flatScores()
+    const k = restWeight / anchor.weight
+    const lo = Math.max(-flat, (flat - 100) / k)
+    const hi = Math.min(100 - flat, flat / k)
+    const o = Math.min(Math.max(offset, lo), hi)
+    const scores = { [anchor.id]: round1(clamp01(flat - o * k)) }
+    rest.forEach(c => { scores[c.id] = round1(clamp01(flat + o)) })
+    return scores
   }
+
+  // Points of spread between the anchor and everything else. Enough to make the
+  // three paths visibly different strategies, small enough to stay realistic.
+  const OFFSET = 5
 
   return [
-    { name: 'Consistent',     icon: '→', description: 'Same effort across all remaining work', scores: consistent, possible: true },
-    { name: 'Strong Finish',  icon: '↑', description: 'Build early, dominate the final',        scores: strong,     possible: true },
-    { name: 'Front-Loaded',   icon: '⚡', description: 'Bank points now, less pressure later',   scores: front,      possible: true },
+    { name: 'Consistent',    description: 'Same effort everywhere. Steady and predictable.', scores: flatScores(),    possible: true },
+    { name: 'Strong Finish', description: 'Coast on the small stuff, deliver on the final.', scores: shaped(-OFFSET), possible: true },
+    { name: 'Front-Loaded',  description: 'Bank points now, less pressure later.',           scores: shaped(OFFSET),  possible: true },
   ]
 }

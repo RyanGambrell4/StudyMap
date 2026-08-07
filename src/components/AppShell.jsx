@@ -8,7 +8,7 @@ import OnboardingTour from './OnboardingTour'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const NAV_BG  = '#FFFFFF'
-const PAGE_BG = '#F7F6F3'
+const PAGE_BG = '#F7F8FA'
 const ACCENT  = '#3B61C4'
 const TEXT    = '#111111'
 const MUTED   = '#6B6B6B'
@@ -301,7 +301,7 @@ export default function AppShell({
                 <button
                   onClick={() => { setOpenHub(null); navTo('tutor') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '8px 14px', borderRadius: 8, background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
+                  onMouseEnter={e => e.currentTarget.style.background = '#F7F8FA'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
                 >
                   <svg width="14" height="14" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -347,7 +347,7 @@ export default function AppShell({
                 <button
                   onClick={() => { setOpenHub(null); track('nav_section_opened', { section: 'tools' }); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '9px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
+                  onMouseEnter={e => e.currentTarget.style.background = '#F7F8FA'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
                 >
                   <svg width="14" height="14" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -359,7 +359,7 @@ export default function AppShell({
                 <button
                   onClick={() => { setOpenHub(null); navTo('diagrams') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
+                  onMouseEnter={e => e.currentTarget.style.background = '#F7F8FA'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
                 >
                   <svg width="14" height="14" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -370,7 +370,7 @@ export default function AppShell({
                 <button
                   onClick={() => { setOpenHub(null); navTo('problem-solver') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
+                  onMouseEnter={e => e.currentTarget.style.background = '#F7F8FA'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
                 >
                   <svg width="14" height="14" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -381,7 +381,7 @@ export default function AppShell({
                 <button
                   onClick={() => { setOpenHub(null); navTo('essay-architect') }}
                   style={{ display: 'flex', alignItems: 'center', gap: 9, width: '100%', padding: '8px 14px', background: 'none', border: 'none', cursor: 'pointer' }}
-                  onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
+                  onMouseEnter={e => e.currentTarget.style.background = '#F7F8FA'}
                   onMouseLeave={e => e.currentTarget.style.background = 'none'}
                 >
                   <svg width="14" height="14" fill="none" stroke="#6B6B6B" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -411,9 +411,9 @@ export default function AppShell({
           <button
             onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true, ctrlKey: true, bubbles: true }))}
             title="Search commands (⌘K)"
-            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 30, padding: '0 10px', borderRadius: 7, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer', color: MUTED, fontSize: 12, fontWeight: 500, transition: 'all 0.12s' }}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, height: 30, padding: '0 10px', borderRadius: 7, background: '#F7F8FA', border: `1px solid ${BORDER}`, cursor: 'pointer', color: MUTED, fontSize: 12, fontWeight: 500, transition: 'all 0.12s' }}
             onMouseEnter={e => { e.currentTarget.style.background = '#F0EFEC'; e.currentTarget.style.color = TEXT }}
-            onMouseLeave={e => { e.currentTarget.style.background = '#F7F6F3'; e.currentTarget.style.color = MUTED }}
+            onMouseLeave={e => { e.currentTarget.style.background = '#F7F8FA'; e.currentTarget.style.color = MUTED }}
           >
             <svg width="13" height="13" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
               <circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
@@ -438,7 +438,7 @@ export default function AppShell({
                 {SETTINGS_ITEMS.map(({ label, onClick, icon, danger }) => (
                   <button key={label} onClick={onClick}
                     style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '9px 14px', width: '100%', background: 'none', border: 'none', color: danger ? '#9B9B9B' : TEXT, fontSize: 13, fontWeight: 500, cursor: 'pointer', textAlign: 'left' }}
-                    onMouseEnter={e => e.currentTarget.style.background = '#F7F6F3'}
+                    onMouseEnter={e => e.currentTarget.style.background = '#F7F8FA'}
                     onMouseLeave={e => e.currentTarget.style.background = 'none'}
                   >
                     <svg style={{ width: 14, height: 14, color: danger ? '#9B9B9B' : MUTED, flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -451,7 +451,7 @@ export default function AppShell({
                   <button
                     onClick={googleCalendarConnected ? undefined : () => { setSettingsOpen(false); onConnectGoogleCalendar?.() }}
                     style={{ display: 'flex', alignItems: 'center', gap: 9, padding: '9px 14px', width: '100%', background: 'none', border: 'none', color: googleCalendarConnected ? '#16A34A' : TEXT, fontSize: 13, fontWeight: 500, cursor: googleCalendarConnected ? 'default' : 'pointer', textAlign: 'left' }}
-                    onMouseEnter={e => { if (!googleCalendarConnected) e.currentTarget.style.background = '#F7F6F3' }}
+                    onMouseEnter={e => { if (!googleCalendarConnected) e.currentTarget.style.background = '#F7F8FA' }}
                     onMouseLeave={e => e.currentTarget.style.background = 'none'}
                   >
                     <svg style={{ width: 14, height: 14, color: googleCalendarConnected ? '#16A34A' : MUTED, flexShrink: 0 }} viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -567,7 +567,7 @@ export default function AppShell({
               <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
                 <button
                   onClick={() => { setMobileHub(null); track('nav_section_opened', { section: 'tools' }); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F8FA', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
                   <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <rect x="2" y="3" width="7" height="7" rx="1"/><rect x="15" y="3" width="7" height="7" rx="1"/><rect x="2" y="14" width="7" height="7" rx="1"/><path d="M15 17.5h7M18.5 14v7"/>
@@ -577,7 +577,7 @@ export default function AppShell({
                 </button>
                 <button
                   onClick={() => { setMobileHub(null); track('nav_section_opened', { section: 'tools' }); typeof onNavigateToTools === 'function' ? onNavigateToTools() : setActiveSection('tools') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F8FA', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
                   <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <path d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
@@ -592,7 +592,7 @@ export default function AppShell({
                 </button>
                 <button
                   onClick={() => { setMobileHub(null); navTo('diagrams') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F8FA', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
                   <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <path d="M9 3H5a2 2 0 00-2 2v4m6-6h10a2 2 0 012 2v4M9 3v18m0 0h10a2 2 0 002-2V9M9 21H5a2 2 0 01-2-2V9m0 0h18" />
@@ -602,7 +602,7 @@ export default function AppShell({
                 </button>
                 <button
                   onClick={() => { setMobileHub(null); navTo('problem-solver') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F8FA', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
                   <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <path d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -612,7 +612,7 @@ export default function AppShell({
                 </button>
                 <button
                   onClick={() => { setMobileHub(null); navTo('essay-architect') }}
-                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F6F3', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
+                  style={{ display: 'flex', alignItems: 'center', gap: 10, width: '100%', padding: '11px 14px', borderRadius: 10, background: '#F7F8FA', border: `1px solid ${BORDER}`, cursor: 'pointer' }}
                 >
                   <svg width="15" height="15" fill="none" stroke={MUTED} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                     <path d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

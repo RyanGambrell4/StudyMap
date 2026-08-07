@@ -123,7 +123,7 @@ export default function PracticeExamModal({ course, onStart, onClose, onShowPayw
           )}
 
           {/* Tabs */}
-          <div style={{ display: 'flex', gap: 4, marginBottom: 20, background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: 4 }}>
+          <div style={{ display: 'flex', gap: 4, marginBottom: 20, background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: 4 }}>
             {[['upload', 'Upload past exam / notes'], ['paste', 'Paste text']].map(([tab, label]) => (
               <button
                 key={tab}
@@ -228,7 +228,7 @@ export default function PracticeExamModal({ course, onStart, onClose, onShowPayw
 
         {/* Footer */}
         <div style={{ padding: '16px 24px', borderTop: '1px solid rgba(0,0,0,0.07)', display: 'flex', gap: 10, justifyContent: 'flex-end', flexShrink: 0 }}>
-          <button onClick={onClose} disabled={generating} style={{ padding: '10px 16px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: generating ? 'not-allowed' : 'pointer' }}>Cancel</button>
+          <button onClick={onClose} disabled={generating} style={{ padding: '10px 16px', background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: generating ? 'not-allowed' : 'pointer' }}>Cancel</button>
           <button onClick={handleGenerate} disabled={generating || !hasEnoughText} style={{ padding: '10px 20px', background: hasEnoughText && !generating ? '#3B61C4' : '#9B9B9B', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: hasEnoughText && !generating ? 'pointer' : 'not-allowed' }}>
             {generating ? 'Generating…' : `Generate ${length}-question exam`}
           </button>

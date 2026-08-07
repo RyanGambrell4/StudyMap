@@ -15,7 +15,7 @@
 
 export const T = {
   // Surfaces
-  bg:           '#F7F6F3',
+  bg:           '#F7F8FA',
   bgCard:       '#FFFFFF',
   bgEl:         '#F0EFEC',
 

@@ -205,7 +205,7 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
               {error && (
                 <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '10px 14px', marginBottom: 16, color: '#dc2626', fontSize: 13 }}>{error}</div>
               )}
-              <div style={{ display: 'flex', gap: 4, marginBottom: 20, background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: 4 }}>
+              <div style={{ display: 'flex', gap: 4, marginBottom: 20, background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: 4 }}>
                 {[['pdf', 'Upload PDF'], ['paste', 'Paste Text'], ['url', 'Import from URL']].map(([tab, label]) => (
                   <button
                     key={tab}
@@ -292,7 +292,7 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
 
               <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                 {items.map(item => (
-                  <div key={item.id} style={{ background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', borderLeft: `3px solid ${selectedColor.dot}`, borderRadius: 12, padding: 16, display: 'flex', gap: 12 }}>
+                  <div key={item.id} style={{ background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.07)', borderLeft: `3px solid ${selectedColor.dot}`, borderRadius: 12, padding: 16, display: 'flex', gap: 12 }}>
                     <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 8 }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <input type="text" value={item.name} onChange={e => update(item.id, 'name', e.target.value)} style={inputStyle} />
@@ -324,22 +324,22 @@ export default function SyllabusUploadModal({ courses, initialCourseIdx, initial
             <>
               {step === 'input' && activeTab === 'paste' ? (
                 <>
-                  <button onClick={onClose} style={{ padding: '10px 16px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+                  <button onClick={onClose} style={{ padding: '10px 16px', background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
                   <button onClick={handlePasteConfirm} style={{ flex: 1, padding: '10px', background: '#3B61C4', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}>Extract Events</button>
                 </>
               ) : step === 'input' && activeTab === 'url' ? (
                 <>
-                  <button onClick={onClose} style={{ padding: '10px 16px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+                  <button onClick={onClose} style={{ padding: '10px 16px', background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
                   <button onClick={handleScrapeUrl} disabled={!syllabusUrl.trim()} style={{ flex: 1, padding: '10px', background: '#3B61C4', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: syllabusUrl.trim() ? 'pointer' : 'not-allowed', opacity: syllabusUrl.trim() ? 1 : 0.5 }}>Import from URL</button>
                 </>
               ) : (
-                <button onClick={onClose} style={{ flex: 1, padding: '10px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+                <button onClick={onClose} style={{ flex: 1, padding: '10px', background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
               )}
             </>
           )}
           {step === 'review' && (
             <>
-              <button onClick={onClose} style={{ padding: '10px 16px', background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
+              <button onClick={onClose} style={{ padding: '10px 16px', background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}>Cancel</button>
               <button
                 onClick={() => { track('syllabus_events_confirmed', { eventCount: items.length, source: activeTab }); onConfirm(items, selectedCourseIdx) }}
                 disabled={items.length === 0}

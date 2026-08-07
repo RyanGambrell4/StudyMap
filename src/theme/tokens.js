@@ -1,4 +1,4 @@
-// StudyEdge V2 design tokens — the official design system.
+// StudyEdge AI V2 design tokens: the official design system.
 // See CLAUDE.md ("Design System") for the rules that go with these values.
 // Everything visual should read from this file; do not hard-code hexes elsewhere.
 
@@ -39,3 +39,49 @@ export const courseColor = (idx) => COURSE_COLORS[idx % COURSE_COLORS.length]
 
 export const RADIUS = { sm: 8, md: 12, lg: 16, xl: 20, pill: 999 }
 export const SPACE  = { xs: 4, sm: 8, md: 12, lg: 16, xl: 24, xxl: 32 }
+
+// ── Grade Hub ─────────────────────────────────────────────────────────────────
+// Values transcribed from the approved design export in design/grade-hub/
+// (canvas turn 2 + "Grade Hub Spec"). Scoped to the Grade Hub so it can carry
+// its own typographic system without redefining V2 for the rest of the app.
+//
+// The rule that governs this palette: color always encodes data, never
+// decorates. Every hex below means something specific.
+export const GRADE_HUB = {
+  // Surfaces
+  pageBg:     '#f5f6f8',
+  card:       '#ffffff',
+  cardBorder: '#e7e8ec',
+  cardShadow: '0 1px 3px rgba(28,27,24,.05)',
+  rowRule:    '#f0f1f4',  // table row rules, card footer rule
+  chipBorder: '#e3e4e8',  // chip borders, dividers inside chips
+  ctrlBorder: '#d9dbe1',  // target control border, dashed editable underline
+
+  // Data colors: the four cushion-bar segments
+  earned:  '#3452D9',  // points banked
+  lost:    '#C9CAD1',  // points gone forever
+  needed:  '#B9C5F0',  // still needed / still possible
+  cushion: '#B9DFC9',  // headroom above the target cutoff
+
+  // Data colors: status
+  green:       '#1a9e5c',  // graded dot, Strong Finish accent + chart
+  dotUngraded: '#d3d4d9',  // not-yet-graded dot
+  amber:       '#D97706',  // shortfall segment, impossible rule, Front-Loaded
+  amberText:   '#b45309',  // impossible-state label, over-100 weight counter
+
+  // Ink
+  ink:       '#1C1B18',  // headings, numerals, primary text
+  secondary: '#55565c',  // hero setup sentence, inactive nav
+  body:      '#6f7075',  // body muted, legend text
+  label:     '#8a8b90',  // uppercase section labels, inactive tabs
+  colHeader: '#a0a1a6',  // table column headers
+  emptyDash: '#c6c7cc',  // the "–" on ungraded rows
+
+  // Action
+  blue:      '#3452D9',
+  blueHover: '#2a43b8',
+}
+
+// Newsreader carries every numeral and heading in the Grade Hub. Loaded once in
+// app.html alongside Inter; do not add a second font link.
+export const GH_SERIF = "'Newsreader', Georgia, serif"

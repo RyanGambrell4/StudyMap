@@ -7,7 +7,7 @@ import PracticeExamScreen from './PracticeExamScreen'
 import PracticeExamResults from './PracticeExamResults'
 
 const D = {
-  bg: '#F7F6F3',
+  bg: '#F7F8FA',
   text: '#1A1A1A',
   muted: '#6B6B6B',
   dim: '#9B9B9B',

@@ -61,7 +61,7 @@ export const shadow = {
 // Base palette — light theme only per project rules.
 export const color = {
   // Surfaces
-  bg:          '#F7F6F3',
+  bg:          '#F7F8FA',
   surface:     '#FFFFFF',
   surfaceMuted: '#FAF9F6',
   surfaceHover: 'rgba(0,0,0,0.02)',

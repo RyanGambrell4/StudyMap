@@ -119,7 +119,7 @@ function SectionDraftView({ section, sectionIdx, outline, onBack, buildContext, 
             }}
           />
           {section?.points?.length > 0 && (
-            <div style={{ marginTop: 10, padding: '10px 12px', background: '#F7F6F3', borderRadius: 8, fontSize: 11.5, color: '#6B6B6B', lineHeight: 1.6 }}>
+            <div style={{ marginTop: 10, padding: '10px 12px', background: '#F7F8FA', borderRadius: 8, fontSize: 11.5, color: '#6B6B6B', lineHeight: 1.6 }}>
               <strong style={{ color: '#111' }}>Outline points to hit:</strong>
               <ul style={{ margin: '4px 0 0 18px', padding: 0 }}>
                 {section.points.map((p, i) => <li key={i}>{p}</li>)}
@@ -221,7 +221,7 @@ function SectionDraftView({ section, sectionIdx, outline, onBack, buildContext, 
             )}
 
             {review.wordCountAdvice && (
-              <div style={{ padding: '10px 12px', background: '#F7F6F3', borderRadius: 8, fontSize: 12, color: '#6B6B6B', lineHeight: 1.4 }}>
+              <div style={{ padding: '10px 12px', background: '#F7F8FA', borderRadius: 8, fontSize: 12, color: '#6B6B6B', lineHeight: 1.4 }}>
                 <strong>Word count:</strong> {review.wordCountAdvice}
               </div>
             )}
@@ -631,7 +631,7 @@ export default function EssayArchitectView({ userId, onShowPaywall, courses = []
             style={{
               width: '100%', minHeight: 90, borderRadius: 10, border: '1px solid rgba(0,0,0,0.12)',
               padding: '12px 14px', fontSize: 14, resize: 'vertical', fontFamily: 'inherit',
-              color: '#111', background: '#F7F6F3', boxSizing: 'border-box', outline: 'none',
+              color: '#111', background: '#F7F8FA', boxSizing: 'border-box', outline: 'none',
               marginBottom: 16
             }}
           />

@@ -1486,7 +1486,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
   // ─── RENDER ─────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#F7F6F3', animation: 'fm-enter 280ms cubic-bezier(0.16,1,0.3,1) both' }}>
+    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#F7F8FA', animation: 'fm-enter 280ms cubic-bezier(0.16,1,0.3,1) both' }}>
       <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(180deg, ${dot}22 0%, transparent 28%)`, zIndex: 0 }} />
       {/* Top accent line */}
       <div className="h-1 w-full shrink-0" style={{ background: `linear-gradient(90deg, ${dot}, ${dot}88)` }} />
@@ -1555,7 +1555,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
       {/* ── Break overlay ── */}
       {breakOverlay && (
-        <div className="absolute inset-0 z-[110] flex flex-col items-center justify-center overflow-y-auto py-8" style={{ backgroundColor: '#F7F6F3', isolation: 'isolate' }}>
+        <div className="absolute inset-0 z-[110] flex flex-col items-center justify-center overflow-y-auto py-8" style={{ backgroundColor: '#F7F8FA', isolation: 'isolate' }}>
           <style>{`
             @keyframes il-fade { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
             .il-btn { transition: transform 150ms cubic-bezier(0.4,0,0.2,1), box-shadow 150ms cubic-bezier(0.4,0,0.2,1), background 150ms; }
@@ -1641,7 +1641,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       {/* ── Session complete screen ── */}
       {showComplete && (
         <>
-        <div className="absolute inset-0 z-[105] flex flex-col overflow-y-auto" style={{ backgroundColor: '#F7F6F3', animation: 'sc-enter 320ms cubic-bezier(0.16,1,0.3,1) both' }}>
+        <div className="absolute inset-0 z-[105] flex flex-col overflow-y-auto" style={{ backgroundColor: '#F7F8FA', animation: 'sc-enter 320ms cubic-bezier(0.16,1,0.3,1) both' }}>
           <style>{`
             @keyframes sc-enter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
             @keyframes sc-check { 0% { opacity: 0; transform: scale(0.5); } 60% { transform: scale(1.12); } 100% { opacity: 1; transform: scale(1); } }
@@ -1706,7 +1706,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                           <div key={id} className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold"
                             style={done
                               ? { backgroundColor: 'rgba(22,163,74,0.1)', border: '1px solid rgba(22,163,74,0.2)', color: '#16A34A' }
-                              : { backgroundColor: '#F7F6F3', border: '1px solid rgba(0,0,0,0.07)', color: '#9B9B9B' }}>
+                              : { backgroundColor: '#F7F8FA', border: '1px solid rgba(0,0,0,0.07)', color: '#9B9B9B' }}>
                             {done && (
                               <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#16A34A" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
                                 <path d="M5 13l4 4L19 7" />
@@ -1833,7 +1833,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               if (days < 0 || days > 30) return null
               const urgent = days <= 7
               return (
-                <div className="mb-5 rounded-xl px-4 py-3 text-center" style={{ background: urgent ? '#FFF5E6' : '#F7F6F3', border: `1px solid ${urgent ? '#F0B27A' : 'rgba(0,0,0,0.07)'}` }}>
+                <div className="mb-5 rounded-xl px-4 py-3 text-center" style={{ background: urgent ? '#FFF5E6' : '#F7F8FA', border: `1px solid ${urgent ? '#F0B27A' : 'rgba(0,0,0,0.07)'}` }}>
                   <p className="text-sm font-semibold m-0" style={{ color: urgent ? '#7A4B0A' : '#111111' }}>
                     {days === 0 ? `${course.name ?? 'Your exam'} is today` : `${days} day${days !== 1 ? 's' : ''} to ${course.name ?? 'your exam'}`}
                   </p>
@@ -2066,7 +2066,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                   onClick={handleRecallSkip}
                   style={{
                     flex: 1, padding: '11px 0',
-                    background: '#F7F6F3', border: '1px solid rgba(0,0,0,0.09)',
+                    background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.09)',
                     borderRadius: 12, fontSize: 13, fontWeight: 600,
                     color: '#9B9B9B', cursor: 'pointer', fontFamily: 'inherit',
                   }}

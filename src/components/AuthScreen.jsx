@@ -197,7 +197,7 @@ export default function AuthScreen({ initialMode, onBack }) {
       {/* Right panel */}
       <div style={{
         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        backgroundColor: '#F7F6F3', padding: '40px 24px', overflowY: 'auto',
+        backgroundColor: '#F7F8FA', padding: '40px 24px', overflowY: 'auto',
       }}>
         <div style={{ width: '100%', maxWidth: 400 }}>
 
@@ -596,7 +596,7 @@ function ConfirmationPending({ email, onResend, resendStatus, onSwitchEmail, onS
 
       <div style={{
         flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center',
-        backgroundColor: '#F7F6F3', padding: '40px 24px',
+        backgroundColor: '#F7F8FA', padding: '40px 24px',
       }}>
         <div style={{ width: '100%', maxWidth: 420 }}>
           <style>{`@keyframes pulse-ring { 0%,100% { box-shadow: 0 0 0 0 rgba(59,97,196,0.4) } 50% { box-shadow: 0 0 0 8px rgba(59,97,196,0) } }`}</style>

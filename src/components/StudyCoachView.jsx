@@ -17,7 +17,7 @@ function saveCoachPlan(courseId, plan, formData) { dbSaveCoachPlan(courseId, pla
 const EXAM_COURSE_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
 
 const D = {
-  bg: '#F7F6F3', bgCard: '#FFFFFF', bgEl: '#F0EFEC',
+  bg: '#F7F8FA', bgCard: '#FFFFFF', bgEl: '#F0EFEC',
   border: 'rgba(0,0,0,0.07)', borderStrong: 'rgba(0,0,0,0.12)',
   text: '#111111', muted: '#6B6B6B', dim: '#9B9B9B',
   accent: '#3B61C4', glow: 'rgba(59,97,196,0.2)',
@@ -1973,7 +1973,7 @@ function PlanView({ plan, course, dot, pushed, onPush, onReset, form, onStartFoc
               <button onClick={() => setShareOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', fontSize: 20, lineHeight: 1 }}>×</button>
             </div>
             <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-              <div style={{ flex: 1, background: '#F7F6F3', border: '1px solid #E5E5E5', borderRadius: 10, padding: '10px 12px', fontSize: 12, color: '#6B6B6B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              <div style={{ flex: 1, background: '#F7F8FA', border: '1px solid #E5E5E5', borderRadius: 10, padding: '10px 12px', fontSize: 12, color: '#6B6B6B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                 {shareLink}
               </div>
               <button

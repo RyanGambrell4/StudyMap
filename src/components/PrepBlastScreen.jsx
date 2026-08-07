@@ -6,7 +6,7 @@ import { getCachedCoachPlan } from '../lib/db'
 import { track } from '../lib/analytics'
 
 const D = {
-  bg: '#F7F6F3', bgCard: '#FFFFFF',
+  bg: '#F7F8FA', bgCard: '#FFFFFF',
   border: 'rgba(0,0,0,0.07)', borderStrong: 'rgba(0,0,0,0.12)',
   text: '#111111', muted: '#6B6B6B', dim: '#9B9B9B',
   accent: '#3B61C4', green: '#16A34A', amber: '#D97706', red: '#DC2626',
