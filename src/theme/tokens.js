@@ -1,4 +1,4 @@
-// StudyEdge V2 design tokens — the official design system.
+// StudyEdge AI V2 design tokens: the official design system.
 // See CLAUDE.md ("Design System") for the rules that go with these values.
 // Everything visual should read from this file; do not hard-code hexes elsewhere.
 
@@ -57,13 +57,13 @@ export const GRADE_HUB = {
   chipBorder: '#e3e4e8',  // chip borders, dividers inside chips
   ctrlBorder: '#d9dbe1',  // target control border, dashed editable underline
 
-  // Data colors — the four cushion-bar segments
+  // Data colors: the four cushion-bar segments
   earned:  '#3452D9',  // points banked
   lost:    '#C9CAD1',  // points gone forever
   needed:  '#B9C5F0',  // still needed / still possible
   cushion: '#B9DFC9',  // headroom above the target cutoff
 
-  // Data colors — status
+  // Data colors: status
   green:       '#1a9e5c',  // graded dot, Strong Finish accent + chart
   dotUngraded: '#d3d4d9',  // not-yet-graded dot
   amber:       '#D97706',  // shortfall segment, impossible rule, Front-Loaded
