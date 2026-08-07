@@ -85,3 +85,45 @@ export const GRADE_HUB = {
 // Newsreader carries every numeral and heading in the Grade Hub. Loaded once in
 // app.html alongside Inter; do not add a second font link.
 export const GH_SERIF = "'Newsreader', Georgia, serif"
+
+// ── Study Coach ───────────────────────────────────────────────────────────────
+// Values transcribed from the approved design export in design/study-coach/
+// (canvas turn 3 + "Study Coach Spec", section 3). The Study Coach shares the
+// Grade Hub's design language, so every neutral and surface below is the same
+// value GRADE_HUB already defines and is aliased rather than redefined; only
+// the handful of colors specific to plan progress are new.
+//
+// Same governing rule as the Grade Hub: color encodes data, never decorates.
+export const STUDY_COACH = {
+  // Surfaces and neutrals, shared with the Grade Hub
+  pageBg:     GRADE_HUB.pageBg,      // #f5f6f8
+  card:       GRADE_HUB.card,
+  cardBorder: GRADE_HUB.cardBorder,
+  cardShadow: GRADE_HUB.cardShadow,
+  rowRule:    GRADE_HUB.rowRule,     // inner row rules in the week accordion
+  ink:        GRADE_HUB.ink,         // H1, session titles, numerals
+  secondary:  GRADE_HUB.secondary,   // focus lines, amber body, pushed text
+  body:       GRADE_HUB.body,        // row focus lines, bar legend
+  label:      GRADE_HUB.label,       // eyebrows, meta, week summaries, carets
+  faint:      GRADE_HUB.colHeader,   // provenance line, done-row meta (#a0a1a6)
+  strike:     GRADE_HUB.emptyDash,   // done-row strikethrough (#c6c7cc)
+
+  // Data colors: the progress bar and its states
+  done:           '#3452D9',  // done segment, Start session, up-next numerals
+  stillScheduled: '#B9C5F0',  // not-yet-due segment; whole track when done = 0
+  behind:         '#D97706',  // behind segment, amber rule, struggle dots
+  behindText:     '#b45309',  // amber block label, Catch up button text
+  green:          '#1a9e5c',  // session done check, week Complete, pushed dot
+
+  // Action
+  blue:      GRADE_HUB.blue,
+  blueHover: GRADE_HUB.blueHover,
+
+  // The up-next row highlight inside the week accordion
+  upNextBg: '#f8f9fb',
+}
+
+// The Study Coach sets its headings and numerals in the same serif as the
+// Grade Hub. Alias rather than a second declaration so there is one name to
+// change if the display face ever moves.
+export const SC_SERIF = GH_SERIF

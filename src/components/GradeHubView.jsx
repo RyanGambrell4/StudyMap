@@ -4,6 +4,7 @@ import { getActivePlan, hasUsedTrial } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import { saveCoachPlanStruggles, getCachedCoachPlan } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
+import { buildScheduleBlocks } from '../utils/pushPlanToSchedule'
 import { track } from '../lib/analytics'
 import { GRADE_HUB as G, GH_SERIF } from '../theme/tokens'
 import {
@@ -352,14 +353,27 @@ function Stat({ label, value, mobile }) {
   )
 }
 
-function SyncLink({ onClick, synced, style }) {
+// `status` is the real result of the last sync, never an assumption. The old
+// version flipped to "Synced to study plan" even when there was no coach plan
+// and nothing had happened.
+function SyncLink({ onClick, status, style }) {
+  const label = status?.kind === 'synced' ? `Synced ${status.count} sessions`
+    : status?.kind === 'noplan' ? 'No study plan yet'
+    : 'Sync to study plan ›'
   return (
-    <button className="gh-link" onClick={onClick} style={{
-      background: 'none', border: 'none', padding: 0, cursor: 'pointer',
-      fontSize: 14, fontWeight: 600, color: G.blue, ...style,
-    }}>
-      {synced ? 'Synced to study plan' : 'Sync to study plan ›'}
-    </button>
+    <span style={{ display: 'inline-flex', flexDirection: 'column', gap: 4, ...style }}>
+      <button className="gh-link" onClick={onClick} style={{
+        background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+        fontSize: 14, fontWeight: 600, color: G.blue, textAlign: 'left',
+      }}>
+        {label}
+      </button>
+      {status?.kind === 'noplan' && (
+        <span style={{ fontSize: 12.5, color: G.body, fontWeight: 400 }}>
+          Build one in Study Coach and your struggles will carry over.
+        </span>
+      )}
+    </span>
   )
 }
 
@@ -461,7 +475,7 @@ function TargetControl({ value, onChange, mobile, staticGrade }) {
 }
 
 // ── Hero answer card ──────────────────────────────────────────────────────────
-function HeroCard({ math, components, targetGrade, targetLabel, onTargetChange, onSync, synced, mobile }) {
+function HeroCard({ math, components, targetGrade, targetLabel, onTargetChange, onSync, status, mobile }) {
   const maxLetter = letterGrade(math.maxAchievable)
   const best = math.impossible ? bestAchievableTarget(components, math.maxAchievable) : null
 
@@ -534,9 +548,9 @@ function HeroCard({ math, components, targetGrade, targetLabel, onTargetChange, 
           value={fmt1(math.allGraded ? math.finalAverage : math.currentAverage)}
         />
         <Stat mobile={mobile} label="Graded" value={`${math.gradedCount} of ${math.componentCount}`} />
-        {!mobile && <SyncLink onClick={onSync} synced={synced} style={{ marginLeft: 'auto' }} />}
+        {!mobile && <SyncLink onClick={onSync} status={status} style={{ marginLeft: 'auto' }} />}
       </div>
-      {mobile && <SyncLink onClick={onSync} synced={synced} style={{ display: 'inline-block', marginTop: 12, fontSize: 13.5 }} />}
+      {mobile && <SyncLink onClick={onSync} status={status} style={{ marginTop: 12 }} />}
     </div>
   )
 }
@@ -855,7 +869,7 @@ function PlanTab({ course, gradeData, onSave, onSync, mobile }) {
   )
   const [targetGrade, setTargetGrade] = useState(saved.targetGrade ?? 85)
   const [justSaved, setJustSaved] = useState(false)
-  const [synced, setSynced] = useState(false)
+  const [syncStatus, setSyncStatus] = useState(null)
 
   const blankRow = () => ({ id: uid(), component: '', weight: '', grade: '', graded: false })
 
@@ -934,9 +948,9 @@ function PlanTab({ course, gradeData, onSave, onSync, mobile }) {
   }
 
   const handleSync = async () => {
-    await onSync?.()
-    setSynced(true)
-    setTimeout(() => setSynced(false), 3000)
+    const result = await onSync?.()
+    setSyncStatus(result ?? { kind: 'noplan' })
+    setTimeout(() => setSyncStatus(null), 6000)
   }
 
   const paths = useMemo(
@@ -963,7 +977,7 @@ function PlanTab({ course, gradeData, onSave, onSync, mobile }) {
           targetLabel={targetLabel}
           onTargetChange={handleTargetChange}
           onSync={handleSync}
-          synced={synced}
+          status={syncStatus}
           mobile={mobile}
         />
       )}
@@ -1543,38 +1557,32 @@ export default function GradeHubView({ courses, onEditCourse, onShowPaywall, ini
     ].filter(Boolean)
     try { await saveCoachPlanStruggles(course.id ?? activeCourseIdx, struggles) } catch (e) { console.error(e) }
 
-    // 2. Push coach plan sessions onto the calendar
-    const cached = getCachedCoachPlan(course.id ?? activeCourseIdx)
-    if (!cached?.plan?.weeklyFocus?.length) return
-    const today = new Date()
-    const dow = today.getDay()
-    const mondayOffset = dow === 0 ? -6 : 1 - dow
-    // Spread sessions across Mon/Wed/Fri/Tue/Thu so they don't stack on one day
-    const DAY_SPREAD = [0, 2, 4, 1, 3]
-    const sessions = []
-    cached.plan.weeklyFocus.forEach((week, wi) => {
-      const weekMonday = new Date(today)
-      weekMonday.setDate(today.getDate() + mondayOffset + wi * 7)
-      ;(week.sessions || []).forEach((sess, si) => {
-        const sessionDate = new Date(weekMonday)
-        sessionDate.setDate(weekMonday.getDate() + DAY_SPREAD[si % 5])
-        const dateStr = sessionDate.toISOString().split('T')[0]
-        sessions.push({
-          id: `coach-${dateStr}-${wi}-${si}-${Date.now()}`,
-          dateStr,
-          courseId: activeCourseIdx,
-          courseName: course.name,
-          color: course.color,
-          sessionType: sess.sessionLabel || 'Review',
-          duration: sess.duration || cached.formData?.sessionLen || cached.formData?.sessionMinutes || 60,
-          startTime: null,
-          endTime: null,
-          isManual: true,
-          fromCoachPlan: true,
-        })
-      })
+    // 2. Push coach plan sessions onto the calendar.
+    // This used to have its own date maths, which produced a different
+    // schedule from the one Study Coach produced for the same plan. It now
+    // calls the shared builder, so both routes agree.
+    const courseKey = course.id ?? activeCourseIdx
+    const cached = getCachedCoachPlan(courseKey)
+    if (!cached?.plan?.weeklyFocus?.length) {
+      // No plan to sync. Say so instead of reporting a success that did not
+      // happen: the struggles above were still saved and will be picked up
+      // the moment a plan is built.
+      return { kind: 'noplan' }
+    }
+
+    const { sessions, skipped } = buildScheduleBlocks({
+      plan: cached.plan,
+      course,
+      courseKey,
+      courseIdx: activeCourseIdx,
+      preferredTime: 'Morning',
+      existingSessions: [],
+      sessionLen: cached.formData?.sessionLen ?? cached.formData?.sessionMinutes ?? 60,
     })
-    if (sessions.length) onSyncToCalendar?.(sessions)
+
+    if (!sessions.length) return { kind: 'nothing' }
+    onSyncToCalendar?.(sessions, courseKey)
+    return { kind: 'synced', count: sessions.length, skipped: skipped.length }
   }, [gradeData, course, activeCourseIdx, onSyncToCalendar])
 
   if (plan === 'free') return <LockedState onShowPaywall={onShowPaywall} />

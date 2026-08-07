@@ -1,6 +1,8 @@
 import { useMemo, useState, useCallback, useEffect, useRef, lazy, Suspense } from 'react'
 import Spinner from './ui/spinner'
 import { track } from '../lib/analytics'
+import { isPlanBlock } from '../utils/pushPlanToSchedule'
+import { setSessionDone } from '../../lib/shared/coachPlan.js'
 import { generateSchedule } from '../utils/generateSchedule'
 import { clean } from '../utils/strings'
 import {
@@ -9,6 +11,7 @@ import {
   saveSyllabusEvents,
   saveManualSessions,
   getCachedCoachPlan,
+  saveCoachPlanObject,
   saveCoachPlan as dbSaveCoachPlan,
   getCachedCompletedSessions,
   saveCompletedSession,
@@ -487,8 +490,34 @@ export default function OutputView({
       window.history.pushState({ section: activeSection }, '', `#${activeSection}`)
     }
   }, [activeSection])
+  // Blueprint and Focus Mode are overlays, so they get their own history entry
+  // on the same stack: Back closes the overlay and returns to the view that
+  // launched it rather than leaving the section entirely.
+  const overlay = focusSession ? 'focus' : blueprintSession ? 'blueprint' : null
+  const overlayRef = useRef(null)
+  const overlayFromPop = useRef(false)
+  useEffect(() => {
+    const prev = overlayRef.current
+    overlayRef.current = overlay
+    if (overlayFromPop.current) { overlayFromPop.current = false; return }
+    if (!prev && overlay) {
+      window.history.pushState({ section: activeSection, overlay }, '', `#${overlay}`)
+    } else if (prev && !overlay) {
+      // Closed from inside the overlay (Exit, or finishing a session). Drop the
+      // entry we pushed so Back does not reopen it.
+      window.history.back()
+    }
+  }, [overlay])
+
   useEffect(() => {
     const onPop = (e) => {
+      if (!e.state?.overlay && overlayRef.current) {
+        overlayFromPop.current = true
+        setFocusSession(null)
+        setBlueprintSession(null)
+        setActiveBlueprint(null)
+        return
+      }
       const section = e.state?.section ?? 'dashboard'
       setActiveSection(section)
     }
@@ -549,6 +578,9 @@ export default function OutputView({
   const [expandedDayStr, setExpandedDayStr] = useState(null)
   const [currentMonthStr, setCurrentMonthStr] = useState(todayMonthStr)
   const [manualSessions, setManualSessions] = useState(() => getCachedManualSessions() ?? [])
+  // Bumped whenever the stored coach plan changes underneath a mounted view
+  // (session completion). Study Coach re-reads the plan when this changes.
+  const [coachPlanVersion, setCoachPlanVersion] = useState(0)
   const [addSessionDayStr, setAddSessionDayStr] = useState(null)
   const [restDays, setRestDays] = useState(() => {
     try { return JSON.parse(localStorage.getItem('studyedge_rest_days') ?? '[]') } catch { return [] }
@@ -977,7 +1009,7 @@ export default function OutputView({
         onShowPaywall?.('blueprint')
         return
       }
-      // Allow free users to start — FocusMode enforces the 30-min daily cap internally
+      // Allow free users to start: FocusMode enforces the 30-min daily cap internally
     }
     track('session_started', { courseId: s.courseId, courseName: s.courseName, sessionType: s.sessionType, studyMethod: s.studyMethod ?? null, duration: s.duration })
     // Fire first_session_started exactly once per user. Anchors the
@@ -1028,6 +1060,22 @@ export default function OutputView({
     setCompletedIds(prev => new Set([...prev, id]))
     setFocusSession(sess => {
       if (sess) {
+        // Coach sessions write their completion back into the stored plan,
+        // which is the canonical record. This is what advances the hero, the
+        // progress bar and the "X of 12" count when the student returns.
+        //
+        // TODO (follow-up, out of scope this pass): feed session completion
+        // into the mastery / progress signals Grade Hub reads, so the
+        // Coach -> Grade Hub direction of the handoff is wired too. Today only
+        // Grade Hub -> Coach (struggles) exists.
+        if (sess.planSessionId && sess.planCourseKey != null) {
+          const saved = getCachedCoachPlan(sess.planCourseKey)
+          if (saved?.plan) {
+            const nextPlan = setSessionDone(saved.plan, sess.planSessionId, true)
+            saveCoachPlanObject(sess.planCourseKey, nextPlan)
+            setCoachPlanVersion(v => v + 1)
+          }
+        }
         const identity = courseIdentityPatch(sess.courseId, sess.courseName, courses)
         const record = {
           id: sess.id,
@@ -2242,12 +2290,16 @@ export default function OutputView({
             completedSessions={completedSessionLog}
             scheduledSessions={manualSessions}
             restDays={restDays}
-            onPushToSchedule={incoming => {
-              setManualSessions(prev => {
-                const courseId = incoming[0]?.courseId
-                const filtered = prev.filter(s => !s.fromCoachPlan || s.courseId !== courseId)
-                return [...filtered, ...incoming]
-              })
+            coachPlanVersion={coachPlanVersion}
+            onOpenGradeHub={() => setActiveSection('grades')}
+            onPushToSchedule={(incoming, courseKey) => {
+              // Replace this plan's blocks rather than stacking a second copy.
+              // Keyed on the stable `coach-<courseKey>-` id prefix, so pushing
+              // twice is idempotent even when the dates have changed.
+              setManualSessions(prev => [
+                ...prev.filter(s => !isPlanBlock(s, courseKey)),
+                ...incoming,
+              ])
             }}
             onOpenReviewQueue={() => setActiveSection('review')}
             onStartSyllabusOnboarding={handleStartSyllabusOnboarding}
@@ -2279,13 +2331,13 @@ export default function OutputView({
             userId={userId}
             onShowPaywall={onShowPaywall}
             initialCourseIdx={gradesCourseIdx}
-            onSyncToCalendar={incoming => {
-              setManualSessions(prev => {
-                // Remove any previously synced coach-plan sessions for these course/week combos
-                // so re-syncing doesn't stack duplicates
-                const filtered = prev.filter(s => !s.fromCoachPlan || s.courseId !== incoming[0]?.courseId)
-                return [...filtered, ...incoming]
-              })
+            onSyncToCalendar={(incoming, courseKey) => {
+              // Same replace-not-stack rule as the Study Coach push, keyed on
+              // the stable block id so both routes behave identically.
+              setManualSessions(prev => [
+                ...prev.filter(s => !isPlanBlock(s, courseKey)),
+                ...incoming,
+              ])
             }}
           />
           )
@@ -2403,7 +2455,7 @@ export default function OutputView({
 
       </AppShell>
 
-      {/* Global Cmd+K command palette — mounts once at the top of the tree */}
+      {/* Global Cmd+K command palette, mounts once at the top of the tree */}
       <CommandPalette actions={(() => {
         const nav = (section) => () => setActiveSection(section)
         const preset = (id) => () => {
