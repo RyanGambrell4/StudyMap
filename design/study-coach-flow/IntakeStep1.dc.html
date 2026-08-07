@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f5f6f8;font-family:'Inter',sans-serif;color:#1C1B18;-webkit-font-smoothing:antialiased}
+a{color:#3452D9;text-decoration:none}a:hover{color:#2a43b8;text-decoration:underline}
+textarea::placeholder,input::placeholder{color:#9a9ba1}
+</style>
+</helmet>
+<div style="min-width:1280px">
+<div style="background:#ffffff;border-bottom:1px solid #e7e8ec">
+  <div style="max-width:1200px;margin:0 auto;padding:0 32px;height:60px;display:flex;align-items:center;gap:32px">
+    <div style="display:flex;align-items:center;gap:10px"><img src="assets/logo.png" alt="StudyEdge AI" style="height:26px;width:26px"><span style="font-size:15px;font-weight:700;letter-spacing:-0.01em">StudyEdge AI</span></div>
+    <div style="display:flex;align-items:center;gap:26px;font-size:14px;font-weight:500;color:#55565c;height:100%">
+      <a href="#" style="color:#55565c">Home</a>
+      <a href="#" style="color:#55565c">Schedule</a>
+      <span style="color:#3452D9;font-weight:600;height:100%;display:flex;align-items:center;box-shadow:inset 0 -2px 0 #3452D9">Strategy</span>
+      <a href="#" style="color:#55565c">Study Tools</a>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:16px">
+      <div style="display:flex;align-items:center;gap:8px;background:#f5f6f8;border:1px solid #e7e8ec;border-radius:8px;padding:7px 12px;width:180px;color:#8a8b91;font-size:13px">Search</div>
+      <div style="width:32px;height:32px;border-radius:50%;background:#3452D9;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center">RY</div>
+    </div>
+  </div>
+</div>
+<div style="max-width:1200px;margin:0 auto;padding:44px 32px 140px">
+  <h1 style="font-family:'Newsreader',serif;font-size:44px;font-weight:500;margin:0;line-height:1.1;letter-spacing:-0.01em">Tell me about the course<span style="color:#3452D9">.</span></h1>
+  <div style="display:flex;align-items:center;gap:12px;margin:18px 0 36px;font-size:13px">
+    <span style="display:flex;align-items:center;gap:8px;color:#1C1B18;font-weight:600"><span style="font-family:'Newsreader',serif;font-size:15px">1</span> Tell me about the course</span>
+    <span style="width:24px;height:1px;background:#d9dbe1"></span>
+    <span style="display:flex;align-items:center;gap:8px;color:#9a9ba1"><span style="font-family:'Newsreader',serif;font-size:15px">2</span> Confirm and refine</span>
+    <span style="width:24px;height:1px;background:#d9dbe1"></span>
+    <span style="display:flex;align-items:center;gap:8px;color:#9a9ba1"><span style="font-family:'Newsreader',serif;font-size:15px">3</span> Your study plan</span>
+  </div>
+
+  <div style="display:flex;flex-direction:column;gap:24px">
+
+    <div style="background:#ffffff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:36px 40px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:28px">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="width:32px;height:32px;border-radius:50%;background:#3452D9;color:#ffffff;font-family:'Newsreader',serif;font-size:17px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0">1</div>
+          <div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#55565c;margin-bottom:4px">Step 1 of 3</div>
+            <div style="font-family:'Newsreader',serif;font-size:27px;font-weight:500;line-height:1.1">The course and the goal.</div>
+          </div>
+        </div>
+        <sc-if value="{{ card1Feedback }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13px;font-weight:600;color:#1a9e5c;display:flex;align-items:center;gap:6px;padding-top:6px"><span style="font-weight:700">&#10003;</span>{{ card1Feedback }}</div>
+        </sc-if>
+      </div>
+      <div style="font-size:13.5px;font-weight:600;margin-bottom:10px">Which course is this plan for?</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:28px">
+        <sc-for list="{{ courseChips }}" as="c" hint-placeholder-count="6">
+          <button onClick="{{ c.onClick }}" style="display:inline-flex;align-items:center;gap:8px;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;padding:9px 16px;border-radius:999px;cursor:pointer;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }}"><span style="width:8px;height:8px;border-radius:50%;background:{{ c.dot }}"></span>{{ c.name }}</button>
+        </sc-for>
+      </div>
+      <div style="font-size:13.5px;font-weight:600;margin-bottom:10px">What does a win look like?</div>
+      <textarea value="{{ goal }}" onChange="{{ onGoal }}" placeholder="For example: score an 85 or higher on the final, or finally feel solid on the second half of the course." style="width:100%;box-sizing:border-box;min-height:96px;resize:vertical;border:1px solid #d9dbe1;border-radius:10px;padding:14px 16px;font-family:'Inter',sans-serif;font-size:15px;line-height:1.5;color:#1C1B18;outline:none" style-focus="border-color:#3452D9"></textarea>
+    </div>
+
+    <div style="background:#ffffff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:36px 40px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:28px">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="width:32px;height:32px;border-radius:50%;background:#3452D9;color:#ffffff;font-family:'Newsreader',serif;font-size:17px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0">2</div>
+          <div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#55565c;margin-bottom:4px">What to study</div>
+            <div style="font-family:'Newsreader',serif;font-size:27px;font-weight:500;line-height:1.1">What's on the exam.</div>
+          </div>
+        </div>
+        <sc-if value="{{ card2Feedback }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13px;font-weight:600;color:#1a9e5c;display:flex;align-items:center;gap:6px;padding-top:6px"><span style="font-weight:700">&#10003;</span>{{ card2Feedback }}</div>
+        </sc-if>
+      </div>
+      <div style="font-size:13.5px;font-weight:600;margin-bottom:10px">Topics your professor emphasizes</div>
+      <input value="{{ topicDraft }}" onChange="{{ onTopicDraft }}" onKeyDown="{{ onTopicKey }}" placeholder="Type a topic and press Enter" style="width:100%;box-sizing:border-box;border:1px solid #d9dbe1;border-radius:10px;padding:12px 16px;font-family:'Inter',sans-serif;font-size:14.5px;color:#1C1B18;outline:none" style-focus="border-color:#3452D9">
+      <sc-if value="{{ hasTopics }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px">
+          <sc-for list="{{ topicChips }}" as="t" hint-placeholder-count="3">
+            <span style="display:inline-flex;align-items:center;gap:8px;background:#EEF1FD;color:#3452D9;font-size:13px;font-weight:500;padding:7px 12px;border-radius:999px">{{ t.name }}<button onClick="{{ t.onRemove }}" style="all:unset;cursor:pointer;font-size:14px;line-height:1;color:#3452D9">&times;</button></span>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="display:flex;align-items:baseline;justify-content:space-between;margin:28px 0 10px">
+        <span style="font-size:13.5px;font-weight:600">Where you stand</span>
+        <span style="font-size:12.5px;color:#9a9ba1">Optional, but sharpens the plan</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
+        <div>
+          <div style="font-size:12.5px;font-weight:600;color:#1a9e5c;margin-bottom:8px">What feels solid</div>
+          <textarea value="{{ solid }}" onChange="{{ onSolid }}" placeholder="Concepts you could teach a friend" style="width:100%;box-sizing:border-box;min-height:84px;resize:vertical;border:1px solid #d9dbe1;border-left:3px solid #1a9e5c;border-radius:10px;padding:12px 14px;font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;color:#1C1B18;outline:none" style-focus="border-color:#1a9e5c;border-left-color:#1a9e5c"></textarea>
+        </div>
+        <div>
+          <div style="font-size:12.5px;font-weight:600;color:#D97706;margin-bottom:8px">What you're struggling with</div>
+          <textarea value="{{ struggling }}" onChange="{{ onStruggling }}" placeholder="Separate areas with commas. These get extra time in the plan." style="width:100%;box-sizing:border-box;min-height:84px;resize:vertical;border:1px solid #d9dbe1;border-left:3px solid #D97706;border-radius:10px;padding:12px 14px;font-family:'Inter',sans-serif;font-size:14px;line-height:1.5;color:#1C1B18;outline:none" style-focus="border-color:#D97706;border-left-color:#D97706"></textarea>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:16px;border:1px solid #e7e8ec;border-left:3px solid #D97706;border-radius:12px;padding:16px 20px;margin-top:20px">
+        <div>
+          <div style="font-size:13.5px;font-weight:600">Struggle Tracker</div>
+          <div style="font-size:12.5px;color:#55565c;margin-top:3px">Pull in the topics you've flagged while studying.</div>
+        </div>
+        <a href="#" style="font-size:13.5px;font-weight:600;flex-shrink:0">Import</a>
+      </div>
+    </div>
+
+    <div style="background:#ffffff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:36px 40px">
+      <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:24px;margin-bottom:28px">
+        <div style="display:flex;align-items:center;gap:16px">
+          <div style="width:32px;height:32px;border-radius:50%;background:#3452D9;color:#ffffff;font-family:'Newsreader',serif;font-size:17px;font-weight:500;display:flex;align-items:center;justify-content:center;flex-shrink:0">3</div>
+          <div>
+            <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#55565c;margin-bottom:4px">When to study</div>
+            <div style="font-family:'Newsreader',serif;font-size:27px;font-weight:500;line-height:1.1">Dates and rhythm.</div>
+          </div>
+        </div>
+        <sc-if value="{{ card3Feedback }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13px;font-weight:600;color:#1a9e5c;display:flex;align-items:center;gap:6px;padding-top:6px"><span style="font-weight:700">&#10003;</span>{{ card3Feedback }}</div>
+        </sc-if>
+      </div>
+      <div style="font-size:13.5px;font-weight:600;margin-bottom:10px">Upcoming deadlines</div>
+      <sc-if value="{{ hasDeadlines }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px">
+          <sc-for list="{{ deadlineRows }}" as="d" hint-placeholder-count="1">
+            <div style="display:flex;align-items:center;justify-content:space-between;border:1px solid #e7e8ec;border-left:3px solid #3452D9;border-radius:10px;padding:12px 16px">
+              <span style="font-size:14px;font-weight:600">{{ d.name }}</span>
+              <span style="display:flex;align-items:center;gap:14px"><span style="font-size:13.5px;color:#55565c">{{ d.date }}</span><button onClick="{{ d.onRemove }}" style="all:unset;cursor:pointer;color:#9a9ba1;font-size:15px;line-height:1">&times;</button></span>
+            </div>
+          </sc-for>
+        </div>
+      </sc-if>
+      <div style="display:flex;gap:10px;margin-bottom:28px">
+        <input value="{{ dlName }}" onChange="{{ onDlName }}" placeholder="Deadline name, like Midterm" style="flex:1;border:1px solid #d9dbe1;border-radius:10px;padding:11px 14px;font-family:'Inter',sans-serif;font-size:14px;color:#1C1B18;outline:none" style-focus="border-color:#3452D9">
+        <input type="date" value="{{ dlDate }}" onChange="{{ onDlDate }}" style="border:1px solid #d9dbe1;border-radius:10px;padding:11px 14px;font-family:'Inter',sans-serif;font-size:14px;color:#55565c;outline:none" style-focus="border-color:#3452D9">
+        <button onClick="{{ addDeadline }}" style="background:#ffffff;border:1px solid #d9dbe1;border-radius:10px;padding:11px 16px;font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;color:#1C1B18;cursor:pointer">Add</button>
+      </div>
+      <div style="font-size:13.5px;font-weight:600;margin-bottom:10px">Course materials</div>
+      <div style="border:1.5px dashed #3452D9;background:#F7F9FE;border-radius:12px;padding:26px;text-align:center;margin-bottom:28px">
+        <div style="font-size:14px;color:#55565c">Drop your syllabus, lecture slides, or notes here</div>
+        <div style="font-size:13px;margin-top:6px"><a href="#" style="font-weight:600">Browse files</a></div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-bottom:28px">
+        <div>
+          <div style="font-size:13.5px;font-weight:600;margin-bottom:10px">Study days per week</div>
+          <div style="display:flex;gap:8px">
+            <sc-for list="{{ dayOpts }}" as="o" hint-placeholder-count="6">
+              <button onClick="{{ o.onClick }}" style="font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;width:40px;height:38px;border-radius:10px;cursor:pointer;border:1px solid {{ o.border }};background:{{ o.bg }};color:{{ o.color }}">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+        <div>
+          <div style="font-size:13.5px;font-weight:600;margin-bottom:10px">Session length</div>
+          <div style="display:flex;gap:8px">
+            <sc-for list="{{ lenOpts }}" as="o" hint-placeholder-count="4">
+              <button onClick="{{ o.onClick }}" style="font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;padding:0 14px;height:38px;border-radius:10px;cursor:pointer;border:1px solid {{ o.border }};background:{{ o.bg }};color:{{ o.color }}">{{ o.label }}</button>
+            </sc-for>
+          </div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:28px">
+        <div>
+          <div style="font-size:13.5px;font-weight:600">Weekend sessions</div>
+          <div style="font-size:12.5px;color:#55565c;margin-top:3px">Allow the plan to schedule Saturdays and Sundays.</div>
+        </div>
+        <div onClick="{{ toggleWeekends }}" style="width:42px;height:24px;border-radius:12px;cursor:pointer;position:relative;transition:background .15s;background:{{ weekendBg }}">
+          <div style="width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:3px;transition:left .15s;box-shadow:0 1px 2px rgba(28,27,24,.2);left:{{ weekendKnob }}"></div>
+        </div>
+      </div>
+      <div style="font-size:13.5px;font-weight:600;margin-bottom:10px">How you learn best</div>
+      <div style="display:flex;flex-wrap:wrap;gap:10px">
+        <sc-for list="{{ styleChips }}" as="c" hint-placeholder-count="6">
+          <button onClick="{{ c.onClick }}" style="font-family:'Inter',sans-serif;font-size:13.5px;font-weight:500;padding:9px 16px;border-radius:999px;cursor:pointer;border:1px solid {{ c.border }};background:{{ c.bg }};color:{{ c.color }}">{{ c.name }}</button>
+        </sc-for>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="position:fixed;bottom:0;left:0;right:0;background:#ffffff;border-top:1px solid #e7e8ec;box-shadow:0 -1px 3px rgba(28,27,24,.05);z-index:10">
+  <div style="max-width:1200px;min-width:1200px;margin:0 auto;padding:16px 32px;display:flex;align-items:center;justify-content:space-between;gap:24px;box-sizing:border-box">
+    <div style="min-width:0">
+      <div style="font-size:14px;font-weight:500;color:{{ footerColor }};display:flex;align-items:center;gap:8px"><sc-if value="{{ footerReady }}" hint-placeholder-val="{{ false }}"><span style="color:#1a9e5c;font-weight:700">&#10003;</span></sc-if>{{ footerLine }}</div>
+      <div style="font-size:12px;color:#9a9ba1;margin-top:3px">The plan uses only what's on this page.</div>
+    </div>
+    <button disabled="{{ btnDisabled }}" style="border:none;border-radius:10px;padding:13px 24px;font-family:'Inter',sans-serif;font-size:14.5px;font-weight:600;flex-shrink:0;white-space:nowrap;background:{{ btnBg }};color:{{ btnColor }};cursor:{{ btnCursor }}">Review my input</button>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;filled&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:false,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;State&quot;}}">
+class Component extends DCLogic {
+  constructor(props) {
+    super(props);
+    const filled = props.filled ?? false;
+    this.state = filled ? {
+      course: "Cell Biology",
+      goal: "Score an 85 or higher on the final. I'm sitting at a B minus and the final is worth 40 percent of the grade.",
+      topics: ["Cell membrane structure and transport", "Cellular respiration and ATP production", "DNA replication and mutations"],
+      topicDraft: "", solid: "Cell membrane basics, diffusion and osmosis.",
+      struggling: "Glycolysis and Krebs cycle steps, electron transport chain order",
+      deadlines: [{ name: "Exam Day", date: "2026-12-12" }], dlName: "", dlDate: "",
+      days: 4, length: 45, weekends: false, styles: ["Active recall", "Spaced repetition"]
+    } : {
+      course: null, goal: "", topics: [], topicDraft: "", solid: "", struggling: "",
+      deadlines: [], dlName: "", dlDate: "", days: null, length: null, weekends: false, styles: []
+    };
+  }
+  renderVals() {
+    const s = this.state;
+    const B = "#3452D9", G = "#1a9e5c", M = "#55565c", INK = "#1C1B18";
+    const dots = { "Cell Biology": "#1a9e5c", "Organic Chemistry": "#D97706", "Cognitive Psychology": "#8B5CF6", "Linear Algebra": "#3452D9", "Intro to Psyc": "#E11D48", "Digital Marketing": "#0891B2" };
+    const courses = Object.keys(dots);
+    const learnStyles = ["Active recall", "Spaced repetition", "Practice problems", "Flashcards", "Watching videos", "Teaching others"];
+    const courseChips = courses.map(n => {
+      const sel = s.course === n;
+      return { name: n, dot: sel ? "#ffffff" : dots[n], onClick: () => this.setState({ course: sel ? null : n }), border: sel ? B : "#d9dbe1", bg: sel ? B : "#ffffff", color: sel ? "#ffffff" : INK };
+    });
+    const selChip = (n, sel, onClick) => ({ name: n, onClick, border: sel ? B : "#d9dbe1", bg: sel ? B : "#ffffff", color: sel ? "#ffffff" : INK });
+    const styleChips = learnStyles.map(n => selChip(n, s.styles.includes(n), () => this.setState(st => ({ styles: st.styles.includes(n) ? st.styles.filter(x => x !== n) : st.styles.concat(n) }))));
+    const opt = (label, sel, onClick) => ({ label, onClick, border: sel ? B : "#d9dbe1", bg: sel ? B : "#ffffff", color: sel ? "#ffffff" : INK });
+    const dayOpts = [2, 3, 4, 5, 6, 7].map(n => opt(String(n), s.days === n, () => this.setState({ days: n })));
+    const lenOpts = [25, 45, 60, 90].map(n => opt(n + " min", s.length === n, () => this.setState({ length: n })));
+    const topicChips = s.topics.map((t, i) => ({ name: t, onRemove: () => this.setState(st => ({ topics: st.topics.filter((_, j) => j !== i) })) }));
+    const fmt = iso => { const [y, m, d] = iso.split("-").map(Number); return ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"][m-1] + " " + d + ", " + y; };
+    const deadlineRows = s.deadlines.map((d, i) => ({ name: d.name, date: d.date ? fmt(d.date) : "No date", onRemove: () => this.setState(st => ({ deadlines: st.deadlines.filter((_, j) => j !== i) })) }));
+    const strugAreas = s.struggling.split(/[,\n]/).map(x => x.trim()).filter(Boolean);
+    const goalSet = s.goal.trim().length > 0;
+    const plural = (n, w) => n + " " + w + (n === 1 ? "" : "s");
+    const card1Feedback = s.course && goalSet ? "Course and goal set" : (s.course || (goalSet ? "Goal set" : null));
+    const c2 = [];
+    if (s.topics.length) c2.push(plural(s.topics.length, "topic"));
+    if (strugAreas.length) c2.push(plural(strugAreas.length, "struggle area"));
+    const card2Feedback = c2.length ? c2.join(", ") : null;
+    const c3 = [];
+    if (s.deadlines.length) c3.push(plural(s.deadlines.length, "deadline"));
+    if (s.days) c3.push(s.days + " days a week");
+    if (s.length) c3.push(s.length + " min sessions");
+    const card3Feedback = c3.length ? c3.join(", ") : null;
+    const ready = !!s.course && goalSet;
+    let footerLine, footerColor;
+    if (!ready) {
+      const missing = [!s.course ? "Pick a course" : null, !goalSet ? "describe your goal" : null].filter(Boolean);
+      footerLine = (missing.length === 2 ? "Pick a course and describe your goal" : missing[0].charAt(0).toUpperCase() + missing[0].slice(1)) + " to continue";
+      footerColor = "#9a9ba1";
+    } else {
+      const parts = [];
+      if (s.topics.length) parts.push(plural(s.topics.length, "topic"));
+      if (strugAreas.length) parts.push(plural(strugAreas.length, "struggle area"));
+      if (s.deadlines.length) parts.push(plural(s.deadlines.length, "deadline"));
+      if (parts.length === 0) footerLine = "Course and goal set. Topics and deadlines will sharpen the plan.";
+      else if (parts.length === 1) footerLine = "Working with " + parts[0];
+      else footerLine = "Working with " + parts.slice(0, -1).join(", ") + ", and " + parts[parts.length - 1];
+      footerColor = G;
+    }
+    const addDeadline = () => { if (this.state.dlName.trim()) this.setState(st => ({ deadlines: st.deadlines.concat({ name: st.dlName.trim(), date: st.dlDate }), dlName: "", dlDate: "" })); };
+    return {
+      courseChips, styleChips, dayOpts, lenOpts, topicChips, deadlineRows,
+      card1Feedback, card2Feedback, card3Feedback,
+      footerLine, footerColor, footerReady: ready,
+      goal: s.goal, solid: s.solid, struggling: s.struggling, topicDraft: s.topicDraft,
+      dlName: s.dlName, dlDate: s.dlDate,
+      hasTopics: s.topics.length > 0, hasDeadlines: s.deadlines.length > 0,
+      onGoal: e => this.setState({ goal: e.target.value }),
+      onSolid: e => this.setState({ solid: e.target.value }),
+      onStruggling: e => this.setState({ struggling: e.target.value }),
+      onTopicDraft: e => this.setState({ topicDraft: e.target.value }),
+      onTopicKey: e => { if (e.key === "Enter" && e.target.value.trim()) { e.preventDefault(); this.setState(st => ({ topics: st.topics.concat(st.topicDraft.trim()), topicDraft: "" })); } },
+      onDlName: e => this.setState({ dlName: e.target.value }),
+      onDlDate: e => this.setState({ dlDate: e.target.value }),
+      addDeadline,
+      toggleWeekends: () => this.setState(st => ({ weekends: !st.weekends })),
+      weekendBg: s.weekends ? B : "#d9dbe1",
+      weekendKnob: s.weekends ? "21px" : "3px",
+      btnDisabled: !ready, btnBg: ready ? B : "#e7e8ec", btnColor: ready ? "#ffffff" : "#9a9ba1", btnCursor: ready ? "pointer" : "default"
+    };
+  }
+}
+</script>
+</body>
+</html>

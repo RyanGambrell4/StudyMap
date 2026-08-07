@@ -18,24 +18,7 @@ import {
   computePlanMath, progressSegments, formatHours,
   flattenSessions, nextSession, parseISO,
 } from '../../lib/shared/coachPlan.js'
-
-// The mobile artboard (3e) restructures rather than reflows: header actions
-// collapse into the overflow, the hero button goes full width, rows drop to two
-// lines and Push moves below the plan. Different tree, so the breakpoint is JS.
-function useIsMobile(bp = 760) {
-  const query = `(max-width:${bp}px)`
-  const [isMobile, setIsMobile] = useState(
-    () => typeof window !== 'undefined' && window.matchMedia(query).matches
-  )
-  useEffect(() => {
-    if (typeof window === 'undefined') return
-    const mq = window.matchMedia(query)
-    const onChange = e => setIsMobile(e.matches)
-    mq.addEventListener('change', onChange)
-    return () => mq.removeEventListener('change', onChange)
-  }, [query])
-  return isMobile
-}
+import { useIsMobile } from '../utils/useIsMobile'
 
 const todayISO = () => {
   const d = new Date()

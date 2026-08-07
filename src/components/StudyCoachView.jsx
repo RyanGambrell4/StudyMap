@@ -1,19 +1,30 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import Spinner from './ui/spinner'
-import { jsPDF } from 'jspdf'
-import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan, saveCoachPlanStruggles, saveCoachPlanHardNote, clearCoachPlanHardNotes, saveCoachPlanObject, saveCoachPlanPushedAt } from '../lib/db'
+import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan, saveCoachPlanStruggles, saveCoachPlanObject, saveCoachPlanPushedAt } from '../lib/db'
 import StudyCoachPlanView from './StudyCoachPlanView'
 import { buildScheduleBlocks } from '../utils/pushPlanToSchedule'
 import { catchUpReschedule, nextSession, flattenSessions } from '../../lib/shared/coachPlan.js'
+import StudyCoachHubView from './StudyCoachHubView'
+import StudyCoachIntakeStep from './StudyCoachIntakeStep'
+import { toHubEntry } from '../utils/coachHub'
+import { routeHash, routeState, parseRoute } from '../utils/coachRoute'
 import { extractText } from '../utils/extractText'
-import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery, canUseFeature, incrementFeatureUsage, hasUsedTrial, getActivePlan } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, canUseFeature, incrementFeatureUsage, getActivePlan } from '../lib/subscription'
 import { getCurrentGrade, letterGrade, TARGET_OPTIONS } from '../utils/gradeCalc'
 import { track } from '../lib/analytics'
 
 // ── DB helpers ────────────────────────────────────────────────────────────────
 function loadCoachPlan(courseId) { return getCachedCoachPlan(courseId) }
+
+// Where an in-progress wizard draft lives so a refresh does not lose it. The
+// finished plan goes to user_data; this is only the unsubmitted form.
+const DRAFT_KEY = 'se_coach_draft'
+
+const todayISO = () => {
+  const d = new Date()
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
 function saveCoachPlan(courseId, plan, formData) { dbSaveCoachPlan(courseId, plan, formData) }
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
@@ -169,345 +180,6 @@ function Stepper({ step, go }) {
   )
 }
 
-// ── Chip input ────────────────────────────────────────────────────────────────
-function ChipInput({ values, onChange, placeholder, color = D.indigo }) {
-  const [draft, setDraft] = useState('')
-  const add = () => {
-    const v = draft.trim()
-    if (!v) return
-    onChange([...values, v]); setDraft('')
-  }
-  return (
-    <div>
-      <div style={{ display: 'flex', gap: 8 }}>
-        <input type="text" className="sc-input" value={draft} placeholder={placeholder}
-          onChange={e => setDraft(e.target.value)}
-          onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); add() } }} />
-        <button onClick={add} style={{ padding: '0 16px', borderRadius: 9, flexShrink: 0, background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.25)', color: D.indigo, fontSize: 13, fontWeight: 600, cursor: 'pointer' }}>Add</button>
-      </div>
-      {values.length > 0 && (
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6, marginTop: 10 }}>
-          {values.map((v, i) => (
-            <span key={i} style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '5px 6px 5px 11px', borderRadius: 7, background: `${color}18`, border: `1px solid ${color}35`, color, fontSize: 12, fontWeight: 500 }}>
-              {v}
-              <button onClick={() => onChange(values.filter((_, j) => j !== i))} style={{ width: 18, height: 18, borderRadius: 5, display: 'grid', placeItems: 'center', color, opacity: 0.7, cursor: 'pointer' }}>
-                <Icon name="x" size={10} />
-              </button>
-            </span>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── File drop zone ────────────────────────────────────────────────────────────
-function FileDropZone({ files, onChange, onExtract, loading }) {
-  const inputRef = useRef(null)
-  const [drag, setDrag] = useState(false)
-  const addFiles = (fs) => {
-    Array.from(fs).forEach(f => {
-      onChange(prev => [...prev, { name: f.name, size: f.size }])
-      onExtract?.(f)
-    })
-  }
-  return (
-    <div>
-      <div
-        onClick={() => inputRef.current?.click()}
-        onDragOver={e => { e.preventDefault(); setDrag(true) }}
-        onDragLeave={() => setDrag(false)}
-        onDrop={e => { e.preventDefault(); setDrag(false); addFiles(e.dataTransfer.files) }}
-        style={{ padding: 20, borderRadius: 11, cursor: 'pointer', background: drag ? 'rgba(34,211,238,0.08)' : 'rgba(0,0,0,0.03)', border: `1px dashed ${drag ? D.cyan : D.borderStrong}`, textAlign: 'center', transition: 'all 0.15s' }}
-      >
-        {loading ? (
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, color: D.muted, fontSize: 13 }}>
-            <Spinner size="sm" color={D.accent} track="transparent" />
-            Extracting text…
-          </div>
-        ) : (
-          <>
-            <Icon name="upload" size={20} color={D.muted} />
-            <div style={{ fontSize: 13, color: D.text, marginTop: 8, fontWeight: 500 }}>Drop files or click to upload</div>
-            <div style={{ fontSize: 11.5, color: D.dim, marginTop: 3 }}>PDF, DOCX, PNG, JPG</div>
-          </>
-        )}
-      </div>
-      <input ref={inputRef} type="file" multiple style={{ display: 'none' }} onChange={e => e.target.files && addFiles(e.target.files)} accept=".pdf,.docx,.doc,.png,.jpg,.jpeg" />
-      {files.length > 0 && (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 10 }}>
-          {files.map((f, i) => (
-            <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 8, background: `rgba(34,211,238,0.06)`, border: `1px solid rgba(34,211,238,0.2)` }}>
-              <Icon name="file" size={13} color={D.cyan} />
-              <span style={{ fontSize: 12.5, flex: 1, color: D.text }}>{f.name}</span>
-              <button onClick={() => onChange(files.filter((_, j) => j !== i))} style={{ width: 20, height: 20, borderRadius: 5, color: D.muted, display: 'grid', placeItems: 'center', cursor: 'pointer' }}>
-                <Icon name="x" size={11} />
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── Field block ───────────────────────────────────────────────────────────────
-function FieldBlock({ icon, color, label, hint, required, children }) {
-  return (
-    <div>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 6 }}>
-        <Icon name={icon} size={12} color={color} />
-        <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.5px', color: D.muted, textTransform: 'uppercase' }}>
-          {label}{required && <span style={{ color: D.orange, marginLeft: 4 }}>*</span>}
-        </span>
-      </div>
-      {hint && <div style={{ fontSize: 12, color: D.dim, marginBottom: 10, lineHeight: 1.45 }}>{hint}</div>}
-      {children}
-    </div>
-  )
-}
-
-// ── Coach rail ────────────────────────────────────────────────────────────────
-function CoachRail({ form, confidence, course }) {
-  const topics = form.topics || []
-  const dates = (form.dates || []).filter(d => d.date && d.label)
-  return (
-    <div className="sc-rail" style={{ position: 'sticky', top: 20 }}>
-      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 18 }}>
-        <div style={{ fontSize: 12.5, color: D.muted, lineHeight: 1.55, marginBottom: 14 }}>
-          {!form.courseId && form.courseIdx === undefined ? (
-            'Pick a course to get started.'
-          ) : !form.goal?.trim() && !topics.length ? (
-            <><strong style={{ color: D.text }}>{course?.name}</strong>: add a goal or topics to start building.</>
-          ) : (
-            <>Working with <strong style={{ color: D.text }}>{topics.length}</strong> topic{topics.length === 1 ? '' : 's'}{dates.length > 0 && <> and <strong style={{ color: D.text }}>{dates.length}</strong> date{dates.length === 1 ? '' : 's'}</>}.</>
-          )}
-        </div>
-        <div style={{ marginBottom: 6, display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-          <span style={{ fontSize: 12, color: D.muted }}>Plan confidence</span>
-          <span style={{ fontSize: 15, fontWeight: 700, color: confidence >= 6 ? D.mint : confidence >= 3 ? D.indigo : D.dim }}>{Math.round(confidence / 9 * 100)}%</span>
-        </div>
-        <div style={{ height: 4, background: 'rgba(0,0,0,0.06)', borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
-          <div style={{ width: `${(confidence / 9) * 100}%`, height: '100%', background: confidence >= 6 ? D.mint : D.accent, transition: 'width 0.3s' }} />
-        </div>
-        <div style={{ fontSize: 11.5, color: D.dim, lineHeight: 1.45, marginBottom: 14 }}>
-          {confidence < 3 && 'Add topics or a goal to strengthen the plan.'}
-          {confidence >= 3 && confidence < 6 && 'Good start. Dates and materials improve pacing.'}
-          {confidence >= 6 && 'Strong inputs. The plan will be specific to what you shared.'}
-        </div>
-        <div style={{ borderTop: `1px solid ${D.border}`, paddingTop: 12, fontSize: 11.5, color: D.dim, lineHeight: 1.5 }}>
-          Only plans from what you tell me. No invented topics or dates.
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── Step 1: Intake ────────────────────────────────────────────────────────────
-function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, materialError, onMaterialFile, onNext, syllabusHintFile, onSyllabusHint, onSaveStruggles }) {
-  const update = (k, v) => setForm(f => ({ ...f, [k]: v }))
-  const course = courses[form.courseIdx]
-  const _EXAM_PAT = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
-  const isExamMode = form.courseIdx >= 0 && _EXAM_PAT.test(courses[form.courseIdx]?.name ?? '')
-  const dates = form.dates || []
-  const addDate = () => update('dates', [...dates, { label: '', date: '' }])
-  const updateDate = (i, patch) => update('dates', dates.map((d, j) => j === i ? { ...d, ...patch } : d))
-  const removeDate = (i) => update('dates', dates.filter((_, j) => j !== i))
-
-  const canProceed = form.courseIdx >= 0 && (form.goal?.trim() || form.topics?.length > 0)
-  const confidence = [
-    form.goal?.trim(), form.topics?.length > 0, form.struggles?.trim(),
-    dates.some(d => d.date && d.label), form.strengths?.trim(), form.struggles?.trim(),
-    form.materials?.length > 0, form.daysPerWeek, form.sessionLen,
-  ].filter(Boolean).length
-
-  return (
-    <div className="sc-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: 24, alignItems: 'flex-start' }}>
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-
-        {/* Course selector */}
-        <FieldBlock icon="book" color={D.accent} label="Course" required hint="Which class is this plan for?">
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-            {courses.map((c, i) => {
-              const active = form.courseIdx === i
-              const color = c.color?.dot || D.accent
-              return (
-                <button key={i} onClick={() => setForm({ courseIdx: i, goal: '', topics: [], strengths: '', struggles: '', dates: [], materials: [], daysPerWeek: 3, sessionLen: 60, style: [] })} style={{ padding: '10px 14px', borderRadius: 10, background: active ? `linear-gradient(135deg, ${color}22, ${color}0a)` : 'rgba(0,0,0,0.03)', border: active ? `1px solid ${color}55` : `1px solid ${D.border}`, boxShadow: active ? `0 0 0 3px ${color}12` : 'none', color: active ? D.text : D.muted, fontSize: 12.5, fontWeight: active ? 600 : 500, display: 'inline-flex', alignItems: 'center', gap: 8, transition: 'all 0.15s', cursor: 'pointer' }}>
-                  <span style={{ width: 7, height: 7, borderRadius: '50%', background: color, boxShadow: `0 0 6px ${color}90` }} />
-                  {c.name}
-                </button>
-              )
-            })}
-          </div>
-        </FieldBlock>
-
-        {/* Struggles from AI Tutor */}
-        {cachedStruggles.length > 0 && (
-          <div style={{ padding: '12px 16px', borderRadius: 11, background: 'rgba(59,97,196,0.05)', border: `1px solid ${D.border}`, display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-            <Icon name="bookmark" size={14} color={D.indigo} />
-            <div style={{ fontSize: 12.5, color: D.indigo }}>
-              <span style={{ fontWeight: 600 }}>Topics flagged from AI Tutor: </span>
-              {cachedStruggles.join(', ')}: these will be emphasized in your plan.
-            </div>
-          </div>
-        )}
-
-        {/* Goal */}
-        <FieldBlock
-          icon="flag"
-          color={D.pink}
-          label={isExamMode ? 'Target score & biggest weakness' : 'Your goal'}
-          hint={isExamMode ? 'What score are you aiming for, and which area of this section gives you the most trouble?' : 'What does success look like to you? Be as specific as possible.'}
-        >
-          <textarea className="sc-input" value={form.goal || ''} onChange={e => update('goal', e.target.value)}
-            placeholder={isExamMode
-              ? `e.g. "Target 130 in this section. Struggling most with timing and discrete questions"`
-              : `e.g. "Score 90%+ on the final" · "Truly understand derivatives, not memorize them" · "Pass with a B+"`}
-          />
-        </FieldBlock>
-
-        {/* Topics */}
-        <FieldBlock icon="target" color={D.indigo} label="Topics your professor emphasizes" hint="Chapters, concepts, or themes - only what you actually know from lectures or the syllabus.">
-          <ChipInput values={form.topics || []} onChange={v => update('topics', v)} placeholder="e.g. Memory encoding, Cognitive biases, Research methods…" />
-        </FieldBlock>
-
-        {/* Strengths / Struggles */}
-        <div className="sc-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <FieldBlock icon="check" color={D.mint} label="What feels solid" hint="Optional: topics you're comfortable with">
-            <textarea className="sc-input" value={form.strengths || ''} onChange={e => update('strengths', e.target.value)} placeholder={`e.g. "Chapter 1–3 readings, classical conditioning"`} />
-          </FieldBlock>
-          <FieldBlock icon="warn" color={D.orange} label="What you're struggling with" hint="Optional: where I should spend extra time">
-            <textarea className="sc-input" value={form.struggles || ''} onChange={e => update('struggles', e.target.value)} placeholder={`e.g. "Statistical significance, research design"`} />
-          </FieldBlock>
-        </div>
-
-        {/* Struggle Tracker. The plan screen's topics strip links here, so this
-            is where a tracked struggle is actually added or resolved. Entries
-            saved here are fed to the generator and come back as sessions with
-            "From your Struggle Tracker" provenance. */}
-        {onSaveStruggles && form.courseIdx >= 0 && courses[form.courseIdx] && (
-          <div style={{ marginTop: 4 }}>
-            <StruggleTracker
-              struggles={cachedStruggles ?? []}
-              courseId={courses[form.courseIdx].id ?? form.courseIdx}
-              courseName={courses[form.courseIdx].name}
-              courseIdx={form.courseIdx}
-              dot={courses[form.courseIdx].color?.dot || D.accent}
-              onSave={onSaveStruggles}
-            />
-          </div>
-        )}
-
-        {/* Dates */}
-        <FieldBlock icon="calendar" color={D.violet} label="Upcoming deadlines" hint="Exam, quiz, or project dates. The plan is anchored around these.">
-          {dates.length === 0 && (
-            <div style={{ fontSize: 12.5, color: D.dim, fontStyle: 'italic', marginBottom: 8 }}>None yet. The plan covers the weeks you specify.</div>
-          )}
-          {dates.map((d, i) => (
-            <div key={i} style={{ display: 'grid', gridTemplateColumns: '1fr 160px 32px', gap: 8, marginBottom: 8 }}>
-              <input type="text" className="sc-input" placeholder="e.g. Midterm, Essay 1 due" value={d.label} onChange={e => updateDate(i, { label: e.target.value })} />
-              <input type="date" className="sc-input" value={d.date} onChange={e => updateDate(i, { date: e.target.value })} />
-              <button onClick={() => removeDate(i)} style={{ width: 32, height: 40, borderRadius: 8, display: 'grid', placeItems: 'center', background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, color: D.muted, cursor: 'pointer' }}>
-                <Icon name="x" size={12} />
-              </button>
-            </div>
-          ))}
-          <button onClick={addDate} style={{ fontSize: 12.5, color: D.indigo, fontWeight: 500, display: 'inline-flex', alignItems: 'center', gap: 6, padding: '6px 0', cursor: 'pointer', background: 'none', border: 'none' }}>
-            <Icon name="plus" size={12} /> Add {dates.length > 0 ? 'another' : 'a date'}
-          </button>
-        </FieldBlock>
-
-        {/* Materials */}
-        <FieldBlock icon="file" color={D.cyan} label="Course materials" hint="Syllabus, notes, readings - optional but makes everything sharper.">
-          <FileDropZone
-            files={form.materials || []}
-            onChange={v => typeof v === 'function' ? setForm(f => ({ ...f, materials: v(f.materials || []) })) : update('materials', v)}
-            onExtract={onMaterialFile}
-            loading={materialLoading}
-          />
-          {materialError && <p style={{ margin: '6px 0 0', fontSize: 12, color: '#DC2626' }}>{materialError}</p>}
-          {syllabusHintFile && onSyllabusHint && (
-            <div style={{ marginTop: 8, padding: '8px 12px', borderRadius: 8, background: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.18)', fontSize: 12.5, color: '#3452D9', display: 'flex', alignItems: 'center', gap: 6 }}>
-              This looks like a syllabus.{' '}
-              <button
-                onClick={() => onSyllabusHint(syllabusHintFile)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#3452D9', fontSize: 12.5, fontWeight: 600, textDecoration: 'underline', textUnderlineOffset: 2, padding: 0 }}
-              >
-                Want me to pull the dates too?
-              </button>
-            </div>
-          )}
-        </FieldBlock>
-
-        {/* Cadence */}
-        <div className="sc-2col" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-          <FieldBlock icon="clock" color={D.amber} label="Study days / week">
-            <div style={{ display: 'flex', gap: 4 }}>
-              {[1,2,3,4,5,6,7].map(n => {
-                const active = form.daysPerWeek === n
-                return (
-                  <button key={n} onClick={() => update('daysPerWeek', n)} style={{ flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 13, fontWeight: 600, cursor: 'pointer', background: active ? '#3B61C4' : 'rgba(0,0,0,0.03)', border: `1px solid ${active ? '#3B61C4' : D.border}`, color: active ? '#fff' : D.muted }}>{n}</button>
-                )
-              })}
-            </div>
-          </FieldBlock>
-          <FieldBlock icon="clock" color={D.amber} label="Session length">
-            <div style={{ display: 'flex', gap: 4 }}>
-              {[30,45,60,75,90].map(m => {
-                const active = form.sessionLen === m
-                return (
-                  <button key={m} onClick={() => update('sessionLen', m)} style={{ flex: 1, padding: '10px 0', borderRadius: 8, fontSize: 12.5, fontWeight: 600, cursor: 'pointer', background: active ? '#3B61C4' : 'rgba(0,0,0,0.03)', border: `1px solid ${active ? '#3B61C4' : D.border}`, color: active ? '#fff' : D.muted }}>{m}m</button>
-                )
-              })}
-            </div>
-          </FieldBlock>
-        </div>
-
-        {/* Include weekends */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 14px', borderRadius: 10, background: form.includeWeekends ? 'rgba(59,97,196,0.08)' : 'rgba(0,0,0,0.02)', border: `1px solid ${form.includeWeekends ? '#3B61C4' : D.border}`, cursor: 'pointer' }} onClick={() => update('includeWeekends', !form.includeWeekends)}>
-          <div>
-            <div style={{ fontSize: 13, fontWeight: 600, color: form.includeWeekends ? '#3B61C4' : D.text }}>Include weekends</div>
-            <div style={{ fontSize: 11.5, color: D.muted, marginTop: 2 }}>Schedule sessions on Saturday &amp; Sunday too</div>
-          </div>
-          <div style={{ width: 38, height: 22, borderRadius: 11, background: form.includeWeekends ? '#3B61C4' : D.border, position: 'relative', flexShrink: 0, transition: 'background 0.2s' }}>
-            <div style={{ position: 'absolute', top: 3, left: form.includeWeekends ? 19 : 3, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'left 0.2s', boxShadow: '0 1px 3px rgba(0,0,0,0.2)' }} />
-          </div>
-        </div>
-
-        {/* Learning style */}
-        <FieldBlock icon="lightbulb" color={D.mint} label="How you learn best" hint="Pick any that apply. The plan leans into these.">
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
-            {['Active recall','Spaced repetition','Practice problems','Teaching others','Visual diagrams','Reading + notes','Flashcards','Watching lectures'].map(t => {
-              const list = form.style || []
-              const active = list.includes(t)
-              return (
-                <button key={t} onClick={() => update('style', active ? list.filter(x => x !== t) : [...list, t])} style={{ padding: '7px 12px', borderRadius: 999, fontSize: 12, cursor: 'pointer', background: active ? 'rgba(22,163,74,0.1)' : 'rgba(0,0,0,0.03)', border: `1px solid ${active ? 'rgba(22,163,74,0.25)' : D.border}`, color: active ? D.mint : D.muted, fontWeight: active ? 600 : 500, display: 'inline-flex', alignItems: 'center', gap: 5 }}>
-                  {active && (<svg width="11" height="11" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>)}
-                  {t}
-                </button>
-              )
-            })}
-          </div>
-        </FieldBlock>
-
-        {/* CTA */}
-        <button
-          disabled={!canProceed}
-          onClick={onNext}
-          style={{ width: '100%', padding: '14px 20px', borderRadius: 11, background: canProceed ? '#3B61C4' : 'rgba(0,0,0,0.04)', color: canProceed ? '#fff' : D.dim, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: canProceed ? 'pointer' : 'not-allowed', border: 'none' }}
-        >
-          Review my input <Icon name="arrow" size={14} />
-        </button>
-        {!canProceed && (
-          <div style={{ fontSize: 11.5, color: D.dim, textAlign: 'center' }}>Pick a course and share at least one goal or topic to continue.</div>
-        )}
-      </div>
-
-      <CoachRail form={form} confidence={confidence} course={courses[form.courseIdx]} />
-    </div>
-  )
-}
-
 // ── Fact card ─────────────────────────────────────────────────────────────────
 function FactCard({ icon, color, title, empty, children }) {
   return (
@@ -567,7 +239,7 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
   if (!form.struggles?.trim()) questions.push({ id: 'struggle', q: "Nothing noted for struggles. Is there a topic where you'd like extra reps?", field: 'struggles' })
 
   return (
-    <div className="sc-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: 24, alignItems: 'flex-start' }}>
+    <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr)', gap: 24, alignItems: 'flex-start' }}>
       <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
         {/* Summary */}
         <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 22 }}>
@@ -637,175 +309,6 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
           </button>
         </div>
       </div>
-      <CoachRail form={form} confidence={9} course={courses[form.courseIdx]} />
-    </div>
-  )
-}
-
-function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
-  const savedPlans = useMemo(() => courses.map((c, i) => loadCoachPlan(c.id ?? i)), [courses])
-  const withPlans = useMemo(() => courses.map((c, i) => ({ course: c, idx: i, saved: savedPlans[i] })).filter(x => x.saved?.plan), [courses, savedPlans])
-  const withoutPlans = useMemo(() => courses.map((c, i) => ({ course: c, idx: i, saved: savedPlans[i] })).filter(x => !x.saved?.plan), [courses, savedPlans])
-
-  const totalHours = useMemo(() => savedPlans.reduce((acc, p) => {
-    if (!p?.plan) return acc
-    const sessions = p.plan.weeklyFocus?.flatMap(w => w.sessions || []).length || 0
-    const sessionLen = p.formData?.sessionLen || p.formData?.sessionMinutes || 60
-    return acc + (sessions * sessionLen / 60)
-  }, 0), [savedPlans])
-
-  const nextDeadline = useMemo(() => {
-    const today = new Date()
-    let earliest = null; let earliestCourse = null
-    savedPlans.forEach((p, i) => {
-      const dates = p?.formData?.dates || p?.formData?.importantDates || []
-      dates.forEach(d => {
-        if (!d.date) return
-        const dt = new Date(d.date + 'T12:00:00')
-        if (dt >= today && (!earliest || dt < earliest)) { earliest = dt; earliestCourse = courses[i] }
-      })
-    })
-    if (!earliest) return null
-    return { days: Math.ceil((earliest - today) / 86400000), course: earliestCourse }
-  }, [savedPlans, courses])
-
-  const getNearestDeadline = (formData) => {
-    if (!formData) return null
-    const today = new Date()
-    const dates = formData.dates || formData.importantDates || []
-    let nearest = null
-    dates.forEach(d => {
-      if (!d.date) return
-      const dt = new Date(d.date + 'T12:00:00')
-      if (!nearest || dt < nearest.dt) nearest = { dt, label: d.label }
-    })
-    if (!nearest) return null
-    return { days: Math.ceil((nearest.dt - today) / 86400000), label: nearest.label }
-  }
-
-  const Stat = ({ label, value, sub }) => (
-    <div style={{ padding: '0 20px', textAlign: 'center' }}>
-      <div style={{ fontSize: 28, fontWeight: 800, letterSpacing: -0.5, color: D.text, lineHeight: 1 }}>{value}</div>
-      <div style={{ fontSize: 11, fontWeight: 600, color: D.muted, marginTop: 5, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{label}</div>
-      {sub && <div style={{ fontSize: 11.5, color: D.dim, marginTop: 2 }}>{sub}</div>}
-    </div>
-  )
-
-  const parseName = (name) => {
-    const idx = name.indexOf(':')
-    if (idx > 0) return { code: name.slice(0, idx).trim(), title: name.slice(idx + 1).trim() }
-    return { code: null, title: name }
-  }
-
-  return (
-    <div>
-      {/* Stats bar */}
-      <div style={{ display: 'flex', alignItems: 'stretch', marginBottom: 28, paddingBottom: 24, borderBottom: `1px solid ${D.border}` }}>
-        <Stat label="Plans Ready" value={withPlans.length} />
-        <div style={{ width: 1, background: D.border, flexShrink: 0 }} />
-        <Stat label="Without Plans" value={withoutPlans.length} />
-        <div style={{ width: 1, background: D.border, flexShrink: 0 }} />
-        <Stat label="Study Hours" value={`${Math.round(totalHours)}h`} />
-        <div style={{ width: 1, background: D.border, flexShrink: 0 }} />
-        <Stat label="Next Deadline"
-          value={nextDeadline ? `${nextDeadline.days}d` : '-'}
-          sub={nextDeadline ? nextDeadline.course.name : 'No deadlines'} />
-      </div>
-
-      {/* Ready to study */}
-      {withPlans.length > 0 && (
-        <div style={{ marginBottom: 32 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 15, fontWeight: 700, color: D.text }}>Ready to study</span>
-            <span style={{ fontSize: 11.5, fontWeight: 600, color: D.muted, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, borderRadius: 999, padding: '2px 9px' }}>{withPlans.length}</span>
-            <span style={{ fontSize: 12.5, color: D.dim }}>Plans built and anchored to your dates</span>
-          </div>
-          <div className="sc-plans-cards">
-            {withPlans.map(({ course, idx, saved }) => {
-              const sessions = saved.plan.weeklyFocus?.flatMap(w => w.sessions || []).length || 0
-              const sessionLen = saved.formData?.sessionLen || saved.formData?.sessionMinutes || 60
-              const weeks = saved.plan.weeklyFocus?.length || 0
-              const hours = Math.round((sessions * sessionLen) / 60)
-              const deadline = getNearestDeadline(saved.formData)
-              const { code, title } = parseName(course.name)
-              const dot = course.color?.dot || D.accent
-              return (
-                <div key={idx} style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: dot, flexShrink: 0 }} />
-                        <span style={{ fontSize: 11, fontWeight: 600, color: D.muted, textTransform: 'uppercase', letterSpacing: '0.06em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{code || title}</span>
-                      </div>
-                      <div style={{ fontSize: 16, fontWeight: 700, color: D.text, lineHeight: 1.3, wordBreak: 'break-word' }}>{code ? title : ''}</div>
-                    </div>
-                    <div style={{ flexShrink: 0, display: 'flex', alignItems: 'center', gap: 5, padding: '4px 10px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.25)' }}>
-                      <span style={{ width: 6, height: 6, borderRadius: '50%', background: D.mint, flexShrink: 0 }} />
-                      <span style={{ fontSize: 11, fontWeight: 600, color: D.mint, whiteSpace: 'nowrap' }}>Plan ready</span>
-                    </div>
-                  </div>
-                  {deadline && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                      <Icon name="calendar" size={12} color={D.dim} />
-                      <span style={{ fontSize: 12.5, color: D.muted, flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{deadline.label}</span>
-                      <span style={{ fontSize: 12.5, fontWeight: 600, flexShrink: 0, color: deadline.days <= 14 ? D.orange : D.muted }}>{deadline.days}d</span>
-                    </div>
-                  )}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: 'fit-content' }}>
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: D.muted }}>{weeks}w</span>
-                    <span style={{ color: D.dim, fontSize: 11 }}>·</span>
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: D.muted }}>{sessions} sessions</span>
-                    <span style={{ color: D.dim, fontSize: 11 }}>·</span>
-                    <span style={{ fontSize: 12.5, fontWeight: 600, color: D.muted }}>{hours}h</span>
-                  </div>
-                  <button onClick={() => onViewPlan(idx)} style={{ background: 'none', border: 'none', padding: 0, color: D.indigo, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left' }}>
-                    View Plan →
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* No plan yet */}
-      {withoutPlans.length > 0 && (
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 16, flexWrap: 'wrap' }}>
-            <span style={{ fontSize: 15, fontWeight: 700, color: D.text }}>No plan yet</span>
-            <span style={{ fontSize: 11.5, fontWeight: 600, color: D.muted, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, borderRadius: 999, padding: '2px 9px' }}>{withoutPlans.length}</span>
-            <span style={{ fontSize: 12.5, color: D.dim }}>Only uses what you share</span>
-          </div>
-          <div className="sc-plans-cards">
-            {withoutPlans.map(({ course, idx }) => {
-              const { code, title } = parseName(course.name)
-              const dot = course.color?.dot || D.accent
-              return (
-                <div key={idx} style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: 10 }}>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 4 }}>
-                        <div style={{ width: 8, height: 8, borderRadius: '50%', background: dot, flexShrink: 0 }} />
-                        <span style={{ fontSize: 11, fontWeight: 600, color: D.muted, textTransform: 'uppercase', letterSpacing: '0.06em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{code || title}</span>
-                      </div>
-                      <div style={{ fontSize: 16, fontWeight: 700, color: D.text, lineHeight: 1.3, wordBreak: 'break-word' }}>{code ? title : ''}</div>
-                    </div>
-                    <div style={{ flexShrink: 0, padding: '4px 10px', borderRadius: 999, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}` }}>
-                      <span style={{ fontSize: 11, fontWeight: 600, color: D.dim }}>No plan</span>
-                    </div>
-                  </div>
-                  <p style={{ fontSize: 12.5, color: D.dim, lineHeight: 1.55, margin: 0, fontStyle: 'italic' }}>
-                    Share your topics, goals, and deadlines. A week-by-week plan is built from exactly what you give it.
-                  </p>
-                  <button onClick={() => onBuildPlan(idx)} style={{ background: 'none', border: 'none', padding: 0, color: D.indigo, fontSize: 13.5, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit', textAlign: 'left', marginTop: 'auto' }}>
-                    Build Plan →
-                  </button>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
     </div>
   )
 }
@@ -829,6 +332,73 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   const [notice, setNotice] = useState(null)
   const [cachedStruggles, setCachedStruggles] = useState([])
   const [uiMode, setUiMode] = useState('plans') // 'plans' | 'building' | 'viewing'
+
+  // Hub rows, read from the canonical plan store. `coachPlanVersion` bumps on
+  // session completion, so finishing a session moves the hub's progress too.
+  const hubEntries = useMemo(
+    () => courses.map((c, i) => toHubEntry(c, i, loadCoachPlan(c.id ?? i))),
+    [courses, coachPlanVersion, plan]
+  )
+
+  // ── Browser history ────────────────────────────────────────────────────────
+  // Extends the section-level pushState in OutputView rather than inventing a
+  // second mechanism: same history entry, one extra `coach` key. Back from
+  // step 2 returns to step 1 with the form intact, and refresh lands on the
+  // view you were looking at instead of the home screen.
+  const routeReady = useRef(false)
+  const fromPop = useRef(false)
+
+  useEffect(() => {
+    const state = routeState(uiMode, step)
+    const hash = routeHash(uiMode, step)
+    if (!routeReady.current) {
+      routeReady.current = true
+      window.history.replaceState(state, '', hash)
+      return
+    }
+    if (fromPop.current) { fromPop.current = false; return }
+    window.history.pushState(state, '', hash)
+  }, [uiMode, step])
+
+  useEffect(() => {
+    const onPop = (e) => {
+      const c = e.state?.coach
+      if (!c) return
+      fromPop.current = true
+      setUiMode(c.uiMode)
+      setStep(c.step)
+    }
+    window.addEventListener('popstate', onPop)
+    return () => window.removeEventListener('popstate', onPop)
+  }, [])
+
+  // Restore the route and the in-progress draft on a hard refresh. React state
+  // survives Back on its own; only a reload needs the draft on disk.
+  useEffect(() => {
+    let draft = null
+    try { draft = JSON.parse(localStorage.getItem(DRAFT_KEY) || 'null') } catch { /* ignore */ }
+    const route = parseRoute(typeof window !== 'undefined' ? window.location.hash : '')
+    if (!route || route.uiMode === 'plans') return
+    if (route.uiMode === 'building' && draft?.form) {
+      setForm(f => ({ ...f, ...draft.form }))
+      setUiMode('building')
+      setStep(route.step)
+    } else if (route.uiMode === 'viewing' && draft?.courseIdx >= 0) {
+      setForm(f => ({ ...f, courseIdx: draft.courseIdx }))
+      setUiMode('viewing')
+      setStep(3)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  // Persist the draft on step changes rather than on every keystroke.
+  useEffect(() => {
+    if (uiMode === 'plans') return
+    try {
+      localStorage.setItem(DRAFT_KEY, JSON.stringify({ form, courseIdx: form.courseIdx }))
+    } catch { /* quota, ignore */ }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [uiMode, step])
 
   // Material extraction
   const [materialText, setMaterialText] = useState('')
@@ -898,7 +468,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     try {
       const text = await extractText(file)
       setMaterialText(prev => prev + '\n' + text)
-      // Detect syllabus-like documents — only when flag is on
+      // Detect syllabus-like documents, only when the flag is on
       const syllabusFlag = typeof localStorage !== 'undefined' && localStorage.getItem('se_syllabus_onboarding') !== '0'
       if (syllabusFlag && onStartSyllabusOnboarding) {
         const lower = text.toLowerCase()
@@ -980,6 +550,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       // correspond to anything. Clear the pushed flag: the student is asked to
       // push again rather than being shown a green dot for a stale schedule.
       await saveCoachPlanPushedAt(courseId, null)
+      try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ }
       setPushed(false)
       setNotice(null)
       // Drop the previous plan's calendar blocks. Their session ids belong to a
@@ -1320,6 +891,45 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
 
   // The plan screen is its own page: no stepper, no step badge, no app-level
   // page padding. It renders full bleed with the background the export calls for.
+  // ── The hub. Its own full bleed page: no PageHeader, no Stepper. ──
+  if (uiMode === 'plans') {
+    return (
+      <StudyCoachHubView
+        entries={hubEntries}
+        today={todayISO()}
+        onNewPlan={handleNewPlan}
+        onOpenPlan={(entry) => handleViewPlan(entry.idx)}
+        onBuildPlan={(entry) => handleBuildPlan(entry.idx)}
+      />
+    )
+  }
+
+  // ── Intake step 1. Also full bleed: it carries its own step indicator. ──
+  if (step === 1) {
+    return (
+      <StudyCoachIntakeStep
+        form={form} setForm={setForm} courses={courses}
+        cachedStruggles={cachedStruggles}
+        materialLoading={materialLoading}
+        materialError={materialError}
+        onMaterialFile={handleMaterialFile}
+        onNext={() => setStep(2)}
+        onSaveStruggles={(updated) => {
+          setCachedStruggles(updated)
+          const courseId = courses[form.courseIdx]?.id ?? form.courseIdx
+          saveCoachPlanStruggles(courseId, updated)
+        }}
+        syllabusHintFile={syllabusHintFile}
+        onSyllabusHint={onStartSyllabusOnboarding ? (file) => {
+          const courseIdx = form.courseIdx >= 0 ? form.courseIdx : null
+          onStartSyllabusOnboarding(file, courseIdx)
+          setSyllabusHintFile(null)
+        } : null}
+        StruggleTracker={StruggleTracker}
+      />
+    )
+  }
+
   if (uiMode !== 'plans' && step === 3 && plan) {
     return (
       <StudyCoachPlanView
@@ -1330,7 +940,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
         pushBusy={pushBusy}
         catchUpBusy={catchUpBusy}
         notice={notice}
-        onBack={() => { setUiMode('plans'); setNotice(null) }}
+        onBack={() => { setUiMode('plans'); setNotice(null); try { localStorage.removeItem(DRAFT_KEY) } catch { /* ignore */ } }}
         onStart={handleStartSession}
         onCatchUp={handleCatchUp}
         onPush={handlePush}
@@ -1351,36 +961,11 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
         onBack={uiMode !== 'plans' ? () => setUiMode('plans') : undefined}
         onNewPlan={uiMode === 'plans' ? handleNewPlan : undefined}
       />
-      {uiMode === 'plans' ? (
-        <div className="sc-page-pad" style={{ padding: '24px 32px 48px', overflowX: 'hidden', maxWidth: '100vw' }}>
-          <MyPlansView courses={courses} onBuildPlan={handleBuildPlan} onViewPlan={handleViewPlan} />
-        </div>
-      ) : (
+      {uiMode !== 'plans' && (
         <div className="sc-page-pad" style={{ padding: '24px 32px 48px', overflowX: 'hidden', maxWidth: '100vw' }}>
           <Stepper step={step} go={setStep} />
           {urgentExamBanner}
           {gradeGapBanner}
-          {step === 1 && (
-            <IntakeStep
-              form={form} setForm={setForm} courses={courses}
-              cachedStruggles={cachedStruggles}
-              materialLoading={materialLoading}
-              materialError={materialError}
-              onMaterialFile={handleMaterialFile}
-              onNext={() => setStep(2)}
-              onSaveStruggles={(updated) => {
-                setCachedStruggles(updated)
-                const courseId = courses[form.courseIdx]?.id ?? form.courseIdx
-                saveCoachPlanStruggles(courseId, updated)
-              }}
-              syllabusHintFile={syllabusHintFile}
-              onSyllabusHint={onStartSyllabusOnboarding ? (file) => {
-                const courseIdx = form.courseIdx >= 0 ? form.courseIdx : null
-                onStartSyllabusOnboarding(file, courseIdx)
-                setSyllabusHintFile(null)
-              } : null}
-            />
-          )}
           {step === 2 && (
             <ReviewStep
               form={form} setForm={setForm} courses={courses}

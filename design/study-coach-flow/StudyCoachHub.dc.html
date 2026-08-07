@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#f5f6f8;font-family:'Inter',sans-serif;color:#1C1B18;-webkit-font-smoothing:antialiased}
+a{color:#3452D9;text-decoration:none}a:hover{color:#2a43b8;text-decoration:underline}
+</style>
+</helmet>
+<div style="min-width:1280px">
+<div style="background:#ffffff;border-bottom:1px solid #e7e8ec">
+  <div style="max-width:1200px;margin:0 auto;padding:0 32px;height:60px;display:flex;align-items:center;gap:32px">
+    <div style="display:flex;align-items:center;gap:10px"><img src="assets/logo.png" alt="StudyEdge AI" style="height:26px;width:26px"><span style="font-size:15px;font-weight:700;letter-spacing:-0.01em">StudyEdge AI</span></div>
+    <div style="display:flex;align-items:center;gap:26px;font-size:14px;font-weight:500;color:#55565c;height:100%">
+      <a href="#" style="color:#55565c">Home</a>
+      <a href="#" style="color:#55565c">Schedule</a>
+      <span style="color:#3452D9;font-weight:600;height:100%;display:flex;align-items:center;box-shadow:inset 0 -2px 0 #3452D9">Strategy</span>
+      <a href="#" style="color:#55565c">Study Tools</a>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:16px">
+      <div style="display:flex;align-items:center;gap:8px;background:#f5f6f8;border:1px solid #e7e8ec;border-radius:8px;padding:7px 12px;width:180px;color:#8a8b91;font-size:13px">Search</div>
+      <div style="width:32px;height:32px;border-radius:50%;background:#3452D9;color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center">RY</div>
+    </div>
+  </div>
+</div>
+<div style="max-width:1200px;margin:0 auto;padding:44px 32px 80px">
+  <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:32px">
+    <div>
+      <h1 style="font-family:'Newsreader',serif;font-size:44px;font-weight:500;margin:0;line-height:1.1;letter-spacing:-0.01em">Study Coach<span style="color:#3452D9">.</span></h1>
+      <p style="margin:10px 0 0;font-size:15px;color:#55565c">One plan per course, built only from what you tell me.</p>
+    </div>
+    <button style="background:#ffffff;border:1px solid #d9dbe1;border-radius:10px;padding:10px 18px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:#1C1B18;cursor:pointer;box-shadow:0 1px 3px rgba(28,27,24,.05)" style-hover="border-color:#b9bcc6">New plan</button>
+  </div>
+
+  <div style="background:#ffffff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:40px 44px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:48px">
+    <div style="max-width:560px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#55565c;margin-bottom:14px">{{ hero.eyebrow }}</div>
+      <div style="font-family:'Newsreader',serif;font-size:34px;font-weight:500;line-height:1.15;letter-spacing:-0.01em">{{ hero.title }}</div>
+      <sc-if value="{{ hero.sub }}" hint-placeholder-val="{{ false }}">
+        <p style="margin:12px 0 0;font-size:15px;color:#55565c;line-height:1.5;text-wrap:pretty">{{ hero.sub }}</p>
+      </sc-if>
+      <sc-if value="{{ hero.progress }}" hint-placeholder-val="{{ true }}">
+        <div style="margin-top:22px">
+          <div style="font-size:14px;font-weight:500;margin-bottom:8px;color:{{ hero.progressColor }}">{{ hero.progress }}</div>
+          <div style="width:340px;height:6px;border-radius:3px;background:#e7e8ec;overflow:hidden"><div style="height:100%;border-radius:3px;background:{{ hero.barColor }};width:{{ hero.pctCss }}"></div></div>
+        </div>
+      </sc-if>
+      <button style="margin-top:26px;background:#3452D9;border:none;border-radius:10px;padding:12px 22px;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;color:#ffffff;cursor:pointer" style-hover="background:#2a43b8">{{ hero.button }}</button>
+    </div>
+    <sc-if value="{{ hero.numeral }}" hint-placeholder-val="{{ true }}">
+      <div style="text-align:center;padding-right:24px;flex-shrink:0">
+        <div style="font-family:'Newsreader',serif;font-size:62px;font-weight:500;line-height:1;color:{{ hero.numeralColor }}">{{ hero.numeral }}</div>
+        <div style="margin-top:8px;font-size:13px;color:#55565c">{{ hero.caption }}</div>
+      </div>
+    </sc-if>
+  </div>
+
+  <div style="font-size:11px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;color:#55565c;margin:0 0 10px 4px">{{ listEyebrow }}</div>
+  <div style="background:#ffffff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);overflow:hidden">
+    <sc-for list="{{ rows }}" as="row" hint-placeholder-count="5">
+      <div style="display:grid;grid-template-columns:14px 1fr 220px 170px 90px;align-items:center;gap:16px;padding:18px 28px;border-bottom:1px solid #f0f1f4">
+        <span style="width:9px;height:9px;border-radius:50%;background:{{ row.dot }}"></span>
+        <span style="font-size:15px;font-weight:600">{{ row.name }}</span>
+        <span style="font-size:13.5px;color:{{ row.deadlineColor }}">{{ row.deadline }}</span>
+        <span style="font-size:13.5px;color:#55565c">{{ row.progress }}</span>
+        <a href="#" style="font-size:13.5px;font-weight:600;text-align:right">{{ row.link }}</a>
+      </div>
+    </sc-for>
+  </div>
+</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;state&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;normal&quot;,&quot;deadline-passed&quot;,&quot;first-time&quot;,&quot;caught-up&quot;],&quot;default&quot;:&quot;normal&quot;,&quot;tsType&quot;:&quot;string&quot;,&quot;section&quot;:&quot;State&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    const st = this.props.state ?? "normal";
+    const B = "#3452D9", G = "#1a9e5c", A = "#D97706", M = "#55565c", INK = "#1C1B18";
+    const dots = { cell: "#1a9e5c", ochem: "#D97706", cog: "#8B5CF6", lin: "#3452D9", psyc: "#E11D48", dig: "#0891B2" };
+    const row = (dot, name, deadline, deadlineColor, progress, link) => ({ dot, name, deadline, deadlineColor, progress, link });
+    const noPlan = (dot, name, deadline) => row(dot, name, deadline, M, "No plan yet", "Build plan");
+    let hero, rows, listEyebrow = "ALL COURSES";
+
+    if (st === "first-time") {
+      hero = { eyebrow: "GET STARTED", title: "Build your first plan.", sub: "Tell me your topics, goal, and deadlines. The plan is built only from what you share, nothing invented.", button: "Build a plan", numeral: null, progress: null };
+      listEyebrow = "YOUR COURSES";
+      rows = [
+        noPlan(dots.cell, "Cell Biology", "No deadline yet"),
+        noPlan(dots.ochem, "Organic Chemistry", "No deadline yet"),
+        noPlan(dots.cog, "Cognitive Psychology", "No deadline yet"),
+        noPlan(dots.lin, "Linear Algebra", "No deadline yet"),
+        noPlan(dots.psyc, "Intro to Psyc", "No deadline yet"),
+        noPlan(dots.dig, "Digital Marketing", "No deadline yet")
+      ];
+    } else if (st === "caught-up") {
+      hero = { eyebrow: "UP NEXT", title: "Cell Biology", numeral: "5", caption: "days until Exam Day", numeralColor: A, progress: "\u2713 All 12 sessions done. You're ready.", progressColor: G, pctCss: "100%", barColor: G, button: "Review plan" };
+      rows = [
+        row(dots.ochem, "Organic Chemistry", "Midterm in 6 days", A, "6 of 9 sessions", "View plan"),
+        row(dots.cog, "Cognitive Psychology", "Exam Day in 19 days", M, "2 of 3 sessions", "View plan"),
+        row(dots.lin, "Linear Algebra", "Final in 27 days", M, "3 of 4 sessions", "View plan"),
+        noPlan(dots.psyc, "Intro to Psyc", "No deadline yet"),
+        noPlan(dots.dig, "Digital Marketing", "No deadline yet")
+      ];
+    } else {
+      hero = { eyebrow: "UP NEXT", title: "Cell Biology", numeral: "12", caption: "days until Exam Day", numeralColor: INK, progress: "7 of 12 sessions done", progressColor: M, pctCss: "58%", barColor: B, button: "Open plan" };
+      const planRows = [
+        row(dots.ochem, "Organic Chemistry", "Midterm in 19 days", M, "2 of 9 sessions", "View plan"),
+        row(dots.cog, "Cognitive Psychology", "Exam Day in 26 days", M, "0 of 3 sessions", "View plan")
+      ];
+      if (st === "deadline-passed") {
+        planRows.push(row(dots.lin, "Linear Algebra", "Exam passed", M, "1 of 4 sessions", "View plan"));
+      } else {
+        planRows.splice(2, 0, row(dots.lin, "Linear Algebra", "Final in 34 days", M, "1 of 4 sessions", "View plan"));
+      }
+      rows = planRows.concat([
+        noPlan(dots.psyc, "Intro to Psyc", "No deadline yet"),
+        noPlan(dots.dig, "Digital Marketing", "No deadline yet")
+      ]);
+    }
+    return { hero, rows, listEyebrow };
+  }
+}
+</script>
+</body>
+</html>

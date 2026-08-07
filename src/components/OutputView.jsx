@@ -489,8 +489,34 @@ export default function OutputView({
       window.history.pushState({ section: activeSection }, '', `#${activeSection}`)
     }
   }, [activeSection])
+  // Blueprint and Focus Mode are overlays, so they get their own history entry
+  // on the same stack: Back closes the overlay and returns to the view that
+  // launched it rather than leaving the section entirely.
+  const overlay = focusSession ? 'focus' : blueprintSession ? 'blueprint' : null
+  const overlayRef = useRef(null)
+  const overlayFromPop = useRef(false)
+  useEffect(() => {
+    const prev = overlayRef.current
+    overlayRef.current = overlay
+    if (overlayFromPop.current) { overlayFromPop.current = false; return }
+    if (!prev && overlay) {
+      window.history.pushState({ section: activeSection, overlay }, '', `#${overlay}`)
+    } else if (prev && !overlay) {
+      // Closed from inside the overlay (Exit, or finishing a session). Drop the
+      // entry we pushed so Back does not reopen it.
+      window.history.back()
+    }
+  }, [overlay])
+
   useEffect(() => {
     const onPop = (e) => {
+      if (!e.state?.overlay && overlayRef.current) {
+        overlayFromPop.current = true
+        setFocusSession(null)
+        setBlueprintSession(null)
+        setActiveBlueprint(null)
+        return
+      }
       const section = e.state?.section ?? 'dashboard'
       setActiveSection(section)
     }
@@ -982,7 +1008,7 @@ export default function OutputView({
         onShowPaywall?.('blueprint')
         return
       }
-      // Allow free users to start — FocusMode enforces the 30-min daily cap internally
+      // Allow free users to start: FocusMode enforces the 30-min daily cap internally
     }
     track('session_started', { courseId: s.courseId, courseName: s.courseName, sessionType: s.sessionType, studyMethod: s.studyMethod ?? null, duration: s.duration })
     // Fire first_session_started exactly once per user. Anchors the
@@ -2420,7 +2446,7 @@ export default function OutputView({
 
       </AppShell>
 
-      {/* Global Cmd+K command palette — mounts once at the top of the tree */}
+      {/* Global Cmd+K command palette, mounts once at the top of the tree */}
       <CommandPalette actions={(() => {
         const nav = (section) => () => setActiveSection(section)
         const preset = (id) => () => {
