@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600;700&display=swap"><style>body{margin:0;background:#eceef2;font-family:Inter,system-ui,sans-serif;color:#1C1B18}a{color:#3452D9;text-decoration:none}a:hover{color:#2a43b8}code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#f0f1f4;border-radius:4px;padding:1px 5px}</style></helmet>
+<div style="max-width:920px;margin:0 auto;padding:56px 40px 96px">
+  <div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#8a8b90;text-transform:uppercase">StudyEdge AI · Strategy · Implementation spec · Aug 2026</div>
+  <h1 style="margin:10px 0 0;font-family:Newsreader,Georgia,serif;font-size:40px;font-weight:500;letter-spacing:-0.01em">Grade Hub — Plan tab<span style="color:#3452D9">.</span></h1>
+  <div style="font-size:14px;color:#6f7075;margin-top:8px">Approved design: <a href="Grade Hub.dc.html#t2">canvas, turn 2</a> (2a fully set up · 2b impossible target · 2c mobile · 2d all graded · 2e empty). This document is the source of truth for values.</div>
+
+  <h2 style="font-family:Newsreader,Georgia,serif;font-size:26px;font-weight:500;margin:44px 0 12px">1 · Grade math</h2>
+  <div style="background:#fff;border:1px solid #e7e8ec;border-radius:12px;padding:22px 26px;font-size:13.5px;line-height:1.9">
+    <div>For a course with components <code>i</code>, each with <code>weight_i</code> (percent, summing to 100) and, if graded, <code>grade_i</code> (0–100):</div>
+    <div style="margin-top:10px"><code>earned = Σ graded (grade_i × weight_i / 100)</code> — points banked.</div>
+    <div><code>lost = Σ graded ((100 − grade_i) × weight_i / 100)</code> — points gone forever.</div>
+    <div><code>remaining = Σ ungraded (weight_i)</code> — points still on the table.</div>
+    <div><code>maxAchievable = 100 − lost = earned + remaining</code></div>
+    <div><code>neededAvg = (targetCutoff − earned) / remaining × 100</code> — the hero number.</div>
+    <div><code>cushion = maxAchievable − targetCutoff</code> — cushion is defined against the max still-achievable grade, not against 100.</div>
+    <div style="margin-top:10px">Target is reachable iff <code>cushion ≥ 0</code>. If <code>cushion &lt; 0</code>, show the impossible state (2b): hero number becomes <code>maxAchievable</code>, shortfall is <code>−cushion</code>.</div>
+    <div style="margin-top:10px;color:#6f7075">Worked example (2a): Midterm 93 at 30% → earned 27.9, lost 2.1, remaining 70, maxAchievable 97.9. A+ cutoff 90.0 → neededAvg 88.7, cushion 7.9. Segments 27.9 + 2.1 + 62.1 + 7.9 = 100.</div>
+    <div style="color:#6f7075">Worked example (2b): Midterm 68 at 30%, Quizzes 78 at 15% → earned 32.1, lost 12.9, remaining 55, maxAchievable 87.1. Target 90 → cushion −2.9: short 2.9, residual lost 10.0. Segments 32.1 + 55.0 + 2.9 + 10.0 = 100.</div>
+    <div style="color:#6f7075">All-graded (2d): remaining 0 → bar is earned 92.4 + lost 7.6.</div>
+  </div>
+
+  <h2 style="font-family:Newsreader,Georgia,serif;font-size:26px;font-weight:500;margin:44px 0 12px">2 · Color</h2>
+  <div style="background:#fff;border:1px solid #e7e8ec;border-radius:12px;padding:22px 26px;font-size:13.5px;line-height:2">
+    <div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase;margin-bottom:6px">Data colors — color always encodes data, never decorates</div>
+    <div style="display:grid;grid-template-columns:130px 110px 1fr;row-gap:2px">
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#3452D9"></span><code>#3452D9</code></span><span>Primary / earned</span><span style="color:#6f7075">Earned bar segment, active states, buttons, links</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#B9C5F0"></span><code>#B9C5F0</code></span><span>Still needed</span><span style="color:#6f7075">Needed / still-possible bar segment</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#B9DFC9"></span><code>#B9DFC9</code></span><span>Cushion</span><span style="color:#6f7075">Cushion bar segment (green tint)</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#C9CAD1"></span><code>#C9CAD1</code></span><span>Lost</span><span style="color:#6f7075">Lost-points bar segment (hairline when small)</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#1a9e5c"></span><code>#1a9e5c</code></span><span>Graded / green</span><span style="color:#6f7075">Graded status dot, Strong Finish accent + chart</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#D97706"></span><code>#D97706</code></span><span>Amber</span><span style="color:#6f7075">Shortfall segment, impossible-state left rule, Front-Loaded accent + chart</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#b45309"></span><code>#b45309</code></span><span>Amber text</span><span style="color:#6f7075">Impossible-state label text</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#d3d4d9"></span><code>#d3d4d9</code></span><span>Ungraded dot</span><span style="color:#6f7075">Status dot for not-yet-graded rows</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#0E9AA8"></span><code>#0E9AA8</code></span><span>Course teal</span><span style="color:#6f7075">Course identity dots (per-course, from live app palette:</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#7C5CFA"></span><code>#7C5CFA</code></span><span>Course purple</span><span style="color:#6f7075">teal, blue #3452D9, purple, amber #D97706, …)</span>
+    </div>
+    <div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase;margin:16px 0 6px">Neutrals</div>
+    <div style="display:grid;grid-template-columns:130px 1fr;row-gap:2px">
+      <span><code>#1C1B18</code></span><span style="color:#6f7075">Ink — headings, numerals, primary text</span>
+      <span><code>#55565c</code></span><span style="color:#6f7075">Secondary text, hero setup sentence, inactive nav</span>
+      <span><code>#6f7075</code></span><span style="color:#6f7075">Body muted, legend text</span>
+      <span><code>#8a8b90</code></span><span style="color:#6f7075">Section labels (uppercase), inactive tabs</span>
+      <span><code>#a0a1a6</code></span><span style="color:#6f7075">Table column headers</span>
+      <span><code>#c6c7cc</code></span><span style="color:#6f7075">Empty grade dash "–"</span>
+      <span><code>#d9dbe1</code></span><span style="color:#6f7075">Target-control border, dashed editable underline</span>
+      <span><code>#e3e4e8</code></span><span style="color:#6f7075">Chip borders, dividers inside chips</span>
+      <span><code>#e7e8ec</code></span><span style="color:#6f7075">Card borders, tab rule, chart baseline</span>
+      <span><code>#f0f1f4</code></span><span style="color:#6f7075">Table row rules, card footer rule</span>
+      <span><code>#f5f6f8</code> / <code>#fff</code></span><span style="color:#6f7075">Page background / card background</span>
+    </div>
+  </div>
+
+  <h2 style="font-family:Newsreader,Georgia,serif;font-size:26px;font-weight:500;margin:44px 0 12px">3 · Type</h2>
+  <div style="background:#fff;border:1px solid #e7e8ec;border-radius:12px;padding:22px 26px;font-size:13.5px;line-height:2">
+    <div style="margin-bottom:6px">Serif: <b>Newsreader</b> (Google Fonts, optical sizing on). Sans: <b>Inter</b>.</div>
+    <div style="display:grid;grid-template-columns:290px 1fr;row-gap:2px">
+      <span>Hero numeral</span><span style="color:#6f7075">Newsreader 62/1.0, wt 500, ls −0.02em, #1C1B18 · mobile 48px</span>
+      <span>Page title "Grade Hub."</span><span style="color:#6f7075">Newsreader 44, wt 500, ls −0.01em · mobile 36 · blue period</span>
+      <span>Hero setup sentence</span><span style="color:#6f7075">Newsreader 21/1.5, wt 500, #55565c · mobile 17</span>
+      <span>Empty-state heading</span><span style="color:#6f7075">Newsreader 30, wt 500</span>
+      <span>Path card titles</span><span style="color:#6f7075">Newsreader 23, wt 500 · mobile 20</span>
+      <span>Grade numerals (table)</span><span style="color:#6f7075">Newsreader 23, wt 500 · mobile 21 · ungraded rows: Inter 15, #c6c7cc "–"</span>
+      <span>Stat numerals (footer)</span><span style="color:#6f7075">Newsreader 22, wt 500 · mobile 19</span>
+      <span>Section labels</span><span style="color:#6f7075">Inter 11, wt 600, uppercase, ls 0.1em, #8a8b90 (stat labels ls 0.08em)</span>
+      <span>Table: names / meta</span><span style="color:#6f7075">Inter 15 wt 600 / Inter 14 · headers Inter 11 wt 600 uppercase #a0a1a6</span>
+      <span>Body / legend / status</span><span style="color:#6f7075">Inter 13.5 · legend 12.5, values wt 600 #1C1B18</span>
+      <span>Buttons / links / nav</span><span style="color:#6f7075">Inter 14 wt 600 · chips 14 (active wt 600)</span>
+    </div>
+  </div>
+
+  <h2 style="font-family:Newsreader,Georgia,serif;font-size:26px;font-weight:500;margin:44px 0 12px">4 · Layout &amp; components</h2>
+  <div style="background:#fff;border:1px solid #e7e8ec;border-radius:12px;padding:22px 26px;font-size:13.5px;line-height:1.9">
+    <div><b>Page.</b> Content max-width 1080, padding 44/40 top/side, 72 bottom. Desktop artboard 1280, mobile 390. Vertical rhythm: chips 26 below title block; tabs 30 below chips; hero card 28 below tabs; components card 24 below hero; Three Paths 36 below.</div>
+    <div style="margin-top:10px"><b>Cards.</b> White, 1px #e7e8ec border, radius 16, shadow <code>0 1px 3px rgba(28,27,24,.05)</code>. Hero padding 32 36 28; components 26 36 12; paths 24 26. Mobile padding 22/20.</div>
+    <div style="margin-top:10px"><b>Hero.</b> Label → setup sentence → numeral row (numeral + target control, gap 22, margin-top 10) → cushion bar (margin-top 26, max-width 720) → footer stats (border-top #f0f1f4, padding-top 22, gap 44; "Sync to study plan ›" right-aligned). Target control: 1px #d9dbe1 border, radius 10, padding 8 14, "TARGET" label + grade + ▾ caret; it is a dropdown.</div>
+    <div style="margin-top:10px"><b>Cushion bar (signature element).</b> Height 10 (mobile 8), radius 5, flex with 2px gaps, segment widths = point values as % (always sum to 100). Order: earned → lost → needed → cushion. Impossible state: earned → possible → short (amber) → lost. Lost segment renders at true width even when thin — never drop it. Legend below (margin-top 10): 8×8 radius-2 swatches, gap 7 within item, 24 between items.</div>
+    <div style="margin-top:10px"><b>Components table.</b> Grid <code>1fr 110px 150px 90px</code> (Component / Weight / Status / Grade right-aligned), rows padding 13 vertical, 1px #f0f1f4 rules. Graded: 7px green dot + "Graded", Newsreader numeral. Ungraded: 7px #d3d4d9 dot + "Not yet", "–". Editable weight/grade values get 1px dashed #d9dbe1 underline. Header row: label + "100% of 100%" counter + right-aligned "Add component" (text button) and "Save and generate plan" (primary, radius 10, padding 9 16). Weight counter turns #b45309 and Save disables when weights ≠ 100.</div>
+    <div style="margin-top:10px"><b>Three Paths cards.</b> Left accent <code>border-left:3px solid</code> — Consistent #3452D9, Strong Finish #1a9e5c, Front-Loaded #D97706. Top-right mini chart: 3 bars (Final, Quizzes, Project), 16px wide, gap 5, container height 42, radius 2 2 0 0, bar color = accent, baseline 1.5px #e7e8ec; bar height px = clamp((pct − 76) × 1.7, 10, 40) — used values: 88.7→30, 91.5→38, 85→20, 84→17, 95→34. Mobile: 12px bars, gap 4, height 34, values ×0.8. Rows of percentages below (Inter 13.5, tabular-nums). "Recommended" marker: 6px blue dot + 10.5px uppercase blue label.</div>
+    <div style="margin-top:10px"><b>Course chips.</b> Pill, padding 9 16, 8px course-identity dot (7px mobile) + name + letter grade. Active: <code>box-shadow: inset 0 0 0 1.5px #3452D9</code>, no border, grade in blue, optional divider + meta ("Final in 18 days"). Inactive: 1px #e3e4e8 border, grade #8a8b90.</div>
+    <div style="margin-top:10px"><b>Impossible state (2b).</b> Setup sentence becomes "Perfect scores on everything remaining top out at:", numeral = maxAchievable. Below numeral row: amber block — <code>border-left:3px solid #D97706</code>, padding 4 0 6 18, uppercase #b45309 label ("A+ is out of reach") + 13.5px #55565c body with "Retarget to B" link. No red, no fills, no icons.</div>
+    <div style="margin-top:10px"><b>All graded (2d).</b> Label "Final grade", numeral = final average, target control replaced by static "GRADE A-" chip (no caret), bar = earned + lost only, no Save/Add actions.</div>
+    <div style="margin-top:10px"><b>Empty (2e).</b> Single centered card, padding 72 36: label, Newsreader 30 question, 14.5px body max-width 440, primary button "Add your first component".</div>
+    <div style="margin-top:10px"><b>Mobile (2c).</b> Chips scroll horizontally; meta drops below chips; footer stats 2-up; Sync link below; Save is a full-width primary bar below the components card; path cards collapse to title + one-line percentages + right-aligned mini chart. Hit targets ≥ 44px.</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

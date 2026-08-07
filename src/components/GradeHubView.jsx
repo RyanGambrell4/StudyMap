@@ -1,48 +1,81 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react'
-import Spinner from './ui/spinner'
 import EmptyState from './ui/empty-state'
-import { getActivePlan, canUseAI, incrementAIQuery, hasUsedTrial } from '../lib/subscription'
+import { getActivePlan, hasUsedTrial } from '../lib/subscription'
 import { clean } from '../utils/strings'
-import { getAccessToken } from '../lib/supabase'
 import { saveCoachPlanStruggles, getCachedCoachPlan } from '../lib/db'
 import { track } from '../lib/analytics'
+import { GRADE_HUB as G, GH_SERIF } from '../theme/tokens'
 import {
-  TARGET_OPTIONS, letterGrade, gradeStatus,
+  TARGET_OPTIONS, letterGrade,
   getCurrentGrade, getProjectedGrade, getNeededOnRemaining,
   getDefenseFloor, generateScenarioPaths,
+  computeGradeMath, bestAchievableTarget,
 } from '../utils/gradeCalc'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
+// Legacy token object still used by the Track and Sandbox tabs. Those tabs keep
+// their current structure in this pass, but their colors are remapped onto the
+// Grade Hub palette so the three tabs read as one page instead of two design
+// systems. Status colors (orange, pink) stay distinct because Track and Sandbox
+// use them to mean something specific.
 const D = {
-  bg:        '#F7F8FA',
-  bgCard:    '#FFFFFF',
-  border:    'rgba(0,0,0,0.07)',
-  borderStr: 'rgba(0,0,0,0.12)',
-  text:      '#111111',
-  muted:     '#6B6B6B',
-  dim:       '#9B9B9B',
-  accent:    '#3B61C4',
-  glow:      'rgba(59,97,196,0.2)',
-  indigo:    '#3B61C4',
-  mint:      '#16A34A',
-  orange:    '#E8531A',
-  sky:       '#2563EB',
+  bg:        G.pageBg,
+  bgCard:    G.card,
+  border:    G.cardBorder,
+  borderStr: G.ctrlBorder,
+  text:      G.ink,
+  muted:     G.secondary,
+  dim:       G.label,
+  accent:    G.blue,
+  glow:      'rgba(52,82,217,0.2)',
+  indigo:    G.blue,
+  mint:      G.green,
+  orange:    G.amber,
+  sky:       G.blue,
   pink:      '#DC2626',
-  amber:     '#D97706',
+  amber:     G.amber,
 }
 
-const PATH_COLORS = [D.sky, D.mint, D.orange]
-const PATH_ICONS = [
-  // Steady - gentle climb
-  <svg key="steady" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M7 17L17 7" /><path d="M9 7h8v8" /></svg>,
-  // Strong - vertical arrow
-  <svg key="strong" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M12 19V5" /><path d="M5 12l7-7 7 7" /></svg>,
-  // Aggressive - lightning
-  <svg key="aggressive" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.25" strokeLinecap="round" strokeLinejoin="round"><path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z" /></svg>,
-]
+// Three Paths accents, in card order. Color here identifies the strategy; it is
+// reused for the card's left rule and its mini chart so the two always agree.
+const PATH_ACCENTS = [G.blue, G.green, G.amber]
 
 function uid() { return Math.random().toString(36).slice(2, 10) }
 const clamp = (v, lo = 0, hi = 100) => Math.max(lo, Math.min(hi, v))
+
+// "an A" but "a B+". Letters are computed, so the article has to be too.
+const article = ltr => (/^[AEFIO]/i.test(ltr ?? '') ? 'an' : 'a')
+
+const fmt1 = n => (n === null || n === undefined || isNaN(n) ? '-' : n.toFixed(1))
+
+// The mobile artboard is 390 wide and restructures rather than reflows: the
+// table becomes stacked rows, Save becomes a full-width bar, path cards collapse
+// to one line. That is a different tree, not different CSS, so the breakpoint
+// lives in JS.
+function useIsMobile(bp = 760) {
+  const query = `(max-width:${bp}px)`
+  const [isMobile, setIsMobile] = useState(
+    () => typeof window !== 'undefined' && window.matchMedia(query).matches
+  )
+  useEffect(() => {
+    if (typeof window === 'undefined') return
+    const mq = window.matchMedia(query)
+    const onChange = e => setIsMobile(e.matches)
+    mq.addEventListener('change', onChange)
+    return () => mq.removeEventListener('change', onChange)
+  }, [query])
+  return isMobile
+}
+
+// Mini chart bar height, straight from the spec:
+//   bar height px = clamp((pct - 76) * 1.7, 10, 40)
+// Mobile scales the whole chart to 0.8. The spec also lists hand-set example
+// heights that this formula does not reproduce and that are not monotonic in
+// pct; the formula is the rule, so the formula is what ships.
+const barHeight = (pct, mobile) => {
+  const h = clamp((pct - 76) * 1.7, 10, 40)
+  return Math.round(mobile ? h * 0.8 : h)
+}
 
 function letterColor(ltr) {
   if (!ltr || ltr === '-') return D.muted
@@ -98,34 +131,54 @@ const GH_STYLE = `
 body{overflow-x:hidden!important;}
 *{box-sizing:border-box;}
 .gh-range{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:3px;background:rgba(0,0,0,0.10);outline:none;position:relative;}
-.gh-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:#3B61C4;cursor:pointer;border:2px solid #FFFFFF;box-shadow:0 0 0 1px #3B61C4,0 2px 8px rgba(59,97,196,0.3);}
-.gh-range::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:#3B61C4;cursor:pointer;border:2px solid #FFFFFF;}
+.gh-range::-webkit-slider-thumb{-webkit-appearance:none;width:16px;height:16px;border-radius:50%;background:${G.blue};cursor:pointer;border:2px solid #FFFFFF;box-shadow:0 0 0 1px ${G.blue},0 2px 8px rgba(52,82,217,0.3);}
+.gh-range::-moz-range-thumb{width:16px;height:16px;border-radius:50%;background:${G.blue};cursor:pointer;border:2px solid #FFFFFF;}
 .gh-range:disabled{opacity:0.5;cursor:default;}
-.gh-input{background:#FFFFFF;border:1px solid rgba(0,0,0,0.10);color:#111111;border-radius:7px;padding:7px 10px;font-size:13px;outline:none;transition:border 0.15s;font-family:inherit;box-sizing:border-box;}
-.gh-input:focus{border-color:rgba(59,97,196,0.5);}
+.gh-input{background:#FFFFFF;border:1px solid ${G.ctrlBorder};color:${G.ink};border-radius:7px;padding:7px 10px;font-size:13px;outline:none;transition:border 0.15s;font-family:inherit;box-sizing:border-box;}
+.gh-input:focus{border-color:${G.blue};}
 .gh-input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0;}
-.gh-input::placeholder{color:#9B9B9B;}
+.gh-input::placeholder{color:${G.label};}
 .gh-input:disabled{opacity:0.4;}
-.gh-input-text{background:#FFFFFF;border:1px solid rgba(0,0,0,0.10);color:#111111;border-radius:7px;padding:7px 10px;font-size:13px;outline:none;transition:border 0.15s;font-family:inherit;box-sizing:border-box;}
-.gh-input-text:focus{border-color:rgba(59,97,196,0.5);}
-.gh-input-text::placeholder{color:#9B9B9B;}
+.gh-input-text{background:#FFFFFF;border:1px solid ${G.ctrlBorder};color:${G.ink};border-radius:7px;padding:7px 10px;font-size:13px;outline:none;transition:border 0.15s;font-family:inherit;box-sizing:border-box;}
+.gh-input-text:focus{border-color:${G.blue};}
+.gh-input-text::placeholder{color:${G.label};}
 .gh-grade-row-inner{display:contents;}
-@media(max-width:900px){.gh-grid{grid-template-columns:1fr!important;}.gh-rail{position:static!important;}}
-@media(max-width:640px){.gh-plan-row{display:flex!important;flex-direction:column!important;gap:8px!important;padding:12px 0!important;border-bottom:1px solid rgba(0,0,0,0.07)!important;min-width:0!important;width:100%!important;}.gh-plan-row-header{display:none!important;}.gh-grade-row-inner{display:grid!important;grid-template-columns:64px 1fr 60px 24px!important;gap:8px!important;align-items:center!important;min-width:0!important;width:100%!important;}.gh-table-wrap{overflow-x:hidden!important;}.gh-plan-content{overflow-x:hidden!important;max-width:100%!important;}.gh-plan-callout{overflow:hidden!important;}.gh-header{padding:16px 14px 14px!important;}.gh-content{padding:14px 14px 90px!important;overflow-x:hidden!important;max-width:100%!important;}.gh-tab-btn{padding:9px 8px!important;font-size:12px!important;gap:5px!important;}.gh-scenarios-grid{grid-template-columns:1fr!important;}.gh-compare-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}.gh-bottom-bar{flex-wrap:wrap!important;gap:8px!important;}.gh-course-strip{flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;padding-bottom:6px!important;}}
+
+/* Editable values sit inline in the table as plain text with a dashed rule,
+   never as boxed inputs. The affordance is the rule, not a border. */
+.gh-cell{border:none;background:transparent;outline:none;font-family:inherit;font-size:inherit;font-weight:inherit;color:inherit;padding:0 0 1px;border-bottom:1px dashed ${G.ctrlBorder};transition:border-color .15s;}
+.gh-cell:focus{border-bottom-color:${G.blue};}
+.gh-cell::-webkit-inner-spin-button,.gh-cell::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+.gh-cell::placeholder{color:${G.emptyDash};}
+.gh-cell-name{border:none;background:transparent;outline:none;font-family:inherit;font-size:inherit;font-weight:inherit;color:inherit;padding:0 0 1px;border-bottom:1px dashed transparent;transition:border-color .15s;width:100%;}
+.gh-cell-name:hover,.gh-cell-name:focus{border-bottom-color:${G.ctrlBorder};}
+.gh-cell-name:focus{border-bottom-color:${G.blue};}
+
+/* Delete stays out of the designed layout and appears on hover or focus, so the
+   row reads exactly as drawn until you reach for it. */
+.gh-row .gh-del{opacity:0;transition:opacity .12s;}
+.gh-row:hover .gh-del,.gh-row:focus-within .gh-del{opacity:1;}
+.gh-del:focus-visible{opacity:1;outline:2px solid ${G.blue};outline-offset:2px;}
+
+.gh-link:hover{color:${G.blueHover};}
+.gh-primary:hover:not(:disabled){background:${G.blueHover};}
+
+@media(max-width:760px){
+.gh-content{padding:28px 20px 56px!important;}
+.gh-scenarios-grid{grid-template-columns:1fr!important;}
+.gh-compare-wrap{overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;}
+.gh-bottom-bar{flex-wrap:wrap!important;gap:8px!important;}
+.gh-course-strip{flex-wrap:nowrap!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch!important;padding-bottom:6px!important;scrollbar-width:none;}
+.gh-course-strip::-webkit-scrollbar{display:none;}
+}
 `
 
 // ── Icons ─────────────────────────────────────────────────────────────────────
-function IcoSparkles() { return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2z"/></svg> }
 function IcoPlus()     { return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12 5v14M5 12h14"/></svg> }
 function IcoX()        { return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 6l12 12M6 18L18 6"/></svg> }
 function IcoLock()     { return <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg> }
 function IcoShield()   { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"/></svg> }
 function IcoCheck()    { return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg> }
-function IcoPlan()     { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 10h8M8 14h5"/></svg> }
-function IcoTrack()    { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg> }
-function IcoBeaker()   { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3v6l-5 9a2 2 0 002 3h12a2 2 0 002-3l-5-9V3M9 3h6M8 14h8"/></svg> }
-function IcoCalendar() { return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/></svg> }
-function IcoArrow()    { return <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg> }
 
 // ── Locked state ──────────────────────────────────────────────────────────────
 function LockedState({ onShowPaywall }) {
@@ -133,8 +186,8 @@ function LockedState({ onShowPaywall }) {
   const fakeRows = [
     { label: 'Midterm Exam',    weight: '25%', score: '82 / 100', grade: 'B',  color: '#3B61C4' },
     { label: 'Lab Report 3',    weight: '10%', score: '91 / 100', grade: 'A-', color: '#16A34A' },
-    { label: 'Problem Set 4',   weight: '8%',  score: '—',        grade: '—',  color: '#D97706' },
-    { label: 'Final Exam',      weight: '35%', score: '—',        grade: '—',  color: '#D97706' },
+    { label: 'Problem Set 4',   weight: '8%',  score: '–',        grade: '–',  color: '#D97706' },
+    { label: 'Final Exam',      weight: '35%', score: '–',        grade: '–',  color: '#D97706' },
   ]
   return (
     <div style={{ position: 'relative', minHeight: 480, background: D.bg, overflow: 'hidden' }}>
@@ -166,7 +219,7 @@ function LockedState({ onShowPaywall }) {
               </div>
               <span style={{ fontSize: 12, color: '#6B6B6B' }}>{r.weight}</span>
               <span style={{ fontSize: 12, color: '#6B6B6B' }}>{r.score}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: r.grade === '—' ? '#9B9B9B' : r.color }}>{r.grade}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: r.grade === '–' ? '#9B9B9B' : r.color }}>{r.grade}</span>
             </div>
           ))}
         </div>
@@ -198,257 +251,764 @@ function LockedState({ onShowPaywall }) {
   )
 }
 
-// ── Course pill card ──────────────────────────────────────────────────────────
-function CourseCard({ course, active, onClick }) {
-  const dot  = course.color?.dot ?? D.accent
+// ── Course chip ───────────────────────────────────────────────────────────────
+// Active chip carries the course identity dot, its letter grade in blue, and a
+// divider plus the one piece of context that matters right now: time to the
+// final, or "Complete" once every component is in.
+function CourseChip({ course, active, mobile, onClick }) {
+  const dot   = course.color?.dot ?? G.blue
   const comps = course.gradeData?.components ?? []
-  const curr = getCurrentGrade(comps)
-  const ltr  = curr !== null ? letterGrade(curr) : null
-  const name = clean(course.name)
-  const shortName = name.length > 22 ? name.slice(0, 20) + '…' : name
+  const curr  = comps.length ? getCurrentGrade(comps) : null
+  const ltr   = curr !== null ? letterGrade(curr) : '–'
+  const name  = clean(course.name)
 
+  const allGraded = comps.length > 0 && comps.every(c => c.graded && c.grade !== null && c.grade !== undefined)
+  const days = daysTo(course.examDate)
+  const meta = allGraded ? 'Complete' : (days !== null && days >= 0 ? `Final in ${days} days` : null)
+
+  const dotSize = mobile ? 7 : 8
   return (
     <button onClick={onClick} style={{
-      padding: '7px 16px', borderRadius: 999, cursor: 'pointer', flexShrink: 0,
-      background: active ? dot : '#FFFFFF',
-      border: `1px solid ${active ? dot : D.border}`,
-      color: active ? '#fff' : D.muted,
-      fontSize: 13, fontWeight: active ? 600 : 500,
-      display: 'inline-flex', alignItems: 'center', gap: 7,
-      whiteSpace: 'nowrap', transition: 'all 0.15s',
+      flex: 'none', display: 'flex', alignItems: 'center', gap: mobile ? 8 : 9,
+      background: G.card, borderRadius: 999,
+      padding: mobile ? '8px 14px' : '9px 16px',
+      border: active ? 'none' : `1px solid ${G.chipBorder}`,
+      boxShadow: active ? `inset 0 0 0 1.5px ${G.blue}` : 'none',
+      cursor: 'pointer', whiteSpace: 'nowrap',
     }}>
-      <span style={{ width: 6, height: 6, borderRadius: '50%', background: active ? 'rgba(255,255,255,0.8)' : dot, flexShrink: 0 }} />
-      {shortName}
-      {ltr && <span style={{ fontSize: 11, fontWeight: 600, color: active ? 'rgba(255,255,255,0.85)' : letterColor(ltr) }}>{ltr}</span>}
+      <span style={{ width: dotSize, height: dotSize, borderRadius: '50%', background: dot, flexShrink: 0 }} />
+      <span style={{ fontSize: mobile ? 13.5 : 14, fontWeight: active ? 600 : 500, color: active ? G.ink : G.secondary }}>{name}</span>
+      <span style={{ fontSize: mobile ? 12.5 : 13, fontWeight: 600, color: active ? G.blue : (ltr === '–' ? G.colHeader : G.label) }}>{ltr}</span>
+      {active && meta && !mobile && (
+        <>
+          <span style={{ width: 1, height: 14, background: G.chipBorder }} />
+          <span style={{ fontSize: 12.5, fontWeight: 500, color: G.body }}>{meta}</span>
+        </>
+      )}
     </button>
   )
 }
 
 // ── Tab switcher ──────────────────────────────────────────────────────────────
-function Tabs({ active, onChange }) {
+function Tabs({ active, onChange, mobile }) {
   const tabs = [
-    { id: 'plan',    label: 'Plan',    Icon: IcoPlan    },
-    { id: 'track',   label: 'Track',   Icon: IcoTrack   },
-    { id: 'sandbox', label: 'Sandbox', Icon: IcoBeaker  },
+    { id: 'plan',    label: 'Plan'    },
+    { id: 'track',   label: 'Track'   },
+    { id: 'sandbox', label: 'Sandbox' },
   ]
   return (
-    <div style={{ display: 'flex', gap: 0, borderBottom: `1px solid ${D.border}`, marginBottom: 4 }}>
-      {tabs.map(t => (
-        <button key={t.id} onClick={() => onChange(t.id)} className="gh-tab-btn" style={{
-          padding: '10px 20px',
-          background: 'transparent',
-          border: 'none',
-          borderBottom: active === t.id ? '2px solid #3B61C4' : '2px solid transparent',
-          color: active === t.id ? '#3B61C4' : D.muted,
-          display: 'flex', alignItems: 'center', gap: 7,
-          fontSize: 13, fontWeight: active === t.id ? 600 : 500,
-          cursor: 'pointer', marginBottom: -1,
-        }}>
-          <t.Icon /> {t.label}
-        </button>
-      ))}
-    </div>
-  )
-}
-
-// ── PathCard ──────────────────────────────────────────────────────────────────
-function PathCard({ color, icon, title, desc, rows }) {
-  return (
-    <div style={{ padding: 14, borderRadius: 11, background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, borderTop: `2px solid ${color}`, minWidth: 0, width: '100%' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-        <div style={{ width: 24, height: 24, borderRadius: 6, background: `${color}18`, color, display: 'grid', placeItems: 'center' }}>{icon}</div>
-        <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>{title}</div>
-      </div>
-      <div style={{ fontSize: 11.5, color: D.muted, marginBottom: 12, lineHeight: 1.4 }}>{desc}</div>
-      {rows.map(([k, v], i) => (
-        <div key={i} style={{ display: 'flex', justifyContent: 'space-between', fontSize: 11.5, padding: '3px 0' }}>
-          <span style={{ color: D.dim }}>{k}</span>
-          <span style={{ color, fontWeight: 700, fontFamily: 'inherit' }}>{v}</span>
-        </div>
-      ))}
+    <div style={{ display: 'flex', gap: mobile ? 22 : 26, borderBottom: `1px solid ${G.cardBorder}`, marginTop: mobile ? 22 : 30 }}>
+      {tabs.map(t => {
+        const on = active === t.id
+        return (
+          <button key={t.id} onClick={() => onChange(t.id)} style={{
+            padding: mobile ? '0 2px 10px' : '0 2px 11px',
+            background: 'transparent', border: 'none', cursor: 'pointer',
+            fontSize: mobile ? 14 : 14.5,
+            fontWeight: on ? 600 : 500,
+            color: on ? G.ink : G.label,
+            borderBottom: on ? `2px solid ${G.blue}` : '2px solid transparent',
+            marginBottom: -1,
+          }}>
+            {t.label}
+          </button>
+        )
+      })}
     </div>
   )
 }
 
 // ── PLAN TAB ──────────────────────────────────────────────────────────────────
-function PlanTab({ course, gradeData, dot, onSave }) {
+// Rebuilt against design/grade-hub/ (canvas turn 2). The hero card answers the
+// one question once; the prediction sidebar, the per-component needs list, the
+// header subtitle and the bottom buffer bar are all absorbed into it. Every
+// figure below is computed from live component data, never from the mockup.
+
+const cardShell = {
+  background: G.card,
+  border: `1px solid ${G.cardBorder}`,
+  borderRadius: 16,
+  boxShadow: G.cardShadow,
+}
+
+const fmtWeight = n => (Number.isInteger(n) ? String(n) : String(Math.round(n * 10) / 10))
+
+function SectionLabel({ children, mobile, style }) {
+  return (
+    <div style={{
+      fontSize: mobile ? 10.5 : 11, fontWeight: 600, letterSpacing: '.1em',
+      color: G.label, textTransform: 'uppercase', ...style,
+    }}>{children}</div>
+  )
+}
+
+function Stat({ label, value, mobile }) {
+  return (
+    <div>
+      <div style={{ fontSize: mobile ? 10.5 : 11, fontWeight: 600, letterSpacing: '.08em', color: G.label, textTransform: 'uppercase' }}>{label}</div>
+      <div style={{ fontFamily: GH_SERIF, fontSize: mobile ? 19 : 22, fontWeight: 500, color: G.ink, marginTop: mobile ? 3 : 4 }}>{value}</div>
+    </div>
+  )
+}
+
+function SyncLink({ onClick, synced, style }) {
+  return (
+    <button className="gh-link" onClick={onClick} style={{
+      background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+      fontSize: 14, fontWeight: 600, color: G.blue, ...style,
+    }}>
+      {synced ? 'Synced to study plan' : 'Sync to study plan ›'}
+    </button>
+  )
+}
+
+// ── Cushion bar ───────────────────────────────────────────────────────────────
+// The signature element. Segment widths are point values on a 100-point course,
+// so the bar always fills exactly and can be read as the whole course at once.
+// The lost segment renders at its true width even when it is a hairline.
+function CushionBar({ math, targetLabel, mobile }) {
+  let segments
+  if (math.allGraded) {
+    segments = [
+      { key: 'earned', value: math.earned, color: G.earned, label: 'Earned' },
+      { key: 'lost',   value: math.lost,   color: G.lost,   label: 'Lost'   },
+    ]
+  } else if (math.impossible) {
+    // Order shifts so the shortfall reads as the gap between what is still
+    // possible and the target. It is carved out of the lost points.
+    segments = [
+      { key: 'earned',   value: math.earned,       color: G.earned, label: 'Earned' },
+      { key: 'possible', value: math.remaining,    color: G.needed, label: mobile ? 'Possible' : 'Still possible' },
+      { key: 'short',    value: math.shortfall,    color: G.amber,  label: mobile ? 'Short' : `Short of ${targetLabel}` },
+      { key: 'lost',     value: math.residualLost, color: G.lost,   label: 'Lost' },
+    ]
+  } else {
+    segments = [
+      { key: 'earned',  value: math.earned,                   color: G.earned,  label: 'Earned' },
+      { key: 'lost',    value: math.lost,                     color: G.lost,    label: 'Lost' },
+      { key: 'needed',  value: math.remaining - math.cushion, color: G.needed,  label: mobile ? 'Needed' : 'Still needed' },
+      { key: 'cushion', value: math.cushion,                  color: G.cushion, label: 'Cushion' },
+    ]
+  }
+  const shown = segments.filter(s => s.value > 0.001)
+
+  return (
+    <div style={{ marginTop: mobile ? 18 : 26, maxWidth: mobile ? '100%' : 720 }}>
+      <div style={{ display: 'flex', height: mobile ? 8 : 10, borderRadius: mobile ? 4 : 5, overflow: 'hidden', gap: 2 }}>
+        {shown.map(s => <div key={s.key} style={{ width: `${s.value}%`, background: s.color }} />)}
+      </div>
+      <div style={{
+        display: 'flex', flexWrap: 'wrap',
+        gap: mobile ? '8px 16px' : '10px 24px',
+        marginTop: mobile ? 9 : 10,
+        fontSize: mobile ? 11.5 : 12.5, color: G.body,
+      }}>
+        {shown.map(s => (
+          <span key={s.key} style={{ display: 'flex', alignItems: 'center', gap: mobile ? 6 : 7 }}>
+            <span style={{ width: mobile ? 7 : 8, height: mobile ? 7 : 8, borderRadius: 2, background: s.color, flexShrink: 0 }} />
+            {s.label}{' '}
+            {mobile
+              ? fmt1(s.value)
+              : <span style={{ fontWeight: 600, color: G.ink }}>{fmt1(s.value)} pts</span>}
+          </span>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Target control ────────────────────────────────────────────────────────────
+// A real dropdown wearing the designed chip. The native select sits invisibly on
+// top so keyboard and mobile pickers work without a custom popover.
+function TargetControl({ value, onChange, mobile, staticGrade }) {
+  const label = TARGET_OPTIONS.find(o => o.value === value)?.label ?? 'A'
+  const shell = {
+    display: 'flex', alignItems: 'center', gap: mobile ? 6 : 8,
+    border: `1px solid ${G.ctrlBorder}`, borderRadius: mobile ? 9 : 10,
+    padding: mobile ? '6px 11px' : '8px 14px',
+    // The artboard draws a compact chip; the same spec requires 44px hit
+    // targets on mobile, so the chip grows to meet the finger.
+    minHeight: mobile ? 44 : undefined,
+    background: 'transparent',
+  }
+  const caption = { fontSize: mobile ? 10 : 11, fontWeight: 600, letterSpacing: '.08em', color: G.label, textTransform: 'uppercase' }
+  const grade   = { fontSize: mobile ? 14 : 16, fontWeight: 600, color: G.ink }
+
+  if (staticGrade) {
+    return (
+      <div style={shell}>
+        <span style={caption}>Grade</span>
+        <span style={grade}>{staticGrade}</span>
+      </div>
+    )
+  }
+  return (
+    <label style={{ ...shell, position: 'relative', cursor: 'pointer' }}>
+      <span style={caption}>Target</span>
+      <span style={grade}>{label}</span>
+      <span style={{ fontSize: mobile ? 9 : 10, color: G.label }}>▾</span>
+      <select
+        aria-label="Target grade"
+        value={value}
+        onChange={e => onChange(parseFloat(e.target.value))}
+        style={{ position: 'absolute', inset: 0, width: '100%', height: '100%', opacity: 0, cursor: 'pointer', border: 'none', appearance: 'none' }}
+      >
+        {TARGET_OPTIONS.map(o => <option key={o.label} value={o.value}>{o.label}</option>)}
+      </select>
+    </label>
+  )
+}
+
+// ── Hero answer card ──────────────────────────────────────────────────────────
+function HeroCard({ math, components, targetGrade, targetLabel, onTargetChange, onSync, synced, mobile }) {
+  const maxLetter = letterGrade(math.maxAchievable)
+  const best = math.impossible ? bestAchievableTarget(components, math.maxAchievable) : null
+
+  const eyebrow = math.allGraded ? 'Final grade' : 'What you need'
+  const setup = math.allGraded
+    ? 'This course is complete. Your final average:'
+    : math.impossible
+      ? 'Perfect scores on everything remaining top out at:'
+      : 'The average you need on remaining work to hit your target:'
+  const headline = math.allGraded
+    ? math.finalAverage
+    : math.impossible
+      ? math.maxAchievable
+      : math.neededAvg
+
+  return (
+    <div style={{ ...cardShell, marginTop: mobile ? 20 : 28, padding: mobile ? '22px 20px' : '32px 36px 28px' }}>
+      <SectionLabel mobile={mobile} style={{ marginBottom: mobile ? 10 : 14 }}>{eyebrow}</SectionLabel>
+
+      <div style={{ fontFamily: GH_SERIF, fontSize: mobile ? 17 : 21, fontWeight: 500, lineHeight: 1.5, color: G.secondary }}>
+        {setup}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: mobile ? 14 : 22, marginTop: mobile ? 8 : 10, flexWrap: 'wrap' }}>
+        <div style={{ fontFamily: GH_SERIF, fontSize: mobile ? 48 : 62, fontWeight: 500, lineHeight: 1, letterSpacing: '-0.02em', color: G.ink }}>
+          {fmt1(headline)}%
+        </div>
+        <TargetControl
+          value={targetGrade}
+          onChange={onTargetChange}
+          mobile={mobile}
+          staticGrade={math.allGraded ? letterGrade(math.finalAverage) : null}
+        />
+      </div>
+
+      {math.impossible && (
+        <div style={{
+          marginTop: mobile ? 18 : 22,
+          borderLeft: `3px solid ${G.amber}`,
+          padding: mobile ? '4px 0 6px 14px' : '4px 0 6px 18px',
+          maxWidth: 640,
+        }}>
+          <div style={{ fontSize: mobile ? 10.5 : 11, fontWeight: 600, letterSpacing: '.09em', color: G.amberText, textTransform: 'uppercase' }}>
+            {targetLabel} is out of reach
+          </div>
+          <div style={{ fontSize: 13.5, lineHeight: 1.6, color: G.secondary, marginTop: 6 }}>
+            The maximum achievable grade is {article(maxLetter)} {maxLetter}, and only with a perfect score on everything remaining.
+            {best && (
+              <>
+                {' '}Aim for {article(best.label)} {best.label} instead and you need a {fmt1(best.neededAvg)}% average on remaining work.{' '}
+                <button className="gh-link" onClick={() => onTargetChange(best.value)} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit', fontWeight: 600, color: G.blue }}>
+                  Retarget to {best.label}
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
+      <CushionBar math={math} targetLabel={targetLabel} mobile={mobile} />
+
+      <div style={{
+        display: 'flex', alignItems: 'flex-end', gap: mobile ? 32 : 44,
+        marginTop: mobile ? 18 : 26, paddingTop: mobile ? 14 : 22,
+        borderTop: `1px solid ${G.rowRule}`,
+      }}>
+        <Stat
+          mobile={mobile}
+          label={math.allGraded ? 'Final average' : (mobile ? 'Current avg' : 'Current average')}
+          value={fmt1(math.allGraded ? math.finalAverage : math.currentAverage)}
+        />
+        <Stat mobile={mobile} label="Graded" value={`${math.gradedCount} of ${math.componentCount}`} />
+        {!mobile && <SyncLink onClick={onSync} synced={synced} style={{ marginLeft: 'auto' }} />}
+      </div>
+      {mobile && <SyncLink onClick={onSync} synced={synced} style={{ display: 'inline-block', marginTop: 12, fontSize: 13.5 }} />}
+    </div>
+  )
+}
+
+// ── Grade components card ─────────────────────────────────────────────────────
+function ComponentsCard({
+  rows, setRow, toggleGraded, addRow, removeRow,
+  totalWeight, weightOk, canSave, onSave, saved, readOnly, mobile,
+}) {
+  const counterColor = weightOk ? G.label : G.amberText
+
+  const nameInput = (row, i, style) => (
+    <input
+      className="gh-cell-name"
+      value={row.component}
+      onChange={e => setRow(i, 'component', e.target.value)}
+      placeholder="Component name"
+      aria-label="Component name"
+      style={style}
+    />
+  )
+
+  // Value and unit share one dashed rule, and the field is sized to its content
+  // so the rule hugs "30%" instead of trailing off across the column.
+  const weightInput = (row, i) => (
+    <span style={{ display: 'inline-flex', alignItems: 'baseline', borderBottom: `1px dashed ${G.ctrlBorder}`, paddingBottom: 1 }}>
+      <input
+        value={row.weight}
+        onChange={e => setRow(i, 'weight', e.target.value)}
+        inputMode="decimal"
+        aria-label="Weight"
+        style={{
+          border: 'none', background: 'transparent', outline: 'none', font: 'inherit',
+          color: 'inherit', padding: 0, textAlign: 'right',
+          width: `${Math.max(2, String(row.weight).length)}ch`,
+        }}
+      />
+      <span>%</span>
+    </span>
+  )
+
+  const gradeInput = (row, i, mob) => {
+    const graded = !!row.graded && row.grade !== ''
+    return (
+      <input
+        className={graded ? 'gh-cell' : 'gh-cell-name'}
+        value={row.grade}
+        onChange={e => setRow(i, 'grade', e.target.value)}
+        inputMode="decimal"
+        placeholder="–"
+        aria-label="Grade"
+        style={{
+          textAlign: 'right',
+          // Sized to the value so the dashed rule sits under the numeral only.
+          width: `${Math.max(2, String(row.grade).length)}ch`,
+          fontFamily: graded ? GH_SERIF : 'inherit',
+          fontSize: graded ? (mob ? 21 : 23) : 15,
+          fontWeight: graded ? 500 : 400,
+          color: graded ? G.ink : G.emptyDash,
+        }}
+      />
+    )
+  }
+
+  const statusButton = (row, i, mob) => {
+    const graded = !!row.graded && row.grade !== ''
+    return (
+      <button
+        onClick={() => toggleGraded(i)}
+        style={{
+          display: 'flex', alignItems: 'center', gap: 7, background: 'none', border: 'none',
+          padding: 0, cursor: 'pointer', fontSize: mob ? 12.5 : 13.5,
+          color: graded ? (mob ? G.label : G.ink) : (mob ? G.label : G.colHeader),
+        }}
+      >
+        {!mob && <span style={{ width: 7, height: 7, borderRadius: '50%', background: graded ? G.green : G.dotUngraded, flexShrink: 0 }} />}
+        {graded ? 'Graded' : 'Not yet'}
+      </button>
+    )
+  }
+
+  const deleteButton = (i, style) => (
+    <button
+      className="gh-del"
+      onClick={() => removeRow(i)}
+      aria-label="Delete component"
+      style={{
+        background: 'none', border: 'none', cursor: 'pointer', color: G.label,
+        display: 'grid', placeItems: 'center', width: 24, height: 24, borderRadius: 6, ...style,
+      }}
+    >
+      <IcoX />
+    </button>
+  )
+
+  const GRID = '1fr 110px 150px 90px'
+
+  return (
+    <>
+      <div style={{ ...cardShell, marginTop: mobile ? 16 : 24, padding: mobile ? '20px 20px 8px' : '26px 36px 12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: mobile ? 0 : 18, justifyContent: mobile ? 'space-between' : 'flex-start', marginBottom: mobile ? 6 : 18 }}>
+          <SectionLabel mobile={mobile}>Grade components</SectionLabel>
+          <span style={{ fontSize: mobile ? 12 : 12.5, fontWeight: 500, color: counterColor }}>
+            {fmtWeight(totalWeight)}% of 100%
+          </span>
+          {!mobile && !readOnly && (
+            <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 18 }}>
+              <button onClick={addRow} className="gh-link" style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', fontSize: 14, fontWeight: 600, color: G.blue }}>
+                Add component
+              </button>
+              <button
+                onClick={onSave}
+                disabled={!canSave}
+                className="gh-primary"
+                style={{
+                  background: canSave ? G.blue : G.chipBorder,
+                  color: canSave ? '#fff' : G.label,
+                  border: 'none', borderRadius: 10, padding: '9px 16px',
+                  fontSize: 14, fontWeight: 600, cursor: canSave ? 'pointer' : 'default',
+                }}
+              >
+                {saved ? 'Saved' : 'Save and generate plan'}
+              </button>
+            </div>
+          )}
+        </div>
+
+        {!mobile && (
+          <div style={{ display: 'grid', gridTemplateColumns: GRID, padding: '0 2px 10px', fontSize: 11, fontWeight: 600, letterSpacing: '.08em', color: G.colHeader, textTransform: 'uppercase' }}>
+            <span>Component</span><span>Weight</span><span>Status</span><span style={{ textAlign: 'right' }}>Grade</span>
+          </div>
+        )}
+
+        {rows.map((row, i) => mobile ? (
+          <div key={row.id} className="gh-row" style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, padding: '12px 0', borderTop: `1px solid ${G.rowRule}`, marginTop: i === 0 ? 8 : 0 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 9, minWidth: 0, flex: 1 }}>
+              <button
+                onClick={() => toggleGraded(i)}
+                aria-label="Toggle graded"
+                style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'grid', placeItems: 'center', width: 16, height: 16, flexShrink: 0 }}
+              >
+                <span style={{ width: 7, height: 7, borderRadius: '50%', background: (row.graded && row.grade !== '') ? G.green : G.dotUngraded }} />
+              </button>
+              <div style={{ minWidth: 0, flex: 1 }}>
+                {nameInput(row, i, { fontSize: 14.5, fontWeight: 600, color: G.ink })}
+                <div style={{ fontSize: 12.5, color: G.label, marginTop: 2, display: 'flex', alignItems: 'center', gap: 5 }}>
+                  {weightInput(row, i)}<span>·</span>{statusButton(row, i, true)}
+                </div>
+              </div>
+            </div>
+            {gradeInput(row, i, true)}
+            {!readOnly && deleteButton(i, { flexShrink: 0, marginLeft: 4 })}
+          </div>
+        ) : (
+          <div key={row.id} className="gh-row" style={{ position: 'relative', display: 'grid', gridTemplateColumns: GRID, alignItems: 'center', padding: '13px 2px', borderTop: `1px solid ${G.rowRule}` }}>
+            <span style={{ fontSize: 15, fontWeight: 600, color: G.ink, paddingRight: 12, minWidth: 0 }}>
+              {nameInput(row, i)}
+            </span>
+            <span style={{ fontSize: 14, color: G.body }}>{weightInput(row, i)}</span>
+            {statusButton(row, i, false)}
+            <span style={{ textAlign: 'right' }}>{gradeInput(row, i, false)}</span>
+            {!readOnly && deleteButton(i, { position: 'absolute', right: -26, top: '50%', transform: 'translateY(-50%)' })}
+          </div>
+        ))}
+
+        {mobile && !readOnly && (
+          <button
+            onClick={addRow}
+            style={{
+              width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center',
+              padding: '14px 0', background: 'none', cursor: 'pointer',
+              // Only the top rule, and it must stay a hairline: a blanket
+              // border:none here would reset it back to a 3px default.
+              borderTop: `1px solid ${G.rowRule}`,
+              borderLeft: 'none', borderRight: 'none', borderBottom: 'none',
+              fontSize: 13.5, fontWeight: 600, color: G.blue,
+            }}
+          >
+            Add component
+          </button>
+        )}
+      </div>
+
+      {mobile && !readOnly && (
+        <button
+          onClick={onSave}
+          disabled={!canSave}
+          className="gh-primary"
+          style={{
+            marginTop: 16, width: '100%', background: canSave ? G.blue : G.chipBorder,
+            color: canSave ? '#fff' : G.label, border: 'none', borderRadius: 12,
+            padding: '13px 0', fontSize: 14.5, fontWeight: 600, cursor: canSave ? 'pointer' : 'default',
+          }}
+        >
+          {saved ? 'Saved' : 'Save and generate plan'}
+        </button>
+      )}
+    </>
+  )
+}
+
+// ── Three paths ───────────────────────────────────────────────────────────────
+function RecommendedMark({ mobile }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: mobile ? 6 : 10 }}>
+      <span style={{ width: 6, height: 6, borderRadius: '50%', background: G.blue }} />
+      <span style={{ fontSize: mobile ? 10 : 10.5, fontWeight: 600, letterSpacing: '.09em', color: G.blue, textTransform: 'uppercase' }}>Recommended</span>
+    </div>
+  )
+}
+
+// Effort distribution at a glance. One bar per remaining component, height from
+// the spec's formula, colored with the path's own accent.
+function MiniChart({ rows, accent, mobile }) {
+  return (
+    <div style={{
+      display: 'flex', alignItems: 'flex-end', gap: mobile ? 4 : 5,
+      height: mobile ? 34 : 42, flex: 'none', paddingBottom: 1,
+      borderBottom: `1.5px solid ${G.cardBorder}`,
+    }}>
+      {rows.slice(0, 6).map((r, i) => (
+        <span key={i} style={{
+          width: mobile ? 12 : 16,
+          height: barHeight(r.pct, mobile),
+          background: accent,
+          borderRadius: '2px 2px 0 0',
+        }} />
+      ))}
+    </div>
+  )
+}
+
+function PathCard({ accent, title, desc, rows, recommended, mobile }) {
+  const shell = {
+    ...cardShell,
+    borderLeft: `3px solid ${accent}`,
+    padding: mobile ? '18px 20px' : '24px 26px',
+  }
+
+  if (mobile) {
+    return (
+      <div style={{ ...shell, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 14 }}>
+        <div style={{ minWidth: 0 }}>
+          {recommended && <RecommendedMark mobile />}
+          <div style={{ fontFamily: GH_SERIF, fontSize: 20, fontWeight: 500, color: G.ink }}>{title}</div>
+          <div style={{ fontSize: 12.5, color: G.body, marginTop: 3 }}>
+            {rows.map(r => `${r.name} ${fmt1(r.pct)}`).join(' · ')}
+          </div>
+        </div>
+        <MiniChart rows={rows} accent={accent} mobile />
+      </div>
+    )
+  }
+
+  return (
+    <div style={shell}>
+      {recommended && <RecommendedMark />}
+      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12 }}>
+        <div>
+          <div style={{ fontFamily: GH_SERIF, fontSize: 23, fontWeight: 500, color: G.ink }}>{title}</div>
+          <div style={{ fontSize: 13.5, color: G.body, marginTop: 5, minHeight: 38, maxWidth: 190 }}>{desc}</div>
+        </div>
+        <MiniChart rows={rows} accent={accent} />
+      </div>
+      <div style={{ marginTop: 14 }}>
+        {rows.map((r, i) => (
+          <div key={i} style={{ display: 'flex', justifyContent: 'space-between', gap: 12, padding: '10px 0', borderTop: `1px solid ${G.rowRule}`, fontSize: 13.5 }}>
+            <span style={{ color: G.body, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{r.name}</span>
+            <span style={{ fontWeight: 600, color: G.ink, fontVariantNumeric: 'tabular-nums', flexShrink: 0 }}>{fmt1(r.pct)}%</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+function EmptyPlan({ courseName, onStart, mobile }) {
+  return (
+    <div style={{
+      ...cardShell,
+      marginTop: mobile ? 20 : 28,
+      padding: mobile ? '48px 24px' : '72px 36px',
+      display: 'flex', flexDirection: 'column', alignItems: 'center', textAlign: 'center',
+    }}>
+      <SectionLabel mobile={mobile}>Set up grading</SectionLabel>
+      <div style={{ fontFamily: GH_SERIF, fontSize: mobile ? 24 : 30, fontWeight: 500, color: G.ink, marginTop: 12 }}>
+        How is {courseName} graded?
+      </div>
+      <div style={{ fontSize: 14.5, lineHeight: 1.6, color: G.body, marginTop: 10, maxWidth: 440 }}>
+        Add the components from your syllabus, like exams, quizzes, and homework, with their weights. Grade Hub does the math from there.
+      </div>
+      <button onClick={onStart} className="gh-primary" style={{
+        marginTop: 24, background: G.blue, color: '#fff', border: 'none',
+        borderRadius: 10, padding: '11px 20px', fontSize: 14.5, fontWeight: 600, cursor: 'pointer',
+      }}>
+        Add your first component
+      </button>
+    </div>
+  )
+}
+
+// ── Plan tab ──────────────────────────────────────────────────────────────────
+function PlanTab({ course, gradeData, onSave, onSync, mobile }) {
   const saved = gradeData ?? {}
+  const savedComps = saved.components ?? []
+
   const [rows, setRows] = useState(() =>
-    saved.components?.length
-      ? saved.components.map(c => ({ ...c, weight: String(c.weight), grade: c.grade !== null ? String(c.grade) : '' }))
-      : [{ id: uid(), component: '', weight: '', grade: '', graded: false }]
+    savedComps.length
+      ? savedComps.map(c => ({
+          ...c,
+          weight: String(c.weight),
+          grade: c.grade !== null && c.grade !== undefined ? String(c.grade) : '',
+        }))
+      : []
   )
   const [targetGrade, setTargetGrade] = useState(saved.targetGrade ?? 85)
-  const [showPlan, setShowPlan] = useState(!!(saved.components?.length))
+  const [justSaved, setJustSaved] = useState(false)
+  const [synced, setSynced] = useState(false)
 
-  const totalWeight  = rows.reduce((s, r) => s + (parseFloat(r.weight) || 0), 0)
-  const weightOk     = Math.abs(totalWeight - 100) < 0.5
-  const canSave      = rows.every(r => r.component.trim() && parseFloat(r.weight) > 0) && weightOk
+  const blankRow = () => ({ id: uid(), component: '', weight: '', grade: '', graded: false })
 
-  const addRow    = () => setRows(p => [...p, { id: uid(), component: '', weight: '', grade: '', graded: false }])
-  const removeRow = i  => setRows(p => p.filter((_, j) => j !== i))
-  const setRow    = (i, f, v) => setRows(p => p.map((r, j) => j === i ? { ...r, [f]: v } : r))
+  const addRow    = () => { setRows(p => [...p, blankRow()]); setJustSaved(false) }
+  const removeRow = i  => { setRows(p => p.filter((_, j) => j !== i)); setJustSaved(false) }
+  const setRow    = (i, field, value) => {
+    setJustSaved(false)
+    setRows(p => p.map((r, j) => {
+      if (j !== i) return r
+      const next = { ...r, [field]: value }
+      // Typing a grade marks the row graded; clearing it marks it outstanding.
+      // The status dot is a shortcut, not a required first step.
+      if (field === 'grade') next.graded = value !== ''
+      return next
+    }))
+  }
+  const toggleGraded = i => {
+    setJustSaved(false)
+    setRows(p => p.map((r, j) => (j === i ? { ...r, graded: !(r.graded && r.grade !== ''), grade: r.graded ? '' : r.grade } : r)))
+  }
+
+  // Live components drive every figure on the page, so the answer updates as the
+  // user types. There is no Run prediction button and nothing to wait for.
+  const liveComponents = useMemo(() => rows.map(r => {
+    const grade = parseFloat(r.grade)
+    const isGraded = r.graded && r.grade !== '' && !isNaN(grade)
+    return {
+      id: r.id,
+      component: r.component.trim() || 'Untitled',
+      weight: parseFloat(r.weight) || 0,
+      grade: isGraded ? grade : null,
+      graded: isGraded,
+    }
+  }), [rows])
+
+  const totalWeight = liveComponents.reduce((s, c) => s + c.weight, 0)
+  const weightOk    = Math.abs(totalWeight - 100) < 0.5
+  const canSave     = rows.length > 0 && rows.every(r => r.component.trim() && parseFloat(r.weight) > 0) && weightOk
+
+  const math = useMemo(() => computeGradeMath(liveComponents, targetGrade), [liveComponents, targetGrade])
+  const targetLabel = TARGET_OPTIONS.find(o => o.value === targetGrade)?.label ?? 'A'
+
+  // A finished course hides Add and Save, as designed. The moment anything is
+  // edited they come back, so correcting a typo on a completed course is never
+  // a dead end.
+  const dirty = useMemo(() => {
+    if (liveComponents.length !== savedComps.length) return true
+    return liveComponents.some((c, i) => {
+      const s = savedComps[i]
+      return !s || s.component !== c.component || s.weight !== c.weight || s.grade !== c.grade
+    })
+  }, [liveComponents, savedComps])
+
+  const persist = useCallback((components, target) => {
+    onSave({ ...(gradeData ?? {}), components, targetGrade: target, scenarios: gradeData?.scenarios ?? [] })
+  }, [gradeData, onSave])
 
   const handleSave = () => {
     if (!canSave) return
-    const components = rows.map(r => ({
-      id: r.id || uid(),
-      component: r.component.trim(),
-      weight: parseFloat(r.weight),
-      grade: r.graded && r.grade !== '' ? parseFloat(r.grade) : null,
-      graded: r.graded && r.grade !== '',
-    }))
-    onSave({ ...(gradeData ?? {}), components, targetGrade, scenarios: gradeData?.scenarios ?? [] })
-    setShowPlan(true)
+    const components = liveComponents.map(c => ({ ...c }))
+    persist(components, targetGrade)
+    setJustSaved(true)
     track('grade_plan_saved', {
       course_name: course?.name,
       component_count: components.length,
       target_grade: targetGrade,
-      is_first_save: !gradeData?.components?.length,
+      is_first_save: !savedComps.length,
     })
   }
 
-  const savedComps   = gradeData?.components ?? []
-  const neededInfo   = showPlan && savedComps.length ? getNeededOnRemaining(savedComps, targetGrade) : null
-  const scenarioPaths = showPlan && savedComps.length ? generateScenarioPaths(savedComps, targetGrade) : []
-  const ungraded     = savedComps.filter(c => !c.graded || c.grade === null)
-  const targetLabel  = TARGET_OPTIONS.find(o => o.value === targetGrade)?.label ?? 'A'
+  // Changing the target re-answers the question immediately, and sticks without
+  // a save so Track and Sandbox stay in step.
+  const handleTargetChange = value => {
+    setTargetGrade(value)
+    if (savedComps.length) persist(savedComps, value)
+  }
+
+  const handleSync = async () => {
+    await onSync?.()
+    setSynced(true)
+    setTimeout(() => setSynced(false), 3000)
+  }
+
+  const paths = useMemo(
+    () => (math.hasComponents && !math.allGraded && !math.impossible
+      ? generateScenarioPaths(liveComponents, targetGrade).filter(p => p.possible !== false)
+      : []),
+    [liveComponents, targetGrade, math.hasComponents, math.allGraded, math.impossible]
+  )
+  const ungraded = liveComponents.filter(c => !c.graded)
+
+  if (!rows.length) {
+    return <EmptyPlan courseName={clean(course.name)} onStart={() => setRows([blankRow()])} mobile={mobile} />
+  }
+
+  const showHero = math.hasComponents && totalWeight > 0
 
   return (
-    <div className="gh-plan-content" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Components table */}
-      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
-        <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 8, rowGap: 8, marginBottom: 16 }}>
-          <div>
-            <div style={{ fontSize: 15, fontWeight: 600, color: D.text }}>Grade components</div>
-            <div style={{ fontSize: 12, color: D.dim, marginTop: 2 }}>Define how this course is graded</div>
-          </div>
-          <div style={{ flex: 1 }} />
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, padding: '5px 10px', borderRadius: 999, background: totalWeight === 100 ? 'rgba(52,211,153,0.1)' : 'rgba(249,115,22,0.1)', border: `1px solid ${totalWeight === 100 ? 'rgba(52,211,153,0.3)' : 'rgba(249,115,22,0.3)'}`, flexShrink: 0, marginLeft: 'auto' }}>
-            <span style={{ width: 6, height: 6, borderRadius: '50%', background: totalWeight === 100 ? D.mint : D.orange }} />
-            <span style={{ fontSize: 11.5, fontWeight: 600, color: totalWeight === 100 ? D.mint : D.orange, fontFamily: 'inherit' }}>{totalWeight.toFixed(0)}% / 100%</span>
-          </div>
-        </div>
-
-        <div className="gh-table-wrap" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-          {/* Header row */}
-          <div className="gh-plan-row gh-plan-row-header" style={{ display: 'grid', gridTemplateColumns: 'minmax(120px,1fr) 80px 100px 80px 28px', gap: 8, fontSize: 10.5, fontWeight: 600, letterSpacing: 0.5, color: D.dim, textTransform: 'uppercase', padding: '0 4px 10px', minWidth: 400 }}>
-            <span>Component</span><span>Weight</span><span>Status</span><span>Grade</span><span />
-          </div>
-
-          {rows.map((row, i) => (
-            <div key={row.id} className="gh-plan-row" style={{ display: 'grid', gridTemplateColumns: 'minmax(120px,1fr) 80px 100px 80px 28px', gap: 8, alignItems: 'center', padding: '6px 0', minWidth: 400 }}>
-              <input className="gh-input-text" type="text" value={row.component} onChange={e => setRow(i, 'component', e.target.value)} placeholder="e.g. Midterm" style={{ width: '100%' }} />
-              <div className="gh-grade-row-inner">
-                <div style={{ position: 'relative' }}>
-                  <input className="gh-input" type="number" value={row.weight} onChange={e => setRow(i, 'weight', e.target.value)} style={{ width: '100%', paddingRight: 26 }} />
-                  <span style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', fontSize: 12, color: D.dim, pointerEvents: 'none' }}>%</span>
-                </div>
-                <button onClick={() => setRow(i, 'graded', !row.graded)} style={{ padding: '7px 10px', fontSize: 12, fontWeight: 600, borderRadius: 7, cursor: 'pointer', background: row.graded ? 'rgba(59,97,196,0.08)' : 'rgba(0,0,0,0.04)', border: row.graded ? '1px solid rgba(59,97,196,0.25)' : `1px solid ${D.border}`, color: row.graded ? D.indigo : D.muted, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}>
-                  {row.graded && <span style={{ width: 5, height: 5, borderRadius: '50%', background: D.indigo }} />}
-                  {row.graded ? 'Graded' : 'Not yet'}
-                </button>
-                <input className="gh-input" type="number" value={row.grade} placeholder="-" onChange={e => setRow(i, 'grade', e.target.value)} disabled={!row.graded} style={{ width: '100%', opacity: row.graded ? 1 : 0.4 }} />
-                <button onClick={() => removeRow(i)} style={{ width: 28, height: 28, borderRadius: 6, color: D.dim, display: 'grid', placeItems: 'center', cursor: 'pointer', transition: 'all 0.15s' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = 'rgba(244,114,182,0.1)'; e.currentTarget.style.color = D.pink }}
-                  onMouseLeave={e => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = D.dim }}>
-                  <IcoX />
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-
-        <button onClick={addRow} style={{ marginTop: 8, padding: '8px 0', width: '100%', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, color: D.indigo, fontWeight: 500, cursor: 'pointer' }}>
-          <IcoPlus /> Add component
-        </button>
-      </div>
-
-      {/* Target grade */}
-      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
-        <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 12 }}>Target grade</div>
-        <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
-          {TARGET_OPTIONS.map(opt => {
-            const isActive = targetGrade === opt.value
-            const c = letterColor(opt.label)
-            return (
-              <button key={opt.label} onClick={() => setTargetGrade(opt.value)} style={{ width: 44, height: 44, borderRadius: 10, cursor: 'pointer', background: isActive ? '#3B61C4' : 'rgba(0,0,0,0.04)', border: isActive ? '1px solid rgba(59,97,196,0.5)' : `1px solid ${c}30`, color: isActive ? '#fff' : c, fontSize: 14, fontWeight: 700, transition: 'all 0.15s' }}>
-                {opt.label}
-              </button>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Save CTA */}
-      <button onClick={handleSave} disabled={!canSave} style={{ padding: '14px 20px', background: canSave ? '#3B61C4' : 'rgba(0,0,0,0.05)', border: 'none', borderRadius: 12, color: canSave ? '#fff' : D.muted, fontSize: 14, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, cursor: canSave ? 'pointer' : 'default', transition: 'all 0.2s' }}>
-        Save &amp; generate plan
-      </button>
-
-      {/* Required avg callout */}
-      {showPlan && savedComps.length > 0 && neededInfo && (
-        <div className="gh-plan-callout" style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 14 }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', wordBreak: 'break-word' }}>To hit {targetLabel}, here's what you need</div>
-              <div style={{ fontSize: 13, color: D.text, marginTop: 3, wordBreak: 'break-word' }}>
-                You need an average of <span style={{ color: D.indigo, fontWeight: 700, fontFamily: 'inherit' }}>{neededInfo.needed != null ? neededInfo.needed.toFixed(1) + '%' : '-'}</span> on remaining work
-              </div>
-            </div>
-          </div>
-
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8, position: 'relative', marginBottom: 14 }}>
-            {ungraded.map(c => (
-              <div key={c.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 6, padding: '10px 12px', background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, borderRadius: 9 }}>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 500, color: D.text }}>{c.component || 'Untitled'}</div>
-                  <div style={{ fontSize: 11, color: D.dim, marginTop: 1 }}>Worth <span style={{ fontFamily: 'inherit' }}>{c.weight}%</span> of final grade</div>
-                </div>
-                <div style={{ padding: '5px 11px', borderRadius: 999, background: 'rgba(52,211,153,0.12)', border: '1px solid rgba(52,211,153,0.3)', color: D.mint, fontSize: 12, fontWeight: 700, fontFamily: 'inherit' }}>
-                  {neededInfo.needed != null ? neededInfo.needed.toFixed(1) + '%' : '-'}
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {neededInfo.bufferPts > 0 && !neededInfo.impossible && (
-            <div style={{ padding: 12, borderRadius: 10, background: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.18)', position: 'relative' }}>
-              <div style={{ fontSize: 12.5, color: D.text, marginBottom: 8, wordBreak: 'break-word', overflowWrap: 'anywhere' }}>
-                You have a <span style={{ color: D.mint, fontWeight: 700, fontFamily: 'inherit' }}>{neededInfo.bufferPts.toFixed(1)}-point</span> buffer on remaining work. Spend it wisely.
-              </div>
-              <div style={{ height: 5, background: 'rgba(0,0,0,0.04)', borderRadius: 3, overflow: 'hidden' }}>
-                <div style={{ width: `${Math.min(100, neededInfo.bufferPts)}%`, height: '100%', background: D.accent }} />
-              </div>
-            </div>
-          )}
-
-          {neededInfo.impossible && (
-            <div style={{ padding: 12, borderRadius: 10, background: 'rgba(244,114,182,0.08)', border: `1px solid ${D.pink}30` }}>
-              <div style={{ fontSize: 12.5, color: D.pink }}>Target is no longer mathematically achievable. Consider adjusting your target grade.</div>
-            </div>
-          )}
-        </div>
+    <>
+      {showHero && (
+        <HeroCard
+          math={math}
+          components={liveComponents}
+          targetGrade={targetGrade}
+          targetLabel={targetLabel}
+          onTargetChange={handleTargetChange}
+          onSync={handleSync}
+          synced={synced}
+          mobile={mobile}
+        />
       )}
 
-      {/* Three paths */}
-      {showPlan && scenarioPaths.length > 0 && (
-        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
-          <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 12 }}>Three paths to {targetLabel}</div>
-          <div className="gh-scenarios-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 12 }}>
-            {scenarioPaths.filter(p => p.possible !== false).slice(0, 3).map((path, pi) => (
+      <ComponentsCard
+        rows={rows}
+        setRow={setRow}
+        toggleGraded={toggleGraded}
+        addRow={addRow}
+        removeRow={removeRow}
+        totalWeight={totalWeight}
+        weightOk={weightOk}
+        canSave={canSave}
+        onSave={handleSave}
+        saved={justSaved}
+        readOnly={math.allGraded && !dirty}
+        mobile={mobile}
+      />
+
+      {paths.length > 0 && ungraded.length > 0 && (
+        <div style={{ marginTop: mobile ? 28 : 36 }}>
+          <SectionLabel mobile={mobile} style={{ marginBottom: mobile ? 12 : 16 }}>
+            Three paths to your {targetLabel}
+          </SectionLabel>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: mobile ? '1fr' : '1fr 1fr 1fr',
+            gap: mobile ? 12 : 16,
+          }}>
+            {paths.slice(0, 3).map((path, pi) => (
               <PathCard
                 key={path.name}
-                color={PATH_COLORS[pi]}
-                icon={PATH_ICONS[pi]}
+                accent={PATH_ACCENTS[pi]}
                 title={path.name}
                 desc={path.description}
-                rows={ungraded.map(c => [c.component, (path.scores[c.id]?.toFixed(0) ?? '-') + '%'])}
+                rows={ungraded.map(c => ({ name: c.component, pct: path.scores[c.id] ?? 0 }))}
+                // Front-Loaded carries the quiet recommendation whenever the
+                // target is still reachable, matching the approved default.
+                recommended={pi === 2}
+                mobile={mobile}
               />
             ))}
           </div>
         </div>
       )}
-    </div>
+    </>
   )
 }
 
@@ -926,298 +1486,25 @@ function SandboxTab({ course, gradeData, dot, onSave }) {
   )
 }
 
-// ── RIGHT RAIL ────────────────────────────────────────────────────────────────
-function RightRail({ course, gradeData, onShowPaywall, userId, onSyncStudyPlan }) {
-  const [aiLoading, setAiLoading]     = useState(false)
-  const [aiPrediction, setAiPrediction] = useState(null)
-  const [aiError, setAiError]         = useState(null)
-  const [syncToast, setSyncToast]     = useState(false)
-
-  const components  = gradeData?.components ?? []
-  const targetGrade = gradeData?.targetGrade ?? 85
-  const graded      = components.filter(c => c.graded && c.grade !== null)
-  const curr        = getCurrentGrade(components)
-  const targetLabel = TARGET_OPTIONS.find(o => o.value === targetGrade)?.label ?? 'A'
-  const bestGrade   = graded.length ? Math.max(...graded.map(c => c.grade)) : null
-
-  const handleRunPredictor = async () => {
-    if (!components.length) return
-    if (!canUseAI()) { onShowPaywall?.('ai'); return }
-    setAiLoading(true)
-    setAiPrediction(null)
-    setAiError(null)
-    try {
-      const token = await getAccessToken()
-      const res = await fetch('/api/generate-study-tools', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({
-          mode: 'predict-grade',
-          courseName: course.name,
-          targetGrade: targetLabel,
-          components: components.map(c => ({ name: c.component, weight: c.weight, type: 'Assignment', earnedGrade: c.graded ? c.grade : null })),
-        }),
-      })
-      const data = await res.json()
-      if (!res.ok) throw new Error(data.error)
-      setAiPrediction(data.prediction)
-      await incrementAIQuery()
-    } catch (e) {
-      console.error(e)
-      setAiError('Could not run prediction. Try again.')
-    } finally {
-      setAiLoading(false)
-    }
-  }
-
-  const handleSync = async () => {
-    await onSyncStudyPlan?.()
-    setSyncToast(true)
-    setTimeout(() => setSyncToast(false), 3000)
-  }
-
-  return (
-    <div className="gh-rail" style={{ display: 'flex', flexDirection: 'column', gap: 16, position: 'sticky', top: 20 }}>
-      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 18 }}>
-        <div style={{ fontSize: 13, fontWeight: 600, color: D.text, marginBottom: 12 }}>Grade prediction</div>
-
-        {aiPrediction ? (
-          <div style={{ marginBottom: 14 }}>
-            <div style={{ display: 'flex', alignItems: 'baseline', gap: 8, marginBottom: 8 }}>
-              <span style={{ fontSize: 36, fontWeight: 800, color: letterColor(letterGrade(aiPrediction.predictedGrade)) }}>{aiPrediction.predictedGrade?.toFixed(1)}%</span>
-              <span style={{ fontSize: 18, fontWeight: 700, color: letterColor(letterGrade(aiPrediction.predictedGrade)) }}>{aiPrediction.letterGrade}</span>
-            </div>
-            {aiPrediction.recommendations?.length > 0 && (
-              <ul style={{ margin: 0, padding: 0, listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                {aiPrediction.recommendations.map((r, i) => (
-                  <li key={i} style={{ fontSize: 12, color: D.muted, display: 'flex', gap: 6 }}><span style={{ color: D.mint }}>→</span> {r}</li>
-                ))}
-              </ul>
-            )}
-          </div>
-        ) : (
-          <div style={{ fontSize: 13, color: D.muted, lineHeight: 1.5, marginBottom: 14 }}>
-            {graded.length > 0 ? `Based on ${graded.length} graded item${graded.length === 1 ? '' : 's'}.` : 'Add graded scores in the Track tab first.'}
-          </div>
-        )}
-
-        {aiError && <p style={{ margin: '0 0 10px', fontSize: 12, color: '#DC2626' }}>{aiError}</p>}
-        <button onClick={handleRunPredictor} disabled={aiLoading || !components.length} style={{ width: '100%', padding: '10px 14px', background: '#3B61C4', border: 'none', borderRadius: 8, fontSize: 12.5, fontWeight: 600, color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, cursor: 'pointer', opacity: aiLoading ? 0.7 : 1 }}>
-          {aiLoading
-            ? <><Spinner size="xs" color="#fff" track="rgba(255,255,255,0.3)" style={{ width: 12, height: 12 }} /> Analyzing…</>
-            : <>Run prediction</>}
-        </button>
-
-        {components.length > 0 && (
-          <>
-            <div style={{ borderTop: `1px solid ${D.border}`, margin: '14px 0 12px' }} />
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {[
-                { label: 'Best grade',   value: bestGrade !== null ? bestGrade + '%' : '-',  color: D.mint   },
-                { label: 'Current avg',  value: curr !== null ? curr.toFixed(1) + '%' : '-', color: D.indigo },
-                { label: 'Graded items', value: `${graded.length} / ${components.length}`,   color: D.text   },
-                { label: 'Target',       value: targetLabel,                                 color: D.text   },
-              ].map((s, i) => (
-                <div key={i} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                  <span style={{ fontSize: 12, color: D.muted }}>{s.label}</span>
-                  <span style={{ fontSize: 12.5, fontWeight: 600, color: s.color }}>{s.value}</span>
-                </div>
-              ))}
-            </div>
-            <div style={{ borderTop: `1px solid ${D.border}`, marginTop: 14, paddingTop: 12 }}>
-              {syncToast && <div style={{ fontSize: 12, color: D.mint, marginBottom: 8 }}>Synced to schedule.</div>}
-              <button onClick={handleSync} style={{ fontSize: 12.5, fontWeight: 500, color: D.indigo, background: 'none', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6, padding: 0 }}>
-                <IcoCalendar /> Sync to study plan
-              </button>
-            </div>
-          </>
-        )}
-      </div>
-    </div>
-  )
-}
-
-// ── GPA What-If Banner ────────────────────────────────────────────────────────
-function WhatIfBanner({ currentGPA, projectedGPA }) {
-  const diff = projectedGPA !== null && currentGPA !== null ? (projectedGPA - currentGPA) : null
-  const up   = diff !== null && diff >= 0
-  return (
-    <div style={{
-      background: 'rgba(217,119,6,0.06)', border: '1px solid rgba(217,119,6,0.2)',
-      borderRadius: 12, padding: '12px 16px', marginBottom: 20,
-      display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
-    }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-        <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#D97706', flexShrink: 0 }} />
-        <span style={{ fontSize: 12.5, fontWeight: 700, color: '#D97706' }}>What-if mode</span>
-        <span style={{ fontSize: 12, color: '#9B9B9B', fontWeight: 500 }}>Changes here don't affect your real grades</span>
-      </div>
-      {currentGPA !== null && projectedGPA !== null && (
-        <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 14 }}>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 10.5, fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Current</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: '#111111', letterSpacing: -0.5 }}>{currentGPA}</div>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', color: up ? '#16A34A' : '#DC2626' }}>
-            <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              {up
-                ? <><line x1="12" y1="19" x2="12" y2="5" /><polyline points="5 12 12 5 19 12" /></>
-                : <><line x1="12" y1="5" x2="12" y2="19" /><polyline points="19 12 12 19 5 12" /></>}
-            </svg>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <div style={{ fontSize: 10.5, fontWeight: 600, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 2 }}>Projected</div>
-            <div style={{ fontSize: 18, fontWeight: 800, color: up ? '#16A34A' : '#DC2626', letterSpacing: -0.5 }}>{projectedGPA}</div>
-          </div>
-          {diff !== null && (
-            <div style={{
-              padding: '4px 10px', borderRadius: 999,
-              background: up ? 'rgba(22,163,74,0.1)' : 'rgba(220,38,38,0.08)',
-              border: `1px solid ${up ? 'rgba(22,163,74,0.25)' : 'rgba(220,38,38,0.2)'}`,
-              color: up ? '#16A34A' : '#DC2626',
-              fontSize: 13, fontWeight: 700,
-            }}>
-              {diff >= 0 ? '+' : ''}{diff.toFixed(2)}
-            </div>
-          )}
-        </div>
-      )}
-    </div>
-  )
-}
-
-// ── What-If Track Tab ─────────────────────────────────────────────────────────
-// Same as TrackTab but grade fields are always editable and changes stay local
-function WhatIfTrackTab({ course, gradeData, dot }) {
-  const components  = gradeData?.components ?? []
-  const targetGrade = gradeData?.targetGrade ?? 85
-
-  const [localGrades, setLocalGrades] = useState(() => {
-    const m = {}
-    components.forEach(c => { m[c.id] = c.grade !== null && c.grade !== undefined ? String(c.grade) : '' })
-    return m
-  })
-  const [localGraded, setLocalGraded] = useState(() => {
-    const m = {}
-    components.forEach(c => { m[c.id] = c.graded ?? false })
-    return m
-  })
-
-  const liveComponents = useMemo(() =>
-    components.map(c => ({ ...c, grade: localGraded[c.id] && localGrades[c.id] !== '' ? parseFloat(localGrades[c.id]) : null, graded: localGraded[c.id] && localGrades[c.id] !== '' })),
-    [components, localGrades, localGraded]
-  )
-
-  const currentGrade = getCurrentGrade(liveComponents)
-  const totalWeight  = liveComponents.reduce((s, c) => s + c.weight, 0)
-  const ltr          = letterGrade(currentGrade)
-  const lc           = letterColor(ltr)
-
-  if (!components.length) return (
-    <div style={{ padding: '40px 0', textAlign: 'center' }}>
-      <p style={{ color: D.muted, fontSize: 13 }}>Set up grade components in the Plan tab first.</p>
-    </div>
-  )
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 24 }}>
-        <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 8 }}>Projected grade</div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 8 }}>
-          <span style={{ fontSize: 64, fontWeight: 800, letterSpacing: -2, lineHeight: 1, color: lc }}>
-            {currentGrade !== null ? currentGrade.toFixed(1) : '-'}
-          </span>
-          <span style={{ fontSize: 22, fontWeight: 500, color: D.muted }}>%</span>
-          <span style={{ fontSize: 28, fontWeight: 700, color: lc, marginLeft: 8 }}>{ltr}</span>
-        </div>
-      </div>
-
-      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 20 }}>
-        <div style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: 0.5, color: D.muted, textTransform: 'uppercase', marginBottom: 14 }}>Adjust any grade</div>
-        {liveComponents.map((c, i) => {
-          const gradeVal = localGrades[c.id] !== '' && !isNaN(parseFloat(localGrades[c.id])) ? parseFloat(localGrades[c.id]) : null
-          const weightPct = totalWeight > 0 ? (c.weight / totalWeight) * 100 : 0
-          return (
-            <div key={c.id} style={{ padding: '14px 0', borderBottom: i < liveComponents.length - 1 ? `1px solid ${D.border}` : 'none' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
-                <div style={{ flex: 1, minWidth: 0 }}>
-                  <div style={{ fontSize: 13.5, fontWeight: 500, color: D.text }}>{c.component}</div>
-                  <div style={{ fontSize: 11.5, color: D.dim, marginTop: 2 }}><span style={{ fontFamily: 'inherit' }}>{c.weight}%</span> of grade</div>
-                </div>
-                <div style={{ position: 'relative', flexShrink: 0 }}>
-                  <input
-                    type="number" min="0" max="100" step="0.1"
-                    value={localGrades[c.id]}
-                    onChange={e => {
-                      setLocalGrades(p => ({ ...p, [c.id]: e.target.value }))
-                      if (e.target.value !== '') setLocalGraded(p => ({ ...p, [c.id]: true }))
-                    }}
-                    placeholder="--"
-                    className="gh-input"
-                    style={{ width: 72, textAlign: 'center', color: gradeVal != null ? letterColor(letterGrade(gradeVal)) : D.dim, fontWeight: gradeVal != null ? 700 : 400, border: '1.5px solid rgba(217,119,6,0.4)' }}
-                  />
-                  <span style={{ position: 'absolute', right: 8, top: '50%', transform: 'translateY(-50%)', fontSize: 11, color: D.dim, pointerEvents: 'none' }}>%</span>
-                </div>
-              </div>
-              <div style={{ height: 3, borderRadius: 2, background: 'rgba(0,0,0,0.05)', overflow: 'hidden' }}>
-                <div style={{ height: '100%', borderRadius: 2, width: `${weightPct}%`, background: gradeVal != null ? letterColor(letterGrade(gradeVal)) : D.border, transition: 'width 0.3s, background 0.3s' }} />
-              </div>
-            </div>
-          )
-        })}
-      </div>
-    </div>
-  )
-}
-
 // ── Main ──────────────────────────────────────────────────────────────────────
-export default function GradeHubView({ courses, onEditCourse, userId, onShowPaywall, initialCourseIdx = 0, onSyncToCalendar }) {
+// userId is still passed by OutputView but is no longer read here: the AI
+// prediction call that needed it is gone, the math is local now.
+export default function GradeHubView({ courses, onEditCourse, onShowPaywall, initialCourseIdx = 0, onSyncToCalendar }) {
   const plan = getActivePlan()
+  const mobile = useIsMobile()
 
   const [activeCourseIdx, setActiveCourseIdx] = useState(() =>
     Math.max(0, Math.min(initialCourseIdx, courses.length - 1))
   )
   const [activeTab, setActiveTab] = useState('plan')
-  const [whatIfMode, setWhatIfMode] = useState(false)
 
   useEffect(() => {
     const idx = Math.max(0, Math.min(initialCourseIdx, courses.length - 1))
     setActiveCourseIdx(idx)
-  }, [initialCourseIdx])
-
-  if (plan === 'free') return <LockedState onShowPaywall={onShowPaywall} />
-  if (!courses.length) return (
-    <div style={{ padding: '60px 32px', textAlign: 'center' }}>
-      <p style={{ color: D.muted, fontSize: 13 }}>Add courses to use the Grade Hub.</p>
-    </div>
-  )
+  }, [initialCourseIdx, courses.length])
 
   const course    = courses[activeCourseIdx]
-  const dot       = course?.color?.dot ?? D.accent
   const gradeData = course?.gradeData ?? null
-  const hasSetup  = !!(gradeData?.components?.length)
-  const gpa       = computeGPA(courses)
-
-  // Quick-answer: "You need X% on remaining work to hit your target"
-  const quickNeed = (() => {
-    if (!hasSetup) return null
-    const comps = gradeData?.components ?? []
-    const target = gradeData?.targetGrade ?? 85
-    const gradedWeight = comps.filter(x => x.graded && x.grade != null).reduce((a, c) => a + (parseFloat(c.weight) || 0), 0)
-    if (gradedWeight < 20) return null
-    return getNeededOnRemaining(comps, target)
-  })()
-
-  // Reset what-if mode when switching courses
-  const handleSelectCourseWithReset = (idx) => {
-    setWhatIfMode(false)
-    handleSelectCourse(idx)
-  }
-
-  const handleSelectCourse = idx => {
-    setActiveCourseIdx(idx)
-    setActiveTab('plan')
-  }
 
   const handleSaveGradeData = useCallback((newData) => {
     onEditCourse(activeCourseIdx, { ...course, gradeData: newData })
@@ -1270,162 +1557,107 @@ export default function GradeHubView({ courses, onEditCourse, userId, onShowPayw
     if (sessions.length) onSyncToCalendar?.(sessions)
   }, [gradeData, course, activeCourseIdx, onSyncToCalendar])
 
+  if (plan === 'free') return <LockedState onShowPaywall={onShowPaywall} />
+  if (!courses.length) return (
+    <div style={{ background: G.pageBg, minHeight: '100vh', padding: '60px 32px', textAlign: 'center' }}>
+      <p style={{ color: G.body, fontSize: 13 }}>Add courses to use the Grade Hub.</p>
+    </div>
+  )
+
+  const dot      = course?.color?.dot ?? G.blue
+  const gpa      = computeGPA(courses)
+  const hasSetup = !!(gradeData?.components?.length)
+  const activeDays = daysTo(course.examDate)
+  const activeComps = gradeData?.components ?? []
+  const activeAllGraded = activeComps.length > 0 && activeComps.every(c => c.graded && c.grade !== null && c.grade !== undefined)
+  const activeMeta = activeAllGraded ? 'Complete' : (activeDays !== null && activeDays >= 0 ? `Final in ${activeDays} days` : null)
+
   return (
-    <div style={{ background: D.bg, minHeight: '100vh', overflowX: 'hidden', maxWidth: '100vw', backgroundImage: 'none', animation: 'gh-in 280ms cubic-bezier(0.16,1,0.3,1) both' }}>
+    <div style={{ background: G.pageBg, minHeight: '100vh', overflowX: 'hidden', maxWidth: '100vw', animation: 'gh-in 280ms cubic-bezier(0.16,1,0.3,1) both' }}>
       <style>{GH_STYLE}{`@keyframes spin{to{transform:rotate(360deg)}} @keyframes gh-in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}`}</style>
 
-      {/* Header */}
-      <div className="gh-header" style={{ padding: '28px 32px 20px', borderBottom: `1px solid ${D.border}` }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 6 }}>
-          <span style={{ fontSize: 11.5, fontWeight: 600, letterSpacing: '0.05em', color: D.muted, textTransform: 'uppercase' }}>Academic Control</span>
-          <span style={{ width: 4, height: 4, borderRadius: '50%', background: D.dim }} />
-          <span style={{ fontSize: 11.5, color: D.dim }}>{getCurrentSemester()} · {courses.length} courses tracked</span>
+      <div className="gh-content" style={{ maxWidth: 1080, margin: '0 auto', padding: '44px 40px 72px' }}>
+        {/* Title block */}
+        <div style={{ fontSize: mobile ? 10.5 : 11, fontWeight: 600, letterSpacing: '.1em', color: G.label, textTransform: 'uppercase' }}>
+          Academic Control · {getCurrentSemester()}{!mobile && ` · ${courses.length} ${courses.length === 1 ? 'course' : 'courses'} tracked`}
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap', rowGap: 10 }}>
-          <h1 style={{ margin: 0, fontSize: 32, fontWeight: 700, letterSpacing: -0.8, color: D.text, display: 'flex', alignItems: 'center', gap: 12 }}>
-            Grade Hub
-            {gpa && (
-              <span style={{ fontSize: 13, fontWeight: 500, color: D.indigo, background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)', padding: '4px 10px', borderRadius: 999, verticalAlign: 'middle' }}>
-                GPA {gpa}
-              </span>
-            )}
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: mobile ? 10 : 14, marginTop: mobile ? 8 : 10, flexWrap: 'wrap' }}>
+          <h1 style={{ margin: 0, fontFamily: GH_SERIF, fontSize: mobile ? 36 : 44, fontWeight: 500, color: G.ink, letterSpacing: '-0.01em' }}>
+            Grade Hub<span style={{ color: G.blue }}>.</span>
           </h1>
-          <div style={{ marginLeft: 'auto' }}>
-            <button
-              onClick={() => setWhatIfMode(v => !v)}
-              style={{
-                display: 'inline-flex', alignItems: 'center', gap: 8,
-                padding: '8px 16px', borderRadius: 10, cursor: 'pointer', fontWeight: 600, fontSize: 13,
-                background: whatIfMode ? 'rgba(217,119,6,0.1)' : 'rgba(0,0,0,0.04)',
-                border: whatIfMode ? '1.5px solid rgba(217,119,6,0.35)' : `1px solid ${D.border}`,
-                color: whatIfMode ? '#D97706' : D.muted,
-                transition: 'all 0.18s',
-              }}
-            >
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M9 3v6l-5 9a2 2 0 002 3h12a2 2 0 002-3l-5-9V3M9 3h6M8 14h8"/>
-              </svg>
-              What-if {whatIfMode ? 'ON' : 'OFF'}
-            </button>
-          </div>
+          {gpa && (
+            <span style={{ border: `1px solid ${G.chipBorder}`, borderRadius: 999, padding: mobile ? '3px 9px' : '4px 11px', fontSize: mobile ? 11.5 : 12, fontWeight: 500, color: G.body }}>
+              GPA {gpa}
+            </span>
+          )}
         </div>
-        {quickNeed && (
-          <p style={{ margin: '6px 0 0', fontSize: 13, color: quickNeed.impossible ? D.red : quickNeed.bufferPts > 5 ? D.green : D.muted, fontWeight: quickNeed.impossible || quickNeed.bufferPts > 5 ? 600 : 400 }}>
-            {quickNeed.impossible
-              ? `Target grade may be out of reach on ${clean(course?.name ?? 'this course')}. Check the Sandbox.`
-              : quickNeed.bufferPts > 5
-                ? `You have a ${quickNeed.bufferPts.toFixed(0)}-point buffer on remaining work in ${clean(course?.name ?? 'this course')}.`
-                : `You need ${quickNeed.needed.toFixed(0)}% on remaining work to hit your target in ${clean(course?.name ?? 'this course')}.`
-            }
-          </p>
-        )}
-        {!quickNeed && (
-          <p style={{ margin: '6px 0 0', fontSize: 14, color: D.muted, maxWidth: 640 }}>
-            Plan, track, and model every scenario for your final grade, one calculator per course.
-          </p>
-        )}
-      </div>
 
-      <div className="gh-content" style={{ padding: '24px 32px 48px', overflowX: 'hidden', maxWidth: '100%' }}>
-        {/* Course pills */}
-        <div className="gh-course-strip" style={{ display: 'flex', gap: 12, marginBottom: 20, overflowX: 'auto' }}>
+        {/* Course switcher */}
+        <div className="gh-course-strip" style={{ display: 'flex', gap: mobile ? 8 : 10, marginTop: mobile ? 20 : 26, alignItems: 'center' }}>
           {courses.map((c, i) => (
-            <CourseCard key={i} course={c} active={activeCourseIdx === i} onClick={() => handleSelectCourseWithReset(i)} />
+            <CourseChip
+              key={c.id ?? i}
+              course={c}
+              active={activeCourseIdx === i}
+              mobile={mobile}
+              onClick={() => { setActiveCourseIdx(i); setActiveTab('plan') }}
+            />
           ))}
         </div>
+        {mobile && activeMeta && (
+          <div style={{ marginTop: 10, fontSize: 12.5, fontWeight: 500, color: G.body }}>{activeMeta}</div>
+        )}
 
-        {/* Grade recovery alert: fires when grade is tracked + 10+ pts below target */}
-        {(() => {
+        <Tabs
+          active={activeTab}
+          mobile={mobile}
+          onChange={tab => { setActiveTab(tab); track('grade_hub_tab_changed', { tab, course_name: course?.name }) }}
+        />
+
+        {/* Recovery nudge. The Plan tab now states the shortfall in the hero and
+            offers a retarget, so this only rides along on Track and Sandbox. */}
+        {activeTab !== 'plan' && (() => {
           if (!hasSetup) return null
-          const comps = gradeData?.components ?? []
-          const curr = getCurrentGrade(comps)
+          const curr = getCurrentGrade(activeComps)
           const target = gradeData?.targetGrade ?? 85
-          const gradedWeight = comps.filter(x => x.graded && x.grade != null).reduce((a, c) => a + (parseFloat(c.weight) || 0), 0)
-          if (curr === null || gradedWeight < 30) return null // not enough data yet
+          const gradedWeight = activeComps.filter(x => x.graded && x.grade != null).reduce((a, c) => a + (parseFloat(c.weight) || 0), 0)
+          if (curr === null || gradedWeight < 30) return null
           const gap = target - curr
-          if (gap < 10) return null // on track
-          const examDays = daysTo(course.examDate)
-          const urgent = examDays !== null && examDays <= 21
+          if (gap < 10) return null
+          const urgent = activeDays !== null && activeDays <= 21
           return (
-            <div style={{
-              marginBottom: 18,
-              background: urgent ? 'rgba(220,38,38,0.05)' : 'rgba(217,119,6,0.05)',
-              border: `1px solid ${urgent ? 'rgba(220,38,38,0.2)' : 'rgba(217,119,6,0.2)'}`,
-              borderLeft: `4px solid ${urgent ? '#DC2626' : '#D97706'}`,
-              borderRadius: 10,
-              padding: '14px 18px',
-              display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
-            }}>
-              <div style={{ flex: 1, minWidth: 200 }}>
-                <p style={{ margin: '0 0 3px', fontWeight: 700, fontSize: 13, color: urgent ? '#DC2626' : '#92400E' }}>
-                  {urgent
-                    ? `Grade recovery mode: ${examDays}d to exam, ${gap.toFixed(0)}pts below target`
-                    : `${gap.toFixed(0)} points below your target grade`}
-                </p>
-                <p style={{ margin: 0, fontSize: 12, color: D.muted, lineHeight: 1.5 }}>
-                  {urgent
-                    ? 'Use the Sandbox tab to model exactly what scores you need on remaining work to hit your target.'
-                    : 'Your current grade needs to improve. Check the Sandbox to see what scores would close the gap.'}
-                </p>
+            <div style={{ marginTop: 24, borderLeft: `3px solid ${G.amber}`, padding: '4px 0 6px 18px', maxWidth: 640 }}>
+              <div style={{ fontSize: 11, fontWeight: 600, letterSpacing: '.09em', color: G.amberText, textTransform: 'uppercase' }}>
+                {gap.toFixed(0)} points below target
               </div>
-              <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
-                <button
-                  onClick={() => setActiveTab('sandbox')}
-                  style={{ background: urgent ? '#DC2626' : '#D97706', color: '#fff', border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 12, fontWeight: 600, cursor: 'pointer', whiteSpace: 'nowrap' }}
-                >
-                  Open Sandbox
-                </button>
+              <div style={{ fontSize: 13.5, lineHeight: 1.6, color: G.secondary, marginTop: 6 }}>
+                {urgent
+                  ? `Your final is in ${activeDays} days. `
+                  : ''}
+                Model the scores that close the gap in the Sandbox.{' '}
+                {activeTab !== 'sandbox' && (
+                  <button className="gh-link" onClick={() => setActiveTab('sandbox')} style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', font: 'inherit', fontWeight: 600, color: G.blue }}>
+                    Open Sandbox
+                  </button>
+                )}
               </div>
             </div>
           )
         })()}
 
-        {/* What-if mode banner */}
-        {whatIfMode && (
-          <WhatIfBanner
-            currentGPA={gpa}
-            projectedGPA={gpa}
-          />
-        )}
-
-        {/* Course label + tabs */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 14 }}>
-          <span style={{ width: 10, height: 10, borderRadius: '50%', background: dot, boxShadow: `0 0 10px ${dot}` }} />
-          <span style={{ fontSize: 16, fontWeight: 600, color: D.text }}>{clean(course.name)}</span>
-          <span style={{ marginLeft: 'auto', fontSize: 11, color: D.dim, fontFamily: 'inherit' }}>
-            {daysTo(course.examDate) !== null ? `${daysTo(course.examDate)}d to exam` : ''}
-          </span>
+        <div style={{ marginTop: activeTab === 'plan' ? 0 : 24 }}>
+          {activeTab === 'plan' && (
+            <PlanTab
+              course={course}
+              gradeData={gradeData}
+              onSave={handleSaveGradeData}
+              onSync={handleSyncStudyPlan}
+              mobile={mobile}
+            />
+          )}
+          {activeTab === 'track'   && <TrackTab   course={course} gradeData={gradeData} dot={dot} onSave={handleSaveGradeData} />}
+          {activeTab === 'sandbox' && <SandboxTab course={course} gradeData={gradeData} dot={dot} onSave={handleSaveGradeData} />}
         </div>
-        <div style={{ marginBottom: 20 }}>
-          <Tabs active={activeTab} onChange={tab => { setActiveTab(tab); track('grade_hub_tab_changed', { tab, course_name: course?.name }) }} />
-        </div>
-
-        {whatIfMode && hasSetup ? (
-          <WhatIfTrackTab course={course} gradeData={gradeData} dot={dot} />
-        ) : hasSetup ? (
-          <div className="gh-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 320px', gap: 20, alignItems: 'flex-start' }}>
-            <div>
-              {activeTab === 'plan'    && <PlanTab    course={course} gradeData={gradeData} dot={dot} onSave={handleSaveGradeData} />}
-              {activeTab === 'track'   && <TrackTab   course={course} gradeData={gradeData} dot={dot} onSave={handleSaveGradeData} />}
-              {activeTab === 'sandbox' && <SandboxTab course={course} gradeData={gradeData} dot={dot} onSave={handleSaveGradeData} />}
-            </div>
-            <div className="gh-rail"><RightRail course={course} gradeData={gradeData} onShowPaywall={onShowPaywall} userId={userId} onSyncStudyPlan={handleSyncStudyPlan} /></div>
-          </div>
-        ) : activeTab === 'plan' ? (
-          <PlanTab course={course} gradeData={gradeData} dot={dot} onSave={handleSaveGradeData} />
-        ) : (
-          // Setup empty state
-          <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 40, textAlign: 'center' }}>
-            <div style={{ width: 48, height: 48, borderRadius: 12, margin: '0 auto 14px', background: `${dot}18`, color: dot, display: 'grid', placeItems: 'center' }}>
-              <IcoPlus />
-            </div>
-            <div style={{ fontSize: 16, fontWeight: 600, color: D.text, marginBottom: 6 }}>Set up {clean(course.name)}</div>
-            <div style={{ fontSize: 13, color: D.muted, marginBottom: 18 }}>Add grade components, weights, and your target to start tracking.</div>
-            <button onClick={() => setActiveTab('plan')} style={{ padding: '11px 22px', background: '#3B61C4', borderRadius: 10, color: '#fff', fontSize: 13, fontWeight: 600, display: 'inline-flex', alignItems: 'center', gap: 7, cursor: 'pointer', border: 'none' }}>
-              Set up course
-            </button>
-          </div>
-        )}
       </div>
     </div>
   )
