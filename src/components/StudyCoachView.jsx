@@ -1,7 +1,10 @@
 import { useState, useEffect, useRef, useMemo } from 'react'
 import Spinner from './ui/spinner'
 import { jsPDF } from 'jspdf'
-import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan, saveCoachPlanStruggles, saveCoachPlanHardNote, clearCoachPlanHardNotes } from '../lib/db'
+import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan, saveCoachPlanStruggles, saveCoachPlanHardNote, clearCoachPlanHardNotes, saveCoachPlanObject, saveCoachPlanPushedAt } from '../lib/db'
+import StudyCoachPlanView from './StudyCoachPlanView'
+import { buildScheduleBlocks } from '../utils/pushPlanToSchedule'
+import { catchUpReschedule, nextSession, flattenSessions } from '../../lib/shared/coachPlan.js'
 import { extractText } from '../utils/extractText'
 import { clean } from '../utils/strings'
 import { getAccessToken } from '../lib/supabase'
@@ -301,7 +304,7 @@ function CoachRail({ form, confidence, course }) {
 }
 
 // ── Step 1: Intake ────────────────────────────────────────────────────────────
-function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, materialError, onMaterialFile, onNext, syllabusHintFile, onSyllabusHint }) {
+function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, materialError, onMaterialFile, onNext, syllabusHintFile, onSyllabusHint, onSaveStruggles }) {
   const update = (k, v) => setForm(f => ({ ...f, [k]: v }))
   const course = courses[form.courseIdx]
   const _EXAM_PAT = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
@@ -377,6 +380,23 @@ function IntakeStep({ form, setForm, courses, cachedStruggles, materialLoading, 
             <textarea className="sc-input" value={form.struggles || ''} onChange={e => update('struggles', e.target.value)} placeholder={`e.g. "Statistical significance, research design"`} />
           </FieldBlock>
         </div>
+
+        {/* Struggle Tracker. The plan screen's topics strip links here, so this
+            is where a tracked struggle is actually added or resolved. Entries
+            saved here are fed to the generator and come back as sessions with
+            "From your Struggle Tracker" provenance. */}
+        {onSaveStruggles && form.courseIdx >= 0 && courses[form.courseIdx] && (
+          <div style={{ marginTop: 4 }}>
+            <StruggleTracker
+              struggles={cachedStruggles ?? []}
+              courseId={courses[form.courseIdx].id ?? form.courseIdx}
+              courseName={courses[form.courseIdx].name}
+              courseIdx={form.courseIdx}
+              dot={courses[form.courseIdx].color?.dot || D.accent}
+              onSave={onSaveStruggles}
+            />
+          </div>
+        )}
 
         {/* Dates */}
         <FieldBlock icon="calendar" color={D.violet} label="Upcoming deadlines" hint="Exam, quiz, or project dates. The plan is anchored around these.">
@@ -622,149 +642,6 @@ function ReviewStep({ form, setForm, courses, onBack, onBuild, loading }) {
   )
 }
 
-// ── Step 3: Plan ──────────────────────────────────────────────────────────────
-function PlanStepWrapper({ plan, form, courses, pushed, onPush, onRefine, error, onStartFocus, struggles, onSaveStruggles, pendingHardNotes, onWeekCheckIn }) {
-  const course = courses[form.courseIdx]
-  const color = course?.color?.dot || D.accent
-  const sessionLen = form.sessionLen || 60
-  const allSessions = plan?.weeklyFocus?.flatMap(w => w.sessions || []) || []
-  const totalSessions = allSessions.length
-  const totalHours = ((totalSessions * sessionLen) / 60).toFixed(1)
-  const weeks = plan?.weeklyFocus?.length || 0
-  const priorityTopicsCount = plan?.priorityTopics?.length || 0
-  const deadlinesCount = (form?.dates || []).filter(d => d.date && d.label).length
-  const firstSession = plan?.weeklyFocus?.[0]?.sessions?.[0]
-  const [hardNoteDismissed, setHardNoteDismissed] = useState(false)
-
-  const handleBannerDismiss = async () => {
-    setHardNoteDismissed(true)
-    try {
-      const courseId = course?.id ?? form.courseIdx
-      await clearCoachPlanHardNotes(courseId)
-    } catch {}
-  }
-
-  const handleBannerUpdate = async () => {
-    try {
-      const courseId = course?.id ?? form.courseIdx
-      await clearCoachPlanHardNotes(courseId)
-    } catch {}
-    onRefine()
-  }
-
-  if (error) {
-    return (
-      <div style={{ padding: 40, textAlign: 'center', background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14 }}>
-        <Icon name="warn" size={28} color={D.orange} />
-        <div style={{ fontSize: 16, fontWeight: 600, color: D.text, marginTop: 12, marginBottom: 6 }}>Couldn't generate plan</div>
-        <div style={{ fontSize: 13, color: D.muted, marginBottom: 18 }}>{error}</div>
-        <button onClick={onRefine} style={{ padding: '11px 20px', borderRadius: 10, background: '#3B61C4', color: '#fff', fontSize: 13, fontWeight: 600, cursor: 'pointer', border: 'none' }}>Go back and try again</button>
-      </div>
-    )
-  }
-
-  if (!plan) return null
-
-  const showBanner = !hardNoteDismissed && pendingHardNotes?.length > 0
-
-  return (
-    <div className="sc-grid" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,1fr) 300px', gap: 24, alignItems: 'flex-start' }}>
-      <div>
-        {showBanner && (
-          <AdaptiveFeedbackBanner
-            notes={pendingHardNotes}
-            onUpdate={handleBannerUpdate}
-            onDismiss={handleBannerDismiss}
-          />
-        )}
-        {onSaveStruggles && (
-          <StruggleTracker
-            struggles={struggles ?? []}
-            courseId={course?.id ?? form.courseIdx}
-            courseName={course?.name ?? ''}
-            dot={color}
-            onSave={onSaveStruggles}
-            courseIdx={form.courseIdx}
-          />
-        )}
-        <PlanView plan={plan} course={course} dot={color} pushed={pushed} onPush={onPush} onReset={onRefine} form={form} onStartFocus={onStartFocus} onWeekCheckIn={onWeekCheckIn} />
-      </div>
-      {/* Right rail */}
-      <div className="sc-rail" style={{ position: 'sticky', top: 20, display: 'flex', flexDirection: 'column', gap: 14 }}>
-        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 16 }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase', marginBottom: 12 }}>At a Glance</div>
-          <StatRow label="Total sessions" value={totalSessions} color={D.indigo} />
-          <StatRow label="Hours of study" value={`${totalHours}h`} color={D.mint} />
-          <StatRow label="Weeks" value={weeks} color={D.violet} />
-          <StatRow label="Your cadence" value={`${form.daysPerWeek || 3}×${sessionLen}m`} color={D.amber} />
-          {priorityTopicsCount > 0 && <StatRow label="Priority topics" value={priorityTopicsCount} color={D.orange} />}
-          {deadlinesCount > 0 && <StatRow label="Deadlines tracked" value={deadlinesCount} color={D.pink} last />}
-        </div>
-        {firstSession && (
-          <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: 16 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 10 }}>
-              <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>Start Here</span>
-            </div>
-            <div style={{ fontSize: 13.5, fontWeight: 600, color: D.text, marginBottom: 4, lineHeight: 1.4 }}>{firstSession.focusArea}</div>
-            <div style={{ fontSize: 12, color: D.muted, marginBottom: 14 }}>{(firstSession.goal || '').split('.')[0]} · {firstSession.duration || sessionLen}m</div>
-            <button
-              onClick={() => {
-                if (!onStartFocus || !course) return
-                const todayStr = new Date().toISOString().split('T')[0]
-                onStartFocus({
-                  id: `coach-${todayStr}-0-0`,
-                  courseId: form.courseIdx,
-                  courseName: course.name,
-                  color: course.color,
-                  sessionType: firstSession.sessionLabel || 'Review',
-                  duration: firstSession.duration || sessionLen,
-                  dateStr: todayStr,
-                  isManual: true,
-                  focusArea: firstSession.focusArea,
-                  keyTopics: firstSession.keyTopics ?? [],
-                  goal: firstSession.goal ?? '',
-                })
-              }}
-              style={{ width: '100%', padding: '11px', borderRadius: 10, background: '#3B61C4', color: '#fff', fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none' }}
-            >
-              Start first session →
-            </button>
-          </div>
-        )}
-        <div style={{ padding: 14, borderRadius: 11, background: 'rgba(52,211,153,0.06)', border: '1px solid rgba(52,211,153,0.2)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
-            <Icon name="check" size={13} color={D.mint} stroke={2.5} />
-            <span style={{ fontSize: 12, fontWeight: 600, color: D.mint }}>Grounded in your inputs</span>
-          </div>
-          <div style={{ fontSize: 11.5, color: D.muted, lineHeight: 1.5 }}>Every session references a topic, date, or learning style you provided. Nothing has been invented.</div>
-        </div>
-        {!canUseFeature('coachPlan').allowed && (
-          <div style={{ padding: 14, borderRadius: 11, background: 'rgba(59,97,196,0.06)', border: '1px solid rgba(59,97,196,0.20)' }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: D.accent, marginBottom: 4 }}>You've used your free plan.</div>
-            <div style={{ fontSize: 11.5, color: D.muted, lineHeight: 1.5, marginBottom: 10 }}>Upgrade to regenerate, add more courses, and build plans for every class.</div>
-            <button
-              onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'coach-plan-result' } }))}
-              style={{ width: '100%', padding: '9px', borderRadius: 8, background: D.accent, color: '#fff', fontSize: 12.5, fontWeight: 700, cursor: 'pointer', border: 'none' }}
-            >
-              {hasUsedTrial() ? 'Upgrade to Pro →' : 'Start 7-day free trial →'}
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-function StatRow({ label, value, color, last }) {
-  return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', padding: '7px 0', alignItems: 'center', borderBottom: last ? 'none' : `1px solid ${D.border}` }}>
-      <span style={{ fontSize: 12, color: D.muted }}>{label}</span>
-      <span style={{ fontSize: 13, fontWeight: 700, color }}>{value}</span>
-    </div>
-  )
-}
-
-// ── My Plans landing view ─────────────────────────────────────────────────────
 function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
   const savedPlans = useMemo(() => courses.map((c, i) => loadCoachPlan(c.id ?? i)), [courses])
   const withPlans = useMemo(() => courses.map((c, i) => ({ course: c, idx: i, saved: savedPlans[i] })).filter(x => x.saved?.plan), [courses, savedPlans])
@@ -934,7 +811,7 @@ function MyPlansView({ courses, onBuildPlan, onViewPlan }) {
 }
 
 // ── Main export ───────────────────────────────────────────────────────────────
-export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle, completedSessions = [], scheduledSessions = [], restDays = [], onOpenExamRescue, onStartSyllabusOnboarding }) {
+export default function StudyCoachView({ courses, userId, onShowPaywall, googleEvents = [], preferredTime = 'Morning', onStartFocus, onNavigateToCourses, onPushToSchedule, learningStyle, completedSessions = [], scheduledSessions = [], restDays = [], onOpenExamRescue, onStartSyllabusOnboarding, coachPlanVersion = 0, onOpenGradeHub }) {
   const [step, setStep] = useState(1)
   const defaultStyle = learningStyle ? [learningStyle] : []
   const [form, setForm] = useState({
@@ -947,6 +824,9 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [pushed, setPushed] = useState(false)
+  const [pushBusy, setPushBusy] = useState(false)
+  const [catchUpBusy, setCatchUpBusy] = useState(false)
+  const [notice, setNotice] = useState(null)
   const [cachedStruggles, setCachedStruggles] = useState([])
   const [uiMode, setUiMode] = useState('plans') // 'plans' | 'building' | 'viewing'
 
@@ -978,6 +858,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
         if (saved.plan) setStep(3)
       }
       setCachedStruggles(saved.struggles ?? [])
+      setPushed(!!saved.pushedAt)
     } else {
       setPlan(null)
       setStep(1)
@@ -992,9 +873,23 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
         return { ...f, dates: [{ label: 'Exam Day', date: course.examDate }, ...filtered] }
       })
     }
-    setPushed(false)
     setError('')
+    setNotice(null)
   }, [form.courseIdx])
+
+  // Completion happens in Focus Mode, which writes back to the stored plan and
+  // bumps this counter. Re-reading here is what makes the hero advance, the bar
+  // move and "X of 12" tick up when the student comes back from a session.
+  useEffect(() => {
+    const idx = form.courseIdx
+    if (idx < 0 || !courses[idx]) return
+    const saved = loadCoachPlan(courses[idx].id ?? idx)
+    if (saved?.plan) {
+      setPlan(saved.plan)
+      setPushed(!!saved.pushedAt)
+      setCachedStruggles(saved.struggles ?? [])
+    }
+  }, [coachPlanVersion])
 
   const handleMaterialFile = async (file) => {
     setMaterialLoading(true)
@@ -1081,7 +976,19 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       setPlan(data)
       const courseId = course.id ?? form.courseIdx
       saveCoachPlan(courseId, data, { ...form, sessionMinutes: form.sessionLen, importantDates: form.dates, emphasisTopics: form.topics?.join(', ') })
-      track('study_plan_generated', { plan: getActivePlan(), weekCount: data.weeks?.length ?? 0 })
+      // Regenerating replaces the plan, so the old calendar blocks no longer
+      // correspond to anything. Clear the pushed flag: the student is asked to
+      // push again rather than being shown a green dot for a stale schedule.
+      await saveCoachPlanPushedAt(courseId, null)
+      setPushed(false)
+      setNotice(null)
+      // Drop the previous plan's calendar blocks. Their session ids belong to a
+      // plan that no longer exists, so leaving them would orphan them on the
+      // Schedule page with nothing to complete them against.
+      onPushToSchedule?.([], courseId)
+      // weekCount read `data.weeks`, which this endpoint has never returned,
+      // so every event since launch reported 0.
+      track('study_plan_generated', { plan: getActivePlan(), weekCount: data.weeklyFocus?.length ?? 0 })
       await incrementAIQuery()
       await incrementFeatureUsage('coachPlan')
       setStep(3)
@@ -1094,169 +1001,147 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     }
   }
 
-  const handlePush = () => {
+  // Push and Update both run this. Session dates come from the plan itself, so
+  // pushing twice replaces the same blocks rather than inventing a new spread.
+  const handlePush = async () => {
     const course = courses[form.courseIdx]
     if (!plan || !course) return
     const courseId = course.id ?? form.courseIdx
-    saveCoachPlan(courseId, plan, { ...form, sessionMinutes: form.sessionLen, importantDates: form.dates })
-
-    const sessionLen = form.sessionLen || 60
-    const daysPerWeek = form.daysPerWeek || 3
-    const MIN_BREAK = 30      // minutes break required between any two study sessions
-    const MAX_STUDY_PER_DAY = 2 // max study sessions per day across all plans
-
-    // Time windows in minutes since midnight
-    const TIME_WINDOWS = {
-      Morning:   { start: 8 * 60,  end: 12 * 60 },
-      Afternoon: { start: 13 * 60, end: 18 * 60 },
-      Evening:   { start: 18 * 60, end: 22 * 60 },
-    }
-    const preferred = TIME_WINDOWS[preferredTime] ?? TIME_WINDOWS.Morning
-    const windowOrder = [preferred, ...Object.values(TIME_WINDOWS).filter(w => w !== preferred)]
-
-    const minsToTime = mins => {
-      const h24 = Math.floor(mins / 60), m = mins % 60
-      return `${h24 % 12 || 12}:${String(m).padStart(2, '0')} ${h24 >= 12 ? 'PM' : 'AM'}`
-    }
-
-    const parseTimeStr = t => {
-      const match = t?.match(/(\d+):(\d+)\s*(AM|PM)/i)
-      if (!match) return null
-      let h = parseInt(match[1]), m = parseInt(match[2])
-      if (match[3].toUpperCase() === 'PM' && h !== 12) h += 12
-      if (match[3].toUpperCase() === 'AM' && h === 12) h = 0
-      return h * 60 + m
-    }
-
-    // Build busy map: gcal events (no break needed) + existing study sessions (MIN_BREAK needed)
-    const busyByDate = {}  // dateKey -> [{startMin, endMin, isStudy}]
-    const studyCountByDate = {}  // dateKey -> count of study sessions already there
-
-    const addBusy = (dateKey, startMin, endMin, isStudy = false) => {
-      if (!busyByDate[dateKey]) busyByDate[dateKey] = []
-      busyByDate[dateKey].push({ startMin, endMin, isStudy })
-    }
-
-    googleEvents.forEach(e => {
-      if (!e.start?.includes('T')) return
-      const dateKey = e.start.split('T')[0]
-      const parse = iso => { const dt = new Date(iso); return dt.getHours() * 60 + dt.getMinutes() }
-      addBusy(dateKey, parse(e.start), e.end ? parse(e.end) : parse(e.start) + 60, false)
-    })
-
-    ;(scheduledSessions || []).forEach(s => {
-      if (!s.dateStr || !s.startTime || !s.fromCoachPlan) return
-      const startMin = parseTimeStr(s.startTime)
-      if (startMin === null) return
-      const dur = s.duration || sessionLen
-      addBusy(s.dateStr, startMin, startMin + dur, true)
-      studyCountByDate[s.dateStr] = (studyCountByDate[s.dateStr] || 0) + 1
-    })
-
-    // Find the first available slot on a date across all windows
-    const findSlot = (dateKey) => {
-      const busy = [...(busyByDate[dateKey] || [])].sort((a, b) => a.startMin - b.startMin)
-      for (const window of windowOrder) {
-        let s = window.start
-        while (s + sessionLen <= window.end) {
-          const e = s + sessionLen
-          const conflict = busy.find(b => {
-            const afterBreak = b.isStudy ? MIN_BREAK : 0
-            return s < b.endMin + afterBreak && e > b.startMin
-          })
-          if (!conflict) return s
-          const afterBreak = conflict.isStudy ? MIN_BREAK : 0
-          s = conflict.endMin + afterBreak
-        }
-      }
-      return null
-    }
-
-    // Spread sessions across days
-    // includeWeekends: interleave Sat/Sun with weekdays so they're picked early
-    const SPREAD_ORDER = form.includeWeekends
-      ? [0, 5, 2, 6, 4, 1, 3]   // Mon, Sat, Wed, Sun, Fri, Tue, Thu
-      : [0, 2, 4, 1, 3, 5, 6]   // Mon, Wed, Fri, Tue, Thu, Sat, Sun
-
-    const totalSessions = (plan.weeklyFocus || []).reduce((sum, w) => sum + (w.sessions?.length || 0), 0)
-    let sessionNum = 0
-    const calSessions = []
-
-    ;(plan.weeklyFocus || []).forEach((week, wi) => {
-      const { startDate } = weekDateRange(wi)
-      const weekSessions = week.sessions || []
-      if (!weekSessions.length) return
-
-      // Choose target days for this week: pick `daysPerWeek` spread days that aren't already at max and not rest days
-      const targetDays = []
-      for (const offset of SPREAD_ORDER) {
-        if (targetDays.length >= Math.max(daysPerWeek, weekSessions.length)) break
-        const d = new Date(startDate)
-        d.setDate(d.getDate() + offset)
-        const dateKey = d.toISOString().split('T')[0]
-        if ((studyCountByDate[dateKey] || 0) < MAX_STUDY_PER_DAY && !restDays.includes(dateKey)) targetDays.push(dateKey)
-      }
-      // Fallback: add any remaining days if we ran out of options
-      if (targetDays.length < weekSessions.length) {
-        for (let offset = 0; offset <= 6; offset++) {
-          if (targetDays.length >= weekSessions.length) break
-          const d = new Date(startDate)
-          d.setDate(d.getDate() + offset)
-          const dateKey = d.toISOString().split('T')[0]
-          if (!targetDays.includes(dateKey)) targetDays.push(dateKey)
-        }
-      }
-
-      weekSessions.forEach((sess, si) => {
-        sessionNum++
-        // Try the target days in order, then any day in the week
-        const fallbackDays = SPREAD_ORDER.map(o => {
-          const d = new Date(startDate); d.setDate(d.getDate() + o); return d.toISOString().split('T')[0]
-        })
-        const candidates = [...new Set([...targetDays, ...fallbackDays])]
-
-        for (const dateKey of candidates) {
-          if ((studyCountByDate[dateKey] || 0) >= MAX_STUDY_PER_DAY) continue
-          const startMin = findSlot(dateKey)
-          if (startMin === null) continue
-
-          const dur = sess.duration || sessionLen
-          addBusy(dateKey, startMin, startMin + dur, true)
-          studyCountByDate[dateKey] = (studyCountByDate[dateKey] || 0) + 1
-
-          // Truncate focusArea at a word boundary so the calendar row never
-          // ends mid-word (e.g. "Glycolysis: step-by-step enzy").
-          const truncateAtWord = (s, max) => {
-            if (!s || s.length <= max) return s
-            const cut = s.slice(0, max)
-            const lastSpace = cut.lastIndexOf(' ')
-            return (lastSpace > max * 0.5 ? cut.slice(0, lastSpace) : cut).replace(/[,:;\--]+$/, '') + '…'
-          }
-          const focusSuffix = sess.focusArea ? ` · ${truncateAtWord(sess.focusArea, 28)}` : ''
-          calSessions.push({
-            id: `coach-${courseId}-w${wi}-s${si}-${Date.now()}`,
-            dateStr: dateKey,
-            courseId: form.courseIdx,
-            courseName: course.name,
-            color: course.color,
-            sessionType: `Session ${sessionNum} of ${totalSessions}${focusSuffix}`,
-            duration: dur,
-            startTime: minsToTime(startMin),
-            endTime: minsToTime(startMin + dur),
-            isManual: true,
-            fromCoachPlan: true,
-            planSessionNum: sessionNum,
-            planTotalSessions: totalSessions,
-          })
-          break
-        }
+    setPushBusy(true)
+    try {
+      const { sessions, skipped } = buildScheduleBlocks({
+        plan,
+        course,
+        courseKey: courseId,
+        courseIdx: form.courseIdx,
+        preferredTime,
+        googleEvents,
+        existingSessions: scheduledSessions,
+        restDays,
+        sessionLen: form.sessionLen || 60,
       })
-    })
 
-    if (onPushToSchedule && calSessions.length) onPushToSchedule(calSessions)
-    track('study_plan_pushed', { sessionCount: calSessions.length })
-    setPushed(true)
+      if (!sessions.length) {
+        setNotice('Every remaining session is already done, so there was nothing to put on your schedule.')
+        return
+      }
+
+      onPushToSchedule?.(sessions, courseId)
+      await saveCoachPlanPushedAt(courseId, Date.now())
+      setPushed(true)
+      setNotice(
+        skipped.length
+          ? `${sessions.length} sessions are on your schedule. ${skipped.length} could not fit around your existing commitments, so they stayed in the plan only.`
+          : null
+      )
+      track('study_plan_pushed', { sessionCount: sessions.length, skipped: skipped.length })
+    } finally {
+      setPushBusy(false)
+    }
   }
+
+  // Catch up is deterministic and runs entirely on the client: no AI call.
+  // It rewrites the stored plan, then re-pushes if the plan was already pushed
+  // so the calendar cannot disagree with the plan.
+  const handleCatchUp = async () => {
+    const course = courses[form.courseIdx]
+    if (!plan || !course) return
+    const courseId = course.id ?? form.courseIdx
+    setCatchUpBusy(true)
+    try {
+      const { plan: next, changed, shortened, merged } = catchUpReschedule(plan, {
+        today: new Date().toISOString().split('T')[0],
+        examDate: plan.examDate ?? null,
+      })
+      if (!changed) {
+        setNotice('There is no time left before the exam to redistribute these sessions.')
+        return
+      }
+
+      setPlan(next)
+      await saveCoachPlanObject(courseId, next)
+
+      if (pushed) {
+        const { sessions } = buildScheduleBlocks({
+          plan: next,
+          course,
+          courseKey: courseId,
+          courseIdx: form.courseIdx,
+          preferredTime,
+          googleEvents,
+          existingSessions: scheduledSessions,
+          restDays,
+          sessionLen: form.sessionLen || 60,
+        })
+        onPushToSchedule?.(sessions, courseId)
+        await saveCoachPlanPushedAt(courseId, Date.now())
+      }
+
+      const bits = []
+      if (shortened) bits.push(`${shortened} review${shortened === 1 ? '' : 's'} shortened`)
+      if (merged) bits.push(`${merged} overlapping session${merged === 1 ? '' : 's'} merged`)
+      setNotice(
+        bits.length
+          ? `Plan reworked to fit the time before your exam: ${bits.join(', ')}.`
+          : 'Plan reworked to fit the time before your exam.'
+      )
+      track('coach_plan_caught_up', { shortened, merged })
+    } finally {
+      setCatchUpBusy(false)
+    }
+  }
+
+  // Start session. The blueprint stays in the loop (it is the signature moment)
+  // but arrives preloaded from the coach session, so the student presses Start
+  // once and lands in a ready session without retyping anything.
+  const handleStartSession = (entry) => {
+    const course = courses[form.courseIdx]
+    if (!course) return
+    const target = entry ?? nextSession(plan)
+    const courseId = course.id ?? form.courseIdx
+    const todayStr = new Date().toISOString().split('T')[0]
+
+    if (!target) {
+      // Complete state: a final review over the whole plan's topics.
+      const topics = [...new Set(flattenSessions(plan).flatMap(f => f.session.keyTopics || []))].slice(0, 6)
+      onStartFocus?.({
+        id: `coach-${courseId}-final-review`,
+        courseId: form.courseIdx,
+        courseName: course.name,
+        color: course.color,
+        sessionType: 'Final review',
+        duration: form.sessionLen || 60,
+        dateStr: todayStr,
+        isManual: true,
+        fromCoachPlan: true,
+        focusArea: 'Final review',
+        goal: plan?.goal || 'Light review of everything the plan covered.',
+        keyTopics: topics,
+        studyMethod: 'Spaced retrieval',
+      })
+      return
+    }
+
+    onStartFocus?.({
+      id: `coach-${courseId}-${target.session.id}`,
+      planSessionId: target.session.id,
+      planCourseKey: courseId,
+      courseId: form.courseIdx,
+      courseName: course.name,
+      color: course.color,
+      sessionType: `Session ${target.ordinal} · ${target.session.focusArea}`,
+      duration: target.session.duration || form.sessionLen || 60,
+      dateStr: target.session.scheduledDate || todayStr,
+      isManual: true,
+      fromCoachPlan: true,
+      // Everything the blueprint needs to build itself without asking again.
+      focusArea: target.session.focusArea,
+      goal: target.session.goal,
+      keyTopics: target.session.keyTopics,
+      studyMethod: target.session.studyMethod,
+    })
+  }
+
 
   const handleBuildPlan = (idx) => {
     setPlan(null)
@@ -1397,6 +1282,66 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     )
   }
 
+  // Refine keeps the existing plan and the existing answers in place: the form
+  // was hydrated from storage on load, so step 1 opens pre-filled. Regenerating
+  // from there replaces the plan; backing out leaves it untouched.
+  const handleRefine = () => {
+    setError('')
+    setNotice(null)
+    setStep(1)
+    setUiMode('building')
+    track('coach_plan_refine_opened', {})
+  }
+
+  const handleExport = () => {
+    const course = courses[form.courseIdx]
+    if (!plan || !course) return
+    const lines = [`StudyEdge AI: ${course.name} study plan`, '']
+    if (plan.goal) lines.push(`Goal: ${plan.goal}`, '')
+    if (plan.examDate) lines.push(`Exam: ${plan.examDate}`, '')
+    ;(plan.weeklyFocus || []).forEach((week, wi) => {
+      lines.push(`${week.week || `Week ${wi + 1}`}: ${week.theme || ''}`.trim())
+      ;(week.sessions || []).forEach(s => {
+        lines.push(`  ${s.done ? '[x]' : '[ ]'} ${s.scheduledDate || ''} ${s.focusArea || ''}`.trimEnd())
+        if (s.goal) lines.push(`      ${s.goal}`)
+        lines.push(`      ${[s.studyMethod, `${s.duration} min`].filter(Boolean).join(' · ')}`)
+      })
+      lines.push('')
+    })
+    const blob = new Blob([lines.join('\n')], { type: 'text/plain' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${course.name.replace(/\s+/g, '-').toLowerCase()}-study-plan.txt`
+    a.click()
+    URL.revokeObjectURL(url)
+    track('coach_plan_exported', {})
+  }
+
+  // The plan screen is its own page: no stepper, no step badge, no app-level
+  // page padding. It renders full bleed with the background the export calls for.
+  if (uiMode !== 'plans' && step === 3 && plan) {
+    return (
+      <StudyCoachPlanView
+        plan={plan}
+        course={courses[form.courseIdx]}
+        courseIdx={form.courseIdx}
+        pushed={pushed}
+        pushBusy={pushBusy}
+        catchUpBusy={catchUpBusy}
+        notice={notice}
+        onBack={() => { setUiMode('plans'); setNotice(null) }}
+        onStart={handleStartSession}
+        onCatchUp={handleCatchUp}
+        onPush={handlePush}
+        onRefine={handleRefine}
+        onExport={handleExport}
+        onOpenStruggleTracker={handleRefine}
+        onOpenGradeHub={onOpenGradeHub}
+      />
+    )
+  }
+
   return (
     <>
       <style>{SC_STYLE}</style>
@@ -1423,6 +1368,11 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
               materialError={materialError}
               onMaterialFile={handleMaterialFile}
               onNext={() => setStep(2)}
+              onSaveStruggles={(updated) => {
+                setCachedStruggles(updated)
+                const courseId = courses[form.courseIdx]?.id ?? form.courseIdx
+                saveCoachPlanStruggles(courseId, updated)
+              }}
               syllabusHintFile={syllabusHintFile}
               onSyllabusHint={onStartSyllabusOnboarding ? (file) => {
                 const courseIdx = form.courseIdx >= 0 ? form.courseIdx : null
@@ -1440,33 +1390,24 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
             />
           )}
           {step === 3 && (
-            <PlanStepWrapper
-              plan={plan} form={form} courses={courses}
-              pushed={pushed}
-              onPush={handlePush}
-              onRefine={() => { setPlan(null); setError(''); setStep(1); setUiMode('building') }}
-              error={error}
-              onStartFocus={onStartFocus}
-              struggles={cachedStruggles}
-              onSaveStruggles={(updated) => {
-                setCachedStruggles(updated)
-                const courseId = courses[form.courseIdx]?.id ?? form.courseIdx
-                saveCoachPlanStruggles(courseId, updated)
-              }}
-              pendingHardNotes={(() => {
-                const course = courses[form.courseIdx]
-                const courseId = course?.id ?? form.courseIdx
-                const saved = loadCoachPlan(courseId)
-                return saved?.pendingHardNotes?.filter(n => n.note?.trim()) ?? []
-              })()}
-              onWeekCheckIn={async (weekIdx, note) => {
-                try {
-                  const course = courses[form.courseIdx]
-                  const courseId = course?.id ?? form.courseIdx
-                  await saveCoachPlanHardNote(courseId, note, `Week ${weekIdx + 1} check-in`)
-                } catch {}
-              }}
-            />
+            /* Reached only when generation failed: a successful plan renders
+               the plan screen above, before this tree. */
+            <div style={{ maxWidth: 560, margin: '32px auto', background: '#fff', border: '1px solid #e7e8ec', borderRadius: 16, padding: '28px 30px' }}>
+              <h2 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: '#1C1B18' }}>
+                We could not build this plan.
+              </h2>
+              <p style={{ margin: '0 0 20px', fontSize: 14, lineHeight: 1.6, color: '#55565c' }}>
+                {error || 'Something went wrong while generating your plan.'}
+              </p>
+              <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+                <button onClick={handleBuild} disabled={loading} style={{ background: '#3452D9', color: '#fff', border: 'none', borderRadius: 10, padding: '10px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer', opacity: loading ? 0.6 : 1 }}>
+                  {loading ? 'Building…' : 'Try again'}
+                </button>
+                <button onClick={handleRefine} style={{ background: 'none', border: '1.5px solid #3452D9', color: '#3452D9', borderRadius: 10, padding: '10px 18px', fontSize: 14, fontWeight: 600, cursor: 'pointer' }}>
+                  Refine inputs
+                </button>
+              </div>
+            </div>
           )}
         </div>
       )}
@@ -1607,766 +1548,6 @@ function StruggleTracker({ struggles, courseId, courseName, dot, onSave, courseI
           )}
         </div>
       )}
-    </div>
-  )
-}
-
-// ── Adaptive feedback banner ──────────────────────────────────────────────────
-function AdaptiveFeedbackBanner({ notes, onUpdate, onDismiss }) {
-  const latest = notes[notes.length - 1]
-  return (
-    <div style={{
-      background: 'rgba(245,158,11,0.06)',
-      border: '1px solid rgba(245,158,11,0.2)',
-      borderRadius: 12,
-      padding: '14px 16px',
-      marginBottom: 16,
-      display: 'flex',
-      alignItems: 'flex-start',
-      justifyContent: 'space-between',
-      gap: 12,
-    }}>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: 12, fontWeight: 700, color: '#F59E0B', marginBottom: 4, letterSpacing: '0.05em', textTransform: 'uppercase' }}>Session feedback</div>
-        <div style={{ fontSize: 13, color: D.text, lineHeight: 1.5, marginBottom: 10 }}>
-          You flagged <strong>"{latest.note}"</strong> as difficult. Regenerate to prioritize this in upcoming sessions.
-        </div>
-        <div style={{ display: 'flex', gap: 8 }}>
-          <button
-            onClick={onUpdate}
-            style={{ padding: '7px 14px', borderRadius: 8, background: '#3B61C4', color: '#fff', fontSize: 12.5, fontWeight: 600, cursor: 'pointer', border: 'none' }}
-          >
-            Update plan
-          </button>
-          <button
-            onClick={onDismiss}
-            style={{ padding: '7px 14px', borderRadius: 8, background: 'transparent', color: D.muted, fontSize: 12.5, fontWeight: 500, cursor: 'pointer', border: `1px solid ${D.border}` }}
-          >
-            Dismiss
-          </button>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-// ── Plan display ──────────────────────────────────────────────────────────────
-function getPhaseColor(label) {
-  const l = (label || '').toUpperCase()
-  if (l.includes('LEARN')) return '#F97316'
-  if (l.includes('SYNTHESIZE') || l.includes('PRACTICE')) return '#34d399'
-  if (l.includes('REVIEW') || l.includes('TEST') || l.includes('EXAM')) return '#D97706'
-  return D.accent
-}
-
-function weekDateRange(weekIndex) {
-  const today = new Date()
-  const dayOfWeek = today.getDay()
-  const monday = new Date(today)
-  monday.setDate(today.getDate() - (dayOfWeek === 0 ? 6 : dayOfWeek - 1) + weekIndex * 7)
-  const sunday = new Date(monday)
-  sunday.setDate(monday.getDate() + 6)
-  const fmt = d => d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-  return { start: fmt(monday), end: fmt(sunday), startDate: new Date(monday) }
-}
-
-// Legacy placeholder - kept for safety, unused
-function tv() { return {} }
-
-function PlanView({ plan, course, dot, pushed, onPush, onReset, form, onStartFocus, onWeekCheckIn }) {
-  const [checked, setChecked] = useState({})
-  const [expandedWeek, setExpandedWeek] = useState(0)
-  const [weekCheckIns, setWeekCheckIns] = useState({})
-  const [weekCheckInInput, setWeekCheckInInput] = useState({})
-  const [weekCheckInSubmitted, setWeekCheckInSubmitted] = useState({})
-  const sessionLen = form?.sessionLen || 60
-  const allSessions = plan?.weeklyFocus?.flatMap(w => w.sessions || []) || []
-  const totalSessions = allSessions.length
-  const doneCount = Object.values(checked).filter(Boolean).length
-  const completePct = totalSessions > 0 ? Math.round((doneCount / totalSessions) * 100) : 0
-  const totalHours = ((totalSessions * sessionLen) / 60).toFixed(1)
-  const weeks = plan?.weeklyFocus?.length || 0
-  const goal = form?.goal?.trim() || ''
-  const struggles = form?.struggles?.trim() || ''
-  const validDates = (form?.dates || []).filter(d => d.date && d.label)
-  const techniquesList = form?.style?.length ? form.style : ['Active recall', 'Reading + notes']
-  const [exportOpen, setExportOpen] = useState(false)
-  const [shareOpen, setShareOpen] = useState(false)
-  const [shareCopied, setShareCopied] = useState(false)
-  const toggleCheck = (wi, si) => setChecked(prev => ({ ...prev, [`${wi}-${si}`]: !prev[`${wi}-${si}`] }))
-
-  const shareLink = (() => {
-    try {
-      const payload = JSON.stringify({
-        courseName: course?.name ?? 'Course',
-        goal: form?.goal ?? '',
-        weeks: plan.weeklyFocus?.map(w => ({ week: w.week, theme: w.theme, sessions: w.sessions?.length ?? 0 })) ?? [],
-        topics: plan.priorityTopics?.slice(0, 8) ?? [],
-      })
-      const b64 = btoa(encodeURIComponent(payload))
-      // utm_* tells PostHog this signup came from a user-shared coach plan,
-      // distinct from organic / referral / paid.
-      return `${window.location.origin}/shared-plan?utm_source=shared_plan&utm_medium=user_share&utm_campaign=coach_plan_share#${b64}`
-    } catch { return null }
-  })()
-
-  function handleCopyShareLink() {
-    if (!shareLink) return
-    navigator.clipboard.writeText(shareLink).then(() => {
-      setShareCopied(true)
-      setTimeout(() => setShareCopied(false), 2500)
-    }).catch(() => {})
-  }
-
-  const buildPlanText = () => {
-    const lines = []
-    const courseName = course?.name || 'Course'
-    const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-    lines.push(`StudyEdge AI: ${courseName} Study Plan`)
-    lines.push(`Generated ${dateStr}`)
-    lines.push('')
-    if (goal) lines.push(`Goal: ${goal}`)
-    lines.push(`Duration: ${weeks} week${weeks !== 1 ? 's' : ''} · ${totalSessions} sessions · ${totalHours}h of focused study`)
-    if (validDates.length) {
-      lines.push('')
-      lines.push('DEADLINES')
-      validDates.forEach(d => {
-        const label = new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        lines.push(`  - ${d.label}: ${label}`)
-      })
-    }
-    ;(plan.weeklyFocus || []).forEach((week, wi) => {
-      const range = weekDateRange(wi)
-      lines.push('')
-      lines.push(`WEEK ${wi + 1}: ${week.theme || 'Foundation'} (${range.start} to ${range.end})`)
-      ;(week.sessions || []).forEach((sess, si) => {
-        lines.push(`  Session ${si + 1}: ${sess.sessionLabel || ''} - ${sess.focusArea || ''}`)
-        if (sess.keyTopics?.length) lines.push(`    Topics: ${sess.keyTopics.join(', ')}`)
-        if (sess.deliverable) lines.push(`    Deliverable: ${sess.deliverable}`)
-      })
-    })
-    if (techniquesList.length) {
-      lines.push('')
-      lines.push('TECHNIQUES IN ROTATION')
-      techniquesList.forEach((t, i) => lines.push(`  ${i + 1}. ${t}`))
-    }
-    return lines.join('\n')
-  }
-
-  const handleDownload = () => {
-    const text = buildPlanText()
-    const blob = new Blob([text], { type: 'text/plain' })
-    const url = URL.createObjectURL(blob)
-    const a = document.createElement('a')
-    a.href = url
-    a.download = `${(course?.name || 'study-plan').replace(/\s+/g, '-').toLowerCase()}-plan.txt`
-    a.click()
-    URL.revokeObjectURL(url)
-    setExportOpen(false)
-  }
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(buildPlanText())
-    } catch {
-      const ta = document.createElement('textarea')
-      ta.value = buildPlanText()
-      document.body.appendChild(ta)
-      ta.select()
-      document.execCommand('copy')
-      document.body.removeChild(ta)
-    }
-    setExportOpen(false)
-  }
-
-  const handleDownloadPdf = () => {
-    const doc = new jsPDF({ unit: 'pt', format: 'letter' })
-    const margin = 48
-    const pageW = doc.internal.pageSize.getWidth()
-    const pageH = doc.internal.pageSize.getHeight()
-    const contentW = pageW - margin * 2
-    let y = margin
-
-    const checkPage = (needed = 20) => {
-      if (y + needed > pageH - margin) { doc.addPage(); y = margin }
-    }
-
-    const text = (str, size, color, bold = false) => {
-      doc.setFontSize(size)
-      doc.setTextColor(...color)
-      doc.setFont('helvetica', bold ? 'bold' : 'normal')
-      return str
-    }
-
-    const writeLine = (str, size, color, bold = false, extraY = 0) => {
-      checkPage(size + extraY + 6)
-      doc.setFontSize(size)
-      doc.setTextColor(...color)
-      doc.setFont('helvetica', bold ? 'bold' : 'normal')
-      const lines = doc.splitTextToSize(str, contentW)
-      doc.text(lines, margin, y)
-      y += lines.length * (size * 1.35) + extraY
-    }
-
-    const courseName = course?.name || 'Course'
-    const dateStr = new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })
-
-    // Header bar
-    doc.setFillColor(15, 10, 40)
-    doc.rect(0, 0, pageW, 72, 'F')
-    doc.setFontSize(20); doc.setFont('helvetica', 'bold'); doc.setTextColor(232, 232, 240)
-    doc.text(courseName + ': Study Plan', margin, 36)
-    doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(136, 136, 160)
-    doc.text(`Generated ${dateStr} · StudyEdge AI`, margin, 54)
-    y = 96
-
-    // Summary line
-    writeLine(`${weeks} week${weeks !== 1 ? 's' : ''} · ${totalSessions} sessions · ${totalHours}h of focused study`, 11, [136, 136, 160])
-    y += 6
-
-    if (goal) {
-      writeLine('GOAL', 8, [99, 102, 241], true)
-      writeLine(goal, 12, [232, 232, 240], false, 10)
-    }
-
-    if (validDates.length) {
-      writeLine('DEADLINES', 8, [99, 102, 241], true)
-      validDates.forEach(d => {
-        const label = new Date(d.date + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })
-        writeLine(`${d.label}: ${label}`, 11, [232, 232, 240])
-      })
-      y += 6
-    }
-
-    // Weeks
-    ;(plan.weeklyFocus || []).forEach((week, wi) => {
-      const range = weekDateRange(wi)
-      y += 8
-      checkPage(60)
-
-      // Week header pill background
-      doc.setFillColor(249, 115, 22, 0.12)
-      doc.setDrawColor(249, 115, 22, 0.3)
-      doc.roundedRect(margin, y - 14, contentW, 22, 4, 4, 'FD')
-      doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(249, 115, 22)
-      doc.text(`WEEK ${wi + 1}  ·  ${week.theme || 'Foundation'}  ·  ${range.start} – ${range.end}`, margin + 8, y + 2)
-      y += 18
-
-      ;(week.sessions || []).forEach((sess, si) => {
-        checkPage(48)
-        y += 8
-        doc.setFontSize(11); doc.setFont('helvetica', 'bold'); doc.setTextColor(232, 232, 240)
-        doc.text(`Session ${si + 1}: ${sess.sessionLabel || ''}`, margin + 8, y)
-        y += 16
-        if (sess.focusArea) {
-          const lines = doc.splitTextToSize(sess.focusArea, contentW - 16)
-          doc.setFontSize(10); doc.setFont('helvetica', 'normal'); doc.setTextColor(136, 136, 160)
-          doc.text(lines, margin + 8, y)
-          y += lines.length * 14
-        }
-        if (sess.keyTopics?.length) {
-          doc.setFontSize(9.5); doc.setTextColor(85, 85, 110)
-          const tLine = doc.splitTextToSize('Topics: ' + sess.keyTopics.join(', '), contentW - 16)
-          doc.text(tLine, margin + 8, y)
-          y += tLine.length * 13
-        }
-      })
-    })
-
-    // Techniques
-    if (techniquesList.length) {
-      y += 14
-      checkPage(40)
-      writeLine('TECHNIQUES IN ROTATION', 8, [99, 102, 241], true)
-      techniquesList.forEach((t, i) => writeLine(`${i + 1}.  ${t}`, 11, [232, 232, 240]))
-    }
-
-    // Footer on every page
-    const totalPages = doc.internal.getNumberOfPages()
-    for (let p = 1; p <= totalPages; p++) {
-      doc.setPage(p)
-      doc.setFontSize(8); doc.setTextColor(85, 85, 110); doc.setFont('helvetica', 'normal')
-      doc.text(`StudyEdge AI · ${courseName}`, margin, pageH - 20)
-      doc.text(`Page ${p} of ${totalPages}`, pageW - margin, pageH - 20, { align: 'right' })
-    }
-
-    doc.save(`${(courseName).replace(/\s+/g, '-').toLowerCase()}-study-plan.pdf`)
-    setExportOpen(false)
-  }
-
-  const TECHNIQUE_HINTS = {
-    'Active recall': 'Self-quiz without notes', 'Spaced repetition': 'Review at growing intervals',
-    'Practice problems': 'Solve, then check solutions', 'Teaching others': 'Explain it out loud',
-    'Visual diagrams': 'Draw concept maps', 'Reading + notes': 'Read, summarize, annotate',
-    'Flashcards': 'Key term card drills', 'Watching lectures': 'Re-watch key sections',
-  }
-
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, paddingBottom: 80 }}>
-      {/* Overview header */}
-      <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '20px 22px', overflow: 'hidden', overflowX: 'hidden' }}>
-        <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase', marginBottom: 10 }}>
-          Your Study Plan
-        </div>
-        <div className="sc-plan-header-row" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-          <div className="sc-plan-text" style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
-              <span style={{ width: 8, height: 8, borderRadius: '50%', background: dot, boxShadow: `0 0 8px ${dot}`, flexShrink: 0 }} />
-              <span style={{ fontSize: 15, fontWeight: 600, color: D.muted, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{course?.name}</span>
-            </div>
-            <div className="sc-plan-title" style={{ fontSize: 22, fontWeight: 700, color: D.text, lineHeight: 1.3, marginBottom: 12 }}>
-              <span style={{ color: D.accent }}>{weeks}</span> week{weeks !== 1 ? 's' : ''} &nbsp;·&nbsp; <span style={{ color: D.accent }}>{totalSessions}</span> sessions &nbsp;·&nbsp; <span style={{ color: D.accent }}>{totalHours}h</span> of focused study
-            </div>
-            <div style={{ fontSize: 13, color: D.muted, lineHeight: 1.6 }}>
-              {goal ? <><span style={{ color: D.text }}>Structured to aim for "{goal}"</span>, </> : ''}
-              {validDates.length > 0 ? `hit ${validDates.length} deadline${validDates.length > 1 ? 's' : ''}, ` : ''}
-              via {techniquesList.slice(0, 2).join(' + ').toLowerCase()}, rotating through the {plan?.priorityTopics?.length || 0} topic{plan?.priorityTopics?.length === 1 ? '' : 's'} you gave me. No topic, date, or recommendation has been invented.
-            </div>
-          </div>
-          <div style={{ flexShrink: 0, textAlign: 'right' }}>
-            <div style={{ fontSize: 22, fontWeight: 700, color: completePct > 0 ? D.mint : D.dim }}>{completePct}%</div>
-            <div style={{ fontSize: 11, color: D.dim }}>{doneCount}/{totalSessions} done</div>
-          </div>
-        </div>
-
-        {/* Apply to Calendar CTA */}
-        <div style={{ marginTop: 16, paddingTop: 16, borderTop: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
-          <div style={{ fontSize: 12.5, color: D.muted, lineHeight: 1.4 }}>
-            {pushed
-              ? <span style={{ color: D.mint, fontWeight: 600 }}>✓ All {totalSessions} sessions added to your calendar with real times</span>
-              : <span>Push all <strong style={{ color: D.text }}>{totalSessions} sessions</strong> to your calendar as timed study blocks</span>
-            }
-          </div>
-          <div style={{ display: 'flex', gap: 8, alignItems: 'center', flexShrink: 0 }}>
-            <button
-              onClick={() => setShareOpen(true)}
-              style={{
-                display: 'flex', alignItems: 'center', gap: 6,
-                padding: '9px 14px', borderRadius: 10, cursor: 'pointer',
-                fontWeight: 600, fontSize: 13,
-                background: 'rgba(59,97,196,0.08)', color: '#3B61C4',
-                border: '1px solid rgba(59,97,196,0.25)', transition: 'all 0.15s',
-              }}
-            >
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
-                <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
-              </svg>
-              Share plan
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Share modal */}
-      {shareOpen && (
-        <div
-          onClick={() => setShareOpen(false)}
-          style={{ position: 'fixed', inset: 0, zIndex: 500, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}
-        >
-          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', borderRadius: 18, padding: '28px 28px 24px', maxWidth: 440, width: '100%', boxShadow: '0 24px 60px rgba(0,0,0,0.2)' }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
-              <div>
-                <div style={{ fontSize: 16, fontWeight: 700, color: '#111' }}>Share your study plan</div>
-                <div style={{ fontSize: 12.5, color: '#6B6B6B', marginTop: 3 }}>Anyone with this link can view a read-only snapshot.</div>
-              </div>
-              <button onClick={() => setShareOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', fontSize: 20, lineHeight: 1 }}>×</button>
-            </div>
-            <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
-              <div style={{ flex: 1, background: '#F7F8FA', border: '1px solid #E5E5E5', borderRadius: 10, padding: '10px 12px', fontSize: 12, color: '#6B6B6B', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                {shareLink}
-              </div>
-              <button
-                onClick={handleCopyShareLink}
-                style={{
-                  flexShrink: 0, padding: '10px 16px', borderRadius: 10, border: 'none', cursor: 'pointer',
-                  fontWeight: 700, fontSize: 13,
-                  background: shareCopied ? 'rgba(5,150,105,0.1)' : '#3B61C4',
-                  color: shareCopied ? '#059669' : '#fff',
-                  transition: 'all 0.15s',
-                }}
-              >
-                {shareCopied ? (<span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>Copied!</span>) : 'Copy'}
-              </button>
-            </div>
-            <div style={{ display: 'flex', gap: 8 }}>
-              <a
-                href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(`Check out my ${course?.name || 'study'} plan on StudyEdge AI: ${shareLink}`)}`}
-                target="_blank" rel="noopener noreferrer"
-                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 12px', borderRadius: 10, border: '1px solid #E5E5E5', fontSize: 12.5, fontWeight: 600, color: '#374151', textDecoration: 'none', background: '#fff' }}
-              >
-                Share on X
-              </a>
-              <a
-                href={`https://wa.me/?text=${encodeURIComponent(`Here's my ${course?.name || ''} study plan, built with StudyEdge AI: ${shareLink}`)}`}
-                target="_blank" rel="noopener noreferrer"
-                style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6, padding: '9px 12px', borderRadius: 10, border: '1px solid #E5E5E5', fontSize: 12.5, fontWeight: 600, color: '#374151', textDecoration: 'none', background: '#fff' }}
-              >
-                Share on WhatsApp
-              </a>
-            </div>
-          </div>
-        </div>
-      )}
-
-
-
-      {/* Priority topics */}
-      {plan?.priorityTopics?.length > 0 && (
-        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '16px 20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
-            <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>What You'll Master: Your {plan.priorityTopics?.length} Topic{plan.priorityTopics?.length !== 1 ? 's' : ''}</span>
-          </div>
-          <div className="sc-topics-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: 8 }}>
-            {plan.priorityTopics?.map((topic, i) => {
-              const isStruggle = struggles && topic.toLowerCase().split(' ').some(w => w.length > 4 && struggles.toLowerCase().includes(w))
-              return (
-                <div key={i} style={{ background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, borderRadius: 10, padding: '12px 14px', display: 'flex', alignItems: 'flex-start', gap: 10 }}>
-                  <span style={{ fontSize: 13, fontWeight: 800, color: `${dot}50`, minWidth: 20 }}>{String(i + 1).padStart(2, '0')}</span>
-                  <div style={{ flex: 1 }}>
-                    <div style={{ fontSize: 13, color: D.text, lineHeight: 1.4 }}>{topic}</div>
-                    {isStruggle && <span style={{ fontSize: 10, color: D.accent, background: 'rgba(59,97,196,0.1)', border: '1px solid rgba(59,97,196,0.25)', borderRadius: 4, padding: '2px 6px', display: 'inline-flex', alignItems: 'center', gap: 4, marginTop: 5, fontWeight: 600 }}>+ Extra reps</span>}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* Struggles banner */}
-      {struggles && (
-        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '14px 18px' }}>
-          <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase', marginBottom: 8 }}>
-            Extra focus from your struggles
-          </div>
-          <div style={{ fontSize: 13, color: D.muted, lineHeight: 1.5, fontStyle: 'italic' }}>"{struggles}"</div>
-        </div>
-      )}
-
-      {/* Missed sessions banner */}
-      {(() => {
-        const today = new Date().toISOString().split('T')[0]
-        const missedSessions = []
-        ;(plan.weeklyFocus || []).forEach((week, wi) => {
-          if (!week.endDate || week.endDate >= today) return
-          ;(week.sessions || []).forEach((sess, si) => {
-            if (!checked[`${wi}-${si}`]) {
-              missedSessions.push({ wi, si, focusArea: sess.focusArea, weekLabel: week.week })
-            }
-          })
-        })
-        if (!missedSessions.length) return null
-        const count = missedSessions.length
-        const firstMissed = missedSessions[0]
-        return (
-          <div style={{
-            background: 'rgba(249,115,22,0.05)',
-            border: '1px solid rgba(249,115,22,0.2)',
-            borderRadius: 12,
-            padding: '14px 16px',
-            marginBottom: 16,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: 12,
-          }}>
-            <div style={{ flex: 1, minWidth: 0 }}>
-              <div style={{ fontSize: 12, fontWeight: 700, color: '#F97316', letterSpacing: '0.05em', textTransform: 'uppercase', marginBottom: 3 }}>
-                {count} session{count !== 1 ? 's' : ''} behind
-              </div>
-              <div style={{ fontSize: 13, color: D.muted }}>
-                {firstMissed.focusArea} and {count - 1 > 0 ? `${count - 1} other${count - 1 !== 1 ? 's' : ''}` : 'more'} from {firstMissed.weekLabel}
-              </div>
-            </div>
-            {onStartFocus && (
-              <button
-                onClick={() => {
-                  const todayStr = new Date().toISOString().split('T')[0]
-                  const combinedTopics = [...new Set(missedSessions.slice(0, 3).map(m => m.focusArea).filter(Boolean))]
-                  onStartFocus({
-                    id: `catch-up-${todayStr}`,
-                    courseId: course?.id ?? 0,
-                    courseName: course?.name ?? '',
-                    color: course?.color,
-                    sessionType: 'Catch-up review',
-                    duration: sessionLen,
-                    dateStr: todayStr,
-                    isManual: true,
-                    fromCoachPlan: true,
-                    focusArea: `Catch-up: ${combinedTopics.join(', ')}`,
-                    keyTopics: combinedTopics,
-                    goal: `Cover ${count} missed session${count !== 1 ? 's' : ''} with active recall`,
-                    studyMethod: 'Cumulative review',
-                  })
-                }}
-                style={{
-                  padding: '8px 14px',
-                  borderRadius: 8,
-                  background: '#F97316',
-                  color: '#fff',
-                  fontSize: 12,
-                  fontWeight: 700,
-                  cursor: 'pointer',
-                  border: 'none',
-                  flexShrink: 0,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                Start catch-up
-              </button>
-            )}
-          </div>
-        )
-      })()}
-
-      {/* Week by week */}
-      <div>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <span style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase' }}>Week by Week</span>
-          <span className="sc-week-hint" style={{ fontSize: 11, color: D.dim }}>Check sessions as you complete them</span>
-        </div>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {plan.weeklyFocus?.map((week, wi) => {
-            const isOpen = expandedWeek === wi
-            const range = weekDateRange(wi)
-            const phase = week.theme || 'Foundation'
-            const weekSessions = week.sessions || []
-            const weekDone = weekSessions.filter((_, si) => checked[`${wi}-${si}`]).length
-            const anchored = validDates.find(d => {
-              const dt = new Date(d.date + 'T12:00:00')
-              const rs = range.startDate
-              const re = new Date(rs); re.setDate(rs.getDate() + 6)
-              return dt >= rs && dt <= re
-            })
-            return (
-              <div key={wi} style={{ borderRadius: 13, overflow: 'hidden', background: D.bgCard, border: `1px solid ${isOpen ? 'rgba(59,97,196,0.25)' : D.border}`, transition: 'all 0.15s' }}>
-                <button style={{ width: '100%', display: 'flex', alignItems: 'center', gap: 14, padding: '14px 18px', textAlign: 'left', cursor: 'pointer', background: 'none', border: 'none' }} onClick={() => setExpandedWeek(isOpen ? -1 : wi)}>
-                  <div style={{ width: 32, height: 32, borderRadius: 9, background: 'rgba(59,97,196,0.1)', display: 'grid', placeItems: 'center', color: '#3B61C4', fontSize: 13, fontWeight: 700, flexShrink: 0 }}>{wi + 1}</div>
-                  <div style={{ flex: 1, minWidth: 0 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-                      <span style={{ fontSize: 14, fontWeight: 600, color: D.text }}>Week {wi + 1}</span>
-                      <span style={{ fontSize: 12, color: D.dim }}>· {range.start} – {range.end}</span>
-                      <span style={{ fontSize: 10.5, fontWeight: 500, padding: '2px 8px', borderRadius: 5, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.muted }}>{phase}</span>
-                    </div>
-                    <div style={{ fontSize: 11.5, color: D.dim, marginTop: 3 }}>
-                      {weekSessions.length} session{weekSessions.length !== 1 ? 's' : ''}
-                      {anchored && <> · anchored to <span style={{ color: D.violet }}>{anchored.label}</span></>}
-                    </div>
-                  </div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
-                    <span style={{ fontSize: 12, color: D.muted }}>{weekDone}/{weekSessions.length}</span>
-                    <svg style={{ width: 16, height: 16, color: D.dim, transform: isOpen ? 'rotate(180deg)' : 'none', transition: 'transform 0.2s' }} fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" /></svg>
-                  </div>
-                </button>
-                {isOpen && (
-                  <div style={{ padding: '0 14px 14px', display: 'flex', flexDirection: 'column', gap: 8 }}>
-                    {weekSessions.map((sess, si) => (
-                      <SessionCard key={si} session={sess} wi={wi} si={si} checked={!!checked[`${wi}-${si}`]} onCheck={() => toggleCheck(wi, si)} struggles={struggles} onStartFocus={onStartFocus} course={course} />
-                    ))}
-                    {/* Week check-in -- appears when all sessions in this week are marked done */}
-                    {(() => {
-                      const allDone = weekSessions.length > 0 && weekSessions.every((_, si) => checked[`${wi}-${si}`])
-                      const alreadySubmitted = weekCheckInSubmitted[wi]
-                      if (!allDone || alreadySubmitted || wi === (plan.weeklyFocus.length - 1)) return null
-                      return (
-                        <div style={{
-                          marginTop: 10,
-                          background: 'rgba(52,211,153,0.05)',
-                          border: '1px solid rgba(52,211,153,0.2)',
-                          borderRadius: 12,
-                          padding: '14px 16px',
-                        }}>
-                          <div style={{ fontSize: 11.5, fontWeight: 700, color: '#34d399', letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 6 }}>Week complete</div>
-                          <div style={{ fontSize: 13, color: D.text, marginBottom: 10 }}>How did week {wi + 1} go? Note anything that was hard or unclear.</div>
-                          <textarea
-                            value={weekCheckInInput[wi] || ''}
-                            onChange={e => setWeekCheckInInput(prev => ({ ...prev, [wi]: e.target.value }))}
-                            placeholder="e.g. Struggled with oxidation states, concept mapping helped a lot..."
-                            style={{
-                              width: '100%',
-                              minHeight: 64,
-                              borderRadius: 8,
-                              border: `1px solid ${D.border}`,
-                              background: '#FFFFFF',
-                              padding: '10px 12px',
-                              fontSize: 13,
-                              color: D.text,
-                              resize: 'vertical',
-                              fontFamily: 'inherit',
-                              boxSizing: 'border-box',
-                              outline: 'none',
-                              marginBottom: 10,
-                            }}
-                          />
-                          <button
-                            disabled={!weekCheckInInput[wi]?.trim()}
-                            onClick={() => {
-                              const note = weekCheckInInput[wi]?.trim()
-                              if (!note) return
-                              setWeekCheckInSubmitted(prev => ({ ...prev, [wi]: true }))
-                              setWeekCheckIns(prev => ({ ...prev, [wi]: note }))
-                              onWeekCheckIn?.(wi, note)
-                            }}
-                            style={{
-                              padding: '8px 16px',
-                              borderRadius: 8,
-                              background: weekCheckInInput[wi]?.trim() ? '#3B61C4' : 'rgba(0,0,0,0.05)',
-                              color: weekCheckInInput[wi]?.trim() ? '#fff' : D.muted,
-                              fontSize: 12.5,
-                              fontWeight: 600,
-                              cursor: weekCheckInInput[wi]?.trim() ? 'pointer' : 'default',
-                              border: 'none',
-                            }}
-                          >
-                            Update plan
-                          </button>
-                        </div>
-                      )
-                    })()}
-                  </div>
-                )}
-              </div>
-            )
-          })}
-        </div>
-      </div>
-
-      {/* Techniques in rotation */}
-      {techniquesList.length > 0 && (
-        <div style={{ background: D.bgCard, border: `1px solid ${D.border}`, borderRadius: 14, padding: '16px 18px' }}>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.12em', color: D.muted, textTransform: 'uppercase', marginBottom: 12 }}>Techniques in Rotation</div>
-          <div className="sc-techniques-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: 8 }}>
-            {techniquesList.map((t, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', borderRadius: 9, background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}` }}>
-                <div style={{ width: 22, height: 22, borderRadius: 7, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, display: 'grid', placeItems: 'center', fontSize: 11, fontWeight: 700, color: D.muted, flexShrink: 0 }}>{i + 1}</div>
-                <div>
-                  <div style={{ fontSize: 13, fontWeight: 600, color: D.text }}>{t}</div>
-                  <div style={{ fontSize: 11, color: D.dim, marginTop: 2 }}>{TECHNIQUE_HINTS[t] || ''}</div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Bottom action bar */}
-      <div style={{ position: 'sticky', bottom: 16, display: 'flex', gap: 10, padding: '14px 18px', background: D.bgEl, border: `1px solid ${D.border}`, borderRadius: 14, backdropFilter: 'blur(8px)' }}>
-        <button onClick={onReset} style={{ flex: 1, padding: '12px', borderRadius: 10, background: 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-          <Icon name="refresh" size={13} /> Refine inputs
-        </button>
-        <button onClick={onPush} disabled={pushed} style={{ flex: 2, padding: '12px 20px', borderRadius: 10, background: pushed ? 'rgba(52,211,153,0.15)' : '#3B61C4', color: '#fff', fontSize: 13.5, fontWeight: 700, cursor: pushed ? 'default' : 'pointer', border: pushed ? '1px solid rgba(52,211,153,0.3)' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-          {pushed ? <><Icon name="check" size={13} stroke={2.5} color={D.mint} /> Pushed to Schedule</> : <><Icon name="calendar" size={13} /> Push to Schedule</>}
-        </button>
-        <div style={{ flex: 1, position: 'relative' }}>
-          <button onClick={() => setExportOpen(v => !v)} style={{ width: '100%', padding: '12px', borderRadius: 10, background: exportOpen ? 'rgba(59,97,196,0.07)' : 'rgba(0,0,0,0.03)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6 }}>
-            <Icon name="upload" size={13} /> Export
-          </button>
-          {exportOpen && (
-            <div style={{ position: 'absolute', bottom: 'calc(100% + 8px)', right: 0, width: 210, background: '#ffffff', border: `1px solid ${D.borderStrong}`, borderRadius: 11, overflow: 'hidden', boxShadow: '0 8px 24px rgba(0,0,0,0.1)', zIndex: 50 }}>
-              <button onClick={handleDownloadPdf} style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: D.text, cursor: 'pointer', background: 'none', border: 'none', textAlign: 'left' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.04)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-                <Icon name="file" size={14} color={D.pink} /> Download PDF
-              </button>
-              <div style={{ height: 1, background: D.border }} />
-              <button onClick={handleDownload} style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: D.text, cursor: 'pointer', background: 'none', border: 'none', textAlign: 'left' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.04)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-                <Icon name="file" size={14} color={D.indigo} /> Download .txt
-              </button>
-              <div style={{ height: 1, background: D.border }} />
-              <button onClick={handleCopy} style={{ width: '100%', padding: '12px 16px', display: 'flex', alignItems: 'center', gap: 10, fontSize: 13, color: D.text, cursor: 'pointer', background: 'none', border: 'none', textAlign: 'left' }}
-                onMouseEnter={e => e.currentTarget.style.background = 'rgba(0,0,0,0.04)'}
-                onMouseLeave={e => e.currentTarget.style.background = 'none'}>
-                <Icon name="edit" size={14} color={D.indigo} /> Copy to clipboard
-              </button>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function SessionCard({ session, wi, si, checked, onCheck, struggles, onStartFocus, course }) {
-  const phaseColor = getPhaseColor(session.sessionLabel)
-  const sl = (struggles || '').toLowerCase()
-  const isStruggle = sl && ((session.focusArea || '').toLowerCase().split(' ').some(w => w.length > 4 && sl.includes(w)) || (session.keyTopics || []).some(t => sl.includes(t.toLowerCase())))
-  return (
-    <div style={{ background: '#FFFFFF', border: `1px solid rgba(0,0,0,0.07)`, borderLeft: `3px solid ${phaseColor}`, borderRadius: 10, padding: '14px 16px', display: 'flex', gap: 12 }}>
-      <button onClick={onCheck} style={{ width: 18, height: 18, borderRadius: 5, border: `1.5px solid ${checked ? phaseColor : 'rgba(255,255,255,0.15)'}`, background: checked ? phaseColor : 'transparent', display: 'grid', placeItems: 'center', flexShrink: 0, marginTop: 2, cursor: 'pointer' }}>
-        {checked && <Icon name="check" size={10} color="#fff" stroke={3} />}
-      </button>
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 8 }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0 }}>
-            <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase', padding: '2px 8px', borderRadius: 5, background: `${phaseColor}18`, border: `1px solid ${phaseColor}35`, color: phaseColor, flexShrink: 0 }}>{session.sessionLabel}</span>
-            <span style={{ fontSize: 13.5, fontWeight: 600, color: checked ? D.muted : D.text, textDecoration: checked ? 'line-through' : 'none', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{session.focusArea}</span>
-          </div>
-          <span style={{ fontSize: 11.5, color: D.muted, flexShrink: 0 }}>{session.duration || 60}m</span>
-        </div>
-        <div className="sc-session-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10, marginBottom: 8 }}>
-          <div>
-            <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', color: D.dim, textTransform: 'uppercase', marginBottom: 3 }}>Focus</div>
-            <div style={{ fontSize: 12.5, color: D.muted, lineHeight: 1.4 }}>{session.goal}</div>
-          </div>
-          {session.studyMethod && (
-            <div>
-              <div style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', color: D.dim, textTransform: 'uppercase', marginBottom: 3 }}>Method</div>
-              <div style={{ fontSize: 12.5, color: D.muted, lineHeight: 1.4 }}>{session.studyMethod}</div>
-            </div>
-          )}
-        </div>
-        {session.keyTopics?.length > 0 && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap', marginBottom: isStruggle ? 8 : 0 }}>
-            <span style={{ fontSize: 9.5, fontWeight: 700, letterSpacing: '0.1em', color: D.dim, textTransform: 'uppercase', marginRight: 2 }}>Topics</span>
-            {session.keyTopics.map((t, i) => <span key={i} style={{ fontSize: 11, padding: '2px 8px', borderRadius: 5, background: 'rgba(0,0,0,0.04)', border: `1px solid rgba(255,255,255,0.1)`, color: D.muted }}>{t}</span>)}
-          </div>
-        )}
-        {isStruggle && (
-          <span style={{ fontSize: 10.5, color: D.orange, background: 'rgba(249,115,22,0.1)', border: '1px solid rgba(249,115,22,0.25)', borderRadius: 5, padding: '2px 8px', display: 'inline-flex', alignItems: 'center', gap: 4, fontWeight: 600 }}>
-            <Icon name="zap" size={9} color={D.orange} /> Priority: matches your struggles
-          </span>
-        )}
-        {onStartFocus && (
-          <div style={{ marginTop: 10, paddingTop: 10, borderTop: `1px solid ${D.border}` }}>
-            <button
-              onClick={() => {
-                const today = new Date().toISOString().split('T')[0]
-                onStartFocus({
-                  id: `coach-plan-${wi}-${si}-${today}`,
-                  courseId: course?.id ?? 0,
-                  courseName: course?.name ?? '',
-                  color: course?.color,
-                  sessionType: session.studyMethod || session.sessionLabel || 'Review',
-                  duration: session.duration || 60,
-                  dateStr: today,
-                  isManual: true,
-                  fromCoachPlan: true,
-                  focusArea: session.focusArea,
-                  keyTopics: session.keyTopics ?? [],
-                  goal: session.goal ?? '',
-                  studyMethod: session.studyMethod ?? '',
-                })
-              }}
-              style={{
-                width: '100%',
-                padding: '8px',
-                borderRadius: 8,
-                background: 'rgba(59,97,196,0.07)',
-                border: `1px solid rgba(59,97,196,0.2)`,
-                color: '#3B61C4',
-                fontSize: 12.5,
-                fontWeight: 600,
-                cursor: 'pointer',
-              }}
-            >
-              Start session
-            </button>
-          </div>
-        )}
-      </div>
     </div>
   )
 }

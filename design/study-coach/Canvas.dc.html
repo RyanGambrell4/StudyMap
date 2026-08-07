@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600;700&display=swap"><style>body{margin:0;background:#eceef2;font-family:Inter,system-ui,sans-serif}a{color:#3452D9;text-decoration:none}a:hover{color:#2a43b8}.dv-turn{padding:40px 44px 32px;scroll-margin-top:16px}.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 20px}.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:#1a1a1a;color:#fff;border-radius:4px;text-decoration:none}.dv-tname{font:600 13px/1.2 Inter,sans-serif;color:#1a1a1a}.dv-opts{display:flex;flex-wrap:wrap;gap:36px;align-items:flex-start}.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}.dv-oid{font:600 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:#1a1a1a;border-radius:5px;text-decoration:none}.dv-olabel{display:flex;align-items:baseline;gap:8px;font:400 11px/1.3 Inter,sans-serif;color:rgba(0,0,0,.55)}.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}.dv-opt:target .dv-oid{background:#3452D9;color:#fff}.dv-next{margin:22px 0 0;font:12px/1.5 Inter,sans-serif;color:rgba(0,0,0,.5)}</style></helmet>
+<section class="dv-turn" id="t3">
+<div class="dv-thd"><a class="dv-tid" href="#t3">3</a><span class="dv-tname">Study Coach · plan view redesign</span></div>
+<sc-if value="{{ showNotes }}" hint-placeholder-val="{{ true }}">
+<div style="max-width:780px;margin:0 0 28px;font-size:12.5px;line-height:1.65;color:rgba(0,0,0,.6)">
+<div style="font-weight:600;color:#1a1a1a;margin-bottom:6px">Design notes and assumptions</div>
+Organized around "what do I study next": the hero is the next session with the single solid blue button. Plan management (Push to Schedule, Refine inputs, Export in overflow) lives in the header row; Push is outlined so the hero Start stays the one primary. Pushed state shown in <a class="dv-oid" href="#3b">3b</a> as a green-dot confirmation with a quiet Update link. The progress bar reuses the Grade Hub cushion-bar language: blue done, light blue remaining, amber for sessions behind schedule in <a class="dv-oid" href="#3c">3c</a>. In the behind state, Catch up is an amber-bordered action inside the amber block; Start session remains the page primary since the student still starts the next session either way. Topics strip sits above the weeks with amber markers on struggle-added topics and carries the Struggle Tracker link, so the tracker no longer occupies a card row. Numbers: 12 sessions × 45 min = 9.0 hrs; mid-plan 5 done leaves 5.25 hrs; behind state 4 done, 7 expected by day 9 of 18, so 3 behind, 6.0 hrs left. Nav chrome shown on <a class="dv-oid" href="#3a">3a</a> and <a class="dv-oid" href="#3e">3e</a> only. Trust line cut entirely per brief.
+</div>
+</sc-if>
+<div class="dv-opts">
+
+<div class="dv-opt" id="3a"><div class="dv-olabel"><a class="dv-oid" href="#3a">3a</a>Fresh plan · nothing done · not pushed · desktop 1280</div>
+<div class="dv-card" style="width:1280px;background:#f5f6f8">
+  <div style="height:60px;background:#fff;border-bottom:1px solid #ebecef;display:flex;align-items:center;padding:0 32px;gap:36px">
+    <div style="display:flex;align-items:center;gap:10px"><img src="assets/logo.png" alt="" style="height:24px;width:auto"><span style="font-size:15.5px;font-weight:700;color:#1C1B18">StudyEdge AI</span></div>
+    <div style="display:flex;align-items:center;gap:26px;align-self:stretch">
+      <span style="font-size:14px;font-weight:500;color:#55565c;display:flex;align-items:center">Home</span>
+      <span style="font-size:14px;font-weight:500;color:#55565c;display:flex;align-items:center">Schedule</span>
+      <span style="font-size:14px;font-weight:500;color:#55565c;display:flex;align-items:center">Strategy</span>
+      <span style="font-size:14px;font-weight:600;color:#1C1B18;display:flex;align-items:center;align-self:stretch;box-shadow:inset 0 -2px 0 #3452D9">Study Tools</span>
+    </div>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:14px">
+      <div style="display:flex;align-items:center;gap:8px;border:1px solid #e3e4e8;border-radius:8px;padding:6px 12px;color:#8a8b90;font-size:13px">Search <span style="font-size:11px;border:1px solid #e3e4e8;border-radius:4px;padding:1px 4px">⌘K</span></div>
+      <div style="width:30px;height:30px;border-radius:50%;background:#3452D9;color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center">RY</div>
+    </div>
+  </div>
+  <div style="max-width:1080px;margin:0 auto;padding:40px 40px 72px">
+    <a href="#3a" style="font-size:13px;font-weight:500;color:#8a8b90">‹ Back to My Plans</a>
+    <div style="display:flex;align-items:flex-end;gap:24px;margin-top:18px">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.1em;color:#8a8b90;text-transform:uppercase"><span style="width:8px;height:8px;border-radius:50%;background:#7C5CFA"></span>Cell Biology · Exam Dec 4</div>
+        <h1 style="margin:8px 0 0;font-family:Newsreader,Georgia,serif;font-size:44px;font-weight:500;color:#1C1B18;letter-spacing:-0.01em">Study Coach<span style="color:#3452D9">.</span></h1>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:18px;padding-bottom:8px">
+        <span style="font-size:14px;font-weight:600;color:#3452D9">Refine inputs</span>
+        <span style="display:flex;align-items:center;gap:8px;border:1.5px solid #3452D9;color:#3452D9;border-radius:10px;padding:8px 16px;font-size:14px;font-weight:600">Push to Schedule</span>
+        <span style="font-size:16px;font-weight:600;color:#8a8b90;letter-spacing:.05em">···</span>
+      </div>
+    </div>
+    <div style="margin-top:28px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:32px 36px 28px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#8a8b90;text-transform:uppercase;margin-bottom:14px">Up next</div>
+      <div style="display:flex;align-items:flex-start;gap:32px">
+        <div style="flex:1">
+          <div style="font-family:Newsreader,Georgia,serif;font-size:30px;font-weight:500;color:#1C1B18;letter-spacing:-0.01em">Session 1 · Cell structure and organelles</div>
+          <div style="font-size:14.5px;line-height:1.6;color:#55565c;margin-top:8px;max-width:560px">Name every organelle and what it does without looking at your notes.</div>
+          <div style="font-size:12.5px;color:#a0a1a6;margin-top:6px">From your topics · Cell structure</div>
+          <div style="font-size:13px;font-weight:500;color:#8a8b90;margin-top:8px">Active recall · 45 min</div>
+        </div>
+        <span style="flex:none;background:#3452D9;color:#fff;border-radius:10px;padding:12px 24px;font-size:15px;font-weight:600;margin-top:4px">Start session</span>
+      </div>
+      <div style="margin-top:26px;max-width:720px">
+        <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px">
+          <div style="width:100%;background:#B9C5F0"></div>
+        </div>
+        <div style="display:flex;gap:24px;margin-top:10px;font-size:12.5px;color:#6f7075">
+          <span style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:2px;background:#3452D9"></span>Done</span>
+          <span style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:2px;background:#B9C5F0"></span>Remaining</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:44px;margin-top:26px;padding-top:22px;border-top:1px solid #f0f1f4">
+        <div><div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase">Sessions</div><div style="font-family:Newsreader,Georgia,serif;font-size:22px;font-weight:500;color:#1C1B18;margin-top:4px">0 of 12</div></div>
+        <div><div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase">Hours remaining</div><div style="font-family:Newsreader,Georgia,serif;font-size:22px;font-weight:500;color:#1C1B18;margin-top:4px">9.0</div></div>
+        <div><div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase">Exam in</div><div style="font-family:Newsreader,Georgia,serif;font-size:22px;font-weight:500;color:#1C1B18;margin-top:4px">18 days</div></div>
+      </div>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;margin:26px 2px 14px;flex-wrap:wrap">
+      <span style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#8a8b90;text-transform:uppercase">This plan emphasizes</span>
+      <span style="font-size:13px;color:#55565c;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#D97706"></span>Membrane transport</span>
+      <span style="font-size:13px;color:#55565c;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#D97706"></span>Glycolysis</span>
+      <span style="font-size:13px;color:#55565c">Krebs cycle</span>
+      <span style="font-size:13px;color:#55565c">Cell signaling</span>
+      <span style="font-size:13px;color:#55565c">Mitosis</span>
+      <span style="font-size:12.5px;color:#8a8b90;margin-left:6px"><span style="display:inline-block;width:6px;height:6px;border-radius:50%;background:#D97706;margin-right:5px"></span>added from your <a href="#3a" style="font-weight:600">Struggle Tracker ›</a></span>
+    </div>
+    <div style="background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);overflow:hidden">
+      <div style="padding:20px 28px;display:flex;align-items:baseline;gap:14px;border-bottom:1px solid #f0f1f4">
+        <span style="font-size:15px;font-weight:600;color:#1C1B18">Week 1 · Foundations</span>
+        <span style="font-size:13px;color:#8a8b90">4 sessions · 3.0 hrs</span>
+        <span style="margin-left:auto;font-size:11px;color:#8a8b90">▴</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;padding:16px 28px;border-bottom:1px solid #f0f1f4;background:#f8f9fb">
+        <span style="flex:none;width:26px;font-family:Newsreader,Georgia,serif;font-size:18px;font-weight:500;color:#3452D9">1</span>
+        <div style="flex:1"><div style="font-size:14.5px;font-weight:600;color:#1C1B18">Cell structure and organelles</div><div style="font-size:13px;color:#6f7075;margin-top:2px">Name every organelle and what it does without notes.</div></div>
+        <span style="flex:none;font-size:12.5px;color:#8a8b90">Active recall · 45 min</span>
+        <span style="flex:none;font-size:11px;font-weight:600;letter-spacing:.08em;color:#3452D9;text-transform:uppercase">Up next</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;padding:16px 28px;border-bottom:1px solid #f0f1f4">
+        <span style="flex:none;width:26px;font-family:Newsreader,Georgia,serif;font-size:18px;font-weight:500;color:#8a8b90">2</span>
+        <div style="flex:1"><div style="font-size:14.5px;font-weight:600;color:#1C1B18">Membrane transport</div><div style="font-size:13px;color:#6f7075;margin-top:2px">Passive vs active transport, and when the cell uses each.</div></div>
+        <span style="flex:none;font-size:12.5px;color:#8a8b90">Practice questions · 45 min</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;padding:16px 28px;border-bottom:1px solid #f0f1f4">
+        <span style="flex:none;width:26px;font-family:Newsreader,Georgia,serif;font-size:18px;font-weight:500;color:#8a8b90">3</span>
+        <div style="flex:1"><div style="font-size:14.5px;font-weight:600;color:#1C1B18">Enzymes and activation energy</div><div style="font-size:13px;color:#6f7075;margin-top:2px">Explain how enzymes lower activation energy in your own words.</div></div>
+        <span style="flex:none;font-size:12.5px;color:#8a8b90">Feynman technique · 45 min</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;padding:16px 28px">
+        <span style="flex:none;width:26px;font-family:Newsreader,Georgia,serif;font-size:18px;font-weight:500;color:#8a8b90">4</span>
+        <div style="flex:1"><div style="font-size:14.5px;font-weight:600;color:#1C1B18">Week 1 review: foundations</div><div style="font-size:13px;color:#6f7075;margin-top:2px">Retest everything from sessions 1 to 3, closed book.</div></div>
+        <span style="flex:none;font-size:12.5px;color:#8a8b90">Spaced review · 45 min</span>
+      </div>
+    </div>
+    <div style="margin-top:14px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:20px 28px;display:flex;align-items:baseline;gap:14px">
+      <span style="font-size:15px;font-weight:600;color:#1C1B18">Week 2 · Energy and metabolism</span>
+      <span style="font-size:13px;color:#8a8b90">4 sessions · 3.0 hrs · glycolysis, Krebs cycle, photosynthesis</span>
+      <span style="margin-left:auto;font-size:11px;color:#8a8b90">▾</span>
+    </div>
+    <div style="margin-top:14px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:20px 28px;display:flex;align-items:baseline;gap:14px">
+      <span style="font-size:15px;font-weight:600;color:#1C1B18">Week 3 · Communication and division</span>
+      <span style="font-size:13px;color:#8a8b90">4 sessions · 3.0 hrs · signaling, mitosis, meiosis, mock exam</span>
+      <span style="margin-left:auto;font-size:11px;color:#8a8b90">▾</span>
+    </div>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="3b"><div class="dv-olabel"><a class="dv-oid" href="#3b">3b</a>Mid-plan · 5 of 12 done · pushed to calendar</div>
+<div class="dv-card" style="width:1280px;background:#f5f6f8">
+  <div style="max-width:1080px;margin:0 auto;padding:40px 40px 72px">
+    <a href="#3b" style="font-size:13px;font-weight:500;color:#8a8b90">‹ Back to My Plans</a>
+    <div style="display:flex;align-items:flex-end;gap:24px;margin-top:18px">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.1em;color:#8a8b90;text-transform:uppercase"><span style="width:8px;height:8px;border-radius:50%;background:#7C5CFA"></span>Cell Biology · Exam Dec 4</div>
+        <h1 style="margin:8px 0 0;font-family:Newsreader,Georgia,serif;font-size:44px;font-weight:500;color:#1C1B18;letter-spacing:-0.01em">Study Coach<span style="color:#3452D9">.</span></h1>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:18px;padding-bottom:8px">
+        <span style="font-size:14px;font-weight:600;color:#3452D9">Refine inputs</span>
+        <span style="display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:500;color:#55565c"><span style="width:7px;height:7px;border-radius:50%;background:#1a9e5c"></span>On your schedule · <a href="#3b" style="font-weight:600">Update</a></span>
+        <span style="font-size:16px;font-weight:600;color:#8a8b90;letter-spacing:.05em">···</span>
+      </div>
+    </div>
+    <div style="margin-top:28px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:32px 36px 28px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#8a8b90;text-transform:uppercase;margin-bottom:14px">Up next</div>
+      <div style="display:flex;align-items:flex-start;gap:32px">
+        <div style="flex:1">
+          <div style="font-family:Newsreader,Georgia,serif;font-size:30px;font-weight:500;color:#1C1B18;letter-spacing:-0.01em">Session 6 · Krebs cycle and electron transport</div>
+          <div style="font-size:14.5px;line-height:1.6;color:#55565c;margin-top:8px;max-width:560px">Trace one glucose molecule from pyruvate to ATP without skipping steps.</div>
+          <div style="font-size:12.5px;color:#a0a1a6;margin-top:6px">From your topics · Krebs cycle</div>
+          <div style="font-size:13px;font-weight:500;color:#8a8b90;margin-top:8px">Active recall · 45 min</div>
+        </div>
+        <span style="flex:none;background:#3452D9;color:#fff;border-radius:10px;padding:12px 24px;font-size:15px;font-weight:600;margin-top:4px">Start session</span>
+      </div>
+      <div style="margin-top:26px;max-width:720px">
+        <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px">
+          <div style="width:41.7%;background:#3452D9"></div>
+          <div style="width:58.3%;background:#B9C5F0"></div>
+        </div>
+        <div style="display:flex;gap:24px;margin-top:10px;font-size:12.5px;color:#6f7075">
+          <span style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:2px;background:#3452D9"></span>Done</span>
+          <span style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:2px;background:#B9C5F0"></span>Remaining</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:44px;margin-top:26px;padding-top:22px;border-top:1px solid #f0f1f4">
+        <div><div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase">Sessions</div><div style="font-family:Newsreader,Georgia,serif;font-size:22px;font-weight:500;color:#1C1B18;margin-top:4px">5 of 12</div></div>
+        <div><div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase">Hours remaining</div><div style="font-family:Newsreader,Georgia,serif;font-size:22px;font-weight:500;color:#1C1B18;margin-top:4px">5.25</div></div>
+        <div><div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase">Exam in</div><div style="font-family:Newsreader,Georgia,serif;font-size:22px;font-weight:500;color:#1C1B18;margin-top:4px">11 days</div></div>
+      </div>
+    </div>
+    <div style="margin-top:26px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:20px 28px;display:flex;align-items:baseline;gap:14px">
+      <span style="font-size:15px;font-weight:600;color:#1C1B18">Week 1 · Foundations</span>
+      <span style="font-size:13px;color:#8a8b90">4 of 4 done · 3.0 hrs</span>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12.5px;color:#1a9e5c;font-weight:600"><span style="width:7px;height:7px;border-radius:50%;background:#1a9e5c"></span>Complete</span>
+    </div>
+    <div style="margin-top:14px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);overflow:hidden">
+      <div style="padding:20px 28px;display:flex;align-items:baseline;gap:14px;border-bottom:1px solid #f0f1f4">
+        <span style="font-size:15px;font-weight:600;color:#1C1B18">Week 2 · Energy and metabolism</span>
+        <span style="font-size:13px;color:#8a8b90">1 of 4 done · 3.0 hrs</span>
+        <span style="margin-left:auto;font-size:11px;color:#8a8b90">▴</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;padding:16px 28px;border-bottom:1px solid #f0f1f4">
+        <span style="flex:none;width:26px;display:flex;align-items:center;justify-content:center"><span style="width:18px;height:18px;border-radius:50%;background:#1a9e5c;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center">✓</span></span>
+        <div style="flex:1"><div style="font-size:14.5px;font-weight:600;color:#8a8b90;text-decoration:line-through;text-decoration-color:#c6c7cc">Glycolysis step by step</div><div style="font-size:13px;color:#a0a1a6;margin-top:2px">Done Nov 21 · Practice questions · 45 min</div></div>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;padding:16px 28px;border-bottom:1px solid #f0f1f4;background:#f8f9fb">
+        <span style="flex:none;width:26px;font-family:Newsreader,Georgia,serif;font-size:18px;font-weight:500;color:#3452D9">6</span>
+        <div style="flex:1"><div style="font-size:14.5px;font-weight:600;color:#1C1B18">Krebs cycle and electron transport</div><div style="font-size:13px;color:#6f7075;margin-top:2px">Trace one glucose molecule from pyruvate to ATP.</div></div>
+        <span style="flex:none;font-size:12.5px;color:#8a8b90">Active recall · 45 min</span>
+        <span style="flex:none;font-size:11px;font-weight:600;letter-spacing:.08em;color:#3452D9;text-transform:uppercase">Up next</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;padding:16px 28px;border-bottom:1px solid #f0f1f4">
+        <span style="flex:none;width:26px;font-family:Newsreader,Georgia,serif;font-size:18px;font-weight:500;color:#8a8b90">7</span>
+        <div style="flex:1"><div style="font-size:14.5px;font-weight:600;color:#1C1B18">Photosynthesis: light and dark reactions</div><div style="font-size:13px;color:#6f7075;margin-top:2px">Where each stage happens and what goes in and out.</div></div>
+        <span style="flex:none;font-size:12.5px;color:#8a8b90">Feynman technique · 45 min</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:16px;padding:16px 28px">
+        <span style="flex:none;width:26px;font-family:Newsreader,Georgia,serif;font-size:18px;font-weight:500;color:#8a8b90">8</span>
+        <div style="flex:1"><div style="font-size:14.5px;font-weight:600;color:#1C1B18">Week 2 review: metabolism</div><div style="font-size:13px;color:#6f7075;margin-top:2px">Retest sessions 5 to 7, closed book.</div></div>
+        <span style="flex:none;font-size:12.5px;color:#8a8b90">Spaced review · 45 min</span>
+      </div>
+    </div>
+    <div style="margin-top:14px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:20px 28px;display:flex;align-items:baseline;gap:14px">
+      <span style="font-size:15px;font-weight:600;color:#1C1B18">Week 3 · Communication and division</span>
+      <span style="font-size:13px;color:#8a8b90">4 sessions · 3.0 hrs · signaling, mitosis, meiosis, mock exam</span>
+      <span style="margin-left:auto;font-size:11px;color:#8a8b90">▾</span>
+    </div>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="3c"><div class="dv-olabel"><a class="dv-oid" href="#3c">3c</a>Behind schedule · 3 sessions behind · amber state</div>
+<div class="dv-card" style="width:1280px;background:#f5f6f8">
+  <div style="max-width:1080px;margin:0 auto;padding:40px 40px 60px">
+    <a href="#3c" style="font-size:13px;font-weight:500;color:#8a8b90">‹ Back to My Plans</a>
+    <div style="display:flex;align-items:flex-end;gap:24px;margin-top:18px">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.1em;color:#8a8b90;text-transform:uppercase"><span style="width:8px;height:8px;border-radius:50%;background:#7C5CFA"></span>Cell Biology · Exam Dec 4</div>
+        <h1 style="margin:8px 0 0;font-family:Newsreader,Georgia,serif;font-size:44px;font-weight:500;color:#1C1B18;letter-spacing:-0.01em">Study Coach<span style="color:#3452D9">.</span></h1>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:18px;padding-bottom:8px">
+        <span style="font-size:14px;font-weight:600;color:#3452D9">Refine inputs</span>
+        <span style="display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:500;color:#55565c"><span style="width:7px;height:7px;border-radius:50%;background:#1a9e5c"></span>On your schedule · <a href="#3c" style="font-weight:600">Update</a></span>
+        <span style="font-size:16px;font-weight:600;color:#8a8b90;letter-spacing:.05em">···</span>
+      </div>
+    </div>
+    <div style="margin-top:28px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:32px 36px 28px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#8a8b90;text-transform:uppercase;margin-bottom:14px">Up next</div>
+      <div style="display:flex;align-items:flex-start;gap:32px">
+        <div style="flex:1">
+          <div style="font-family:Newsreader,Georgia,serif;font-size:30px;font-weight:500;color:#1C1B18;letter-spacing:-0.01em">Session 5 · Glycolysis step by step</div>
+          <div style="font-size:14.5px;line-height:1.6;color:#55565c;margin-top:8px;max-width:560px">Write the ten steps from glucose to pyruvate, then check your work.</div>
+          <div style="font-size:12.5px;color:#a0a1a6;margin-top:6px">From your Struggle Tracker · Glycolysis</div>
+          <div style="font-size:13px;font-weight:500;color:#8a8b90;margin-top:8px">Practice questions · 45 min</div>
+        </div>
+        <span style="flex:none;background:#3452D9;color:#fff;border-radius:10px;padding:12px 24px;font-size:15px;font-weight:600;margin-top:4px">Start session</span>
+      </div>
+      <div style="margin-top:22px;border-left:3px solid #D97706;padding:4px 0 6px 18px;max-width:640px">
+        <div style="font-size:11px;font-weight:600;letter-spacing:.09em;color:#b45309;text-transform:uppercase">3 sessions behind schedule</div>
+        <div style="font-size:13.5px;line-height:1.6;color:#55565c;margin-top:6px">By today the plan expected 7 sessions done. Catch up reworks the 8 sessions left to fit the time before the exam, shortening reviews and merging overlapping topics.</div>
+        <span style="display:inline-block;margin-top:10px;border:1.5px solid #D97706;color:#b45309;border-radius:9px;padding:7px 14px;font-size:13.5px;font-weight:600">Catch up</span>
+      </div>
+      <div style="margin-top:24px;max-width:720px">
+        <div style="display:flex;height:10px;border-radius:5px;overflow:hidden;gap:2px">
+          <div style="width:33.3%;background:#3452D9"></div>
+          <div style="width:25%;background:#D97706"></div>
+          <div style="width:41.7%;background:#B9C5F0"></div>
+        </div>
+        <div style="display:flex;gap:24px;margin-top:10px;font-size:12.5px;color:#6f7075">
+          <span style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:2px;background:#3452D9"></span>Done</span>
+          <span style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:2px;background:#D97706"></span>Behind <span style="font-weight:600;color:#1C1B18">3</span></span>
+          <span style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:2px;background:#B9C5F0"></span>Still scheduled</span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:44px;margin-top:26px;padding-top:22px;border-top:1px solid #f0f1f4">
+        <div><div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase">Sessions</div><div style="font-family:Newsreader,Georgia,serif;font-size:22px;font-weight:500;color:#1C1B18;margin-top:4px">4 of 12</div></div>
+        <div><div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase">Hours remaining</div><div style="font-family:Newsreader,Georgia,serif;font-size:22px;font-weight:500;color:#1C1B18;margin-top:4px">6.0</div></div>
+        <div><div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase">Exam in</div><div style="font-family:Newsreader,Georgia,serif;font-size:22px;font-weight:500;color:#1C1B18;margin-top:4px">9 days</div></div>
+      </div>
+    </div>
+    <div style="margin-top:26px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:20px 28px;display:flex;align-items:baseline;gap:14px">
+      <span style="font-size:15px;font-weight:600;color:#1C1B18">Week 1 · Foundations</span>
+      <span style="font-size:13px;color:#8a8b90">4 of 4 done · 3.0 hrs</span>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12.5px;color:#1a9e5c;font-weight:600"><span style="width:7px;height:7px;border-radius:50%;background:#1a9e5c"></span>Complete</span>
+    </div>
+    <div style="margin-top:14px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:20px 28px;display:flex;align-items:baseline;gap:14px">
+      <span style="font-size:15px;font-weight:600;color:#1C1B18">Week 2 · Energy and metabolism</span>
+      <span style="font-size:13px;color:#8a8b90">0 of 4 done · 3.0 hrs · glycolysis, Krebs cycle, photosynthesis</span>
+      <span style="margin-left:auto;font-size:11px;color:#8a8b90">▾</span>
+    </div>
+    <div style="margin-top:14px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:20px 28px;display:flex;align-items:baseline;gap:14px">
+      <span style="font-size:15px;font-weight:600;color:#1C1B18">Week 3 · Communication and division</span>
+      <span style="font-size:13px;color:#8a8b90">4 sessions · 3.0 hrs · signaling, mitosis, meiosis, mock exam</span>
+      <span style="margin-left:auto;font-size:11px;color:#8a8b90">▾</span>
+    </div>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="3d"><div class="dv-olabel"><a class="dv-oid" href="#3d">3d</a>Complete · all 12 done before the exam</div>
+<div class="dv-card" style="width:1280px;background:#f5f6f8">
+  <div style="max-width:1080px;margin:0 auto;padding:40px 40px 60px">
+    <a href="#3d" style="font-size:13px;font-weight:500;color:#8a8b90">‹ Back to My Plans</a>
+    <div style="display:flex;align-items:flex-end;gap:24px;margin-top:18px">
+      <div>
+        <div style="display:flex;align-items:center;gap:8px;font-size:11px;font-weight:600;letter-spacing:.1em;color:#8a8b90;text-transform:uppercase"><span style="width:8px;height:8px;border-radius:50%;background:#7C5CFA"></span>Cell Biology · Exam Dec 4</div>
+        <h1 style="margin:8px 0 0;font-family:Newsreader,Georgia,serif;font-size:44px;font-weight:500;color:#1C1B18;letter-spacing:-0.01em">Study Coach<span style="color:#3452D9">.</span></h1>
+      </div>
+      <div style="margin-left:auto;display:flex;align-items:center;gap:18px;padding-bottom:8px">
+        <span style="font-size:14px;font-weight:600;color:#3452D9">Refine inputs</span>
+        <span style="display:flex;align-items:center;gap:8px;font-size:13.5px;font-weight:500;color:#55565c"><span style="width:7px;height:7px;border-radius:50%;background:#1a9e5c"></span>On your schedule</span>
+        <span style="font-size:16px;font-weight:600;color:#8a8b90;letter-spacing:.05em">···</span>
+      </div>
+    </div>
+    <div style="margin-top:28px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:32px 36px 28px">
+      <div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#8a8b90;text-transform:uppercase;margin-bottom:14px">Plan complete</div>
+      <div style="display:flex;align-items:flex-start;gap:32px">
+        <div style="flex:1">
+          <div style="font-family:Newsreader,Georgia,serif;font-size:30px;font-weight:500;color:#1C1B18;letter-spacing:-0.01em">All 12 sessions done, 2 days early.</div>
+          <div style="font-size:14.5px;line-height:1.6;color:#55565c;margin-top:8px;max-width:560px">You covered everything in the plan. A light review the day before the exam is the best use of the time left, or check where your grade stands in <a href="Grade Hub.dc.html#t2">Grade Hub</a>.</div>
+        </div>
+        <span style="flex:none;background:#3452D9;color:#fff;border-radius:10px;padding:12px 24px;font-size:15px;font-weight:600;margin-top:4px">Start final review</span>
+      </div>
+      <div style="margin-top:26px;max-width:720px">
+        <div style="display:flex;height:10px;border-radius:5px;overflow:hidden">
+          <div style="width:100%;background:#3452D9;border-radius:5px"></div>
+        </div>
+        <div style="display:flex;gap:24px;margin-top:10px;font-size:12.5px;color:#6f7075">
+          <span style="display:flex;align-items:center;gap:7px"><span style="width:8px;height:8px;border-radius:2px;background:#3452D9"></span>Done <span style="font-weight:600;color:#1C1B18">12 of 12</span></span>
+        </div>
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:44px;margin-top:26px;padding-top:22px;border-top:1px solid #f0f1f4">
+        <div><div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase">Hours studied</div><div style="font-family:Newsreader,Georgia,serif;font-size:22px;font-weight:500;color:#1C1B18;margin-top:4px">9.0</div></div>
+        <div><div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase">Exam in</div><div style="font-family:Newsreader,Georgia,serif;font-size:22px;font-weight:500;color:#1C1B18;margin-top:4px">2 days</div></div>
+        <a href="Grade Hub.dc.html#t2" style="margin-left:auto;font-size:14px;font-weight:600;color:#3452D9">See where you stand in Grade Hub ›</a>
+      </div>
+    </div>
+    <div style="margin-top:26px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:20px 28px;display:flex;align-items:baseline;gap:14px">
+      <span style="font-size:15px;font-weight:600;color:#1C1B18">Week 1 · Foundations</span>
+      <span style="font-size:13px;color:#8a8b90">4 of 4 done · 3.0 hrs</span>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12.5px;color:#1a9e5c;font-weight:600"><span style="width:7px;height:7px;border-radius:50%;background:#1a9e5c"></span>Complete</span>
+    </div>
+    <div style="margin-top:14px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:20px 28px;display:flex;align-items:baseline;gap:14px">
+      <span style="font-size:15px;font-weight:600;color:#1C1B18">Week 2 · Energy and metabolism</span>
+      <span style="font-size:13px;color:#8a8b90">4 of 4 done · 3.0 hrs</span>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12.5px;color:#1a9e5c;font-weight:600"><span style="width:7px;height:7px;border-radius:50%;background:#1a9e5c"></span>Complete</span>
+    </div>
+    <div style="margin-top:14px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:20px 28px;display:flex;align-items:baseline;gap:14px">
+      <span style="font-size:15px;font-weight:600;color:#1C1B18">Week 3 · Communication and division</span>
+      <span style="font-size:13px;color:#8a8b90">4 of 4 done · 3.0 hrs</span>
+      <span style="margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12.5px;color:#1a9e5c;font-weight:600"><span style="width:7px;height:7px;border-radius:50%;background:#1a9e5c"></span>Complete</span>
+    </div>
+  </div>
+</div></div>
+
+<div class="dv-opt" id="3e"><div class="dv-olabel"><a class="dv-oid" href="#3e">3e</a>Mobile · 390 · fresh plan</div>
+<div class="dv-card" style="width:390px;background:#f5f6f8">
+  <div style="height:54px;background:#fff;border-bottom:1px solid #ebecef;display:flex;align-items:center;justify-content:space-between;padding:0 20px">
+    <div style="display:flex;align-items:center;gap:9px"><img src="assets/logo.png" alt="" style="height:22px;width:auto"><span style="font-size:15px;font-weight:700;color:#1C1B18">StudyEdge AI</span></div>
+    <div style="display:flex;flex-direction:column;gap:4px"><span style="width:18px;height:2px;background:#1C1B18;border-radius:1px"></span><span style="width:18px;height:2px;background:#1C1B18;border-radius:1px"></span></div>
+  </div>
+  <div style="padding:24px 20px 56px">
+    <a href="#3e" style="font-size:12.5px;font-weight:500;color:#8a8b90">‹ Back to My Plans</a>
+    <div style="display:flex;align-items:center;gap:7px;font-size:10.5px;font-weight:600;letter-spacing:.1em;color:#8a8b90;text-transform:uppercase;margin-top:16px"><span style="width:7px;height:7px;border-radius:50%;background:#7C5CFA"></span>Cell Biology · Exam Dec 4</div>
+    <div style="display:flex;align-items:center;gap:12px;margin-top:6px">
+      <h1 style="margin:0;font-family:Newsreader,Georgia,serif;font-size:36px;font-weight:500;color:#1C1B18;letter-spacing:-0.01em">Study Coach<span style="color:#3452D9">.</span></h1>
+      <span style="margin-left:auto;font-size:15px;font-weight:600;color:#8a8b90;letter-spacing:.05em">···</span>
+    </div>
+    <div style="margin-top:20px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:22px 20px">
+      <div style="font-size:10.5px;font-weight:600;letter-spacing:.1em;color:#8a8b90;text-transform:uppercase;margin-bottom:10px">Up next</div>
+      <div style="font-family:Newsreader,Georgia,serif;font-size:24px;font-weight:500;line-height:1.3;color:#1C1B18">Session 1 · Cell structure and organelles</div>
+      <div style="font-size:13.5px;line-height:1.6;color:#55565c;margin-top:7px">Name every organelle and what it does without looking at your notes.</div>
+      <div style="font-size:12px;color:#a0a1a6;margin-top:5px">From your topics · Cell structure</div>
+      <div style="font-size:12.5px;font-weight:500;color:#8a8b90;margin-top:7px">Active recall · 45 min</div>
+      <div style="margin-top:16px;background:#3452D9;color:#fff;border-radius:12px;padding:13px 0;text-align:center;font-size:14.5px;font-weight:600">Start session</div>
+      <div style="margin-top:20px">
+        <div style="display:flex;height:8px;border-radius:4px;overflow:hidden">
+          <div style="width:100%;background:#B9C5F0;border-radius:4px"></div>
+        </div>
+        <div style="display:flex;gap:16px;margin-top:9px;font-size:11.5px;color:#6f7075">
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:2px;background:#3452D9"></span>Done</span>
+          <span style="display:flex;align-items:center;gap:6px"><span style="width:7px;height:7px;border-radius:2px;background:#B9C5F0"></span>Remaining</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:26px;margin-top:18px;padding-top:14px;border-top:1px solid #f0f1f4">
+        <div><div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase">Sessions</div><div style="font-family:Newsreader,Georgia,serif;font-size:19px;font-weight:500;color:#1C1B18;margin-top:3px">0 of 12</div></div>
+        <div><div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase">Hours left</div><div style="font-family:Newsreader,Georgia,serif;font-size:19px;font-weight:500;color:#1C1B18;margin-top:3px">9.0</div></div>
+        <div><div style="font-size:10.5px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase">Exam in</div><div style="font-family:Newsreader,Georgia,serif;font-size:19px;font-weight:500;color:#1C1B18;margin-top:3px">18 days</div></div>
+      </div>
+    </div>
+    <div style="margin:22px 2px 12px;font-size:12px;line-height:1.8;color:#55565c"><span style="font-size:10.5px;font-weight:600;letter-spacing:.1em;color:#8a8b90;text-transform:uppercase">Emphasizes</span>&nbsp; <span style="white-space:nowrap"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#D97706;margin:0 4px 2px 0"></span>Membrane transport</span> · <span style="white-space:nowrap"><span style="display:inline-block;width:5px;height:5px;border-radius:50%;background:#D97706;margin:0 4px 2px 0"></span>Glycolysis</span> · Krebs cycle · Cell signaling · Mitosis · <a href="#3e" style="font-weight:600">Struggle Tracker ›</a></div>
+    <div style="background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);overflow:hidden">
+      <div style="padding:16px 18px;border-bottom:1px solid #f0f1f4">
+        <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:14.5px;font-weight:600;color:#1C1B18">Week 1 · Foundations</span><span style="margin-left:auto;font-size:11px;color:#8a8b90">▴</span></div>
+        <div style="font-size:12px;color:#8a8b90;margin-top:2px">4 sessions · 3.0 hrs</div>
+      </div>
+      <div style="padding:14px 18px;border-bottom:1px solid #f0f1f4;background:#f8f9fb">
+        <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:Newsreader,Georgia,serif;font-size:16px;font-weight:500;color:#3452D9">1</span><span style="font-size:13.5px;font-weight:600;color:#1C1B18">Cell structure and organelles</span><span style="margin-left:auto;font-size:10px;font-weight:600;letter-spacing:.08em;color:#3452D9;text-transform:uppercase">Up next</span></div>
+        <div style="font-size:12.5px;color:#6f7075;margin-top:3px">Name every organelle without notes. · Active recall · 45 min</div>
+      </div>
+      <div style="padding:14px 18px;border-bottom:1px solid #f0f1f4">
+        <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:Newsreader,Georgia,serif;font-size:16px;font-weight:500;color:#8a8b90">2</span><span style="font-size:13.5px;font-weight:600;color:#1C1B18">Membrane transport</span></div>
+        <div style="font-size:12.5px;color:#6f7075;margin-top:3px">Passive vs active transport. · Practice questions · 45 min</div>
+      </div>
+      <div style="padding:14px 18px;border-bottom:1px solid #f0f1f4">
+        <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:Newsreader,Georgia,serif;font-size:16px;font-weight:500;color:#8a8b90">3</span><span style="font-size:13.5px;font-weight:600;color:#1C1B18">Enzymes and activation energy</span></div>
+        <div style="font-size:12.5px;color:#6f7075;margin-top:3px">Explain enzymes in your own words. · Feynman · 45 min</div>
+      </div>
+      <div style="padding:14px 18px">
+        <div style="display:flex;align-items:baseline;gap:10px"><span style="font-family:Newsreader,Georgia,serif;font-size:16px;font-weight:500;color:#8a8b90">4</span><span style="font-size:13.5px;font-weight:600;color:#1C1B18">Week 1 review: foundations</span></div>
+        <div style="font-size:12.5px;color:#6f7075;margin-top:3px">Retest sessions 1 to 3, closed book. · Spaced review · 45 min</div>
+      </div>
+    </div>
+    <div style="margin-top:12px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:16px 18px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:14.5px;font-weight:600;color:#1C1B18">Week 2 · Energy and metabolism</span><span style="margin-left:auto;font-size:11px;color:#8a8b90">▾</span></div>
+      <div style="font-size:12px;color:#8a8b90;margin-top:2px">4 sessions · 3.0 hrs · glycolysis, Krebs, photosynthesis</div>
+    </div>
+    <div style="margin-top:12px;background:#fff;border:1px solid #e7e8ec;border-radius:16px;box-shadow:0 1px 3px rgba(28,27,24,.05);padding:16px 18px">
+      <div style="display:flex;align-items:baseline;gap:10px"><span style="font-size:14.5px;font-weight:600;color:#1C1B18">Week 3 · Communication and division</span><span style="margin-left:auto;font-size:11px;color:#8a8b90">▾</span></div>
+      <div style="font-size:12px;color:#8a8b90;margin-top:2px">4 sessions · 3.0 hrs · signaling, mitosis, meiosis, mock</div>
+    </div>
+    <div style="margin-top:16px;border:1.5px solid #3452D9;color:#3452D9;border-radius:12px;padding:12px 0;text-align:center;font-size:14.5px;font-weight:600">Push to Schedule</div>
+    <div style="margin-top:12px;text-align:center;font-size:13.5px;font-weight:600;color:#3452D9">Refine inputs</div>
+  </div>
+</div></div>
+
+</div>
+<p class="dv-next">Implementation spec: <a href="Study Coach Spec.dc.html">Study Coach Spec</a>.</p>
+</section>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showDesignNotes&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Canvas&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return { showNotes: this.props.showDesignNotes ?? true };
+  }
+}
+</script>
+</body>
+</html>

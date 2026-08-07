@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import Spinner from './ui/spinner'
-import { getCachedCoachPlan, saveCoachPlan, getCachedStudyTools } from '../lib/db'
+import { getCachedCoachPlan, getCachedStudyTools } from '../lib/db'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
 import { track } from '../lib/analytics'
@@ -77,8 +77,9 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
       const prefill = [nextSession.focusArea, ...(nextSession.keyTopics ?? [])].filter(Boolean).join(', ')
       setFocus(prefill)
       setCoachBanner(`Loaded from your Study Coach plan: ${nextSession.focusArea}`)
-      const updatedIndex = Math.min(idx + 1, allSessions.length - 1)
-      saveCoachPlan(courseId, saved.plan, saved.formData)
+      // No write here. Which session is next is derived from the plan's own
+      // done flags now, so the old sessionIndex cursor (and the re-save that
+      // maintained it) is gone.
     } catch {}
   }, [])
 

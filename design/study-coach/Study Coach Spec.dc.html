@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><link rel="preconnect" href="https://fonts.googleapis.com"><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500;6..72,600&family=Inter:wght@400;500;600;700&display=swap"><style>body{margin:0;background:#eceef2;font-family:Inter,system-ui,sans-serif;color:#1C1B18}a{color:#3452D9;text-decoration:none}a:hover{color:#2a43b8}code{font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#f0f1f4;border-radius:4px;padding:1px 5px}</style></helmet>
+<div style="max-width:920px;margin:0 auto;padding:56px 40px 96px">
+  <div style="font-size:11px;font-weight:600;letter-spacing:.1em;color:#8a8b90;text-transform:uppercase">StudyEdge AI · Study Coach · Implementation spec · Aug 2026</div>
+  <h1 style="margin:10px 0 0;font-family:Newsreader,Georgia,serif;font-size:40px;font-weight:500;letter-spacing:-0.01em">Study Coach — plan view<span style="color:#3452D9">.</span></h1>
+  <div style="font-size:14px;color:#6f7075;margin-top:8px">Approved design: <a href="Canvas.dc.html#t3">canvas, turn 3</a> (3a fresh · 3b mid-plan, pushed · 3c behind · 3d complete · 3e mobile). Target: <code>design/study-coach/</code>. Shares the Grade Hub design language; where a value is not listed here, the <a href="Grade Hub Spec.dc.html">Grade Hub spec</a> applies. Product name is always "StudyEdge AI". No em dashes in copy. Every statistic renders exactly once per page.</div>
+
+  <h2 style="font-family:Newsreader,Georgia,serif;font-size:26px;font-weight:500;margin:44px 0 12px">1 · Plan math</h2>
+  <div style="background:#fff;border:1px solid #e7e8ec;border-radius:12px;padding:22px 26px;font-size:13.5px;line-height:1.9">
+    <div>Each session has a scheduled date, a duration (minutes), and a done flag.</div>
+    <div style="margin-top:10px"><code>done = count(sessions where done)</code></div>
+    <div><code>remaining = total − done</code></div>
+    <div><code>hoursRemaining = Σ remaining (duration_i) / 60</code> — shown to 2 significant decimals (9.0, 5.25, 6.0).</div>
+    <div><code>expectedByToday = count(sessions where scheduledDate ≤ today)</code> — a session counts as expected the moment its scheduled date has passed, whether or not it was done.</div>
+    <div><code>behind = max(0, expectedByToday − done)</code> — the behind state renders iff <code>behind ≥ 1</code>.</div>
+    <div><code>stillScheduled = remaining − behind</code> — sessions whose date has not yet passed.</div>
+    <div><code>daysToExam = examDate − today</code> (calendar days, ceil).</div>
+    <div style="margin-top:10px">Progress bar segments (widths = count / total as %): <code>done</code> blue → <code>behind</code> amber (behind state only) → <code>stillScheduled</code> light blue. Segments always sum to <code>total</code>.</div>
+    <div style="margin-top:10px;color:#6f7075">Worked example (3c): total 12 at 45 min, done 4, expectedByToday 7 → behind 3, remaining 8, stillScheduled 5, hoursRemaining 6.0, daysToExam 9. Bar 33.3% + 25% + 41.7%. The copy's "7 sessions expected" and "8 sessions left" appear only in the amber block; 4, 6.0, and 9 appear only in the footer stats; 3 appears only in the bar legend and amber label.</div>
+    <div style="color:#6f7075">Fresh (3a): done 0, bar is one light-blue track. Mid (3b): 5 done, 5.25 hrs. Complete (3d): bar fully blue, legend "Done 12 of 12", footer swaps Sessions/Hours remaining for Hours studied 9.0.</div>
+  </div>
+
+  <h2 style="font-family:Newsreader,Georgia,serif;font-size:26px;font-weight:500;margin:44px 0 12px">2 · Catch-up rule</h2>
+  <div style="background:#fff;border:1px solid #e7e8ec;border-radius:12px;padding:22px 26px;font-size:13.5px;line-height:1.9">
+    <div>"Catch up" rebuilds the schedule for the <code>remaining</code> sessions across the days from tomorrow to the day before the exam:</div>
+    <div style="margin-top:8px">1. Redistribute remaining sessions evenly across available days, at most one session per day while <code>remaining ≤ daysLeft</code>.</div>
+    <div>2. If <code>remaining &gt; daysLeft</code>, first shorten review sessions (Spaced review type) from 45 to 30 min, then merge adjacent sessions that share a topic theme (e.g. two metabolism sessions become one 60 min session), until sessions fit at max two per day.</div>
+    <div>3. The mock exam session always stays last, on the final available day.</div>
+    <div>4. Session content is never dropped, only compressed or merged; the plan re-pushes to the calendar automatically if it was pushed.</div>
+    <div style="margin-top:8px;color:#6f7075">Button copy states the effect before it runs; the amber block explains it in one sentence ("reworks the N sessions left to fit the time before the exam, shortening reviews and merging overlapping topics").</div>
+  </div>
+
+  <h2 style="font-family:Newsreader,Georgia,serif;font-size:26px;font-weight:500;margin:44px 0 12px">3 · Color</h2>
+  <div style="background:#fff;border:1px solid #e7e8ec;border-radius:12px;padding:22px 26px;font-size:13.5px;line-height:2">
+    <div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase;margin-bottom:6px">Data colors — color encodes data, never decorates</div>
+    <div style="display:grid;grid-template-columns:130px 150px 1fr;row-gap:2px">
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#3452D9"></span><code>#3452D9</code></span><span>Primary / done</span><span style="color:#6f7075">Done bar segment, Start session button, links, up-next session number</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#B9C5F0"></span><code>#B9C5F0</code></span><span>Still scheduled</span><span style="color:#6f7075">Not-yet-due bar segment; entire track when done = 0</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#D97706"></span><code>#D97706</code></span><span>Behind / struggle</span><span style="color:#6f7075">Behind bar segment, amber block left rule, Catch up button border, struggle-topic dots (6px, 5px mobile)</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#b45309"></span><code>#b45309</code></span><span>Amber text</span><span style="color:#6f7075">Amber block label, Catch up button text</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#1a9e5c"></span><code>#1a9e5c</code></span><span>Done / green</span><span style="color:#6f7075">Session done check circle, week Complete dot, "On your schedule" dot</span>
+      <span style="display:flex;align-items:center;gap:8px"><span style="width:12px;height:12px;border-radius:3px;background:#7C5CFA"></span><code>#7C5CFA</code></span><span>Course dot</span><span style="color:#6f7075">Course identity dot in the eyebrow (per-course palette shared with Grade Hub chips)</span>
+    </div>
+    <div style="font-size:11px;font-weight:600;letter-spacing:.08em;color:#8a8b90;text-transform:uppercase;margin:16px 0 6px">Neutrals (shared with Grade Hub)</div>
+    <div style="display:grid;grid-template-columns:130px 1fr;row-gap:2px">
+      <span><code>#1C1B18</code></span><span style="color:#6f7075">Ink: H1, session titles, numerals</span>
+      <span><code>#55565c</code></span><span style="color:#6f7075">Focus lines, amber block body, pushed-state text</span>
+      <span><code>#6f7075</code></span><span style="color:#6f7075">Row focus lines, bar legend</span>
+      <span><code>#8a8b90</code></span><span style="color:#6f7075">Eyebrows, meta (method · duration), week summaries, Back link, caret glyphs, overflow ···</span>
+      <span><code>#a0a1a6</code></span><span style="color:#6f7075">Provenance line, done-row meta</span>
+      <span><code>#c6c7cc</code></span><span style="color:#6f7075">Done-row strikethrough color</span>
+      <span><code>#e7e8ec</code> / <code>#f0f1f4</code></span><span style="color:#6f7075">Card borders / inner row rules</span>
+      <span><code>#f8f9fb</code></span><span style="color:#6f7075">Up-next row highlight inside week accordion</span>
+      <span><code>#f5f6f8</code> / <code>#fff</code></span><span style="color:#6f7075">Page background / cards</span>
+    </div>
+  </div>
+
+  <h2 style="font-family:Newsreader,Georgia,serif;font-size:26px;font-weight:500;margin:44px 0 12px">4 · Type</h2>
+  <div style="background:#fff;border:1px solid #e7e8ec;border-radius:12px;padding:22px 26px;font-size:13.5px;line-height:2">
+    <div style="margin-bottom:6px">Serif: <b>Newsreader</b> (optical sizing on). Sans: <b>Inter</b>.</div>
+    <div style="display:grid;grid-template-columns:290px 1fr;row-gap:2px">
+      <span>"Study Coach." H1</span><span style="color:#6f7075">Newsreader 44, wt 500, ls −0.01em · mobile 36 · blue period</span>
+      <span>Hero session title</span><span style="color:#6f7075">Newsreader 30, wt 500, ls −0.01em · mobile 24/1.3</span>
+      <span>Hero focus line</span><span style="color:#6f7075">Inter 14.5/1.6, #55565c, max-width 560 · mobile 13.5</span>
+      <span>Provenance line</span><span style="color:#6f7075">Inter 12.5, #a0a1a6, margin-top 6 · mobile 12, margin-top 5 · "From your topics · X" or "From your Struggle Tracker · X"</span>
+      <span>Hero meta</span><span style="color:#6f7075">Inter 13 wt 500 #8a8b90, margin-top 8 · "Method · 45 min"</span>
+      <span>Footer stat numerals</span><span style="color:#6f7075">Newsreader 22, wt 500 · mobile 19 · labels Inter 11 wt 600 uppercase ls .08em #8a8b90</span>
+      <span>Session numbers (rows)</span><span style="color:#6f7075">Newsreader 18, wt 500 · up next #3452D9, others #8a8b90 · mobile 16</span>
+      <span>Week titles / summaries</span><span style="color:#6f7075">Inter 15 wt 600 / Inter 13 #8a8b90 · mobile 14.5 / 12</span>
+      <span>Row titles / focus</span><span style="color:#6f7075">Inter 14.5 wt 600 / Inter 13 #6f7075 · row meta 12.5 #8a8b90 · mobile 13.5 / 12.5</span>
+      <span>Eyebrows / section labels</span><span style="color:#6f7075">Inter 11 wt 600 uppercase ls .1em #8a8b90 · mobile 10.5</span>
+      <span>Buttons / header links</span><span style="color:#6f7075">Inter 15 wt 600 (Start session) · 14 wt 600 (header actions) · Back link 13 wt 500 #8a8b90</span>
+      <span>Amber block</span><span style="color:#6f7075">Label Inter 11 wt 600 uppercase ls .09em #b45309 · body 13.5/1.6 #55565c · Catch up 13.5 wt 600</span>
+    </div>
+  </div>
+
+  <h2 style="font-family:Newsreader,Georgia,serif;font-size:26px;font-weight:500;margin:44px 0 12px">5 · Layout &amp; components</h2>
+  <div style="background:#fff;border:1px solid #e7e8ec;border-radius:12px;padding:22px 26px;font-size:13.5px;line-height:1.9">
+    <div><b>Page.</b> Desktop 1280, content max-width 1080, padding 40 side, 40 top, 72 bottom. Cards: white, 1px #e7e8ec, radius 16, shadow <code>0 1px 3px rgba(28,27,24,.05)</code>. Rhythm: Back link → header row 18 below → hero card 28 below → topics strip 26 below (margin 26 2 14) → week cards, 14 between.</div>
+    <div style="margin-top:10px"><b>Header.</b> Left: eyebrow (8px course dot + "Cell Biology · Exam Dec 4") over H1. Right, baseline-aligned (gap 18, padding-bottom 8): "Refine inputs" text link; Push control; "···" overflow (holds Export). No stepper, no step badge, no subtitle. Not pushed: "Push to Schedule" outlined button, 1.5px #3452D9 border, radius 10, padding 8 16. Pushed: 7px green dot + "On your schedule" + quiet "Update" link, no button chrome.</div>
+    <div style="margin-top:10px"><b>Hero card.</b> Padding 32 36 28. Eyebrow "Up next" (margin-bottom 14) → flex row gap 32: session block (title, focus, provenance, meta) + "Start session" solid #3452D9, radius 10, padding 12 24, the ONLY solid button per state. Progress bar (margin-top 26, max-width 720): height 10, radius 5, 2px gaps, cushion-bar language; legend margin-top 10, 8×8 radius-2 swatches, gap 7/24 — counts appear in the legend only when they appear nowhere else (Behind 3; Done 12 of 12 in complete). Footer stats: border-top #f0f1f4, padding-top 22, gap 44: Sessions X of 12, Hours remaining, Exam in N days.</div>
+    <div style="margin-top:10px"><b>Behind state (3c).</b> Amber block between session block and bar (margin-top 22): <code>border-left:3px solid #D97706</code>, padding 4 0 6 18, max-width 640. Uppercase label "N sessions behind schedule", one body sentence naming expectedByToday and sessions left, then "Catch up": 1.5px #D97706 border, #b45309 text, radius 9, padding 7 14, margin-top 10. No standalone banner anywhere.</div>
+    <div style="margin-top:10px"><b>Complete state (3d).</b> Eyebrow becomes "Plan complete", title "All 12 sessions done, N days early.", body points to a final review and links Grade Hub. Primary "Start final review"; footer right link "See where you stand in Grade Hub ›". Bar fully #3452D9, no gap, legend "Done 12 of 12". Stats: Hours studied, Exam in. No confetti, no celebration graphics.</div>
+    <div style="margin-top:10px"><b>Topics strip.</b> One flex-wrap line (gap 10): uppercase label "This plan emphasizes" + topic names Inter 13 #55565c; struggle-added topics get a 6px #D97706 dot before the name; trailing note "· added from your Struggle Tracker ›" links the tracker. This line is the Struggle Tracker's only home on the page.</div>
+    <div style="margin-top:10px"><b>Week accordion.</b> Header row padding 20 28: title + summary ("4 sessions · 3.0 hrs" collapsed adds topic theme; started weeks show "X of 4 done") + right: ▴/▾ caret, or green dot + "Complete". Current week expanded by default. Session rows: padding 16 28, 1px #f0f1f4 rules, flex gap 16: 26px number column, title + one-line focus, right meta "Method · 45 min". Up-next row: #f8f9fb background, blue number, uppercase blue "UP NEXT" tag; NO per-row Start buttons, NO topic pills. Done rows: 18px green check circle, title #8a8b90 with line-through (#c6c7cc), meta "Done Nov 21 · Method · 45 min" in #a0a1a6.</div>
+    <div style="margin-top:10px"><b>Mobile (390, from 3e).</b> Page padding 24 20 56. Header actions collapse into ···; hero button full-width (radius 12, padding 13 0); bar height 8; stats 3-up (2-up + wrap if tight); topics strip becomes a wrapped text line; rows drop to two lines (title row + "focus · method · min"); Push to Schedule is a full-width outlined bar below the plan, Refine inputs a centered text link under it. Hit targets ≥ 44px. <b>Behind on mobile:</b> amber block keeps the 3px left rule, padding 4 0 6 14, full card width; Catch up becomes a full-width 44px outlined amber button; the three-segment bar keeps true proportions at 8px height with the legend wrapping to two lines if needed (swatch labels Done / Behind 3 / Still scheduled). <b>Complete on mobile:</b> title wraps to two lines at Newsreader 24, "Start final review" full-width primary, Grade Hub link centered below the stats row.</div>
+    <div style="margin-top:10px"><b>States.</b> Fresh (3a, not pushed) · Mid-plan (3b, pushed) · Behind (3c) · Complete (3d) · Mobile (3e). One primary action per state; behind keeps Start session as primary and Catch up as the amber secondary.</div>
+  </div>
+</div>
+</x-dc>
+</body>
+</html>

@@ -149,6 +149,35 @@ export async function saveCoachPlan(courseId, plan, formData) {
   await _upsert({ coach_plans: updated })
 }
 
+/**
+ * Replaces the stored plan object for a course, leaving formData, struggles
+ * and everything else in the envelope untouched.
+ *
+ * The stored plan is canonical: session completion, catch-up rescheduling and
+ * regeneration all land here, and every surface that shows plan or session
+ * information reads back from here. Nothing else may keep its own copy.
+ */
+export async function saveCoachPlanObject(courseId, plan) {
+  const existing = _cache?.coach_plans ?? {}
+  const prev = existing[courseId] ?? {}
+  const updated = { ...existing, [courseId]: { ...prev, plan, savedAt: Date.now() } }
+  if (_cache) _cache.coach_plans = updated
+  await _upsert({ coach_plans: updated })
+}
+
+/**
+ * Records that this plan's sessions are on the calendar (or clears it).
+ * Persisted so the header's pushed state survives a reload, which it did not
+ * when it lived in component state.
+ */
+export async function saveCoachPlanPushedAt(courseId, pushedAt) {
+  const existing = _cache?.coach_plans ?? {}
+  const prev = existing[courseId] ?? {}
+  const updated = { ...existing, [courseId]: { ...prev, pushedAt } }
+  if (_cache) _cache.coach_plans = updated
+  await _upsert({ coach_plans: updated })
+}
+
 export async function saveCoachPlanStruggles(courseId, struggles) {
   const existing = _cache?.coach_plans ?? {}
   const updated = {

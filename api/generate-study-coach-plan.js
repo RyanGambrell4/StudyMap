@@ -6,6 +6,15 @@ import {
   isMethodOnly,
 } from '../lib/server/coachAntiGuessing.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
+import {
+  buildInputTopics,
+  validatePlan,
+  buildRepairPrompt,
+} from '../lib/server/coachPlanValidate.js'
+// Only the scheduler is imported. This module already has its own local toISO
+// and parseISO for the week scaffold; importing the shared ones as well is a
+// redeclaration that Node rejects outright.
+import { assignScheduledDates } from '../lib/shared/coachPlan.js'
 
 // ─── Calendar helpers ────────────────────────────────────────────────────────
 // LLMs are unreliable at calendar math (Monday of week N, weeks-until-exam,
@@ -114,8 +123,42 @@ function buildPhaseMap(totalWeeks) {
 // Force the parsed plan onto the deterministic scaffold so dates, week count,
 // and session count per week are always sound regardless of what the model
 // returned. Content (focusArea, goal, keyTopics, studyMethod) is preserved.
-function repairPlan(plan, scaffold, sessionsPerWeek, sessionMinutes, phaseMap, studentTextBag = '') {
+function repairPlan(plan, scaffold, sessionsPerWeek, sessionMinutes, phaseMap, studentTextBag = '', inputTopics = []) {
   const incoming = Array.isArray(plan?.weeklyFocus) ? plan.weeklyFocus : []
+
+  // Padding for short weeks. The model routinely returns fewer sessions than
+  // the scaffold asks for, and the padding it gets is held to exactly the same
+  // grounding standard as the rest of the plan: we cycle the student's own
+  // topics with a different study method each pass, which is precisely the
+  // "repeat topics rather than invent material" rule. Only when the student
+  // named no topics at all do we fall back to a neutral recall slot.
+  const PAD_METHODS = ['Active recall', 'Practice problems', 'Feynman explanation', 'Spaced retrieval', 'Mixed problem set']
+  let padCount = 0
+  const makePadSession = (labelIndex) => {
+    if (!inputTopics.length) {
+      return {
+        sessionLabel: `Session ${labelIndex}`,
+        focusArea: 'Active recall on this week\'s topic',
+        goal: 'Self-test on what was covered this week',
+        keyTopics: [],
+        studyMethod: 'Active recall + practice problems',
+        duration: sessionMinutes,
+      }
+    }
+    const topic = inputTopics[padCount % inputTopics.length]
+    const method = PAD_METHODS[Math.floor(padCount / inputTopics.length) % PAD_METHODS.length]
+    padCount++
+    return {
+      sessionLabel: `Session ${labelIndex}`,
+      focusArea: topic.label,
+      goal: `Work through ${topic.label} again using ${method.toLowerCase()}.`,
+      keyTopics: [topic.label],
+      studyMethod: method,
+      sessionType: 'Retrieval',
+      provenanceLabel: topic.label,
+      duration: sessionMinutes,
+    }
+  }
   // Per-invocation copy of neutral traps so concurrent requests don't
   // drain a shared pool.
   const neutralTraps = [
@@ -136,16 +179,10 @@ function repairPlan(plan, scaffold, sessionsPerWeek, sessionMinutes, phaseMap, s
     const src = incoming[i] || {}
     let sessions = Array.isArray(src.sessions) ? src.sessions.slice(0, sessionsPerWeek) : []
 
-    // Pad short weeks with a recall slot rather than leaving them empty.
+    // Pad short weeks rather than leaving them empty. See makePadSession:
+    // padding repeats the student's topics, it never invents material.
     while (sessions.length < sessionsPerWeek) {
-      sessions.push({
-        sessionLabel: `Session ${sessions.length + 1}`,
-        focusArea: 'Active recall on this week\'s topic',
-        goal: 'Self-test on what was covered this week',
-        keyTopics: [],
-        studyMethod: 'Active recall + practice problems',
-        duration: sessionMinutes,
-      })
+      sessions.push(makePadSession(sessions.length + 1))
     }
 
     const phase = phaseMap[w.index]
@@ -162,12 +199,18 @@ function repairPlan(plan, scaffold, sessionsPerWeek, sessionMinutes, phaseMap, s
         sessionLabel: s.sessionLabel || `Session ${j + 1}`,
         // Focus area: keep as-is if grounded in student text OR method-only;
         // otherwise degrade to the neutral "Active recall on this week's material".
+        // An empty focusArea has no content to contradict, so it degrades to
+        // one of the student's own topics. A non-empty but ungrounded one is
+        // left exactly as the model wrote it: silently retitling it would
+        // leave a session called "Cell structure" whose goal and topics are
+        // still about something else. The validator rejects it instead and the
+        // repair pass rewrites the whole session coherently.
         focusArea: (() => {
           const raw = String(s.focusArea || '').trim()
-          if (!raw) return 'Active recall on this week\'s material'
-          if (studentTextBag && (isGroundedInStudent(raw, studentTextBag) || isMethodOnly(raw))) return raw
-          if (!studentTextBag && isMethodOnly(raw)) return raw
-          return 'Active recall on this week\'s material'
+          if (raw) return raw
+          return inputTopics.length
+            ? inputTopics[(i + j) % inputTopics.length].label
+            : 'Active recall on this week\'s material'
         })(),
         goal: String(s.goal || '').trim() || 'Retrieve and apply key concepts',
         // keyTopics: filter out anything the student never mentioned.
@@ -177,6 +220,15 @@ function repairPlan(plan, scaffold, sessionsPerWeek, sessionMinutes, phaseMap, s
         studyMethod: String(s.studyMethod || 'Active recall').trim() || 'Active recall',
         duration: Number.isFinite(Number(s.duration)) ? Number(s.duration) : sessionMinutes,
         ...(s.sessionType ? { sessionType: String(s.sessionType) } : {}),
+        // Carried through untouched so the validator can resolve it into a
+        // real provenance record; it is stripped there and never stored raw.
+        ...(s.provenanceLabel ? { provenanceLabel: String(s.provenanceLabel).slice(0, 80) } : {}),
+        // Stable, deterministic, and independent of when the plan is pushed.
+        // Every downstream reference to a session (completion write-back,
+        // calendar block id, provenance marker) keys off this.
+        id: `cs-w${i + 1}-s${j + 1}`,
+        done: false,
+        doneAt: null,
       })),
     }
   })
@@ -185,7 +237,7 @@ function repairPlan(plan, scaffold, sessionsPerWeek, sessionMinutes, phaseMap, s
     summary: typeof plan?.summary === 'string' ? plan.summary.trim() : '',
     weeklyFocus,
     // priorityTopics MUST be grounded in student text. If the student named
-    // zero topics, this is empty — better than fabricated. Method-only entries
+    // zero topics, this is empty, which beats fabricated. Method-only entries
     // are dropped too (priorityTopics is for topics, not methods).
     priorityTopics: Array.isArray(plan?.priorityTopics)
       ? plan.priorityTopics
@@ -202,7 +254,7 @@ function repairPlan(plan, scaffold, sessionsPerWeek, sessionMinutes, phaseMap, s
             const raw = String(t).slice(0, 90).trim()
             if (!raw) return null
             if (isMethodOnly(raw)) return raw
-            // Not method-like — swap for a neutral trap so we never leak
+            // Not method-like, so swap for a neutral trap and never leak
             // fabricated subject content into the warning list.
             return neutralTraps.shift() ?? 'Passive rereading instead of active recall'
           })
@@ -325,6 +377,9 @@ Hard rules you ALWAYS follow:
 - warningZones: 3 items, ≤ 10 words each. MUST be generic study-method traps only (e.g., "Cramming without retrieval practice", "Skipping cumulative review", "Passive rereading over active recall"). NEVER subject-specific.
 - priorityTopics: up to 5 items, ≤ 5 words each. Each item MUST appear (case-insensitive) in the student inputs below. Fewer items is better than fabricated items. If the student named zero topics, priorityTopics MUST be an empty array.
 - keyTopics per session: each entry MUST appear (case-insensitive) in the student inputs below. Emit an empty array rather than invent.
+- Every session MUST name, in "provenanceLabel", the single student-provided topic or struggle it comes from, copied VERBATIM from the student's list. This is how the plan proves it is grounded. A session you cannot attribute to one of the student's own topics must not exist.
+- Sessions may ONLY reference the provided topics verbatim. You may not introduce subject matter of your own, however reasonable it seems for the course.
+- When there are too few topics to fill the schedule, REPEAT topics across sessions with a different study method each time (for example: active recall, then practice problems, then a Feynman explanation of the same topic). Repetition is correct and expected. Inventing new material to pad the schedule is not.
 
 ${ANTI_GUESSING_RULES}
 
@@ -345,6 +400,7 @@ Return JSON in exactly this shape:
           "keyTopics": ["topic 1", "topic 2", "topic 3"],
           "studyMethod": "one concrete method from the allowed list",
           "sessionType": "one of the allowed types",
+          "provenanceLabel": "the student's own topic or struggle this session comes from, verbatim",
           "duration": 60
         }
       ]
@@ -390,7 +446,31 @@ ${isExamMode ? `Phase intent reminder:
 No em dashes in any text field.
 Output the JSON now.`
 
-  try {
+  // Bag of every string the student contributed. Used by repairPlan to
+  // scrub any keyTopics / priorityTopics / focusArea that the model
+  // invented despite the anti-guessing rules.
+  const studentTextBag = [
+    goal,
+    emphasisTopics,
+    courseMaterials,
+    Array.isArray(struggles) ? struggles.join('\n') : struggles,
+    Array.isArray(weakAreas) ? weakAreas.join('\n') : weakAreas,
+    strengths,
+  ].filter(Boolean).join('\n')
+
+  // The closed set a plan is allowed to talk about, and the horizon it must
+  // fit inside. Both come from the student; neither is ever inferred.
+  const inputTopics = buildInputTopics({ emphasisTopics, struggles })
+  const todayISO = toISO(new Date())
+  const examDate = (() => {
+    const dates = (importantDates || []).filter(d => d?.date && parseISO(d.date))
+    const exam = dates.find(d => /exam|final|test/i.test(d.label || ''))
+    const chosen = exam ?? dates.sort((a, b) => a.date.localeCompare(b.date)).pop()
+    return chosen?.date && chosen.date > todayISO ? chosen.date : null
+  })()
+  const expectedSessionCount = scaffold.totalWeeks * sessionsPerWeek
+
+  const callModel = async (messages) => {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -403,7 +483,7 @@ Output the JSON now.`
         model: 'claude-sonnet-4-6',
         max_tokens: 8000,
         system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
-        messages: [{ role: 'user', content: userPrompt }],
+        messages,
       }),
     })
 
@@ -416,28 +496,69 @@ Output the JSON now.`
     const first = content.indexOf('{')
     const last = content.lastIndexOf('}')
     if (first === -1 || last === -1) throw new Error('AI response was not valid JSON')
-
-    let raw
     try {
-      raw = JSON.parse(content.slice(first, last + 1))
+      return { raw: JSON.parse(content.slice(first, last + 1)), text: content.slice(first, last + 1) }
     } catch (e) {
       throw new Error('Could not parse plan JSON: ' + e.message)
     }
+  }
 
-    // Bag of every string the student contributed. Used by repairPlan to
-    // scrub any keyTopics / priorityTopics / focusArea that the model
-    // invented despite the anti-guessing rules.
-    const studentTextBag = [
-      goal,
-      emphasisTopics,
-      courseMaterials,
-      Array.isArray(struggles) ? struggles.join('\n') : struggles,
-      Array.isArray(weakAreas) ? weakAreas.join('\n') : weakAreas,
-      strengths,
-    ].filter(Boolean).join('\n')
+  // Deterministic post-processing: force the model's content onto our week
+  // scaffold, stamp stable ids, then lay real dates over the sessions. Only
+  // after all three does the plan become checkable.
+  const shape = (raw) => {
+    const plan = repairPlan(raw, scaffold, sessionsPerWeek, sessionLen, phaseMap, studentTextBag, inputTopics)
+    assignScheduledDates(plan, { today: todayISO, examDate })
+    plan.examDate = examDate
+    plan.generatedAt = new Date().toISOString()
+    plan.goal = String(goal || '').trim()
+    return plan
+  }
 
-    const plan = repairPlan(raw, scaffold, sessionsPerWeek, sessionLen, phaseMap, studentTextBag)
-    res.status(200).json(plan)
+  const check = (plan) => validatePlan(plan, {
+    inputTopics,
+    today: todayISO,
+    examDate,
+    sessionMinutes: sessionLen,
+    expectedSessionCount,
+  })
+
+  try {
+    const messages = [{ role: 'user', content: userPrompt }]
+    const firstPass = await callModel(messages)
+    let plan = shape(firstPass.raw)
+    let result = check(plan)
+
+    // One repair pass: hand the model its own output plus the exact list of
+    // violations. Anything still broken after this is a clean retry error --
+    // we never store or render a plan that failed validation.
+    if (!result.ok) {
+      console.warn('[generate-study-coach-plan] validation failed, repairing', {
+        count: result.violations.length,
+        sample: result.violations.slice(0, 3),
+      })
+      const repaired = await callModel([
+        ...messages,
+        { role: 'assistant', content: firstPass.text },
+        { role: 'user', content: buildRepairPrompt(result.violations) },
+      ])
+      plan = shape(repaired.raw)
+      result = check(plan)
+    }
+
+    if (!result.ok) {
+      console.error('[generate-study-coach-plan] plan rejected after repair', {
+        count: result.violations.length,
+        sample: result.violations.slice(0, 5),
+      })
+      return res.status(422).json({
+        error: 'We could not build a plan grounded in your inputs. Add a few more topics in Refine inputs and try again.',
+        code: 'PLAN_UNGROUNDED',
+        violations: result.violations.slice(0, 5),
+      })
+    }
+
+    res.status(200).json(result.plan)
   } catch (error) {
     console.error('Study coach plan error:', error)
     res.status(500).json({ error: error.message ?? 'Internal server error' })

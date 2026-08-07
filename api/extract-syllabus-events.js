@@ -54,6 +54,7 @@ For each item return:
 
 Return ONLY the JSON array with no other text, markdown, or explanation.
 Example: [{"name":"Midterm Exam","date":"${currentYear}-03-12","type":"Midterm","weight":25,"notes":"In class, closed book"}]` }]
+        }]
       })
     })
 
