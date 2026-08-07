@@ -3,7 +3,7 @@ import Spinner from './ui/spinner'
 import { getCachedCoachPlan, saveCoachPlan as dbSaveCoachPlan, saveCoachPlanStruggles, saveCoachPlanObject, saveCoachPlanPushedAt } from '../lib/db'
 import StudyCoachPlanView from './StudyCoachPlanView'
 import { buildScheduleBlocks } from '../utils/pushPlanToSchedule'
-import { catchUpReschedule, nextSession, flattenSessions } from '../../lib/shared/coachPlan.js'
+import { catchUpReschedule, nextSession, flattenSessions, migratePlan } from '../../lib/shared/coachPlan.js'
 import StudyCoachHubView from './StudyCoachHubView'
 import StudyCoachIntakeStep from './StudyCoachIntakeStep'
 import { toHubEntry } from '../utils/coachHub'
@@ -20,6 +20,13 @@ function loadCoachPlan(courseId) { return getCachedCoachPlan(courseId) }
 // Where an in-progress wizard draft lives so a refresh does not lose it. The
 // finished plan goes to user_data; this is only the unsubmitted form.
 const DRAFT_KEY = 'se_coach_draft'
+
+// The wizard keeps two scratch fields for the deadline row being typed. They
+// are UI state, not inputs, so they never reach stored formData.
+function stripTransient(form) {
+  const { _dlName, _dlDate, ...rest } = form
+  return rest
+}
 
 const todayISO = () => {
   const d = new Date()
@@ -545,7 +552,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
       if (!res.ok) throw new Error(data.error ?? 'Failed to generate plan')
       setPlan(data)
       const courseId = course.id ?? form.courseIdx
-      saveCoachPlan(courseId, data, { ...form, sessionMinutes: form.sessionLen, importantDates: form.dates, emphasisTopics: form.topics?.join(', ') })
+      saveCoachPlan(courseId, data, { ...stripTransient(form), sessionMinutes: form.sessionLen, importantDates: form.dates, emphasisTopics: form.topics?.join(', ') })
       // Regenerating replaces the plan, so the old calendar blocks no longer
       // correspond to anything. Clear the pushed flag: the student is asked to
       // push again rather than being shown a green dot for a stale schedule.
@@ -719,14 +726,25 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
     setError('')
     setStep(1)
     setPushed(false)
-    setForm({ courseIdx: idx, goal: '', topics: [], strengths: '', struggles: '', dates: [], materials: [], daysPerWeek: 3, sessionLen: 60, style: [] })
+    setForm({ courseIdx: idx, goal: '', topics: [], strengths: '', struggles: '', dates: [], materials: [], daysPerWeek: null, sessionLen: null, style: [] })
     setUiMode('building')
   }
 
   const handleViewPlan = (idx) => {
     const course = courses[idx]
-    const saved = loadCoachPlan(course?.id ?? idx)
-    if (saved?.plan) setPlan(saved.plan)
+    const courseId = course?.id ?? idx
+    const saved = loadCoachPlan(courseId)
+    if (saved?.plan) {
+      // Plans stored before sessions had ids, dates and done flags get brought
+      // up to shape on read, otherwise they show no progress and cannot push.
+      const examDate = saved.plan.examDate
+        ?? (saved.formData?.dates ?? saved.formData?.importantDates ?? [])
+             .filter(d => d?.date).sort((a, b) => a.date.localeCompare(b.date))[0]?.date
+        ?? null
+      const { plan: migrated, changed } = migratePlan(saved.plan, { today: todayISO(), examDate })
+      setPlan(migrated)
+      if (changed) saveCoachPlanObject(courseId, migrated)
+    }
     setForm(f => ({ ...f, courseIdx: idx }))
     setStep(3)
     setUiMode('viewing')
