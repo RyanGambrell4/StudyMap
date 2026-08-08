@@ -32,7 +32,16 @@ export default async function handler(req, res) {
     url.searchParams.set('order', 'relevance')
 
     const r = await fetch(url.toString())
-    if (!r.ok) return res.status(200).json({ videos: [] })
+    if (!r.ok) {
+      // Log the reason rather than swallowing it. A quiet [] here reads to the
+      // student as "no videos exist for this topic", which hides quota
+      // exhaustion, a revoked key, or key restrictions for as long as it lasts.
+      const body = await r.text()
+      let reason = ''
+      try { reason = JSON.parse(body)?.error?.errors?.[0]?.reason ?? '' } catch { /* non-JSON body, logged raw below */ }
+      console.error('[YouTube] search failed:', r.status, reason || body.slice(0, 300))
+      return res.status(200).json({ videos: [] })
+    }
 
     const data = await r.json()
     const videos = (data.items ?? []).map(item => ({
