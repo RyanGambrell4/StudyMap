@@ -279,7 +279,11 @@ function CourseChip({ course, active, mobile, onClick }) {
       cursor: 'pointer', whiteSpace: 'nowrap',
     }}>
       <span style={{ width: dotSize, height: dotSize, borderRadius: '50%', background: dot, flexShrink: 0 }} />
-      <span style={{ fontSize: mobile ? 13.5 : 14, fontWeight: active ? 600 : 500, color: active ? G.ink : G.secondary }}>{name}</span>
+      <span style={{
+        fontSize: mobile ? 13.5 : 14, fontWeight: active ? 600 : 500,
+        color: active ? G.ink : G.secondary,
+        maxWidth: mobile ? 200 : 260, overflow: 'hidden', textOverflow: 'ellipsis',
+      }}>{name}</span>
       <span style={{ fontSize: mobile ? 12.5 : 13, fontWeight: 600, color: active ? G.blue : (ltr === '–' ? G.colHeader : G.label) }}>{ltr}</span>
       {active && meta && !mobile && (
         <>
@@ -1621,7 +1625,7 @@ export default function GradeHubView({ courses, onEditCourse, onShowPaywall, ini
         </div>
 
         {/* Course switcher */}
-        <div className="gh-course-strip" style={{ display: 'flex', gap: mobile ? 8 : 10, marginTop: mobile ? 20 : 26, alignItems: 'center' }}>
+        <div className="gh-course-strip" style={{ display: 'flex', flexWrap: 'wrap', gap: mobile ? 8 : 10, marginTop: mobile ? 20 : 26, alignItems: 'center' }}>
           {courses.map((c, i) => (
             <CourseChip
               key={c.id ?? i}
