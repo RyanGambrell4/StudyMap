@@ -1122,9 +1122,10 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
     if (!topic) return
     setYtLoading(true)
     try {
+      const token = await getAccessToken()
       const res = await fetchWithRetry('/api/youtube-suggestions', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({ topic, courseName: currentBlock?.course ?? session.courseName }),
       })
       const data = await res.json()
