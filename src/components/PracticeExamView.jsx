@@ -1,21 +1,177 @@
-import { useState } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import { getCachedPracticeExams, savePracticeExam } from '../lib/db'
+import { listUploads } from '../lib/uploadRegistry'
 import { getActivePlan, canUseFeature } from '../lib/subscription'
 import { track } from '../lib/analytics'
+import { PRACTICE_EXAMS as C, PE_SERIF, SANS } from '../theme/tokens'
+import { useIsMobile } from '../utils/useIsMobile'
+import {
+  EXAM_LENGTHS, buildExamHistory, examRowMeta, scoreColor,
+  sourceLine, timerLabel, timerMinutesFor, buildStartPayload,
+} from '../utils/practiceExams'
 import PracticeExamSetup from './PracticeExamSetup'
 import PracticeExamScreen from './PracticeExamScreen'
 import PracticeExamResults from './PracticeExamResults'
 
-const D = {
-  bg: '#F7F8FA',
-  text: '#1A1A1A',
-  muted: '#6B6B6B',
-  dim: '#9B9B9B',
-  accent: '#3B61C4',
-  border: 'rgba(0,0,0,0.07)',
+const btnReset = {
+  appearance: 'none', border: 'none', background: 'none',
+  padding: 0, margin: 0, cursor: 'pointer', textAlign: 'left',
+}
+
+/** Uppercase section label, 11px with the export's letter spacing. */
+function Eyebrow({ children, style }) {
+  return (
+    <div style={{
+      fontFamily: SANS, fontSize: 11, fontWeight: 600, lineHeight: 1,
+      letterSpacing: '.08em', color: C.secondary, ...style,
+    }}>{children}</div>
+  )
+}
+
+/**
+ * Course chip. Same shape as the Study Coach intake Pill, set to the values in
+ * design/practice-exams/ (10px 16px, 14px) rather than intake's (9px 16px,
+ * 13.5px). The 0.5px and 1px divergence is the export's, not a mistake; a
+ * future pass should unify the two into one shared chip.
+ */
+function CourseChip({ name, dot, selected, onClick }) {
+  return (
+    <button type="button" onClick={onClick} style={{
+      ...btnReset, fontFamily: SANS, fontSize: 14, fontWeight: 500, lineHeight: 1,
+      display: 'inline-flex', alignItems: 'center', gap: 9,
+      padding: '10px 16px', borderRadius: 999,
+      border: `1px solid ${selected ? C.blue : C.cardBorder}`,
+      background: selected ? C.blue : C.card,
+      color: selected ? '#ffffff' : C.ink,
+      minHeight: 40,
+    }}>
+      <span style={{
+        width: 7, height: 7, borderRadius: 999, flexShrink: 0,
+        background: selected ? '#ffffff' : dot,
+        ...(selected ? { opacity: 0.85 } : {}),
+      }} />
+      {name}
+    </button>
+  )
+}
+
+function LengthButton({ n, selected, onClick }) {
+  return (
+    <button type="button" onClick={onClick} style={{
+      ...btnReset, fontFamily: SANS, fontSize: 14, lineHeight: 1,
+      fontWeight: selected ? 600 : 500,
+      display: 'inline-flex', alignItems: 'baseline', gap: 5,
+      padding: '9px 16px', borderRadius: 10,
+      border: selected ? `1.5px solid ${C.blue}` : `1px solid ${C.cardBorder}`,
+      background: C.card,
+      color: selected ? C.blue : C.ink,
+      minHeight: 38,
+    }}>
+      {n}
+      <span style={{
+        fontSize: 12,
+        color: selected ? C.blue : C.secondary,
+        ...(selected ? { opacity: 0.7 } : {}),
+      }}>questions</span>
+    </button>
+  )
+}
+
+function TimerToggle({ on, label, onClick }) {
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 11, minHeight: 35 }}>
+      <button
+        type="button"
+        role="switch"
+        aria-checked={on}
+        aria-label="Time this exam"
+        onClick={onClick}
+        style={{
+          ...btnReset,
+          width: 40, height: 23, borderRadius: 999, flexShrink: 0,
+          background: on ? C.blue : C.cardBorder,
+          display: 'inline-flex', alignItems: 'center',
+          padding: '0 3px',
+          justifyContent: on ? 'flex-end' : 'flex-start',
+        }}
+      >
+        <span style={{ width: 17, height: 17, borderRadius: 999, background: '#ffffff' }} />
+      </button>
+      <span style={{
+        fontFamily: SANS, fontSize: 14, fontWeight: 400, lineHeight: 1,
+        color: on ? C.ink : C.secondary,
+      }}>{label}</span>
+    </div>
+  )
+}
+
+function HistoryRow({ row, mobile, onReview }) {
+  const meta = examRowMeta(row)
+  const color = scoreColor(row.score)
+
+  const identity = (
+    <div style={{ display: 'flex', alignItems: 'center', gap: 11, flexWrap: 'wrap' }}>
+      <span style={{ width: 8, height: 8, borderRadius: 999, background: row.dot, flexShrink: 0 }} />
+      <span style={{ fontFamily: SANS, fontSize: 15, fontWeight: 500, lineHeight: 1.3, color: C.ink }}>
+        {row.courseName}
+      </span>
+      {meta && (
+        <span style={{ fontFamily: SANS, fontSize: 13, fontWeight: 400, lineHeight: 1.3, color: C.secondary }}>
+          {meta}
+        </span>
+      )}
+    </div>
+  )
+
+  // A record with no auto-gradable questions has no score. It gets a muted
+  // dash, never a number and never a color.
+  const numeral = (
+    <span style={{
+      fontFamily: PE_SERIF, fontSize: 22, fontWeight: 500,
+      color: color ?? C.secondary,
+      minWidth: 34, textAlign: 'right',
+    }}>{row.score == null ? '–' : row.score}</span>
+  )
+
+  const review = row.canReview ? (
+    <button type="button" onClick={() => onReview(row)} style={{
+      ...btnReset, fontFamily: SANS, fontSize: 13.5, fontWeight: 500, lineHeight: 1,
+      color: C.blue,
+    }}>Review</button>
+  ) : <span />
+
+  if (mobile) {
+    // Two lines on a phone: identity above, score and Review below.
+    return (
+      <div style={{
+        borderTop: `1px solid ${C.cardBorder}`, padding: '16px 22px',
+        display: 'flex', flexDirection: 'column', gap: 10,
+      }}>
+        {identity}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
+          {numeral}
+          {review}
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div style={{
+      borderTop: `1px solid ${C.cardBorder}`, padding: '18px 32px',
+      display: 'grid', gridTemplateColumns: '1fr auto auto',
+      alignItems: 'center', gap: 28,
+    }}>
+      {identity}
+      {numeral}
+      {review}
+    </div>
+  )
 }
 
 export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTeachItBack, onOpenQuizBurst }) {
+  const mobile = useIsMobile()
+
   const [subview, setSubview] = useState('landing') // 'landing' | 'setup' | 'taking' | 'results'
   const [examCourse, setExamCourse] = useState(null)
   const [examQuestions, setExamQuestions] = useState([])
@@ -23,11 +179,69 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
   const [examTimeMs, setExamTimeMs] = useState(0)
   const [examTimerMinutes, setExamTimerMinutes] = useState(null)
   const [questionTimings, setQuestionTimings] = useState([])
+  const [replay, setReplay] = useState(null)
   const [refreshKey, setRefreshKey] = useState(0)
-  // eslint-disable-next-line no-unused-vars
-  const _bust = refreshKey
 
-  const handleStart = ({ questions, courseName, courseId, timerMinutes }) => {
+  // Setup choices, all made here so no downstream step asks for them again.
+  const [selectedCourseId, setSelectedCourseId] = useState(courses[0]?.id ?? null)
+  const [length, setLength] = useState(20)
+  const [timerOn, setTimerOn] = useState(true)
+
+  const selectedCourse = useMemo(
+    () => courses.find(c => String(c.id) === String(selectedCourseId)) ?? courses[0] ?? null,
+    [courses, selectedCourseId],
+  )
+
+  // Uploads are a per-course network read, so every answer is kept for the
+  // life of the view. Switching chips back and forth never refetches.
+  //
+  // The cache is read during render and the fetch only bumps a counter, so a
+  // course whose answer is already known renders resolved on the first pass
+  // with no intermediate "checking" frame.
+  const materialCache = useRef(new Map())
+  const [materialVersion, setMaterialVersion] = useState(0)
+  const courseKey = selectedCourse?.id != null ? String(selectedCourse.id) : null
+  const _materialBust = materialVersion // re-render trigger when a fetch resolves
+  const material = courseKey ? materialCache.current.get(courseKey) ?? null : null
+
+  useEffect(() => {
+    if (!courseKey || materialCache.current.has(courseKey)) return
+    // Until this lands the source line says it is checking rather than
+    // warning, so a student who has material never sees the amber line flash
+    // before it is corrected.
+    let cancelled = false
+    listUploads(courseKey)
+      .then(uploads => {
+        const processed = uploads.filter(u => u.status === 'processed')
+        return {
+          hasNotes: processed.some(u => u.kind !== 'syllabus'),
+          hasSyllabus: processed.some(u => u.kind === 'syllabus'),
+        }
+      })
+      .catch(() => ({ error: true }))
+      .then(result => {
+        materialCache.current.set(courseKey, result)
+        if (!cancelled) setMaterialVersion(v => v + 1)
+      })
+    return () => { cancelled = true }
+  }, [courseKey])
+
+  const history = useMemo(() => {
+    const plans = Object.fromEntries(
+      courses.map(c => [String(c.id), { practice_exams: getCachedPracticeExams(c.id) }]),
+    )
+    return buildExamHistory(plans, courses)
+    // refreshKey is a deliberate cache bust: getCachedPracticeExams reads a
+    // module-level cache that a finished exam mutates outside of React.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [courses, refreshKey])
+
+  const hasPastResults = useMemo(
+    () => history.some(r => String(r.courseId) === String(selectedCourse?.id)),
+    [history, selectedCourse?.id],
+  )
+
+  const handleStart = ({ questions, timerMinutes }) => {
     setExamQuestions(questions)
     setExamAnswers(questions.map(() => ''))
     setExamTimerMinutes(timerMinutes ?? null)
@@ -38,6 +252,7 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
     setExamAnswers(answers)
     setExamTimeMs(timeMs)
     setQuestionTimings(timings ?? [])
+    setReplay(null)
     setSubview('results')
     try {
       const courseId = examCourse?.id ?? null
@@ -68,6 +283,7 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
     setExamAnswers(examQuestions.map(() => ''))
     setExamTimeMs(0)
     setQuestionTimings([])
+    setReplay(null)
     setSubview('taking')
   }
 
@@ -79,9 +295,24 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
     setExamTimeMs(0)
     setExamTimerMinutes(null)
     setQuestionTimings([])
+    setReplay(null)
   }
 
-  // ── Overlays (full-screen, rendered above everything) ──────────────────────
+  // Opens a stored exam in the results view. readOnly stops the replay from
+  // re-recording a study session, re-adding deck cards or re-firing mastery
+  // signals for work the student already did.
+  const handleReview = (row) => {
+    const course = courses.find(c => String(c.id) === String(row.courseId)) ?? null
+    setExamCourse(course ?? { id: row.courseId, name: row.courseName })
+    setExamQuestions(row.exam.questions ?? [])
+    setExamAnswers(row.exam.answers ?? [])
+    setExamTimeMs(Number.isFinite(row.exam.timeMs) ? row.exam.timeMs : 0)
+    setQuestionTimings([])
+    setReplay(row.id)
+    setSubview('results')
+  }
+
+  // ── Overlays ───────────────────────────────────────────────────────────────
   if (subview === 'taking') {
     return (
       <PracticeExamScreen
@@ -104,6 +335,7 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
         courseId={examCourse?.id ?? null}
         courseName={examCourse?.name ?? null}
         course={examCourse}
+        readOnly={replay !== null}
         onRetake={handleRetake}
         onClose={closeToLanding}
         onOpenTeachItBack={onOpenTeachItBack ? (topic) => {
@@ -121,7 +353,9 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
   if (subview === 'setup') {
     return (
       <PracticeExamSetup
-        courses={courses}
+        course={selectedCourse}
+        length={length}
+        timerMinutes={timerOn ? timerMinutesFor(length) : null}
         onBack={() => setSubview('landing')}
         onStart={(payload) => {
           setExamCourse(payload.course)
@@ -132,130 +366,156 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
     )
   }
 
-  // ── Landing page ───────────────────────────────────────────────────────────
+  // ── Entry screen ───────────────────────────────────────────────────────────
+  const pagePad = mobile ? '28px 20px 48px' : '56px 72px 72px'
+  const cardPadX = mobile ? 22 : 32
+  const source = sourceLine({
+    courseName: selectedCourse?.name,
+    material,
+    hasPastResults,
+  })
+
+  const heading = (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+      <Eyebrow>PRACTICE EXAMS</Eyebrow>
+      <h1 style={{
+        margin: 0, fontFamily: PE_SERIF, fontSize: mobile ? 34 : 44,
+        fontWeight: 500, lineHeight: 1.1, color: C.ink,
+      }}>Practice Exams<span style={{ color: C.blue }}>.</span></h1>
+      <p style={{
+        margin: 0, fontFamily: SANS, fontSize: 15, fontWeight: 400, lineHeight: 1.5,
+        color: C.secondary, maxWidth: 560,
+      }}>Built from your material. Find out where you stand before it counts.</p>
+    </div>
+  )
+
+  if (!courses.length) {
+    return (
+      <div style={{ minHeight: '100%', background: C.pageBg, padding: pagePad, fontFamily: SANS }}>
+        <div style={{ maxWidth: 1136, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 40 }}>
+          {heading}
+          <p style={{
+            margin: 0, fontFamily: SANS, fontSize: 13.5, fontWeight: 400, lineHeight: 1.5,
+            color: C.secondary,
+          }}>Add a course first. Practice exams are built per course.</p>
+        </div>
+      </div>
+    )
+  }
+
+  const plan = getActivePlan()
+  const isPro = plan === 'pro' || plan === 'unlimited'
+  const canStart = isPro || canUseFeature('practiceExam').allowed
+
   return (
-    <div style={{ minHeight: '100%', background: D.bg, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', padding: '44px 24px 80px' }}>
-      <div style={{ width: '100%', maxWidth: 580 }}>
+    <div style={{ minHeight: '100%', background: C.pageBg, padding: pagePad, fontFamily: SANS }}>
+      <div style={{ maxWidth: 1136, margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 40 }}>
 
-        {/* Section label */}
-        <p style={{ margin: '0 0 16px', fontSize: 11, fontWeight: 700, color: D.dim, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Practice Exams</p>
+        {heading}
 
-        {/* Main card */}
-        <div style={{ background: '#fff', borderRadius: 20, border: `1px solid ${D.border}`, overflow: 'hidden', marginBottom: 12 }}>
-
-          {/* Header */}
-          <div style={{ padding: '36px 36px 30px' }}>
-            <h1 style={{ margin: '0 0 10px', fontSize: 27, fontWeight: 800, color: D.text, letterSpacing: '-0.025em', lineHeight: 1.2 }}>
-              Test yourself before it counts.
-            </h1>
-            <p style={{ margin: 0, fontSize: 14.5, color: D.muted, lineHeight: 1.65, maxWidth: 460 }}>
-              Generate a realistic exam from your own material. Find out exactly where you stand and what to fix before the real thing.
-            </p>
+        {/* ── Setup card ────────────────────────────────────────────────── */}
+        <div style={{
+          background: C.card, border: `1px solid ${C.cardBorder}`,
+          borderRadius: 16, boxShadow: C.cardShadow,
+        }}>
+          <div style={{
+            padding: `28px ${cardPadX}px 26px`,
+            display: 'flex', flexDirection: 'column', gap: 14,
+          }}>
+            <Eyebrow>COURSE</Eyebrow>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 10 }}>
+              {courses.map((c, i) => (
+                <CourseChip
+                  key={c.id ?? i}
+                  name={c.name}
+                  dot={c.color?.dot ?? history.find(r => String(r.courseId) === String(c.id))?.dot ?? C.blue}
+                  selected={String(c.id) === String(selectedCourse?.id)}
+                  onClick={() => setSelectedCourseId(c.id)}
+                />
+              ))}
+            </div>
           </div>
 
-          {/* Features */}
-          <div style={{ borderTop: `1px solid ${D.border}`, padding: '24px 36px', display: 'flex', flexDirection: 'column', gap: 15 }}>
-            {[
-              {
-                icon: (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-                    <path d="M14 2v6h6M9 13h6M9 17h4"/>
-                  </svg>
-                ),
-                label: 'Pulls verbatim questions directly from your uploaded material',
-              },
-              {
-                icon: (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="9"/>
-                    <path d="M12 7v5l3 3"/>
-                  </svg>
-                ),
-                label: 'Optional countdown timer with per-question time tracking',
-              },
-              {
-                icon: (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M18 20V10M12 20V4M6 20v-6"/>
-                  </svg>
-                ),
-                label: 'Instant score with a breakdown of your weakest areas',
-              },
-              {
-                icon: (
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M12 2a9 9 0 1 0 9 9"/>
-                    <path d="M12 6v6l4 2"/>
-                    <path d="M17 2l5 5-5 5"/>
-                  </svg>
-                ),
-                label: 'Built from your course data, grades, and past exams',
-              },
-            ].map(({ icon, label }) => (
-              <div key={label} style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                <div style={{ width: 30, height: 30, borderRadius: 8, background: 'rgba(59,97,196,0.07)', color: D.accent, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                  {icon}
-                </div>
-                <span style={{ fontSize: 13.5, color: D.muted, lineHeight: 1.45 }}>{label}</span>
+          <div style={{
+            borderTop: `1px solid ${C.cardBorder}`,
+            padding: `24px ${cardPadX}px`,
+            display: 'flex', alignItems: mobile ? 'stretch' : 'flex-end',
+            flexDirection: mobile ? 'column' : 'row',
+            gap: mobile ? 24 : 48, flexWrap: 'wrap',
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <Eyebrow>LENGTH</Eyebrow>
+              <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+                {EXAM_LENGTHS.map(n => (
+                  <LengthButton key={n} n={n} selected={length === n} onClick={() => setLength(n)} />
+                ))}
               </div>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <Eyebrow>TIMER</Eyebrow>
+              <TimerToggle on={timerOn} label={timerLabel(timerOn, length)} onClick={() => setTimerOn(v => !v)} />
+            </div>
+          </div>
+
+          <div style={{
+            borderTop: `1px solid ${C.cardBorder}`,
+            padding: `22px ${cardPadX}px 26px`,
+            display: 'flex', alignItems: mobile ? 'stretch' : 'center',
+            flexDirection: mobile ? 'column' : 'row',
+            justifyContent: 'space-between', gap: mobile ? 18 : 32, flexWrap: 'wrap',
+          }}>
+            <p style={{
+              margin: 0, fontFamily: SANS, fontSize: 13.5, fontWeight: 400, lineHeight: 1.5,
+              color: source.tone === 'amber' ? C.amber : C.secondary,
+              maxWidth: source.tone === 'amber' ? 540 : 520,
+            }}>{source.text}</p>
+            <button
+              type="button"
+              onClick={() => {
+                if (!canStart) { onShowPaywall?.('practice_exam'); return }
+                const { course: _course, ...payload } = buildStartPayload({ course: selectedCourse, length, timerOn })
+                track('practice_exam_start_clicked', { plan, courseCount: courses.length, ...payload })
+                setSubview('setup')
+              }}
+              style={{
+                ...btnReset,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                padding: '14px 26px', borderRadius: 12, background: C.blue,
+                fontFamily: SANS, fontSize: 14.5, fontWeight: 600, lineHeight: 1, color: '#ffffff',
+                flexShrink: 0, minHeight: 44,
+                ...(mobile ? { width: '100%' } : {}),
+              }}
+            >Start practice exam</button>
+          </div>
+        </div>
+
+        {/* ── History ───────────────────────────────────────────────────── */}
+        {history.length === 0 ? (
+          <p style={{
+            margin: `-16px 0 0 ${mobile ? 0 : 2}px`, fontFamily: SANS,
+            fontSize: 13.5, fontWeight: 400, lineHeight: 1.5, color: C.secondary,
+          }}>Your past exams and scores will show up here.</p>
+        ) : (
+          <div style={{
+            background: C.card, border: `1px solid ${C.cardBorder}`,
+            borderRadius: 16, boxShadow: C.cardShadow,
+          }}>
+            <div style={{
+              padding: `24px ${cardPadX}px 18px`,
+              display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 16,
+            }}>
+              <h2 style={{
+                margin: 0, fontFamily: PE_SERIF, fontSize: 24, fontWeight: 500, color: C.ink,
+              }}>Past exams</h2>
+              <span style={{
+                fontFamily: SANS, fontSize: 13, fontWeight: 400, lineHeight: 1, color: C.secondary,
+              }}>{history.length} taken</span>
+            </div>
+            {history.map(row => (
+              <HistoryRow key={row.id} row={row} mobile={mobile} onReview={handleReview} />
             ))}
           </div>
-
-          {/* CTA */}
-          <div style={{ borderTop: `1px solid ${D.border}`, padding: '24px 36px' }}>
-            {courses.length === 0 ? (
-              <div style={{ padding: '18px 20px', background: 'rgba(59,97,196,0.04)', borderRadius: 10, border: '1px solid rgba(59,97,196,0.14)', borderLeft: '3px solid rgba(59,97,196,0.4)' }}>
-                <p style={{ margin: '0 0 4px', fontSize: 13.5, fontWeight: 700, color: D.text }}>Add a course to unlock practice exams</p>
-                <p style={{ margin: '0 0 8px', fontSize: 12.5, color: D.muted, lineHeight: 1.5 }}>Practice exams are the #1 predictor of real exam performance. Students who take 3+ improve their scores significantly by targeting their actual weak spots.</p>
-                <p style={{ margin: 0, fontSize: 12, color: '#3B61C4', fontWeight: 600 }}>Go to Courses → add your first course to get started.</p>
-              </div>
-            ) : (() => {
-              const plan = getActivePlan()
-              const isPro = plan === 'pro' || plan === 'unlimited'
-              const freeExamAllowed = !isPro && canUseFeature('practiceExam').allowed
-              const canStart = isPro || freeExamAllowed
-              return (
-                <button
-                  onClick={() => {
-                    if (!canStart) { onShowPaywall?.('practice_exam'); return }
-                    track('practice_exam_start_clicked', { plan, courseCount: courses.length })
-                    setSubview('setup')
-                  }}
-                  style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, width: '100%', padding: '13px 24px', background: D.accent, border: 'none', borderRadius: 11, color: '#fff', fontWeight: 700, fontSize: 14.5, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em', transition: 'opacity 0.15s' }}
-                  onMouseEnter={e => e.currentTarget.style.opacity = '0.87'}
-                  onMouseLeave={e => e.currentTarget.style.opacity = '1'}
-                >
-                  {freeExamAllowed && (
-                    <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 999, background: 'rgba(255,255,255,0.18)', color: '#fff', letterSpacing: '0.05em', textTransform: 'uppercase' }}>1 Free</span>
-                  )}
-                  {!canStart && (
-                    <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 7px', borderRadius: 999, background: 'rgba(255,255,255,0.18)', color: '#fff', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Pro</span>
-                  )}
-                  Start Practice Exam
-                  <svg width="15" height="15" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                    <path d="M5 12h14M12 5l7 7-7 7"/>
-                  </svg>
-                </button>
-              )
-            })()}
-          </div>
-        </div>
-
-        {/* Steps row */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 0, background: '#fff', borderRadius: 14, border: `1px solid ${D.border}`, overflow: 'hidden' }}>
-          {[
-            { n: '1', title: 'Pick a course', desc: 'Select the course you are preparing for.' },
-            { n: '2', title: 'Add your material', desc: 'Upload a past exam, paste notes, or describe the topics.' },
-            { n: '3', title: 'Review results', desc: 'See your score, mistakes, and where to focus next.' },
-          ].map(({ n, title, desc }, i) => (
-            <div key={n} style={{ padding: '20px 22px', borderLeft: i > 0 ? `1px solid ${D.border}` : 'none' }}>
-              <div style={{ fontSize: 11, fontWeight: 800, color: D.accent, letterSpacing: '0.04em', marginBottom: 6 }}>{n}</div>
-              <p style={{ margin: '0 0 4px', fontSize: 13, fontWeight: 700, color: D.text, lineHeight: 1.3 }}>{title}</p>
-              <p style={{ margin: 0, fontSize: 12, color: D.muted, lineHeight: 1.5 }}>{desc}</p>
-            </div>
-          ))}
-        </div>
+        )}
 
       </div>
     </div>

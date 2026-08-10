@@ -127,3 +127,35 @@ export const STUDY_COACH = {
 // Grade Hub. Alias rather than a second declaration so there is one name to
 // change if the display face ever moves.
 export const SC_SERIF = GH_SERIF
+
+// ── Practice Exams ────────────────────────────────────────────────────────────
+// Values transcribed from the approved design export in design/practice-exams/
+// (states A, B and C). Every surface and neutral the export uses is a value
+// GRADE_HUB already defines, so this block aliases rather than redefines; the
+// redesign introduced no new hex.
+//
+// Same governing rule as the Grade Hub and the Study Coach: color encodes
+// data. The three score colors below are the only place color is decided by a
+// number, and their thresholds live in utils/practiceExams.js.
+export const PRACTICE_EXAMS = {
+  // Surfaces and neutrals
+  pageBg:     GRADE_HUB.pageBg,      // #f5f6f8
+  card:       GRADE_HUB.card,
+  cardBorder: GRADE_HUB.cardBorder,  // #e7e8ec, also the chip and toggle rule
+  cardShadow: GRADE_HUB.cardShadow,
+  ink:        GRADE_HUB.ink,         // H1, chip labels, course names, mid scores
+  secondary:  GRADE_HUB.secondary,   // eyebrow, subtext, source line, row meta
+  label:      GRADE_HUB.label,       // fallback course dot when a course is gone
+
+  // Data colors: the score bands
+  green: GRADE_HUB.green,  // #1a9e5c, 85 and up
+  amber: GRADE_HUB.amber,  // #D97706, below 70, and the no-material line
+
+  // Action
+  blue:      GRADE_HUB.blue,
+  blueHover: GRADE_HUB.blueHover,
+}
+
+// Practice Exams sets its H1, its score numerals and the history card heading
+// in the same serif as the Grade Hub and the Study Coach.
+export const PE_SERIF = GH_SERIF

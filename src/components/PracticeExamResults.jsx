@@ -96,7 +96,12 @@ function ScoreTrendChart({ scores, currentScore }) {
   )
 }
 
-export default function PracticeExamResults({ questions, answers, timeMs, questionTimings = [], courseId, courseName, course = null, onRetake, onClose, onOpenTeachItBack, onOpenQuizBurst }) {
+/**
+ * readOnly is replay mode: the student is reopening a stored exam from the
+ * history card, not finishing a new one. The work was already counted once, so
+ * every mount side effect below is suppressed. Replaying writes nothing.
+ */
+export default function PracticeExamResults({ questions, answers, timeMs, questionTimings = [], courseId, courseName, course = null, readOnly = false, onRetake, onClose, onOpenTeachItBack, onOpenQuizBurst }) {
   const graded = useMemo(() => questions.map((q, i) => {
     const given = answers[i] ?? ''
     const correct = q.type === 'multiple_choice' ? gradeMc(q, given) : gradeShort(q, given)
@@ -109,7 +114,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
 
   // Grade-projection debrief: pull the student's actual course grade + target
   // and project what this exam score would do to the final grade. Purely
-  // local — no LLM roundtrip.
+  // local, no LLM roundtrip.
   const projection = useMemo(() => {
     if (score == null || !course) return null
     const components = course?.gradeData?.components ?? []
@@ -161,8 +166,10 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
     return () => clearTimeout(timer)
   }, [score])
 
-  // Fire confetti when score is good
+  // Fire confetti when score is good. Never on a replay: the celebration
+  // belongs to the moment the exam was finished.
   useEffect(() => {
+    if (readOnly) return
     if (score === null || celebratedRef.current) return
     celebratedRef.current = true
     if (score >= 70) {
@@ -191,10 +198,14 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
   }, [graded])
 
   useEffect(() => {
+    // Replay mode records nothing. Study history, deck cards, weak topics and
+    // mastery signals were all written when this exam was actually taken;
+    // writing them again would count one exam twice.
+    if (readOnly) return
     if (weakTopics.length) addWeakTopics(weakTopics.map(([t]) => t))
     addStudySession({ tool: 'Practice Exam', score: score ?? null, topic: null, courseName: courseName || null })
     // Missed practice-exam questions become deck cards. Practice exam is
-    // where the highest-value misses are — these are the ones the real exam
+    // where the highest-value misses are. These are the ones the real exam
     // will punish, so we want them in spaced-repetition immediately.
     const missedForDeck = graded
       .filter(g => g.correct === false)
@@ -321,7 +332,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
           </button>
         </div>
 
-        {/* Grade projection debrief — the "so what does this mean for my
+        {/* Grade projection debrief: the "so what does this mean for my
             actual course grade" panel. Only renders when we know enough to
             compute a projection. */}
         {projection && (
@@ -399,7 +410,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
                   })}
                 </div>
                 <div style={{ fontSize: 11.5, color: '#9B9B9B', marginTop: 10, fontStyle: 'italic', lineHeight: 1.5 }}>
-                  Projection is a linear estimate — not a guarantee. Doing these 3 sessions typically moves practice-exam scores 8-15 pts on the topics covered.
+                  Projection is a linear estimate, not a guarantee. Doing these 3 sessions typically moves practice-exam scores 8-15 pts on the topics covered.
                 </div>
               </div>
             )}
@@ -523,7 +534,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
           </div>
         )}
 
-        {/* Exam Autopsy — cognitive-skill breakdown */}
+        {/* Exam Autopsy: cognitive-skill breakdown */}
         {autopsyHasData && autoGradedCount >= 3 && (
           <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: 18 }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, gap: 12, flexWrap: 'wrap' }}>
@@ -704,7 +715,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
           })}
         </div>
 
-        {/* Free upgrade nudge — shown after using the 1 free practice exam */}
+        {/* Free upgrade nudge: shown after using the 1 free practice exam */}
         {plan === 'free' && !canUseFeature('practiceExam').allowed && (
           <div style={{ background: 'linear-gradient(135deg, rgba(59,97,196,0.06), rgba(99,102,241,0.06))', border: '1px solid rgba(59,97,196,0.22)', borderRadius: 18, padding: 18, marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
             <div style={{ flex: 1, minWidth: 220 }}>
