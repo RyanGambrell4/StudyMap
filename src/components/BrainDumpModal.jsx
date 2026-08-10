@@ -156,6 +156,7 @@ export default function BrainDumpModal({
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
   const [hasUploads, setHasUploads] = useState(null)
+  const [retrying, setRetrying] = useState(false)
 
   const intervalRef = useRef(null)
   const textareaRef = useRef(null)
@@ -326,6 +327,33 @@ export default function BrainDumpModal({
       setScreen(SCREENS.WRITING)
     } finally {
       submittingRef.current = false
+    }
+  }
+
+  // Retry the evidence write only. This never re-scores: the score on screen
+  // stays the score, and no AI credit is spent fixing a database problem.
+  async function retryRecord() {
+    if (retrying || !result?.artifactId) return
+    setRetrying(true)
+    try {
+      const token = await getAccessToken()
+      const res = await fetch('/api/record-brain-dump-signal', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify({ artifactId: result.artifactId }),
+      })
+      const data = await res.json()
+      setResult(prev => ({ ...prev, recorded: Boolean(data.recorded), retryable: Boolean(data.retryable) }))
+      if (data.recorded) {
+        track('brain_dump_record_retry_succeeded', { topic: topic.trim() })
+        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'brainDump' } }))
+      } else {
+        track('brain_dump_record_retry_failed', { topic: topic.trim(), retryable: Boolean(data.retryable) })
+      }
+    } catch {
+      setResult(prev => ({ ...prev, recorded: false, retryable: true }))
+    } finally {
+      setRetrying(false)
     }
   }
 
@@ -637,10 +665,22 @@ export default function BrainDumpModal({
             </>
           ) : (
             <span style={{ color: C.shaky }}>
-              This score was not saved to your map. Nothing else was lost.{' '}
-              <button type="button" onClick={() => handleSubmit()} style={{ ...btnReset, color: C.blue, fontWeight: 600 }}>
-                Try recording it again
-              </button>
+              This score was not saved to your map. Your {score} still stands and nothing you wrote was lost.
+              {result?.retryable && result?.artifactId ? (
+                <>
+                  {' '}
+                  <button
+                    type="button"
+                    onClick={retryRecord}
+                    disabled={retrying}
+                    style={{ ...btnReset, color: C.blue, fontWeight: 600, cursor: retrying ? 'default' : 'pointer' }}
+                  >
+                    {retrying ? 'Saving.' : 'Try saving it again'}
+                  </button>
+                </>
+              ) : (
+                ' Retrying will not help with this one, so it is worth reporting.'
+              )}
             </span>
           )}
         </div>

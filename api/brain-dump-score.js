@@ -5,7 +5,7 @@ import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { recordTopicSignal } from '../lib/server/topicSignals.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
-import { shapeBrainDumpResult } from '../lib/shared/brainDumpResult.js'
+import { shapeBrainDumpResult, isRetryableWriteFailure } from '../lib/shared/brainDumpResult.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -188,8 +188,14 @@ ${missedRules}
       // The client renders "Added to your map." only when this is true, so
       // a failed write must never be reported to the student as a success.
       result.recorded = scoreWrite.ok
+      // Whether offering a retry is honest. A check-constraint violation is
+      // the shape a missing migration takes, and it will fail identically
+      // every time, so the client hides the button rather than looping the
+      // student through a failure it cannot resolve.
+      result.retryable = scoreWrite.ok ? false : isRetryableWriteFailure(scoreWrite.code)
     } else {
       result.recorded = false
+      result.retryable = false
     }
 
     // Persist each named possibleGap as a brain_dump_gap topic signal.
@@ -217,7 +223,12 @@ ${missedRules}
       }))
     }
 
-    saveArtifact({
+    // Awaited, unlike the other generator endpoints, because the result
+    // screen's retry needs this row's id: it is the only server-side record
+    // of the score, and retrying reads the score back from it rather than
+    // trusting a number from the client. A failed write is still not fatal,
+    // it just means the retry cannot be offered.
+    const artifact = await saveArtifact({
       userId: gate.userId,
       courseId,
       courseName: resolvedName,
@@ -240,8 +251,16 @@ ${missedRules}
         text_excerpt: String(text || '').slice(0, 2000),
         wordCount,
       },
-    }).then(w => { if (!w.ok) console.warn('[brain-dump-score] saveArtifact failed', w.error) })
-      .catch(err => console.warn('[brain-dump-score] saveArtifact threw', err?.message))
+    }).catch(err => {
+      console.warn('[brain-dump-score] saveArtifact threw', err?.message)
+      return { ok: false }
+    })
+    if (!artifact.ok) console.warn('[brain-dump-score] saveArtifact failed', artifact.error)
+
+    result.artifactId = artifact.ok ? artifact.id : null
+    // Without the artifact there is nothing for the retry to read the score
+    // back out of, so the button cannot be offered honestly.
+    if (!result.artifactId) result.retryable = false
 
     return res.status(200).json(result)
   } catch (e) {

@@ -20,7 +20,7 @@ import {
   progressFraction,
   pickerTopics,
 } from './brainDumpFlow'
-import { shapeBrainDumpResult, buildWriteBackRecord } from '../../lib/shared/brainDumpResult.js'
+import { shapeBrainDumpResult, buildWriteBackRecord, isRetryableWriteFailure } from '../../lib/shared/brainDumpResult.js'
 
 describe('timer', () => {
   it('is fixed at three minutes', () => {
@@ -168,6 +168,36 @@ describe('results list gating', () => {
     const out = shapeBrainDumpResult(null, { comparedAgainstMaterial: true })
     expect(out.covered).toEqual([])
     expect(out.missed).toEqual([])
+  })
+})
+
+describe('retryable write failures', () => {
+  it('does not offer a retry for a check-constraint violation, which is a missing migration', () => {
+    expect(isRetryableWriteFailure('23514')).toBe(false)
+  })
+
+  it('does not offer a retry for a missing table, column, or denied privilege', () => {
+    expect(isRetryableWriteFailure('42P01')).toBe(false)
+    expect(isRetryableWriteFailure('42703')).toBe(false)
+    expect(isRetryableWriteFailure('42501')).toBe(false)
+  })
+
+  it('offers a retry for a transient failure', () => {
+    expect(isRetryableWriteFailure('08006')).toBe(true)
+    expect(isRetryableWriteFailure('57014')).toBe(true)
+    expect(isRetryableWriteFailure('db_error')).toBe(true)
+  })
+
+  it('offers a retry for an unrecognised or absent code', () => {
+    // Offering a retry that fails is a smaller harm than hiding one that
+    // would have worked.
+    expect(isRetryableWriteFailure(undefined)).toBe(true)
+    expect(isRetryableWriteFailure(null)).toBe(true)
+    expect(isRetryableWriteFailure('something-new')).toBe(true)
+  })
+
+  it('compares codes as strings, so a numeric code still classifies', () => {
+    expect(isRetryableWriteFailure(23514)).toBe(false)
   })
 })
 
