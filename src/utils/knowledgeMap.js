@@ -30,10 +30,14 @@ export const SOURCE_LABELS = {
 // here is one right-or-wrong answer, not a score.
 const PER_QUESTION_TYPES = new Set(['quiz_answer', 'practice_exam_answer'])
 
-// Signal types that record that something happened without grading it. These
-// count as evidence of activity, so the row stops saying "No evidence yet",
-// but they can never make a topic read Solid on their own.
-const UNSCORED_TYPES = new Set(['brain_dump_gap'])
+// Signal types whose score column holds a fixed policy constant rather than a
+// measurement of what the student knows: brain_dump_gap is always 0.0 and
+// repair_misconception always 0.2, set in lib/server/topicSignals.js so the
+// course brain can weight them. Surfacing either as a number would put a
+// figure on the screen that nothing measured. They count as evidence of
+// activity, so the row stops saying "No evidence yet", but they carry no
+// score and can never make a topic read Solid.
+const UNSCORED_TYPES = new Set(['brain_dump_gap', 'repair_misconception'])
 
 // Per-question rows this far apart belong to different sittings. Two hours is
 // comfortably longer than any single exam and far shorter than the gap

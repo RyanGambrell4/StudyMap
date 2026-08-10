@@ -75,6 +75,15 @@ describe('deriveStatus', () => {
     expect(d.evidenceLine.text).not.toMatch(/\d+(?!\s*days)/)
   })
 
+  it('shows no number for a misconception repair, whose 0.2 is a policy constant', () => {
+    const d = deriveStatus([
+      signal({ signalType: 'repair_misconception', score: 20, at: daysAgo(3) }),
+    ], { now: NOW })
+    expect(d.status).toBe('untested')
+    expect(d.score).toBeNull()
+    expect(d.evidenceLine.text).toBe('Misconception repair, 3 days ago')
+  })
+
   it('keeps unscored evidence from masking a real score', () => {
     const d = deriveStatus([
       signal({ score: 88, at: daysAgo(5) }),
