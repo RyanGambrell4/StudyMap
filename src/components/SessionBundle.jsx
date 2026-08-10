@@ -129,6 +129,10 @@ export default function SessionBundle({
           userId={userId}
           initialTopic={topic}
           initialCourseIdx={courseIdx}
+          // Rendered inside the bundle's own frame, so the flow lays out in
+          // place instead of covering the viewport, and leaves history to the
+          // bundle rather than pushing its own entries.
+          embedded
           onClose={onClose}
           onShowPaywall={onShowPaywall}
           onDrillGaps={() => setStep('quiz')}

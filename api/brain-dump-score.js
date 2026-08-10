@@ -5,6 +5,7 @@ import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { recordTopicSignal } from '../lib/server/topicSignals.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
+import { shapeBrainDumpResult } from '../lib/shared/brainDumpResult.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -31,6 +32,17 @@ export default async function handler(req, res) {
   const wordCount = text.trim().split(/\s+/).length
   const contextBlock = formatCourseContextForPrompt(brain)
 
+  // Whether this dump was actually compared against the student's own
+  // uploaded material. Computed here from the retrieved excerpts, never
+  // inferred from what the model says it did. getCourseContext returns
+  // materials: null when the student has no uploads for this course (or
+  // when the killswitch is off), so an empty excerpt list is the single
+  // honest test. The results screen keys its entire "You missed" section
+  // off this flag: no material, no missed list, no citations.
+  const materialExcerpts = Array.isArray(brain.materials?.excerpts) ? brain.materials.excerpts : []
+  const comparedAgainstMaterial = materialExcerpts.length > 0
+  const materialFiles = [...new Set(materialExcerpts.map(e => e.filename).filter(Boolean))]
+
   // Prior brain-dump scores from client-passed recentSessions (score history
   // isn't persisted server-side). Text-only history is on brain.sessions.brainDumps.
   const priorDumps = (legacyCtx?.recentSessions ?? [])
@@ -41,6 +53,25 @@ export default async function handler(req, res) {
     : 'No prior brain-dump scores tracked for this course yet.'
 
   const supplementBlock = buildClientSupplementBlock(legacyCtx)
+
+  // The covered/missed contract. "covered" is always requested: naming what
+  // the student demonstrably wrote is grounded in their own text and needs
+  // no uploads. "missed" is only requested when we actually have their
+  // material to compare against, because a missed list without material is
+  // the model guessing at a syllabus and presenting it as the student's own
+  // notes. Any missed array that comes back when comparedAgainstMaterial is
+  // false gets dropped below regardless of what the model returned.
+  const missedSpec = comparedAgainstMaterial
+    ? `  "missed": [
+    { "point": "A specific point present in the uploaded material that the dump did not cover", "source": "The exact filename from UPLOADED MATERIALS above, plus a locator such as a page or slide only if the excerpt shows one" }
+  ],
+`
+    : ''
+
+  const missedRules = comparedAgainstMaterial
+    ? `- missed: 3 to 5 items, every one drawn from the UPLOADED MATERIALS block above. Never list a point that is not in that material.
+- missed[].source: cite the filename exactly as it appears in the [Source: ...] tag. Do not invent page or slide numbers that the excerpt does not show.`
+    : `- Do NOT return a "missed" field. There is no uploaded material for this course, so there is nothing of the student's to compare against and any gap list would be a guess.`
 
   const prompt = `You are the student's academic coach scoring a brain dump exercise for ${resolvedName}.
 
@@ -61,7 +92,8 @@ Score it fairly but rigorously. Reward conceptual coverage and accuracy over com
 Return ONLY valid JSON:
 {
   "score": 71,
-  "categories": {
+  "covered": ["4 to 6 specific things the student actually demonstrated in the dump above, each a short noun phrase"],
+${missedSpec}  "categories": {
     "Concepts": { "score": 7, "gap": "Specific concept not mentioned that appears in the syllabus/emphasis" },
     "Application": { "score": 6, "gap": "Missing worked example or scenario" },
     "Detail": { "score": 8, "gap": "Missing specific numerical or defining detail" },
@@ -72,12 +104,14 @@ Return ONLY valid JSON:
   "upgradeTarget": "B+",
   "possibleGaps": ["3 specific topics they likely didn't cover, drawn from syllabus/emphasis/weak topics"],
   "syllabusCoverage": "One sentence naming which syllabus topics the dump did or did not touch. Omit if syllabus is empty.",
-  "changeSincePrior": "One sentence comparing to prior brain dumps — 'up 8 points on Concepts, flat on Connections'. Omit if no prior dumps.",
+  "changeSincePrior": "One sentence comparing to prior brain dumps, for example 'up 8 points on Concepts, flat on Connections'. Omit if no prior dumps.",
   "learningStyleTip": "One sentence with the single action the student should take next, framed for their learning style."
 }
 
 Rules:
 - score: specific integer, never divisible by 5 or 10 (e.g. 67, 71, 83).
+- covered: only things genuinely present in the dump text above. If the dump is thin, return fewer items. Never pad the list.
+${missedRules}
 - category scores: integers 1-10, should vary meaningfully.
 - gap: one specific concept or detail they didn't clearly address (grounded in the context, not generic).
 - gradeProjection: hedged ("trending toward", "tracking toward"). No definitive claims.
@@ -116,13 +150,54 @@ Rules:
     if (first === -1 || last === -1) throw new Error('Malformed AI response')
     const result = JSON.parse(content.slice(first, last + 1))
 
+    // Enforce the material contract on the way out. The model is told not to
+    // return a missed list without material, but the response is not a
+    // trusted channel: shapeBrainDumpResult drops a stray array so it can
+    // never reach the results screen and be shown as "your material".
+    const shaped = shapeBrainDumpResult(result, {
+      comparedAgainstMaterial,
+      materialFiles,
+      courseName: resolvedName,
+    })
+    Object.assign(result, shaped)
+    if (!comparedAgainstMaterial) delete result.missed
+
+    // The dump's own graded result for the topic the student wrote about.
+    // This is the row the Knowledge Map reads to show "Brain Dump 71, today";
+    // the brain_dump_gap rows below are unscored evidence of activity and
+    // cannot make a topic read Solid on their own. Only written when the
+    // student named a topic, because a signal with no topic has nowhere to
+    // land on the map.
+    const dumpTopic = typeof topic === 'string' ? topic.trim() : ''
+    const overallScore = typeof result?.score === 'number' ? result.score : null
+    if (dumpTopic && overallScore !== null && courseId) {
+      const scoreWrite = await recordTopicSignal({
+        userId: gate.userId,
+        courseId,
+        courseName: resolvedName,
+        topic: dumpTopic,
+        signalType: 'brain_dump_score',
+        rawScore: Math.max(0, Math.min(1, overallScore / 100)),
+        metadata: {
+          word_count: wordCount,
+          compared_against_material: comparedAgainstMaterial,
+          material_files: materialFiles.slice(0, 6),
+        },
+      })
+      if (!scoreWrite.ok) console.error('[brain-dump-score] brain_dump_score signal failed', scoreWrite)
+      // The client renders "Added to your map." only when this is true, so
+      // a failed write must never be reported to the student as a success.
+      result.recorded = scoreWrite.ok
+    } else {
+      result.recorded = false
+    }
+
     // Persist each named possibleGap as a brain_dump_gap topic signal.
     // Fire-and-forget style: signal-write failures are logged but never
     // block the user-facing response. courseId here is the stable string
     // resolved above; we never pass a numeric index.
     const gaps = Array.isArray(result?.possibleGaps) ? result.possibleGaps : []
     if (gaps.length && courseId) {
-      const overallScore = typeof result?.score === 'number' ? result.score : null
       await Promise.all(gaps.slice(0, 5).map(async (gapTopic) => {
         if (!gapTopic || typeof gapTopic !== 'string') return
         const write = await recordTopicSignal({
@@ -151,6 +226,9 @@ Rules:
       topic: topic || null,
       payload: {
         score: result.score,
+        covered: result.covered,
+        missed: result.missed ?? null,
+        comparedAgainstMaterial,
         categories: result.categories,
         gradeProjection: result.gradeProjection,
         studyTimeToUpgrade: result.studyTimeToUpgrade,
