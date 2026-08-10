@@ -127,3 +127,58 @@ export const STUDY_COACH = {
 // Grade Hub. Alias rather than a second declaration so there is one name to
 // change if the display face ever moves.
 export const SC_SERIF = GH_SERIF
+
+// ── Knowledge Map ─────────────────────────────────────────────────────────────
+// Values transcribed from the approved design export in design/knowledge-map/
+// (8 states, "1 Map Populated" through "8 Topic Detail"). The Knowledge Map
+// shares the Grade Hub's design language, so every surface and neutral it has
+// in common is aliased rather than redefined. Only the neutrals the export
+// introduces are new values.
+//
+// Same governing rule as the Grade Hub and Study Coach: color encodes data,
+// never decorates. The three status colors below are the whole vocabulary of
+// this screen; nothing else on the page is allowed to be green or amber.
+export const KNOWLEDGE_MAP = {
+  // Surfaces and neutrals, shared with the Grade Hub
+  pageBg:     GRADE_HUB.pageBg,      // #f5f6f8
+  card:       GRADE_HUB.card,
+  cardBorder: GRADE_HUB.cardBorder,  // #e7e8ec
+  cardShadow: GRADE_HUB.cardShadow,
+  rowRule:    GRADE_HUB.rowRule,     // #f0f1f4, topic row separators
+  ink:        GRADE_HUB.ink,         // #1C1B18, H1, topic names, numerals
+  secondary:  GRADE_HUB.secondary,   // #55565c, subtext, evidence lines, eyebrows
+
+  // Status: the only three states a topic can be in
+  solid:    GRADE_HUB.green,   // #1a9e5c
+  shaky:    GRADE_HUB.amber,   // #D97706
+  untested: GRADE_HUB.secondary, // #55565c, the word; the dot uses `hollow`
+
+  // Neutrals the export introduces that the Grade Hub does not carry
+  stale:       '#8a8b91',  // the "(a while ago)" suffix on an aged evidence line
+  hollow:      '#b6b7bd',  // untested dot border, row chevron, sparkline stroke
+  placeholder: '#9a9ba1',  // "Or type any topic" input placeholder
+  disabled:    '#c9cbd4',  // primary button before a topic is chosen
+  chipHover:   '#d5d7de',  // course chip border on hover
+  tileHover:   '#c9cbd4',  // topic tile border on hover
+  rowHover:    '#fafbfc',  // topic row background on hover
+  selectedRow: '#f5f6f8',  // the row backing the open topic detail panel
+
+  // Topic detail panel
+  scrim:       'rgba(28,27,24,.24)',
+  panelShadow: '-8px 0 28px rgba(28,27,24,.08)',
+
+  // Action
+  blue:      GRADE_HUB.blue,       // #3452D9
+  blueHover: GRADE_HUB.blueHover,  // #2a43b8
+}
+
+// The Knowledge Map sets its headings, countdown, and score numerals in the
+// same serif as the Grade Hub and Study Coach.
+export const KM_SERIF = GH_SERIF
+
+// Status thresholds and staleness, in one place because both the map and its
+// tests read them. A topic is Solid at 80 and above, Shaky below, Untested
+// with no scored evidence at all. Evidence keeps its status once it ages past
+// STALE_DAYS but is marked stale in the UI.
+export const KM_SOLID_AT = 80
+export const KM_STALE_DAYS = 14

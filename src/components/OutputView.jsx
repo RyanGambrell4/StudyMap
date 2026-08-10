@@ -1949,10 +1949,12 @@ export default function OutputView({
             pendingAdaptation={pendingAdaptation}
             onShowAdaptModal={() => setShowAdaptModal(true)}
             onOpenCheatSheet={() => { track('feature_opened', { feature: 'cheat_sheet' }); setShowCheatSheet(true) }}
-            onOpenBrainDump={(topic) => {
+            onOpenBrainDump={(topic, courseId) => {
               track('feature_opened', { feature: 'brain_dump' })
               if (topic) {
-                const idx = courses.findIndex(c => String(c.id) === String(topic))
+                // courseId is what identifies the course. This used to match
+                // the topic string against course ids, so idx was always -1.
+                const idx = courseId != null ? courses.findIndex(c => String(c.id) === String(courseId)) : -1
                 setBrainDumpInit({ topic: typeof topic === 'string' ? topic : '', courseIdx: idx >= 0 ? idx : 0 })
               }
               setShowBrainDump(true)
@@ -2414,9 +2416,13 @@ export default function OutputView({
         {activeSection === 'mastery' && (
           <MasteryMapView
             courses={courses}
-            onOpenBrainDump={() => setShowBrainDump(true)}
-            onDrillTopic={(topic) => { setShowBrainDump(true) }}
-            onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
+            onOpenBrainDump={({ topic, courseIdx } = {}) => {
+              // The topic used to be dropped here, so every Brain Dump opened
+              // from the map arrived with an empty topic field.
+              setBrainDumpInit({ topic: topic ?? '', courseIdx: courseIdx ?? 0 })
+              setShowBrainDump(true)
+            }}
+            onUploadNotes={() => setActiveSection('courses')}
           />
         )}
 
@@ -2483,7 +2489,7 @@ export default function OutputView({
           { id: 'nav-problem',   group: 'Navigate', label: 'Problem Solver',   hint: 'Step-by-step breakdowns',  run: () => { track('feature_opened', { feature: 'problem_solver', source: 'cmdk' }); setActiveSection('problem-solver') }, keywords: 'problem solver step math science' },
           { id: 'nav-essay',     group: 'Navigate', label: 'Essay Architect',  hint: 'Outline any essay',        run: () => { track('feature_opened', { feature: 'essay_architect', source: 'cmdk' }); setActiveSection('essay-architect') }, keywords: 'essay outline writing structure thesis' },
           { id: 'nav-account',   group: 'Navigate', label: 'Account',          hint: 'Plan + settings',          run: nav('account'),          keywords: 'settings billing profile plan subscription' },
-          { id: 't-braindump',    group: 'Tools',    label: 'Brain Dump',       hint: '15-min recall drill',       run: () => { track('feature_opened', { feature: 'brain_dump', source: 'cmdk' }); setShowBrainDump(true) }, keywords: 'brain dump recall write' },
+          { id: 't-braindump',    group: 'Tools',    label: 'Brain Dump',       hint: '3-minute recall drill',       run: () => { track('feature_opened', { feature: 'brain_dump', source: 'cmdk' }); setShowBrainDump(true) }, keywords: 'brain dump recall write' },
           { id: 't-teachitback', group: 'Tools',    label: 'Teach It Back',    hint: 'Explain it, find your gaps', run: () => { track('feature_opened', { feature: 'teach_it_back', source: 'cmdk' }); setShowTeachItBack(true) }, keywords: 'teach it back explain concept mastery' },
           { id: 't-cheatsheet',  group: 'Tools',    label: 'AI Cheat Sheet',   hint: 'One-page summary',          run: () => { track('feature_opened', { feature: 'cheat_sheet', source: 'cmdk' }); setShowCheatSheet(true) }, keywords: 'cheat sheet summary condense' },
           { id: 't-rescue',      group: 'Tools',    label: 'Exam Rescue',      hint: 'Last-mile prep',            run: () => { track('feature_opened', { feature: 'exam_rescue', source: 'cmdk' }); setShowExamRescue(true) }, keywords: 'exam rescue cram save last minute' },
@@ -2523,6 +2529,7 @@ export default function OutputView({
           initialCourseIdx={brainDumpInit?.courseIdx ?? 0}
           onClose={() => { setShowBrainDump(false); setBrainDumpInit(null) }}
           onShowPaywall={onShowPaywall}
+          onUploadNotes={() => { setShowBrainDump(false); setBrainDumpInit(null); setActiveSection('courses') }}
           onDrillGaps={(topic) => { setShowBrainDump(false); setBrainDumpInit(null); setPendingDrillTopic(topic); setActiveSection('tools') }}
         />
       )}
