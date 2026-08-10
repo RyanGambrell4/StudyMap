@@ -2,7 +2,7 @@ import { useMemo, useEffect, useRef, useState } from 'react'
 import { track } from '../lib/analytics'
 import ReadinessPill, { computeReadiness } from './ReadinessPill'
 import ReferralCard from './ReferralCard'
-import { useCelebration } from '../utils/useCelebration'
+import { useCelebration, TIER } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { usePushNotifications } from '../utils/usePushNotifications'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
@@ -17,7 +17,6 @@ import CrossCourseCard from './CrossCourseCard'
 import ExamCountdownCard from './ExamCountdownCard'
 import StreakGuardCard from './StreakGuardCard'
 import WeeklyRecapCard from './WeeklyRecapCard'
-import WelcomeOverlay from './WelcomeOverlay'
 import QuickStartCard from './QuickStartCard'
 import WeeklyGoalCard from './WeeklyGoalCard'
 import { buildQuickSession, QUICK_PRESETS } from '../lib/quickStart'
@@ -431,7 +430,8 @@ export default function DashboardView({
   useEffect(() => {
     if (allComplete && firedRef.current !== allCompleteKey) {
       firedRef.current = allCompleteKey
-      celebrate('big')
+      // Daily goal hit. Tier 1 per the celebration table, not a confetti burst.
+      celebrate({ tier: TIER.SMALL, trigger: 'daily_goal_hit' })
     }
   }, [allComplete, allCompleteKey])
 
@@ -449,8 +449,10 @@ export default function DashboardView({
     return () => window.removeEventListener('studyedge:tool-session-complete', handler)
   }, [todayStr, recordCompletion])
 
-  const handleToggle = (id) => {
-    if (!completedIds.has(id)) celebrate('light')
+  const handleToggle = (id, anchorEl = null) => {
+    // Item checked. Tier 0: a 180ms scale on the button the user just pressed,
+    // no confetti. Trivial actions must not spend the confetti budget.
+    if (!completedIds.has(id)) celebrate({ tier: TIER.MICRO, trigger: 'session_checked', anchorEl })
     onToggle(id)
   }
 
@@ -705,14 +707,6 @@ export default function DashboardView({
     })()
     return (
       <div style={{ minHeight: '100vh', background: D.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 24px' }}>
-        <WelcomeOverlay
-          firstName={emailFirstName}
-          isExamMode={isExamMode}
-          onStart={() => {
-            track('welcome_overlay_start_click', { source: 'dashboard_empty' })
-            onNavigateToCourses?.()
-          }}
-        />
         <div style={{ maxWidth: 420, width: '100%', textAlign: 'center' }}>
           <h2 style={{ color: D.text, fontSize: 26, fontWeight: 700, letterSpacing: -0.5, margin: '0 0 10px', lineHeight: 1.2 }}>
             {isExamMode ? 'One section to get started.' : 'One course to get started.'}
@@ -1845,7 +1839,7 @@ export default function DashboardView({
                   >
                     <IcoPlay /> Start session
                   </button>
-                  <button onClick={(e) => { e.stopPropagation(); handleToggle(displaySession.id) }} className="dash-ghost-btn" style={{ fontSize: 13, color: D.textMuted, padding: '6px 8px', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Mark done</button>
+                  <button onClick={(e) => { e.stopPropagation(); handleToggle(displaySession.id, e.currentTarget) }} className="dash-ghost-btn" style={{ fontSize: 13, color: D.textMuted, padding: '6px 8px', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Mark done</button>
                   <button onClick={(e) => { e.stopPropagation(); setSessionIdx(i => (i + 1) % Math.max(uncompletedToday.length, 1)) }} className="dash-ghost-btn" style={{ fontSize: 13, color: D.textMuted, padding: '6px 8px', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Skip</button>
                   <div className="dash-pomodoro" style={{ marginLeft: 'auto', fontSize: 11, color: D.textDim, display: 'flex', alignItems: 'center', gap: 5 }}>
                     <IcoZap /> Pomodoro · 25 + 5

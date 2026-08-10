@@ -12,7 +12,7 @@ import { getAccessToken } from '../lib/supabase'
 import { fetchWithRetry } from '../lib/utils'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, getFocusMinutesUsed, incrementFeatureUsage, FREE_LIMITS, hasUsedTrial } from '../lib/subscription'
 import { sliderToRecall } from '../utils/adaptationEngine'
-import { useCelebration } from '../utils/useCelebration'
+import { useCelebration, TIER } from '../utils/useCelebration'
 import { extractText } from '../utils/extractText'
 import AIChatView from './AIChatView'
 import { track } from '../lib/analytics'
@@ -544,7 +544,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   useEffect(() => {
     if (showComplete && !celebratedRef.current) {
       celebratedRef.current = true
-      celebrate('big')
+      // Session complete. Tier 1 per the celebration table.
+      celebrate({ tier: TIER.SMALL, trigger: 'session_completed' })
     }
   }, [showComplete])
   const [pdfDownloading, setPdfDownloading] = useState(false)

@@ -4,7 +4,7 @@ import {
 } from '../lib/masteryStore'
 import { track } from '../lib/analytics'
 import { color as C, space as S, radius as R, motion as M, shadow as SH, touch as T, focusRing } from '../lib/designTokens'
-import { useCelebration } from '../utils/useCelebration'
+import { useCelebration, TIER } from '../utils/useCelebration'
 import { recordReviewClear, getWeeklyClears } from '../lib/reviewClears'
 
 // ── Formatters ──────────────────────────────────────────────────────────────
@@ -368,7 +368,8 @@ export default function ReviewQueueView({ courses, onOpenBrainDump, onOpenQuizBu
       setWeeklyClears(result.weeklyClears)
       if (result.recorded) {
         setJustCleared(true)
-        celebrate('medium')
+        // Queue cleared is a completed unit of work, not a milestone. Tier 1.
+        celebrate({ tier: TIER.SMALL, trigger: 'review_queue_cleared' })
         track('review_queue_cleared', { weeklyClears: result.weeklyClears, clearedCount: prev })
         const t = setTimeout(() => setJustCleared(false), 8000)
         return () => clearTimeout(t)

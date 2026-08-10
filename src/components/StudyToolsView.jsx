@@ -9,7 +9,7 @@ import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, hasUsedTrial } from '../lib/subscription'
 import { findSimilarCards, dedupeAgainstExisting } from '../lib/embeddings'
 import { getDeckHealth, labelForSource } from '../lib/deckHealth'
-import { useCelebration } from '../utils/useCelebration'
+import { useCelebration, TIER } from '../utils/useCelebration'
 import { hydrateCourseContext } from '../lib/courseContext'
 import { track } from '../lib/analytics'
 
@@ -562,7 +562,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     const isLast = cardIdx === flashcards.length - 1
     if (isLast && !deckDoneRef.current) {
       deckDoneRef.current = true
-      setTimeout(() => celebrate('medium'), 300)
+      // Deck finished. Tier 1, same as any completed unit of work.
+      setTimeout(() => celebrate({ tier: TIER.SMALL, trigger: 'flashcard_deck_complete' }), 300)
     } else if (!isLast) {
       deckDoneRef.current = false
     }
@@ -591,7 +592,8 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
     if (isLastSm2 && !deckDoneRef.current) {
       deckDoneRef.current = true
       track('flashcard_deck_complete', { cardCount: flashcards.length, plan: getActivePlan() })
-      setTimeout(() => celebrate('medium'), 300)
+      // Deck finished. Tier 1, same as any completed unit of work.
+      setTimeout(() => celebrate({ tier: TIER.SMALL, trigger: 'flashcard_deck_complete' }), 300)
     } else if (!isLastSm2) {
       deckDoneRef.current = false
     }

@@ -4,7 +4,8 @@ import { track } from '../lib/analytics'
 import { getCachedStudyTools } from '../lib/db'
 import { getDueCards } from '../lib/sm2'
 import { getReviewStats } from '../lib/masteryStore'
-import OnboardingTour from './OnboardingTour'
+import CelebrationOverlay from './rewards/CelebrationOverlay'
+import XPFlyupLayer from './rewards/XPFlyup'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const NAV_BG  = '#FFFFFF'
@@ -40,12 +41,10 @@ export default function AppShell({
 }) {
   const isExamMode = Array.isArray(courses) && courses.some(c => EXAM_PATTERN.test(c.name))
   const [settingsOpen, setSettingsOpen]     = useState(false)
-  const [startTour, setStartTour]           = useState(null)
   const [openHub, setOpenHub]               = useState(null)   // 'strategy' | 'brainTraining' | null  (desktop)
   const [mobileHub, setMobileHub]           = useState(null)   // same, for mobile sheet
   const settingsRef   = useRef(null)
   const closeTimerRef = useRef(null)
-  const handleTourReady = useCallback((fn) => setStartTour(() => fn), [])
 
   const isStrategyActive = STRATEGY_SECTIONS.includes(activeSection)
   const isBrainActive    = BRAIN_SECTIONS.includes(activeSection)
@@ -130,13 +129,6 @@ export default function AppShell({
         <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginRight: 36, flexShrink: 0 }}>
           <img src="/favicon.png" alt="StudyEdge AI" style={{ height: 28, width: 28, objectFit: 'contain' }} />
           <span style={{ fontWeight: 700, fontSize: 15, color: TEXT, letterSpacing: '-0.01em' }}>StudyEdge AI</span>
-          {startTour && (
-            <button onClick={startTour} title="Take a tour" style={{ marginLeft: 4, width: 22, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', borderRadius: 5, color: MUTED, background: 'transparent', border: 'none', cursor: 'pointer' }}>
-              <svg style={{ width: 13, height: 13 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
-            </button>
-          )}
         </div>
 
         {/* Nav links */}
@@ -511,7 +503,10 @@ export default function AppShell({
         {children}
       </main>
 
-      <OnboardingTour onReady={handleTourReady} />
+      {/* Mounted once for the whole app. Features request a tier from the
+          celebration controller; these are the only surfaces that paint one. */}
+      <CelebrationOverlay />
+      <XPFlyupLayer />
 
       {/* ── Mobile hub backdrop ── */}
       {mobileHub && (
