@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { track } from '../lib/analytics'
+import { saveExamDraft, clearExamDraft } from '../lib/examDraft'
 
 function fmtTime(seconds) {
   if (seconds < 0) seconds = 0
@@ -9,17 +10,25 @@ function fmtTime(seconds) {
 }
 
 // onSubmit({ answers, timeMs, questionTimings }): hand off to results
-// onExit(): bail without submitting
-export default function PracticeExamScreen({ questions, courseName, timerMinutes, onSubmit, onExit }) {
-  const [idx, setIdx] = useState(0)
-  const [answers, setAnswers] = useState(() => questions.map(() => ''))
+// onExit(): leave the exam. The screen saves or clears the draft first.
+// initial: a saved draft being resumed, or null for a fresh exam.
+export default function PracticeExamScreen({ questions, courseId, courseName, timerMinutes, initial = null, onSubmit, onExit }) {
+  const [idx, setIdx] = useState(() => initial?.idx ?? 0)
+  const [answers, setAnswers] = useState(() =>
+    questions.map((_, i) => (typeof initial?.answers?.[i] === 'string' ? initial.answers[i] : '')))
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false)
-  const [secondsLeft, setSecondsLeft] = useState(timerMinutes ? timerMinutes * 60 : null)
-  const startedAt = useRef(Date.now())
+  const [showExitConfirm, setShowExitConfirm] = useState(false)
+  const [secondsLeft, setSecondsLeft] = useState(() => {
+    if (Number.isFinite(initial?.secondsLeft)) return initial.secondsLeft
+    return timerMinutes ? timerMinutes * 60 : null
+  })
+  // Time already spent on a resumed exam is folded into the start point, so
+  // the submitted duration is the whole sitting, not just this visit.
+  const startedAt = useRef(Date.now() - (initial?.elapsedMs ?? 0))
   const submittedRef = useRef(false)
   // Per-question timing
   const questionStartRef = useRef(Date.now())
-  const timingsRef = useRef(questions.map(() => 0)) // accumulated ms per question
+  const timingsRef = useRef(questions.map((_, i) => initial?.timings?.[i] ?? 0)) // accumulated ms per question
 
   const total = questions.length
   const current = questions[idx]
@@ -32,9 +41,24 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
     questionStartRef.current = Date.now()
   }
 
+  // Writes the current state of the sitting to the local draft. Called on
+  // every change, so a reload or a closed tab loses nothing either.
+  const persist = (over = {}) => {
+    if (submittedRef.current) return
+    saveExamDraft({
+      courseId, courseName, questions,
+      answers, idx, timerMinutes, secondsLeft,
+      elapsedMs: Date.now() - startedAt.current,
+      timings: timingsRef.current,
+      ...over,
+    })
+  }
+
   const finalize = (override) => {
     if (submittedRef.current) return
     submittedRef.current = true
+    // The exam is finished, so the draft has nothing left to protect.
+    clearExamDraft()
     recordCurrentQuestionTime()
     const questionTimings = questions.map((q, i) => ({ id: q.id ?? `q${i + 1}`, topic: q.topic ?? 'General', question: q.question, timeMs: timingsRef.current[i] ?? 0 }))
     const finalAnswers = override ?? answers
@@ -68,6 +92,22 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
     setIdx(newIdx)
   }
 
+  // Keep the draft current. Answers, position and the clock all matter on the
+  // way back in, so any of them changing rewrites it.
+  useEffect(() => {
+    persist()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answers, idx, secondsLeft])
+
+  // A closing tab gets one last write. The effect above has usually already
+  // run, so this only matters for the moments in between.
+  useEffect(() => {
+    const h = () => persist()
+    window.addEventListener('beforeunload', h)
+    return () => window.removeEventListener('beforeunload', h)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [answers, idx, secondsLeft])
+
   // Keyboard nav
   useEffect(() => {
     const h = (e) => {
@@ -93,7 +133,7 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
       {/* Top bar */}
       <div style={{ padding: '16px 24px', borderBottom: '1px solid rgba(0,0,0,0.07)', background: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 16, minWidth: 0 }}>
-          <button onClick={() => { track('practice_exam_exited', { questionCount: total, answeredCount: answered, idx }); onExit() }} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B6B6B', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, padding: 4 }}>
+          <button onClick={() => setShowExitConfirm(true)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#6B6B6B', display: 'flex', alignItems: 'center', gap: 6, fontSize: 13, fontWeight: 600, padding: 4 }}>
             <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" /></svg>
             Exit
           </button>
@@ -233,6 +273,42 @@ export default function PracticeExamScreen({ questions, courseName, timerMinutes
           </div>
         </div>
       </div>
+
+      {/* Exit dialog. Saving is the default action because losing an hour of
+          answers to a stray tap is the failure this screen used to have. */}
+      {showExitConfirm && (
+        <div role="dialog" aria-modal="true" aria-label="Leave exam" style={{ position: 'fixed', inset: 0, zIndex: 320, background: 'rgba(0,0,0,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16 }}>
+          <div style={{ background: '#fff', borderRadius: 16, padding: 24, maxWidth: 440, width: '100%', boxShadow: '0 16px 48px rgba(0,0,0,0.18)' }}>
+            <h3 style={{ margin: 0, fontSize: 18, fontWeight: 700, color: '#1A1A1A' }}>Leave this exam?</h3>
+            <p style={{ margin: '8px 0 20px', color: '#6B6B6B', fontSize: 14, lineHeight: 1.55 }}>
+              You've answered {answered} of {total} questions. Save your progress and you can pick it up from the Practice Exams screen.
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+              <button
+                onClick={() => setShowExitConfirm(false)}
+                style={{ padding: '10px 16px', background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}
+              >Keep going</button>
+              <button
+                onClick={() => {
+                  clearExamDraft()
+                  track('practice_exam_exited', { questionCount: total, answeredCount: answered, idx, saved: false })
+                  onExit()
+                }}
+                style={{ padding: '10px 16px', background: 'transparent', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 10, color: '#6B6B6B', fontWeight: 600, fontSize: 13, cursor: 'pointer' }}
+              >Discard exam</button>
+              <button
+                onClick={() => {
+                  recordCurrentQuestionTime()
+                  persist()
+                  track('practice_exam_exited', { questionCount: total, answeredCount: answered, idx, saved: true })
+                  onExit()
+                }}
+                style={{ padding: '10px 20px', background: '#3B61C4', border: 'none', borderRadius: 10, color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+              >Save and exit</button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Submit confirm dialog */}
       {showSubmitConfirm && (

@@ -1,6 +1,7 @@
 import { useState, useMemo, useEffect, useRef } from 'react'
 import { getCachedPracticeExams, savePracticeExam } from '../lib/db'
 import { listUploads } from '../lib/uploadRegistry'
+import { loadExamDraft, clearExamDraft, draftSummary } from '../lib/examDraft'
 import { getActivePlan, canUseFeature } from '../lib/subscription'
 import { track } from '../lib/analytics'
 import { PRACTICE_EXAMS as C, PE_SERIF, SANS } from '../theme/tokens'
@@ -181,6 +182,11 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
   const [questionTimings, setQuestionTimings] = useState([])
   const [replay, setReplay] = useState(null)
   const [refreshKey, setRefreshKey] = useState(0)
+  // A saved, unfinished exam. Read once on mount and refreshed whenever we
+  // come back to the entry screen.
+  const [draft, setDraft] = useState(() => loadExamDraft())
+  const [resumeInitial, setResumeInitial] = useState(null)
+  const [confirmReplaceDraft, setConfirmReplaceDraft] = useState(false)
 
   // Setup choices, all made here so no downstream step asks for them again.
   const [selectedCourseId, setSelectedCourseId] = useState(courses[0]?.id ?? null)
@@ -296,6 +302,39 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
     setExamTimerMinutes(null)
     setQuestionTimings([])
     setReplay(null)
+    setResumeInitial(null)
+    // The exam screen may have just saved or discarded a draft.
+    setDraft(loadExamDraft())
+  }
+
+  // Picks a saved exam back up exactly where it was left.
+  const handleResume = () => {
+    if (!draft) return
+    const course = courses.find(c => String(c.id) === String(draft.courseId)) ?? null
+    track('practice_exam_resumed', {
+      questionCount: draft.questions.length,
+      answeredCount: draft.answeredCount,
+      courseName: draft.courseName ?? null,
+    })
+    setExamCourse(course ?? { id: draft.courseId, name: draft.courseName })
+    setExamQuestions(draft.questions)
+    setExamAnswers(draft.answers)
+    setExamTimerMinutes(draft.timerMinutes ?? null)
+    setResumeInitial(draft)
+    setReplay(null)
+    setSubview('taking')
+  }
+
+  const discardDraft = () => {
+    clearExamDraft()
+    setDraft(null)
+    setConfirmReplaceDraft(false)
+  }
+
+  const goToSetup = () => {
+    setResumeInitial(null)
+    setConfirmReplaceDraft(false)
+    setSubview('setup')
   }
 
   // Opens a stored exam in the results view. readOnly stops the replay from
@@ -317,8 +356,10 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
     return (
       <PracticeExamScreen
         questions={examQuestions}
+        courseId={examCourse?.id ?? null}
         courseName={examCourse?.name ?? null}
         timerMinutes={examTimerMinutes}
+        initial={resumeInitial}
         onSubmit={handleSubmit}
         onExit={closeToLanding}
       />
@@ -413,6 +454,49 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
 
         {heading}
 
+        {/* ── Saved exam ────────────────────────────────────────────────── */}
+        {/* Sits above the setup card because picking up an unfinished exam is
+            the more urgent of the two things this screen offers. */}
+        {draft && (
+          <div style={{
+            background: C.card, border: `1px solid ${C.cardBorder}`,
+            borderRadius: 16, boxShadow: C.cardShadow,
+            padding: `20px ${cardPadX}px`,
+            display: 'flex', alignItems: mobile ? 'stretch' : 'center',
+            flexDirection: mobile ? 'column' : 'row',
+            justifyContent: 'space-between', gap: mobile ? 14 : 24,
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 4, minWidth: 0 }}>
+              <Eyebrow>EXAM IN PROGRESS</Eyebrow>
+              <p style={{
+                margin: '6px 0 0', fontFamily: SANS, fontSize: 15, fontWeight: 500,
+                lineHeight: 1.3, color: C.ink,
+              }}>{draft.courseName || 'Practice exam'}</p>
+              <p style={{
+                margin: 0, fontFamily: SANS, fontSize: 13, fontWeight: 400,
+                lineHeight: 1.4, color: C.secondary,
+              }}>{draftSummary(draft)}</p>
+            </div>
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 14, flexShrink: 0,
+              ...(mobile ? { justifyContent: 'space-between' } : {}),
+            }}>
+              <button type="button" onClick={discardDraft} style={{
+                ...btnReset, fontFamily: SANS, fontSize: 13.5, fontWeight: 500,
+                lineHeight: 1, color: C.secondary, padding: '10px 4px',
+              }}>Discard</button>
+              <button type="button" onClick={handleResume} style={{
+                ...btnReset,
+                display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                padding: '12px 22px', borderRadius: 12,
+                border: `1px solid ${C.blue}`, background: C.card,
+                fontFamily: SANS, fontSize: 14, fontWeight: 600, lineHeight: 1,
+                color: C.blue, minHeight: 42,
+              }}>Resume exam</button>
+            </div>
+          </div>
+        )}
+
         {/* ── Setup card ────────────────────────────────────────────────── */}
         <div style={{
           background: C.card, border: `1px solid ${C.cardBorder}`,
@@ -475,7 +559,10 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
                 if (!canStart) { onShowPaywall?.('practice_exam'); return }
                 const { course: _course, ...payload } = buildStartPayload({ course: selectedCourse, length, timerOn })
                 track('practice_exam_start_clicked', { plan, courseCount: courses.length, ...payload })
-                setSubview('setup')
+                // Only one exam is held at a time, so ask before a new one
+                // takes the saved one's place.
+                if (draft) { setConfirmReplaceDraft(true); return }
+                goToSetup()
               }}
               style={{
                 ...btnReset,
@@ -518,6 +605,38 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
         )}
 
       </div>
+
+      {confirmReplaceDraft && draft && (
+        <div role="dialog" aria-modal="true" aria-label="Replace saved exam" style={{
+          position: 'fixed', inset: 0, zIndex: 320, background: 'rgba(0,0,0,0.4)',
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 16,
+        }}>
+          <div style={{
+            background: C.card, borderRadius: 16, padding: 24, maxWidth: 440, width: '100%',
+            boxShadow: '0 16px 48px rgba(0,0,0,0.18)',
+          }}>
+            <h3 style={{
+              margin: 0, fontFamily: SANS, fontSize: 17, fontWeight: 600, color: C.ink,
+            }}>You have an exam in progress</h3>
+            <p style={{
+              margin: '8px 0 20px', fontFamily: SANS, fontSize: 14, lineHeight: 1.55, color: C.secondary,
+            }}>
+              {draft.courseName ? `${draft.courseName}, ` : ''}{draftSummary(draft)}. Starting a new exam replaces it.
+            </p>
+            <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', flexWrap: 'wrap' }}>
+              <button type="button" onClick={() => setConfirmReplaceDraft(false)} style={{
+                ...btnReset, padding: '10px 16px', borderRadius: 10,
+                border: `1px solid ${C.cardBorder}`, background: C.card,
+                fontFamily: SANS, fontSize: 13.5, fontWeight: 500, color: C.secondary,
+              }}>Cancel</button>
+              <button type="button" onClick={() => { discardDraft(); goToSetup() }} style={{
+                ...btnReset, padding: '10px 20px', borderRadius: 10, border: 'none',
+                background: C.blue, fontFamily: SANS, fontSize: 13.5, fontWeight: 600, color: '#ffffff',
+              }}>Start a new exam</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }

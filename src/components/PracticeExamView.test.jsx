@@ -34,7 +34,10 @@ const setupProps = vi.hoisted(() => ({ current: null }))
 vi.mock('./PracticeExamSetup', () => ({
   default: (props) => { setupProps.current = props; return <div data-testid="setup" /> },
 }))
-vi.mock('./PracticeExamScreen', () => ({ default: () => <div /> }))
+const screenProps = vi.hoisted(() => ({ current: null }))
+vi.mock('./PracticeExamScreen', () => ({
+  default: (props) => { screenProps.current = props; return <div data-testid="screen" /> },
+}))
 vi.mock('./PracticeExamResults', () => ({ default: () => <div /> }))
 
 const PracticeExamView = (await import('./PracticeExamView')).default
@@ -56,11 +59,38 @@ const rec = (over) => ({
 
 let container
 
+// Node 26 defines an unavailable localStorage global that shadows jsdom's, so
+// the store is stubbed explicitly rather than assumed.
+function stubStorage(seed = null) {
+  const store = new Map()
+  if (seed) store.set('studyedge_practice_exam_draft', JSON.stringify(seed))
+  vi.stubGlobal('localStorage', {
+    getItem: k => (store.has(k) ? store.get(k) : null),
+    setItem: (k, v) => { store.set(k, String(v)) },
+    removeItem: k => { store.delete(k) },
+    clear: () => { store.clear() },
+  })
+  return store
+}
+
+const savedExam = {
+  version: 1, savedAt: Date.now(), courseId: 'c2', courseName: 'Organic Chemistry',
+  questions: [
+    { type: 'multiple_choice', question: 'Q1', answer: 'A', options: ['A', 'B'] },
+    { type: 'multiple_choice', question: 'Q2', answer: 'B', options: ['A', 'B'] },
+    { type: 'multiple_choice', question: 'Q3', answer: 'A', options: ['A', 'B'] },
+  ],
+  answers: ['A', 'B', ''], idx: 1,
+  timerMinutes: 30, secondsLeft: 800, elapsedMs: 1000000, timings: [10, 20, 30],
+}
+
 beforeEach(() => {
   listUploads.mockClear()
   listUploads.mockResolvedValue([])
   exams.current = {}
   setupProps.current = null
+  screenProps.current = null
+  stubStorage()
   window.matchMedia = window.matchMedia ?? (() => ({
     matches: false, addEventListener() {}, removeEventListener() {},
   }))
@@ -207,6 +237,83 @@ describe('history card', () => {
     }
     await mount()
     expect(byText('Review')).toHaveLength(0)
+  })
+})
+
+describe('a saved, unfinished exam', () => {
+  const click = (label) => act(async () => {
+    [...container.querySelectorAll('button')].find(b => b.textContent === label).click()
+  })
+
+  it('is not offered when there is nothing saved', async () => {
+    await mount()
+    expect(text()).not.toContain('EXAM IN PROGRESS')
+    expect(byText('Resume exam')).toHaveLength(0)
+  })
+
+  it('shows what was saved and how far it got', async () => {
+    stubStorage(savedExam)
+    await mount()
+    expect(text()).toContain('EXAM IN PROGRESS')
+    expect(text()).toContain('Organic Chemistry')
+    expect(text()).toContain('2 of 3 answered')
+  })
+
+  it('hands the whole sitting back to the exam screen on resume', async () => {
+    stubStorage(savedExam)
+    await mount()
+    await click('Resume exam')
+    expect(screenProps.current.questions).toHaveLength(3)
+    expect(screenProps.current.initial.answers).toEqual(['A', 'B', ''])
+    expect(screenProps.current.initial.idx).toBe(1)
+    expect(screenProps.current.initial.secondsLeft).toBe(800)
+    expect(screenProps.current.initial.elapsedMs).toBe(1000000)
+    expect(screenProps.current.timerMinutes).toBe(30)
+    expect(screenProps.current.courseId).toBe('c2')
+  })
+
+  it('lets the student throw it away deliberately', async () => {
+    stubStorage(savedExam)
+    await mount()
+    await click('Discard')
+    expect(text()).not.toContain('EXAM IN PROGRESS')
+    expect(byText('Resume exam')).toHaveLength(0)
+  })
+
+  it('asks before a new exam takes its place', async () => {
+    stubStorage(savedExam)
+    await mount()
+    await click('Start practice exam')
+    expect(setupProps.current).toBe(null)
+    expect(text()).toContain('You have an exam in progress')
+  })
+
+  it('goes ahead once the student confirms', async () => {
+    stubStorage(savedExam)
+    await mount()
+    await click('Start practice exam')
+    await click('Start a new exam')
+    expect(setupProps.current).not.toBe(null)
+  })
+
+  it('keeps the saved exam when the student cancels', async () => {
+    stubStorage(savedExam)
+    await mount()
+    await click('Start practice exam')
+    await click('Cancel')
+    expect(setupProps.current).toBe(null)
+    expect(text()).toContain('EXAM IN PROGRESS')
+  })
+
+  it('keeps Resume secondary so there is still one primary button', async () => {
+    stubStorage(savedExam)
+    await mount()
+    const resume = byText('Resume exam')[0]
+    const start = byText('Start practice exam')[0]
+    // The primary is the filled one. Resume is outlined.
+    expect(start.style.background).toBe('rgb(52, 82, 217)')
+    expect(resume.style.background).toBe('rgb(255, 255, 255)')
+    expect(resume.style.color).toBe('rgb(52, 82, 217)')
   })
 })
 
