@@ -111,7 +111,8 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
       if (prevEntry?.count >= 1) setPrevMasteryScore(prevEntry.score)
       setSessionCount((prevEntry?.count ?? 0) + 1)
       if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, data.score, 'teachItBack')
-      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'teachItBack' } }))
+      // Dispatched from the GeneratingScreen handoff instead, so the reward
+      // does not land on top of the progress ring.
       track('teach_it_back_scored', { score: data.score, topic: topic.trim() || null, plan, hasFollowUp: Boolean(data.followUp) })
       setResult(data)
       setGenNext('result')
@@ -339,7 +340,15 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
               {...stagesFor('teachItBack')}
               title="Marking your explanation"
               ready={genNext !== null}
-              onComplete={() => { setStep(genNext); setGenNext(null) }}
+              onComplete={() => {
+                setStep(genNext)
+                setGenNext(null)
+                // Only the first pass is a session. The follow-up is a second
+                // question inside the same one and must not count twice.
+                if (genNext === 'result') {
+                  window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'teachItBack', score: result?.score } }))
+                }
+              }}
             />
           )}
 

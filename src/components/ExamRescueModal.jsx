@@ -85,7 +85,8 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
         incrementAIQuery()
         incrementFeatureUsage('examRescue')
         addStudySession({ tool: 'Exam Rescue', score: null, topic: null, courseName: course?.name || null })
-        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'examRescue' } }))
+        // Dispatched from the GeneratingScreen handoff instead, so the reward
+        // does not land on top of the progress ring.
         track('exam_rescue_generated', { topicCount: data.topics?.length ?? 0, courseName: course?.name || null, plan: getActivePlan() })
         setTopics(data.topics)
         setGenReady(true)
@@ -252,7 +253,11 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
             {...stagesFor('examRescue')}
             title="Building your rescue plan"
             ready={genReady}
-            onComplete={() => { setGenReady(false); setStep('topics') }}
+            onComplete={() => {
+              setGenReady(false)
+              setStep('topics')
+              window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'examRescue' } }))
+            }}
           />
         )}
 

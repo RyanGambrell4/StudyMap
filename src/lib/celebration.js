@@ -22,9 +22,10 @@ import confetti from 'canvas-confetti'
 import { track } from './analytics'
 import { DURATION_MS, prefersReducedMotion } from './motion'
 
-export const TIER = { MICRO: 0, SMALL: 1, MEDIUM: 2, MAJOR: 3 }
-
-export const TIER_NAME = ['micro', 'small', 'medium', 'major']
+// Defined in celebrationTiers.js and re-exported here so every existing
+// `import { TIER } from './celebration'` keeps working unchanged.
+import { TIER, TIER_NAME } from './celebrationTiers'
+export { TIER, TIER_NAME }
 
 const CAPS_KEY_PREFIX = 'studyedge_celebration_caps_v1'
 const SOUND_KEY = 'studyedge_sound_enabled_v1'

@@ -220,7 +220,9 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
         })
         addStudySession({ tool: 'Brain Dump', score: data.score, topic: topic.trim() || null, courseName: course?.name || null })
         if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, data.score, 'brainDump')
-        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'brainDump' } }))
+        // The completion event is dispatched from the GeneratingScreen handoff
+        // below, not here. Firing it now would land the reward on top of the
+        // progress ring, before the student has seen a single result.
         track('brain_dump_scored', { score: data.score, topic: topic.trim() || null, plan: getActivePlan() })
         setResult(data)
         setGenReady(true)
@@ -508,7 +510,11 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
             {...stagesFor('brainDump')}
             title={`Marking your ${text.trim().split(/\s+/).length} words`}
             ready={genReady}
-            onComplete={() => { setGenReady(false); setStep('result') }}
+            onComplete={() => {
+              setGenReady(false)
+              setStep('result')
+              window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'brainDump', score: result?.score } }))
+            }}
           />
         )}
 

@@ -276,7 +276,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
             })
             .catch(() => {})
         }
-        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'quizBurst' } }))
+        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'quizBurst', score: finalScore, total: questions.length } }))
         track('quiz_burst_complete', {
           score: quizPct, topic: topic.trim() || null, plan: getActivePlan(), questionCount: questions.length,
           gapsClosed: closed.length, gapsImproved: improved.length, gapsRemaining: stillWeak.length,

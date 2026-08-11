@@ -100,7 +100,8 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
         if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
         incrementAIQuery()
         addStudySession({ tool: 'AI Cheat Sheet', score: null, topic: examPrompt.trim() || null, courseName: course?.name || null })
-        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'cheatSheet' } }))
+        // Dispatched from the GeneratingScreen handoff instead, so the reward
+        // does not land on top of the progress ring.
         track('cheat_sheet_generated', { topic: examPrompt.trim() || null, plan: getActivePlan() })
         setResult(data)
         setGenReady(true)
@@ -345,7 +346,11 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
             {...stagesFor('cheatSheet')}
             title="Building your one page"
             ready={genReady}
-            onComplete={() => { setGenReady(false); setStep('result') }}
+            onComplete={() => {
+              setGenReady(false)
+              setStep('result')
+              window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'cheatSheet' } }))
+            }}
           />
         )}
 

@@ -6,6 +6,7 @@ import { getDueCards } from '../lib/sm2'
 import { getReviewStats } from '../lib/masteryStore'
 import CelebrationOverlay from './rewards/CelebrationOverlay'
 import XPFlyupLayer from './rewards/XPFlyup'
+import { startToolCelebrations } from '../lib/toolCelebrations'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const NAV_BG  = '#FFFFFF'
@@ -51,6 +52,10 @@ export default function AppShell({
   const navTo = useCallback((section) => { track('nav_section_opened', { section }); setActiveSection(section) }, [setActiveSection])
 
   useEffect(() => { window.scrollTo(0, 0) }, [activeSection])
+
+  // Finishing any tool becomes a reward here, next to the surfaces that paint
+  // one, rather than in each of the twelve tools that dispatch the event.
+  useEffect(() => startToolCelebrations(), [])
 
   // Close settings on outside click
   useEffect(() => {
