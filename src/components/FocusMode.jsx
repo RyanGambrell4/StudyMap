@@ -544,8 +544,14 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   useEffect(() => {
     if (showComplete && !celebratedRef.current) {
       celebratedRef.current = true
-      // Session complete. Tier 1 per the celebration table.
-      celebrate({ tier: TIER.SMALL, trigger: 'session_completed' })
+      // Session complete. Tier 1 per the celebration table. There is no anchor
+      // element here, so the controller raises its strip; give it real copy
+      // rather than letting it fall back to a generic line.
+      celebrate({
+        tier: TIER.SMALL,
+        trigger: 'session_completed',
+        meta: { title: 'Session done', body: course?.name ? `${course.name} logged.` : null },
+      })
     }
   }, [showComplete])
   const [pdfDownloading, setPdfDownloading] = useState(false)

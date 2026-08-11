@@ -328,7 +328,23 @@ export function celebrate({ tier = TIER.MICRO, trigger = 'unknown', anchorEl = n
       break
 
     case TIER.SMALL:
-      liftAndGlow(el, { duration: 400 })
+      if (el) {
+        liftAndGlow(el, { duration: 400 })
+      } else {
+        // Without an anchor there is nothing to lift, and the xpbar event below
+        // has no subscriber, so a SMALL used to be a silent no-op on web (the
+        // tone is off by default there). A tier that can vanish is not a tier.
+        // Fall back to the same non-blocking strip MEDIUM uses, which is still
+        // clearly quieter than confetti.
+        emit({
+          type: 'toast',
+          tier: fired,
+          trigger,
+          title: meta.title ?? null,
+          body: meta.body ?? null,
+          durationMs: 700,
+        })
+      }
       emit({ type: 'xpbar', trigger, meta })
       playTone(fired)
       break

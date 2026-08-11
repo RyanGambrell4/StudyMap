@@ -36,6 +36,7 @@ import CommandPalette from './CommandPalette'
 import { QUICK_PRESETS, buildQuickSession } from '../lib/quickStart'
 import { useSessionReminders } from '../utils/useSessionReminders'
 import { useStreak, recordCompletion } from '../utils/useStreak'
+import { useCelebration, TIER } from '../utils/useCelebration'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, hasUsedTrial, canUseFeature } from '../lib/subscription'
 const CoursesView    = lazy(() => import('./CoursesView'))
@@ -226,7 +227,7 @@ function SessionBlock({ session, completed, onToggle }) {
           ? 'repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(0,0,0,0.06) 4px,rgba(0,0,0,0.06) 8px)'
           : undefined,
       }}
-      onClick={() => onToggle(session.id)}
+      onClick={(e) => onToggle(session.id, e.currentTarget)}
     >
       {session.startTime && (
         <div style={{ fontSize: 9, fontWeight: 500, color: '#9B9B9B', marginBottom: 2 }}>{session.startTime}</div>
@@ -543,6 +544,8 @@ export default function OutputView({
   const [syllabusOnboardingError, setSyllabusOnboardingError] = useState('')
   const [syllabusRegistryWarning, setSyllabusRegistryWarning] = useState(false)
 
+  const celebrate = useCelebration()
+
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('studyedge_view_mode') ?? 'week')
   const todayStr = new Date().toISOString().split('T')[0]
   const todayMonthStr = todayStr.slice(0, 7)
@@ -724,6 +727,28 @@ export default function OutputView({
     const doneToday = allSessions.some(s => s.dateStr === todayStr && completedIds.has(s.id))
     if (doneToday) recordCompletion(todayStr)
   }, [completedIds, allSessions, todayStr])
+
+  // Clearing the day is the one moment in the plan worth marking. It lived in
+  // the V1 dashboard, which se_dashboard_v2 has been keeping unmounted, so in
+  // practice nobody has been getting it. Same reasoning as the streak above:
+  // completedIds is owned here, so this is the only place that sees the day
+  // close regardless of which dashboard is on screen.
+  const dailyGoalFiredRef = useRef(null)
+  useEffect(() => {
+    const todaySessions = allSessions.filter(s => s.dateStr === todayStr)
+    const cleared = todaySessions.length > 0 && todaySessions.every(s => completedIds.has(s.id))
+    if (!cleared) return
+    if (dailyGoalFiredRef.current === todayStr) return
+    dailyGoalFiredRef.current = todayStr
+    // MEDIUM, not SMALL. Clearing the day can only happen once a day, which is
+    // exactly what a confetti budget is for. The controller caps MEDIUM at two
+    // a day anyway, so this cannot become wallpaper.
+    celebrate({
+      tier: TIER.MEDIUM,
+      trigger: 'daily_goal_hit',
+      meta: { title: 'Day cleared', body: 'Everything you planned for today is done.' },
+    })
+  }, [completedIds, allSessions, todayStr, celebrate])
 
   // ── persist ──
   useEffect(() => { onSavePlan(completedIds, assignments) }, [completedIds, assignments])
@@ -1104,7 +1129,14 @@ export default function OutputView({
     setActiveBlueprint(null)
   }, [])
   const handleFocusExit = useCallback(() => { setFocusSession(null); setActiveBlueprint(null) }, [])
-  const handleToggle = useCallback(id => {
+  // anchorEl lets the XP flyup arc out of the checkbox the student just pressed
+  // instead of the middle of the screen. Callers that have the element pass it.
+  const handleToggle = useCallback((id, anchorEl = null) => {
+    // Fired here and not inside the updater below: state updaters run twice
+    // under StrictMode, and a celebration is a side effect, not a reducer.
+    // Tier 0 means a short scale on the control itself, no confetti. Checking a
+    // box is not worth the confetti budget, but silence is not right either.
+    if (!completedIds.has(id)) celebrate({ tier: TIER.MICRO, trigger: 'session_checked', anchorEl })
     setCompletedIds(prev => {
       const n = new Set(prev)
       if (n.has(id)) {
@@ -1128,7 +1160,7 @@ export default function OutputView({
       }
       return n
     })
-  }, [allSessions, courses])
+  }, [allSessions, courses, completedIds, celebrate])
 
   const handleRatingSave = useCallback(async (rating, hardNotes) => {
     if (!ratingSession) return

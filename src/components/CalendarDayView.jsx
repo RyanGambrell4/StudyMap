@@ -393,7 +393,7 @@ export default function CalendarDayView({
               >
                 <span className="truncate">{ev.isSyllabus ? ev.name : ev.courseName}</span>
                 {!ev.isSyllabus && (
-                  <button onClick={() => onToggle(ev.id)} className="ml-2 shrink-0">
+                  <button onClick={(e) => onToggle(ev.id, e.currentTarget)} className="ml-2 shrink-0">
                     <div style={{
                       width: 14, height: 14, borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center',
                       background: completedIds.has(ev.id) ? '#10B981' : 'transparent',

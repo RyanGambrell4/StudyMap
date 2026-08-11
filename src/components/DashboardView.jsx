@@ -1,8 +1,7 @@
-import { useMemo, useEffect, useRef, useState } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { track } from '../lib/analytics'
 import ReadinessPill, { computeReadiness } from './ReadinessPill'
 import ReferralCard from './ReferralCard'
-import { useCelebration, TIER } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import PushPromptCard from './PushPromptCard'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
@@ -295,7 +294,6 @@ export default function DashboardView({
   }, [showSevenDayBanner]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const { currentStreak, lastCompletedDate, freezeCount, canFreeze, lapsedStreak, spendFreeze, personalBest } = useStreak()
-  const celebrate = useCelebration()
   const streak = currentStreak
   const [aiBriefDismissed, setAiBriefDismissed] = useState(() =>
     sessionStorage.getItem('studyedge_brief_dismissed') === '1'
@@ -418,28 +416,18 @@ export default function DashboardView({
     return { weekHours: (weekMins / 60).toFixed(1), avgRecall }
   }, [completedSessions, todayStr])
 
-  // Celebration + streak
-  const allCompleteKey = todayStr + (allComplete ? '-done' : '')
-  const firedRef = useRef(null)
-  useEffect(() => {
-    if (allComplete && firedRef.current !== allCompleteKey) {
-      firedRef.current = allCompleteKey
-      // Daily goal hit. Tier 1 per the celebration table, not a confetti burst.
-      celebrate({ tier: TIER.SMALL, trigger: 'daily_goal_hit' })
-    }
-  }, [allComplete, allCompleteKey])
+  // Celebrations deliberately do NOT live here any more, for the same reason as
+  // streak recording below: this component only mounts when se_dashboard_v2 is
+  // off, so anything fired from here reached almost nobody. Both the checkbox
+  // tier-0 and the daily-goal tier-1 now fire from OutputView, which owns
+  // completedIds and is mounted either way. Firing here too would double up.
 
   // Streak recording deliberately does NOT live here any more. Checkbox
   // completions are recorded in OutputView and tool completions are handled by
   // the streak store's own window listener, so the streak survives whichever
   // dashboard is mounted. This component only reads.
 
-  const handleToggle = (id, anchorEl = null) => {
-    // Item checked. Tier 0: a 180ms scale on the button the user just pressed,
-    // no confetti. Trivial actions must not spend the confetti budget.
-    if (!completedIds.has(id)) celebrate({ tier: TIER.MICRO, trigger: 'session_checked', anchorEl })
-    onToggle(id)
-  }
+  const handleToggle = (id, anchorEl = null) => onToggle(id, anchorEl)
 
   // ── Derived ─────────────────────────────────────────────────────────────────
   const todaySessions = useMemo(
