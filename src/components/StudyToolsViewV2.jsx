@@ -26,7 +26,7 @@ const ICON = {
 
 const TOOLS = {
   quizBurst: { id: 'quizBurst', name: 'Quiz Burst', desc: 'A 5-question hit on one topic. Fast recall, no setup.', color: '#E8A63C', ctaLabel: 'Start 5-question quiz', costLine: 'Uses 1 AI Boost', feature: 'quizBurst' },
-  topicDrill: { id: 'topicDrill', name: 'Topic Drill', desc: 'Type any topic — instant 5-question practice.', color: '#10A56E', ctaLabel: 'Start drill', costLine: 'Uses 1 AI Boost' },
+  topicDrill: { id: 'topicDrill', name: 'Topic Drill', desc: 'Type any topic for instant 5-question practice.', color: '#10A56E', ctaLabel: 'Start drill', costLine: 'Uses 1 AI Boost' },
   teachItBack: { id: 'teachItBack', name: 'Teach It Back', desc: 'Explain a concept in your own words. Get scored on understanding.', color: '#3452D9', ctaLabel: 'Start explanation', costLine: 'Uses 1 AI Boost', feature: 'teachItBack' },
   brainDump: { id: 'brainDump', name: 'Brain Dump', desc: 'Recall everything you know on a topic. Score your memory.', color: '#10A56E', ctaLabel: 'Start brain dump', costLine: 'Uses 1 AI Boost', feature: 'brainDump' },
   timeAttack: { id: 'timeAttack', name: 'Time Attack', desc: '60 seconds. 14 questions. How many can you get right?', color: '#EA580C', ctaLabel: 'Start time attack', costLine: 'Uses 1 AI Boost' },
@@ -49,9 +49,7 @@ const CATEGORIES = [
 
 export default function StudyToolsViewV2({
   courses,
-  userId,
   onShowPaywall,
-  learningStyle,
   onNavigateToCoach,
   onOpenCheatSheet,
   onOpenBrainDump,
@@ -75,9 +73,9 @@ export default function StudyToolsViewV2({
   const [showUpload, setShowUpload] = useState(false)
   const [uploadCourseIdx, setUploadCourseIdx] = useState(0)
 
-  const plan = getActivePlan()
-  const isPro = plan === 'pro' || plan === 'unlimited' || plan === 'trial'
-  const isUnlimited = plan === 'unlimited'
+  // Pro gating is enforced at start time by each tool's own paywall call, not
+  // by disabling cards here, so only the Unlimited check is needed.
+  const isUnlimited = getActivePlan() === 'unlimited'
 
   const { recommendations } = useMemo(() => getRecommendations(courses), [courses])
 
@@ -93,6 +91,21 @@ export default function StudyToolsViewV2({
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [presetTool])
+
+  // Brain Dump's "drill the gaps" stores a topic and navigates here. V1 used to
+  // auto-open its inline drill mode; the V2 equivalent is to open the Topic
+  // Drill modal already pointed at that topic. Without this the student taps
+  // "drill the gaps", lands on the hub, and nothing happens.
+  useEffect(() => {
+    if (!initialDrillTopic) return
+    const bp = computeBestPick('topicDrill', courses)
+    bp.topic = initialDrillTopic
+    setOpenBestPick(bp)
+    setOpenToolId('topicDrill')
+    track('tool_modal_opened', { tool: 'topicDrill', source: 'brain_dump_gaps' })
+    onDrillTopicConsumed?.()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialDrillTopic])
 
   function openTool(toolId) {
     if (!TOOLS[toolId]) return
@@ -167,11 +180,6 @@ export default function StudyToolsViewV2({
     }
   }
 
-  function isToolDisabled(tool) {
-    if (tool.proOnly && !isPro) return { disabled: false } // paywall triggers on start
-    if (tool.unlimitedOnly && !isUnlimited) return { disabled: false }
-    return { disabled: false }
-  }
 
   return (
     <div style={{ background: T.bg, minHeight: '100%', fontFamily: SANS }}>
@@ -221,7 +229,7 @@ export default function StudyToolsViewV2({
                     </div>
                     <div style={{ fontSize: 14, color: T.text, marginTop: 1 }}>
                       <span style={{ fontWeight: 700 }}>{t.name}</span>
-                      <span style={{ color: T.muted }}>{' — '}{r.reason}</span>
+                      <span style={{ color: T.muted }}>{' · '}{r.reason}</span>
                     </div>
                   </div>
                   <div style={{

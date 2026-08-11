@@ -41,7 +41,10 @@ Read `AGENTS_SPEC.md` before running any agent task. It contains the full app co
 
 **V2 redesign feature flags** (both default ON — set to `'0'` in `localStorage` to opt out):
 - `se_dashboard_v2` → `DashboardViewV2` in the Dashboard section.
-- `se_tools_v2` → `StudyToolsViewV2` in the Study Tools section.
+- `se_tools_v2` → `StudyToolsViewV2` in the Study Tools section. Wired up on
+  2026-08-10; before that this line described a flag that did not exist in the
+  code and `StudyToolsViewV2` was imported by nothing, so no user ever saw it.
+  If you add a V2 component, add its flag and its import in the same commit.
 
 ## Pricing (live source of truth: `PRICING_SPEC.md`)
 - Free / Pro / Unlimited tiers

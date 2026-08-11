@@ -41,6 +41,7 @@ import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, hasUsedT
 const CoursesView    = lazy(() => import('./CoursesView'))
 const ProgressView   = lazy(() => import('./ProgressView'))
 const StudyToolsView = lazy(() => import('./StudyToolsView'))
+const StudyToolsViewV2 = lazy(() => import('./StudyToolsViewV2'))
 const StudyCoachView = lazy(() => import('./StudyCoachView'))
 const PracticeExamView = lazy(() => import('./PracticeExamView'))
 import AIChatView from './AIChatView'
@@ -500,6 +501,7 @@ export default function OutputView({
   const isExamMode = courses.some(c => EXAM_PATTERN.test(c.name))
 
   const [dashboardV2] = useState(() => localStorage.getItem('se_dashboard_v2') !== '0')
+  const [toolsV2] = useState(() => localStorage.getItem('se_tools_v2') !== '0')
   const [assignments, setAssignments] = useState(() => initialAssignments ?? [])
   const [logGradeId, setLogGradeId] = useState(null)
   const [gradeInput, setGradeInput] = useState('')
@@ -2216,25 +2218,33 @@ export default function OutputView({
         )}
 
         {/* ── Study Tools ── */}
-        {activeSection === 'tools' && (
-          <StudyToolsView
-            courses={courses}
-            userId={userId}
-            onShowPaywall={onShowPaywall}
-            learningStyle={learningStyle}
-            onNavigateToCoach={() => { if (getActivePlan() === 'free') { onShowPaywall?.('coach'); return } setActiveSection('coach') }}
-            onOpenCheatSheet={() => setShowCheatSheet(true)}
-            onOpenBrainDump={() => setShowBrainDump(true)}
-            onOpenExamRescue={() => setShowExamRescue(true)}
-            onOpenQuizBurst={() => setShowQuizBurst(true)}
-            onOpenPodcast={() => setShowPodcast(true)}
-            onOpenTeachItBack={() => setShowTeachItBack(true)}
-            onOpenConnectionsMode={() => setShowConnectionsMode(true)}
-            onOpenTimeAttack={() => setShowTimedChallenge(true)}
-            initialDrillTopic={pendingDrillTopic}
-            onDrillTopicConsumed={() => setPendingDrillTopic(null)}
-          />
-        )}
+        {activeSection === 'tools' && (() => {
+          // The V2 hub collects course and topic up front in its ToolModal and
+          // hands the result to these callbacks, so the tool opens already
+          // configured instead of showing a second setup screen. V1 calls the
+          // same callbacks with no argument, which falls through to the old
+          // behaviour, so both paths work off one set of handlers.
+          const ToolsView = toolsV2 ? StudyToolsViewV2 : StudyToolsView
+          return (
+            <ToolsView
+              courses={courses}
+              userId={userId}
+              onShowPaywall={onShowPaywall}
+              learningStyle={learningStyle}
+              onNavigateToCoach={() => { if (getActivePlan() === 'free') { onShowPaywall?.('coach'); return } setActiveSection('coach') }}
+              onOpenCheatSheet={() => setShowCheatSheet(true)}
+              onOpenBrainDump={(cfg) => { if (cfg) setBrainDumpInit(cfg); setShowBrainDump(true) }}
+              onOpenExamRescue={() => setShowExamRescue(true)}
+              onOpenQuizBurst={(cfg) => { if (cfg) setQuizBurstInit(cfg); setShowQuizBurst(true) }}
+              onOpenPodcast={() => setShowPodcast(true)}
+              onOpenTeachItBack={(cfg) => { if (cfg) setTeachItBackInit(cfg); setShowTeachItBack(true) }}
+              onOpenConnectionsMode={() => setShowConnectionsMode(true)}
+              onOpenTimeAttack={() => setShowTimedChallenge(true)}
+              initialDrillTopic={pendingDrillTopic}
+              onDrillTopicConsumed={() => setPendingDrillTopic(null)}
+            />
+          )
+        })()}
 
         {/* ── Study Coach ── */}
         {activeSection === 'coach' && (
