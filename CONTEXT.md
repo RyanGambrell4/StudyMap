@@ -1589,3 +1589,76 @@ was missing.
 
 Note `usePushNotifications(userId)` never actually reads its `userId`
 argument, so the component needed no prop threading.
+
+---
+
+## Phase 0: turn the lights on (2026-08-10)
+
+### 1. The V2 tools hub now ships
+
+`StudyToolsViewV2` (341 lines) was imported by nothing, and the
+`se_tools_v2` flag `CLAUDE.md` documented as default-on did not exist in the
+code. Added the lazy import, the flag, and the render switch, and corrected
+`CLAUDE.md`.
+
+The V2 hub collects course and topic up front in its `ToolModal`, then passes
+them to the open callbacks so the tool opens already configured. The handlers
+take an optional config and fall through to the old behaviour when called with
+no argument, so V1 and the dashboard call sites are untouched.
+
+**Regression caught before shipping:** V2 ignored `initialDrillTopic`, so Brain
+Dump's "drill the gaps" would have navigated to the hub and done nothing. It
+now opens Topic Drill pointed at that topic.
+
+**Follow-up:** ExamRescue, Connections, TimeAttack, CheatSheet and Podcast do
+not accept an initial course index, so V2's `courseIdx` is ignored for those
+five and the student picks again inside.
+
+### 2. `npm run find:dark`
+
+`scripts/find-dark-modules.mjs` lists every module under `src/` that nothing
+imports. Written because three separate finished features had already shipped
+to nobody for exactly this reason, and nothing errors in that state.
+
+**It found 22.** The notable ones:
+
+| Module | Lines | What it is |
+|---|---|---|
+| `tools/ToolResultsScreen.jsx` | 177 | **The end-of-session summary screen.** Score, recall before and after, coach line, Go again / Done. This is the highest-retention item on the build plan, already written. |
+| `GradePredictorView.jsx` | 400 | Full AI grade predictor view |
+| `SessionBundle.jsx` | 271 | Session bundle UI |
+| `StudyBuddyCard.jsx` | 251 | Study buddy invites, the only social feature in the codebase |
+| `CourseDiagnostic.jsx` | 233 | Diagnostic that updates mastery, adds cards, logs sessions |
+| `PracticeExamModal.jsx` | 240 | Practice exam modal |
+| `PrepBlastScreen.jsx` | 216 | Prep blast screen |
+| `coach/CoachRoot.jsx` | 130 | Coach root |
+| `DeckAddedToast.jsx` | 112 | Deck-added toast |
+| `tools/ToolFocusMode.jsx` | 100 | Focus runner for the V2 tools system |
+| `onboarding/OnboardingFlow.jsx` | 256 | The new onboarding, pending the routing decision below |
+
+The rest are `ui/` primitives never adopted (`badge`, `button`, `card`,
+`switch`, `bento-product-features`) and superseded local utils
+(`generateFlashcards`, `generateQuiz`, `parseSyllabus`,
+`extractSyllabusEvents`, `uploadClient`, `coachMicroUpdates`) that AI endpoints
+replaced. Those are cleanup, not features.
+
+Run `npm run find:dark` before shipping any new V2 component.
+
+### 3. Onboarding routing: deferred deliberately, not forgotten
+
+`OnboardingFlow` is still not routed in. The blockers are real and this is the
+signup funnel, so it wants its own session with manual testing:
+
+- `App.jsx:775` renders `<Onboarding>` only when `session.user` exists, so
+  onboarding is currently post-auth. The design brief explicitly forbids an
+  account gate before the reveal, which means the flow has to run pre-auth and
+  the answers have to survive the auth boundary.
+- `handleOnboardingComplete` at `App.jsx:414` expects
+  `{yearLevel, learningStyle, preferredTime, schoolType, emailDigest, durationMs, trialTaken}`.
+  `OnboardingFlow` produces a different shape entirely
+  (`course, school, examDate, currentGrade, targetGrade, struggles, studyHours,
+  learningStyles, studyTime, commitment`), so an adapter is required.
+- The existing `Onboarding.jsx` needs a decision: replaced, or kept behind a
+  flag.
+
+Answers already persist under a versioned key, so the storage half is solved.

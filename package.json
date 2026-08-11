@@ -9,6 +9,7 @@
     "lint": "eslint .",
     "test:insights": "node scripts/test-onboarding-insights.mjs",
     "test:streak": "node scripts/test-streak-logic.mjs",
+    "find:dark": "node scripts/find-dark-modules.mjs .",
     "preview": "vite preview"
   },
   "dependencies": {
