@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect, useCallback } from 'react'
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
 import PushPromptCard from './PushPromptCard'
 import { getWeeklyGoal, computeWeeklyProgress } from '../lib/weeklyGoal'
 import { getMasteryForCourse, getDueForReview } from '../lib/masteryStore'
@@ -345,8 +345,11 @@ function HeroDone({ weeklyMinutes, weeklyGoalHours, nextSession }) {
 // ── Hero: Syllabus drop (flag: se_syllabus_onboarding) ───────────────────────
 function HeroSyllabusDrop({ onDropSyllabus, loading, error, onClearError, onSetupManually }) {
   const [dragging, setDragging] = useState(false)
-  const fileRef = { current: null }
-  const inputRef = (el) => { fileRef.current = el }
+  // A real ref, not a plain object recreated every render. The old version
+  // only worked because the inline callback ref changed identity each render
+  // and React happened to re-attach it; memoize either one and the file picker
+  // silently stops opening.
+  const fileRef = useRef(null)
 
   const handleFile = (file) => {
     if (!file) return
@@ -396,7 +399,7 @@ function HeroSyllabusDrop({ onDropSyllabus, loading, error, onClearError, onSetu
         }}
       >
         <input
-          ref={inputRef}
+          ref={fileRef}
           type="file"
           accept=".pdf,.docx,.pptx"
           style={{ display: 'none' }}
