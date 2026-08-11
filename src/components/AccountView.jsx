@@ -1,9 +1,10 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { getActivePlan, getCachedSubscription, initSubscription, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession, activateTrial } from '../lib/subscription'
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
 import ReferralCard from './ReferralCard'
 import { useStreak } from '../utils/useStreak'
+import { isSoundEnabled, setSoundEnabled, playTone, TIER } from '../lib/celebration'
 
 const PLAN_INFO = {
   free: {
@@ -91,6 +92,23 @@ export default function AccountView({
   // you have done, which belongs with your account, not in the way of the next
   // thing to do.
   const { currentStreak, personalBest } = useStreak()
+
+  // Read once on mount rather than on every render: isSoundEnabled() touches
+  // localStorage, and this component re-renders on plan and usage changes.
+  const [soundOn, setSoundOn] = useState(() => isSoundEnabled())
+  // Side effects stay outside the updater: state updaters run twice under
+  // StrictMode, which would write the flag and play the tone twice.
+  const handleToggleSound = useCallback(() => {
+    const next = !soundOn
+    setSoundOn(next)
+    setSoundEnabled(next)
+    // Turning it on plays the real tone rather than promising one. Not a full
+    // celebrate() call: a toast reading "Nice work" for flipping a switch
+    // would be exactly the kind of empty reward the tier system exists to
+    // prevent.
+    if (next) playTone(TIER.SMALL)
+    track('sound_toggled', { enabled: next })
+  }, [soundOn])
 
   const plan = getActivePlan()
   const trialActive = isTrialActive()
@@ -601,6 +619,47 @@ export default function AccountView({
                 {smsError && <p style={{ margin: '6px 0 0', fontSize: 12, color: '#DC2626' }}>{smsError}</p>}
               </>
             )}
+          </div>
+          {/* Reward sounds. The synth, the per-tier tones and the persisted
+              flag all already existed in celebration.js; there was simply no
+              way for anyone to turn them on. Off by default on web, which is
+              why this reads as opt-in rather than a mute switch. */}
+          <div
+            style={{
+              display: 'flex', alignItems: 'center', gap: 14,
+              padding: '12px 4px',
+              borderBottom: '1px solid rgba(0,0,0,0.06)',
+            }}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M11 5L6 9H2v6h4l5 4V5z" />
+              {soundOn ? <path d="M15.5 8.5a5 5 0 010 7M19 5a10 10 0 010 14" /> : <path d="M22 9l-6 6M16 9l6 6" />}
+            </svg>
+            <div style={{ flex: 1 }}>
+              <p style={{ margin: 0, fontSize: 14, fontWeight: 600, color: '#111111' }}>Sound effects</p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: '#9B9B9B' }}>A short tone when you finish something</p>
+            </div>
+            <button
+              type="button"
+              role="switch"
+              aria-checked={soundOn}
+              aria-label="Sound effects"
+              onClick={handleToggleSound}
+              style={{
+                width: 46, height: 27, flexShrink: 0, padding: 3,
+                borderRadius: 999, border: 'none', cursor: 'pointer',
+                background: soundOn ? '#3B61C4' : 'rgba(0,0,0,0.14)',
+                transition: 'background 160ms ease',
+                display: 'flex', justifyContent: soundOn ? 'flex-end' : 'flex-start',
+              }}
+            >
+              <span
+                style={{
+                  width: 21, height: 21, borderRadius: '50%', background: '#FFFFFF',
+                  boxShadow: '0 1px 3px rgba(0,0,0,0.2)', display: 'block',
+                }}
+              />
+            </button>
           </div>
           <button
             onClick={onImportSyllabus}

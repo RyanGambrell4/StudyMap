@@ -105,7 +105,10 @@ export function setSoundEnabled(on) {
 }
 
 // Synthesised so we do not ship audio binaries or risk a 404 on a reward beat.
-function playTone(tier) {
+// Exported so the Account toggle can preview the real tone. Firing a whole
+// celebrate() there would raise a toast for flipping a switch, which is the
+// empty reward the tier system exists to prevent.
+export function playTone(tier) {
   if (!isSoundEnabled()) return
   if (typeof window === 'undefined') return
   const Ctx = window.AudioContext || window.webkitAudioContext
