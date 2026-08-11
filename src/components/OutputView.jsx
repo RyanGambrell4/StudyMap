@@ -442,6 +442,16 @@ export default function OutputView({
   const [quizBurstInit, setQuizBurstInit] = useState(null) // { courseIdx, topic } when launched from Cheat Sheet
   const [showConnectionsMode, setShowConnectionsMode] = useState(false)
   const [showTimedChallenge, setShowTimedChallenge] = useState(false)
+  // The tools hub lets a student pick a course before launching. These five
+  // callbacks used to drop the { courseIdx } they were handed, so the choice
+  // silently did nothing and the tool opened on whatever it defaulted to.
+  //
+  // One slot shared by all five, which is safe because only one of them can be
+  // open at a time and every one of their onClose handlers resets it to null.
+  // That invariant is what lets the other launch points (the V1 hub, the
+  // dashboard, the coach banner) keep passing no config and still get the
+  // smart default rather than a stale course from a previous launch.
+  const [toolCourseIdx, setToolCourseIdx] = useState(null)
   const [pendingDrillTopic, setPendingDrillTopic] = useState(null)
   const [ratingSession, setRatingSession] = useState(null) // session to rate after completion
   const [ratingReminder, setRatingReminder] = useState(null) // skipped session pending reminder
@@ -2264,14 +2274,14 @@ export default function OutputView({
               onShowPaywall={onShowPaywall}
               learningStyle={learningStyle}
               onNavigateToCoach={() => { if (getActivePlan() === 'free') { onShowPaywall?.('coach'); return } setActiveSection('coach') }}
-              onOpenCheatSheet={() => setShowCheatSheet(true)}
+              onOpenCheatSheet={(cfg) => { setToolCourseIdx(cfg?.courseIdx ?? null); setShowCheatSheet(true) }}
               onOpenBrainDump={(cfg) => { if (cfg) setBrainDumpInit(cfg); setShowBrainDump(true) }}
-              onOpenExamRescue={() => setShowExamRescue(true)}
+              onOpenExamRescue={(cfg) => { setToolCourseIdx(cfg?.courseIdx ?? null); setShowExamRescue(true) }}
               onOpenQuizBurst={(cfg) => { if (cfg) setQuizBurstInit(cfg); setShowQuizBurst(true) }}
-              onOpenPodcast={() => setShowPodcast(true)}
+              onOpenPodcast={(cfg) => { setToolCourseIdx(cfg?.courseIdx ?? null); setShowPodcast(true) }}
               onOpenTeachItBack={(cfg) => { if (cfg) setTeachItBackInit(cfg); setShowTeachItBack(true) }}
-              onOpenConnectionsMode={() => setShowConnectionsMode(true)}
-              onOpenTimeAttack={() => setShowTimedChallenge(true)}
+              onOpenConnectionsMode={(cfg) => { setToolCourseIdx(cfg?.courseIdx ?? null); setShowConnectionsMode(true) }}
+              onOpenTimeAttack={(cfg) => { setToolCourseIdx(cfg?.courseIdx ?? null); setShowTimedChallenge(true) }}
               initialDrillTopic={pendingDrillTopic}
               onDrillTopicConsumed={() => setPendingDrillTopic(null)}
             />
@@ -2502,7 +2512,8 @@ export default function OutputView({
         <CheatSheetModal
           courses={courses}
           userId={userId}
-          onClose={() => setShowCheatSheet(false)}
+          initialCourseIdx={toolCourseIdx}
+          onClose={() => { setShowCheatSheet(false); setToolCourseIdx(null) }}
           onShowPaywall={onShowPaywall}
           onOpenQuizBurst={({ courseIdx, topic }) => { setShowCheatSheet(false); setQuizBurstInit({ courseIdx, topic }); setShowQuizBurst(true) }}
         />
@@ -2537,7 +2548,8 @@ export default function OutputView({
         <ExamRescueModal
           courses={courses}
           userId={userId}
-          onClose={() => setShowExamRescue(false)}
+          initialCourseIdx={toolCourseIdx}
+          onClose={() => { setShowExamRescue(false); setToolCourseIdx(null) }}
           onShowPaywall={onShowPaywall}
         />
       )}
@@ -2557,7 +2569,8 @@ export default function OutputView({
         <PodcastGenerator
           courses={courses}
           userId={userId}
-          onClose={() => setShowPodcast(false)}
+          initialCourseIdx={toolCourseIdx}
+          onClose={() => { setShowPodcast(false); setToolCourseIdx(null) }}
           onShowPaywall={onShowPaywall}
         />
       )}
@@ -2574,7 +2587,8 @@ export default function OutputView({
       {showConnectionsMode && (
         <ConnectionsModeModal
           courses={courses}
-          onClose={() => setShowConnectionsMode(false)}
+          initialCourseIdx={toolCourseIdx}
+          onClose={() => { setShowConnectionsMode(false); setToolCourseIdx(null) }}
           onShowPaywall={onShowPaywall}
         />
       )}
@@ -2582,7 +2596,8 @@ export default function OutputView({
         <TimedChallengeModal
           courses={courses}
           userId={userId}
-          onClose={() => setShowTimedChallenge(false)}
+          initialCourseIdx={toolCourseIdx}
+          onClose={() => { setShowTimedChallenge(false); setToolCourseIdx(null) }}
           onShowPaywall={onShowPaywall}
         />
       )}

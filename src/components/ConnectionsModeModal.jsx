@@ -97,11 +97,17 @@ function ConnectionDiagram({ conceptA, conceptB, originA, originB, bridgeType, i
   )
 }
 
-export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, learningStyle = null, yearLevel = null, firstName = null, schoolType = null, assignments = [] }) {
+export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, initialCourseIdx = null, learningStyle = null, yearLevel = null, firstName = null, schoolType = null, assignments = [] }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
-  const initialSmartCourse = useMemo(() => pickSmartCourse(courses).index, [courses])
+  // An explicit choice from the tools hub beats the smart default. Guessing
+  // over the top of a course the student just picked is worse than not
+  // guessing at all.
+  const initialSmartCourse = useMemo(
+    () => (initialCourseIdx != null ? initialCourseIdx : pickSmartCourse(courses).index),
+    [initialCourseIdx, courses],
+  )
   const [courseIdx, setCourseIdx] = useState(initialSmartCourse)
   const [showManual, setShowManual] = useState(false)
   // Cross-course mode is only meaningful when the student actually has 2+

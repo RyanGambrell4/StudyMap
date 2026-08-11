@@ -1,5 +1,5 @@
 # StudyEdge AI — Living Context
-_Last updated by: UX Copy Agent on 2026-07-19 (comprehensive AI-voice + slop sweep across all ~70 JSX components: removed "We'll/I'll" first-person voice from CoursesView, SyllabusUploadModal, AuthScreen, ErrorBoundary, BlueprintScreen; removed "AI-powered/AI-generated/personalized" qualifiers from AppShell, DashboardView, OutputView, SharedPlanView, PodcastGenerator, OnboardingTour, CheatSheetModal, FocusMode; removed emoji from App.jsx email confirmation tips, browser notifications, FocusMode dead-code icons; removed preachy/slop copy from WeeklyGoalCard, ConfidenceTapModal, DashboardView, Onboarding headings. 12 commits shipped to main.); Quality Sweep Agent on 2026-07-16 (second session: DashboardView AI chip visibility bug, floating trial nudge price fix, AuthScreen plan-aware trial price, FocusMode Enter stale closure, stale 7-day trial copy in 4 files); Quality Sweep Agent on 2026-07-16 (boost nudge email rewrite, double-credit bugs fixed in teach-it-back/connections-mode/exam-rescue, freeBadge fix, em-dash guardrails in 5 more AI prompts, $0 today → card-required in 3 emails, stale AI limit corrections); SEO Agent on 2026-06-10 (43 new pages: Wave A AI category, Wave B panic-study blog, Wave C study science/GPA, Wave D 30 school GPA pages, Wave E vercel.json + sitemap + footer); QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: Engagement pass on 2026-08-11 (narrated AI waits, celebrations that actually reach users, twelve silent tool completions, em-dash copy sweep with a detector, focus rings and press states, sound toggle, tools-hub course selection; branch worktree-dopamine-onboarding-web, NOT merged to main); UX Copy Agent on 2026-07-19 (comprehensive AI-voice + slop sweep across all ~70 JSX components: removed "We'll/I'll" first-person voice from CoursesView, SyllabusUploadModal, AuthScreen, ErrorBoundary, BlueprintScreen; removed "AI-powered/AI-generated/personalized" qualifiers from AppShell, DashboardView, OutputView, SharedPlanView, PodcastGenerator, OnboardingTour, CheatSheetModal, FocusMode; removed emoji from App.jsx email confirmation tips, browser notifications, FocusMode dead-code icons; removed preachy/slop copy from WeeklyGoalCard, ConfidenceTapModal, DashboardView, Onboarding headings. 12 commits shipped to main.); Quality Sweep Agent on 2026-07-16 (second session: DashboardView AI chip visibility bug, floating trial nudge price fix, AuthScreen plan-aware trial price, FocusMode Enter stale closure, stale 7-day trial copy in 4 files); Quality Sweep Agent on 2026-07-16 (boost nudge email rewrite, double-credit bugs fixed in teach-it-back/connections-mode/exam-rescue, freeBadge fix, em-dash guardrails in 5 more AI prompts, $0 today → card-required in 3 emails, stale AI limit corrections); SEO Agent on 2026-06-10 (43 new pages: Wave A AI category, Wave B panic-study blog, Wave C study science/GPA, Wave D 30 school GPA pages, Wave E vercel.json + sitemap + footer); QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
 
 ---
 
@@ -84,18 +84,40 @@ sent to the model, 1 in `strings.js` which is the regex that strips them.
 - Migrating 30 files of local `@keyframes` to a shared module was dropped.
   Churn across 30 files, nothing a student would notice.
 
+### Course selection now survives the launch
+
+The tools hub passes `{ courseIdx }` when a student picks a course. Five
+callbacks in OutputView dropped it on the floor, and the five modals had no
+prop to receive it, so the choice silently did nothing for Exam Rescue,
+Connections, Time Attack, Cheat Sheet and Podcast. All five now accept
+`initialCourseIdx`, and an explicit choice beats `pickSmartCourse()`:
+guessing over the top of a course the student just picked is worse than
+not guessing at all.
+
+One shared `toolCourseIdx` slot serves all five. That is safe because only
+one can be open at a time and every onClose resets it to null, which is
+what lets the other launch points keep passing no config and still get the
+smart default rather than a stale course.
+
+### Sound
+
+`celebration.js` had the WebAudio synth, per-tier tones and a persisted
+flag, with nothing anywhere able to switch them on. There is now an Account
+toggle. It calls `playTone` directly rather than `celebrate()`, so flipping
+a switch does not raise a toast reading "Nice work". `playTone` was made
+public for this.
+
 ### Known follow-ups
 
 - `strings.js` `clean()` strips em dashes from AI output, but not every
   AI-rendering path has been verified to call it.
-- ExamRescue, Connections, TimeAttack, CheatSheet and Podcast do not accept
-  `initialCourseIdx`, so V2's `courseIdx` is ignored for those five.
+- Haptics were not started. Needs a Capacitor bridge.
 - `OnboardingFlow` is still dark. Routing it needs a pre-auth restructure:
   `App.jsx:775` gates on `session.user` and `handleOnboardingComplete`
-  expects a different shape.
-- Sound and haptics were not started. `celebration.js` has
-  `isSoundEnabled`/`setSoundEnabled`/`playTone`; sound is off by default on
-  web and there is no Account toggle for it yet.
+  expects a different shape. This is the largest remaining dark module and
+  it sits on the signup path.
+- The `xpbar` celebration event is emitted by every SMALL and consumed by
+  nothing. Either build the surface or stop emitting it.
 
 ---
 

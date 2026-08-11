@@ -41,14 +41,18 @@ function Pill({ label, style }) {
   )
 }
 
-export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpenQuizBurst, learningStyle = null, yearLevel = null, firstName = null, schoolType = null, assignments = [] }) {
+export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpenQuizBurst, initialCourseIdx = null, learningStyle = null, yearLevel = null, firstName = null, schoolType = null, assignments = [] }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
   // Auto-select the highest-value course (closest exam within 14d, or the
   // one with the biggest unaddressed gap) so the modal opens pointed at the
   // right course rather than courses[0].
-  const initialSmartCourse = useMemo(() => pickSmartCourse(courses).index, [courses])
+  // An explicit choice from the tools hub beats the smart default.
+  const initialSmartCourse = useMemo(
+    () => (initialCourseIdx != null ? initialCourseIdx : pickSmartCourse(courses).index),
+    [initialCourseIdx, courses],
+  )
   const [courseIdx, setCourseIdx] = useState(initialSmartCourse)
   const [examPrompt, setExamPrompt] = useState('')
   const [showManual, setShowManual] = useState(false)

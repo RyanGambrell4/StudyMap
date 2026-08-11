@@ -42,11 +42,14 @@ function savePB(courseKey, record) {
   } catch { return false }
 }
 
-export default function TimedChallengeModal({ courses, userId, onClose, onShowPaywall }) {
+export default function TimedChallengeModal({ courses, userId, onClose, onShowPaywall, initialCourseIdx = null }) {
   const [step, setStep] = useState('setup') // 'setup' | 'loading' | 'active' | 'done'
   // Set once the questions are in hand; GeneratingScreen decides when to show them.
   const [genReady, setGenReady] = useState(false)
-  const [selectedCourse, setSelectedCourse] = useState(courses.length > 0 ? 0 : -1)
+  // -1 means "no courses at all", which is a different state from "course 0".
+  const [selectedCourse, setSelectedCourse] = useState(
+    courses.length > 0 ? (initialCourseIdx ?? 0) : -1
+  )
   const [topic, setTopic] = useState('')
   const [error, setError] = useState('')
 

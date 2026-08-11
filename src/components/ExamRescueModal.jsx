@@ -23,11 +23,12 @@ const PRIORITY_STYLE = {
 }
 const BLOCK_COLORS = { study: '#3B61C4', buffer: '#16A34A' }
 
-export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
+export default function ExamRescueModal({ courses, onClose, onShowPaywall, initialCourseIdx = null }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
-  const [courseIdx, setCourseIdx] = useState(0)
+  // Honour the course the tools hub was pointed at; fall back to the first.
+  const [courseIdx, setCourseIdx] = useState(initialCourseIdx ?? 0)
   const [gradeIdx, setGradeIdx] = useState(8) // default B
   const [examDatetime, setExamDatetime] = useState('')
   const [step, setStep] = useState('setup') // 'setup' | 'generating' | 'topics' | 'schedule'
