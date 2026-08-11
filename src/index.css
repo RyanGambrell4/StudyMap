@@ -99,6 +99,61 @@
   box-sizing: border-box;
 }
 
+/* ── Keyboard focus ────────────────────────────────────────────────────────
+   Thirty-seven files set `outline: 'none'` as an inline style to kill the
+   default focus ring, which no stylesheet rule can beat without !important,
+   since inline styles win regardless of selector specificity. So this is one
+   of the rare places !important is the correct tool rather than a shortcut.
+
+   :focus-visible, not :focus. The browser only matches it for keyboard and
+   assistive-tech focus, so clicking a button still does not draw a ring. That
+   is what made the blanket outline: none tempting in the first place.
+
+   Blue #3452D9 is T.blue from src/theme/tokens.js. It cannot be imported into
+   plain CSS, so it is written out here; if the token moves, this moves. */
+:focus-visible {
+  outline: 2px solid #3452D9 !important;
+  outline-offset: 2px !important;
+  border-radius: 4px;
+}
+
+/* ── Press feedback ────────────────────────────────────────────────────────
+   Every button in the app dips very slightly when pressed. Deliberately NOT
+   !important: a handful of buttons animate their own transform, and those
+   should keep owning it rather than fighting this rule.
+
+   Scoped to real buttons and links with a button role. Cards that happen to be
+   clickable divs are left alone, because scaling a full-width card reads as a
+   glitch rather than a press. */
+button:not(:disabled):active,
+[role='button']:not([aria-disabled='true']):active {
+  transform: scale(0.98);
+}
+
+button,
+[role='button'] {
+  transition: transform 90ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* ── Reduced motion ────────────────────────────────────────────────────────
+   A blanket `animation: none` would be a bug, not a kindness: plenty of the
+   keyframes above use fill-mode `both` and start at opacity 0, so removing the
+   animation would leave the content permanently invisible. Collapsing the
+   duration instead snaps each element straight to its end state.
+
+   JS-driven motion is handled separately by useReducedMotion() in
+   src/lib/motion.js. This only covers CSS. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 body {
   margin: 0;
   font-family: 'Inter', system-ui, -apple-system, sans-serif;

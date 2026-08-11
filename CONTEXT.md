@@ -3,6 +3,102 @@ _Last updated by: UX Copy Agent on 2026-07-19 (comprehensive AI-voice + slop swe
 
 ---
 
+## Engagement pass -- 2026-08-11 (waits, rewards, copy, interaction states)
+
+Branch `worktree-dopamine-onboarding-web`. Not merged to main.
+
+### The pattern worth remembering
+
+Most of the value this run came from finding finished features that render
+to nobody, not from writing new ones. `npm run find:dark` lists modules
+nothing imports (22 at last run). Three separate reward mechanisms were
+built, wired at one end, and reaching zero users. Check this before
+building anything new.
+
+### Narrated waits replace spinners
+
+`src/components/ui/GeneratingScreen.jsx` plus `src/lib/toolStages.js`.
+Progress ring with honest stage labels naming the real work. Live in Quiz
+Burst, Time Attack, Teach It Back, Brain Dump, Connections, Cheat Sheet,
+Exam Rescue. Cheat Sheet and Exam Rescue previously had no wait screen at
+all, only a spinner inside the button.
+
+Not fixed-length theatre: rushes to 100 when work lands early, holds at 92
+percent when the backend is slower than the estimate, never walks to 100
+before the data exists. Connections' per-answer scoring keeps its spinner
+on purpose, since narrating a one second round trip only slows it down.
+
+### Celebrations now reach users
+
+Three reasons they were not:
+1. `daily_goal_hit` and `session_checked` lived only in V1 DashboardView,
+   which `se_dashboard_v2` keeps unmounted. Both now fire from OutputView,
+   which owns `completedIds` either way. V1 copies removed.
+2. `TIER.SMALL` with no anchor element was a silent no-op on web. It called
+   `liftAndGlow(null)`, emitted an `xpbar` event **no component subscribes
+   to**, and played a tone that is off by default. Finishing a session in
+   Focus Mode produced nothing. SMALL without an anchor now raises a strip.
+   The dead `xpbar` surface was never built and is still unbuilt.
+3. Checkboxes passed no anchor, so the XP flyup arced from screen centre.
+
+`src/lib/toolCelebrations.js` is one listener over the existing
+`studyedge:tool-session-complete` event, covering the twelve tools that
+ended in silence. Adding a tool means dispatching that event, nothing else.
+Focus Mode and Practice Exam are excluded because they celebrate
+themselves. Payload gained optional `score`/`total`; 90 percent or better
+earns confetti. `npm run test:celebrations` (17 assertions).
+
+`TIER`/`TIER_NAME` moved to `src/lib/celebrationTiers.js` so the mapping is
+testable in plain node without pulling in canvas-confetti, PostHog and the
+DOM. `celebration.js` re-exports both, so no existing import changed.
+
+### Em dashes
+
+`npm run find:emdash` strips comments and reports only real copy. A raw
+grep says 40+ files; almost all are comments. Real count was 49 in 21
+files. Eight deliberately left: 6 in confirmed-dark modules
+(CourseDiagnostic, SessionBundle), 1 in `courseContext.js` prompt text
+sent to the model, 1 in `strings.js` which is the regex that strips them.
+
+### Interaction states, in `src/index.css`
+
+- Keyboard focus rings. The app had none: 37 files set `outline: 'none'`
+  inline, which no stylesheet can beat without `!important`. Uses
+  `:focus-visible`, so clicking still draws nothing.
+- Press feedback on buttons. Deliberately not `!important`, so buttons that
+  animate their own transform keep owning it. Not applied to clickable divs.
+- Reduced-motion guard. Collapses durations rather than setting
+  `animation: none`, because many existing keyframes use fill-mode `both`
+  from `opacity: 0` and would leave content permanently invisible.
+
+### Judgement calls, so they are not re-litigated
+
+- **`tools/ToolResultsScreen.jsx` was NOT wired in, and should not be.**
+  An earlier plan called it the highest-value dark module. Comparing it
+  against what tools already ship, it is a downgrade everywhere: Time
+  Attack already has a personal-best badge, colour-coded score, skipped
+  count and topic drill; Quiz Burst has mastery delta, calibration, missed
+  questions and repair. Artifact tools have no score for it to show. Its
+  one good idea is the recall before/after bar, which Quiz Burst has as
+  text. File left in place rather than deleted.
+- Migrating 30 files of local `@keyframes` to a shared module was dropped.
+  Churn across 30 files, nothing a student would notice.
+
+### Known follow-ups
+
+- `strings.js` `clean()` strips em dashes from AI output, but not every
+  AI-rendering path has been verified to call it.
+- ExamRescue, Connections, TimeAttack, CheatSheet and Podcast do not accept
+  `initialCourseIdx`, so V2's `courseIdx` is ignored for those five.
+- `OnboardingFlow` is still dark. Routing it needs a pre-auth restructure:
+  `App.jsx:775` gates on `session.user` and `handleOnboardingComplete`
+  expects a different shape.
+- Sound and haptics were not started. `celebration.js` has
+  `isSoundEnabled`/`setSoundEnabled`/`playTone`; sound is off by default on
+  web and there is no Account toggle for it yet.
+
+---
+
 ## SEO Agent -- 2026-06-10 (43-page content expansion)
 
 43 new static HTML pages shipped to `public/` in 5 waves. All pages use `/seo.css`, no em dashes, no emojis, proper JSON-LD, and CTA links to `/app?signup=1&plan=pro&billing=weekly&trial=1`.
