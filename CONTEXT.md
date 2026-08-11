@@ -1560,3 +1560,32 @@ app-wide job.
 Three em dashes in user-facing V2 copy (CLAUDE.md forbids them): "Weekly goal
 — not set yet", "Recall N% — needs work", "Let's get you set up — two minutes,
 tops."
+
+---
+
+## Push notification prompt, same root cause (2026-08-10)
+
+Checked whether any other retention surface was stranded in V1. One was, and it
+is arguably the more valuable of the two.
+
+**The push notification prompt was only ever defined inline in V1
+`DashboardView`.** `usePushNotifications` was imported there and nowhere else,
+so no user on the default V2 dashboard was ever asked to enable reminders. The
+whole push stack behind it (`/api/push-subscribe`, VAPID keys, the service
+worker, `useSessionReminders`) was already built and reachable; only the ask
+was missing.
+
+### What changed
+
+- `src/components/PushPromptCard.jsx` (new) — the banner as a shared,
+  self-gating component on V2 tokens. Renders null unless the browser can take
+  a subscription and the user has not granted, denied or dismissed.
+- Rendered in **both** dashboards. V1's 35-line inline copy was deleted in
+  favour of it, so the two cannot drift apart again.
+- **New gate: `earned`.** The browser permission prompt is one-shot and a
+  denial is permanent, so it is no longer spent on a cold first visit. Both
+  dashboards pass true only once the user has a completed session behind them.
+  This also matches the design brief's "push prompt after first session".
+
+Note `usePushNotifications(userId)` never actually reads its `userId`
+argument, so the component needed no prop threading.

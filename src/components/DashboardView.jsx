@@ -4,7 +4,7 @@ import ReadinessPill, { computeReadiness } from './ReadinessPill'
 import ReferralCard from './ReferralCard'
 import { useCelebration, TIER } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
-import { usePushNotifications } from '../utils/usePushNotifications'
+import PushPromptCard from './PushPromptCard'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
 import { getActivePlan, canUseFeature, getFeatureUsage, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession, activateTrial } from '../lib/subscription'
 import { clean } from '../utils/strings'
@@ -295,7 +295,6 @@ export default function DashboardView({
   }, [showSevenDayBanner]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const { currentStreak, lastCompletedDate, freezeCount, canFreeze, lapsedStreak, spendFreeze, personalBest } = useStreak()
-  const { shouldPrompt: shouldPromptPush, requestAndSubscribe, dismiss: dismissPush } = usePushNotifications(userId)
   const celebrate = useCelebration()
   const streak = currentStreak
   const [aiBriefDismissed, setAiBriefDismissed] = useState(() =>
@@ -1358,41 +1357,7 @@ export default function DashboardView({
       )}
 
       {/* ── Push notification prompt ── */}
-      {shouldPromptPush && (
-        <div style={{ padding: '0 32px 4px' }}>
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(107,143,255,0.08), rgba(59,97,196,0.06))',
-            border: '1px solid rgba(107,143,255,0.2)',
-            borderRadius: 10, padding: '12px 16px',
-            display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
-          }}>
-            <div style={{ flexShrink: 0, width: 32, height: 32, background: 'rgba(107,143,255,0.12)', border: '1px solid rgba(107,143,255,0.25)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            </div>
-            <div style={{ flex: 1, minWidth: 180 }}>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#1e3a5f' }}>
-                Never miss a study session
-              </p>
-              <p style={{ margin: '2px 0 0', fontSize: 12, color: '#4B5563', lineHeight: 1.4 }}>
-                Get a daily nudge at 9 AM so your streak stays alive and exams don't sneak up on you.
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
-              <button
-                onClick={() => { track('push_subscribe_clicked'); requestAndSubscribe() }}
-                style={{ background: '#3B61C4', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 700, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}
-              >
-                Turn on reminders
-              </button>
-              <button
-                onClick={() => { track('push_subscribe_dismissed'); dismissPush() }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', fontSize: 18, lineHeight: 1, padding: '0 2px' }}
-                aria-label="Dismiss"
-              >×</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PushPromptCard earned={hasCompletedFirstSession} wrapperStyle={{ padding: '0 32px 4px' }} />
 
       {/* ── Grid ── */}
       <div className="dash-grid" style={{ padding: '20px 32px 48px', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>

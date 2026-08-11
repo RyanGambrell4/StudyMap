@@ -1,6 +1,7 @@
 import { useMemo, useState, useEffect, useCallback } from 'react'
 import { useStreak } from '../utils/useStreak'
 import StreakGuardCard from './StreakGuardCard'
+import PushPromptCard from './PushPromptCard'
 import { getWeeklyGoal, computeWeeklyProgress } from '../lib/weeklyGoal'
 import { getMasteryForCourse, getDueForReview } from '../lib/masteryStore'
 import { daysBetween } from '../utils/dateUtils'
@@ -1125,6 +1126,11 @@ export default function DashboardViewV2({
           onUseFreeze={() => spendFreeze(todayStr)}
           onStartFocus={onStartFocus}
         />
+
+        {/* Reminders. Only offered once they have a completed session behind
+            them: the browser permission prompt is one-shot and a denial is
+            permanent, so it is not spent on a cold first visit. */}
+        <PushPromptCard earned={(completedSessions?.length ?? 0) >= 1} />
 
         {/* Courses */}
         <CoursesCard
