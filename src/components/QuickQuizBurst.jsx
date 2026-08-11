@@ -12,6 +12,8 @@ import { addCardsToDeck, cardFromQuizMiss } from '../lib/deckAdditions'
 import { recordConfidence } from '../lib/confidenceStore'
 import { track } from '../lib/analytics'
 import Spinner from './ui/spinner'
+import GeneratingScreen from './ui/GeneratingScreen'
+import { stagesFor } from '../lib/toolStages'
 
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
@@ -48,6 +50,10 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME)
   const [flash, setFlash] = useState(null) // 'correct' | 'wrong'
   const [error, setError] = useState('')
+  // The questions land before the student sees them. GeneratingScreen owns the
+  // handoff: it finishes its ring, then calls back to actually show the quiz.
+  // Dropping them on screen the instant the fetch resolves reads as cheap.
+  const [genReady, setGenReady] = useState(false)
   const [repairs, setRepairs] = useState({}) // { [qIdx]: { loading, data, repairSelected, repairConfirmed, error } }
   // Mastery delta tracking: snapshot before the quiz starts, diff after.
   const [preMastery, setPreMastery] = useState({}) // { topic: score }
@@ -125,6 +131,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
     const resolvedTopic = overrideTopic ?? topic.trim()
     if (overrideTopic && overrideTopic !== topic) setTopic(overrideTopic)
     setStep('loading')
+    setGenReady(false)
     setError('')
     track('quiz_burst_started', { topic: resolvedTopic || null, courseName: course?.name ?? null, smartDefault: !!overrideTopic })
 
@@ -174,7 +181,8 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
         setMaxStreak(0)
         setSelected(null)
         setConfirmed(false)
-        setStep('quiz')
+        // Everything is staged; the ring decides when it becomes visible.
+        setGenReady(true)
         return
       } catch (e) {
         retries++
@@ -598,10 +606,12 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
 
         {/* Loading */}
         {step === 'loading' && (
-          <div style={{ padding: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
-            <Spinner size="lg" />
-            <div style={{ fontSize: 14, fontWeight: 600, color: D.textMuted }}>Generating your quiz...</div>
-          </div>
+          <GeneratingScreen
+            {...stagesFor('quizBurst')}
+            title="Building your quiz"
+            ready={genReady}
+            onComplete={() => { setGenReady(false); setStep('quiz') }}
+          />
         )}
 
         {/* Quiz */}

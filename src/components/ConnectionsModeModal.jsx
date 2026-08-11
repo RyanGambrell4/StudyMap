@@ -10,6 +10,8 @@ import { getLastSessionBridge } from '../lib/lastSessionBridge'
 import { addCardsToDeck, cardFromConnectionMiss } from '../lib/deckAdditions'
 import { track } from '../lib/analytics'
 import Spinner from './ui/spinner'
+import GeneratingScreen from './ui/GeneratingScreen'
+import { stagesFor } from '../lib/toolStages'
 
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
@@ -112,6 +114,9 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
     return getLastSessionBridge({ courseId: c?.id ?? null, courseName: c?.name ?? null, currentTool: 'Connections' })
   }, [courseIdx, courses])
   const [step, setStep] = useState('setup') // setup | generating | cards | scoring | done
+  // Only the initial generation gets the narrated wait. Scoring a single answer
+  // is a one-second round trip, and dressing that up would just slow it down.
+  const [genReady, setGenReady] = useState(false)
   const [connections, setConnections] = useState([])
   const [cardIdx, setCardIdx] = useState(0)
   const [answer, setAnswer] = useState('')
@@ -131,6 +136,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
 
     setStep('generating')
+    setGenReady(false)
     setError('')
     track('connections_started', { courseName: course?.name ?? null, plan })
 
@@ -177,7 +183,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
       setCardIdx(0)
       setScores([])
       setAnswer('')
-      setStep('cards')
+      setGenReady(true)
     } catch (e) {
       track('connections_error', { error: e.message ?? 'unknown' })
       setError(e.message || 'Something went wrong. Please try again.')
@@ -426,10 +432,12 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
 
           {/* Generating */}
           {step === 'generating' && (
-            <div style={{ padding: 60, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
-              <Spinner size="lg" />
-              <div style={{ fontSize: 14, fontWeight: 600, color: D.textMuted }}>Finding connections in your material...</div>
-            </div>
+            <GeneratingScreen
+              {...stagesFor('connections')}
+              title="Linking your topics"
+              ready={genReady}
+              onComplete={() => { setGenReady(false); setStep('cards') }}
+            />
           )}
 
           {/* Cards */}

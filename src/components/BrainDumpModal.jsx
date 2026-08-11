@@ -14,6 +14,8 @@ import { getLastSessionBridge } from '../lib/lastSessionBridge'
 import GapCloser from './GapCloser'
 import { track } from '../lib/analytics'
 import Spinner from './ui/spinner'
+import GeneratingScreen from './ui/GeneratingScreen'
+import { stagesFor } from '../lib/toolStages'
 
 const D = {
   bg: '#F7F6F3', bgCard: '#FFFFFF',
@@ -87,6 +89,8 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
     return getLastSessionBridge({ courseId: c?.id ?? null, courseName: c?.name ?? null, currentTool: 'Brain Dump' })
   }, [courseIdx, courses])
   const [step, setStep] = useState('setup') // 'setup' | 'timer' | 'scoring' | 'result'
+  // The score is in hand; GeneratingScreen decides when the student sees it.
+  const [genReady, setGenReady] = useState(false)
   const [text, setText] = useState('')
   const [timeLeft, setTimeLeft] = useState(60)
   const [running, setRunning] = useState(false)
@@ -179,6 +183,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
       return
     }
     setStep('scoring')
+    setGenReady(false)
     setLoading(true)
     setError('')
     track('brain_dump_started', { topic: topic.trim() || null, courseName: course?.name ?? null })
@@ -218,7 +223,7 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
         window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'brainDump' } }))
         track('brain_dump_scored', { score: data.score, topic: topic.trim() || null, plan: getActivePlan() })
         setResult(data)
-        setStep('result')
+        setGenReady(true)
         setLoading(false)
         return
       } catch (e) {
@@ -499,11 +504,12 @@ export default function BrainDumpModal({ courses, onClose, onShowPaywall, onDril
 
         {/* Scoring state */}
         {step === 'scoring' && (
-          <div style={{ padding: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-            <Spinner size="lg" />
-            <div style={{ fontSize: 15, fontWeight: 600, color: D.textMuted }}>Scoring your brain dump...</div>
-            <div style={{ fontSize: 13, color: D.textDim }}>Analyzing {text.trim().split(/\s+/).length} words</div>
-          </div>
+          <GeneratingScreen
+            {...stagesFor('brainDump')}
+            title={`Marking your ${text.trim().split(/\s+/).length} words`}
+            ready={genReady}
+            onComplete={() => { setGenReady(false); setStep('result') }}
+          />
         )}
 
         {/* Result */}

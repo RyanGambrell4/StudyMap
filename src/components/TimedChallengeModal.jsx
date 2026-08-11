@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import Spinner from './ui/spinner'
+import GeneratingScreen from './ui/GeneratingScreen'
+import { stagesFor } from '../lib/toolStages'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
 import { addStudySession } from '../lib/studyHistory'
@@ -43,6 +44,8 @@ function savePB(courseKey, record) {
 
 export default function TimedChallengeModal({ courses, userId, onClose, onShowPaywall }) {
   const [step, setStep] = useState('setup') // 'setup' | 'loading' | 'active' | 'done'
+  // Set once the questions are in hand; GeneratingScreen decides when to show them.
+  const [genReady, setGenReady] = useState(false)
   const [selectedCourse, setSelectedCourse] = useState(courses.length > 0 ? 0 : -1)
   const [topic, setTopic] = useState('')
   const [error, setError] = useState('')
@@ -93,6 +96,7 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setError('')
     setStep('loading')
+    setGenReady(false)
     track('time_attack_started', { courseName, topic: topic.trim() || null })
     try {
       const token = await getAccessToken()
@@ -110,7 +114,7 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
       setSelected(null)
       setTimeLeft(TOTAL_TIME)
       setTimedOut(false)
-      setStep('active')
+      setGenReady(true)
       await incrementAIQuery()
     } catch (e) {
       track('time_attack_error', { error: e.message ?? 'unknown' })
@@ -246,11 +250,12 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
 
           {/* ── Loading ── */}
           {step === 'loading' && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '32px 0' }}>
-              <Spinner size="md" />
-              <p style={{ fontSize: 14, fontWeight: 600, color: D.text, margin: 0 }}>Generating 14 questions...</p>
-              <p style={{ fontSize: 12, color: D.muted, margin: 0 }}>Get ready to go fast</p>
-            </div>
+            <GeneratingScreen
+              {...stagesFor('timeAttack')}
+              title="Get ready to go fast"
+              ready={genReady}
+              onComplete={() => { setGenReady(false); setStep('active') }}
+            />
           )}
 
           {/* ── Active ── */}

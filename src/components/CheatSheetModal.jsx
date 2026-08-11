@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react'
 import Spinner from './ui/spinner'
+import GeneratingScreen from './ui/GeneratingScreen'
+import { stagesFor } from '../lib/toolStages'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, hasUsedTrial } from '../lib/subscription'
 import { addStudySession } from '../lib/studyHistory'
@@ -54,7 +56,8 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
   const [regenerateCount, setRegenerateCount] = useState(0)
-  const [step, setStep] = useState('setup') // 'setup' | 'result'
+  const [step, setStep] = useState('setup') // 'setup' | 'generating' | 'result'
+  const [genReady, setGenReady] = useState(false)
   const [timeBudget, setTimeBudget] = useState(45) // minutes
   const [checkedTopics, setCheckedTopics] = useState({}) // { topicName: true }
   const [planStartTs, setPlanStartTs] = useState(null)
@@ -70,6 +73,8 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
   async function generate(regen = 0) {
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setLoading(true)
+    setStep('generating')
+    setGenReady(false)
     setError('')
     setResult(null)
     if (!regen) track('cheat_sheet_started', { courseName: course?.name ?? null })
@@ -98,7 +103,7 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
         window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'cheatSheet' } }))
         track('cheat_sheet_generated', { topic: examPrompt.trim() || null, plan: getActivePlan() })
         setResult(data)
-        setStep('result')
+        setGenReady(true)
         setLoading(false)
         return
       } catch (e) {
@@ -107,6 +112,9 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
           track('cheat_sheet_error', { error: e.message ?? 'unknown' })
           setError(e.message || 'Something went wrong. Please try again.')
           setLoading(false)
+          // generate() already cleared the old sheet, so setup is the only
+          // screen with anything to show.
+          setStep('setup')
         }
       }
     }
@@ -330,6 +338,15 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
               </div>
             )}
           </div>
+        )}
+
+        {step === 'generating' && (
+          <GeneratingScreen
+            {...stagesFor('cheatSheet')}
+            title="Building your one page"
+            ready={genReady}
+            onComplete={() => { setGenReady(false); setStep('result') }}
+          />
         )}
 
         {/* Result step */}
