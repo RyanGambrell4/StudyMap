@@ -3,6 +3,7 @@ import { getActivePlan, getCachedSubscription, initSubscription, isTrialActive, 
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
 import ReferralCard from './ReferralCard'
+import { useStreak } from '../utils/useStreak'
 
 const PLAN_INFO = {
   free: {
@@ -86,6 +87,11 @@ export default function AccountView({
   courses = [],
   todayStr,
 }) {
+  // The streak lives here rather than on the dashboard: it is a record of what
+  // you have done, which belongs with your account, not in the way of the next
+  // thing to do.
+  const { currentStreak, personalBest } = useStreak()
+
   const plan = getActivePlan()
   const trialActive = isTrialActive()
   const trialUsed = hasUsedTrial()
@@ -134,23 +140,15 @@ export default function AccountView({
     const avgRecall = withRecall.length
       ? Math.round(withRecall.reduce((a, s) => a + s.recallScore, 0) / withRecall.length)
       : null
-    // streak
-    const datesSet = new Set(completedSessions.map(s => s.dateStr))
-    let streak = 0
-    const d = new Date((todayStr ?? new Date().toISOString().slice(0, 10)) + 'T12:00:00')
-    if (!datesSet.has(todayStr)) d.setDate(d.getDate() - 1)
-    while (streak < 999) {
-      const k = d.toISOString().slice(0, 10)
-      if (!datesSet.has(k)) break
-      streak++
-      d.setDate(d.getDate() - 1)
-    }
+    // The streak is NOT recomputed here. It comes from the streak store, which
+    // also counts tool sessions (Quiz Burst, Brain Dump, Focus Mode and the
+    // rest). Deriving it from completedSessions alone produced a second,
+    // lower number that disagreed with the one the rest of the app uses.
     return {
       totalHours: (totalMins / 60).toFixed(1),
       weekHours: (weekMins / 60).toFixed(1),
       sessions: completedSessions.length,
       avgRecall,
-      streak,
     }
   }, [completedSessions, todayStr])
 
@@ -304,7 +302,7 @@ export default function AccountView({
           {[
             { label: 'This week', value: `${progressStats.weekHours}h`, sub: `${progressStats.totalHours}h total`, primary: true },
             { label: 'Sessions', value: progressStats.sessions, sub: 'completed' },
-            { label: 'Study streak', value: `${progressStats.streak}d`, sub: progressStats.streak === 0 ? 'Start today' : 'in a row' },
+            { label: 'Study streak', value: `${currentStreak}d`, sub: currentStreak === 0 ? 'Start today' : personalBest > currentStreak ? `Best ${personalBest}d` : 'in a row' },
             { label: 'Avg recall', value: progressStats.avgRecall != null ? `${progressStats.avgRecall}%` : '-', sub: progressStats.avgRecall != null ? 'across sessions' : 'No data yet' },
           ].map(({ label, value, sub, primary }) => (
             <div key={label} style={{ background: '#F7F6F3', borderRadius: 10, padding: '12px 14px', border: '1px solid rgba(0,0,0,0.07)' }}>

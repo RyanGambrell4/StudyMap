@@ -1,6 +1,4 @@
 import { useMemo, useState, useEffect, useCallback } from 'react'
-import { useStreak } from '../utils/useStreak'
-import StreakGuardCard from './StreakGuardCard'
 import PushPromptCard from './PushPromptCard'
 import { getWeeklyGoal, computeWeeklyProgress } from '../lib/weeklyGoal'
 import { getMasteryForCourse, getDueForReview } from '../lib/masteryStore'
@@ -102,12 +100,6 @@ function sessionTypeLabel(type) {
 const IcoCheck = ({ size = 11 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 12.5l5.5 5.5L20 6.5"/>
-  </svg>
-)
-
-const IcoFlame = ({ color = '#F5820B', size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-    <path d="M12 2c1 3.5-.7 5.2-2 6.6C8.6 10 7.5 11.3 7.5 14a4.5 4.5 0 0 0 9 0c0-1.2-.4-2.2-1-3-.3 1-.9 1.6-1.7 2 .4-2.6-.3-5.4-1.8-7.4A11 11 0 0 0 12 2z"/>
   </svg>
 )
 
@@ -304,7 +296,7 @@ function HeroNormal({ nextSession, avgRecall, dueCount, payoffLine, onStartFocus
 }
 
 // ── Hero: Done for today ───────────────────────────────────────────────────────
-function HeroDone({ streak, weeklyMinutes, weeklyGoalHours, nextSession }) {
+function HeroDone({ weeklyMinutes, weeklyGoalHours, nextSession }) {
   const hoursThis   = weeklyMinutes / 60
   const pct         = Math.min(100, Math.round((hoursThis / weeklyGoalHours) * 100))
   const hoursLabel  = `${hoursThis.toFixed(1)} of ${weeklyGoalHours} hrs this week`
@@ -335,10 +327,7 @@ function HeroDone({ streak, weeklyMinutes, weeklyGoalHours, nextSession }) {
         <IcoCheck size={24} />
       </div>
       <div style={{ fontFamily: SERIF, fontSize: 26, fontWeight: 500, marginTop: 20 }}>
-        {/* Never append a zero here. This is the last thing they read each day. */}
-        {streak >= 1
-          ? `Done for today. Streak at ${streak} ${streak === 1 ? 'day' : 'days'}.`
-          : 'Done for today.'}
+        Done for today.
       </div>
       <div style={{ maxWidth: 340, margin: '22px auto 0' }}>
         <div style={{ height: 6, background: '#EAECF0', borderRadius: 3, overflow: 'hidden' }}>
@@ -519,36 +508,15 @@ function HeroNewUser({ setupSteps, onStepClick }) {
 }
 
 // ── Stat strip ────────────────────────────────────────────────────────────────
-function StatStrip({ streak, weeklyMinutes, weeklyGoalHours, sessionsThisWeek, isNewUser }) {
+// The streak deliberately does not appear here. It lives in Account settings:
+// the dashboard is for what to do next, not for a scoreboard of the past.
+function StatStrip({ weeklyMinutes, weeklyGoalHours, sessionsThisWeek, isNewUser }) {
   const hoursThis  = weeklyMinutes / 60
   const pct        = Math.min(100, Math.round((hoursThis / weeklyGoalHours) * 100))
   const weeklyLabel = `${hoursThis.toFixed(1)} of ${weeklyGoalHours} hrs this week`
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', rowGap: 10, padding: '0 6px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        {isNewUser ? (
-          <>
-            <IcoFlame color="#C9C6BF" size={16} />
-            <span style={{ fontSize: 13, color: T.dim }}>Streak starts with your first session</span>
-          </>
-        ) : streak === 0 ? (
-          // Never render "0-day streak". It is the one number that reads as a
-          // verdict on the user rather than a status.
-          <>
-            <IcoFlame color="#C9C6BF" size={16} />
-            <span style={{ fontSize: 13, color: T.dim, whiteSpace: 'nowrap' }}>No streak yet. Today starts one.</span>
-          </>
-        ) : (
-          <>
-            <IcoFlame />
-            <span style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' }}>{streak}-day streak</span>
-          </>
-        )}
-      </div>
-
-      <div style={{ width: 1, height: 18, background: 'rgba(0,0,0,0.1)', margin: '0 22px', flexShrink: 0 }} />
-
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
         {isNewUser ? (
           <>
@@ -871,12 +839,6 @@ export default function DashboardViewV2({
     document.head.appendChild(link)
   }, [])
 
-  const { currentStreak, completedToday, freezeCount, canFreeze, spendFreeze } = useStreak()
-
-  const todaySessions = useMemo(
-    () => allSessions.filter(s => s.dateStr === todayStr),
-    [allSessions, todayStr],
-  )
   const weeklyGoal = useMemo(() => getWeeklyGoal(todayStr), [todayStr])
   const weeklyProgress = useMemo(
     () => computeWeeklyProgress(completedSessions, todayStr),
@@ -940,7 +902,7 @@ export default function DashboardViewV2({
     } else if (avg != null && avg < 70) {
       line = `${nextSession.courseName} recall is below target. This session builds it back up.`
     } else if (avg != null) {
-      line = `You're making progress. Keep the streak going.`
+      line = `${nextSession.courseName} is on track. This session keeps it there.`
     }
 
     return { payoffLine: line, avgRecall: avg, dueCount: due }
@@ -1088,7 +1050,6 @@ export default function DashboardViewV2({
           <HeroNewUser setupSteps={setupSteps} onStepClick={handleStepClick} />
         ) : doneForToday ? (
           <HeroDone
-            streak={currentStreak}
             weeklyMinutes={weeklyProgress.minutes}
             weeklyGoalHours={weeklyGoal.hours}
             nextSession={nextDaySession}
@@ -1106,25 +1067,10 @@ export default function DashboardViewV2({
 
         {/* Stat strip */}
         <StatStrip
-          streak={currentStreak}
           weeklyMinutes={weeklyProgress.minutes}
           weeklyGoalHours={weeklyGoal.hours}
           sessionsThisWeek={weeklyProgress.sessions}
           isNewUser={isNewUser}
-        />
-
-        {/* Streak guard. This is the loss-aversion surface, and until now it
-            only existed on the V1 dashboard, which the default flag never
-            mounts. The card self-gates: streak >= 3, nothing done today, and
-            after 3pm. */}
-        <StreakGuardCard
-          streak={currentStreak}
-          completedToday={completedToday || doneForToday}
-          todaySessions={todaySessions}
-          freezeCount={freezeCount}
-          canFreeze={canFreeze}
-          onUseFreeze={() => spendFreeze(todayStr)}
-          onStartFocus={onStartFocus}
         />
 
         {/* Reminders. Only offered once they have a completed session behind
