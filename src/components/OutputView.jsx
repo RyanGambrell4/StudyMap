@@ -35,7 +35,7 @@ import DashboardViewV2 from './DashboardViewV2'
 import CommandPalette from './CommandPalette'
 import { QUICK_PRESETS, buildQuickSession } from '../lib/quickStart'
 import { useSessionReminders } from '../utils/useSessionReminders'
-import { useStreak } from '../utils/useStreak'
+import { useStreak, recordCompletion } from '../utils/useStreak'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, hasUsedTrial, canUseFeature } from '../lib/subscription'
 const CoursesView    = lazy(() => import('./CoursesView'))
@@ -711,6 +711,17 @@ export default function OutputView({
       setFixConflictsLoading(false)
     }
   }
+
+  // Streak: checking off any of today's sessions feeds it. This lives here,
+  // above the dashboard switch, rather than inside a dashboard. The tool events
+  // are handled by the streak store itself; the checkbox state is owned here
+  // and nowhere else, so this is the one place that can see it regardless of
+  // which dashboard is mounted. recordCompletion is idempotent per day, so
+  // re-running on every completedIds change is free.
+  useEffect(() => {
+    const doneToday = allSessions.some(s => s.dateStr === todayStr && completedIds.has(s.id))
+    if (doneToday) recordCompletion(todayStr)
+  }, [completedIds, allSessions, todayStr])
 
   // ── persist ──
   useEffect(() => { onSavePlan(completedIds, assignments) }, [completedIds, assignments])

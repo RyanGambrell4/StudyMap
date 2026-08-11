@@ -294,7 +294,7 @@ export default function DashboardView({
     }
   }, [showSevenDayBanner]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const { currentStreak, lastCompletedDate, recordCompletion, freezeCount, useFreeze, personalBest } = useStreak()
+  const { currentStreak, lastCompletedDate, freezeCount, canFreeze, lapsedStreak, spendFreeze, personalBest } = useStreak()
   const { shouldPrompt: shouldPromptPush, requestAndSubscribe, dismiss: dismissPush } = usePushNotifications(userId)
   const celebrate = useCelebration()
   const streak = currentStreak
@@ -309,15 +309,10 @@ export default function DashboardView({
   )
   const hasCompletedFirstSession = (completedSessions?.length ?? 0) >= 1
   // Streak is "broken" when they had a multi-day streak but didn't study yesterday or today.
-  // currentStreak still holds the old value (resets only on next recordCompletion call).
-  const yesterdayStr = (() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().split('T')[0] })()
-  const isStreakBroken = !!(
-    lastCompletedDate &&
-    lastCompletedDate !== todayStr &&
-    lastCompletedDate !== yesterdayStr &&
-    currentStreak > 1 &&
-    !streakBannerDismissed
-  )
+  // The store now decays currentStreak to 0 the moment that happens, so the size
+  // of the streak they lost lives in lapsedStreak. Reading currentStreak here
+  // would make this banner permanently false.
+  const isStreakBroken = !!(lapsedStreak > 1 && !streakBannerDismissed)
   // Streak is "at risk" when user hasn't studied today, has a streak of 2+,
   // it's after 6pm, and the streak isn't already broken.
   const isStreakAtRisk = !!(
@@ -340,8 +335,8 @@ export default function DashboardView({
 
   // Trigger real-time streak-broken email when streak breaks
   useEffect(() => {
-    if (!isStreakBroken || !userEmail || !userId || currentStreak <= 1) return
-    const key = `se_streak_trigger_sent_${currentStreak}`
+    if (!isStreakBroken || !userEmail || !userId || lapsedStreak <= 1) return
+    const key = `se_streak_trigger_sent_${lapsedStreak}`
     if (sessionStorage.getItem(key)) return
     sessionStorage.setItem(key, '1')
     import('../lib/supabase').then(({ getAccessToken }) =>
@@ -349,7 +344,7 @@ export default function DashboardView({
         fetch('/api/streak-broken-trigger', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ streak: currentStreak, email: userEmail }),
+          body: JSON.stringify({ streak: lapsedStreak, email: userEmail }),
         }).catch(() => {})
       )
     )
@@ -435,19 +430,10 @@ export default function DashboardView({
     }
   }, [allComplete, allCompleteKey])
 
-  // Update streak whenever any of today's sessions become completed (handles FocusMode + manual toggle)
-  useEffect(() => {
-    const hasCompletedToday = todaySessions.some(s => completedIds.has(s.id))
-    if (hasCompletedToday) recordCompletion(todayStr)
-  }, [completedIds])
-
-  // Tool sessions (Brain Dump, Teach It Back, Quiz Burst, etc.) also count toward the streak.
-  // Modals dispatch this event on success; we record completion so the streak stays alive.
-  useEffect(() => {
-    const handler = () => recordCompletion(todayStr)
-    window.addEventListener('studyedge:tool-session-complete', handler)
-    return () => window.removeEventListener('studyedge:tool-session-complete', handler)
-  }, [todayStr, recordCompletion])
+  // Streak recording deliberately does NOT live here any more. Checkbox
+  // completions are recorded in OutputView and tool completions are handled by
+  // the streak store's own window listener, so the streak survives whichever
+  // dashboard is mounted. This component only reads.
 
   const handleToggle = (id, anchorEl = null) => {
     // Item checked. Tier 0: a 180ms scale on the button the user just pressed,
@@ -1329,22 +1315,22 @@ export default function DashboardView({
             <IcoFlame color="#F97316" />
             <div style={{ flex: 1, minWidth: 180 }}>
               <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#92400E' }}>
-                Your {currentStreak}-day streak broke.
+                Your {lapsedStreak}-day streak broke.
               </p>
               <p style={{ margin: '2px 0 0', fontSize: 12, color: '#B45309', lineHeight: 1.4 }}>
-                {freezeCount > 0
+                {canFreeze
                   ? `Use a Streak Freeze to save it. You have ${freezeCount} left.`
                   : 'Start a session today to rebuild it.'}
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
-              {freezeCount > 0 && (
+              {canFreeze && (
                 <button
                   onClick={() => {
-                    useFreeze(todayStr)
+                    spendFreeze(todayStr)
                     sessionStorage.setItem('se_streak_banner_dismissed', '1')
                     setStreakBannerDismissed(true)
-                    track('streak_freeze_used', { streak: currentStreak, freezesLeft: freezeCount - 1 })
+                    track('streak_freeze_used', { streak: lapsedStreak, freezesLeft: freezeCount - 1 })
                   }}
                   style={{ background: '#FFFFFF', border: '1.5px solid #F97316', borderRadius: 8, padding: '7px 14px', fontSize: 12, fontWeight: 700, color: '#F97316', cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5 }}
                 >
@@ -1354,7 +1340,7 @@ export default function DashboardView({
               )}
               <button
                 onClick={() => {
-                  track('streak_recovery_cta_clicked', { streak: currentStreak })
+                  track('streak_recovery_cta_clicked', { streak: lapsedStreak })
                   onNavigateToCourses?.()
                 }}
                 style={{ background: '#F97316', border: 'none', borderRadius: 8, padding: '7px 14px', fontSize: 12, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}
@@ -1362,7 +1348,7 @@ export default function DashboardView({
                 Start a session →
               </button>
               <button
-                onClick={() => { sessionStorage.setItem('se_streak_banner_dismissed', '1'); setStreakBannerDismissed(true); track('streak_recovery_banner_dismissed', { streak: currentStreak }) }}
+                onClick={() => { sessionStorage.setItem('se_streak_banner_dismissed', '1'); setStreakBannerDismissed(true); track('streak_recovery_banner_dismissed', { streak: lapsedStreak }) }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#B45309', fontSize: 18, lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
                 aria-label="Dismiss"
               >×</button>
@@ -1425,7 +1411,8 @@ export default function DashboardView({
           completedToday={todaySessions.some(s => completedIds.has(s.id)) || lastCompletedDate === todayStr}
           todaySessions={todaySessions}
           freezeCount={freezeCount}
-          onUseFreeze={useFreeze}
+          canFreeze={canFreeze}
+          onUseFreeze={() => spendFreeze(todayStr)}
           onStartFocus={onStartFocus}
         />
 

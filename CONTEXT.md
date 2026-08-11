@@ -1475,3 +1475,88 @@ _Continuing from the first background session. Focused on pricing copy accuracy,
 ### Previously fixed (from first session, now resolved)
 - FocusMode keyboard shortcut stale closure (fixed this session)
 - `StudyCoachView.jsx` MyPlansView `useMemo` (fixed in first session)
+
+---
+
+## Streak loop repair (2026-08-10, branch `worktree-dopamine-onboarding-web`)
+
+_Went looking for retention improvements and found the streak mechanic was
+entirely dead in the default configuration. Fixed that before adding anything
+new, because no new dopamine feature would have mattered while this was broken._
+
+### The core bug (critical, shipping)
+
+The streak never incremented for anyone on the default dashboard.
+
+- `se_dashboard_v2` defaults ON (`OutputView.jsx`: `localStorage.getItem('se_dashboard_v2') !== '0'`).
+- When ON, `DashboardViewV2` renders and `DashboardView` (V1) never mounts.
+- `recordCompletion` was called **only** inside V1 `DashboardView`.
+- V1 also held the **only** listener for `studyedge:tool-session-complete`,
+  an event dispatched by **14** different tools (FocusMode, QuickQuizBurst,
+  BrainDump, PracticeExam, TeachItBack, CheatSheet, Podcast, EssayArchitect,
+  Connections, Diagrams, ProblemSolver, TimedChallenge, ExamRescue, Diagnostic).
+
+Net effect: every tool completion fired into the void, the streak sat at 0
+permanently, `StatStrip` rendered a literal "0-day streak", and `HeroDone` ended
+each finished day with "Done for today. Streak at 0 days." `StreakGuardCard`
+(the loss-aversion surface) requires `streak >= 3` and so never appeared at all.
+
+### Secondary bugs found in the same file
+
+- **The streak never decayed.** `currentStreak` was only recomputed on the next
+  completion, so a lapsed streak displayed its stale value indefinitely. A
+  number that cannot go down exerts no loss aversion and is also simply false.
+- **Freezes accumulated without a cap**, one per ISO week forever. A user in
+  week twelve had twelve freezes and a streak that could not break.
+- **localStorage was written during render**, inside a `useState` initialiser,
+  which can double-award under StrictMode.
+- Three `useStreak()` callers each held **separate copies** of the state, so a
+  change in one would not update the others.
+
+### What changed
+
+- `src/lib/streakLogic.js` (new) — the pure rules: decay, transitions, freeze
+  eligibility. No React, no storage, no clock reads.
+- `src/utils/useStreak.js` — rewritten as a single module store read through
+  `useSyncExternalStore`, so every consumer shares one live value. **The store
+  owns the `studyedge:tool-session-complete` listener itself**, so recording no
+  longer depends on which view is mounted. Recomputes on `visibilitychange` and
+  `focus` to handle the date rolling on a tab left open overnight.
+- `src/components/OutputView.jsx` — records checkbox completions, one level
+  above the dashboard switch, since it owns `completedIds`.
+- `src/components/DashboardViewV2.jsx` — renders `StreakGuardCard` (first time
+  loss aversion exists on the default dashboard); never prints "0-day streak".
+- `src/components/DashboardView.jsx` — reads only; recording removed. Broken
+  banner and the streak-broken email trigger now read `lapsedStreak`, which is
+  what makes them still fire now that `currentStreak` decays to 0.
+- `src/components/StreakGuardCard.jsx` — migrated off the deprecated V1 palette
+  to `src/theme/tokens.js` per CLAUDE.md.
+
+### Behaviour changes worth knowing
+
+- A freeze now covers exactly one day (today, or yesterday to bridge a miss)
+  and **cannot resurrect a streak that lapsed long ago**. It protects a run
+  without lengthening it, because no studying happened on the covered day.
+- Freeze cap is 2. Existing over-cap balances are clamped on read.
+- `useFreeze` was renamed `spendFreeze`: the `use` prefix made
+  `rules-of-hooks` reject every call inside an event handler.
+
+### Known limitation (pre-existing, deliberately not forked)
+
+Dates use the app-wide UTC-derived `toDateStr`, so "today" rolls over before
+local midnight in western timezones. The streak now matches the `todayStr`
+threaded through the rest of the app; changing that convention is a separate,
+app-wide job.
+
+### Verification
+
+- `npm run test:streak` — 32 rules, including leap day, new year and month-end
+  boundaries, and a 30-day walk.
+- `npm run test:insights` — 3210 combinations, still passing.
+- Whole-app esbuild import-graph resolution, clean.
+
+### Also fixed while in these files
+
+Three em dashes in user-facing V2 copy (CLAUDE.md forbids them): "Weekly goal
+— not set yet", "Recall N% — needs work", "Let's get you set up — two minutes,
+tops."

@@ -8,6 +8,7 @@
     "build": "vite build",
     "lint": "eslint .",
     "test:insights": "node scripts/test-onboarding-insights.mjs",
+    "test:streak": "node scripts/test-streak-logic.mjs",
     "preview": "vite preview"
   },
   "dependencies": {
