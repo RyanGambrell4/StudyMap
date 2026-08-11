@@ -365,7 +365,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
                   })}
                 </div>
                 <div style={{ fontSize: 11.5, color: '#9B9B9B', marginTop: 10, fontStyle: 'italic', lineHeight: 1.5 }}>
-                  Projection is a linear estimate — not a guarantee. Doing these 3 sessions typically moves practice-exam scores 8-15 pts on the topics covered.
+                  Projection is a linear estimate, not a guarantee. Doing these 3 sessions typically moves practice-exam scores 8-15 pts on the topics covered.
                 </div>
               </div>
             )}

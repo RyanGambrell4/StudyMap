@@ -11,6 +11,7 @@
     "test:streak": "node scripts/test-streak-logic.mjs",
     "test:celebrations": "node scripts/test-tool-celebrations.mjs",
     "find:dark": "node scripts/find-dark-modules.mjs .",
+    "find:emdash": "node scripts/find-em-dashes.mjs .",
     "preview": "vite preview"
   },
   "dependencies": {

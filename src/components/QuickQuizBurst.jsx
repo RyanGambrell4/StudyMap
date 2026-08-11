@@ -756,7 +756,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
 
             {missedQuestions.length > 0 && (
               <div style={{ margin: '12px 0', padding: '8px 12px', background: 'rgba(59,97,196,0.05)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 8, fontSize: 12, color: D.blue, textAlign: 'center', fontWeight: 600 }}>
-                Missed {missedQuestions.length} question{missedQuestions.length === 1 ? '' : 's'} — added to your review deck.
+                Missed {missedQuestions.length} question{missedQuestions.length === 1 ? '' : 's'}. Added to your review deck.
               </div>
             )}
 
@@ -772,12 +772,12 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                 </div>
                 <div style={{ fontSize: 13, color: D.text, lineHeight: 1.5, marginBottom: 6 }}>
                   {calibration.score >= 85
-                    ? 'Well calibrated — your confidence matches reality.'
+                    ? 'Well calibrated. Your confidence matches reality.'
                     : calibration.overconfidentCount > 0
-                      ? <>You were <strong>overconfident</strong> on {calibration.overconfidentCount} miss{calibration.overconfidentCount === 1 ? '' : 'es'}{calibration.overconfidentTopic ? <>, worst on <strong>{calibration.overconfidentTopic}</strong></> : ''}. That's the real gap — you didn't know what you didn't know.</>
+                      ? <>You were <strong>overconfident</strong> on {calibration.overconfidentCount} miss{calibration.overconfidentCount === 1 ? '' : 'es'}{calibration.overconfidentTopic ? <>, worst on <strong>{calibration.overconfidentTopic}</strong></> : ''}. That's the real gap. You didn't know what you didn't know.</>
                       : calibration.underconfidentCount > 0
-                        ? <>You were <strong>underconfident</strong> on {calibration.underconfidentCount} right answer{calibration.underconfidentCount === 1 ? '' : 's'}. You know more than you trust — push yourself harder.</>
-                        : 'Your confidence signals are mixed — worth another quiz to sharpen the read.'}
+                        ? <>You were <strong>underconfident</strong> on {calibration.underconfidentCount} right answer{calibration.underconfidentCount === 1 ? '' : 's'}. You know more than you trust, so push yourself harder.</>
+                        : 'Your confidence signals are mixed. Another quiz would sharpen the read.'}
                 </div>
                 <div style={{ fontSize: 11.5, color: D.textDim, fontStyle: 'italic' }}>
                   Research: fixing calibration alone lifts real exam scores 5-15%. The topics you're most confident and most wrong about are the ones to drill.
@@ -834,7 +834,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                 {masteryDelta.nextWeak?.topic && (
                   <div style={{ fontSize: 13, color: D.textMuted, marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
                     <strong style={{ color: D.text }}>Next up:</strong>{' '}
-                    {masteryDelta.nextWeak.topic} sits at {masteryDelta.nextWeak.score}/100 — target it in your next session.
+                    {masteryDelta.nextWeak.topic} sits at {masteryDelta.nextWeak.score}/100. Target it in your next session.
                   </div>
                 )}
               </div>
@@ -915,7 +915,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                                 {repair.repairConfirmed && (
                                   <div style={{ marginTop: 8 }}>
                                     <div style={{ fontSize: 12, fontWeight: 700, color: repair.repairSelected === rq.answer ? D.green : D.red, marginBottom: 6 }}>
-                                      {repair.repairSelected === rq.answer ? 'Got it.' : 'Not quite — here\'s the fix:'}
+                                      {repair.repairSelected === rq.answer ? 'Got it.' : 'Not quite. Here\'s the fix:'}
                                     </div>
                                     <ExplainAs
                                       concept={rq.question}

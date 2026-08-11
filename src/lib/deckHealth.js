@@ -74,10 +74,10 @@ export function getDeckHealth() {
     .slice(0, 5)
 
   const recommendedAction =
-    dueToday >= 8 ? `You have ${dueToday} cards due — start a 10-min review.` :
-    consistentlyMissed >= 5 ? `${consistentlyMissed} cards you keep missing — worth a targeted drill.` :
-    stale >= 5 ? `${stale} cards untouched in 2 weeks — refresh them before they decay further.` :
-    dueToday > 0 ? `${dueToday} card${dueToday === 1 ? '' : 's'} due — knock them out.` :
+    dueToday >= 8 ? `You have ${dueToday} cards due. Start a 10-min review.` :
+    consistentlyMissed >= 5 ? `${consistentlyMissed} cards you keep missing. Worth a targeted drill.` :
+    stale >= 5 ? `${stale} cards untouched in 2 weeks. Refresh them before they decay further.` :
+    dueToday > 0 ? `${dueToday} card${dueToday === 1 ? '' : 's'} due. Knock them out.` :
     'Deck is clean. Add source material or run a Quiz Burst to feed it more.'
 
   return {

@@ -930,7 +930,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
                   {health.fromMisses > 0 && health.newestSource && (
                     <div style={{ marginTop: 10, fontSize: 11.5, color: '#9B9B9B' }}>
-                      {health.fromMisses} card{health.fromMisses === 1 ? '' : 's'} auto-added this month — most recently from {labelForSource(health.newestSource)}.
+                      {health.fromMisses} card{health.fromMisses === 1 ? '' : 's'} auto-added this month, most recently from {labelForSource(health.newestSource)}.
                     </div>
                   )}
                 </div>

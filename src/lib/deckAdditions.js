@@ -81,7 +81,7 @@ export async function addCardsToDeck(newCards, { courseIdx = null, skipEmbedding
 export function cardFromQuizMiss(question, courseId, courseName) {
   return {
     front: question.question,
-    back: `${question.answer}${question.explanation ? ` — ${question.explanation}` : ''}`,
+    back: `${question.answer}${question.explanation ? `. ${question.explanation}` : ''}`,
     topic: question.topic ?? null,
     source: SOURCE.QUIZ_MISS,
     sourceMeta: { courseId, courseName },
@@ -111,7 +111,7 @@ export function cardFromBrainDumpGap(gap, courseId, courseName) {
 export function cardFromPracticeExamMiss(question, courseId, courseName) {
   return {
     front: question.question,
-    back: `${question.answer}${question.explanation ? ` — ${question.explanation}` : ''}`,
+    back: `${question.answer}${question.explanation ? `. ${question.explanation}` : ''}`,
     topic: question.topic ?? null,
     source: SOURCE.PRACTICE_EXAM_MISS,
     sourceMeta: { courseId, courseName },

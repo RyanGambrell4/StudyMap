@@ -139,7 +139,7 @@ export default function CoachCreateModal({
     setError('')
     const topics = extractTopics(combinedRawText(), [])
     if (!topics.length) {
-      setError('Add at least one topic — type them, or upload your syllabus or notes.')
+      setError('Add at least one topic. Type them, or upload your syllabus or notes.')
       return
     }
     const flagged = extraRepsTopicsFromRecall(course.id)
