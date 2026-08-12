@@ -96,7 +96,17 @@ export default function CourseDiagnostic({
     // from instead of the empty state.
     const missed = finalAnswers.filter(a => !a.correct).map(a => cardFromQuizMiss(a.question, course?.id ?? null, course?.name ?? null))
     if (missed.length) addCardsToDeck(missed).catch(() => {})
-    window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'diagnostic' } }))
+    window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', {
+      detail: {
+        tool: 'diagnostic',
+        score,
+        courseId: course?.id ?? null,
+        courseName: course?.name ?? null,
+        // The topics she missed are the ones a sub-floor diagnostic should
+        // offer to drill, weakest first.
+        gaps: [...new Set(finalAnswers.filter(a => !a.correct).map(a => a.question?.topic?.trim()).filter(Boolean))].slice(0, 2),
+      },
+    }))
     track('course_diagnostic_complete', { score, courseName: course?.name })
     setStep('done')
   }
@@ -139,7 +149,7 @@ export default function CourseDiagnostic({
                 Take a 3-min diagnostic
               </div>
               <div style={{ fontSize: 13, color: D.textMuted, marginBottom: 0, lineHeight: 1.55 }}>
-                5 questions on {course?.name}. Your answers seed your mastery data so every other feature — Quiz Burst, Cheat Sheet, Study Coach — starts personalized from day 1 instead of guessing for two weeks.
+                5 questions on {course?.name}. Your answers seed your mastery data so every other feature (Quiz Burst, Cheat Sheet, Study Coach) starts personalized from day 1 instead of guessing for two weeks.
               </div>
             </div>
 
@@ -159,7 +169,7 @@ export default function CourseDiagnostic({
               Start diagnostic →
             </button>
             <button onClick={onClose} style={{ marginTop: 8, width: '100%', padding: '8px', fontSize: 12.5, color: D.textDim, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
-              Skip — I'll set it up manually later
+              Skip, I'll set it up manually later
             </button>
           </div>
         )}
@@ -213,7 +223,7 @@ export default function CourseDiagnostic({
           <div style={{ padding: 28, textAlign: 'center' }}>
             <div style={{ fontSize: 56, marginBottom: 10 }}>🎯</div>
             <div style={{ fontSize: 22, fontWeight: 800, color: D.text, letterSpacing: -0.3, marginBottom: 6 }}>
-              {correctCount}/{questions.length} right — but the score doesn't matter.
+              {correctCount}/{questions.length} right. The score is not the point here.
             </div>
             <div style={{ fontSize: 13.5, color: D.textMuted, marginBottom: 20, lineHeight: 1.55 }}>
               What matters: {course?.name} now has real mastery data. Your dashboard, Session Bundle, Cheat Sheet, and Coach Plan just came alive.

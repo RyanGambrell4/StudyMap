@@ -461,6 +461,22 @@ export default function OutputView({
   const [ratingReminder, setRatingReminder] = useState(null) // skipped session pending reminder
   const ratingReminderTimerRef = useRef(null)
 
+  // ── Repair prompt listener ────────────────────────────────────────────────
+  // Raised by the celebration controller when a scored session came in under
+  // the floor. Reuses the existing topic drill rather than adding a parallel
+  // path: `pendingDrillTopic` is the same channel Brain Dump's "drill the gaps"
+  // already uses, and StudyToolsView opens straight into drill mode on it.
+  useEffect(() => {
+    const handler = (e) => {
+      const topic = e?.detail?.topic
+      if (!topic) return
+      setPendingDrillTopic(topic)
+      setActiveSection('tools')
+    }
+    window.addEventListener('studyedge:repair-topic', handler)
+    return () => window.removeEventListener('studyedge:repair-topic', handler)
+  }, [])
+
   // ── First-query nudge listener ────────────────────────────────────────────────
   useEffect(() => {
     const handler = (e) => {

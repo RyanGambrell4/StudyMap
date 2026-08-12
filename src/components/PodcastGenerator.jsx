@@ -177,7 +177,14 @@ export default function PodcastGenerator({ courses, userId, onClose, onShowPaywa
       setPodcast(data.podcast)
       setResetAt(data.usage?.resetAt ?? null)
       setStep('done')
-      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'podcast' } }))
+      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', {
+        detail: {
+          tool: 'podcast',
+          topic: data.podcast?.title ?? null,
+          courseId: selectedCourse?.id ?? null,
+          courseName: selectedCourse?.name ?? null,
+        },
+      }))
       track('podcast_generated', { plan: getActivePlan() })
     } catch (e) {
       track('podcast_error', { error: e.message ?? 'unknown' })

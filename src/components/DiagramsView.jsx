@@ -930,7 +930,9 @@ export default function DiagramsView({ courses, userId, onShowPaywall, learningS
       saveDiagram(entry)
       await incrementAIQuery()
       track('diagram_generated', { type: diagramType, hasCourseName: !!courseName })
-      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'diagrams' } }))
+      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', {
+        detail: { tool: 'diagrams', topic: entry.title || null, courseName: courseName ?? null },
+      }))
 
       setActiveDiagram(entry)
       setMode('view')

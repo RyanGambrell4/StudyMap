@@ -307,7 +307,20 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
             }).catch(() => {})
           }
         }
-        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'quizBurst', score: finalScore, total: questions.length } }))
+        // topic and the weakest remaining concepts ride along so the reward can
+        // name what she actually did, and so a sub-floor score can offer a drill
+        // scoped to the thing she lost rather than to the whole course.
+        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', {
+          detail: {
+            tool: 'quizBurst',
+            score: finalScore,
+            total: questions.length,
+            topic: topic.trim() || null,
+            courseId: course?.id ?? null,
+            courseName: course?.name ?? null,
+            gaps: stillWeak.map(w => w.topic).filter(Boolean),
+          },
+        }))
         track('quiz_burst_complete', {
           score: quizPct, topic: topic.trim() || null, plan: getActivePlan(), questionCount: questions.length,
           gapsClosed: closed.length, gapsImproved: improved.length, gapsRemaining: stillWeak.length,

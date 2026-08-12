@@ -4,6 +4,7 @@ import { getWeeklyGoal, computeWeeklyProgress } from '../lib/weeklyGoal'
 import { getMasteryForCourse, getDueForReview } from '../lib/masteryStore'
 import { daysBetween } from '../utils/dateUtils'
 import { track } from '../lib/analytics'
+import { getReturnAck, markReturnAcked } from '../lib/returnAck'
 
 // ── Design tokens (from handoff doc — do not deviate) ─────────────────────────
 const T = {
@@ -991,7 +992,23 @@ export default function DashboardViewV2({
 
   const dateLabel    = formatDateLabel(todayStr)
   const greetingText = greeting()
-  const subline = doneForToday
+
+  // Coming back after four or more days away is acknowledged before anything
+  // else, once, and without mentioning the gap. Read on mount rather than at
+  // render so it is stable for the life of the session, and marked immediately
+  // so a reload does not say it twice.
+  const [returnAck, setReturnAck] = useState(null)
+  useEffect(() => {
+    const ack = getReturnAck()
+    if (!ack) return
+    setReturnAck(ack)
+    markReturnAcked(ack.sinceDate)
+    track('return_acknowledged', { days_away: ack.daysAway, had_topic: Boolean(ack.topic) })
+  }, [])
+
+  const subline = returnAck
+    ? returnAck.line
+    : doneForToday
     ? "Today's work is in the bank."
     : isNewUser
     ? "Let's get you set up. Two minutes, tops."

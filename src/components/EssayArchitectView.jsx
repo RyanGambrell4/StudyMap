@@ -533,7 +533,9 @@ export default function EssayArchitectView({ userId, onShowPaywall, courses = []
       }
 
       incrementAIQuery()
-      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'essayArchitect' } }))
+      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', {
+        detail: { tool: 'essayArchitect', topic: topic?.trim() || null },
+      }))
       track('essay_outline_generated', { topic: topic || null })
       const entry = {
         id: Date.now().toString(),

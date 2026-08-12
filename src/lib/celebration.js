@@ -349,6 +349,13 @@ export function celebrate({ tier = TIER.MICRO, trigger = 'unknown', anchorEl = n
           durationMs: 700,
         })
       }
+      // KEEP THIS EMIT. It currently has no subscriber, which makes it look
+      // like dead code, and a previous audit flagged it as exactly that. It is
+      // the input signal for the Mastery Map home surface (see
+      // engagement-audit-and-build-order.md section 3.1): every SMALL is one
+      // unit of progress against a topic, which is what lights a node on that
+      // map. Deleting it means rebuilding the emit side later. The surface is
+      // planned, not shipped.
       emit({ type: 'xpbar', trigger, meta })
       playTone(fired)
       break
@@ -387,9 +394,54 @@ export function celebrate({ tier = TIER.MICRO, trigger = 'unknown', anchorEl = n
   return fired
 }
 
+/**
+ * The other half of the response system: what happens when a session went badly.
+ *
+ * This is deliberately NOT celebrate() at a low tier. It fires no confetti, no
+ * tone, no lift, and it consumes no cap, because nothing here is a reward. It
+ * raises one strip that names the concept she lost and offers a single button
+ * that drills only that concept.
+ *
+ * It lives in this file rather than alongside the tool listener for the same
+ * reason celebrate() does: there is exactly one module allowed to paint over
+ * the app, so there is exactly one place to audit what the student can be
+ * interrupted by.
+ *
+ * @param {object} opts
+ * @param {string} opts.concept      the thing she lost points on. Required.
+ * @param {string} [opts.alsoConcept] one more, at most.
+ * @param {string} [opts.courseName]
+ * @param {string} [opts.courseId]
+ * @param {number} [opts.pct]        the score, for analytics only. Not shown.
+ * @param {string} [opts.actionLabel]
+ */
+export function showRepair({
+  trigger = 'unknown', concept = null, alsoConcept = null,
+  courseName = null, courseId = null, pct = null,
+  actionLabel = 'Six minutes on just that',
+} = {}) {
+  // Without a concept there is nothing specific to say and nothing to scope a
+  // drill to. Silence beats a generic "keep going", which is the consolation
+  // copy this whole branch exists to avoid.
+  if (!concept) return false
+
+  track('repair_prompt_shown', { trigger, concept, course_name: courseName, pct })
+
+  emit({
+    type: 'repair',
+    trigger,
+    concept,
+    alsoConcept,
+    courseName,
+    courseId,
+    actionLabel,
+  })
+  return true
+}
+
 /** Test and debug helper. Not called in product code. */
 export function _resetCapsForTesting() {
   writeCaps({ ...EMPTY_CAPS })
 }
 
-export default { TIER, celebrate, subscribeCelebration, setCelebrationUser, isSoundEnabled, setSoundEnabled }
+export default { TIER, celebrate, showRepair, subscribeCelebration, setCelebrationUser, isSoundEnabled, setSoundEnabled }

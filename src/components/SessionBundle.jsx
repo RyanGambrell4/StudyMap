@@ -94,9 +94,9 @@ export default function SessionBundle({
           </div>
 
           <ol style={{ margin: '0 0 20px', padding: '0 0 0 20px', color: D.text, fontSize: 13.5, lineHeight: 1.65 }}>
-            <li><strong>60s brain dump</strong> — spill everything you know about {topic}</li>
-            <li><strong>5 questions</strong> — targeted quiz, harder if you crushed the dump</li>
-            <li><strong>Wrap</strong> — what you moved, what to hit next</li>
+            <li><strong>60s brain dump.</strong> Spill everything you know about {topic}</li>
+            <li><strong>5 questions.</strong> Targeted quiz, harder if the dump went well</li>
+            <li><strong>Wrap.</strong> What you moved, what to hit next</li>
           </ol>
 
           <button

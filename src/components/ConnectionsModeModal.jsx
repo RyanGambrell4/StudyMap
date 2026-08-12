@@ -240,7 +240,10 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
           })
           .catch(() => {})
       }
-      const updatedScores = [...scores, data]
+      // Carry the pair alongside the score. The scores array is the only record
+      // of the session by the time it ends, so without this the completion
+      // event cannot name which link she actually missed.
+      const updatedScores = [...scores, { ...data, conceptA: current.conceptA ?? null, conceptB: current.conceptB ?? null }]
       setScores(updatedScores)
       latestScoresRef.current = updatedScores
       setStep('scored')
@@ -255,7 +258,15 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
       const finalScores = latestScoresRef.current.length ? latestScoresRef.current : scores
       const finalAvg = finalScores.length ? Math.round(finalScores.reduce((s, r) => s + r.score, 0) / finalScores.length) : 0
       addStudySession({ tool: 'Connections', score: finalAvg, topic: null, courseName: course?.name || null })
-      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'connections', score: finalAvg } }))
+      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', {
+        detail: {
+          tool: 'connections', score: finalAvg,
+          courseId: course?.id ?? null,
+          courseName: course?.name ?? null,
+          // The weakest links are the concepts worth drilling if this went badly.
+          gaps: [...finalScores].sort((a, b) => (a.score ?? 0) - (b.score ?? 0)).slice(0, 2).map(r => r.conceptA).filter(Boolean),
+        },
+      }))
       track('connections_session_complete', { avgScore: finalAvg, cardCount: totalCards })
       setStep('done')
     } else {

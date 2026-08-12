@@ -6,10 +6,15 @@
  * the frequency caps meaningful: there is exactly one place that can paint a
  * celebration, so there is exactly one place to audit.
  *
- * Handles three controller events:
+ * Handles four controller events:
  *   overlay  MAJOR  full screen takeover, 1400ms, offers a share card
  *   toast    MEDIUM non-blocking strip, 700ms, never interrupts input
  *   badge    reduced-motion substitute for either of the above
+ *   repair   NOT a reward. Raised when a scored session came in under the
+ *            floor. Names the concept she lost and offers one button that
+ *            drills it. Deliberately shares none of the reward vocabulary:
+ *            no green, no check mark, no confetti, no tone, and it waits to be
+ *            dismissed instead of expiring, because it carries an action.
  */
 
 import { useState, useEffect, useCallback } from 'react'
@@ -67,16 +72,112 @@ function ShareCard({ title, body, onShared }) {
   )
 }
 
+/**
+ * The under-the-floor response. One sentence naming what she lost, one button
+ * that fixes only that, and a way out. No praise, no consolation, no "keep
+ * going". Competence is the comfort here.
+ */
+function RepairPrompt({ data, onDismiss }) {
+  const reduced = useReducedMotion()
+
+  const startDrill = useCallback(() => {
+    track('repair_prompt_accepted', { concept: data.concept, trigger: data.trigger })
+    // Handled by OutputView, which owns section routing and the drill topic.
+    window.dispatchEvent(new CustomEvent('studyedge:repair-topic', {
+      detail: { topic: data.concept, courseId: data.courseId ?? null, courseName: data.courseName ?? null },
+    }))
+    onDismiss()
+  }, [data, onDismiss])
+
+  return (
+    <motion.div
+      role="status"
+      aria-live="polite"
+      initial={reduced ? { opacity: 0 } : { y: 20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      exit={reduced ? { opacity: 0 } : { y: 12, opacity: 0 }}
+      transition={reduced ? { duration: DURATION.micro } : SPRING.ui}
+      style={{
+        position: 'fixed',
+        left: '50%',
+        bottom: 26,
+        transform: 'translateX(-50%)',
+        zIndex: 113,
+        display: 'flex',
+        alignItems: 'center',
+        gap: 14,
+        flexWrap: 'wrap',
+        padding: '14px 16px 14px 18px',
+        borderRadius: RADIUS.lg,
+        background: T.card,
+        border: `1px solid ${T.border}`,
+        boxShadow: '0 10px 34px rgba(0,0,0,0.12)',
+        maxWidth: 'min(460px, calc(100vw - 32px))',
+      }}
+    >
+      <div style={{ flex: '1 1 200px', minWidth: 0 }}>
+        <div style={{ fontSize: 13.5, fontWeight: 700, color: T.text, lineHeight: 1.45 }}>
+          You lost most of it on {data.concept}.
+        </div>
+        {data.alsoConcept ? (
+          <div style={{ fontSize: 12.5, color: T.muted, marginTop: 3 }}>
+            {data.alsoConcept} slipped too.
+          </div>
+        ) : null}
+      </div>
+
+      <div style={{ display: 'flex', alignItems: 'center', gap: 4, flexShrink: 0 }}>
+        <button
+          type="button"
+          onClick={startDrill}
+          style={{
+            padding: '9px 14px',
+            minHeight: 40,
+            borderRadius: RADIUS.pill,
+            border: 'none',
+            background: T.blue,
+            color: '#FFFFFF',
+            fontSize: 13,
+            fontWeight: 700,
+            fontFamily: 'inherit',
+            cursor: 'pointer',
+            whiteSpace: 'nowrap',
+          }}
+        >
+          {data.actionLabel ?? 'Six minutes on just that'}
+        </button>
+        <button
+          type="button"
+          onClick={onDismiss}
+          aria-label="Dismiss"
+          style={{
+            width: 34, height: 34,
+            display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+            borderRadius: RADIUS.pill,
+            border: 'none', background: 'transparent',
+            color: T.dim, fontSize: 17, lineHeight: 1,
+            fontFamily: 'inherit', cursor: 'pointer', flexShrink: 0,
+          }}
+        >
+          ×
+        </button>
+      </div>
+    </motion.div>
+  )
+}
+
 export default function CelebrationOverlay() {
   const [overlay, setOverlay] = useState(null)
   const [toast, setToast] = useState(null)
   const [badge, setBadge] = useState(null)
+  const [repair, setRepair] = useState(null)
   const reduced = useReducedMotion()
 
   useEffect(() => subscribeCelebration((e) => {
     if (e.type === 'overlay') setOverlay({ ...e, key: Date.now() })
     else if (e.type === 'toast') setToast({ ...e, key: Date.now() })
     else if (e.type === 'badge') setBadge({ ...e, key: Date.now() })
+    else if (e.type === 'repair') setRepair({ ...e, key: Date.now() })
   }), [])
 
   // Auto-dismiss. Each surface owns its own timer so they can overlap safely.
@@ -105,6 +206,17 @@ export default function CelebrationOverlay() {
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
   }, [overlay])
+
+  // The repair prompt carries an action, so it does not expire on a timer the
+  // way a reward does. Escape and its own dismiss button are the ways out.
+  useEffect(() => {
+    if (!repair) return
+    const onKey = (e) => { if (e.key === 'Escape') setRepair(null) }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [repair])
+
+  const dismissRepair = useCallback(() => setRepair(null), [])
 
   const dismissOverlay = useCallback(() => setOverlay(null), [])
 
@@ -220,6 +332,14 @@ export default function CelebrationOverlay() {
               <span style={{ fontSize: 13, color: T.muted }}>{toast.body}</span>
             ) : null}
           </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      {/* Under the floor. Not a reward, and styled so it cannot be mistaken
+          for one. Sits above the toast so the two can never stack. */}
+      <AnimatePresence>
+        {repair ? (
+          <RepairPrompt key={repair.key} data={repair} onDismiss={dismissRepair} />
         ) : null}
       </AnimatePresence>
 

@@ -346,7 +346,15 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
                 // Only the first pass is a session. The follow-up is a second
                 // question inside the same one and must not count twice.
                 if (genNext === 'result') {
-                  window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'teachItBack', score: result?.score } }))
+                  window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', {
+                    detail: {
+                      tool: 'teachItBack',
+                      score: result?.score,
+                      topic: topic.trim() || null,
+                      courseId: course?.id ?? null,
+                      courseName: course?.name ?? null,
+                    },
+                  }))
                 }
               }}
             />

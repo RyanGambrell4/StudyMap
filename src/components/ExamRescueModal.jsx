@@ -257,7 +257,16 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall, initi
             onComplete={() => {
               setGenReady(false)
               setStep('topics')
-              window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'examRescue' } }))
+              // The plan is ordered weakest first, so topics[0] is what the
+              // reward should point her at.
+              window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', {
+                detail: {
+                  tool: 'examRescue',
+                  topic: topics?.[0]?.name ?? null,
+                  courseId: course?.id ?? null,
+                  courseName: course?.name ?? null,
+                },
+              }))
             }}
           />
         )}

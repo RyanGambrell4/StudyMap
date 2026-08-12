@@ -353,7 +353,15 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
             onComplete={() => {
               setGenReady(false)
               setStep('result')
-              window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'cheatSheet' } }))
+              window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', {
+                detail: {
+                  tool: 'cheatSheet',
+                  // What she asked it to cover, when she narrowed it at all.
+                  topic: examPrompt.trim() || null,
+                  courseId: course?.id ?? null,
+                  courseName: course?.name ?? null,
+                },
+              }))
             }}
           />
         )}

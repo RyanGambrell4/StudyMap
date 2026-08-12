@@ -316,7 +316,18 @@ export default function BrainDumpModal({
       // surfaces still do (Smart Start, Comeback, Review Queue), so the write
       // stays until those are migrated.
       updateMastery(topic.trim(), courseId, data.score, 'brainDump')
-      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'brainDump' } }))
+      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', {
+        detail: {
+          tool: 'brainDump',
+          score: data.score,
+          topic: topic.trim() || null,
+          courseId,
+          courseName: course?.name ?? null,
+          // What she could not produce from memory is exactly what a sub-floor
+          // score should offer to drill.
+          gaps: data.possibleGaps ?? [],
+        },
+      }))
       track('brain_dump_scored', { score: data.score, topic: topic.trim(), recorded: Boolean(data.recorded), plan: getActivePlan() })
 
       setResult(data)
@@ -346,7 +357,10 @@ export default function BrainDumpModal({
       setResult(prev => ({ ...prev, recorded: Boolean(data.recorded), retryable: Boolean(data.retryable) }))
       if (data.recorded) {
         track('brain_dump_record_retry_succeeded', { topic: topic.trim() })
-        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'brainDump' } }))
+        // `silent` because this is a database retry, not a second session. The
+        // streak still wants to hear about it; the reward layer must not
+        // respond again to a score the student was already shown.
+        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'brainDump', silent: true } }))
       } else {
         track('brain_dump_record_retry_failed', { topic: topic.trim(), retryable: Boolean(data.retryable) })
       }
