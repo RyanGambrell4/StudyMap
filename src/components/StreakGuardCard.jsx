@@ -1,13 +1,17 @@
 import { useEffect, useMemo, useState } from 'react'
 import { track } from '../lib/analytics'
+import { T, RADIUS } from '../theme/tokens'
 
+// Migrated off the deprecated V1 palette per CLAUDE.md. Urgent state uses the
+// V2 red (the urgency colour), the calmer state uses V2 amber. Both are plain
+// hex so the `${color}XX` alpha suffixes below still resolve.
 const D = {
-  bg:      '#FFFFFF',
-  text:    '#111111',
-  muted:   '#6B6B6B',
-  dim:     '#9B9B9B',
-  orange:  '#EA580C',
-  amber:   '#D97706',
+  bg:     T.card,
+  text:   T.text,
+  muted:  T.muted,
+  dim:    T.dim,
+  orange: T.red,
+  amber:  T.amber,
 }
 
 function hoursUntilMidnight() {
@@ -25,6 +29,7 @@ export default function StreakGuardCard({
   completedToday = false,
   todaySessions = [],
   freezeCount = 0,
+  canFreeze = false,
   onUseFreeze,
   onStartFocus,
 }) {
@@ -69,7 +74,7 @@ export default function StreakGuardCard({
       background: `linear-gradient(135deg, ${D.bg} 0%, ${color}0D 100%)`,
       border: `1px solid ${color}30`,
       borderLeft: `4px solid ${color}`,
-      borderRadius: 16,
+      borderRadius: RADIUS.lg,
       padding: '16px 20px',
       boxShadow: `0 2px 8px ${color}12, 0 1px 3px rgba(0,0,0,0.04)`,
       display: 'flex', gap: 16, alignItems: 'center', flexWrap: 'wrap',
@@ -136,7 +141,7 @@ export default function StreakGuardCard({
 
         {/* Actions */}
         <div className="sg-actions" style={{ display: 'flex', gap: 8, flexShrink: 0, alignSelf: 'center', alignItems: 'center' }}>
-          {freezeCount > 0 && (
+          {canFreeze && (
             <button
               className="sg-ghost"
               onClick={() => { track('streak_guard_freeze', { streak, freezeCount }); onUseFreeze?.() }}

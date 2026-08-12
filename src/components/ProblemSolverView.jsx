@@ -545,7 +545,7 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
           <div style={{ marginTop: 16, padding: 18, background: 'rgba(22,163,74,0.06)', border: '1px solid rgba(22,163,74,0.22)', borderRadius: 12 }}>
             <div style={{ fontSize: 11, fontWeight: 700, color: '#16A34A', letterSpacing: '0.07em', textTransform: 'uppercase', marginBottom: 6 }}>You solved it</div>
             <div style={{ fontSize: 15, fontWeight: 700, color: '#111', marginBottom: 8 }}>Final answer: {socraticFinal}</div>
-            <div style={{ fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.5 }}>You worked through this yourself — you'll remember it far longer than if I'd just shown you.</div>
+            <div style={{ fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.5 }}>You worked through this yourself, so you'll remember it far longer than if I'd just shown you.</div>
           </div>
         )}
       </div>
@@ -590,7 +590,7 @@ export default function ProblemSolverView({ userId, onShowPaywall }) {
                 </summary>
                 <ol style={{ marginTop: 10, paddingLeft: 22, color: '#111', fontSize: 13, lineHeight: 1.6 }}>
                   {diagnosis.correctPathFromHere.map((s, i) => (
-                    <li key={i}><strong>{s.action}</strong> — {s.work}</li>
+                    <li key={i}><strong>{s.action}</strong>{': '}{s.work}</li>
                   ))}
                 </ol>
                 {diagnosis.wouldFinalAnswerBe && (

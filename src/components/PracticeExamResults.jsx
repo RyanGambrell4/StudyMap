@@ -1,7 +1,7 @@
 import { useMemo, useEffect, useRef, useState, useCallback } from 'react'
 import { getActivePlan, canUseFeature, hasUsedTrial } from '../lib/subscription'
 import { getCachedPracticeExams } from '../lib/db'
-import { useCelebration } from '../utils/useCelebration'
+import { useCelebration, TIER } from '../utils/useCelebration'
 import { getAccessToken } from '../lib/supabase'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
@@ -167,7 +167,9 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
     celebratedRef.current = true
     if (score >= 70) {
       const timer = setTimeout(() => {
-        celebrate(score >= 90 ? 'big' : 'medium')
+        // Practice exam completed. Tier 2 either way; the controller's 2-per-day
+        // cap decides whether it lands as a burst or quietly downgrades.
+        celebrate({ tier: TIER.MEDIUM, trigger: 'practice_exam_completed', meta: { score } })
       }, 900)
       return () => clearTimeout(timer)
     }
@@ -399,7 +401,7 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
                   })}
                 </div>
                 <div style={{ fontSize: 11.5, color: '#9B9B9B', marginTop: 10, fontStyle: 'italic', lineHeight: 1.5 }}>
-                  Projection is a linear estimate — not a guarantee. Doing these 3 sessions typically moves practice-exam scores 8-15 pts on the topics covered.
+                  Projection is a linear estimate, not a guarantee. Doing these 3 sessions typically moves practice-exam scores 8-15 pts on the topics covered.
                 </div>
               </div>
             )}

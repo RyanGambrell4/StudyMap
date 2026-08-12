@@ -780,7 +780,7 @@ function DiagramPractice({ diagram, title, courseId, courseName, onExit }) {
         <div style={{ marginLeft: depth * 16 }}>
           <div style={{ fontSize: 13, color: '#111', padding: '4px 0' }}>
             {depth === 0 ? <strong>{node.label}</strong> : renderNode(node.label, `h-${path.join('-')}`)}
-            {node.note && <span style={{ fontSize: 11, color: '#9B9B9B', marginLeft: 6 }}>— {node.note}</span>}
+            {node.note && <span style={{ fontSize: 11, color: '#9B9B9B', marginLeft: 6 }}>{node.note}</span>}
           </div>
           {Array.isArray(node.children) && node.children.map((c, i) => walk(c, [...path, i], depth + 1))}
         </div>

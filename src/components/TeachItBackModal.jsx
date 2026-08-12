@@ -7,7 +7,8 @@ import { addStudySession } from '../lib/studyHistory'
 import { updateMastery, getWeakestTopics, getMastery } from '../lib/masteryStore'
 import { getCachedStudyTools } from '../lib/db'
 import { track } from '../lib/analytics'
-import Spinner from './ui/spinner'
+import GeneratingScreen from './ui/GeneratingScreen'
+import { stagesFor } from '../lib/toolStages'
 
 const D = {
   bg: '#F7F8FA', bgCard: '#FFFFFF',
@@ -45,6 +46,9 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
   const [explanation, setExplanation] = useState('')
   const [followUpAnswer, setFollowUpAnswer] = useState('')
   const [step, setStep] = useState(autoStart && initialTopic ? 'explain' : 'setup') // setup | explain | evaluating | result | followup | final
+  // Where the wait is headed once the ring finishes. The evaluating screen is
+  // shared by the first explanation and the follow-up, so it has to be told.
+  const [genNext, setGenNext] = useState(null)
   const [result, setResult] = useState(null)
   const [prevMasteryScore, setPrevMasteryScore] = useState(null)
   const [sessionCount, setSessionCount] = useState(null)
@@ -83,6 +87,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
 
     setStep('evaluating')
+    setGenNext(null)
     setError('')
     track('teach_it_back_started', { topic: topic.trim() || null, courseName: course?.name ?? null, plan })
     try {
@@ -106,10 +111,11 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
       if (prevEntry?.count >= 1) setPrevMasteryScore(prevEntry.score)
       setSessionCount((prevEntry?.count ?? 0) + 1)
       if (topic.trim()) updateMastery(topic.trim(), course?.id ?? null, data.score, 'teachItBack')
-      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'teachItBack' } }))
+      // Dispatched from the GeneratingScreen handoff instead, so the reward
+      // does not land on top of the progress ring.
       track('teach_it_back_scored', { score: data.score, topic: topic.trim() || null, plan, hasFollowUp: Boolean(data.followUp) })
       setResult(data)
-      setStep('result')
+      setGenNext('result')
     } catch (e) {
       track('teach_it_back_error', { error: e.message ?? 'unknown' })
       setError(aiErrorMessage(e.status, e.message))
@@ -120,6 +126,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
   async function submitFollowUp() {
     if (!followUpAnswer.trim()) return
     setStep('evaluating')
+    setGenNext(null)
     setError('')
     try {
       const token = await getAccessToken()
@@ -139,7 +146,7 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
       if (!res.ok) throw Object.assign(new Error(aiErrorMessage(res.status, data.error)), { status: res.status })
       track('teach_it_back_followup_scored', { understood: data.understood })
       setFinalResult(data)
-      setStep('final')
+      setGenNext('final')
     } catch (e) {
       setError(aiErrorMessage(e.status, e.message))
       setStep('followup')
@@ -329,10 +336,20 @@ export default function TeachItBackModal({ courses, onClose, onShowPaywall, init
 
           {/* Evaluating */}
           {step === 'evaluating' && (
-            <div style={{ padding: 60, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
-              <Spinner size="lg" />
-              <div style={{ fontSize: 14, fontWeight: 600, color: D.textMuted }}>Evaluating your explanation...</div>
-            </div>
+            <GeneratingScreen
+              {...stagesFor('teachItBack')}
+              title="Marking your explanation"
+              ready={genNext !== null}
+              onComplete={() => {
+                setStep(genNext)
+                setGenNext(null)
+                // Only the first pass is a session. The follow-up is a second
+                // question inside the same one and must not count twice.
+                if (genNext === 'result') {
+                  window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'teachItBack', score: result?.score } }))
+                }
+              }}
+            />
           )}
 
           {/* Result */}

@@ -12,6 +12,8 @@ import { addCardsToDeck, cardFromQuizMiss } from '../lib/deckAdditions'
 import { recordConfidence } from '../lib/confidenceStore'
 import { track } from '../lib/analytics'
 import Spinner from './ui/spinner'
+import GeneratingScreen from './ui/GeneratingScreen'
+import { stagesFor } from '../lib/toolStages'
 
 const D = {
   bg: '#F7F8FA', bgCard: '#FFFFFF',
@@ -48,6 +50,10 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
   const [timeLeft, setTimeLeft] = useState(QUESTION_TIME)
   const [flash, setFlash] = useState(null) // 'correct' | 'wrong'
   const [error, setError] = useState('')
+  // The questions land before the student sees them. GeneratingScreen owns the
+  // handoff: it finishes its ring, then calls back to actually show the quiz.
+  // Dropping them on screen the instant the fetch resolves reads as cheap.
+  const [genReady, setGenReady] = useState(false)
   const [repairs, setRepairs] = useState({}) // { [qIdx]: { loading, data, repairSelected, repairConfirmed, error } }
   // Mastery delta tracking: snapshot before the quiz starts, diff after.
   const [preMastery, setPreMastery] = useState({}) // { topic: score }
@@ -125,6 +131,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
     const resolvedTopic = overrideTopic ?? topic.trim()
     if (overrideTopic && overrideTopic !== topic) setTopic(overrideTopic)
     setStep('loading')
+    setGenReady(false)
     setError('')
     track('quiz_burst_started', { topic: resolvedTopic || null, courseName: course?.name ?? null, smartDefault: !!overrideTopic })
 
@@ -174,7 +181,8 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
         setMaxStreak(0)
         setSelected(null)
         setConfirmed(false)
-        setStep('quiz')
+        // Everything is staged; the ring decides when it becomes visible.
+        setGenReady(true)
         return
       } catch (e) {
         retries++
@@ -299,7 +307,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
             }).catch(() => {})
           }
         }
-        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'quizBurst' } }))
+        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'quizBurst', score: finalScore, total: questions.length } }))
         track('quiz_burst_complete', {
           score: quizPct, topic: topic.trim() || null, plan: getActivePlan(), questionCount: questions.length,
           gapsClosed: closed.length, gapsImproved: improved.length, gapsRemaining: stillWeak.length,
@@ -629,10 +637,12 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
 
         {/* Loading */}
         {step === 'loading' && (
-          <div style={{ padding: 48, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
-            <Spinner size="lg" />
-            <div style={{ fontSize: 14, fontWeight: 600, color: D.textMuted }}>Generating your quiz...</div>
-          </div>
+          <GeneratingScreen
+            {...stagesFor('quizBurst')}
+            title="Building your quiz"
+            ready={genReady}
+            onComplete={() => { setGenReady(false); setStep('quiz') }}
+          />
         )}
 
         {/* Quiz */}
@@ -777,7 +787,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
 
             {missedQuestions.length > 0 && (
               <div style={{ margin: '12px 0', padding: '8px 12px', background: 'rgba(59,97,196,0.05)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 8, fontSize: 12, color: D.blue, textAlign: 'center', fontWeight: 600 }}>
-                Missed {missedQuestions.length} question{missedQuestions.length === 1 ? '' : 's'} — added to your review deck.
+                Missed {missedQuestions.length} question{missedQuestions.length === 1 ? '' : 's'}. Added to your review deck.
               </div>
             )}
 
@@ -793,12 +803,12 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                 </div>
                 <div style={{ fontSize: 13, color: D.text, lineHeight: 1.5, marginBottom: 6 }}>
                   {calibration.score >= 85
-                    ? 'Well calibrated — your confidence matches reality.'
+                    ? 'Well calibrated. Your confidence matches reality.'
                     : calibration.overconfidentCount > 0
-                      ? <>You were <strong>overconfident</strong> on {calibration.overconfidentCount} miss{calibration.overconfidentCount === 1 ? '' : 'es'}{calibration.overconfidentTopic ? <>, worst on <strong>{calibration.overconfidentTopic}</strong></> : ''}. That's the real gap — you didn't know what you didn't know.</>
+                      ? <>You were <strong>overconfident</strong> on {calibration.overconfidentCount} miss{calibration.overconfidentCount === 1 ? '' : 'es'}{calibration.overconfidentTopic ? <>, worst on <strong>{calibration.overconfidentTopic}</strong></> : ''}. That's the real gap. You didn't know what you didn't know.</>
                       : calibration.underconfidentCount > 0
-                        ? <>You were <strong>underconfident</strong> on {calibration.underconfidentCount} right answer{calibration.underconfidentCount === 1 ? '' : 's'}. You know more than you trust — push yourself harder.</>
-                        : 'Your confidence signals are mixed — worth another quiz to sharpen the read.'}
+                        ? <>You were <strong>underconfident</strong> on {calibration.underconfidentCount} right answer{calibration.underconfidentCount === 1 ? '' : 's'}. You know more than you trust, so push yourself harder.</>
+                        : 'Your confidence signals are mixed. Another quiz would sharpen the read.'}
                 </div>
                 <div style={{ fontSize: 11.5, color: D.textDim, fontStyle: 'italic' }}>
                   Research: fixing calibration alone lifts real exam scores 5-15%. The topics you're most confident and most wrong about are the ones to drill.
@@ -855,7 +865,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                 {masteryDelta.nextWeak?.topic && (
                   <div style={{ fontSize: 13, color: D.textMuted, marginTop: 8, paddingTop: 8, borderTop: '1px solid rgba(0,0,0,0.06)' }}>
                     <strong style={{ color: D.text }}>Next up:</strong>{' '}
-                    {masteryDelta.nextWeak.topic} sits at {masteryDelta.nextWeak.score}/100 — target it in your next session.
+                    {masteryDelta.nextWeak.topic} sits at {masteryDelta.nextWeak.score}/100. Target it in your next session.
                   </div>
                 )}
               </div>
@@ -936,7 +946,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                                 {repair.repairConfirmed && (
                                   <div style={{ marginTop: 8 }}>
                                     <div style={{ fontSize: 12, fontWeight: 700, color: repair.repairSelected === rq.answer ? D.green : D.red, marginBottom: 6 }}>
-                                      {repair.repairSelected === rq.answer ? 'Got it.' : 'Not quite — here\'s the fix:'}
+                                      {repair.repairSelected === rq.answer ? 'Got it.' : 'Not quite. Here\'s the fix:'}
                                     </div>
                                     <ExplainAs
                                       concept={rq.question}

@@ -1,10 +1,9 @@
-import { useMemo, useEffect, useRef, useState } from 'react'
+import { useMemo, useEffect, useState } from 'react'
 import { track } from '../lib/analytics'
 import ReadinessPill, { computeReadiness } from './ReadinessPill'
 import ReferralCard from './ReferralCard'
-import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
-import { usePushNotifications } from '../utils/usePushNotifications'
+import PushPromptCard from './PushPromptCard'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
 import { getActivePlan, canUseFeature, getFeatureUsage, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession, activateTrial } from '../lib/subscription'
 import { clean } from '../utils/strings'
@@ -17,7 +16,6 @@ import CrossCourseCard from './CrossCourseCard'
 import ExamCountdownCard from './ExamCountdownCard'
 import StreakGuardCard from './StreakGuardCard'
 import WeeklyRecapCard from './WeeklyRecapCard'
-import WelcomeOverlay from './WelcomeOverlay'
 import QuickStartCard from './QuickStartCard'
 import WeeklyGoalCard from './WeeklyGoalCard'
 import { buildQuickSession, QUICK_PRESETS } from '../lib/quickStart'
@@ -295,9 +293,7 @@ export default function DashboardView({
     }
   }, [showSevenDayBanner]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const { currentStreak, lastCompletedDate, recordCompletion, freezeCount, useFreeze, personalBest } = useStreak()
-  const { shouldPrompt: shouldPromptPush, requestAndSubscribe, dismiss: dismissPush } = usePushNotifications(userId)
-  const celebrate = useCelebration()
+  const { currentStreak, lastCompletedDate, freezeCount, canFreeze, lapsedStreak, spendFreeze, personalBest } = useStreak()
   const streak = currentStreak
   const [aiBriefDismissed, setAiBriefDismissed] = useState(() =>
     sessionStorage.getItem('studyedge_brief_dismissed') === '1'
@@ -310,15 +306,10 @@ export default function DashboardView({
   )
   const hasCompletedFirstSession = (completedSessions?.length ?? 0) >= 1
   // Streak is "broken" when they had a multi-day streak but didn't study yesterday or today.
-  // currentStreak still holds the old value (resets only on next recordCompletion call).
-  const yesterdayStr = (() => { const d = new Date(); d.setDate(d.getDate() - 1); return d.toISOString().split('T')[0] })()
-  const isStreakBroken = !!(
-    lastCompletedDate &&
-    lastCompletedDate !== todayStr &&
-    lastCompletedDate !== yesterdayStr &&
-    currentStreak > 1 &&
-    !streakBannerDismissed
-  )
+  // The store now decays currentStreak to 0 the moment that happens, so the size
+  // of the streak they lost lives in lapsedStreak. Reading currentStreak here
+  // would make this banner permanently false.
+  const isStreakBroken = !!(lapsedStreak > 1 && !streakBannerDismissed)
   // Streak is "at risk" when user hasn't studied today, has a streak of 2+,
   // it's after 6pm, and the streak isn't already broken.
   const isStreakAtRisk = !!(
@@ -341,8 +332,8 @@ export default function DashboardView({
 
   // Trigger real-time streak-broken email when streak breaks
   useEffect(() => {
-    if (!isStreakBroken || !userEmail || !userId || currentStreak <= 1) return
-    const key = `se_streak_trigger_sent_${currentStreak}`
+    if (!isStreakBroken || !userEmail || !userId || lapsedStreak <= 1) return
+    const key = `se_streak_trigger_sent_${lapsedStreak}`
     if (sessionStorage.getItem(key)) return
     sessionStorage.setItem(key, '1')
     import('../lib/supabase').then(({ getAccessToken }) =>
@@ -350,7 +341,7 @@ export default function DashboardView({
         fetch('/api/streak-broken-trigger', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ streak: currentStreak, email: userEmail }),
+          body: JSON.stringify({ streak: lapsedStreak, email: userEmail }),
         }).catch(() => {})
       )
     )
@@ -425,34 +416,18 @@ export default function DashboardView({
     return { weekHours: (weekMins / 60).toFixed(1), avgRecall }
   }, [completedSessions, todayStr])
 
-  // Celebration + streak
-  const allCompleteKey = todayStr + (allComplete ? '-done' : '')
-  const firedRef = useRef(null)
-  useEffect(() => {
-    if (allComplete && firedRef.current !== allCompleteKey) {
-      firedRef.current = allCompleteKey
-      celebrate('big')
-    }
-  }, [allComplete, allCompleteKey])
+  // Celebrations deliberately do NOT live here any more, for the same reason as
+  // streak recording below: this component only mounts when se_dashboard_v2 is
+  // off, so anything fired from here reached almost nobody. Both the checkbox
+  // tier-0 and the daily-goal tier-1 now fire from OutputView, which owns
+  // completedIds and is mounted either way. Firing here too would double up.
 
-  // Update streak whenever any of today's sessions become completed (handles FocusMode + manual toggle)
-  useEffect(() => {
-    const hasCompletedToday = todaySessions.some(s => completedIds.has(s.id))
-    if (hasCompletedToday) recordCompletion(todayStr)
-  }, [completedIds])
+  // Streak recording deliberately does NOT live here any more. Checkbox
+  // completions are recorded in OutputView and tool completions are handled by
+  // the streak store's own window listener, so the streak survives whichever
+  // dashboard is mounted. This component only reads.
 
-  // Tool sessions (Brain Dump, Teach It Back, Quiz Burst, etc.) also count toward the streak.
-  // Modals dispatch this event on success; we record completion so the streak stays alive.
-  useEffect(() => {
-    const handler = () => recordCompletion(todayStr)
-    window.addEventListener('studyedge:tool-session-complete', handler)
-    return () => window.removeEventListener('studyedge:tool-session-complete', handler)
-  }, [todayStr, recordCompletion])
-
-  const handleToggle = (id) => {
-    if (!completedIds.has(id)) celebrate('light')
-    onToggle(id)
-  }
+  const handleToggle = (id, anchorEl = null) => onToggle(id, anchorEl)
 
   // ── Derived ─────────────────────────────────────────────────────────────────
   const todaySessions = useMemo(
@@ -705,14 +680,6 @@ export default function DashboardView({
     })()
     return (
       <div style={{ minHeight: '100vh', background: D.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 24px' }}>
-        <WelcomeOverlay
-          firstName={emailFirstName}
-          isExamMode={isExamMode}
-          onStart={() => {
-            track('welcome_overlay_start_click', { source: 'dashboard_empty' })
-            onNavigateToCourses?.()
-          }}
-        />
         <div style={{ maxWidth: 420, width: '100%', textAlign: 'center' }}>
           <h2 style={{ color: D.text, fontSize: 26, fontWeight: 700, letterSpacing: -0.5, margin: '0 0 10px', lineHeight: 1.2 }}>
             {isExamMode ? 'One section to get started.' : 'One course to get started.'}
@@ -1335,22 +1302,22 @@ export default function DashboardView({
             <IcoFlame color="#F97316" />
             <div style={{ flex: 1, minWidth: 180 }}>
               <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#92400E' }}>
-                Your {currentStreak}-day streak broke.
+                Your {lapsedStreak}-day streak broke.
               </p>
               <p style={{ margin: '2px 0 0', fontSize: 12, color: '#B45309', lineHeight: 1.4 }}>
-                {freezeCount > 0
+                {canFreeze
                   ? `Use a Streak Freeze to save it. You have ${freezeCount} left.`
                   : 'Start a session today to rebuild it.'}
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
-              {freezeCount > 0 && (
+              {canFreeze && (
                 <button
                   onClick={() => {
-                    useFreeze(todayStr)
+                    spendFreeze(todayStr)
                     sessionStorage.setItem('se_streak_banner_dismissed', '1')
                     setStreakBannerDismissed(true)
-                    track('streak_freeze_used', { streak: currentStreak, freezesLeft: freezeCount - 1 })
+                    track('streak_freeze_used', { streak: lapsedStreak, freezesLeft: freezeCount - 1 })
                   }}
                   style={{ background: '#FFFFFF', border: '1.5px solid #F97316', borderRadius: 8, padding: '7px 14px', fontSize: 12, fontWeight: 700, color: '#F97316', cursor: 'pointer', whiteSpace: 'nowrap', display: 'flex', alignItems: 'center', gap: 5 }}
                 >
@@ -1360,7 +1327,7 @@ export default function DashboardView({
               )}
               <button
                 onClick={() => {
-                  track('streak_recovery_cta_clicked', { streak: currentStreak })
+                  track('streak_recovery_cta_clicked', { streak: lapsedStreak })
                   onNavigateToCourses?.()
                 }}
                 style={{ background: '#F97316', border: 'none', borderRadius: 8, padding: '7px 14px', fontSize: 12, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}
@@ -1368,7 +1335,7 @@ export default function DashboardView({
                 Start a session →
               </button>
               <button
-                onClick={() => { sessionStorage.setItem('se_streak_banner_dismissed', '1'); setStreakBannerDismissed(true); track('streak_recovery_banner_dismissed', { streak: currentStreak }) }}
+                onClick={() => { sessionStorage.setItem('se_streak_banner_dismissed', '1'); setStreakBannerDismissed(true); track('streak_recovery_banner_dismissed', { streak: lapsedStreak }) }}
                 style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#B45309', fontSize: 18, lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
                 aria-label="Dismiss"
               >×</button>
@@ -1378,41 +1345,7 @@ export default function DashboardView({
       )}
 
       {/* ── Push notification prompt ── */}
-      {shouldPromptPush && (
-        <div style={{ padding: '0 32px 4px' }}>
-          <div style={{
-            background: 'linear-gradient(135deg, rgba(107,143,255,0.08), rgba(59,97,196,0.06))',
-            border: '1px solid rgba(107,143,255,0.2)',
-            borderRadius: 10, padding: '12px 16px',
-            display: 'flex', alignItems: 'center', gap: 14, flexWrap: 'wrap',
-          }}>
-            <div style={{ flexShrink: 0, width: 32, height: 32, background: 'rgba(107,143,255,0.12)', border: '1px solid rgba(107,143,255,0.25)', borderRadius: 8, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-            </div>
-            <div style={{ flex: 1, minWidth: 180 }}>
-              <p style={{ margin: 0, fontWeight: 700, fontSize: 13, color: '#1e3a5f' }}>
-                Never miss a study session
-              </p>
-              <p style={{ margin: '2px 0 0', fontSize: 12, color: '#4B5563', lineHeight: 1.4 }}>
-                Get a daily nudge at 9 AM so your streak stays alive and exams don't sneak up on you.
-              </p>
-            </div>
-            <div style={{ display: 'flex', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
-              <button
-                onClick={() => { track('push_subscribe_clicked'); requestAndSubscribe() }}
-                style={{ background: '#3B61C4', border: 'none', borderRadius: 8, padding: '8px 14px', fontSize: 12, fontWeight: 700, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}
-              >
-                Turn on reminders
-              </button>
-              <button
-                onClick={() => { track('push_subscribe_dismissed'); dismissPush() }}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', fontSize: 18, lineHeight: 1, padding: '0 2px' }}
-                aria-label="Dismiss"
-              >×</button>
-            </div>
-          </div>
-        </div>
-      )}
+      <PushPromptCard earned={hasCompletedFirstSession} wrapperStyle={{ padding: '0 32px 4px' }} />
 
       {/* ── Grid ── */}
       <div className="dash-grid" style={{ padding: '20px 32px 48px', display: 'grid', gridTemplateColumns: 'repeat(12, 1fr)', gap: 14 }}>
@@ -1431,7 +1364,8 @@ export default function DashboardView({
           completedToday={todaySessions.some(s => completedIds.has(s.id)) || lastCompletedDate === todayStr}
           todaySessions={todaySessions}
           freezeCount={freezeCount}
-          onUseFreeze={useFreeze}
+          canFreeze={canFreeze}
+          onUseFreeze={() => spendFreeze(todayStr)}
           onStartFocus={onStartFocus}
         />
 
@@ -1845,7 +1779,7 @@ export default function DashboardView({
                   >
                     <IcoPlay /> Start session
                   </button>
-                  <button onClick={(e) => { e.stopPropagation(); handleToggle(displaySession.id) }} className="dash-ghost-btn" style={{ fontSize: 13, color: D.textMuted, padding: '6px 8px', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Mark done</button>
+                  <button onClick={(e) => { e.stopPropagation(); handleToggle(displaySession.id, e.currentTarget) }} className="dash-ghost-btn" style={{ fontSize: 13, color: D.textMuted, padding: '6px 8px', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Mark done</button>
                   <button onClick={(e) => { e.stopPropagation(); setSessionIdx(i => (i + 1) % Math.max(uncompletedToday.length, 1)) }} className="dash-ghost-btn" style={{ fontSize: 13, color: D.textMuted, padding: '6px 8px', background: 'none', border: 'none', cursor: 'pointer', fontWeight: 500 }}>Skip</button>
                   <div className="dash-pomodoro" style={{ marginLeft: 'auto', fontSize: 11, color: D.textDim, display: 'flex', alignItems: 'center', gap: 5 }}>
                     <IcoZap /> Pomodoro · 25 + 5

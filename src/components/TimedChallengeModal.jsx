@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react'
-import Spinner from './ui/spinner'
+import GeneratingScreen from './ui/GeneratingScreen'
+import { stagesFor } from '../lib/toolStages'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
 import { addStudySession } from '../lib/studyHistory'
@@ -41,9 +42,14 @@ function savePB(courseKey, record) {
   } catch { return false }
 }
 
-export default function TimedChallengeModal({ courses, userId, onClose, onShowPaywall }) {
+export default function TimedChallengeModal({ courses, userId, onClose, onShowPaywall, initialCourseIdx = null }) {
   const [step, setStep] = useState('setup') // 'setup' | 'loading' | 'active' | 'done'
-  const [selectedCourse, setSelectedCourse] = useState(courses.length > 0 ? 0 : -1)
+  // Set once the questions are in hand; GeneratingScreen decides when to show them.
+  const [genReady, setGenReady] = useState(false)
+  // -1 means "no courses at all", which is a different state from "course 0".
+  const [selectedCourse, setSelectedCourse] = useState(
+    courses.length > 0 ? (initialCourseIdx ?? 0) : -1
+  )
   const [topic, setTopic] = useState('')
   const [error, setError] = useState('')
 
@@ -93,6 +99,7 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setError('')
     setStep('loading')
+    setGenReady(false)
     track('time_attack_started', { courseName, topic: topic.trim() || null })
     try {
       const token = await getAccessToken()
@@ -110,7 +117,7 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
       setSelected(null)
       setTimeLeft(TOTAL_TIME)
       setTimedOut(false)
-      setStep('active')
+      setGenReady(true)
       await incrementAIQuery()
     } catch (e) {
       track('time_attack_error', { error: e.message ?? 'unknown' })
@@ -151,7 +158,7 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
     const score = total > 0 ? Math.round((correct / total) * 100) : 0
     const isNewPB = savePB(courseKey, { score, correct, total, date: new Date().toISOString() })
     addStudySession({ tool: 'Time Attack', score, topic: topic.trim() || null, courseName: course?.name || null })
-    window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'timeAttack' } }))
+    window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'timeAttack', score: correct, total } }))
     track('time_attack_complete', { score, topic: topic.trim() || null, isNewPB, plan: getActivePlan() })
     doneStatsRef.current = { correct, total, score, isNewPB }
   }, [step])
@@ -246,11 +253,12 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
 
           {/* ── Loading ── */}
           {step === 'loading' && (
-            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14, padding: '32px 0' }}>
-              <Spinner size="md" />
-              <p style={{ fontSize: 14, fontWeight: 600, color: D.text, margin: 0 }}>Generating 14 questions...</p>
-              <p style={{ fontSize: 12, color: D.muted, margin: 0 }}>Get ready to go fast</p>
-            </div>
+            <GeneratingScreen
+              {...stagesFor('timeAttack')}
+              title="Get ready to go fast"
+              ready={genReady}
+              onComplete={() => { setGenReady(false); setStep('active') }}
+            />
           )}
 
           {/* ── Active ── */}

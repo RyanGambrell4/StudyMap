@@ -59,7 +59,7 @@ export function pickSmartTopic(course, ctx = null) {
   if (weakest && weakest.score < 70) {
     return {
       topic: weakest.topic,
-      reason: `weakest topic — mastery ${weakest.score}/100`,
+      reason: `weakest topic, mastery ${weakest.score}/100`,
       confidence: 'high',
       source: 'weak_topic',
     }

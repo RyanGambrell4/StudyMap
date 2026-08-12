@@ -10,6 +10,8 @@ import { getLastSessionBridge } from '../lib/lastSessionBridge'
 import { addCardsToDeck, cardFromConnectionMiss } from '../lib/deckAdditions'
 import { track } from '../lib/analytics'
 import Spinner from './ui/spinner'
+import GeneratingScreen from './ui/GeneratingScreen'
+import { stagesFor } from '../lib/toolStages'
 
 const D = {
   bg: '#F7F8FA', bgCard: '#FFFFFF',
@@ -95,11 +97,17 @@ function ConnectionDiagram({ conceptA, conceptB, originA, originB, bridgeType, i
   )
 }
 
-export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, learningStyle = null, yearLevel = null, firstName = null, schoolType = null, assignments = [] }) {
+export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, initialCourseIdx = null, learningStyle = null, yearLevel = null, firstName = null, schoolType = null, assignments = [] }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
-  const initialSmartCourse = useMemo(() => pickSmartCourse(courses).index, [courses])
+  // An explicit choice from the tools hub beats the smart default. Guessing
+  // over the top of a course the student just picked is worse than not
+  // guessing at all.
+  const initialSmartCourse = useMemo(
+    () => (initialCourseIdx != null ? initialCourseIdx : pickSmartCourse(courses).index),
+    [initialCourseIdx, courses],
+  )
   const [courseIdx, setCourseIdx] = useState(initialSmartCourse)
   const [showManual, setShowManual] = useState(false)
   // Cross-course mode is only meaningful when the student actually has 2+
@@ -112,6 +120,9 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
     return getLastSessionBridge({ courseId: c?.id ?? null, courseName: c?.name ?? null, currentTool: 'Connections' })
   }, [courseIdx, courses])
   const [step, setStep] = useState('setup') // setup | generating | cards | scoring | done
+  // Only the initial generation gets the narrated wait. Scoring a single answer
+  // is a one-second round trip, and dressing that up would just slow it down.
+  const [genReady, setGenReady] = useState(false)
   const [connections, setConnections] = useState([])
   const [cardIdx, setCardIdx] = useState(0)
   const [answer, setAnswer] = useState('')
@@ -131,6 +142,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
 
     setStep('generating')
+    setGenReady(false)
     setError('')
     track('connections_started', { courseName: course?.name ?? null, plan })
 
@@ -177,7 +189,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
       setCardIdx(0)
       setScores([])
       setAnswer('')
-      setStep('cards')
+      setGenReady(true)
     } catch (e) {
       track('connections_error', { error: e.message ?? 'unknown' })
       setError(e.message || 'Something went wrong. Please try again.')
@@ -243,7 +255,7 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
       const finalScores = latestScoresRef.current.length ? latestScoresRef.current : scores
       const finalAvg = finalScores.length ? Math.round(finalScores.reduce((s, r) => s + r.score, 0) / finalScores.length) : 0
       addStudySession({ tool: 'Connections', score: finalAvg, topic: null, courseName: course?.name || null })
-      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'connections' } }))
+      window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'connections', score: finalAvg } }))
       track('connections_session_complete', { avgScore: finalAvg, cardCount: totalCards })
       setStep('done')
     } else {
@@ -426,10 +438,12 @@ export default function ConnectionsModeModal({ courses, onClose, onShowPaywall, 
 
           {/* Generating */}
           {step === 'generating' && (
-            <div style={{ padding: 60, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 14 }}>
-              <Spinner size="lg" />
-              <div style={{ fontSize: 14, fontWeight: 600, color: D.textMuted }}>Finding connections in your material...</div>
-            </div>
+            <GeneratingScreen
+              {...stagesFor('connections')}
+              title="Linking your topics"
+              ready={genReady}
+              onComplete={() => { setGenReady(false); setStep('cards') }}
+            />
           )}
 
           {/* Cards */}

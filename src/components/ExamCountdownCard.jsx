@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import { getMasteryForCourse, getWeakestTopics } from '../lib/masteryStore'
 import { clean } from '../utils/strings'
 import { track } from '../lib/analytics'
+import { daysUntil } from '../utils/dateUtils'
 
 const D = {
   bg:      '#FFFFFF',
@@ -13,13 +14,6 @@ const D = {
   amber:   '#D97706',
   green:   '#16A34A',
   brand:   '#3B61C4',
-}
-
-function daysUntil(dateStr) {
-  if (!dateStr) return null
-  const target = new Date(dateStr + 'T12:00:00').getTime()
-  const now = Date.now()
-  return Math.max(0, Math.ceil((target - now) / 86400000))
 }
 
 // Composite readiness: mastery average blended with a coverage penalty

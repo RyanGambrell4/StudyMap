@@ -188,8 +188,8 @@ function LockedState({ onShowPaywall }) {
   const fakeRows = [
     { label: 'Midterm Exam',    weight: '25%', score: '82 / 100', grade: 'B',  color: '#3B61C4' },
     { label: 'Lab Report 3',    weight: '10%', score: '91 / 100', grade: 'A-', color: '#16A34A' },
-    { label: 'Problem Set 4',   weight: '8%',  score: '–',        grade: '–',  color: '#D97706' },
-    { label: 'Final Exam',      weight: '35%', score: '–',        grade: '–',  color: '#D97706' },
+    { label: 'Problem Set 4',   weight: '8%',  score: '-',          grade: '-',  color: '#D97706' },
+    { label: 'Final Exam',      weight: '35%', score: '-',          grade: '-',  color: '#D97706' },
   ]
   return (
     <div style={{ position: 'relative', minHeight: 480, background: D.bg, overflow: 'hidden' }}>
@@ -221,7 +221,7 @@ function LockedState({ onShowPaywall }) {
               </div>
               <span style={{ fontSize: 12, color: '#6B6B6B' }}>{r.weight}</span>
               <span style={{ fontSize: 12, color: '#6B6B6B' }}>{r.score}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: r.grade === '–' ? '#9B9B9B' : r.color }}>{r.grade}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: r.grade === '-' ? '#9B9B9B' : r.color }}>{r.grade}</span>
             </div>
           ))}
         </div>

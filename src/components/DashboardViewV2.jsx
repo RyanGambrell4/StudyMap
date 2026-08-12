@@ -1,5 +1,5 @@
-import { useMemo, useState, useEffect, useCallback } from 'react'
-import { useStreak } from '../utils/useStreak'
+import { useMemo, useState, useEffect, useCallback, useRef } from 'react'
+import PushPromptCard from './PushPromptCard'
 import { getWeeklyGoal, computeWeeklyProgress } from '../lib/weeklyGoal'
 import { getMasteryForCourse, getDueForReview } from '../lib/masteryStore'
 import { daysBetween } from '../utils/dateUtils'
@@ -100,12 +100,6 @@ function sessionTypeLabel(type) {
 const IcoCheck = ({ size = 11 }) => (
   <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="3.5" strokeLinecap="round" strokeLinejoin="round">
     <path d="M4 12.5l5.5 5.5L20 6.5"/>
-  </svg>
-)
-
-const IcoFlame = ({ color = '#F5820B', size = 18 }) => (
-  <svg width={size} height={size} viewBox="0 0 24 24" fill={color}>
-    <path d="M12 2c1 3.5-.7 5.2-2 6.6C8.6 10 7.5 11.3 7.5 14a4.5 4.5 0 0 0 9 0c0-1.2-.4-2.2-1-3-.3 1-.9 1.6-1.7 2 .4-2.6-.3-5.4-1.8-7.4A11 11 0 0 0 12 2z"/>
   </svg>
 )
 
@@ -302,7 +296,7 @@ function HeroNormal({ nextSession, avgRecall, dueCount, payoffLine, onStartFocus
 }
 
 // ── Hero: Done for today ───────────────────────────────────────────────────────
-function HeroDone({ streak, weeklyMinutes, weeklyGoalHours, nextSession }) {
+function HeroDone({ weeklyMinutes, weeklyGoalHours, nextSession }) {
   const hoursThis   = weeklyMinutes / 60
   const pct         = Math.min(100, Math.round((hoursThis / weeklyGoalHours) * 100))
   const hoursLabel  = `${hoursThis.toFixed(1)} of ${weeklyGoalHours} hrs this week`
@@ -333,7 +327,7 @@ function HeroDone({ streak, weeklyMinutes, weeklyGoalHours, nextSession }) {
         <IcoCheck size={24} />
       </div>
       <div style={{ fontFamily: SERIF, fontSize: 26, fontWeight: 500, marginTop: 20 }}>
-        Done for today. Streak at {streak} {streak === 1 ? 'day' : 'days'}.
+        Done for today.
       </div>
       <div style={{ maxWidth: 340, margin: '22px auto 0' }}>
         <div style={{ height: 6, background: '#EAECF0', borderRadius: 3, overflow: 'hidden' }}>
@@ -351,8 +345,11 @@ function HeroDone({ streak, weeklyMinutes, weeklyGoalHours, nextSession }) {
 // ── Hero: Syllabus drop (flag: se_syllabus_onboarding) ───────────────────────
 function HeroSyllabusDrop({ onDropSyllabus, loading, error, onClearError, onSetupManually }) {
   const [dragging, setDragging] = useState(false)
-  const fileRef = { current: null }
-  const inputRef = (el) => { fileRef.current = el }
+  // A real ref, not a plain object recreated every render. The old version
+  // only worked because the inline callback ref changed identity each render
+  // and React happened to re-attach it; memoize either one and the file picker
+  // silently stops opening.
+  const fileRef = useRef(null)
 
   const handleFile = (file) => {
     if (!file) return
@@ -402,7 +399,7 @@ function HeroSyllabusDrop({ onDropSyllabus, loading, error, onClearError, onSetu
         }}
       >
         <input
-          ref={inputRef}
+          ref={fileRef}
           type="file"
           accept=".pdf,.docx,.pptx"
           style={{ display: 'none' }}
@@ -514,34 +511,20 @@ function HeroNewUser({ setupSteps, onStepClick }) {
 }
 
 // ── Stat strip ────────────────────────────────────────────────────────────────
-function StatStrip({ streak, weeklyMinutes, weeklyGoalHours, sessionsThisWeek, isNewUser }) {
+// The streak deliberately does not appear here. It lives in Account settings:
+// the dashboard is for what to do next, not for a scoreboard of the past.
+function StatStrip({ weeklyMinutes, weeklyGoalHours, sessionsThisWeek, isNewUser }) {
   const hoursThis  = weeklyMinutes / 60
   const pct        = Math.min(100, Math.round((hoursThis / weeklyGoalHours) * 100))
   const weeklyLabel = `${hoursThis.toFixed(1)} of ${weeklyGoalHours} hrs this week`
 
   return (
     <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', rowGap: 10, padding: '0 6px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-        {isNewUser ? (
-          <>
-            <IcoFlame color="#C9C6BF" size={16} />
-            <span style={{ fontSize: 13, color: T.dim }}>Streak starts with your first session</span>
-          </>
-        ) : (
-          <>
-            <IcoFlame />
-            <span style={{ fontSize: 13, fontWeight: 600, whiteSpace: 'nowrap' }}>{streak}-day streak</span>
-          </>
-        )}
-      </div>
-
-      <div style={{ width: 1, height: 18, background: 'rgba(0,0,0,0.1)', margin: '0 22px', flexShrink: 0 }} />
-
       <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
         {isNewUser ? (
           <>
             <div style={{ flex: 1, height: 6, background: '#EAECF0', borderRadius: 3, minWidth: 60 }} />
-            <span style={{ fontSize: 13, color: T.dim, flexShrink: 0 }}>Weekly goal — not set yet</span>
+            <span style={{ fontSize: 13, color: T.dim, flexShrink: 0 }}>Weekly goal not set yet</span>
           </>
         ) : (
           <>
@@ -589,7 +572,7 @@ function CourseRow({ course, idx, todayStr, recall, onClick }) {
   } else if (days !== null && days > 7 && days <= 21) {
     status = recall != null ? `${days} days · recall ${recall}%` : `${days} days to exam`
   } else if (recall != null && recall < 60) {
-    status = `Recall ${recall}% — needs work`
+    status = `Recall ${recall}%, needs work`
   }
 
   return (
@@ -859,7 +842,6 @@ export default function DashboardViewV2({
     document.head.appendChild(link)
   }, [])
 
-  const { currentStreak } = useStreak()
   const weeklyGoal = useMemo(() => getWeeklyGoal(todayStr), [todayStr])
   const weeklyProgress = useMemo(
     () => computeWeeklyProgress(completedSessions, todayStr),
@@ -923,7 +905,7 @@ export default function DashboardViewV2({
     } else if (avg != null && avg < 70) {
       line = `${nextSession.courseName} recall is below target. This session builds it back up.`
     } else if (avg != null) {
-      line = `You're making progress. Keep the streak going.`
+      line = `${nextSession.courseName} is on track. This session keeps it there.`
     }
 
     return { payoffLine: line, avgRecall: avg, dueCount: due }
@@ -1012,7 +994,7 @@ export default function DashboardViewV2({
   const subline = doneForToday
     ? "Today's work is in the bank."
     : isNewUser
-    ? "Let's get you set up — two minutes, tops."
+    ? "Let's get you set up. Two minutes, tops."
     : 'One focused session today keeps you on pace.'
 
   // Responsive outer padding
@@ -1071,7 +1053,6 @@ export default function DashboardViewV2({
           <HeroNewUser setupSteps={setupSteps} onStepClick={handleStepClick} />
         ) : doneForToday ? (
           <HeroDone
-            streak={currentStreak}
             weeklyMinutes={weeklyProgress.minutes}
             weeklyGoalHours={weeklyGoal.hours}
             nextSession={nextDaySession}
@@ -1089,12 +1070,16 @@ export default function DashboardViewV2({
 
         {/* Stat strip */}
         <StatStrip
-          streak={currentStreak}
           weeklyMinutes={weeklyProgress.minutes}
           weeklyGoalHours={weeklyGoal.hours}
           sessionsThisWeek={weeklyProgress.sessions}
           isNewUser={isNewUser}
         />
+
+        {/* Reminders. Only offered once they have a completed session behind
+            them: the browser permission prompt is one-shot and a denial is
+            permanent, so it is not spent on a cold first visit. */}
+        <PushPromptCard earned={(completedSessions?.length ?? 0) >= 1} />
 
         {/* Courses */}
         <CoursesCard

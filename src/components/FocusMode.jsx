@@ -12,7 +12,7 @@ import { getAccessToken } from '../lib/supabase'
 import { fetchWithRetry } from '../lib/utils'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, getFocusMinutesUsed, incrementFeatureUsage, FREE_LIMITS, hasUsedTrial } from '../lib/subscription'
 import { sliderToRecall } from '../utils/adaptationEngine'
-import { useCelebration } from '../utils/useCelebration'
+import { useCelebration, TIER } from '../utils/useCelebration'
 import { extractText } from '../utils/extractText'
 import AIChatView from './AIChatView'
 import { track } from '../lib/analytics'
@@ -544,7 +544,14 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
   useEffect(() => {
     if (showComplete && !celebratedRef.current) {
       celebratedRef.current = true
-      celebrate('big')
+      // Session complete. Tier 1 per the celebration table. There is no anchor
+      // element here, so the controller raises its strip; give it real copy
+      // rather than letting it fall back to a generic line.
+      celebrate({
+        tier: TIER.SMALL,
+        trigger: 'session_completed',
+        meta: { title: 'Session done', body: course?.name ? `${course.name} logged.` : null },
+      })
     }
   }, [showComplete])
   const [pdfDownloading, setPdfDownloading] = useState(false)

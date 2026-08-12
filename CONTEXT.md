@@ -1,5 +1,123 @@
 # StudyEdge AI — Living Context
-_Last updated by: UX Copy Agent on 2026-07-19 (comprehensive AI-voice + slop sweep across all ~70 JSX components: removed "We'll/I'll" first-person voice from CoursesView, SyllabusUploadModal, AuthScreen, ErrorBoundary, BlueprintScreen; removed "AI-powered/AI-generated/personalized" qualifiers from AppShell, DashboardView, OutputView, SharedPlanView, PodcastGenerator, OnboardingTour, CheatSheetModal, FocusMode; removed emoji from App.jsx email confirmation tips, browser notifications, FocusMode dead-code icons; removed preachy/slop copy from WeeklyGoalCard, ConfidenceTapModal, DashboardView, Onboarding headings. 12 commits shipped to main.); Quality Sweep Agent on 2026-07-16 (second session: DashboardView AI chip visibility bug, floating trial nudge price fix, AuthScreen plan-aware trial price, FocusMode Enter stale closure, stale 7-day trial copy in 4 files); Quality Sweep Agent on 2026-07-16 (boost nudge email rewrite, double-credit bugs fixed in teach-it-back/connections-mode/exam-rescue, freeBadge fix, em-dash guardrails in 5 more AI prompts, $0 today → card-required in 3 emails, stale AI limit corrections); SEO Agent on 2026-06-10 (43 new pages: Wave A AI category, Wave B panic-study blog, Wave C study science/GPA, Wave D 30 school GPA pages, Wave E vercel.json + sitemap + footer); QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: Engagement pass on 2026-08-11 (narrated AI waits, celebrations that actually reach users, twelve silent tool completions, em-dash copy sweep with a detector, focus rings and press states, sound toggle, tools-hub course selection; branch worktree-dopamine-onboarding-web, NOT merged to main); UX Copy Agent on 2026-07-19 (comprehensive AI-voice + slop sweep across all ~70 JSX components: removed "We'll/I'll" first-person voice from CoursesView, SyllabusUploadModal, AuthScreen, ErrorBoundary, BlueprintScreen; removed "AI-powered/AI-generated/personalized" qualifiers from AppShell, DashboardView, OutputView, SharedPlanView, PodcastGenerator, OnboardingTour, CheatSheetModal, FocusMode; removed emoji from App.jsx email confirmation tips, browser notifications, FocusMode dead-code icons; removed preachy/slop copy from WeeklyGoalCard, ConfidenceTapModal, DashboardView, Onboarding headings. 12 commits shipped to main.); Quality Sweep Agent on 2026-07-16 (second session: DashboardView AI chip visibility bug, floating trial nudge price fix, AuthScreen plan-aware trial price, FocusMode Enter stale closure, stale 7-day trial copy in 4 files); Quality Sweep Agent on 2026-07-16 (boost nudge email rewrite, double-credit bugs fixed in teach-it-back/connections-mode/exam-rescue, freeBadge fix, em-dash guardrails in 5 more AI prompts, $0 today → card-required in 3 emails, stale AI limit corrections); SEO Agent on 2026-06-10 (43 new pages: Wave A AI category, Wave B panic-study blog, Wave C study science/GPA, Wave D 30 school GPA pages, Wave E vercel.json + sitemap + footer); QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+
+---
+
+## Engagement pass -- 2026-08-11 (waits, rewards, copy, interaction states)
+
+Branch `worktree-dopamine-onboarding-web`. Not merged to main.
+
+### The pattern worth remembering
+
+Most of the value this run came from finding finished features that render
+to nobody, not from writing new ones. `npm run find:dark` lists modules
+nothing imports (22 at last run). Three separate reward mechanisms were
+built, wired at one end, and reaching zero users. Check this before
+building anything new.
+
+### Narrated waits replace spinners
+
+`src/components/ui/GeneratingScreen.jsx` plus `src/lib/toolStages.js`.
+Progress ring with honest stage labels naming the real work. Live in Quiz
+Burst, Time Attack, Teach It Back, Brain Dump, Connections, Cheat Sheet,
+Exam Rescue. Cheat Sheet and Exam Rescue previously had no wait screen at
+all, only a spinner inside the button.
+
+Not fixed-length theatre: rushes to 100 when work lands early, holds at 92
+percent when the backend is slower than the estimate, never walks to 100
+before the data exists. Connections' per-answer scoring keeps its spinner
+on purpose, since narrating a one second round trip only slows it down.
+
+### Celebrations now reach users
+
+Three reasons they were not:
+1. `daily_goal_hit` and `session_checked` lived only in V1 DashboardView,
+   which `se_dashboard_v2` keeps unmounted. Both now fire from OutputView,
+   which owns `completedIds` either way. V1 copies removed.
+2. `TIER.SMALL` with no anchor element was a silent no-op on web. It called
+   `liftAndGlow(null)`, emitted an `xpbar` event **no component subscribes
+   to**, and played a tone that is off by default. Finishing a session in
+   Focus Mode produced nothing. SMALL without an anchor now raises a strip.
+   The dead `xpbar` surface was never built and is still unbuilt.
+3. Checkboxes passed no anchor, so the XP flyup arced from screen centre.
+
+`src/lib/toolCelebrations.js` is one listener over the existing
+`studyedge:tool-session-complete` event, covering the twelve tools that
+ended in silence. Adding a tool means dispatching that event, nothing else.
+Focus Mode and Practice Exam are excluded because they celebrate
+themselves. Payload gained optional `score`/`total`; 90 percent or better
+earns confetti. `npm run test:celebrations` (17 assertions).
+
+`TIER`/`TIER_NAME` moved to `src/lib/celebrationTiers.js` so the mapping is
+testable in plain node without pulling in canvas-confetti, PostHog and the
+DOM. `celebration.js` re-exports both, so no existing import changed.
+
+### Em dashes
+
+`npm run find:emdash` strips comments and reports only real copy. A raw
+grep says 40+ files; almost all are comments. Real count was 49 in 21
+files. Eight deliberately left: 6 in confirmed-dark modules
+(CourseDiagnostic, SessionBundle), 1 in `courseContext.js` prompt text
+sent to the model, 1 in `strings.js` which is the regex that strips them.
+
+### Interaction states, in `src/index.css`
+
+- Keyboard focus rings. The app had none: 37 files set `outline: 'none'`
+  inline, which no stylesheet can beat without `!important`. Uses
+  `:focus-visible`, so clicking still draws nothing.
+- Press feedback on buttons. Deliberately not `!important`, so buttons that
+  animate their own transform keep owning it. Not applied to clickable divs.
+- Reduced-motion guard. Collapses durations rather than setting
+  `animation: none`, because many existing keyframes use fill-mode `both`
+  from `opacity: 0` and would leave content permanently invisible.
+
+### Judgement calls, so they are not re-litigated
+
+- **`tools/ToolResultsScreen.jsx` was NOT wired in, and should not be.**
+  An earlier plan called it the highest-value dark module. Comparing it
+  against what tools already ship, it is a downgrade everywhere: Time
+  Attack already has a personal-best badge, colour-coded score, skipped
+  count and topic drill; Quiz Burst has mastery delta, calibration, missed
+  questions and repair. Artifact tools have no score for it to show. Its
+  one good idea is the recall before/after bar, which Quiz Burst has as
+  text. File left in place rather than deleted.
+- Migrating 30 files of local `@keyframes` to a shared module was dropped.
+  Churn across 30 files, nothing a student would notice.
+
+### Course selection now survives the launch
+
+The tools hub passes `{ courseIdx }` when a student picks a course. Five
+callbacks in OutputView dropped it on the floor, and the five modals had no
+prop to receive it, so the choice silently did nothing for Exam Rescue,
+Connections, Time Attack, Cheat Sheet and Podcast. All five now accept
+`initialCourseIdx`, and an explicit choice beats `pickSmartCourse()`:
+guessing over the top of a course the student just picked is worse than
+not guessing at all.
+
+One shared `toolCourseIdx` slot serves all five. That is safe because only
+one can be open at a time and every onClose resets it to null, which is
+what lets the other launch points keep passing no config and still get the
+smart default rather than a stale course.
+
+### Sound
+
+`celebration.js` had the WebAudio synth, per-tier tones and a persisted
+flag, with nothing anywhere able to switch them on. There is now an Account
+toggle. It calls `playTone` directly rather than `celebrate()`, so flipping
+a switch does not raise a toast reading "Nice work". `playTone` was made
+public for this.
+
+### Known follow-ups
+
+- `strings.js` `clean()` strips em dashes from AI output, but not every
+  AI-rendering path has been verified to call it.
+- Haptics were not started. Needs a Capacitor bridge.
+- `OnboardingFlow` is still dark. Routing it needs a pre-auth restructure:
+  `App.jsx:775` gates on `session.user` and `handleOnboardingComplete`
+  expects a different shape. This is the largest remaining dark module and
+  it sits on the signup path.
+- The `xpbar` celebration event is emitted by every SMALL and consumed by
+  nothing. Either build the surface or stop emitting it.
 
 ---
 
@@ -1475,3 +1593,190 @@ _Continuing from the first background session. Focused on pricing copy accuracy,
 ### Previously fixed (from first session, now resolved)
 - FocusMode keyboard shortcut stale closure (fixed this session)
 - `StudyCoachView.jsx` MyPlansView `useMemo` (fixed in first session)
+
+---
+
+## Streak loop repair (2026-08-10, branch `worktree-dopamine-onboarding-web`)
+
+_Went looking for retention improvements and found the streak mechanic was
+entirely dead in the default configuration. Fixed that before adding anything
+new, because no new dopamine feature would have mattered while this was broken._
+
+### The core bug (critical, shipping)
+
+The streak never incremented for anyone on the default dashboard.
+
+- `se_dashboard_v2` defaults ON (`OutputView.jsx`: `localStorage.getItem('se_dashboard_v2') !== '0'`).
+- When ON, `DashboardViewV2` renders and `DashboardView` (V1) never mounts.
+- `recordCompletion` was called **only** inside V1 `DashboardView`.
+- V1 also held the **only** listener for `studyedge:tool-session-complete`,
+  an event dispatched by **14** different tools (FocusMode, QuickQuizBurst,
+  BrainDump, PracticeExam, TeachItBack, CheatSheet, Podcast, EssayArchitect,
+  Connections, Diagrams, ProblemSolver, TimedChallenge, ExamRescue, Diagnostic).
+
+Net effect: every tool completion fired into the void, the streak sat at 0
+permanently, `StatStrip` rendered a literal "0-day streak", and `HeroDone` ended
+each finished day with "Done for today. Streak at 0 days." `StreakGuardCard`
+(the loss-aversion surface) requires `streak >= 3` and so never appeared at all.
+
+### Secondary bugs found in the same file
+
+- **The streak never decayed.** `currentStreak` was only recomputed on the next
+  completion, so a lapsed streak displayed its stale value indefinitely. A
+  number that cannot go down exerts no loss aversion and is also simply false.
+- **Freezes accumulated without a cap**, one per ISO week forever. A user in
+  week twelve had twelve freezes and a streak that could not break.
+- **localStorage was written during render**, inside a `useState` initialiser,
+  which can double-award under StrictMode.
+- Three `useStreak()` callers each held **separate copies** of the state, so a
+  change in one would not update the others.
+
+### What changed
+
+- `src/lib/streakLogic.js` (new) — the pure rules: decay, transitions, freeze
+  eligibility. No React, no storage, no clock reads.
+- `src/utils/useStreak.js` — rewritten as a single module store read through
+  `useSyncExternalStore`, so every consumer shares one live value. **The store
+  owns the `studyedge:tool-session-complete` listener itself**, so recording no
+  longer depends on which view is mounted. Recomputes on `visibilitychange` and
+  `focus` to handle the date rolling on a tab left open overnight.
+- `src/components/OutputView.jsx` — records checkbox completions, one level
+  above the dashboard switch, since it owns `completedIds`.
+- `src/components/DashboardViewV2.jsx` — renders `StreakGuardCard` (first time
+  loss aversion exists on the default dashboard); never prints "0-day streak".
+- `src/components/DashboardView.jsx` — reads only; recording removed. Broken
+  banner and the streak-broken email trigger now read `lapsedStreak`, which is
+  what makes them still fire now that `currentStreak` decays to 0.
+- `src/components/StreakGuardCard.jsx` — migrated off the deprecated V1 palette
+  to `src/theme/tokens.js` per CLAUDE.md.
+
+### Behaviour changes worth knowing
+
+- A freeze now covers exactly one day (today, or yesterday to bridge a miss)
+  and **cannot resurrect a streak that lapsed long ago**. It protects a run
+  without lengthening it, because no studying happened on the covered day.
+- Freeze cap is 2. Existing over-cap balances are clamped on read.
+- `useFreeze` was renamed `spendFreeze`: the `use` prefix made
+  `rules-of-hooks` reject every call inside an event handler.
+
+### Known limitation (pre-existing, deliberately not forked)
+
+Dates use the app-wide UTC-derived `toDateStr`, so "today" rolls over before
+local midnight in western timezones. The streak now matches the `todayStr`
+threaded through the rest of the app; changing that convention is a separate,
+app-wide job.
+
+### Verification
+
+- `npm run test:streak` — 32 rules, including leap day, new year and month-end
+  boundaries, and a 30-day walk.
+- `npm run test:insights` — 3210 combinations, still passing.
+- Whole-app esbuild import-graph resolution, clean.
+
+### Also fixed while in these files
+
+Three em dashes in user-facing V2 copy (CLAUDE.md forbids them): "Weekly goal
+— not set yet", "Recall N% — needs work", "Let's get you set up — two minutes,
+tops."
+
+---
+
+## Push notification prompt, same root cause (2026-08-10)
+
+Checked whether any other retention surface was stranded in V1. One was, and it
+is arguably the more valuable of the two.
+
+**The push notification prompt was only ever defined inline in V1
+`DashboardView`.** `usePushNotifications` was imported there and nowhere else,
+so no user on the default V2 dashboard was ever asked to enable reminders. The
+whole push stack behind it (`/api/push-subscribe`, VAPID keys, the service
+worker, `useSessionReminders`) was already built and reachable; only the ask
+was missing.
+
+### What changed
+
+- `src/components/PushPromptCard.jsx` (new) — the banner as a shared,
+  self-gating component on V2 tokens. Renders null unless the browser can take
+  a subscription and the user has not granted, denied or dismissed.
+- Rendered in **both** dashboards. V1's 35-line inline copy was deleted in
+  favour of it, so the two cannot drift apart again.
+- **New gate: `earned`.** The browser permission prompt is one-shot and a
+  denial is permanent, so it is no longer spent on a cold first visit. Both
+  dashboards pass true only once the user has a completed session behind them.
+  This also matches the design brief's "push prompt after first session".
+
+Note `usePushNotifications(userId)` never actually reads its `userId`
+argument, so the component needed no prop threading.
+
+---
+
+## Phase 0: turn the lights on (2026-08-10)
+
+### 1. The V2 tools hub now ships
+
+`StudyToolsViewV2` (341 lines) was imported by nothing, and the
+`se_tools_v2` flag `CLAUDE.md` documented as default-on did not exist in the
+code. Added the lazy import, the flag, and the render switch, and corrected
+`CLAUDE.md`.
+
+The V2 hub collects course and topic up front in its `ToolModal`, then passes
+them to the open callbacks so the tool opens already configured. The handlers
+take an optional config and fall through to the old behaviour when called with
+no argument, so V1 and the dashboard call sites are untouched.
+
+**Regression caught before shipping:** V2 ignored `initialDrillTopic`, so Brain
+Dump's "drill the gaps" would have navigated to the hub and done nothing. It
+now opens Topic Drill pointed at that topic.
+
+**Follow-up:** ExamRescue, Connections, TimeAttack, CheatSheet and Podcast do
+not accept an initial course index, so V2's `courseIdx` is ignored for those
+five and the student picks again inside.
+
+### 2. `npm run find:dark`
+
+`scripts/find-dark-modules.mjs` lists every module under `src/` that nothing
+imports. Written because three separate finished features had already shipped
+to nobody for exactly this reason, and nothing errors in that state.
+
+**It found 22.** The notable ones:
+
+| Module | Lines | What it is |
+|---|---|---|
+| `tools/ToolResultsScreen.jsx` | 177 | **The end-of-session summary screen.** Score, recall before and after, coach line, Go again / Done. This is the highest-retention item on the build plan, already written. |
+| `GradePredictorView.jsx` | 400 | Full AI grade predictor view |
+| `SessionBundle.jsx` | 271 | Session bundle UI |
+| `StudyBuddyCard.jsx` | 251 | Study buddy invites, the only social feature in the codebase |
+| `CourseDiagnostic.jsx` | 233 | Diagnostic that updates mastery, adds cards, logs sessions |
+| `PracticeExamModal.jsx` | 240 | Practice exam modal |
+| `PrepBlastScreen.jsx` | 216 | Prep blast screen |
+| `coach/CoachRoot.jsx` | 130 | Coach root |
+| `DeckAddedToast.jsx` | 112 | Deck-added toast |
+| `tools/ToolFocusMode.jsx` | 100 | Focus runner for the V2 tools system |
+| `onboarding/OnboardingFlow.jsx` | 256 | The new onboarding, pending the routing decision below |
+
+The rest are `ui/` primitives never adopted (`badge`, `button`, `card`,
+`switch`, `bento-product-features`) and superseded local utils
+(`generateFlashcards`, `generateQuiz`, `parseSyllabus`,
+`extractSyllabusEvents`, `uploadClient`, `coachMicroUpdates`) that AI endpoints
+replaced. Those are cleanup, not features.
+
+Run `npm run find:dark` before shipping any new V2 component.
+
+### 3. Onboarding routing: deferred deliberately, not forgotten
+
+`OnboardingFlow` is still not routed in. The blockers are real and this is the
+signup funnel, so it wants its own session with manual testing:
+
+- `App.jsx:775` renders `<Onboarding>` only when `session.user` exists, so
+  onboarding is currently post-auth. The design brief explicitly forbids an
+  account gate before the reveal, which means the flow has to run pre-auth and
+  the answers have to survive the auth boundary.
+- `handleOnboardingComplete` at `App.jsx:414` expects
+  `{yearLevel, learningStyle, preferredTime, schoolType, emailDigest, durationMs, trialTaken}`.
+  `OnboardingFlow` produces a different shape entirely
+  (`course, school, examDate, currentGrade, targetGrade, struggles, studyHours,
+  learningStyles, studyTime, commitment`), so an adapter is required.
+- The existing `Onboarding.jsx` needs a decision: replaced, or kept behind a
+  flag.
+
+Answers already persist under a versioned key, so the storage half is solved.

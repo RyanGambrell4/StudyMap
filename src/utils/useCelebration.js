@@ -1,52 +1,45 @@
-import confetti from 'canvas-confetti'
-import { useCallback, useRef } from 'react'
+/**
+ * useCelebration - thin React binding over the celebration controller.
+ *
+ * This hook no longer owns any celebration logic. It delegates to
+ * `src/lib/celebration.js`, which is the only place that fires confetti,
+ * enforces frequency caps and reports to PostHog.
+ *
+ * The legacy call signature `celebrate('light' | 'medium' | 'big')` still works
+ * so existing callers do not break, but new code should pass the options form:
+ *
+ *   const celebrate = useCelebration()
+ *   celebrate({ tier: TIER.MEDIUM, trigger: 'streak_milestone', anchorEl: ref, meta: { xp: 10 } })
+ *
+ * Passing an `anchorEl` matters. Without it a MEDIUM burst originates from the
+ * middle of the viewport instead of the element the user just interacted with.
+ */
 
-const todayStr = () => new Date().toISOString().split('T')[0]
+import { useCallback } from 'react'
+import { celebrate as fire, TIER } from '../lib/celebration'
+
+// Safety net for any call site that still passes a legacy string. Every known
+// call site has been audited and migrated to an explicit tier; see the tier
+// table in `dopamine-onboarding-design-brief.md` section 4.
+const LEGACY_TIER = {
+  light:  TIER.MICRO,
+  medium: TIER.SMALL,
+  big:    TIER.MEDIUM,
+}
 
 export function useCelebration() {
-  // Track light-confetti fires per day - resets automatically when date changes
-  const lightRef = useRef({ date: todayStr(), count: 0 })
-
-  const celebrate = useCallback((level = 'medium') => {
-    if (level === 'light') {
-      const today = todayStr()
-      if (lightRef.current.date !== today) {
-        lightRef.current = { date: today, count: 0 }
-      }
-      if (lightRef.current.count >= 2) return
-      lightRef.current.count++
-      confetti({
-        particleCount: 60,
-        spread: 50,
-        origin: { y: 0.7 },
-        disableForReducedMotion: true,
+  return useCallback((arg = {}, extra = {}) => {
+    if (typeof arg === 'string') {
+      return fire({
+        tier: LEGACY_TIER[arg] ?? TIER.MICRO,
+        trigger: extra.trigger ?? `legacy_${arg}`,
+        anchorEl: extra.anchorEl ?? null,
+        meta: extra.meta ?? {},
       })
-    } else if (level === 'medium') {
-      confetti({
-        particleCount: 120,
-        spread: 70,
-        origin: { y: 0.6 },
-        disableForReducedMotion: true,
-      })
-    } else if (level === 'big') {
-      confetti({
-        particleCount: 150,
-        angle: 60,
-        spread: 55,
-        origin: { x: 0, y: 0.65 },
-        disableForReducedMotion: true,
-      })
-      setTimeout(() => {
-        confetti({
-          particleCount: 150,
-          angle: 120,
-          spread: 55,
-          origin: { x: 1, y: 0.65 },
-          disableForReducedMotion: true,
-        })
-      }, 150)
     }
+    return fire(arg)
   }, [])
-
-  return celebrate
 }
+
+export { TIER }
+export default useCelebration

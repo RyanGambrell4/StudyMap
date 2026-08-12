@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import Spinner from './ui/spinner'
+import GeneratingScreen from './ui/GeneratingScreen'
+import { stagesFor } from '../lib/toolStages'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeatureUsage, hasUsedTrial } from '../lib/subscription'
 import { addStudySession } from '../lib/studyHistory'
@@ -21,14 +23,16 @@ const PRIORITY_STYLE = {
 }
 const BLOCK_COLORS = { study: '#3B61C4', buffer: '#16A34A' }
 
-export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
+export default function ExamRescueModal({ courses, onClose, onShowPaywall, initialCourseIdx = null }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
-  const [courseIdx, setCourseIdx] = useState(0)
+  // Honour the course the tools hub was pointed at; fall back to the first.
+  const [courseIdx, setCourseIdx] = useState(initialCourseIdx ?? 0)
   const [gradeIdx, setGradeIdx] = useState(8) // default B
   const [examDatetime, setExamDatetime] = useState('')
-  const [step, setStep] = useState('setup') // 'setup' | 'topics' | 'schedule'
+  const [step, setStep] = useState('setup') // 'setup' | 'generating' | 'topics' | 'schedule'
+  const [genReady, setGenReady] = useState(false)
   const [topics, setTopics] = useState(null)
   const [schedule, setSchedule] = useState(null)
   const [scheduleLoading, setScheduleLoading] = useState(false)
@@ -58,6 +62,8 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
     const { allowed: canRescue } = canUseFeature('examRescue')
     if (!canRescue) { onShowPaywall?.('examRescue'); return }
     setLoading(true)
+    setStep('generating')
+    setGenReady(false)
     setError('')
     track('exam_rescue_started', { courseName: course?.name ?? null, plan: getActivePlan() })
 
@@ -80,10 +86,11 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
         incrementAIQuery()
         incrementFeatureUsage('examRescue')
         addStudySession({ tool: 'Exam Rescue', score: null, topic: null, courseName: course?.name || null })
-        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'examRescue' } }))
+        // Dispatched from the GeneratingScreen handoff instead, so the reward
+        // does not land on top of the progress ring.
         track('exam_rescue_generated', { topicCount: data.topics?.length ?? 0, courseName: course?.name || null, plan: getActivePlan() })
         setTopics(data.topics)
-        setStep('topics')
+        setGenReady(true)
         setLoading(false)
         // Kick off schedule generation immediately in background
         generateSchedule(data.topics)
@@ -94,6 +101,7 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
           track('exam_rescue_error', { error: e.message ?? 'unknown' })
           setError(e.message || 'Something went wrong. Please try again.')
           setLoading(false)
+          setStep('setup')
         }
       }
     }
@@ -239,6 +247,19 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
               )
             })()}
           </div>
+        )}
+
+        {step === 'generating' && (
+          <GeneratingScreen
+            {...stagesFor('examRescue')}
+            title="Building your rescue plan"
+            ready={genReady}
+            onComplete={() => {
+              setGenReady(false)
+              setStep('topics')
+              window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'examRescue' } }))
+            }}
+          />
         )}
 
         {/* Topics step */}

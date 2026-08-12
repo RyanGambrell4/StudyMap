@@ -117,11 +117,12 @@ function AudioPlayer({ url }) {
   )
 }
 
-export default function PodcastGenerator({ courses, userId, onClose, onShowPaywall }) {
+export default function PodcastGenerator({ courses, userId, onClose, onShowPaywall, initialCourseIdx = null }) {
   const plan = getActivePlan()
   const isUnlimited = plan === 'unlimited'
 
-  const [selectedIdx, setSelectedIdx] = useState(0)
+  // Honour the course the tools hub was pointed at; fall back to the first.
+  const [selectedIdx, setSelectedIdx] = useState(initialCourseIdx ?? 0)
   const [step, setStep] = useState('setup') // setup | generating | done | error
   const [msgIdx, setMsgIdx] = useState(0)
   const [error, setError] = useState('')

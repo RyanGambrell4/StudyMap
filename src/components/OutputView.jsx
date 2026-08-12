@@ -38,12 +38,14 @@ import DashboardViewV2 from './DashboardViewV2'
 import CommandPalette from './CommandPalette'
 import { QUICK_PRESETS, buildQuickSession } from '../lib/quickStart'
 import { useSessionReminders } from '../utils/useSessionReminders'
-import { useStreak } from '../utils/useStreak'
+import { useStreak, recordCompletion } from '../utils/useStreak'
+import { useCelebration, TIER } from '../utils/useCelebration'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, hasUsedTrial, canUseFeature } from '../lib/subscription'
 const CoursesView    = lazy(() => import('./CoursesView'))
 const ProgressView   = lazy(() => import('./ProgressView'))
 const StudyToolsView = lazy(() => import('./StudyToolsView'))
+const StudyToolsViewV2 = lazy(() => import('./StudyToolsViewV2'))
 const StudyCoachView = lazy(() => import('./StudyCoachView'))
 const PracticeExamView = lazy(() => import('./PracticeExamView'))
 import AIChatView from './AIChatView'
@@ -229,7 +231,7 @@ function SessionBlock({ session, completed, onToggle }) {
           ? 'repeating-linear-gradient(45deg,transparent,transparent 4px,rgba(0,0,0,0.06) 4px,rgba(0,0,0,0.06) 8px)'
           : undefined,
       }}
-      onClick={() => onToggle(session.id)}
+      onClick={(e) => onToggle(session.id, e.currentTarget)}
     >
       {session.startTime && (
         <div style={{ fontSize: 9, fontWeight: 500, color: '#9B9B9B', marginBottom: 2 }}>{session.startTime}</div>
@@ -444,6 +446,16 @@ export default function OutputView({
   const [quizBurstInit, setQuizBurstInit] = useState(null) // { courseIdx, topic } when launched from Cheat Sheet
   const [showConnectionsMode, setShowConnectionsMode] = useState(false)
   const [showTimedChallenge, setShowTimedChallenge] = useState(false)
+  // The tools hub lets a student pick a course before launching. These five
+  // callbacks used to drop the { courseIdx } they were handed, so the choice
+  // silently did nothing and the tool opened on whatever it defaulted to.
+  //
+  // One slot shared by all five, which is safe because only one of them can be
+  // open at a time and every one of their onClose handlers resets it to null.
+  // That invariant is what lets the other launch points (the V1 hub, the
+  // dashboard, the coach banner) keep passing no config and still get the
+  // smart default rather than a stale course from a previous launch.
+  const [toolCourseIdx, setToolCourseIdx] = useState(null)
   const [pendingDrillTopic, setPendingDrillTopic] = useState(null)
   const [ratingSession, setRatingSession] = useState(null) // session to rate after completion
   const [ratingReminder, setRatingReminder] = useState(null) // skipped session pending reminder
@@ -530,6 +542,7 @@ export default function OutputView({
   const isExamMode = courses.some(c => EXAM_PATTERN.test(c.name))
 
   const [dashboardV2] = useState(() => localStorage.getItem('se_dashboard_v2') !== '0')
+  const [toolsV2] = useState(() => localStorage.getItem('se_tools_v2') !== '0')
   const [assignments, setAssignments] = useState(() => initialAssignments ?? [])
   const [logGradeId, setLogGradeId] = useState(null)
   const [gradeInput, setGradeInput] = useState('')
@@ -570,6 +583,8 @@ export default function OutputView({
   const [syllabusOnboardingLoading, setSyllabusOnboardingLoading] = useState(false)
   const [syllabusOnboardingError, setSyllabusOnboardingError] = useState('')
   const [syllabusRegistryWarning, setSyllabusRegistryWarning] = useState(false)
+
+  const celebrate = useCelebration()
 
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('studyedge_view_mode') ?? 'week')
   const todayStr = new Date().toISOString().split('T')[0]
@@ -744,6 +759,39 @@ export default function OutputView({
       setFixConflictsLoading(false)
     }
   }
+
+  // Streak: checking off any of today's sessions feeds it. This lives here,
+  // above the dashboard switch, rather than inside a dashboard. The tool events
+  // are handled by the streak store itself; the checkbox state is owned here
+  // and nowhere else, so this is the one place that can see it regardless of
+  // which dashboard is mounted. recordCompletion is idempotent per day, so
+  // re-running on every completedIds change is free.
+  useEffect(() => {
+    const doneToday = allSessions.some(s => s.dateStr === todayStr && completedIds.has(s.id))
+    if (doneToday) recordCompletion(todayStr)
+  }, [completedIds, allSessions, todayStr])
+
+  // Clearing the day is the one moment in the plan worth marking. It lived in
+  // the V1 dashboard, which se_dashboard_v2 has been keeping unmounted, so in
+  // practice nobody has been getting it. Same reasoning as the streak above:
+  // completedIds is owned here, so this is the only place that sees the day
+  // close regardless of which dashboard is on screen.
+  const dailyGoalFiredRef = useRef(null)
+  useEffect(() => {
+    const todaySessions = allSessions.filter(s => s.dateStr === todayStr)
+    const cleared = todaySessions.length > 0 && todaySessions.every(s => completedIds.has(s.id))
+    if (!cleared) return
+    if (dailyGoalFiredRef.current === todayStr) return
+    dailyGoalFiredRef.current = todayStr
+    // MEDIUM, not SMALL. Clearing the day can only happen once a day, which is
+    // exactly what a confetti budget is for. The controller caps MEDIUM at two
+    // a day anyway, so this cannot become wallpaper.
+    celebrate({
+      tier: TIER.MEDIUM,
+      trigger: 'daily_goal_hit',
+      meta: { title: 'Day cleared', body: 'Everything you planned for today is done.' },
+    })
+  }, [completedIds, allSessions, todayStr, celebrate])
 
   // ── persist ──
   useEffect(() => { onSavePlan(completedIds, assignments) }, [completedIds, assignments])
@@ -1140,7 +1188,14 @@ export default function OutputView({
     setActiveBlueprint(null)
   }, [])
   const handleFocusExit = useCallback(() => { setFocusSession(null); setActiveBlueprint(null) }, [])
-  const handleToggle = useCallback(id => {
+  // anchorEl lets the XP flyup arc out of the checkbox the student just pressed
+  // instead of the middle of the screen. Callers that have the element pass it.
+  const handleToggle = useCallback((id, anchorEl = null) => {
+    // Fired here and not inside the updater below: state updaters run twice
+    // under StrictMode, and a celebration is a side effect, not a reducer.
+    // Tier 0 means a short scale on the control itself, no confetti. Checking a
+    // box is not worth the confetti budget, but silence is not right either.
+    if (!completedIds.has(id)) celebrate({ tier: TIER.MICRO, trigger: 'session_checked', anchorEl })
     setCompletedIds(prev => {
       const n = new Set(prev)
       if (n.has(id)) {
@@ -1164,7 +1219,7 @@ export default function OutputView({
       }
       return n
     })
-  }, [allSessions, courses])
+  }, [allSessions, courses, completedIds, celebrate])
 
   const handleRatingSave = useCallback(async (rating, hardNotes) => {
     if (!ratingSession) return
@@ -2256,25 +2311,33 @@ export default function OutputView({
         )}
 
         {/* ── Study Tools ── */}
-        {activeSection === 'tools' && (
-          <StudyToolsView
-            courses={courses}
-            userId={userId}
-            onShowPaywall={onShowPaywall}
-            learningStyle={learningStyle}
-            onNavigateToCoach={() => { if (getActivePlan() === 'free') { onShowPaywall?.('coach'); return } setActiveSection('coach') }}
-            onOpenCheatSheet={() => setShowCheatSheet(true)}
-            onOpenBrainDump={() => setShowBrainDump(true)}
-            onOpenExamRescue={() => setShowExamRescue(true)}
-            onOpenQuizBurst={() => setShowQuizBurst(true)}
-            onOpenPodcast={() => setShowPodcast(true)}
-            onOpenTeachItBack={() => setShowTeachItBack(true)}
-            onOpenConnectionsMode={() => setShowConnectionsMode(true)}
-            onOpenTimeAttack={() => setShowTimedChallenge(true)}
-            initialDrillTopic={pendingDrillTopic}
-            onDrillTopicConsumed={() => setPendingDrillTopic(null)}
-          />
-        )}
+        {activeSection === 'tools' && (() => {
+          // The V2 hub collects course and topic up front in its ToolModal and
+          // hands the result to these callbacks, so the tool opens already
+          // configured instead of showing a second setup screen. V1 calls the
+          // same callbacks with no argument, which falls through to the old
+          // behaviour, so both paths work off one set of handlers.
+          const ToolsView = toolsV2 ? StudyToolsViewV2 : StudyToolsView
+          return (
+            <ToolsView
+              courses={courses}
+              userId={userId}
+              onShowPaywall={onShowPaywall}
+              learningStyle={learningStyle}
+              onNavigateToCoach={() => { if (getActivePlan() === 'free') { onShowPaywall?.('coach'); return } setActiveSection('coach') }}
+              onOpenCheatSheet={(cfg) => { setToolCourseIdx(cfg?.courseIdx ?? null); setShowCheatSheet(true) }}
+              onOpenBrainDump={(cfg) => { if (cfg) setBrainDumpInit(cfg); setShowBrainDump(true) }}
+              onOpenExamRescue={(cfg) => { setToolCourseIdx(cfg?.courseIdx ?? null); setShowExamRescue(true) }}
+              onOpenQuizBurst={(cfg) => { if (cfg) setQuizBurstInit(cfg); setShowQuizBurst(true) }}
+              onOpenPodcast={(cfg) => { setToolCourseIdx(cfg?.courseIdx ?? null); setShowPodcast(true) }}
+              onOpenTeachItBack={(cfg) => { if (cfg) setTeachItBackInit(cfg); setShowTeachItBack(true) }}
+              onOpenConnectionsMode={(cfg) => { setToolCourseIdx(cfg?.courseIdx ?? null); setShowConnectionsMode(true) }}
+              onOpenTimeAttack={(cfg) => { setToolCourseIdx(cfg?.courseIdx ?? null); setShowTimedChallenge(true) }}
+              initialDrillTopic={pendingDrillTopic}
+              onDrillTopicConsumed={() => setPendingDrillTopic(null)}
+            />
+          )
+        })()}
 
         {/* ── Study Coach ── */}
         {activeSection === 'coach' && (
@@ -2516,7 +2579,8 @@ export default function OutputView({
         <CheatSheetModal
           courses={courses}
           userId={userId}
-          onClose={() => setShowCheatSheet(false)}
+          initialCourseIdx={toolCourseIdx}
+          onClose={() => { setShowCheatSheet(false); setToolCourseIdx(null) }}
           onShowPaywall={onShowPaywall}
           onOpenQuizBurst={({ courseIdx, topic }) => { setShowCheatSheet(false); setQuizBurstInit({ courseIdx, topic }); setShowQuizBurst(true) }}
         />
@@ -2552,7 +2616,8 @@ export default function OutputView({
         <ExamRescueModal
           courses={courses}
           userId={userId}
-          onClose={() => setShowExamRescue(false)}
+          initialCourseIdx={toolCourseIdx}
+          onClose={() => { setShowExamRescue(false); setToolCourseIdx(null) }}
           onShowPaywall={onShowPaywall}
         />
       )}
@@ -2572,7 +2637,8 @@ export default function OutputView({
         <PodcastGenerator
           courses={courses}
           userId={userId}
-          onClose={() => setShowPodcast(false)}
+          initialCourseIdx={toolCourseIdx}
+          onClose={() => { setShowPodcast(false); setToolCourseIdx(null) }}
           onShowPaywall={onShowPaywall}
         />
       )}
@@ -2589,7 +2655,8 @@ export default function OutputView({
       {showConnectionsMode && (
         <ConnectionsModeModal
           courses={courses}
-          onClose={() => setShowConnectionsMode(false)}
+          initialCourseIdx={toolCourseIdx}
+          onClose={() => { setShowConnectionsMode(false); setToolCourseIdx(null) }}
           onShowPaywall={onShowPaywall}
         />
       )}
@@ -2597,7 +2664,8 @@ export default function OutputView({
         <TimedChallengeModal
           courses={courses}
           userId={userId}
-          onClose={() => setShowTimedChallenge(false)}
+          initialCourseIdx={toolCourseIdx}
+          onClose={() => { setShowTimedChallenge(false); setToolCourseIdx(null) }}
           onShowPaywall={onShowPaywall}
         />
       )}

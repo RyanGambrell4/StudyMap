@@ -135,7 +135,7 @@ export default function GapCloser({ gap, courseId, courseName, courseContext, on
           onClick={() => { updateMastery(gap, courseId, 85, 'self_skip'); onDismiss?.(gap, 'skip') }}
           style={{ fontSize: 12, fontWeight: 600, padding: '6px 12px', borderRadius: 7, background: 'none', border: `1px solid ${D.border}`, color: D.textDim, cursor: 'pointer', fontFamily: 'inherit' }}
         >
-          I know it — skip
+          I know it, skip
         </button>
       </div>
     )
@@ -223,7 +223,7 @@ export default function GapCloser({ gap, courseId, courseName, courseContext, on
         <strong style={{ fontSize: 11.5, letterSpacing: '0.06em', color: great ? D.green : '#D97706' }}>
           {great ? 'GAP CLOSED · ' : 'STILL SHAKY · '}
         </strong>
-        <span style={{ fontSize: 13, color: D.text }}>Scored {score}% on {gap}. {great ? 'Mastery updated.' : 'Added to review — we\'ll circle back.'}</span>
+        <span style={{ fontSize: 13, color: D.text }}>Scored {score}% on {gap}. {great ? 'Mastery updated.' : 'Added to review. We\'ll circle back.'}</span>
       </div>
     )
   }

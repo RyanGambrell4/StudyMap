@@ -9,7 +9,13 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:insights": "node scripts/test-onboarding-insights.mjs",
+    "test:streak": "node scripts/test-streak-logic.mjs",
+    "test:celebrations": "node scripts/test-tool-celebrations.mjs",
+    "test:rewards": "node scripts/test-reward-copy.mjs",
+    "find:dark": "node scripts/find-dark-modules.mjs .",
+    "find:emdash": "node scripts/find-em-dashes.mjs ."
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",

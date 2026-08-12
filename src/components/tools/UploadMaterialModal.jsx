@@ -318,7 +318,7 @@ export default function UploadMaterialModal({ courses, defaultCourseIdx = 0, onC
                 ) : (
                   <div>
                     <div style={{ fontSize: 15, fontWeight: 700, color: T.text }}>Drop a file here, or click to browse</div>
-                    <div style={{ fontSize: 13, color: T.muted, marginTop: 6 }}>PDF, slides, docs, images — up to 50 MB</div>
+                    <div style={{ fontSize: 13, color: T.muted, marginTop: 6 }}>PDF, slides, docs, images. Up to 50 MB</div>
                   </div>
                 )}
               </button>
@@ -366,7 +366,7 @@ export default function UploadMaterialModal({ courses, defaultCourseIdx = 0, onC
                 ) : (
                   <div>
                     <div style={{ fontSize: 15, fontWeight: 700, color: T.text }}>Record or upload a lecture</div>
-                    <div style={{ fontSize: 13, color: T.muted, marginTop: 6 }}>MP3, M4A, or record right here — up to 2 hours</div>
+                    <div style={{ fontSize: 13, color: T.muted, marginTop: 6 }}>MP3, M4A, or record right here. Up to 2 hours</div>
                   </div>
                 )}
               </button>

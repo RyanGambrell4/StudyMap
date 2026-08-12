@@ -1,5 +1,7 @@
 import { useState, useMemo } from 'react'
 import Spinner from './ui/spinner'
+import GeneratingScreen from './ui/GeneratingScreen'
+import { stagesFor } from '../lib/toolStages'
 import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan, hasUsedTrial } from '../lib/subscription'
 import { addStudySession } from '../lib/studyHistory'
@@ -39,14 +41,18 @@ function Pill({ label, style }) {
   )
 }
 
-export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpenQuizBurst, learningStyle = null, yearLevel = null, firstName = null, schoolType = null, assignments = [] }) {
+export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpenQuizBurst, initialCourseIdx = null, learningStyle = null, yearLevel = null, firstName = null, schoolType = null, assignments = [] }) {
   const plan = getActivePlan()
   const isPro = plan !== 'free'
 
   // Auto-select the highest-value course (closest exam within 14d, or the
   // one with the biggest unaddressed gap) so the modal opens pointed at the
   // right course rather than courses[0].
-  const initialSmartCourse = useMemo(() => pickSmartCourse(courses).index, [courses])
+  // An explicit choice from the tools hub beats the smart default.
+  const initialSmartCourse = useMemo(
+    () => (initialCourseIdx != null ? initialCourseIdx : pickSmartCourse(courses).index),
+    [initialCourseIdx, courses],
+  )
   const [courseIdx, setCourseIdx] = useState(initialSmartCourse)
   const [examPrompt, setExamPrompt] = useState('')
   const [showManual, setShowManual] = useState(false)
@@ -54,7 +60,8 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
   const [error, setError] = useState('')
   const [result, setResult] = useState(null)
   const [regenerateCount, setRegenerateCount] = useState(0)
-  const [step, setStep] = useState('setup') // 'setup' | 'result'
+  const [step, setStep] = useState('setup') // 'setup' | 'generating' | 'result'
+  const [genReady, setGenReady] = useState(false)
   const [timeBudget, setTimeBudget] = useState(45) // minutes
   const [checkedTopics, setCheckedTopics] = useState({}) // { topicName: true }
   const [planStartTs, setPlanStartTs] = useState(null)
@@ -70,6 +77,8 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
   async function generate(regen = 0) {
     if (!canUseAI()) { onShowPaywall?.('ai'); return }
     setLoading(true)
+    setStep('generating')
+    setGenReady(false)
     setError('')
     setResult(null)
     if (!regen) track('cheat_sheet_started', { courseName: course?.name ?? null })
@@ -95,10 +104,11 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
         if (!res.ok) throw new Error(data.error ?? 'Something went wrong. Please try again.')
         incrementAIQuery()
         addStudySession({ tool: 'AI Cheat Sheet', score: null, topic: examPrompt.trim() || null, courseName: course?.name || null })
-        window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'cheatSheet' } }))
+        // Dispatched from the GeneratingScreen handoff instead, so the reward
+        // does not land on top of the progress ring.
         track('cheat_sheet_generated', { topic: examPrompt.trim() || null, plan: getActivePlan() })
         setResult(data)
-        setStep('result')
+        setGenReady(true)
         setLoading(false)
         return
       } catch (e) {
@@ -107,6 +117,9 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
           track('cheat_sheet_error', { error: e.message ?? 'unknown' })
           setError(e.message || 'Something went wrong. Please try again.')
           setLoading(false)
+          // generate() already cleared the old sheet, so setup is the only
+          // screen with anything to show.
+          setStep('setup')
         }
       }
     }
@@ -330,6 +343,19 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
               </div>
             )}
           </div>
+        )}
+
+        {step === 'generating' && (
+          <GeneratingScreen
+            {...stagesFor('cheatSheet')}
+            title="Building your one page"
+            ready={genReady}
+            onComplete={() => {
+              setGenReady(false)
+              setStep('result')
+              window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'cheatSheet' } }))
+            }}
+          />
         )}
 
         {/* Result step */}
