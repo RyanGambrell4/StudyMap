@@ -20,6 +20,40 @@ import { updateMastery, getMasteryLevel, getMasteryColor, getAllMastery } from '
 import { recordConfidence } from '../lib/confidenceStore'
 import { generateFollowUpPrompts } from '../lib/followUpPrompts'
 
+/**
+ * FD - the Focus Mode dark palette. INTENTIONAL, AND SCOPED TO THIS FILE.
+ *
+ * This app is light only and prior agents have run repeated "dark leak purges"
+ * across the codebase. This is the one sanctioned exception inside the product
+ * shell (the landing page is the other, and it has its own namespace). Do not
+ * purge it as a regression, do not lift it into tokens.js, and do not import
+ * it anywhere else. See CONTEXT.md.
+ *
+ * Why it exists: Focus Mode is the core repeat action and it used to look
+ * exactly like every other screen, so starting a session crossed no threshold.
+ * Rituals are what turn usage into habit. Entering a session now visibly
+ * changes state, and the completion screen returns to the light so that the
+ * celebration never fires into the dark.
+ *
+ * The values are warm near-blacks, not blue-blacks and not pure black, because
+ * the light theme is warm paper. The dark state should read as the same room
+ * with the lights off rather than as a different product.
+ */
+const FD = {
+  bg:       '#141310',   // the room
+  surface:  '#1C1A16',   // top bar, tab bar
+  raised:   '#242019',   // controls
+  border:   'rgba(255,255,255,0.09)',
+  text:     '#F2F0EC',
+  muted:    '#8A857E',
+  dim:      '#6B665F',
+  // #3B61C4 on #141310 is about 3.1:1, which fails AA for text. This is the
+  // same hue lifted until it passes against the dark room. Accent FILLS still
+  // use the brand blue, since white on #3B61C4 is unaffected.
+  accent:   '#7C9AF0',
+  accentBg: 'rgba(124,154,240,0.14)',
+}
+
 function fmt(seconds) {
   const m = Math.floor(seconds / 60).toString().padStart(2, '0')
   const s = (seconds % 60).toString().padStart(2, '0')
@@ -1494,8 +1528,23 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
   // ─── RENDER ─────────────────────────────────────────────────────────────────
   return (
-    <div className="fixed inset-0 z-[100] flex flex-col overflow-hidden" style={{ backgroundColor: '#F7F8FA', animation: 'fm-enter 280ms cubic-bezier(0.16,1,0.3,1) both' }}>
-      <div className="absolute inset-0 pointer-events-none" style={{ background: `linear-gradient(180deg, ${dot}22 0%, transparent 28%)`, zIndex: 0 }} />
+    <div
+      className="fixed inset-0 z-[100] flex flex-col overflow-hidden fm-room"
+      data-focus-lit={showComplete ? 'true' : 'false'}
+      style={{ backgroundColor: showComplete ? '#F7F8FA' : FD.bg, animation: 'fm-enter 280ms cubic-bezier(0.16,1,0.3,1) both' }}
+    >
+      {/* The warm pool of light the session sits in. Warm rather than blue so
+          the dark state reads as the same room as the light theme with the
+          lights off, not as a different product. */}
+      <div
+        className="absolute inset-0 pointer-events-none fm-room-glow"
+        style={{
+          background: showComplete
+            ? `linear-gradient(180deg, ${dot}22 0%, transparent 28%)`
+            : `radial-gradient(ellipse 90% 60% at 50% 34%, ${dot}1f 0%, transparent 70%)`,
+          zIndex: 0,
+        }}
+      />
       {/* Top accent line */}
       <div className="h-1 w-full shrink-0" style={{ background: `linear-gradient(90deg, ${dot}, ${dot}88)` }} />
 
@@ -2111,25 +2160,25 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
       <div className="relative flex flex-col h-full overflow-hidden">
 
         {/* ── Top bar ── */}
-        <div className="relative flex items-center px-5 py-3 shrink-0" style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+        <div className="relative flex items-center px-5 py-3 shrink-0 fm-chrome" style={{ backgroundColor: FD.surface, borderBottom: `1px solid ${FD.border}` }}>
           {/* Left: course info */}
           <div className="flex items-center gap-2 flex-1 min-w-0">
             <div className="rounded-full shrink-0" style={{ width: 8, height: 8, backgroundColor: dot }} />
-            <span className="font-semibold text-sm truncate" style={{ color: '#1A1A1A' }}>{session.courseName}</span>
-            <span className="shrink-0" style={{ color: 'rgba(0,0,0,0.18)', fontSize: 12 }}>·</span>
-            <span className="text-xs shrink-0" style={{ color: '#9B9B9B' }}>{session.sessionType}</span>
+            <span className="font-semibold text-sm truncate" style={{ color: FD.text }}>{session.courseName}</span>
+            <span className="shrink-0" style={{ color: FD.dim, fontSize: 12 }}>·</span>
+            <span className="text-xs shrink-0" style={{ color: FD.muted }}>{session.sessionType}</span>
           </div>
           {/* Center: label - hidden on mobile so it can't collide with the left course/session text */}
           <div className="absolute left-1/2 -translate-x-1/2 pointer-events-none hidden md:block">
-            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: '#9B9B9B' }}>Focus Session</span>
+            <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.14em', textTransform: 'uppercase', color: FD.dim }}>Focus Session</span>
           </div>
           {/* Right: elapsed + exit */}
           <div className="flex items-center gap-4 shrink-0">
-            <span style={{ fontSize: 12, color: '#9B9B9B', fontFamily: 'ui-monospace, monospace' }}>
-              {fmt(elapsed)} <span style={{ color: '#9B9B9B' }}>/ {String(session.duration).padStart(2,'0')}:00</span>
+            <span style={{ fontSize: 12, color: FD.muted, fontFamily: 'ui-monospace, monospace' }}>
+              {fmt(elapsed)} <span style={{ color: FD.dim }}>/ {String(session.duration).padStart(2,'0')}:00</span>
             </span>
             {isFree && focusMinutesAllowed < Infinity && (
-              <span style={{ fontSize: 11, color: '#9B9B9B' }}>
+              <span style={{ fontSize: 11, color: FD.muted }}>
                 {Math.max(0, focusMinutesAllowed - Math.floor((totalSec - remaining) / 60))} min left today
               </span>
             )}
@@ -2140,9 +2189,9 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 title="Ambient sound"
                 style={{
                   display: 'inline-flex', alignItems: 'center', gap: 4, fontSize: 11,
-                  color: ambientMode !== 'off' ? '#3B61C4' : '#9B9B9B',
-                  background: ambientMode !== 'off' ? 'rgba(59,97,196,0.08)' : 'rgba(0,0,0,0.04)',
-                  border: ambientMode !== 'off' ? '1px solid rgba(59,97,196,0.2)' : '1px solid rgba(0,0,0,0.08)',
+                  color: ambientMode !== 'off' ? FD.accent : FD.muted,
+                  background: ambientMode !== 'off' ? FD.accentBg : 'rgba(255,255,255,0.05)',
+                  border: `1px solid ${ambientMode !== 'off' ? 'rgba(124,154,240,0.28)' : FD.border}`,
                   borderRadius: 8, padding: '4px 9px', cursor: 'pointer',
                 }}
               >
@@ -2203,7 +2252,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 }
               }}
               className="text-xs transition-colors"
-              style={{ color: '#9B9B9B' }}
+              style={{ color: FD.muted }}
             >
               Exit
             </button>
@@ -2212,18 +2261,18 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
         {/* ── Block info + segmented progress bar ── */}
         {blocks && (
-          <div className="shrink-0 px-6 pt-3 pb-2" style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid rgba(0,0,0,0.07)' }}>
+          <div className="shrink-0 px-6 pt-3 pb-2 fm-chrome" style={{ backgroundColor: FD.surface, borderBottom: `1px solid ${FD.border}` }}>
             {currentBlock && !finished && (
               <div className="flex items-center gap-2 mb-2">
                 <span style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: blockColor }}>
                   Block {String(blockIdx + 1).padStart(2, '0')}/{String(blocks.length).padStart(2, '0')}
                 </span>
                 <span style={{ color: 'rgba(0,0,0,0.15)', fontSize: 10 }}>·</span>
-                <span style={{ fontSize: 13, color: '#1A1A1A', fontWeight: 500 }}>{currentBlock.title}</span>
+                <span style={{ fontSize: 13, color: FD.text, fontWeight: 500 }}>{currentBlock.title}</span>
                 {currentBlock.activity && (
                   <>
-                    <span style={{ color: 'rgba(0,0,0,0.15)', fontSize: 10 }}>·</span>
-                    <span style={{ fontSize: 11, color: '#9B9B9B', fontStyle: 'italic' }}>{currentBlock.activity}</span>
+                    <span style={{ color: FD.dim, fontSize: 10 }}>·</span>
+                    <span style={{ fontSize: 11, color: FD.muted, fontStyle: 'italic' }}>{currentBlock.activity}</span>
                   </>
                 )}
               </div>
@@ -2242,13 +2291,13 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
         )}
 
         {/* ── Timer + controls (hero section) ── */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6 min-h-0" style={{ minHeight: 160, overflow: 'hidden', background: `radial-gradient(ellipse at 50% 40%, ${dot}0e 0%, transparent 68%)` }}>
+        <div className="flex-1 flex flex-col items-center justify-center px-6 min-h-0 fm-timer-in" style={{ minHeight: 160, overflow: 'hidden', background: `radial-gradient(ellipse at 50% 40%, ${dot}14 0%, transparent 68%)` }}>
           {finished ? (
             <div className="flex flex-col items-center gap-3">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke={dot} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M5 13l4 4L19 7" />
               </svg>
-              <p style={{ fontSize: 14, color: '#9B9B9B' }}>Session complete</p>
+              <p style={{ fontSize: 14, color: FD.muted }}>Session complete</p>
             </div>
           ) : (
             <>
@@ -2267,7 +2316,9 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                       style={{ position: 'absolute', top: 0, left: 0, transform: 'rotate(-90deg)' }}
                       aria-hidden="true"
                     >
-                      <circle cx="150" cy="150" r={R} fill="none" stroke={`${dot}18`} strokeWidth="3" />
+                      {/* The unfilled track needs to be lighter than the room,
+                          not darker, now that the room is dark. */}
+                      <circle cx="150" cy="150" r={R} fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="3" />
                       <circle
                         cx="150" cy="150" r={R}
                         fill="none"
@@ -2286,8 +2337,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                         fontFamily: '"SF Mono", "Fira Code", ui-monospace, monospace',
                         letterSpacing: '-0.03em',
                         lineHeight: 1,
-                        color: running ? '#1A1A1A' : '#9B9B9B',
-                        textShadow: running ? `0 0 80px ${dot}35` : 'none',
+                        color: running ? FD.text : FD.dim,
+                        textShadow: running ? `0 0 90px ${dot}55` : 'none',
                         transition: 'color 0.3s, text-shadow 0.3s',
                         userSelect: 'none',
                         position: 'relative',
@@ -2300,7 +2351,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               })()}
 
               {/* Sub-label */}
-              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, fontSize: 12, color: '#9B9B9B' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10, fontSize: 12, color: FD.muted }}>
                 <span>{blocks ? 'remaining this block' : 'remaining'}</span>
                 <span style={{ opacity: 0.35 }}>·</span>
                 <span>{session.duration} min total</span>
@@ -2308,7 +2359,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
 
               {/* Block instruction */}
               {blocks && currentBlock && !blockTransition && (
-                <p style={{ fontSize: 13, color: '#6B6B6B', marginTop: 18, textAlign: 'center', maxWidth: 420, lineHeight: 1.65 }}>
+                <p style={{ fontSize: 13, color: FD.muted, marginTop: 18, textAlign: 'center', maxWidth: 420, lineHeight: 1.65 }}>
                   {currentBlock.instruction}
                 </p>
               )}
@@ -2388,11 +2439,11 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               <div style={{ display: 'flex', gap: 10, marginTop: 28, flexWrap: 'wrap', justifyContent: 'center' }}>
                 {/* Pause / Resume */}
                 {wasRestored && !running && (
-                  <div style={{ fontSize: 11, color: '#9B9B9B', textAlign: 'center', marginBottom: 4 }}>Session restored. Tap Resume to continue.</div>
+                  <div style={{ fontSize: 11, color: FD.muted, textAlign: 'center', marginBottom: 4 }}>Session restored. Tap Resume to continue.</div>
                 )}
                 <button
                   onClick={handleTogglePause}
-                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 18px', borderRadius: 10, backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#6B6B6B', fontSize: 13, fontWeight: 500, cursor: 'pointer', lineHeight: 1 }}
+                  style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 18px', borderRadius: 10, backgroundColor: FD.raised, border: `1px solid ${FD.border}`, color: FD.text, fontSize: 13, fontWeight: 500, cursor: 'pointer', lineHeight: 1 }}
                 >
                   {running ? (
                     <svg width="13" height="13" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zM7 8a1 1 0 012 0v4a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v4a1 1 0 102 0V8a1 1 0 00-1-1z" clipRule="evenodd" /></svg>
@@ -2400,14 +2451,14 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     <svg width="13" height="13" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM9.555 7.168A1 1 0 008 8v4a1 1 0 001.555.832l3-2a1 1 0 000-1.664l-3-2z" clipRule="evenodd" /></svg>
                   )}
                   <span>{running ? 'Pause' : 'Resume'}</span>
-                  <span style={{ fontSize: 10, color: '#9B9B9B' }}>[Space]</span>
+                  <span style={{ fontSize: 10, color: FD.dim }}>[Space]</span>
                 </button>
 
                 {/* Skip block */}
                 {blocks && nextBlock && (
                   <button
                     onClick={handleSkipBlock}
-                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 18px', borderRadius: 10, backgroundColor: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', color: '#9B9B9B', fontSize: 13, fontWeight: 500, cursor: 'pointer', lineHeight: 1 }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '12px 18px', borderRadius: 10, backgroundColor: FD.raised, border: `1px solid ${FD.border}`, color: FD.muted, fontSize: 13, fontWeight: 500, cursor: 'pointer', lineHeight: 1 }}
                   >
                     <span>Skip block</span>
                     <svg width="11" height="11" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" /></svg>
@@ -2426,7 +2477,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
               </div>
 
               {/* Keyboard hint */}
-              <p style={{ fontSize: 11, color: '#9B9B9B', marginTop: 16 }}>
+              <p style={{ fontSize: 11, color: FD.dim, marginTop: 16 }}>
                 [Space] pause &nbsp;·&nbsp; [↵] finish &nbsp;·&nbsp; [1–5] tools &nbsp;·&nbsp; [Esc] exit
               </p>
             </>
@@ -3068,7 +3119,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
         )}
 
         {/* ── Bottom tab bar ── */}
-        <div className="shrink-0 overflow-x-auto" style={{ backgroundColor: '#FFFFFF', borderTop: '1px solid rgba(0,0,0,0.07)' }}>
+        <div className="shrink-0 overflow-x-auto fm-chrome" style={{ backgroundColor: FD.surface, borderTop: `1px solid ${FD.border}` }}>
           <div style={{ display: 'flex', minWidth: 'fit-content' }}>
             {SESSION_TABS.map(({ id, label, num }) => {
               const isActive = activeTab === id
@@ -3091,7 +3142,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     alignItems: 'center',
                     gap: 2,
                     transition: 'all 0.15s',
-                    color: isActive ? tabColor : wasVisited && !isActive ? '#6B6B6B' : '#9B9B9B',
+                    color: isActive ? tabColor : wasVisited && !isActive ? FD.text : FD.muted,
                   }}
                 >
                   <span style={{ fontSize: 12, fontWeight: isActive ? 700 : 400, whiteSpace: 'nowrap' }}>
@@ -3100,7 +3151,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                       <span style={{ display: 'inline-block', width: 4, height: 4, borderRadius: '50%', backgroundColor: tabColor, marginLeft: 4, verticalAlign: 'middle', marginBottom: 1, opacity: 0.7 }} />
                     )}
                   </span>
-                  <span style={{ fontSize: 10, color: isActive ? tabColor : '#9B9B9B', fontFamily: 'ui-monospace, monospace' }}>
+                  <span style={{ fontSize: 10, color: isActive ? tabColor : FD.dim, fontFamily: 'ui-monospace, monospace' }}>
                     {isActive ? '▲ hide' : num}
                   </span>
                 </button>
@@ -3115,6 +3166,47 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
         @keyframes fm-enter {
           from { opacity: 0; transform: translateY(12px); }
           to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── Crossing the threshold ───────────────────────────────────────
+           Entering a session is a state change, so it is staggered rather
+           than cut: the room darkens first, the chrome settles in behind it,
+           and the timer scales up last and slowest so it arrives as the
+           thing that matters. Roughly 520ms end to end.
+
+           Returning to the light is handled by the completion screen, which
+           paints its own opaque light surface over this one, so the
+           celebration never fires into the dark. */
+        .fm-room {
+          transition: background-color 420ms cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .fm-room-glow {
+          animation: fm-room-lights 520ms cubic-bezier(0.16, 1, 0.3, 1) both;
+        }
+        @keyframes fm-room-lights {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        .fm-chrome {
+          animation: fm-chrome-in 380ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
+        }
+        @keyframes fm-chrome-in {
+          from { opacity: 0; }
+          to   { opacity: 1; }
+        }
+        .fm-timer-in {
+          animation: fm-timer-rise 520ms cubic-bezier(0.16, 1, 0.3, 1) 140ms both;
+        }
+        @keyframes fm-timer-rise {
+          from { opacity: 0; transform: scale(0.94); }
+          to   { opacity: 1; transform: scale(1); }
+        }
+
+        /* Motion is an enhancement. The state change itself is functional and
+           still happens instantly, it just stops being animated. */
+        @media (prefers-reduced-motion: reduce) {
+          .fm-room { transition: none; }
+          .fm-room-glow, .fm-chrome, .fm-timer-in { animation-duration: 1ms; animation-delay: 0ms; }
         }
         @keyframes breathe {
           0%, 100% { transform: scale(1); }

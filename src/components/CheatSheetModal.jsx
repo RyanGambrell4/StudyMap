@@ -350,6 +350,10 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
             {...stagesFor('cheatSheet')}
             title="Building your one page"
             ready={genReady}
+            // Her syllabus topics, the ones she ticked. Real material, named
+            // back to her while the page is written.
+            topics={planTopics.filter(t => checkedTopics[t.name]).map(t => t.name)}
+            topicsLabel={n => `Covering ${n} ${n === 1 ? 'topic' : 'topics'}`}
             onComplete={() => {
               setGenReady(false)
               setStep('result')

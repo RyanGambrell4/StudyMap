@@ -1,5 +1,149 @@
 # StudyEdge AI — Living Context
-_Last updated by: Engagement pass on 2026-08-11 (narrated AI waits, celebrations that actually reach users, twelve silent tool completions, em-dash copy sweep with a detector, focus rings and press states, sound toggle, tools-hub course selection; branch worktree-dopamine-onboarding-web, NOT merged to main); UX Copy Agent on 2026-07-19 (comprehensive AI-voice + slop sweep across all ~70 JSX components: removed "We'll/I'll" first-person voice from CoursesView, SyllabusUploadModal, AuthScreen, ErrorBoundary, BlueprintScreen; removed "AI-powered/AI-generated/personalized" qualifiers from AppShell, DashboardView, OutputView, SharedPlanView, PodcastGenerator, OnboardingTour, CheatSheetModal, FocusMode; removed emoji from App.jsx email confirmation tips, browser notifications, FocusMode dead-code icons; removed preachy/slop copy from WeeklyGoalCard, ConfidenceTapModal, DashboardView, Onboarding headings. 12 commits shipped to main.); Quality Sweep Agent on 2026-07-16 (second session: DashboardView AI chip visibility bug, floating trial nudge price fix, AuthScreen plan-aware trial price, FocusMode Enter stale closure, stale 7-day trial copy in 4 files); Quality Sweep Agent on 2026-07-16 (boost nudge email rewrite, double-credit bugs fixed in teach-it-back/connections-mode/exam-rescue, freeBadge fix, em-dash guardrails in 5 more AI prompts, $0 today → card-required in 3 emails, stale AI limit corrections); SEO Agent on 2026-06-10 (43 new pages: Wave A AI category, Wave B panic-study blog, Wave C study science/GPA, Wave D 30 school GPA pages, Wave E vercel.json + sitemap + footer); QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+_Last updated by: Feel pass v1 on 2026-08-12 (dopamine branch merged into current main; reward copy that names her material; sub-60-percent scores get a repair prompt instead of a quieter trophy; StatNumber; Focus Mode warm-dark state, intentional, do not purge; real topics inside the AI wait; branch worktree-feel-pass-v1, NOT merged to main); Engagement pass on 2026-08-11 (visual stage labels on AI waits, celebrations that actually reach users, twelve silent tool completions, em-dash copy sweep with a detector, focus rings and press states, sound toggle, tools-hub course selection; branch worktree-dopamine-onboarding-web, NOT merged to main); UX Copy Agent on 2026-07-19 (comprehensive AI-voice + slop sweep across all ~70 JSX components: removed "We'll/I'll" first-person voice from CoursesView, SyllabusUploadModal, AuthScreen, ErrorBoundary, BlueprintScreen; removed "AI-powered/AI-generated/personalized" qualifiers from AppShell, DashboardView, OutputView, SharedPlanView, PodcastGenerator, OnboardingTour, CheatSheetModal, FocusMode; removed emoji from App.jsx email confirmation tips, browser notifications, FocusMode dead-code icons; removed preachy/slop copy from WeeklyGoalCard, ConfidenceTapModal, DashboardView, Onboarding headings. 12 commits shipped to main.); Quality Sweep Agent on 2026-07-16 (second session: DashboardView AI chip visibility bug, floating trial nudge price fix, AuthScreen plan-aware trial price, FocusMode Enter stale closure, stale 7-day trial copy in 4 files); Quality Sweep Agent on 2026-07-16 (boost nudge email rewrite, double-credit bugs fixed in teach-it-back/connections-mode/exam-rescue, freeBadge fix, em-dash guardrails in 5 more AI prompts, $0 today → card-required in 3 emails, stale AI limit corrections); SEO Agent on 2026-06-10 (43 new pages: Wave A AI category, Wave B panic-study blog, Wave C study science/GPA, Wave D 30 school GPA pages, Wave E vercel.json + sitemap + footer); QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
+
+---
+
+## Feel pass v1 -- 2026-08-12 (reward layer, stat numbers, Focus Mode dark, wait content)
+
+Branch `worktree-feel-pass-v1`. Contains the dopamine branch merged into
+current main, then four changes on top. Not merged to main.
+
+### Read this before you trust the previous entry
+
+The 2026-08-11 entry below describes `worktree-dopamine-onboarding-web` as
+six commits sitting on main. By the time it was landed, main had moved ~48
+commits ahead and the branch needed a real merge, not a fast-forward. Three
+things in that entry are now wrong or stale:
+
+- **The bg token is `#F7F8FA`, not `#F7F6F3`.** main replaced the cream
+  background app-wide in `4cac1c1`. `src/tokens.js` and `src/theme/tokens.js`
+  are the source of truth. Zero occurrences of `#F7F6F3` remain in `src/`.
+- **Per-topic mastery write-back already exists.** `mastery-writeback-v1`
+  landed on main: `topic_signals` table, `/api/record-signals`, and
+  server-computed mastery in `courseContext`. Anything planning to "start
+  collecting mastery data" should read that first.
+- **A Mastery Map view already exists** (`src/components/MasteryMapView.jsx`),
+  along with the Knowledge Map / Brain Dump redesign.
+
+Merge conflicts worth knowing about, because the instructions said to resolve
+in favour of the branch and that would have been wrong twice:
+`BrainDumpModal.jsx` and `StudyToolsView.jsx` on the branch were based on the
+pre-redesign versions, so taking the branch would have reverted main's
+Knowledge Map rebuild and re-added the Deck Health card main deliberately
+removed. Both took main. `QuickQuizBurst.jsx` kept both sides.
+`src/components/coach/` took main's deletion (superseded by
+`StudyCoachHubView` / `StudyCoachPlanView` / `coachIntake`).
+
+### Failure is now a different shape of response, not a quieter reward
+
+`src/lib/celebrationTiers.js` holds all three thresholds together:
+below `WEAK_PCT` (60) nothing celebrates, `STRONG_PCT` (90) and up escalates
+to MEDIUM, everything between gets the tool's flat tier.
+
+Under the floor, `celebrationFor` returns `{ kind: 'repair' }` instead of a
+tier, and `showRepair()` in `celebration.js` raises a strip that names the
+concept she lost and offers one button. No confetti, no tone, no cap
+consumed, none of the reward vocabulary, and it does not expire on a timer
+because it carries an action. The button dispatches `studyedge:repair-topic`,
+which `OutputView` turns into the existing `pendingDrillTopic` flow, so it
+lands in the real topic drill rather than being decorative.
+
+With no concept to name it returns null and the app says nothing. That is
+deliberate: a generic "keep going" is the exact consolation copy the branch
+exists to avoid, and a button that cannot be scoped is worse than no button.
+
+### Reward copy names the material
+
+Every tool dispatch now carries `topic`, `courseId`, `courseName` and, where
+the tool knows them, `gaps`. Wins read "8 of 8 on enzyme kinetics." with a
+trajectory line under it ("Third topic you have locked this week.") computed
+from local study history. When no trajectory fact clears the bar the line is
+omitted rather than padded.
+
+The six artifact tools point forward at the next action instead of reporting
+that generation finished. Brain Dump's evidence-write retry now sends
+`silent: true` so a database retry cannot raise a second response to a score
+the student already saw.
+
+### The numbers are the hero
+
+`src/components/ui/StatNumber.jsx` is the ONLY way a meaningful number should
+be displayed. Tabular numerals, three size steps, count-up on a deliberately
+overdamped spring (`SPRING.count`) so it never overshoots, driven by a motion
+value rather than React state. Renders the final value immediately under
+reduced motion.
+
+It replaced a bespoke counter in `PracticeExamResults` that re-rendered the
+whole screen 28 times, ignored reduced motion, and leaked its interval on
+unmount. Do not write another one.
+
+The increment indicator is intentionally NOT the XP flyup: that layer renders
+"+N XP" and this app has no points economy.
+
+### Focus Mode is dark ON PURPOSE. Do not purge it.
+
+`FD` at the top of `src/components/FocusMode.jsx` is a warm-dark palette
+scoped to that file. This is a sanctioned exception to the light-only rule,
+alongside the landing page. A UI consistency agent running a dark-leak purge
+should leave it alone and should not lift it into `tokens.js`.
+
+Entering a session now crosses a threshold: the room darkens, chrome settles
+in behind it, and the timer scales up last, ~520ms staggered. The accent is
+lifted to `#7C9AF0` because `#3B61C4` on `#141310` is about 3.1:1 and fails
+AA for text; accent fills still use brand blue since white on `#3B61C4` is
+unaffected. The completion screen paints its own opaque light surface over
+the top, so the celebration fires into the light rather than the dark.
+
+Scope is the session shell: top bar, block bar, timer hero, controls, tab
+bar. The tab panels that slide up (recall, flashcards, quiz, practice, notes)
+are still light surfaces on the dark room, which reads as intentional and
+avoids rewriting 3000 lines. If someone wants those dark too, that is a
+separate deliberate pass.
+
+### Her material inside the wait
+
+`GeneratingScreen` takes optional `topics` plus a `topicsLabel` function.
+The label is caller-supplied on purpose so each wiring stays honest about
+where the topics came from: "Covering" when she chose them (Cheat Sheet),
+"Targeting" when we picked them from her history (Quiz Burst), "Found" only
+if a caller genuinely extracts them from her document during that wait.
+
+Nothing is ever seeded with placeholder topics. The list is de-duplicated,
+truncated at 34 characters, capped at four, and the count reports the real
+total rather than the visible one.
+
+**Honest limit:** the strongest case for this feature is the syllabus flow,
+where `/api/parse-syllabus` returns topics verified against the source text.
+It is NOT wired, because that pipeline does not render `GeneratingScreen`
+during the window when the topics exist. Wiring it means restructuring the
+syllabus commit path, which was out of scope here.
+
+### What was judged and rejected
+
+- **Wiring `ToolResultsScreen.jsx`.** Still a downgrade on what the tools
+  already ship. Unchanged decision.
+- **Deleting the `xpbar` emit.** Kept, with a comment at the emit site
+  explaining that it is the Mastery Map input signal. The previous entry's
+  "either build the surface or stop emitting it" is superseded: the surface
+  is planned.
+- **Making the whole of Focus Mode dark.** See scope note above.
+- **Reusing the XP flyup for stat deltas.** It is branded "+N XP".
+
+### Known, pre-existing, not introduced here
+
+- `eslint` reports `'motion' is defined but never used` in files that only
+  use `<motion.div>`. The config has no `eslint-plugin-react`, so
+  `jsx-uses-vars` is absent. `GeneratingScreen` already documents this.
+- `npm run find:emdash` reports 8 remaining, all in test files, an AI prompt
+  string in `courseContext.js`, and the de-dasher in `strings.js`. The six
+  that were on-screen copy (CourseDiagnostic, SessionBundle) were fixed.
+- `.git` lives under an iCloud-synced Desktop. Packfiles get evicted to
+  dataless placeholders, and git then reports "far too short to be a
+  packfile" or "sha1 file truncated". This is NOT corruption and re-cloning
+  is not the fix. `ls` will show the full size while `du` shows a fraction.
+  Fix: `brctl download "<path to .git>"`, then wait. The same eviction makes
+  the first read of any source file return empty, which can make guard tests
+  that scan files fail spuriously on a cold run.
 
 ---
 
@@ -15,7 +159,11 @@ nothing imports (22 at last run). Three separate reward mechanisms were
 built, wired at one end, and reaching zero users. Check this before
 building anything new.
 
-### Narrated waits replace spinners
+### Visual stage labels replace spinners
+
+CORRECTION (2026-08-12): this section was originally headed "narrated
+waits". Nothing is narrated. They are visual stage labels on a progress
+ring, which is a good feature described with the wrong word.
 
 `src/components/ui/GeneratingScreen.jsx` plus `src/lib/toolStages.js`.
 Progress ring with honest stage labels naming the real work. Live in Quiz
@@ -46,7 +194,16 @@ Three reasons they were not:
 ended in silence. Adding a tool means dispatching that event, nothing else.
 Focus Mode and Practice Exam are excluded because they celebrate
 themselves. Payload gained optional `score`/`total`; 90 percent or better
-earns confetti. `npm run test:celebrations` (17 assertions).
+earns confetti.
+
+CORRECTION (2026-08-12): the original recap claimed celebration intensity
+scaled to session quality across twelve tools. It scaled across SIX. The
+six scored tools (Quiz Burst, Time Attack, Teach It Back, Brain Dump,
+Connections, Diagnostic) escalate at 90 percent or better. The six artifact
+tools (Cheat Sheet, Podcast, Diagrams, Essay Architect, Problem Solver,
+Rescue Plan) fired a flat SMALL every time regardless of anything. They
+were no longer silent, which is a real fix, but they were not scaled.
+See the 2026-08-12 entry for what replaced this.
 
 `TIER`/`TIER_NAME` moved to `src/lib/celebrationTiers.js` so the mapping is
 testable in plain node without pulling in canvas-confetti, PostHog and the
@@ -56,9 +213,14 @@ DOM. `celebration.js` re-exports both, so no existing import changed.
 
 `npm run find:emdash` strips comments and reports only real copy. A raw
 grep says 40+ files; almost all are comments. Real count was 49 in 21
-files. Eight deliberately left: 6 in confirmed-dark modules
-(CourseDiagnostic, SessionBundle), 1 in `courseContext.js` prompt text
-sent to the model, 1 in `strings.js` which is the regex that strips them.
+files. Eight were left at the time: 6 in CourseDiagnostic and SessionBundle,
+1 in `courseContext.js` prompt text sent to the model, 1 in `strings.js`
+which is the regex that strips them.
+
+CORRECTION (2026-08-12): the 6 in CourseDiagnostic and SessionBundle were
+described as being in "confirmed-dark modules", meaning unreachable code.
+They were not. Both render, and all 6 were on-screen copy. Fixed on
+2026-08-12.
 
 ### Interaction states, in `src/index.css`
 

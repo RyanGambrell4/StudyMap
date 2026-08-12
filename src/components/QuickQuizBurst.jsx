@@ -654,6 +654,10 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
             {...stagesFor('quizBurst')}
             title="Building your quiz"
             ready={genReady}
+            // The weak spots her own history produced, named while the quiz is
+            // written. "Targeting" because we picked these, she did not.
+            topics={suggestedTopics}
+            topicsLabel={n => `Targeting ${n} weak ${n === 1 ? 'spot' : 'spots'}`}
             onComplete={() => { setGenReady(false); setStep('quiz') }}
           />
         )}

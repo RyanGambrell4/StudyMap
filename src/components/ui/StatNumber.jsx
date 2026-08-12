@@ -24,8 +24,14 @@
  */
 
 import { useEffect, useRef, useState } from 'react'
-import { motion, useMotionValue, useTransform, animate } from 'framer-motion'
-import { SPRING, DURATION, useReducedMotion } from '../../lib/motion'
+// `motion` is only ever referenced from JSX. This project's eslint config has
+// no eslint-plugin-react, so its jsx-uses-vars rule is absent and no-unused-vars
+// cannot see JSX identifiers. Uppercase component names slip through the
+// varsIgnorePattern; a lowercase one like this does not.
+// eslint-disable-next-line no-unused-vars
+import { motion } from 'framer-motion'
+import { useMotionValue, useTransform, animate } from 'framer-motion'
+import { SPRING, useReducedMotion } from '../../lib/motion'
 import { T } from '../../theme/tokens'
 
 /**
@@ -210,5 +216,3 @@ export default function StatNumber({
     </div>
   )
 }
-
-export { SIZES as STAT_SIZES, TABULAR as TABULAR_NUMERALS, DURATION as _DURATION }

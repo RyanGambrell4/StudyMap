@@ -102,11 +102,40 @@ export default function GeneratingScreen({
   title = 'Working on it',
   estimatedMs = 6000,
   error = null,
+  // Real topics pulled out of the student's own material, when the pipeline
+  // surfaces them before the main generation finishes. Optional everywhere.
+  topics = null,
+  // How to describe them. Callers must say what is true for their pipeline:
+  // "Found" only when the model extracted them from her document during this
+  // wait, "Covering" when she chose them, "Targeting" when we picked them from
+  // her history. Receives the real count.
+  topicsLabel = n => `Found ${n} ${n === 1 ? 'topic' : 'topics'}`,
 }) {
   const reduced = useReducedMotion()
   const [pct, setPct] = useState(0)
   const [stageIdx, setStageIdx] = useState(0)
   const [overrunning, setOverrunning] = useState(false)
+
+  // Clean, de-duplicate and cap what came back. Extraction output is model
+  // output, so it can arrive with blanks, repeats, or a topic long enough to
+  // break the layout. Four is the cap: enough to prove it read the document,
+  // few enough to stay a glance rather than a list to work through.
+  const cleanTopics = []
+  const seenTopics = new Set()
+  for (const raw of Array.isArray(topics) ? topics : []) {
+    const value = typeof raw === 'string' ? raw : raw?.topic ?? raw?.name ?? raw?.title
+    if (typeof value !== 'string') continue
+    const trimmed = value.replace(/\s+/g, ' ').trim()
+    if (!trimmed) continue
+    const key = trimmed.toLowerCase()
+    if (seenTopics.has(key)) continue
+    seenTopics.add(key)
+    cleanTopics.push(trimmed.length > 34 ? `${trimmed.slice(0, 33).trimEnd()}...` : trimmed)
+  }
+  const visibleTopics = cleanTopics.slice(0, 4)
+  // Count the real total, not the truncated one. Claiming "4 topics" when it
+  // found 14 undersells the only thing this block is here to prove.
+  const topicCountLabel = cleanTopics.length > 0 ? topicsLabel(cleanTopics.length) : ''
 
   const progress = useMotionValue(0)
   const dash = useTransform(progress, (p) => `${(p / 100) * CIRC} ${CIRC}`)
@@ -230,6 +259,44 @@ export default function GeneratingScreen({
           />
         ))}
       </div>
+
+      {/* What the model actually found in HER material, surfaced while the
+          rest of the work finishes. This is the cheapest demonstration in the
+          app that it read her document rather than answering from nothing, and
+          it lands in the moment she is most likely to be doubting that.
+
+          Only ever rendered from real extracted topics passed by the caller.
+          Never seeded with placeholders: a fabricated version of this is worse
+          than not doing it, because the one time she does not recognise a
+          topic is the moment she stops believing any of it. */}
+      {visibleTopics.length > 0 ? (
+        <div style={{ marginTop: 22, width: '100%', maxWidth: 320 }} aria-live="polite">
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: T.dim, marginBottom: 8 }}>
+            {topicCountLabel}
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 6 }}>
+            {visibleTopics.map((t, i) => (
+              <motion.span
+                key={t}
+                initial={reduced ? { opacity: 0 } : { opacity: 0, y: 6 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={reduced
+                  ? { duration: DURATION.micro }
+                  : { ...SPRING.ui, delay: i * 0.09 }}
+                style={{
+                  fontSize: 12, fontWeight: 600, color: T.text,
+                  background: T.bg, border: `1px solid ${T.border}`,
+                  borderRadius: RADIUS.pill, padding: '5px 11px',
+                  maxWidth: '100%', overflow: 'hidden',
+                  textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+                }}
+              >
+                {t}
+              </motion.span>
+            ))}
+          </div>
+        </div>
+      ) : null}
 
       {overrunning ? (
         <motion.p
