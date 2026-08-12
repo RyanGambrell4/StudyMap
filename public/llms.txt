@@ -22,7 +22,7 @@ College and university students in any major. Works for STEM, humanities, social
 ## Pricing
 
 - **Free** — $0 forever. 1 course, 10 AI actions/month, 1 free use of Session Blueprints, Focus Mode, and AI Coach. No credit card required.
-- **Pro** — $2.99/week or $9.99/month or $69.99/year. 5 courses, 100 AI study boosts/month, AI Study Coach, Session Blueprints, smart calendar, Google Calendar sync. 3-day free trial, cancel anytime.
+- **Pro** — $2.99/week or $9.99/month or $69.99/year. 5 courses, 100 AI study boosts/month, AI Study Coach, Session Blueprints, smart calendar, Google Calendar sync. 7-day free trial, cancel anytime.
 - **Unlimited** — $4.99/week or $14.99/month or $119.99/year. Unlimited courses, unlimited AI actions, AI Tutor with session memory, advanced practice exam analytics, predicted exam score. Cancel anytime.
 
 Machine-readable pricing: https://getstudyedge.com/pricing.md
@@ -154,8 +154,6 @@ Machine-readable pricing: https://getstudyedge.com/pricing.md
 - Product details: https://getstudyedge.com/okf/product.md
 - Audience and use cases: https://getstudyedge.com/okf/audience.md
 - Tools and calculators: https://getstudyedge.com/okf/tools.md
-
-- Editorial Policy: https://getstudyedge.com/blog/editorial-policy
 
 ## Contact
 

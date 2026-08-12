@@ -1476,6 +1476,26 @@
             "source": "/blog/",
             "destination": "/blog",
             "permanent": true
+        },
+        {
+            "source": "/blog/author",
+            "destination": "/blog",
+            "permanent": true
+        },
+        {
+            "source": "/blog/author.html",
+            "destination": "/blog",
+            "permanent": true
+        },
+        {
+            "source": "/blog/editorial-policy",
+            "destination": "/blog",
+            "permanent": true
+        },
+        {
+            "source": "/blog/editorial-policy.html",
+            "destination": "/blog",
+            "permanent": true
         }
     ]
 }
