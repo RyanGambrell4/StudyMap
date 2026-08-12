@@ -425,8 +425,9 @@ export function showRepair({
   // copy this whole branch exists to avoid.
   if (!concept) return false
 
-  track('repair_prompt_shown', { trigger, concept, course_name: courseName, pct })
-
+  // Emit BEFORE reporting. Analytics is not allowed to decide whether the
+  // student sees a response: if track() throws (no key configured, blocked by
+  // an extension, transport wedged) the prompt must still appear.
   emit({
     type: 'repair',
     trigger,
@@ -436,6 +437,8 @@ export function showRepair({
     courseId,
     actionLabel,
   })
+
+  try { track('repair_prompt_shown', { trigger, concept, course_name: courseName, pct }) } catch { /* never block the prompt */ }
   return true
 }
 

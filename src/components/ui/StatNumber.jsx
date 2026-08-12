@@ -101,9 +101,6 @@ export default function StatNumber({
   const [delta, setDelta] = useState(null)
 
   useEffect(() => {
-    const from = prevRef.current
-    prevRef.current = numeric
-
     // Reduced motion: the value is simply correct, immediately, always.
     if (reduced) {
       mv.set(numeric)
@@ -116,8 +113,16 @@ export default function StatNumber({
       mv.set(numeric)
       return
     }
-    // A re-render that did not change the value must not re-trigger the count.
-    if (!isMount && from === numeric) return
+
+    // Guard on where the number ACTUALLY is, not on what the last render
+    // thought it was. StrictMode double-invokes effects in dev: the first pass
+    // would record the target and the second pass would then see "no change"
+    // and skip, stranding the display at zero. Reading the motion value makes
+    // that second pass re-animate, and still correctly skips a re-render that
+    // genuinely did not move the number.
+    const from = prevRef.current
+    prevRef.current = numeric
+    if (mv.get() === numeric) return
 
     const controls = animate(mv, numeric, SPRING.count)
 

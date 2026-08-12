@@ -121,7 +121,10 @@ function RepairPrompt({ data, onDismiss }) {
         </div>
         {data.alsoConcept ? (
           <div style={{ fontSize: 12.5, color: T.muted, marginTop: 3 }}>
-            {data.alsoConcept} slipped too.
+            {/* Sentence-initial, so it needs a capital. Concept strings come
+                back from the model in whatever case it felt like, and
+                "oxidative phosphorylation slipped too." reads like a typo. */}
+            {data.alsoConcept.charAt(0).toUpperCase() + data.alsoConcept.slice(1)} slipped too.
           </div>
         ) : null}
       </div>

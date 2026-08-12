@@ -118,6 +118,31 @@ It is NOT wired, because that pipeline does not render `GeneratingScreen`
 during the window when the topics exist. Wiring it means restructuring the
 syllabus commit path, which was out of scope here.
 
+### Three bugs that only turned up by looking at it
+
+All three passed every test and would have shipped.
+
+1. **Every StatNumber was stuck on 0.** React StrictMode double-invokes
+   effects in dev. The first pass recorded the target in a ref, so the second
+   pass saw "value did not change" and skipped the animation, leaving the
+   display at zero. Now the guard reads the motion value itself rather than
+   the ref, so it re-animates when the number is genuinely not there yet.
+2. **The repair prompt's second line started lowercase.** "oxidative
+   phosphorylation slipped too." Concept strings come back from the model in
+   whatever case it chose, and sentence-initial position needs a capital.
+3. **`showRepair` reported before it emitted.** If `track()` threw (no
+   PostHog key, blocked by an extension) the student would get no response at
+   all on a bad score. Analytics now runs after the emit and inside a
+   try/catch. It is not allowed to decide whether a student sees a response.
+
+Method, if this is worth repeating: the app entry is `app.html` at `/app`,
+not `/`, and `main.jsx` statically imports `App`, so a worktree without a
+`.env` renders a blank page and swallows the reason. A dev-only gallery
+mounted behind a query param let the reward states be seen without an
+account, a course and a deliberately bad quiz. It was removed before commit
+because keeping it meant lazy-importing `App` in the production entry point,
+which is not a change this work should be making.
+
 ### What was judged and rejected
 
 - **Wiring `ToolResultsScreen.jsx`.** Still a downgrade on what the tools
