@@ -35,6 +35,11 @@ export const SPRING = {
   ui:          { type: 'spring', stiffness: 260, damping: 26, mass: 1 }, // crisp, no bounce
   reward:      { type: 'spring', stiffness: 300, damping: 18, mass: 1 }, // slight overshoot
   celebration: { type: 'spring', stiffness: 200, damping: 12, mass: 1 }, // bouncy
+  // Counting a number up. Deliberately overdamped (damping ratio just above 1)
+  // so it decelerates into the final value without ever overshooting it.
+  // A number that flies past 100 percent and settles back reads as a bug, not
+  // as personality. Settles in roughly 700ms.
+  count:       { type: 'spring', stiffness: 90, damping: 20, mass: 1 },
 }
 
 export const EASE = {

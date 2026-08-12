@@ -5,6 +5,7 @@ import { useCelebration, TIER } from '../utils/useCelebration'
 import { getAccessToken } from '../lib/supabase'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
+import StatNumber from './ui/StatNumber'
 import { addCardsToDeck, cardFromPracticeExamMiss } from '../lib/deckAdditions'
 import { analyzeExam, SKILL_LABEL, SKILL_HINT, SKILL_COLOR } from '../lib/examAutopsy'
 import { getCurrentGrade } from '../utils/gradeCalc'
@@ -141,25 +142,13 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
 
   const celebrate = useCelebration()
   const celebratedRef = useRef(false)
-  const [displayScore, setDisplayScore] = useState(0)
 
-  // Animate score counter from 0 → actual score
-  useEffect(() => {
-    if (score === null) return
-    const target = score
-    const steps = 28
-    const delay = 600 // start after brief pause
-    let step = 0
-    const timer = setTimeout(() => {
-      const interval = setInterval(() => {
-        step++
-        const eased = Math.round(target * (1 - Math.pow(1 - step / steps, 3)))
-        setDisplayScore(Math.min(target, eased))
-        if (step >= steps) clearInterval(interval)
-      }, 30)
-    }, delay)
-    return () => clearTimeout(timer)
-  }, [score])
+  // The score counter used to be a bespoke setInterval here: 28 steps of 30ms
+  // driving component state, so the whole results screen re-rendered 28 times,
+  // it ignored prefers-reduced-motion, and its cleanup cleared only the outer
+  // timeout, leaving the interval running after an unmount. StatNumber owns
+  // this now, drives it off a motion value instead of state, and degrades
+  // correctly. This is the one place a number counts up in this app.
 
   // Fire confetti when score is good
   useEffect(() => {
@@ -414,7 +403,14 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
             {score !== null && (
               <div>
                 <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Score</p>
-                <p style={{ margin: '4px 0 0', fontSize: 38, fontWeight: 800, color: score >= 70 ? '#16A34A' : score >= 50 ? '#D97706' : '#DC2626', lineHeight: 1, letterSpacing: '-0.02em' }}>{displayScore}<span style={{ fontSize: 18, color: '#6B6B6B', fontWeight: 700 }}>%</span></p>
+                <StatNumber
+                  value={score}
+                  suffix="%"
+                  size="hero"
+                  color={score >= 70 ? '#16A34A' : score >= 50 ? '#D97706' : '#DC2626'}
+                  style={{ marginTop: 4 }}
+                  ariaLabel={`Score ${score} percent`}
+                />
                 <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6B6B6B' }}>{correctCount} of {autoGradedCount} multiple-choice correct</p>
               </div>
             )}
@@ -455,7 +451,13 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
                   <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#3B61C4', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Predicted real exam score</p>
                   <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6B6B6B' }}>Based on your trend across {scoreHistory.length} practice exams</p>
                 </div>
-                <p style={{ margin: 0, fontSize: 30, fontWeight: 800, color: '#3B61C4', letterSpacing: '-0.02em' }}>{predictedScore}%</p>
+                <StatNumber
+                  value={predictedScore}
+                  suffix="%"
+                  size="standard"
+                  color="#3B61C4"
+                  ariaLabel={`Predicted real exam score ${predictedScore} percent`}
+                />
               </div>
             )}
           </div>

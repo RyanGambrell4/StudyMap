@@ -357,9 +357,9 @@ export default function BrainDumpModal({
       setResult(prev => ({ ...prev, recorded: Boolean(data.recorded), retryable: Boolean(data.retryable) }))
       if (data.recorded) {
         track('brain_dump_record_retry_succeeded', { topic: topic.trim() })
-        // `silent` because this is a database retry, not a second session. The
-        // streak still wants to hear about it; the reward layer must not
-        // respond again to a score the student was already shown.
+        // `silent` because this is a database retry, not a second session.
+        // Consumers that count completions still want the event; the reward
+        // layer must not respond again to a score already shown to the student.
         window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'brainDump', silent: true } }))
       } else {
         track('brain_dump_record_retry_failed', { topic: topic.trim(), retryable: Boolean(data.retryable) })

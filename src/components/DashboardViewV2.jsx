@@ -5,6 +5,7 @@ import { getMasteryForCourse, getDueForReview } from '../lib/masteryStore'
 import { daysBetween } from '../utils/dateUtils'
 import { track } from '../lib/analytics'
 import { getReturnAck, markReturnAcked } from '../lib/returnAck'
+import StatNumber from './ui/StatNumber'
 
 // ── Design tokens (from handoff doc — do not deviate) ─────────────────────────
 const T = {
@@ -517,36 +518,32 @@ function HeroNewUser({ setupSteps, onStepClick }) {
 function StatStrip({ weeklyMinutes, weeklyGoalHours, sessionsThisWeek, isNewUser }) {
   const hoursThis  = weeklyMinutes / 60
   const pct        = Math.min(100, Math.round((hoursThis / weeklyGoalHours) * 100))
-  const weeklyLabel = `${hoursThis.toFixed(1)} of ${weeklyGoalHours} hrs this week`
+
+  if (isNewUser) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '0 6px' }}>
+        <div style={{ flex: 1, height: 6, background: '#EAECF0', borderRadius: 3, minWidth: 60 }} />
+        <span style={{ fontSize: 13, color: T.dim, flexShrink: 0 }}>Your first session starts the count</span>
+      </div>
+    )
+  }
 
   return (
-    <div style={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', rowGap: 10, padding: '0 6px' }}>
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12, flex: 1, minWidth: 0 }}>
-        {isNewUser ? (
-          <>
-            <div style={{ flex: 1, height: 6, background: '#EAECF0', borderRadius: 3, minWidth: 60 }} />
-            <span style={{ fontSize: 13, color: T.dim, flexShrink: 0 }}>Weekly goal not set yet</span>
-          </>
-        ) : (
-          <>
-            <div style={{ flex: 1, height: 6, background: '#EAECF0', borderRadius: 3, overflow: 'hidden', minWidth: 60 }}>
-              <div style={{ width: `${pct}%`, height: '100%', background: T.blue, borderRadius: 3 }} />
-            </div>
-            <span style={{ fontSize: 13, color: T.muted, flexShrink: 0, whiteSpace: 'nowrap' }}>{weeklyLabel}</span>
-          </>
-        )}
+    <div style={{ padding: '0 6px' }}>
+      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 36, flexWrap: 'wrap', rowGap: 18 }}>
+        <StatNumber
+          value={hoursThis}
+          decimals={1}
+          label={`of ${weeklyGoalHours} hours this week`}
+        />
+        <StatNumber
+          value={sessionsThisWeek}
+          label={sessionsThisWeek === 1 ? 'session this week' : 'sessions this week'}
+        />
       </div>
 
-      <div style={{ width: 1, height: 18, background: 'rgba(0,0,0,0.1)', margin: '0 22px', flexShrink: 0 }} />
-
-      <div style={{ flexShrink: 0, whiteSpace: 'nowrap' }}>
-        {isNewUser ? (
-          <span style={{ fontSize: 13, color: T.dim }}>Sessions show up here</span>
-        ) : (
-          <span style={{ fontSize: 13, color: T.muted }}>
-            <span style={{ fontWeight: 600, color: T.text }}>{sessionsThisWeek}</span> sessions this week
-          </span>
-        )}
+      <div style={{ marginTop: 14, height: 6, background: '#EAECF0', borderRadius: 3, overflow: 'hidden' }}>
+        <div style={{ width: `${pct}%`, height: '100%', background: T.blue, borderRadius: 3, transition: 'width 0.5s cubic-bezier(0.16,1,0.3,1)' }} />
       </div>
     </div>
   )

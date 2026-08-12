@@ -5,6 +5,7 @@ import { track } from '../lib/analytics'
 import ReferralCard from './ReferralCard'
 import { useStreak } from '../utils/useStreak'
 import { isSoundEnabled, setSoundEnabled, playTone, TIER } from '../lib/celebration'
+import StatNumber from './ui/StatNumber'
 
 const PLAN_INFO = {
   free: {
@@ -318,14 +319,25 @@ export default function AccountView({
         </div>
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
           {[
-            { label: 'This week', value: `${progressStats.weekHours}h`, sub: `${progressStats.totalHours}h total`, primary: true },
+            { label: 'This week', value: progressStats.weekHours, suffix: 'h', sub: `${progressStats.totalHours}h total`, primary: true },
             { label: 'Sessions', value: progressStats.sessions, sub: 'completed' },
-            { label: 'Study streak', value: `${currentStreak}d`, sub: currentStreak === 0 ? 'Start today' : personalBest > currentStreak ? `Best ${personalBest}d` : 'in a row' },
-            { label: 'Avg recall', value: progressStats.avgRecall != null ? `${progressStats.avgRecall}%` : '-', sub: progressStats.avgRecall != null ? 'across sessions' : 'No data yet' },
-          ].map(({ label, value, sub, primary }) => (
+            { label: 'Study streak', value: currentStreak, suffix: 'd', sub: currentStreak === 0 ? 'Start today' : personalBest > currentStreak ? `Best ${personalBest}d` : 'in a row' },
+            { label: 'Avg recall', value: progressStats.avgRecall, suffix: '%', sub: progressStats.avgRecall != null ? 'across sessions' : 'No data yet' },
+          ].map(({ label, value, suffix = '', sub, primary }) => (
             <div key={label} style={{ background: '#F7F8FA', borderRadius: 10, padding: '12px 14px', border: '1px solid rgba(0,0,0,0.07)' }}>
               <p style={{ margin: '0 0 3px', fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>{label}</p>
-              <p style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 700, color: primary ? '#3B61C4' : '#111111', letterSpacing: '-0.02em' }}>{value}</p>
+              {value == null ? (
+                <p style={{ margin: '0 0 2px', fontSize: 22, fontWeight: 700, color: '#9B9B9B', letterSpacing: '-0.02em' }}>-</p>
+              ) : (
+                <StatNumber
+                  value={value}
+                  suffix={suffix}
+                  size="standard"
+                  color={primary ? '#3B61C4' : '#111111'}
+                  ariaLabel={`${label}: ${value}${suffix}`}
+                  style={{ marginBottom: 2 }}
+                />
+              )}
               <p style={{ margin: 0, fontSize: 11, color: '#6B6B6B' }}>{sub}</p>
             </div>
           ))}

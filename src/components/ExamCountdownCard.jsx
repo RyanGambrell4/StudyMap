@@ -3,6 +3,7 @@ import { getMasteryForCourse, getWeakestTopics } from '../lib/masteryStore'
 import { clean } from '../utils/strings'
 import { track } from '../lib/analytics'
 import { daysUntil } from '../utils/dateUtils'
+import StatNumber from './ui/StatNumber'
 
 const D = {
   bg:      '#FFFFFF',
@@ -121,12 +122,22 @@ export default function ExamCountdownCard({ courses = [], onStartFocus, onOpenEx
           boxShadow: `0 4px 14px ${urgencyColor}45`,
           animation: days <= 1 ? 'ec-pulse 2.4s ease-in-out infinite' : 'none',
         }}>
-          <div style={{ fontSize: 34, fontWeight: 800, color: '#FFFFFF', lineHeight: 1, letterSpacing: '-0.03em', fontVariantNumeric: 'tabular-nums' }}>
-            {days === 0 ? 'Today' : days}
-          </div>
-          <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.85)', textTransform: 'uppercase', letterSpacing: '0.09em', marginTop: 4 }}>
-            {days === 0 ? '' : days === 1 ? 'day left' : 'days left'}
-          </div>
+          {days === 0 ? (
+            <div style={{ fontSize: 34, fontWeight: 800, color: '#FFFFFF', lineHeight: 1, letterSpacing: '-0.03em' }}>
+              Today
+            </div>
+          ) : (
+            <StatNumber
+              value={days}
+              label={days === 1 ? 'day left' : 'days left'}
+              size="hero"
+              align="center"
+              color="#FFFFFF"
+              style={{ alignItems: 'center' }}
+              labelStyle={{ color: 'rgba(255,255,255,0.85)', letterSpacing: '0.09em', fontWeight: 700 }}
+              ariaLabel={`${days} ${days === 1 ? 'day' : 'days'} until the exam`}
+            />
+          )}
         </div>
 
         {/* Text */}
