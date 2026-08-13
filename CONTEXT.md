@@ -70,11 +70,59 @@ This is most of the retention build already written:
    `ReadableStream` or SSE. Item 5 is a from-scratch lift across the
    generation endpoints, correctly ordered last.
 
+### Two more corrections, found while building
+
+6. **"Name the session after her material" is not possible at topic
+   granularity, and that is not a shortfall in the implementation.** Scheduled
+   sessions carry only `courseId`, `courseName`, `duration`, `sessionType`
+   (see `generateSchedule.js`). They have no topic, because the topic is
+   chosen by the AI blueprint when the session actually starts. Putting a
+   topic on the button would mean guessing what the blueprint will pick and
+   being wrong some of the time, on the one element the whole dashboard leads
+   with. Course name plus minutes is the honest ceiling here.
+
+7. **`StudyCoachPlanView.test.jsx` fails every evening.** Its `TODAY` came
+   from `new Date().toISOString()`, which is UTC, while the component compares
+   against the LOCAL date. From about 20:00 EDT onwards the two disagree by a
+   day and the "behind schedule" case fails. The suite was green at 14:42 and
+   red at 20:54 on the same day for that reason alone. Fixed here by anchoring
+   `TODAY` to local calendar parts. Worth knowing that `toDateStr()` in
+   `utils/dateUtils.js` has the same UTC behaviour and is safe only because
+   `addDays()` anchors at local noon first.
+
 ### What that means for the build order
 
 Items 2 and 3 are mostly a wiring job, not a build job. The cards exist, the
 scheduling data exists, and the priority engine exists. They are behind a
 flag that has been off since the V2 dashboard shipped.
+
+### What shipped in this build
+
+**Item 1, done.** `lib/gradeProjection.js` projects a course grade using recall
+as the estimate for ungraded work, and the projection now leads the dashboard
+stat strip as an animated `StatNumber`. After a scored session, if the
+projection moved, the reward line says so in her material's language and
+outranks the generic trajectory line. `lib/courseRegistry.js` is the seam that
+lets the non-React celebration listener reach grade components.
+
+**Item 2, parts 2 and 3 done. Part 1 not done.** `lib/whileYouWereGone.js`
+answers "what changed while I was gone" from cards that ripened since her last
+visit, and the primary button now names the course and its size. The
+instant-restore cache was NOT built: it needs a cached dashboard snapshot
+painted before Supabase rehydrates, which means touching the boot gate in
+`App.jsx`, and it deserves its own pass rather than being rushed at the end of
+this one.
+
+**Items 3, 4, 5 not started.** Per the spec's own instruction to stop rather
+than half finish. Item 3 (end every session naming the next one) is the
+natural next pass and `SessionBundle.jsx` plus `quickStart.js` are most of it.
+
+### Still true, still not done: the five dead cards
+
+This build did NOT wire `SmartStartCard` and friends into V2. Item 1 and item 2
+were the ordered priorities and they were enough for one pass. That wiring is
+the single highest-value item left on the board, because it is five finished
+features that currently render to nobody, and it is a wiring job.
 
 
 
