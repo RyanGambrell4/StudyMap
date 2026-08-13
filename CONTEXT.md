@@ -3,7 +3,80 @@ _Last updated by: Feel pass v1 on 2026-08-12 (dopamine branch merged into curren
 
 ---
 
-## Feel pass v1 -- 2026-08-12 (reward layer, stat numbers, Focus Mode dark, wait content)
+## Retention loop v1 -- 2026-08-12: AUDIT FIRST, corrections to the build spec
+
+Branch `worktree-retention-loop-v1`, off `worktree-feel-pass-v1`. This section
+was written BEFORE any code, against the live tree, because the two prior
+builds were both handed specs with stale premises. Same again here.
+
+### The big one: five retention cards render to nobody
+
+`SmartStartCard`, `QuickStartCard`, `ComebackCard`, `MomentumCard` and
+`StreakGuardCard` are imported and rendered **only** by
+`src/components/DashboardView.jsx`, which is the V1 dashboard.
+`se_dashboard_v2` defaults ON (`OutputView.jsx:560`), so **V1 never mounts**.
+Every one of those cards is dead in production.
+
+`npm run find:dark` does NOT catch this, and cannot: V1 is still imported by
+`OutputView`, so the cards have a live importer. The detector finds orphaned
+modules, not modules orphaned behind a flag. If you are looking for dead
+features, `find:dark` is necessary and not sufficient. Check what actually
+mounts.
+
+This is most of the retention build already written:
+
+- `SmartStartCard` is a full priority-ranked "one action right now" engine
+  (exam tomorrow > exam in 2-3 days > today's uncompleted session > weakest
+  topic), already reading `masteryStore`. That IS "one decision, not a menu".
+- `ComebackCard` is the away-3-days-plus re-entry card, already guilt-free by
+  design, already picking a confidence-win topic rather than the hardest one.
+- `MomentumCard` sits on `src/lib/momentum.js`, which already computes
+  consistency, mastery velocity, completion rate, an 8-week history and
+  `detectComeback()`.
+
+### Corrections to the spec as written
+
+1. **`GradePredictorView.jsx` does not exist.** There is no such file. Grade
+   projection lives in `src/utils/gradeCalc.js` (`getProjectedGrade`,
+   `computeGradeMath`, `getNeededOnRemaining`, `generateScenarioPaths`) and is
+   rendered by `GradeHubView.jsx` only.
+
+   The spec's actual hypothesis is CORRECT though: `gradeCalc.js` contains
+   zero references to mastery or study history. `getProjectedGrade` treats
+   every ungraded component as 0 unless an explicit `overrides[componentId]`
+   is passed. That `overrides` map is the seam mastery should feed.
+
+2. **"That second is currently a skeleton loader" is wrong, and the truth is
+   worse.** `App.jsx` holds cold start behind a bare spinner while Supabase
+   rehydrates a stored session. There is no skeleton, and no cached dashboard
+   state anywhere in `src/` (no cache key, no `lastKnown` anything). Item 2's
+   instant-restore is genuinely new work, not an improvement on something.
+
+3. **"One decision, not a menu" is already half-shipped on V2.** `HeroNormal`
+   in `DashboardViewV2.jsx` is already a single centred primary button with
+   duration, course name and a payoff line, with everything else below it.
+   The hierarchy fight is already won. What is missing is that its action
+   comes from the calendar blueprint rather than from the mastery/exam
+   priority engine, and the button says "Start next session" rather than
+   naming her material. That is a much smaller change than the spec implies.
+
+4. **`find:dark` reports 36 modules, but 10 are `.test.js(x)` files.** Vitest
+   imports those; they are not dead. Real orphans worth knowing about:
+   `GapCloser.jsx` (233 lines, one-tap gap drill, relevant to item 4),
+   `SessionBundle.jsx` (275 lines, relevant to item 3), `PrepBlastScreen`,
+   `StudyBuddyCard`, `CourseDiagnostic`, `PracticeExamModal`.
+
+5. **Streaming: only `api/chat-tutor.js` streams.** No other endpoint uses
+   `ReadableStream` or SSE. Item 5 is a from-scratch lift across the
+   generation endpoints, correctly ordered last.
+
+### What that means for the build order
+
+Items 2 and 3 are mostly a wiring job, not a build job. The cards exist, the
+scheduling data exists, and the priority engine exists. They are behind a
+flag that has been off since the V2 dashboard shipped.
+
+
 
 Branch `worktree-feel-pass-v1`. Contains the dopamine branch merged into
 current main, then four changes on top. Not merged to main.
