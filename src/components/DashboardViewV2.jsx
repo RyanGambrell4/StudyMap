@@ -6,6 +6,8 @@ import { daysBetween } from '../utils/dateUtils'
 import { track } from '../lib/analytics'
 import { getReturnAck, markReturnAcked } from '../lib/returnAck'
 import StatNumber from './ui/StatNumber'
+import { projectCourseGrade, recordProjection } from '../lib/gradeProjection'
+import { buildWhileYouWereGone, getLastVisit, recordVisit } from '../lib/whileYouWereGone'
 
 // ── Design tokens (from handoff doc — do not deviate) ─────────────────────────
 const T = {
@@ -210,6 +212,29 @@ function ExamBanner({ course, todayStr }) {
   )
 }
 
+/**
+ * The primary button's label. Names the material where the session knows it,
+ * and always states the size, because "how long is this" is the question that
+ * actually decides whether she starts at 11pm.
+ *
+ * Falls back down a ladder rather than rendering a blank or an "undefined":
+ * topic, then course, then the session type, then a plain start.
+ */
+function startLabel(session) {
+  if (!session) return 'Start'
+  const mins = Number(session.duration)
+  const size = Number.isFinite(mins) && mins > 0 ? `${mins} min` : null
+
+  const topic = typeof session.topic === 'string' && session.topic.trim() ? session.topic.trim() : null
+  const course = typeof session.courseName === 'string' && session.courseName.trim() ? session.courseName.trim() : null
+  const subject = topic ?? course ?? (session.sessionType ? sessionTypeLabel(session.sessionType) : null)
+
+  if (subject && size) return `${subject}, ${size}`
+  if (subject) return subject
+  if (size) return size
+  return 'next session'
+}
+
 // ── Hero: Normal ──────────────────────────────────────────────────────────────
 function HeroNormal({ nextSession, avgRecall, dueCount, payoffLine, onStartFocus, onNavigateToCalendar }) {
   const [hov, setHov] = useState(false)
@@ -250,7 +275,12 @@ function HeroNormal({ nextSession, avgRecall, dueCount, payoffLine, onStartFocus
           margin: '0 auto',
         }}
       >
-        {nextSession ? 'Start next session' : 'No sessions scheduled'}
+        {/* Named after her material and sized in minutes. "Start next session"
+            is a label for a database row; "Start: enzyme kinetics, 25 min" is
+            an appointment she can decide about without opening anything. */}
+        {nextSession
+          ? `Start: ${startLabel(nextSession)}`
+          : 'No sessions scheduled'}
       </button>
 
       <div style={{ fontSize: 14, fontWeight: 500, color: T.text, marginTop: 22 }}>
@@ -515,7 +545,7 @@ function HeroNewUser({ setupSteps, onStepClick }) {
 // ── Stat strip ────────────────────────────────────────────────────────────────
 // The streak deliberately does not appear here. It lives in Account settings:
 // the dashboard is for what to do next, not for a scoreboard of the past.
-function StatStrip({ weeklyMinutes, weeklyGoalHours, sessionsThisWeek, isNewUser }) {
+function StatStrip({ weeklyMinutes, weeklyGoalHours, sessionsThisWeek, isNewUser, projection, projectionCourseName }) {
   const hoursThis  = weeklyMinutes / 60
   const pct        = Math.min(100, Math.round((hoursThis / weeklyGoalHours) * 100))
 
@@ -531,6 +561,20 @@ function StatStrip({ weeklyMinutes, weeklyGoalHours, sessionsThisWeek, isNewUser
   return (
     <div style={{ padding: '0 6px' }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 36, flexWrap: 'wrap', rowGap: 18 }}>
+        {/* Her projected grade leads, because it is the only number here she
+            already cared about before she met this app. Omitted entirely when
+            there is nothing honest to project, rather than shown as a dash. */}
+        {projection ? (
+          <StatNumber
+            value={projection.projected}
+            decimals={projection.projected % 1 === 0 ? 0 : 1}
+            suffix="%"
+            label={projectionCourseName ? `${projectionCourseName} projected` : 'projected grade'}
+            color={T.blue}
+            showDelta
+            ariaLabel={`${projectionCourseName ?? 'Course'} projected grade ${projection.projected} percent, ${projection.letter}`}
+          />
+        ) : null}
         <StatNumber
           value={hoursThis}
           decimals={1}
@@ -886,6 +930,68 @@ export default function DashboardViewV2({
       .sort((a, b) => daysUntil(a.examDate, todayStr) - daysUntil(b.examDate, todayStr))[0] ?? null
   }, [courses, todayStr])
 
+  // What ripened while she was away. Computed once on mount against the
+  // previous visit timestamp, then the visit is stamped, so the same set of
+  // cards is never reported twice.
+  // Computed in the initialiser rather than an effect so the line is present
+  // on the FIRST paint. Item 2 is about her not watching her own state load
+  // in; a line that appears one render later is the thing it exists to avoid.
+  // Stamping the visit here too means the same cards are never reported twice.
+  const [gone] = useState(() => {
+    const lastVisit = getLastVisit()
+    const result = buildWhileYouWereGone({ due: getDueForReview(null, 200), lastVisit })
+    recordVisit()
+    return result
+  })
+  useEffect(() => {
+    if (gone) track('while_you_were_gone_shown', { count: gone.count, had_topic: Boolean(gone.topic) })
+  }, [gone])
+
+  // Mastery is written to localStorage by the tools, which React cannot see.
+  // Bumping this on a completed session is what makes the projection move
+  // while she is still looking at it, rather than on the next full reload.
+  const [masteryVersion, setMasteryVersion] = useState(0)
+  useEffect(() => {
+    const bump = () => setMasteryVersion(v => v + 1)
+    window.addEventListener('studyedge:tool-session-complete', bump)
+    window.addEventListener('studyedge:mastery-updated', bump)
+    return () => {
+      window.removeEventListener('studyedge:tool-session-complete', bump)
+      window.removeEventListener('studyedge:mastery-updated', bump)
+    }
+  }, [])
+
+  // The projected grade shown on the dashboard. One course, not all of them:
+  // four projections is a report card, and a report card is a page she has to
+  // read rather than a number she can glance at. Priority is the course with
+  // the nearest exam, because that is the one she is anxious about, falling
+  // back to the first course that can actually support a projection.
+  // `masteryVersion` is a real dependency even though it does not appear in
+  // the body: the projection reads localStorage, which React cannot observe,
+  // so the counter is what carries "a session just changed her mastery".
+  const projected = useMemo(() => {
+    const ordered = [...(courses ?? [])].sort((a, b) => {
+      const da = a?.examDate ? daysUntil(a.examDate, todayStr) : Infinity
+      const db = b?.examDate ? daysUntil(b.examDate, todayStr) : Infinity
+      return da - db
+    })
+    const hit = ordered
+      .map(c => ({ p: projectCourseGrade(c), name: c?.name ?? null }))
+      .find(x => x.p !== null)
+    return hit ?? null
+  }, [courses, todayStr, masteryVersion])
+
+  const projection = projected?.p ?? null
+  const projectionCourseName = projected?.name ?? null
+
+  // Record a baseline so the first session after this visit has something to
+  // compare against. Without it getProjectionMove has no prior snapshot and
+  // correctly reports nothing, which would mean her very first session never
+  // shows a projection move.
+  useEffect(() => {
+    if (projection?.courseId != null) recordProjection(projection.courseId, projection)
+  }, [projection])
+
   // Payoff line + recall info for hero
   const { payoffLine, avgRecall, dueCount } = useMemo(() => {
     if (!nextSession) return { payoffLine: null, avgRecall: null, dueCount: 0 }
@@ -1037,6 +1143,16 @@ export default function DashboardViewV2({
             {greetingText}<span style={{ color: T.blue }}>.</span>
           </div>
           <div style={{ fontSize: 14.5, color: T.muted, marginTop: 12 }}>{subline}</div>
+
+          {/* What ripened while she was away. Above the fold, one line, and
+              only when it is true. This is the app's answer to "what changed
+              since I was last here", which a tool hub cannot answer at all. */}
+          {gone && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 10 }}>
+              <span style={{ width: 5, height: 5, borderRadius: 999, background: T.blue, flexShrink: 0 }} />
+              <span style={{ fontSize: 13.5, color: T.text, fontWeight: 500 }}>{gone.line}</span>
+            </div>
+          )}
         </div>
 
         {/* Registry write warning — shown when syllabus onboarding completed but file couldn't be saved to materials */}
@@ -1088,6 +1204,8 @@ export default function DashboardViewV2({
           weeklyGoalHours={weeklyGoal.hours}
           sessionsThisWeek={weeklyProgress.sessions}
           isNewUser={isNewUser}
+          projection={projection}
+          projectionCourseName={projectionCourseName}
         />
 
         {/* Reminders. Only offered once they have a completed session behind

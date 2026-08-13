@@ -14,7 +14,18 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import StudyCoachPlanView from './StudyCoachPlanView'
 import { setSessionDone, flattenSessions, addDays, assignScheduledDates } from '../../lib/shared/coachPlan.js'
 
-const TODAY = new Date().toISOString().split('T')[0]
+// Local calendar date, NOT the UTC one. `toISOString()` on a bare `new Date()`
+// rolls over to tomorrow once local time passes 20:00 in EDT, while the
+// component under test computes "behind schedule" against the LOCAL date. The
+// two disagreed by a day every evening, so this test failed from about 8pm
+// onwards and passed again the next morning. Anchoring to local noon is the
+// same trick `addDays` already uses to stay timezone-stable.
+const TODAY = (() => {
+  const d = new Date()
+  const m = String(d.getMonth() + 1).padStart(2, '0')
+  const day = String(d.getDate()).padStart(2, '0')
+  return `${d.getFullYear()}-${m}-${day}`
+})()
 const EXAM = addDays(TODAY, 18)
 const TOPICS = ['Cell structure', 'Membrane transport', 'Glycolysis', 'Krebs cycle']
 const course = { id: 'c1', name: 'Cell Biology', color: { dot: '#7C5CFA' } }

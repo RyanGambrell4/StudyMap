@@ -117,6 +117,15 @@ function clean(value, maxLen = 60) {
 function trajectoryLine(context = {}, { strong }) {
   const { topicsLockedThisWeek, sessionsThisWeek, streakDays } = context
 
+  // A grade projection that just moved outranks every other fact we could
+  // state. It is the only number here she cared about before she met this
+  // app, and it is the one that traces directly to the session she just
+  // finished. "Third topic you have locked this week" is a nice line; "moves
+  // your BIOL 2030 projection to B+" is the reason she opens this tomorrow.
+  if (typeof context.projectionLine === 'string' && context.projectionLine) {
+    return context.projectionLine
+  }
+
   // Only claim a topic is "locked" off the back of a session that locked one.
   if (strong && typeof topicsLockedThisWeek === 'number' && topicsLockedThisWeek >= 2) {
     const word = ordinal(topicsLockedThisWeek)
@@ -270,6 +279,39 @@ async function readContext(detail) {
     const { getWeakestTopics } = await import('./masteryStore')
     out.fallbackConcept = getWeakestTopics(detail?.courseId ?? null, 1)?.[0]?.topic ?? null
   } catch { /* ignore */ }
+
+  // Did this session move her grade projection? The tools write mastery before
+  // they dispatch, so by now the projection already reflects the session and
+  // the stored snapshot still holds the pre-session value. That difference is
+  // the whole point of the feature.
+  //
+  // The snapshot is re-recorded here rather than on the dashboard alone, so
+  // the same movement cannot be reported twice.
+  try {
+    const courseId = detail?.courseId ?? null
+    if (courseId != null) {
+      const [{ getCourseById }, projection] = await Promise.all([
+        import('./courseRegistry'),
+        import('./gradeProjection'),
+      ])
+      const course = getCourseById(courseId)
+      if (course) {
+        const projected = projection.projectCourseGrade(course)
+        if (projected) {
+          const move = projection.getProjectionMove(courseId, projected)
+          if (move) {
+            out.projectionLine = projection.projectionMoveLine({
+              move,
+              courseName: detail?.courseName ?? course?.name ?? null,
+              topic: detail?.topic ?? null,
+              scorePct: toPercent(detail?.score, detail?.total),
+            })
+          }
+          projection.recordProjection(courseId, projected)
+        }
+      }
+    }
+  } catch { /* a projection we cannot compute is simply not mentioned */ }
 
   return out
 }

@@ -34,6 +34,7 @@ import CalendarWeekView from './CalendarWeekView'
 import AddSessionModal from './AddSessionModal'
 import AppShell from './AppShell'
 import DashboardView from './DashboardView'
+import { setCourses } from '../lib/courseRegistry'
 import DashboardViewV2 from './DashboardViewV2'
 import CommandPalette from './CommandPalette'
 import { QUICK_PRESETS, buildQuickSession } from '../lib/quickStart'
@@ -460,6 +461,10 @@ export default function OutputView({
   const [ratingSession, setRatingSession] = useState(null) // session to rate after completion
   const [ratingReminder, setRatingReminder] = useState(null) // skipped session pending reminder
   const ratingReminderTimerRef = useRef(null)
+
+  // Mirror courses out to the non-React registry, so the celebration listener
+  // can reach grade components when a session lands. See lib/courseRegistry.
+  useEffect(() => { setCourses(courses) }, [courses])
 
   // ── Repair prompt listener ────────────────────────────────────────────────
   // Raised by the celebration controller when a scored session came in under
