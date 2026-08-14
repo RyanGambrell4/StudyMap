@@ -8,7 +8,7 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 export const config = { maxDuration: 120 }
 
-// One-time personal email from Ryan to all non-converted users who signed up 3+ days ago.
+// One-time personal email from the StudyEdge AI team to all non-converted users who signed up 3+ days ago.
 // Protected by service key — not meant to run on a cron, trigger manually via GET with auth header.
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).end()
@@ -69,7 +69,7 @@ export default async function handler(req, res) {
 
     try {
       await resend.emails.send({
-        from: 'Ryan Gambrell <ryan@getstudyedge.com>',
+        from: 'StudyEdge AI Team <ryan@getstudyedge.com>',
         to: user.email,
         subject: 'honest question about StudyEdge',
         headers: listUnsubscribeHeaders(user.user_id),
@@ -78,7 +78,7 @@ export default async function handler(req, res) {
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#f9fafb;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-${preheader('Quick question from the founder. Takes 30 seconds.')}
+${preheader('Quick question from the StudyEdge AI team. Takes 30 seconds.')}
   <div style="max-width:540px;margin:0 auto;padding:40px 16px;">
     <div style="background:#fff;border-radius:12px;padding:36px 32px;border:1px solid #e5e7eb;">
 
@@ -86,16 +86,16 @@ ${preheader('Quick question from the founder. Takes 30 seconds.')}
         Hey ${cap},
       </p>
       <p style="margin:0 0 18px;font-size:15px;color:#374151;line-height:1.7;">
-        I'm Ryan. I built StudyEdge AI. You signed up a few days ago and I wanted to reach out personally.
+        We're the team behind StudyEdge AI. You signed up a few days ago and we wanted to reach out.
       </p>
       <p style="margin:0 0 18px;font-size:15px;color:#374151;line-height:1.7;">
-        I noticed you haven't tried the Pro trial yet and I'm genuinely curious: <strong>what held you back?</strong>
+        We noticed you haven't tried the Pro trial yet and we're genuinely curious: <strong>what held you back?</strong>
       </p>
       <p style="margin:0 0 18px;font-size:15px;color:#374151;line-height:1.7;">
         Was it the price? Not sure if it was worth it? Didn't get to try it properly? Something else?
       </p>
       <p style="margin:0 0 24px;font-size:15px;color:#374151;line-height:1.7;">
-        I read every reply and use the feedback to make the app better. Even a one-line answer helps a lot.
+        We read every reply and use the feedback to make the app better. Even a one-line answer helps a lot.
       </p>
 
       <div style="border-top:1px solid #e5e7eb;padding-top:24px;margin-bottom:24px;">
@@ -110,10 +110,9 @@ ${preheader('Quick question from the founder. Takes 30 seconds.')}
       </div>
 
       <p style="margin:0;font-size:15px;color:#374151;line-height:1.7;">
-        Either way, reply to this email. I'll write back.
+        Either way, reply to this email. We'll write back.
       </p>
-      <p style="margin:12px 0 0;font-size:15px;color:#374151;">Ryan</p>
-      <p style="margin:4px 0 0;font-size:13px;color:#6b7280;">Founder, StudyEdge AI</p>
+      <p style="margin:12px 0 0;font-size:15px;color:#374151;">The StudyEdge AI Team</p>
 
       <p style="margin:24px 0 0;font-size:11px;color:#9ca3af;border-top:1px solid #f3f4f6;padding-top:16px;">
         StudyEdge AI · <a href="https://getstudyedge.com/unsubscribe?uid=${user.user_id}" style="color:#9ca3af;">Unsubscribe</a>

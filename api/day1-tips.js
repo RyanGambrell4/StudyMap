@@ -43,7 +43,7 @@ export default async function handler(req, res) {
     if (!gate.ok) continue
     try {
       await resend.emails.send({
-        from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
+        from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: user.email,
         subject: '3 things that make StudyEdge actually work',
         headers: listUnsubscribeHeaders(user.email),

@@ -8,7 +8,7 @@
  *      FEEDBACK_NOTIFY_EMAIL (default: support@mail.getstudyedge.com).
  *
  * This is the direct feedback loop referenced in the conversion plan — the
- * whole point is that Ryan sees each submission the moment it lands so he
+ * whole point is that the team sees each submission the moment it lands so we
  * can act on the friction that's blocking conversion.
  */
 
