@@ -178,7 +178,7 @@ export default function FeedbackModal({ open, onClose }) {
                   Send feedback
                 </h2>
                 <p style={{ margin: 0, fontSize: 13, color: MUTED, lineHeight: 1.55 }}>
-                  What's confusing, broken, or missing? Every submission goes straight to Ryan.
+                  What's confusing, broken, or missing? Every submission goes straight to the StudyEdge AI team.
                 </p>
               </div>
               <button

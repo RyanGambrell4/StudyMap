@@ -174,7 +174,7 @@ export default async function handler(req, res) {
 
     try {
       await resend.emails.send({
-        from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
+        from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: user.email,
         subject: story.subject,
         headers: listUnsubscribeHeaders(user.email),
@@ -234,7 +234,7 @@ ${preheader(story.preheaderText)}
         </table>
 
         <p style="margin:26px 0 0;font-size:14px;color:#6B6B6B;line-height:1.7;">
-          Have a question about how the Study Coach or Brain Dump works? Reply to this email. I personally read every one.<br><br>Ryan
+          Have a question about how the Study Coach or Brain Dump works? Reply to this email. We read every one.<br><br>The StudyEdge AI Team
         </p>
       </td></tr>
 

@@ -600,7 +600,7 @@ export default async function handler(req, res) {
       if (userId && email && process.env.RESEND_API_KEY) {
         try {
           await resend.emails.send({
-            from: 'Ryan at StudyEdge <ryan@getstudyedge.com>',
+            from: 'StudyEdge AI Team <ryan@getstudyedge.com>',
             to: email,
             subject: 'You left before finishing. Your trial spot is still open.',
             headers: listUnsubscribeHeaders(userId),
@@ -630,9 +630,9 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
       ${wasTrial ? 'Complete your free trial →' : 'Complete signup →'}
     </a>
     <p style="margin:24px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">
-      Any questions? Just reply. I read every message.
+      Any questions? Just reply. We read every message.
     </p>
-    <p style="margin:8px 0 0;font-size:13px;color:#6b7280;">Ryan, StudyEdge AI</p>
+    <p style="margin:8px 0 0;font-size:13px;color:#6b7280;">The StudyEdge AI Team</p>
     <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;text-align:center;">
       StudyEdge AI · <a href="https://getstudyedge.com/unsubscribe?uid=${userId}" style="color:#9ca3af;">Unsubscribe</a>
     </p>

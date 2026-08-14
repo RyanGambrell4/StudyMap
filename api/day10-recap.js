@@ -105,7 +105,7 @@ export default async function handler(req, res) {
 
     try {
       await resend.emails.send({
-        from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
+        from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: user.email,
         subject: trialUsed ? '10 days in. Time to go back to Pro?' : "10 days in. Here's what you're still leaving on the table.",
         headers: listUnsubscribeHeaders(user.email),

@@ -187,7 +187,7 @@ async function sendCampaign(campaign, userId, email, userData, context) {
       const ctaUrl = `https://getstudyedge.com/app?upload=syllabus&utm_source=email&utm_medium=lifecycle&utm_campaign=no_course_24h`
       const opener = name ? `${name}, your semester plan is one syllabus away.` : 'Your semester plan is one syllabus away.'
       await resend.emails.send({
-        from: 'Ryan from StudyEdge AI <support@mail.getstudyedge.com>',
+        from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: email,
         subject: 'Drop one syllabus, get your semester planned',
         headers: listUnsubscribeHeaders(userId),
@@ -209,7 +209,7 @@ ${preheader('Drop your syllabus and get a study plan built around your real exam
         </p>
         <a href="${ctaUrl}" style="display:block;text-align:center;background:#3B61C4;color:#fff;font-weight:800;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none;letter-spacing:-0.01em;">Drop your syllabus, get your plan</a>
         <p style="margin:12px 0 0;font-size:13px;color:#9ca3af;text-align:center;">getstudyedge.com/app</p>
-        <p style="margin:20px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">Any questions, just reply. I read every one.<br>Ryan</p>
+        <p style="margin:20px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">Any questions, just reply. We read every one.<br>The StudyEdge AI Team</p>
         <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;text-align:center;">StudyEdge AI · <a href="https://getstudyedge.com/unsubscribe?uid=${userId}" style="color:#9ca3af;">Unsubscribe</a></p>
       </td></tr>
     </table>
@@ -230,7 +230,7 @@ ${preheader('Drop your syllabus and get a study plan built around your real exam
         : 'Your plan is ready. Start your first session.'
       const headline = courseName ? `Your ${courseName} plan is ready.` : 'Your study plan is ready.'
       await resend.emails.send({
-        from: 'Ryan from StudyEdge AI <support@mail.getstudyedge.com>',
+        from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: email,
         subject,
         headers: listUnsubscribeHeaders(userId),
@@ -274,7 +274,7 @@ ${preheader('Your first session takes 15 minutes. Tap Session Blueprint and you 
         ? `${name}, you finished your first session.`
         : courseName ? `You finished your first ${courseName} session.` : 'You finished your first session.'
       await resend.emails.send({
-        from: 'Ryan from StudyEdge AI <support@mail.getstudyedge.com>',
+        from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: email,
         subject: 'You finished your first session.',
         headers: listUnsubscribeHeaders(userId),
@@ -324,7 +324,7 @@ ${preheader('The hardest part is done. Every session from here is easier to star
       const upgradeUrl = `https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=paywall_hit`
       const greeting = name ? `${name}, ` : ''
       await resend.emails.send({
-        from: 'Ryan from StudyEdge AI <support@mail.getstudyedge.com>',
+        from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: email,
         subject: copy.subject,
         headers: listUnsubscribeHeaders(userId),
@@ -360,7 +360,7 @@ ${preheader(copy.unlock)}
       const wasTrial = context?.wasTrial ?? true
       const ctaUrl = `https://getstudyedge.com/app?plan=pro&billing=weekly${wasTrial ? '&trial=1' : ''}&utm_source=email&utm_medium=lifecycle&utm_campaign=checkout_abandoned`
       await resend.emails.send({
-        from: 'Ryan from StudyEdge AI <support@mail.getstudyedge.com>',
+        from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: email,
         subject: 'Looks like checkout didn\'t go through.',
         headers: listUnsubscribeHeaders(userId),
@@ -374,7 +374,7 @@ ${preheader('Your spot is still open. It takes 30 seconds to complete.')}
     <h1 style="margin:0 0 12px;font-size:20px;font-weight:800;color:#111;letter-spacing:-0.03em;">Looks like checkout didn't go through.</h1>
     <p style="margin:0 0 20px;font-size:15px;color:#4b5563;line-height:1.6;">${name ? `Hey ${name}. ` : ''}Your ${wasTrial ? '7-day free trial' : 'Pro signup'} checkout didn't go through. Your spot is still open. Takes about 30 seconds to finish.</p>
     <a href="${ctaUrl}" style="display:block;text-align:center;background:#3B61C4;color:#fff;font-weight:800;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none;">${wasTrial ? 'Complete your free trial →' : 'Complete signup →'}</a>
-    <p style="margin:20px 0 0;font-size:13px;color:#6b7280;">Any questions? Just reply. I read every message.<br>Ryan, StudyEdge AI</p>
+    <p style="margin:20px 0 0;font-size:13px;color:#6b7280;">Any questions? Just reply. We read every message.<br>The StudyEdge AI Team</p>
     <p style="margin:16px 0 0;font-size:12px;color:#9ca3af;text-align:center;">StudyEdge AI · <a href="https://getstudyedge.com/unsubscribe?uid=${userId}" style="color:#9ca3af;">Unsubscribe</a></p>
   </div>
 </div>
@@ -400,7 +400,7 @@ ${preheader('Your spot is still open. It takes 30 seconds to complete.')}
         return (candidate && candidate.length <= 49) ? candidate : 'Your next session takes 15 minutes.'
       })()
       await resend.emails.send({
-        from: 'Ryan from StudyEdge AI <support@mail.getstudyedge.com>',
+        from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: email,
         subject: reEngageSubject,
         headers: listUnsubscribeHeaders(userId),
@@ -434,7 +434,7 @@ ${preheader('Your study plan is still there. Your next session takes 15 minutes 
     // COPY STATUS: PENDING APPROVAL
     case 'welcome': {
       await resend.emails.send({
-        from: 'Ryan from StudyEdge AI <support@mail.getstudyedge.com>',
+        from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: email,
         subject: `${name ? `${name}, your` : 'Your'} AI study assistant is ready.`,
         headers: listUnsubscribeHeaders(userId),
@@ -461,7 +461,7 @@ ${preheader('Add your first course and your study plan, session blueprints, and 
           Add your first course, give it an exam date, and your plan is live in about 30 seconds.
         </p>
         <a href="https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=welcome" style="display:block;text-align:center;background:#3B61C4;color:#fff;font-weight:800;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none;letter-spacing:-0.01em;">Add my first course →</a>
-        <p style="margin:20px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">Any questions, just reply. I read every one.<br>Ryan, StudyEdge AI</p>
+        <p style="margin:20px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">Any questions, just reply. We read every one.<br>The StudyEdge AI Team</p>
         <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;text-align:center;">StudyEdge AI · <a href="https://getstudyedge.com/unsubscribe?uid=${userId}" style="color:#9ca3af;">Unsubscribe</a></p>
       </td></tr>
     </table>
@@ -480,7 +480,7 @@ ${preheader('Add your first course and your study plan, session blueprints, and 
       const preferredTime = context?.preferredTime
       const hasProfile = yearLevel || learningStyle || preferredTime
       await resend.emails.send({
-        from: 'Ryan from StudyEdge AI <support@mail.getstudyedge.com>',
+        from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: email,
         subject: 'Your profile is set. Now add a course.',
         headers: listUnsubscribeHeaders(userId),
@@ -532,7 +532,7 @@ ${preheader('StudyEdge AI needs a course and exam date to build your plan. One c
         ? `around ${planCourseNames.join(', ')}`
         : 'around your courses'
       await resend.emails.send({
-        from: 'Ryan from StudyEdge AI <support@mail.getstudyedge.com>',
+        from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: email,
         subject: 'Your first study plan is live.',
         headers: listUnsubscribeHeaders(userId),
@@ -587,7 +587,7 @@ ${preheader('Open your first session, run a Blueprint, and you have a real plan 
         ? `Your ${streakNum}-day streak broke. Come back today.`
         : `Your streak broke. Get it back today.`
       await resend.emails.send({
-        from: 'Ryan from StudyEdge AI <support@mail.getstudyedge.com>',
+        from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: email,
         subject,
         headers: listUnsubscribeHeaders(userId),

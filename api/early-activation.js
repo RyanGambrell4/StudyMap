@@ -58,7 +58,7 @@ export default async function handler(req, res) {
 
     try {
       await resend.emails.send({
-        from: 'Ryan from StudyEdge <support@mail.getstudyedge.com>',
+        from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: user.email,
         subject,
         headers: listUnsubscribeHeaders(user.email),
@@ -79,7 +79,7 @@ ${preheader("Add a course with an exam date. Everything else runs from there: yo
         <span style="font-size:16px;font-weight:700;color:#111111;vertical-align:middle;letter-spacing:-0.3px;">StudyEdge</span>
       </td></tr>
       <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
-        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">From Ryan</p>
+        <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">From the StudyEdge AI Team</p>
         <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">
           The one thing that makes StudyEdge actually work.
         </h1>
@@ -114,7 +114,7 @@ ${preheader("Add a course with an exam date. Everything else runs from there: yo
           <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=early_activation_trial" style="display:inline-block;background:#E8531A;color:#FFFFFF;font-size:13px;font-weight:700;text-decoration:none;border-radius:8px;padding:11px 24px;">Start free 7-day trial →</a>
         </div>
         <p style="margin:22px 0 0;font-size:14px;color:#6B6B6B;line-height:1.65;">
-          Reply if you have questions. I read them.<br>Ryan
+          Reply if you have questions. We read them.<br>The StudyEdge AI Team
         </p>
       </td></tr>
       <tr><td style="padding:24px 0 0;text-align:center;">
