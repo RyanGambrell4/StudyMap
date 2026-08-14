@@ -1120,10 +1120,10 @@ export default function DashboardView({
                 Your study plan is live. Unlock the full picture.
               </p>
               <p style={{ margin: '4px 0 10px', fontSize: 12, color: D.textMuted, lineHeight: 1.55 }}>
-                You generated your first blueprint. The hardest part is done. Unlimited gives you unlimited courses, 100 AI sessions/month, and unlimited blueprints. 7-day free trial, then $4.99/wk.
+                You generated your first blueprint. The hardest part is done. Pro gives you 5 courses, 100 AI actions a month, and unlimited blueprints. 7-day free trial, then $2.99/wk.
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                {['Unlimited courses', '100 AI sessions/month', 'Unlimited blueprints'].map(f => (
+                {['5 courses', '100 AI actions/month', 'Unlimited blueprints'].map(f => (
                   <span key={f} style={{ fontSize: 11, fontWeight: 600, color: D.blue, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                     <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                     {f}
@@ -1167,11 +1167,11 @@ export default function DashboardView({
               </p>
               <p style={{ margin: '3px 0 8px', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
                 {upcomingExam && upcomingExam.days <= 5
-                  ? 'Exam Rescue, Cheat Sheets, and unlimited focus sessions are all included. 7-day free trial, then $4.99/wk.'
-                  : 'Removes the 30-min cap, adds unlimited courses, 100 AI sessions/month, and unlimited blueprints. 7-day free trial, then $4.99/wk.'}
+                  ? 'Exam Rescue, Cheat Sheets, and unlimited focus sessions are all included. 7-day free trial, then $2.99/wk.'
+                  : 'Removes the 30-min cap, adds 5 courses, 100 AI actions a month, and unlimited blueprints. 7-day free trial, then $2.99/wk.'}
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-                {['Unlimited sessions', '100 AI actions/month', 'Unlimited courses'].map(f => (
+                {['Unlimited focus sessions', '100 AI actions/month', '5 courses'].map(f => (
                   <span key={f} style={{ fontSize: 11, fontWeight: 600, color: D.blue, display: 'inline-flex', alignItems: 'center', gap: 4 }}>
                     <svg width="10" height="10" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12" /></svg>
                     {f}
@@ -1233,7 +1233,7 @@ export default function DashboardView({
                 You've had {sessionsCount} study sessions. You're actually using this.
               </p>
               <p style={{ margin: '4px 0 0', fontSize: 12, color: D.textMuted, lineHeight: 1.55 }}>
-                Unlock unlimited focus time, unlimited courses, and 100 AI sessions/month. 7-day free trial, then $4.99/wk.
+                Unlock unlimited focus time, 5 courses, and 100 AI actions a month. 7-day free trial, then $2.99/wk.
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
@@ -1271,7 +1271,7 @@ export default function DashboardView({
                 You've been on free for {accountAgeDays} days. The trial is still open.
               </p>
               <p style={{ margin: '3px 0 0', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
-                7 days free, then $4.99/wk. Unlimited sessions, unlimited courses, 100 AI actions/month. Cancel anytime.
+                7 days free, then $2.99/wk. Unlimited focus sessions, 5 courses, 100 AI actions a month. Cancel anytime.
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>

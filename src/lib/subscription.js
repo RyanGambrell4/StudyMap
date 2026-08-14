@@ -3,7 +3,7 @@
  *
  * 3-tier model:
  *  Free      → permanent, capped per feature
- *  Trial     → 3-day Pro via Stripe Checkout. Card required upfront; charged after 3 days unless cancelled.
+ *  Trial     → 7-day Pro via Stripe Checkout. Card required upfront; charged $2.99/wk after 7 days unless cancelled.
  *  Pro       → Stripe paid (weekly/monthly/annual), 5 courses, 100 AI actions/month
  *  Unlimited → Stripe paid (weekly/monthly/annual), unlimited everything + tutor memory & advanced analytics
  */
@@ -19,7 +19,7 @@ import { track } from './analytics'
 
 // Free is a one-time preview tier: most premium features are limited to a
 // single lifetime use so users see what each tool does, then hit a real wall
-// that drives them into the 3-day trial.
+// that drives them into the 7-day Pro trial.
 export const FREE_LIMITS = {
   courses:             1,
   aiTutor:             { count: 5,  period: 'total' },
@@ -142,17 +142,25 @@ export function getTrialDaysRemaining() {
   return Math.max(0, Math.ceil(TRIAL_DURATION_DAYS - elapsed))
 }
 
+// REVENUE-CRITICAL. The 7-day free trial is always Pro/weekly ($2.99/wk after).
+// Single source of truth for every trial CTA in the app — do not pass a plan in
+// at the call site, and do not change these values without also updating the
+// trial copy in PrePaywall, PaywallModal, DashboardView, AccountView, Onboarding
+// and PaywallExitGift. Trial entitlements are PRO_LIMITS (see TRIAL_LIMITS above)
+// and getActivePlan() returns 'pro' while trialing, so billing the Unlimited
+// price here would charge users for a tier they never had access to.
+export const TRIAL_PLAN = 'pro'
+export const TRIAL_BILLING_PERIOD = 'weekly'
+
 // activateTrial routes through Stripe Checkout so a card is collected upfront.
 // Returns the checkout URL on success, or null on failure.
 // Pass userId and userEmail from the calling component.
-// Trial is on Unlimited (weekly) — this matches revealed user preference: 100% of
-// paying users chose Unlimited, so we start them there and let them downgrade if needed.
 export async function activateTrial(userId, userEmail) {
   const uid = userId ?? _uid
   if (!uid) return null
   if (hasUsedTrial()) return null
-  track('trial_cta_clicked', { source: 'activateTrial' })
-  const url = await createCheckoutSession('unlimited', 'weekly', userEmail, uid, { trial: true })
+  track('trial_cta_clicked', { source: 'activateTrial', plan: TRIAL_PLAN, billing_period: TRIAL_BILLING_PERIOD })
+  const url = await createCheckoutSession(TRIAL_PLAN, TRIAL_BILLING_PERIOD, userEmail, uid, { trial: true })
   return url ?? null
 }
 
@@ -360,7 +368,7 @@ export function incrementAIQuery() {
 
 // ── Stripe checkout session creator ──────────────────────────────────────────
 // Used for paid plan signups and card-required trials.
-// Pass opts.trial: true to create a 3-day Stripe trial (card collected upfront).
+// Pass opts.trial: true to create a 7-day Stripe trial (card collected upfront).
 
 export async function createCheckoutSession(plan, billingPeriod, userEmail, userId, opts = {}) {
   // checkout_button_clicked = honest name for what happened (CTA was clicked, API call is starting).

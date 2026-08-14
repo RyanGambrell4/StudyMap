@@ -7,11 +7,15 @@ import { track } from '../lib/analytics'
  *
  *   Step 1 — What you'll get   (outcome-focused benefits, big icons)
  *   Step 2 — Social proof      (star rating + count + rotating quotes)
- *   Step 3 — How the trial works (Today / Day 2 / Day 3 timeline)
+ *   Step 3 — How the trial works (Today / Day 6 / Day 7 timeline)
  *
- * The last step's CTA advances into the actual PaywallModal — the parent
- * (PaywallModal) mounts this first, then swaps to the plan grid once the
- * user hits Continue on step 3 (or dismisses).
+ * REVENUE-CRITICAL. The step 3 CTA goes STRAIGHT to Stripe Checkout for the
+ * 7-day Pro trial (via the parent's onStartTrial → activateTrial). It does NOT
+ * hand off to the plan grid — that intermediate pricing screen was a dead step
+ * that made users pick a plan they had already been promised, and it is the
+ * reason the button said "Start your 7-day free trial" without starting one.
+ * The plan grid is still reachable by dismissing/skipping this modal, and it is
+ * still the only path for trial-expired users and Unlimited-only triggers.
  *
  * Behavior:
  *   - Shown at most once per session (parent tracks via sessionStorage flag).
@@ -65,12 +69,12 @@ const TIMELINE = [
   {
     day: 'Day 7',
     color: '#3B61C4',
-    title: 'Continue for $4.99/wk or cancel',
-    body: "Loving it? Stay on Unlimited for $4.99/wk. Not for you? One tap to cancel. No charge, no email chase.",
+    title: 'Continue for $2.99/wk or cancel',
+    body: "Loving it? Stay on Pro for $2.99/wk. Not for you? One tap to cancel. No charge, no email chase.",
   },
 ]
 
-export default function PrePaywall({ open, trigger, onContinue, onDismiss }) {
+export default function PrePaywall({ open, trigger, onStartTrial, onDismiss, trialLoading = false, trialError = null }) {
   const [step, setStep]                 = useState(0)
   const [quoteIdx, setQuoteIdx]         = useState(0)
   const openedAtRef                     = useRef(null)
@@ -116,11 +120,12 @@ export default function PrePaywall({ open, trigger, onContinue, onDismiss }) {
       setStep(step + 1)
       return
     }
-    // Last step → continue into the real paywall
+    if (trialLoading) return
+    // Last step → straight to Stripe Checkout for the 7-day Pro trial.
     const ms = openedAtRef.current ? Date.now() - openedAtRef.current : null
-    track('prepaywall_continued', { trigger: trigger ?? null, ms_open: ms })
-    onContinue?.()
-  }, [step, trigger, onContinue])
+    track('prepaywall_continued', { trigger: trigger ?? null, ms_open: ms, destination: 'stripe_checkout' })
+    onStartTrial?.()
+  }, [step, trigger, onStartTrial, trialLoading])
 
   const skip = useCallback((reason) => {
     const ms = openedAtRef.current ? Date.now() - openedAtRef.current : null
@@ -194,8 +199,15 @@ export default function PrePaywall({ open, trigger, onContinue, onDismiss }) {
         {step === 2 && <StepTrialTimeline />}
 
         {/* Primary CTA */}
+        {step === 2 && trialError && (
+          <p style={{ margin: '18px 0 -4px', textAlign: 'center', fontSize: '0.78rem', color: '#EF4444' }}>
+            {trialError}
+          </p>
+        )}
+
         <button
           onClick={advance}
+          disabled={step === 2 && trialLoading}
           style={{
             marginTop: 22,
             width: '100%', padding: '14px',
@@ -204,22 +216,24 @@ export default function PrePaywall({ open, trigger, onContinue, onDismiss }) {
               : ACCENT,
             border: 'none', borderRadius: '12px',
             color: '#fff', fontSize: '0.95rem', fontWeight: 800,
-            letterSpacing: '-0.2px', cursor: 'pointer',
+            letterSpacing: '-0.2px',
+            cursor: step === 2 && trialLoading ? 'not-allowed' : 'pointer',
+            opacity: step === 2 && trialLoading ? 0.75 : 1,
             fontFamily: 'inherit',
             boxShadow: step === 2 ? '0 6px 20px rgba(59,97,196,0.28)' : 'none',
             transition: 'opacity 0.15s',
           }}
-          onMouseEnter={e => e.currentTarget.style.opacity = '0.9'}
-          onMouseLeave={e => e.currentTarget.style.opacity = '1'}
+          onMouseEnter={e => { if (!(step === 2 && trialLoading)) e.currentTarget.style.opacity = '0.9' }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = step === 2 && trialLoading ? '0.75' : '1' }}
         >
           {step === 0 && 'Continue →'}
           {step === 1 && 'Continue →'}
-          {step === 2 && 'Start your 7-day free trial'}
+          {step === 2 && (trialLoading ? 'Loading…' : 'Start your 7-day free trial')}
         </button>
 
         {step === 2 && (
           <p style={{ margin: '10px 0 0', textAlign: 'center', fontSize: '0.72rem', color: '#9B9B9B' }}>
-            Card required · Cancel anytime · No hidden fees
+            Card required · $2.99/wk after 7 days · Cancel anytime
           </p>
         )}
 

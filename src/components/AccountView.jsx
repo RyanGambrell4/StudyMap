@@ -449,7 +449,7 @@ export default function AccountView({
               Start your 7-day free trial
             </p>
             <p style={{ margin: '0 0 12px', fontSize: 12, color: '#6B6B6B' }}>
-              Full Unlimited access for 7 days, then $4.99/wk. Card required. Cancel anytime.
+              Full Pro access for 7 days, then $2.99/wk. Card required. Cancel anytime.
             </p>
             <button
               onClick={handleStartTrial}

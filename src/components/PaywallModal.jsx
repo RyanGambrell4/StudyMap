@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getActivePlan, getFeatureUsage } from '../lib/subscription'
+import { createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getActivePlan, getFeatureUsage, TRIAL_PLAN, TRIAL_BILLING_PERIOD } from '../lib/subscription'
 import { track } from '../lib/analytics'
 import { getAccessToken } from '../lib/supabase'
 import PaywallExitGift from './PaywallExitGift'
@@ -235,14 +235,14 @@ const LIMIT_MESSAGES = {
     body: "Drilling is how knowledge sticks. Pro gives you unlimited topic drills so you can target every weak area before exam day.",
   },
   'nav-upgrade': {
-    tag: 'Ready to go back to Unlimited?',
+    tag: 'Ready to go back to Pro?',
     title: 'Everything you had during your trial.',
-    body: "$4.99/wk. Unlimited courses, unlimited AI, AI Tutor with session memory, advanced analytics, and every study tool. Cancel anytime.",
+    body: "$2.99/wk. 5 courses, 100 AI actions a month, AI Study Coach, Grade Hub, unlimited focus sessions, and every study tool. Cancel anytime.",
   },
   'nav-trial': {
-    tag: 'Try Unlimited, 7-day free trial',
+    tag: 'Try Pro, 7-day free trial',
     title: 'Full access. No restrictions.',
-    body: "Unlimited courses, unlimited AI actions, AI Tutor with session memory, advanced exam analytics, and every study tool. $4.99/wk after. Cancel anytime.",
+    body: "5 courses, 100 AI actions a month, AI Study Coach, unlimited Session Blueprints, unlimited focus sessions, and every study tool. $2.99/wk after. Cancel anytime.",
   },
 }
 
@@ -407,7 +407,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   }, [onClose, trigger, showPrePaywall])
 
   const handleStartTrial = async () => {
-    track('paywall_cta_click', { plan_clicked: 'unlimited', billing_period: 'weekly', trigger_feature: trigger, is_trial: true })
+    track('paywall_cta_click', { plan_clicked: TRIAL_PLAN, billing_period: TRIAL_BILLING_PERIOD, trigger_feature: trigger, is_trial: true })
     // trial_started removed — trial_activated fires server-side from the Stripe webhook when the
     // subscription is actually created (customer.subscription.created with status=trialing).
     setTrialLoading(true)
@@ -455,9 +455,12 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
   const markPrePaywallSeen = () => {
     try { window.sessionStorage.setItem(PREPAYWALL_SESSION_KEY, '1') } catch {}
   }
-  const handlePrePaywallContinue = () => {
+  // The pre-paywall's final CTA goes straight to Stripe for the 7-day Pro trial.
+  // Keep the modal mounted while the session is created so the user sees the
+  // loading state and any error, instead of being dropped onto the plan grid.
+  const handlePrePaywallStartTrial = () => {
     markPrePaywallSeen()
-    setShowPrePaywall(false)
+    handleStartTrial()
   }
   const handlePrePaywallDismiss = () => {
     markPrePaywallSeen()
@@ -521,7 +524,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
           </div>
         </div>
         <PaywallExitGift open={exitGiftOpen} trigger={trigger} onDismiss={handleGiftDismiss} />
-        <PrePaywall open={showPrePaywall} trigger={trigger} onContinue={handlePrePaywallContinue} onDismiss={handlePrePaywallDismiss} />
+        <PrePaywall open={showPrePaywall} trigger={trigger} onStartTrial={handlePrePaywallStartTrial} onDismiss={handlePrePaywallDismiss} trialLoading={trialLoading} trialError={trialError} />
       </>
     )
   }
@@ -574,7 +577,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
           </div>
         </div>
         <PaywallExitGift open={exitGiftOpen} trigger={trigger} onDismiss={handleGiftDismiss} />
-        <PrePaywall open={showPrePaywall} trigger={trigger} onContinue={handlePrePaywallContinue} onDismiss={handlePrePaywallDismiss} />
+        <PrePaywall open={showPrePaywall} trigger={trigger} onStartTrial={handlePrePaywallStartTrial} onDismiss={handlePrePaywallDismiss} trialLoading={trialLoading} trialError={trialError} />
       </>
     )
   }
@@ -651,7 +654,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
           </div>
         </div>
         <PaywallExitGift open={exitGiftOpen} trigger={trigger} onDismiss={handleGiftDismiss} />
-        <PrePaywall open={showPrePaywall} trigger={trigger} onContinue={handlePrePaywallContinue} onDismiss={handlePrePaywallDismiss} />
+        <PrePaywall open={showPrePaywall} trigger={trigger} onStartTrial={handlePrePaywallStartTrial} onDismiss={handlePrePaywallDismiss} trialLoading={trialLoading} trialError={trialError} />
       </>
     )
   }
@@ -719,7 +722,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
             </p>
             {!isUnlimitedTrigger && (
               <p style={{ color: '#9B9B9B', fontSize: '0.78rem', margin: 0 }}>
-                7-day Unlimited trial · $4.99/wk after · Cancel anytime
+                7-day Pro trial · $2.99/wk after · Cancel anytime
               </p>
             )}
           </div>
@@ -839,7 +842,7 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
               7-day free trial · Cancel anytime
             </div>
             <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 6px', letterSpacing: '-0.3px' }}>
-              Try Unlimited, free for 7 days.
+              Try Pro, free for 7 days.
             </h3>
             <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 14px', lineHeight: 1.5 }}>
               Full access starting today. We'll email you the day before your trial ends so nothing catches you off guard.
@@ -994,9 +997,11 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
                     {plan.subPrices[billingPeriod]}
                   </div>
                 )}
-                {planId === 'unlimited' && !trialUsed && !trialActive && (
+                {/* The 7-day free trial is Pro-only, so the trial line belongs on
+                    the Pro card. Unlimited is a direct paid upgrade, no trial. */}
+                {planId === TRIAL_PLAN && !trialUsed && !trialActive && (
                   <div style={{ fontSize: '0.68rem', color: '#059669', marginTop: '4px', fontWeight: 700 }}>
-                    Card required · 7-day trial · $4.99/wk after
+                    Card required · 7-day trial · $2.99/wk after
                   </div>
                 )}
               </div>
@@ -1073,8 +1078,10 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     <PrePaywall
       open={showPrePaywall}
       trigger={trigger}
-      onContinue={handlePrePaywallContinue}
+      onStartTrial={handlePrePaywallStartTrial}
       onDismiss={handlePrePaywallDismiss}
+      trialLoading={trialLoading}
+      trialError={trialError}
     />
     </>
   )
