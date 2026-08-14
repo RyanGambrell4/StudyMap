@@ -563,7 +563,7 @@ export default function PracticeExamResults({
         {outOfExams && (
           <Card delay={200} style={{ padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
             <p style={{ margin: 0, font: '400 13.5px/1.5 Inter, sans-serif', color: C.secondary, maxWidth: 560 }}>
-              That was your free practice exam. {hasUsedTrial() ? 'Pro gives you unlimited exams for every course.' : 'Pro gives you unlimited exams for every course, free for 3 days.'}
+              That was your free practice exam. {hasUsedTrial() ? 'Pro gives you unlimited exams for every course.' : 'Pro gives you unlimited exams for every course, free for 7 days.'}
             </p>
             <TextLink onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'practice-exam-results' } }))}>
               {hasUsedTrial() ? 'See plans' : 'Start free trial'}

@@ -11,7 +11,7 @@ Four tiers: Free, Pro, Unlimited. Pro and Unlimited each have three billing peri
 | Tier       | Weekly      | Monthly      | Annual         | Notes                          |
 |------------|-------------|--------------|----------------|--------------------------------|
 | Free       | —           | —            | —              | Always available               |
-| Pro        | $2.99/week  | $9.99/month  | $69.99/year    | 7-day free trial (no card)     |
+| Pro        | $2.99/week  | $9.99/month  | $69.99/year    | 7-day free trial (card required) |
 | Unlimited  | $4.99/week  | $14.99/month | $119.99/year   | No trial                       |
 
 **Savings framing:**

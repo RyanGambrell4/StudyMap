@@ -1153,8 +1153,11 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
   // and an old commit (2af08aa, 2026-05-25) assumed otherwise and silently
   // produced 0 new customers for 9 days. Verify with
   // `node scripts/verify-trial-flow.mjs` after any change to this block.
-  // Trial now defaults to Unlimited/weekly — 100% of paying users chose Unlimited,
-  // so we align the trial with revealed user preference. Pro trial still works.
+  // The trial is Pro/weekly ($2.99/wk after) — see TRIAL_PLAN in
+  // src/lib/subscription.js, which is what every trial CTA in the app sends.
+  // Trial entitlements are PRO_LIMITS and getActivePlan() reports 'pro' while
+  // trialing, so trialling on Unlimited billed users for a tier they never had.
+  // Unlimited is still accepted here for legacy links, but nothing sends it.
   const wantsTrial = !!trial && (plan === 'pro' || plan === 'unlimited')
 
   const subscriptionData = {

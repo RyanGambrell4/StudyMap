@@ -45,9 +45,20 @@ Read `AGENTS_SPEC.md` before running any agent task. It contains the full app co
 
 ## Pricing (live source of truth: `PRICING_SPEC.md`)
 - Free / Pro / Unlimited tiers
-- Pro: $2.99/wk · $9.99/mo · $69.99/yr — 3-day free trial via Stripe Checkout (card required, auto-bills $2.99/wk after)
+- Pro: $2.99/wk · $9.99/mo · $69.99/yr — 7-day free trial via Stripe Checkout (card required, auto-bills $2.99/wk after)
 - Unlimited: $4.99/wk · $14.99/mo · $119.99/yr — no trial
 - `getActivePlan()` returns `'free' | 'trial' | 'pro' | 'unlimited'`
+
+**REVENUE-CRITICAL trial invariant.** The 7-day free trial is ALWAYS Pro/weekly.
+`TRIAL_PLAN` and `TRIAL_BILLING_PERIOD` in `src/lib/subscription.js` are the only
+source of truth — never pass a plan into `activateTrial()`, and never point a
+trial CTA at Unlimited. Trial entitlements are `PRO_LIMITS` and `getActivePlan()`
+reports `'pro'` while trialing, so billing the trial on Unlimited charges users
+$4.99/wk for a tier they never had (this shipped once and was caught in
+production). `src/lib/trialPlan.test.js` locks this down. Any trial copy change
+must keep "Pro" and "$2.99/wk after 7 days" consistent across PrePaywall,
+PaywallModal, DashboardView, AccountView, Onboarding, PaywallExitGift, AuthScreen
+and the `index.html` landing page.
 
 ---
 
@@ -105,7 +116,7 @@ Run the StudyEdge Email agent. Read EMAIL_AGENT_SPEC.md and AGENTS_SPEC.md first
 - Landing page is INTENTIONALLY DARK (`#060614` bg) — do NOT convert to light theme
 - This is the exception to the light-only rule — landing page dark theme is by design
 - CTA `goTrial()` must always point to `/app?signup=1&plan=pro&billing=weekly&trial=1`
-- Trial CTAs must NOT say "no credit card required" — the trial goes through Stripe Checkout and collects a card. Use "3-day free trial · Cancel anytime" instead.
+- Trial CTAs must NOT say "no credit card required" — the trial goes through Stripe Checkout and collects a card. Use "7-day free trial · Cancel anytime" instead.
 **Invocation:**
 ```
 Run the StudyEdge Landing Page agent. Read LANDING_AGENT_SPEC.md and AGENTS_SPEC.md first. Audit the current landing page, identify the highest-priority improvement, implement it fully, verify it builds, commit, push. Update CONTEXT.md when done.
@@ -118,7 +129,7 @@ Run the StudyEdge Landing Page agent. Read LANDING_AGENT_SPEC.md and AGENTS_SPEC
 **What it does:** Audits and optimizes the new-user funnel from signup through onboarding to first meaningful action. Fixes copy, reduces steps, improves post-onboarding landing, fixes the email confirmation wall.
 **Key context:**
 - ONBOARDING_AGENT_SPEC.md references old 7-day/$12.99 pricing — **ignore those numbers**
-- Live pricing is in `PRICING_SPEC.md`: 3-day free trial, $2.99/wk Pro
+- Live pricing is in `PRICING_SPEC.md`: 7-day free trial, $2.99/wk Pro
 - Onboarding files: `StepCourses.jsx`, `StepAssignments.jsx`, `StepLearningStyle.jsx`, `StepSchedule.jsx`, `AuthScreen.jsx`
 - Known issues: no progress bar, blank dashboard after onboarding, generic copy, weak confirmation pending screen
 **Invocation:**

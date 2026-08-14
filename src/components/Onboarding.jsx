@@ -766,7 +766,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             </span>
           ) : (
             <span style={{ display: 'block', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              Try every Unlimited feature.
+              Try every Pro feature.
             </span>
           )}
           <span style={{ display: 'block', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
@@ -789,8 +789,8 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         <div style={{ background: 'rgba(107,143,255,.07)', border: '1px solid rgba(107,143,255,.22)', borderRadius: 14, padding: '18px 20px', marginBottom: 16 }}>
           <p style={{ fontSize: 10, fontWeight: 700, color: '#6B8FFF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Everything unlocked with your 7-day trial</p>
           {[
-            'Unlimited courses',
-            'Unlimited AI tutor messages',
+            '5 courses',
+            '100 AI actions a month',
             'AI Study Coach with week-by-week session plan',
             'Unlimited Session Blueprints',
             'Unlimited Focus sessions (no 30-min cap)',
@@ -802,7 +802,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             </div>
           ))}
           <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(107,143,255,.15)', fontSize: 11, color: 'rgba(255,255,255,.35)', lineHeight: 1.5 }}>
-            After 7 days, $4.99/wk. Cancel anytime.
+            After 7 days, $2.99/wk. Cancel anytime.
           </div>
         </div>
 
@@ -856,7 +856,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
         </button>
 
         <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.25)', fontSize: '0.71rem', marginBottom: 18 }}>
-          Card required · $4.99/wk after 7 days · Cancel anytime in account
+          Card required · $2.99/wk after 7 days · Cancel anytime in account
         </p>
 
         {/* Skip — low-prominence, copy reminds them what they're giving up */}

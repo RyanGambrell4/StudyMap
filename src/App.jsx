@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from './lib/supabase'
 import { initUserData, clearUserData, savePlan, refreshSubscription, saveEmailDigest } from './lib/db'
-import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getCachedSubscription, TRIAL_DURATION_DAYS } from './lib/subscription'
+import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getCachedSubscription, TRIAL_DURATION_DAYS, TRIAL_PLAN, TRIAL_BILLING_PERIOD } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
 import { initAnalytics, identifyUser, resetUser, track, register, registerOnce } from './lib/analytics'
 import { captureReferralParam, getStoredReferrer, clearStoredReferrer } from './lib/referral'
@@ -346,8 +346,10 @@ export default function App() {
     window.history.replaceState({}, '', window.location.pathname)
 
     const opts = checkoutIntent.trial ? { trial: true } : { promo: checkoutIntent.promo }
-    const plan = checkoutIntent.trial ? 'pro' : checkoutIntent.plan
-    const billing = checkoutIntent.trial ? 'weekly' : checkoutIntent.billing
+    // A ?trial=1 intent is ALWAYS the Pro weekly trial, whatever plan the link
+    // asked for. Same source of truth as activateTrial().
+    const plan = checkoutIntent.trial ? TRIAL_PLAN : checkoutIntent.plan
+    const billing = checkoutIntent.trial ? TRIAL_BILLING_PERIOD : checkoutIntent.billing
 
     createCheckoutSession(plan, billing, session.user.email, session.user.id, opts)
       .then(result => {
@@ -858,7 +860,7 @@ export default function App() {
         }}>
           <div style={{ flex: 1 }}>
             <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 700, color: '#fff' }}>Unlock unlimited sessions</p>
-            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,.65)' }}>7-day trial · $4.99/wk after</p>
+            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,.65)' }}>7-day trial · $2.99/wk after</p>
           </div>
           <button
             onClick={() => { track('trial_nudge_clicked', { source: 'floating_pill' }); openPaywall('trial_nudge') }}
