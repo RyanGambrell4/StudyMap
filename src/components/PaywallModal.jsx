@@ -106,8 +106,8 @@ const LIMIT_MESSAGES = {
   },
   practiceExamAnalytics: {
     tag: 'Unlimited only · Advanced analytics',
-    title: 'See your trend. Predict your real score.',
-    body: 'Unlimited unlocks score trend graphs across all your practice exams plus an AI-predicted real exam score.',
+    title: 'See whether the work is landing.',
+    body: 'Unlimited charts your score across every practice exam for a course, so you can watch a weak topic turn into a strong one.',
   },
   coach: {
     tag: 'Replan as life happens',

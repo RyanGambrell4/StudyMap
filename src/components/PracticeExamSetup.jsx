@@ -65,32 +65,28 @@ function buildPersonalizationContext(course) {
   return parts.length ? parts.join('\n') : null
 }
 
-const LENGTHS = [30, 45, 60]
-const MINS_PER_Q = 1.5
-
-export default function PracticeExamSetup({ courses, onBack, onStart, onShowPaywall }) {
-  const [selectedCourseId, setSelectedCourseId] = useState(courses[0]?.id ?? null)
+/**
+ * Source material only.
+ *
+ * The course, the exam length and the timer are all settled on the entry
+ * screen (design/practice-exams/, state A) and arrive here as props. This step
+ * must never ask for them again.
+ */
+export default function PracticeExamSetup({ course, length, timerMinutes, onBack, onStart, onShowPaywall }) {
   const [activeTab, setActiveTab] = useState('upload') // 'upload' | 'paste' | 'describe'
   const [file, setFile] = useState(null)
   const [extractedText, setExtractedText] = useState('')
   const [extracting, setExtracting] = useState(false)
   const [pastedText, setPastedText] = useState('')
   const [description, setDescription] = useState('')
-  const [length, setLength] = useState(30)
-  const [customLength, setCustomLength] = useState('')
-  const [timerOn, setTimerOn] = useState(false)
-  const [timerMinutes, setTimerMinutes] = useState(null) // null = using suggestion
-  const [timerOverride, setTimerOverride] = useState('')
   const [generating, setGenerating] = useState(false)
   const [loadingMsg, setLoadingMsg] = useState('')
   const [error, setError] = useState('')
   const [dragging, setDragging] = useState(false)
   const fileRef = useRef(null)
 
-  const selectedCourse = courses.find(c => c.id === selectedCourseId) ?? courses[0] ?? null
-  const effectiveLength = length === 'custom' ? (parseInt(customLength) || 30) : length
-  const suggestedMinutes = Math.round(effectiveLength * MINS_PER_Q)
-  const effectiveTimerMinutes = timerOverride ? (parseInt(timerOverride) || suggestedMinutes) : suggestedMinutes
+  const selectedCourse = course ?? null
+  const effectiveLength = length
 
   const sourceText = activeTab === 'upload' ? extractedText : activeTab === 'paste' ? pastedText : ''
   const descriptionText = activeTab === 'describe' ? description : description
@@ -159,14 +155,14 @@ export default function PracticeExamSetup({ courses, onBack, onStart, onShowPayw
 
       if (plan === 'free') incrementFeatureUsage('practiceExam')
 
-      track('practice_exam_started', { questionCount: data.questions.length, courseName: selectedCourse.name, timed: timerOn, plan })
+      track('practice_exam_started', { questionCount: data.questions.length, courseName: selectedCourse.name, timed: timerMinutes != null, plan })
 
       onStart({
         questions: data.questions,
         course: selectedCourse,
         courseName: selectedCourse.name,
         courseId: selectedCourse.id,
-        timerMinutes: timerOn ? effectiveTimerMinutes : null,
+        timerMinutes: timerMinutes ?? null,
       })
     } catch (e) {
       setError(e.message ?? 'Failed to generate exam. Please try again.')
@@ -202,34 +198,23 @@ export default function PracticeExamSetup({ courses, onBack, onStart, onShowPayw
           Practice Exams
         </button>
 
-        <h1 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 800, color: D.text, letterSpacing: '-0.02em' }}>Set up your exam</h1>
-        <p style={{ margin: '0 0 32px', fontSize: 14, color: D.muted }}>Set your options below, then generate.</p>
+        <h1 style={{ margin: '0 0 6px', fontSize: 24, fontWeight: 800, color: D.text, letterSpacing: '-0.02em' }}>What should the exam be built from?</h1>
+        {/* Read-back of what was already chosen. Not a question: the entry
+            screen settled the course, the length and the timer. */}
+        <p style={{ margin: '0 0 32px', fontSize: 14, color: D.muted }}>
+          {[
+            selectedCourse?.name,
+            `${effectiveLength} questions`,
+            timerMinutes == null ? 'no timer' : `${timerMinutes} minute timer`,
+          ].filter(Boolean).join(' · ')}
+        </p>
 
         {error && (
           <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: 10, padding: '10px 14px', marginBottom: 20, color: '#dc2626', fontSize: 13 }}>{error}</div>
         )}
 
-        {/* ── Step 1: Course ─────────────────────────────────────────────── */}
-        <Section label="1. Choose a course">
-          <select
-            value={selectedCourseId ?? ''}
-            onChange={e => setSelectedCourseId(e.target.value)}
-            disabled={generating}
-            style={{ ...inputStyle, appearance: 'none', backgroundImage: `url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%239B9B9B' stroke-width='2' viewBox='0 0 24 24'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E")`, backgroundRepeat: 'no-repeat', backgroundPosition: 'right 14px center', paddingRight: 36, cursor: generating ? 'not-allowed' : 'pointer' }}
-          >
-            {courses.map(c => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </select>
-          {selectedCourse && buildPersonalizationContext(selectedCourse) && (
-            <p style={{ margin: '8px 0 0', fontSize: 12, color: D.accent, fontWeight: 500 }}>
-              ✦ Using your grades, coach plan, and exam history for this course
-            </p>
-          )}
-        </Section>
-
-        {/* ── Step 2: Source material ────────────────────────────────────── */}
-        <Section label="2. Add your source material">
+        {/* ── Source material ────────────────────────────────────────────── */}
+        <Section label="Add your source material">
           <div style={{ display: 'flex', gap: 4, background: D.bg, border: `1px solid ${D.border}`, borderRadius: 12, padding: 4, marginBottom: 16 }}>
             {tabBtn('upload', 'Upload file')}
             {tabBtn('paste', 'Paste text')}
@@ -301,76 +286,6 @@ export default function PracticeExamSetup({ courses, onBack, onStart, onShowPayw
                 placeholder='e.g. "focus on chapters 5–8, lots of definitions, prof likes case studies"'
                 style={inputStyle}
               />
-            </div>
-          )}
-        </Section>
-
-        {/* ── Step 3: Length ─────────────────────────────────────────────── */}
-        <Section label="3. Exam length">
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
-            {LENGTHS.map(n => (
-              <button
-                key={n}
-                onClick={() => { setLength(n); setCustomLength('') }}
-                disabled={generating}
-                style={{ flex: 1, minWidth: 80, padding: '13px 8px', borderRadius: 12, border: length === n ? `2px solid ${D.accent}` : `1px solid ${D.border}`, background: length === n ? 'rgba(59,97,196,0.06)' : '#fff', color: length === n ? D.accent : D.text, cursor: generating ? 'not-allowed' : 'pointer', fontWeight: 700, fontSize: 15, transition: 'all 0.15s', fontFamily: 'inherit' }}
-              >
-                {n} <span style={{ fontSize: 11, fontWeight: 500, opacity: 0.7 }}>Qs</span>
-              </button>
-            ))}
-            <div style={{ flex: 1, minWidth: 80, position: 'relative' }}>
-              <input
-                type="number"
-                value={customLength}
-                onChange={e => { setCustomLength(e.target.value); setLength('custom') }}
-                onFocus={() => setLength('custom')}
-                disabled={generating}
-                placeholder="Custom"
-                min={5} max={100}
-                style={{ ...inputStyle, padding: '13px 8px', textAlign: 'center', fontWeight: 700, fontSize: 15, border: length === 'custom' ? `2px solid ${D.accent}` : `1px solid ${D.border}`, background: length === 'custom' ? 'rgba(59,97,196,0.06)' : '#fff', color: length === 'custom' ? D.accent : D.text, borderRadius: 12 }}
-              />
-            </div>
-          </div>
-        </Section>
-
-        {/* ── Step 4: Timer ──────────────────────────────────────────────── */}
-        <Section label="4. Timer (optional)">
-          <label style={{ display: 'flex', alignItems: 'center', gap: 10, cursor: generating ? 'not-allowed' : 'pointer', marginBottom: timerOn ? 14 : 0 }}>
-            <input
-              type="checkbox"
-              checked={timerOn}
-              onChange={e => setTimerOn(e.target.checked)}
-              disabled={generating}
-              style={{ width: 17, height: 17, accentColor: D.accent, cursor: 'pointer' }}
-            />
-            <span style={{ fontSize: 14, color: D.text, fontWeight: 600 }}>Time this exam</span>
-          </label>
-
-          {timerOn && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexWrap: 'wrap' }}>
-              <div style={{ padding: '10px 16px', background: 'rgba(59,97,196,0.06)', border: `1px solid rgba(59,97,196,0.18)`, borderRadius: 10, fontSize: 13, color: D.accent, fontWeight: 600 }}>
-                Suggested: {suggestedMinutes} min ({MINS_PER_Q} min/question)
-              </div>
-              {!timerOverride ? (
-                <button
-                  onClick={() => setTimerOverride(String(suggestedMinutes))}
-                  style={{ padding: '10px 14px', background: '#fff', border: `1px solid ${D.border}`, borderRadius: 10, fontSize: 13, color: D.muted, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-                >
-                  Change
-                </button>
-              ) : (
-                <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                  <input
-                    type="number"
-                    value={timerOverride}
-                    onChange={e => setTimerOverride(e.target.value)}
-                    min={1} max={300}
-                    style={{ ...inputStyle, width: 72, padding: '9px 10px', textAlign: 'center' }}
-                  />
-                  <span style={{ fontSize: 13, color: D.muted }}>min</span>
-                  <button onClick={() => setTimerOverride('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: D.dim, fontSize: 12 }}>Use suggested</button>
-                </div>
-              )}
             </div>
           )}
         </Section>

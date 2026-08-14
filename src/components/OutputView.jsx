@@ -2350,7 +2350,10 @@ export default function OutputView({
           <PracticeExamView
             courses={courses}
             onShowPaywall={onShowPaywall}
-            onOpenTeachItBack={({ courseIdx, topic }) => { setTeachItBackInit({ courseIdx, topic }); setShowTeachItBack(true) }}
+            onOpenBrainDump={({ courseIdx, topic } = {}) => {
+              setBrainDumpInit({ topic: topic ?? '', courseIdx: courseIdx ?? 0 })
+              setShowBrainDump(true)
+            }}
           />
         )}
 

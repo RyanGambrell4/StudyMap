@@ -6,195 +6,325 @@ import { getAccessToken } from '../lib/supabase'
 import { addWeakTopics } from '../lib/weakTopics'
 import { addStudySession } from '../lib/studyHistory'
 import { addCardsToDeck, cardFromPracticeExamMiss } from '../lib/deckAdditions'
-import { analyzeExam, SKILL_LABEL, SKILL_HINT, SKILL_COLOR } from '../lib/examAutopsy'
-import { getCurrentGrade } from '../utils/gradeCalc'
 import { track } from '../lib/analytics'
+import { PRACTICE_EXAMS as C, PE_SERIF } from '../theme/tokens'
+import {
+  gradeExam, examScore, correctCountLine, topicBreakdown,
+  subtextLine, headline, sortForReview, reviewGroup, scoreColor,
+} from '../utils/examResults'
 
-function fmtMs(ms) {
-  const total = Math.round(ms / 1000)
-  const m = Math.floor(total / 60)
-  const s = total % 60
-  if (m === 0) return `${s}s`
-  return `${m}m ${s.toString().padStart(2, '0')}s`
+// The one score at which a finished exam is worth celebrating. Below it the
+// student has work to do and a burst of confetti reads as mockery.
+const CELEBRATE_AT = 85
+
+const EYEBROW = {
+  font: `600 11px/1 Inter, sans-serif`,
+  letterSpacing: '.08em',
+  color: C.secondary,
+  textTransform: 'uppercase',
 }
 
-function gradeMc(question, given) {
-  if (!given) return false
-  if (given === question.answer) return true
-  // tolerate "A. text" vs "A. Text" minor whitespace variants
-  return given.trim().toLowerCase() === question.answer?.trim().toLowerCase()
-}
-
-function gradeShort(question, given) {
-  if (!given) return false
-  // Heuristic: short-answer can't be auto-graded perfectly. We mark as
-  // "self-grade" - neither right nor wrong by default. User reads the model
-  // answer and learns. We return null to signal "not auto-graded".
-  return null
-}
-
-function fmtMs2(ms) {
-  const s = Math.round(ms / 1000)
-  if (s < 60) return `${s}s`
-  return `${Math.floor(s / 60)}m ${(s % 60).toString().padStart(2, '0')}s`
-}
-
-// Linear extrapolation from a series of scores → predicted next score.
-// Uses simple least-squares regression on (index, score) pairs. Clamped 0–100.
-function predictNextScore(scores) {
-  if (!scores || scores.length < 2) return null
-  const n = scores.length
-  const xs = scores.map((_, i) => i)
-  const meanX = xs.reduce((a, b) => a + b, 0) / n
-  const meanY = scores.reduce((a, b) => a + b, 0) / n
-  let num = 0, den = 0
-  for (let i = 0; i < n; i++) {
-    num += (xs[i] - meanX) * (scores[i] - meanY)
-    den += (xs[i] - meanX) ** 2
-  }
-  const slope = den === 0 ? 0 : num / den
-  const intercept = meanY - slope * meanX
-  const projected = intercept + slope * n
-  return Math.max(0, Math.min(100, Math.round(projected)))
-}
-
-function ScoreTrendChart({ scores, currentScore }) {
-  // Inline SVG line chart. Scores: array of numbers 0-100, oldest first.
-  // The newest dot is highlighted in brand color.
-  const W = 520, H = 140, PAD = 24
-  const n = scores.length
-  if (n < 1) return null
-  const minY = 0, maxY = 100
-  const x = (i) => PAD + (n === 1 ? (W - 2 * PAD) / 2 : (i * (W - 2 * PAD)) / (n - 1))
-  const y = (v) => H - PAD - ((v - minY) / (maxY - minY)) * (H - 2 * PAD)
-  const points = scores.map((s, i) => `${x(i)},${y(s)}`).join(' ')
+function Card({ children, delay = 0, style }) {
   return (
-    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block' }} aria-label="Score trend">
-      {[0, 50, 100].map(v => (
-        <line key={v} x1={PAD} x2={W - PAD} y1={y(v)} y2={y(v)} stroke="rgba(0,0,0,0.07)" strokeDasharray="3 3" />
+    <div
+      className="per-rise"
+      style={{
+        background: C.card, border: `1px solid ${C.cardBorder}`,
+        borderRadius: 16, boxShadow: C.cardShadow,
+        animationDelay: `${delay}ms`, ...style,
+      }}
+    >
+      {children}
+    </div>
+  )
+}
+
+// A quiet blue text link. Used for Drill, "Why was I wrong?" and the upgrade
+// nudges, so that Retake stays the only filled button on the screen.
+function TextLink({ onClick, children, style }) {
+  return (
+    <button
+      onClick={onClick}
+      style={{
+        background: 'none', border: 'none', padding: 0, cursor: 'pointer',
+        font: '500 13px/1 Inter, sans-serif', color: C.blue,
+        fontFamily: 'inherit', ...style,
+      }}
+    >
+      {children}
+    </button>
+  )
+}
+
+/**
+ * Every score this course has recorded, oldest to newest.
+ *
+ * This plots what the student actually sat and nothing else. The card it
+ * replaced also drew a regression line forward and labelled it a predicted
+ * real exam score, which was a number the app had no way to know.
+ */
+function TrendLine({ scores }) {
+  const W = 276, H = 84, PAD_X = 6, PAD_Y = 12
+  const n = scores.length
+  const x = i => PAD_X + (n === 1 ? (W - 2 * PAD_X) / 2 : (i * (W - 2 * PAD_X)) / (n - 1))
+  const y = v => H - PAD_Y - (v / 100) * (H - 2 * PAD_Y)
+  const last = n - 1
+
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%" style={{ display: 'block', overflow: 'visible' }} aria-label={`Score trend across ${n} practice exams`}>
+      <polyline
+        points={scores.map((s, i) => `${x(i)},${y(s)}`).join(' ')}
+        fill="none" stroke={C.cardBorder} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round"
+      />
+      {scores.map((s, i) => (
+        <circle
+          key={i}
+          cx={x(i)} cy={y(s)} r={i === last ? 4 : 2.5}
+          fill={i === last ? scoreColor(s) : C.card}
+          stroke={i === last ? scoreColor(s) : C.barTrack}
+          strokeWidth="1.5"
+        />
       ))}
-      {[0, 50, 100].map(v => (
-        <text key={`l-${v}`} x={4} y={y(v) + 4} fontSize="10" fill="#9B9B9B" fontWeight="600">{v}</text>
-      ))}
-      {n > 1 && (
-        <polyline points={points} fill="none" stroke="#3B61C4" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" />
-      )}
-      {scores.map((s, i) => {
-        const isLast = i === n - 1
-        return (
-          <g key={i}>
-            <circle cx={x(i)} cy={y(s)} r={isLast ? 5 : 3.5} fill={isLast ? '#3B61C4' : '#fff'} stroke="#3B61C4" strokeWidth="2" />
-            {isLast && (
-              <text x={x(i)} y={y(s) - 12} textAnchor="middle" fontSize="11" fontWeight="700" fill="#1A1A1A">
-                {currentScore}%
-              </text>
-            )}
-          </g>
-        )
-      })}
     </svg>
   )
 }
 
-export default function PracticeExamResults({ questions, answers, timeMs, questionTimings = [], courseId, courseName, course = null, onRetake, onClose, onOpenTeachItBack, onOpenQuizBurst }) {
-  const graded = useMemo(() => questions.map((q, i) => {
-    const given = answers[i] ?? ''
-    const correct = q.type === 'multiple_choice' ? gradeMc(q, given) : gradeShort(q, given)
-    return { q, given, correct }
-  }), [questions, answers])
+function Check() {
+  return (
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={C.green} strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+      <polyline points="20 6 9 17 4 12" />
+    </svg>
+  )
+}
 
-  const autoGradedCount = graded.filter(g => g.correct !== null).length
-  const correctCount = graded.filter(g => g.correct === true).length
-  const score = autoGradedCount > 0 ? Math.round((correctCount / autoGradedCount) * 100) : null
+/**
+ * One row of the answer review.
+ *
+ * A missed question is open by default, because that is the reason the student
+ * is on this screen. A correct one collapses to a single line: it is worth
+ * confirming at a glance and worth expanding only if they want to check they
+ * were right for the right reason. Nothing here is tinted. A hard exam should
+ * read as a list of things to learn, not nineteen alarms in a row.
+ */
+function AnswerRow({ item, number, repair, onFetchRepair, onRepairAnswer }) {
+  const { q, given } = item
+  const group = reviewGroup(item)
+  const [open, setOpen] = useState(group !== 'correct')
 
-  // Grade-projection debrief: pull the student's actual course grade + target
-  // and project what this exam score would do to the final grade. Purely
-  // local — no LLM roundtrip.
-  const projection = useMemo(() => {
-    if (score == null || !course) return null
-    const components = course?.gradeData?.components ?? []
-    const currentGrade = components.length ? getCurrentGrade(components) : null
-    const target = typeof course?.targetGrade === 'number' ? course.targetGrade : null
+  const eyebrow = (
+    <div style={{ display: 'flex', alignItems: 'baseline', gap: 12, minWidth: 0 }}>
+      <span style={{ ...EYEBROW, whiteSpace: 'nowrap' }}>Question {number}</span>
+      {q?.topic && (
+        <span style={{ font: '400 12px/1 Inter, sans-serif', color: C.secondary, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+          {q.topic}
+        </span>
+      )}
+    </div>
+  )
 
-    // Rough projection: if we had a full grade breakdown, remaining ungraded
-    // weight is what this exam counts for. If not, use a 30% blend heuristic
-    // so we're not silent. Both cases clamp 0-100.
-    let projected
-    if (currentGrade != null && components.length) {
-      const gradedWeight = components.filter(c => c.graded && c.grade != null).reduce((s, c) => s + (c.weight || 0), 0)
-      const remainingWeight = Math.max(0, 100 - gradedWeight)
-      const blend = remainingWeight / 100
-      projected = Math.max(0, Math.min(100, currentGrade * (1 - blend) + score * blend))
-    } else if (currentGrade != null) {
-      projected = Math.max(0, Math.min(100, currentGrade * 0.7 + score * 0.3))
-    } else {
-      projected = score
-    }
-    projected = Math.round(projected * 10) / 10
-    return {
-      currentGrade: currentGrade == null ? null : Math.round(currentGrade * 10) / 10,
-      target,
-      projected,
-      gapToTarget: target == null ? null : Math.round((target - projected) * 10) / 10,
-    }
-  }, [score, course])
+  if (group === 'correct' && !open) {
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        style={{
+          width: '100%', textAlign: 'left', background: 'none', border: 'none',
+          borderTop: `1px solid ${C.cardBorder}`, padding: '16px 32px', cursor: 'pointer',
+          display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
+          gap: 12, fontFamily: 'inherit',
+        }}
+      >
+        {eyebrow}
+        <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6, flexShrink: 0 }}>
+          <Check />
+          <span style={{ font: '400 13px/1 Inter, sans-serif', color: C.secondary }}>Correct</span>
+        </span>
+      </button>
+    )
+  }
+
+  return (
+    <div style={{ borderTop: `1px solid ${C.cardBorder}`, padding: '22px 32px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12 }}>
+        {eyebrow}
+        {group === 'correct' && (
+          <button
+            onClick={() => setOpen(false)}
+            style={{ background: 'none', border: 'none', padding: 0, cursor: 'pointer', display: 'inline-flex', alignItems: 'center', gap: 6, fontFamily: 'inherit', flexShrink: 0 }}
+          >
+            <Check />
+            <span style={{ font: '400 13px/1 Inter, sans-serif', color: C.secondary }}>Hide</span>
+          </button>
+        )}
+      </div>
+
+      <p style={{ margin: 0, fontFamily: PE_SERIF, fontSize: 19, fontWeight: 400, lineHeight: 1.45, color: C.ink, textWrap: 'pretty' }}>
+        {q?.question}
+      </p>
+
+      <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px 24px', font: '400 13.5px/1.4 Inter, sans-serif' }}>
+        {group === 'missed' && (
+          given
+            ? (
+              <span style={{ color: C.secondary, display: 'inline-flex', alignItems: 'baseline', gap: 7 }}>
+                <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.amber, flexShrink: 0, alignSelf: 'center' }} />
+                Your answer {given}
+              </span>
+            )
+            : <span style={{ color: C.secondary, fontStyle: 'italic' }}>Skipped</span>
+        )}
+        {group === 'ungraded' && (
+          <span style={{ color: C.secondary }}>
+            {given ? `Your answer ${given}` : <em>Skipped</em>}
+          </span>
+        )}
+        {q?.answer && (
+          <span style={{ color: C.secondary }}>
+            {q?.type === 'multiple_choice' ? 'Correct answer ' : 'Model answer '}
+            <span style={{ color: C.green }}>{q.answer}</span>
+          </span>
+        )}
+      </div>
+
+      {q?.explanation && (
+        <p style={{ margin: 0, font: '400 13.5px/1.55 Inter, sans-serif', color: C.secondary, maxWidth: 640 }}>
+          {q.explanation}
+        </p>
+      )}
+
+      {group === 'missed' && (
+        <MisconceptionRepair
+          repair={repair}
+          onFetch={onFetchRepair}
+          onAnswer={onRepairAnswer}
+        />
+      )}
+    </div>
+  )
+}
+
+/**
+ * The "Why was I wrong?" flow. Opens as a quiet text link and expands into a
+ * diagnosis plus one reinforcing question. Colors follow the same vocabulary
+ * as everything else: green for right, amber for wrong. No red.
+ */
+function MisconceptionRepair({ repair, onFetch, onAnswer }) {
+  const rq = repair?.data?.repairQuestion
+
+  if (!repair) return <TextLink onClick={onFetch} style={{ alignSelf: 'flex-start' }}>Why was I wrong?</TextLink>
+  if (repair.loading) return <p style={{ margin: 0, font: '400 13px/1 Inter, sans-serif', color: C.secondary }}>Working out where this went wrong.</p>
+  if (repair.error) return <p style={{ margin: 0, font: '400 13px/1.4 Inter, sans-serif', color: C.amber }}>{repair.error}</p>
+  if (!repair.data) return null
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 12, paddingTop: 4 }}>
+      <div>
+        <div style={{ ...EYEBROW, marginBottom: 6 }}>What went wrong</div>
+        <p style={{ margin: 0, font: '400 13.5px/1.55 Inter, sans-serif', color: C.ink, maxWidth: 640 }}>{repair.data.diagnosis}</p>
+      </div>
+
+      {rq && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={EYEBROW}>Try it again</div>
+          <p style={{ margin: 0, fontFamily: PE_SERIF, fontSize: 16, fontWeight: 400, lineHeight: 1.45, color: C.ink }}>{rq.question}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 6, maxWidth: 520 }}>
+            {rq.options.map((opt, oi) => {
+              const isSelected = repair.repairSelected === opt
+              const isCorrect = opt === rq.answer
+              const showRight = repair.repairConfirmed && isCorrect
+              const showWrong = repair.repairConfirmed && isSelected && !isCorrect
+              const edge = showRight ? C.green : showWrong ? C.amber : isSelected ? C.blue : C.cardBorder
+              return (
+                <button
+                  key={oi}
+                  onClick={() => !repair.repairConfirmed && onAnswer(opt)}
+                  disabled={repair.repairConfirmed}
+                  style={{
+                    padding: '10px 13px', borderRadius: 10, textAlign: 'left',
+                    font: '400 13.5px/1.4 Inter, sans-serif', fontFamily: 'inherit',
+                    border: `1px solid ${edge}`, background: C.card,
+                    color: showRight ? C.green : showWrong ? C.amber : C.ink,
+                    cursor: repair.repairConfirmed ? 'default' : 'pointer',
+                  }}
+                >
+                  {opt}
+                </button>
+              )
+            })}
+          </div>
+          {repair.repairConfirmed && (
+            <p style={{ margin: 0, font: '400 13.5px/1.55 Inter, sans-serif', color: C.secondary, maxWidth: 640 }}>
+              <span style={{ color: repair.repairSelected === rq.answer ? C.green : C.amber }}>
+                {repair.repairSelected === rq.answer ? 'Got it. ' : 'Still not quite. '}
+              </span>
+              {rq.explanation}
+            </p>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/**
+ * readOnly is replay mode: the student is reopening a stored exam from the
+ * history card, not finishing a new one. The work was already counted once, so
+ * every mount side effect below is suppressed. Replaying writes nothing.
+ */
+export default function PracticeExamResults({
+  questions, answers, timeMs, courseId, courseName,
+  timerMinutes = null, takenAt = null, savedToHistory = false, readOnly = false,
+  onRetake, onClose, onDrillTopic,
+}) {
+  const graded = useMemo(() => gradeExam(questions, answers), [questions, answers])
+  const { score, correctCount, autoGradedCount } = useMemo(() => examScore(graded), [graded])
+  const topics = useMemo(() => topicBreakdown(graded), [graded])
+  const ordered = useMemo(() => sortForReview(graded), [graded])
+
+  // Everything the student sat before this one, for the comparison line. The
+  // current exam is already in the cache by the time this renders, so it is
+  // filtered out by timestamp rather than assumed to be absent.
+  const priorExams = useMemo(() => {
+    if (!courseId) return []
+    const all = getCachedPracticeExams(courseId) ?? []
+    return all.filter(e => !Number.isFinite(takenAt) || (Number.isFinite(e?.takenAt) && e.takenAt < takenAt))
+  }, [courseId, takenAt])
+
+  const subtext = useMemo(
+    () => subtextLine({ score, priorExams, timeMs, timerMinutes }),
+    [score, priorExams, timeMs, timerMinutes],
+  )
+
+  // Weak topics, for the write-backs below. Ordered worst first and capped,
+  // which is the shape addWeakTopics has always expected.
+  const weakTopics = useMemo(
+    () => topics.filter(t => t.missed > 0).sort((a, b) => a.pct - b.pct).slice(0, 5),
+    [topics],
+  )
 
   const celebrate = useCelebration()
   const celebratedRef = useRef(false)
-  const [displayScore, setDisplayScore] = useState(0)
 
-  // Animate score counter from 0 → actual score
+  // Confetti belongs to the moment an exam was finished well. Never on a
+  // replay, and never below CELEBRATE_AT: a 40 does not get a celebration.
   useEffect(() => {
-    if (score === null) return
-    const target = score
-    const steps = 28
-    const delay = 600 // start after brief pause
-    let step = 0
-    const timer = setTimeout(() => {
-      const interval = setInterval(() => {
-        step++
-        const eased = Math.round(target * (1 - Math.pow(1 - step / steps, 3)))
-        setDisplayScore(Math.min(target, eased))
-        if (step >= steps) clearInterval(interval)
-      }, 30)
-    }, delay)
-    return () => clearTimeout(timer)
-  }, [score])
-
-  // Fire confetti when score is good
-  useEffect(() => {
+    if (readOnly) return
     if (score === null || celebratedRef.current) return
     celebratedRef.current = true
-    if (score >= 70) {
-      const timer = setTimeout(() => {
-        celebrate(score >= 90 ? 'big' : 'medium')
-      }, 900)
+    if (score >= CELEBRATE_AT) {
+      const timer = setTimeout(() => celebrate(score >= 90 ? 'big' : 'medium'), 700)
       return () => clearTimeout(timer)
     }
   }, [])
 
-  // Weak topics: missed counts grouped by topic, only from auto-graded
-  const weakTopics = useMemo(() => {
-    const map = new Map()
-    for (const { q, correct } of graded) {
-      if (correct === null) continue
-      const topic = q.topic || 'General'
-      if (!map.has(topic)) map.set(topic, { total: 0, missed: 0 })
-      const s = map.get(topic)
-      s.total += 1
-      if (correct === false) s.missed += 1
-    }
-    return [...map.entries()]
-      .filter(([, s]) => s.missed > 0)
-      .sort((a, b) => (b[1].missed / b[1].total) - (a[1].missed / a[1].total))
-      .slice(0, 5)
-  }, [graded])
-
   useEffect(() => {
-    if (weakTopics.length) addWeakTopics(weakTopics.map(([t]) => t))
+    // Replay mode records nothing. Study history, deck cards, weak topics and
+    // mastery signals were all written when this exam was actually taken;
+    // writing them again would count one exam twice.
+    if (readOnly) return
+    if (weakTopics.length) addWeakTopics(weakTopics.map(t => t.topic))
     addStudySession({ tool: 'Practice Exam', score: score ?? null, topic: null, courseName: courseName || null })
     // Missed practice-exam questions become deck cards. Practice exam is
-    // where the highest-value misses are — these are the ones the real exam
+    // where the highest-value misses are. These are the ones the real exam
     // will punish, so we want them in spaced-repetition immediately.
     const missedForDeck = graded
       .filter(g => g.correct === false)
@@ -244,11 +374,6 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
     track('practice_exam_complete', { score: score ?? null, questionCount: graded.length, weakTopicCount: weakTopics.length, plan: getActivePlan() })
   }, [])
 
-  const hasShortAnswer = graded.some(g => g.correct === null)
-
-  const plan = getActivePlan()
-  const isUnlimited = plan === 'unlimited'
-
   const [repairs, setRepairs] = useState({})
 
   const fetchRepair = useCallback(async (questionIdx) => {
@@ -276,454 +401,192 @@ export default function PracticeExamResults({ questions, answers, timeMs, questi
     }
   }, [graded, courseName])
 
-  function handleRepairAnswer(questionIdx, opt) {
+  const handleRepairAnswer = useCallback((questionIdx, opt) => {
     setRepairs(prev => ({ ...prev, [questionIdx]: { ...prev[questionIdx], repairSelected: opt, repairConfirmed: true } }))
-  }
+  }, [])
 
-  // Pull cached score history for this course (Unlimited only - gated below).
-  // savePracticeExam saves before the results view renders, so the newest exam
-  // is already at index 0. We reverse for oldest→newest chart order.
-  const scoreHistory = useMemo(() => {
-    if (!isUnlimited || !courseId) return []
-    const exams = getCachedPracticeExams(courseId) ?? []
-    return [...exams]
-      .filter(e => typeof e?.score === 'number')
+  const plan = getActivePlan()
+  const isUnlimited = plan === 'unlimited'
+  const outOfExams = plan === 'free' && !canUseFeature('practiceExam').allowed
+  const countLine = correctCountLine({ correctCount, autoGradedCount })
+
+  // The trend needs at least two sittings to be a trend. Scores only, oldest
+  // first, with this exam on the end.
+  const trend = useMemo(() => {
+    if (!isUnlimited) return []
+    const past = priorExams
+      .filter(e => Number.isFinite(e?.score))
       .sort((a, b) => (a.takenAt ?? 0) - (b.takenAt ?? 0))
       .map(e => e.score)
-  }, [isUnlimited, courseId])
-
-  const predictedScore = useMemo(() => {
-    if (!isUnlimited || scoreHistory.length < 2) return null
-    return predictNextScore(scoreHistory)
-  }, [isUnlimited, scoreHistory])
-
-  const trendDelta = useMemo(() => {
-    if (scoreHistory.length < 2) return null
-    return scoreHistory[scoreHistory.length - 1] - scoreHistory[0]
-  }, [scoreHistory])
-
-  const autopsy = useMemo(() => analyzeExam(graded), [graded])
-  const autopsyHasData = autopsy.rows.some(r => r.total > 0)
+    return Number.isFinite(score) ? [...past, score] : past
+  }, [isUnlimited, priorExams, score])
 
   return (
-    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: '#F7F8FA', overflowY: 'auto', animation: 'per-enter 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
-      <style>{`@keyframes per-enter { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }`}</style>
-      <div style={{ maxWidth: 820, margin: '0 auto', padding: '32px 24px 80px' }}>
+    <div style={{ position: 'fixed', inset: 0, zIndex: 300, background: C.pageBg, overflowY: 'auto' }}>
+      <style>{`
+        @keyframes per-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+        .per-rise { animation: per-rise 400ms cubic-bezier(0.16,1,0.3,1) both; }
+        .per-grid { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 24px; align-items: start; }
+        @media (max-width: 900px) {
+          .per-grid { grid-template-columns: minmax(0, 1fr); }
+          .per-pad { padding: 32px 20px 64px !important; }
+          .per-row { padding-left: 20px !important; padding-right: 20px !important; }
+        }
+        @media (prefers-reduced-motion: reduce) {
+          .per-rise { animation: none !important; }
+        }
+      `}</style>
 
-        {/* Header */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-          <div>
-            <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Results{courseName ? ` · ${courseName}` : ''}</p>
-            <h1 style={{ margin: '4px 0 0', fontSize: 28, fontWeight: 800, color: '#1A1A1A', letterSpacing: '-0.01em' }}>Practice exam complete</h1>
-          </div>
-          <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#9B9B9B', padding: 4 }}>
-            <svg width="22" height="22" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
-          </button>
-        </div>
+      <div className="per-pad" style={{ maxWidth: 1136, margin: '0 auto', padding: '56px 24px 72px', display: 'flex', flexDirection: 'column', gap: 32 }}>
 
-        {/* Grade projection debrief — the "so what does this mean for my
-            actual course grade" panel. Only renders when we know enough to
-            compute a projection. */}
-        {projection && (
-          <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: 18 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em', marginBottom: 12 }}>
-              What this means for your course grade
-            </div>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'flex-end', marginBottom: 16 }}>
-              {projection.currentGrade != null && (
-                <div>
-                  <div style={{ fontSize: 11, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Currently</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: '#111', letterSpacing: '-0.02em' }}>{projection.currentGrade}%</div>
-                </div>
-              )}
-              <div>
-                <div style={{ fontSize: 11, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Projected if this were the real exam</div>
-                <div style={{
-                  fontSize: 30, fontWeight: 800, letterSpacing: '-0.02em',
-                  color: projection.gapToTarget != null && projection.gapToTarget > 0 ? '#D97706' : '#16A34A',
-                }}>
-                  {projection.projected}%
-                </div>
-              </div>
-              {projection.target != null && (
-                <div>
-                  <div style={{ fontSize: 11, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Target</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: '#3B61C4' }}>{projection.target}%</div>
-                </div>
-              )}
-              {projection.gapToTarget != null && (
-                <div>
-                  <div style={{ fontSize: 11, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gap</div>
-                  <div style={{ fontSize: 22, fontWeight: 800, color: projection.gapToTarget > 0 ? '#D97706' : '#16A34A' }}>
-                    {projection.gapToTarget > 0 ? `${projection.gapToTarget} pts short` : `${Math.abs(projection.gapToTarget)} pts ahead`}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {weakTopics.length > 0 && (
-              <div style={{ background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.05)', borderRadius: 12, padding: 16, marginBottom: 14 }}>
-                <div style={{ fontSize: 11, fontWeight: 700, color: '#3B61C4', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
-                  Your recovery plan · {Math.min(3, weakTopics.length)} sessions
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {weakTopics.slice(0, 3).map(([topic, s], i) => {
-                    const missRate = Math.round((s.missed / s.total) * 100)
-                    const minutes = missRate >= 60 ? 15 : 10
-                    return (
-                      <div key={topic} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', background: '#fff', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 10 }}>
-                        <div style={{ width: 22, height: 22, borderRadius: 6, background: '#3B61C4', color: '#fff', fontSize: 11, fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                          {i + 1}
-                        </div>
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <div style={{ fontSize: 13.5, fontWeight: 700, color: '#111' }}>{topic}</div>
-                          <div style={{ fontSize: 11.5, color: '#6B6B6B' }}>
-                            Missed {s.missed}/{s.total} on this exam · ~{minutes} min session
-                          </div>
-                        </div>
-                        {i === 0 && onOpenQuizBurst && (
-                          <button
-                            onClick={() => onOpenQuizBurst(topic)}
-                            style={{
-                              fontSize: 12, fontWeight: 700, padding: '7px 14px', borderRadius: 8,
-                              background: '#E8531A', color: '#fff', border: 'none', cursor: 'pointer',
-                              fontFamily: 'inherit', flexShrink: 0,
-                              boxShadow: '0 2px 8px rgba(232,83,26,0.35)',
-                            }}
-                          >
-                            Do session 1 now →
-                          </button>
-                        )}
-                      </div>
-                    )
-                  })}
-                </div>
-                <div style={{ fontSize: 11.5, color: '#9B9B9B', marginTop: 10, fontStyle: 'italic', lineHeight: 1.5 }}>
-                  Projection is a linear estimate — not a guarantee. Doing these 3 sessions typically moves practice-exam scores 8-15 pts on the topics covered.
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Score card */}
-        <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: 18 }}>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 24, alignItems: 'center' }}>
-            {score !== null && (
-              <div>
-                <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Score</p>
-                <p style={{ margin: '4px 0 0', fontSize: 38, fontWeight: 800, color: score >= 70 ? '#16A34A' : score >= 50 ? '#D97706' : '#DC2626', lineHeight: 1, letterSpacing: '-0.02em' }}>{displayScore}<span style={{ fontSize: 18, color: '#6B6B6B', fontWeight: 700 }}>%</span></p>
-                <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6B6B6B' }}>{correctCount} of {autoGradedCount} multiple-choice correct</p>
-              </div>
-            )}
-            {hasShortAnswer && (
-              <div>
-                <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Short answer</p>
-                <p style={{ margin: '4px 0 0', fontSize: 14, color: '#1A1A1A', fontWeight: 600 }}>Self-graded</p>
-                <p style={{ margin: '2px 0 0', fontSize: 13, color: '#6B6B6B' }}>Compare your response with the model answer below</p>
-              </div>
-            )}
-            <div>
-              <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Time</p>
-              <p style={{ margin: '4px 0 0', fontSize: 18, fontWeight: 700, color: '#1A1A1A' }}>{fmtMs(timeMs)}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Advanced analytics (Unlimited only) */}
-        {isUnlimited && scoreHistory.length >= 2 && (
-          <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 24, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: 18 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 14, flexWrap: 'wrap', gap: 8 }}>
-              <div>
-                <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Score trend · last {scoreHistory.length} exams</p>
-                {trendDelta !== null && (
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: trendDelta >= 0 ? '#16A34A' : '#DC2626', fontWeight: 600 }}>
-                    {trendDelta >= 0 ? '+' : ''}{trendDelta} pts since your first exam
-                  </p>
-                )}
-              </div>
-              <span style={{ fontSize: 10, fontWeight: 800, color: '#3B61C4', background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.20)', borderRadius: 999, padding: '3px 9px', letterSpacing: '0.5px' }}>
-                UNLIMITED
-              </span>
-            </div>
-            <ScoreTrendChart scores={scoreHistory} currentScore={score} />
-            {predictedScore !== null && (
-              <div style={{ marginTop: 14, padding: '14px 16px', background: 'rgba(59,97,196,0.05)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 12, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 12 }}>
-                <div>
-                  <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#3B61C4', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Predicted real exam score</p>
-                  <p style={{ margin: '4px 0 0', fontSize: 13, color: '#6B6B6B' }}>Based on your trend across {scoreHistory.length} practice exams</p>
-                </div>
-                <p style={{ margin: 0, fontSize: 30, fontWeight: 800, color: '#3B61C4', letterSpacing: '-0.02em' }}>{predictedScore}%</p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Upsell card for Pro/Free */}
-        {!isUnlimited && (
-          <div style={{ background: 'linear-gradient(135deg, rgba(59,97,196,0.05), rgba(99,102,241,0.06))', border: '1px solid rgba(59,97,196,0.22)', borderRadius: 18, padding: 18, marginBottom: 18, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 14, flex: 1, minWidth: 240 }}>
-              <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(59,97,196,0.10)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3B61C4" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17" />
-                  <polyline points="16 7 22 7 22 13" />
-                </svg>
-              </div>
-              <div>
-                <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>Unlock advanced exam analytics</p>
-                <p style={{ margin: '2px 0 0', fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.5 }}>
-                  See your score trend across every practice exam and get an AI-predicted real exam score. Available on Unlimited.
-                </p>
-              </div>
-            </div>
-            <button
-              onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'practiceExamAnalytics' } }))}
-              style={{ padding: '10px 16px', background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 13.5, cursor: 'pointer', whiteSpace: 'nowrap' }}
-            >
-              See plans →
-            </button>
-          </div>
-        )}
-
-        {/* Weak topics */}
-        {weakTopics.length > 0 && (
-          <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: 18 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12, gap: 12, flexWrap: 'wrap' }}>
-              <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Weakest topics</p>
-              <button
-                onClick={() => {
-                  const topicNames = weakTopics.map(([t]) => t)
-                  addWeakTopics(topicNames)
-                  window.dispatchEvent(new CustomEvent('studyedge:drill-topics', { detail: { topic: topicNames[0] } }))
-                }}
-                style={{ fontSize: 12, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.07)', border: '1px solid rgba(220,38,38,0.20)', borderRadius: 8, padding: '5px 12px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 6 }}
-              >
-                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                Drill these topics
-              </button>
-            </div>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              {weakTopics.map(([topic, s]) => (
-                <div key={topic} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16 }}>
-                  <span style={{ fontSize: 14, color: '#1A1A1A', fontWeight: 600 }}>{topic}</span>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                    {onOpenTeachItBack && (
-                      <button
-                        onClick={() => onOpenTeachItBack(topic)}
-                        style={{ fontSize: 11, fontWeight: 700, color: '#7C3AED', background: 'rgba(124,58,237,0.07)', border: '1px solid rgba(124,58,237,0.2)', borderRadius: 6, padding: '3px 9px', cursor: 'pointer' }}
-                      >
-                        Teach It
-                      </button>
-                    )}
-                    <span style={{ fontSize: 13, color: '#DC2626', fontWeight: 700 }}>{s.missed}/{s.total} missed</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Exam Autopsy — cognitive-skill breakdown */}
-        {autopsyHasData && autoGradedCount >= 3 && (
-          <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: 18 }}>
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 4, gap: 12, flexWrap: 'wrap' }}>
-              <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Exam autopsy · by cognitive skill</p>
-            </div>
-            <p style={{ margin: '0 0 14px', fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.5 }}>
-              Where you actually leak points. Different failure modes need different fixes.
+        {/* Headline */}
+        <div className="per-rise" style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+          <div style={EYEBROW}>Practice exam result{courseName ? `, ${courseName}` : ''}</div>
+          <h1 style={{ margin: 0, fontFamily: PE_SERIF, fontSize: 44, fontWeight: 500, lineHeight: 1.1, color: C.ink }}>
+            {headline(score)}<span style={{ color: C.blue }}>.</span>
+          </h1>
+          {subtext && (
+            <p style={{ margin: 0, font: '400 15px/1.5 Inter, sans-serif', color: C.secondary, maxWidth: 560 }}>
+              {subtext}
             </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {autopsy.rows.filter(r => r.total > 0).map(r => {
-                const color = SKILL_COLOR[r.skill]
-                const barBg = `${color}18`
-                return (
-                  <div key={r.skill} style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', background: '#FAFAF8', borderRadius: 12, border: '1px solid rgba(0,0,0,0.05)' }}>
-                    <div style={{ flex: '0 0 100px' }}>
-                      <div style={{ fontSize: 13, fontWeight: 700, color: '#1A1A1A', letterSpacing: '-0.005em' }}>{SKILL_LABEL[r.skill]}</div>
-                      <div style={{ fontSize: 11, color: '#9B9B9B', fontWeight: 600, marginTop: 2 }}>{r.correct}/{r.total}</div>
-                    </div>
-                    <div style={{ flex: 1, position: 'relative', height: 8, background: barBg, borderRadius: 999, overflow: 'hidden' }}>
-                      <div style={{
-                        position: 'absolute', left: 0, top: 0, bottom: 0,
-                        width: `${r.pct}%`, background: color, borderRadius: 999,
-                        transition: 'width 600ms cubic-bezier(0.16,1,0.3,1)',
-                      }}/>
-                    </div>
-                    <div style={{ flex: '0 0 44px', textAlign: 'right', fontSize: 14, fontWeight: 800, color, letterSpacing: '-0.01em' }}>{r.pct}%</div>
-                  </div>
-                )
-              })}
-            </div>
-            {autopsy.insight && (
-              <div style={{ marginTop: 14, padding: '12px 14px', background: `${SKILL_COLOR[autopsy.insight.weakest.skill]}0D`, border: `1px solid ${SKILL_COLOR[autopsy.insight.weakest.skill]}30`, borderRadius: 12 }}>
-                <p style={{ margin: '0 0 4px', fontSize: 12, fontWeight: 800, color: SKILL_COLOR[autopsy.insight.weakest.skill], letterSpacing: '-0.005em' }}>
-                  Fix your {SKILL_LABEL[autopsy.insight.weakest.skill].toLowerCase()} gap first. You're {autopsy.insight.gap} points behind your {SKILL_LABEL[autopsy.insight.strongest.skill].toLowerCase()}.
-                </p>
-                <p style={{ margin: 0, fontSize: 12.5, color: '#4A4A4A', lineHeight: 1.5 }}>
-                  {SKILL_HINT[autopsy.insight.weakest.skill]}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Time breakdown */}
-        {questionTimings.length > 0 && (() => {
-          const sorted = [...questionTimings].sort((a, b) => b.timeMs - a.timeMs)
-          const slowest = sorted.slice(0, 3).filter(t => t.timeMs > 0)
-          const avg = questionTimings.length ? Math.round(questionTimings.reduce((s, t) => s + t.timeMs, 0) / questionTimings.length) : 0
-          if (!slowest.length) return null
-          return (
-            <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 18, padding: 20, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', marginBottom: 18 }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-                <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Time breakdown</p>
-                <span style={{ fontSize: 12, color: '#6B6B6B' }}>Avg {fmtMs2(avg)} per question</span>
-              </div>
-              <p style={{ margin: '0 0 10px', fontSize: 12, color: '#9B9B9B' }}>Slowest questions: likely areas of uncertainty</p>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                {slowest.map((t, i) => (
-                  <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', background: '#FAFAF8', borderRadius: 10, border: '1px solid rgba(0,0,0,0.06)' }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', minWidth: 28 }}>#{sorted.indexOf(t) + 1}</span>
-                    <span style={{ fontSize: 13, color: '#1A1A1A', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{t.topic}</span>
-                    <span style={{ fontSize: 13, fontWeight: 700, color: '#D97706', flexShrink: 0 }}>{fmtMs2(t.timeMs)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )
-        })()}
-
-        {/* Per-question breakdown */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {graded.map(({ q, given, correct }, i) => {
-            const colorState = correct === true ? '#16A34A' : correct === false ? '#DC2626' : '#6B6B6B'
-            const bgState = correct === true ? 'rgba(22,163,74,0.06)' : correct === false ? 'rgba(220,38,38,0.05)' : '#fff'
-            return (
-              <div key={i} style={{ background: bgState, border: `1px solid ${correct === true ? 'rgba(22,163,74,0.18)' : correct === false ? 'rgba(220,38,38,0.18)' : 'rgba(0,0,0,0.07)'}`, borderRadius: 14, padding: 18 }}>
-                <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 12, marginBottom: 10 }}>
-                  <p style={{ margin: 0, fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.07em' }}>Q{i + 1} · {q.topic}</p>
-                  <span style={{ fontSize: 11, fontWeight: 700, color: colorState, textTransform: 'uppercase', letterSpacing: '0.05em', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
-                    {correct === true && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>}
-                    {correct === false && <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>}
-                    {correct === true ? 'Correct' : correct === false ? 'Incorrect' : 'Self-grade'}
-                  </span>
-                </div>
-                <p style={{ margin: '0 0 12px', fontSize: 15, fontWeight: 600, color: '#1A1A1A', lineHeight: 1.5 }}>{q.question}</p>
-
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
-                  <div>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Your answer </span>
-                    <span style={{ fontSize: 14, color: given ? '#1A1A1A' : '#9B9B9B', fontStyle: given ? 'normal' : 'italic' }}>{given || 'skipped'}</span>
-                  </div>
-                  <div>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>{q.type === 'multiple_choice' ? 'Correct answer ' : 'Model answer '}</span>
-                    <span style={{ fontSize: 14, color: '#16A34A', fontWeight: 600 }}>{q.answer}</span>
-                  </div>
-                  {q.explanation && (
-                    <p style={{ margin: '10px 0 0', padding: '10px 12px', background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(0,0,0,0.06)', borderRadius: 10, fontSize: 13, color: '#1A1A1A', lineHeight: 1.55 }}>
-                      <span style={{ fontWeight: 700 }}>Why:</span> {q.explanation}
-                    </p>
-                  )}
-                </div>
-
-                {correct === false && (() => {
-                  const repair = repairs[i]
-                  const rq = repair?.data?.repairQuestion
-                  return (
-                    <div style={{ marginTop: 14, borderTop: '1px solid rgba(220,38,38,0.12)', paddingTop: 12 }}>
-                      {!repair && (
-                        <button
-                          onClick={() => fetchRepair(i)}
-                          style={{ fontSize: 12, fontWeight: 700, color: '#3B61C4', background: 'rgba(59,97,196,0.07)', border: '1px solid rgba(59,97,196,0.20)', borderRadius: 7, padding: '6px 14px', cursor: 'pointer', fontFamily: 'inherit' }}
-                        >
-                          Why was I wrong?
-                        </button>
-                      )}
-                      {repair?.loading && (
-                        <p style={{ margin: 0, fontSize: 12.5, color: '#6B6B6B' }}>Analyzing your mistake...</p>
-                      )}
-                      {repair?.error && (
-                        <p style={{ margin: 0, fontSize: 12.5, color: '#DC2626' }}>{repair.error}</p>
-                      )}
-                      {repair?.data && (
-                        <div style={{ background: 'rgba(59,97,196,0.04)', border: '1px solid rgba(59,97,196,0.14)', borderRadius: 10, padding: '14px' }}>
-                          <p style={{ margin: '0 0 4px', fontSize: 11, fontWeight: 700, color: '#3B61C4', textTransform: 'uppercase', letterSpacing: '0.06em' }}>What went wrong</p>
-                          <p style={{ margin: '0 0 14px', fontSize: 13, color: '#1A1A1A', lineHeight: 1.55 }}>{repair.data.diagnosis}</p>
-                          {rq && (
-                            <>
-                              <p style={{ margin: '0 0 8px', fontSize: 11, fontWeight: 700, color: '#6B6B6B', textTransform: 'uppercase', letterSpacing: '0.06em' }}>Reinforce this concept</p>
-                              <p style={{ margin: '0 0 8px', fontSize: 13.5, fontWeight: 600, color: '#1A1A1A', lineHeight: 1.45 }}>{rq.question}</p>
-                              <div style={{ display: 'flex', flexDirection: 'column', gap: 5 }}>
-                                {rq.options.map((opt, oi) => {
-                                  const isSelected = repair.repairSelected === opt
-                                  const isCorrect = opt === rq.answer
-                                  const showRight = repair.repairConfirmed && isCorrect
-                                  const showWrong = repair.repairConfirmed && isSelected && !isCorrect
-                                  return (
-                                    <button
-                                      key={oi}
-                                      onClick={() => !repair.repairConfirmed && handleRepairAnswer(i, opt)}
-                                      disabled={repair.repairConfirmed}
-                                      style={{
-                                        padding: '9px 13px', borderRadius: 8, textAlign: 'left',
-                                        fontSize: 13, fontWeight: showRight ? 700 : 500, lineHeight: 1.4,
-                                        border: `1.5px solid ${showRight ? '#16A34A' : showWrong ? '#DC2626' : isSelected ? '#3B61C4' : 'rgba(0,0,0,0.09)'}`,
-                                        background: showRight ? 'rgba(22,163,74,0.08)' : showWrong ? 'rgba(220,38,38,0.08)' : isSelected ? 'rgba(59,97,196,0.06)' : '#fff',
-                                        color: showRight ? '#16A34A' : showWrong ? '#DC2626' : isSelected ? '#3B61C4' : '#1A1A1A',
-                                        cursor: repair.repairConfirmed ? 'default' : 'pointer',
-                                        fontFamily: 'inherit',
-                                        transition: 'all 0.15s',
-                                      }}
-                                    >
-                                      <span style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 6 }}>
-                                        <span>{opt}</span>
-                                        {showRight && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>}
-                                        {showWrong && <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><path d="M18 6L6 18M6 6l12 12"/></svg>}
-                                      </span>
-                                    </button>
-                                  )
-                                })}
-                              </div>
-                              {repair.repairConfirmed && (
-                                <div style={{ marginTop: 8, padding: '9px 12px', borderRadius: 8, background: repair.repairSelected === rq.answer ? 'rgba(22,163,74,0.07)' : 'rgba(220,38,38,0.06)', border: `1px solid ${repair.repairSelected === rq.answer ? 'rgba(22,163,74,0.20)' : 'rgba(220,38,38,0.18)'}` }}>
-                                  <p style={{ margin: '0 0 3px', fontSize: 12.5, fontWeight: 700, color: repair.repairSelected === rq.answer ? '#16A34A' : '#DC2626' }}>
-                                    {repair.repairSelected === rq.answer ? 'Got it.' : 'Not quite. Review the explanation below.'}
-                                  </p>
-                                  <p style={{ margin: 0, fontSize: 12.5, color: '#6B6B6B', lineHeight: 1.5 }}>{rq.explanation}</p>
-                                </div>
-                              )}
-                            </>
-                          )}
-                        </div>
-                      )}
-                    </div>
-                  )
-                })()}
-              </div>
-            )
-          })}
+          )}
         </div>
 
-        {/* Free upgrade nudge — shown after using the 1 free practice exam */}
-        {plan === 'free' && !canUseFeature('practiceExam').allowed && (
-          <div style={{ background: 'linear-gradient(135deg, rgba(59,97,196,0.06), rgba(99,102,241,0.06))', border: '1px solid rgba(59,97,196,0.22)', borderRadius: 18, padding: 18, marginTop: 24, display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-            <div style={{ flex: 1, minWidth: 220 }}>
-              <p style={{ margin: 0, fontSize: 14, fontWeight: 700, color: '#1A1A1A' }}>You've used your free practice exam.</p>
-              <p style={{ margin: '3px 0 0', fontSize: 13, color: '#6B6B6B', lineHeight: 1.5 }}>{hasUsedTrial() ? 'Upgrade to Pro for unlimited practice exams, AI scoring, and score trend analytics.' : 'Start your 7-day free trial. Unlimited practice exams, AI scoring, and score trend analytics.'}</p>
+        <div className="per-grid">
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 24, minWidth: 0 }}>
+
+          {/* Score and topics */}
+          <Card delay={60} style={{ padding: 32, display: 'flex', flexDirection: 'column', gap: 26 }}>
+            <div style={{ display: 'flex', alignItems: 'baseline', gap: 14, flexWrap: 'wrap' }}>
+              {score === null ? (
+                <>
+                  <span style={{ fontFamily: PE_SERIF, fontSize: 62, fontWeight: 500, lineHeight: 1, color: C.secondary }}>
+                    &ndash;
+                  </span>
+                  <span style={{ font: '400 14px/1.3 Inter, sans-serif', color: C.secondary }}>Scored answers below</span>
+                </>
+              ) : (
+                <>
+                  <span style={{ fontFamily: PE_SERIF, fontSize: 62, fontWeight: 500, lineHeight: 1, color: scoreColor(score) }}>
+                    {score}
+                  </span>
+                  {countLine && <span style={{ font: '400 14px/1 Inter, sans-serif', color: C.secondary }}>{countLine}</span>}
+                </>
+              )}
             </div>
-            <button
-              onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'practice-exam-results' } }))}
-              style={{ padding: '10px 18px', background: '#3B61C4', color: '#fff', border: 'none', borderRadius: 10, fontWeight: 700, fontSize: 14, cursor: 'pointer', whiteSpace: 'nowrap' }}
-            >
-              {hasUsedTrial() ? 'Upgrade to Pro' : 'Start 7-day free trial →'}
-            </button>
+
+            {topics.length > 0 && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                <div style={EYEBROW}>By topic</div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  {topics.map(t => (
+                    <div key={t.topic} style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, font: '400 13.5px/1.3 Inter, sans-serif', color: C.ink }}>
+                        <span style={{ minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis' }}>{t.topic}</span>
+                        <span style={{ color: C.secondary, flexShrink: 0 }}>{t.correct} of {t.total}</span>
+                      </div>
+                      <div style={{ height: 4, borderRadius: 2, background: C.barTrack }}>
+                        <div style={{ width: `${t.pct}%`, height: 4, borderRadius: 2, background: t.color }} />
+                      </div>
+                      {t.missed > 0 && onDrillTopic && (
+                        <TextLink onClick={() => onDrillTopic(t.topic)} style={{ alignSelf: 'flex-start', marginTop: 2 }}>
+                          Drill
+                        </TextLink>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {savedToHistory && !readOnly && (
+              <p style={{ margin: 0, font: '400 13px/1.5 Inter, sans-serif', color: C.secondary }}>
+                Added to your practice exam history.
+              </p>
+            )}
+          </Card>
+
+          {/* Score trend, Unlimited only. Every point is an exam that was
+              actually sat. The card this replaced also drew the line forward
+              and called the result a predicted real exam score. */}
+          {trend.length >= 2 && (
+            <Card delay={100} style={{ padding: 32, display: 'flex', flexDirection: 'column', gap: 16 }}>
+              <div style={EYEBROW}>Score trend</div>
+              <TrendLine scores={trend} />
+              <p style={{ margin: 0, font: '400 13px/1.5 Inter, sans-serif', color: C.secondary }}>
+                Your last {trend.length} practice exams for this course.
+              </p>
+            </Card>
+          )}
+
+          {/* The Unlimited nudge for everyone else, as a link rather than a
+              button so Retake stays the only filled action. */}
+          {!isUnlimited && (
+            <Card delay={100} style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+              <p style={{ margin: 0, font: '400 13.5px/1.5 Inter, sans-serif', color: C.secondary }}>
+                Unlimited charts your score across every practice exam for a course, so you can see whether the work is landing.
+              </p>
+              <TextLink
+                onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'practiceExamAnalytics' } }))}
+                style={{ alignSelf: 'flex-start' }}
+              >
+                See Unlimited
+              </TextLink>
+            </Card>
+          )}
+
           </div>
+
+          {/* Answer review */}
+          <Card delay={130} style={{ overflow: 'hidden' }}>
+            <div style={{ padding: '24px 32px 18px', display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: 12, flexWrap: 'wrap' }}>
+              <h2 style={{ margin: 0, fontFamily: PE_SERIF, fontSize: 24, fontWeight: 500, color: C.ink }}>Your answers.</h2>
+              <span style={{ font: '400 12.5px/1 Inter, sans-serif', color: C.secondary }}>Missed first</span>
+            </div>
+            {ordered.map(item => (
+              <div key={item.index} className="per-row">
+                <AnswerRow
+                  item={item}
+                  number={item.index + 1}
+                  repair={repairs[item.index]}
+                  onFetchRepair={() => fetchRepair(item.index)}
+                  onRepairAnswer={(opt) => handleRepairAnswer(item.index, opt)}
+                />
+              </div>
+            ))}
+          </Card>
+        </div>
+
+        {/* The one upgrade nudge: shown after a free student uses their exam.
+            A text link, not a button, so Retake stays the only primary. */}
+        {outOfExams && (
+          <Card delay={200} style={{ padding: '18px 24px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
+            <p style={{ margin: 0, font: '400 13.5px/1.5 Inter, sans-serif', color: C.secondary, maxWidth: 560 }}>
+              That was your free practice exam. {hasUsedTrial() ? 'Pro gives you unlimited exams for every course.' : 'Pro gives you unlimited exams for every course, free for 3 days.'}
+            </p>
+            <TextLink onClick={() => window.dispatchEvent(new CustomEvent('studyedge:open-paywall', { detail: { trigger: 'practice-exam-results' } }))}>
+              {hasUsedTrial() ? 'See plans' : 'Start free trial'}
+            </TextLink>
+          </Card>
         )}
 
         {/* Actions */}
-        <div style={{ display: 'flex', gap: 10, marginTop: 24, justifyContent: 'flex-end' }}>
-          <button onClick={onClose} style={{ padding: '12px 18px', background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.08)', borderRadius: 12, color: '#1A1A1A', fontWeight: 600, fontSize: 14, cursor: 'pointer' }}>Back to Practice Exams</button>
-          <button onClick={onRetake} style={{ padding: '12px 22px', background: '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontWeight: 700, fontSize: 14, cursor: 'pointer' }}>Retake</button>
+        <div className="per-rise" style={{ display: 'flex', gap: 16, alignItems: 'center', justifyContent: 'flex-end', flexWrap: 'wrap', animationDelay: '260ms' }}>
+          <TextLink onClick={onClose} style={{ font: '500 14px/1 Inter, sans-serif', color: C.secondary }}>
+            Back to Practice Exams
+          </TextLink>
+          <button
+            onClick={onRetake}
+            style={{
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+              padding: '14px 26px', borderRadius: 12, border: 'none',
+              background: C.blue, color: '#fff', cursor: 'pointer',
+              font: '600 14.5px/1 Inter, sans-serif', fontFamily: 'inherit',
+            }}
+          >
+            Retake
+          </button>
         </div>
       </div>
     </div>
