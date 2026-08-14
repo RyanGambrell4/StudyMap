@@ -10,7 +10,7 @@
  * and every trust disclaimer except the single line in the footer.
  */
 
-import { useRef } from 'react'
+import { useMemo, useRef } from 'react'
 import { STUDY_COACH as C, SC_SERIF, SANS, courseColor } from '../theme/tokens'
 import { cardFeedback, footerState, TRUST_LINE } from '../utils/coachIntake'
 import { useIsMobile } from '../utils/useIsMobile'
@@ -132,6 +132,33 @@ export default function StudyCoachIntakeStep({
       addTopic(e.target.value)
       e.target.value = ''
     }
+  }
+
+  // Topics pulled from a confirmed syllabus live on the course. They used to be
+  // written and never read, so this picker started empty even right after an
+  // upload. They are offered as suggestions, never auto-applied: the topic list
+  // is the closed set the generated plan is allowed to cover, so the student has
+  // to be the one who chooses what goes in it.
+  const selectedCourse = form.courseIdx >= 0 ? courses[form.courseIdx] : null
+  const suggestedTopics = useMemo(() => {
+    const fromSyllabus = Array.isArray(selectedCourse?.topics) ? selectedCourse.topics : []
+    const chosen = Array.isArray(form.topics) ? form.topics : []
+    const seen = new Set(chosen.map(t => String(t).trim().toLowerCase()))
+    const out = []
+    for (const entry of fromSyllabus) {
+      const title = String(entry?.title ?? entry ?? '').trim()
+      if (!title) continue
+      const key = title.toLowerCase()
+      if (seen.has(key)) continue
+      seen.add(key)
+      out.push(title)
+    }
+    return out
+  }, [selectedCourse, form.topics])
+
+  const addAllSuggestedTopics = () => {
+    if (!suggestedTopics.length) return
+    update('topics', [...topics, ...suggestedTopics])
   }
 
   // ── Deadlines: staged inputs, committed by Add, stored on form.dates ──
@@ -258,6 +285,45 @@ export default function StudyCoachIntakeStep({
                     >×</button>
                   </span>
                 ))}
+              </div>
+            )}
+
+            {suggestedTopics.length > 0 && (
+              <div style={{ marginTop: 16 }}>
+                <div style={{
+                  display: 'flex', alignItems: 'baseline', justifyContent: 'space-between',
+                  gap: 12, flexWrap: 'wrap', marginBottom: 9,
+                }}>
+                  <span style={{ fontSize: 12.5, color: PLACEHOLDER }}>
+                    From your syllabus. Tap to add.
+                  </span>
+                  <button
+                    type="button"
+                    onClick={addAllSuggestedTopics}
+                    style={{ ...btnReset, fontSize: 12.5, fontWeight: 600, color: C.blue }}
+                  >
+                    Add all {suggestedTopics.length}
+                  </button>
+                </div>
+                <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  {suggestedTopics.map(t => (
+                    <button
+                      key={t}
+                      type="button"
+                      onClick={() => addTopic(t)}
+                      aria-label={`Add topic ${t}`}
+                      style={{
+                        ...btnReset,
+                        display: 'inline-flex', alignItems: 'center', gap: 6,
+                        border: `1px dashed ${BORDER}`, borderRadius: 999,
+                        padding: '6px 12px', fontSize: 13, color: C.ink, background: '#fff',
+                      }}
+                    >
+                      <span style={{ color: C.blue, fontWeight: 700, lineHeight: 1 }}>+</span>
+                      {t}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
 

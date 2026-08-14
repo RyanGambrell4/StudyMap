@@ -137,6 +137,17 @@ export default function SyllabusOnboardingModal({ parsedData, existingCourse, on
   const hasGrading = grading.length > 0
   const hasMeetings = meetings.length > 0
 
+  // Grade Hub only accepts a component set whose weights total 100 (within 0.5).
+  // We never rescale what the syllabus says to force that, so the honest move is
+  // to show the running total and name the gap. The student closes it in Grade Hub.
+  const gradingTotal = grading.reduce((sum, g) => sum + (Number(g.percentage) || 0), 0)
+  const gradingBalanced = Math.abs(gradingTotal - 100) < 0.5
+  const gradingGap = Math.round((100 - gradingTotal) * 10) / 10
+
+  // A course that already has Grade Hub set up keeps what it has. Overwriting a
+  // student's own weights with a re-parse is data loss, not a setup step.
+  const gradeHubAlreadySetUp = (existingCourse?.gradeData?.components?.length ?? 0) > 0
+
   // ── Helpers ───────────────────────────────────────────────────────────────
   const updateExam = (id, field, value) =>
     setExams(prev => prev.map(e => e._id === id ? { ...e, [field]: value } : e))
@@ -159,7 +170,18 @@ export default function SyllabusOnboardingModal({ parsedData, existingCourse, on
     exams: exams.filter(e => e.checked).map(({ _id, checked, ...rest }) => rest),
     dueDates: dueDates.filter(d => d.checked).map(({ _id, checked, ...rest }) => rest),
     topics: topics.map(({ _id, ...rest }) => rest),
-    gradeComponents: grading.map((g, i) => ({ id: `gc-${i}`, name: g.category, weight: g.percentage })),
+    // Emitted in the exact shape Grade Hub reads (component, not name), so the
+    // confirmed breakdown lands in course.gradeData.components. Weights are
+    // passed through verbatim: never rescaled to force a sum of 100.
+    gradeComponents: grading.map((g, i) => ({
+      id: `gc-${i}`,
+      component: String(g.category ?? '').trim() || 'Untitled',
+      weight: Number(g.percentage) || 0,
+      grade: null,
+      graded: false,
+    })),
+    gradeWeightsBalanced: gradingBalanced,
+    gradeHubAlreadySetUp,
     classMeetings: meetings.filter(m => m.checked).map(({ _id, checked, ...rest }) => rest),
     isPastTerm: p.isPastTerm ?? false,
   })
@@ -323,18 +345,37 @@ export default function SyllabusOnboardingModal({ parsedData, existingCourse, on
           {/* Grading breakdown */}
           {hasGrading && (
             <div>
-              <SectionLabel>Worth the most</SectionLabel>
-              <div style={{ fontSize: 12.5, color: T.muted, marginBottom: 12 }}>Used to prioritize topics in your study plan.</div>
+              <SectionLabel>How you're graded</SectionLabel>
+              <div style={{ fontSize: 12.5, color: T.muted, marginBottom: 12 }}>
+                {gradeHubAlreadySetUp
+                  ? 'Grade Hub is already set up for this course, so these stay as a reference and will not replace what you have.'
+                  : 'These become your Grade Hub components, exactly as your syllabus lists them.'}
+              </div>
               <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
                 {grading.map((g, i) => (
                   <div
                     key={i}
-                    style={{ padding: '6px 12px', borderRadius: 999, background: T.accentSoft, border: `1px solid ${T.accentGlow}`, fontSize: 13, color: T.accent, fontWeight: 600 }}
+                    style={{ display: 'inline-flex', alignItems: 'center', gap: 4, padding: '6px 8px 6px 12px', borderRadius: 999, background: T.accentSoft, border: `1px solid ${T.accentGlow}`, fontSize: 13, color: T.accent, fontWeight: 600 }}
                   >
                     {g.category} {g.percentage}%
+                    <SnippetBadge snippet={g.sourceSnippet} />
                   </div>
                 ))}
               </div>
+
+              <div style={{ marginTop: 12, display: 'flex', alignItems: 'baseline', gap: 8, flexWrap: 'wrap' }}>
+                <span style={{ fontSize: 12.5, fontWeight: 700, color: gradingBalanced ? T.muted : T.amber }}>
+                  Total: {Math.round(gradingTotal * 10) / 10}% of 100%
+                </span>
+              </div>
+
+              {!gradingBalanced && !gradeHubAlreadySetUp && (
+                <div style={{ marginTop: 8, padding: '10px 14px', borderRadius: 10, background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.2)', fontSize: 12.5, color: '#92400E', lineHeight: 1.55 }}>
+                  {gradingGap > 0
+                    ? `Your syllabus accounts for ${Math.round(gradingTotal * 10) / 10}%, so ${gradingGap}% is unaccounted for. We are keeping the numbers exactly as written rather than adjusting them to reach 100. Grade Hub will ask you to close the gap before it can track your grade.`
+                    : `Your syllabus adds up to ${Math.round(gradingTotal * 10) / 10}%, which is ${Math.abs(gradingGap)}% over 100. We are keeping the numbers exactly as written rather than adjusting them. Grade Hub will ask you to reconcile this before it can track your grade.`}
+                </div>
+              )}
             </div>
           )}
 

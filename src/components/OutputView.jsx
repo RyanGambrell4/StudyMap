@@ -1274,6 +1274,25 @@ export default function OutputView({
     const futureExams = (result.exams ?? []).filter(e => e.date >= today).sort((a, b) => a.date.localeCompare(b.date))
     const nearestExamDate = futureExams[0]?.date ?? null
 
+    // Grade Hub reads course.gradeData.components and nothing else. The confirmed
+    // breakdown used to be written to course.gradeComponents, which no reader in
+    // the app looks at, so a student could approve their grading table and still
+    // land on an empty Grade Hub. Weights are passed through exactly as the
+    // syllabus stated them; we never rescale to force a sum of 100.
+    const confirmedComponents = result.gradeComponents ?? []
+    const buildGradeData = (existing) => {
+      // A course that already has its own components keeps them. Replacing a
+      // student's hand-entered weights with a re-parse would be data loss.
+      if ((existing?.components?.length ?? 0) > 0) return existing
+      if (!confirmedComponents.length) return existing
+      return {
+        ...(existing ?? {}),
+        components: confirmedComponents.map(c => ({ ...c })),
+        targetGrade: existing?.targetGrade ?? 85,
+        scenarios: existing?.scenarios ?? [],
+      }
+    }
+
     let courseObj
     let courseIdx = syllabusOnboardingScopeIdx
     let course
@@ -1288,7 +1307,7 @@ export default function OutputView({
         examDate: nearestExamDate || course.examDate,
         exams: result.exams ?? [],
         topics: result.topics ?? [],
-        gradeComponents: result.gradeComponents ?? [],
+        gradeData: buildGradeData(course.gradeData),
         classSchedule: result.classMeetings?.length
           ? { ...course.classSchedule, syllabusExtracted: result.classMeetings }
           : course.classSchedule,
@@ -1306,7 +1325,7 @@ export default function OutputView({
         color: { name: 'custom', dot: colorDot },
         exams: result.exams ?? [],
         topics: result.topics ?? [],
-        gradeComponents: result.gradeComponents ?? [],
+        gradeData: buildGradeData(null),
         classSchedule: result.classMeetings?.length
           ? { syllabusExtracted: result.classMeetings }
           : undefined,
@@ -1432,6 +1451,8 @@ export default function OutputView({
       examCount: result.exams?.length ?? 0,
       topicCount: result.topics?.length ?? 0,
       hasGrading: (result.gradeComponents?.length ?? 0) > 0,
+      gradeHubApplied: confirmedComponents.length > 0 && !result.gradeHubAlreadySetUp,
+      gradeWeightsBalanced: result.gradeWeightsBalanced ?? null,
       registryWriteOk: !!syllabusUploadId,
     })
     setActiveSection('dashboard')

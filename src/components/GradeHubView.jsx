@@ -562,9 +562,22 @@ function HeroCard({ math, components, targetGrade, targetLabel, onTargetChange, 
 // ── Grade components card ─────────────────────────────────────────────────────
 function ComponentsCard({
   rows, setRow, toggleGraded, addRow, removeRow,
-  totalWeight, weightOk, canSave, onSave, saved, readOnly, mobile,
+  totalWeight, weightOk, canSave, saveBlockReason, onSave, saved, readOnly, mobile,
 }) {
   const counterColor = weightOk ? G.label : G.amberText
+
+  const blockNotice = (!readOnly && saveBlockReason) ? (
+    <div
+      role="status"
+      style={{
+        marginTop: 12, padding: '10px 14px', borderRadius: 10,
+        background: 'rgba(217,119,6,0.08)', border: '1px solid rgba(217,119,6,0.2)',
+        fontSize: 13, color: '#92400E', lineHeight: 1.55,
+      }}
+    >
+      {saveBlockReason}
+    </div>
+  ) : null
 
   const nameInput = (row, i, style) => (
     <input
@@ -681,6 +694,8 @@ function ComponentsCard({
             </div>
           )}
         </div>
+
+        {blockNotice && <div style={{ marginBottom: mobile ? 14 : 18 }}>{blockNotice}</div>}
 
         {!mobile && (
           <div style={{ display: 'grid', gridTemplateColumns: GRID, padding: '0 2px 10px', fontSize: 11, fontWeight: 600, letterSpacing: '.08em', color: G.colHeader, textTransform: 'uppercase' }}>
@@ -913,6 +928,35 @@ function PlanTab({ course, gradeData, onSave, onSync, mobile }) {
   const weightOk    = Math.abs(totalWeight - 100) < 0.5
   const canSave     = rows.length > 0 && rows.every(r => r.component.trim() && parseFloat(r.weight) > 0) && weightOk
 
+  // A disabled button that never says why is a dead end, and weights that do not
+  // total 100 are the common case straight off a syllabus. Name the blocker.
+  const saveBlockReason = useMemo(() => {
+    if (!rows.length) return 'Add at least one component before saving.'
+
+    const unnamed = rows.filter(r => !r.component.trim()).length
+    if (unnamed) {
+      return unnamed === 1
+        ? 'One component still needs a name.'
+        : `${unnamed} components still need a name.`
+    }
+
+    const weightless = rows.filter(r => !(parseFloat(r.weight) > 0)).length
+    if (weightless) {
+      return weightless === 1
+        ? 'One component still needs a weight above 0.'
+        : `${weightless} components still need a weight above 0.`
+    }
+
+    if (!weightOk) {
+      const gap = Math.round((100 - totalWeight) * 10) / 10
+      return gap > 0
+        ? `Your weights add up to ${fmtWeight(totalWeight)}%. Add the missing ${fmtWeight(gap)}% to save, or adjust a component until the total reaches 100%.`
+        : `Your weights add up to ${fmtWeight(totalWeight)}%, which is ${fmtWeight(Math.abs(gap))}% over. Trim a component until the total reaches 100%.`
+    }
+
+    return null
+  }, [rows, weightOk, totalWeight])
+
   const math = useMemo(() => computeGradeMath(liveComponents, targetGrade), [liveComponents, targetGrade])
   const targetLabel = TARGET_OPTIONS.find(o => o.value === targetGrade)?.label ?? 'A'
 
@@ -995,6 +1039,7 @@ function PlanTab({ course, gradeData, onSave, onSync, mobile }) {
         totalWeight={totalWeight}
         weightOk={weightOk}
         canSave={canSave}
+        saveBlockReason={saveBlockReason}
         onSave={handleSave}
         saved={justSaved}
         readOnly={math.allGraded && !dirty}
