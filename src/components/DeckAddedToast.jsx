@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from 'react'
+import { T, RADIUS } from '../theme/tokens'
 
 // DeckAddedToast — global singleton at OutputView level. Listens for the
 // studyedge:deck-updated event fired by deckAdditions.js and shows a
@@ -70,17 +71,17 @@ export default function DeckAddedToast({ onReview }) {
         zIndex: 700,
         display: 'flex', alignItems: 'center', gap: 12,
         padding: '10px 14px 10px 16px',
-        background: '#111111',
-        color: '#fff',
-        borderRadius: 12,
-        boxShadow: '0 10px 30px rgba(0,0,0,0.28)',
-        border: '1px solid rgba(255,255,255,0.10)',
+        background: T.card,
+        color: T.text,
+        borderRadius: RADIUS.md,
+        boxShadow: '0 10px 30px rgba(0,0,0,0.14)',
+        border: `1px solid ${T.border}`,
         maxWidth: 'calc(100vw - 32px)',
         animation: 'toast-in 220ms cubic-bezier(0.16,1,0.3,1) both',
       }}
     >
       <style>{`@keyframes toast-in{from{opacity:0;transform:translateX(-50%) translateY(12px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}`}</style>
-      <div style={{ width: 8, height: 8, borderRadius: '50%', background: '#4ADE80', boxShadow: '0 0 8px rgba(74,222,128,0.7)' }} />
+      <div style={{ width: 8, height: 8, borderRadius: '50%', background: T.green, boxShadow: `0 0 8px ${T.greenBg}` }} />
       <div style={{ fontSize: 13, fontWeight: 600 }}>
         {totalAdded} card{totalAdded === 1 ? '' : 's'} added from {sourceLabel}
       </div>
@@ -88,8 +89,8 @@ export default function DeckAddedToast({ onReview }) {
         <button
           onClick={() => { setVisible(false); onReview() }}
           style={{
-            marginLeft: 4, padding: '5px 11px', borderRadius: 7,
-            background: '#E8531A', color: '#fff', border: 'none',
+            marginLeft: 4, padding: '5px 11px', borderRadius: RADIUS.sm,
+            background: T.blue, color: '#fff', border: 'none',
             fontSize: 12, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit',
           }}
         >
@@ -100,7 +101,7 @@ export default function DeckAddedToast({ onReview }) {
         onClick={() => setVisible(false)}
         aria-label="Dismiss"
         style={{
-          background: 'none', border: 'none', color: 'rgba(255,255,255,0.5)',
+          background: 'none', border: 'none', color: T.dim,
           cursor: 'pointer', padding: 4, marginLeft: 2, display: 'flex',
         }}
       >

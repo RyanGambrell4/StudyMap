@@ -1,4 +1,5 @@
 import { useState, useMemo, useEffect } from 'react'
+import { T } from '../theme/tokens'
 import BrainDumpModal from './BrainDumpModal'
 import QuickQuizBurst from './QuickQuizBurst'
 import { hydrateCourseContext } from '../lib/courseContext'
@@ -17,11 +18,13 @@ import { track } from '../lib/analytics'
 //   3. Quiz Burst — 5-Q quiz on the same topic, auto-started
 //   4. Wrap — mastery delta, cards added, "do it again tomorrow?"
 
+// V2 design tokens (see CLAUDE.md "Design System"). `accent` used to be the
+// legacy orange, which made this flow look like a different product.
 const D = {
-  bg: '#F7F8FA', bgCard: '#FFFFFF',
-  border: 'rgba(0,0,0,0.07)',
-  text: '#111111', textMuted: '#6B6B6B', textDim: '#9B9B9B',
-  green: '#16A34A', accent: '#E8531A', blue: '#3B61C4',
+  bg: T.bg, bgCard: T.card,
+  border: T.border,
+  text: T.text, textMuted: T.muted, textDim: T.dim,
+  green: T.green, accent: T.blue, blue: T.blue,
 }
 
 export default function SessionBundle({
@@ -101,7 +104,7 @@ export default function SessionBundle({
 
           <button
             onClick={() => setStep('dump')}
-            style={{ width: '100%', padding: '14px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 3px 12px rgba(232,83,26,0.35)` }}
+            style={{ width: '100%', padding: '14px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 15, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 3px 12px rgba(52,82,217,0.30)` }}
           >
             Start your 15-min session →
           </button>
@@ -188,7 +191,7 @@ export default function SessionBundle({
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <button
             onClick={() => { setStep('intro'); setCardsAddedTotal(0) }}
-            style={{ width: '100%', padding: '13px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 3px 12px rgba(232,83,26,0.35)` }}
+            style={{ width: '100%', padding: '13px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 3px 12px rgba(52,82,217,0.30)` }}
           >
             Do another 15-min session →
           </button>
@@ -256,7 +259,9 @@ function BundleStepFrame({ currentStep, onSkip, children }) {
           {[1, 2, 3].map(n => (
             <span key={n} style={{
               width: 12, height: 3, borderRadius: 2,
-              background: n <= currentStep ? '#E8531A' : 'rgba(255,255,255,0.25)',
+              // White on the dark HUD pill: brand blue at 3px on #111 is
+              // effectively invisible. The pill is neutral chrome, not accent.
+              background: n <= currentStep ? '#FFFFFF' : 'rgba(255,255,255,0.25)',
             }} />
           ))}
         </div>

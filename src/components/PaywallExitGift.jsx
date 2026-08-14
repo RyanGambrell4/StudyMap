@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
+import { T, RADIUS } from '../theme/tokens'
 
 /**
  * PaywallExitGift — the intercept that fires when a free user closes the
@@ -19,11 +20,21 @@ import { track } from '../lib/analytics'
  * record the rating and route to the thanks screen.
  */
 
-const ACCENT   = '#E8531A'
-const TEXT     = '#111111'
-const MUTED    = '#6B6B6B'
-const BORDER   = '#E5E5E5'
-const BG_CARD  = '#FFFFFF'
+// V2 design tokens (see CLAUDE.md "Design System"). This modal previously
+// carried its own orange palette that matched nothing else in the product.
+const ACCENT     = T.blue
+const ACCENT_BG  = T.blueBg
+const TEXT       = T.text
+const MUTED      = T.muted
+const DIM        = T.dim
+const BORDER     = T.border
+const BG_CARD    = T.card
+
+// Rating stars. Filled uses the brand amber hue that backs `T.amberBg`
+// (rgba(232,177,74,...)) rather than a generic gold, so the stars sit in the
+// same family as every other amber surface in the app.
+const STAR_ON  = '#E8B14A'
+const STAR_OFF = 'rgba(105,110,120,0.30)'  // T.neutral at low opacity
 
 const REVIEW_URL = import.meta.env?.VITE_REVIEW_URL
   || 'https://apps.apple.com/app/studyedge-ai/id6737843050?action=write-review'
@@ -138,7 +149,7 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
         role="dialog"
         aria-modal="true"
         style={{
-          width: '100%', maxWidth: 440, background: BG_CARD, borderRadius: 20,
+          width: '100%', maxWidth: 440, background: BG_CARD, borderRadius: RADIUS.xl,
           border: `1px solid ${BORDER}`, boxShadow: '0 24px 64px rgba(0,0,0,0.20)',
           padding: 28, textAlign: 'center', position: 'relative',
         }}
@@ -150,10 +161,10 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
           style={{
             position: 'absolute', top: 14, right: 14, width: 30, height: 30,
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            background: 'none', border: 'none', color: '#9B9B9B', cursor: 'pointer',
-            borderRadius: 8,
+            background: 'none', border: 'none', color: DIM, cursor: 'pointer',
+            borderRadius: RADIUS.sm,
           }}
-          onMouseEnter={e => e.currentTarget.style.background = '#F7F8FA'}
+          onMouseEnter={e => e.currentTarget.style.background = T.bg}
           onMouseLeave={e => e.currentTarget.style.background = 'none'}
         >
           <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
@@ -164,7 +175,7 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
         {view === 'gift' && (
           <>
             <div style={{
-              width: 60, height: 60, borderRadius: '50%', background: '#FFF6F0',
+              width: 60, height: 60, borderRadius: '50%', background: ACCENT_BG,
               border: `2px dashed ${ACCENT}`, display: 'inline-flex', alignItems: 'center',
               justifyContent: 'center', marginBottom: 14,
             }}>
@@ -179,18 +190,20 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
             <p style={{ margin: '0 0 10px', fontSize: 14, color: MUTED, lineHeight: 1.6 }}>
               No card required. Five more study sessions to try blueprints, cheat sheets, and flashcards.
             </p>
-            <p style={{ margin: '0 0 18px', fontSize: 13, color: MUTED, lineHeight: 1.55, background: '#FFF6F0', border: `1px solid ${ACCENT}25`, borderRadius: 10, padding: '10px 14px' }}>
+            <p style={{ margin: '0 0 18px', fontSize: 13, color: MUTED, lineHeight: 1.55, background: ACCENT_BG, border: `1px solid ${BORDER}`, borderRadius: RADIUS.md, padding: '10px 14px' }}>
               Or skip the gift and start a <strong style={{ color: ACCENT }}>7-day free trial</strong>. Card required · $4.99/wk after 7 days. Unlimited sessions, unlimited courses, 100 AI actions/month. Cancel anytime.
             </p>
             {claimError && (
-              <p style={{ margin: '0 0 12px', fontSize: 13, color: '#DC2626' }}>{claimError}</p>
+              <p style={{ margin: '0 0 12px', fontSize: 13, color: T.red }}>{claimError}</p>
             )}
             <button
               onClick={claim}
               disabled={claiming}
+              onMouseEnter={e => { if (!claiming) e.currentTarget.style.background = T.blueHov }}
+              onMouseLeave={e => { e.currentTarget.style.background = ACCENT }}
               style={{
                 width: '100%', background: ACCENT, color: '#fff', border: 'none',
-                borderRadius: 12, padding: '13px', fontSize: 14, fontWeight: 700,
+                borderRadius: RADIUS.md, padding: '13px', fontSize: 14, fontWeight: 700,
                 cursor: claiming ? 'default' : 'pointer', marginBottom: 8,
               }}
             >
@@ -199,7 +212,7 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
             <button
               onClick={done}
               style={{
-                background: 'none', border: 'none', color: '#9B9B9B',
+                background: 'none', border: 'none', color: DIM,
                 fontSize: 12, cursor: 'pointer', padding: '6px',
               }}
             >
@@ -211,13 +224,13 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
         {view === 'rating' && (
           <>
             <div style={{
-              width: 60, height: 60, borderRadius: '50%', background: '#F0FDF4',
+              width: 60, height: 60, borderRadius: '50%', background: T.greenBg,
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               marginBottom: 14,
             }}>
-              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#22C55E" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={T.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
             </div>
-            <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: '#22C55E', textTransform: 'uppercase' }}>
+            <p style={{ margin: 0, fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', color: T.green, textTransform: 'uppercase' }}>
               Claimed · 5 actions added
             </p>
             <h2 style={{ margin: '6px 0 10px', fontSize: 20, fontWeight: 700, color: TEXT, letterSpacing: '-0.3px', lineHeight: 1.35 }}>
@@ -245,8 +258,8 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
                     }}
                   >
                     <svg width="34" height="34" viewBox="0 0 24 24"
-                      fill={filled ? '#FBBF24' : 'none'}
-                      stroke={filled ? '#FBBF24' : '#D4D4D4'}
+                      fill={filled ? STAR_ON : 'none'}
+                      stroke={filled ? STAR_ON : STAR_OFF}
                       strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
                       <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
                     </svg>
@@ -258,7 +271,7 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
               <button
                 onClick={done}
                 style={{
-                  background: 'none', border: 'none', color: '#9B9B9B',
+                  background: 'none', border: 'none', color: DIM,
                   fontSize: 12, cursor: 'pointer', padding: '6px',
                 }}
               >
@@ -271,11 +284,11 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
         {view === 'thanks' && (
           <>
             <div style={{
-              width: 60, height: 60, borderRadius: '50%', background: '#F0FDF4',
+              width: 60, height: 60, borderRadius: '50%', background: T.greenBg,
               display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
               marginBottom: 14,
             }} aria-hidden>
-              <svg width="30" height="30" fill="none" stroke="#16A34A" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
+              <svg width="30" height="30" fill="none" stroke={T.green} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
                 <polyline points="20 6 9 17 4 12" />
               </svg>
             </div>
@@ -288,7 +301,7 @@ export default function PaywallExitGift({ open, trigger, onDismiss }) {
             <button
               onClick={done}
               style={{
-                width: '100%', background: '#3B61C4', color: '#fff', border: 'none',
+                width: '100%', background: ACCENT, color: '#fff', border: 'none',
                 borderRadius: 12, padding: '13px', fontSize: 14, fontWeight: 700, cursor: 'pointer',
               }}
             >
