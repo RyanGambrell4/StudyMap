@@ -268,6 +268,37 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
             })
             .catch(() => {})
         }
+        // Batch one topic_signal per answered question with a topic, mirroring
+        // the practice-exam path in PracticeExamResults. Quiz Burst previously
+        // wrote only to masteryStore, which keeps no per-event date, so quiz
+        // results could never appear on the Knowledge Map. Fire-and-forget:
+        // the POST is not awaited and its failure never blocks the done screen.
+        if (typeof course?.id === 'string' && course.id && course?.name) {
+          const signals = questions
+            .map((qq, i) => {
+              const qTopic = typeof qq?.topic === 'string' ? qq.topic.trim() : ''
+              if (!qTopic) return null
+              return {
+                signalType: 'quiz_answer',
+                courseId: course.id,
+                courseName: course.name,
+                topic: qTopic,
+                rawScore: finalAnswers[i]?.correct ? 1 : 0,
+                metadata: { difficulty: qq?.difficulty ?? null },
+              }
+            })
+            .filter(Boolean)
+            .slice(0, 50)
+          if (signals.length) {
+            getAccessToken().then(token => {
+              fetch('/api/record-signals', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                body: JSON.stringify({ signals }),
+              }).catch(() => {})
+            }).catch(() => {})
+          }
+        }
         window.dispatchEvent(new CustomEvent('studyedge:tool-session-complete', { detail: { tool: 'quizBurst' } }))
         track('quiz_burst_complete', {
           score: quizPct, topic: topic.trim() || null, plan: getActivePlan(), questionCount: questions.length,

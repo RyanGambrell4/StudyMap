@@ -1,457 +1,502 @@
-import { useState, useMemo, useEffect } from 'react'
-import { getAllMastery, getMasteryColor, getMasteryLevel, getMasteryTrend, getMasterySummary } from '../lib/masteryStore'
-import { clean } from '../utils/strings'
+/**
+ * MasteryMapView - the Knowledge Map.
+ *
+ * Matches design/knowledge-map/ ("1 Map Populated", "2 Map Empty",
+ * "8 Topic Detail"). All derivation lives in src/utils/knowledgeMap.js so the
+ * rules can be tested without a DOM; this file renders and nothing else.
+ *
+ * The contract this screen keeps: every number on it was recorded by a tool
+ * the student used, and every claim names the event and the date behind it.
+ * There is no modelling and no projection. A topic with no scored evidence
+ * says so.
+ *
+ * The export has no mobile artboard, so the responsive rules follow the ones
+ * the Study Coach hub already uses: the hero stacks, list rows drop to two
+ * lines, and the page never scrolls sideways.
+ */
+
+import { useState, useMemo, useEffect, useCallback } from 'react'
+import { KNOWLEDGE_MAP as C, KM_SERIF, courseColor } from '../theme/tokens'
+import { deriveStatus, selectHero, courseAggregate } from '../utils/knowledgeMap'
+import { NO_PLAN_TOPICS_HINT } from '../utils/brainDumpFlow'
+import { loadEvidence, groupByCourse, planTopicsFor } from '../lib/knowledgeEvidence'
+import { useIsMobile } from '../utils/useIsMobile'
 import { track } from '../lib/analytics'
+import TopicDetailPanel from './TopicDetailPanel'
+import TopicTile from './ui/TopicTile'
 
-const D = {
-  bg:     '#F7F8FA',
-  bgCard: '#FFFFFF',
-  border: 'rgba(0,0,0,0.07)',
-  text:   '#111111',
-  muted:  '#6B6B6B',
-  dim:    '#9B9B9B',
-  blue:   '#3B61C4',
-  green:  '#16A34A',
-  amber:  '#D97706',
-  red:    '#DC2626',
+const btnReset = { border: 'none', background: 'none', padding: 0, font: 'inherit', cursor: 'pointer' }
+
+const EYEBROW = {
+  fontSize: 11, fontWeight: 600, letterSpacing: '.08em',
+  textTransform: 'uppercase', color: C.secondary,
 }
 
-function timeAgo(ts) {
-  if (!ts) return null
-  const diff = Date.now() - ts
-  const min = Math.floor(diff / 60000)
-  if (min < 60) return `${min}m ago`
-  const hr = Math.floor(diff / 3600000)
-  if (hr < 24) return `${hr}h ago`
-  const days = Math.floor(diff / 86400000)
-  return `${days}d ago`
-}
+const STATUS_WORD = { solid: 'Solid', shaky: 'Shaky', untested: 'Untested' }
+const STATUS_COLOR = { solid: C.solid, shaky: C.shaky, untested: C.untested }
 
-const SOURCE_LABELS = {
-  brainDump: 'Brain Dump',
-  teachItBack: 'Teach It Back',
-  quiz: 'Quiz',
-  flashcard: 'Flashcards',
-  practiceExam: 'Practice Exam',
-}
+// The rows shown before "Show all N topics".
+const COLLAPSED_ROWS = 5
 
-function TrendArrow({ trend }) {
-  if (!trend || trend === 'flat') return null
+function StatusDot({ status, stale }) {
+  const color = STATUS_COLOR[status]
+  // Hollow means "not currently proven": untested always, and any status
+  // whose evidence has aged out.
+  const hollow = status === 'untested' || stale
   return (
-    <svg width="10" height="10" viewBox="0 0 12 12" fill="none">
-      {trend === 'up'
-        ? <path d="M3 8l3-4 3 4" stroke={D.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-        : <path d="M3 4l3 4 3-4" stroke={D.red} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-      }
+    <span style={{
+      width: 8, height: 8, borderRadius: '50%', flex: 'none',
+      ...(hollow
+        ? { border: `1.5px solid ${status === 'untested' ? C.hollow : color}` }
+        : { background: color }),
+    }} />
+  )
+}
+
+function Chevron() {
+  return (
+    <svg width="7" height="12" viewBox="0 0 7 12" fill="none" style={{ flex: 'none' }} aria-hidden="true">
+      <path d="M1 1l5 5-5 5" stroke={C.hollow} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
     </svg>
   )
 }
 
-function ScoreBar({ score, color }) {
+function EvidenceLine({ line }) {
   return (
-    <div style={{ height: 4, background: 'rgba(0,0,0,0.06)', borderRadius: 999, overflow: 'hidden', width: '100%' }}>
-      <div style={{
-        height: '100%',
-        width: `${score}%`,
-        background: color,
-        borderRadius: 999,
-        transition: 'width 0.5s ease',
-      }} />
+    <div style={{ fontSize: 13, color: C.secondary, marginTop: 4 }}>
+      {line.text}
+      {line.staleSuffix && <span style={{ color: C.stale }}> {line.staleSuffix}</span>}
     </div>
   )
 }
 
-function TopicCard({ entry, onDrill, onTeachItBack, idx }) {
-  const [hovered, setHovered] = useState(false)
-  const color = getMasteryColor(entry.score)
-  const level = getMasteryLevel(entry.score)
-  const trend = getMasteryTrend(entry)
-  const ago = timeAgo(entry.lastUpdated)
+function TopicRow({ entry, mobile, selected, onOpen }) {
+  const [hover, setHover] = useState(false)
+  const { status, stale } = entry.derived
 
   return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
+    <button
+      type="button"
+      onClick={() => onOpen(entry)}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
       style={{
-        background: D.bgCard,
-        border: `1px solid ${hovered ? `${color}30` : D.border}`,
-        borderRadius: 12,
-        padding: '14px 16px',
-        boxShadow: hovered ? `0 4px 20px ${color}12` : '0 1px 3px rgba(0,0,0,0.06)',
-        transition: 'box-shadow 0.2s ease, border-color 0.2s ease',
-        display: 'flex', flexDirection: 'column', gap: 10,
-        position: 'relative', overflow: 'hidden',
-        animation: `mmv-card 280ms ease ${Math.min(idx ?? 0, 12) * 45}ms both`,
+        ...btnReset,
+        width: '100%', textAlign: 'left',
+        display: 'flex', alignItems: mobile ? 'flex-start' : 'center',
+        justifyContent: 'space-between', gap: mobile ? 12 : 24,
+        padding: mobile ? '14px 18px' : '15px 28px',
+        borderTop: `1px solid ${C.rowRule}`,
+        background: selected ? C.selectedRow : hover ? C.rowHover : 'transparent',
+        flexDirection: mobile ? 'column' : 'row',
       }}
     >
-      {/* Level badge */}
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: 15, fontWeight: 500, color: C.ink }}>{entry.topic}</div>
+        <EvidenceLine line={entry.derived.evidenceLine} />
+      </div>
       <div style={{
-        position: 'absolute', top: 0, right: 0,
-        padding: '3px 9px',
-        background: `${color}12`,
-        borderBottomLeftRadius: 8,
-        borderTopRightRadius: 12,
-        fontSize: 10, fontWeight: 700, letterSpacing: '0.06em',
-        textTransform: 'uppercase', color,
+        display: 'flex', alignItems: 'center', gap: mobile ? 8 : 28,
+        flex: 'none', width: mobile ? 'auto' : undefined,
       }}>
-        {level}
-      </div>
-
-      {/* Header */}
-      <div style={{ paddingRight: 60 }}>
-        <p style={{ margin: 0, fontSize: 13.5, fontWeight: 700, color: D.text, lineHeight: 1.3 }}>
-          {entry.topic}
-        </p>
-        {entry.courseId && (
-          <p style={{ margin: '2px 0 0', fontSize: 11, color: D.dim }}>{entry.courseId}</p>
-        )}
-      </div>
-
-      {/* Score row */}
-      <div>
-        <div style={{ display: 'flex', alignItems: 'baseline', gap: 6, marginBottom: 5 }}>
-          <span style={{ fontSize: 22, fontWeight: 800, color, letterSpacing: -1, lineHeight: 1 }}>
-            {entry.score}%
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, width: mobile ? 'auto' : 96 }}>
+          <StatusDot status={status} stale={stale} />
+          <span style={{ fontSize: 13, fontWeight: 500, color: STATUS_COLOR[status] }}>
+            {STATUS_WORD[status]}
           </span>
-          <TrendArrow trend={trend} />
-          {entry.prevScore != null && trend !== 'flat' && (
-            <span style={{ fontSize: 11, color: D.dim }}>
-              from {entry.prevScore}%
-            </span>
-          )}
         </div>
-        <ScoreBar score={entry.score} color={color} />
+        {!mobile && <Chevron />}
       </div>
+    </button>
+  )
+}
 
-      {/* Meta row */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center' }}>
-          {entry.source && (
-            <span style={{ fontSize: 10.5, fontWeight: 600, color: D.dim, background: 'rgba(0,0,0,0.05)', borderRadius: 5, padding: '2px 7px' }}>
-              {SOURCE_LABELS[entry.source] ?? entry.source}
-            </span>
-          )}
-          {entry.count > 1 && (
-            <span style={{ fontSize: 10.5, color: D.dim }}>{entry.count} sessions</span>
-          )}
-          {ago && <span style={{ fontSize: 10.5, color: D.dim }}>{ago}</span>}
+function HeroCard({ hero, mobile, onStart }) {
+  const congratulating = hero.mode === 'congratulate'
+  return (
+    <div style={{
+      margin: '20px 0 0',
+      background: C.card, border: `1px solid ${C.cardBorder}`,
+      borderRadius: 16, boxShadow: C.cardShadow,
+      padding: mobile ? '24px 22px' : '30px 32px',
+      display: 'flex',
+      flexDirection: mobile ? 'column' : 'row',
+      alignItems: mobile ? 'stretch' : 'flex-end',
+      justifyContent: 'space-between',
+      gap: mobile ? 20 : 40,
+    }}>
+      <div style={{ minWidth: 0 }}>
+        <div style={EYEBROW}>{congratulating ? 'Where you stand' : 'Check this next'}</div>
+        <div style={{
+          fontFamily: KM_SERIF, fontSize: mobile ? 24 : 30, fontWeight: 500,
+          lineHeight: 1.2, margin: '10px 0 0',
+          color: congratulating ? C.solid : C.ink,
+        }}>
+          {hero.headline}
         </div>
-
-        {hovered && (
-          <div style={{ display: 'flex', gap: 6 }}>
-            <button
-              onClick={() => onDrill?.(entry.topic)}
-              className="mastery-action-btn"
-              style={{
-                fontSize: 11.5, fontWeight: 700, color: D.blue,
-                background: 'rgba(59,97,196,0.08)', border: `1px solid rgba(59,97,196,0.2)`,
-                borderRadius: 7, padding: '4px 11px', cursor: 'pointer', fontFamily: 'inherit',
-                whiteSpace: 'nowrap',
-              }}
-            >
-              Drill this
-            </button>
-            {entry.score < 75 && onTeachItBack && (
-              <button
-                onClick={() => onTeachItBack?.(entry.topic, entry.courseId)}
-                className="mastery-action-btn"
-                style={{
-                  fontSize: 11.5, fontWeight: 700, color: '#7C3AED',
-                  background: 'rgba(124,58,237,0.08)', border: `1px solid rgba(124,58,237,0.2)`,
-                  borderRadius: 7, padding: '4px 11px', cursor: 'pointer', fontFamily: 'inherit',
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                Teach It
-              </button>
-            )}
+        {hero.evidence && (
+          <div style={{ fontSize: 14, color: C.secondary, margin: '8px 0 0' }}>
+            {congratulating ? `${hero.topic.topic}. ${hero.evidence}` : hero.evidence}
           </div>
         )}
       </div>
+      <PrimaryButton
+        label="Brain Dump this topic"
+        full={mobile}
+        onClick={() => onStart(hero.topic)}
+      />
     </div>
   )
 }
 
-function EmptyState({ onStartBrainDump }) {
+function PrimaryButton({ label, onClick, full = false, disabled = false }) {
+  const [hover, setHover] = useState(false)
   return (
-    <div style={{ textAlign: 'center', padding: '64px 24px' }}>
+    <button
+      type="button"
+      onClick={disabled ? undefined : onClick}
+      disabled={disabled}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        ...btnReset,
+        background: disabled ? C.disabled : hover ? C.blueHover : C.blue,
+        color: '#fff', fontSize: 14, fontWeight: 600,
+        padding: '13px 22px', borderRadius: 10,
+        whiteSpace: 'nowrap', cursor: disabled ? 'not-allowed' : 'pointer',
+        width: full ? '100%' : 'auto', textAlign: 'center', flex: 'none',
+      }}
+    >
+      {label}
+    </button>
+  )
+}
+
+function CourseChip({ label, dot, active, onClick }) {
+  const [hover, setHover] = useState(false)
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+      style={{
+        ...btnReset,
+        display: 'flex', alignItems: 'center', gap: 8,
+        padding: '8px 16px', borderRadius: 999,
+        fontSize: 13, fontWeight: 500,
+        background: active ? C.blue : C.card,
+        color: active ? '#fff' : C.ink,
+        border: `1px solid ${active ? C.blue : hover ? C.chipHover : C.cardBorder}`,
+      }}
+    >
+      {dot && !active && <span style={{ width: 7, height: 7, borderRadius: '50%', background: dot }} />}
+      {label}
+    </button>
+  )
+}
+
+function CourseCard({ course, idx, mobile, selectedKey, onOpenTopic }) {
+  const [expanded, setExpanded] = useState(false)
+  const agg = courseAggregate(course.topics)
+  const dot = courseColor(idx).dot
+  const shown = expanded ? course.topics : course.topics.slice(0, COLLAPSED_ROWS)
+  const hidden = course.topics.length - shown.length
+
+  return (
+    <div style={{
+      background: C.card, border: `1px solid ${C.cardBorder}`,
+      borderRadius: 16, boxShadow: C.cardShadow, overflow: 'hidden',
+    }}>
       <div style={{
-        width: 56, height: 56, borderRadius: 16, background: 'rgba(59,97,196,0.08)',
-        border: '1px solid rgba(59,97,196,0.15)',
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        margin: '0 auto 20px',
+        display: 'flex', alignItems: mobile ? 'flex-start' : 'center',
+        justifyContent: 'space-between', gap: 12,
+        flexDirection: mobile ? 'column' : 'row',
+        padding: mobile ? '18px 18px 14px' : '22px 28px 18px',
       }}>
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke={D.blue} strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
-          <path d="M9 3a3 3 0 00-3 3 3 3 0 00-3 3v3a3 3 0 003 3v2a3 3 0 003 3 3 3 0 003-3V3z"/>
-          <path d="M15 3a3 3 0 013 3 3 3 0 013 3v3a3 3 0 01-3 3v2a3 3 0 01-3 3 3 3 0 01-3-3V3z"/>
-        </svg>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, minWidth: 0 }}>
+          <span style={{ width: 9, height: 9, borderRadius: '50%', background: dot, flex: 'none' }} />
+          <span style={{ fontFamily: KM_SERIF, fontSize: mobile ? 20 : 22, fontWeight: 500, color: C.ink }}>
+            {course.courseName}
+          </span>
+        </div>
+        <div style={{ fontSize: 13, color: C.secondary }}>
+          {agg.solid} of {agg.total} {agg.total === 1 ? 'topic' : 'topics'} solid
+        </div>
       </div>
-      <h3 style={{ margin: '0 0 8px', fontSize: 18, fontWeight: 700, color: D.text }}>Your knowledge map is empty</h3>
-      <p style={{ margin: '0 0 24px', fontSize: 14, color: D.muted, maxWidth: 340, marginLeft: 'auto', marginRight: 'auto', lineHeight: 1.6 }}>
-        Every Brain Dump, Teach It Back session, and quiz adds a topic to your map. Start one now to see where you stand.
-      </p>
-      <button
-        onClick={onStartBrainDump}
-        style={{
-          display: 'inline-flex', alignItems: 'center', gap: 8,
-          padding: '12px 24px', background: D.blue, color: '#fff',
-          border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 700,
-          cursor: 'pointer', fontFamily: 'inherit',
-          boxShadow: '0 4px 16px rgba(59,97,196,0.3)',
-        }}
-      >
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 3a3 3 0 00-3 3 3 3 0 00-3 3v3a3 3 0 003 3v2a3 3 0 003 3 3 3 0 003-3V3z"/><path d="M15 3a3 3 0 013 3 3 3 0 013 3v3a3 3 0 01-3 3v2a3 3 0 01-3 3 3 3 0 01-3-3V3z"/></svg>
-        Do your first Brain Dump
-      </button>
+
+      {shown.map(entry => (
+        <TopicRow
+          key={entry.key}
+          entry={entry}
+          mobile={mobile}
+          selected={selectedKey === entry.key}
+          onOpen={onOpenTopic}
+        />
+      ))}
+
+      {(hidden > 0 || expanded) && (
+        <div style={{ padding: mobile ? '14px 18px' : '14px 28px', borderTop: `1px solid ${C.rowRule}` }}>
+          <button
+            type="button"
+            onClick={() => setExpanded(v => !v)}
+            style={{ ...btnReset, fontSize: 13, fontWeight: 500, color: C.blue }}
+          >
+            {expanded ? 'Show fewer topics' : `Show all ${course.topics.length} topics`}
+          </button>
+        </div>
+      )}
     </div>
   )
 }
 
-const SORT_OPTIONS = [
-  { id: 'score-asc',  label: 'Weakest first' },
-  { id: 'score-desc', label: 'Strongest first' },
-  { id: 'recent',     label: 'Most recent' },
-  { id: 'sessions',   label: 'Most practiced' },
-]
-
-const FILTER_OPTIONS = [
-  { id: 'all',        label: 'All topics' },
-  { id: 'weak',       label: 'Weak' },
-  { id: 'developing', label: 'Developing' },
-  { id: 'strong',     label: 'Strong' },
-]
-
-export default function MasteryMapView({ courses, onOpenBrainDump, onDrillTopic, onOpenTeachItBack }) {
-  const [sort, setSort] = useState('score-asc')
-  const [filter, setFilter] = useState('all')
-  const [search, setSearch] = useState('')
-  const [selectedCourse, setSelectedCourse] = useState('all')
-  const [data, setData] = useState([])
-
-  useEffect(() => {
-    track('mastery_map_viewed')
-    setData(getAllMastery())
-  }, [])
-
-  const summary = useMemo(() => {
-    if (!data.length) return null
-    const avg = Math.round(data.reduce((s, m) => s + m.score, 0) / data.length)
-    return {
-      total: data.length,
-      avg,
-      strong: data.filter(m => m.score >= 70).length,
-      developing: data.filter(m => m.score >= 40 && m.score < 70).length,
-      weak: data.filter(m => m.score < 40).length,
-    }
-  }, [data])
-
-  const courseNames = useMemo(() => {
-    const names = new Set(data.map(m => m.courseId).filter(Boolean))
-    return ['all', ...names]
-  }, [data])
-
-  const filtered = useMemo(() => {
-    let items = [...data]
-
-    if (selectedCourse !== 'all') {
-      items = items.filter(m => String(m.courseId) === selectedCourse)
-    }
-    if (search.trim()) {
-      const q = search.toLowerCase()
-      items = items.filter(m => m.topic.toLowerCase().includes(q))
-    }
-    if (filter !== 'all') {
-      items = items.filter(m => getMasteryLevel(m.score) === filter)
-    }
-
-    switch (sort) {
-      case 'score-asc':  return items.sort((a, b) => a.score - b.score)
-      case 'score-desc': return items.sort((a, b) => b.score - a.score)
-      case 'recent':     return items.sort((a, b) => (b.lastUpdated ?? 0) - (a.lastUpdated ?? 0))
-      case 'sessions':   return items.sort((a, b) => (b.count ?? 0) - (a.count ?? 0))
-      default:           return items
-    }
-  }, [data, selectedCourse, search, filter, sort])
-
-  const handleDrill = (topic) => {
-    track('mastery_map_drill_clicked', { topic })
-    onDrillTopic?.(topic)
-    onOpenBrainDump?.()
-  }
-
-  const handleTeachItBack = (topic, courseId) => {
-    track('mastery_map_teach_it_back_clicked', { topic })
-    const idx = (courses ?? []).findIndex(c => (c.name ?? '').toLowerCase() === (courseId ?? '').toLowerCase())
-    onOpenTeachItBack?.({ courseIdx: idx >= 0 ? idx : 0, topic })
-  }
+function EmptyState({ courses, mobile, onStart }) {
+  const [courseIdx, setCourseIdx] = useState(0)
+  const [topic, setTopic] = useState('')
+  const course = courses[courseIdx] ?? null
+  const suggestions = useMemo(() => planTopicsFor(course?.id).slice(0, 6), [course?.id])
 
   return (
-    <div style={{ minHeight: '100vh', background: D.bg, animation: 'mmv-in 260ms cubic-bezier(0.16,1,0.3,1) both' }}>
-      <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
-        @keyframes mmv-in { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-        @keyframes mmv-card { from { opacity: 0; transform: translateY(6px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .mastery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
-        @media (max-width: 600px) { .mastery-grid { grid-template-columns: 1fr; } }
-        .mastery-filter-btn { background: none; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 6px 14px; font-size: 12.5px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-        .mastery-filter-btn.active { background: #3B61C4; color: #fff; border-color: #3B61C4; }
-        .mastery-sort-btn { background: none; border: 1px solid rgba(0,0,0,0.1); border-radius: 8px; padding: 5px 12px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: inherit; color: #6B6B6B; transition: all 0.15s; white-space: nowrap; }
-        .mastery-sort-btn.active { border-color: #3B61C4; color: #3B61C4; background: rgba(59,97,196,0.06); }
-        .mastery-action-btn { transition: transform 0.1s !important; }
-        .mastery-action-btn:active { transform: scale(0.93) !important; }
-      `}</style>
-
-      {/* Header */}
-      <div style={{ padding: '28px 32px 0' }}>
-        <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16, flexWrap: 'wrap' }}>
-          <div>
-            <div style={{ fontSize: 11, fontWeight: 700, color: D.blue, letterSpacing: '0.08em', textTransform: 'uppercase', marginBottom: 8, opacity: 0.8 }}>
-              Knowledge Map
-            </div>
-            <h1 style={{ fontFamily: "'Instrument Serif', Georgia, serif", fontSize: 34, fontWeight: 400, margin: 0, letterSpacing: -0.5, lineHeight: 1.15, color: D.text }}>
-              What you know<span style={{ color: D.blue }}>.</span>
-            </h1>
-            <p style={{ fontSize: 14, color: D.muted, margin: '6px 0 0' }}>
-              Built from your Brain Dumps, quizzes, and Teach It Back sessions.
-            </p>
-          </div>
-
-          {summary && (
-            <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              {[
-                { label: 'Topics tracked', value: summary.total, color: D.blue },
-                { label: 'Avg mastery', value: `${summary.avg}%`, color: summary.avg >= 70 ? D.green : summary.avg >= 40 ? D.amber : D.red },
-              ].map(({ label, value, color }) => (
-                <div key={label} style={{
-                  background: D.bgCard, border: `1px solid ${D.border}`,
-                  borderRadius: 10, padding: '10px 16px', textAlign: 'center',
-                  boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
-                }}>
-                  <div style={{ fontSize: 20, fontWeight: 800, color, letterSpacing: -0.5 }}>{value}</div>
-                  <div style={{ fontSize: 10.5, fontWeight: 600, color: D.dim, textTransform: 'uppercase', letterSpacing: '0.06em', marginTop: 2 }}>{label}</div>
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-
-        {/* Progress bar across mastery levels */}
-        {summary && (
-          <div style={{ marginTop: 20, display: 'flex', gap: 12, flexWrap: 'wrap', alignItems: 'center' }}>
-            <div style={{ flex: 1, minWidth: 200, height: 8, display: 'flex', borderRadius: 999, overflow: 'hidden', background: 'rgba(0,0,0,0.06)' }}>
-              <div style={{ width: `${(summary.strong / summary.total) * 100}%`, background: D.green, transition: 'width 0.6s ease' }} />
-              <div style={{ width: `${(summary.developing / summary.total) * 100}%`, background: D.amber, transition: 'width 0.6s ease' }} />
-              <div style={{ width: `${(summary.weak / summary.total) * 100}%`, background: D.red, transition: 'width 0.6s ease' }} />
-            </div>
-            <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-              {[
-                { label: 'Strong', count: summary.strong, color: D.green },
-                { label: 'Developing', count: summary.developing, color: D.amber },
-                { label: 'Weak', count: summary.weak, color: D.red },
-              ].map(({ label, count, color }) => (
-                <span key={label} style={{ fontSize: 11.5, color: D.muted, display: 'flex', alignItems: 'center', gap: 5 }}>
-                  <span style={{ width: 8, height: 8, borderRadius: 2, background: color, display: 'inline-block' }} />
-                  <strong style={{ color, fontWeight: 700 }}>{count}</strong> {label}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
+    <div style={{
+      margin: '32px 0 0', maxWidth: 760,
+      background: C.card, border: `1px solid ${C.cardBorder}`,
+      borderRadius: 16, boxShadow: C.cardShadow,
+      padding: mobile ? '26px 22px' : '36px 40px 34px',
+    }}>
+      <div style={{ fontFamily: KM_SERIF, fontSize: mobile ? 22 : 26, fontWeight: 500, lineHeight: 1.3, color: C.ink }}>
+        Nothing recorded yet<span style={{ color: C.blue }}>.</span>
       </div>
+      <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.6, color: C.secondary }}>
+        Every Brain Dump, quiz, and Teach It Back session records what you proved you know. This page collects
+        the evidence per topic so you can see what is solid and what is shaky.
+      </p>
 
-      {/* Controls */}
-      {data.length > 0 && (
-        <div style={{ padding: '16px 32px 0', display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {/* Search + course filter */}
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', alignItems: 'center' }}>
-            <div style={{ position: 'relative', flex: 1, minWidth: 180, maxWidth: 320 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke={D.dim} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none' }}>
-                <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
-              </svg>
-              <input
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-                placeholder="Search topics..."
-                style={{
-                  width: '100%', boxSizing: 'border-box',
-                  padding: '8px 12px 8px 30px',
-                  border: `1px solid ${D.border}`, borderRadius: 9,
-                  fontSize: 13, color: D.text, background: D.bgCard,
-                  fontFamily: 'inherit', outline: 'none',
-                }}
-              />
-            </div>
+      <div style={{ height: 1, background: C.rowRule, margin: '28px 0' }} />
 
-            {courseNames.length > 2 && (
-              <select
-                value={selectedCourse}
-                onChange={e => setSelectedCourse(e.target.value)}
-                style={{
-                  padding: '8px 12px', border: `1px solid ${D.border}`, borderRadius: 9,
-                  fontSize: 13, color: D.text, background: D.bgCard,
-                  fontFamily: 'inherit', cursor: 'pointer', outline: 'none',
-                }}
-              >
-                <option value="all">All courses</option>
-                {courseNames.filter(n => n !== 'all').map(n => (
-                  <option key={n} value={n}>{n}</option>
-                ))}
-              </select>
-            )}
-          </div>
+      <div style={EYEBROW}>Pick a topic to start with</div>
 
-          {/* Filter + sort row */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
-              {FILTER_OPTIONS.map(({ id, label }) => (
-                <button
-                  key={id}
-                  className={`mastery-filter-btn${filter === id ? ' active' : ''}`}
-                  onClick={() => setFilter(id)}
-                  style={{ color: filter === id ? '#fff' : D.muted }}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-            <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
-              <span style={{ fontSize: 11.5, fontWeight: 600, color: D.dim }}>Sort:</span>
-              {SORT_OPTIONS.map(({ id, label }) => (
-                <button
-                  key={id}
-                  className={`mastery-sort-btn${sort === id ? ' active' : ''}`}
-                  onClick={() => setSort(id)}
-                >
-                  {label}
-                </button>
-              ))}
-            </div>
-          </div>
+      {courses.length > 0 && (
+        <div style={{ display: 'flex', gap: 8, margin: '14px 0 0', flexWrap: 'wrap' }}>
+          {courses.map((c, i) => (
+            <CourseChip
+              key={c.id ?? i}
+              label={c.name}
+              dot={courseColor(i).dot}
+              active={courseIdx === i}
+              onClick={() => { setCourseIdx(i); setTopic('') }}
+            />
+          ))}
         </div>
       )}
 
-      {/* Grid */}
-      <div style={{ padding: '16px 32px 80px' }}>
-        {data.length === 0 ? (
-          <EmptyState onStartBrainDump={onOpenBrainDump} />
-        ) : filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', padding: '48px 24px', color: D.dim, fontSize: 14 }}>
-            No topics match your filters.
-          </div>
-        ) : (
-          <div className="mastery-grid">
-            {filtered.map((entry, idx) => (
-              <TopicCard
-                key={`${entry.courseId}::${entry.topic}`}
-                entry={entry}
-                idx={idx}
-                onDrill={handleDrill}
-                onTeachItBack={onOpenTeachItBack ? handleTeachItBack : null}
+      {suggestions.length > 0 ? (
+        <div style={{ display: 'flex', gap: 8, margin: '18px 0 0', flexWrap: 'wrap' }}>
+          {suggestions.map(t => (
+            <TopicTile key={t} label={t} active={topic === t} onClick={() => setTopic(t)} />
+          ))}
+        </div>
+      ) : (
+        <p style={{ margin: '18px 0 0', fontSize: 13, color: C.stale }}>{NO_PLAN_TOPICS_HINT}</p>
+      )}
+
+      <input
+        type="text"
+        value={topic}
+        onChange={e => setTopic(e.target.value)}
+        placeholder="Or type any topic"
+        style={{
+          margin: '16px 0 0', width: mobile ? '100%' : 340, maxWidth: '100%',
+          padding: '11px 14px', border: `1px solid ${C.cardBorder}`, borderRadius: 10,
+          font: 'inherit', fontSize: 14, color: C.ink, background: C.card, outline: 'none',
+          boxSizing: 'border-box',
+        }}
+      />
+
+      <div style={{
+        display: 'flex', alignItems: mobile ? 'stretch' : 'center', gap: 16,
+        margin: '26px 0 0', flexDirection: mobile ? 'column' : 'row',
+      }}>
+        <PrimaryButton
+          label="Start your first Brain Dump"
+          full={mobile}
+          disabled={!topic.trim()}
+          onClick={() => onStart({ topic: topic.trim(), courseId: course?.id ?? null, courseIdx })}
+        />
+        <div style={{ fontSize: 13, color: C.secondary }}>
+          Pick or type a topic first. You will get 3 minutes.
+        </div>
+      </div>
+    </div>
+  )
+}
+
+export default function MasteryMapView({ courses = [], onOpenBrainDump, onUploadNotes }) {
+  const mobile = useIsMobile()
+  const [records, setRecords] = useState(null)
+  const [loadError, setLoadError] = useState(false)
+  const [courseFilter, setCourseFilter] = useState('all')
+  const [openTopic, setOpenTopic] = useState(null)
+  // Captured when evidence loads rather than read during render, so ages and
+  // staleness stay stable across re-renders instead of drifting mid-paint.
+  const [now, setNow] = useState(0)
+
+  const refresh = useCallback(async () => {
+    const { records: rows, error } = await loadEvidence()
+    setNow(Date.now())
+    setRecords(rows)
+    setLoadError(Boolean(error))
+  }, [])
+
+  useEffect(() => {
+    track('mastery_map_viewed')
+    // Subscribing to an external system: every setState inside refresh runs
+    // after the database read resolves, never synchronously in this body.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    refresh()
+  }, [refresh])
+
+  // A dump scored elsewhere in the app lands on the map without a reload.
+  useEffect(() => {
+    const onComplete = () => { refresh() }
+    window.addEventListener('studyedge:tool-session-complete', onComplete)
+    return () => window.removeEventListener('studyedge:tool-session-complete', onComplete)
+  }, [refresh])
+
+  const planTopicsByCourse = useMemo(() => {
+    const out = {}
+    for (const c of courses) {
+      if (c?.id == null) continue
+      out[c.id] = planTopicsFor(c.id)
+    }
+    return out
+  }, [courses])
+
+  const grouped = useMemo(() => {
+    if (!records) return []
+    return groupByCourse(records, courses, planTopicsByCourse).map(course => ({
+      ...course,
+      topics: course.topics.map(t => ({
+        ...t,
+        key: `${course.courseId ?? 'unassigned'}::${t.topic.toLowerCase()}`,
+        courseId: course.courseId,
+        courseName: course.courseName,
+        derived: deriveStatus(t.evidence, { now }),
+      })),
+    }))
+  }, [records, courses, planTopicsByCourse, now])
+
+  const visible = useMemo(
+    () => (courseFilter === 'all' ? grouped : grouped.filter(c => String(c.courseId) === courseFilter)),
+    [grouped, courseFilter],
+  )
+
+  const hero = useMemo(
+    () => selectHero(visible.flatMap(c => c.topics), { now }),
+    [visible, now],
+  )
+
+  const startDump = useCallback((entry) => {
+    if (!entry) return
+    const courseIdx = courses.findIndex(c => String(c.id) === String(entry.courseId))
+    track('knowledge_map_brain_dump_started', { topic: entry.topic })
+    onOpenBrainDump?.({
+      topic: entry.topic,
+      courseId: entry.courseId ?? null,
+      courseIdx: courseIdx >= 0 ? courseIdx : 0,
+    })
+  }, [courses, onOpenBrainDump])
+
+  const header = (
+    <>
+      <div style={EYEBROW}>Knowledge Map</div>
+      <h1 style={{
+        fontFamily: KM_SERIF, fontWeight: 500, fontSize: mobile ? 32 : 44,
+        lineHeight: 1.1, margin: '10px 0 0', color: C.ink,
+      }}>
+        What you know<span style={{ color: C.blue }}>.</span>
+      </h1>
+      <p style={{ margin: '12px 0 0', fontSize: 15, lineHeight: 1.5, color: C.secondary, maxWidth: 620 }}>
+        Evidence from your Brain Dumps, quizzes, and Teach It Back sessions. Nothing here is guessed.
+      </p>
+    </>
+  )
+
+  const hasAnything = grouped.some(c => c.topics.length > 0)
+
+  return (
+    <div style={{
+      minHeight: '100vh', background: C.pageBg,
+      padding: mobile ? '28px 18px 80px' : '56px 100px 96px',
+      overflowX: 'hidden',
+    }}>
+      {header}
+
+      {records === null ? (
+        <p style={{ margin: '32px 0 0', fontSize: 14, color: C.secondary }}>Reading your evidence.</p>
+      ) : loadError ? (
+        <div style={{
+          margin: '32px 0 0', maxWidth: 620,
+          background: C.card, border: `1px solid ${C.cardBorder}`,
+          borderRadius: 16, boxShadow: C.cardShadow, padding: '24px 26px',
+        }}>
+          <div style={{ fontSize: 15, fontWeight: 500, color: C.ink }}>Could not read your evidence just now</div>
+          <p style={{ margin: '6px 0 0', fontSize: 14, lineHeight: 1.6, color: C.secondary }}>
+            Nothing is lost. Reload the page and the map will rebuild from what is recorded.
+          </p>
+        </div>
+      ) : !hasAnything ? (
+        <EmptyState
+          courses={courses}
+          mobile={mobile}
+          onStart={({ topic, courseId, courseIdx }) => {
+            track('knowledge_map_brain_dump_started', { topic, source: 'empty_state' })
+            onOpenBrainDump?.({ topic, courseId, courseIdx })
+          }}
+        />
+      ) : (
+        <>
+          {grouped.length > 1 && (
+            <div style={{ display: 'flex', gap: 8, margin: '28px 0 0', flexWrap: 'wrap' }}>
+              <CourseChip label="All courses" active={courseFilter === 'all'} onClick={() => setCourseFilter('all')} />
+              {grouped.map((c, i) => (
+                <CourseChip
+                  key={c.courseId ?? i}
+                  label={c.courseName}
+                  dot={courseColor(i).dot}
+                  active={courseFilter === String(c.courseId)}
+                  onClick={() => setCourseFilter(String(c.courseId))}
+                />
+              ))}
+            </div>
+          )}
+
+          {hero && <HeroCard hero={hero} mobile={mobile} onStart={startDump} />}
+
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 20, margin: '32px 0 0' }}>
+            {visible.map((course, i) => (
+              <CourseCard
+                key={course.courseId ?? i}
+                course={course}
+                idx={i}
+                mobile={mobile}
+                selectedKey={openTopic?.key ?? null}
+                onOpenTopic={(entry) => { track('knowledge_map_topic_opened', { topic: entry.topic }); setOpenTopic(entry) }}
               />
             ))}
           </div>
-        )}
-      </div>
+        </>
+      )}
+
+      {openTopic && (
+        <TopicDetailPanel
+          entry={openTopic}
+          now={now}
+          mobile={mobile}
+          onClose={() => setOpenTopic(null)}
+          onStartDump={() => { const e = openTopic; setOpenTopic(null); startDump(e) }}
+          onUploadNotes={onUploadNotes}
+        />
+      )}
     </div>
   )
 }
