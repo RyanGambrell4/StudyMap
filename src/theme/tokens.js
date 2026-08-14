@@ -151,6 +151,11 @@ export const PRACTICE_EXAMS = {
   green: GRADE_HUB.green,  // #1a9e5c, 85 and up
   amber: GRADE_HUB.amber,  // #D97706, below 70, and the no-material line
 
+  // The only value the result state (E) adds: the unfilled part of a topic
+  // bar. It is a track, not data, so it is deliberately outside the bands
+  // above and never carries meaning on its own.
+  barTrack: '#eef0f6',
+
   // Action
   blue:      GRADE_HUB.blue,
   blueHover: GRADE_HUB.blueHover,

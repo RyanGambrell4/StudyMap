@@ -170,7 +170,7 @@ function HistoryRow({ row, mobile, onReview }) {
   )
 }
 
-export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTeachItBack, onOpenQuizBurst }) {
+export default function PracticeExamView({ courses = [], onShowPaywall, onOpenBrainDump }) {
   const mobile = useIsMobile()
 
   const [subview, setSubview] = useState('landing') // 'landing' | 'setup' | 'taking' | 'results'
@@ -179,7 +179,13 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
   const [examAnswers, setExamAnswers] = useState([])
   const [examTimeMs, setExamTimeMs] = useState(0)
   const [examTimerMinutes, setExamTimerMinutes] = useState(null)
-  const [questionTimings, setQuestionTimings] = useState([])
+  // When this exam was sat. The results screen compares against everything
+  // older than this, so it needs a timestamp rather than an assumption that
+  // the newest stored record is some other exam.
+  const [examTakenAt, setExamTakenAt] = useState(null)
+  // Whether this exam reached the server. The results screen only claims it
+  // was added to history once the write actually came back.
+  const [examSaved, setExamSaved] = useState(false)
   const [replay, setReplay] = useState(null)
   const [refreshKey, setRefreshKey] = useState(0)
   // A saved, unfinished exam. Read once on mount and refreshed whenever we
@@ -254,14 +260,16 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
     setSubview('taking')
   }
 
-  const handleSubmit = ({ answers, timeMs, questionTimings: timings }) => {
+  const handleSubmit = ({ answers, timeMs }) => {
     setExamAnswers(answers)
     setExamTimeMs(timeMs)
-    setQuestionTimings(timings ?? [])
     setReplay(null)
+    setExamSaved(false)
     setSubview('results')
     try {
       const courseId = examCourse?.id ?? null
+      const takenAt = Date.now()
+      setExamTakenAt(takenAt)
       if (courseId !== null) {
         const correct = examQuestions.reduce((n, q, i) => {
           if (q.type !== 'multiple_choice') return n
@@ -270,15 +278,15 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
         const mcCount = examQuestions.filter(q => q.type === 'multiple_choice').length
         const score = mcCount > 0 ? Math.round((correct / mcCount) * 100) : null
         savePracticeExam(courseId, {
-          id: `exam_${Date.now()}`,
-          takenAt: Date.now(),
+          id: `exam_${takenAt}`,
+          takenAt,
           courseName: examCourse?.name ?? null,
           questions: examQuestions,
           answers,
           score,
           timeMs,
         })
-          .then(() => setRefreshKey(k => k + 1))
+          .then(() => { setExamSaved(true); setRefreshKey(k => k + 1) })
           .catch(e => console.error('savePracticeExam failed', e))
       }
     } catch (e) { console.error('savePracticeExam failed', e) }
@@ -288,8 +296,9 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
     track('practice_exam_retake', { questionCount: examQuestions.length, courseName: examCourse?.name ?? null })
     setExamAnswers(examQuestions.map(() => ''))
     setExamTimeMs(0)
-    setQuestionTimings([])
     setReplay(null)
+    setExamTakenAt(null)
+    setExamSaved(false)
     setSubview('taking')
   }
 
@@ -300,8 +309,9 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
     setExamAnswers([])
     setExamTimeMs(0)
     setExamTimerMinutes(null)
-    setQuestionTimings([])
     setReplay(null)
+    setExamTakenAt(null)
+    setExamSaved(false)
     setResumeInitial(null)
     // The exam screen may have just saved or discarded a draft.
     setDraft(loadExamDraft())
@@ -346,7 +356,9 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
     setExamQuestions(row.exam.questions ?? [])
     setExamAnswers(row.exam.answers ?? [])
     setExamTimeMs(Number.isFinite(row.exam.timeMs) ? row.exam.timeMs : 0)
-    setQuestionTimings([])
+    setExamTimerMinutes(null) // stored records do not carry the timer setting
+    setExamTakenAt(Number.isFinite(row.takenAt) ? row.takenAt : null)
+    setExamSaved(false)
     setReplay(row.id)
     setSubview('results')
   }
@@ -372,20 +384,17 @@ export default function PracticeExamView({ courses = [], onShowPaywall, onOpenTe
         questions={examQuestions}
         answers={examAnswers}
         timeMs={examTimeMs}
-        questionTimings={questionTimings}
         courseId={examCourse?.id ?? null}
         courseName={examCourse?.name ?? null}
-        course={examCourse}
+        timerMinutes={examTimerMinutes}
+        takenAt={examTakenAt}
+        savedToHistory={examSaved}
         readOnly={replay !== null}
         onRetake={handleRetake}
         onClose={closeToLanding}
-        onOpenTeachItBack={onOpenTeachItBack ? (topic) => {
+        onDrillTopic={onOpenBrainDump ? (topic) => {
           const courseIdx = Math.max(0, courses.findIndex(c => String(c.id) === String(examCourse?.id)))
-          onOpenTeachItBack({ courseIdx, topic })
-        } : null}
-        onOpenQuizBurst={onOpenQuizBurst ? (topic) => {
-          const courseIdx = Math.max(0, courses.findIndex(c => String(c.id) === String(examCourse?.id)))
-          onOpenQuizBurst({ courseIdx, topic })
+          onOpenBrainDump({ courseIdx, topic })
         } : null}
       />
     )
