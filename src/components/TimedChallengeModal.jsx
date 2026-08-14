@@ -4,18 +4,21 @@ import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, getActivePlan } from '../lib/subscription'
 import { addStudySession } from '../lib/studyHistory'
 import { track } from '../lib/analytics'
+import { T } from '../theme/tokens'
 
+// V2 design tokens (see CLAUDE.md "Design System"). `orange` was a local
+// accent that matched nothing else in the product; it now resolves to brand
+// blue so this modal reads as the same app. Urgency stays on `red`.
 const D = {
-  bg: '#F7F8FA',
-  card: '#FFFFFF',
-  border: 'rgba(0,0,0,0.07)',
-  accent: '#3B61C4',
-  text: '#111111',
-  muted: '#6B6B6B',
-  red: '#DC2626',
-  green: '#16A34A',
-  amber: '#D97706',
-  orange: '#EA580C',
+  bg: T.bg,
+  card: T.card,
+  border: T.border,
+  accent: T.blue,
+  text: T.text,
+  muted: T.muted,
+  red: T.red,
+  green: T.green,
+  amber: T.amber,
 }
 
 const PB_KEY = 'studyedge_time_attack_pb'
@@ -176,8 +179,8 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px 20px 14px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 9 }}>
-            <div style={{ width: 34, height: 34, borderRadius: 9, background: `${D.orange}14`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={D.orange} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <div style={{ width: 34, height: 34, borderRadius: 9, background: `${D.accent}14`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke={D.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 15 15"/>
               </svg>
             </div>
@@ -218,15 +221,15 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
                   onKeyDown={e => e.key === 'Enter' && handleStart()}
                   placeholder="e.g. Cardiac output, Organic reactions..."
                   style={{ width: '100%', padding: '10px 12px', borderRadius: 10, border: `1px solid rgba(0,0,0,0.1)`, fontSize: 13, color: D.text, background: D.card, outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }}
-                  onFocus={e => e.target.style.borderColor = D.orange}
+                  onFocus={e => e.target.style.borderColor = D.accent}
                   onBlur={e => e.target.style.borderColor = 'rgba(0,0,0,0.1)'}
                 />
               </div>
 
               {pb && (
-                <div style={{ padding: '10px 14px', borderRadius: 10, background: `${D.orange}0D`, border: `1px solid ${D.orange}30`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ padding: '10px 14px', borderRadius: 10, background: `${D.accent}0D`, border: `1px solid ${D.accent}30`, display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                   <span style={{ fontSize: 12, color: D.muted }}>Personal best</span>
-                  <span style={{ fontSize: 14, fontWeight: 800, color: D.orange }}>{pb.score}%</span>
+                  <span style={{ fontSize: 14, fontWeight: 800, color: D.accent }}>{pb.score}%</span>
                 </div>
               )}
 
@@ -237,7 +240,7 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
               <button
                 onClick={handleStart}
                 disabled={courses.length === 0 && selectedCourse < 0}
-                style={{ width: '100%', padding: '13px', borderRadius: 11, background: D.orange, border: 'none', color: '#FFFFFF', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em' }}
+                style={{ width: '100%', padding: '13px', borderRadius: 11, background: D.accent, border: 'none', color: '#FFFFFF', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit', letterSpacing: '-0.01em' }}
               >
                 Start Challenge
               </button>
@@ -269,7 +272,7 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
 
               {/* Timer bar */}
               <div style={{ height: 4, borderRadius: 999, background: 'rgba(0,0,0,0.08)', overflow: 'hidden', marginBottom: 4 }}>
-                <div style={{ height: '100%', borderRadius: 999, background: timerCritical ? D.red : D.orange, width: `${pctTime}%`, transition: 'width 1s linear, background 0.3s' }} />
+                <div style={{ height: '100%', borderRadius: 999, background: timerCritical ? D.red : D.accent, width: `${pctTime}%`, transition: 'width 1s linear, background 0.3s' }} />
               </div>
 
               {/* Question */}
@@ -313,8 +316,8 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
               {/* Score */}
               <div style={{ background: D.card, border: `1px solid ${D.border}`, borderRadius: 14, padding: '28px 20px', textAlign: 'center' }}>
                 {doneStats.isNewPB && (
-                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 999, background: `${D.orange}14`, border: `1px solid ${D.orange}30`, marginBottom: 14 }}>
-                    <span style={{ fontSize: 11, fontWeight: 700, color: D.orange, letterSpacing: '0.04em' }}>NEW PERSONAL BEST</span>
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '3px 10px', borderRadius: 999, background: `${D.accent}14`, border: `1px solid ${D.accent}30`, marginBottom: 14 }}>
+                    <span style={{ fontSize: 11, fontWeight: 700, color: D.accent, letterSpacing: '0.04em' }}>NEW PERSONAL BEST</span>
                   </div>
                 )}
                 <div style={{ fontSize: 62, fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1, color: doneStats.score >= 80 ? D.green : doneStats.score >= 60 ? D.amber : D.red }}>
@@ -326,7 +329,7 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
                 </p>
                 {pb && !doneStats.isNewPB && (
                   <p style={{ margin: '8px 0 0', fontSize: 12, color: D.muted }}>
-                    Personal best: <strong style={{ color: D.orange }}>{pb.score}%</strong>
+                    Personal best: <strong style={{ color: D.accent }}>{pb.score}%</strong>
                   </p>
                 )}
               </div>
@@ -339,7 +342,7 @@ export default function TimedChallengeModal({ courses, userId, onClose, onShowPa
               {/* Buttons */}
               <button
                 onClick={handlePlayAgain}
-                style={{ width: '100%', padding: '13px', borderRadius: 11, background: D.orange, border: 'none', color: '#FFFFFF', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}
+                style={{ width: '100%', padding: '13px', borderRadius: 11, background: D.accent, border: 'none', color: '#FFFFFF', fontSize: 14, fontWeight: 800, cursor: 'pointer', fontFamily: 'inherit' }}
               >
                 Go Again
               </button>
