@@ -26,6 +26,7 @@ import FocusMode from './FocusMode'
 import BlueprintScreen from './BlueprintScreen'
 import SyllabusUploadModal from './SyllabusUploadModal'
 import SyllabusOnboardingModal from './SyllabusOnboardingModal'
+import { T, RADIUS } from '../theme/tokens'
 import { addUpload } from '../lib/uploadRegistry'
 import { courseIdentityPatch } from '../lib/courseIdentity'
 import CalendarMonthView from './CalendarMonthView'
@@ -569,6 +570,11 @@ export default function OutputView({
   const [syllabusOnboardingFile, setSyllabusOnboardingFile] = useState(null)
   const [syllabusOnboardingLoading, setSyllabusOnboardingLoading] = useState(false)
   const [syllabusOnboardingError, setSyllabusOnboardingError] = useState('')
+  // Which entry point started the parse. The new-user dashboard hero renders its
+  // own inline progress and error, so it opts out of the global overlay below.
+  // Every other caller ('global') gets the overlay, because without it a failed
+  // parse produced no UI at all and looked like the app had silently dropped it.
+  const [syllabusOnboardingOrigin, setSyllabusOnboardingOrigin] = useState('global')
   const [syllabusRegistryWarning, setSyllabusRegistryWarning] = useState(false)
 
   const [viewMode, setViewMode] = useState(() => localStorage.getItem('studyedge_view_mode') ?? 'week')
@@ -1231,11 +1237,12 @@ export default function OutputView({
 
   // ── Syllabus onboarding (parse-syllabus flow) ─────────────────────────────
 
-  const handleStartSyllabusOnboarding = async (file, courseIdx = null) => {
+  const handleStartSyllabusOnboarding = async (file, courseIdx = null, origin = 'global') => {
     setSyllabusOnboardingError('')
     setSyllabusOnboardingLoading(true)
     setSyllabusOnboardingScopeIdx(courseIdx)
     setSyllabusOnboardingFile(file)
+    setSyllabusOnboardingOrigin(origin)
     try {
       const { extractText } = await import('../utils/extractText')
       const text = await extractText(file)
@@ -1662,6 +1669,48 @@ export default function OutputView({
         />
       )}
 
+      {/* Syllabus parse progress + failure. The new-user dashboard hero renders
+          its own inline version, so it is excluded here to avoid duplicate UI. */}
+      {syllabusOnboardingOrigin !== 'dashboard' && (syllabusOnboardingLoading || syllabusOnboardingError) && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-live="polite"
+          style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'grid', placeItems: 'center', padding: 20 }}
+        >
+          <div style={{ width: '100%', maxWidth: 400, background: T.card, border: `1px solid ${T.border}`, borderRadius: RADIUS.lg, boxShadow: '0 30px 80px rgba(0,0,0,0.25)', padding: 24, textAlign: 'center' }}>
+            {syllabusOnboardingLoading ? (
+              <>
+                <Spinner size="lg" color={T.blue} style={{ margin: '0 auto 16px' }} />
+                <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>Reading your syllabus</div>
+                <div style={{ fontSize: 13, color: T.muted, marginTop: 6, lineHeight: 1.5 }}>
+                  Pulling out your dates, topics, and grade weights. This takes a few seconds.
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: T.redBg, display: 'grid', placeItems: 'center', margin: '0 auto 14px', color: T.red }}>
+                  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>Could not read that syllabus</div>
+                <div style={{ fontSize: 13, color: T.muted, marginTop: 6, lineHeight: 1.5 }}>{syllabusOnboardingError}</div>
+                <div style={{ fontSize: 12.5, color: T.dim, marginTop: 10, lineHeight: 1.5 }}>
+                  Your course was saved. You can add the syllabus again any time from the Courses tab.
+                </div>
+                <button
+                  onClick={() => setSyllabusOnboardingError('')}
+                  style={{ marginTop: 18, width: '100%', padding: '11px 20px', borderRadius: RADIUS.sm, background: T.blue, color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = T.blueHov }}
+                  onMouseLeave={e => { e.currentTarget.style.background = T.blue }}
+                >
+                  Got it
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+
       {addSessionDayStr && (
         <AddSessionModal
           dateStr={addSessionDayStr}
@@ -1903,7 +1952,7 @@ export default function OutputView({
             onOpenBrainDump={() => { track('feature_opened', { feature: 'brain_dump' }); setShowBrainDump(true) }}
             onOpenPodcast={() => { track('feature_opened', { feature: 'podcast' }); setShowPodcast(true) }}
             onShowPaywall={onShowPaywall}
-            onDropSyllabus={(file) => handleStartSyllabusOnboarding(file, null)}
+            onDropSyllabus={(file) => handleStartSyllabusOnboarding(file, null, 'dashboard')}
             syllabusOnboardingLoading={syllabusOnboardingLoading}
             syllabusOnboardingError={syllabusOnboardingError}
             onClearSyllabusError={() => setSyllabusOnboardingError('')}

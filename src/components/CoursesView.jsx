@@ -372,6 +372,12 @@ function AddCoursePanel({ courseCount, onClose, onAdd, onStartSyllabusOnboarding
     const colorObj = { name: 'custom', dot: color }
     const courseId = Date.now().toString(36) + Math.random().toString(36).slice(2, 5)
     onAdd({ id: courseId, name: name.trim(), code: code.trim(), examDate, difficulty, targetGrade, color: colorObj, classSchedule: classSchedule || undefined })
+    // Create the course first, then merge the syllabus into it. `courseCount` is
+    // the pre-add length, so it is the index the new course lands on. Scoping the
+    // import to that index means a failed parse leaves the course intact rather
+    // than losing it, and a successful parse updates that course instead of
+    // creating a second one.
+    if (syllabusFile && onStartSyllabusOnboarding) onStartSyllabusOnboarding(syllabusFile, courseCount)
     onClose()
   }
 
@@ -441,10 +447,14 @@ function AddCoursePanel({ courseCount, onClose, onAdd, onStartSyllabusOnboarding
                 accept=".pdf,.docx,.pptx"
                 style={{ display: 'none' }}
                 onChange={e => {
-                  const file = e.target.files[0]
-                  if (!file) return
-                  onClose()
-                  onStartSyllabusOnboarding(file, null)
+                  // Stage the file only. This used to close the modal and start
+                  // parsing immediately, which discarded every field already
+                  // filled in and left no course behind when the parse failed.
+                  // The import now runs from handleAdd, after the course exists.
+                  const file = e.target.files?.[0]
+                  if (file) { setSyllabusFile(file); setError('') }
+                  // Reset so picking the same file again still fires onChange.
+                  e.target.value = ''
                 }}
               />
               <AddonToggle
@@ -460,7 +470,7 @@ function AddCoursePanel({ courseCount, onClose, onAdd, onStartSyllabusOnboarding
                       <Icon name="upload" size={14} color={D.indigo} />
                       {syllabusFile ? syllabusFile.name : 'Choose file (PDF, DOCX, or PPTX)'}
                     </button>
-                    <div style={{ fontSize: 11.5, color: D.dim }}>Uploading a syllabus skips manual setup and fills in your course automatically.</div>
+                    <div style={{ fontSize: 11.5, color: D.dim }}>{syllabusFile ? "Ready. We'll pull out your dates, topics, and weights right after you add the course." : "We'll read it and fill in your dates, topics, and weights right after you add the course."}</div>
                   </div>
                 )}
               </AddonToggle>
