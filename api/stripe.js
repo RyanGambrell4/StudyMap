@@ -20,6 +20,7 @@ import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js
 import { sendFounderCancellationEmail } from '../lib/server/founderOutreach.js'
 import { createTrialCancelOffer, userHasExistingOffer } from '../lib/server/oneTimeOffer.js'
 import { sendProWelcomeEmail } from '../lib/server/proWelcomeEmail.js'
+import { resolveCheckoutPlan, TRIAL_PLAN, TRIAL_BILLING_PERIOD, TRIAL_PERIOD_DAYS } from '../lib/server/trialPlan.js'
 
 // Disable Vercel's default body parsing - required for Stripe signature verification
 export const config = {
@@ -1126,10 +1127,24 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
     }
   }
 
-  const { plan, billingPeriod: rawBillingPeriod, userEmail, userId, trial, promo } = body
+  const { plan: rawPlan, billingPeriod: rawBillingPeriod, userEmail, userId, trial, promo } = body
 
-  // Normalize billing period aliases: 'annual' → 'yearly'.
-  const billingPeriod = rawBillingPeriod === 'annual' ? 'yearly' : rawBillingPeriod
+  // REVENUE-CRITICAL. Any trial request is forced to Pro/weekly here, at the only
+  // chokepoint that can create a Stripe session — the client is never trusted,
+  // because cached PWA bundles and old email links outlive a frontend deploy.
+  // See lib/server/trialPlan.js for the full rationale.
+  const { plan, billingPeriod, wantsTrial, coerced } = resolveCheckoutPlan({
+    plan: rawPlan,
+    billingPeriod: rawBillingPeriod,
+    trial,
+  })
+
+  if (coerced) {
+    console.warn(
+      `[stripe checkout] Trial requested for ${rawPlan}/${rawBillingPeriod} — forced to ` +
+      `${TRIAL_PLAN}/${TRIAL_BILLING_PERIOD}. Source is a stale client or a legacy link.`
+    )
+  }
 
   const priceId = PRICE_IDS[plan]?.[billingPeriod]
 
@@ -1145,25 +1160,17 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
   }
 
   // REVENUE-CRITICAL.
-  // Trial is available on Pro or Unlimited (all three billing periods). It is a
-  // CARD-REQUIRED 7-day trial: `payment_method_collection: 'always'` below
-  // forces Stripe Checkout to collect a card before the trial starts, and
-  // Stripe auto-bills after 7 days unless the user cancels. There is no
-  // "no-card trial" path anywhere in this product anymore - earlier copy
-  // and an old commit (2af08aa, 2026-05-25) assumed otherwise and silently
-  // produced 0 new customers for 9 days. Verify with
+  // The trial (always Pro/weekly, forced above) is CARD-REQUIRED:
+  // `payment_method_collection: 'always'` below forces Stripe Checkout to collect a
+  // card before the trial starts, and Stripe auto-bills after 7 days unless the user
+  // cancels. There is no "no-card trial" path anywhere in this product anymore -
+  // earlier copy and an old commit (2af08aa, 2026-05-25) assumed otherwise and
+  // silently produced 0 new customers for 9 days. Verify with
   // `node scripts/verify-trial-flow.mjs` after any change to this block.
-  // The trial is Pro/weekly ($2.99/wk after) — see TRIAL_PLAN in
-  // src/lib/subscription.js, which is what every trial CTA in the app sends.
-  // Trial entitlements are PRO_LIMITS and getActivePlan() reports 'pro' while
-  // trialing, so trialling on Unlimited billed users for a tier they never had.
-  // Unlimited is still accepted here for legacy links, but nothing sends it.
-  const wantsTrial = !!trial && (plan === 'pro' || plan === 'unlimited')
-
   const subscriptionData = {
     metadata: { user_id: userId },
     ...(wantsTrial && {
-      trial_period_days: 7,
+      trial_period_days: TRIAL_PERIOD_DAYS,
       trial_settings: { end_behavior: { missing_payment_method: 'cancel' } },
     }),
   }
@@ -1241,11 +1248,10 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
         : { allow_promotion_codes: true }
       ),
       // Reassurance copy directly under the Start trial button - the moment of
-      // highest abandonment anxiety on the trial path. Price varies by plan.
+      // highest abandonment anxiety on the trial path. The trial is always Pro
+      // weekly, so the price here is fixed at $2.99.
       custom_text: wantsTrial
-        ? { submit: { message: plan === 'unlimited'
-            ? "Free for 7 days, then $4.99/week. Cancel anytime in your account before day 8 and you won't be charged."
-            : "Free for 7 days, then $2.99/week. Cancel anytime in your account before day 8 and you won't be charged." } }
+        ? { submit: { message: "Free for 7 days, then $2.99/week. Cancel anytime in your account before day 8 and you won't be charged." } }
         : undefined,
       success_url: 'https://getstudyedge.com/app?checkout=success',
       cancel_url: 'https://getstudyedge.com/app?checkout=cancelled',
