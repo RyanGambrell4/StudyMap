@@ -1349,13 +1349,18 @@ export default function OutputView({
     const courseColor = courseObj.color ?? NEUTRAL_COLOR
     const newEvents = []
 
+    // `e.name` is model output, so it can be missing. Reading `.toLowerCase()`
+    // off undefined here used to throw, and since this whole function is async
+    // and its caller did not await it, that surfaced as the confirm button
+    // doing nothing at all. Defaulted the same way the dueDates loop below does.
     ;(result.exams ?? []).forEach(e => {
-      const key = `${e.date}|${e.name.toLowerCase()}`
+      const examName = e.name ?? ''
+      const key = `${e.date}|${examName.toLowerCase()}`
       if (existingKeys.has(key)) return
       existingKeys.add(key)
       newEvents.push({
         id: `syl-onboard-exam-${Date.now()}-${Math.random().toString(36).slice(2, 5)}`,
-        name: e.name,
+        name: examName,
         date: e.date,
         type: 'Exam',
         weight: e.weight ?? null,

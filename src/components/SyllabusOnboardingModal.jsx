@@ -1,5 +1,6 @@
 import { useState, useRef } from 'react'
 import { T } from '../tokens'
+import Spinner from './ui/spinner'
 
 const SANS = "'Inter', 'system-ui', sans-serif"
 
@@ -163,6 +164,33 @@ export default function SyllabusOnboardingModal({ parsedData, existingCourse, on
     classMeetings: meetings.filter(m => m.checked).map(({ _id, checked, ...rest }) => rest),
     isPastTerm: p.isPastTerm ?? false,
   })
+
+  // ── Submit ────────────────────────────────────────────────────────────────
+  // Committing is slow: it saves the course, uploads the syllabus, and then asks
+  // the model for a full study plan, which can take the better part of a minute.
+  // Without a pending state the button looked completely dead for that whole
+  // window, and because the caller is an async function any throw inside it
+  // became an unhandled rejection that left this modal open with no explanation.
+  // Awaiting the caller here gives us both the spinner and a place to catch.
+  const [submitting, setSubmitting] = useState('')
+  const [submitError, setSubmitError] = useState('')
+
+  const submit = async (kind) => {
+    if (submitting) return
+    setSubmitting(kind)
+    setSubmitError('')
+    try {
+      const handler = kind === 'confirm' ? onConfirm : onSkipPlan
+      await handler?.(buildResult())
+    } catch (err) {
+      setSubmitError(err?.message || 'Could not finish setting up your course. Try again.')
+    } finally {
+      // On success the caller unmounts this modal, so this is a no-op. It matters
+      // when the caller returns without unmounting (a paywall, for example),
+      // which would otherwise leave the button stuck spinning forever.
+      setSubmitting('')
+    }
+  }
 
   const inputStyle = {
     background: T.bgEl, border: `1px solid ${T.border}`, borderRadius: 8,
@@ -371,26 +399,49 @@ export default function SyllabusOnboardingModal({ parsedData, existingCourse, on
 
         {/* Footer */}
         <div style={{ padding: '16px 24px', borderTop: `1px solid ${T.border}`, display: 'flex', flexDirection: 'column', gap: 10 }}>
-          <button
-            onClick={() => onConfirm(buildResult())}
-            disabled={!courseName.trim() && !existingCourse}
-            style={{
-              width: '100%', padding: '13px 20px', borderRadius: 12, border: 'none',
-              background: (courseName.trim() || existingCourse) ? T.accent : T.bgEl,
-              color: (courseName.trim() || existingCourse) ? '#fff' : T.dim,
-              fontSize: 14.5, fontWeight: 700, cursor: (courseName.trim() || existingCourse) ? 'pointer' : 'not-allowed',
-              boxShadow: (courseName.trim() || existingCourse) ? '0 4px 14px rgba(59,97,196,0.22)' : 'none',
-              transition: 'all 0.15s',
-            }}
-          >
-            Set up my course
-          </button>
-          <button
-            onClick={() => onSkipPlan(buildResult())}
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: T.muted, fontSize: 13, textDecoration: 'underline', textUnderlineOffset: 2, padding: '4px 0' }}
-          >
-            Skip the plan for now
-          </button>
+          {submitError && (
+            <div role="alert" style={{ fontSize: 12.5, color: T.pink, lineHeight: 1.5, textAlign: 'center' }}>
+              {submitError}
+            </div>
+          )}
+          {(() => {
+            const canSubmit = !!(courseName.trim() || existingCourse)
+            const busy = !!submitting
+            const live = canSubmit && !busy
+            return (
+              <>
+                <button
+                  onClick={() => submit('confirm')}
+                  disabled={!canSubmit || busy}
+                  style={{
+                    width: '100%', padding: '13px 20px', borderRadius: 12, border: 'none',
+                    background: canSubmit ? T.accent : T.bgEl,
+                    color: canSubmit ? '#fff' : T.dim,
+                    fontSize: 14.5, fontWeight: 700, cursor: live ? 'pointer' : 'not-allowed',
+                    boxShadow: live ? '0 4px 14px rgba(59,97,196,0.22)' : 'none',
+                    opacity: busy ? 0.75 : 1,
+                    transition: 'all 0.15s',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+                  }}
+                >
+                  {submitting === 'confirm' && <Spinner size="xs" color="#fff" track="rgba(255,255,255,0.35)" />}
+                  {submitting === 'confirm' ? 'Building your study plan' : 'Set up my course'}
+                </button>
+                <button
+                  onClick={() => submit('skip')}
+                  disabled={busy}
+                  style={{ background: 'none', border: 'none', cursor: busy ? 'not-allowed' : 'pointer', color: T.muted, fontSize: 13, textDecoration: 'underline', textUnderlineOffset: 2, padding: '4px 0', opacity: busy ? 0.6 : 1 }}
+                >
+                  {submitting === 'skip' ? 'Saving your course' : 'Skip the plan for now'}
+                </button>
+                {submitting === 'confirm' && (
+                  <div aria-live="polite" style={{ fontSize: 12, color: T.dim, textAlign: 'center', lineHeight: 1.5 }}>
+                    This takes up to a minute. Your course is already saved.
+                  </div>
+                )}
+              </>
+            )
+          })()}
         </div>
 
       </div>
