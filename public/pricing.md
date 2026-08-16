@@ -7,7 +7,7 @@ AI study planner for college students. Free to start, no credit card required.
 - Courses: 1 course
 - AI actions: 10 AI actions/month
 - Included features: 1 free use of Session Blueprints, Focus Mode, and AI Coach; flashcards, quizzes, active recall
-- Trial: No credit card required
+- Credit card: Not required
 
 ## Pro
 - Weekly price: $2.99/week
@@ -16,7 +16,7 @@ AI study planner for college students. Free to start, no credit card required.
 - Courses: 5 courses
 - AI actions: 100 AI study boosts/month
 - Included features: AI Study Coach, Session Blueprints, Focus Mode, AI Flashcard Maker, Google Calendar sync, smart scheduler, Grade Hub, Syllabus import, streak tracking
-- Trial: 3-day free trial, cancel anytime
+- Trial: 7-day free trial. Credit card required; auto-renews at $2.99/week unless cancelled. Cancel anytime.
 
 ## Unlimited
 - Weekly price: $4.99/week
