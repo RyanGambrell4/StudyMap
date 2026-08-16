@@ -1,0 +1,55 @@
+{
+  "$comment": [
+    "Single source of truth for every marketing fact that appears on more than one page.",
+    "",
+    "Why this exists: the static pages in public/ are hand-authored HTML with no template",
+    "layer, so a price or trial length changes in one place and silently rots in 130 others.",
+    "That happened three times (llms.txt pricing URL, an admit-rate placeholder, and the trial",
+    "length, which was wrong on every single static page while the app itself was correct).",
+    "",
+    "The values here are NOT the runtime source of truth for billing. lib/server/trialPlan.js",
+    "is, and it stays that way because it is revenue-critical and independently tested.",
+    "scripts/check-facts.mjs asserts this file agrees with it, so marketing copy cannot drift",
+    "away from what Stripe actually charges without failing the build.",
+    "",
+    "To change a fact: edit it here, run `npm run facts:sync`, commit the result.",
+    "To verify nothing has drifted: `npm run facts:check` (also runs as part of `npm test`)."
+  ],
+
+  "trial": {
+    "days": 7,
+    "plan": "pro",
+    "billingPeriod": "weekly",
+    "cardRequired": true
+  },
+
+  "plans": {
+    "free": {
+      "name": "Free",
+      "week": null,
+      "month": 0,
+      "year": null
+    },
+    "pro": {
+      "name": "Pro",
+      "week": 2.99,
+      "month": 9.99,
+      "year": 69.99
+    },
+    "unlimited": {
+      "name": "Unlimited",
+      "week": 4.99,
+      "month": 14.99,
+      "year": 119.99
+    }
+  },
+
+  "support": {
+    "email": "support@getstudyedge.com"
+  },
+
+  "site": {
+    "domain": "getstudyedge.com",
+    "origin": "https://getstudyedge.com"
+  }
+}
