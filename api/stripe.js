@@ -21,6 +21,7 @@ import { sendFounderCancellationEmail } from '../lib/server/founderOutreach.js'
 import { createTrialCancelOffer, userHasExistingOffer } from '../lib/server/oneTimeOffer.js'
 import { sendProWelcomeEmail } from '../lib/server/proWelcomeEmail.js'
 import { resolveCheckoutPlan, TRIAL_PLAN, TRIAL_BILLING_PERIOD, TRIAL_PERIOD_DAYS } from '../lib/server/trialPlan.js'
+import { normalizeCustomerId, resolveCheckoutCustomer, customerSessionArgs } from '../lib/server/checkoutCustomer.js'
 
 // Disable Vercel's default body parsing - required for Stripe signature verification
 export const config = {
@@ -1176,6 +1177,7 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
   }
 
   // Guard: if this user already has an active or trialing subscription, block the duplicate
+  let existingCustomerId = null
   if (userId) {
     try {
       const { data: existingUser } = await supabaseAdmin
@@ -1185,6 +1187,9 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
         .maybeSingle()
 
       const existingSub = existingUser?.subscription
+      // Reused below so checkout attaches to the customer we already have rather
+      // than letting Stripe mint a new one. See the customer-resolution block.
+      existingCustomerId = normalizeCustomerId(existingSub?.stripeCustomerId)
       // Only block if the user already has a real Stripe-backed paid/trialing sub.
       // Free users default to { plan: 'free', status: 'active' } so checking status
       // alone was rejecting every signup; require an actual stripeSubId + paid plan.
@@ -1229,6 +1234,64 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
     }
   }
 
+  // Resolve ONE Stripe customer for this person, rather than letting Stripe mint
+  // a fresh one per checkout.
+  //
+  // Passing `customer_email` to Checkout creates a brand new Customer object on
+  // every session. In production that produced 2 customer records for one user
+  // and 4 for another (same email, same address), and the duplicates billed
+  // independently: one user was charged $12.99 twice on the same day across two
+  // customer IDs, both of which had to be refunded.
+  //
+  // Order of preference:
+  //   1. the customer id we already stored for this user
+  //   2. an existing Stripe customer with the same email
+  //   3. nothing — fall back to customer_email and let Stripe create the first one
+  //
+  // Stripe rejects a session that sets both `customer` and `customer_email`, so
+  // these are mutually exclusive below.
+  let lookupCustomerId = null
+  if (!existingCustomerId && userEmail) {
+    try {
+      const found = await stripe.customers.list({ email: userEmail, limit: 1 })
+      lookupCustomerId = found.data?.[0]?.id ?? null
+    } catch (lookupErr) {
+      // Non-fatal. A failed lookup should never block a paying user, it just
+      // means we fall through to customer_email for this one session.
+      console.error('[stripe checkout] Customer lookup failed, falling back to customer_email:', lookupErr?.message ?? lookupErr)
+    }
+  }
+
+  const { customerId: resolvedCustomerId, source: customerSource } = resolveCheckoutCustomer({
+    storedId: existingCustomerId,
+    lookupId: lookupCustomerId,
+  })
+  if (customerSource === 'lookup') {
+    console.log(`[stripe checkout] Reusing existing customer ${resolvedCustomerId} for ${userEmail}`)
+  }
+
+  // Persist the id so the next checkout skips the lookup entirely and, more
+  // importantly, so a Stripe-side email change cannot fork the account.
+  if (resolvedCustomerId && !existingCustomerId && userId) {
+    try {
+      const { data: row } = await supabaseAdmin
+        .from('user_data')
+        .select('subscription')
+        .eq('user_id', userId)
+        .maybeSingle()
+      await supabaseAdmin.from('user_data').upsert(
+        {
+          user_id: userId,
+          subscription: { ...(row?.subscription ?? {}), stripeCustomerId: resolvedCustomerId },
+          updated_at: new Date().toISOString(),
+        },
+        { onConflict: 'user_id' },
+      )
+    } catch (persistErr) {
+      console.error('[stripe checkout] Could not persist stripeCustomerId:', persistErr?.message ?? persistErr)
+    }
+  }
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
@@ -1237,7 +1300,8 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
       // "mislabeled as Apple Pay" (Guideline 1.1.6).
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
-      customer_email: userEmail || undefined,
+      // Mutually exclusive: Stripe errors if both are set.
+      ...customerSessionArgs({ customerId: resolvedCustomerId, userEmail }),
       // For trials we must collect the card up front so billing starts after the trial ends.
       payment_method_collection: wantsTrial ? 'always' : undefined,
       subscription_data: subscriptionData,
