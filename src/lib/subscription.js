@@ -312,14 +312,45 @@ export async function incrementFeatureUsage(featureName, amount = 1) {
 
   _sub = { ..._sub, feature_usage: updatedUsage }
 
-  if (_uid) {
-    const snapshot = { ..._sub }
-    supabase
+  if (!_uid) return
+
+  // Write ONLY feature_usage, merged onto the freshest row.
+  //
+  // This used to upsert `{ ..._sub }` — the whole subscription object from a
+  // page-load snapshot — which meant it erased anything the server had written
+  // since the page loaded (aiQueriesUsed, Stripe ids, lifecycle email flags).
+  // The server writer had the mirror-image bug, and between them `feature_usage`
+  // did not survive on a single one of 777 rows, so every non-AI free limit was
+  // both unenforced and unmeasured.
+  //
+  // Re-reading immediately before the write keeps this writer to its own key.
+  try {
+    const { data: freshRow } = await supabase
       .from('user_data')
-      .upsert({ user_id: _uid, subscription: snapshot, updated_at: now }, { onConflict: 'user_id' })
-      .then(({ error }) => {
-        if (error) console.error('[subscription] incrementFeatureUsage error:', error)
-      })
+      .select('subscription')
+      .eq('user_id', _uid)
+      .maybeSingle()
+
+    const latest = freshRow?.subscription ?? _sub ?? {}
+    const merged = { ...latest, feature_usage: updatedUsage }
+
+    const { error } = await supabase
+      .from('user_data')
+      .upsert({ user_id: _uid, subscription: merged, updated_at: now }, { onConflict: 'user_id' })
+
+    if (error) {
+      // Previously console-only, which made a failing write invisible in
+      // production. Surface it so a silent regression is detectable.
+      console.error('[subscription] incrementFeatureUsage write failed:', error)
+      track('feature_usage_write_failed', { feature: featureName, message: error.message ?? String(error) })
+      return
+    }
+
+    // Keep the in-memory copy consistent with what actually landed.
+    _sub = merged
+  } catch (err) {
+    console.error('[subscription] incrementFeatureUsage threw:', err)
+    track('feature_usage_write_failed', { feature: featureName, message: err?.message ?? String(err) })
   }
 }
 
