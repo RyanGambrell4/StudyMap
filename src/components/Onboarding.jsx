@@ -243,6 +243,8 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
     onComplete({ ...profile, durationMs: Date.now() - onboardingStart.current, ...extra })
   }
 
+  const profileData = { yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true, courseName: courseName.trim() || null, examDate: examDate || null }
+
   // Auto-advance off the app preview after 10s. This used to open the trial
   // offer; it now completes onboarding and hands the user to the course gate.
   useEffect(() => {
@@ -251,7 +253,6 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
     return () => clearTimeout(timer)
   }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const profileData = { yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true, courseName: courseName.trim() || null, examDate: examDate || null }
 
   // Thin fixed progress bar + step label rendered at the top of each step
   const StepProgress = () => (
