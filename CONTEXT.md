@@ -1475,3 +1475,139 @@ _Continuing from the first background session. Focused on pricing copy accuracy,
 ### Previously fixed (from first session, now resolved)
 - FocusMode keyboard shortcut stale closure (fixed this session)
 - `StudyCoachView.jsx` MyPlansView `useMemo` (fixed in first session)
+
+
+## Funnel repair — 2026-08-20 (branch `worktree-fix-funnel-course-gate`)
+
+### Premises in the brief that were wrong
+
+**"The repo moved from ~/Desktop/StudyEdgeAI to ~/Projects/StudyEdgeAI. Run
+`git worktree repair`, the 13 worktrees under `Web App/.claude/worktrees/` are
+broken."**
+Wrong in every particular, and no repair was needed.
+- The working repo is `~/Projects/StudyMapLocal`. `~/Projects/StudyEdgeAI` is an
+  assets folder containing an empty git repo with no commits and no remote.
+- There is no `Web App/` directory in the working repo. That path exists only
+  in the stale iCloud copy at `~/Desktop/StudyEdgeAI/Web App`, whose git
+  directory is genuinely corrupt (no resolvable HEAD). Do not work there.
+- Worktrees are healthy. `git worktree list` resolves all of them and
+  `git fsck` exits 0 with only dangling objects. There are 43, not 13.
+
+**"`Missing courseId (or unique courseName)` appears verbatim in 10 endpoints."**
+Sixteen, not ten. Two more endpoints (`prep-blast`, `timed-challenge`) returned
+`Missing courseName`, which is the same defect wearing a different string.
+
+**"`aiResetPeriod: 'total'` gives 5 AI actions for life."**
+The identifier named in the brief lives in a block marked
+`// Legacy - kept for backwards compatibility` and is read by one function
+nobody calls for this purpose. The value that actually governed the free
+allowance was `FREE_LIMITS.aiTutor.period`. More importantly there were FOUR
+answers in the tree, not two:
+- `lib/server/usage.js` reset monthly, via `isNewMonth`. This is the only one
+  users ever felt, because the server is the enforcer.
+- `FREE_LIMITS.aiTutor.period` said `'total'`.
+- `getAIQueriesUsed()` read the counter against a DAILY boundary.
+- The copy said "this month".
+
+**"Roughly 400 accounts exist with no course."**
+516 of 809, as of 2026-08-20.
+
+**"Zero em dashes in user facing copy, detector already exists."**
+No repo-wide em dash detector exists. What exists is `clean()` in
+`src/utils/strings.js`, a runtime sanitiser for stored course names, and
+per-file assertions inside two component tests. The branch was checked by
+diffing added lines rather than by running a detector.
+
+**"`course_count: 0` on `trial_offer` reflects real state."**
+It does not, and could not have. `course_count` is a PostHog SUPER PROPERTY
+registered exactly once, in the `useEffect` keyed on `session.user.id` in
+App.jsx, immediately after login. It was never re-registered. So every event
+fired later in a session carried the value captured before the user had done
+anything, and `course_count: 0` on any in-session event was guaranteed
+regardless of what the user did. Any analysis that read it as real state was
+reading a snapshot taken at login.
+
+The underlying claim is nonetheless true, for a stronger reason: onboarding had
+no course-adding step at all. Steps were `personalize`, `app_preview`,
+`trial_offer`. It collected an optional course NAME string and created nothing,
+and `handleOnboardingComplete` hardcoded `n_courses: 0` with the comment
+"0 here by definition". So the card ask genuinely did render against an empty
+account, every time.
+
+The super property is now re-registered whenever the course list changes.
+
+### Which capture bug was live
+
+Both were present in the code. The one that actually killed server-side
+analytics was the swallowed rejection.
+
+Read from a preview runtime log on 2026-08-20 at 22:16:30 UTC, deployment
+`dpl_G46UjffJq4qdV9pNA3kwgPK7yfhc`:
+
+```
+[posthog] MISCONFIGURED (personal): POSTHOG_API_KEY holds a personal API key
+(phx_...). PostHog ingest rejects these with 401 invalid_personal_api_key.
+It needs the project write key (phc_...), the same value as VITE_POSTHOG_KEY.
+```
+
+`POSTHOG_API_KEY` is set to a personal API key. PostHog ingest rejects it with
+401 on every call, and the old implementation awaited `fetch` without reading
+the response, so every rejection was silent. The fire-and-forget at
+`api/stripe.js:1263` was real but secondary: it affected one event, and that
+event would have been rejected anyway.
+
+Two facts about the ingest endpoint, verified live the same day, that make this
+worth writing down:
+- a `phx_` key returns `401 API key is not valid: personal_api_key`
+- ANY `phc_`-shaped key returns 200, valid or not, because ingest validates
+  asynchronously. `res.ok` proves acceptance, NOT delivery. Confirming an event
+  landed requires reading it back through the query API.
+
+### Analytics series break
+
+Server-side events before 2026-08-20 are not trustworthy and were not
+backfilled. Five landed in total between 2026-07-27 and 2026-08-20. Treat
+2026-08-20 as the start of the clean server-side series.
+
+Client-side events are unaffected and continuous, EXCEPT `course_count`, which
+was a stale login-time snapshot on every event until this branch. Do not slice
+any historical funnel by `course_count`.
+
+### Production environment still needs one change
+
+The correct value is the project write key, which is public by design and is
+already visible in the production client bundle:
+
+```
+vercel env rm POSTHOG_API_KEY production
+printf 'phc_vALU9oNcFGu4PNaqjWvVrGgvLn68CyAJaeWbVGiUQSkd' | vercel env add POSTHOG_API_KEY production
+```
+
+This branch set the correct key for PREVIEW ONLY, scoped to
+`worktree-fix-funnel-course-gate`, so the chain could be verified without
+touching production. Production still holds the `phx_` key.
+
+`POSTHOG_PERSONAL_API_KEY` is a separate, correctly-named variable holding a
+`phx_` key for the query API. Leave it alone. It is not the ingest credential.
+
+### Quota model
+
+Unified on MONTHLY. `AI_ACTION_PERIOD` in `src/lib/subscription.js` is the
+single source of truth, and `src/lib/subscription.aiQuota.test.js` fails the
+build if the client period, the copy label, the server boundary, or the plan
+numbers drift apart.
+
+Monthly was chosen because it is what the server already enforced and what the
+copy already promised, so it is the smallest change that makes all four
+statements agree. The one-shot `period: 'total'` previews on other free
+features (blueprint, coachPlan, practiceExam, brainDump, quizBurst, examRescue)
+are deliberate and were NOT changed.
+
+### Known issue not fixed here
+
+`lib/server/subscriptionMerge.js` does not exist on main. The
+`worktree-fix-feature-usage-clobber` branch wrote it but was never merged, so
+the clobber it fixes is still live: `user_data.subscription` has several
+writers that each rewrite the whole JSON column from a snapshot read earlier in
+the request. `commitReservation` in `lib/server/usage.js` inherits that shape.
+This branch did not make it worse and did not fix it.
