@@ -418,7 +418,7 @@ export default function OutputView({
     () => generateSchedule(courses, schedule, learningStyle, yearLevel),
     [courses, schedule, learningStyle, yearLevel]
   )
-  const { weeks, stats, sessionMinutes, examConflicts = [] } = result
+  const { weeks, stats, sessionMinutes } = result
 
   // ── state ──
   const [completedIds, setCompletedIds] = useState(() => initialCompletedIds ?? new Set())
@@ -677,28 +677,6 @@ export default function OutputView({
     setRestDays(prev =>
       prev.includes(dateStr) ? prev.filter(d => d !== dateStr) : [...prev, dateStr]
     )
-  }, [])
-
-  const handleBulkRescheduleWeek = useCallback((mondayStr, sessionIds) => {
-    // Push every session in the week forward 7 days
-    setSessionTimeOverrides(prev => {
-      const next = { ...prev }
-      sessionIds.forEach(id => {
-        const existing = next[id]
-        if (existing) {
-          const d = new Date(existing.dateStr + 'T12:00:00')
-          d.setDate(d.getDate() + 7)
-          next[id] = { ...existing, dateStr: d.toISOString().split('T')[0] }
-        }
-      })
-      return next
-    })
-    setManualSessions(prev => prev.map(s => {
-      if (!sessionIds.includes(s.id)) return s
-      const d = new Date(s.dateStr + 'T12:00:00')
-      d.setDate(d.getDate() + 7)
-      return { ...s, dateStr: d.toISOString().split('T')[0] }
-    }))
   }, [])
 
   const handleSessionMove = useCallback((sessionId, newDateStr, newStartTime, newEndTime) => {
@@ -1996,7 +1974,6 @@ export default function OutputView({
             userId={userId}
             weeklyHourGoal={schedule?.hoursPerWeek ?? 10}
             recoveryCoursesIdx={recoveryCoursesIdx}
-            examConflicts={examConflicts}
             coachPlans={coachPlans}
             onOpenStudyCoach={handleOpenStudyCoach}
             schoolType={schoolType}
@@ -2045,26 +2022,6 @@ export default function OutputView({
                 <button onClick={() => setActiveSection('grades')} style={{ fontSize: 12, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                   View grades →
                 </button>
-              </div>
-            )}
-            {/* Exam conflict banner */}
-            {examConflicts.length > 0 && (
-              <div style={{
-                marginBottom: 16, padding: '12px 16px', borderRadius: 12,
-                background: 'rgba(217,119,6,0.07)', border: '1px solid rgba(217,119,6,0.25)',
-                display: 'flex', flexDirection: 'column', gap: 6,
-              }}>
-                <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:13, fontWeight:700, color:'#D97706' }}>
-                  <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.41 0zM12 9v4M12 17h.01"/>
-                  </svg>
-                  Exam Cluster Detected
-                </div>
-                {examConflicts.map((c, i) => (
-                  <div key={i} style={{ fontSize: 12.5, color: '#6B6B6B' }}>
-                    <strong style={{ color: '#1A1A1A' }}>{c.courseA}</strong> and <strong style={{ color: '#1A1A1A' }}>{c.courseB}</strong> exams are only <strong>{c.gapDays} day{c.gapDays !== 1 ? 's' : ''}</strong> apart. Front-load {c.courseA} prep now to avoid a crunch.
-                  </div>
-                ))}
               </div>
             )}
 
@@ -2257,7 +2214,6 @@ export default function OutputView({
                 examDates={courses.filter(c => c.examDate).map(c => ({ dateStr: c.examDate, courseName: c.name, color: c.color }))}
                 restDays={restDays}
                 onToggleRestDay={handleToggleRestDay}
-                onBulkRescheduleWeek={handleBulkRescheduleWeek}
                 plan={getActivePlan()}
                 onShowPaywall={onShowPaywall}
                 onStartFocus={handleStartFocus}

@@ -117,7 +117,20 @@ export function generateSchedule(courses, schedule, learningStyle, yearLevel = '
   const nineMonthsOut = addDays(today, 274)
   const scheduleEnd = lastExamPlus2Weeks > nineMonthsOut ? lastExamPlus2Weeks : nineMonthsOut
 
-  const scheduleMap = {}
+  // Any two exams within CLUSTER_WINDOW_DAYS of each other would otherwise have
+  // their final-week prep collide. Front-load both courses instead so the crunch
+  // never forms, rather than scheduling it and warning about it afterwards.
+  const CLUSTER_WINDOW_DAYS = 7
+  const isClustered = parsedCourses.map((course, i) =>
+    parsedCourses.some((other, j) =>
+      j !== i && Math.abs(daysBetween(course.examDateObj, other.examDateObj)) <= CLUSTER_WINDOW_DAYS
+    )
+  )
+
+  // Sessions are collected unplaced first: a session's start time depends on how
+  // many sessions share its day, so times can only be assigned after the daily
+  // load has been balanced.
+  const placements = []
 
   parsedCourses.forEach((course, courseIdx) => {
     const daysUntilExam = daysBetween(today, course.examDateObj)
@@ -132,28 +145,18 @@ export function generateSchedule(courses, schedule, learningStyle, yearLevel = '
       * gradeMulti
     ))
 
-    const sessionDates = planSessions(today, course.examDateObj, rawSessions)
+    const sessionDates = planSessions(today, course.examDateObj, rawSessions, isClustered[courseIdx])
 
     sessionDates.forEach((date, idx) => {
-      const key = dateStr(date)
-      if (!scheduleMap[key]) scheduleMap[key] = []
-
-      const daysLeft    = daysBetween(date, course.examDateObj)
-      const sessionType = getSessionType(idx, sessionDates.length, daysLeft, learningStyle, yearLevel)
-      const dur         = sessionMinutes
-      const classBlocks = getClassBlocksForDate(parsedCourses, key)
-      const times       = sessionTimes(preferredTime, scheduleMap[key].length, dur, classBlocks)
-
-      scheduleMap[key].push({
-        id: `${courseIdx}-${key}-${idx}`,
-        dateStr: key,
-        courseId: courseIdx,
-        courseName: course.name,
-        color: course.color,
-        sessionType,
-        duration: dur,
-        daysUntilExam: daysLeft,
-        ...times,
+      placements.push({
+        courseIdx,
+        course,
+        date,
+        sessionIdx: idx,
+        totalSessions: sessionDates.length,
+        duration: sessionMinutes,
+        anchored: false,
+        idSuffix: String(idx),
       })
     })
 
@@ -161,42 +164,58 @@ export function generateSchedule(courses, schedule, learningStyle, yearLevel = '
     const oneBefore = addDays(course.examDateObj, -1)
 
     if (twoBefore >= today) {
-      const key = dateStr(twoBefore)
-      if (!scheduleMap[key]) scheduleMap[key] = []
-      if (!scheduleMap[key].find(s => s.courseId === courseIdx && s.sessionType === 'Final Review')) {
-        const dur = Math.round(sessionMinutes * 1.2)
-        scheduleMap[key].push({
-          id: `${courseIdx}-${key}-finalreview`,
-          dateStr: key,
-          courseId: courseIdx,
-          courseName: course.name,
-          color: course.color,
-          sessionType: 'Final Review',
-          duration: dur,
-          daysUntilExam: 2,
-          ...sessionTimes(preferredTime, scheduleMap[key].length, dur, getClassBlocksForDate(parsedCourses, key)),
-        })
-      }
+      placements.push({
+        courseIdx,
+        course,
+        date: twoBefore,
+        sessionType: 'Final Review',
+        duration: Math.round(sessionMinutes * 1.2),
+        anchored: true,
+        idSuffix: 'finalreview',
+      })
     }
     if (oneBefore >= today) {
-      const key = dateStr(oneBefore)
-      if (!scheduleMap[key]) scheduleMap[key] = []
-      if (!scheduleMap[key].find(s => s.courseId === courseIdx && s.sessionType === 'Exam Cram')) {
-        const dur = Math.round(sessionMinutes * 1.5)
-        scheduleMap[key].push({
-          id: `${courseIdx}-${key}-examcram`,
-          dateStr: key,
-          courseId: courseIdx,
-          courseName: course.name,
-          color: course.color,
-          sessionType: 'Exam Cram',
-          duration: dur,
-          daysUntilExam: 1,
-          ...sessionTimes(preferredTime, scheduleMap[key].length, dur, getClassBlocksForDate(parsedCourses, key)),
-        })
-      }
+      placements.push({
+        courseIdx,
+        course,
+        date: oneBefore,
+        sessionType: 'Exam Cram',
+        duration: Math.round(sessionMinutes * 1.5),
+        anchored: true,
+        idSuffix: 'examcram',
+      })
     }
   })
+
+  balanceDailyLoad(placements, today, maxSessionsPerDay(hoursPerWeek, sessionMinutes))
+
+  const scheduleMap = {}
+  placements
+    .sort((a, b) => (a.date - b.date) || (a.courseIdx - b.courseIdx))
+    .forEach(p => {
+      const key      = dateStr(p.date)
+      const daysLeft = daysBetween(p.date, p.course.examDateObj)
+      const sessionType = p.anchored
+        ? p.sessionType
+        : getSessionType(p.sessionIdx, p.totalSessions, daysLeft, learningStyle, yearLevel)
+
+      if (!scheduleMap[key]) scheduleMap[key] = []
+      if (p.anchored && scheduleMap[key].some(s => s.courseId === p.courseIdx && s.sessionType === sessionType)) return
+
+      const times = sessionTimes(preferredTime, scheduleMap[key].length, p.duration, getClassBlocksForDate(parsedCourses, key))
+
+      scheduleMap[key].push({
+        id: `${p.courseIdx}-${key}-${p.idSuffix}`,
+        dateStr: key,
+        courseId: p.courseIdx,
+        courseName: p.course.name,
+        color: p.course.color,
+        sessionType,
+        duration: p.duration,
+        daysUntilExam: daysLeft,
+        ...times,
+      })
+    })
 
   // Build weekly structure
   const weeks = []
@@ -236,28 +255,6 @@ export function generateSchedule(courses, schedule, learningStyle, yearLevel = '
     .filter(c => c.examDateObj >= today)
     .sort((a, b) => a.examDateObj - b.examDateObj)[0]
 
-  // ── Exam conflict detection ──────────────────────────────────────────────────
-  // Flag any two courses whose exams are within 7 days of each other
-  const examConflicts = []
-  const upcoming = parsedCourses
-    .filter(c => c.examDateObj >= today)
-    .sort((a, b) => a.examDateObj - b.examDateObj)
-
-  for (let i = 0; i < upcoming.length; i++) {
-    for (let j = i + 1; j < upcoming.length; j++) {
-      const gap = daysBetween(upcoming[i].examDateObj, upcoming[j].examDateObj)
-      if (gap <= 7) {
-        examConflicts.push({
-          courseA: upcoming[i].name,
-          courseB: upcoming[j].name,
-          examDateA: dateStr(upcoming[i].examDateObj),
-          examDateB: dateStr(upcoming[j].examDateObj),
-          gapDays: gap,
-        })
-      }
-    }
-  }
-
   return {
     weeks,
     stats: {
@@ -269,15 +266,72 @@ export function generateSchedule(courses, schedule, learningStyle, yearLevel = '
         : null,
     },
     sessionMinutes,
-    examConflicts,
   }
+}
+
+// A day this full is a crunch. Derived from the user's weekly hours spread over
+// the six non-Sunday study days, clamped so it is never absurdly tight or loose.
+function maxSessionsPerDay(hoursPerWeek, sessionMinutes) {
+  const weeklySessions = (hoursPerWeek * 60) / sessionMinutes
+  return Math.min(4, Math.max(2, Math.ceil(weeklySessions / 6)))
+}
+
+// Moves overflow sessions off crunch days onto the nearest earlier open day.
+// Sessions only ever move earlier — never closer to an exam — and the anchored
+// Final Review / Exam Cram sessions never move at all.
+function balanceDailyLoad(placements, today, maxPerDay) {
+  const byDay = new Map()
+  placements.forEach(p => {
+    const key = dateStr(p.date)
+    if (!byDay.has(key)) byDay.set(key, [])
+    byDay.get(key).push(p)
+  })
+
+  const days = [...byDay.keys()].sort()
+
+  for (let i = days.length - 1; i >= 0; i--) {
+    const key = days[i]
+    let overflow = byDay.get(key).length - maxPerDay
+    if (overflow <= 0) continue
+
+    // Move the sessions with the most slack first: the ones whose exam is furthest away.
+    const movable = byDay.get(key)
+      .filter(p => !p.anchored)
+      .sort((a, b) => b.course.examDateObj - a.course.examDateObj)
+
+    for (const p of movable) {
+      if (overflow <= 0) break
+      const target = findEarlierOpenDay(p, byDay, today, maxPerDay)
+      if (!target) continue
+
+      byDay.set(key, byDay.get(key).filter(x => x !== p))
+      p.date = target
+      const targetKey = dateStr(target)
+      if (!byDay.has(targetKey)) byDay.set(targetKey, [])
+      byDay.get(targetKey).push(p)
+      overflow--
+    }
+  }
+}
+
+function findEarlierOpenDay(placement, byDay, today, maxPerDay) {
+  for (let back = 1; back <= 60; back++) {
+    const candidate = addDays(placement.date, -back)
+    if (daysBetween(today, candidate) < 1) return null   // never today or in the past
+    if (candidate.getDay() === 0) continue               // Sundays stay free
+    const existing = byDay.get(dateStr(candidate)) || []
+    if (existing.length >= maxPerDay) continue
+    if (existing.some(p => p.courseIdx === placement.courseIdx)) continue  // one course per day
+    return candidate
+  }
+  return null
 }
 
 function getTotalWeight(courses) {
   return courses.reduce((sum, c) => sum + (DIFFICULTY_WEIGHTS[c.difficulty] || 1.6), 0)
 }
 
-function planSessions(startDate, examDate, targetCount) {
+function planSessions(startDate, examDate, targetCount, frontLoad = false) {
   const daysUntilExam = daysBetween(startDate, examDate)
   if (daysUntilExam <= 0) return []
 
@@ -290,7 +344,10 @@ function planSessions(startDate, examDate, targetCount) {
     }
   } else {
     const earlyEnd   = daysUntilExam - 7
-    const earlyCount = Math.max(1, Math.round(targetCount * 0.6))
+    // Clustered exams get a heavier early share so the overlapping final weeks
+    // stay light instead of stacking two courses' worth of cramming together.
+    const earlyRatio = frontLoad ? 0.85 : 0.6
+    const earlyCount = Math.max(1, Math.round(targetCount * earlyRatio))
     const lateCount  = targetCount - earlyCount
 
     if (earlyEnd > 0 && earlyCount > 0) {
