@@ -86,7 +86,7 @@ export default async function handler(req, res) {
   if (!topic?.trim()) return res.status(400).json({ error: 'Topic is required' })
 
   const schema = schemaFor(diagramType, topic.trim())
-  if (!schema) return res.status(400).json({ error: 'Invalid diagram type' })
+  if (!schema) return sendUserError(res, 'unexpected', `generate-diagram: unrecognised diagramType ${diagramType}`)
 
   let courseId = bodyCourseId
   if (!courseId && courseName) courseId = await resolveCourseId(auth.userId, courseName)

@@ -1,7 +1,8 @@
 // Scrape syllabus from URL using Firecrawl + Claude extraction
 // Env vars: FIRECRAWL_API_KEY, ANTHROPIC_API_KEY
 
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { sendUserError } from '../lib/server/userErrors.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
@@ -9,11 +10,11 @@ export default async function handler(req, res) {
   const firecrawlKey = process.env.FIRECRAWL_API_KEY
   if (!firecrawlKey) return res.status(503).json({ error: 'URL scraping not configured' })
 
-  const gate = await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const { url, courseName } = req.body ?? {}
-  if (!url) return res.status(400).json({ error: 'url required' })
+  if (!url) return sendUserError(res, 'missing_input', 'scrape-syllabus: no url in body')
 
   // Validate URL and block SSRF targets (private IPs, localhost, cloud metadata)
   let parsedUrl
@@ -29,8 +30,13 @@ export default async function handler(req, res) {
     /^::1$/, /^fc[\da-f]{2}:/i, /^fe80:/i,
   ]
   if (ssrfDenylist.some(p => p.test(hostname))) {
-    return res.status(400).json({ error: 'Invalid URL' })
+    return sendUserError(res, 'unreadable_input', `scrape-syllabus: blocked host ${hostname}`)
   }
+
+  // Reserved after validation, so a request that gets rejected costs nothing.
+  const gate = await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
 
   const now = new Date()
   const currentYear = now.getFullYear()
@@ -114,6 +120,8 @@ Example: [{"name":"Midterm Exam","date":"${currentYear}-03-12","type":"Midterm",
     const cleaned = text.slice(firstBracket, lastBracket + 1)
     const events = JSON.parse(cleaned)
 
+    // The work succeeded, so charge for it now.
+    await gate.commit?.()
     return res.status(200).json({ events, source: 'url', url })
   } catch (err) {
     console.error('[scrape-syllabus]', err.message)

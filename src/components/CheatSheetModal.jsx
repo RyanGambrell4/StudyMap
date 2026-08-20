@@ -85,7 +85,8 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
-            courseName: course?.name ?? examPrompt,
+            courseName: course?.name ?? undefined,
+            courseId: course?.id ?? null,
             examPrompt: examPrompt || undefined,
             regenerate: regen,
             courseContext,

@@ -1,4 +1,5 @@
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { sendUserError } from '../lib/server/userErrors.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -6,11 +7,16 @@ export default async function handler(req, res) {
   const contentLength = parseInt(req.headers['content-length'] || '0')
   if (contentLength > 500000) return res.status(413).json({ error: 'Payload too large' })
 
-  const gate = await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const { conflictingSessions, googleEvents, timePreference, preferredTime } = req.body
-  if (!conflictingSessions?.length) return res.status(400).json({ error: 'No conflicting sessions provided' })
+  if (!conflictingSessions?.length) return sendUserError(res, 'unexpected', 'reschedule-conflicts: empty conflictingSessions')
+
+  // Reserved after validation, so a request that gets rejected costs nothing.
+  const gate = await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
 
   // iOS now sends `preferredTime`. Older callers still send `timePreference`.
   const effectivePref = preferredTime ?? timePreference
@@ -91,6 +97,8 @@ Return ONLY a JSON array, no other text:
     const first = content.indexOf('[')
     const last  = content.lastIndexOf(']')
     const suggestions = JSON.parse(content.slice(first, last + 1))
+    // The work succeeded, so charge for it now.
+    await gate.commit?.()
     res.status(200).json({ suggestions })
   } catch (error) {
     console.error('[reschedule-conflicts] error:', error)

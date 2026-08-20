@@ -202,5 +202,5 @@ Rules:
     }
   }
 
-  return res.status(400).json({ error: 'Invalid step. Use "topics" or "schedule".' })
+  return sendUserError(res, 'unexpected', `exam-rescue: unrecognised step ${step}`)
 }

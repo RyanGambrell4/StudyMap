@@ -139,7 +139,7 @@ Rules:
   try {
     outline = JSON.parse(jsonMatch[0])
   } catch {
-    return res.status(500).json({ error: 'Invalid JSON from AI' })
+    return sendUserError(res, 'generation_failed', 'essay-outline: model returned unparseable JSON')
   }
 
   const resolvedName = brain.identity?.name || courseName || 'this course'

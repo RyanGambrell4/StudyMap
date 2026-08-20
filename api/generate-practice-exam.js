@@ -47,7 +47,7 @@ export default async function handler(req, res) {
     const hasText = typeof text === 'string' && text.trim().length >= 50
     const hasDescription = typeof description === 'string' && description.trim().length >= 30
     if (!hasText && !hasDescription) {
-      return res.status(400).json({ error: 'Provide source material - upload a file, paste notes, or describe your exam (at least a few sentences).' })
+      return sendUserError(res, 'missing_input', 'generate-practice-exam: neither text nor description met the minimum length')
     }
 
     // Every input check is behind us, so this request is going to do real work.

@@ -1153,6 +1153,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
         body: JSON.stringify({
           mode: 'quick-quiz',
           courseName: session.courseName,
+          courseId: session.courseId ?? null,
           sessionType: session.sessionType,
           topic: quizTopic.trim(),
           text: [
@@ -1281,6 +1282,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
         body: JSON.stringify({
           mode: 'quick-quiz',
           courseName: session.courseName,
+          courseId: session.courseId ?? null,
           sessionType: session.sessionType,
           topic: quizTopic.trim() || session.sessionType,
           text: [
@@ -1369,6 +1371,8 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
         body: JSON.stringify({
           text,
           topic,
+          courseName: session.courseName,
+          courseId: session.courseId ?? null,
           images: fcSourceImages.map(img => ({ media_type: img.media_type, data: img.data })),
           creative: true,
           professorEmphasis: fcProfessorEmphasis || null,

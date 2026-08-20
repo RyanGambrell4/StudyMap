@@ -1,16 +1,22 @@
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { sendUserError } from '../lib/server/userErrors.js'
 import { recordTopicSignal } from '../lib/server/topicSignals.js'
 import { resolveCourseId } from '../lib/server/courseContext.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const gate = await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const { courseName, courseId: bodyCourseId, topic, wrongQuestion, wrongAnswer, correctAnswer, existingExplanation } = req.body
   if (!courseName || !wrongQuestion || !correctAnswer)
-    return res.status(400).json({ error: 'Missing required fields' })
+    return sendUserError(res, 'missing_input', 'repair-misconception: missing course, question, or correct answer')
+
+  // Reserved after validation, so a request that gets rejected costs nothing.
+  const gate = await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
 
   const prompt = `A student studying ${courseName} got a practice question wrong. Diagnose the specific misconception and create a follow-up question to confirm they now understand.
 
@@ -86,6 +92,8 @@ Rules:
       }
     }
 
+    // The work succeeded, so charge for it now.
+    await gate.commit?.()
     return res.status(200).json(result)
   } catch (e) {
     console.error('[repair-misconception]', e)

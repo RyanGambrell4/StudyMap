@@ -48,7 +48,8 @@ export default function CourseDiagnostic({
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          courseName: course?.name ?? 'unknown',
+          courseName: course?.name ?? undefined,
+          courseId: course?.id ?? null,
           courseContext,
         }),
       })

@@ -1386,7 +1386,6 @@ export default function OutputView({
     // later from the coach.
     if (!skipPlan && canUseAI()) {
       try {
-        incrementAIQuery()
         const topicStr = (result.topics ?? [])
           .slice(0, 30)
           .map(t => t.title)
@@ -1398,6 +1397,7 @@ export default function OutputView({
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             courseName: courseObj.name,
+            courseId: courseObj.id,
             goal: 'Do well in this course',
             emphasisTopics: topicStr || undefined,
             importantDates,
@@ -1408,6 +1408,11 @@ export default function OutputView({
         })
         const plan = await res.json()
         if (res.ok && plan.weeklyFocus) {
+          // Counted here rather than before the fetch. Incrementing up front
+          // charged for the attempt and, now that this call also marks the
+          // first successful generation, would have credited a win to a
+          // request that had not returned yet.
+          incrementAIQuery('syllabus_coach_plan')
           const formData = {
             courseName: courseObj.name,
             goal: 'Do well in this course',

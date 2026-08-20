@@ -33,7 +33,7 @@ export default async function handler(req, res) {
     brainDumpGaps,
     upcomingDeadlines,
   } = req.body || {}
-  if (!messages?.length) return res.status(400).json({ error: 'Missing messages' })
+  if (!messages?.length) return sendUserError(res, 'missing_input', 'chat-tutor: empty messages array')
 
   let courseId = bodyCourseId
   if (!courseId && courseName) courseId = await resolveCourseId(auth.userId, courseName)

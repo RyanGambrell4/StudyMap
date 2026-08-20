@@ -143,7 +143,8 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
-            courseName: course?.name ?? 'unknown',
+            courseName: course?.name ?? undefined,
+            courseId: course?.id ?? null,
             topic: resolvedTopic || undefined,
             courseContext,
           }),
@@ -325,7 +326,8 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          courseName: course?.name ?? 'unknown',
+          courseName: course?.name ?? undefined,
+          courseId: course?.id ?? null,
           topic: topic.trim() || undefined,
           wrongQuestion: q.question,
           wrongAnswer: ans?.selected ?? null,

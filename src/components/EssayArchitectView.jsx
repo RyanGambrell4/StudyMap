@@ -27,7 +27,7 @@ const WORD_COUNTS = [500, 750, 1000, 1500, 2000, 3000, 5000]
 // SectionDraftView — the drafting partner. Student writes their draft of one
 // section on the left; on submit, AI review renders on the right with hits,
 // misses, evidence gaps, concrete edits, and rubric-aligned scoring.
-function SectionDraftView({ section, sectionIdx, outline, onBack, buildContext, courseName, requirements }) {
+function SectionDraftView({ section, sectionIdx, outline, onBack, buildContext, courseName, courseId, requirements }) {
   const [draft, setDraft] = useState('')
   const [review, setReview] = useState(null)
   const [wordCount, setWordCount] = useState(0)
@@ -61,6 +61,8 @@ function SectionDraftView({ section, sectionIdx, outline, onBack, buildContext, 
           essayType: outline?.essayType,
           wordAllocation: targetWords,
           requirements,
+          courseName,
+          courseId,
           courseContext: buildContext(courseName),
         }),
       })
@@ -463,12 +465,15 @@ export default function EssayArchitectView({ userId, onShowPaywall, courses = []
   // If the user's typed courseName matches one of their real courses, pull
   // the full context from it. Otherwise send a minimal context so the API
   // still gets student profile info like learning style + year level.
-  const buildContext = (name) => {
-    const matched = name?.trim()
-      ? courses.find(c => c.name?.trim().toLowerCase() === name.trim().toLowerCase())
-      : null
-    return hydrateCourseContext(matched, { firstName, yearLevel, learningStyle, schoolType, assignments })
-  }
+  // Resolve the typed course name to a real course. The server needs the id:
+  // resolving by name alone fails whenever the student types something that is
+  // not an exact match for one of their courses, which is most of the time.
+  const matchCourse = (name) => name?.trim()
+    ? (courses.find(c => c.name?.trim().toLowerCase() === name.trim().toLowerCase()) ?? null)
+    : null
+  const matchCourseId = (name) => matchCourse(name)?.id ?? null
+  const buildContext = (name) =>
+    hydrateCourseContext(matchCourse(name), { firstName, yearLevel, learningStyle, schoolType, assignments })
   const [mode, setMode] = useState('hub')
   const [outlines, setOutlines] = useState(loadOutlines)
   const [activeOutline, setActiveOutline] = useState(null)
@@ -477,7 +482,7 @@ export default function EssayArchitectView({ userId, onShowPaywall, courses = []
   const [essayType, setEssayType] = useState('argumentative')
   const [wordCount, setWordCount] = useState(1000)
   const [requirements, setRequirements] = useState('')
-  const [courseName, setCourseName] = useState('')
+  const [courseName, setCourseName] = useState(courses[0]?.name ?? '')
   const [loading, setLoading] = useState(false)
   const [loadingTheses, setLoadingTheses] = useState(false)
   const [thesisOptions, setThesisOptions] = useState(null)
@@ -493,7 +498,7 @@ export default function EssayArchitectView({ userId, onShowPaywall, courses = []
       const res = await fetch('/api/essay-thesis', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ topic, essayType, wordCount, requirements, courseName, thesis: selectedThesis, courseContext: buildContext(courseName) })
+        body: JSON.stringify({ topic, essayType, wordCount, requirements, courseName, courseId: matchCourseId(courseName), thesis: selectedThesis, courseContext: buildContext(courseName) })
       })
       const json = await res.json()
       if (!res.ok) throw new Error(json.error || 'Something went wrong. Please try again.')
@@ -522,7 +527,7 @@ export default function EssayArchitectView({ userId, onShowPaywall, courses = []
           'Content-Type': 'application/json',
           Authorization: `Bearer ${token}`
         },
-        body: JSON.stringify({ topic, essayType, wordCount, requirements, courseName, thesis: selectedThesis, courseContext: buildContext(courseName) })
+        body: JSON.stringify({ topic, essayType, wordCount, requirements, courseName, courseId: matchCourseId(courseName), thesis: selectedThesis, courseContext: buildContext(courseName) })
       })
 
       const json = await res.json()
@@ -563,6 +568,7 @@ export default function EssayArchitectView({ userId, onShowPaywall, courses = []
           outline={activeOutline.outline}
           buildContext={buildContext}
           courseName={courseName || activeOutline.outline?.courseName}
+          courseId={matchCourseId(courseName || activeOutline.outline?.courseName)}
           requirements={requirements}
           onBack={() => { setDraftingSection(null); setMode('result') }}
         />

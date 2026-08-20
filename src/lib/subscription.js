@@ -405,8 +405,13 @@ export function getAIQueriesLimit() {
   return FREE_LIMITS.aiTutor.count
 }
 
-export function incrementAIQuery() {
+export function incrementAIQuery(source) {
   incrementFeatureUsage('aiTutor')
+
+  // Every caller invokes this after its response has come back clean, so this
+  // is the app's de facto "a generation just worked" signal. Stamping the first
+  // win here is what unlocks the card ask; see hasSuccessfulGeneration.
+  markSuccessfulGeneration(source ?? 'ai_action')
 
   if (!_sub) return
   const now = new Date().toISOString()

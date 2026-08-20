@@ -15,7 +15,7 @@ export default async function handler(req, res) {
   if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const { text, courseName, courseId: bodyCourseId, topic, courseContext: legacyCtx } = req.body || {}
-  if (!text) return res.status(400).json({ error: 'Missing required fields' })
+  if (!text) return sendUserError(res, 'missing_input', 'brain-dump-score: no text in body')
 
   let courseId = bodyCourseId
   if (!courseId && courseName) courseId = await resolveCourseId(auth.userId, courseName)

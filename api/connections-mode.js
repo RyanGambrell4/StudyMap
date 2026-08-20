@@ -38,7 +38,7 @@ export default async function handler(req, res) {
     extraCourseContexts = [],
   } = req.body || {}
 
-  if (!phase) return res.status(400).json({ error: 'Missing required fields' })
+  if (!phase) return sendUserError(res, 'unexpected', 'connections-mode: no phase in body')
 
   const auth = await verifyAuth(req)
   if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
@@ -158,7 +158,7 @@ Rules:
 - No em dashes anywhere.`
   } else if (phase === 'score') {
     if (!conceptA || !conceptB || question === undefined || answer === undefined)
-      return res.status(400).json({ error: 'Missing fields for score phase' })
+      return sendUserError(res, 'unexpected', 'connections-mode: score phase missing pairs or answers')
 
     prompt = `A ${resolvedName} student was asked about the relationship between "${conceptA}" and "${conceptB}".
 
@@ -179,7 +179,7 @@ Score their understanding. Return ONLY valid JSON:
 
 Be fair but exacting — a vague answer scores below 60. No em dashes anywhere.`
   } else {
-    return res.status(400).json({ error: 'Invalid phase' })
+    return sendUserError(res, 'unexpected', `connections-mode: unrecognised phase ${phase}`)
   }
 
   try {

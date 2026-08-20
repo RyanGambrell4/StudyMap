@@ -26,7 +26,7 @@ export default async function handler(req, res) {
   } = req.body || {}
 
   if (!sectionName || !draft?.trim()) {
-    return res.status(400).json({ error: 'sectionName and draft are required' })
+    return sendUserError(res, 'missing_input', 'essay-review-section: no sectionName or empty draft')
   }
 
   let courseId = bodyCourseId

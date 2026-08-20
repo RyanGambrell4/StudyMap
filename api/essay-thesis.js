@@ -80,7 +80,7 @@ Return ONLY a JSON array of 3 strings: ["thesis 1", "thesis 2", "thesis 3"]`
   try {
     theses = JSON.parse(arrMatch[0])
   } catch {
-    return res.status(500).json({ error: 'Invalid JSON from AI' })
+    return sendUserError(res, 'generation_failed', 'essay-thesis: model returned unparseable JSON')
   }
 
   // The work succeeded, so charge for it now. A reservation that never

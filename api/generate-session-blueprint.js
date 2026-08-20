@@ -37,7 +37,7 @@ export default async function handler(req, res) {
     currentGradePct,
     preferredTime,
   } = req.body || {}
-  if (!durationMinutes) return res.status(400).json({ error: 'Missing durationMinutes' })
+  if (!durationMinutes) return sendUserError(res, 'unexpected', 'generate-session-blueprint: no durationMinutes in body')
 
   let courseId = bodyCourseId
   if (!courseId && courseName) courseId = await resolveCourseId(auth.userId, courseName)

@@ -9,7 +9,7 @@ const PLAN_INFO = {
     label: 'Free',
     features: [
       '1 course (preview only)',
-      '5 AI messages total',
+      '5 AI messages a month',
       'Session Blueprint · 1 total',
       'Brain Dump, Quiz Burst, Exam Rescue · 1 each',
       'Focus Mode · 30 min/day',

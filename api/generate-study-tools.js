@@ -161,7 +161,7 @@ Rules:
   // ── predict-grade mode ────────────────────────────────────────────────────────
   if (mode === 'predict-grade') {
     const { courseName, targetGrade, components } = req.body
-    if (!courseName || !components?.length) return res.status(400).json({ error: 'Missing required fields' })
+    if (!courseName || !components?.length) return sendUserError(res, 'missing_input', 'generate-study-tools: predict-grade missing courseName or components')
 
     const filled = components.filter(c => c.earnedGrade !== null && c.earnedGrade !== undefined)
     const remaining = components.filter(c => c.earnedGrade === null || c.earnedGrade === undefined)
