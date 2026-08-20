@@ -1,4 +1,5 @@
 import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { USER_ERRORS } from '../lib/server/userErrors.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -69,6 +70,6 @@ Example: [{"name":"Midterm Exam","date":"${currentYear}-03-12","type":"Midterm",
   } catch (error) {
     console.error('Syllabus extraction error:', error)
     console.error(error)
-    res.status(500).json({ error: error.message ?? 'Internal server error' })
+    res.status(500).json({ error: USER_ERRORS.unexpected.error, code: USER_ERRORS.unexpected.code })
   }
 }

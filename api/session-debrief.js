@@ -1,25 +1,33 @@
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { sendUserError } from '../lib/server/userErrors.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const gate = await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const { courseName, courseId: bodyCourseId, sessionType, duration, recallText, notes, weakTopics: legacyWeak } = req.body || {}
 
   let courseId = bodyCourseId
-  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
-  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+  if (!courseId && courseName) courseId = await resolveCourseId(auth.userId, courseName)
+  if (!courseId) return sendUserError(res, 'course_required', `session-debrief: no courseId resolved (courseName=${courseName ?? 'none'})`)
+
+  // Quota is reserved only now, once the request is known to be well formed.
+  // It used to be taken at the top of the handler, so a request that was about
+  // to be rejected for a missing course still cost the user an AI action.
+  const gate = await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
 
   let brain
   try {
     brain = await getCourseContext(gate.userId, courseId, { topic: sessionType || null, request: req })
   } catch (err) {
     console.error('[session-debrief] getCourseContext failed', err)
-    return res.status(400).json({ error: String(err?.message || err) })
+    return sendUserError(res, 'course_context_failed', err)
   }
 
   const resolvedName = brain.identity?.name || courseName
@@ -87,6 +95,9 @@ No em dashes. If no recall text was provided, base gaps and strengths on the kno
     const last = content.lastIndexOf('}')
     if (first === -1 || last === -1) throw new Error('Malformed AI response')
     const result = JSON.parse(content.slice(first, last + 1))
+    // The work succeeded, so charge for it now. A reservation that never
+    // reaches this line costs the user nothing.
+    await gate.commit?.()
     return res.status(200).json(result)
   } catch (e) {
     console.error('[session-debrief]', e)

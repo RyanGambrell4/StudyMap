@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from './lib/supabase'
 import { initUserData, clearUserData, savePlan, refreshSubscription, saveEmailDigest } from './lib/db'
-import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getCachedSubscription, TRIAL_DURATION_DAYS, TRIAL_PLAN, TRIAL_BILLING_PERIOD } from './lib/subscription'
+import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getCachedSubscription, hasSuccessfulGeneration, TRIAL_DURATION_DAYS, TRIAL_PLAN, TRIAL_BILLING_PERIOD } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
 import { initAnalytics, identifyUser, resetUser, track, register, registerOnce } from './lib/analytics'
 import { captureReferralParam, getStoredReferrer, clearStoredReferrer } from './lib/referral'
@@ -128,14 +128,31 @@ export default function App() {
     return null
   })
 
+  // Single choke point for every card ask in the app. Nothing opens the paywall
+  // except through here, which is what makes the rule below enforceable.
+  //
+  // The rule: a free user who has never had an AI generation succeed does not
+  // get asked for a card. They have not been shown anything works yet, so the
+  // ask has nothing behind it. 20 of 24 trials quit before the trial ended and
+  // 13 were cancelled the same day the card went in, which is what asking too
+  // early produces. Not showing it is the correct outcome, not a lost
+  // conversion.
+  //
+  // Paid and trialing users are unaffected: their paywall surfaces are upgrade
+  // and tier-comparison screens, not a first card ask.
   const openPaywall = useCallback((trigger = 'courses') => {
+    const plan = getActivePlan()
+    if (plan === 'free' && !hasSuccessfulGeneration()) {
+      track('paywall_suppressed_no_win', { trigger, current_plan: plan })
+      return
+    }
     setPaywallTrigger(trigger)
     setPaywallOpen(true)
     const unlimitedTriggers = new Set(['tutorMemory', 'practiceExamAnalytics', 'unlimited'])
     track('paywall_shown', {
       trigger,
       plan_required: unlimitedTriggers.has(trigger) ? 'unlimited' : 'pro',
-      current_plan: getActivePlan(),
+      current_plan: plan,
     })
   }, [])
 
@@ -145,6 +162,20 @@ export default function App() {
     const handler = (e) => openPaywall(e.detail?.trigger ?? 'courses')
     window.addEventListener('studyedge:open-paywall', handler)
     return () => window.removeEventListener('studyedge:open-paywall', handler)
+  }, [openPaywall])
+
+  // The positive half of the same rule. The card ask now fires off a
+  // demonstrated win: the moment a free user's first AI generation lands
+  // against their own course material, and not before.
+  useEffect(() => {
+    const handler = (e) => {
+      if (getActivePlan() !== 'free') return
+      // Let the result render and be seen before the ask lands on top of it.
+      setTimeout(() => openPaywall('first-win'), 2500)
+      track('first_win_paywall_scheduled', { source: e.detail?.source ?? null })
+    }
+    window.addEventListener('studyedge:first-win', handler)
+    return () => window.removeEventListener('studyedge:first-win', handler)
   }, [openPaywall])
 
   // Same pattern for the feedback modal — AppShell settings menu, empty
@@ -330,9 +361,21 @@ export default function App() {
         course_count: plan?.courses?.length ?? 0,
         has_onboarded: !!plan,
       })
+      // course_count is re-registered by the effect below whenever the course
+      // list changes. Registering it only here meant it was captured before the
+      // user had added anything and then never updated, so every later event in
+      // the session reported course_count: 0 no matter what the user did. Any
+      // analysis that read that property as real state was reading a snapshot
+      // taken at login.
       setDbReady(true)
     })
   }, [session?.user?.id])
+
+  // Keep course_count honest for every event fired after login.
+  useEffect(() => {
+    if (!dbReady) return
+    register({ course_count: courses.length })
+  }, [courses.length, dbReady])
 
   // ── Checkout intent → Stripe redirect ────────────────────────────────────
   // Runs exactly once per intent: ref guard prevents re-entry on re-renders.
@@ -850,7 +893,9 @@ export default function App() {
       )}
 
       {/* Floating trial nudge — appears 2 min in for free users who haven't trialed */}
-      {showOutput && trialNudgeVisible && !trialNudgeDismissed && getActivePlan() === 'free' && !hasUsedTrial() && (
+      {/* Same rule as openPaywall: no card ask, in any surface, before a
+          generation has actually succeeded for this user. */}
+      {showOutput && trialNudgeVisible && !trialNudgeDismissed && getActivePlan() === 'free' && !hasUsedTrial() && hasSuccessfulGeneration() && courses.length > 0 && (
         <div style={{
           position: 'fixed', bottom: 20, right: 20, zIndex: 998,
           background: '#3B61C4',

@@ -1,4 +1,5 @@
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { USER_ERRORS, sendUserError } from '../lib/server/userErrors.js'
 import { logAiCall } from '../lib/server/axiom.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
@@ -9,8 +10,8 @@ export default async function handler(req, res) {
   const contentLength = parseInt(req.headers['content-length'] || '0')
   if (contentLength > 100000) return res.status(413).json({ error: 'Payload too large' })
 
-  const gate = await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const {
     messages,
@@ -35,8 +36,15 @@ export default async function handler(req, res) {
   if (!messages?.length) return res.status(400).json({ error: 'Missing messages' })
 
   let courseId = bodyCourseId
-  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
-  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+  if (!courseId && courseName) courseId = await resolveCourseId(auth.userId, courseName)
+  if (!courseId) return sendUserError(res, 'course_required', `chat-tutor: no courseId resolved (courseName=${courseName ?? 'none'})`)
+
+  // Quota is reserved only now, once the request is known to be well formed.
+  // It used to be taken at the top of the handler, so a request that was about
+  // to be rejected for a missing course still cost the user an AI action.
+  const gate = await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
 
   // Extract the latest user message once — we use it for both the topic
   // hint into getCourseContext (so materials retrieval targets what the
@@ -51,7 +59,7 @@ export default async function handler(req, res) {
     })
   } catch (err) {
     console.error('[chat-tutor] getCourseContext failed', err)
-    return res.status(400).json({ error: String(err?.message || err) })
+    return sendUserError(res, 'course_context_failed', err)
   }
   const resolvedCourseName = brain.identity?.name || courseName
   const serverContextBlock = formatCourseContextForPrompt(brain)
@@ -234,10 +242,15 @@ Only include this line when the student is clearly struggling. Otherwise omit it
       latencyMs: Date.now() - t0,
     })
 
+    // The stream completed, so charge for it. This is awaited before res.end()
+    // because ending the response ends the function invocation, and a write
+    // still in flight at that point is not guaranteed to land.
+    await gate.commit?.()
+
     res.end()
   } catch (error) {
     console.error('Chat tutor error:', error)
-    res.write(`data: ${JSON.stringify({ error: error.message ?? 'Internal server error' })}\n\n`)
+    res.write(`data: ${JSON.stringify({ error: USER_ERRORS.unexpected.error, code: USER_ERRORS.unexpected.code })}\n\n`)
     res.end()
   }
 }

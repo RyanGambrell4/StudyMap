@@ -1,4 +1,5 @@
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { sendUserError } from '../lib/server/userErrors.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
@@ -21,26 +22,36 @@ function brainIsRich(brain) {
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
-  const gate = await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const { topic, essayType, wordCount, requirements, courseName, courseId: bodyCourseId, thesis } = req.body || {}
   if (!topic?.trim()) return res.status(400).json({ error: 'Essay topic is required' })
 
   let courseId = bodyCourseId
-  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
-  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+  if (!courseId && courseName) courseId = await resolveCourseId(auth.userId, courseName)
+  if (!courseId) return sendUserError(res, 'course_required', `essay-outline: no courseId resolved (courseName=${courseName ?? 'none'})`)
+
+  // Quota is reserved only now, once the request is known to be well formed.
+  // It used to be taken at the top of the handler, so a request that was about
+  // to be rejected for a missing course still cost the user an AI action.
+  const gate = await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
 
   let brain
   try {
     brain = await getCourseContext(gate.userId, courseId, { topic: topic.trim(), request: req })
   } catch (err) {
     console.error('[essay-outline] getCourseContext failed', err)
-    return res.status(400).json({ error: String(err?.message || err) })
+    return sendUserError(res, 'course_context_failed', err)
   }
 
   const hasPrompt = typeof requirements === 'string' && requirements.trim().length >= 20
   if (!hasPrompt && !brainIsRich(brain)) {
+    // Deliberately no commit. This branch asks the student for the assignment
+    // prompt and generates nothing, so it must not spend an AI action. The old
+    // top-of-handler gate charged for it.
     return res.status(200).json({
       needsMoreContext: true,
       reason: 'no-prompt-no-context',
@@ -143,5 +154,8 @@ Rules:
   }).then(w => { if (!w.ok) console.warn('[essay-outline] saveArtifact failed', w.error) })
     .catch(err => console.warn('[essay-outline] saveArtifact threw', err?.message))
 
+  // The work succeeded, so charge for it now. A reservation that never
+  // reaches this line costs the user nothing.
+  await gate.commit?.()
   return res.status(200).json({ outline })
 }

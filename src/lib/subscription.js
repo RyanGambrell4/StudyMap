@@ -20,9 +20,22 @@ import { track } from './analytics'
 // Free is a one-time preview tier: most premium features are limited to a
 // single lifetime use so users see what each tool does, then hit a real wall
 // that drives them into the 7-day Pro trial.
+//
+// The AI action pool is the exception, and it resets monthly. Three places used
+// to disagree about this: the server enforced a monthly reset, this file said
+// 'total' (five actions for life), and the user-facing copy said "this month".
+// The server was the only one users actually felt, and monthly is what the copy
+// has always promised, so monthly is the model everywhere now.
+//
+// AI_ACTION_PERIOD is the single source of truth. Copy that describes the free
+// AI allowance must be generated from AI_PERIOD_LABEL rather than hard-coded,
+// and subscription.aiQuota.test.js fails the build if the two drift apart.
+export const AI_ACTION_PERIOD = 'month'
+export const AI_PERIOD_LABEL = 'this month'
+
 export const FREE_LIMITS = {
   courses:             1,
-  aiTutor:             { count: 5,  period: 'total' },
+  aiTutor:             { count: 5,  period: AI_ACTION_PERIOD },
   blueprint:           { count: 1,  period: 'total' },
   coachPlan:           { count: 1,  period: 'total' },
   practiceExam:        { count: 1,  period: 'total' },
@@ -56,7 +69,7 @@ export const TRIAL_LIMITS = PRO_LIMITS
 
 // Legacy - kept for backwards compatibility
 export const PLAN_LIMITS = {
-  free:      { courses: 1,        aiQueries: 5,        aiResetPeriod: 'total' },
+  free:      { courses: 1,        aiQueries: 5,        aiResetPeriod: AI_ACTION_PERIOD },
   pro:       { courses: 5,        aiQueries: 100,      aiResetPeriod: 'month' },
   unlimited: { courses: Infinity, aiQueries: Infinity, aiResetPeriod: 'month' },
 }
@@ -323,6 +336,53 @@ export async function incrementFeatureUsage(featureName, amount = 1) {
   }
 }
 
+// ── First successful generation ──────────────────────────────────────────────
+// The card ask is not allowed to fire until the user has had one AI generation
+// actually succeed against their own course material. 13 of 24 trials were
+// cancelled the same day the card was entered, which is what asking before any
+// value has landed produces.
+//
+// This is stamped once, on the first success, and persists in the subscription
+// row so it survives a reload and a new device. It is deliberately NOT derived
+// from feature_usage: those counters increment when a generation STARTS, and
+// counting attempts as wins is the whole bug this build exists to fix.
+
+export function hasSuccessfulGeneration() {
+  return !!getCachedSubscription()?.firstGenerationAt
+}
+
+export function getFirstGenerationAt() {
+  return getCachedSubscription()?.firstGenerationAt ?? null
+}
+
+/**
+ * Call ONLY from a path where an AI generation returned usable output to the
+ * user. Idempotent: the first call wins and later calls are no-ops.
+ */
+export function markSuccessfulGeneration(source) {
+  if (!_sub) return false
+  if (_sub.firstGenerationAt) return false
+
+  const now = new Date().toISOString()
+  _sub = { ..._sub, firstGenerationAt: now }
+
+  if (_uid) {
+    const snapshot = { ..._sub }
+    supabase
+      .from('user_data')
+      .upsert({ user_id: _uid, subscription: snapshot, updated_at: now }, { onConflict: 'user_id' })
+      .then(({ error }) => {
+        if (error) console.error('[subscription] markSuccessfulGeneration error:', error)
+      })
+  }
+
+  track('first_generation_succeeded', { source: source ?? null, plan: getActivePlan() })
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('studyedge:first-win', { detail: { source: source ?? null } }))
+  }
+  return true
+}
+
 // ── AI helpers (backwards-compat wrappers) ────────────────────────────────────
 
 export function canUseAI() {
@@ -331,7 +391,11 @@ export function canUseAI() {
 
 export function getAIQueriesUsed() {
   const usage = getFeatureUsage('aiTutor')
-  if (isNewDay(usage.resetAt)) return 0
+  // Must use the same boundary as FREE_LIMITS.aiTutor.period and as the server
+  // in lib/server/usage.js. This read used a daily boundary against a limit
+  // that was never daily, so the count the user saw drifted from the count
+  // that was actually enforced.
+  if (isNewMonth(usage.resetAt)) return 0
   return usage.count ?? (_sub?.aiQueriesUsed ?? 0)
 }
 

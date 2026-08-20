@@ -1,4 +1,5 @@
-import { verifyAndCheckAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { sendUserError } from '../lib/server/userErrors.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 
@@ -21,19 +22,29 @@ export default async function handler(req, res) {
   } = req.body || {}
 
   // Schedule step is auto-generated as part of the same session — auth only, no extra credit.
-  const gate = step === 'schedule' ? await verifyAuth(req) : await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   let courseId = bodyCourseId
-  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
-  if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+  if (!courseId && courseName) courseId = await resolveCourseId(auth.userId, courseName)
+  if (!courseId) return sendUserError(res, 'course_required', `exam-rescue: no courseId resolved (courseName=${courseName ?? 'none'})`)
+
+  // Quota is reserved only now, once the request is known to be well formed.
+  // It used to be taken at the top of the handler, so a request that was about
+  // to be rejected for a missing course still cost the user an AI action.
+  // The non-AI branch keeps the plain auth result and never reserves.
+  const gate = step === 'schedule'
+    ? auth
+    : await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
 
   let brain
   try {
     brain = await getCourseContext(gate.userId, courseId, { request: req })
   } catch (err) {
     console.error('[exam-rescue] getCourseContext failed', err)
-    return res.status(400).json({ error: String(err?.message || err) })
+    return sendUserError(res, 'course_context_failed', err)
   }
   const resolvedName = brain.identity?.name || courseName
   const courseContextBlock = formatCourseContextForPrompt(brain)
@@ -106,6 +117,9 @@ Rules:
       const first = content.indexOf('{')
       const last = content.lastIndexOf('}')
       const result = JSON.parse(content.slice(first, last + 1))
+      // The work succeeded, so charge for it now. A reservation that never
+      // reaches this line costs the user nothing.
+      await gate.commit?.()
       return res.status(200).json(result)
     } catch (e) {
       console.error('[exam-rescue topics]', e)
@@ -178,6 +192,9 @@ Rules:
       const first = content.indexOf('{')
       const last = content.lastIndexOf('}')
       const result = JSON.parse(content.slice(first, last + 1))
+      // The work succeeded, so charge for it now. A reservation that never
+      // reaches this line costs the user nothing.
+      await gate.commit?.()
       return res.status(200).json(result)
     } catch (e) {
       console.error('[exam-rescue schedule]', e)

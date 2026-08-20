@@ -20,6 +20,7 @@
 
 import { createHmac, timingSafeEqual } from 'crypto'
 import { createClient } from '@supabase/supabase-js'
+import { posthogCapture as captureServerEvent } from '../lib/server/posthog.js'
 
 export const config = {
   api: { bodyParser: false },
@@ -56,22 +57,11 @@ function verifySignature(rawBody, headers, secret) {
 }
 
 // ─── PostHog server-side capture ────────────────────────────────────────────
-async function posthogCapture(event, distinctId, properties = {}) {
-  if (!process.env.POSTHOG_API_KEY || !distinctId) return
-  try {
-    await fetch('https://us.i.posthog.com/capture/', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        api_key: process.env.POSTHOG_API_KEY,
-        event,
-        distinct_id: distinctId,
-        properties: { ...properties, $lib: 'resend-webhook' },
-        timestamp: new Date().toISOString(),
-      }),
-    })
-  } catch { /* analytics is non-critical — never block the 200 response */ }
-}
+// Shared implementation in lib/server/posthog.js. This file used to carry its
+// own copy that swallowed every failure, including the 401 a personal API key
+// returns, so email engagement events vanished with no trace.
+const posthogCapture = (event, distinctId, properties = {}) =>
+  captureServerEvent(event, distinctId, { source: 'resend_webhook', ...properties })
 
 // ─── Campaign fallback for emails sent before tagging was added ──────────────
 function campaignFromSubject(subject = '') {

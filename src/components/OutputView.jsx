@@ -26,6 +26,7 @@ import FocusMode from './FocusMode'
 import BlueprintScreen from './BlueprintScreen'
 import SyllabusUploadModal from './SyllabusUploadModal'
 import SyllabusOnboardingModal from './SyllabusOnboardingModal'
+import CourseRequiredGate from './CourseRequiredGate'
 import { T, RADIUS } from '../theme/tokens'
 import { addUpload } from '../lib/uploadRegistry'
 import { courseIdentityPatch } from '../lib/courseIdentity'
@@ -1249,7 +1250,12 @@ export default function OutputView({
   }
 
   const handleSyllabusOnboardingCommit = async (result, skipPlan) => {
-    if (!canUseAI()) { onShowPaywall?.('ai'); return }
+    // No AI-quota guard here. The parse that produced `result` already charged
+    // for its AI action, and this step is what turns that into an actual
+    // course. Blocking it on remaining quota stranded users with an empty
+    // account behind a paywall, which is the exact dead end the course gate
+    // exists to remove. The only fresh AI action below is the optional first
+    // study plan, and that is guarded at its own call site.
 
     const COURSE_COLORS = ['#3B82F6', '#6366F1', '#059669', '#D97706', '#EC4899', '#0891B2']
     const NEUTRAL_COLOR = { name: 'neutral', dot: '#64748b' }
@@ -1374,8 +1380,11 @@ export default function OutputView({
       setSyllabusEvents(prev => [...prev, ...newEvents])
     }
 
-    // Generate first study plan unless skipping
-    if (!skipPlan) {
+    // Generate first study plan unless skipping. This is a real AI action, so
+    // it is the step that checks remaining quota. Running out here is not an
+    // error: the course is already saved and the student can generate a plan
+    // later from the coach.
+    if (!skipPlan && canUseAI()) {
       try {
         incrementAIQuery()
         const topicStr = (result.topics ?? [])
@@ -1535,6 +1544,91 @@ export default function OutputView({
   }
 
   // ── render ────────────────────────────────────────────────────────────────
+  // Rendered by both the normal shell and the first-course gate below. The
+  // gate drives the same parse-syllabus flow, so it needs the same review
+  // modal and the same progress/failure overlay.
+  const syllabusOnboardingOverlays = (
+    <>
+      {syllabusOnboardingData && (
+        <SyllabusOnboardingModal
+          parsedData={syllabusOnboardingData}
+          existingCourse={syllabusOnboardingScopeIdx !== null ? courses[syllabusOnboardingScopeIdx] ?? null : null}
+          onConfirm={(result) => handleSyllabusOnboardingCommit(result, false)}
+          onSkipPlan={(result) => handleSyllabusOnboardingCommit(result, true)}
+          onClose={() => { setSyllabusOnboardingData(null); setSyllabusOnboardingScopeIdx(null) }}
+        />
+      )}
+
+      {/* Syllabus parse progress + failure. The new-user dashboard hero renders
+          its own inline version, so it is excluded here to avoid duplicate UI. */}
+      {syllabusOnboardingOrigin !== 'dashboard' && syllabusOnboardingOrigin !== 'gate' && (syllabusOnboardingLoading || syllabusOnboardingError) && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-live="polite"
+          style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'grid', placeItems: 'center', padding: 20 }}
+        >
+          <div style={{ width: '100%', maxWidth: 400, background: T.card, border: `1px solid ${T.border}`, borderRadius: RADIUS.lg, boxShadow: '0 30px 80px rgba(0,0,0,0.25)', padding: 24, textAlign: 'center' }}>
+            {syllabusOnboardingLoading ? (
+              <>
+                <Spinner size="lg" color={T.blue} style={{ margin: '0 auto 16px' }} />
+                <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>Reading your syllabus</div>
+                <div style={{ fontSize: 13, color: T.muted, marginTop: 6, lineHeight: 1.5 }}>
+                  Pulling out your dates, topics, and grade weights. This takes a few seconds.
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: T.redBg, display: 'grid', placeItems: 'center', margin: '0 auto 14px', color: T.red }}>
+                  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>Could not read that syllabus</div>
+                <div style={{ fontSize: 13, color: T.muted, marginTop: 6, lineHeight: 1.5 }}>{syllabusOnboardingError}</div>
+                <div style={{ fontSize: 12.5, color: T.dim, marginTop: 10, lineHeight: 1.5 }}>
+                  Your course was saved. You can add the syllabus again any time from the Courses tab.
+                </div>
+                <button
+                  onClick={() => setSyllabusOnboardingError('')}
+                  style={{ marginTop: 18, width: '100%', padding: '11px 20px', borderRadius: RADIUS.sm, background: T.blue, color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = T.blueHov }}
+                  onMouseLeave={e => { e.currentTarget.style.background = T.blue }}
+                >
+                  Got it
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  )
+
+  // ── First course gate ─────────────────────────────────────────────────────
+  // Every AI endpoint resolves a courseId, the schedule is generated per
+  // course, and the paywall has nothing to argue about against an empty
+  // account. Onboarding used to finish with zero courses and hand the user a
+  // dashboard that could not do anything, so the gate stands in front of the
+  // shell instead.
+  //
+  // The condition is the course list itself, not a "new user" flag, so a
+  // returning account that has no courses lands here too rather than on a
+  // dashboard that cannot work.
+  if (courses.length === 0) {
+    return (
+      <>
+        <CourseRequiredGate
+          onUploadSyllabus={file => handleStartSyllabusOnboarding(file, null, 'gate')}
+          onAddCourse={onAddCourse}
+          parsing={syllabusOnboardingLoading}
+          parseError={syllabusOnboardingError}
+          onDismissParseError={() => setSyllabusOnboardingError('')}
+          onSignOut={onSignOut}
+        />
+        {syllabusOnboardingOverlays}
+      </>
+    )
+  }
+
   return (
     <>
       {/* ── First-query nudge modal ── */}
@@ -1642,57 +1736,7 @@ export default function OutputView({
         />
       )}
 
-      {syllabusOnboardingData && (
-        <SyllabusOnboardingModal
-          parsedData={syllabusOnboardingData}
-          existingCourse={syllabusOnboardingScopeIdx !== null ? courses[syllabusOnboardingScopeIdx] ?? null : null}
-          onConfirm={(result) => handleSyllabusOnboardingCommit(result, false)}
-          onSkipPlan={(result) => handleSyllabusOnboardingCommit(result, true)}
-          onClose={() => { setSyllabusOnboardingData(null); setSyllabusOnboardingScopeIdx(null) }}
-        />
-      )}
-
-      {/* Syllabus parse progress + failure. The new-user dashboard hero renders
-          its own inline version, so it is excluded here to avoid duplicate UI. */}
-      {syllabusOnboardingOrigin !== 'dashboard' && (syllabusOnboardingLoading || syllabusOnboardingError) && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-live="polite"
-          style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'grid', placeItems: 'center', padding: 20 }}
-        >
-          <div style={{ width: '100%', maxWidth: 400, background: T.card, border: `1px solid ${T.border}`, borderRadius: RADIUS.lg, boxShadow: '0 30px 80px rgba(0,0,0,0.25)', padding: 24, textAlign: 'center' }}>
-            {syllabusOnboardingLoading ? (
-              <>
-                <Spinner size="lg" color={T.blue} style={{ margin: '0 auto 16px' }} />
-                <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>Reading your syllabus</div>
-                <div style={{ fontSize: 13, color: T.muted, marginTop: 6, lineHeight: 1.5 }}>
-                  Pulling out your dates, topics, and grade weights. This takes a few seconds.
-                </div>
-              </>
-            ) : (
-              <>
-                <div style={{ width: 40, height: 40, borderRadius: '50%', background: T.redBg, display: 'grid', placeItems: 'center', margin: '0 auto 14px', color: T.red }}>
-                  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
-                </div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>Could not read that syllabus</div>
-                <div style={{ fontSize: 13, color: T.muted, marginTop: 6, lineHeight: 1.5 }}>{syllabusOnboardingError}</div>
-                <div style={{ fontSize: 12.5, color: T.dim, marginTop: 10, lineHeight: 1.5 }}>
-                  Your course was saved. You can add the syllabus again any time from the Courses tab.
-                </div>
-                <button
-                  onClick={() => setSyllabusOnboardingError('')}
-                  style={{ marginTop: 18, width: '100%', padding: '11px 20px', borderRadius: RADIUS.sm, background: T.blue, color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = T.blueHov }}
-                  onMouseLeave={e => { e.currentTarget.style.background = T.blue }}
-                >
-                  Got it
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      {syllabusOnboardingOverlays}
 
       {addSessionDayStr && (
         <AddSessionModal
