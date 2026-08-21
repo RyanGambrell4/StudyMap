@@ -114,3 +114,43 @@ in-memory update that makes the rule work within the session.
    Either move the increments behind a server endpoint, or move the counter out
    of `subscription` into a column the trigger does not guard.
 3. Treat every historical statistic derived from `feature_usage` as void.
+
+## Consequence: the quota counter users see is always wrong
+
+Asked separately as "find the remaining-AI-actions counter, or establish it does
+not exist". It exists, in exactly one place, and it lies.
+
+**Where it renders.** `src/components/AIChatView.jsx:451`, in the chat input
+footer, free users only:
+
+```
+{remaining} free AI questions left · Pro gives you 100/month
+```
+
+That is the only surface a default user can reach. `DashboardView.jsx:199` also
+computes `aiRemaining`, but DashboardView is V1 and sits behind the
+`se_dashboard_v2` opt-out, so it does not render by default. Nothing on the
+live dashboard, the account screen or the study tools shows a remaining count.
+`getAIQueriesUsed()` and `getAIQueriesLimit()` are dead: nothing outside a test
+calls them.
+
+**Why it is wrong.** It reads `canUseFeature('aiTutor')` ->
+`getFeatureUsage('aiTutor')` -> `subscription.feature_usage.aiTutor`, which is
+absent on all 810 rows for the reason documented above. So it falls back to
+`{ count: 0 }` and renders **"5 free AI questions left"** on every fresh
+session, no matter how many the user has actually spent.
+
+Enforcement, meanwhile, reads `aiQueriesUsed` on the server, which is accurate.
+
+So the two disagree by construction. A free user who has spent all five sees
+"5 free AI questions left", sends a sixth, and is refused with a 402. The
+counter cannot warn anyone, because it never counts down across sessions.
+
+**It also never states the period.** The copy says "free AI questions left" and
+"Pro gives you 100/month". It never says the free allowance renews monthly, so
+`AI_PERIOD_LABEL` has nowhere to render even now that the config agrees on
+monthly.
+
+Not fixed here: the fix is to source the counter from the server-authoritative
+number rather than from `feature_usage`, which is a change to quota code and out
+of scope for this build.
