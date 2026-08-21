@@ -56,9 +56,37 @@ Expect: 12 required tables `ok`, and the three listed as `still absent`.
 
 ### 2. Apply the migration
 
-Supabase dashboard → SQL Editor → paste `migrations/20260727_email_suppression_and_queue.sql` → Run. It is `IF NOT EXISTS` throughout, so it is safe to re-run.
+Supabase dashboard → SQL Editor → paste **`migrations/20260821_email_suppression_and_queue_v2.sql`** → Run. It is `IF NOT EXISTS` throughout, so it is safe to re-run, and safe to run on top of the 27 July file if you already ran that one.
+
+> **Do not run `migrations/20260727_email_suppression_and_queue.sql`.** It creates the three tables and never enables row-level security on them. This project's default privileges grant `anon` and `authenticated` full `arwdDxtm` on every new table in `public`, so all three land world-readable and world-writable to anyone holding the anon key, which ships in the browser bundle.
+>
+> Measured on staging with the 27 July DDL applied, via `scripts/probeSuppressionTableExposure.mjs`. All twelve of these returned success:
+>
+> | actor | operation | result |
+> |---|---|---|
+> | anon, not logged in | read `email_suppression` | 200, rows returned |
+> | anon, not logged in | read `email_queue` | 200, rows returned |
+> | anon, not logged in | read `app_config` | 200, rows returned |
+> | anon, not logged in | `DELETE` from `email_suppression` | 200, row deleted |
+> | anon, not logged in | flip `app_config.lifecycle_v2` | 200, row updated |
+> | anon, not logged in | `INSERT` into `email_suppression` | 201, row created |
+> | logged-in student | the same six | same |
+>
+> `email_queue.context` carries recipient email addresses, and `email_suppression` is by construction a list of people who bounced or complained. Shipping the 27 July file would replace a suppression list that does not work with one that anyone can read, empty, or poison. v2 is the identical schema with RLS enabled, zero policies, and the anon/authenticated grants revoked. The service role bypasses RLS, so `emailGuard`, `emailQueue` and `featureFlags` keep working with no code change.
 
 Re-run step 1. The three should now read `now present`.
+
+Then confirm they are locked, not just present:
+
+```bash
+SUPABASE_URL=https://vpmgamaspefwqywttdtj.supabase.co \
+SUPABASE_ANON_KEY=<production anon key> \
+SUPABASE_SERVICE_KEY=<production service key> \
+ALLOW_PROD=1 \
+  node scripts/probeSuppressionTableExposure.mjs
+```
+
+Expect `No path reachable with the anon key.` and exit code 0. It seeds and removes its own throwaway rows and student, and sends no email.
 
 ### 3. Backfill, dry run first
 

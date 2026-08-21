@@ -43,11 +43,19 @@ export default async function handler(req, res) {
 
   // ── 1. Cancel any active Stripe subscription ──────────────────────────────
   try {
-    const { data: row } = await supabaseAdmin
+    const { data: row, error: readErr } = await supabaseAdmin
       .from('user_data')
       .select('subscription')
       .eq('user_id', userId)
       .maybeSingle()
+
+    // A failed read looks identical to "this user has no subscription", which
+    // would delete the account and leave a live Stripe subscription billing a
+    // card with no way to reach it. Stop and let the user retry.
+    if (readErr) {
+      console.error('[delete-account] subscription read failed, refusing to delete:', readErr.message, readErr.code ?? '')
+      return res.status(503).json({ error: 'Could not verify your subscription. Nothing was deleted. Please try again.' })
+    }
 
     const stripeSubId = row?.subscription?.stripeSubId
     const subStatus = row?.subscription?.status

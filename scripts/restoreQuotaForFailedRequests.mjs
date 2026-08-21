@@ -88,19 +88,32 @@ const db = createClient(SUPABASE_URL, SUPABASE_SERVICE_KEY)
 const courseCount = (row) => Array.isArray(row?.plan?.courses) ? row.plan.courses.length : 0
 const used = (row) => Number(row?.subscription?.aiQueriesUsed) || 0
 
+// PostgREST caps an unbounded select at max-rows (1000 by default) and returns
+// the truncated set with no error. That would be silent and it would be wrong in
+// the dangerous direction: a truncated success-trace set makes accounts look like
+// they never generated anything, so the script would hand back quota that was
+// legitimately spent. user_data is at 815 rows as of 2026-08-21, so this is not
+// hypothetical for much longer. Page explicitly rather than trust one round trip.
+const PAGE = 1000
+
+async function selectAll(table, columns) {
+  const out = []
+  for (let from = 0; ; from += PAGE) {
+    const { data, error } = await db.from(table).select(columns).range(from, from + PAGE - 1)
+    if (error) throw new Error(`reading ${table}: ${error.message}`)
+    out.push(...(data ?? []))
+    if (!data || data.length < PAGE) return out
+  }
+}
+
 async function idsWithRows(table) {
-  const { data, error } = await db.from(table).select('user_id')
-  if (error) throw new Error(`reading ${table}: ${error.message}`)
-  return new Set((data ?? []).map(r => r.user_id))
+  return new Set((await selectAll(table, 'user_id')).map(r => r.user_id))
 }
 
 async function main() {
   console.log(APPLY ? 'MODE: apply\n' : 'MODE: dry run, nothing will be written\n')
 
-  const { data: rows, error } = await db
-    .from('user_data')
-    .select('user_id, plan, subscription')
-  if (error) throw new Error(`reading user_data: ${error.message}`)
+  const rows = await selectAll('user_data', 'user_id, plan, subscription')
 
   // The three places a successful generation leaves a trace.
   const [withArtifacts, withUploads, withSignals] = await Promise.all([

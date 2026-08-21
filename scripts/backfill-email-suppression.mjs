@@ -4,7 +4,7 @@
  *
  * WHY THIS IS NOT OPTIONAL
  * ------------------------
- * Applying migrations/20260727_email_suppression_and_queue.sql creates an EMPTY
+ * Applying migrations/20260821_email_suppression_and_queue_v2.sql creates an EMPTY
  * table. An empty suppression list suppresses nobody. Every address that hard
  * bounced or filed a complaint between 2026-07-27 and today is still mailable
  * the moment the migration lands, so the migration on its own changes nothing

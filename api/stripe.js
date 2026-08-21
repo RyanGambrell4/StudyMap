@@ -527,11 +527,20 @@ export default async function handler(req, res) {
 
     // ── Idempotency check - skip duplicate event deliveries ───────────────────
     const eventId = event.id
-    const { data: existingEvent } = await supabaseAdmin
+    const { data: existingEvent, error: idempotencyErr } = await supabaseAdmin
       .from('stripe_idempotency')
       .select('event_id')
       .eq('event_id', eventId)
       .maybeSingle()
+    // A failed read here used to look exactly like "not a duplicate", so a
+    // missing table or a transient outage would have let every retried Stripe
+    // delivery reprocess: duplicate plan grants, duplicate emails. Return 500
+    // instead, which makes Stripe retry the delivery rather than us process it
+    // twice.
+    if (idempotencyErr) {
+      console.error('[stripe] idempotency check FAILED, refusing to process:', idempotencyErr.message, idempotencyErr.code ?? '')
+      return res.status(500).json({ error: 'Idempotency check unavailable' })
+    }
     if (existingEvent) {
       console.log(`[stripe] Duplicate event ${eventId} - skipping`)
       return res.status(200).json({ ok: true, duplicate: true })

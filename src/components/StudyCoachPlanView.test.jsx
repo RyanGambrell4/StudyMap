@@ -14,20 +14,30 @@ import { renderToStaticMarkup } from 'react-dom/server'
 import StudyCoachPlanView from './StudyCoachPlanView'
 import { setSessionDone, flattenSessions, addDays, assignScheduledDates } from '../../lib/shared/coachPlan.js'
 
-// Freeze the clock before TODAY is computed.
+// Freeze the clock AND derive TODAY the way the component does.
 //
-// These fixtures place sessions at offsets relative to "now", and the component
-// decides how far behind schedule a plan is by comparing those dates against
-// the current one. TODAY was derived from toISOString(), which is UTC, while
-// the component reads the local date, so for the last few hours of every day
-// the two disagreed by one and the "3c behind" case rendered "On your schedule"
-// instead. It passed at 18:24 and failed at 21:51 on 2026-08-20, which is when
-// UTC rolled over. Only the Date is faked; timers are left alone so
-// react-dom/server is unaffected.
-vi.useFakeTimers({ toFake: ['Date'] })
-vi.setSystemTime(new Date('2026-03-11T12:00:00Z'))
+// Every offset in these fixtures is relative to "today", and the component
+// decides how far behind a plan is by comparing those dates against the current
+// one. Its todayISO() reads LOCAL date parts (getFullYear/getMonth/getDate)
+// while the fixtures read toISOString(), which is UTC. The two disagree by a day
+// for every hour where the local and UTC dates differ, and that shifts which
+// sessions count as scheduled-by-today, which changes the behind-schedule counts
+// the 3c and no-exam-date cases assert. It passed at 18:24 and failed at 21:51
+// on 2026-08-20, which is when UTC rolled over in America/Toronto.
+//
+// Freezing the clock alone is not enough: a fixed instant still produces two
+// different dates in two different timezones, so a UTC-derived TODAY still
+// disagrees with the component's local one anywhere far enough east or west.
+// Deriving TODAY from the same local parts makes them agree by construction.
+// Only Date is faked; leaving timers alone keeps react-dom/server unaffected.
+const FROZEN_NOW = new Date('2026-03-11T12:00:00.000Z')
+beforeAll(() => { vi.useFakeTimers({ toFake: ['Date'] }); vi.setSystemTime(FROZEN_NOW) })
+afterAll(() => { vi.useRealTimers() })
 
-const TODAY = new Date().toISOString().split('T')[0]
+const localISODate = (d) =>
+  `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+
+const TODAY = localISODate(FROZEN_NOW)
 const EXAM = addDays(TODAY, 18)
 const TOPICS = ['Cell structure', 'Membrane transport', 'Glycolysis', 'Krebs cycle']
 const course = { id: 'c1', name: 'Cell Biology', color: { dot: '#7C5CFA' } }
@@ -40,7 +50,7 @@ beforeAll(() => {
     addEventListener() {}, removeEventListener() {},
   })
 })
-afterAll(() => { delete globalThis.__MOBILE__; vi.useRealTimers() })
+afterAll(() => { delete globalThis.__MOBILE__ })
 
 function plan({ startOffset = 1, examDate = EXAM, weeks = 3, perWeek = 4, duration = 45 } = {}) {
   const p = {
