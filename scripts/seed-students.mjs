@@ -292,7 +292,7 @@ const browserPayloads = {}
 let made = 0
 for (const s of STUDENTS) {
   try {
-    const id = await upsertStudent(s)
+    await upsertStudent(s)
     const courses = s.row.plan?.courses?.length ?? 0
     const used = s.row.subscription?.aiQueriesUsed ?? 0
     console.log(`  ${s.key.padEnd(24)} ${s.email.padEnd(42)} courses=${courses} aiUsed=${used}/5`)

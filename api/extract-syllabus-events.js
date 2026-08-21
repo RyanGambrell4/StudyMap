@@ -1,5 +1,5 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
-import { USER_ERRORS } from '../lib/server/userErrors.js'
+import { USER_ERRORS, sendUserError } from '../lib/server/userErrors.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })

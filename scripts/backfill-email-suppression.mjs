@@ -88,7 +88,7 @@ function normaliseReason(raw) {
 }
 
 function parseCsv(path) {
-  const text = readFileSync(path, 'utf8').replace(/^﻿/, '')
+  const text = readFileSync(path, 'utf8').replace(/^\uFEFF/, '')  // strip BOM
   const rows = text.split(/\r?\n/).filter(l => l.trim())
   if (!rows.length) return []
   const split = (line) => line.match(/("([^"]|"")*"|[^,]*)(,|$)/g)?.map(c =>
