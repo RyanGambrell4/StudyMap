@@ -1536,6 +1536,25 @@ account, every time.
 
 The super property is now re-registered whenever the course list changes.
 
+Quantified, so nobody has to take this on trust. The database says 293 of 809
+accounts have at least one course. PostHog, over the last 90 days, says:
+
+    course_count      events    distinct people
+    (not set)         19337     4375
+    0                 13180      511
+    1                  1403       53
+    5 / 7 / 8 / 10 / 11  ~1370      1 each
+
+Only 53 people have EVER emitted an event carrying course_count >= 1, against
+293 accounts that actually hold a course. The ~240 missing accounts added their
+course after login, in a session where the property had already been registered
+as 0 and was never updated again. The value could only correct itself on a
+LATER session's login, and 88% of users are active on exactly one day, so for
+most of them it never did.
+
+This is why `course_count: 0` on `trial_offer` was guaranteed rather than
+observed. Do not slice any pre-2026-08-20 funnel by this property.
+
 ### Which capture bug was live
 
 Both were present in the code. The one that actually killed server-side
@@ -1563,11 +1582,49 @@ worth writing down:
   asynchronously. `res.ok` proves acceptance, NOT delivery. Confirming an event
   landed requires reading it back through the query API.
 
+### Proof the fix works, read back out of PostHog
+
+Not inferred from the absence of an error. The same endpoint was called with the
+same request shape from two deployments that differed only in which key they
+held, and the events were then queried back:
+
+| distinct_id                        | fired    | key   | landed |
+|------------------------------------|----------|-------|--------|
+| claude-posthog-diagnostic-20260820 | 22:16:30 | phx_  | NO     |
+| claude-posthog-verify-20260820     | 22:19:48 | phx_  | NO     |
+| claude-posthog-verify3-20260820    | 22:20:22 | phx_  | NO     |
+| claude-posthog-final-20260820      | 22:21:21 | phc_  | YES    |
+
+The one that landed carries `$lib: server` and `source: stripe_checkout`, which
+also confirms the shared module and the awaited `checkout_started` are both
+working.
+
+Note for anyone reading runtime logs during this window: the 22:20:22 request
+showed no error line at the time it was queried, which looked like a success. It
+was not. The event never arrived. That was log-ingestion lag, and it is a good
+reason to confirm analytics by reading events back rather than by watching for
+errors.
+
 ### Analytics series break
 
 Server-side events before 2026-08-20 are not trustworthy and were not
-backfilled. Five landed in total between 2026-07-27 and 2026-08-20. Treat
-2026-08-20 as the start of the clean server-side series.
+backfilled. The audit reported "5 events ever since 27 Jul". The event history
+is slightly different and sharper: FIVE server-side events exist in total, and
+the last one was 2026-07-22.
+
+    2026-06-25  trial_activated
+    2026-07-02  trial_activated
+    2026-07-12  trial_activated
+    2026-07-15  checkout_success
+    2026-07-22  trial_activated
+
+Then nothing for 29 days. That lines up with `POSTHOG_API_KEY` being created on
+roughly 2026-07-26 (25 days before 2026-08-20 per `vercel env ls`): server
+capture worked until the variable was set to a personal key, and has produced
+nothing since.
+
+Treat 2026-07-22 as the end of the old series and 2026-08-20 as the start of the
+clean one.
 
 Client-side events are unaffected and continuous, EXCEPT `course_count`, which
 was a stale login-time snapshot on every event until this branch. Do not slice
