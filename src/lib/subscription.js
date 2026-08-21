@@ -246,6 +246,41 @@ export function getFeatureUsage(featureName) {
  * For pro/trial/unlimited: always allowed (returns remaining: null).
  * For free: checks per-feature caps with period reset logic.
  */
+/**
+ * Remaining free AI actions, from the number the SERVER actually enforces.
+ *
+ * `subscription.aiQueriesUsed` is written by lib/server/usage.js with the
+ * service key, so it is the only usage figure in this file that is actually accurate.
+ *
+ * The obvious-looking alternative, `feature_usage.aiTutor`, is not usable:
+ * `subscription` is guarded by a trigger that reverts every non-service-role
+ * write, so the browser has never persisted that key on any of 810 production
+ * rows. Reading it always returns { count: 0 }, which is why the counter in the
+ * chat footer read "5 free AI questions left" no matter how many the user had
+ * spent. See docs/subscription-column-writes.md.
+ */
+export function getAiActionsUsed() {
+  const sub = getCachedSubscription()
+  // Same monthly boundary the server applies in reserveAiUsage.
+  if (isNewMonth(sub?.aiQueriesResetAt)) return 0
+  return Number(sub?.aiQueriesUsed) || 0
+}
+
+export function getAiActionsLimit() {
+  const plan = getActivePlan()
+  if (plan === 'unlimited') return Infinity
+  if (plan === 'pro' || plan === 'trial') return PRO_LIMITS.aiActions.count
+  const sub = getCachedSubscription()
+  // Bonus actions from the paywall-exit gift are server-written and real.
+  return FREE_LIMITS.aiTutor.count + (Number(sub?.bonusAiActions) || 0)
+}
+
+export function getAiActionsRemaining() {
+  const limit = getAiActionsLimit()
+  if (limit === Infinity) return null
+  return Math.max(0, limit - getAiActionsUsed())
+}
+
 export function canUseFeature(featureName) {
   const plan = getActivePlan()
 
@@ -263,6 +298,19 @@ export function canUseFeature(featureName) {
   // Focus mode is handled separately via minutesUsed
   if (minutes !== undefined) {
     return { allowed: true, remaining: minutes, resetIn: period === 'day' ? 'tomorrow' : null }
+  }
+
+  // aiTutor is the one feature whose counter is server-authoritative. Everything
+  // else still reads feature_usage, which has never persisted, and is therefore
+  // unenforced across sessions. That is a separate decision, documented in
+  // docs/free-tier-enforcement.md, not something to silently change here.
+  if (featureName === 'aiTutor') {
+    const remaining = getAiActionsRemaining()
+    return {
+      allowed: remaining === null || remaining > 0,
+      remaining,
+      resetIn: AI_ACTION_PERIOD === 'month' ? 'next month' : null,
+    }
   }
 
   const usage = getFeatureUsage(featureName)
@@ -433,9 +481,11 @@ export function incrementAIQuery(source) {
   // getFeatureUsage only tracks free-plan counts; for paid users it returns
   // { count: 0 } since incrementFeatureUsage is a no-op for them.
   if (plan === 'free') {
-    const usage = getFeatureUsage('aiTutor')
-    const newCount = usage.count ?? 0
-    _sub = { ..._sub, aiQueriesUsed: newCount, aiQueriesResetAt: now }
+    // Advance the server-authoritative counter, not the feature_usage one.
+    // feature_usage never persists, so deriving from it reset the display to 1
+    // on every fresh session.
+    const newCount = (Number(_sub.aiQueriesUsed) || 0) + 1
+    _sub = { ..._sub, aiQueriesUsed: newCount, aiQueriesResetAt: _sub.aiQueriesResetAt ?? now }
     window.dispatchEvent(new CustomEvent('studyedge:ai-query-used', { detail: { count: newCount } }))
 
     const limit = getAIQueriesLimit()
