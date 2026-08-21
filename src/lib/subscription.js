@@ -358,6 +358,19 @@ export function getFirstGenerationAt() {
 /**
  * Call ONLY from a path where an AI generation returned usable output to the
  * user. Idempotent: the first call wins and later calls are no-ops.
+ *
+ * IMPORTANT: the supabase upsert below DOES NOT PERSIST. `subscription` is
+ * guarded by user_data_guard_subscription_trg, which reverts any write from a
+ * non-service role, silently and without an error. Verified in production:
+ * `feature_usage`, written the same way, is absent on all 810 rows.
+ *
+ * The rule still works, for a different reason than this code suggests. The
+ * durable stamp is written server-side by commitReservation() in
+ * lib/server/usage.js on the success path of every AI call, using the service
+ * key. What this function actually buys is the IN-MEMORY update and the event,
+ * which is what gates the card ask for the rest of the current session.
+ *
+ * See docs/subscription-column-writes.md.
  */
 export function markSuccessfulGeneration(source) {
   if (!_sub) return false

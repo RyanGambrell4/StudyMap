@@ -60,7 +60,12 @@ describe('the first successful generation', () => {
 
     expect(hasSuccessfulGeneration()).toBe(true)
     expect(getFirstGenerationAt()).toBeTruthy()
-    // Persisted, so a reload does not ask for a card all over again.
+    // This asserts the client ATTEMPTS the write, against a mocked Supabase.
+    // In production the write is reverted by user_data_guard_subscription_trg,
+    // which blocks every non-service-role write to `subscription`. The durable
+    // stamp comes from commitReservation() server-side instead. Do not read
+    // this assertion as proof that the value survives a reload.
+    // See docs/subscription-column-writes.md.
     expect(upserts).toHaveLength(1)
     expect(upserts[0].subscription.firstGenerationAt).toBeTruthy()
     // Announced, so the card ask can fire off the win.

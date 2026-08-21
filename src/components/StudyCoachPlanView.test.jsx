@@ -9,10 +9,23 @@
  * These also assert the copy the export pins, so a stat that silently stops
  * rendering fails here.
  */
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
+import { describe, it, expect, beforeAll, afterAll, vi } from 'vitest'
 import { renderToStaticMarkup } from 'react-dom/server'
 import StudyCoachPlanView from './StudyCoachPlanView'
 import { setSessionDone, flattenSessions, addDays, assignScheduledDates } from '../../lib/shared/coachPlan.js'
+
+// Freeze the clock before TODAY is computed.
+//
+// These fixtures place sessions at offsets relative to "now", and the component
+// decides how far behind schedule a plan is by comparing those dates against
+// the current one. TODAY was derived from toISOString(), which is UTC, while
+// the component reads the local date, so for the last few hours of every day
+// the two disagreed by one and the "3c behind" case rendered "On your schedule"
+// instead. It passed at 18:24 and failed at 21:51 on 2026-08-20, which is when
+// UTC rolled over. Only the Date is faked; timers are left alone so
+// react-dom/server is unaffected.
+vi.useFakeTimers({ toFake: ['Date'] })
+vi.setSystemTime(new Date('2026-03-11T12:00:00Z'))
 
 const TODAY = new Date().toISOString().split('T')[0]
 const EXAM = addDays(TODAY, 18)
@@ -27,7 +40,7 @@ beforeAll(() => {
     addEventListener() {}, removeEventListener() {},
   })
 })
-afterAll(() => { delete globalThis.__MOBILE__ })
+afterAll(() => { delete globalThis.__MOBILE__; vi.useRealTimers() })
 
 function plan({ startOffset = 1, examDate = EXAM, weeks = 3, perWeek = 4, duration = 45 } = {}) {
   const p = {
