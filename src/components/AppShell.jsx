@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import { getActivePlan, isTrialActive, hasUsedTrial, getTrialDaysRemaining } from '../lib/subscription'
+import { getActivePlan, isTrialActive, hasUsedTrial, getTrialDaysRemaining, hasSuccessfulGeneration } from '../lib/subscription'
 import { track } from '../lib/analytics'
 import { getCachedStudyTools } from '../lib/db'
 import { getDueCards } from '../lib/sm2'
@@ -490,7 +490,7 @@ export default function AppShell({
                   Trial · {daysLeft}d left
                 </span>
               </button>
-            ) : plan === 'free' && !hasUsedTrial() ? (
+            ) : plan === 'free' && !hasUsedTrial() && hasSuccessfulGeneration() ? (
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenPaywall?.('nav-trial') }}
                 style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ACCENT, border: 'none', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
@@ -499,14 +499,14 @@ export default function AppShell({
               </button>
             ) : plan !== 'free' ? (
               <span style={{ fontSize: 11, fontWeight: 700, color: plan === 'unlimited' ? '#16A34A' : ACCENT }}>{planLabel}</span>
-            ) : (
+            ) : hasSuccessfulGeneration() ? (
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenPaywall?.('nav-upgrade') }}
                 style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ACCENT, border: 'none', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
               >
                 Upgrade
               </button>
-            )}
+            ) : null}
           </button>
         </div>
       </header>

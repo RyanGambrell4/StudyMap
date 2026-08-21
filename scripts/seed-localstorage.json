@@ -1,0 +1,70 @@
+{
+  "note": "Browser half of the seeded state. Mastery, streaks and the review queue are localStorage, not database, so they cannot be seeded server side.",
+  "howToApply": "Log in as the student, open devtools console, then: Object.entries(payload).forEach(([k,v]) => localStorage.setItem(k, JSON.stringify(v)))",
+  "keyMap": {
+    "mastery": "se_mastery_v2",
+    "streak": "se_streak_v1",
+    "reviewDue": "se_review_queue_v1",
+    "lastActiveAt": "se_last_active_v1"
+  },
+  "students": {
+    "seed-mid-semester@studyedge.test": {
+      "mastery": {
+        "seed-course-1": {
+          "Stereochemistry": {
+            "score": 38,
+            "updatedAt": "2026-08-10T01:43:07.177Z"
+          },
+          "Reaction Mechanisms": {
+            "score": 84,
+            "updatedAt": "2026-08-19T01:43:07.177Z"
+          }
+        }
+      }
+    },
+    "seed-exam-shock@studyedge.test": {
+      "mastery": {
+        "seed-course-1": {
+          "Glycolysis": {
+            "score": 41,
+            "updatedAt": "2026-08-21T01:43:07.177Z",
+            "previous": 88
+          }
+        }
+      }
+    },
+    "seed-streak@studyedge.test": {
+      "streak": {
+        "count": 9,
+        "lastStudiedAt": "2026-08-20T01:43:07.177Z"
+      },
+      "reviewDue": [
+        {
+          "courseId": "seed-course-1",
+          "topic": "Hypothesis Testing",
+          "dueAt": "2026-08-21T01:43:07.177Z"
+        }
+      ]
+    },
+    "seed-lapsed@studyedge.test": {
+      "lastActiveAt": "2026-08-07T01:43:07.177Z",
+      "reviewDue": [
+        {
+          "courseId": "seed-course-1",
+          "topic": "Aldol Condensation",
+          "dueAt": "2026-08-12T01:43:07.177Z"
+        },
+        {
+          "courseId": "seed-course-1",
+          "topic": "Grignard Reagents",
+          "dueAt": "2026-08-17T01:43:07.177Z"
+        },
+        {
+          "courseId": "seed-course-2",
+          "topic": "Mitosis",
+          "dueAt": "2026-08-20T01:43:07.177Z"
+        }
+      ]
+    }
+  }
+}

@@ -1,5 +1,18 @@
 {
   "worktree": {
     "bgIsolation": "none"
+  },
+  "hooks": {
+    "WorktreeCreate": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR/scripts/bootstrap-worktree.sh\"",
+            "timeout": 300
+          }
+        ]
+      }
+    ]
   }
 }
