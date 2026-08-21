@@ -352,30 +352,39 @@ export default function App() {
         setInitialCompletedIds(new Set(plan.completedIds ?? []))
         setShowOutput(true)
       }
-      // Attach the full user profile as super properties so every event is sliceable.
-      register({
-        active_plan: getActivePlan(),
-        year_level: plan?.yearLevel ?? null,
-        learning_style: plan?.learningStyle ?? null,
-        school_type: plan?.schoolType ?? null,
-        course_count: plan?.courses?.length ?? 0,
-        has_onboarded: !!plan,
-      })
-      // course_count is re-registered by the effect below whenever the course
-      // list changes. Registering it only here meant it was captured before the
-      // user had added anything and then never updated, so every later event in
-      // the session reported course_count: 0 no matter what the user did. Any
-      // analysis that read that property as real state was reading a snapshot
-      // taken at login.
       setDbReady(true)
     })
   }, [session?.user?.id])
 
-  // Keep course_count honest for every event fired after login.
+  // ── Super properties ───────────────────────────────────────────────────────
+  // These used to be registered exactly once, in the effect above, at login.
+  // That is before a new user has done anything: no courses, no onboarding
+  // answers, plan still free. They were never re-registered, so every event for
+  // the rest of that session carried the login-time snapshot no matter what the
+  // user actually did, and 88% of users only ever have one session.
+  //
+  // Measured on 2026-08-21 over 90 days, which is what this effect fixes:
+  //   course_count   only 53 people ever emitted >= 1, against 293 accounts
+  //                  that hold a course
+  //   has_onboarded  512 people emitted False, 111 True, and 7 people emitted
+  //                  has_onboarded False together with active_plan pro, which
+  //                  cannot both be current
+  //
+  // Registering on every change costs nothing: posthog.register writes to local
+  // storage, it is not a network call.
   useEffect(() => {
     if (!dbReady) return
-    register({ course_count: courses.length })
-  }, [courses.length, dbReady])
+    register({
+      active_plan: getActivePlan(),
+      year_level: yearLevel ?? null,
+      learning_style: learningStyle ?? null,
+      school_type: schoolType ?? null,
+      course_count: courses.length,
+      has_onboarded: showOutput,
+    })
+  // active_plan is not in the dep list on its own because a plan change comes
+  // back through a Stripe redirect, which remounts the app and re-runs this.
+  }, [dbReady, courses.length, yearLevel, learningStyle, schoolType, showOutput])
 
   // ── Checkout intent → Stripe redirect ────────────────────────────────────
   // Runs exactly once per intent: ref guard prevents re-entry on re-renders.

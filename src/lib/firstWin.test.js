@@ -128,3 +128,55 @@ describe('the card ask is wired behind the win', () => {
     expect(pill).toContain('hasSuccessfulGeneration()')
   })
 })
+
+
+/**
+ * The card ask has more than one entry point, and openPaywall is not all of
+ * them. DashboardView and AccountView call activateTrial() directly, which goes
+ * straight to Stripe Checkout, and AppShell renders a trial button in the nav.
+ *
+ * The live defect this pins: AppShell showed "Start 7-Day Trial" on every
+ * section of the app for an account that had never had a generation succeed,
+ * and because openPaywall refuses to open for such an account, clicking it did
+ * nothing at all. Found by clicking through staging, not by any test.
+ */
+describe('every card-ask surface waits for a demonstrated win', () => {
+  const read = (f) => readFileSync(new URL(f, import.meta.url), 'utf8')
+
+  it('AppShell nav trial and upgrade buttons are gated', () => {
+    const src = read('../components/AppShell.jsx')
+    expect(src).toContain('hasSuccessfulGeneration')
+    const trialIdx = src.indexOf("onOpenPaywall?.('nav-trial')")
+    expect(trialIdx).toBeGreaterThan(-1)
+    expect(src.slice(trialIdx - 400, trialIdx)).toContain('hasSuccessfulGeneration()')
+    const upIdx = src.indexOf("onOpenPaywall?.('nav-upgrade')")
+    expect(upIdx).toBeGreaterThan(-1)
+    expect(src.slice(upIdx - 400, upIdx)).toContain('hasSuccessfulGeneration()')
+  })
+
+  it('DashboardView free-tier asks are gated', () => {
+    const src = read('../components/DashboardView.jsx')
+    expect(src).toContain('const canAskForCard = hasSuccessfulGeneration()')
+    for (const name of ['showAiChip', 'showTrialCard', 'showSessionNudge', 'showSevenDayBanner']) {
+      const i = src.indexOf(`const ${name} =`)
+      expect(i, `${name} not found`).toBeGreaterThan(-1)
+      const end = src.indexOf('\n\n', i)
+      expect(src.slice(i, end === -1 ? i + 400 : end), `${name} does not require a win`).toContain('canAskForCard')
+    }
+  })
+
+  it('AccountView trial and upgrade blocks are gated', () => {
+    const src = read('../components/AccountView.jsx')
+    expect(src).toContain('const canAskForCard = hasSuccessfulGeneration()')
+    expect(src).toContain("plan === 'free' && canAskForCard && !trialUsed")
+  })
+
+  it('no component calls activateTrial without also checking for a win', () => {
+    for (const f of ['../components/DashboardView.jsx', '../components/AccountView.jsx']) {
+      const src = read(f)
+      if (src.includes('activateTrial(')) {
+        expect(src, `${f} calls activateTrial but never checks for a win`).toContain('hasSuccessfulGeneration')
+      }
+    }
+  })
+})
