@@ -71,7 +71,35 @@ export default async function handler(req, res) {
   }
 
   // ── 2. Delete all user data from public tables ────────────────────────────
-  const tables = ['user_data', 'ios_state', 'struggle_topics']
+  //
+  // Every public table with a user_id, not a subset. The list used to be
+  // ['user_data', 'ios_state', 'struggle_topics'], which left five tables
+  // behind. Most of them cascade from auth.users so the rows went eventually,
+  // but `course_uploads.user_id` has ON DELETE NO ACTION, so its rows did not
+  // cascade and instead BLOCKED the auth delete outright:
+  //
+  //   23503  update or delete on table "users" violates foreign key constraint
+  //          "course_uploads_user_id_fkey" on table "course_uploads"
+  //
+  // Step 3 then returned 500 and the user was told to email support. Anyone who
+  // had ever uploaded a syllabus could not delete their account, and
+  // `course_uploads.extracted_text` holds the full text of what they uploaded.
+  // Seven production accounts are in that state today.
+  //
+  // Deleting the rows here fixes it without a schema change. The FK is still
+  // worth correcting; supabase/fix-course-uploads-cascade.sql does that
+  // separately so this route stops depending on list completeness.
+  const tables = [
+    'course_uploads',           // must precede the auth delete: NO ACTION FK
+    'user_data',
+    'ios_state',
+    'struggle_topics',
+    'topic_signals',
+    'generated_artifacts',
+    'course_grade_baselines',
+    'one_time_offers',
+  ]
+  const undeleted = []
   for (const table of tables) {
     const { error } = await supabaseAdmin
       .from(table)
@@ -79,14 +107,17 @@ export default async function handler(req, res) {
       .eq('user_id', userId)
     if (error) {
       console.error(`[delete-account] Failed to delete from ${table}:`, error)
-      // Log but continue - partial cleanup is better than no cleanup.
+      undeleted.push(table)
     }
   }
+  // `feedback.user_id` is ON DELETE SET NULL by design, so feedback survives
+  // deletion as anonymous. That is deliberate and not in this list.
 
   // ── 3. Delete the auth user ───────────────────────────────────────────────
   const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(userId)
   if (deleteError) {
-    console.error('[delete-account] Auth delete error:', deleteError)
+    console.error('[delete-account] Auth delete error:', deleteError,
+      undeleted.length ? `(rows left behind in: ${undeleted.join(', ')})` : '')
     return res.status(500).json({ error: 'Failed to delete account. Please contact support@getstudyedge.com.' })
   }
 
