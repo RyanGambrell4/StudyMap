@@ -55,6 +55,9 @@ const ProblemSolverView   = lazy(() => import('./ProblemSolverView'))
 const EssayArchitectView  = lazy(() => import('./EssayArchitectView'))
 const MasteryMapView      = lazy(() => import('./MasteryMapView'))
 const ReviewQueueView     = lazy(() => import('./ReviewQueueView'))
+// Eager on purpose: it is the fallback for the lazy view above, so pulling it
+// from that module would load the very chunk it is meant to cover.
+import ReviewQueueSkeleton from './ReviewQueueSkeleton'
 const SemesterView        = lazy(() => import('./SemesterView'))
 import CheatSheetModal from './CheatSheetModal'
 import BrainDumpModal from './BrainDumpModal'
@@ -2448,7 +2451,10 @@ export default function OutputView({
         )}
 
         {/* ── Review Queue ── */}
+        {/* Its own boundary, nested inside the shared one, so the queue gets a
+            skeleton shaped like its rows instead of the generic spinner. */}
         {activeSection === 'review' && (
+          <Suspense fallback={<ReviewQueueSkeleton />}>
           <ReviewQueueView
             courses={courses}
             onOpenBrainDump={(topic, courseId) => {
@@ -2462,6 +2468,7 @@ export default function OutputView({
               setShowQuizBurst(true)
             }}
           />
+          </Suspense>
         )}
 
         </Suspense>

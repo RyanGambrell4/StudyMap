@@ -1475,3 +1475,35 @@ _Continuing from the first background session. Focused on pricing copy accuracy,
 ### Previously fixed (from first session, now resolved)
 - FocusMode keyboard shortcut stale closure (fixed this session)
 - `StudyCoachView.jsx` MyPlansView `useMemo` (fixed in first session)
+
+---
+
+## 2026-08-24 — Review Queue redesign
+
+**Branch:** `worktree-review-queue-redesign` · Files: `ReviewQueueView.jsx`,
+`ReviewQueueSkeleton.jsx` (new), `OutputView.jsx`, `harness/review-queue.*` (new).
+
+Presentation rebuild of the Review Queue onto the Knowledge Map's design
+language (`KNOWLEDGE_MAP` tokens + `KM_SERIF`). It was the last screen still
+importing the deprecated V1 palette in `src/lib/designTokens.js`.
+
+Two things worth knowing beyond the restyle:
+
+1. **The counts used to come from two different queries.** `getReviewStats()`
+   is unfiltered and uses a 3-day upcoming window; the tabs are filtered and
+   use 7. The stat tiles and the tabs could therefore disagree. The tiles are
+   gone and the tabs are now the single source of both counts.
+2. **The queue never re-read its own store.** `dueItems` was memoised on
+   `courseId` alone, so finishing a Brain Dump from a row left the cleared
+   topic on screen and the queue could never reach zero while visible. That is
+   why the "queue cleared" celebration never fired in practice. It now
+   subscribes to `studyedge:tool-session-complete`, the same event the
+   Knowledge Map and Dashboard already listen for.
+
+Scheduling logic, the masteryStore contract, the prop signature and all four
+PostHog events (`review_queue_drill`, `review_queue_drill_all`,
+`review_queue_cleared`) are unchanged.
+
+Screenshots of each state: `design/review-queue/`.
+Visual harness: `npx vite --config harness/vite.harness.config.js` then
+`http://localhost:5199/review-queue.html?state=due&w=390`.
