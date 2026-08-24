@@ -10,7 +10,7 @@ Nothing here has been applied. Every command is yours to run.
 
 Three faults stacked, each of which alone would be enough:
 
-1. **The migration was never applied.** `migrations/20260727_email_suppression_and_queue.sql` creates `email_suppression`, `email_queue` and `app_config`. Production has none of them.
+1. **The migration was never applied.** `migrations/20260727_email_suppression_and_queue.sql` creates `email_suppression`, `email_queue` and `app_config`. Production has none of them. Do not run that file: it creates all three without row-level security. Run `migrations/20260821_email_suppression_and_queue_v2.sql`, and see step 2 for why.
 
 2. **Nothing ever wrote to the table anyway.** The migration's comment says *"Written by resend-webhook on bounce and complaint events"*. That was never implemented. `api/resend-webhook.js` handles `email.bounced` and `email.complained` by calling `posthogCapture` and `console.warn`, and nothing else. **Applying the migration alone gets you an empty table that stays empty forever.**
 
