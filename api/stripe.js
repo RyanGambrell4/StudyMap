@@ -21,7 +21,7 @@ import { sendFounderCancellationEmail } from '../lib/server/founderOutreach.js'
 import { createTrialCancelOffer, userHasExistingOffer } from '../lib/server/oneTimeOffer.js'
 import { sendProWelcomeEmail } from '../lib/server/proWelcomeEmail.js'
 import { resolveCheckoutPlan, TRIAL_PLAN, TRIAL_BILLING_PERIOD, TRIAL_PERIOD_DAYS } from '../lib/server/trialPlan.js'
-import { normalizeCustomerId, resolveCheckoutCustomer, customerSessionArgs } from '../lib/server/checkoutCustomer.js'
+import { normalizeCustomerId, resolveCheckoutCustomer, customerSessionArgs, hasLiveSubscription, selectPreferredCustomer, buildCustomerPatch } from '../lib/server/checkoutCustomer.js'
 
 // Disable Vercel's default body parsing - required for Stripe signature verification
 export const config = {
@@ -33,6 +33,12 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 // ── Basic in-memory rate limit for checkout (per IP, 5 req / 60s) ─────────────
 const _checkoutRateMap = new Map()
+
+// How many duplicate Stripe customers we probe for a live subscription before
+// settling for the newest. Bounded because each probe is a second API call on
+// the checkout path, and nobody has enough duplicates for the tail to matter —
+// the worst case in production today is four.
+const SUBSCRIPTION_PROBE_LIMIT = 5
 function checkoutRateLimit(ip) {
   const now = Date.now()
   const window = 60_000
@@ -1273,8 +1279,26 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
   let lookupCustomerId = null
   if (!existingCustomerId && verifiedUser?.email) {
     try {
-      const found = await stripe.customers.list({ email: verifiedUser.email, limit: 1 })
-      lookupCustomerId = found.data?.[0]?.id ?? null
+      // limit 10, not 1. The people this fix exists for already have several
+      // records each, and `customers.list` returns newest first — so limit 1
+      // hands back the duplicate minted by the most recent abandoned checkout,
+      // which is the empty one. Probe them for a live subscription instead.
+      const found = await stripe.customers.list({ email: verifiedUser.email, limit: 10 })
+      const candidates = []
+      for (const customer of (found.data ?? []).slice(0, SUBSCRIPTION_PROBE_LIMIT)) {
+        let live = false
+        try {
+          const subs = await stripe.subscriptions.list({ customer: customer.id, status: 'all', limit: 10 })
+          live = hasLiveSubscription(subs.data)
+        } catch (subErr) {
+          // Treat an unreadable customer as "no live subscription" rather than
+          // failing the checkout. Worst case we fall back to newest-first.
+          console.error(`[stripe checkout] Could not read subscriptions for ${customer.id}:`, subErr?.message ?? subErr)
+        }
+        candidates.push({ id: customer.id, hasLiveSubscription: live })
+        if (live) break // found the record that is actually billing; stop probing
+      }
+      lookupCustomerId = selectPreferredCustomer(candidates)
     } catch (lookupErr) {
       // Non-fatal. A failed lookup should never block a paying user, it just
       // means we fall through to customer_email for this one session.
@@ -1299,14 +1323,23 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
         .select('subscription')
         .eq('user_id', userId)
         .maybeSingle()
-      await supabaseAdmin.from('user_data').upsert(
-        {
-          user_id: userId,
-          subscription: { ...(row?.subscription ?? {}), stripeCustomerId: resolvedCustomerId },
-          updated_at: new Date().toISOString(),
-        },
-        { onConflict: 'user_id' },
-      )
+
+      // update, not upsert, and only over a subscription object that already
+      // exists. An insert here would create `subscription = { stripeCustomerId }`
+      // with no plan and no status, and initSubscription() takes the stored
+      // object whole rather than merging DEFAULT_SUB into it — so that user
+      // would read back plan: undefined for every gate in the app. A NULL
+      // subscription reads back as the full defaults, which is strictly better
+      // than a partial object. See buildCustomerPatch.
+      const patch = buildCustomerPatch(row?.subscription, resolvedCustomerId)
+      if (patch) {
+        await supabaseAdmin
+          .from('user_data')
+          .update({ subscription: patch, updated_at: new Date().toISOString() })
+          .eq('user_id', userId)
+      } else {
+        console.log(`[stripe checkout] No subscription object for ${userId} yet — leaving the first write to the webhook`)
+      }
     } catch (persistErr) {
       console.error('[stripe checkout] Could not persist stripeCustomerId:', persistErr?.message ?? persistErr)
     }
