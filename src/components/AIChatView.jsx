@@ -131,6 +131,7 @@ export default function AIChatView({ courseId, courseName, examDate, targetGrade
           messages: messagesForApi,
           tutorMemory: hasTutorMemory,
           courseName,
+          courseId: typeof courseId === 'string' ? courseId : null,
           examDate: examDate ?? null,
           targetGrade: targetGrade ?? null,
           coachPlan,

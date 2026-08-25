@@ -1,18 +1,24 @@
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { sendUserError } from '../lib/server/userErrors.js'
 import { resolveCourseId } from '../lib/server/courseContext.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const gate = await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const { concept, answer, courseName, courseId: bodyCourseId } = req.body
-  if (!concept || !answer) return res.status(400).json({ error: 'Missing concept or answer' })
+  if (!concept || !answer) return sendUserError(res, 'missing_input', 'generate-mnemonic: no concept or no answer')
 
   let courseId = bodyCourseId || null
-  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName).catch(() => null)
+  if (!courseId && courseName) courseId = await resolveCourseId(auth.userId, courseName).catch(() => null)
+
+  // Reserved after validation, so a request that gets rejected costs nothing.
+  const gate = await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
 
   const prompt = `Create a memorable mnemonic device to help a student remember the following flashcard.
 
@@ -66,6 +72,8 @@ Rules:
       }).then(w => { if (!w.ok) console.warn('[generate-mnemonic] saveArtifact failed', w.error) })
         .catch(err => console.warn('[generate-mnemonic] saveArtifact threw', err?.message))
     }
+    // The work succeeded, so charge for it now.
+    await gate.commit?.()
     return res.status(200).json(result)
   } catch (e) {
     console.error('[generate-mnemonic]', e)

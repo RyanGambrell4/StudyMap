@@ -3,8 +3,12 @@ import { flattenSessions } from '../lib/shared/coachPlan.js'
 
 // The handler's two external dependencies are stubbed so the test exercises
 // exactly one thing: what the grounding gate does to a model response.
+// The handler now authenticates first, resolves the course, and only then
+// reserves an AI action, so the mock has to cover both halves of that split.
 vi.mock('../lib/server/usage.js', () => ({
-  verifyAndCheckAiUsage: async () => ({ ok: true, userId: 'user-1' }),
+  verifyAuth: async () => ({ ok: true, userId: 'user-1' }),
+  reserveAiUsage: async () => ({ ok: true, userId: 'user-1', commit: async () => ({ ok: true }) }),
+  verifyAndCheckAiUsage: async () => ({ ok: true, userId: 'user-1', commit: async () => ({ ok: true }) }),
 }))
 vi.mock('../lib/server/courseContext.js', () => ({
   getCourseContext: async () => ({ identity: { name: 'Cell Biology' } }),

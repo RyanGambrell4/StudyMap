@@ -21,6 +21,7 @@ import { sendFounderCancellationEmail } from '../lib/server/founderOutreach.js'
 import { createTrialCancelOffer, userHasExistingOffer } from '../lib/server/oneTimeOffer.js'
 import { sendProWelcomeEmail } from '../lib/server/proWelcomeEmail.js'
 import { resolveCheckoutPlan, TRIAL_PLAN, TRIAL_BILLING_PERIOD, TRIAL_PERIOD_DAYS } from '../lib/server/trialPlan.js'
+import { posthogCapture as captureServerEvent } from '../lib/server/posthog.js'
 
 // Disable Vercel's default body parsing - required for Stripe signature verification
 export const config = {
@@ -91,37 +92,16 @@ const PRICE_TO_PLAN = {
 // Fires events from this server so funnel data isn't lost when the browser
 // navigates away before posthog-js can flush.
 //
-// Requires POSTHOG_API_KEY (plain runtime env var, NOT VITE_POSTHOG_KEY).
-// VITE_POSTHOG_KEY is a build-time Vite replacement — process.env.VITE_POSTHOG_KEY
-// is undefined at Vercel function runtime. Set POSTHOG_API_KEY = phc_... in
-// Vercel project settings → Environment Variables → all environments.
-async function posthogCapture(event, distinctId, properties = {}) {
-  const key = process.env.POSTHOG_API_KEY
-  if (!key) {
-    console.error('[posthog] POSTHOG_API_KEY is not set — server-side analytics are being silently dropped. Add POSTHOG_API_KEY to Vercel environment variables.')
-    return
-  }
-  if (!distinctId) {
-    console.warn('[posthog] posthogCapture called without distinctId — event dropped:', event)
-    return
-  }
-  const host = process.env.POSTHOG_HOST || 'https://us.i.posthog.com'
-  try {
-    await fetch(`${host}/i/v0/e/`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        api_key: key,
-        event,
-        distinct_id: distinctId,
-        properties: { ...properties, $lib: 'server', source: 'stripe_webhook' },
-        timestamp: new Date().toISOString(),
-      }),
-    })
-  } catch (err) {
-    console.error('[posthog] capture failed (non-fatal):', err.message)
-  }
-}
+// The implementation lives in lib/server/posthog.js so this file and
+// api/resend-webhook.js cannot drift apart again. It checks res.ok, logs the
+// rejection body, and throws outside production. See that file for why a 200
+// from PostHog does not by itself prove an event landed.
+//
+// Thin wrapper: stamp the origin on every event fired from this file. A call
+// that passes its own `source` wins, so the checkout-session path can
+// distinguish itself from the webhook path.
+const posthogCapture = (event, distinctId, properties = {}) =>
+  captureServerEvent(event, distinctId, { source: 'stripe_webhook', ...properties })
 
 async function sendWinBackEmail(toEmail) {
   if (!process.env.RESEND_API_KEY) return
@@ -547,11 +527,20 @@ export default async function handler(req, res) {
 
     // ── Idempotency check - skip duplicate event deliveries ───────────────────
     const eventId = event.id
-    const { data: existingEvent } = await supabaseAdmin
+    const { data: existingEvent, error: idempotencyErr } = await supabaseAdmin
       .from('stripe_idempotency')
       .select('event_id')
       .eq('event_id', eventId)
       .maybeSingle()
+    // A failed read here used to look exactly like "not a duplicate", so a
+    // missing table or a transient outage would have let every retried Stripe
+    // delivery reprocess: duplicate plan grants, duplicate emails. Return 500
+    // instead, which makes Stripe retry the delivery rather than us process it
+    // twice.
+    if (idempotencyErr) {
+      console.error('[stripe] idempotency check FAILED, refusing to process:', idempotencyErr.message, idempotencyErr.code ?? '')
+      return res.status(500).json({ error: 'Idempotency check unavailable' })
+    }
     if (existingEvent) {
       console.log(`[stripe] Duplicate event ${eventId} - skipping`)
       return res.status(200).json({ ok: true, duplicate: true })
@@ -1259,13 +1248,26 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
 
     // checkout_started fires here — after the Stripe session actually exists.
     // Client fires checkout_button_clicked on CTA click; this is the honest conversion signal.
+    //
+    // This is awaited. It used to be fire-and-forget, and returning the JSON
+    // response below ends the function invocation: a capture still in flight at
+    // that moment is not guaranteed to run, which is how checkout_started went
+    // missing. Analytics must still never fail a checkout that Stripe has
+    // already accepted, so a capture error is logged here rather than falling
+    // through to the catch below, which would return a 500 for a session that
+    // was created successfully.
     if (userId) {
-      posthogCapture('checkout_started', userId, {
-        plan,
-        billing_period: billingPeriod,
-        is_trial: wantsTrial,
-        stripe_session_id: session.id,
-      }).catch(() => {})
+      try {
+        await posthogCapture('checkout_started', userId, {
+          plan,
+          billing_period: billingPeriod,
+          is_trial: wantsTrial,
+          stripe_session_id: session.id,
+          source: 'stripe_checkout',
+        })
+      } catch (err) {
+        console.error('[stripe checkout] checkout_started capture failed:', err.message)
+      }
     }
 
     return res.status(200).json({ url: session.url })

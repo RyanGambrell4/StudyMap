@@ -69,7 +69,8 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
-            courseName: course?.name ?? 'course',
+            courseName: course?.name ?? undefined,
+            courseId: course?.id ?? null,
             currentGrade,
             hoursAvailable: hoursUntilExam ?? 4,
             step: 'topics',
@@ -108,7 +109,8 @@ export default function ExamRescueModal({ courses, onClose, onShowPaywall }) {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
-          courseName: course?.name ?? 'course',
+          courseName: course?.name ?? undefined,
+          courseId: course?.id ?? null,
           hoursAvailable: hoursUntilExam ?? 4,
           topics: topicList,
           step: 'schedule',

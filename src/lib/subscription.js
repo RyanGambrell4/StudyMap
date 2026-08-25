@@ -20,9 +20,22 @@ import { track } from './analytics'
 // Free is a one-time preview tier: most premium features are limited to a
 // single lifetime use so users see what each tool does, then hit a real wall
 // that drives them into the 7-day Pro trial.
+//
+// The AI action pool is the exception, and it resets monthly. Three places used
+// to disagree about this: the server enforced a monthly reset, this file said
+// 'total' (five actions for life), and the user-facing copy said "this month".
+// The server was the only one users actually felt, and monthly is what the copy
+// has always promised, so monthly is the model everywhere now.
+//
+// AI_ACTION_PERIOD is the single source of truth. Copy that describes the free
+// AI allowance must be generated from AI_PERIOD_LABEL rather than hard-coded,
+// and subscription.aiQuota.test.js fails the build if the two drift apart.
+export const AI_ACTION_PERIOD = 'month'
+export const AI_PERIOD_LABEL = 'this month'
+
 export const FREE_LIMITS = {
   courses:             1,
-  aiTutor:             { count: 5,  period: 'total' },
+  aiTutor:             { count: 5,  period: AI_ACTION_PERIOD },
   blueprint:           { count: 1,  period: 'total' },
   coachPlan:           { count: 1,  period: 'total' },
   practiceExam:        { count: 1,  period: 'total' },
@@ -56,7 +69,7 @@ export const TRIAL_LIMITS = PRO_LIMITS
 
 // Legacy - kept for backwards compatibility
 export const PLAN_LIMITS = {
-  free:      { courses: 1,        aiQueries: 5,        aiResetPeriod: 'total' },
+  free:      { courses: 1,        aiQueries: 5,        aiResetPeriod: AI_ACTION_PERIOD },
   pro:       { courses: 5,        aiQueries: 100,      aiResetPeriod: 'month' },
   unlimited: { courses: Infinity, aiQueries: Infinity, aiResetPeriod: 'month' },
 }
@@ -233,6 +246,41 @@ export function getFeatureUsage(featureName) {
  * For pro/trial/unlimited: always allowed (returns remaining: null).
  * For free: checks per-feature caps with period reset logic.
  */
+/**
+ * Remaining free AI actions, from the number the SERVER actually enforces.
+ *
+ * `subscription.aiQueriesUsed` is written by lib/server/usage.js with the
+ * service key, so it is the only usage figure in this file that is actually accurate.
+ *
+ * The obvious-looking alternative, `feature_usage.aiTutor`, is not usable:
+ * `subscription` is guarded by a trigger that reverts every non-service-role
+ * write, so the browser has never persisted that key on any of 810 production
+ * rows. Reading it always returns { count: 0 }, which is why the counter in the
+ * chat footer read "5 free AI questions left" no matter how many the user had
+ * spent. See docs/subscription-column-writes.md.
+ */
+export function getAiActionsUsed() {
+  const sub = getCachedSubscription()
+  // Same monthly boundary the server applies in reserveAiUsage.
+  if (isNewMonth(sub?.aiQueriesResetAt)) return 0
+  return Number(sub?.aiQueriesUsed) || 0
+}
+
+export function getAiActionsLimit() {
+  const plan = getActivePlan()
+  if (plan === 'unlimited') return Infinity
+  if (plan === 'pro' || plan === 'trial') return PRO_LIMITS.aiActions.count
+  const sub = getCachedSubscription()
+  // Bonus actions from the paywall-exit gift are server-written and real.
+  return FREE_LIMITS.aiTutor.count + (Number(sub?.bonusAiActions) || 0)
+}
+
+export function getAiActionsRemaining() {
+  const limit = getAiActionsLimit()
+  if (limit === Infinity) return null
+  return Math.max(0, limit - getAiActionsUsed())
+}
+
 export function canUseFeature(featureName) {
   const plan = getActivePlan()
 
@@ -250,6 +298,19 @@ export function canUseFeature(featureName) {
   // Focus mode is handled separately via minutesUsed
   if (minutes !== undefined) {
     return { allowed: true, remaining: minutes, resetIn: period === 'day' ? 'tomorrow' : null }
+  }
+
+  // aiTutor is the one feature whose counter is server-authoritative. Everything
+  // else still reads feature_usage, which has never persisted, and is therefore
+  // unenforced across sessions. That is a separate decision, documented in
+  // docs/free-tier-enforcement.md, not something to silently change here.
+  if (featureName === 'aiTutor') {
+    const remaining = getAiActionsRemaining()
+    return {
+      allowed: remaining === null || remaining > 0,
+      remaining,
+      resetIn: AI_ACTION_PERIOD === 'month' ? 'next month' : null,
+    }
   }
 
   const usage = getFeatureUsage(featureName)
@@ -323,6 +384,66 @@ export async function incrementFeatureUsage(featureName, amount = 1) {
   }
 }
 
+// ── First successful generation ──────────────────────────────────────────────
+// The card ask is not allowed to fire until the user has had one AI generation
+// actually succeed against their own course material. 13 of 24 trials were
+// cancelled the same day the card was entered, which is what asking before any
+// value has landed produces.
+//
+// This is stamped once, on the first success, and persists in the subscription
+// row so it survives a reload and a new device. It is deliberately NOT derived
+// from feature_usage: those counters increment when a generation STARTS, and
+// counting attempts as wins is the whole bug this build exists to fix.
+
+export function hasSuccessfulGeneration() {
+  return !!getCachedSubscription()?.firstGenerationAt
+}
+
+export function getFirstGenerationAt() {
+  return getCachedSubscription()?.firstGenerationAt ?? null
+}
+
+/**
+ * Call ONLY from a path where an AI generation returned usable output to the
+ * user. Idempotent: the first call wins and later calls are no-ops.
+ *
+ * IMPORTANT: the supabase upsert below DOES NOT PERSIST. `subscription` is
+ * guarded by user_data_guard_subscription_trg, which reverts any write from a
+ * non-service role, silently and without an error. Verified in production:
+ * `feature_usage`, written the same way, is absent on all 810 rows.
+ *
+ * The rule still works, for a different reason than this code suggests. The
+ * durable stamp is written server-side by commitReservation() in
+ * lib/server/usage.js on the success path of every AI call, using the service
+ * key. What this function actually buys is the IN-MEMORY update and the event,
+ * which is what gates the card ask for the rest of the current session.
+ *
+ * See docs/subscription-column-writes.md.
+ */
+export function markSuccessfulGeneration(source) {
+  if (!_sub) return false
+  if (_sub.firstGenerationAt) return false
+
+  const now = new Date().toISOString()
+  _sub = { ..._sub, firstGenerationAt: now }
+
+  if (_uid) {
+    const snapshot = { ..._sub }
+    supabase
+      .from('user_data')
+      .upsert({ user_id: _uid, subscription: snapshot, updated_at: now }, { onConflict: 'user_id' })
+      .then(({ error }) => {
+        if (error) console.error('[subscription] markSuccessfulGeneration error:', error)
+      })
+  }
+
+  track('first_generation_succeeded', { source: source ?? null, plan: getActivePlan() })
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('studyedge:first-win', { detail: { source: source ?? null } }))
+  }
+  return true
+}
+
 // ── AI helpers (backwards-compat wrappers) ────────────────────────────────────
 
 export function canUseAI() {
@@ -331,7 +452,11 @@ export function canUseAI() {
 
 export function getAIQueriesUsed() {
   const usage = getFeatureUsage('aiTutor')
-  if (isNewDay(usage.resetAt)) return 0
+  // Must use the same boundary as FREE_LIMITS.aiTutor.period and as the server
+  // in lib/server/usage.js. This read used a daily boundary against a limit
+  // that was never daily, so the count the user saw drifted from the count
+  // that was actually enforced.
+  if (isNewMonth(usage.resetAt)) return 0
   return usage.count ?? (_sub?.aiQueriesUsed ?? 0)
 }
 
@@ -341,8 +466,13 @@ export function getAIQueriesLimit() {
   return FREE_LIMITS.aiTutor.count
 }
 
-export function incrementAIQuery() {
+export function incrementAIQuery(source) {
   incrementFeatureUsage('aiTutor')
+
+  // Every caller invokes this after its response has come back clean, so this
+  // is the app's de facto "a generation just worked" signal. Stamping the first
+  // win here is what unlocks the card ask; see hasSuccessfulGeneration.
+  markSuccessfulGeneration(source ?? 'ai_action')
 
   if (!_sub) return
   const now = new Date().toISOString()
@@ -351,9 +481,11 @@ export function incrementAIQuery() {
   // getFeatureUsage only tracks free-plan counts; for paid users it returns
   // { count: 0 } since incrementFeatureUsage is a no-op for them.
   if (plan === 'free') {
-    const usage = getFeatureUsage('aiTutor')
-    const newCount = usage.count ?? 0
-    _sub = { ..._sub, aiQueriesUsed: newCount, aiQueriesResetAt: now }
+    // Advance the server-authoritative counter, not the feature_usage one.
+    // feature_usage never persists, so deriving from it reset the display to 1
+    // on every fresh session.
+    const newCount = (Number(_sub.aiQueriesUsed) || 0) + 1
+    _sub = { ..._sub, aiQueriesUsed: newCount, aiQueriesResetAt: _sub.aiQueriesResetAt ?? now }
     window.dispatchEvent(new CustomEvent('studyedge:ai-query-used', { detail: { count: newCount } }))
 
     const limit = getAIQueriesLimit()

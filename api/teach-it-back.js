@@ -1,4 +1,5 @@
-import { verifyAndCheckAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { sendUserError } from '../lib/server/userErrors.js'
 import { recordTopicSignal } from '../lib/server/topicSignals.js'
 import { resolveCourseId } from '../lib/server/courseContext.js'
 
@@ -6,18 +7,22 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   const { courseName, courseId: bodyCourseId, topic, explanation, phase, followUpQuestion, followUpAnswer } = req.body
-  if (!courseName || !topic || !explanation) return res.status(400).json({ error: 'Missing required fields' })
+  if (!courseName || !topic || !explanation) return sendUserError(res, 'missing_input', 'teach-it-back: missing course, topic, or explanation')
 
   // Follow-up is part of the same session, auth only, no extra credit consumed.
   // For the initial phase we resolve userId from the AI usage gate; follow-up
   // phase does not persist a signal so we do not need userId here.
   let userId = null
+  let gate = null
   if (phase === 'followup') {
     const auth = await verifyAuth(req)
     if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
     userId = auth.userId
   } else {
-    const gate = await verifyAndCheckAiUsage(req)
+    const auth = await verifyAuth(req)
+    if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
+    // Reserved, not charged. gate.commit() runs on the success path below.
+    gate = await reserveAiUsage(req, { verified: auth })
     if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
     userId = gate.userId
   }
@@ -108,6 +113,9 @@ Rules:
       }
     }
 
+    // The work succeeded, so charge for it now. The follow-up phase never
+    // reserved, so commit is absent there and this is a no-op.
+    await gate?.commit?.()
     return res.status(200).json(result)
   } catch (e) {
     console.error('[teach-it-back]', e)

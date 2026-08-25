@@ -1,3 +1,18 @@
+-- ============================================================================
+-- SUPERSEDED. DO NOT RUN THIS FILE.
+-- Run migrations/20260821_email_suppression_and_queue_v2.sql instead.
+--
+-- This version creates all three tables without enabling row-level security.
+-- This project's default privileges grant anon and authenticated full
+-- arwdDxtm on every new table in public, so running this file leaves
+-- email_suppression, email_queue and app_config readable and writable by
+-- anyone holding the anon key, which ships in the browser bundle. Proven on
+-- staging: scripts/probeSuppressionTableExposure.mjs, 12 of 12 operations
+-- succeeded, including DELETE from email_suppression with no login at all.
+--
+-- v2 is the identical schema plus ENABLE ROW LEVEL SECURITY and REVOKE.
+-- ============================================================================
+
 -- Migration: email suppression, app_config feature flags, email_queue
 -- Run in Supabase SQL Editor BEFORE deploying code changes.
 -- Safe to re-run (all statements are IF NOT EXISTS / ON CONFLICT DO NOTHING).

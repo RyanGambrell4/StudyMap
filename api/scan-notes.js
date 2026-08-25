@@ -1,4 +1,5 @@
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { sendUserError } from '../lib/server/userErrors.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -8,13 +9,18 @@ export default async function handler(req, res) {
   const contentLength = parseInt(req.headers['content-length'] || '0')
   if (contentLength > 5_000_000) return res.status(413).json({ error: 'Payload too large' })
 
-  const gate = await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const { imageBase64, mediaType } = req.body
   if (!imageBase64 || !mediaType) {
-    return res.status(400).json({ error: 'Missing image data' })
+    return sendUserError(res, 'missing_input', 'scan-notes: no image payload')
   }
+
+  // Reserved after validation, so a request that gets rejected costs nothing.
+  const gate = await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -57,6 +63,8 @@ export default async function handler(req, res) {
     }
 
     const text = data.content?.[0]?.text ?? ''
+    // The work succeeded, so charge for it now.
+    await gate.commit?.()
     res.status(200).json({ text })
   } catch (error) {
     console.error('scan-notes error:', error)

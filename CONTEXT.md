@@ -1,4 +1,95 @@
 # StudyEdge AI — Living Context
+
+## Verification Agent -- 2026-08-24 (P0 audit, shipped with the funnel branch)
+
+Shipped as 4 commits on top of the 12 unmerged `worktree-fix-funnel-course-gate`
+commits. Everything below was reproduced against the staging project
+(`bkxcroylxubcnwkpxvqk`) before and after the change. No production writes.
+
+### Fixed and shipped
+
+**Account deletion returned 500 for anyone who had uploaded a syllabus.**
+Eight public tables reference `auth.users`; seven cascade. `course_uploads.user_id`
+was declared with no `ON DELETE` clause, which defaults to `NO ACTION`, so its
+rows blocked the auth delete with `23503`. `api/delete-account.js` cleaned only
+three of the eight tables, `course_uploads` not among them, so the route hit that
+error and told the user to email support. `course_uploads.extracted_text` holds
+the full text of the uploaded document. Seven production accounts were in that
+state. The route now clears all eight, uploads first.
+Verify: `node scripts/verifyAccountDeletion.mjs` (4/4; 1/4 with the old list).
+
+**`lib/server/usage.js` threw at import when `RESEND_API_KEY` was unset.**
+`new Resend(undefined)` throws, and every AI endpoint imports that module, so a
+missing or misspelled key would have 500'd the entire AI surface at cold start
+over a nudge email that is skipped when the key is absent. Now lazy.
+
+**`api/stripe.js` webhook idempotency read ignored its error.** A failed read was
+indistinguishable from "not a duplicate", so any retried Stripe delivery would
+reprocess. Returns 500 now so Stripe retries instead.
+
+### Found, NOT fixed (billing and subscription code was out of scope)
+
+**Two AI-quota races.** `commitReservation` reads `subscription` at reserve time
+and writes the whole column at commit time; the gap is a whole generation.
+- Two overlapping generations charge one action.
+- A Stripe upgrade landing mid-generation is erased: seeded `plan=pro` plus
+  `stripeSubId` between reserve and commit, and after commit the row read
+  `plan=free` with the sub id gone. The user pays, `getActivePlan()` says free,
+  and Stripe does not retry because from its side the write succeeded.
+
+Prepared: `supabase/atomic-ai-usage-increment.sql`. Validated on staging, took
+`scripts/verifyAiQuotaAccounting.mjs` from 12/14 to 14/14, then dropped.
+
+**13 accounts on `plan: unlimited, status: active` with no Stripe customer id.**
+Ten signed up after the guard trigger, with zero trials used, and the only
+server-side writer of `plan: 'unlimited'` is the Stripe webhook. Either comped
+deliberately or `rls-lockdown.sql` sat unapplied for weeks. Needs a decision.
+
+### Prepared migrations, NOT applied
+
+```
+migrations/20260821_email_suppression_and_queue_v2.sql   RUN THIS ONE
+supabase/atomic-ai-usage-increment.sql                   quota races
+supabase/fix-course-uploads-cascade.sql                  FK hygiene
+supabase/fix-rls-redundant-policy.sql                    user_data policy
+```
+
+**Do not run `migrations/20260727_email_suppression_and_queue.sql`.** It creates
+`email_suppression`, `email_queue` and `app_config` with no row-level security,
+and this project's default ACL grants `anon` and `authenticated` full `arwdDxtm`
+on every new table in `public`. Applied to staging, all twelve of these succeeded
+with no login at all: read all three tables, `DELETE FROM email_suppression`,
+flip `app_config.lifecycle_v2`, `INSERT` into email_suppression.
+`email_queue.context` carries recipient addresses. The v2 file is the same schema
+with RLS on and grants revoked.
+Verify: `node scripts/probeSuppressionTableExposure.mjs`.
+
+### Settled questions
+
+- **The RLS lockdown is real, not cosmetic.** The old `Users can manage their own
+  data` policy is exactly as narrow as the four that replaced it, so ORing them
+  changes nothing. No cross-user read or write path exists on any of the twelve
+  public tables. Dropping the old policy is hygiene, not an incident.
+- **PostHog has nothing to delete.** Zero of 27 saved insights, 3 dashboards,
+  4 cohorts and 2 alerts slice by `active_plan`, `year_level`, `learning_style`,
+  `school_type`, `has_onboarded` or `course_count`. The six are on 16,167 events,
+  so ad-hoc queries are still unreliable, but the wall is clean.
+- **The `{ data }` swallow is 51 sites, not 8.** The ones that gate a real
+  decision are fixed; the rest are pinned by
+  `lib/server/supabaseErrorSwallow.test.js`, which fails on a new one. Lower
+  `BASELINE` when you fix one.
+
+### Still blocked
+
+- **Bounce and complaint rates since 27 July** need `RESEND_API_KEY`. Vercel
+  returns empty strings for all 42 sensitive vars via `env pull`. The dashboard
+  CSV export also works: `scripts/backfill-email-suppression.mjs --from-csv`.
+- **The generation half of the AI checks** (syllabus upload producing a populated
+  course, flashcards, FocusMode, quiz burst, diagrams, essay review) needs
+  `ANTHROPIC_API_KEY`, which is not in `~/.studyedge/env.staging`.
+
+---
+
 _Last updated by: UX Copy Agent on 2026-07-19 (comprehensive AI-voice + slop sweep across all ~70 JSX components: removed "We'll/I'll" first-person voice from CoursesView, SyllabusUploadModal, AuthScreen, ErrorBoundary, BlueprintScreen; removed "AI-powered/AI-generated/personalized" qualifiers from AppShell, DashboardView, OutputView, SharedPlanView, PodcastGenerator, OnboardingTour, CheatSheetModal, FocusMode; removed emoji from App.jsx email confirmation tips, browser notifications, FocusMode dead-code icons; removed preachy/slop copy from WeeklyGoalCard, ConfidenceTapModal, DashboardView, Onboarding headings. 12 commits shipped to main.); Quality Sweep Agent on 2026-07-16 (second session: DashboardView AI chip visibility bug, floating trial nudge price fix, AuthScreen plan-aware trial price, FocusMode Enter stale closure, stale 7-day trial copy in 4 files); Quality Sweep Agent on 2026-07-16 (boost nudge email rewrite, double-credit bugs fixed in teach-it-back/connections-mode/exam-rescue, freeBadge fix, em-dash guardrails in 5 more AI prompts, $0 today → card-required in 3 emails, stale AI limit corrections); SEO Agent on 2026-06-10 (43 new pages: Wave A AI category, Wave B panic-study blog, Wave C study science/GPA, Wave D 30 school GPA pages, Wave E vercel.json + sitemap + footer); QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
 
 ---
@@ -1507,3 +1598,195 @@ PostHog events (`review_queue_drill`, `review_queue_drill_all`,
 Screenshots of each state: `design/review-queue/`.
 Visual harness: `npx vite --config harness/vite.harness.config.js` then
 `http://localhost:5199/review-queue.html?state=due&w=390`.
+
+## Funnel repair — 2026-08-20 (branch `worktree-fix-funnel-course-gate`)
+
+### Premises in the brief that were wrong
+
+**"The repo moved from ~/Desktop/StudyEdgeAI to ~/Projects/StudyEdgeAI. Run
+`git worktree repair`, the 13 worktrees under `Web App/.claude/worktrees/` are
+broken."**
+Wrong in every particular, and no repair was needed.
+- The working repo is `~/Projects/StudyMapLocal`. `~/Projects/StudyEdgeAI` is an
+  assets folder containing an empty git repo with no commits and no remote.
+- There is no `Web App/` directory in the working repo. That path exists only
+  in the stale iCloud copy at `~/Desktop/StudyEdgeAI/Web App`, whose git
+  directory is genuinely corrupt (no resolvable HEAD). Do not work there.
+- Worktrees are healthy. `git worktree list` resolves all of them and
+  `git fsck` exits 0 with only dangling objects. There are 43, not 13.
+
+**"`Missing courseId (or unique courseName)` appears verbatim in 10 endpoints."**
+Sixteen, not ten. Two more endpoints (`prep-blast`, `timed-challenge`) returned
+`Missing courseName`, which is the same defect wearing a different string.
+
+**"`aiResetPeriod: 'total'` gives 5 AI actions for life."**
+The identifier named in the brief lives in a block marked
+`// Legacy - kept for backwards compatibility` and is read by one function
+nobody calls for this purpose. The value that actually governed the free
+allowance was `FREE_LIMITS.aiTutor.period`. More importantly there were FOUR
+answers in the tree, not two:
+- `lib/server/usage.js` reset monthly, via `isNewMonth`. This is the only one
+  users ever felt, because the server is the enforcer.
+- `FREE_LIMITS.aiTutor.period` said `'total'`.
+- `getAIQueriesUsed()` read the counter against a DAILY boundary.
+- The copy said "this month".
+
+**"Roughly 400 accounts exist with no course."**
+516 of 809, as of 2026-08-20.
+
+**"Zero em dashes in user facing copy, detector already exists."**
+No repo-wide em dash detector exists. What exists is `clean()` in
+`src/utils/strings.js`, a runtime sanitiser for stored course names, and
+per-file assertions inside two component tests. The branch was checked by
+diffing added lines rather than by running a detector.
+
+**"`course_count: 0` on `trial_offer` reflects real state."**
+It does not, and could not have. `course_count` is a PostHog SUPER PROPERTY
+registered exactly once, in the `useEffect` keyed on `session.user.id` in
+App.jsx, immediately after login. It was never re-registered. So every event
+fired later in a session carried the value captured before the user had done
+anything, and `course_count: 0` on any in-session event was guaranteed
+regardless of what the user did. Any analysis that read it as real state was
+reading a snapshot taken at login.
+
+The underlying claim is nonetheless true, for a stronger reason: onboarding had
+no course-adding step at all. Steps were `personalize`, `app_preview`,
+`trial_offer`. It collected an optional course NAME string and created nothing,
+and `handleOnboardingComplete` hardcoded `n_courses: 0` with the comment
+"0 here by definition". So the card ask genuinely did render against an empty
+account, every time.
+
+The super property is now re-registered whenever the course list changes.
+
+Quantified, so nobody has to take this on trust. The database says 293 of 809
+accounts have at least one course. PostHog, over the last 90 days, says:
+
+    course_count      events    distinct people
+    (not set)         19337     4375
+    0                 13180      511
+    1                  1403       53
+    5 / 7 / 8 / 10 / 11  ~1370      1 each
+
+Only 53 people have EVER emitted an event carrying course_count >= 1, against
+293 accounts that actually hold a course. The ~240 missing accounts added their
+course after login, in a session where the property had already been registered
+as 0 and was never updated again. The value could only correct itself on a
+LATER session's login, and 88% of users are active on exactly one day, so for
+most of them it never did.
+
+This is why `course_count: 0` on `trial_offer` was guaranteed rather than
+observed. Do not slice any pre-2026-08-20 funnel by this property.
+
+### Which capture bug was live
+
+Both were present in the code. The one that actually killed server-side
+analytics was the swallowed rejection.
+
+Read from a preview runtime log on 2026-08-20 at 22:16:30 UTC, deployment
+`dpl_G46UjffJq4qdV9pNA3kwgPK7yfhc`:
+
+```
+[posthog] MISCONFIGURED (personal): POSTHOG_API_KEY holds a personal API key
+(phx_...). PostHog ingest rejects these with 401 invalid_personal_api_key.
+It needs the project write key (phc_...), the same value as VITE_POSTHOG_KEY.
+```
+
+`POSTHOG_API_KEY` is set to a personal API key. PostHog ingest rejects it with
+401 on every call, and the old implementation awaited `fetch` without reading
+the response, so every rejection was silent. The fire-and-forget at
+`api/stripe.js:1263` was real but secondary: it affected one event, and that
+event would have been rejected anyway.
+
+Two facts about the ingest endpoint, verified live the same day, that make this
+worth writing down:
+- a `phx_` key returns `401 API key is not valid: personal_api_key`
+- ANY `phc_`-shaped key returns 200, valid or not, because ingest validates
+  asynchronously. `res.ok` proves acceptance, NOT delivery. Confirming an event
+  landed requires reading it back through the query API.
+
+### Proof the fix works, read back out of PostHog
+
+Not inferred from the absence of an error. The same endpoint was called with the
+same request shape from two deployments that differed only in which key they
+held, and the events were then queried back:
+
+| distinct_id                        | fired    | key   | landed |
+|------------------------------------|----------|-------|--------|
+| claude-posthog-diagnostic-20260820 | 22:16:30 | phx_  | NO     |
+| claude-posthog-verify-20260820     | 22:19:48 | phx_  | NO     |
+| claude-posthog-verify3-20260820    | 22:20:22 | phx_  | NO     |
+| claude-posthog-final-20260820      | 22:21:21 | phc_  | YES    |
+
+The one that landed carries `$lib: server` and `source: stripe_checkout`, which
+also confirms the shared module and the awaited `checkout_started` are both
+working.
+
+Note for anyone reading runtime logs during this window: the 22:20:22 request
+showed no error line at the time it was queried, which looked like a success. It
+was not. The event never arrived. That was log-ingestion lag, and it is a good
+reason to confirm analytics by reading events back rather than by watching for
+errors.
+
+### Analytics series break
+
+Server-side events before 2026-08-20 are not trustworthy and were not
+backfilled. The audit reported "5 events ever since 27 Jul". The event history
+is slightly different and sharper: FIVE server-side events exist in total, and
+the last one was 2026-07-22.
+
+    2026-06-25  trial_activated
+    2026-07-02  trial_activated
+    2026-07-12  trial_activated
+    2026-07-15  checkout_success
+    2026-07-22  trial_activated
+
+Then nothing for 29 days. That lines up with `POSTHOG_API_KEY` being created on
+roughly 2026-07-26 (25 days before 2026-08-20 per `vercel env ls`): server
+capture worked until the variable was set to a personal key, and has produced
+nothing since.
+
+Treat 2026-07-22 as the end of the old series and 2026-08-20 as the start of the
+clean one.
+
+Client-side events are unaffected and continuous, EXCEPT `course_count`, which
+was a stale login-time snapshot on every event until this branch. Do not slice
+any historical funnel by `course_count`.
+
+### Production environment still needs one change
+
+The correct value is the project write key, which is public by design and is
+already visible in the production client bundle:
+
+```
+vercel env rm POSTHOG_API_KEY production
+printf 'phc_vALU9oNcFGu4PNaqjWvVrGgvLn68CyAJaeWbVGiUQSkd' | vercel env add POSTHOG_API_KEY production
+```
+
+This branch set the correct key for PREVIEW ONLY, scoped to
+`worktree-fix-funnel-course-gate`, so the chain could be verified without
+touching production. Production still holds the `phx_` key.
+
+`POSTHOG_PERSONAL_API_KEY` is a separate, correctly-named variable holding a
+`phx_` key for the query API. Leave it alone. It is not the ingest credential.
+
+### Quota model
+
+Unified on MONTHLY. `AI_ACTION_PERIOD` in `src/lib/subscription.js` is the
+single source of truth, and `src/lib/subscription.aiQuota.test.js` fails the
+build if the client period, the copy label, the server boundary, or the plan
+numbers drift apart.
+
+Monthly was chosen because it is what the server already enforced and what the
+copy already promised, so it is the smallest change that makes all four
+statements agree. The one-shot `period: 'total'` previews on other free
+features (blueprint, coachPlan, practiceExam, brainDump, quizBurst, examRescue)
+are deliberate and were NOT changed.
+
+### Known issue not fixed here
+
+`lib/server/subscriptionMerge.js` does not exist on main. The
+`worktree-fix-feature-usage-clobber` branch wrote it but was never merged, so
+the clobber it fixes is still live: `user_data.subscription` has several
+writers that each rewrite the whole JSON column from a snapshot read earlier in
+the request. `commitReservation` in `lib/server/usage.js` inherits that shape.
+This branch did not make it worse and did not fix it.

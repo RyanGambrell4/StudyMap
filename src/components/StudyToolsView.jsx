@@ -652,6 +652,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
         body: JSON.stringify({
           mode: 'quick-quiz',
           courseName,
+          courseId: course?.id ?? null,
           topic: drillTopic.trim(),
           professorEmphasis: drillEmphasis || null,
           struggles: drillStruggles.length ? drillStruggles : null,

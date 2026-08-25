@@ -1,10 +1,11 @@
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { sendUserError } from '../lib/server/userErrors.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const gate = await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const {
     courseName,
@@ -20,7 +21,12 @@ export default async function handler(req, res) {
     struggles,
     professorEmphasis,
   } = req.body
-  if (!courseName) return res.status(400).json({ error: 'Missing courseName' })
+  if (!courseName) return sendUserError(res, 'course_required', 'prep-blast: no courseName in body')
+
+  // Reserved only after validation, so a rejected request costs nothing.
+  const gate = await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
 
   // Compute days-until-exam if only examDate was provided.
   let resolvedDays = typeof daysUntilExam === 'number' && Number.isFinite(daysUntilExam) ? daysUntilExam : null
@@ -111,6 +117,8 @@ No em dashes. The question must require genuine understanding, not surface recal
     const last = content.lastIndexOf('}')
     if (first === -1 || last === -1) throw new Error('Malformed AI response')
     const result = JSON.parse(content.slice(first, last + 1))
+    // The work succeeded, so charge for it now.
+    await gate.commit?.()
     return res.status(200).json(result)
   } catch (e) {
     console.error('[prep-blast]', e)

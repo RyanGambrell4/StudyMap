@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import { getActivePlan, isTrialActive, hasUsedTrial, getTrialDaysRemaining } from '../lib/subscription'
+import { getActivePlan, isTrialActive, hasUsedTrial, getTrialDaysRemaining, hasSuccessfulGeneration, getAiActionsRemaining, getAiActionsLimit } from '../lib/subscription'
 import { track } from '../lib/analytics'
 import { getCachedStudyTools } from '../lib/db'
 import { getDueCards } from '../lib/sm2'
@@ -477,6 +477,31 @@ export default function AppShell({
             onMouseEnter={e => e.currentTarget.style.background = '#F0EFEC'}
             onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
           >
+            {/* Remaining free AI actions. Free users only, and only once the
+                number means something: before the first generation there is
+                nothing to count down and the gate is what matters. Reads the
+                server-authoritative counter, not feature_usage, which has never
+                persisted. See docs/subscription-column-writes.md. */}
+            {plan === 'free' && hasSuccessfulGeneration() && (() => {
+              const left = getAiActionsRemaining()
+              if (left === null) return null
+              const limit = getAiActionsLimit()
+              const low = left <= 1
+              return (
+                <span
+                  title={`${left} of ${limit} free AI actions left this month`}
+                  style={{
+                    fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap',
+                    padding: '3px 8px', borderRadius: 6, marginRight: 2,
+                    color: low ? '#D97706' : '#5C5952',
+                    background: low ? '#FFF7ED' : '#EFF1F4',
+                    border: `1px solid ${low ? '#FED7AA' : 'transparent'}`,
+                  }}
+                >
+                  {left === 0 ? 'No AI actions left' : `${left} AI left`}
+                </span>
+              )
+            })()}
             <div style={{ width: 32, height: 32, borderRadius: '50%', background: ACCENT, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{initials}</div>
             {isTrialing ? (
               <button
@@ -490,7 +515,7 @@ export default function AppShell({
                   Trial · {daysLeft}d left
                 </span>
               </button>
-            ) : plan === 'free' && !hasUsedTrial() ? (
+            ) : plan === 'free' && !hasUsedTrial() && hasSuccessfulGeneration() ? (
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenPaywall?.('nav-trial') }}
                 style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ACCENT, border: 'none', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
@@ -499,14 +524,14 @@ export default function AppShell({
               </button>
             ) : plan !== 'free' ? (
               <span style={{ fontSize: 11, fontWeight: 700, color: plan === 'unlimited' ? '#16A34A' : ACCENT }}>{planLabel}</span>
-            ) : (
+            ) : hasSuccessfulGeneration() ? (
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenPaywall?.('nav-upgrade') }}
                 style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ACCENT, border: 'none', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
               >
                 Upgrade
               </button>
-            )}
+            ) : null}
           </button>
         </div>
       </header>
