@@ -51,9 +51,13 @@ export function resetUser() {
   posthog.reset()
 }
 
-export function track(event, props = {}) {
+// `options` is passed straight through to posthog.capture. The one that matters
+// here is { transport: 'sendBeacon', send_instantly: true }, for events fired
+// immediately before a reload or navigation — the default XHR is batched and
+// gets cancelled when the page goes away, so the event is simply lost.
+export function track(event, props = {}, options) {
   if (!_ready) return
-  posthog.capture(event, props)
+  posthog.capture(event, props, options)
 }
 
 // Sticky props attached to every event (e.g. plan, school_type). Call when known.

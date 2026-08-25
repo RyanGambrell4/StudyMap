@@ -405,6 +405,9 @@ export default function App() {
 
     createCheckoutSession(plan, billing, session.user.email, session.user.id, opts)
       .then(result => {
+        // Stale bundle: the page is already reloading. Leave the redirecting
+        // state up so the user does not see the app flash back to normal.
+        if (result?.staleBundle) return
         if (result?.alreadySubscribed || !result) { setCheckoutIntent(null); setCheckoutRedirecting(false); return }
         window.location.href = result
       })

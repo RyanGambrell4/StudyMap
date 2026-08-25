@@ -414,6 +414,9 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     setTrialError(null)
     try {
       const url = await activateTrial(userId, userEmail)
+      // A stale bundle: recoverFromStaleBundle() is already reloading the page.
+      // Do not navigate and do not show an error; the retry happens after reload.
+      if (url?.staleBundle) return
       if (!url) { setTrialError('Something went wrong. Please try again.'); return }
       window.location.href = url
     } catch {
@@ -438,6 +441,9 @@ export default function PaywallModal({ trigger, onClose, userEmail, userId, curr
     setLoading(pendingPlan.planId)
     try {
       const url = await createCheckoutSession(pendingPlan.planId, pendingPlan.billingPeriod, userEmail, userId)
+      // A stale bundle: recoverFromStaleBundle() is already reloading the page.
+      // Do not navigate and do not show an error; the retry happens after reload.
+      if (url?.staleBundle) return
       if (!url) { setPlanError('Checkout failed. No charge was made. Please try again.'); setScreen('plans'); return }
       if (url?.alreadySubscribed) { onClose(); return }
       window.location.href = url
