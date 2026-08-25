@@ -503,13 +503,6 @@ export function incrementAIQuery(source) {
 // not as an error to render, and emphatically not as a URL to navigate to.
 export const STALE_BUNDLE = Object.freeze({ staleBundle: true })
 
-/**
- * Force the service worker onto the current deploy, then reload.
- *
- * sw.js already calls skipWaiting() on install and clients.claim() on activate,
- * so update() is enough — there is no waiting worker left to nudge. The reload
- * is what actually swaps the JavaScript this tab is running.
- */
 // One-shot guard, per tab. sessionStorage rather than module scope because the
 // reload wipes module scope — the whole point is to survive it.
 const STALE_RELOAD_KEY = 'se_checkout_stale_reload'
@@ -522,6 +515,13 @@ function writeStaleBundleFlag() {
   try { window.sessionStorage.setItem(STALE_RELOAD_KEY, '1') } catch { /* private mode */ }
 }
 
+/**
+ * Force the service worker onto the current deploy, then reload.
+ *
+ * sw.js already calls skipWaiting() on install and clients.claim() on activate,
+ * so update() is enough — there is no waiting worker left to nudge. The reload
+ * is what actually swaps the JavaScript this tab is running.
+ */
 async function recoverFromStaleBundle() {
   try {
     if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
