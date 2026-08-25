@@ -1,4 +1,95 @@
 # StudyEdge AI — Living Context
+
+## Verification Agent -- 2026-08-24 (P0 audit, shipped with the funnel branch)
+
+Shipped as 4 commits on top of the 12 unmerged `worktree-fix-funnel-course-gate`
+commits. Everything below was reproduced against the staging project
+(`bkxcroylxubcnwkpxvqk`) before and after the change. No production writes.
+
+### Fixed and shipped
+
+**Account deletion returned 500 for anyone who had uploaded a syllabus.**
+Eight public tables reference `auth.users`; seven cascade. `course_uploads.user_id`
+was declared with no `ON DELETE` clause, which defaults to `NO ACTION`, so its
+rows blocked the auth delete with `23503`. `api/delete-account.js` cleaned only
+three of the eight tables, `course_uploads` not among them, so the route hit that
+error and told the user to email support. `course_uploads.extracted_text` holds
+the full text of the uploaded document. Seven production accounts were in that
+state. The route now clears all eight, uploads first.
+Verify: `node scripts/verifyAccountDeletion.mjs` (4/4; 1/4 with the old list).
+
+**`lib/server/usage.js` threw at import when `RESEND_API_KEY` was unset.**
+`new Resend(undefined)` throws, and every AI endpoint imports that module, so a
+missing or misspelled key would have 500'd the entire AI surface at cold start
+over a nudge email that is skipped when the key is absent. Now lazy.
+
+**`api/stripe.js` webhook idempotency read ignored its error.** A failed read was
+indistinguishable from "not a duplicate", so any retried Stripe delivery would
+reprocess. Returns 500 now so Stripe retries instead.
+
+### Found, NOT fixed (billing and subscription code was out of scope)
+
+**Two AI-quota races.** `commitReservation` reads `subscription` at reserve time
+and writes the whole column at commit time; the gap is a whole generation.
+- Two overlapping generations charge one action.
+- A Stripe upgrade landing mid-generation is erased: seeded `plan=pro` plus
+  `stripeSubId` between reserve and commit, and after commit the row read
+  `plan=free` with the sub id gone. The user pays, `getActivePlan()` says free,
+  and Stripe does not retry because from its side the write succeeded.
+
+Prepared: `supabase/atomic-ai-usage-increment.sql`. Validated on staging, took
+`scripts/verifyAiQuotaAccounting.mjs` from 12/14 to 14/14, then dropped.
+
+**13 accounts on `plan: unlimited, status: active` with no Stripe customer id.**
+Ten signed up after the guard trigger, with zero trials used, and the only
+server-side writer of `plan: 'unlimited'` is the Stripe webhook. Either comped
+deliberately or `rls-lockdown.sql` sat unapplied for weeks. Needs a decision.
+
+### Prepared migrations, NOT applied
+
+```
+migrations/20260821_email_suppression_and_queue_v2.sql   RUN THIS ONE
+supabase/atomic-ai-usage-increment.sql                   quota races
+supabase/fix-course-uploads-cascade.sql                  FK hygiene
+supabase/fix-rls-redundant-policy.sql                    user_data policy
+```
+
+**Do not run `migrations/20260727_email_suppression_and_queue.sql`.** It creates
+`email_suppression`, `email_queue` and `app_config` with no row-level security,
+and this project's default ACL grants `anon` and `authenticated` full `arwdDxtm`
+on every new table in `public`. Applied to staging, all twelve of these succeeded
+with no login at all: read all three tables, `DELETE FROM email_suppression`,
+flip `app_config.lifecycle_v2`, `INSERT` into email_suppression.
+`email_queue.context` carries recipient addresses. The v2 file is the same schema
+with RLS on and grants revoked.
+Verify: `node scripts/probeSuppressionTableExposure.mjs`.
+
+### Settled questions
+
+- **The RLS lockdown is real, not cosmetic.** The old `Users can manage their own
+  data` policy is exactly as narrow as the four that replaced it, so ORing them
+  changes nothing. No cross-user read or write path exists on any of the twelve
+  public tables. Dropping the old policy is hygiene, not an incident.
+- **PostHog has nothing to delete.** Zero of 27 saved insights, 3 dashboards,
+  4 cohorts and 2 alerts slice by `active_plan`, `year_level`, `learning_style`,
+  `school_type`, `has_onboarded` or `course_count`. The six are on 16,167 events,
+  so ad-hoc queries are still unreliable, but the wall is clean.
+- **The `{ data }` swallow is 51 sites, not 8.** The ones that gate a real
+  decision are fixed; the rest are pinned by
+  `lib/server/supabaseErrorSwallow.test.js`, which fails on a new one. Lower
+  `BASELINE` when you fix one.
+
+### Still blocked
+
+- **Bounce and complaint rates since 27 July** need `RESEND_API_KEY`. Vercel
+  returns empty strings for all 42 sensitive vars via `env pull`. The dashboard
+  CSV export also works: `scripts/backfill-email-suppression.mjs --from-csv`.
+- **The generation half of the AI checks** (syllabus upload producing a populated
+  course, flashcards, FocusMode, quiz burst, diagrams, essay review) needs
+  `ANTHROPIC_API_KEY`, which is not in `~/.studyedge/env.staging`.
+
+---
+
 _Last updated by: UX Copy Agent on 2026-07-19 (comprehensive AI-voice + slop sweep across all ~70 JSX components: removed "We'll/I'll" first-person voice from CoursesView, SyllabusUploadModal, AuthScreen, ErrorBoundary, BlueprintScreen; removed "AI-powered/AI-generated/personalized" qualifiers from AppShell, DashboardView, OutputView, SharedPlanView, PodcastGenerator, OnboardingTour, CheatSheetModal, FocusMode; removed emoji from App.jsx email confirmation tips, browser notifications, FocusMode dead-code icons; removed preachy/slop copy from WeeklyGoalCard, ConfidenceTapModal, DashboardView, Onboarding headings. 12 commits shipped to main.); Quality Sweep Agent on 2026-07-16 (second session: DashboardView AI chip visibility bug, floating trial nudge price fix, AuthScreen plan-aware trial price, FocusMode Enter stale closure, stale 7-day trial copy in 4 files); Quality Sweep Agent on 2026-07-16 (boost nudge email rewrite, double-credit bugs fixed in teach-it-back/connections-mode/exam-rescue, freeBadge fix, em-dash guardrails in 5 more AI prompts, $0 today → card-required in 3 emails, stale AI limit corrections); SEO Agent on 2026-06-10 (43 new pages: Wave A AI category, Wave B panic-study blog, Wave C study science/GPA, Wave D 30 school GPA pages, Wave E vercel.json + sitemap + footer); QA Agent on 2026-06-09 (em-dash sweep across 20+ components + 7 API files, emoji purge in FocusMode/CalendarWeekView/StudyToolsView/App.jsx, dark color leak fixes in StudyToolsView + SharedPlanView); Onboarding Agent on 2026-06-09 (funnel-timing analytics, email-confirmation funnel events, first_session_started anchor, AuthScreen em-dash sweep, signup header copy upgrade); Paywall Agent on 2026-06-09 (trial bar 3-day formula fix, Unlimited tutor session memory wiring, PostHog event contract refresh, Practice Exam Pro pill); UI Consistency Agent on 2026-06-09 (token doc pass, second-layer dark purge: 5 surfaces, em-dash + emoji + sub-token grey sweep on app shell); Landing Page Agent on 2026-06-08 (FAQ accordion section with FAQPage JSON-LD, sub-agent paused mid-build; main session corrected a Pro-pricing factual error in the FAQ copy + JSON-LD, swept em-dashes from new comments, verified the build, and shipped); Email Agent on 2026-06-08 (deleted dead crons.js, rewrote 2 Stripe webhook emails to light theme, shipped /unsubscribe page, fixed App.jsx duplicate-declaration build break); SEO pass on 2026-06-08 follow-up (built /pricing, tidied /not-affiliated, removed lock emoji, swept per-page meta keywords, repointed 4 broken og:image refs); SEO pass on 2026-06-08 (NCR copy sweep, internal Related-links block on 52 pages, meta-keywords cleanup, sitemap lastmod refresh); SEO Agent on 2026-06-01 (quality pass: em-dash purge, sitemap refresh, noindex hardening); Landing Page Agent on 2026-05-24 (Run 1 , hero CTA + How It Works); Onboarding & Paywall Conversion Agent on 2026-05-24; UI Consistency Agent on 2026-05-23 (full dark-purge pass); SEO Agent on 2026-05-23 (SEO layers)_
 
 ---
