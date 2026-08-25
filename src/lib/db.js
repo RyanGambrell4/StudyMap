@@ -109,9 +109,106 @@ async function _upsert(fields) {
   if (error) console.error('[db] upsert error', error)
 }
 
+/**
+ * Whether the plan_version column exists. Null until we find out, then latched
+ * so we log the fallback once rather than on every save.
+ */
+let _planVersioningAvailable = null
+
+/**
+ * Save the plan, refusing to overwrite a newer version written by another tab.
+ *
+ * savePlan is not read-modify-write against the database, so it is not the race
+ * commitReservation has. It is last-write-wins across CLIENTS: two tabs open,
+ * each holding its own `courses` array, and the second to save overwrites the
+ * first tab's course with a blob that never contained it.
+ *
+ * The write is now conditional on the version we last read. If another tab has
+ * saved since, the update matches zero rows, and rather than pretend it worked
+ * we re-read, hand the caller the winning plan, and report the conflict so it
+ * can reapply its change onto fresh state.
+ *
+ * Returns { ok, conflict, plan }:
+ *   { ok: true,  conflict: false }              our write landed
+ *   { ok: false, conflict: true, plan }         another tab won; `plan` is theirs
+ *   { ok: false, conflict: false }              the write failed for another reason
+ *
+ * Falls back to the old unguarded write while user_data.plan_version does not
+ * exist, logging once. That fallback is deliberate. Shipping a client that hard
+ * depends on a column nobody has applied is exactly how email_suppression,
+ * feature_usage, email_digest and user_data.courses each became a dead feature,
+ * and this is not going to be the fifth.
+ */
 export async function savePlan(plan) {
   if (_cache) _cache.plan = plan
+  if (!_userId) return { ok: false, conflict: false }
+
+  const now = new Date().toISOString()
+
+  if (_planVersioningAvailable !== false) {
+    const expected = _cache?.plan_version
+    if (typeof expected === 'number') {
+      const { data, error } = await supabase
+        .from('user_data')
+        .update({ plan, updated_at: now })
+        .eq('user_id', _userId)
+        .eq('plan_version', expected)
+        .select('plan, plan_version')
+
+      if (!error) {
+        _planVersioningAvailable = true
+        if (data?.length) {
+          if (_cache) _cache.plan_version = data[0].plan_version
+          return { ok: true, conflict: false }
+        }
+        // Zero rows matched: either the row's version moved on, or there is no
+        // row yet. Re-read to tell those apart.
+        const { data: fresh, error: rereadErr } = await supabase
+          .from('user_data')
+          .select('plan, plan_version')
+          .eq('user_id', _userId)
+          .maybeSingle()
+        if (rereadErr) {
+          // We know our guarded write did not land and we cannot see why.
+          // Falling through to the unguarded upsert here would perform exactly
+          // the blind overwrite this function exists to prevent, on a row we
+          // have just been told we are out of date with. Refuse instead.
+          console.error('[db] plan write refused: guarded write matched nothing and the re-read failed', rereadErr)
+          return { ok: false, conflict: false }
+        }
+        if (fresh) {
+          console.warn(
+            `[db] plan write refused: another session saved version ${fresh.plan_version} ` +
+            `while this one held ${expected}. Not overwriting it.`
+          )
+          if (_cache) { _cache.plan = fresh.plan; _cache.plan_version = fresh.plan_version }
+          return { ok: false, conflict: true, plan: fresh.plan }
+        }
+        // No row at all yet: fall through to the upsert below to create it.
+      } else if (isMissingPlanVersion(error)) {
+        if (_planVersioningAvailable === null) {
+          console.warn(
+            '[db] user_data.plan_version does not exist, so concurrent tabs can still ' +
+            'overwrite each other. Apply migrations/20260825_plan_version_optimistic_lock.sql.'
+          )
+        }
+        _planVersioningAvailable = false
+      } else {
+        console.error('[db] plan write error', error)
+        return { ok: false, conflict: false }
+      }
+    }
+  }
+
+  // Either versioning is unavailable, or there is no row to guard yet.
   await _upsert({ plan })
+  return { ok: true, conflict: false }
+}
+
+function isMissingPlanVersion(error) {
+  const code = error?.code
+  return code === '42703' || code === 'PGRST204' ||
+    /plan_version/.test(error?.message ?? '')
 }
 
 export async function saveSyllabusEvents(events) {

@@ -1,0 +1,93 @@
+# Fail the build when the code queries schema that production does not have.
+#
+# Four features have shipped into a void by that exact route: a migration was
+# written, never applied, and supabase-js returned `{ data: null, error }` where
+# nobody looked at `error`. The largest of them, user_data.courses, killed 17 of
+# 27 cron jobs and went unnoticed for two months while production logged
+# `42703 column user_data.courses does not exist` several times a day.
+#
+# This runs scripts/assertSchema.mjs, which derives what the code needs by
+# parsing every .from()/.select()/.eq()/.rpc() in api/ and lib/server/, and
+# checks each one against the live database. It is a parse of ~60 files plus one
+# round trip per reference, so it finishes in seconds.
+#
+# SETUP: this needs two repository secrets pointing at PRODUCTION, because
+# production is the schema a merge to main will deploy against:
+#
+#   SUPABASE_URL           https://vpmgamaspefwqywttdtj.supabase.co
+#   SUPABASE_SERVICE_KEY   the service role key
+#
+# The job is read-only. It issues limit=0 selects and an argument-shape probe
+# per RPC, and writes nothing.
+#
+# Until those secrets exist the job skips rather than fails, so adding this file
+# cannot block anyone. Check the skip notice in the summary; a permanently
+# skipping guard is not a guard.
+
+name: schema assert
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  assert:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+
+      - name: Show what the code expects
+        run: node scripts/assertSchema.mjs --list
+
+      - name: Check for secrets
+        id: secrets
+        env:
+          URL: ${{ secrets.SUPABASE_URL }}
+          KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          if [ -n "$URL" ] && [ -n "$KEY" ]; then
+            echo "present=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "present=false" >> "$GITHUB_OUTPUT"
+            {
+              echo "### Schema assertion skipped"
+              echo
+              echo "\`SUPABASE_URL\` and \`SUPABASE_SERVICE_KEY\` are not set as repository secrets,"
+              echo "so this guard did not run. It is the check that would have caught"
+              echo "\`user_data.courses\` before it took out 17 cron jobs for two months."
+              echo "Add them in Settings, Secrets and variables, Actions."
+            } >> "$GITHUB_STEP_SUMMARY"
+          fi
+
+      - name: Assert the live schema matches what the code queries
+        if: steps.secrets.outputs.present == 'true'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_KEY: ${{ secrets.SUPABASE_SERVICE_KEY }}
+        run: |
+          set -o pipefail
+          node scripts/assertSchema.mjs | tee /tmp/schema.txt
+
+      - name: Explain a failure in the run summary
+        if: failure() && steps.secrets.outputs.present == 'true'
+        run: |
+          {
+            echo "### Schema drift"
+            echo
+            echo "The code queries something this database does not have. Either apply the"
+            echo "migration, or add a dated waiver with a reason to"
+            echo "\`scripts/schema-drift-allowlist.json\`. An expired waiver fails too,"
+            echo "on purpose."
+            echo
+            echo '```'
+            cat /tmp/schema.txt || true
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"

@@ -13,11 +13,11 @@
         "seed-course-1": {
           "Stereochemistry": {
             "score": 38,
-            "updatedAt": "2026-08-10T01:43:07.177Z"
+            "updatedAt": "2026-08-14T01:29:46.500Z"
           },
           "Reaction Mechanisms": {
             "score": 84,
-            "updatedAt": "2026-08-19T01:43:07.177Z"
+            "updatedAt": "2026-08-23T01:29:46.500Z"
           }
         }
       }
@@ -27,7 +27,7 @@
         "seed-course-1": {
           "Glycolysis": {
             "score": 41,
-            "updatedAt": "2026-08-21T01:43:07.177Z",
+            "updatedAt": "2026-08-25T01:29:46.500Z",
             "previous": 88
           }
         }
@@ -36,33 +36,33 @@
     "seed-streak@studyedge.test": {
       "streak": {
         "count": 9,
-        "lastStudiedAt": "2026-08-20T01:43:07.177Z"
+        "lastStudiedAt": "2026-08-24T01:29:46.500Z"
       },
       "reviewDue": [
         {
           "courseId": "seed-course-1",
           "topic": "Hypothesis Testing",
-          "dueAt": "2026-08-21T01:43:07.177Z"
+          "dueAt": "2026-08-25T01:29:46.500Z"
         }
       ]
     },
     "seed-lapsed@studyedge.test": {
-      "lastActiveAt": "2026-08-07T01:43:07.177Z",
+      "lastActiveAt": "2026-08-11T01:29:46.500Z",
       "reviewDue": [
         {
           "courseId": "seed-course-1",
           "topic": "Aldol Condensation",
-          "dueAt": "2026-08-12T01:43:07.177Z"
+          "dueAt": "2026-08-16T01:29:46.500Z"
         },
         {
           "courseId": "seed-course-1",
           "topic": "Grignard Reagents",
-          "dueAt": "2026-08-17T01:43:07.177Z"
+          "dueAt": "2026-08-21T01:29:46.500Z"
         },
         {
           "courseId": "seed-course-2",
           "topic": "Mitosis",
-          "dueAt": "2026-08-20T01:43:07.177Z"
+          "dueAt": "2026-08-24T01:29:46.500Z"
         }
       ]
     }

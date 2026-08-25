@@ -1,0 +1,26 @@
+{
+  "_comment": [
+    "Known-missing schema, waived until a date. An entry needs a reason and an",
+    "expiry, and an EXPIRED entry fails the build just like an unlisted one.",
+    "That is deliberate: 'we will apply it later' is exactly how email_suppression,",
+    "feature_usage, email_digest and user_data.courses all became permanent.",
+    "Shrink this list. Do not grow it."
+  ],
+  "entries": [
+    {
+      "ref": "user_data.sms_consent_at",
+      "reason": "api/sms-opt-in.js records SMS consent metadata into columns that were never created. The route is not on any cron and is only reachable from the Account screen, so it fails for the handful of users who try to enable SMS rather than breaking a scheduled job. Needs its own migration alongside the sms_consent_ip and sms_consent_text columns.",
+      "expires": "2026-09-30"
+    },
+    {
+      "ref": "user_data.sms_consent_ip",
+      "reason": "Same migration as sms_consent_at.",
+      "expires": "2026-09-30"
+    },
+    {
+      "ref": "user_data.sms_consent_text",
+      "reason": "Same migration as sms_consent_at. This one also matters for consent records: it stores the exact wording the user agreed to.",
+      "expires": "2026-09-30"
+    }
+  ]
+}
