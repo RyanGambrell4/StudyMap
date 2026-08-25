@@ -1,7 +1,8 @@
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
+import { sendUserError } from '../lib/server/userErrors.js'
 
 const MIN_LEN = 10
 const MAX_LEN = 30
@@ -11,8 +12,8 @@ export default async function handler(req, res) {
   try {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-    const gate = await verifyAndCheckAiUsage(req)
-    if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+    const auth = await verifyAuth(req)
+    if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
     const {
       text,
@@ -31,23 +32,29 @@ export default async function handler(req, res) {
     const length = Math.max(MIN_LEN, Math.min(MAX_LEN, Number(examLength) || 10))
 
     let courseId = bodyCourseId
-    if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
-    if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+    if (!courseId && courseName) courseId = await resolveCourseId(auth.userId, courseName)
+    if (!courseId) return sendUserError(res, 'course_required', `generate-practice-exam: no courseId resolved (courseName=${courseName ?? 'none'})`)
 
     let brain
     try {
-      brain = await getCourseContext(gate.userId, courseId, { request: req })
+      brain = await getCourseContext(auth.userId, courseId, { request: req })
     } catch (err) {
       console.error('[generate-practice-exam] getCourseContext failed', err)
-      return res.status(400).json({ error: String(err?.message || err) })
+      return sendUserError(res, 'course_context_failed', err)
     }
     const courseContextBlock = formatCourseContextForPrompt(brain)
 
     const hasText = typeof text === 'string' && text.trim().length >= 50
     const hasDescription = typeof description === 'string' && description.trim().length >= 30
     if (!hasText && !hasDescription) {
-      return res.status(400).json({ error: 'Provide source material - upload a file, paste notes, or describe your exam (at least a few sentences).' })
+      return sendUserError(res, 'missing_input', 'generate-practice-exam: neither text nor description met the minimum length')
     }
+
+    // Every input check is behind us, so this request is going to do real work.
+    // Reserving here rather than at the top of the handler is what stops a
+    // rejected request from costing the user an AI action.
+    const gate = await reserveAiUsage(req, { verified: auth })
+    if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
     const source = hasText ? text.slice(0, MAX_SOURCE_CHARS) : null
     const desc = hasDescription ? description.trim().slice(0, 3000) : null
@@ -158,7 +165,7 @@ Hard rules:
     const content = data.content?.[0]?.text
     if (!content) {
       console.error('[generate-practice-exam] Empty AI response:', JSON.stringify(data).slice(0, 400))
-      return res.status(502).json({ error: data.error?.message ?? 'Empty AI response. Please try again.' })
+      return sendUserError(res, 'generation_failed', data.error?.message ?? 'empty AI response')
     }
 
     const stripped = content.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '')
@@ -209,6 +216,9 @@ Hard rules:
       payload: { questions: normalized },
     }).then(w => { if (!w.ok) console.warn('[generate-practice-exam] saveArtifact failed', w.error) })
       .catch(err2 => console.warn('[generate-practice-exam] saveArtifact threw', err2?.message))
+    // The work succeeded, so charge for it now. A reservation that never
+    // reaches this line costs the user nothing.
+    await gate.commit?.()
     return res.status(200).json({ questions: normalized })
 
   } catch (err) {

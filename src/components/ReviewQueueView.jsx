@@ -1,23 +1,70 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
+/**
+ * ReviewQueueView - the spaced repetition queue.
+ *
+ * Presentation rebuilt to sit inside the same design language as the Knowledge
+ * Map, Practice Exams and the Study Coach: KNOWLEDGE_MAP neutrals, Newsreader
+ * for the H1 and for numerals, Inter for everything else, one shadow, radius 16
+ * on cards and 10 on controls. Nothing about the scheduling logic, the data
+ * contract, the prop signature or the analytics events changed here; every
+ * number on this screen still comes from masteryStore.
+ *
+ * Two rules govern the visual hierarchy and explain most of the choices below:
+ *
+ *   1. Every count appears exactly once. The tabs own the due and upcoming
+ *      numbers. Nothing above them restates a number they already carry.
+ *      (The old screen read the counts twice from two different queries -
+ *      getReviewStats() is unfiltered and uses a 3-day upcoming window, while
+ *      the tabs are filtered and use 7 - so the two could legitimately
+ *      disagree. Both now read the same filtered lists.)
+ *
+ *   2. One red per row, and it is always the same thing: how late the review
+ *      is. Mastery is context and never red; the ring is monochrome blue like
+ *      every other progress indicator in the app, and the status dot follows
+ *      the Knowledge Map's filled/hollow convention rather than a third hue.
+ *
+ * The loading state lives in ReviewQueueSkeleton.jsx, wired to this view's own
+ * Suspense boundary in OutputView, because the wait worth covering is the lazy
+ * chunk fetch and not the synchronous store read.
+ */
+
+import { useState, useMemo, useEffect, useRef, useId } from 'react'
 import {
-  getDueForReview, getUpcomingReviews, getMasteryColor, getMasteryLevel, getMasteryTrend, getReviewStats,
+  getDueForReview, getUpcomingReviews, getMasteryLevel, getMasteryTrend,
 } from '../lib/masteryStore'
 import { track } from '../lib/analytics'
-import { color as C, space as S, radius as R, motion as M, shadow as SH, touch as T, focusRing } from '../lib/designTokens'
+import { KNOWLEDGE_MAP as C, PRACTICE_EXAMS as PE, T, KM_SERIF, SANS, courseColor } from '../theme/tokens'
+import { useIsMobile } from '../utils/useIsMobile'
 import { useCelebration } from '../utils/useCelebration'
 import { recordReviewClear, getWeeklyClears } from '../lib/reviewClears'
+
+const DAY = 86400000
+
+const btnReset = {
+  appearance: 'none', border: 'none', background: 'none',
+  padding: 0, margin: 0, cursor: 'pointer', font: 'inherit', textAlign: 'left',
+}
+
+const EYEBROW = {
+  fontFamily: SANS, fontSize: 11, fontWeight: 600, lineHeight: 1,
+  letterSpacing: '.08em', textTransform: 'uppercase', color: C.secondary,
+}
+
+// #B93A3A rather than the base #D64545 because this is 13px body text and the
+// base red lands at 4.38:1 on white, just under AA. The base value is still
+// correct for the non-text rail, which only has to clear 3:1.
+const OVERDUE_INK = T.redHov
 
 // ── Formatters ──────────────────────────────────────────────────────────────
 function timeAgo(ts) {
   if (!ts) return 'never'
-  const d = Math.floor((Date.now() - ts) / 86400000)
+  const d = Math.floor((Date.now() - ts) / DAY)
   const h = Math.floor((Date.now() - ts) / 3600000)
   if (d >= 1) return `${d}d ago`
   if (h >= 1) return `${h}h ago`
   return 'just now'
 }
 function overdueLabel(ms) {
-  const d = Math.floor(ms / 86400000)
+  const d = Math.floor(ms / DAY)
   const h = Math.floor(ms / 3600000)
   if (d >= 2) return `${d} days overdue`
   if (d >= 1) return '1 day overdue'
@@ -26,334 +73,598 @@ function overdueLabel(ms) {
 }
 function dueInLabel(due) {
   const diff = due - Date.now()
-  const d = Math.floor(diff / 86400000)
+  const d = Math.floor(diff / DAY)
   const h = Math.floor(diff / 3600000)
-  if (d >= 1) return `in ${d} day${d !== 1 ? 's' : ''}`
-  if (h >= 1) return `in ${h} hour${h !== 1 ? 's' : ''}`
-  return 'soon'
+  if (d >= 1) return `Due in ${d} day${d !== 1 ? 's' : ''}`
+  if (h >= 1) return `Due in ${h} hour${h !== 1 ? 's' : ''}`
+  return 'Due soon'
 }
 
+// ── Scoped stylesheet ───────────────────────────────────────────────────────
+// Hover, active, focus-visible and the two-line clamp cannot be expressed as
+// inline styles, and this screen has no stylesheet of its own. One injected
+// block, every selector namespaced, so it cannot leak into another view.
+const SHEET = `
+.rq-row { transition: background 150ms cubic-bezier(.4,0,.2,1); }
+.rq-row:hover { background: ${C.rowHover}; }
+
+.rq-clamp {
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden; overflow-wrap: anywhere;
+}
+
+.rq-press { transition: background 140ms cubic-bezier(.4,0,.2,1), transform 140ms cubic-bezier(.4,0,.2,1), border-color 140ms cubic-bezier(.4,0,.2,1); }
+.rq-press:active:not(:disabled) { transform: scale(.97); }
+.rq-press:disabled { cursor: not-allowed; opacity: .55; }
+
+.rq-primary:hover:not(:disabled) { background: ${C.blueHover}; }
+.rq-quiet:hover:not(:disabled) { background: ${C.pageBg}; border-color: ${C.tileHover}; }
+.rq-link:hover:not(:disabled) { color: ${C.blueHover}; text-decoration: underline; }
+.rq-tab:hover { color: ${C.ink}; }
+.rq-select-shell:hover { border-color: ${C.tileHover}; }
+
+.rq-focus:focus-visible,
+.rq-select-native:focus-visible + .rq-select-ring {
+  outline: 2px solid ${C.blue};
+  outline-offset: 2px;
+}
+.rq-focus:focus:not(:focus-visible) { outline: none; }
+
+@keyframes rq-rise { from { opacity: 0; transform: translateY(10px) scale(.97); } to { opacity: 1; transform: none; } }
+@keyframes rq-ring { from { transform: scale(.5); opacity: .85; } to { transform: scale(1.55); opacity: 0; } }
+
+.rq-rise { animation: rq-rise 460ms cubic-bezier(.16,1,.3,1) both; }
+.rq-halo { animation: rq-ring 1300ms ease-out 180ms both; }
+
+@media (prefers-reduced-motion: reduce) {
+  .rq-row, .rq-press { transition: none; }
+  .rq-press:active:not(:disabled) { transform: none; }
+  .rq-rise, .rq-halo { animation: none; }
+  .rq-halo { opacity: 0; }
+}
+`
+
 // ── Mastery ring ────────────────────────────────────────────────────────────
-function MasteryRing({ score, size = 56 }) {
-  const r = (size - 6) / 2
+// The ring is deliberately monochrome. Its job is to show how much of the
+// topic is proven, which the arc and the numeral already do; making it also
+// carry a red/amber/green status was the third colour system on a row that
+// only needs one. Blue is what every other progress indicator in the app uses
+// (Study Coach `done`, Grade Hub `earned`).
+//
+// The bare numeral used to teach the user nothing, so it now sits under a
+// caption that names the unit, and the whole ring carries one aria-label.
+function MasteryRing({ score, level, size }) {
+  const stroke = 4
+  const r = (size - stroke) / 2
   const circ = 2 * Math.PI * r
-  const dash = (score / 100) * circ
-  const col = getMasteryColor(score)
+  const pct = Math.max(0, Math.min(100, score ?? 0))
+  const dash = (pct / 100) * circ
+
   return (
-    <svg width={size} height={size} viewBox={`0 0 ${size} ${size}`} style={{ flexShrink: 0 }}>
-      <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={`${col}18`} strokeWidth="4" />
-      <circle
-        cx={size / 2} cy={size / 2} r={r}
-        fill="none" stroke={col} strokeWidth="4" strokeLinecap="round"
-        strokeDasharray={`${dash} ${circ}`}
-        transform={`rotate(-90 ${size / 2} ${size / 2})`}
-        style={{ transition: `stroke-dasharray ${M.slow}ms ${M.easeOut}` }}
-      />
-      <text
-        x="50%" y="50%" dy="0.35em" textAnchor="middle"
-        fontSize={size * 0.34} fontWeight="800" fill={col}
-        style={{ fontFamily: 'ui-monospace, monospace' }}
-      >{score}</text>
-    </svg>
+    <div style={{
+      display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 5, flex: 'none',
+    }}>
+      <svg
+        width={size} height={size} viewBox={`0 0 ${size} ${size}`}
+        role="img"
+        aria-label={`Mastery ${pct} out of 100. ${level}.`}
+        style={{ display: 'block' }}
+      >
+        <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={PE.barTrack} strokeWidth={stroke} />
+        <circle
+          cx={size / 2} cy={size / 2} r={r}
+          fill="none" stroke={C.blue} strokeWidth={stroke} strokeLinecap="round"
+          strokeDasharray={`${dash} ${circ}`}
+          transform={`rotate(-90 ${size / 2} ${size / 2})`}
+        />
+        <text
+          x="50%" y="50%" dy="0.36em" textAnchor="middle"
+          fontFamily={KM_SERIF} fontSize={size * 0.42} fontWeight="500" fill={C.ink}
+        >{pct}</text>
+      </svg>
+      <span aria-hidden style={{ ...EYEBROW, fontSize: 9.5, letterSpacing: '.07em' }}>Mastery</span>
+    </div>
   )
 }
 
-function TrendPill({ trend }) {
+// ── Row status ──────────────────────────────────────────────────────────────
+// The word carries the state, so nothing here is communicated by colour alone.
+// The dot follows the Knowledge Map: filled means proven at this level, hollow
+// means not proven yet. That keeps weak and developing apart without spending
+// a third hue, and keeps red for lateness.
+const LEVEL_LABEL = { strong: 'Strong', developing: 'Developing', weak: 'Weak', unknown: 'Not scored' }
+
+function StatusDot({ level }) {
+  const filled = level === 'strong' || level === 'developing'
+  const tone = level === 'strong' ? C.solid : level === 'developing' ? C.shaky : C.hollow
+  return (
+    <span aria-hidden style={{
+      width: 8, height: 8, borderRadius: 999, flex: 'none',
+      ...(filled ? { background: tone } : { border: `1.5px solid ${level === 'weak' ? C.shaky : C.hollow}` }),
+    }} />
+  )
+}
+
+function TrendNote({ trend }) {
   if (!trend || trend === 'flat') return null
   const up = trend === 'up'
   return (
-    <span style={{
-      display: 'inline-flex', alignItems: 'center', gap: 3,
-      fontSize: 10.5, fontWeight: 700, letterSpacing: '0.02em',
-      color: up ? C.success : C.danger,
-      background: up ? C.successSoft : C.dangerSoft,
-      borderRadius: R.xs, padding: '2px 6px',
-    }}>
-      <svg width="9" height="9" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-        {up ? <><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></>
-            : <><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></>}
+    <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4, color: C.secondary }}>
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+        strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+        {up
+          ? <><polyline points="23 6 13.5 15.5 8.5 10.5 1 18" /><polyline points="17 6 23 6 23 12" /></>
+          : <><polyline points="23 18 13.5 8.5 8.5 13.5 1 6" /><polyline points="17 18 23 18 23 12" /></>}
       </svg>
       {up ? 'improving' : 'slipping'}
     </span>
   )
 }
 
-// ── Topic card ──────────────────────────────────────────────────────────────
-function TopicCard({ item, onDrill, onQuiz, isDue }) {
-  const [hovered, setHovered] = useState(false)
-  const level = getMasteryLevel(item.score)
-  const col = getMasteryColor(item.score)
-  const trend = getMasteryTrend(item)
-
-  return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      style={{
-        display: 'flex', alignItems: 'center', gap: S[4],
-        padding: `${S[4]}px ${S[5]}px`,
-        background: hovered ? C.surfaceHover : C.surface,
-        borderBottom: `1px solid ${C.divider}`,
-        transition: `background ${M.fast}ms ${M.easing}`,
-        minHeight: T.large,
-      }}
-    >
-      {/* Mastery ring */}
-      <MasteryRing score={item.score} size={52} />
-
-      {/* Info */}
-      <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: S[2], marginBottom: 4, flexWrap: 'wrap' }}>
-          <span style={{ fontSize: 14.5, fontWeight: 700, color: C.text, letterSpacing: '-0.01em', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 260 }}>
-            {item.topic}
-          </span>
-          <span style={{
-            fontSize: 10, fontWeight: 700, letterSpacing: '0.06em', textTransform: 'uppercase',
-            color: col, background: `${col}12`,
-            padding: '2px 7px', borderRadius: R.xs,
-          }}>
-            {level}
-          </span>
-          <TrendPill trend={trend} />
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: S[3], fontSize: 12, color: C.textMuted, flexWrap: 'wrap' }}>
-          {isDue ? (
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', gap: 4,
-              color: item.overdueMs > 86400000 ? C.danger : C.warning,
-              fontWeight: 700,
-            }}>
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'currentColor', display: 'inline-block' }} />
-              {overdueLabel(item.overdueMs)}
-            </span>
-          ) : (
-            <span style={{ color: C.textMuted }}>Review due {dueInLabel(item.dueAt)}</span>
-          )}
-          <span style={{ color: C.textDim }}>·</span>
-          <span>{item.count} session{item.count !== 1 ? 's' : ''}</span>
-          <span style={{ color: C.textDim }}>·</span>
-          <span>Last practiced {timeAgo(item.lastUpdated)}</span>
-        </div>
-      </div>
-
-      {/* Actions */}
-      <div style={{ display: 'flex', gap: S[2], flexShrink: 0 }}>
-        <button
-          onClick={() => onDrill?.(item.topic, item.courseId)}
-          aria-label={`Brain Dump: ${item.topic}`}
-          style={{
-            minHeight: T.min, minWidth: T.min,
-            padding: `${S[2]}px ${S[3]}px`,
-            fontSize: 12.5, fontWeight: 700,
-            color: C.textInverse, background: C.accent,
-            border: 'none', borderRadius: R.md,
-            cursor: 'pointer',
-            boxShadow: SH.sm,
-            transition: `transform ${M.fast}ms ${M.easing}, background ${M.fast}ms ${M.easing}`,
-          }}
-          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
-          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-          onFocus={e => Object.assign(e.currentTarget.style, focusRing(C.accent))}
-          onBlur={e => e.currentTarget.style.boxShadow = SH.sm}
-        >
-          Drill
-        </button>
-        <button
-          onClick={() => onQuiz?.(item.topic, item.courseId)}
-          aria-label={`Quiz: ${item.topic}`}
-          style={{
-            minHeight: T.min, minWidth: T.min,
-            padding: `${S[2]}px ${S[3]}px`,
-            fontSize: 12.5, fontWeight: 700,
-            color: C.accent, background: C.accentSoft,
-            border: `1px solid ${C.accentRing}`,
-            borderRadius: R.md,
-            cursor: 'pointer',
-            transition: `background ${M.fast}ms ${M.easing}`,
-          }}
-          onMouseDown={e => e.currentTarget.style.transform = 'scale(0.96)'}
-          onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          Quiz
-        </button>
-      </div>
-    </div>
-  )
-}
-
-// ── Summary stat card ───────────────────────────────────────────────────────
-function StatCard({ label, value, sublabel, tint, urgent, onClick }) {
+// ── Buttons ─────────────────────────────────────────────────────────────────
+function PrimaryButton({ label, onClick, full = false, disabled = false, ariaLabel, style }) {
   return (
     <button
+      type="button"
       onClick={onClick}
-      disabled={!onClick}
+      disabled={disabled}
+      aria-label={ariaLabel}
+      className="rq-press rq-primary rq-focus"
       style={{
-        display: 'flex', flexDirection: 'column', gap: 4,
-        flex: 1, minWidth: 140,
-        padding: `${S[4]}px ${S[5]}px`,
-        background: urgent ? tint + '14' : C.surface,
-        border: `1px solid ${urgent ? tint + '35' : C.border}`,
-        borderRadius: R.lg,
-        boxShadow: SH.sm,
-        cursor: onClick ? 'pointer' : 'default',
-        textAlign: 'left',
-        fontFamily: 'inherit',
-        transition: `transform ${M.fast}ms ${M.easing}, box-shadow ${M.fast}ms ${M.easing}`,
-        opacity: value === 0 && !urgent ? 0.65 : 1,
+        ...btnReset,
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        minHeight: 44, padding: '12px 22px', borderRadius: 10,
+        background: C.blue, color: '#ffffff',
+        fontFamily: SANS, fontSize: 14, fontWeight: 600, lineHeight: 1,
+        width: full ? '100%' : 'auto', textAlign: 'center', flex: 'none',
+        whiteSpace: 'nowrap',
+        ...style,
       }}
-      onMouseEnter={e => onClick && (e.currentTarget.style.boxShadow = SH.md)}
-      onMouseLeave={e => onClick && (e.currentTarget.style.boxShadow = SH.sm)}
     >
-      <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.07em', textTransform: 'uppercase', color: urgent ? tint : C.textMuted }}>
-        {label}
-      </div>
-      <div style={{ fontSize: 32, fontWeight: 800, color: urgent ? tint : C.text, letterSpacing: '-0.03em', lineHeight: 1, fontFamily: 'ui-monospace, monospace' }}>
-        {value}
-      </div>
-      {sublabel && (
-        <div style={{ fontSize: 12, color: C.textMuted, marginTop: 2 }}>{sublabel}</div>
-      )}
+      {label}
     </button>
   )
 }
 
-// ── Empty state ─────────────────────────────────────────────────────────────
-function EmptyState({ tab, onOpenBrainDump, justCleared = false, weeklyClears = 0 }) {
-  if (tab === 'due') {
-    const badge = justCleared ? 'Queue cleared' : 'All caught up'
-    const headline = justCleared
-      ? 'Nice. You just cleared the queue.'
-      : 'You are all caught up'
-    const bodyCopy = justCleared
-      ? `That's ${weeklyClears} clear${weeklyClears !== 1 ? 's' : ''} this week. Spaced repetition compounds. The topics you just reviewed will stay sharp for longer.`
-      : 'Every topic in your Knowledge Map is well within its review window. Come back later or add new topics with a Brain Dump.'
-    return (
-      <div style={{ padding: `${S[16]}px ${S[6]}px`, textAlign: 'center', position: 'relative' }}>
-        <style>{`
-          @keyframes rq-rise { from { opacity: 0; transform: translateY(8px) scale(0.96); } to { opacity: 1; transform: translateY(0) scale(1); } }
-          @keyframes rq-glow { 0%,100% { opacity: 0.55; transform: scale(1); } 50% { opacity: 1; transform: scale(1.1); } }
-          @keyframes rq-ring { from { transform: scale(0.4); opacity: 0.9; } to { transform: scale(1.6); opacity: 0; } }
-        `}</style>
-        <div style={{
-          position: 'relative',
-          width: 96, height: 96, borderRadius: R['2xl'],
-          background: `linear-gradient(135deg, ${C.success}22, ${C.success}0A)`,
-          border: `1px solid ${C.success}35`,
-          display: 'flex', alignItems: 'center', justifyContent: 'center',
-          margin: `0 auto ${S[5]}px`,
-          boxShadow: SH.glow(C.success),
-          animation: justCleared ? 'rq-rise 500ms cubic-bezier(0.16,1,0.3,1) both' : 'none',
-        }}>
-          {justCleared && (
-            <>
-              <span aria-hidden style={{
-                position: 'absolute', inset: -6, borderRadius: R['2xl'],
-                border: `2px solid ${C.success}`, animation: 'rq-ring 1400ms ease-out 200ms',
-                pointerEvents: 'none',
-              }}/>
-              <span aria-hidden style={{
-                position: 'absolute', inset: -12, borderRadius: '50%',
-                background: `radial-gradient(circle, ${C.success}30 0%, transparent 65%)`,
-                animation: 'rq-glow 2.6s ease-in-out infinite',
-                pointerEvents: 'none',
-              }}/>
-            </>
-          )}
-          <svg width="42" height="42" fill="none" stroke={C.success} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24" style={{ position: 'relative' }}>
-            <path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
-          </svg>
-        </div>
-        <div style={{
-          display: 'inline-flex', alignItems: 'center', gap: 6,
-          padding: '4px 12px', marginBottom: 10,
-          background: `${C.success}14`, border: `1px solid ${C.success}30`,
-          borderRadius: 999,
-          fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase',
-          color: C.success,
-        }}>
-          <span style={{ width: 6, height: 6, borderRadius: '50%', background: C.success }}/>
-          {badge}
-        </div>
-        <h3 style={{ fontSize: 22, fontWeight: 800, color: C.text, margin: '0 0 8px', letterSpacing: '-0.02em', lineHeight: 1.2 }}>
-          {headline}
-        </h3>
-        <p style={{ fontSize: 14, color: C.textMuted, margin: '0 auto', maxWidth: 420, lineHeight: 1.6 }}>
-          {bodyCopy}
-        </p>
-        {justCleared && weeklyClears >= 2 && (
-          <div style={{
-            display: 'inline-flex', alignItems: 'center', gap: 8,
-            marginTop: S[4], padding: '8px 14px',
-            background: '#FAFAF8', border: `1px solid ${C.border ?? 'rgba(0,0,0,0.07)'}`,
-            borderRadius: 10,
-            fontSize: 12.5, fontWeight: 700, color: C.text,
-          }}>
-            <svg width="14" height="14" fill="none" stroke={C.success} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-              <polyline points="20 6 9 17 4 12"/>
-            </svg>
-            {weeklyClears} clears this week · you're building a real habit
-          </div>
-        )}
-        {onOpenBrainDump && (
-          <div style={{ marginTop: S[5] }}>
-            <button
-              onClick={onOpenBrainDump}
-              style={{
-                minHeight: T.min,
-                padding: `${S[3]}px ${S[5]}px`,
-                fontSize: 13.5, fontWeight: 700,
-                color: C.textInverse, background: C.accent,
-                border: 'none', borderRadius: R.md,
-                cursor: 'pointer', fontFamily: 'inherit',
-                boxShadow: SH.glow(C.accent),
-                transition: `transform ${M.fast}ms ${M.easing}`,
-              }}
-              onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
-              onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-            >
-              {justCleared ? 'Capture new topics' : 'Add a new topic'}
-            </button>
-          </div>
-        )}
-      </div>
-    )
-  }
+function QuietButton({ label, onClick, full = false, ariaLabel }) {
   return (
-    <div style={{ padding: `${S[16]}px ${S[6]}px`, textAlign: 'center' }}>
-      <div style={{
-        width: 80, height: 80, borderRadius: R['2xl'],
-        background: `linear-gradient(135deg, ${C.accent}14, ${C.accent}06)`,
-        border: `1px solid ${C.accent}25`,
-        display: 'flex', alignItems: 'center', justifyContent: 'center',
-        margin: `0 auto ${S[5]}px`,
-      }}>
-        <svg width="36" height="36" fill="none" stroke={C.accent} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-          <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
+    <button
+      type="button"
+      onClick={onClick}
+      aria-label={ariaLabel}
+      className="rq-press rq-quiet rq-focus"
+      style={{
+        ...btnReset,
+        display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+        minHeight: 44, padding: '12px 18px', borderRadius: 10,
+        background: C.card, color: C.secondary,
+        border: `1px solid ${C.cardBorder}`,
+        fontFamily: SANS, fontSize: 13.5, fontWeight: 500, lineHeight: 1,
+        width: full ? '100%' : 'auto', textAlign: 'center', flex: 'none',
+        whiteSpace: 'nowrap',
+      }}
+    >
+      {label}
+    </button>
+  )
+}
+
+// ── Course filter ───────────────────────────────────────────────────────────
+// The app's dropdown pattern, taken from the Grade Hub target-grade control: a
+// styled shell with the real <select> laid over it at zero opacity. It reads as
+// a designed control, keeps the native picker on mobile, and inherits keyboard
+// and screen reader behaviour for free. The focus ring is drawn on the shell,
+// driven by :focus-visible on the native element underneath.
+function CourseFilter({ courses, value, onChange, mobile }) {
+  const selected = value === 'all' ? null : courses.find(c => String(c.id) === value)
+  const idx = selected ? courses.findIndex(c => String(c.id) === value) : -1
+
+  return (
+    <div style={{ position: 'relative', flex: mobile ? '1 1 100%' : '0 0 auto' }}>
+      <select
+        className="rq-select-native"
+        aria-label="Filter by course"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+        style={{
+          position: 'absolute', inset: 0, width: '100%', height: '100%',
+          opacity: 0, cursor: 'pointer', border: 'none', appearance: 'none', margin: 0,
+        }}
+      >
+        <option value="all">All courses</option>
+        {courses.map(c => <option key={c.id} value={String(c.id)}>{c.name}</option>)}
+      </select>
+      <div
+        aria-hidden
+        className="rq-select-ring rq-select-shell"
+        style={{
+          display: 'flex', alignItems: 'center', gap: 9,
+          minHeight: 44, padding: '0 14px', borderRadius: 10,
+          border: `1px solid ${C.cardBorder}`, background: C.card,
+          fontFamily: SANS, fontSize: 13.5, fontWeight: 500, color: C.ink,
+          width: mobile ? '100%' : 'auto', pointerEvents: 'none',
+          transition: 'border-color 140ms cubic-bezier(.4,0,.2,1)',
+        }}
+      >
+        {selected
+          ? <span style={{ width: 7, height: 7, borderRadius: 999, background: courseColor(idx).dot, flex: 'none' }} />
+          : null}
+        <span style={{
+          flex: 1, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap',
+        }}>{selected ? selected.name : 'All courses'}</span>
+        <svg width="10" height="6" viewBox="0 0 10 6" fill="none" style={{ flex: 'none' }}>
+          <path d="M1 1l4 4 4-4" stroke={C.hollow} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </div>
-      <h3 style={{ fontSize: 20, fontWeight: 800, color: C.text, margin: '0 0 8px', letterSpacing: '-0.02em' }}>
-        Nothing scheduled yet
-      </h3>
-      <p style={{ fontSize: 14, color: C.textMuted, margin: '0 auto', maxWidth: 380, lineHeight: 1.55 }}>
-        Complete Brain Dumps and quizzes to build your review schedule. Every practice adds a review interval so you never forget what you learned.
-      </p>
     </div>
+  )
+}
+
+// ── Tabs ────────────────────────────────────────────────────────────────────
+// The segmented control the app already uses (Upload Material modal): a
+// neutral track, a white thumb with the one shadow. These two labels are the
+// only place the due and upcoming counts appear on the whole screen.
+function Tabs({ tab, onChange, dueCount, upcomingCount, mobile }) {
+  const items = [
+    { id: 'due', label: 'Due', count: dueCount },
+    { id: 'upcoming', label: 'Coming up', count: upcomingCount },
+  ]
+  return (
+    <div
+      role="tablist"
+      aria-label="Review queue"
+      style={{
+        display: 'flex', background: T.neutralBg, borderRadius: 12, padding: 4,
+        flex: mobile ? '1 1 100%' : '0 0 auto',
+      }}
+    >
+      {items.map(t => {
+        const active = tab === t.id
+        return (
+          <button
+            key={t.id}
+            type="button"
+            role="tab"
+            id={`rq-tab-${t.id}`}
+            aria-selected={active}
+            aria-controls="rq-panel"
+            onClick={() => onChange(t.id)}
+            className="rq-press rq-tab rq-focus"
+            style={{
+              ...btnReset,
+              display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 7,
+              flex: mobile ? 1 : '0 0 auto',
+              // 44 on touch to clear the tap-target floor; the app's segmented
+              // control sits at 36, which is right for a pointer.
+              minHeight: mobile ? 44 : 36,
+              padding: '0 16px', borderRadius: 8,
+              background: active ? C.card : 'transparent',
+              color: active ? C.ink : C.secondary,
+              boxShadow: active ? '0 1px 3px rgba(28,27,24,0.08)' : 'none',
+              fontFamily: SANS, fontSize: 13.5, fontWeight: active ? 600 : 500, lineHeight: 1,
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {t.label}
+            <span style={{
+              fontFamily: KM_SERIF, fontSize: 14, fontWeight: 500,
+              color: active ? C.ink : C.label,
+            }}>{t.count}</span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+// ── Topic row ───────────────────────────────────────────────────────────────
+// One primary path per row. Brain Dump is the path the queue exists to push
+// you down, so it is the only filled button; Quiz is still one tap away but no
+// longer asks you to choose on every single row.
+//
+// The metadata line is ranked rather than run together: lateness first, in the
+// one red this row is allowed and at the heaviest weight, then what you know,
+// then the history that matters least, in the faintest ink.
+function TopicRow({ item, isDue, onDrill, onQuiz, mobile, first }) {
+  const level = getMasteryLevel(item.score)
+  const trend = getMasteryTrend(item)
+  // Red is spent at 3 days, not at 1. A day or two late is the normal texture
+  // of a queue, and colouring that red is what stopped the colour meaning
+  // anything. Past three days the review has drifted far enough outside its
+  // window that it is worth calling out.
+  const veryLate = isDue && item.overdueMs > 3 * DAY
+
+  const timing = isDue ? overdueLabel(item.overdueMs) : dueInLabel(item.dueAt)
+
+  // Quiet action first, primary last, on one line. Stacking them made every
+  // row 98px of button, which is what let two equal buttons read as a choice.
+  const actions = (
+    <div style={{
+      display: 'flex', gap: mobile ? 10 : 6, flex: 'none',
+      alignItems: 'center', justifyContent: mobile ? 'stretch' : 'flex-end',
+      width: mobile ? '100%' : 'auto',
+    }}>
+      <button
+        type="button"
+        onClick={() => onQuiz?.(item.topic, item.courseId)}
+        aria-label={`Quiz: ${item.topic}`}
+        className="rq-press rq-link rq-focus"
+        style={{
+          ...btnReset,
+          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+          minHeight: 44, padding: '0 14px',
+          borderRadius: 10, color: C.blue,
+          fontFamily: SANS, fontSize: 13.5, fontWeight: 500, lineHeight: 1,
+          flex: 'none', whiteSpace: 'nowrap',
+        }}
+      >
+        Quiz instead
+      </button>
+      <PrimaryButton
+        label="Brain Dump"
+        ariaLabel={`Brain Dump: ${item.topic}`}
+        onClick={() => onDrill?.(item.topic, item.courseId)}
+        style={mobile ? { flex: 1 } : { minWidth: 126 }}
+      />
+    </div>
+  )
+
+  return (
+    <div
+      className="rq-row"
+      style={{
+        display: 'flex', gap: mobile ? 14 : 24,
+        alignItems: mobile ? 'flex-start' : 'center',
+        flexDirection: mobile ? 'column' : 'row',
+        padding: mobile ? '18px 18px' : '20px 28px',
+        // Lighter than the card border, and absent on the first row so the
+        // container's own edge does the work there.
+        borderTop: first ? 'none' : `1px solid ${C.rowRule}`,
+      }}
+    >
+      <div style={{
+        display: 'flex', gap: mobile ? 14 : 20, alignItems: 'center',
+        flex: 1, minWidth: 0, width: mobile ? '100%' : 'auto',
+      }}>
+        <MasteryRing score={item.score} level={LEVEL_LABEL[level] ?? level} size={mobile ? 48 : 54} />
+
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            className="rq-clamp"
+            title={item.topic}
+            style={{
+              fontFamily: SANS, fontSize: 15, fontWeight: 500, lineHeight: 1.35,
+              color: C.ink, letterSpacing: '-0.005em',
+            }}
+          >
+            {item.topic}
+          </div>
+
+          {/* Ranked metadata. Three tiers of weight, size and ink. */}
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap',
+            marginTop: 6, fontFamily: SANS,
+          }}>
+            <span style={{
+              fontSize: 13, fontWeight: 600, lineHeight: 1.3,
+              color: veryLate ? OVERDUE_INK : C.secondary,
+            }}>
+              {timing}
+            </span>
+            <span aria-hidden style={{ color: C.hollow }}>·</span>
+            <span style={{
+              display: 'inline-flex', alignItems: 'center', gap: 6,
+              fontSize: 13, fontWeight: 500, lineHeight: 1.3, color: C.secondary,
+            }}>
+              <StatusDot level={level} />
+              {LEVEL_LABEL[level] ?? level}
+            </span>
+            {/* The trend is the least load-bearing thing on the row, so at
+                390px it is the first thing dropped rather than the thing that
+                wraps the ranked line onto two. */}
+            {!mobile && trend && trend !== 'flat' && (
+              <>
+                <span aria-hidden style={{ color: C.hollow }}>·</span>
+                <TrendNote trend={trend} />
+              </>
+            )}
+          </div>
+
+          <div style={{
+            marginTop: 3, fontFamily: SANS, fontSize: 12.5, fontWeight: 400,
+            lineHeight: 1.4, color: C.stale,
+          }}>
+            {item.count} session{item.count !== 1 ? 's' : ''} · last practiced {timeAgo(item.lastUpdated)}
+          </div>
+        </div>
+      </div>
+
+      {actions}
+    </div>
+  )
+}
+
+// ── Empty states ────────────────────────────────────────────────────────────
+function EmptyShell({ children, mobile }) {
+  return (
+    <div style={{
+      padding: mobile ? '38px 22px 34px' : '56px 40px 50px',
+      textAlign: 'center',
+      display: 'flex', flexDirection: 'column', alignItems: 'center',
+    }}>
+      {children}
+    </div>
+  )
+}
+
+function EmptyBody({ children }) {
+  return (
+    <p style={{
+      margin: '12px 0 0', maxWidth: 460,
+      fontFamily: SANS, fontSize: 14.5, lineHeight: 1.6, color: C.secondary,
+    }}>{children}</p>
+  )
+}
+
+// A cleared queue is the best moment this screen has, so it gets the loudest
+// treatment on the page: the serif headline, the one green mark, and the
+// weekly count that makes the habit visible.
+function ClearedState({ mobile, weeklyClears, onOpenBrainDump }) {
+  return (
+    <EmptyShell mobile={mobile}>
+      <div className="rq-rise" style={{
+        position: 'relative',
+        width: 68, height: 68, borderRadius: 999,
+        background: `${C.solid}14`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center',
+        marginBottom: 20,
+      }}>
+        <span aria-hidden className="rq-halo" style={{
+          position: 'absolute', inset: -4, borderRadius: 999,
+          border: `2px solid ${C.solid}`, pointerEvents: 'none',
+        }} />
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={C.solid}
+          strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </div>
+      <h2 style={{
+        margin: 0, fontFamily: KM_SERIF, fontWeight: 500,
+        fontSize: mobile ? 24 : 28, lineHeight: 1.25, color: C.ink,
+      }}>
+        Queue cleared<span style={{ color: C.solid }}>.</span>
+      </h2>
+      <EmptyBody>
+        Every topic that was due is reviewed. Spaced repetition compounds, so the ones you just
+        went through will hold for longer before they come back.
+      </EmptyBody>
+      {weeklyClears >= 2 && (
+        <div style={{
+          display: 'inline-flex', alignItems: 'center', gap: 8,
+          margin: '18px 0 0', padding: '9px 15px', borderRadius: 999,
+          background: C.pageBg, border: `1px solid ${C.cardBorder}`,
+          fontFamily: SANS, fontSize: 13, fontWeight: 500, color: C.ink,
+        }}>
+          <span style={{ width: 7, height: 7, borderRadius: 999, background: C.solid }} />
+          {weeklyClears} clears this week
+        </div>
+      )}
+      {onOpenBrainDump && (
+        <div style={{ marginTop: 24, width: mobile ? '100%' : 'auto' }}>
+          <PrimaryButton label="Capture new topics" full={mobile} onClick={() => onOpenBrainDump()} />
+        </div>
+      )}
+    </EmptyShell>
+  )
+}
+
+function CaughtUpState({ mobile, onOpenBrainDump }) {
+  return (
+    <EmptyShell mobile={mobile}>
+      <div style={{
+        width: 60, height: 60, borderRadius: 999, background: `${C.solid}12`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18,
+      }}>
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke={C.solid}
+          strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <polyline points="20 6 9 17 4 12" />
+        </svg>
+      </div>
+      <h2 style={{
+        margin: 0, fontFamily: KM_SERIF, fontWeight: 500,
+        fontSize: mobile ? 22 : 26, lineHeight: 1.25, color: C.ink,
+      }}>
+        Nothing due right now<span style={{ color: C.solid }}>.</span>
+      </h2>
+      <EmptyBody>
+        Every topic you have practiced is still inside its review window. Check the Coming up tab to
+        see what lands next, or add a topic with a Brain Dump.
+      </EmptyBody>
+      {onOpenBrainDump && (
+        <div style={{ marginTop: 22, width: mobile ? '100%' : 'auto' }}>
+          <PrimaryButton label="Add a new topic" full={mobile} onClick={() => onOpenBrainDump()} />
+        </div>
+      )}
+    </EmptyShell>
+  )
+}
+
+// Two different nothings, and they deserve different copy. Nothing scheduled
+// at all is a first-run state and needs teaching; nothing in the next 7 days
+// when the queue is otherwise healthy is a good result and should say so.
+function UpcomingEmptyState({ mobile, hasAnyHistory, onOpenBrainDump }) {
+  return (
+    <EmptyShell mobile={mobile}>
+      <div style={{
+        width: 60, height: 60, borderRadius: 999, background: C.pageBg,
+        border: `1px solid ${C.cardBorder}`,
+        display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18,
+      }}>
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={C.hollow}
+          strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+          <rect x="3" y="4" width="18" height="18" rx="2.5" />
+          <line x1="16" y1="2" x2="16" y2="6" /><line x1="8" y1="2" x2="8" y2="6" />
+          <line x1="3" y1="10" x2="21" y2="10" />
+        </svg>
+      </div>
+      <h2 style={{
+        margin: 0, fontFamily: KM_SERIF, fontWeight: 500,
+        fontSize: mobile ? 22 : 26, lineHeight: 1.25, color: C.ink,
+      }}>
+        {hasAnyHistory ? 'Clear for the next 7 days' : 'Nothing scheduled yet'}
+        <span style={{ color: C.blue }}>.</span>
+      </h2>
+      <EmptyBody>
+        {hasAnyHistory
+          ? 'No topic comes back up this week. Anything you practice from here gets its own review date and will show up in this tab.'
+          : 'Finish a Brain Dump or a quiz and the topic lands here with a review date. Every practice pushes the next review further out.'}
+      </EmptyBody>
+      {onOpenBrainDump && (
+        <div style={{ marginTop: 22, width: mobile ? '100%' : 'auto' }}>
+          <PrimaryButton
+            label={hasAnyHistory ? 'Practice something new' : 'Start a Brain Dump'}
+            full={mobile}
+            onClick={() => onOpenBrainDump()}
+          />
+        </div>
+      )}
+    </EmptyShell>
   )
 }
 
 // ── Main view ───────────────────────────────────────────────────────────────
 export default function ReviewQueueView({ courses, onOpenBrainDump, onOpenQuizBurst }) {
+  const mobile = useIsMobile()
   const [courseFilter, setCourseFilter] = useState('all')
   const [tab, setTab] = useState('due')
+  const sheetId = useId()
 
   const courseId = useMemo(() => {
     if (courseFilter === 'all') return null
     return courses?.find(c => String(c.id) === courseFilter)?.id ?? null
   }, [courseFilter, courses])
 
-  const dueItems = useMemo(() => getDueForReview(courseId), [courseId])
-  const upcomingItems = useMemo(() => getUpcomingReviews(courseId, 7), [courseId])
-  const stats = useMemo(() => getReviewStats(), [])
+  // Both lists were memoised on courseId alone, so finishing a Brain Dump from
+  // a row left the queue showing the topic you had just cleared, and the queue
+  // could never reach zero while you were looking at it. That is why clearing
+  // it produced nothing. The Knowledge Map and the Dashboard already re-read on
+  // this event; the queue now does the same. It re-reads the same store through
+  // the same functions, so no scheduling behaviour changes, only when it looks.
+  const [readAt, setReadAt] = useState(0)
+  useEffect(() => {
+    const onComplete = () => setReadAt(n => n + 1)
+    window.addEventListener('studyedge:tool-session-complete', onComplete)
+    return () => window.removeEventListener('studyedge:tool-session-complete', onComplete)
+  }, [])
+
+  // readAt is a deliberate cache key, not a value either call reads, which is
+  // exactly the shape the exhaustive-deps rule cannot see: the store behind
+  // these functions is external to React, so bumping the key is what makes the
+  // read happen again.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const dueItems = useMemo(() => getDueForReview(courseId), [courseId, readAt])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const upcomingItems = useMemo(() => getUpcomingReviews(courseId, 7), [courseId, readAt])
 
   // Fire a celebration the moment the due queue drops from >0 to 0.
   // Guarded so re-renders and course-filter flips don't retrigger.
@@ -378,7 +689,8 @@ export default function ReviewQueueView({ courses, onOpenBrainDump, onOpenQuizBu
   }, [dueItems.length, courseId, celebrate])
 
   const displayed = tab === 'due' ? dueItems : upcomingItems
-  const overdueByADay = dueItems.filter(i => i.overdueMs > 86400000).length
+  const oldest = dueItems[0] ?? null
+  const nextUp = upcomingItems[0] ?? null
 
   const handleDrill = (topic, courseId) => {
     track('review_queue_drill', { topic, source: 'brain_dump' })
@@ -388,167 +700,143 @@ export default function ReviewQueueView({ courses, onOpenBrainDump, onOpenQuizBu
     track('review_queue_drill', { topic, source: 'quiz' })
     onOpenQuizBurst?.(topic, courseId)
   }
+  const handleDrillAll = () => {
+    track('review_queue_drill_all')
+    onOpenBrainDump?.()
+  }
+
+  // The one line under the H1. It never restates a count the tabs already
+  // carry; it says the single thing those counts cannot, which is how long the
+  // worst topic has been sitting, or when the next one lands.
+  const subline = dueItems.length > 0
+    ? (oldest && oldest.overdueMs > DAY
+        ? `Your longest wait is ${overdueLabel(oldest.overdueMs).replace(' overdue', '')}. Reviewing right before you forget is what makes it stick.`
+        : 'Reviewing right before you forget is what makes it stick.')
+    : nextUp
+      ? `Nothing is due. The next topic comes back ${dueInLabel(nextUp.dueAt).toLowerCase().replace('due ', '')}.`
+      : 'Topics come back on a schedule set by how well you know them.'
+
   return (
     <div style={{
-      maxWidth: 860,
-      margin: '0 auto',
-      padding: `${S[8]}px ${S[4]}px ${S[16]}px`,
-      fontFamily: "'Inter', system-ui, sans-serif",
+      minHeight: '100vh', background: C.pageBg,
+      padding: mobile ? '28px 18px 80px' : '56px 100px 96px',
+      overflowX: 'hidden',
+      fontFamily: SANS,
     }}>
-      {/* Header */}
-      <header style={{ marginBottom: S[6] }}>
-        <p style={{
-          fontSize: 11, fontWeight: 700, letterSpacing: '0.1em', textTransform: 'uppercase',
-          color: C.textMuted, margin: `0 0 ${S[2]}px`,
-        }}>
-          Spaced Repetition
-        </p>
-        <h1 style={{
-          fontSize: 36, fontWeight: 800, color: C.text, letterSpacing: '-0.025em', lineHeight: 1.1,
-          margin: `0 0 ${S[3]}px`,
-        }}>
-          Review Queue
-        </h1>
-        <p style={{ fontSize: 15, color: C.textMuted, margin: 0, lineHeight: 1.55, maxWidth: 560 }}>
-          Topics scheduled for review based on how well you know them. Reviewing at the right time locks in long-term retention.
-        </p>
+      <style id={`rq-sheet-${sheetId}`}>{SHEET}</style>
+
+      {/* Header. One eyebrow, one headline, one sentence, one button. The
+          primary action is a button with button proportions rather than a
+          third tile wearing a metric's shell. */}
+      <header style={{
+        display: 'flex',
+        flexDirection: mobile ? 'column' : 'row',
+        alignItems: mobile ? 'stretch' : 'flex-end',
+        justifyContent: 'space-between',
+        gap: mobile ? 22 : 40,
+      }}>
+        <div style={{ minWidth: 0 }}>
+          <div style={EYEBROW}>Review Queue</div>
+          <h1 style={{
+            fontFamily: KM_SERIF, fontWeight: 500, fontSize: mobile ? 32 : 44,
+            lineHeight: 1.1, margin: '10px 0 0', color: C.ink,
+          }}>
+            What comes back next<span style={{ color: C.blue }}>.</span>
+          </h1>
+          <p style={{
+            margin: '12px 0 0', fontSize: 15, lineHeight: 1.5,
+            color: C.secondary, maxWidth: 620,
+          }}>
+            {subline}
+          </p>
+        </div>
+        {dueItems.length > 0 && (
+          <PrimaryButton
+            label="Start reviewing"
+            full={mobile}
+            onClick={handleDrillAll}
+            style={{ padding: '14px 26px', minHeight: 48 }}
+          />
+        )}
       </header>
 
-      {/* Summary stat cards */}
-      <div style={{ display: 'flex', gap: S[3], marginBottom: S[5], flexWrap: 'wrap' }}>
-        <StatCard
-          label="Due now"
-          value={stats.dueCount}
-          sublabel={overdueByADay > 0 ? `${overdueByADay} overdue by 1+ day` : 'Ready to review'}
-          tint={C.danger}
-          urgent={stats.dueCount > 0}
-          onClick={stats.dueCount > 0 ? () => setTab('due') : null}
-        />
-        <StatCard
-          label="Coming up"
-          value={stats.upcomingCount}
-          sublabel="Within 7 days"
-          tint={C.warning}
-          urgent={false}
-          onClick={stats.upcomingCount > 0 ? () => setTab('upcoming') : null}
-        />
-        {stats.dueCount > 0 && (
-          <button
-            onClick={() => { track('review_queue_drill_all'); onOpenBrainDump?.() }}
-            style={{
-              minHeight: T.large,
-              padding: `${S[3]}px ${S[6]}px`,
-              background: `linear-gradient(135deg, ${C.accent}, ${C.accentHover})`,
-              color: C.textInverse, border: 'none', borderRadius: R.lg,
-              fontSize: 14, fontWeight: 700, cursor: 'pointer',
-              boxShadow: SH.glow(C.accent),
-              fontFamily: 'inherit',
-              transition: `transform ${M.fast}ms ${M.easing}, box-shadow ${M.fast}ms ${M.easing}`,
-              display: 'inline-flex', alignItems: 'center', gap: S[2],
-              alignSelf: 'stretch',
-            }}
-            onMouseDown={e => e.currentTarget.style.transform = 'scale(0.97)'}
-            onMouseUp={e => e.currentTarget.style.transform = 'scale(1)'}
-          >
-            <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-            Drill everything due
-          </button>
-        )}
-      </div>
-
       {/* Controls */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: S[3], marginBottom: S[4], flexWrap: 'wrap' }}>
-        <div style={{ display: 'flex', gap: 3, background: 'rgba(0,0,0,0.04)', borderRadius: R.md, padding: 3 }}>
-          {[
-            { id: 'due', label: `Due (${dueItems.length})` },
-            { id: 'upcoming', label: `Coming up (${upcomingItems.length})` },
-          ].map(t => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              style={{
-                minHeight: 36,
-                padding: `${S[2]}px ${S[4]}px`,
-                borderRadius: R.sm, border: 'none', cursor: 'pointer',
-                fontSize: 13, fontWeight: tab === t.id ? 700 : 500,
-                background: tab === t.id ? C.surface : 'transparent',
-                color: tab === t.id ? C.text : C.textMuted,
-                boxShadow: tab === t.id ? SH.sm : 'none',
-                fontFamily: 'inherit',
-                transition: `background ${M.fast}ms ${M.easing}, color ${M.fast}ms ${M.easing}`,
-              }}
-            >
-              {t.label}
-            </button>
-          ))}
-        </div>
+      <div style={{
+        display: 'flex', alignItems: 'center', gap: 10,
+        margin: mobile ? '26px 0 0' : '32px 0 0',
+        flexWrap: 'wrap',
+      }}>
+        <Tabs
+          tab={tab}
+          onChange={setTab}
+          dueCount={dueItems.length}
+          upcomingCount={upcomingItems.length}
+          mobile={mobile}
+        />
         {courses?.length > 1 && (
-          <select
+          <CourseFilter
+            courses={courses}
             value={courseFilter}
-            onChange={e => setCourseFilter(e.target.value)}
-            style={{
-              minHeight: 36, fontSize: 13,
-              color: C.text, background: C.surface,
-              border: `1px solid ${C.border}`, borderRadius: R.md,
-              padding: `${S[2]}px ${S[3]}px`,
-              cursor: 'pointer', outline: 'none',
-              fontFamily: 'inherit',
-            }}
-          >
-            <option value="all">All courses</option>
-            {courses.map(c => (
-              <option key={c.id} value={String(c.id)}>{c.name}</option>
-            ))}
-          </select>
+            onChange={setCourseFilter}
+            mobile={mobile}
+          />
         )}
       </div>
 
-      {/* Topic list */}
-      <div style={{
-        background: C.surface, borderRadius: R.xl,
-        border: `1px solid ${C.border}`, overflow: 'hidden',
-        boxShadow: SH.md,
-      }}>
-        {displayed.length === 0
-          ? <EmptyState tab={tab} onOpenBrainDump={onOpenBrainDump} justCleared={justCleared} weeklyClears={weeklyClears} />
-          : displayed.map((item, i) => (
-            <TopicCard
+      {/* List */}
+      <div
+        id="rq-panel"
+        role="tabpanel"
+        aria-labelledby={`rq-tab-${tab}`}
+        style={{
+          margin: mobile ? '16px 0 0' : '20px 0 0',
+          background: C.card, border: `1px solid ${C.cardBorder}`,
+          borderRadius: 16, boxShadow: C.cardShadow, overflow: 'hidden',
+        }}
+      >
+        {displayed.length === 0 ? (
+          tab === 'due'
+            ? (justCleared
+                ? <ClearedState mobile={mobile} weeklyClears={weeklyClears} onOpenBrainDump={onOpenBrainDump} />
+                : <CaughtUpState mobile={mobile} onOpenBrainDump={onOpenBrainDump} />)
+            : <UpcomingEmptyState
+                mobile={mobile}
+                hasAnyHistory={dueItems.length > 0}
+                onOpenBrainDump={onOpenBrainDump}
+              />
+        ) : (
+          displayed.map((item, i) => (
+            <TopicRow
               key={`${item.topic}-${item.courseId}-${i}`}
               item={item}
               isDue={tab === 'due'}
               onDrill={handleDrill}
               onQuiz={handleQuiz}
+              mobile={mobile}
+              first={i === 0}
             />
-          ))}
+          ))
+        )}
       </div>
 
-      {/* How it works — only shown until the user has seen a topic (then they know) */}
-      {(dueItems.length === 0 && upcomingItems.length === 0) && (
+      {/* How it works, only while there is nothing to look at yet. */}
+      {dueItems.length === 0 && upcomingItems.length === 0 && (
         <div style={{
-          marginTop: S[5],
-          padding: `${S[4]}px ${S[5]}px`,
-          borderRadius: R.lg,
-          background: C.accentSoft,
-          border: `1px solid ${C.accentRing}`,
-          display: 'flex', gap: S[3], alignItems: 'flex-start',
+          margin: mobile ? '16px 0 0' : '20px 0 0',
+          padding: mobile ? '18px 20px' : '22px 28px',
+          borderRadius: 16,
+          background: C.card, border: `1px solid ${C.cardBorder}`,
+          boxShadow: C.cardShadow,
+          maxWidth: 720,
         }}>
-          <div style={{
-            width: 32, height: 32, borderRadius: R.md, flexShrink: 0,
-            background: `${C.accent}18`,
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
+          <div style={EYEBROW}>How this works</div>
+          <p style={{
+            margin: '10px 0 0', fontSize: 14, lineHeight: 1.6, color: C.secondary,
           }}>
-            <svg width="16" height="16" fill="none" stroke={C.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-              <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
-            </svg>
-          </div>
-          <div>
-            <p style={{ fontSize: 12, fontWeight: 700, color: C.accent, margin: `0 0 ${S[1]}px`, letterSpacing: '0.04em', textTransform: 'uppercase' }}>
-              How this works
-            </p>
-            <p style={{ fontSize: 13, color: C.textMuted, margin: 0, lineHeight: 1.6 }}>
-              Review intervals scale with your mastery. Weak topics come back in 1 day, developing in 2 to 4 days, strong in 7 days. Each review updates your score and pushes the next review further out.
-            </p>
-          </div>
+            Review intervals scale with your mastery. Weak topics come back in 1 day, developing in
+            2 to 4 days, strong in 7. Each review updates your score and pushes the next review
+            further out.
+          </p>
         </div>
       )}
     </div>

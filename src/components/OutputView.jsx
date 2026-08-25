@@ -26,6 +26,7 @@ import FocusMode from './FocusMode'
 import BlueprintScreen from './BlueprintScreen'
 import SyllabusUploadModal from './SyllabusUploadModal'
 import SyllabusOnboardingModal from './SyllabusOnboardingModal'
+import CourseRequiredGate from './CourseRequiredGate'
 import { T, RADIUS } from '../theme/tokens'
 import { addUpload } from '../lib/uploadRegistry'
 import { courseIdentityPatch } from '../lib/courseIdentity'
@@ -55,6 +56,9 @@ const ProblemSolverView   = lazy(() => import('./ProblemSolverView'))
 const EssayArchitectView  = lazy(() => import('./EssayArchitectView'))
 const MasteryMapView      = lazy(() => import('./MasteryMapView'))
 const ReviewQueueView     = lazy(() => import('./ReviewQueueView'))
+// Eager on purpose: it is the fallback for the lazy view above, so pulling it
+// from that module would load the very chunk it is meant to cover.
+import ReviewQueueSkeleton from './ReviewQueueSkeleton'
 const SemesterView        = lazy(() => import('./SemesterView'))
 import CheatSheetModal from './CheatSheetModal'
 import BrainDumpModal from './BrainDumpModal'
@@ -418,7 +422,7 @@ export default function OutputView({
     () => generateSchedule(courses, schedule, learningStyle, yearLevel),
     [courses, schedule, learningStyle, yearLevel]
   )
-  const { weeks, stats, sessionMinutes, examConflicts = [] } = result
+  const { weeks, stats, sessionMinutes } = result
 
   // ── state ──
   const [completedIds, setCompletedIds] = useState(() => initialCompletedIds ?? new Set())
@@ -677,28 +681,6 @@ export default function OutputView({
     setRestDays(prev =>
       prev.includes(dateStr) ? prev.filter(d => d !== dateStr) : [...prev, dateStr]
     )
-  }, [])
-
-  const handleBulkRescheduleWeek = useCallback((mondayStr, sessionIds) => {
-    // Push every session in the week forward 7 days
-    setSessionTimeOverrides(prev => {
-      const next = { ...prev }
-      sessionIds.forEach(id => {
-        const existing = next[id]
-        if (existing) {
-          const d = new Date(existing.dateStr + 'T12:00:00')
-          d.setDate(d.getDate() + 7)
-          next[id] = { ...existing, dateStr: d.toISOString().split('T')[0] }
-        }
-      })
-      return next
-    })
-    setManualSessions(prev => prev.map(s => {
-      if (!sessionIds.includes(s.id)) return s
-      const d = new Date(s.dateStr + 'T12:00:00')
-      d.setDate(d.getDate() + 7)
-      return { ...s, dateStr: d.toISOString().split('T')[0] }
-    }))
   }, [])
 
   const handleSessionMove = useCallback((sessionId, newDateStr, newStartTime, newEndTime) => {
@@ -1271,7 +1253,12 @@ export default function OutputView({
   }
 
   const handleSyllabusOnboardingCommit = async (result, skipPlan) => {
-    if (!canUseAI()) { onShowPaywall?.('ai'); return }
+    // No AI-quota guard here. The parse that produced `result` already charged
+    // for its AI action, and this step is what turns that into an actual
+    // course. Blocking it on remaining quota stranded users with an empty
+    // account behind a paywall, which is the exact dead end the course gate
+    // exists to remove. The only fresh AI action below is the optional first
+    // study plan, and that is guarded at its own call site.
 
     const COURSE_COLORS = ['#3B82F6', '#6366F1', '#059669', '#D97706', '#EC4899', '#0891B2']
     const NEUTRAL_COLOR = { name: 'neutral', dot: '#64748b' }
@@ -1396,10 +1383,12 @@ export default function OutputView({
       setSyllabusEvents(prev => [...prev, ...newEvents])
     }
 
-    // Generate first study plan unless skipping
-    if (!skipPlan) {
+    // Generate first study plan unless skipping. This is a real AI action, so
+    // it is the step that checks remaining quota. Running out here is not an
+    // error: the course is already saved and the student can generate a plan
+    // later from the coach.
+    if (!skipPlan && canUseAI()) {
       try {
-        incrementAIQuery()
         const topicStr = (result.topics ?? [])
           .slice(0, 30)
           .map(t => t.title)
@@ -1411,6 +1400,7 @@ export default function OutputView({
           headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
           body: JSON.stringify({
             courseName: courseObj.name,
+            courseId: courseObj.id,
             goal: 'Do well in this course',
             emphasisTopics: topicStr || undefined,
             importantDates,
@@ -1421,6 +1411,11 @@ export default function OutputView({
         })
         const plan = await res.json()
         if (res.ok && plan.weeklyFocus) {
+          // Counted here rather than before the fetch. Incrementing up front
+          // charged for the attempt and, now that this call also marks the
+          // first successful generation, would have credited a win to a
+          // request that had not returned yet.
+          incrementAIQuery('syllabus_coach_plan')
           const formData = {
             courseName: courseObj.name,
             goal: 'Do well in this course',
@@ -1557,6 +1552,91 @@ export default function OutputView({
   }
 
   // ── render ────────────────────────────────────────────────────────────────
+  // Rendered by both the normal shell and the first-course gate below. The
+  // gate drives the same parse-syllabus flow, so it needs the same review
+  // modal and the same progress/failure overlay.
+  const syllabusOnboardingOverlays = (
+    <>
+      {syllabusOnboardingData && (
+        <SyllabusOnboardingModal
+          parsedData={syllabusOnboardingData}
+          existingCourse={syllabusOnboardingScopeIdx !== null ? courses[syllabusOnboardingScopeIdx] ?? null : null}
+          onConfirm={(result) => handleSyllabusOnboardingCommit(result, false)}
+          onSkipPlan={(result) => handleSyllabusOnboardingCommit(result, true)}
+          onClose={() => { setSyllabusOnboardingData(null); setSyllabusOnboardingScopeIdx(null) }}
+        />
+      )}
+
+      {/* Syllabus parse progress + failure. The new-user dashboard hero renders
+          its own inline version, so it is excluded here to avoid duplicate UI. */}
+      {syllabusOnboardingOrigin !== 'dashboard' && syllabusOnboardingOrigin !== 'gate' && (syllabusOnboardingLoading || syllabusOnboardingError) && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-live="polite"
+          style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'grid', placeItems: 'center', padding: 20 }}
+        >
+          <div style={{ width: '100%', maxWidth: 400, background: T.card, border: `1px solid ${T.border}`, borderRadius: RADIUS.lg, boxShadow: '0 30px 80px rgba(0,0,0,0.25)', padding: 24, textAlign: 'center' }}>
+            {syllabusOnboardingLoading ? (
+              <>
+                <Spinner size="lg" color={T.blue} style={{ margin: '0 auto 16px' }} />
+                <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>Reading your syllabus</div>
+                <div style={{ fontSize: 13, color: T.muted, marginTop: 6, lineHeight: 1.5 }}>
+                  Pulling out your dates, topics, and grade weights. This takes a few seconds.
+                </div>
+              </>
+            ) : (
+              <>
+                <div style={{ width: 40, height: 40, borderRadius: '50%', background: T.redBg, display: 'grid', placeItems: 'center', margin: '0 auto 14px', color: T.red }}>
+                  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
+                </div>
+                <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>Could not read that syllabus</div>
+                <div style={{ fontSize: 13, color: T.muted, marginTop: 6, lineHeight: 1.5 }}>{syllabusOnboardingError}</div>
+                <div style={{ fontSize: 12.5, color: T.dim, marginTop: 10, lineHeight: 1.5 }}>
+                  Your course was saved. You can add the syllabus again any time from the Courses tab.
+                </div>
+                <button
+                  onClick={() => setSyllabusOnboardingError('')}
+                  style={{ marginTop: 18, width: '100%', padding: '11px 20px', borderRadius: RADIUS.sm, background: T.blue, color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
+                  onMouseEnter={e => { e.currentTarget.style.background = T.blueHov }}
+                  onMouseLeave={e => { e.currentTarget.style.background = T.blue }}
+                >
+                  Got it
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  )
+
+  // ── First course gate ─────────────────────────────────────────────────────
+  // Every AI endpoint resolves a courseId, the schedule is generated per
+  // course, and the paywall has nothing to argue about against an empty
+  // account. Onboarding used to finish with zero courses and hand the user a
+  // dashboard that could not do anything, so the gate stands in front of the
+  // shell instead.
+  //
+  // The condition is the course list itself, not a "new user" flag, so a
+  // returning account that has no courses lands here too rather than on a
+  // dashboard that cannot work.
+  if (courses.length === 0) {
+    return (
+      <>
+        <CourseRequiredGate
+          onUploadSyllabus={file => handleStartSyllabusOnboarding(file, null, 'gate')}
+          onAddCourse={onAddCourse}
+          parsing={syllabusOnboardingLoading}
+          parseError={syllabusOnboardingError}
+          onDismissParseError={() => setSyllabusOnboardingError('')}
+          onSignOut={onSignOut}
+        />
+        {syllabusOnboardingOverlays}
+      </>
+    )
+  }
+
   return (
     <>
       {/* ── First-query nudge modal ── */}
@@ -1664,57 +1744,7 @@ export default function OutputView({
         />
       )}
 
-      {syllabusOnboardingData && (
-        <SyllabusOnboardingModal
-          parsedData={syllabusOnboardingData}
-          existingCourse={syllabusOnboardingScopeIdx !== null ? courses[syllabusOnboardingScopeIdx] ?? null : null}
-          onConfirm={(result) => handleSyllabusOnboardingCommit(result, false)}
-          onSkipPlan={(result) => handleSyllabusOnboardingCommit(result, true)}
-          onClose={() => { setSyllabusOnboardingData(null); setSyllabusOnboardingScopeIdx(null) }}
-        />
-      )}
-
-      {/* Syllabus parse progress + failure. The new-user dashboard hero renders
-          its own inline version, so it is excluded here to avoid duplicate UI. */}
-      {syllabusOnboardingOrigin !== 'dashboard' && (syllabusOnboardingLoading || syllabusOnboardingError) && (
-        <div
-          role="dialog"
-          aria-modal="true"
-          aria-live="polite"
-          style={{ position: 'fixed', inset: 0, zIndex: 60, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(8px)', display: 'grid', placeItems: 'center', padding: 20 }}
-        >
-          <div style={{ width: '100%', maxWidth: 400, background: T.card, border: `1px solid ${T.border}`, borderRadius: RADIUS.lg, boxShadow: '0 30px 80px rgba(0,0,0,0.25)', padding: 24, textAlign: 'center' }}>
-            {syllabusOnboardingLoading ? (
-              <>
-                <Spinner size="lg" color={T.blue} style={{ margin: '0 auto 16px' }} />
-                <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>Reading your syllabus</div>
-                <div style={{ fontSize: 13, color: T.muted, marginTop: 6, lineHeight: 1.5 }}>
-                  Pulling out your dates, topics, and grade weights. This takes a few seconds.
-                </div>
-              </>
-            ) : (
-              <>
-                <div style={{ width: 40, height: 40, borderRadius: '50%', background: T.redBg, display: 'grid', placeItems: 'center', margin: '0 auto 14px', color: T.red }}>
-                  <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M12 9v4m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z" /></svg>
-                </div>
-                <div style={{ fontSize: 15, fontWeight: 600, color: T.text }}>Could not read that syllabus</div>
-                <div style={{ fontSize: 13, color: T.muted, marginTop: 6, lineHeight: 1.5 }}>{syllabusOnboardingError}</div>
-                <div style={{ fontSize: 12.5, color: T.dim, marginTop: 10, lineHeight: 1.5 }}>
-                  Your course was saved. You can add the syllabus again any time from the Courses tab.
-                </div>
-                <button
-                  onClick={() => setSyllabusOnboardingError('')}
-                  style={{ marginTop: 18, width: '100%', padding: '11px 20px', borderRadius: RADIUS.sm, background: T.blue, color: '#fff', border: 'none', fontSize: 13, fontWeight: 600, cursor: 'pointer', fontFamily: 'inherit' }}
-                  onMouseEnter={e => { e.currentTarget.style.background = T.blueHov }}
-                  onMouseLeave={e => { e.currentTarget.style.background = T.blue }}
-                >
-                  Got it
-                </button>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      {syllabusOnboardingOverlays}
 
       {addSessionDayStr && (
         <AddSessionModal
@@ -1996,7 +2026,6 @@ export default function OutputView({
             userId={userId}
             weeklyHourGoal={schedule?.hoursPerWeek ?? 10}
             recoveryCoursesIdx={recoveryCoursesIdx}
-            examConflicts={examConflicts}
             coachPlans={coachPlans}
             onOpenStudyCoach={handleOpenStudyCoach}
             schoolType={schoolType}
@@ -2045,26 +2074,6 @@ export default function OutputView({
                 <button onClick={() => setActiveSection('grades')} style={{ fontSize: 12, fontWeight: 700, color: '#DC2626', background: 'rgba(220,38,38,0.1)', border: '1px solid rgba(220,38,38,0.2)', borderRadius: 8, padding: '6px 12px', cursor: 'pointer', whiteSpace: 'nowrap' }}>
                   View grades →
                 </button>
-              </div>
-            )}
-            {/* Exam conflict banner */}
-            {examConflicts.length > 0 && (
-              <div style={{
-                marginBottom: 16, padding: '12px 16px', borderRadius: 12,
-                background: 'rgba(217,119,6,0.07)', border: '1px solid rgba(217,119,6,0.25)',
-                display: 'flex', flexDirection: 'column', gap: 6,
-              }}>
-                <div style={{ display:'flex', alignItems:'center', gap:6, fontSize:13, fontWeight:700, color:'#D97706' }}>
-                  <svg width="13" height="13" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M10.3 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.41 0zM12 9v4M12 17h.01"/>
-                  </svg>
-                  Exam Cluster Detected
-                </div>
-                {examConflicts.map((c, i) => (
-                  <div key={i} style={{ fontSize: 12.5, color: '#6B6B6B' }}>
-                    <strong style={{ color: '#1A1A1A' }}>{c.courseA}</strong> and <strong style={{ color: '#1A1A1A' }}>{c.courseB}</strong> exams are only <strong>{c.gapDays} day{c.gapDays !== 1 ? 's' : ''}</strong> apart. Front-load {c.courseA} prep now to avoid a crunch.
-                  </div>
-                ))}
               </div>
             )}
 
@@ -2257,7 +2266,6 @@ export default function OutputView({
                 examDates={courses.filter(c => c.examDate).map(c => ({ dateStr: c.examDate, courseName: c.name, color: c.color }))}
                 restDays={restDays}
                 onToggleRestDay={handleToggleRestDay}
-                onBulkRescheduleWeek={handleBulkRescheduleWeek}
                 plan={getActivePlan()}
                 onShowPaywall={onShowPaywall}
                 onStartFocus={handleStartFocus}
@@ -2492,7 +2500,10 @@ export default function OutputView({
         )}
 
         {/* ── Review Queue ── */}
+        {/* Its own boundary, nested inside the shared one, so the queue gets a
+            skeleton shaped like its rows instead of the generic spinner. */}
         {activeSection === 'review' && (
+          <Suspense fallback={<ReviewQueueSkeleton />}>
           <ReviewQueueView
             courses={courses}
             onOpenBrainDump={(topic, courseId) => {
@@ -2506,6 +2517,7 @@ export default function OutputView({
               setShowQuizBurst(true)
             }}
           />
+          </Suspense>
         )}
 
         </Suspense>

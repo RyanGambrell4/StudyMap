@@ -1,4 +1,5 @@
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { USER_ERRORS, sendUserError } from '../lib/server/userErrors.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -6,11 +7,16 @@ export default async function handler(req, res) {
   const contentLength = parseInt(req.headers['content-length'] || '0')
   if (contentLength > 500000) return res.status(413).json({ error: 'Payload too large' })
 
-  const gate = await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const { text } = req.body
-  if (!text || text.length < 50) return res.status(400).json({ error: 'Not enough text' })
+  if (!text || text.length < 50) return sendUserError(res, 'unreadable_input', 'extract-syllabus-events: text under 50 chars')
+
+  // Reserved after validation, so a request that gets rejected costs nothing.
+  const gate = await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
 
   const now = new Date()
   const currentYear = now.getFullYear()
@@ -65,10 +71,12 @@ Example: [{"name":"Midterm Exam","date":"${currentYear}-03-12","type":"Midterm",
     const lastBracket = content.lastIndexOf(']')
     const cleaned = content.slice(firstBracket, lastBracket + 1)
     const events = JSON.parse(cleaned)
+    // The work succeeded, so charge for it now.
+    await gate.commit?.()
     res.status(200).json({ events })
   } catch (error) {
     console.error('Syllabus extraction error:', error)
     console.error(error)
-    res.status(500).json({ error: error.message ?? 'Internal server error' })
+    res.status(500).json({ error: USER_ERRORS.unexpected.error, code: USER_ERRORS.unexpected.code })
   }
 }

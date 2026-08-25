@@ -1,4 +1,5 @@
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { sendUserError } from '../lib/server/userErrors.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildContextBlock } from '../lib/server/courseContextPrompt.js'
@@ -19,17 +20,22 @@ import { buildContextBlock } from '../lib/server/courseContextPrompt.js'
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
-  const gate = await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const { concept, context, mode, priorExplanation, courseId: bodyCourseId, courseName, courseContext: legacyCtx } = req.body || {}
-  if (!concept?.trim()) return res.status(400).json({ error: 'concept is required' })
+  if (!concept?.trim()) return sendUserError(res, 'missing_input', 'reteach: empty concept')
+
+  // Reserved after validation, so a request that gets rejected costs nothing.
+  const gate = await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
 
   const modeInstruction = MODE_INSTRUCTIONS[mode] ?? MODE_INSTRUCTIONS.short
 
   let contextBlock = ''
   let courseId = bodyCourseId
-  if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
+  if (!courseId && courseName) courseId = await resolveCourseId(auth.userId, courseName)
 
   if (courseId) {
     try {
@@ -89,6 +95,8 @@ No em dashes anywhere.`
     const last = content.lastIndexOf('}')
     if (first === -1 || last === -1) throw new Error('Malformed AI response')
     const result = JSON.parse(content.slice(first, last + 1))
+    // The work succeeded, so charge for it now.
+    await gate.commit?.()
     return res.status(200).json({ ...result, mode })
   } catch (e) {
     console.error('[reteach]', e)

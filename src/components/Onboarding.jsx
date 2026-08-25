@@ -1,9 +1,13 @@
 import { useState, useRef, useEffect } from 'react'
 import { track } from '../lib/analytics'
-import { activateTrial, hasUsedTrial } from '../lib/subscription'
 import { readUtmPrefill } from '../lib/utmPersonalize'
 
-const STEP_NAMES = { 1: 'personalize', 2: 'app_preview', 3: 'trial_offer' }
+// Onboarding ends at the preview. The card ask used to be step 3 here, which
+// fired it against an account with no course and no generation behind it.
+// It now lives behind a successful AI generation instead. See
+// OutputView's first-win paywall trigger.
+const STEP_NAMES = { 1: 'personalize', 2: 'app_preview' }
+const STEP_COUNT = 2
 
 // Color accent per school type
 const SCHOOL_COLORS = {
@@ -175,23 +179,12 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
   const [step, setStep]               = useState(1)
   const [animKey, setAnimKey]         = useState(0)
   const [animDir, setAnimDir]         = useState(1)
-  const [trialLoading, setTrialLoading] = useState(false)
-  const [trialError, setTrialError]     = useState(null)
   const [schoolType, setSchoolType]   = useState(saved?.schoolType ?? utm.schoolType ?? null)
   const [yearLevel, setYearLevel]     = useState(saved?.yearLevel  ?? utm.yearLevel  ?? null)
   const [preferredTime, setPreferredTime] = useState(saved?.preferredTime ?? null)
   const [courseName, setCourseName]   = useState(saved?.courseName ?? '')
   const [examDate, setExamDate]       = useState(saved?.examDate ?? '')
   const [showConfetti, setShowConfetti]   = useState(false)
-  const [skipVisible, setSkipVisible]     = useState(false)
-
-  // Delay the step-2 skip button by 4s so the preview lands first
-  useEffect(() => {
-    if (step !== 2) return
-    setSkipVisible(false)
-    const t = setTimeout(() => setSkipVisible(true), 4000)
-    return () => clearTimeout(t)
-  }, [step])
 
 
   const stepEnteredAt   = useRef(Date.now())
@@ -250,24 +243,26 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
     onComplete({ ...profile, durationMs: Date.now() - onboardingStart.current, ...extra })
   }
 
-  // Auto-advance from app preview (step 2) to trial offer (step 3) after 10s
+  const profileData = { yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true, courseName: courseName.trim() || null, examDate: examDate || null }
+
+  // Auto-advance off the app preview after 10s. This used to open the trial
+  // offer; it now completes onboarding and hands the user to the course gate.
   useEffect(() => {
     if (step !== 2) return
-    const timer = setTimeout(() => goTo(3), 10000)
+    const timer = setTimeout(() => completeWith(profileData, { trialTaken: false }), 10000)
     return () => clearTimeout(timer)
   }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
 
-  const profileData = { yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true, courseName: courseName.trim() || null, examDate: examDate || null }
 
   // Thin fixed progress bar + step label rendered at the top of each step
   const StepProgress = () => (
     <div style={{ position: 'fixed', top: 0, left: 0, right: 0, zIndex: 50 }}>
       <div style={{ height: 3, background: 'rgba(255,255,255,0.07)' }}>
-        <div style={{ height: '100%', width: `${(step / 3) * 100}%`, background: 'linear-gradient(90deg, #6B8FFF, #93C5FD)', transition: 'width 0.4s ease', borderRadius: '0 2px 2px 0' }} />
+        <div style={{ height: '100%', width: `${(step / STEP_COUNT) * 100}%`, background: 'linear-gradient(90deg, #6B8FFF, #93C5FD)', transition: 'width 0.4s ease', borderRadius: '0 2px 2px 0' }} />
       </div>
       <div style={{ display: 'flex', justifyContent: 'center', paddingTop: 10 }}>
         <span style={{ fontSize: '0.65rem', fontWeight: 700, color: 'rgba(255,255,255,0.28)', letterSpacing: '0.1em', textTransform: 'uppercase' }}>
-          Step {step} of 3
+          Step {step} of {STEP_COUNT}
         </span>
       </div>
     </div>
@@ -536,7 +531,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           {/* ── CTA ── */}
           <button
             onClick={() => {
-              if (!hasUsedTrial()) { goTo(2) } else { completeWith(profileData) }
+              goTo(2)
             }}
             disabled={!allDone}
             style={{
@@ -693,7 +688,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
           </div>
 
           <button
-            onClick={() => goTo(3)}
+            onClick={() => completeWith(profileData, { trialTaken: false })}
             style={{
               width: '100%', padding: '15px', border: 'none', borderRadius: 14,
               background: 'linear-gradient(135deg, #3B61C4 0%, #6B35D9 50%, #3B61C4 100%)',
@@ -706,18 +701,8 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.01)' }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
           >
-            Unlock my full plan →
+            Build my study plan →
           </button>
-          {skipVisible && (
-            <button
-              onClick={() => { track('preview_skipped', { source: 'onboarding' }); completeWith(profileData, { trialTaken: false }) }}
-              style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.2)', fontSize: '0.74rem', cursor: 'pointer', width: '100%', padding: '6px', fontFamily: 'inherit', marginBottom: 8, transition: 'color .15s opacity .4s', opacity: skipVisible ? 1 : 0 }}
-              onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,.4)' }}
-              onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,.2)' }}
-            >
-              Continue with free plan
-            </button>
-          )}
           <div style={{ textAlign: 'center' }}>
             <button
               onClick={() => goTo(1, -1)}
@@ -732,171 +717,6 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
       </div>
     )
   }
-
-  // ── Step 3: Trial offer ──────────────────────────────────────────────────────
-  const step3DaysToExam = examDate
-    ? Math.ceil((new Date(examDate) - new Date()) / (1000 * 60 * 60 * 24))
-    : null
-  const step3Course = courseName.trim()
-  const step3ExamWord = schoolType === 'exam' ? 'exam' : 'final'
-  if (step === 3) return (
-    <div style={{ minHeight: '100vh', background: '#080C18', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px 16px', position: 'relative', overflow: 'hidden' }}>
-      <StepProgress />
-      <style>{STYLES}</style>
-      <div style={{ position: 'absolute', top: '-200px', left: '50%', transform: 'translateX(-50%)', width: 700, height: 500, background: 'radial-gradient(ellipse, rgba(107,53,217,.14) 0%, transparent 65%)', pointerEvents: 'none' }} />
-
-      <div
-        key={animKey}
-        className={animDir >= 0 ? 'slide-in' : 'slide-in-back'}
-        style={{ maxWidth: 460, width: '100%', position: 'relative', zIndex: 1 }}
-      >
-        {/* Badge */}
-        <div style={{ textAlign: 'center', marginBottom: 18 }}>
-          <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(52,211,153,0.10)', border: '1px solid rgba(52,211,153,0.30)', borderRadius: 999, padding: '6px 18px', fontSize: 11, fontWeight: 700, color: '#34D399', letterSpacing: '0.07em', textTransform: 'uppercase' }}>
-            <span style={{ display: 'inline-block', width: 7, height: 7, background: '#34D399', borderRadius: '50%', animation: 'ob-glow-pulse 1.8s ease-in-out infinite' }} />
-            7-day free trial · Cancel anytime
-          </div>
-        </div>
-
-        {/* Headline */}
-        <h1 style={{ textAlign: 'center', marginBottom: 10, lineHeight: 1.08 }}>
-          {step3DaysToExam && step3Course ? (
-            <span style={{ display: 'block', fontSize: '1.75rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              Your {step3Course} {step3ExamWord} is in {step3DaysToExam} days.
-            </span>
-          ) : (
-            <span style={{ display: 'block', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              Try every Pro feature.
-            </span>
-          )}
-          <span style={{ display: 'block', fontSize: '2.1rem', fontWeight: 800, letterSpacing: '-0.04em', background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-            {step3DaysToExam && step3Course ? "Your plan is ready. Free for 7 days." : 'Free for 7 days.'}
-          </span>
-        </h1>
-        <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.9rem', textAlign: 'center', marginBottom: 28, lineHeight: 1.65 }}>
-          {step3DaysToExam && step3Course
-            ? `Every session between now and your ${step3ExamWord}, mapped out, optimized, and ready. Unlock it all with a 7-day free trial. Cancel anytime.`
-            : schoolType === 'hs'
-            ? 'Built for AP classes, finals, and everything between. See the difference in your first study session.'
-            : schoolType === 'exam'
-            ? 'High-stakes prep, built around your real test date. See how much sharper your studying gets before paying a cent.'
-            : schoolType === 'uni'
-            ? 'Your full semester, every course, every exam, finally organized. Full access, no restrictions.'
-            : 'Full access, no restrictions. See how much sharper you study before paying a cent.'}
-        </p>
-
-        {/* What unlocks with trial */}
-        <div style={{ background: 'rgba(107,143,255,.07)', border: '1px solid rgba(107,143,255,.22)', borderRadius: 14, padding: '18px 20px', marginBottom: 16 }}>
-          <p style={{ fontSize: 10, fontWeight: 700, color: '#6B8FFF', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 12 }}>Everything unlocked with your 7-day trial</p>
-          {[
-            '5 courses',
-            '100 AI actions a month',
-            'AI Study Coach with week-by-week session plan',
-            'Unlimited Session Blueprints',
-            'Unlimited Focus sessions (no 30-min cap)',
-            'Practice exams, Brain Dumps, Exam Rescue',
-          ].map(text => (
-            <div key={text} style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 9 }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6B8FFF" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><polyline points="20 6 9 17 4 12"/></svg>
-              <span style={{ fontSize: 12, color: 'rgba(255,255,255,.82)', lineHeight: 1.4 }}>{text}</span>
-            </div>
-          ))}
-          <div style={{ marginTop: 12, paddingTop: 12, borderTop: '1px solid rgba(107,143,255,.15)', fontSize: 11, color: 'rgba(255,255,255,.35)', lineHeight: 1.5 }}>
-            After 7 days, $2.99/wk. Cancel anytime.
-          </div>
-        </div>
-
-        {/* Stars */}
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, marginBottom: 22 }}>
-          <div style={{ display: 'flex', gap: 2 }}>
-            {Array.from({ length: 5 }).map((_, i) => (
-              <svg key={i} width="14" height="14" viewBox="0 0 20 20" fill="#FBBF24">
-                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-              </svg>
-            ))}
-          </div>
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,.38)', fontWeight: 500 }}>Loved by 400+ students</span>
-        </div>
-
-        {/* Primary CTA */}
-        {trialError && (
-          <p style={{ color: '#F87171', fontSize: '0.78rem', textAlign: 'center', marginBottom: 8 }}>
-            {trialError}
-          </p>
-        )}
-        <button
-          onClick={async () => {
-            track('trial_cta_clicked', { source: 'onboarding' })
-            setTrialLoading(true)
-            setTrialError(null)
-            const url = await activateTrial(userId, userEmail)
-            if (url) {
-              window.location.href = url
-            } else {
-              setTrialLoading(false)
-              setTrialError('Something went wrong starting your trial. Please try again.')
-            }
-          }}
-          disabled={trialLoading}
-          style={{
-            width: '100%', padding: '16px',
-            background: '#3B61C4',
-            border: 'none', borderRadius: 14,
-            color: '#fff', fontSize: '1rem', fontWeight: 800,
-            cursor: trialLoading ? 'not-allowed' : 'pointer',
-            letterSpacing: '-0.01em', marginBottom: 8,
-            opacity: trialLoading ? 0.7 : 1,
-            boxShadow: '0 4px 32px rgba(59,97,196,.45)',
-            transition: 'transform .15s, opacity .2s',
-          }}
-          onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.transform = 'scale(1.01)' }}
-          onMouseLeave={e => { if (!trialLoading) e.currentTarget.style.transform = 'scale(1)' }}
-        >
-          {trialLoading ? 'Loading…' : 'Start 7-day free trial →'}
-        </button>
-
-        <p style={{ textAlign: 'center', color: 'rgba(255,255,255,.25)', fontSize: '0.71rem', marginBottom: 18 }}>
-          Card required · $2.99/wk after 7 days · Cancel anytime in account
-        </p>
-
-        {/* Skip — low-prominence, copy reminds them what they're giving up */}
-        <button
-          onClick={() => {
-            track('trial_skipped', {
-              source: 'onboarding',
-              ms_on_step: Date.now() - stepEnteredAt.current,
-              has_course: !!step3Course,
-              has_exam_date: !!examDate,
-              days_to_exam: step3DaysToExam,
-            })
-            completeWith(profileData, { trialTaken: false })
-          }}
-          style={{
-            background: 'none', border: 'none', padding: '6px',
-            color: 'rgba(255,255,255,.18)', fontSize: '0.72rem',
-            cursor: 'pointer', textAlign: 'center', display: 'block',
-            width: '100%', fontFamily: 'inherit', marginBottom: 10,
-            transition: 'color .15s', lineHeight: 1.5,
-          }}
-          onMouseEnter={e => { e.currentTarget.style.color = 'rgba(255,255,255,.35)' }}
-          onMouseLeave={e => { e.currentTarget.style.color = 'rgba(255,255,255,.18)' }}
-        >
-          No thanks, I'll skip the 7 days
-        </button>
-
-        <div style={{ textAlign: 'center' }}>
-          <button
-            onClick={() => goTo(2, -1)}
-            style={{ background: 'none', border: 'none', color: 'rgba(255,255,255,.22)', fontSize: '0.77rem', cursor: 'pointer', padding: 4, transition: 'color .15s' }}
-            onMouseEnter={e => e.currentTarget.style.color = 'rgba(255,255,255,.5)'}
-            onMouseLeave={e => e.currentTarget.style.color = 'rgba(255,255,255,.22)'}
-          >
-            ← Back
-          </button>
-        </div>
-      </div>
-    </div>
-  )
 
   return null
 }

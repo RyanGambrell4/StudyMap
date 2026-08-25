@@ -6,7 +6,7 @@ import { useCelebration } from '../utils/useCelebration'
 import { useStreak } from '../utils/useStreak'
 import { usePushNotifications } from '../utils/usePushNotifications'
 import { getCurrentGrade, letterGrade, gradeStatus } from '../utils/gradeCalc'
-import { getActivePlan, canUseFeature, getFeatureUsage, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession, activateTrial } from '../lib/subscription'
+import { getActivePlan, canUseFeature, getFeatureUsage, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession, activateTrial, hasSuccessfulGeneration } from '../lib/subscription'
 import { clean } from '../utils/strings'
 import { daysBetween, formatShortDate } from '../utils/dateUtils'
 import { getWeakTopics } from '../lib/weakTopics'
@@ -250,7 +250,12 @@ export default function DashboardView({
   const [aiChipDismissed, setAiChipDismissed] = useState(
     () => sessionStorage.getItem('studyedge_ai_chip_dismissed') === '1'
   )
-  const showAiChip = plan === 'free' && aiUsed >= 3 && !aiChipDismissed
+  // No card ask, on any surface, until a generation has actually succeeded for
+  // this user. These surfaces bypass openPaywall entirely (they call
+  // activateTrial directly, which goes straight to Stripe), so they have to
+  // carry the rule themselves.
+  const canAskForCard = hasSuccessfulGeneration()
+  const showAiChip = plan === 'free' && canAskForCard && aiUsed >= 3 && !aiChipDismissed
   const aiChipTrialEligible = showAiChip && !hasUsedTrial()
   const [trialCardDismissed, setTrialCardDismissed] = useState(() => {
     const ts = localStorage.getItem('studyedge_trial_card_dismissed_at')
@@ -258,14 +263,14 @@ export default function DashboardView({
     const hoursSince = (Date.now() - parseInt(ts, 10)) / 3_600_000
     return hoursSince < 24
   })
-  const showTrialCard = plan === 'free' && !hasUsedTrial() && !trialCardDismissed && !showAiChip && !(completedSessions?.length >= 1)
+  const showTrialCard = plan === 'free' && canAskForCard && !hasUsedTrial() && !trialCardDismissed && !showAiChip && !(completedSessions?.length >= 1)
 
   // ── Session-based nudge: shown when user completes 3+ focus sessions ──────
   const sessionsCount = completedSessions?.length ?? 0
   const [sessionNudgeDismissed, setSessionNudgeDismissed] = useState(() =>
     sessionStorage.getItem('se_session_nudge_dismissed') === '1'
   )
-  const showSessionNudge = plan === 'free' && !hasUsedTrial() && sessionsCount >= 3 && !sessionNudgeDismissed && !showAiChip && !isTrialActive()
+  const showSessionNudge = plan === 'free' && canAskForCard && !hasUsedTrial() && sessionsCount >= 3 && !sessionNudgeDismissed && !showAiChip && !isTrialActive()
   useEffect(() => {
     if (showSessionNudge) {
       track('sessions_nudge_shown', { sessions_count: sessionsCount })
@@ -282,6 +287,7 @@ export default function DashboardView({
   })
   const showSevenDayBanner =
     plan === 'free' &&
+    canAskForCard &&
     !hasUsedTrial() &&
     accountAgeDays !== null &&
     accountAgeDays >= 7 &&

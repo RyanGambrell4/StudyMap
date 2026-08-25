@@ -1,9 +1,10 @@
-import { verifyAndCheckAiUsage } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { sendUserError } from '../lib/server/userErrors.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
-  const gate = await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const {
     problem,
@@ -18,8 +19,13 @@ export default async function handler(req, res) {
     lastStudentReply = null,      // socratic: what the student typed as the next step
   } = req.body
   if (!problem?.trim() && !imageBase64 && !studentWorkImage) {
-    return res.status(400).json({ error: 'Problem text, problem image, or work image required' })
+    return sendUserError(res, 'missing_input', 'solve-problem: no problem text and no images')
   }
+
+  // Reserved after validation, so a request that gets rejected costs nothing.
+  const gate = await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
 
   const modeConfig = MODE_CONFIG[mode] ?? MODE_CONFIG.solution
   const systemPrompt = modeConfig.system
@@ -77,7 +83,11 @@ export default async function handler(req, res) {
   }
 
   // Preserve the existing 'solution' shape so existing callers don't break.
+  // The work succeeded, so charge for it now.
+  await gate.commit?.()
   if (mode === 'solution') return res.status(200).json({ solution: result, mode })
+  // The work succeeded, so charge for it now.
+  await gate.commit?.()
   return res.status(200).json({ ...result, mode })
 }
 

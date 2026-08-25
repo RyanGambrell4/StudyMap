@@ -1,8 +1,9 @@
-import { verifyAndCheckAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
+import { USER_ERRORS, sendUserError } from '../lib/server/userErrors.js'
 
 export default async function handler(req, res) {
   try {
@@ -14,10 +15,11 @@ export default async function handler(req, res) {
   if (contentLength > 4_500_000) return res.status(413).json({ error: 'Payload too large. Try fewer or smaller images.' })
 
   // predict-grade mode uses simple math on already-submitted data, so it's
-  // auth-only. Every other mode runs Claude and consumes a study boost.
+  // auth-only. Every other mode runs Claude and consumes a study boost, but the
+  // boost is not reserved until the course has resolved. See below.
   const isPredict = req.body?.mode === 'predict-grade'
-  const gate = isPredict ? await verifyAuth(req) : await verifyAndCheckAiUsage(req)
-  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
 
   const { text, mode, courseName, courseId: bodyCourseId, sessionType, topic, images, professorEmphasis, struggles, learningStyle, courseContext: legacyCtx } = req.body;
   const safeImages = Array.isArray(images) ? images.slice(0, 6).filter(i => i?.data && i?.media_type) : []
@@ -30,24 +32,30 @@ export default async function handler(req, res) {
   let resolvedCourseName = courseName || 'Unknown Course'
   if (mode !== 'predict-grade') {
     let courseId = bodyCourseId
-    if (!courseId && courseName) courseId = await resolveCourseId(gate.userId, courseName)
-    if (!courseId) return res.status(400).json({ error: 'Missing courseId (or unique courseName)' })
+    if (!courseId && courseName) courseId = await resolveCourseId(auth.userId, courseName)
+    if (!courseId) return sendUserError(res, 'course_required', `generate-study-tools: no courseId resolved (mode=${mode}, courseName=${courseName ?? 'none'})`)
     resolvedCourseId = courseId
     let brain
     try {
-      brain = await getCourseContext(gate.userId, courseId, { topic: topic || null, request: req })
+      brain = await getCourseContext(auth.userId, courseId, { topic: topic || null, request: req })
     } catch (err) {
       console.error('[generate-study-tools] getCourseContext failed', err)
-      return res.status(400).json({ error: String(err?.message || err) })
+      return sendUserError(res, 'course_context_failed', err)
     }
     resolvedCourseName = brain.identity?.name || courseName || 'Unknown Course'
     ctxBlock = ANTI_GUESSING_RULES + '\n\n' + formatCourseContextForPrompt(brain)
     supplementBlock = buildClientSupplementBlock(legacyCtx)
   }
 
+  // The course has resolved and the request is well formed, so this is the
+  // first point at which it is honest to charge for it. predict-grade does no
+  // AI work and never reserves.
+  const gate = isPredict ? auth : await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
+
   // ── quick-quiz mode (replaces the old generate-quick-quiz endpoint) ──────────
   if (mode === 'quick-quiz') {
-    if (!courseName) return res.status(400).json({ error: 'Missing courseName' })
+    if (!courseName) return sendUserError(res, 'course_required', 'generate-study-tools: quick-quiz called without courseName')
 
     const hasTopic = typeof topic === 'string' && topic.trim().length > 0
     const hasText = typeof text === 'string' && text.length > 50
@@ -140,17 +148,20 @@ Rules:
         return { ...q, options: newOptions, answer: newAnswer }
       })
 
+      // The work succeeded, so charge for it now. A reservation that never
+      // reaches this line costs the user nothing.
+      await gate.commit?.()
       return res.status(200).json({ questions: shuffled })
     } catch (error) {
       console.error('Quick quiz error:', error)
-      return res.status(500).json({ error: error.message ?? 'Internal server error' })
+      return res.status(500).json({ error: USER_ERRORS.unexpected.error, code: USER_ERRORS.unexpected.code })
     }
   }
 
   // ── predict-grade mode ────────────────────────────────────────────────────────
   if (mode === 'predict-grade') {
     const { courseName, targetGrade, components } = req.body
-    if (!courseName || !components?.length) return res.status(400).json({ error: 'Missing required fields' })
+    if (!courseName || !components?.length) return sendUserError(res, 'missing_input', 'generate-study-tools: predict-grade missing courseName or components')
 
     const filled = components.filter(c => c.earnedGrade !== null && c.earnedGrade !== undefined)
     const remaining = components.filter(c => c.earnedGrade === null || c.earnedGrade === undefined)
@@ -220,10 +231,13 @@ Rules:
       const first = content.indexOf('{')
       const last = content.lastIndexOf('}')
       const prediction = JSON.parse(content.slice(first, last + 1))
+      // The work succeeded, so charge for it now. A reservation that never
+      // reaches this line costs the user nothing.
+      await gate.commit?.()
       return res.status(200).json({ prediction })
     } catch (error) {
       console.error('Predict grade error:', error)
-      return res.status(500).json({ error: error.message ?? 'Internal server error' })
+      return res.status(500).json({ error: USER_ERRORS.unexpected.error, code: USER_ERRORS.unexpected.code })
     }
   }
 
@@ -390,10 +404,13 @@ Hard rules:
       }).then(w => { if (!w.ok) console.warn('[generate-study-tools] saveArtifact failed', w.error) })
         .catch(err2 => console.warn('[generate-study-tools] saveArtifact threw', err2?.message))
     }
+    // The work succeeded, so charge for it now. A reservation that never
+    // reaches this line costs the user nothing.
+    await gate.commit?.()
     res.status(200).json(parsed);
   } catch (error) {
     console.error('API error:', error);
-    res.status(500).json({ error: error.message ?? 'Internal server error' });
+    res.status(500).json({ error: USER_ERRORS.unexpected.error, code: USER_ERRORS.unexpected.code });
   }
 
   } catch (err) {

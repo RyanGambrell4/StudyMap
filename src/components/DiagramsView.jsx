@@ -913,7 +913,7 @@ export default function DiagramsView({ courses, userId, onShowPaywall, learningS
       const res = await fetch('/api/generate-diagram', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ topic: topic.trim(), diagramType, courseName, courseContext }),
+        body: JSON.stringify({ topic: topic.trim(), diagramType, courseName, courseId: course?.id ?? null, courseContext }),
       })
       const data = await res.json()
       if (!res.ok) throw new Error(data.error ?? 'Generation failed')
@@ -1253,7 +1253,7 @@ export default function DiagramsView({ courses, userId, onShowPaywall, learningS
 
         {!isPro && (
           <p style={{ textAlign: 'center', fontSize: 12, color: '#9B9B9B', marginTop: 12 }}>
-            Uses 1 AI query. Free plan includes 5 total.
+            Uses 1 AI query. Free plan includes 5 a month.
           </p>
         )}
       </div>

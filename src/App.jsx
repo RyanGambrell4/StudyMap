@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from './lib/supabase'
 import { initUserData, clearUserData, savePlan, refreshSubscription, saveEmailDigest } from './lib/db'
-import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getCachedSubscription, TRIAL_DURATION_DAYS, TRIAL_PLAN, TRIAL_BILLING_PERIOD } from './lib/subscription'
+import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getCachedSubscription, hasSuccessfulGeneration, TRIAL_DURATION_DAYS, TRIAL_PLAN, TRIAL_BILLING_PERIOD } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
 import { initAnalytics, identifyUser, resetUser, track, register, registerOnce } from './lib/analytics'
 import { captureReferralParam, getStoredReferrer, clearStoredReferrer } from './lib/referral'
@@ -128,14 +128,31 @@ export default function App() {
     return null
   })
 
+  // Single choke point for every card ask in the app. Nothing opens the paywall
+  // except through here, which is what makes the rule below enforceable.
+  //
+  // The rule: a free user who has never had an AI generation succeed does not
+  // get asked for a card. They have not been shown anything works yet, so the
+  // ask has nothing behind it. 20 of 24 trials quit before the trial ended and
+  // 13 were cancelled the same day the card went in, which is what asking too
+  // early produces. Not showing it is the correct outcome, not a lost
+  // conversion.
+  //
+  // Paid and trialing users are unaffected: their paywall surfaces are upgrade
+  // and tier-comparison screens, not a first card ask.
   const openPaywall = useCallback((trigger = 'courses') => {
+    const plan = getActivePlan()
+    if (plan === 'free' && !hasSuccessfulGeneration()) {
+      track('paywall_suppressed_no_win', { trigger, current_plan: plan })
+      return
+    }
     setPaywallTrigger(trigger)
     setPaywallOpen(true)
     const unlimitedTriggers = new Set(['tutorMemory', 'practiceExamAnalytics', 'unlimited'])
     track('paywall_shown', {
       trigger,
       plan_required: unlimitedTriggers.has(trigger) ? 'unlimited' : 'pro',
-      current_plan: getActivePlan(),
+      current_plan: plan,
     })
   }, [])
 
@@ -145,6 +162,20 @@ export default function App() {
     const handler = (e) => openPaywall(e.detail?.trigger ?? 'courses')
     window.addEventListener('studyedge:open-paywall', handler)
     return () => window.removeEventListener('studyedge:open-paywall', handler)
+  }, [openPaywall])
+
+  // The positive half of the same rule. The card ask now fires off a
+  // demonstrated win: the moment a free user's first AI generation lands
+  // against their own course material, and not before.
+  useEffect(() => {
+    const handler = (e) => {
+      if (getActivePlan() !== 'free') return
+      // Let the result render and be seen before the ask lands on top of it.
+      setTimeout(() => openPaywall('first-win'), 2500)
+      track('first_win_paywall_scheduled', { source: e.detail?.source ?? null })
+    }
+    window.addEventListener('studyedge:first-win', handler)
+    return () => window.removeEventListener('studyedge:first-win', handler)
   }, [openPaywall])
 
   // Same pattern for the feedback modal — AppShell settings menu, empty
@@ -321,18 +352,39 @@ export default function App() {
         setInitialCompletedIds(new Set(plan.completedIds ?? []))
         setShowOutput(true)
       }
-      // Attach the full user profile as super properties so every event is sliceable.
-      register({
-        active_plan: getActivePlan(),
-        year_level: plan?.yearLevel ?? null,
-        learning_style: plan?.learningStyle ?? null,
-        school_type: plan?.schoolType ?? null,
-        course_count: plan?.courses?.length ?? 0,
-        has_onboarded: !!plan,
-      })
       setDbReady(true)
     })
   }, [session?.user?.id])
+
+  // ── Super properties ───────────────────────────────────────────────────────
+  // These used to be registered exactly once, in the effect above, at login.
+  // That is before a new user has done anything: no courses, no onboarding
+  // answers, plan still free. They were never re-registered, so every event for
+  // the rest of that session carried the login-time snapshot no matter what the
+  // user actually did, and 88% of users only ever have one session.
+  //
+  // Measured on 2026-08-21 over 90 days, which is what this effect fixes:
+  //   course_count   only 53 people ever emitted >= 1, against 293 accounts
+  //                  that hold a course
+  //   has_onboarded  512 people emitted False, 111 True, and 7 people emitted
+  //                  has_onboarded False together with active_plan pro, which
+  //                  cannot both be current
+  //
+  // Registering on every change costs nothing: posthog.register writes to local
+  // storage, it is not a network call.
+  useEffect(() => {
+    if (!dbReady) return
+    register({
+      active_plan: getActivePlan(),
+      year_level: yearLevel ?? null,
+      learning_style: learningStyle ?? null,
+      school_type: schoolType ?? null,
+      course_count: courses.length,
+      has_onboarded: showOutput,
+    })
+  // active_plan is not in the dep list on its own because a plan change comes
+  // back through a Stripe redirect, which remounts the app and re-runs this.
+  }, [dbReady, courses.length, yearLevel, learningStyle, schoolType, showOutput])
 
   // ── Checkout intent → Stripe redirect ────────────────────────────────────
   // Runs exactly once per intent: ref guard prevents re-entry on re-renders.
@@ -850,7 +902,9 @@ export default function App() {
       )}
 
       {/* Floating trial nudge — appears 2 min in for free users who haven't trialed */}
-      {showOutput && trialNudgeVisible && !trialNudgeDismissed && getActivePlan() === 'free' && !hasUsedTrial() && (
+      {/* Same rule as openPaywall: no card ask, in any surface, before a
+          generation has actually succeeded for this user. */}
+      {showOutput && trialNudgeVisible && !trialNudgeDismissed && getActivePlan() === 'free' && !hasUsedTrial() && hasSuccessfulGeneration() && courses.length > 0 && (
         <div style={{
           position: 'fixed', bottom: 20, right: 20, zIndex: 998,
           background: '#3B61C4',

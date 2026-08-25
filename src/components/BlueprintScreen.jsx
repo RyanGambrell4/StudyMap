@@ -149,6 +149,7 @@ export default function BlueprintScreen({ session, course, onStartSession, onExi
         headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
         body: JSON.stringify({
           courseName: session.courseName,
+          courseId: course?.id ?? session.courseId ?? null,
           sessionType,
           durationMinutes: session.duration,
           examDate: upcomingExamDate,
