@@ -85,6 +85,39 @@
 --   set -a && . ~/.studyedge/env.staging && set +a
 --   env -u RESEND_API_KEY node scripts/verifyAiQuotaAccounting.mjs
 -- Expect 14 of 14, specifically checks 5 and 6 flipping to PASS.
+--
+-- ── APPLY COMMAND, and what it costs while traffic is running ───────────────
+-- Supabase dashboard -> SQL Editor -> paste this whole file -> Run.
+-- There is no CLI step; this is a function definition, not a data migration.
+--
+-- BLAST RADIUS IF YOU RUN IT DURING TRAFFIC: none that stops a request.
+--
+--   - CREATE OR REPLACE FUNCTION takes a lock on the function, not on
+--     user_data. No table is locked, no row is rewritten, nothing is scanned.
+--     There is no ACCESS EXCLUSIVE lock and no rewrite, so concurrent reads and
+--     writes to user_data are unaffected for the whole duration.
+--
+--   - Nothing calls this function until you also change commitReservation in
+--     lib/server/usage.js. Applying the SQL alone is inert: it adds an unused
+--     function and changes no behaviour. That is deliberate, so you can apply
+--     the database half at a quiet moment and deploy the code half separately.
+--
+--   - The REVOKE/GRANT lines only touch this new function's ACL. They cannot
+--     affect any existing grant.
+--
+--   - Rollback is DROP FUNCTION, equally instant, and safe as long as the code
+--     half is not deployed (or has already been reverted).
+--
+-- THE ORDER THAT MATTERS: apply this SQL FIRST, deploy the code SECOND.
+-- The reverse order breaks every AI generation for as long as the gap lasts,
+-- because commitReservation would call a function that does not exist yet and
+-- every commit would fail. In the correct order the worst case is an unused
+-- function sitting in the schema.
+--
+-- If you want to be able to roll the code back without a database change,
+-- have commitReservation fall back to the old inline write when the RPC returns
+-- PGRST202 (function not found). Then the two halves are independent in both
+-- directions.
 -- ============================================================================
 
 BEGIN;
