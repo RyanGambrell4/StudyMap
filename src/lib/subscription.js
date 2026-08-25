@@ -12,7 +12,7 @@
 export const TRIAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000
 export const TRIAL_DURATION_DAYS = 7
 
-import { supabase } from './supabase'
+import { supabase, getAccessToken } from './supabase'
 import { track } from './analytics'
 
 // ── Plan limits ───────────────────────────────────────────────────────────────
@@ -375,9 +375,16 @@ export async function createCheckoutSession(plan, billingPeriod, userEmail, user
   // checkout_started fires server-side from api/stripe.js only when the Stripe session is created.
   track('checkout_button_clicked', { plan, billingPeriod, trial: !!opts.trial, has_promo: !!opts.promo })
   try {
+    // The server requires a Bearer token for any request carrying a userId, and
+    // derives the checkout email from that token rather than from this body.
+    // Without the header the request is rejected 401, so this is not optional.
+    const accessToken = await getAccessToken()
     const res = await fetch('/api/stripe', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+      },
       body: JSON.stringify({ plan, billingPeriod, userEmail, userId, trial: !!opts.trial, promo: opts.promo ?? null }),
     })
 

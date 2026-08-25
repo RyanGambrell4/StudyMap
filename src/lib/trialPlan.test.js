@@ -69,5 +69,10 @@ describe('trial plan invariants', () => {
     expect(body.plan).toBe('pro')
     expect(body.billingPeriod).toBe('weekly')
     expect(body.trial).toBe(true)
+
+    // REVENUE-CRITICAL. /api/stripe rejects any request carrying a userId that
+    // does not present a matching Bearer token, so a checkout call that forgets
+    // this header is not a degraded experience, it is a 401 on every upgrade.
+    expect(checkoutCall[1].headers.Authorization).toBe('Bearer test-token')
   })
 })

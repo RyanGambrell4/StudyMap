@@ -1118,17 +1118,37 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
     }
   }
 
-  // If the request includes a Bearer token, verify it matches the userId in the body.
-  // This blocks an attacker who knows a victim's UUID from creating a checkout on their behalf.
+  // Any request that claims a userId MUST prove it owns that userId.
+  //
+  // This was `if (checkoutToken && body.userId)`, which an attacker skipped by
+  // simply omitting the Authorization header — the guard only ever ran against
+  // callers who were already honest. That was survivable while stripeCustomerId
+  // was written in exactly one place, the Stripe webhook, from a trusted
+  // `sub.customer`. It stopped being survivable the moment checkout started
+  // resolving and persisting a customer id, because subscription.stripeCustomerId
+  // is a capability key: create-portal-session opens a Stripe Billing Portal for
+  // whatever id sits on the row, and the referral path credits $9.99 to it. An
+  // unauthenticated write to that field is an unauthenticated read of somebody
+  // else's invoices, billing address and card last-4.
   const checkoutToken = req.headers['authorization']?.replace('Bearer ', '').trim()
-  if (checkoutToken && body.userId) {
+  let verifiedUser = null
+  if (body.userId) {
+    if (!checkoutToken) return res.status(401).json({ error: 'Unauthorized' })
     const { data: { user: checkoutUser }, error: checkoutAuthErr } = await supabaseAdmin.auth.getUser(checkoutToken)
     if (checkoutAuthErr || !checkoutUser || checkoutUser.id !== body.userId) {
       return res.status(403).json({ error: 'Forbidden' })
     }
+    verifiedUser = checkoutUser
   }
 
-  const { plan: rawPlan, billingPeriod: rawBillingPeriod, userEmail, userId, trial, promo } = body
+  const { plan: rawPlan, billingPeriod: rawBillingPeriod, userId, trial, promo } = body
+
+  // The email comes from the verified Supabase user, never from the request body.
+  // A body-supplied address would let a caller point the customer lookup below at
+  // anyone and attach the resulting `cus_...` to their own row. An unverified
+  // caller (no userId) keeps the old behaviour: their body email is only ever
+  // handed to Stripe as `customer_email`, which reads nothing back.
+  const userEmail = verifiedUser?.email ?? body.userEmail
 
   // REVENUE-CRITICAL. Any trial request is forced to Pro/weekly here, at the only
   // chokepoint that can create a Stripe session — the client is never trusted,
@@ -1251,9 +1271,9 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
   // Stripe rejects a session that sets both `customer` and `customer_email`, so
   // these are mutually exclusive below.
   let lookupCustomerId = null
-  if (!existingCustomerId && userEmail) {
+  if (!existingCustomerId && verifiedUser?.email) {
     try {
-      const found = await stripe.customers.list({ email: userEmail, limit: 1 })
+      const found = await stripe.customers.list({ email: verifiedUser.email, limit: 1 })
       lookupCustomerId = found.data?.[0]?.id ?? null
     } catch (lookupErr) {
       // Non-fatal. A failed lookup should never block a paying user, it just
@@ -1272,7 +1292,7 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
 
   // Persist the id so the next checkout skips the lookup entirely and, more
   // importantly, so a Stripe-side email change cannot fork the account.
-  if (resolvedCustomerId && !existingCustomerId && userId) {
+  if (resolvedCustomerId && !existingCustomerId && verifiedUser && userId) {
     try {
       const { data: row } = await supabaseAdmin
         .from('user_data')
