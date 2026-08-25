@@ -59,13 +59,27 @@ export default function CourseRequiredGate({
     if (examDate <= todayStr) { setError('That date has already passed. Pick a date in the future.'); return }
     setError('')
     track('course_gate_manual_submitted', {})
+    // Only what the student actually typed, plus a colour, which is
+    // presentation rather than a claim about them.
+    //
+    // `targetGrade` is deliberately absent. This form never asks for it, and it
+    // is not a cosmetic field: generateSchedule multiplies study time by
+    // GRADE_MULTIPLIERS = { A: 1.6, B: 1.2, C: 1.0, 'Pass/Fail': 0.85 }, and
+    // OutputView flags a course as "in recovery" against
+    // TARGET_THRESHOLDS = { A: 80, ... }. Writing 'A' here told the app every
+    // new student was aiming for an A and scheduled 60 percent more work than
+    // the neutral fallback, on no evidence at all. Omitting it lets each
+    // consumer apply its own documented default (?? 1.0, ?? 80), and the
+    // student can set a real target in Courses whenever they want one.
+    //
+    // `difficulty` is omitted for the same reason, and costs nothing to omit:
+    // DIFFICULTY_WEIGHTS falls back to `|| 1.6`, which is exactly the 'Medium'
+    // this used to write. Storing it only created the appearance of a choice.
     onAddCourse?.({
       id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
       name: trimmed,
       code: '',
       examDate,
-      difficulty: 'Medium',
-      targetGrade: 'A',
       color: { name: 'custom', dot: COURSE_COLORS[0].dot },
     })
   }

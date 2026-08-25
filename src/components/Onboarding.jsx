@@ -243,7 +243,23 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
     onComplete({ ...profile, durationMs: Date.now() - onboardingStart.current, ...extra })
   }
 
-  const profileData = { yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: true, courseName: courseName.trim() || null, examDate: examDate || null }
+  // emailDigest is false because this flow never asks.
+  //
+  // It used to be a real checkbox, ticked by default but visible and
+  // untickable. The rewrite removed the checkbox and kept the `true`, so every
+  // account since has been recorded as having opted in to the weekly digest
+  // without ever being shown the question. That is a consent we do not have.
+  //
+  // Two things follow, and both are worth knowing before changing this back:
+  //   - `user_data.email_digest` does not exist in production, so
+  //     saveEmailDigest()'s write fails and is swallowed by db.js's
+  //     `[db] upsert error`. Nothing was ever actually stored.
+  //   - api/weekly-digest.js selects that column and filters `.eq(..., true)`,
+  //     so the Sunday cron 500s and has never sent a digest to anyone.
+  //
+  // Defaulting to false is the honest state until the checkbox comes back.
+  // Restoring it is a product decision, not a bug fix, so it is not made here.
+  const profileData = { yearLevel, learningStyle: null, preferredTime, schoolType, emailDigest: false, courseName: courseName.trim() || null, examDate: examDate || null }
 
   // Auto-advance off the app preview after 10s. This used to open the trial
   // offer; it now completes onboarding and hands the user to the course gate.
@@ -583,107 +599,80 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
     )
   }
 
-  // ── Step 2: App preview ──────────────────────────────────────────────────────
+  // ── Step 2: what we actually have, and what happens next ────────────────────
+  //
+  // This screen used to claim "AI built your plan" and show three courses with
+  // green Ready pills, a week of sessions, and a quote attributed to an "AI
+  // Study Coach". None of it was real. No AI ran, no plan existed, no schedule
+  // had been computed, and the course names were a hardcoded array keyed on
+  // school type. A user who typed a real course got theirs plus two invented
+  // ones. handleOnboardingComplete calls setCourses([]) immediately after, and
+  // the very next screen asks for the first course, so the app contradicted
+  // itself within one click.
+  //
+  // The rule this violated is the codebase's own: no fabricated data, every
+  // section either populated with real data plus provenance or stated as
+  // missing. It is worth more here than anywhere else, because this is the
+  // first thing a new user sees.
+  //
+  // What this screen asserts now is limited to what the user actually told us,
+  // plus an honest description of the next step.
   if (step === 2) {
-    const subjectsByType = {
-      hs:   ['AP Biology', 'Pre-Calculus', 'AP English Literature'],
-      uni:  ['Intro Psychology', 'Calculus II', 'Organic Chemistry'],
-      exam: ['Practice Sections', 'Concept Review', 'Timed Drills'],
-    }
-    const genericSubjects = subjectsByType[schoolType] ?? subjectsByType.uni
     const trimmedCourse = courseName.trim()
-    const subjects = trimmedCourse
-      ? [trimmedCourse, ...genericSubjects.slice(0, 2)]
-      : genericSubjects
     const daysToExam = examDate
       ? Math.ceil((new Date(examDate) - new Date()) / (1000 * 60 * 60 * 24))
       : null
-    const timeLabel = preferredTime ?? 'Evening'
     const schoolLabel = schoolType === 'hs' ? 'high school' : schoolType === 'exam' ? 'exam prep' : 'university'
     const examWord = schoolType === 'exam' ? 'exam' : 'final'
+
+    // Every row here is something the user typed or picked. If they skipped the
+    // optional fields, the row is absent rather than filled with a guess.
+    const answers = [
+      { label: 'Studying for', value: `${yearLevel} ${schoolLabel}` },
+      preferredTime ? { label: 'Best focus time', value: `${preferredTime} sessions` } : null,
+      trimmedCourse ? { label: 'First course', value: trimmedCourse } : null,
+      daysToExam !== null && daysToExam >= 0
+        ? { label: `Next ${examWord}`, value: daysToExam === 0 ? 'today' : `in ${daysToExam} day${daysToExam === 1 ? '' : 's'}` }
+        : null,
+    ].filter(Boolean)
 
     return (
       <div style={{ backgroundColor: '#080C18', minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '32px 16px', position: 'relative', overflow: 'hidden' }}>
         <StepProgress />
         <style>{STYLES + `
-          @keyframes countdown-bar { from { width: 0% } to { width: 100% } }
           @keyframes fade-up { from { opacity: 0; transform: translateY(16px) } to { opacity: 1; transform: translateY(0) } }
         `}</style>
-        <div style={{ position: 'absolute', top: '-150px', left: '50%', transform: 'translateX(-50%)', width: 600, height: 400, background: 'radial-gradient(ellipse, rgba(52,211,153,.09) 0%, transparent 65%)', pointerEvents: 'none' }} />
+        <div style={{ position: 'absolute', top: '-150px', left: '50%', transform: 'translateX(-50%)', width: 600, height: 400, background: 'radial-gradient(ellipse, rgba(107,143,255,.09) 0%, transparent 65%)', pointerEvents: 'none' }} />
 
         <div key={animKey} className={animDir >= 0 ? 'slide-in' : 'slide-in-back'} style={{ maxWidth: 460, width: '100%', position: 'relative', zIndex: 1 }}>
 
-          <div style={{ textAlign: 'center', marginBottom: 20 }}>
-            <div style={{ display: 'inline-flex', alignItems: 'center', gap: 7, background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.3)', borderRadius: 999, padding: '5px 16px', fontSize: 11, fontWeight: 700, color: '#34D399', letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-              <span style={{ display: 'inline-block', width: 7, height: 7, background: '#34D399', borderRadius: '50%', animation: 'ob-glow-pulse 1.4s ease-in-out infinite' }} />
-              AI built your plan
-            </div>
-          </div>
-
           <h2 style={{ textAlign: 'center', marginBottom: 6, fontSize: '2rem', fontWeight: 800, letterSpacing: '-0.04em', lineHeight: 1.1, fontFamily: "'Cormorant Garamond', Georgia, serif" }}>
             <span style={{ background: 'linear-gradient(160deg, #fff 30%, rgba(255,255,255,.65))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
-              Your study plan is ready.
+              {trimmedCourse ? 'Got it.' : 'That is everything we need.'}
             </span>
           </h2>
           <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.83rem', textAlign: 'center', marginBottom: 24 }}>
-            {daysToExam && trimmedCourse
-              ? `${trimmedCourse} · ${daysToExam} days to go · ${timeLabel} sessions`
-              : `Built for ${yearLevel} ${schoolLabel} · ${timeLabel} sessions`}
+            One more step and your plan is built from your real course material.
           </p>
 
-          {/* Week schedule preview */}
+          {/* What the user told us. Nothing inferred, nothing invented. */}
           <div style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 14, padding: '16px 18px', marginBottom: 12, animation: 'fade-up 0.35s ease both' }}>
-            <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>This Week's Sessions</p>
-            <div style={{ display: 'flex', gap: 6, marginBottom: 10 }}>
-              {['M','T','W','T','F'].map((d, i) => {
-                const active = [0,1,3,4].includes(i)
-                return (
-                  <div key={i} style={{ flex: 1, textAlign: 'center', padding: '8px 4px', borderRadius: 8, background: active ? 'rgba(107,143,255,0.12)' : 'transparent', border: active ? '1px solid rgba(107,143,255,0.25)' : '1px solid rgba(255,255,255,0.06)' }}>
-                    <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.65rem', fontWeight: 700, marginBottom: 6 }}>{d}</p>
-                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: active ? '#6B8FFF' : 'rgba(255,255,255,0.1)', margin: '0 auto' }} />
-                  </div>
-                )
-              })}
-            </div>
-            <p style={{ color: 'rgba(255,255,255,.28)', fontSize: '0.72rem' }}>4 sessions · ~2.5 hrs this week</p>
-          </div>
-
-          {/* Courses preview */}
-          <div style={{ background: 'rgba(255,255,255,.04)', border: '1px solid rgba(255,255,255,.08)', borderRadius: 14, padding: '16px 18px', marginBottom: 12, animation: 'fade-up 0.35s ease 0.08s both' }}>
-            <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Your Courses</p>
-            {subjects.map((s, i) => (
-              <div key={i} style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: i < subjects.length - 1 ? 10 : 0 }}>
-                <div style={{ width: 8, height: 8, borderRadius: '50%', flexShrink: 0, background: ['#6B8FFF','#6366F1','#34D399'][i] }} />
-                <p style={{ color: 'rgba(255,255,255,.85)', fontSize: '0.84rem', fontWeight: 600, flex: 1 }}>{s}</p>
-                <div style={{ background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.2)', borderRadius: 6, padding: '2px 8px', fontSize: '0.65rem', fontWeight: 700, color: '#34D399', flexShrink: 0 }}>Ready</div>
+            <p style={{ color: 'rgba(255,255,255,.35)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 12 }}>Your answers</p>
+            {answers.map((a, i) => (
+              <div key={a.label} style={{ display: 'flex', alignItems: 'baseline', gap: 12, marginBottom: i < answers.length - 1 ? 10 : 0 }}>
+                <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.78rem', flexShrink: 0, minWidth: 108 }}>{a.label}</p>
+                <p style={{ color: 'rgba(255,255,255,.85)', fontSize: '0.84rem', fontWeight: 600 }}>{a.value}</p>
               </div>
             ))}
           </div>
 
-          {/* AI Coach bubble */}
-          <div style={{ background: 'rgba(107,143,255,.07)', border: '1px solid rgba(107,143,255,.2)', borderRadius: 14, padding: '14px 16px', marginBottom: 20, animation: 'fade-up 0.35s ease 0.16s both' }}>
-            <div style={{ display: 'flex', gap: 10 }}>
-              <div style={{ width: 28, height: 28, borderRadius: 8, background: '#3B61C4', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.9)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="8" r="4"/><path d="M20 21a8 8 0 1 0-16 0"/><line x1="12" y1="4" x2="12" y2="2"/><circle cx="12" cy="2" r="1" fill="rgba(255,255,255,0.9)" stroke="none"/></svg>
-              </div>
-              <div>
-                <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.65rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 4 }}>AI Study Coach</p>
-                <p style={{ color: 'rgba(255,255,255,.78)', fontSize: '0.82rem', lineHeight: 1.55 }}>
-                  {daysToExam && trimmedCourse
-                    ? `"Your ${trimmedCourse} ${examWord} is in ${daysToExam} days. ${timeLabel} sessions are built around what matters most. Start your Blueprint today and you'll walk in ready."`
-                    : `"${timeLabel} sessions are scheduled across all ${subjects.length} courses. Start with ${subjects[0]} first -- it has the most material to cover."`}
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Auto-advance progress bar */}
-          <div style={{ marginBottom: 16 }}>
-            <div style={{ height: 3, background: 'rgba(255,255,255,.07)', borderRadius: 3, overflow: 'hidden' }}>
-              <div style={{ height: '100%', background: '#3B61C4', borderRadius: 3, animation: 'countdown-bar 10s linear forwards' }} />
-            </div>
-            <p style={{ color: 'rgba(255,255,255,.25)', fontSize: '0.69rem', textAlign: 'center', marginTop: 6 }}>
-              Opening your full plan in a moment…
+          {/* What happens next, described as the future thing it is. */}
+          <div style={{ background: 'rgba(107,143,255,.07)', border: '1px solid rgba(107,143,255,.2)', borderRadius: 14, padding: '16px 18px', marginBottom: 20, animation: 'fade-up 0.35s ease 0.08s both' }}>
+            <p style={{ color: 'rgba(255,255,255,.4)', fontSize: '0.68rem', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em', marginBottom: 10 }}>Next</p>
+            <p style={{ color: 'rgba(255,255,255,.78)', fontSize: '0.84rem', lineHeight: 1.6 }}>
+              {trimmedCourse
+                ? `Add your syllabus for ${trimmedCourse} and StudyEdge reads the dates, topics and grade weights out of it, then schedules ${preferredTime ? preferredTime.toLowerCase() : ''} sessions backwards from your ${examWord}.`
+                : `Add your first course. StudyEdge reads the dates, topics and grade weights out of your syllabus, then schedules sessions backwards from your ${examWord}.`}
             </p>
           </div>
 
@@ -701,7 +690,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
             onMouseEnter={e => { e.currentTarget.style.transform = 'scale(1.01)' }}
             onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)' }}
           >
-            Build my study plan →
+            Add my first course →
           </button>
           <div style={{ textAlign: 'center' }}>
             <button
