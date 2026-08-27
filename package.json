@@ -9,7 +9,11 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "sitemap:lastmod": "node scripts/updateSitemapLastmod.mjs",
+    "sitemap:check": "node scripts/updateSitemapLastmod.mjs --check",
+    "indexnow": "node scripts/indexnow.mjs",
+    "indexnow:submit": "node scripts/indexnow.mjs --submit"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
