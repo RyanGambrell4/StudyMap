@@ -11,7 +11,11 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "schema:assert": "node scripts/assertSchema.mjs",
-    "schema:list": "node scripts/assertSchema.mjs --list"
+    "schema:list": "node scripts/assertSchema.mjs --list",
+    "sitemap:lastmod": "node scripts/updateSitemapLastmod.mjs",
+    "sitemap:check": "node scripts/updateSitemapLastmod.mjs --check",
+    "indexnow": "node scripts/indexnow.mjs",
+    "indexnow:submit": "node scripts/indexnow.mjs --submit"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
