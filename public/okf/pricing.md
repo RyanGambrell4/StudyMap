@@ -23,7 +23,7 @@ last_updated: "2026-06-20"
 - **Weekly:** $2.99/week
 - **Monthly:** $9.99/month
 - **Annual:** $69.99/year (~$5.83/month, save 42%)
-- **Trial:** 3-day free trial, cancel anytime
+- **Trial:** 7-day free trial, cancel anytime
 - **Courses:** Up to 5 courses
 - **AI Tutor:** 100 AI study boosts/month
 - **Session Blueprints:** Unlimited
