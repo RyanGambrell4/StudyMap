@@ -278,8 +278,13 @@ explicitly including:
 
 All 891 accounts at once. Paid users untouched.
 
-- **Verify the exclusion before deploying.** Query every account with an active or
-  trialing subscription and confirm in writing that none change tier.
+- **Verify the exclusion before deploying. AMENDED: there is now a real person behind
+  this.** User **`ab7de9ae-b5ad-475d-9693-a72b266e2a6a`** (`sub_1U99vfKCY4pCgrHv3gnF1dn7`,
+  Unlimited monthly, active since 2026-08-27) is a live paying subscriber and the only
+  one. Under the new tier Unlimited keeps everything, so nothing should change for them,
+  but that must be **verified and written down before the migration deploys**, not
+  assumed. Query every account with an active, trialing or past_due subscription and
+  confirm in writing that none change tier.
 - Free counters reset to zero on the new weekly cycle. The 23 currently locked out get a
   fresh allowance and, for the first time, a working paywall.
 - **Nothing is deleted for anyone, ever.** Semester plans, grades, decks and exam history
@@ -330,13 +335,33 @@ The real number, and the reason this matters:
 > users** and **1 server-side `checkout_started`**. `checkout_error` also stopped
 > firing after 2026-08-11.
 
-That is not a broken gauge. Either the deployed function lacks a working
-`POSTHOG_API_KEY` (the August probes look like locally-run scripts, and Vercel sensitive
-env vars cannot be read back to confirm), or Stripe sessions are genuinely not being
-created for almost anyone. **Build order step 1 discriminates between the two:** if a
-real purchase completes and emits a server `checkout_started`, the pipeline is fine and
-the gap is session creation. If the purchase completes and no event lands, the key is
-wrong.
+That is not a broken gauge.
+
+**AMENDED again, and half of it is now settled.** The 2026-08-27 purchase proves Stripe
+sessions **are** being created and paid, at least sometimes: that customer reached
+Stripe's hosted page four separate times, abandoned three, and completed the fourth. So
+this is **not a total checkout outage**. It is a conversion problem, and possibly also a
+tracking problem, and the two are separable:
+
+- **Conversion.** 185 `checkout_button_clicked` from 126 distinct users, against a
+  handful of completed payments. People are reaching Stripe and not finishing. The
+  purchase timeline below is the best evidence we have about why, and abandonment on the
+  Stripe page itself is now a first-class thing to instrument.
+- **Tracking.** `checkout_started` fires server-side after the session exists, and has
+  landed once since 27 July. Step 1's preview test still discriminates this half: click
+  through to Stripe's page on production and check whether a server `checkout_started`
+  appears. If it does not, the deployed function's `POSTHOG_API_KEY` is wrong; Vercel
+  sensitive env vars cannot be read back, so this is the only way to tell.
+
+**A correction to the suppression claim in section 4.** "Suppressed for 875 of 891
+accounts" was a count of accounts lacking a `firstGenerationAt` stamp, not an observed
+blocking rate, and it overstated the effect. Observed over 60 days:
+`paywall_shown` fired **118 times for 64 distinct users**, while
+`paywall_suppressed_no_win` fired **10 times for 4 users**. The 2026-08-27 customer saw
+the paywall eight times without ever holding a stamp. So at least one paywall surface
+bypasses `openPaywall()`'s gate. Bug 1 should still remove the gate, but branch 2 must
+also establish **which** surfaces route through `openPaywall()` and which do not, because
+the answer is currently not what the code reads like.
 
 ### Events
 
@@ -359,17 +384,34 @@ not.
 
 One branch each, reviewed and merged before the next.
 
-1. **Prove checkout takes money.** Merge the Stripe customer fix, then put a real card
-   through end to end in live mode from a phone. Everything below is worthless if this is
-   broken, and it has never been verified.
-   **AMENDED:** buy **Unlimited monthly ($14.99)**, not the trial. The 7-day trial is
-   card-required but charges **$0 today**, so it proves session creation, the webhook and
-   the subscription row, and says nothing about whether money settles. Unlimited monthly
-   charges immediately and is not a price being deleted in branch 3, so it does not need
-   re-testing. Use a fresh throwaway account, never the founder account, since a
-   successful purchase writes a paid plan onto it and makes it useless for testing the
-   free tier in branches 4-6. Check the Radar rule that blocked the 2026-08-24 charge
-   first, so a Radar block is not misread as a code failure.
+1. **Verify the Stripe customer branch does not regress a now-proven path. No card, no
+   spend.**
+
+   **AMENDED twice.** This step originally read "prove checkout takes money... it has
+   never been verified," and was then amended to buy Unlimited monthly. Both are
+   obsolete: the path was proven by a real customer on 2026-08-27, one day before this
+   spec was written.
+
+   Evidence the whole chain works end to end:
+
+   | Stage | Evidence |
+   |---|---|
+   | Charge settled | `ch_3U99vfKCY4pCgrHv1ZOCqpg9`, **$14.99 captured**, 2026-08-27 20:29 UTC |
+   | Subscription created | `sub_1U99vfKCY4pCgrHv3gnF1dn7`, Unlimited monthly, status `active`, no trial |
+   | Webhook fired and entitlement written | user `ab7de9ae-b5ad-475d-9693-a72b266e2a6a` reads `plan: unlimited, status: active, billingPeriod: monthly` |
+
+   Buying it again proves nothing new. What is still unproven is that the Stripe customer
+   branch does not **break** that path, since it changes checkout auth. So this step is
+   now a free regression test: deploy the branch to a preview, click through to Stripe's
+   own page, confirm it renders **$14.99 / month, StudyEdge Unlimited**, and **stop
+   there**. Then repeat the stale-tab case — load the app, redeploy, and click upgrade in
+   the still-open tab without reloading.
+
+   On Radar: the blocked charges are **not** our checkout. Every one belongs to a single
+   Ghanaian prepaid Visa on Unlimited weekly, and each is `description: "Subscription
+   update"` — dunning retries on a `past_due` subscription, scored
+   `highest_risk_level` by Stripe's default model. No custom rule is blocking new
+   checkouts.
 2. **Fix the two bugs and settle the analytics question.** Paywall suppression and the
    backfill, `?upgrade=1`, and confirming whether the deployed function's PostHog key
    works. Also commit this spec and its mockup into the repo, and fix `CLAUDE.md`, which
