@@ -1113,27 +1113,58 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
     }
   }
 
-  // Any request that claims a userId MUST prove it owns that userId.
+  // Any request that claims a userId must prove it before it is allowed to WRITE
+  // anything about that user. It does not have to prove it merely to buy.
   //
-  // This was `if (checkoutToken && body.userId)`, which an attacker skipped by
-  // simply omitting the Authorization header — the guard only ever ran against
-  // callers who were already honest. That was survivable while stripeCustomerId
-  // was written in exactly one place, the Stripe webhook, from a trusted
-  // `sub.customer`. It stopped being survivable the moment checkout started
-  // resolving and persisting a customer id, because subscription.stripeCustomerId
-  // is a capability key: create-portal-session opens a Stripe Billing Portal for
-  // whatever id sits on the row, and the referral path credits $9.99 to it. An
-  // unauthenticated write to that field is an unauthenticated read of somebody
-  // else's invoices, billing address and card last-4.
+  // The hole being closed: `subscription.stripeCustomerId` is a capability key.
+  // create-portal-session opens a Stripe Billing Portal for whatever id sits on
+  // the row, and the referral path credits $9.99 to it. So an unauthenticated
+  // write to that field is an unauthenticated read of somebody else's invoices,
+  // billing address and card last-4. The original guard here was
+  // `if (checkoutToken && body.userId)`, which an attacker skipped by simply
+  // omitting the Authorization header — it only ever ran against honest callers.
+  //
+  // The first fix was to 401 every tokenless request. That closed the hole and
+  // broke a working revenue path with it. This app ships a service worker that
+  // serves navigations from the precache, deploys land several times a day, and
+  // students leave tabs open for days; every one of those tabs runs pre-deploy
+  // JavaScript that sends no Authorization header. Those users are not
+  // attackers, they are the highest-intent traffic we have, and a 401 loses the
+  // sale at the exact moment it was won. recoverFromStaleBundle() cannot save
+  // them either — the old bundle does not contain that code.
+  //
+  // So: degrade instead of reject. A tokenless request may still create a
+  // checkout session, because the worst it can do is pay for somebody else's
+  // subscription, which is a gift and not an attack. What it may NOT do is
+  // touch the capability key. For a tokenless request we refuse to
+  //   * write stripeCustomerId          (the persist block requires verifiedUser)
+  //   * resolve a customer by body email (the lookup block requires verifiedUser)
+  //   * reuse the stored customer id    (existingCustomerId is forced to null below)
+  // which leaves exactly the pre-branch behaviour: a session carrying
+  // customer_email, which reads nothing back and grants nothing.
+  //
+  // A token that is PRESENT but invalid or mismatched is still a hard 403. That
+  // is a caller lying about who they are, not a stale bundle.
   const checkoutToken = req.headers['authorization']?.replace('Bearer ', '').trim()
   let verifiedUser = null
+  let tokenlessCheckout = false
   if (body.userId) {
-    if (!checkoutToken) return res.status(401).json({ error: 'Unauthorized' })
-    const { data: { user: checkoutUser }, error: checkoutAuthErr } = await supabaseAdmin.auth.getUser(checkoutToken)
-    if (checkoutAuthErr || !checkoutUser || checkoutUser.id !== body.userId) {
-      return res.status(403).json({ error: 'Forbidden' })
+    if (!checkoutToken) {
+      tokenlessCheckout = true
+      // Greppable in Vercel runtime logs. A stale bundle cannot report itself
+      // from the client — it does not contain the code that would do it — so
+      // this line is the only way to count how often this path is taken.
+      console.warn(
+        `[stripe checkout] tokenless_checkout user=${body.userId} — session allowed, ` +
+        'customer id will not be read, reused or written'
+      )
+    } else {
+      const { data: { user: checkoutUser }, error: checkoutAuthErr } = await supabaseAdmin.auth.getUser(checkoutToken)
+      if (checkoutAuthErr || !checkoutUser || checkoutUser.id !== body.userId) {
+        return res.status(403).json({ error: 'Forbidden' })
+      }
+      verifiedUser = checkoutUser
     }
-    verifiedUser = checkoutUser
   }
 
   const { plan: rawPlan, billingPeriod: rawBillingPeriod, userId, trial, promo } = body
@@ -1204,7 +1235,15 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
       const existingSub = existingUser?.subscription
       // Reused below so checkout attaches to the customer we already have rather
       // than letting Stripe mint a new one. See the customer-resolution block.
-      existingCustomerId = normalizeCustomerId(existingSub?.stripeCustomerId)
+      //
+      // Not on the tokenless path. Attaching a session to a stored `cus_...` the
+      // caller has not proven they own would prefill that customer's details on
+      // Stripe's hosted page, which is a read of someone else's data by a
+      // different route than the write we already refuse. Tokenless falls all
+      // the way back to customer_email, which reads nothing back.
+      existingCustomerId = tokenlessCheckout
+        ? null
+        : normalizeCustomerId(existingSub?.stripeCustomerId)
       // Only block if the user already has a real Stripe-backed paid/trialing sub.
       // Free users default to { plan: 'free', status: 'active' } so checking status
       // alone was rejecting every signup; require an actual stripeSubId + paid plan.

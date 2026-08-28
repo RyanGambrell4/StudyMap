@@ -548,6 +548,24 @@ export async function createCheckoutSession(plan, billingPeriod, userEmail, user
     // derives the checkout email from that token rather than from this body.
     // Without the header the request is rejected 401, so this is not optional.
     const accessToken = await getAccessToken()
+
+    // The server accepts a tokenless checkout rather than 401ing it, but it
+    // degrades: no customer id is read, reused or written for that session.
+    // Count how often we land there.
+    //
+    // Read the limit carefully. This only fires from a CURRENT bundle whose
+    // session was missing or expired at click time. It can never fire for the
+    // cohort it was originally asked about — a tab running pre-deploy
+    // JavaScript does not contain this line. Stale bundles are only countable
+    // server side, from the `[stripe checkout] tokenless_checkout` warning in
+    // the Vercel runtime log. The two numbers together are the real total.
+    if (!accessToken) {
+      track('checkout_tokenless', {
+        plan, billingPeriod, trial: !!opts.trial,
+        reason: 'no_access_token',
+      })
+    }
+
     const res = await fetch('/api/stripe', {
       method: 'POST',
       headers: {
@@ -559,6 +577,15 @@ export async function createCheckoutSession(plan, billingPeriod, userEmail, user
 
     const data = await res.json()
 
+    // NOTE, since the server changed under this handler: /api/stripe no longer
+    // 401s a tokenless checkout. It accepts it and degrades instead, precisely
+    // so the stale-tab cohort described below is not turned away. This branch is
+    // therefore a backstop rather than the main path, and it is kept because it
+    // still covers any other route that answers 401 and because deleting a
+    // recovery on the strength of "the server should not do that any more" is
+    // how the failure comes back. Everything below remains accurate about what
+    // it can and cannot rescue.
+    //
     // /api/stripe returns 401 on the checkout path in exactly one case: no
     // Authorization header at all. A header that is present but invalid returns
     // 403. So reaching here means this bundle sent no token.
