@@ -489,7 +489,19 @@ Output the JSON now.`
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
-        max_tokens: 8000,
+        // 8000 was not enough. A full coach plan for a student with a dense
+        // schedule serialises to ~30,000 characters, which is right at the
+        // 8000-token ceiling, so the model was cut off mid-array and the JSON
+        // never closed. It surfaced as "Could not parse plan JSON: Expected ','
+        // or ']'" at character offsets of 27540, 30210 and 30628 — three
+        // different truncation points, not three malformed responses.
+        //
+        // 16000 is the practical ceiling for a non-streaming request: this
+        // model accepts far more, but a large non-streaming generation risks
+        // an HTTP timeout before the response is returned. Going higher means
+        // converting this endpoint to streaming, which is a bigger change than
+        // a paying customer's broken plan should have to wait for.
+        max_tokens: 16000,
         system: [{ type: 'text', text: systemPrompt, cache_control: { type: 'ephemeral' } }],
         messages,
       }),
@@ -501,6 +513,21 @@ Output the JSON now.`
     }
     const content = data.content?.[0]?.text
     if (!content) throw new Error('Empty response from AI')
+
+    // Check for truncation BEFORE parsing. A response cut off at max_tokens is
+    // still valid text and still contains a '{' and a '}', so it sails past the
+    // checks below and dies inside JSON.parse with a syntax error that points at
+    // a character offset. That reads like the model emitted malformed JSON. It
+    // did not — it was interrupted, and the only honest fix is a bigger budget,
+    // not a more forgiving parser. Say so, so the next person does not go
+    // looking for a prompt bug.
+    if (data.stop_reason === 'max_tokens') {
+      throw new Error(
+        `Coach plan generation hit the ${data.usage?.output_tokens ?? 'max'}-token output limit and was cut off. ` +
+        'The plan is too large for the current max_tokens; raise it or move this endpoint to streaming.'
+      )
+    }
+
     const first = content.indexOf('{')
     const last = content.lastIndexOf('}')
     if (first === -1 || last === -1) throw new Error('AI response was not valid JSON')
