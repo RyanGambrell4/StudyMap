@@ -30,7 +30,7 @@ export default async function handler(req, res) {
   // Pull free users who had a trial (trialUsedAt set) so we can filter by when their trial ended.
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
-    .select('user_id, subscription, completed_sessions, courses')
+    .select('user_id, subscription, completed_sessions, plan')
     .not('subscription->trialUsedAt', 'is', null)
     .limit(2000)
 
@@ -66,7 +66,7 @@ export default async function handler(req, res) {
       if (!email) { skipped++; continue }
 
       const sessionCount = Array.isArray(row.completed_sessions) ? row.completed_sessions.length : 0
-      const courseCount  = Array.isArray(row.courses) ? row.courses.length : 0
+      const courseCount  = Array.isArray(row.plan?.courses) ? row.plan.courses.length : 0
 
       const activityLine = sessionCount > 0
         ? `You completed ${sessionCount} session${sessionCount !== 1 ? 's' : ''} during your trial. That's real progress.`

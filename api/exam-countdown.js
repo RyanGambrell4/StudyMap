@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
-    .select('user_id, courses, subscription')
+    .select('user_id, plan, subscription')
     .limit(2000)
 
   if (error) {
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
   let sent = 0, skipped = 0
 
   for (const row of rows ?? []) {
-    const courses = Array.isArray(row.courses) ? row.courses : []
+    const courses = Array.isArray(row.plan?.courses) ? row.plan.courses : []
     const matches = courses.filter(c => c.examDate === target14 || c.examDate === target7)
     if (!matches.length) { skipped++; continue }
 

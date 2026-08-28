@@ -41,7 +41,7 @@ export default async function handler(req, res) {
 
     const { data: row, error: rowError } = await supabaseAdmin
       .from('user_data')
-      .select('subscription, completed_sessions, courses, syllabus_events')
+      .select('subscription, completed_sessions, plan, syllabus_events')
       .eq('user_id', user.id)
       .maybeSingle()
 
@@ -54,8 +54,8 @@ export default async function handler(req, res) {
     if (!gate.ok) { skipped++; continue }
 
     const sessionCount  = Array.isArray(row?.completed_sessions) ? row.completed_sessions.length : 0
-    const courseCount   = Array.isArray(row?.courses) ? row.courses.length : 0
-    const courseNames   = (row?.courses ?? []).map(c => c.name).filter(Boolean)
+    const courseCount   = Array.isArray(row?.plan?.courses) ? row.plan.courses.length : 0
+    const courseNames   = (row?.plan?.courses ?? []).map(c => c.name).filter(Boolean)
     const trialUsed     = !!(row?.subscription?.trialUsedAt || row?.subscription?.trial_activated)
 
     const todayStr = new Date().toISOString().slice(0, 10)

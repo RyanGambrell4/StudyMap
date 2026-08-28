@@ -166,6 +166,46 @@ Run the StudyEdge Paywall agent. Read PAYWALL_REDESIGN_SPEC.md, PRICING_SPEC.md,
 
 ---
 
+## Patterns to watch
+
+### Two ID shapes, one tolerant reader
+
+The most expensive bug found in this codebase so far: the same logical value was
+stored in two different shapes, and only *some* readers knew it.
+
+`plan.courses[].id` is an opaque string (`mtayo3uplg2`), but every session the
+scheduler writes stores `courseId` as the course's **array index** — a number.
+Verified 2026-08-28: of 861 sessions across all 35 users who have any, 861 carry
+a number and none carry the id. `classifyCourseRow` in `courseContext.js` knew
+this and handled both. `loadUserAndCourse`, three hundred lines up the same file,
+did a strict `String(c.id) === String(courseId)` and could therefore never
+resolve a session-launched request. Every AI tool opened from inside a focus
+session failed, for every user, silently, for months. It surfaced only because
+the one paying customer used it hard enough to generate 31 errors in thirteen
+minutes.
+
+**What made it invisible:** it failed as a clean, plausible error message
+(`course 3 not found for user ...`) that reads like bad input rather than a
+broken lookup, and the affected path had no alerting.
+
+When you find a value stored in two shapes:
+
+1. **Grep for every reader before fixing one.** A tolerant reader next to a
+   strict one is the signature — if one place handles both shapes, assume the
+   others should and check.
+2. **Put the tolerance in one function**, and make the precedence explicit (here:
+   opaque id wins, index is a fallback, so a course whose id is literally `"3"`
+   is not shadowed by index 3).
+3. **Fix the reader before the writer.** Correcting the writer leaves all
+   existing rows broken and needs a migration; a tolerant reader repairs history
+   at once and buys time to fix the writer properly.
+4. **Related smell:** a column that does not exist. Sixteen lifecycle endpoints
+   selected `user_data.courses`; courses live at `plan->courses`. supabase-js
+   returns `{data: null, error}` rather than throwing, so the whole endpoint
+   degraded to "skip every user" instead of failing loudly.
+
+---
+
 ## Shared Rules (All Agents)
 1. Read `AGENTS_SPEC.md` + the relevant spec file before starting any work
 2. Check `CONTEXT.md` for current app state and open issues

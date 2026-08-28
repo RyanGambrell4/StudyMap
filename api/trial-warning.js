@@ -29,7 +29,7 @@ export default async function handler(req, res) {
 
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
-    .select('user_id, subscription, completed_sessions, courses, trial_email_flags')
+    .select('user_id, subscription, completed_sessions, plan, trial_email_flags')
     .not('subscription->trialUsedAt', 'is', null)
     .limit(2000)
 
@@ -64,7 +64,7 @@ export default async function handler(req, res) {
       if (!email) { skipped++; continue }
 
       const sessionCount    = Array.isArray(row.completed_sessions) ? row.completed_sessions.length : 0
-      const courseCount     = Array.isArray(row.courses) ? row.courses.length : 0
+      const courseCount     = Array.isArray(row.plan?.courses) ? row.plan.courses.length : 0
       const eng             = row.subscription?.email_engagement ?? {}
       const openedCampaigns = Array.isArray(eng.opened_campaigns) ? eng.opened_campaigns : []
       const clickedAny      = Array.isArray(eng.clicked_campaigns) && eng.clicked_campaigns.length > 0

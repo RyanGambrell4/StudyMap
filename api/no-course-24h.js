@@ -41,13 +41,13 @@ export default async function handler(req, res) {
 
     const { data: row } = await supabaseAdmin
       .from('user_data')
-      .select('courses, completed_sessions, subscription')
+      .select('plan, completed_sessions, subscription')
       .eq('user_id', r.user_id)
       .maybeSingle()
 
     // Skip if no user_data (never completed onboarding) or already has courses
     if (!row) { skipped++; continue }
-    const courseCount = Array.isArray(row?.courses) ? row.courses.length : 0
+    const courseCount = Array.isArray(row?.plan?.courses) ? row.plan.courses.length : 0
     if (courseCount > 0) { skipped++; continue }
 
     // Skip paid/trialing users

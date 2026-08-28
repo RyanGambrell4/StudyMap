@@ -42,7 +42,7 @@ export default async function handler(req, res) {
 
     const { data: row, error: rowError } = await supabaseAdmin
       .from('user_data')
-      .select('subscription, completed_sessions, courses')
+      .select('subscription, completed_sessions, plan')
       .eq('user_id', user.id)
       .maybeSingle()
 
@@ -54,7 +54,7 @@ export default async function handler(req, res) {
 
     const plan = row?.subscription?.plan ?? 'free'
     const sessionCount = Array.isArray(row?.completed_sessions) ? row.completed_sessions.length : 0
-    const courseCount = Array.isArray(row?.courses) ? row.courses.length : 0
+    const courseCount = Array.isArray(row?.plan?.courses) ? row.plan.courses.length : 0
     const trialUsed = !!(row?.subscription?.trialUsedAt || row?.subscription?.trial_activated)
     if (plan !== 'free') { skipped++; continue }
 
