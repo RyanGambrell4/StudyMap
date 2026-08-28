@@ -417,6 +417,35 @@ One branch each, reviewed and merged before the next.
    works. Also commit this spec and its mockup into the repo, and fix `CLAUDE.md`, which
    names the wrong repo path and calls `PRICING_SPEC.md` the "live source of truth" when
    it is neither. All pure repairs, none depend on the new tier.
+
+   **Added to branch 2 scope, 2026-08-28:**
+
+   **2a. The webhook must refuse to overwrite an existing paid subscription from an
+   unverified session.** Checkout now degrades rather than 401ing a tokenless request,
+   which is right — those are stale-bundle customers, not attackers, and the capability
+   key is protected. But a tokenless request still sets `metadata.user_id` from an
+   unverified body, so someone who knew a victim's UUID could pay and have the webhook
+   attach *their* subscription to the victim's row. Against a free account that is a
+   gift. Against a **paying** account it could overwrite a real subscription record, and
+   we now have one of those. This vector is not new — pre-branch code behaved identically
+   — but it should not survive branch 2. Mark unverified sessions in `metadata` at
+   creation, and have the webhook refuse to overwrite a row that already holds an active
+   paid `stripeSubId` when the session was unverified.
+
+   **2b. Instrument abandonment on Stripe's own hosted page.** This is currently invisible
+   and it sits one step before money. The 2026-08-27 customer reached Stripe **four
+   times** and abandoned **three** before buying, and nothing in our data would have
+   shown that. Three parts:
+   - subscribe to `checkout.session.expired` and `checkout.session.async_payment_failed`
+     in the webhook, and record both
+   - fire a client event when the app is re-entered from a Stripe redirect without a
+     completed session (the `?checkout=cancelled` return already exists and is currently
+     only used for UI state)
+   - then report the real abandonment rate across all 126 users who have clicked
+     checkout, not the one we happen to have a timeline for
+
+   If that rate is high, it is a bigger and far cheaper problem than anything else in this
+   document, and it should be known **before** branches 3 through 7 are built.
 3. **Pricing collapse.** Archive weekly, remove from UI, repoint every `billing=weekly`
    site across the 80 files listed in section 4, fix the trial to convert to Pro monthly,
    reconcile `PRICING_SPEC.md` with the code.

@@ -166,6 +166,39 @@ Run the StudyEdge Paywall agent. Read PAYWALL_REDESIGN_SPEC.md, PRICING_SPEC.md,
 
 ---
 
+## Pushing and deploying — split by blast radius, do not ask every time
+
+`main` auto-deploys to production and there is a **live paying subscriber**. The gate
+below is about blast radius, not about how good the work is. Apply the reasoning to
+cases this list does not name.
+
+| Action | Permission |
+|---|---|
+| Push to any branch | **Free. No permission needed, ever.** |
+| Merge to `main` and deploy | **Go ahead without asking** — provided the change touches none of the five below and the suite is green |
+| Anything touching the five below | **Ask first, every time** |
+
+**The five. These are the only places where being wrong costs a customer:**
+
+1. `api/stripe.js`
+2. auth
+3. the entitlement layer
+4. webhooks
+5. any database migration
+
+Mechanism, when merging: **merge locally, then push `main`.** Never push a feature
+branch straight onto `main`. If the mechanism has to differ for any reason, say so
+*before* running it, not after.
+
+Two judgement notes that follow from "the gate is about blast radius":
+
+- A merge to `main` is a production deploy. Don't spend one on a change with no user
+  benefit (a docs-only commit, say) — let it ride along with the next real merge.
+- Prefer a low-traffic window. The service worker serves navigations from its precache,
+  so every deploy strands open tabs on pre-deploy JavaScript until they reload.
+
+---
+
 ## Shared Rules (All Agents)
 1. Read `AGENTS_SPEC.md` + the relevant spec file before starting any work
 2. Check `CONTEXT.md` for current app state and open issues
