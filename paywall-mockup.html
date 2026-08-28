@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>StudyEdge Paywall Mockup</title>
+<style>
+  body { margin:0; padding:40px 20px; background:#F4F3F0;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+    display:flex; align-items:flex-start; justify-content:center; min-height:100vh; }
+  .stage { width:100%; max-width:760px; }
+  .note { margin:0 0 22px; font-size:13px; color:#6E6E76; line-height:1.6; }
+  .note b { color:#111112; }
+</style>
+<style>
+  /* ---- Okara-pattern paywall mockup ---- */
+  .pwshell {
+    background:#FFFFFF; border:1px solid #E6E3DC; border-radius:16px;
+    padding:38px 28px 34px; margin:26px 0; color:#111112; position:relative;
+    box-shadow:0 1px 2px rgba(0,0,0,.04), 0 18px 46px -28px rgba(0,0,0,.32);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",system-ui,sans-serif;
+  }
+  .pwshell .x { position:absolute; top:20px; right:22px; color:#9A9A9E; font-size:19px; line-height:1; }
+  .pw-h { text-align:center; font-size:1.6rem; font-weight:700; letter-spacing:-.02em; margin:0 0 8px; color:#111112; }
+  .pw-s { text-align:center; color:#6E6E76; font-size:.95rem; margin:0 0 20px; }
+  .pw-togwrap { display:flex; flex-direction:column; align-items:center; margin-bottom:26px; }
+  .pw-save { color:#15A05A; font-size:.8rem; font-weight:600; margin-bottom:2px; }
+  .pw-tog {
+    display:inline-flex; background:#F2EEE6; border-radius:999px; padding:5px;
+    gap:2px;
+  }
+  .pw-tog span {
+    padding:8px 22px; border-radius:999px; font-size:.9rem; font-weight:600; color:#5C5C64;
+  }
+  .pw-tog span.on { background:#0B0B0C; color:#FFFFFF; }
+  .pw-cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(258px,1fr)); gap:16px; }
+  .pw-card { border:1px solid #E6E3DC; border-radius:14px; padding:24px 22px; background:#FFF; position:relative; }
+  .pw-card.dark { background:#0B0B0C; border-color:#0B0B0C; color:#F4F4F2; }
+  .pw-pop {
+    position:absolute; top:-9px; right:16px; background:#1EA95C; color:#fff;
+    font-size:9.5px; font-weight:700; letter-spacing:.03em; padding:3px 8px; border-radius:5px;
+  }
+  .pw-name { font-size:1.22rem; font-weight:700; letter-spacing:-.01em; margin:0 0 12px; }
+  .pw-badge {
+    display:inline-block; background:#D9F5E4; color:#0E7A44; font-size:10px; font-weight:700;
+    padding:2px 7px; border-radius:5px; margin-left:8px; vertical-align:3px; letter-spacing:.02em;
+  }
+  .pw-card.dark .pw-badge { background:#12351F; color:#5FD894; }
+  .pw-price { font-size:2.5rem; font-weight:700; letter-spacing:-.03em; line-height:1; font-variant-numeric:tabular-nums; }
+  .pw-per { font-size:1rem; font-weight:500; color:#8A8A92; margin-left:4px; }
+  .pw-card.dark .pw-per { color:#8E8E96; }
+  .pw-desc { color:#6E6E76; font-size:.88rem; margin:10px 0 16px; }
+  .pw-card.dark .pw-desc { color:#9A9AA2; }
+  .pw-rule { height:1px; background:#EAE7E0; margin:0 0 16px; }
+  .pw-card.dark .pw-rule { background:#26262A; }
+  .pw-btn {
+    display:block; text-align:center; background:#0B0B0C; color:#fff;
+    padding:13px; border-radius:10px; font-weight:600; font-size:.95rem;
+  }
+  .pw-card.dark .pw-btn { background:#F2F2F0; color:#0B0B0C; }
+  .pw-fine { text-align:center; font-size:.72rem; color:#8A8A92; margin:9px 0 18px; }
+  .pw-card.dark .pw-fine { color:#7E7E88; }
+  .pw-feat-h { font-size:.86rem; font-weight:600; display:flex; gap:8px; margin-bottom:12px; line-height:1.4; }
+  .pw-check { color:#1EA95C; font-weight:700; }
+  .pw-list { list-style:none; padding:0; margin:0; }
+  .pw-list li {
+    display:flex; align-items:center; gap:9px; font-size:.86rem; padding:5px 0; margin:0; color:#3A3A42;
+  }
+  .pw-card.dark .pw-list li { color:#D2D2DA; }
+  .pw-plus {
+    width:17px; height:17px; border-radius:999px; border:1px solid #D8D5CE;
+    display:inline-flex; align-items:center; justify-content:center;
+    font-size:11px; color:#9A9AA2; flex:none; line-height:1;
+  }
+  .pw-card.dark .pw-plus { border-color:#33333A; color:#7E7E88; }
+  @media (max-width:560px){ .pwshell{padding:30px 16px 26px;} .pw-cards{grid-template-columns:1fr;} }
+</style>
+</head>
+<body>
+<div class="stage">
+<p class="note"><b>StudyEdge paywall</b> &mdash; production-usable markup and CSS. Pro is the highlighted card because it is where the trial lives and where nearly everyone should land. On Annual, prices become $69.99 and $119.99, badges read "Save 42%" and "Save 33%", and the trial disappears (Pro's button becomes "Get Pro"). On mobile the cards stack with Pro first and the button must be reachable without scrolling.</p>
+<div class="pwshell">
+    <span class="x">&times;</span>
+    <h4 class="pw-h">Unlock your semester</h4>
+    <p class="pw-s">14 more sessions built for BIO 201, your full plan through finals</p>
+
+    <div class="pw-togwrap">
+      <span class="pw-save">Save up to 42%</span>
+      <div class="pw-tog"><span class="on">Monthly</span><span>Annual</span></div>
+    </div>
+
+    <div class="pw-cards">
+      <div class="pw-card dark">
+        <span class="pw-pop">Most Popular</span>
+        <p class="pw-name">Pro</p>
+        <div><span class="pw-price">$9.99</span><span class="pw-per">/mo</span></div>
+        <p class="pw-desc">Everything StudyEdge builds, 5 courses</p>
+        <div class="pw-rule"></div>
+        <div class="pw-btn">Start 7-day free trial</div>
+        <p class="pw-fine">Free for 7 days, then $9.99/month &middot; Cancel anytime</p>
+        <div class="pw-feat-h"><span class="pw-check">&#10003;</span><span>Everything in Free, plus the whole system:</span></div>
+        <ul class="pw-list">
+          <li><span class="pw-plus">+</span>Full semester plan, every week</li>
+          <li><span class="pw-plus">+</span>Grade Hub and predicted scores</li>
+          <li><span class="pw-plus">+</span>Knowledge map and tutor memory</li>
+          <li><span class="pw-plus">+</span>Unlimited practice exams and history</li>
+          <li><span class="pw-plus">+</span>Unlimited AI tutor chat</li>
+          <li><span class="pw-plus">+</span>100 AI actions a month</li>
+        </ul>
+      </div>
+
+      <div class="pw-card">
+        <p class="pw-name">Unlimited</p>
+        <div><span class="pw-price">$14.99</span><span class="pw-per">/mo</span></div>
+        <p class="pw-desc">No caps on anything</p>
+        <div class="pw-rule"></div>
+        <div class="pw-btn">Get Unlimited</div>
+        <p class="pw-fine">Billed monthly &middot; Cancel anytime</p>
+        <div class="pw-feat-h"><span class="pw-check">&#10003;</span><span>Everything in Pro, plus:</span></div>
+        <ul class="pw-list">
+          <li><span class="pw-plus">+</span>Unlimited courses</li>
+          <li><span class="pw-plus">+</span>Unlimited AI actions</li>
+          <li><span class="pw-plus">+</span>Podcast mode</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+</body>
+</html>
