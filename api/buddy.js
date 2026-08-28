@@ -24,14 +24,14 @@ export default async function handler(req, res) {
 
     const { data: row, error } = await supabaseAdmin
       .from('user_data')
-      .select('completed_sessions, courses, streak')
+      .select('completed_sessions, plan, streak')
       .eq('user_id', buddyId)
       .single()
 
     if (error || !row) return res.status(404).json({ error: 'Buddy not found' })
 
     const completedSessions = Array.isArray(row.completed_sessions) ? row.completed_sessions : []
-    const courses = Array.isArray(row.courses) ? row.courses : []
+    const courses = Array.isArray(row.plan?.courses) ? row.plan.courses : []
 
     // Compute streak from completed_sessions if no dedicated streak column
     const streak = row.streak ?? (() => {

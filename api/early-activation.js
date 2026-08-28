@@ -39,7 +39,7 @@ export default async function handler(req, res) {
 
     const { data: row } = await supabaseAdmin
       .from('user_data')
-      .select('subscription, completed_sessions, courses')
+      .select('subscription, completed_sessions')
       .eq('user_id', user.id)
       .maybeSingle()
 

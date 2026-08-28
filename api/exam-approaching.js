@@ -65,7 +65,7 @@ export default async function handler(req, res) {
   // Pull all free users who have syllabus events (exams) coming up.
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
-    .select('user_id, subscription, completed_sessions, courses, syllabus_events, plan')
+    .select('user_id, subscription, completed_sessions, syllabus_events, plan')
     .not('syllabus_events', 'is', null)
     .limit(5000)
 

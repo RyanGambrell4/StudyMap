@@ -44,7 +44,7 @@ export default async function handler(req, res) {
 
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
-    .select('user_id, subscription, plan, completed_sessions, courses, trial_email_flags')
+    .select('user_id, subscription, plan, completed_sessions, trial_email_flags')
     .not('subscription->trialUsedAt', 'is', null)
     .limit(2000)
 
@@ -83,7 +83,7 @@ export default async function handler(req, res) {
 
       const greeting = firstName ? `Hey ${firstName}` : 'Hey'
       const sessionCount = Array.isArray(row.completed_sessions) ? row.completed_sessions.length : 0
-      const courseCount  = Array.isArray(row.courses) ? row.courses.length : 0
+      const courseCount  = Array.isArray(row.plan?.courses) ? row.plan.courses.length : 0
       const isInactive = sessionCount === 0 && courseCount === 0
 
       let subject, kicker, kickerColor, headline, lead, tipTitle, tipBody, ctaLabel, ctaHref, ctaSub

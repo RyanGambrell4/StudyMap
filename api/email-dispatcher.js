@@ -73,7 +73,7 @@ export default async function handler(req, res) {
     // 2. Re-verify the trigger condition still holds
     const { data: userData, error: udErr } = await supabaseAdmin
       .from('user_data')
-      .select('subscription, completed_sessions, courses, syllabus_events')
+      .select('subscription, completed_sessions, plan, syllabus_events')
       .eq('user_id', user_id)
       .maybeSingle()
 
@@ -109,7 +109,7 @@ export default async function handler(req, res) {
 
 function verifyTrigger(campaign, userData, context) {
   const sessions = Array.isArray(userData.completed_sessions) ? userData.completed_sessions : []
-  const courses = Array.isArray(userData.courses) ? userData.courses : []
+  const courses = Array.isArray(userData.plan?.courses) ? userData.plan.courses : []
   const plan = userData.subscription?.plan ?? 'free'
   const activeStatuses = ['active', 'trialing', 'past_due']
   const isActive = activeStatuses.includes(userData.subscription?.status)
@@ -170,7 +170,7 @@ function safeName(raw) {
 
 async function sendCampaign(campaign, userId, email, userData, context) {
   const name = safeName(context?.firstName ?? email.split('@')[0].split('.')?.[0])
-  const courses = Array.isArray(userData.courses) ? userData.courses : []
+  const courses = Array.isArray(userData.plan?.courses) ? userData.plan.courses : []
   const sessions = Array.isArray(userData.completed_sessions) ? userData.completed_sessions : []
   const sub = userData.subscription ?? {}
   const trialUsed = !!(sub.trialUsedAt || sub.trial_activated)

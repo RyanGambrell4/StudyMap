@@ -9,6 +9,32 @@ import { enqueueEmail } from '../lib/server/emailQueue.js'
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
 
+// A standing blast-radius guard, not a tuning knob. This job selects from the
+// whole user table rather than a signup window, so a filter that is wrong by
+// one line reaches everybody at once — which is exactly what happened here.
+// With the never-activated exclusion in place the real audience is ~20, so this
+// ceiling should never bind; if it ever does, a filter has regressed and the
+// warning below is the signal to go and look.
+const DAILY_SEND_CAP = 50
+
+// Longest gap we are willing to say out loud. Past this the number is more
+// likely to be a data artefact than a real absence.
+const MAX_PLAUSIBLE_AWAY_DAYS = 400
+
+/**
+ * Render an elapsed-time phrase, or null when we cannot stand behind the number.
+ *
+ * Every caller must handle null by dropping the duration from the sentence
+ * entirely rather than substituting a placeholder. An email that tells a
+ * student they have been away "999 days" is worse than one that never mentions
+ * how long it has been — it is obviously wrong, and being obviously wrong about
+ * the one personal detail in the message costs more than the message gains.
+ */
+function elapsedPhrase(days) {
+  if (!Number.isFinite(days) || days < 1 || days > MAX_PLAUSIBLE_AWAY_DAYS) return null
+  return `${days} day${days === 1 ? '' : 's'}`
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).end()
 
@@ -30,7 +56,7 @@ export default async function handler(req, res) {
 
   const { data: rows, error } = await supabaseAdmin
     .from('user_data')
-    .select('user_id, plan, subscription, completed_sessions, syllabus_events, courses, last_emailed_at')
+    .select('user_id, plan, subscription, completed_sessions, syllabus_events, last_emailed_at')
     .not('plan', 'is', null)
 
   if (error) {
@@ -43,23 +69,48 @@ export default async function handler(req, res) {
   let sent = 0, skipped = 0
 
   for (const row of rows ?? []) {
+    if (sent >= DAILY_SEND_CAP) {
+      console.warn(`[re-engage] daily cap of ${DAILY_SEND_CAP} reached; stopping this run`)
+      break
+    }
     try {
       const completedSessions = Array.isArray(row.completed_sessions) ? row.completed_sessions : []
       const lastSession = completedSessions[completedSessions.length - 1]?.dateStr
-      const daysSinceSession = lastSession
-        ? Math.floor((now - new Date(lastSession + 'T12:00:00').getTime()) / 86400000)
-        : 999
 
-      // Only engage users who have been away 3+ days
-      if (daysSinceSession < 3) { skipped++; continue }
+      // A student who has never completed a session is NOT dormant. They never
+      // started, and "we miss you / you've been away" is the wrong thing to say
+      // to them: it burns the address and it describes an experience they never
+      // had. That cohort needs its own email saying they never got going and
+      // here is the two-minute version — deliberately not written yet.
+      //
+      // This exclusion is a permanent design decision, not a temporary safety
+      // valve. Do not restore a default elapsed time to let them back in.
+      //
+      // The default that used to live here was 999, which meant every account
+      // that had never completed a session scored as 999 days dormant and
+      // passed every filter below. On 2026-08-28 that was 537 of 558 accounts,
+      // and the only reason none of them were emailed is that emailGuard was
+      // failing closed against a suppression table that did not exist. The day
+      // that table is created, this loop would have sent 552 emails in one run.
+      if (!lastSession) { skipped++; continue }
+
+      const daysSinceSession = Math.floor(
+        (now - new Date(lastSession + 'T12:00:00').getTime()) / 86400000
+      )
+
+      // Guard the arithmetic too, not just the audience. A malformed or future
+      // dateStr yields NaN or a negative, and the copy below interpolates this
+      // number straight into a subject line.
+      if (!Number.isFinite(daysSinceSession) || daysSinceSession < 3) { skipped++; continue }
 
       // Two tiers: 3-7 days = "short" dormant, 7+ days = "long" dormant
       const tier = daysSinceSession >= 7 ? 'long' : 'short'
 
-      // Rate-limit: low priority (>= 5 days since last email of any kind)
-      const gate = await canSendUserEmail(row.user_id, { priority: 'low', email })
-      if (!gate.ok) { skipped++; continue }
-
+      // Resolve the address BEFORE the gate. This used to sit after, and passed
+      // `email` into canSendUserEmail() three lines before `let email` declared
+      // it — a temporal dead zone ReferenceError on every single row, thrown
+      // inside this try and silently counted as a skip. The endpoint could
+      // never have sent anything even with a healthy suppression table.
       let email
       try {
         const { data: authUser } = await supabaseAdmin.auth.admin.getUserById(row.user_id)
@@ -67,10 +118,14 @@ export default async function handler(req, res) {
       } catch { /* skip */ }
       if (!email) { skipped++; continue }
 
+      // Rate-limit: low priority (>= 5 days since last email of any kind)
+      const gate = await canSendUserEmail(row.user_id, { priority: 'low', email })
+      if (!gate.ok) { skipped++; continue }
+
       const plan        = row.plan ?? {}
       const userPlan    = row?.subscription?.plan ?? 'free'
       const trialUsed   = !!(row?.subscription?.trialUsedAt)
-      const courseNames = (row?.courses ?? []).map(c => c.name).filter(Boolean)
+      const courseNames = (row?.plan?.courses ?? []).map(c => c.name).filter(Boolean)
       const sessionCount = completedSessions.length
 
       const upcomingExam = (row.syllabus_events ?? [])
@@ -97,20 +152,32 @@ export default async function handler(req, res) {
       // Build content based on tier
       let subject, headline, bodyPara1, bodyPara2
 
+      // null when the elapsed value is not something we should say out loud.
+      // Every use below has a no-duration variant.
+      const away = elapsedPhrase(daysSinceSession)
+
       if (tier === 'long') {
         // 7+ days: strong urgency, falling behind framing
         const weeksGone = Math.floor(daysSinceSession / 7)
         subject = courseNames.length
-          ? `${courseNames[0]}: you've been away ${daysSinceSession} days`
-          : `You've been away from StudyEdge for ${daysSinceSession} days`
+          ? (away
+              ? `${courseNames[0]}: you've been away ${away}`
+              : `${courseNames[0]}: your plan is still waiting`)
+          : (away
+              ? `You've been away from StudyEdge for ${away}`
+              : `Your StudyEdge plan is still waiting`)
         headline = courseNames.length
-          ? `Your ${courseNames[0]} plan hasn't moved in ${daysSinceSession} days.`
-          : `You haven't studied in ${daysSinceSession} days. Your exams aren't waiting.`
+          ? (away
+              ? `Your ${courseNames[0]} plan hasn't moved in ${away}.`
+              : `Your ${courseNames[0]} plan hasn't moved.`)
+          : (away
+              ? `You haven't studied in ${away}. Your exams aren't waiting.`
+              : `You haven't studied in a while. Your exams aren't waiting.`)
         bodyPara1 = upcomingExam
           ? `Your <strong style="color:#111111;">${upcomingExam.title ?? 'exam'}</strong> is on
              <strong style="color:#111111;">${upcomingExam.date ?? upcomingExam.dateStr}</strong>.
              Every day you don't study puts you further behind the students who are. Come back today.`
-          : `${weeksGone > 1 ? `It's been ${weeksGone} weeks.` : `It's been over a week.`}
+          : `${away ? (weeksGone > 1 ? `It's been ${weeksGone} weeks.` : `It's been over a week.`) : `It's been a while.`}
              The students who fall behind in their courses aren't the ones who don't understand the material.
              They're the ones who lose their rhythm. You still have time to get it back.`
         bodyPara2 = sessionCount > 0
@@ -165,7 +232,7 @@ export default async function handler(req, res) {
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Come back to StudyEdge</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-${preheader(courseNames.length ? `Your ${courseNames[0]} plan is sitting here. ${daysSinceSession} days of ground to make up.` : `You've been away ${daysSinceSession} days. Your study plan is waiting.`)}
+${preheader(courseNames.length ? `Your ${courseNames[0]} plan is sitting here.${away ? ` ${away} of ground to make up.` : ''}` : (away ? `You've been away ${away}. Your study plan is waiting.` : `Your study plan is waiting.`))}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
@@ -174,7 +241,7 @@ ${preheader(courseNames.length ? `Your ${courseNames[0]} plan is sitting here. $
       </td></tr>
       <tr><td style="background:#FFFFFF;border-radius:16px;border:1px solid rgba(0,0,0,0.07);padding:32px 32px 28px;">
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:${tier === 'long' ? '#E8531A' : '#9B9B9B'};text-transform:uppercase;">
-          ${tier === 'long' ? `${daysSinceSession} days away` : 'Come back'}
+          ${tier === 'long' && away ? `${away} away` : 'Come back'}
         </p>
         <h1 style="margin:0 0 16px;font-size:24px;font-weight:700;color:#111111;letter-spacing:-0.5px;line-height:1.3;">
           ${headline}

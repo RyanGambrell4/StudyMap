@@ -43,7 +43,7 @@ export default async function handler(req, res) {
 
     const { data: row, error: rowError } = await supabaseAdmin
       .from('user_data')
-      .select('subscription, completed_sessions, courses, plan')
+      .select('subscription, completed_sessions, plan')
       .eq('user_id', user.id)
       .maybeSingle()
 
@@ -56,7 +56,7 @@ export default async function handler(req, res) {
     if (plan !== 'free') { skipped++; continue }
 
     const sessionCount = Array.isArray(row?.completed_sessions) ? row.completed_sessions.length : 0
-    const courseCount  = Array.isArray(row?.courses) ? row.courses.length : 0
+    const courseCount  = Array.isArray(row?.plan?.courses) ? row.plan.courses.length : 0
 
     // Skip users who are already engaged
     if (sessionCount > 0 || courseCount > 0) { skipped++; continue }
