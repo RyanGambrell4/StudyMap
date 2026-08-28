@@ -104,7 +104,43 @@ of value kills activation, and 59% of signups already die inside onboarding.
 
 ### First-run sequence
 
-1. Sign up, upload one syllabus, watch it parse into real courses and real exam dates.
+**AMENDED: manual entry leads, syllabus upload is the secondary path.**
+
+The original step 1 was "upload one syllabus." Production says that is the wrong
+default. Of 13 users who chose the syllabus path in 60 days, **11 (85%) abandoned it
+and switched to manual entry**, and 9 went on to submit manually — 33 selections
+from 13 users, roughly 2.5 attempts each before giving up. The paying customer tried
+three times in two minutes, then switched.
+
+Two things make this a leading-path problem rather than a bug to chase:
+
+- **There is no crash.** Production logs show no `parse-syllabus` error cluster. The
+  endpoint is not failing; students simply do not have a syllabus file to hand,
+  which is unsurprising when almost all traffic is phones.
+- **It is completely uninstrumented.** There is no `syllabus_upload_failed` event
+  anywhere in the project, which is why an 85% abandonment rate on step one of the
+  product went unnoticed for two months.
+
+Opening the first run with the step most students fail is asking them to fail before
+they have done anything, on the same screen where 59% already die.
+
+1. Sign up, then **add one course by hand: course name, next exam date, textbook.**
+   This is the default and the first thing offered. It is what 9 of 13 users ended up
+   doing anyway, and it takes seconds on a phone.
+   - **"I have my syllabus" is offered alongside it, not ahead of it.** Students who
+     do have the file get the richer path and should still be able to take it in one
+     tap; it simply stops being the toll gate.
+   - **Instrument the failure.** Add a `syllabus_upload_failed` event with a `reason`
+     property (no file chosen, unsupported type, parse returned nothing, request
+     failed, abandoned). Without it we cannot tell a broken parser from a student who
+     never had the document, and those need opposite fixes.
+   - **Design for the actual course load.** 55% of students who tell us what they are
+     are in high school, and they carry six to eight classes with names like
+     "AP Human Geography", "Pre-AP Geometry", "Honors Latin III", "PSAT 10". Adding
+     several courses in a row must feel native, not like an edge case: no wording that
+     assumes a university term, no vocabulary that assumes semesters or credit hours
+     over terms and periods, and no layout that quietly assumes four or five courses
+     is the ceiling.
 2. **The full plan generates on screen, visibly, in real time.** Every week, every
    session, real titles from their real course. Do not shortcut this with a spinner.
    The generation is the sales pitch.
