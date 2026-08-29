@@ -1,14 +1,27 @@
 /**
- * The card ask may not fire before a generation has actually succeeded.
+ * The first-generation stamp is a signal. It is not a gate.
  *
- * The trial offer used to be step 3 of onboarding, ten seconds after a preview
- * screen, against an account with no course and no generation behind it. 13 of
- * 24 trials were cancelled the same day the card went in and 20 of 24 quit
- * before the trial ended.
+ * markSuccessfulGeneration() still exists and still schedules a well-timed ask
+ * the moment a student's first generation lands — that part was always the good
+ * idea, and the tests for it below are unchanged.
  *
- * The rule is enforced at one choke point, openPaywall in App.jsx, which is
- * what makes it checkable at all. These tests cover the signal it reads
- * (markSuccessfulGeneration) and assert the wiring is still in place.
+ * What these tests now forbid is the thing that idea turned into. The stamp was
+ * wired as a precondition on openPaywall and on every upgrade surface in the
+ * product. Because it is written only server-side, and only from 2026-08-25,
+ * almost no account had one — so every upgrade button in the app silently did
+ * nothing. Clicking did not navigate, did not open a modal, did not error.
+ * Walked on production 2026-08-29 against a free account with one course: the
+ * Grade Hub lock CTA and the Courses add button were both dead.
+ *
+ * The earlier version of this file made that worse rather than catching it. It
+ * asserted the gate was present on every surface, so the tests went green
+ * precisely because the buttons were unreachable. A previous round even found
+ * the same defect in the nav and "fixed" it by hiding the button instead of
+ * fixing the gate — the comment recording that is still in the git history.
+ *
+ * So the assertions are inverted. A gate on the ask must never be a silent
+ * no-op again: if a surface should not ask, it renders something a person can
+ * see, and if openPaywall cannot open it says so out loud.
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { readFileSync } from 'fs'
@@ -93,95 +106,95 @@ describe('the first successful generation', () => {
   })
 })
 
-describe('the card ask is wired behind the win', () => {
+describe('openPaywall opens, unconditionally', () => {
   const app = readFileSync(new URL('../App.jsx', import.meta.url), 'utf8')
   const onboarding = readFileSync(new URL('../components/Onboarding.jsx', import.meta.url), 'utf8')
 
-  it('openPaywall refuses to open for a free user with no successful generation', () => {
+  // The body of openPaywall, which is what actually has to be free of gates.
+  const fnBody = (() => {
     const fn = app.slice(app.indexOf('const openPaywall = useCallback'))
-    const body = fn.slice(0, fn.indexOf('}, [])'))
-    expect(body).toContain("plan === 'free' && !hasSuccessfulGeneration()")
-    // It must return before setting any paywall state.
-    const guardIdx = body.indexOf('!hasSuccessfulGeneration()')
-    const openIdx = body.indexOf('setPaywallOpen(true)')
-    expect(guardIdx).toBeGreaterThan(-1)
-    expect(openIdx).toBeGreaterThan(guardIdx)
+    return fn.slice(0, fn.indexOf('}, [])'))
+  })()
+
+  it('REGRESSION: does not gate opening on the first-generation stamp', () => {
+    // This is the whole bug. If this string comes back, every upgrade button in
+    // the product goes dead again for any account without a server-written stamp.
+    expect(fnBody, 'openPaywall must not consult the first-generation stamp')
+      .not.toContain('hasSuccessfulGeneration')
   })
 
-  it('every paywall surface goes through that one choke point', () => {
-    // Any component opening the paywall does it by dispatching this event,
-    // which App routes into openPaywall. A direct setPaywallOpen elsewhere
-    // would bypass the rule.
+  it('REGRESSION: has no early return before the paywall is opened', () => {
+    const openIdx = fnBody.indexOf('setPaywallOpen(true)')
+    expect(openIdx, 'setPaywallOpen(true) not found').toBeGreaterThan(-1)
+    const before = fnBody.slice(0, openIdx)
+    // `return` inside the refuse() helper is fine; a bare early return that
+    // skips opening is not. Nothing above the open call may return.
+    const bareReturn = before.split('\n').find(l => /^\s*return\b/.test(l))
+    expect(bareReturn, `early return before opening: ${bareReturn}`).toBeUndefined()
+  })
+
+  it('a refusal is loud: it logs and fires an event', () => {
+    // A CTA that no-ops must never again be invisible. Any future condition that
+    // wants to suppress the paywall has to go through this path.
+    expect(fnBody).toContain('paywall_open_failed')
+    expect(fnBody).toContain('console.error')
+  })
+
+  it('every paywall surface still goes through that one choke point', () => {
     const directOpens = app.split('\n').filter(l => l.includes('setPaywallOpen(true)'))
     expect(directOpens, 'setPaywallOpen(true) should only appear inside openPaywall').toHaveLength(1)
   })
 
-  it('the win schedules the ask rather than onboarding scheduling it', () => {
+  it('the win still schedules an ask — that part was never the problem', () => {
     expect(app).toContain("window.addEventListener('studyedge:first-win', handler)")
     expect(app).toContain("openPaywall('first-win')")
   })
 
-  it('onboarding no longer contains a trial step', () => {
+  it('onboarding still contains no trial step', () => {
     expect(onboarding).not.toContain('trial_offer')
     expect(onboarding).not.toContain('activateTrial')
     expect(onboarding).not.toContain('Start 7-day free trial')
     expect(onboarding).not.toContain('step === 3')
   })
-
-  it('the floating trial pill obeys the same rule', () => {
-    const pill = app.split('\n').find(l => l.includes('trialNudgeVisible && !trialNudgeDismissed'))
-    expect(pill).toContain('hasSuccessfulGeneration()')
-  })
 })
 
-
 /**
- * The card ask has more than one entry point, and openPaywall is not all of
- * them. DashboardView and AccountView call activateTrial() directly, which goes
- * straight to Stripe Checkout, and AppShell renders a trial button in the nav.
+ * Every upgrade entry point must be reachable by a free account.
  *
- * The live defect this pins: AppShell showed "Start 7-Day Trial" on every
- * section of the app for an account that had never had a generation succeed,
- * and because openPaywall refuses to open for such an account, clicking it did
- * nothing at all. Found by clicking through staging, not by any test.
+ * These four surfaces were each gated on the stamp, so a free user had no
+ * visible way to upgrade anywhere in the product: no nav button, no dashboard
+ * prompt, no Account control, and a floating pill that never appeared.
  */
-describe('every card-ask surface waits for a demonstrated win', () => {
+describe('no upgrade surface is gated on the stamp', () => {
   const read = (f) => readFileSync(new URL(f, import.meta.url), 'utf8')
 
-  it('AppShell nav trial and upgrade buttons are gated', () => {
-    const src = read('../components/AppShell.jsx')
-    expect(src).toContain('hasSuccessfulGeneration')
-    const trialIdx = src.indexOf("onOpenPaywall?.('nav-trial')")
-    expect(trialIdx).toBeGreaterThan(-1)
-    expect(src.slice(trialIdx - 400, trialIdx)).toContain('hasSuccessfulGeneration()')
-    const upIdx = src.indexOf("onOpenPaywall?.('nav-upgrade')")
-    expect(upIdx).toBeGreaterThan(-1)
-    expect(src.slice(upIdx - 400, upIdx)).toContain('hasSuccessfulGeneration()')
+  for (const file of [
+    '../components/AppShell.jsx',
+    '../components/DashboardView.jsx',
+    '../components/AccountView.jsx',
+  ]) {
+    it(`REGRESSION: ${file.split('/').pop()} does not import or call the stamp`, () => {
+      const src = read(file)
+      // Comments are allowed to mention the history; code is not. Strip line
+      // comments before asserting so the prose above does not fake a pass —
+      // the previous version of this suite went green off exactly that kind of
+      // string match.
+      const code = src.split('\n').filter(l => !l.trim().startsWith('//')).join('\n')
+      expect(code, `${file} still gates an upgrade surface on the stamp`)
+        .not.toContain('hasSuccessfulGeneration')
+    })
+  }
+
+  it('REGRESSION: the floating trial pill is not gated on the stamp', () => {
+    const app = read('../App.jsx')
+    const pill = app.split('\n').find(l => l.includes('trialNudgeVisible && !trialNudgeDismissed'))
+    expect(pill, 'trial pill line not found').toBeTruthy()
+    expect(pill).not.toContain('hasSuccessfulGeneration')
   })
 
-  it('DashboardView free-tier asks are gated', () => {
-    const src = read('../components/DashboardView.jsx')
-    expect(src).toContain('const canAskForCard = hasSuccessfulGeneration()')
-    for (const name of ['showAiChip', 'showTrialCard', 'showSessionNudge', 'showSevenDayBanner']) {
-      const i = src.indexOf(`const ${name} =`)
-      expect(i, `${name} not found`).toBeGreaterThan(-1)
-      const end = src.indexOf('\n\n', i)
-      expect(src.slice(i, end === -1 ? i + 400 : end), `${name} does not require a win`).toContain('canAskForCard')
-    }
-  })
-
-  it('AccountView trial and upgrade blocks are gated', () => {
-    const src = read('../components/AccountView.jsx')
-    expect(src).toContain('const canAskForCard = hasSuccessfulGeneration()')
-    expect(src).toContain("plan === 'free' && canAskForCard && !trialUsed")
-  })
-
-  it('no component calls activateTrial without also checking for a win', () => {
-    for (const f of ['../components/DashboardView.jsx', '../components/AccountView.jsx']) {
-      const src = read(f)
-      if (src.includes('activateTrial(')) {
-        expect(src, `${f} calls activateTrial but never checks for a win`).toContain('hasSuccessfulGeneration')
-      }
-    }
+  it('the Courses add button no longer says "Free Trial to Add"', () => {
+    // Not English, and it described a trial rather than the action.
+    const src = read('../components/CoursesView.jsx')
+    expect(src).not.toContain('Free Trial to Add')
   })
 })

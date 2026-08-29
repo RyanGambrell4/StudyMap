@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { getActivePlan, getCachedSubscription, initSubscription, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession, activateTrial, hasSuccessfulGeneration } from '../lib/subscription'
+import { getActivePlan, getCachedSubscription, initSubscription, isTrialActive, hasUsedTrial, getTrialDaysRemaining, createCheckoutSession, activateTrial } from '../lib/subscription'
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
 import ReferralCard from './ReferralCard'
@@ -91,7 +91,10 @@ export default function AccountView({
   const trialUsed = hasUsedTrial()
   // Same rule as the dashboard and the nav: this screen calls activateTrial
   // directly, so openPaywall's gate does not cover it.
-  const canAskForCard = hasSuccessfulGeneration()
+  // Removed: a first-generation-stamp gate that hid the upgrade and trial
+  // blocks below from any account without that server-written stamp. A free
+  // user looking at their own Account page and finding no way to upgrade is
+  // not a well-timed ask, it is a missing feature.
   const trialDaysLeft = getTrialDaysRemaining()
   const planInfo = PLAN_INFO[plan] ?? PLAN_INFO.free
   const initials = userEmail ? userEmail.split('@')[0].slice(0, 2).toUpperCase() : 'U'
@@ -440,7 +443,7 @@ export default function AccountView({
         </ul>
 
         {/* Free trial CTA - only when plan is free and trial never used */}
-        {plan === 'free' && canAskForCard && !trialUsed && !trialActive && (
+        {plan === 'free' && !trialUsed && !trialActive && (
           <div style={{
             background: '#F0EFEC',
             border: '1px solid rgba(0,0,0,0.07)',
@@ -472,7 +475,7 @@ export default function AccountView({
         )}
 
         {/* Paid upgrade CTAs */}
-        {plan === 'free' && canAskForCard && (trialUsed || trialActive) && !trialActive && (
+        {plan === 'free' && (trialUsed || trialActive) && !trialActive && (
           <button
             onClick={() => onShowPaywall?.('courses')}
             style={{

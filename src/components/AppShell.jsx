@@ -1,5 +1,5 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react'
-import { getActivePlan, isTrialActive, hasUsedTrial, getTrialDaysRemaining, hasSuccessfulGeneration, getAiActionsRemaining, getAiActionsLimit } from '../lib/subscription'
+import { getActivePlan, isTrialActive, hasUsedTrial, getTrialDaysRemaining, getAiActionsRemaining, getAiActionsLimit } from '../lib/subscription'
 import { track } from '../lib/analytics'
 import { getCachedStudyTools } from '../lib/db'
 import { getDueCards } from '../lib/sm2'
@@ -482,7 +482,7 @@ export default function AppShell({
                 nothing to count down and the gate is what matters. Reads the
                 server-authoritative counter, not feature_usage, which has never
                 persisted. See docs/subscription-column-writes.md. */}
-            {plan === 'free' && hasSuccessfulGeneration() && (() => {
+            {plan === 'free' && (() => {
               const left = getAiActionsRemaining()
               if (left === null) return null
               const limit = getAiActionsLimit()
@@ -515,7 +515,7 @@ export default function AppShell({
                   Trial · {daysLeft}d left
                 </span>
               </button>
-            ) : plan === 'free' && !hasUsedTrial() && hasSuccessfulGeneration() ? (
+            ) : plan === 'free' && !hasUsedTrial() ? (
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenPaywall?.('nav-trial') }}
                 style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ACCENT, border: 'none', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
@@ -524,7 +524,7 @@ export default function AppShell({
               </button>
             ) : plan !== 'free' ? (
               <span style={{ fontSize: 11, fontWeight: 700, color: plan === 'unlimited' ? '#16A34A' : ACCENT }}>{planLabel}</span>
-            ) : hasSuccessfulGeneration() ? (
+            ) : plan === 'free' ? (
               <button
                 onClick={(e) => { e.stopPropagation(); onOpenPaywall?.('nav-upgrade') }}
                 style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ACCENT, border: 'none', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', whiteSpace: 'nowrap' }}

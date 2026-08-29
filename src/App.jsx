@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase } from './lib/supabase'
 import { initUserData, clearUserData, savePlan, refreshSubscription, saveEmailDigest } from './lib/db'
-import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getCachedSubscription, hasSuccessfulGeneration, TRIAL_DURATION_DAYS, TRIAL_PLAN, TRIAL_BILLING_PERIOD } from './lib/subscription'
+import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getCachedSubscription, TRIAL_DURATION_DAYS, TRIAL_PLAN, TRIAL_BILLING_PERIOD } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
 import { initAnalytics, identifyUser, resetUser, track, register, registerOnce } from './lib/analytics'
 import { captureReferralParam, getStoredReferrer, clearStoredReferrer } from './lib/referral'
@@ -129,25 +129,50 @@ export default function App() {
   })
 
   // Single choke point for every card ask in the app. Nothing opens the paywall
-  // except through here, which is what makes the rule below enforceable.
+  // except through here — which is exactly why a bad rule here takes the whole
+  // product's upgrade path down with it.
   //
-  // The rule: a free user who has never had an AI generation succeed does not
-  // get asked for a card. They have not been shown anything works yet, so the
-  // ask has nothing behind it. 20 of 24 trials quit before the trial ended and
-  // 13 were cancelled the same day the card went in, which is what asking too
-  // early produces. Not showing it is the correct outcome, not a lost
-  // conversion.
+  // This function opens the paywall. It does not decide whether to.
   //
-  // Paid and trialing users are unaffected: their paywall surfaces are upgrade
-  // and tier-comparison screens, not a first card ask.
+  // It used to return early, opening nothing, for any free user without a
+  // `firstGenerationAt` stamp — the rule being that a card ask before a
+  // demonstrated win converts badly. The intent was reasonable. The
+  // implementation was an outage.
+  //
+  // That stamp is written only server-side, by commitReservation(), and only
+  // started being written on 2026-08-25, so almost no account had one. Because
+  // every upgrade CTA in the product routes through this one function, the
+  // effect was not "the ask is delayed" — it was that **every upgrade button in
+  // the app silently did nothing**: click, no navigation, no modal, no error.
+  // Confirmed by walking production on 2026-08-29 with a free account holding
+  // one course and no generations: the Grade Hub lock CTA and the Courses add
+  // button were both dead, and the account's `subscription` was null, so
+  // hasSuccessfulGeneration() could only ever return false.
+  //
+  // The gate is gone. If we want to stage the ask again, it must be a *visible*
+  // state — a different screen, or a control that explains itself — never a
+  // silent no-op. A refusal nobody can see is indistinguishable from a bug, and
+  // this one hid for as long as it existed.
   const openPaywall = useCallback((trigger = 'courses') => {
     const plan = getActivePlan()
-    if (plan === 'free' && !hasSuccessfulGeneration()) {
-      track('paywall_suppressed_no_win', { trigger, current_plan: plan })
+
+    // The only sanctioned way to not open. Any future condition that wants to
+    // suppress the paywall must call this rather than returning, so the failure
+    // is always visible in logs and in PostHog. A CTA that no-ops must never
+    // again be invisible.
+    const refuse = (reason) => {
+      console.error(`[paywall] refused to open — trigger=${trigger} reason=${reason}`)
+      track('paywall_open_failed', { trigger, current_plan: plan, reason })
+    }
+
+    try {
+      setPaywallTrigger(trigger)
+      setPaywallOpen(true)
+    } catch (err) {
+      refuse(err?.message ?? 'set_state_threw')
       return
     }
-    setPaywallTrigger(trigger)
-    setPaywallOpen(true)
+
     const unlimitedTriggers = new Set(['tutorMemory', 'practiceExamAnalytics', 'unlimited'])
     track('paywall_shown', {
       trigger,
@@ -904,7 +929,7 @@ export default function App() {
       {/* Floating trial nudge — appears 2 min in for free users who haven't trialed */}
       {/* Same rule as openPaywall: no card ask, in any surface, before a
           generation has actually succeeded for this user. */}
-      {showOutput && trialNudgeVisible && !trialNudgeDismissed && getActivePlan() === 'free' && !hasUsedTrial() && hasSuccessfulGeneration() && courses.length > 0 && (
+      {showOutput && trialNudgeVisible && !trialNudgeDismissed && getActivePlan() === 'free' && !hasUsedTrial() && courses.length > 0 && (
         <div style={{
           position: 'fixed', bottom: 20, right: 20, zIndex: 998,
           background: '#3B61C4',
