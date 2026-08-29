@@ -8,8 +8,10 @@
     "build": "vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest run",
-    "test:watch": "vitest"
+    "test": "vitest run && node scripts/check-facts.mjs",
+    "test:watch": "vitest",
+    "facts:check": "node scripts/check-facts.mjs",
+    "facts:sync": "node scripts/sync-facts.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
