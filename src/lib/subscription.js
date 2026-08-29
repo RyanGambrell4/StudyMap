@@ -12,7 +12,7 @@
 export const TRIAL_DURATION_MS = 7 * 24 * 60 * 60 * 1000
 export const TRIAL_DURATION_DAYS = 7
 
-import { supabase } from './supabase'
+import { supabase, getAccessToken } from './supabase'
 import { track } from './analytics'
 
 // ── Plan limits ───────────────────────────────────────────────────────────────
@@ -498,6 +498,43 @@ export function incrementAIQuery(source) {
   }
 }
 
+// Returned by createCheckoutSession when /api/stripe rejects this bundle as
+// unauthenticated. Callers must treat it as "a reload is already in flight" —
+// not as an error to render, and emphatically not as a URL to navigate to.
+export const STALE_BUNDLE = Object.freeze({ staleBundle: true })
+
+// One-shot guard, per tab. sessionStorage rather than module scope because the
+// reload wipes module scope — the whole point is to survive it.
+const STALE_RELOAD_KEY = 'se_checkout_stale_reload'
+
+function readStaleBundleFlag() {
+  try { return window.sessionStorage.getItem(STALE_RELOAD_KEY) === '1' } catch { return false }
+}
+
+function writeStaleBundleFlag() {
+  try { window.sessionStorage.setItem(STALE_RELOAD_KEY, '1') } catch { /* private mode */ }
+}
+
+/**
+ * Force the service worker onto the current deploy, then reload.
+ *
+ * sw.js already calls skipWaiting() on install and clients.claim() on activate,
+ * so update() is enough — there is no waiting worker left to nudge. The reload
+ * is what actually swaps the JavaScript this tab is running.
+ */
+async function recoverFromStaleBundle() {
+  try {
+    if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
+      const registrations = await navigator.serviceWorker.getRegistrations()
+      await Promise.all(registrations.map((r) => r.update().catch(() => {})))
+    }
+  } catch {
+    // Best effort. Even if the worker cannot be updated we still reload, which
+    // re-requests the HTML and usually breaks the loop on its own.
+  }
+  try { window.location.reload() } catch { /* non-browser context */ }
+}
+
 // ── Stripe checkout session creator ──────────────────────────────────────────
 // Used for paid plan signups and card-required trials.
 // Pass opts.trial: true to create a 7-day Stripe trial (card collected upfront).
@@ -507,13 +544,56 @@ export async function createCheckoutSession(plan, billingPeriod, userEmail, user
   // checkout_started fires server-side from api/stripe.js only when the Stripe session is created.
   track('checkout_button_clicked', { plan, billingPeriod, trial: !!opts.trial, has_promo: !!opts.promo })
   try {
+    // The server requires a Bearer token for any request carrying a userId, and
+    // derives the checkout email from that token rather than from this body.
+    // Without the header the request is rejected 401, so this is not optional.
+    const accessToken = await getAccessToken()
     const res = await fetch('/api/stripe', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...(accessToken && { Authorization: `Bearer ${accessToken}` }),
+      },
       body: JSON.stringify({ plan, billingPeriod, userEmail, userId, trial: !!opts.trial, promo: opts.promo ?? null }),
     })
 
     const data = await res.json()
+
+    // /api/stripe returns 401 on the checkout path in exactly one case: no
+    // Authorization header at all. A header that is present but invalid returns
+    // 403. So reaching here means this bundle sent no token.
+    //
+    // Read that carefully, because it bounds what this handler can do. A tab
+    // still running pre-deploy JavaScript never executes this code — the old
+    // bundle does not contain it — so this does NOT rescue the stale-tab cohort.
+    // The only way to protect them is server side, by not rejecting a tokenless
+    // checkout outright. What reaches here is a current bundle whose
+    // getAccessToken() came back empty: a session that expired or had not
+    // finished hydrating when the user clicked.
+    //
+    // One reload is still the right move for that — it re-hydrates the session
+    // and picks up any waiting service worker. But only one. Reloading cannot
+    // mint a session that does not exist, so an unconditional reload would spin
+    // the page every time an expired user clicked upgrade. After the first
+    // attempt we fall through to the normal error path and let them see it.
+    //
+    // sendBeacon because the reload cancels a batched XHR, and the event that
+    // tells us how often this happens is the one we would never receive.
+    if (res.status === 401) {
+      const alreadyTried = readStaleBundleFlag()
+      track('checkout_error', {
+        plan, billingPeriod, trial: !!opts.trial,
+        reason: alreadyTried ? 'stale_bundle_401_repeat' : 'stale_bundle_401',
+        status: 401,
+        had_access_token: !!accessToken,
+      }, { transport: 'sendBeacon', send_instantly: true })
+
+      if (alreadyTried) return null // second time: real auth failure, show the error
+
+      writeStaleBundleFlag()
+      await recoverFromStaleBundle()
+      return STALE_BUNDLE
+    }
 
     if (res.status === 409 && data.alreadySubscribed) {
       console.warn('[subscription] User already subscribed - skipping checkout')

@@ -21,6 +21,7 @@ import { sendFounderCancellationEmail } from '../lib/server/founderOutreach.js'
 import { createTrialCancelOffer, userHasExistingOffer } from '../lib/server/oneTimeOffer.js'
 import { sendProWelcomeEmail } from '../lib/server/proWelcomeEmail.js'
 import { resolveCheckoutPlan, TRIAL_PLAN, TRIAL_BILLING_PERIOD, TRIAL_PERIOD_DAYS } from '../lib/server/trialPlan.js'
+import { normalizeCustomerId, resolveCheckoutCustomer, customerSessionArgs, hasLiveSubscription, selectPreferredCustomer, buildCustomerPatch } from '../lib/server/checkoutCustomer.js'
 import { posthogCapture as captureServerEvent } from '../lib/server/posthog.js'
 
 // Disable Vercel's default body parsing - required for Stripe signature verification
@@ -33,6 +34,12 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 // ── Basic in-memory rate limit for checkout (per IP, 5 req / 60s) ─────────────
 const _checkoutRateMap = new Map()
+
+// How many duplicate Stripe customers we probe for a live subscription before
+// settling for the newest. Bounded because each probe is a second API call on
+// the checkout path, and nobody has enough duplicates for the tail to matter —
+// the worst case in production today is four.
+const SUBSCRIPTION_PROBE_LIMIT = 5
 function checkoutRateLimit(ip) {
   const now = Date.now()
   const window = 60_000
@@ -1106,17 +1113,37 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
     }
   }
 
-  // If the request includes a Bearer token, verify it matches the userId in the body.
-  // This blocks an attacker who knows a victim's UUID from creating a checkout on their behalf.
+  // Any request that claims a userId MUST prove it owns that userId.
+  //
+  // This was `if (checkoutToken && body.userId)`, which an attacker skipped by
+  // simply omitting the Authorization header — the guard only ever ran against
+  // callers who were already honest. That was survivable while stripeCustomerId
+  // was written in exactly one place, the Stripe webhook, from a trusted
+  // `sub.customer`. It stopped being survivable the moment checkout started
+  // resolving and persisting a customer id, because subscription.stripeCustomerId
+  // is a capability key: create-portal-session opens a Stripe Billing Portal for
+  // whatever id sits on the row, and the referral path credits $9.99 to it. An
+  // unauthenticated write to that field is an unauthenticated read of somebody
+  // else's invoices, billing address and card last-4.
   const checkoutToken = req.headers['authorization']?.replace('Bearer ', '').trim()
-  if (checkoutToken && body.userId) {
+  let verifiedUser = null
+  if (body.userId) {
+    if (!checkoutToken) return res.status(401).json({ error: 'Unauthorized' })
     const { data: { user: checkoutUser }, error: checkoutAuthErr } = await supabaseAdmin.auth.getUser(checkoutToken)
     if (checkoutAuthErr || !checkoutUser || checkoutUser.id !== body.userId) {
       return res.status(403).json({ error: 'Forbidden' })
     }
+    verifiedUser = checkoutUser
   }
 
-  const { plan: rawPlan, billingPeriod: rawBillingPeriod, userEmail, userId, trial, promo } = body
+  const { plan: rawPlan, billingPeriod: rawBillingPeriod, userId, trial, promo } = body
+
+  // The email comes from the verified Supabase user, never from the request body.
+  // A body-supplied address would let a caller point the customer lookup below at
+  // anyone and attach the resulting `cus_...` to their own row. An unverified
+  // caller (no userId) keeps the old behaviour: their body email is only ever
+  // handed to Stripe as `customer_email`, which reads nothing back.
+  const userEmail = verifiedUser?.email ?? body.userEmail
 
   // REVENUE-CRITICAL. Any trial request is forced to Pro/weekly here, at the only
   // chokepoint that can create a Stripe session — the client is never trusted,
@@ -1165,6 +1192,7 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
   }
 
   // Guard: if this user already has an active or trialing subscription, block the duplicate
+  let existingCustomerId = null
   if (userId) {
     try {
       const { data: existingUser } = await supabaseAdmin
@@ -1174,6 +1202,9 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
         .maybeSingle()
 
       const existingSub = existingUser?.subscription
+      // Reused below so checkout attaches to the customer we already have rather
+      // than letting Stripe mint a new one. See the customer-resolution block.
+      existingCustomerId = normalizeCustomerId(existingSub?.stripeCustomerId)
       // Only block if the user already has a real Stripe-backed paid/trialing sub.
       // Free users default to { plan: 'free', status: 'active' } so checking status
       // alone was rejecting every signup; require an actual stripeSubId + paid plan.
@@ -1218,6 +1249,97 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
     }
   }
 
+  // Resolve ONE Stripe customer for this person, rather than letting Stripe mint
+  // a fresh one per checkout.
+  //
+  // Passing `customer_email` to Checkout creates a brand new Customer object on
+  // every session. In production that produced 2 customer records for one user
+  // and 4 for another (same email, same address), and the duplicates billed
+  // independently: one user was charged $12.99 twice on the same day across two
+  // customer IDs, both of which had to be refunded.
+  //
+  // Order of preference:
+  //   1. the customer id we already stored for this user
+  //   2. an existing Stripe customer with the same email
+  //   3. nothing — fall back to customer_email and let Stripe create the first one
+  //
+  // Stripe rejects a session that sets both `customer` and `customer_email`, so
+  // these are mutually exclusive below.
+  let lookupCustomerId = null
+  if (!existingCustomerId && verifiedUser?.email) {
+    try {
+      // limit 10, not 1. The people this fix exists for already have several
+      // records each, and `customers.list` returns newest first — so limit 1
+      // hands back the duplicate minted by the most recent abandoned checkout,
+      // which is the empty one. Probe them for a live subscription instead.
+      const found = await stripe.customers.list({ email: verifiedUser.email, limit: 10 })
+      const candidates = []
+      for (const customer of (found.data ?? []).slice(0, SUBSCRIPTION_PROBE_LIMIT)) {
+        let live = false
+        try {
+          const subs = await stripe.subscriptions.list({ customer: customer.id, status: 'all', limit: 10 })
+          live = hasLiveSubscription(subs.data)
+        } catch (subErr) {
+          // Treat an unreadable customer as "no live subscription" rather than
+          // failing the checkout. Worst case we fall back to newest-first.
+          console.error(`[stripe checkout] Could not read subscriptions for ${customer.id}:`, subErr?.message ?? subErr)
+        }
+        candidates.push({ id: customer.id, hasLiveSubscription: live })
+        if (live) break // found the record that is actually billing; stop probing
+      }
+      lookupCustomerId = selectPreferredCustomer(candidates)
+    } catch (lookupErr) {
+      // Non-fatal. A failed lookup should never block a paying user, it just
+      // means we fall through to customer_email for this one session.
+      console.error('[stripe checkout] Customer lookup failed, falling back to customer_email:', lookupErr?.message ?? lookupErr)
+    }
+  }
+
+  const { customerId: resolvedCustomerId, source: customerSource } = resolveCheckoutCustomer({
+    storedId: existingCustomerId,
+    lookupId: lookupCustomerId,
+  })
+  if (customerSource === 'lookup') {
+    console.log(`[stripe checkout] Reusing existing customer ${resolvedCustomerId} for ${userEmail}`)
+  }
+
+  // Persist the id so the next checkout skips the lookup entirely and, more
+  // importantly, so a Stripe-side email change cannot fork the account.
+  if (resolvedCustomerId && !existingCustomerId && verifiedUser && userId) {
+    try {
+      // Destructure the error too. supabase-js does not throw: a denied read, a
+      // timeout and "no such row" all arrive as data: null, and treating a
+      // failed read as an empty row here would log the reassuring "no
+      // subscription object yet" line while silently dropping the write.
+      const { data: row, error: rowErr } = await supabaseAdmin
+        .from('user_data')
+        .select('subscription')
+        .eq('user_id', userId)
+        .maybeSingle()
+
+      // update, not upsert, and only over a subscription object that already
+      // exists. An insert here would create `subscription = { stripeCustomerId }`
+      // with no plan and no status, and initSubscription() takes the stored
+      // object whole rather than merging DEFAULT_SUB into it — so that user
+      // would read back plan: undefined for every gate in the app. A NULL
+      // subscription reads back as the full defaults, which is strictly better
+      // than a partial object. See buildCustomerPatch.
+      const patch = rowErr ? null : buildCustomerPatch(row?.subscription, resolvedCustomerId)
+      if (rowErr) {
+        console.error(`[stripe checkout] Could not read subscription for ${userId}, not persisting the customer id:`, rowErr.message ?? rowErr)
+      } else if (patch) {
+        await supabaseAdmin
+          .from('user_data')
+          .update({ subscription: patch, updated_at: new Date().toISOString() })
+          .eq('user_id', userId)
+      } else {
+        console.log(`[stripe checkout] No subscription object for ${userId} yet — leaving the first write to the webhook`)
+      }
+    } catch (persistErr) {
+      console.error('[stripe checkout] Could not persist stripeCustomerId:', persistErr?.message ?? persistErr)
+    }
+  }
+
   try {
     const session = await stripe.checkout.sessions.create({
       mode: 'subscription',
@@ -1226,7 +1348,8 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
       // "mislabeled as Apple Pay" (Guideline 1.1.6).
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
-      customer_email: userEmail || undefined,
+      // Mutually exclusive: Stripe errors if both are set.
+      ...customerSessionArgs({ customerId: resolvedCustomerId, userEmail }),
       // For trials we must collect the card up front so billing starts after the trial ends.
       payment_method_collection: wantsTrial ? 'always' : undefined,
       subscription_data: subscriptionData,

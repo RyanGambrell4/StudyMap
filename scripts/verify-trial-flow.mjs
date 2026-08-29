@@ -31,10 +31,16 @@ const fail = (msg) => console.log(`${c.red}✗${c.reset} ${msg}`)
 const dim  = (msg) => console.log(`${c.dim}${msg}${c.reset}`)
 
 async function postCheckout({ plan, billingPeriod, trial }) {
+  // Deliberately no userId. The endpoint now demands a matching Bearer token for
+  // any request that carries one, and this script has no way to mint a real
+  // Supabase session. Sending TEST_USER_ID here would return 401 and the script
+  // would cry "trial checkout is broken" when it is not. What this smoke test
+  // actually checks — that the endpoint is reachable and that a trial request is
+  // coerced to Pro/weekly before a Stripe session is created — does not need one.
   const res = await fetch(`${BASE}/api/stripe`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ plan, billingPeriod, userEmail: TEST_EMAIL, userId: TEST_USER_ID, trial }),
+    body: JSON.stringify({ plan, billingPeriod, userEmail: TEST_EMAIL, trial }),
   })
   const data = await res.json().catch(() => ({}))
   return { status: res.status, data }
@@ -43,7 +49,7 @@ async function postCheckout({ plan, billingPeriod, trial }) {
 async function main() {
   console.log(`\nVerifying trial -> Stripe flow against ${BASE}\n`)
   dim(`Test email:   ${TEST_EMAIL}`)
-  dim(`Test user id: ${TEST_USER_ID}\n`)
+  dim(`Test user id: ${TEST_USER_ID} (not sent \u2014 endpoint requires a real session)\n`)
 
   // 1) Trial checkout should return a Stripe URL
   console.log('1) POST /api/stripe with trial=true')

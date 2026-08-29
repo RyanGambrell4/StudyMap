@@ -230,6 +230,9 @@ export default function DashboardView({
     setTrialBannerLoading(true)
     try {
       const url = await activateTrial(userId, userEmail)
+      // A stale bundle: recoverFromStaleBundle() is already reloading the page.
+      // Do not navigate and do not show an error; the retry happens after reload.
+      if (url?.staleBundle) return
       if (!url) { setTrialBannerLoading(false); return }
       window.location.href = url
     } catch {
