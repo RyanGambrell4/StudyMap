@@ -56,25 +56,38 @@ const supabaseAdmin = createClient(
 // Legacy semester/old-monthly IDs are intentionally NOT in the lookup map.
 // Existing subscribers on those prices are still resolved correctly via
 // PRICE_TO_PLAN (grandfathered) but no new checkout sessions can target them.
+// Weekly is retired. It is deliberately absent from this map so that no new
+// checkout session can target it, whatever a stale bundle or an old email link
+// asks for. Monthly and yearly are the only sellable periods.
+//
+// A weekly charge on a student debit card is the specific thing that killed the
+// only real subscription this product has had: $2.99 cleared once, then three
+// declines inside two minutes.
 const PRICE_IDS = {
   pro: {
-    weekly:  process.env.STRIPE_PRICE_PRO_WEEKLY  || 'price_pro_weekly',
     monthly: process.env.STRIPE_PRICE_PRO_MONTHLY || 'price_pro_monthly',
     yearly:  process.env.STRIPE_PRICE_PRO_ANNUAL  || 'price_pro_annual',
   },
   unlimited: {
-    weekly:  process.env.STRIPE_PRICE_UNLIMITED_WEEKLY  || 'price_unlimited_weekly',
     monthly: process.env.STRIPE_PRICE_UNLIMITED_MONTHLY || 'price_unlimited_monthly',
     yearly:  process.env.STRIPE_PRICE_UNLIMITED_ANNUAL  || 'price_unlimited_annual',
   },
 }
 
+// Retired weekly ids. Kept only so PRICE_TO_PLAN can still resolve the
+// subscriptions that already exist on them - archiving a price in Stripe stops
+// new signups, it does not cancel anyone.
+const ARCHIVED_WEEKLY = {
+  pro:       process.env.STRIPE_PRICE_PRO_WEEKLY       || 'price_pro_weekly',
+  unlimited: process.env.STRIPE_PRICE_UNLIMITED_WEEKLY || 'price_unlimited_weekly',
+}
+
 const PRICE_TO_PLAN = {
   // New price IDs (env-driven, with placeholder fallbacks for local dev)
-  [PRICE_IDS.pro.weekly]:        { plan: 'pro',       billingPeriod: 'weekly'  },
+  [ARCHIVED_WEEKLY.pro]:         { plan: 'pro',       billingPeriod: 'weekly'  },
   [PRICE_IDS.pro.monthly]:       { plan: 'pro',       billingPeriod: 'monthly' },
   [PRICE_IDS.pro.yearly]:        { plan: 'pro',       billingPeriod: 'yearly'  },
-  [PRICE_IDS.unlimited.weekly]:  { plan: 'unlimited', billingPeriod: 'weekly'  },
+  [ARCHIVED_WEEKLY.unlimited]:   { plan: 'unlimited', billingPeriod: 'weekly'  },
   [PRICE_IDS.unlimited.monthly]: { plan: 'unlimited', billingPeriod: 'monthly' },
   [PRICE_IDS.unlimited.yearly]:  { plan: 'unlimited', billingPeriod: 'yearly'  },
 
@@ -151,13 +164,13 @@ ${preheader("Your Pro subscription is cancelled. You keep full access until the 
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1"
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1"
                style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">
               Reactivate Pro
             </a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">Pro is $2.99/wk. Cancel anytime.</span>
+            <span style="font-size:12px;color:#9B9B9B;">Pro is $9.99/mo. Cancel anytime.</span>
           </td></tr>
         </table>
       </td></tr>
@@ -187,13 +200,13 @@ async function sendTrialExpiryEmail(toEmail) {
     await resend.emails.send({
       from: 'StudyEdge AI <support@mail.getstudyedge.com>',
       to: toEmail,
-      subject: 'Your trial ends tomorrow. Keep Pro for $2.99/wk.',
+      subject: 'Your trial ends tomorrow. Keep Pro for $9.99/mo.',
       headers: listUnsubscribeHeaders(toEmail),
       html: `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your free trial ends tomorrow</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;color:#111111;">
-${preheader("Trial ends tomorrow. Your card gets charged $2.99/wk unless you cancel in your account.")}
+${preheader("Trial ends tomorrow. Your card gets charged $9.99/mo unless you cancel in your account.")}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
@@ -206,7 +219,7 @@ ${preheader("Trial ends tomorrow. Your card gets charged $2.99/wk unless you can
           Your Pro trial ends tomorrow.
         </h1>
         <p style="margin:0 0 14px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Tomorrow your card is charged <strong style="color:#111111;">$2.99/week</strong> and Pro continues automatically. If you don't want to keep it, cancel in Settings before then.
+          Tomorrow your card is charged <strong style="color:#111111;">$9.99/month</strong> and Pro continues automatically. If you don't want to keep it, cancel in Settings before then.
         </p>
         <p style="margin:18px 0 10px;font-size:11px;font-weight:600;letter-spacing:0.06em;color:#9B9B9B;text-transform:uppercase;">What you keep with Pro</p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:22px;">
@@ -293,7 +306,7 @@ ${preheader("You have full Pro access. Here is everything that is now unlocked."
           You have full Pro access.
         </h1>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Your 7-day free trial is active.${endDate ? ` It ends on <strong style="color:#111111;">${endDate}</strong>.` : ''} After that, your card is charged $2.99/week unless you cancel. Here's everything you can use right now:
+          Your 7-day free trial is active.${endDate ? ` It ends on <strong style="color:#111111;">${endDate}</strong>.` : ''} After that, your card is charged $9.99/month unless you cancel. Here's everything you can use right now:
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
@@ -384,10 +397,10 @@ ${preheader("Your trial was cancelled. Your card will not be charged. Your accou
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Restart trial anytime</a>
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Restart trial anytime</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">7-day trial, then $2.99/wk. Cancel before day 8 and you won't be charged.</span>
+            <span style="font-size:12px;color:#9B9B9B;">7-day trial, then $9.99/mo. Cancel before day 8 and you won't be charged.</span>
           </td></tr>
         </table>
       </td></tr>
@@ -612,11 +625,11 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
       <p style="margin:0;font-size:13.5px;color:#166534;line-height:1.6;">
         ${wasTrial
           ? '<strong>Try Pro free for 7 days.</strong> Enter your card to start. You won\'t be charged until day 8. Cancel anytime before then.'
-          : '<strong>Pro is $2.99/week.</strong> 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions. Cancel anytime.'
+          : '<strong>Pro is $9.99/month.</strong> 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions. Cancel anytime.'
         }
       </p>
     </div>
-    <a href="https://getstudyedge.com/app?plan=pro&billing=weekly${wasTrial ? '&trial=1' : ''}" style="display:block;text-align:center;background:#3B61C4;color:#fff;font-weight:800;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none;letter-spacing:-0.01em;">
+    <a href="https://getstudyedge.com/app?plan=pro&billing=monthly${wasTrial ? '&trial=1' : ''}" style="display:block;text-align:center;background:#3B61C4;color:#fff;font-weight:800;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none;letter-spacing:-0.01em;">
       ${wasTrial ? 'Complete your free trial →' : 'Complete signup →'}
     </a>
     <p style="margin:24px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">
@@ -1238,9 +1251,12 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
       ),
       // Reassurance copy directly under the Start trial button - the moment of
       // highest abandonment anxiety on the trial path. The trial is always Pro
-      // weekly, so the price here is fixed at $2.99.
+      // monthly, so the price here is fixed at $9.99. This string is what Stripe
+      // renders on its own hosted page, so it is the one piece of pricing copy
+      // we cannot fix with a frontend deploy - it has to match TRIAL_PLAN and
+      // TRIAL_BILLING_PERIOD exactly.
       custom_text: wantsTrial
-        ? { submit: { message: "Free for 7 days, then $2.99/week. Cancel anytime in your account before day 8 and you won't be charged." } }
+        ? { submit: { message: "Free for 7 days, then $9.99/month. Cancel anytime in your account before day 8 and you won't be charged." } }
         : undefined,
       success_url: 'https://getstudyedge.com/app?checkout=success',
       cancel_url: 'https://getstudyedge.com/app?checkout=cancelled',

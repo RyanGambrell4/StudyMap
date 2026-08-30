@@ -1129,7 +1129,7 @@ export default function DashboardView({
                 Your study plan is live. Unlock the full picture.
               </p>
               <p style={{ margin: '4px 0 10px', fontSize: 12, color: D.textMuted, lineHeight: 1.55 }}>
-                You generated your first blueprint. The hardest part is done. Pro gives you 5 courses, 100 AI actions a month, and unlimited blueprints. 7-day free trial, then $2.99/wk.
+                You generated your first blueprint. The hardest part is done. Pro gives you 5 courses, 100 AI actions a month, and unlimited blueprints. 7-day free trial, then $9.99/mo.
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 {['5 courses', '100 AI actions/month', 'Unlimited blueprints'].map(f => (
@@ -1176,8 +1176,8 @@ export default function DashboardView({
               </p>
               <p style={{ margin: '3px 0 8px', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
                 {upcomingExam && upcomingExam.days <= 5
-                  ? 'Exam Rescue, Cheat Sheets, and unlimited focus sessions are all included. 7-day free trial, then $2.99/wk.'
-                  : 'Removes the 30-min cap, adds 5 courses, 100 AI actions a month, and unlimited blueprints. 7-day free trial, then $2.99/wk.'}
+                  ? 'Exam Rescue, Cheat Sheets, and unlimited focus sessions are all included. 7-day free trial, then $9.99/mo.'
+                  : 'Removes the 30-min cap, adds 5 courses, 100 AI actions a month, and unlimited blueprints. 7-day free trial, then $9.99/mo.'}
               </p>
               <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
                 {['Unlimited focus sessions', '100 AI actions/month', '5 courses'].map(f => (
@@ -1216,7 +1216,7 @@ export default function DashboardView({
                   ? `${clean(upcomingExam.course.name)} exam in ${upcomingExam.days} day${upcomingExam.days !== 1 ? 's' : ''}. Exam Rescue is a Pro feature.`
                   : 'Ready to go back to Pro?'}
               </p>
-              <p style={{ margin: '2px 0 0', fontSize: 12, color: D.textMuted }}>$2.99/wk. Cancel anytime. Everything you had during your trial.</p>
+              <p style={{ margin: '2px 0 0', fontSize: 12, color: D.textMuted }}>$9.99/mo. Cancel anytime. Everything you had during your trial.</p>
             </div>
             <button onClick={() => onShowPaywall?.(upcomingExam && upcomingExam.days <= 5 ? 'examRescue' : 'nav-upgrade')} style={{ background: D.blue, border: 'none', borderRadius: 8, padding: '8px 16px', fontSize: 13, fontWeight: 600, color: '#fff', cursor: 'pointer', whiteSpace: 'nowrap' }}>
               Upgrade to Pro →
@@ -1242,7 +1242,7 @@ export default function DashboardView({
                 You've had {sessionsCount} study sessions. You're actually using this.
               </p>
               <p style={{ margin: '4px 0 0', fontSize: 12, color: D.textMuted, lineHeight: 1.55 }}>
-                Unlock unlimited focus time, 5 courses, and 100 AI actions a month. 7-day free trial, then $2.99/wk.
+                Unlock unlimited focus time, 5 courses, and 100 AI actions a month. 7-day free trial, then $9.99/mo.
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>
@@ -1280,7 +1280,7 @@ export default function DashboardView({
                 You've been on free for {accountAgeDays} days. The trial is still open.
               </p>
               <p style={{ margin: '3px 0 0', fontSize: 12, color: D.textMuted, lineHeight: 1.5 }}>
-                7 days free, then $2.99/wk. Unlimited focus sessions, 5 courses, 100 AI actions a month. Cancel anytime.
+                7 days free, then $9.99/mo. Unlimited focus sessions, 5 courses, 100 AI actions a month. Cancel anytime.
               </p>
             </div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 10, flexShrink: 0 }}>

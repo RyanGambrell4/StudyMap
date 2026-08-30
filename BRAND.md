@@ -55,8 +55,8 @@
 
 ### Required disclosures
 - Trial copy must say "7-day free trial · Cancel anytime"
-- Pro plan: $2.99/week after trial
-- CTA URLs: /app?signup=1&plan=pro&billing=weekly&trial=1
+- Pro plan: $9.99/month after trial
+- CTA URLs: /app?signup=1&plan=pro&billing=monthly&trial=1
 
 ## Topic Scope
 

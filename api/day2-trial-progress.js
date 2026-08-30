@@ -48,7 +48,7 @@ function inactiveBody({ audienceLine, greeting, firstName }) {
     kickerColor: '#E8531A',
     lead: `${greeting}, you haven't run a session yet. That's the only thing standing between you and knowing if this actually works for you.`,
     tipTitle: 'The 5-minute win',
-    tipBody: `Add one course with the next real exam date. That's it. The AI Study Coach will spin up a specific plan and a Session Blueprint automatically. You'll see in one session whether this is worth $2.99/wk.`,
+    tipBody: `Add one course with the next real exam date. That's it. The AI Study Coach will spin up a specific plan and a Session Blueprint automatically. You'll see in one session whether this is worth $9.99/mo.`,
     tipContext: audienceLine,
     ctaLabel: 'Try one session now',
     ctaHref: 'https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day2_rescue',
@@ -71,7 +71,7 @@ function activeBody({ audienceLine, greeting, firstName, sessionCount }) {
     tipContext: audienceLine,
     ctaLabel: 'Generate a cheat sheet',
     ctaHref: 'https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day2_active',
-    ctaSub: 'Trial ends in ~5 days. Keep Pro at $2.99/wk.',
+    ctaSub: 'Trial ends in ~5 days. Keep Pro at $9.99/mo.',
   }
 }
 

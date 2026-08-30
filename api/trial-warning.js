@@ -83,11 +83,11 @@ export default async function handler(req, res) {
         kicker       = 'Trial ending: you\'re engaged'
         heading      = sessionCount >= 3
           ? `${sessionCount} sessions in 7 days. That's the habit that changes grades.`
-          : `You've read every email. Here's why $2.99 actually makes sense.`
+          : `You've read every email. Here's why $9.99 actually makes sense.`
         activityLine = sessionCount >= 3
           ? `You've logged ${sessionCount} sessions in 7 days. That puts you in the top 10% of trial users. Tomorrow, without Pro, those AI Study Coach plans, Blueprints, and Exam Rescue runs all go away. The 5-course tracking drops back to 1.`
 
-          : `You've been reading these. You know what Pro does. The honest case: $2.99/week is less than one coffee, and the students who keep it for a full semester consistently pull a GPA tier higher than those who don't.`
+          : `You've been reading these. You know what Pro does. The honest case: $9.99/month is less than one coffee, and the students who keep it for a full semester consistently pull a GPA tier higher than those who don't.`
       } else if (isZeroActivity) {
         subject      = `Your trial ends in 24 hours. You haven't tried it yet.`
         kicker       = 'Trial ending: unused'
@@ -154,14 +154,14 @@ ${preheader("Lock in Pro now. Your trial ends in less than 24 hours.")}
           </tr>`).join('')}
         </table>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro is <strong style="color:#111111;">$2.99/week</strong>. Cancel anytime. No commitment, no hassle.
+          Pro is <strong style="color:#111111;">$9.99/month</strong>. Cancel anytime. No commitment, no hassle.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Keep Pro · $2.99/wk</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Keep Pro · $9.99/mo</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">$2.99/wk · Cancel in account anytime</span>
+            <span style="font-size:12px;color:#9B9B9B;">$9.99/mo · Cancel in account anytime</span>
           </td></tr>
         </table>
       </td></tr>

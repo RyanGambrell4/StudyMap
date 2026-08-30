@@ -88,7 +88,7 @@ export default async function handler(req, res) {
 <html lang="en">
 <head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Your trial ended</title></head>
 <body style="margin:0;padding:0;background:#F7F6F3;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-${preheader("You tried Pro. You know what it does. $2.99/wk to get it back.")}
+${preheader("You tried Pro. You know what it does. $9.99/mo to get it back.")}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
     <table width="100%" cellpadding="0" cellspacing="0" style="max-width:580px;">
@@ -124,14 +124,14 @@ ${preheader("You tried Pro. You know what it does. $2.99/wk to get it back.")}
           </tr>`).join('')}
         </table>
         <p style="margin:0 0 18px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro is <strong style="color:#111111;">$2.99/week</strong>, less than a coffee. You already know what you get. Cancel anytime from your account.
+          Pro is <strong style="color:#111111;">$9.99/month</strong>, less than a coffee. You already know what you get. Cancel anytime from your account.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Upgrade to Pro · $2.99/wk</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Upgrade to Pro · $9.99/mo</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">$2.99/wk · Cancel in account anytime</span>
+            <span style="font-size:12px;color:#9B9B9B;">$9.99/mo · Cancel in account anytime</span>
           </td></tr>
         </table>
       </td></tr>

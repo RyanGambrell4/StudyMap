@@ -8,7 +8,7 @@
 //
 // What this DOES NOT PROVE:
 //   - That the React app actually calls /api/stripe when a user lands
-//     on /app?signup=1&plan=pro&billing=weekly&trial=1 after signup.
+//     on /app?signup=1&plan=pro&billing=monthly&trial=1 after signup.
 //     The fix in src/App.jsx (commit 3e785a4) is what makes that
 //     happen; only a real signup in an incognito browser exercises it.
 //
@@ -82,7 +82,7 @@ async function main() {
 
   console.log(`\n${c.green}All API checks passed.${c.reset} The backend is wired up correctly.`)
   console.log(`\nStill required to fully verify the funnel:`)
-  console.log(`  1. Open ${BASE}/app?signup=1&plan=pro&billing=weekly&trial=1 in an incognito window`)
+  console.log(`  1. Open ${BASE}/app?signup=1&plan=pro&billing=monthly&trial=1 in an incognito window`)
   console.log(`  2. Sign up with a throwaway email`)
   console.log(`  3. Confirm the browser auto-redirects to checkout.stripe.com`)
   console.log(`  4. Watch Stripe -> Payments -> Checkout for the session in the next 24h\n`)

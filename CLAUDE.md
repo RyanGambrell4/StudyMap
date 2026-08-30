@@ -43,20 +43,30 @@ Read `AGENTS_SPEC.md` before running any agent task. It contains the full app co
 - `se_dashboard_v2` → `DashboardViewV2` in the Dashboard section.
 - `se_tools_v2` → `StudyToolsViewV2` in the Study Tools section.
 
-## Pricing (live source of truth: `PRICING_SPEC.md`)
+## Pricing (live source of truth: this section + `src/lib/subscription.js`)
+
+> `PRICING_SPEC.md` was labelled the live source of truth and was not: it
+> described a no-card 3-day trial, 2 AI actions a day, and a 60-minute focus
+> cap, none of which the code has ever done. Treat the code as authoritative
+> and this section as its summary.
 - Free / Pro / Unlimited tiers
-- Pro: $2.99/wk · $9.99/mo · $69.99/yr — 7-day free trial via Stripe Checkout (card required, auto-bills $2.99/wk after)
-- Unlimited: $4.99/wk · $14.99/mo · $119.99/yr — no trial
+- Pro: $9.99/mo · $69.99/yr — 7-day free trial via Stripe Checkout (card required, auto-bills $9.99/mo after)
+- Unlimited: $14.99/mo · $119.99/yr — no trial
+- **Weekly and semester are retired.** They are not sellable periods. `PRICE_IDS`
+  in `api/stripe.js` deliberately omits them so no checkout can target one, and
+  `resolveCheckoutPlan()` converts any request naming one to monthly rather than
+  failing it — 85 files carried `billing=weekly` links, and old links must sell
+  the current price rather than break.
 - `getActivePlan()` returns `'free' | 'trial' | 'pro' | 'unlimited'`
 
-**REVENUE-CRITICAL trial invariant.** The 7-day free trial is ALWAYS Pro/weekly.
+**REVENUE-CRITICAL trial invariant.** The 7-day free trial is ALWAYS Pro/monthly.
 `TRIAL_PLAN` and `TRIAL_BILLING_PERIOD` in `src/lib/subscription.js` are the only
 source of truth — never pass a plan into `activateTrial()`, and never point a
 trial CTA at Unlimited. Trial entitlements are `PRO_LIMITS` and `getActivePlan()`
 reports `'pro'` while trialing, so billing the trial on Unlimited charges users
 $4.99/wk for a tier they never had (this shipped once and was caught in
 production). `src/lib/trialPlan.test.js` locks this down. Any trial copy change
-must keep "Pro" and "$2.99/wk after 7 days" consistent across PrePaywall,
+must keep "Pro" and "$9.99/mo after 7 days" consistent across PrePaywall,
 PaywallModal, DashboardView, AccountView, Onboarding, PaywallExitGift, AuthScreen
 and the `index.html` landing page.
 
@@ -115,7 +125,7 @@ Run the StudyEdge Email agent. Read EMAIL_AGENT_SPEC.md and AGENTS_SPEC.md first
 - Landing page lives in the root `index.html` (embedded React via Babel, ~2500 lines). `src/components/LandingPage.jsx` is legacy dead code — do NOT edit it and do NOT import it back into `App.jsx`.
 - Landing page is INTENTIONALLY DARK (`#060614` bg) — do NOT convert to light theme
 - This is the exception to the light-only rule — landing page dark theme is by design
-- CTA `goTrial()` must always point to `/app?signup=1&plan=pro&billing=weekly&trial=1`
+- CTA `goTrial()` must always point to `/app?signup=1&plan=pro&billing=monthly&trial=1`
 - Trial CTAs must NOT say "no credit card required" — the trial goes through Stripe Checkout and collects a card. Use "7-day free trial · Cancel anytime" instead.
 **Invocation:**
 ```
@@ -129,7 +139,7 @@ Run the StudyEdge Landing Page agent. Read LANDING_AGENT_SPEC.md and AGENTS_SPEC
 **What it does:** Audits and optimizes the new-user funnel from signup through onboarding to first meaningful action. Fixes copy, reduces steps, improves post-onboarding landing, fixes the email confirmation wall.
 **Key context:**
 - ONBOARDING_AGENT_SPEC.md references old 7-day/$12.99 pricing — **ignore those numbers**
-- Live pricing is in `PRICING_SPEC.md`: 7-day free trial, $2.99/wk Pro
+- Live pricing: 7-day free trial, $9.99/mo Pro
 - Onboarding files: `StepCourses.jsx`, `StepAssignments.jsx`, `StepLearningStyle.jsx`, `StepSchedule.jsx`, `AuthScreen.jsx`
 - Known issues: no progress bar, blank dashboard after onboarding, generic copy, weak confirmation pending screen
 **Invocation:**

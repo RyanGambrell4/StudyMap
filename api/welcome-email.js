@@ -101,7 +101,7 @@ ${preheader("You have 7 days of Pro free. Here's what to do first.")}
           ${headline}
         </h1>
         <p style="margin:0 0 22px;font-size:15.5px;color:#444444;line-height:1.65;">
-          You're set up. Before you start, try <strong style="color:#111111;">Pro free for 7 days</strong>. $2.99/wk after the trial. Cancel anytime from your account.
+          You're set up. Before you start, try <strong style="color:#111111;">Pro free for 7 days</strong>. $9.99/mo after the trial. Cancel anytime from your account.
         </p>
         <p style="margin:0 0 14px;font-size:11.5px;font-weight:600;letter-spacing:0.08em;color:#9B9B9B;text-transform:uppercase;">What Pro unlocks</p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:28px;">
@@ -130,7 +130,7 @@ ${preheader("You have 7 days of Pro free. Here's what to do first.")}
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:10px;">
-            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1"
+            <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1"
                style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none;border-radius:12px;padding:14px 34px;box-shadow:0 1px 2px rgba(59,97,196,0.18);">
               Start my free 7-day trial
             </a>

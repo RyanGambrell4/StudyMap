@@ -117,7 +117,7 @@ export default async function handler(req, res) {
         tipBody = `Open a course, tap "Exam Rescue" on any topic you're weakest at. Paste in some notes or a concept you're struggling with. The AI identifies the specific gaps in your understanding and gives you a targeted 20-minute review plan. It's the closest thing to having a tutor look at your work and tell you exactly what to focus on.`
         ctaLabel = 'Try Exam Rescue'
         ctaHref = 'https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day3_trial_active'
-        ctaSub = '4 days of Pro remaining. Keep everything at $2.99/wk.'
+        ctaSub = '4 days of Pro remaining. Keep everything at $9.99/mo.'
       }
 
       try {

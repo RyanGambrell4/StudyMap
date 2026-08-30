@@ -131,12 +131,12 @@ export default async function handler(req, res) {
         subject     = `Your trial ended. You ran ${sessionCount} session${sessionCount !== 1 ? 's' : ''}.`
         heading     = `You started. Here's what you lose if you stop.`
         lead        = `${greeting}, your Pro trial just ended. You ran ${sessionCount} session${sessionCount !== 1 ? 's' : ''}, enough to see what the tool does. The students who get the real results are the ones who use it consistently, not just once.`
-        urgencyNote = `One session a day with a Blueprint is what moves the needle. $2.99/week is less than one coffee. The grade difference is not.`
+        urgencyNote = `One session a day with a Blueprint is what moves the needle. $9.99/month is less than one coffee. The grade difference is not.`
       } else {
         subject     = `Your trial ended without a single session.`
         heading     = `Your trial is over. You never ran a session.`
         lead        = `${greeting}, your Pro trial ended. You set up your account${courseCount > 0 ? ` and added ${courseCount} course${courseCount !== 1 ? 's' : ''}` : ''}, but never ran a study session. That's the one step that separates the students who see results from those who don't.`
-        urgencyNote = `A single 2-minute session with the AI Study Coach will show you more than any email can. Pro is $2.99/week. If it doesn't help, cancel in 10 seconds from your account.`
+        urgencyNote = `A single 2-minute session with the AI Study Coach will show you more than any email can. Pro is $9.99/month. If it doesn't help, cancel in 10 seconds from your account.`
       }
 
       const upgradeUrl = `https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=trial_report_card`
@@ -159,7 +159,7 @@ ${preheader(sessionCount >= 3
   ? `You logged ${sessionCount} sessions. That habit doesn't have to end here.`
   : sessionCount > 0
     ? `You ran ${sessionCount} session${sessionCount !== 1 ? 's' : ''} on Pro. Here's what you lose now.`
-    : `Your trial ended without a session. $2.99/week to pick up where you didn't start.`
+    : `Your trial ended without a session. $9.99/month to pick up where you didn't start.`
 )}
 <table width="100%" cellpadding="0" cellspacing="0" style="background:#F7F6F3;padding:32px 16px;">
   <tr><td align="center">
@@ -279,14 +279,14 @@ ${preheader(sessionCount >= 3
 
         <!-- CTA -->
         <p style="margin:0 0 20px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro is <strong style="color:#111111;">$2.99/week</strong>. Cancel in your account any time. One tap.
+          Pro is <strong style="color:#111111;">$9.99/month</strong>. Cancel in your account any time. One tap.
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:10px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none;border-radius:12px;padding:14px 36px;letter-spacing:-0.2px;">Upgrade to Pro · $2.99/wk</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none;border-radius:12px;padding:14px 36px;letter-spacing:-0.2px;">Upgrade to Pro · $9.99/mo</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">$2.99/wk · Cancel in account anytime</span>
+            <span style="font-size:12px;color:#9B9B9B;">$9.99/mo · Cancel in account anytime</span>
           </td></tr>
         </table>
 

@@ -268,7 +268,7 @@ ${preheader('Your first session takes 15 minutes. Tap Session Blueprint and you 
       // Single CTA: trial if free and never tried (peak conversion moment);
       // otherwise open their updated plan.
       const cta = (!isPro && !trialUsed)
-        ? { text: 'Start your free 7-day trial', url: `https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=first_session_trial`, sub: 'Card required. Cancel before day 8 and pay nothing.' }
+        ? { text: 'Start your free 7-day trial', url: `https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=first_session_trial`, sub: 'Card required. Cancel before day 8 and pay nothing.' }
         : { text: 'See your updated plan', url: `https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=first_session`, sub: null }
       const opener = name
         ? `${name}, you finished your first session.`
@@ -321,7 +321,7 @@ ${preheader('The hardest part is done. Every session from here is easier to star
         cheatSheet:     { subject: 'AI Cheat Sheets unlock with Pro.', headline: 'AI Cheat Sheets are a Pro feature.', unlock: 'Pro unlocks unlimited AI cheat sheets. Pull the key concepts from any topic in seconds.' },
       }
       const copy = PAYWALL_COPY[trigger] ?? { subject: 'You hit a limit on StudyEdge AI', headline: 'You hit the free plan limit.', unlock: 'Pro gives you 5 courses, 100 AI actions per month, unlimited blueprints and focus sessions.' }
-      const upgradeUrl = `https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=paywall_hit`
+      const upgradeUrl = `https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=paywall_hit`
       const greeting = name ? `${name}, ` : ''
       await resend.emails.send({
         from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
@@ -358,7 +358,7 @@ ${preheader(copy.unlock)}
     // Mapped to Stripe checkout.session.expired email. Approved copy re-used.
     case 'checkout-recovery': {
       const wasTrial = context?.wasTrial ?? true
-      const ctaUrl = `https://getstudyedge.com/app?plan=pro&billing=weekly${wasTrial ? '&trial=1' : ''}&utm_source=email&utm_medium=lifecycle&utm_campaign=checkout_abandoned`
+      const ctaUrl = `https://getstudyedge.com/app?plan=pro&billing=monthly${wasTrial ? '&trial=1' : ''}&utm_source=email&utm_medium=lifecycle&utm_campaign=checkout_abandoned`
       await resend.emails.send({
         from: 'StudyEdge AI Team <support@mail.getstudyedge.com>',
         to: email,

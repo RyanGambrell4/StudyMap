@@ -130,7 +130,7 @@ export default async function handler(req, res) {
 
       const upgradeUrl = trialUsed
         ? `https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=exam_approaching_winback`
-        : `https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=exam_approaching`
+        : `https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=exam_approaching`
 
       // Branch copy
       let lead, tip, tipTitle, ctaLabel
@@ -237,7 +237,7 @@ ${preheader(daysLeft <= 3 ? `${examTitle}: ${daysLeft} day${daysLeft !== 1 ? 's'
               </tr>`).join('')}
             </table>
             <p style="margin:14px 0 0;font-size:13px;color:#6B6B6B;line-height:1.55;">
-              Pro is <strong style="color:#111111;">$2.99/week</strong>.
+              Pro is <strong style="color:#111111;">$9.99/month</strong>.
               ${trialUsed ? 'You know what you get.' : `Try free for 7 days. No charge until day 8.`}
             </p>
           </td></tr>
@@ -245,10 +245,10 @@ ${preheader(daysLeft <= 3 ? `${examTitle}: ${daysLeft} day${daysLeft !== 1 ? 's'
 
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:10px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:${urgency.color};color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none;border-radius:12px;padding:14px 36px;">${trialUsed ? 'Upgrade to Pro · $2.99/wk' : ctaLabel}</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:${urgency.color};color:#FFFFFF;font-size:15px;font-weight:600;text-decoration:none;border-radius:12px;padding:14px 36px;">${trialUsed ? 'Upgrade to Pro · $9.99/mo' : ctaLabel}</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12.5px;color:#9B9B9B;">${trialUsed ? '$2.99/wk · Cancel anytime' : 'Card required · $2.99/wk after day 8 · Cancel anytime'}</span>
+            <span style="font-size:12.5px;color:#9B9B9B;">${trialUsed ? '$9.99/mo · Cancel anytime' : 'Card required · $9.99/mo after day 8 · Cancel anytime'}</span>
           </td></tr>
         </table>
 

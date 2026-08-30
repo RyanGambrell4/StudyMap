@@ -3,7 +3,7 @@
  *
  * 3-tier model:
  *  Free      → permanent, capped per feature
- *  Trial     → 7-day Pro via Stripe Checkout. Card required upfront; charged $2.99/wk after 7 days unless cancelled.
+ *  Trial     → 7-day Pro via Stripe Checkout. Card required upfront; charged $9.99/mo after 7 days unless cancelled.
  *  Pro       → Stripe paid (weekly/monthly/annual), 5 courses, 100 AI actions/month
  *  Unlimited → Stripe paid (weekly/monthly/annual), unlimited everything + tutor memory & advanced analytics
  */
@@ -155,15 +155,15 @@ export function getTrialDaysRemaining() {
   return Math.max(0, Math.ceil(TRIAL_DURATION_DAYS - elapsed))
 }
 
-// REVENUE-CRITICAL. The 7-day free trial is always Pro/weekly ($2.99/wk after).
+// REVENUE-CRITICAL. The 7-day free trial is always Pro/monthly ($9.99/mo after).
 // Single source of truth for every trial CTA in the app — do not pass a plan in
 // at the call site, and do not change these values without also updating the
-// trial copy in PrePaywall, PaywallModal, DashboardView, AccountView, Onboarding
-// and PaywallExitGift. Trial entitlements are PRO_LIMITS (see TRIAL_LIMITS above)
+// trial copy in PaywallModal, DashboardView, AccountView and Onboarding.
+// Trial entitlements are PRO_LIMITS (see TRIAL_LIMITS above)
 // and getActivePlan() returns 'pro' while trialing, so billing the Unlimited
 // price here would charge users for a tier they never had access to.
 export const TRIAL_PLAN = 'pro'
-export const TRIAL_BILLING_PERIOD = 'weekly'
+export const TRIAL_BILLING_PERIOD = 'monthly'
 
 // activateTrial routes through Stripe Checkout so a card is collected upfront.
 // Returns the checkout URL on success, or null on failure.

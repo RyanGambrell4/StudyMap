@@ -73,7 +73,7 @@ export default async function handler(req, res) {
     const trialUsed = !!(row?.subscription?.trialUsedAt || row?.subscription?.trial_activated)
     const upgradeUrl = trialUsed
       ? `https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=no_first_session_winback`
-      : `https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=no_first_session`
+      : `https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=no_first_session`
     const ctaLabel = trialUsed ? 'Open the app' : 'Open the app and start your trial'
 
     try {

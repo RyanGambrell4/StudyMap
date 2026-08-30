@@ -20,7 +20,7 @@ last_updated: "2026-06-20"
 
 ## Pro Plan
 
-- **Weekly:** $2.99/week
+- **Weekly:** $9.99/month
 - **Monthly:** $9.99/month
 - **Annual:** $69.99/year (~$5.83/month, save 42%)
 - **Trial:** 7-day free trial, cancel anytime
@@ -34,7 +34,7 @@ last_updated: "2026-06-20"
 
 ## Unlimited Plan
 
-- **Weekly:** $4.99/week
+- **Weekly:** $14.99/month
 - **Monthly:** $14.99/month
 - **Annual:** $119.99/year (~$10/month, save 33%)
 - **Courses:** Unlimited courses
@@ -47,7 +47,7 @@ last_updated: "2026-06-20"
 
 ## Sign Up
 
-- Trial sign-up: https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1
+- Trial sign-up: https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1
 - Pricing page: https://getstudyedge.com/pricing
 
 ## Related Pages

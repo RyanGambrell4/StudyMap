@@ -939,7 +939,7 @@ export default function App() {
         }}>
           <div style={{ flex: 1 }}>
             <p style={{ margin: '0 0 2px', fontSize: 13, fontWeight: 700, color: '#fff' }}>Unlock unlimited sessions</p>
-            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,.65)' }}>7-day trial · $2.99/wk after</p>
+            <p style={{ margin: 0, fontSize: 11.5, color: 'rgba(255,255,255,.65)' }}>7-day trial · $9.99/mo after</p>
           </div>
           <button
             onClick={() => { track('trial_nudge_clicked', { source: 'floating_pill' }); openPaywall('trial_nudge') }}
@@ -955,44 +955,89 @@ export default function App() {
         </div>
       )}
 
-      {/* Checkout cancel banner */}
+      {/* Returned from Stripe without paying.
+        *
+        * This is an abandoned checkout, not a failure. Nothing went wrong and
+        * nothing was charged, so it must not look like an error — it used to be
+        * a full-width amber bar pinned to top:0, which read as a warning and
+        * covered the nav (Study Tools and My Semester sat behind it).
+        *
+        * It is now a small floating card at the bottom: an offer, out of the way
+        * of navigation, saying the one thing the student actually wants to know
+        * after backing out of a payment page. */}
       {showCheckoutCancelBanner && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          zIndex: 1000,
-          background: 'rgba(245,158,11,0.95)',
-          padding: '12px 20px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 12,
-        }}>
-          <span style={{ fontSize: 13.5, color: '#fff', fontWeight: 500 }}>
-            {hasUsedTrial()
-              ? 'Pick up where you left off. No hidden fees.'
-              : '7-day free trial. Card required. Cancel before day 8 and you won\'t be charged.'}
-          </span>
-          <div style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-            <button
-              onClick={() => {
-                setShowCheckoutCancelBanner(false)
-                openPaywall('pro')
-              }}
-              style={{ padding: '7px 14px', borderRadius: 7, background: '#fff', color: '#B45309', fontSize: 13, fontWeight: 700, cursor: 'pointer', border: 'none' }}
-            >
-              Try again
-            </button>
-            <button
-              onClick={() => setShowCheckoutCancelBanner(false)}
-              style={{ padding: '7px 10px', borderRadius: 7, background: 'rgba(255,255,255,0.2)', color: '#fff', fontSize: 13, fontWeight: 500, cursor: 'pointer', border: 'none' }}
-            >
-              Dismiss
-            </button>
+        <>
+          <style>{`
+            @keyframes se-cancel-in {
+              from { opacity: 0; transform: translate(-50%, 14px) scale(.97) }
+              to   { opacity: 1; transform: translate(-50%, 0) scale(1) }
+            }
+            .se-cancel {
+              position: fixed; left: 50%; bottom: 20px; z-index: 1000;
+              transform: translateX(-50%);
+              display: flex; align-items: center; gap: 14px;
+              max-width: min(560px, calc(100vw - 24px));
+              padding: 13px 15px 13px 18px; border-radius: 14px;
+              background: rgba(255,255,255,.86);
+              -webkit-backdrop-filter: blur(18px) saturate(180%);
+              backdrop-filter: blur(18px) saturate(180%);
+              border: 1px solid rgba(16,20,40,.08);
+              box-shadow: 0 1px 2px rgba(16,20,40,.05), 0 16px 40px -16px rgba(16,20,40,.28);
+              animation: se-cancel-in .34s cubic-bezier(.32,.72,0,1) both;
+            }
+            .se-cancel-copy { font-size: 13.5px; line-height: 1.45; color: #1C1B18; }
+            .se-cancel-copy b { font-weight: 650; }
+            .se-cancel-copy span { color: #5C5952; }
+            .se-cancel-actions { display: flex; align-items: center; gap: 6px; margin-left: auto; flex-shrink: 0; }
+            .se-cancel-plans {
+              padding: 8px 14px; border-radius: 9px; border: none; cursor: pointer;
+              background: #3452D9; color: #fff; font-size: 13px; font-weight: 650;
+              font-family: inherit; transition: transform .1s ease-out, filter .16s ease;
+            }
+            .se-cancel-plans:hover { filter: brightness(1.06) }
+            .se-cancel-plans:active { transform: scale(.97) }
+            .se-cancel-x {
+              padding: 8px 10px; border-radius: 9px; border: none; cursor: pointer;
+              background: transparent; color: #6E6B64; font-size: 13px; font-weight: 550;
+              font-family: inherit; transition: background .16s ease, transform .1s ease-out;
+            }
+            .se-cancel-x:hover { background: #EFF1F4 }
+            .se-cancel-x:active { transform: scale(.97) }
+            @media (max-width: 560px) {
+              .se-cancel { flex-direction: column; align-items: flex-start; gap: 10px; }
+              .se-cancel-actions { margin-left: 0; width: 100%; }
+              .se-cancel-plans { flex: 1 }
+            }
+            @media (prefers-reduced-motion: reduce) {
+              .se-cancel { animation: none }
+              .se-cancel-plans:active, .se-cancel-x:active { transform: none }
+            }
+            @media (prefers-reduced-transparency: reduce) {
+              .se-cancel { background: #fff; backdrop-filter: none; -webkit-backdrop-filter: none }
+            }
+          `}</style>
+          <div className="se-cancel" role="status">
+            <p className="se-cancel-copy" style={{ margin: 0 }}>
+              <b>No charge was made.</b>{' '}
+              <span>
+                {hasUsedTrial()
+                  ? 'Your plan is here whenever you want to pick it back up.'
+                  : 'Your 7-day free trial is still available when you are ready.'}
+              </span>
+            </p>
+            <div className="se-cancel-actions">
+              <button
+                className="se-cancel-plans"
+                onClick={() => { setShowCheckoutCancelBanner(false); openPaywall('checkout-cancelled') }}
+              >
+                See plans
+              </button>
+              <button className="se-cancel-x" onClick={() => setShowCheckoutCancelBanner(false)}>
+                Not now
+              </button>
+            </div>
           </div>
-        </div>
+        </>
       )}
 
       {/* Checkout success banner */}

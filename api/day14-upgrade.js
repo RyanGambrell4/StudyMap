@@ -75,7 +75,7 @@ export default async function handler(req, res) {
     const trialUsed = !!(sub.trialUsedAt || sub.trial_activated)
     const upgradeUrl = trialUsed
       ? `https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day14_winback`
-      : `https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day14_upgrade`
+      : `https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day14_upgrade`
 
     const subject = trialUsed
       ? "You tried Pro. What would bring you back?"
@@ -88,7 +88,7 @@ export default async function handler(req, res) {
           That's fine. I want to make sure the price was the only thing holding you back, not the product.
         </p>
         <p style="margin:0 0 16px;font-size:15px;color:#6B6B6B;line-height:1.65;">
-          Pro is $2.99/wk, less than a coffee. At that price it pays for itself the first time you use it to prep for an exam. Here's what you had during your trial:
+          Pro is $9.99/mo, less than a coffee. At that price it pays for itself the first time you use it to prep for an exam. Here's what you had during your trial:
         </p>
         <table cellpadding="0" cellspacing="0" style="width:100%;margin-bottom:24px;">
           ${[
@@ -107,10 +107,10 @@ export default async function handler(req, res) {
         </table>
         <table cellpadding="0" cellspacing="0" style="width:100%;">
           <tr><td align="center" style="padding-bottom:6px;">
-            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Upgrade to Pro · $2.99/wk</a>
+            <a href="${upgradeUrl}" style="display:inline-block;background:#3B61C4;color:#FFFFFF;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;padding:13px 30px;">Upgrade to Pro · $9.99/mo</a>
           </td></tr>
           <tr><td align="center">
-            <span style="font-size:12px;color:#9B9B9B;">$2.99/wk · Cancel in account anytime</span>
+            <span style="font-size:12px;color:#9B9B9B;">$9.99/mo · Cancel in account anytime</span>
           </td></tr>
         </table>` : `
         <p style="margin:0 0 4px;font-size:12px;font-weight:600;letter-spacing:0.06em;color:#E8531A;text-transform:uppercase;">Two weeks in, still free</p>
