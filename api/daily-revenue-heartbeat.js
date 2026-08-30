@@ -157,7 +157,7 @@ export default async function handler(req, res) {
   if (stripeAlert && !stripeErr) {
     reasons.push(
       `ZERO new Stripe customers in 48h (7-day avg: ${avg7d.toFixed(2)}/day). ` +
-      `This mirrors the 2026-05-25 trial-bypass incident. Check /app?signup=1&plan=pro&billing=weekly&trial=1 end-to-end immediately.`
+      `This mirrors the 2026-05-25 trial-bypass incident. Check /app?signup=1&plan=pro&billing=monthly&trial=1 end-to-end immediately.`
     )
   }
   if (stripeErr) reasons.push(`Stripe API error: ${stripeErr}`)

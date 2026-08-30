@@ -68,12 +68,12 @@ export default async function handler(req, res) {
 
     const upgradeUrl = trialUsed
       ? `https://getstudyedge.com/app?utm_source=email&utm_medium=lifecycle&utm_campaign=day7_winback`
-      : `https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day7_milestone`
-    const ctaLabel = trialUsed ? 'Upgrade to Pro · $2.99/wk' : 'Start 7-day free trial'
-    const ctaFootnote = trialUsed ? '$2.99/wk · Cancel in account anytime' : '7-day trial · $2.99/wk after · Card required · Cancel in account anytime'
+      : `https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day7_milestone`
+    const ctaLabel = trialUsed ? 'Upgrade to Pro · $9.99/mo' : 'Start 7-day free trial'
+    const ctaFootnote = trialUsed ? '$9.99/mo · Cancel in account anytime' : '7-day trial · $9.99/mo after · Card required · Cancel in account anytime'
     const valueClose = trialUsed
-      ? `Pro is <strong style="color:#111111;">$2.99/week</strong>, less than a coffee. Everything you had during your trial, permanently.`
-      : `Pro is <strong style="color:#111111;">$2.99/week</strong>, less than a coffee. Try it free for 7 days. Card required, auto-renews unless you cancel.`
+      ? `Pro is <strong style="color:#111111;">$9.99/month</strong>, less than a coffee. Everything you had during your trial, permanently.`
+      : `Pro is <strong style="color:#111111;">$9.99/month</strong>, less than a coffee. Try it free for 7 days. Card required, auto-renews unless you cancel.`
 
     try {
       await resend.emails.send({

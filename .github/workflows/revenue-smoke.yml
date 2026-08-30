@@ -45,4 +45,4 @@ jobs:
         run: |
           echo "::error::Trial -> Stripe Checkout flow is broken on production."
           echo "::error::This is the exact failure mode that caused the 2026-05-25 incident."
-          echo "::error::Drive https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1 manually NOW."
+          echo "::error::Drive https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1 manually NOW."

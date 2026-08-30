@@ -23,7 +23,7 @@ export default function AuthScreen({ initialMode, onBack }) {
       'monthly'
     // The trial is always Pro/weekly regardless of what a legacy link asked for
     // (App.jsx forces TRIAL_PLAN on any ?trial=1 intent), so label it that way.
-    if (trial === '1') return { text: '7-day free trial · Pro', sub: 'Full access included. Card required · $2.99/wk after 7 days. Cancel anytime in your account.' }
+    if (trial === '1') return { text: '7-day free trial · Pro', sub: 'Full access included. Card required · $9.99/mo after 7 days. Cancel anytime in your account.' }
     return { text: `${planLabel} plan`, sub: `Billed ${billingLabel}. Cancel anytime.` }
   })()
 

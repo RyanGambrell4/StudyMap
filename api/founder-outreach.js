@@ -103,10 +103,10 @@ ${preheader('Quick question from the StudyEdge AI team. Takes 30 seconds.')}
         <p style="margin:0 0 16px;font-size:14px;color:#4b5563;line-height:1.6;">
           The fastest way to see what it does: add one course, put in your next exam date, and hit "Generate Plan." It takes about 60 seconds and gives you a full week-by-week study schedule calibrated to your exam.
         </p>
-        <a href="https://getstudyedge.com/app?plan=pro&billing=weekly&trial=1" style="display:inline-block;background:#3B61C4;color:#fff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;text-decoration:none;">
+        <a href="https://getstudyedge.com/app?plan=pro&billing=monthly&trial=1" style="display:inline-block;background:#3B61C4;color:#fff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;text-decoration:none;">
           Try Pro free for 7 days →
         </a>
-        <p style="margin:10px 0 0;font-size:12px;color:#9ca3af;">No charge during the trial. $2.99/wk or $9.99/month after.</p>
+        <p style="margin:10px 0 0;font-size:12px;color:#9ca3af;">No charge during the trial. $9.99/mo or $9.99/month after.</p>
       </div>
 
       <p style="margin:0;font-size:15px;color:#374151;line-height:1.7;">

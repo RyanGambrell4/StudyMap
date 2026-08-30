@@ -1,5 +1,23 @@
 # Pricing Redesign Spec
 
+> **SUPERSEDED, 2026-08-30.** This file described a no-card 3-day trial, 2 AI
+> actions a day, a 60-minute focus cap and weekly billing. None of that is
+> what the code does, and it was labelled "live source of truth" in CLAUDE.md
+> while disagreeing with production on nearly every number.
+>
+> Current pricing, authoritative:
+>
+> | Tier | Monthly | Yearly | Trial |
+> |---|---|---|---|
+> | Pro | $9.99 | $69.99 | 7 days, card required, then $9.99/mo |
+> | Unlimited | $14.99 | $119.99 | none, paid immediately |
+>
+> **Weekly and semester are retired** and cannot be sold. See CLAUDE.md
+> ("Pricing") and `HARD_PAYWALL_SPEC.md` for the tier contents. The rest of
+> this file is kept only as a record of the earlier plan.
+
+---
+
 ## Overview
 
 Four tiers: Free, Pro, Unlimited. Pro and Unlimited each have three billing periods (Weekly / Monthly / Annual). Weekly is the primary offer — lowest friction, "less than a coffee" positioning.

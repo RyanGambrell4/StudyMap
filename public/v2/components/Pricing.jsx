@@ -194,7 +194,7 @@ function FinalCTA(){
             <h2 className="section-title" style={{maxWidth:820,margin:'0 auto'}}>You already know you need a<br/><span className="grad-text">better system.</span></h2>
             <p className="section-sub" style={{margin:'22px auto 32px',maxWidth:560}}>Start free · explore Pro with a 7-day trial inside the app.</p>
             <div className="cta-btns">
-              <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1&plan=pro&billing=weekly&trial=1'}>Start Free Trial →</button>
+              <button className="btn btn-primary btn-lg" onClick={()=>window.location.href='/app?signup=1&plan=pro&billing=monthly&trial=1'}>Start Free Trial →</button>
             </div>
             <div className="cta-foot">
               <span>✓ Free to start</span>

@@ -108,7 +108,7 @@ export default function LandingPage({ onGetStarted }) {
     return () => ro.disconnect()
   }, [])
 
-  const goTrial = () => window.location.href = '/app?signup=1&plan=pro&billing=weekly&trial=1'
+  const goTrial = () => window.location.href = '/app?signup=1&plan=pro&billing=monthly&trial=1'
 
   const [pricingPeriod, setPricingPeriod] = useState('weekly')
   const goCheckout = (plan, period) => {
@@ -525,7 +525,7 @@ export default function LandingPage({ onGetStarted }) {
             <span className="se-ping" style={{ position: 'absolute', inset: 0, borderRadius: '50%', background: '#22c55e', boxShadow: '0 0 10px #22c55e' }} />
           </span>
           <span style={{ fontSize: 13.5, color: '#e2e8f0', fontWeight: 500, letterSpacing: '-0.005em' }}>
-            <strong style={{ color: '#fff', fontWeight: 700 }}>Try Pro free for 7 days</strong> - $2.99/wk after, cancel anytime
+            <strong style={{ color: '#fff', fontWeight: 700 }}>Try Pro free for 7 days</strong> - $9.99/mo after, cancel anytime
           </span>
           <button
             onClick={goTrial}
@@ -2378,7 +2378,7 @@ export default function LandingPage({ onGetStarted }) {
               q: 'Is there a free version, or do I have to pay?',
               a: (
                 <>
-                  Yes. The <strong>Free plan</strong> includes one course, basic session planning, and limited flashcards - no credit card required to sign up. <strong>Pro</strong> ($2.99/week) unlocks 5 courses, 100 AI actions per month, the AI Study Coach, Grade Hub, Focus Mode, and unlimited flashcards, and starts with a 7-day free trial (card required upfront - cancel anytime and you won't be charged). <strong>Unlimited</strong> ($4.99/week) removes the course and AI caps, and adds AI Tutor with session memory plus advanced Practice Exam analytics.
+                  Yes. The <strong>Free plan</strong> includes one course, basic session planning, and limited flashcards - no credit card required to sign up. <strong>Pro</strong> ($9.99/month) unlocks 5 courses, 100 AI actions per month, the AI Study Coach, Grade Hub, Focus Mode, and unlimited flashcards, and starts with a 7-day free trial (card required upfront - cancel anytime and you won't be charged). <strong>Unlimited</strong> ($14.99/month) removes the course and AI caps, and adds AI Tutor with session memory plus advanced Practice Exam analytics.
                 </>
               ),
             },
@@ -2497,7 +2497,7 @@ export default function LandingPage({ onGetStarted }) {
             '@context': 'https://schema.org',
             '@type': 'FAQPage',
             mainEntity: [
-              { q: 'Is there a free version, or do I have to pay?', a: "Yes. The Free plan includes one course, basic session planning, and limited flashcards - no credit card required to sign up. Pro ($2.99/week) unlocks 5 courses, 100 AI actions per month, the AI Study Coach, Grade Hub, Focus Mode, and unlimited flashcards, and starts with a 7-day free trial (card required upfront - cancel anytime and you won't be charged). Unlimited ($4.99/week) removes the course and AI caps, and adds AI Tutor with session memory plus advanced Practice Exam analytics." },
+              { q: 'Is there a free version, or do I have to pay?', a: "Yes. The Free plan includes one course, basic session planning, and limited flashcards - no credit card required to sign up. Pro ($9.99/month) unlocks 5 courses, 100 AI actions per month, the AI Study Coach, Grade Hub, Focus Mode, and unlimited flashcards, and starts with a 7-day free trial (card required upfront - cancel anytime and you won't be charged). Unlimited ($14.99/month) removes the course and AI caps, and adds AI Tutor with session memory plus advanced Practice Exam analytics." },
               { q: 'How does the 7-day Pro trial work?', a: "Card required upfront - you won't be charged during the 7-day trial. Cancel anytime and no payment is taken. After the trial, you return to the free tier automatically." },
               { q: "What if my syllabus or course isn't already in the system?", a: "You can add any course. Drop your syllabus as a PDF or paste it as text, and StudyEdge pulls out exam dates, topics, weights, and assignments. No syllabus on hand? Add the course manually in about 30 seconds: pick the dates, enter your grading breakdown, and the AI builds the plan around it." },
               { q: 'How is this different from Notion, Quizlet, or ChatGPT?', a: "Those tools each solve one piece. Notion is a blank canvas you have to build. Quizlet is a flashcard deck. ChatGPT doesn't know your courses, exam dates, or grades. StudyEdge does all four jobs together: it knows your syllabus, plans every session minute by minute, runs your focus blocks, and tells you the exact score you need on what's left to hit your grade target." },

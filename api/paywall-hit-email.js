@@ -132,11 +132,11 @@ ${preheader(copy.unlock)}
 
       <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 18px;margin-bottom:24px;">
         <p style="margin:0;font-size:13.5px;color:#166534;line-height:1.6;">
-          <strong>Try Pro free for 7 days.</strong> No charge during the trial. $2.99/week or $9.99/month after. Cancel anytime.
+          <strong>Try Pro free for 7 days.</strong> No charge during the trial. $9.99/month or $9.99/month after. Cancel anytime.
         </p>
       </div>
 
-      <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=paywall_hit" style="display:block;text-align:center;background:#E8531A;color:#fff;font-weight:800;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none;letter-spacing:-0.01em;">
+      <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=paywall_hit" style="display:block;text-align:center;background:#E8531A;color:#fff;font-weight:800;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none;letter-spacing:-0.01em;">
         Start Free 7-Day Trial →
       </a>
       <p style="margin:12px 0 0;font-size:12px;color:#9ca3af;text-align:center;">Card required · Cancel before day 8 and pay nothing</p>

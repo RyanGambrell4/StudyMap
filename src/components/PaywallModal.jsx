@@ -1,1088 +1,530 @@
-import { useEffect, useRef, useState } from 'react'
-import { createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getActivePlan, getFeatureUsage, TRIAL_PLAN, TRIAL_BILLING_PERIOD } from '../lib/subscription'
+/**
+ * The one paywall screen.
+ *
+ * Every locked control and every blurred region in the product opens this, via
+ * openPaywall() in App.jsx. There is deliberately no second variant, no
+ * multi-step pre-paywall and no exit gift: those existed to soften an ask that
+ * was mistimed, and the fix for a mistimed ask is timing, not more screens.
+ *
+ * Two taps to Stripe. Tap a locked control, this opens with Pro monthly
+ * selected. Tap the button, land on Stripe. The billing toggle is optional and
+ * does not count as a step.
+ *
+ * Only two billing periods exist: monthly and yearly. Weekly is retired — a
+ * weekly charge on a student debit card is what killed the only real
+ * subscription this product has had.
+ *
+ * Motion follows the Apple fluid-interface rules: feedback lands on pointer
+ * down rather than on release, the sheet materializes (blur and scale together)
+ * rather than fading, enter and exit run the same path in reverse, and every
+ * bit of it degrades to a cross-fade under prefers-reduced-motion.
+ */
+import { useState, useEffect, useRef, useCallback } from 'react'
+import { createPortal } from 'react-dom'
+import {
+  activateTrial,
+  createCheckoutSession,
+  hasUsedTrial,
+  isTrialActive,
+} from '../lib/subscription'
 import { track } from '../lib/analytics'
-import { getAccessToken } from '../lib/supabase'
-import PaywallExitGift from './PaywallExitGift'
-import PrePaywall from './PrePaywall'
+import { T, SERIF, SANS } from '../theme/tokens'
 
-// Session flag so the 3-screen value stack only fires on the FIRST paywall
-// open per session for eligible free users.
-const PREPAYWALL_SESSION_KEY = 'se_prepaywall_seen_v1'
-
-// ── Config ────────────────────────────────────────────────────────────────────
-
-const BILLING_PERIODS = [
-  { id: 'weekly',  label: 'Weekly',  badge: null,          best: false },
-  { id: 'monthly', label: 'Monthly', badge: 'Save 17%',    best: false },
-  { id: 'yearly',  label: 'Annual',  badge: 'Best Value',    best: true  },
-]
-
-// Plan tier → billing period → display price.
-// Source of truth for Pro: weekly $2.99 / monthly $9.99 / annual $69.99.
-// Unlimited: weekly $4.99 / monthly $14.99 / annual $119.99.
+// ── Pricing. Mirrors PRICE_IDS in api/stripe.js; the server is authoritative. ──
 const PLANS = {
-  pro: {
-    name: 'Pro',
-    color: '#3B61C4',
-    gradient: 'linear-gradient(135deg, #3B61C4, #2F4FA0)',
-    prices: {
-      weekly:  '$2.99/wk',
-      monthly: '$9.99/mo',
-      yearly:  '$69.99/yr',
-    },
-    subPrices: {
-      weekly:  'Less than a coffee · billed weekly',
-      monthly: '$2.31/week · billed monthly',
-      yearly:  'Just $1.35/week · billed once a year',
-    },
-    monthlySavingsBadge: 'Save 17%',
-    annualSavingsBadge: 'Save 55%',
-    features: [
-      '5 courses',
-      '100 AI actions/month',
-      'AI Study Coach',
-      'Unlimited Session Blueprints',
-      'Unlimited Focus sessions',
-      'Unlimited brain training',
-      'Flashcards & quizzes',
-    ],
+  monthly: {
+    pro:       { price: '$9.99',  unit: '/mo', note: 'Billed monthly' },
+    unlimited: { price: '$14.99', unit: '/mo', note: 'Billed monthly' },
+    savings:   null,
   },
-  unlimited: {
-    name: 'Unlimited',
-    color: '#34D399',
-    gradient: null,
-    prices: {
-      weekly:  '$4.99/wk',
-      monthly: '$14.99/mo',
-      yearly:  '$119.99/yr',
-    },
-    subPrices: {
-      weekly:  'Billed weekly',
-      monthly: '$3.46/week · billed monthly',
-      yearly:  'Just $2.31/week · billed once a year',
-    },
-    monthlySavingsBadge: 'Save 25%',
-    annualSavingsBadge: 'Save 53%',
-    features: [
-      'Everything in Pro',
-      'Unlimited courses',
-      'Unlimited AI actions',
-      'AI Tutor with session memory',
-      'Advanced Practice Exam analytics',
-      'Predicted exam score',
-      'Priority support',
-    ],
+  yearly: {
+    // $69.99 against $119.88 is 41.6%; $119.99 against $179.88 is 33.3%.
+    // Real percentages, because the student who checks the arithmetic is
+    // exactly the student who was going to buy.
+    pro:       { price: '$69.99',  unit: '/yr', note: 'Billed once a year', save: 'Save 42%' },
+    unlimited: { price: '$119.99', unit: '/yr', note: 'Billed once a year', save: 'Save 33%' },
+    savings:   'Save up to 42%',
   },
 }
 
-// Triggers that require Unlimited specifically (vs Pro).
-const UNLIMITED_ONLY_TRIGGERS = new Set(['tutorMemory', 'practiceExamAnalytics', 'unlimited'])
-
-const LIMIT_MESSAGES = {
-  courses: {
-    tag: 'Manage your full semester',
-    title: 'Add up to 5 courses with Pro.',
-    body: 'Stop juggling apps. Your full semester (every course, every exam) planned in one place.',
-  },
-  ai: {
-    tag: 'Unlock AI tutoring',
-    title: 'Get AI help anytime, for every course.',
-    body: 'Pro gives you 100 AI actions a month. Your always-on tutor for every concept you\'re stuck on.',
-  },
-  'ai-struggle': {
-    tag: 'Close your knowledge gaps',
-    title: 'Your AI coach can fix this.',
-    body: 'You\'re struggling with a flagged topic. Pro unlocks unlimited AI coaching sessions to drill exactly what you\'re missing before your exam.',
-  },
-  'ai-exhausted': {
-    tag: "You've used your free AI actions",
-    title: 'Keep your tutor on tap.',
-    body: "Pro gives you 100 AI actions a month. Your tutor for every concept this semester. Start the 7-day free trial and pick up exactly where you left off.",
-  },
-  tutorMemory: {
-    tag: 'Unlimited only · Tutor memory',
-    title: 'AI Tutor with full session memory.',
-    body: 'Your tutor remembers everything from your conversation. No more re-explaining context every message. Available on Unlimited.',
-  },
-  practiceExamAnalytics: {
-    tag: 'Unlimited only · Advanced analytics',
-    title: 'See whether the work is landing.',
-    body: 'Unlimited charts your score across every practice exam for a course, so you can watch a weak topic turn into a strong one.',
-  },
-  coach: {
-    tag: 'Replan as life happens',
-    title: 'Rebuild your study plan anytime.',
-    body: 'Exams shift. Life happens. Pro lets you regenerate your coach plan whenever your schedule changes.',
-  },
-  blueprint: {
-    tag: 'A plan for every session',
-    title: 'Unlock unlimited Session Blueprints.',
-    body: 'A full breakdown before every study block. What to learn, in what order, with practice prompts ready to go.',
-  },
-  focus: {
-    tag: 'Study without a timer cap',
-    title: 'Unlock unlimited Focus sessions.',
-    body: 'Lock in for as long as you need. Pro removes the 30-min cap so you can finish what you started.',
-  },
-  'focus-limit': {
-    tag: "You've hit your daily focus limit",
-    title: 'Unlock unlimited Focus sessions.',
-    body: "You just hit your 30-min free cap. Pro removes it entirely. Study as long as you need, every day.",
-  },
-  brainDump: {
-    tag: 'Train recall on every topic',
-    title: 'Unlock unlimited Brain Dumps.',
-    body: 'Recall practice is the #1 evidence-based study technique. Pro lets you brain dump anything, anytime.',
-  },
-  quizBurst: {
-    tag: 'Test yourself anytime',
-    title: 'Unlock unlimited Quiz Bursts.',
-    body: 'Quick mastery checks for any topic. Pro lets you generate them on demand, all semester.',
-  },
-  examRescue: {
-    tag: 'Behind on an exam? Rebound fast',
-    title: 'Unlock unlimited Exam Rescues.',
-    body: 'Pro builds a targeted rescue plan for any exam. Figure out exactly what to study and when.',
-  },
-  tools: {
-    tag: 'Your AI-built study materials',
-    title: 'Unlock Flashcards, quizzes, and more.',
-    body: 'Pro auto-generates flashcards and practice quizzes from your own course content. No manual setup.',
-  },
-  grade_recovery: {
-    tag: 'Hit the grade you need',
-    title: 'Unlock Grade Recovery.',
-    body: 'See exactly how many points you need to hit your target, then get a study plan built to get you there.',
-  },
-  'coach-plan-result': {
-    tag: 'Adapt your plan as things change',
-    title: 'Rebuild your plan anytime.',
-    body: 'Your free plan is locked after generation. Pro lets you rebuild it anytime. New exam dates, topic changes, schedule shifts - all covered.',
-  },
-  'practice_exam': {
-    tag: 'Practice more, score higher',
-    title: 'Unlock unlimited practice exams.',
-    body: 'Free includes 1 exam total. Pro gives you unlimited practice, score trend tracking, and weak-topic targeting.',
-  },
-  'practice-exam-results': {
-    tag: "You've used your free exam",
-    title: 'Unlock unlimited practice exams.',
-    body: 'Consistent practice is what moves the needle. Pro gives you unlimited exams with detailed score tracking.',
-  },
-  'brain-dump-result': {
-    tag: 'Keep training your recall',
-    title: 'Unlock unlimited Brain Dumps.',
-    body: "You've used your free brain dump. Pro removes the limit. Dump and score any topic, anytime you need it.",
-  },
-  'quiz-burst-result': {
-    tag: 'Quiz yourself every session',
-    title: 'Unlock unlimited Quiz Bursts.',
-    body: "Daily self-testing is one of the fastest ways to lock in material. Pro gives you unlimited quiz bursts.",
-  },
-  'exam-rescue-result': {
-    tag: 'Next time, come back ready',
-    title: 'Unlock unlimited Exam Rescues.',
-    body: "Pro builds a rescue plan for any exam, any time. Never go into a test unprepared again.",
-  },
-  'focus-complete': {
-    tag: 'Keep your momentum going',
-    title: 'Unlock unlimited focus time.',
-    body: "Great session. Free caps you at 30 min/day. Pro removes that entirely so you can study as long as you need.",
-  },
-  adapt: {
-    tag: 'Your plan just got smarter',
-    title: 'Let your schedule adapt automatically.',
-    body: "Based on your recall score, your plan should shift. Pro applies these adjustments automatically so you always study the right thing next.",
-  },
-  grades: {
-    tag: 'Know your grade before finals',
-    title: 'Unlock full Grade Hub.',
-    body: "Track every assignment, run what-if scenarios, and know exactly what you need on your final to hit your target grade. Pro and Unlimited plans only.",
-  },
-  'study-hacks': {
-    tag: 'Unlock your full study toolkit',
-    title: 'Get every AI study tool.',
-    body: 'Pro unlocks Cheat Sheets, Exam Rescues, unlimited Brain Dumps, and more. One toolkit for your entire semester.',
-  },
-  flashcardDecks: {
-    tag: 'More decks, more mastery',
-    title: 'Unlock unlimited flashcard decks.',
-    body: 'Free includes 1 deck. Pro gives you unlimited decks with unlimited cards. One deck per course, or go deeper on any topic.',
-  },
-  'cheat-sheet': {
-    tag: 'See every high-priority topic',
-    title: 'Unlock all 10 exam topics.',
-    body: "Free shows the #1 ranked topic. Pro unlocks all 10, ranked by AI-estimated exam likelihood and your current readiness, so you know exactly where to spend the time you have left.",
-  },
-  'prep-blast': {
-    tag: 'Smarter session briefs',
-    title: 'Unlock exam-focused and goal-based modes.',
-    body: "Pro uses your exam dates and coach plan to pick the best focus question for your next session. Free mode only covers general weak areas.",
-  },
-  'quiz-result': {
-    tag: 'Keep testing yourself',
-    title: 'Unlimited quizzes, any topic.',
-    body: "Self-testing is the most effective study technique. Pro generates unlimited quizzes from any topic or your uploaded notes, on demand, all semester.",
-  },
-  'streak-milestone': {
-    tag: 'Your streak is worth protecting',
-    title: 'Keep your streak going with Pro.',
-    body: "You've built a real habit. Pro gives you unlimited AI tutoring, blueprints, and focus sessions. Nothing slows you down.",
-  },
-  'drill-result': {
-    tag: 'Keep drilling weak spots',
-    title: 'Unlimited Topic Drills, all semester.',
-    body: "Drilling is how knowledge sticks. Pro gives you unlimited topic drills so you can target every weak area before exam day.",
-  },
-  'nav-upgrade': {
-    tag: 'Ready to go back to Pro?',
-    title: 'Everything you had during your trial.',
-    body: "$2.99/wk. 5 courses, 100 AI actions a month, AI Study Coach, Grade Hub, unlimited focus sessions, and every study tool. Cancel anytime.",
-  },
-  'nav-trial': {
-    tag: 'Try Pro, 7-day free trial',
-    title: 'Full access. No restrictions.',
-    body: "5 courses, 100 AI actions a month, AI Study Coach, unlimited Session Blueprints, unlimited focus sessions, and every study tool. $2.99/wk after. Cancel anytime.",
-  },
-}
-
-const TESTIMONIALS = [
-  { quote: 'finished top of my cohort last semester. I genuinely could not have done it without this', name: 'Danny K.', detail: 'Pre-med, 3.8 GPA' },
-  { quote: 'finally consistent with my studying for the first time ever', name: 'Andy G.', detail: 'University, 2nd year' },
-  { quote: 'one app. all semester. I don\'t need anything else.', name: 'Charlotte B.', detail: 'Law school prep' },
-  { quote: 'went from a C to a B+ in Orgo after using Exam Rescue the week before my midterm', name: 'Priya S.', detail: 'Chemistry major' },
-  { quote: 'the AI study coach actually understands my schedule. worth every penny', name: 'Marcus T.', detail: 'Engineering, 3rd year' },
+const PRO_FEATURES = [
+  ['Your full semester plan', 'Every week through finals, not just this one.'],
+  ['Grade Hub and predicted scores', 'See what you need on the final to hit your target.'],
+  ['Knowledge map and tutor memory', 'The tutor remembers the whole conversation.'],
+  ['Unlimited practice exams', 'Plus the history and mastery behind them.'],
+  ['Unlimited AI tutor chat', 'Ask as much as you want.'],
+  ['100 AI actions a month', 'Blueprints, quizzes, brain dumps, exam rescues.'],
 ]
 
-// Maps each trigger to the most contextually relevant testimonial index.
-// Danny (0) = academic outcomes. Andy (1) = consistency/habit. Charlotte (2) = all-in-one.
-// Priya (3) = exam rescue/rescue scenarios. Marcus (4) = coach, focus, blueprints.
-const TRIGGER_TESTIMONIAL_IDX = {
-  'practice-exam-results': 0, 'practice_exam': 0, 'practiceExamAnalytics': 0,
-  'grades': 0, 'grade_recovery': 0, 'ai-exhausted': 0, 'ai': 0,
-  'brain-dump-result': 1, 'brainDump': 1, 'quiz-burst-result': 1, 'quizBurst': 1,
-  'streak-milestone': 1, 'drill-result': 1,
-  'courses': 2, 'nav-trial': 2, 'nav-upgrade': 2, 'tools': 2, 'flashcardDecks': 2,
-  'exam-rescue-result': 3, 'examRescue': 3, 'cheat-sheet': 3, 'prep-blast': 3,
-  'focus-limit': 4, 'focus-complete': 4, 'focus': 4,
-  'coach': 4, 'coach-plan-result': 4, 'blueprint': 4, 'adapt': 4,
+const UNLIMITED_FEATURES = [
+  ['Unlimited courses', 'Pro covers 5. This covers every class you take.'],
+  ['Unlimited AI actions', 'No monthly ceiling.'],
+  ['Podcast mode', 'Turn any session into audio for the walk to class.'],
+]
+
+// Headline per trigger. Specific beats clever: name the thing they just hit.
+const HEADLINES = {
+  grades:                 'See where your grade is heading',
+  courses:                'Add every class, not just one',
+  'practice_exam':        'Keep practising until it sticks',
+  practiceExamAnalytics:  'See every attempt, not just the last one',
+  tutorMemory:            'A tutor that remembers the whole conversation',
+  semester:               'Unlock your semester',
+  blueprint:              'A plan for every session, not just the first',
+  coach:                  'Your full coach plan, every week',
+  ai:                     'Keep going without running out',
+  'ai-exhausted':         'Keep going without running out',
+  unlimited:              'Take off every cap',
 }
 
-// ── Component ─────────────────────────────────────────────────────────────────
-
-export default function PaywallModal({ trigger, onClose, userEmail, userId, currentPlan = 'free', onTrialActivated, sessionsCompleted = 0, coursesCount = 0, primaryCourseName = null, urgentExamDays = null }) {
-  // Default to yearly — largest weekly-equivalent discount and highest LTV.
-  // Users can still switch via the toggle; we're just picking the anchor.
-  const [billingPeriod, setBillingPeriod] = useState('yearly')
-  const [loading, setLoading] = useState(null)
-  const [testimonialIdx, setTestimonialIdx] = useState(() => TRIGGER_TESTIMONIAL_IDX[trigger] ?? 0)
-  const [socialStatIdx, setSocialStatIdx] = useState(0)
-  const [trialLoading, setTrialLoading] = useState(false)
-  const [trialError, setTrialError] = useState(null)
-  const [planError, setPlanError] = useState(null)
-  const openedAtRef = useRef(Date.now())
-
-  // Screen state: 'stats' (trial-expired), 'commitment' (free+seen PrePaywall),
-  // 'plans' (main pricing), 'trust' (pre-Stripe trust interstitial)
-  const [screen, setScreen] = useState(() => {
-    const used = hasUsedTrial()
-    const active = isTrialActive()
-    if (used && !active) return 'stats'
-    if (!used && !active && currentPlan === 'free' && !UNLIMITED_ONLY_TRIGGERS.has(trigger)) {
-      try { if (window.sessionStorage.getItem(PREPAYWALL_SESSION_KEY)) return 'commitment' } catch {}
-    }
-    return 'plans'
-  })
-  const [pendingPlan, setPendingPlan] = useState(null) // { planId, billingPeriod } for trust screen
+export default function PaywallModal({
+  trigger,
+  onClose,
+  userEmail,
+  userId,
+  currentPlan = 'free',
+  onTrialActivated,
+  coursesCount = 0,
+  primaryCourseName = null,
+}) {
+  // Monthly is the anchor. It is the trial's billing period, so the default
+  // selection and the default CTA agree with each other.
+  const [billingPeriod, setBillingPeriod] = useState('monthly')
+  const [loading, setLoading] = useState(null)   // 'pro' | 'unlimited' | null
+  const [error, setError] = useState(null)
+  const [expanded, setExpanded] = useState(null) // `${card}:${idx}`
+  const [closing, setClosing] = useState(false)
+  const [askReason, setAskReason] = useState(false)
+  const [reason, setReason] = useState('')
+  const openedAt = useRef(Date.now())
+  const sheetRef = useRef(null)
 
   const trialUsed = hasUsedTrial()
   const trialActive = isTrialActive()
-  const isUnlimitedTrigger = UNLIMITED_ONLY_TRIGGERS.has(trigger)
+  // The trial is Pro monthly only. On yearly there is nothing to trial, so the
+  // button says what it does instead of promising a trial it cannot start.
+  const proOffersTrial = !trialUsed && !trialActive && billingPeriod === 'monthly'
 
-  // 3-screen value stack: shown once per session for eligible free users.
-  // Eligibility: free plan, trial not yet used, not on a "hard" Unlimited-only
-  // trigger (those users landed here because they need a specific paid feature —
-  // don't slow them down with a benefits pitch).
-  const prePaywallEligible = (
-    currentPlan === 'free'
-    && !trialUsed
-    && !trialActive
-    && !isUnlimitedTrigger
-  )
-  const [showPrePaywall, setShowPrePaywall] = useState(() => {
-    if (!prePaywallEligible) return false
-    try {
-      return typeof window !== 'undefined' && !window.sessionStorage.getItem(PREPAYWALL_SESSION_KEY)
-    } catch { return false }
-  })
+  const p = PLANS[billingPeriod]
 
-  // Trial card only shows for free users, never for Unlimited-only triggers.
-  const showTrialCard = currentPlan === 'free' && !trialUsed && !trialActive && !isUnlimitedTrigger
-  // Win-back card shows for users whose trial expired and haven't subscribed.
-  const showWinBackCard = currentPlan === 'free' && trialUsed && !trialActive && !isUnlimitedTrigger
-
-  const msg = LIMIT_MESSAGES[trigger] ?? LIMIT_MESSAGES.ai
-  const visiblePlanIds = currentPlan === 'pro' ? ['unlimited'] : Object.keys(PLANS)
-
-  // Track modal open — this is the funnel entry event for paywall conversion analysis
   useEffect(() => {
-    track('paywall_opened', {
-      trigger_feature: trigger,
-      current_plan: currentPlan,
-      trial_used: trialUsed,
-      is_unlimited_trigger: isUnlimitedTrigger,
-    })
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
-
-  // Rotate testimonials every 4 seconds
-  useEffect(() => {
-    const t = setInterval(() => setTestimonialIdx(i => (i + 1) % TESTIMONIALS.length), 4000)
-    return () => clearInterval(t)
-  }, [])
-
-  const SOCIAL_STATS = [
-    'Over 2,400 students finished their semester with StudyEdge AI',
-    'Avg student improves recall by 31% after 2 weeks',
-    '4.8 stars · students rate us higher than every other study app',
-    'Students using the AI coach report studying 2x more consistently',
-  ]
-  useEffect(() => {
-    const t = setInterval(() => setSocialStatIdx(i => (i + 1) % SOCIAL_STATS.length), 5000)
-    return () => clearInterval(t)
-  }, [])
-
-  // Paywall-exit gift: on the FIRST dismiss for a free user, intercept and
-  // show the "5 free AI actions + rate us" screen instead of closing. The
-  // server-side /api/claim-paywall-exit-gift enforces one-shot per user
-  // globally — this flag just prevents re-showing the intercept once the
-  // user has already dismissed it in this open of the paywall.
-  const [exitGiftOpen, setExitGiftOpen] = useState(false)
-  const [exitGiftShown, setExitGiftShown] = useState(false)
-
-  const handleDismiss = (reason) => {
-    track('paywall_dismissed', {
-      trigger_feature: trigger,
-      reason,
-      dwell_ms: Date.now() - openedAtRef.current,
-      current_plan: currentPlan,
-    })
-    // Fire behavioral email while intent is hot — free users only, fire-and-forget
-    if (currentPlan === 'free' && userId) {
-      getAccessToken().then(token => {
-        fetch('/api/paywall-hit-email', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-          body: JSON.stringify({ trigger }),
-        }).catch(() => {})
-      }).catch(() => {})
-    }
-
-    // Show the exit gift once — only for free users who have not yet seen
-    // it this open. Escape key and outside-click both go through here.
-    const shouldOfferGift = currentPlan === 'free' && !!userId && !exitGiftShown
-    if (shouldOfferGift) {
-      setExitGiftShown(true)
-      setExitGiftOpen(true)
-      return  // hold the paywall behind the gift; onClose fires once the gift closes
-    }
-    onClose()
-  }
-
-  // Called by the gift modal on any close. Fires the real onClose so the
-  // paywall goes away and control returns to the parent.
-  const handleGiftDismiss = () => {
-    setExitGiftOpen(false)
-    onClose()
-  }
-
-  // Close on Escape — but not while the pre-paywall is up; it owns its own
-  // Escape handler and firing both would trigger the exit-gift flow prematurely.
-  useEffect(() => {
-    if (showPrePaywall) return
-    const handler = e => { if (e.key === 'Escape') handleDismiss('escape') }
-    window.addEventListener('keydown', handler)
-    return () => window.removeEventListener('keydown', handler)
+    track('paywall_view', { trigger, current_plan: currentPlan, billing_period: billingPeriod })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [onClose, trigger, showPrePaywall])
+  }, [])
 
-  const handleStartTrial = async () => {
-    track('paywall_cta_click', { plan_clicked: TRIAL_PLAN, billing_period: TRIAL_BILLING_PERIOD, trigger_feature: trigger, is_trial: true })
-    // trial_started removed — trial_activated fires server-side from the Stripe webhook when the
-    // subscription is actually created (customer.subscription.created with status=trialing).
-    setTrialLoading(true)
-    setTrialError(null)
+  // Symmetric exit: the sheet leaves along the path it arrived on.
+  const dismiss = useCallback((how) => {
+    if (closing) return
+    setClosing(true)
+    track('paywall_dismissed', {
+      trigger,
+      how,
+      stopped_reason: reason.trim() || null,
+      ms_open: Date.now() - openedAt.current,
+      billing_period: billingPeriod,
+    })
+    window.setTimeout(() => onClose?.(), 180)
+  }, [closing, onClose, trigger, reason, billingPeriod])
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') dismiss('escape') }
+    window.addEventListener('keydown', onKey)
+    sheetRef.current?.focus()
+    return () => window.removeEventListener('keydown', onKey)
+  }, [dismiss])
+
+  const go = async (which) => {
+    if (loading) return
+    setError(null)
+    setLoading(which)
+    track('plan_selected', { plan: which, billing_period: billingPeriod, trigger })
     try {
-      const url = await activateTrial(userId, userEmail)
-      if (!url) { setTrialError('Something went wrong. Please try again.'); return }
+      let url
+      if (which === 'pro' && proOffersTrial) {
+        // 7-day trial. The server forces Pro/monthly whatever we send.
+        url = await activateTrial(userId, userEmail)
+      } else {
+        // Unlimited never trials, and Pro on yearly is a straight purchase.
+        url = await createCheckoutSession(which, billingPeriod, userEmail, userId)
+      }
+      if (url?.staleBundle) return           // a reload is already in flight
+      if (url?.alreadySubscribed) { setError('You already have an active subscription.'); setLoading(null); return }
+      if (!url) { setError('Could not reach checkout. Please try again.'); setLoading(null); return }
+      if (which === 'pro' && proOffersTrial) onTrialActivated?.()
       window.location.href = url
     } catch {
-      setTrialError('Something went wrong. Please try again.')
-    } finally {
-      setTrialLoading(false)
-    }
-  }
-
-  // Route paid plan clicks through the trust interstitial (Feature 3).
-  // Actual Stripe call happens in handleConfirmCheckout after user sees trust screen.
-  const handleSelectPlan = (planId) => {
-    track('paywall_cta_click', { plan_clicked: planId, billing_period: billingPeriod, trigger_feature: trigger, is_trial: false })
-    setPlanError(null)
-    setPendingPlan({ planId, billingPeriod })
-    setScreen('trust')
-  }
-
-  const handleConfirmCheckout = async () => {
-    if (!pendingPlan) return
-    track('trust_screen_confirmed', { plan: pendingPlan.planId, billing: pendingPlan.billingPeriod, trigger_feature: trigger })
-    setLoading(pendingPlan.planId)
-    try {
-      const url = await createCheckoutSession(pendingPlan.planId, pendingPlan.billingPeriod, userEmail, userId)
-      if (!url) { setPlanError('Checkout failed. No charge was made. Please try again.'); setScreen('plans'); return }
-      if (url?.alreadySubscribed) { onClose(); return }
-      window.location.href = url
-    } catch {
-      setPlanError('Checkout failed. No charge was made. Please try again.')
-      setScreen('plans')
-    } finally {
+      setError('Could not reach checkout. Please try again.')
       setLoading(null)
     }
   }
 
-  const isAnnual = billingPeriod === 'yearly'
-  const t = TESTIMONIALS[testimonialIdx]
+  const headline = HEADLINES[trigger] ?? 'Unlock your semester'
+  const sub = primaryCourseName
+    ? `Your full plan for ${primaryCourseName} through finals${coursesCount > 1 ? `, and ${coursesCount - 1} more ${coursesCount - 1 === 1 ? 'class' : 'classes'}` : ''}.`
+    : 'Your full plan through finals.'
 
-  const markPrePaywallSeen = () => {
-    try { window.sessionStorage.setItem(PREPAYWALL_SESSION_KEY, '1') } catch {}
-  }
-  // The pre-paywall's final CTA goes straight to Stripe for the 7-day Pro trial.
-  // Keep the modal mounted while the session is created so the user sees the
-  // loading state and any error, instead of being dropped onto the plan grid.
-  const handlePrePaywallStartTrial = () => {
-    markPrePaywallSeen()
-    handleStartTrial()
-  }
-  const handlePrePaywallDismiss = () => {
-    markPrePaywallSeen()
-    setShowPrePaywall(false)
-  }
-
-  // ── Shared backdrop/modal wrapper constants ──────────────────────────────────
-  const BACKDROP = { position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.45)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', zIndex: 1000, padding: '16px', overflowY: 'auto' }
-  const BACKDROP_A11Y = { role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Upgrade plan' }
-  const MODAL_BASE = { background: '#fff', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '22px', padding: '32px', width: '100%', boxShadow: '0 24px 64px rgba(0,0,0,0.12)', margin: 'auto', position: 'relative' }
-  const CLOSE_BTN = { position: 'absolute', top: 16, right: 16, background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)', borderRadius: '8px', color: '#9B9B9B', cursor: 'pointer', width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }
-  const CloseX = () => <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
-  const Checkmark = ({ color = '#059669' }) => <svg width="14" height="14" fill="none" stroke={color} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M5 13l4 4L19 7" /></svg>
-
-  // ── Feature 1: Stats screen (trial-expired users) ────────────────────────────
-  if (screen === 'stats') {
-    const aiUsed = getFeatureUsage('aiTutor')?.count ?? 0
-    const stats = [
-      sessionsCompleted > 0 ? { n: sessionsCompleted, label: sessionsCompleted === 1 ? 'session completed' : 'sessions completed', color: '#3B61C4', bg: 'rgba(59,97,196,0.08)', border: 'rgba(59,97,196,0.18)' } : null,
-      aiUsed > 0 ? { n: aiUsed, label: aiUsed === 1 ? 'AI question answered' : 'AI questions answered', color: '#3B61C4', bg: 'rgba(59,97,196,0.08)', border: 'rgba(59,97,196,0.18)' } : null,
-      coursesCount > 0 ? { n: coursesCount, label: coursesCount === 1 ? 'course set up' : 'courses set up', color: '#059669', bg: 'rgba(5,150,105,0.08)', border: 'rgba(5,150,105,0.18)' } : null,
-    ].filter(Boolean)
-    return (
-      <>
-        <div {...BACKDROP_A11Y} style={BACKDROP} onClick={e => { if (e.target === e.currentTarget) handleDismiss('backdrop') }}>
-          <div className="pw-modal" style={{ ...MODAL_BASE, maxWidth: 480 }}>
-            <button onClick={() => handleDismiss('close_button')} style={CLOSE_BTN} aria-label="Close"><CloseX /></button>
-            <div style={{ textAlign: 'center', marginBottom: 24 }}>
-              <div style={{ width: 56, height: 56, background: '#3B61C4', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-                <svg width="26" height="26" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-              </div>
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(234,88,12,0.08)', border: '1px solid rgba(234,88,12,0.2)', borderRadius: 999, padding: '3px 10px', fontSize: '0.68rem', fontWeight: 800, color: '#EA580C', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 12 }}>
-                Trial ended
-              </div>
-              <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 8px', letterSpacing: '-0.4px' }}>Don't lose your work.</h2>
-              <p style={{ fontSize: '0.875rem', color: '#6B6B6B', margin: 0, lineHeight: 1.5 }}>Here's what you built during your trial:</p>
-            </div>
-            {stats.length > 0 ? (
-              <div style={{ display: 'grid', gridTemplateColumns: `repeat(${stats.length}, 1fr)`, gap: 10, marginBottom: 20 }}>
-                {stats.map(s => (
-                  <div key={s.label} style={{ background: s.bg, border: `1px solid ${s.border}`, borderRadius: 14, padding: '18px 10px', textAlign: 'center' }}>
-                    <div style={{ fontSize: 34, fontWeight: 800, color: s.color, letterSpacing: '-0.02em', lineHeight: 1 }}>{s.n}</div>
-                    <div style={{ fontSize: 11, color: '#6B6B6B', fontWeight: 600, marginTop: 6, lineHeight: 1.3 }}>{s.label}</div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div style={{ background: '#F7F8FA', borderRadius: 14, padding: 16, marginBottom: 20, textAlign: 'center', fontSize: '0.85rem', color: '#6B6B6B' }}>
-                Your courses and study plan are saved and ready when you upgrade.
-              </div>
-            )}
-            <p style={{ fontSize: '0.875rem', color: '#6B6B6B', margin: '0 0 20px', lineHeight: 1.55, textAlign: 'center' }}>
-              Upgrade to keep full access. Your AI tutor, focus sessions, and everything you set up are still here.
-            </p>
-            <button onClick={() => setScreen('plans')} style={{ width: '100%', padding: '14px', background: '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: 'pointer', letterSpacing: '-0.01em', marginBottom: 10, transition: 'opacity 0.15s' }} onMouseEnter={e => { e.currentTarget.style.opacity = '0.88' }} onMouseLeave={e => { e.currentTarget.style.opacity = '1' }}>
-              Keep everything →
-            </button>
-            <button onClick={() => handleDismiss('stats_skip')} style={{ width: '100%', background: 'none', border: 'none', padding: '8px', color: '#9B9B9B', fontSize: '0.82rem', cursor: 'pointer', fontFamily: 'inherit' }}>
-              Not now
-            </button>
-          </div>
-        </div>
-        <PaywallExitGift open={exitGiftOpen} trigger={trigger} onDismiss={handleGiftDismiss} />
-        <PrePaywall open={showPrePaywall} trigger={trigger} onStartTrial={handlePrePaywallStartTrial} onDismiss={handlePrePaywallDismiss} trialLoading={trialLoading} trialError={trialError} />
-      </>
-    )
-  }
-
-  // ── Feature 5: Commitment question (free users who've already seen PrePaywall) ─
-  if (screen === 'commitment') {
-    const question = primaryCourseName
-      ? `Still studying for ${primaryCourseName}?`
-      : 'Still working toward your study goals?'
-    return (
-      <>
-        <div {...BACKDROP_A11Y} style={BACKDROP} onClick={e => { if (e.target === e.currentTarget) handleDismiss('backdrop') }}>
-          <div className="pw-modal" style={{ ...MODAL_BASE, maxWidth: 420, textAlign: 'center' }}>
-            <button onClick={() => handleDismiss('close_button')} style={CLOSE_BTN} aria-label="Close"><CloseX /></button>
-            <div style={{ width: 60, height: 60, background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.18)', borderRadius: 18, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
-              <svg width="28" height="28" fill="none" stroke="#3B61C4" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <circle cx="12" cy="12" r="10" /><circle cx="12" cy="12" r="6" /><circle cx="12" cy="12" r="2" />
-              </svg>
-            </div>
-            <h2 style={{ fontSize: '1.45rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 10px', letterSpacing: '-0.4px', lineHeight: 1.2 }}>{question}</h2>
-            <p style={{ fontSize: '0.875rem', color: '#6B6B6B', margin: '0 0 28px', lineHeight: 1.55 }}>
-              {showTrialCard
-                ? 'Your study plan is still running. Unlock everything - AI tutor, unlimited sessions, and your full schedule - free for 7 days.'
-                : 'Your study plan is still running. Upgrade to keep your AI tutor, unlimited focus sessions, and full schedule. Everything you need to finish strong.'}
-            </p>
-            <button
-              onClick={() => {
-                track('commitment_yes', { trigger_feature: trigger, trial_eligible: showTrialCard })
-                if (showTrialCard) { handleStartTrial() } else { setScreen('plans') }
-              }}
-              style={{ width: '100%', padding: '14px', background: '#3B61C4', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: trialLoading ? 'not-allowed' : 'pointer', letterSpacing: '-0.01em', marginBottom: 10, transition: 'opacity 0.15s', opacity: trialLoading ? 0.75 : 1 }}
-              onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.opacity = '0.88' }} onMouseLeave={e => { e.currentTarget.style.opacity = trialLoading ? '0.75' : '1' }}
-            >
-              {trialLoading ? 'Loading…' : showTrialCard ? 'Start free 7-day trial →' : 'Yes, keep going →'}
-            </button>
-            {showTrialCard && (
-              <p style={{ fontSize: '0.72rem', color: '#9B9B9B', margin: '-4px 0 10px' }}>7-day free trial · Cancel anytime</p>
-            )}
-            {trialError && (
-              <p style={{ fontSize: '0.78rem', color: '#EF4444', margin: '0 0 8px' }}>{trialError}</p>
-            )}
-            {showTrialCard && (
-              <button onClick={() => { track('commitment_see_plans', { trigger_feature: trigger }); setScreen('plans') }} style={{ width: '100%', background: 'none', border: 'none', padding: '6px', color: '#9B9B9B', fontSize: '0.8rem', cursor: 'pointer', fontFamily: 'inherit', marginBottom: 4 }}>
-                See all plans instead
-              </button>
-            )}
-            <button onClick={() => { track('commitment_no', { trigger_feature: trigger }); handleDismiss('commitment_no') }} style={{ width: '100%', background: 'none', border: 'none', padding: '8px', color: '#C0C0C0', fontSize: '0.78rem', cursor: 'pointer', fontFamily: 'inherit' }}>
-              Not right now
-            </button>
-          </div>
-        </div>
-        <PaywallExitGift open={exitGiftOpen} trigger={trigger} onDismiss={handleGiftDismiss} />
-        <PrePaywall open={showPrePaywall} trigger={trigger} onStartTrial={handlePrePaywallStartTrial} onDismiss={handlePrePaywallDismiss} trialLoading={trialLoading} trialError={trialError} />
-      </>
-    )
-  }
-
-  // ── Feature 3: Trust interstitial (before Stripe checkout) ───────────────────
-  if (screen === 'trust') {
-    const plan = PLANS[pendingPlan?.planId]
-    const price = plan?.prices?.[pendingPlan?.billingPeriod]
-    const CardBadge = ({ label, bg, color = '#fff' }) => (
-      <div style={{ background: bg, borderRadius: 6, padding: '5px 9px', fontSize: '10px', fontWeight: 900, color, fontFamily: 'Arial, sans-serif', letterSpacing: '0.5px', display: 'flex', alignItems: 'center', gap: 3 }}>{label}</div>
-    )
-    return (
-      <>
-        <div {...BACKDROP_A11Y} style={BACKDROP} onClick={e => { if (e.target === e.currentTarget) setScreen('plans') }}>
-          <div className="pw-modal" style={{ ...MODAL_BASE, maxWidth: 420 }}>
-            <button onClick={() => setScreen('plans')} style={{ position: 'absolute', top: 16, left: 16, background: 'none', border: 'none', color: '#9B9B9B', cursor: 'pointer', fontSize: '0.82rem', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4, padding: '4px 8px' }}>
-              <svg width="12" height="12" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24"><path d="M19 12H5m7-7l-7 7 7 7" /></svg>
-              Back
-            </button>
-            <div style={{ textAlign: 'center', paddingTop: 20, marginBottom: 20 }}>
-              <div style={{ width: 56, height: 56, background: 'rgba(5,150,105,0.08)', border: '1px solid rgba(5,150,105,0.2)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 14px' }}>
-                <svg width="24" height="24" fill="none" stroke="#059669" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                  <rect x="3" y="11" width="18" height="11" rx="2" ry="2" /><path d="M7 11V7a5 5 0 0110 0v4" />
-                </svg>
-              </div>
-              <h2 style={{ fontSize: '1.25rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 4px', letterSpacing: '-0.4px' }}>Secure checkout</h2>
-              <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: 0 }}>Powered by Stripe, trusted by millions of businesses</p>
-            </div>
-            <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: 8, marginBottom: 20 }}>
-              <CardBadge label="VISA" bg="#1A1F71" />
-              <div style={{ background: '#1a1a1a', borderRadius: 6, padding: '5px 8px', display: 'flex', alignItems: 'center', gap: 0 }}>
-                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#EB001B' }} />
-                <div style={{ width: 16, height: 16, borderRadius: '50%', background: '#F79E1B', marginLeft: -7, opacity: 0.9 }} />
-              </div>
-              <CardBadge label="AMEX" bg="#007BC1" />
-              <div style={{ background: '#000', borderRadius: 6, padding: '5px 8px', display: 'flex', alignItems: 'center', gap: 3 }}>
-                <svg width="11" height="13" viewBox="0 0 814 1000" fill="white"><path d="M788.1 340.9c-5.8 4.5-108.2 62.2-108.2 190.5 0 148.4 130.3 200.9 134.2 202.2-.6 3.2-20.7 71.9-68.7 141.9-42.8 61.6-87.5 123.1-155.5 123.1s-85.5-39.5-164-39.5c-76 0-103.7 40.8-165.9 40.8s-105-42.8-170.3-135.8C63 465.9 50.9 364.3 50.9 264.2c0-154.9 101-236.8 199.2-236.8 74.3 0 136.3 47.3 183.3 47.3 44.3 0 114.3-50.2 196.6-50.2 30.5 0 109.3 2.6 166.3 74.1zM506.7 85.2C516.3 72.4 527 51.5 527 30.6c0-3.2-.3-6.5-.9-9.7-21.7 2.6-47.8 14.8-64 32.8-10.5 11.6-22.9 31.5-22.9 54.2 0 3.5.6 7 .9 8.1 1.3.3 3.2.6 5.2.6 19.7 0 44.3-12.3 61.4-31.4z" /></svg>
-                <span style={{ fontSize: '9px', fontWeight: 700, color: '#fff', fontFamily: 'Arial, sans-serif' }}>Pay</span>
-              </div>
-            </div>
-            <div style={{ background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 14, padding: '14px 16px', marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 10 }}>
-              {['256-bit SSL encryption on all data', 'Cancel anytime in 2 clicks from your account', 'No surprise charges. Full control over your plan.'].map(item => (
-                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: 10, fontSize: '0.82rem', color: '#1A1A1A' }}>
-                  <Checkmark />
-                  {item}
-                </div>
-              ))}
-            </div>
-            {plan && (
-              <div style={{ background: 'linear-gradient(135deg, rgba(59,97,196,0.06), rgba(124,58,237,0.06))', border: '1.5px solid rgba(59,97,196,0.15)', borderRadius: 14, padding: '14px 16px', marginBottom: 20, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <div>
-                  <div style={{ fontSize: '0.7rem', fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.5px', marginBottom: 3 }}>Starting plan</div>
-                  <div style={{ fontSize: '1rem', fontWeight: 800, color: '#1A1A1A', letterSpacing: '-0.2px' }}>{plan.name}</div>
-                </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontSize: '1.1rem', fontWeight: 800, color: '#3B61C4' }}>{price}</div>
-                  <div style={{ fontSize: '0.68rem', color: '#9B9B9B', fontWeight: 500 }}>billed {pendingPlan.billingPeriod}</div>
-                </div>
-              </div>
-            )}
-            <button
-              onClick={handleConfirmCheckout}
-              disabled={!!loading}
-              style={{ width: '100%', padding: '14px', background: '#059669', border: 'none', borderRadius: 12, color: '#fff', fontSize: '1rem', fontWeight: 800, cursor: loading ? 'not-allowed' : 'pointer', letterSpacing: '-0.01em', marginBottom: 10, opacity: loading ? 0.7 : 1, transition: 'opacity 0.15s' }}
-              onMouseEnter={e => { if (!loading) e.currentTarget.style.opacity = '0.88' }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = loading ? '0.7' : '1' }}
-            >
-              {loading ? 'Loading…' : 'Continue to checkout →'}
-            </button>
-            {planError && <p style={{ textAlign: 'center', color: '#DC2626', fontSize: '0.78rem', margin: '0 0 8px', fontWeight: 500 }}>{planError}</p>}
-            <p style={{ textAlign: 'center', fontSize: '0.72rem', color: '#9B9B9B', margin: 0 }}>
-              You'll enter payment details on Stripe's secure checkout page
-            </p>
-          </div>
-        </div>
-        <PaywallExitGift open={exitGiftOpen} trigger={trigger} onDismiss={handleGiftDismiss} />
-        <PrePaywall open={showPrePaywall} trigger={trigger} onStartTrial={handlePrePaywallStartTrial} onDismiss={handlePrePaywallDismiss} trialLoading={trialLoading} trialError={trialError} />
-      </>
-    )
-  }
-
-  return (
+  return createPortal(
     <>
-    <div
-      style={{
-        position: 'fixed', inset: 0,
-        background: 'rgba(0,0,0,0.45)',
-        backdropFilter: 'blur(8px)',
-        display: 'flex', alignItems: 'flex-start', justifyContent: 'center',
-        zIndex: 1000, padding: '16px',
-        overflowY: 'auto',
-      }}
-      onClick={e => { if (e.target === e.currentTarget) handleDismiss('backdrop') }}
-    >
-      <style>{`
-        @keyframes pw-in { from { opacity: 0; transform: translateY(10px) scale(0.98); } to { opacity: 1; transform: translateY(0) scale(1); } }
-        .pw-modal { animation: pw-in 260ms cubic-bezier(0.16,1,0.3,1) both; }
-        @media (max-width: 600px) {
-          .pw-modal { padding: 20px 16px !important; border-radius: 16px !important; }
-          .pw-cards { grid-template-columns: 1fr !important; }
-        }
-      `}</style>
-      <div className="pw-modal" style={{
-        background: '#fff',
-        border: '1px solid rgba(0,0,0,0.08)',
-        borderRadius: '22px',
-        padding: '32px',
-        maxWidth: '600px',
-        width: '100%',
-        boxShadow: '0 24px 64px rgba(0,0,0,0.12)',
-        margin: 'auto',
-      }}>
-
-        {/* ── Header ── */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '22px' }}>
-          <div>
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: '6px',
-              background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)',
-              borderRadius: '999px', padding: '4px 12px',
-              fontSize: '0.72rem', fontWeight: 700, color: '#3B61C4',
-              textTransform: 'uppercase', letterSpacing: '0.4px',
-              marginBottom: '10px',
-            }}>
-              <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-              {msg.tag}
-            </div>
-            {urgentExamDays != null && urgentExamDays <= 7 && (
-              <div style={{ display: 'inline-flex', alignItems: 'center', gap: 5, background: 'rgba(220,38,38,0.08)', border: '1px solid rgba(220,38,38,0.22)', borderRadius: 999, padding: '3px 10px', fontSize: '0.7rem', fontWeight: 800, color: '#DC2626', letterSpacing: '0.3px', marginBottom: 8 }}>
-                {urgentExamDays <= 1 ? 'Exam tomorrow' : `${urgentExamDays} days until your exam`}
-              </div>
-            )}
-            <h2 style={{ fontSize: '1.3rem', fontWeight: 800, letterSpacing: '-0.4px', color: '#1A1A1A', margin: '0 0 6px' }}>
-              {msg.title}
-            </h2>
-            <p style={{ color: '#6B6B6B', fontSize: '0.875rem', lineHeight: 1.55, margin: '0 0 4px', maxWidth: 420 }}>
-              {urgentExamDays != null && urgentExamDays <= 7
-                ? `You have ${urgentExamDays <= 1 ? 'one day' : `${urgentExamDays} days`} left. ${msg.body}`
-                : msg.body}
-            </p>
-            {!isUnlimitedTrigger && (
-              <p style={{ color: '#9B9B9B', fontSize: '0.78rem', margin: 0 }}>
-                7-day Pro trial · $2.99/wk after · Cancel anytime
-              </p>
-            )}
-          </div>
-          <button
-            onClick={() => handleDismiss('close_button')}
-            style={{
-              background: 'rgba(0,0,0,0.05)', border: '1px solid rgba(0,0,0,0.08)',
-              borderRadius: '8px', color: '#9B9B9B', cursor: 'pointer',
-              width: '32px', height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              flexShrink: 0, marginLeft: '16px', fontSize: '14px',
-            }}
-            aria-label="Close"
-          ><svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg></button>
-        </div>
-
-        {/* ── Social proof bar ── */}
-        <div style={{
-          background: '#F7F8FA', border: '1px solid rgba(0,0,0,0.07)',
-          borderRadius: '12px', padding: '12px 16px', marginBottom: '18px',
-          display: 'flex', flexDirection: 'column', gap: '10px',
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            {/* Star rating */}
-            <div style={{ display: 'flex', gap: '2px' }}>
-              {[1,2,3,4,5].map(s => (
-                <svg key={s} width="12" height="12" viewBox="0 0 24 24" fill="#FBBF24"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-              ))}
-            </div>
-            <span style={{ fontSize: '0.72rem', fontWeight: 700, color: '#6B6B6B' }}>
-              Trusted by 500+ students
-            </span>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-            <svg style={{ width: 14, height: 14, color: '#3B61C4', flexShrink: 0, marginTop: 3 }} fill="currentColor" viewBox="0 0 24 24">
-              <path d="M14.017 21v-7.391c0-5.704 3.731-9.57 8.983-10.609l.995 2.151c-2.432.917-3.995 3.638-3.995 5.849h4v10h-9.983zm-14.017 0v-7.391c0-5.704 3.748-9.57 9-10.609l.996 2.151c-2.433.917-3.996 3.638-3.996 5.849h3.983v10h-9.983z" />
+      <style>{CSS}</style>
+      <div
+        className={`pw-scrim${closing ? ' is-closing' : ''}`}
+        onClick={(e) => { if (e.target === e.currentTarget) dismiss('scrim') }}
+      >
+        <div
+          className={`pw-sheet${closing ? ' is-closing' : ''}`}
+          role="dialog"
+          aria-modal="true"
+          aria-label={headline}
+          tabIndex={-1}
+          ref={sheetRef}
+        >
+          <button className="pw-x" onClick={() => dismiss('close')} aria-label="Close">
+            <svg width="15" height="15" viewBox="0 0 15 15" aria-hidden="true">
+              <path d="M1 1l13 13M14 1L1 14" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
             </svg>
-            <div style={{ flex: 1 }}>
-              <p style={{ margin: '0 0 4px', fontSize: '0.82rem', color: '#1A1A1A', lineHeight: 1.5, fontStyle: 'italic' }}>
-                "{t.quote}"
-              </p>
-              <p style={{ margin: 0, fontSize: '0.72rem', color: '#9B9B9B', fontWeight: 600 }}>
-                {t.name} · {t.detail}
-              </p>
+          </button>
+
+          <header className="pw-head">
+            <div className="pw-brand">
+              <img src="/favicon.png" alt="" width="22" height="22" />
+              <span>StudyEdge AI</span>
             </div>
-            {/* Dots */}
-            <div style={{ display: 'flex', gap: 4, flexShrink: 0, marginTop: 4 }}>
-              {TESTIMONIALS.map((t, i) => (
+            <h2 className="pw-title">{headline}</h2>
+            <p className="pw-sub">{sub}</p>
+          </header>
+
+          <div className="pw-togwrap">
+            {p.savings && <span className="pw-save">{p.savings}</span>}
+            <div className="pw-tog" role="tablist" aria-label="Billing period">
+              {['monthly', 'yearly'].map((period) => (
                 <button
-                  key={i}
-                  onClick={() => setTestimonialIdx(i)}
-                  aria-label={`Show testimonial from ${t.name}`}
-                  style={{
-                    width: i === testimonialIdx ? 14 : 5, height: 5, borderRadius: 3,
-                    background: i === testimonialIdx ? '#3B61C4' : 'rgba(0,0,0,0.12)',
-                    border: 'none', cursor: 'pointer', padding: 0, transition: 'all 0.2s',
-                  }}
-                />
+                  key={period}
+                  role="tab"
+                  aria-selected={billingPeriod === period}
+                  className={billingPeriod === period ? 'on' : ''}
+                  onClick={() => { setBillingPeriod(period); track('pricing_billing_toggle', { billing_period: period, trigger }) }}
+                >
+                  {period === 'monthly' ? 'Monthly' : 'Annual'}
+                </button>
               ))}
             </div>
           </div>
-        </div>
 
-        {/* ── Win-Back Card (trial used, now back on free) ── */}
-        {showWinBackCard && (
-          <div style={{
-            background: 'linear-gradient(135deg, #fff8f0, #fff4e8)',
-            border: '1.5px solid rgba(234,88,12,0.2)',
-            borderRadius: '16px',
-            padding: '20px',
-            marginBottom: '16px',
-          }}>
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: '5px',
-              background: 'rgba(234,88,12,0.08)', border: '1px solid rgba(234,88,12,0.2)',
-              borderRadius: '999px', padding: '3px 10px',
-              fontSize: '0.68rem', fontWeight: 800, color: '#EA580C',
-              textTransform: 'uppercase', letterSpacing: '0.5px',
-              marginBottom: '10px',
-            }}>
-              Your trial ended
-            </div>
-            <p style={{ fontSize: '0.9rem', fontWeight: 700, color: '#1A1A1A', margin: '0 0 6px', letterSpacing: '-0.2px' }}>
-              Here's what you lost when your trial ended:
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '5px', marginBottom: '14px' }}>
-              {['Unlimited focus sessions (30-min cap is back)', '100 AI actions/month (you now have 5)', '5 courses (you\'re back to 1)', 'Session Blueprints, Brain Dumps, Exam Rescues'].map(item => (
-                <div key={item} style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '0.8rem', color: '#6B6B6B' }}>
-                  <span style={{ color: '#EA580C', fontSize: '0.75rem' }}>✕</span>
-                  {item}
+          {error && <p className="pw-err" role="alert">{error}</p>}
+
+          <div className="pw-cards">
+            <Card
+              id="pro"
+              featured
+              name="Pro"
+              badge="Most popular"
+              price={p.pro.price}
+              unit={p.pro.unit}
+              save={p.pro.save}
+              desc="Everything StudyEdge builds, across 5 courses"
+              cta={proOffersTrial ? 'Start 7-day free trial' : 'Get Pro'}
+              fine={proOffersTrial
+                ? `Free for 7 days, then ${p.pro.price}${p.pro.unit} · Cancel anytime`
+                : `${p.pro.note} · Cancel anytime`}
+              featuresLabel="Everything in Free, plus the whole system:"
+              features={PRO_FEATURES}
+              loading={loading === 'pro'}
+              disabled={!!loading}
+              onGo={() => go('pro')}
+              expanded={expanded}
+              setExpanded={setExpanded}
+            />
+            <Card
+              id="unlimited"
+              name="Unlimited"
+              price={p.unlimited.price}
+              unit={p.unlimited.unit}
+              save={p.unlimited.save}
+              desc="No caps on anything"
+              cta="Get Unlimited"
+              fine={`${p.unlimited.note} · Cancel anytime`}
+              featuresLabel="Everything in Pro, plus:"
+              features={UNLIMITED_FEATURES}
+              loading={loading === 'unlimited'}
+              disabled={!!loading}
+              onGo={() => go('unlimited')}
+              expanded={expanded}
+              setExpanded={setExpanded}
+            />
+          </div>
+
+          {/* No dismissal trickery: one visible way out, and one question. */}
+          <footer className="pw-foot">
+            {askReason ? (
+              <form
+                className="pw-reason"
+                onSubmit={(e) => { e.preventDefault(); dismiss('reason_given') }}
+              >
+                <label htmlFor="pw-why">What stopped you?</label>
+                <div>
+                  <input
+                    id="pw-why"
+                    value={reason}
+                    onChange={(e) => setReason(e.target.value)}
+                    placeholder="Too expensive, not sure yet, something missing…"
+                    autoFocus
+                    maxLength={300}
+                  />
+                  <button type="submit" className="pw-send">Send</button>
                 </div>
-              ))}
-            </div>
-            <p style={{ fontSize: '0.78rem', color: '#6B6B6B', margin: '0 0 12px' }}>
-              Get it all back from just $1.35/week on the annual plan. Cancel with one tap.
-            </p>
-          </div>
-        )}
-
-        {/* ── Free Trial Card (shown when trial not yet used) ── */}
-        {showTrialCard && (
-          <div style={{
-            background: 'linear-gradient(135deg, #e8f4fd, #f0f9f4)',
-            border: '1.5px solid rgba(59,130,246,0.25)',
-            borderRadius: '16px',
-            padding: '22px 20px',
-            marginBottom: '16px',
-            textAlign: 'center',
-          }}>
-            <div style={{
-              display: 'inline-flex', alignItems: 'center', gap: '6px',
-              background: 'rgba(16,185,129,0.10)', border: '1px solid rgba(16,185,129,0.25)',
-              borderRadius: '999px', padding: '3px 10px',
-              fontSize: '0.68rem', fontWeight: 800, color: '#059669',
-              textTransform: 'uppercase', letterSpacing: '0.5px',
-              marginBottom: '10px',
-            }}>
-              7-day free trial · Cancel anytime
-            </div>
-            <h3 style={{ fontSize: '1.15rem', fontWeight: 800, color: '#1A1A1A', margin: '0 0 6px', letterSpacing: '-0.3px' }}>
-              Try Pro, free for 7 days.
-            </h3>
-            <p style={{ fontSize: '0.82rem', color: '#6B6B6B', margin: '0 0 14px', lineHeight: 1.5 }}>
-              Full access starting today. We'll email you the day before your trial ends so nothing catches you off guard.
-            </p>
-            <div style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-              background: 'rgba(5,150,105,0.08)', border: '1px solid rgba(5,150,105,0.22)',
-              borderRadius: 10, padding: '8px 12px', marginBottom: 14,
-              fontSize: '0.82rem', fontWeight: 700, color: '#047857',
-            }}>
-              <svg width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
-                <path d="M5 13l4 4L19 7" />
-              </svg>
-              Card required · Cancel anytime
-            </div>
-            {trialError && (
-              <p style={{ fontSize: '0.78rem', color: '#EF4444', margin: '0 0 10px' }}>{trialError}</p>
+                <button type="button" className="pw-skip" onClick={() => dismiss('reason_skipped')}>
+                  Skip
+                </button>
+              </form>
+            ) : (
+              <button className="pw-later" onClick={() => setAskReason(true)}>Maybe later</button>
             )}
-            <button
-              onClick={handleStartTrial}
-              disabled={trialLoading}
-              style={{
-                width: '100%', padding: '13px',
-                background: '#3B61C4',
-                border: 'none', borderRadius: '10px',
-                color: '#fff', fontFamily: 'inherit',
-                fontSize: '0.95rem', fontWeight: 800,
-                cursor: trialLoading ? 'not-allowed' : 'pointer',
-                opacity: trialLoading ? 0.75 : 1,
-                letterSpacing: '-0.2px',
-                transition: 'opacity 0.15s',
-              }}
-              onMouseEnter={e => { if (!trialLoading) e.currentTarget.style.opacity = '0.88' }}
-              onMouseLeave={e => { e.currentTarget.style.opacity = trialLoading ? '0.75' : '1' }}
-            >
-              {trialLoading ? 'Loading…' : 'Continue - free for 7 days'}
-            </button>
-            <p style={{ margin: '10px 0 0', fontSize: '0.72rem', color: '#9B9B9B' }}>
-              7-day free trial · Cancel anytime
-            </p>
-          </div>
-        )}
-
-        {/* ── "Or choose a plan" divider when trial card is shown ── */}
-        {showTrialCard && (
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '14px' }}>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(0,0,0,0.07)' }} />
-            <span style={{ fontSize: '0.72rem', color: '#C0C0C0', fontWeight: 600, whiteSpace: 'nowrap' }}>
-              or choose a paid plan
-            </span>
-            <div style={{ flex: 1, height: '1px', background: 'rgba(0,0,0,0.07)' }} />
-          </div>
-        )}
-
-        {/* ── Billing period toggle ── */}
-        <div style={{
-          display: 'flex', gap: '4px',
-          background: '#F7F8FA',
-          border: '1px solid rgba(0,0,0,0.07)',
-          borderRadius: '12px', padding: '4px',
-          marginBottom: '14px',
-        }}>
-          {BILLING_PERIODS.map(bp => {
-            const isActive = billingPeriod === bp.id
-            return (
-              <button
-                key={bp.id}
-                onClick={() => setBillingPeriod(bp.id)}
-                style={{
-                  flex: 1, padding: '8px 12px', borderRadius: '9px',
-                  border: bp.best && !isActive ? '1px solid rgba(5,150,105,0.35)' : 'none',
-                  cursor: 'pointer',
-                  background: isActive ? (bp.best ? 'linear-gradient(135deg, #ecfdf5, #d1fae5)' : '#fff') : 'transparent',
-                  color: isActive ? '#1A1A1A' : '#9B9B9B',
-                  fontFamily: 'inherit', fontSize: '0.82rem', fontWeight: 600,
-                  transition: 'all 0.15s',
-                  display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '2px',
-                  boxShadow: isActive ? '0 1px 4px rgba(0,0,0,0.08)' : 'none',
-                }}
-              >
-                <span>{bp.label}</span>
-                {bp.badge && (
-                  <span style={{ fontSize: '0.65rem', fontWeight: 700, color: '#059669', letterSpacing: '0.3px' }}>
-                    {bp.badge}
-                  </span>
-                )}
-              </button>
-            )
-          })}
+          </footer>
         </div>
-
-        {/* ── Plan cards ── */}
-        <div className="pw-cards" style={{ display: 'grid', gridTemplateColumns: visiblePlanIds.length === 1 ? '1fr' : '1fr 1fr', gap: '12px', marginBottom: '18px' }}>
-          {Object.entries(PLANS).filter(([planId]) => visiblePlanIds.includes(planId)).map(([planId, plan]) => {
-            // Unlimited is always primary — 100% of paying users chose Unlimited.
-            // Pro shown as the lower-commitment entry option.
-            const isPrimary = planId === 'unlimited'
-            const primaryColor = planId === 'pro' ? '#3B61C4' : '#059669'
-            const primaryBorder = planId === 'pro' ? 'rgba(59,97,196,0.3)' : 'rgba(5,150,105,0.3)'
-            return (
-            <div
-              key={planId}
-              style={{
-                background: '#fff',
-                border: `1.5px solid ${primaryBorder}`,
-                borderRadius: '16px', padding: '20px',
-                display: 'flex', flexDirection: 'column', gap: '14px',
-                position: 'relative', overflow: 'hidden',
-                boxShadow: isPrimary ? '0 8px 24px rgba(0,0,0,0.06)' : 'none',
-              }}
-            >
-              {/* Most popular / Required badge — always on Unlimited */}
-              {isPrimary && visiblePlanIds.length > 1 && (
-                <div style={{
-                  position: 'absolute', top: 12, right: 12,
-                  fontSize: '0.62rem', fontWeight: 800, color: '#fff',
-                  background: 'linear-gradient(135deg, #10B981, #059669)',
-                  borderRadius: '999px', padding: '3px 9px',
-                  textTransform: 'uppercase', letterSpacing: '0.4px',
-                }}>
-                  {isUnlimitedTrigger ? 'Required' : 'Most popular'}
-                </div>
-              )}
-
-              {/* Plan name + price */}
-              <div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '6px' }}>
-                  <div style={{ fontSize: '0.75rem', fontWeight: 700, color: plan.color, textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                    {plan.name}
-                  </div>
-                  {(() => {
-                    const savings = billingPeriod === 'yearly' ? plan.annualSavingsBadge
-                                  : billingPeriod === 'monthly' ? plan.monthlySavingsBadge
-                                  : null
-                    if (!savings) return null
-                    return (
-                      <span style={{
-                        fontSize: '0.62rem', fontWeight: 800, color: '#059669',
-                        background: 'rgba(5,150,105,0.10)', border: '1px solid rgba(5,150,105,0.25)',
-                        borderRadius: '999px', padding: '2px 7px', letterSpacing: '0.3px',
-                      }}>
-                        {savings}
-                      </span>
-                    )
-                  })()}
-                </div>
-                <div style={{ fontSize: '1.3rem', fontWeight: 800, color: '#1A1A1A', letterSpacing: '-0.5px' }}>
-                  {plan.prices[billingPeriod]}
-                </div>
-                {plan.subPrices?.[billingPeriod] && (
-                  <div style={{ fontSize: '0.7rem', color: '#6B6B6B', marginTop: '3px', fontWeight: 600 }}>
-                    {plan.subPrices[billingPeriod]}
-                  </div>
-                )}
-                {/* The 7-day free trial is Pro-only, so the trial line belongs on
-                    the Pro card. Unlimited is a direct paid upgrade, no trial. */}
-                {planId === TRIAL_PLAN && !trialUsed && !trialActive && (
-                  <div style={{ fontSize: '0.68rem', color: '#059669', marginTop: '4px', fontWeight: 700 }}>
-                    Card required · 7-day trial · $2.99/wk after
-                  </div>
-                )}
-              </div>
-
-              {/* Features */}
-              <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '7px', margin: 0, padding: 0, flex: 1 }}>
-                {plan.features.map(f => (
-                  <li key={f} style={{ display: 'flex', alignItems: 'center', gap: '7px', fontSize: '0.81rem', color: '#1A1A1A' }}>
-                    <svg width="12" height="12" fill="none" stroke={plan.color} viewBox="0 0 24 24" style={{ flexShrink: 0 }}>
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                    </svg>
-                    {f}
-                  </li>
-                ))}
-              </ul>
-
-              {/* CTA */}
-              <button
-                onClick={() => handleSelectPlan(planId)}
-                disabled={loading === planId}
-                style={{
-                  width: '100%', padding: '12px',
-                  background: isPrimary ? primaryColor : 'rgba(0,0,0,0.04)',
-                  border: isPrimary ? 'none' : '1px solid rgba(0,0,0,0.10)',
-                  borderRadius: '10px',
-                  color: isPrimary ? 'white' : '#1A1A1A',
-                  fontFamily: 'inherit', fontSize: '0.875rem', fontWeight: 700,
-                  cursor: loading === planId ? 'not-allowed' : 'pointer',
-                  opacity: loading === planId ? 0.7 : 1,
-                  transition: 'opacity 0.15s',
-                }}
-                onMouseEnter={e => { if (loading !== planId) e.currentTarget.style.opacity = '0.88' }}
-                onMouseLeave={e => { e.currentTarget.style.opacity = loading === planId ? '0.7' : '1' }}
-              >
-                {loading === planId ? 'Loading...' : `Continue with ${plan.name} →`}
-              </button>
-            </div>
-            )
-          })}
-        </div>
-
-        {planError && (
-          <p style={{ textAlign: 'center', color: '#DC2626', fontSize: '0.78rem', margin: '0 0 8px', fontWeight: 500 }}>
-            {planError}
-          </p>
-        )}
-
-        {/* ── Social proof ticker ── */}
-        <div style={{ textAlign: 'center', marginBottom: 12 }}>
-          <p style={{ margin: 0, fontSize: '0.72rem', color: '#9B9B9B', transition: 'opacity 0.4s ease', display: 'inline-flex', alignItems: 'center', gap: 6 }}>
-            <svg width="10" height="10" viewBox="0 0 24 24" fill="#3B61C4" opacity="0.5"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
-            {SOCIAL_STATS[socialStatIdx]}
-          </p>
-        </div>
-
-        {/* ── Footer ── */}
-        <p style={{ textAlign: 'center', color: '#9B9B9B', fontSize: '0.75rem', margin: 0 }}>
-          Secure checkout via Stripe · Cancel with one tap · No hidden fees
-        </p>
       </div>
-    </div>
-
-    {/* Exit-intent gift — intercepts the first close for free users, offers
-        5 bonus AI actions + review ask, then closes the paywall for real. */}
-    <PaywallExitGift
-      open={exitGiftOpen}
-      trigger={trigger}
-      onDismiss={handleGiftDismiss}
-    />
-
-    {/* Pre-paywall value stack — the 3-screen pitch shown once per session
-        for eligible free users. Overlays the paywall (higher z-index) until
-        the user Continues or Skips. */}
-    <PrePaywall
-      open={showPrePaywall}
-      trigger={trigger}
-      onStartTrial={handlePrePaywallStartTrial}
-      onDismiss={handlePrePaywallDismiss}
-      trialLoading={trialLoading}
-      trialError={trialError}
-    />
-    </>
+    </>,
+    document.body
   )
 }
+
+function Card({
+  id, featured, name, badge, price, unit, save, desc, cta, fine,
+  featuresLabel, features, loading, disabled, onGo, expanded, setExpanded,
+}) {
+  return (
+    <section className={`pw-card${featured ? ' is-featured' : ''}`}>
+      {badge && <span className="pw-badge">{badge}</span>}
+      <p className="pw-name">{name}</p>
+      <p className="pw-price">
+        <span className="pw-amount">{price}</span>
+        <span className="pw-unit">{unit}</span>
+        {save && <span className="pw-pct">{save}</span>}
+      </p>
+      <p className="pw-desc">{desc}</p>
+
+      <button className="pw-cta" onClick={onGo} disabled={disabled}>
+        {loading ? <span className="pw-spin" aria-label="Loading" /> : cta}
+      </button>
+      <p className="pw-fine">{fine}</p>
+
+      <p className="pw-feath">
+        <svg width="13" height="13" viewBox="0 0 13 13" aria-hidden="true">
+          <path d="M1 6.8l3.4 3.4L12 2.6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+        {featuresLabel}
+      </p>
+      <ul className="pw-list">
+        {features.map(([label, detail], i) => {
+          const key = `${id}:${i}`
+          const open = expanded === key
+          return (
+            <li key={label}>
+              <button
+                className="pw-row"
+                aria-expanded={open}
+                onClick={() => setExpanded(open ? null : key)}
+              >
+                <span className="pw-plus" aria-hidden="true">{open ? '–' : '+'}</span>
+                <span>{label}</span>
+              </button>
+              {open && <p className="pw-detail">{detail}</p>}
+            </li>
+          )
+        })}
+      </ul>
+    </section>
+  )
+}
+
+const CSS = `
+.pw-scrim{
+  position:fixed; inset:0; z-index:2000;
+  display:flex; align-items:center; justify-content:center;
+  padding:24px 16px; overflow-y:auto;
+  background:rgba(12,14,24,.44);
+  -webkit-backdrop-filter:blur(20px) saturate(120%);
+  backdrop-filter:blur(20px) saturate(120%);
+  animation:pw-scrim-in .28s cubic-bezier(.32,.72,0,1) both;
+}
+.pw-scrim.is-closing{ animation:pw-scrim-in .18s cubic-bezier(.32,.72,0,1) reverse both; }
+@keyframes pw-scrim-in{ from{opacity:0} to{opacity:1} }
+
+/* Materialize: blur and scale move together, so it reads as a surface arriving
+   rather than an image fading up. */
+.pw-sheet{
+  position:relative; width:100%; max-width:760px;
+  background:${T.card}; color:${T.text};
+  border-radius:24px; padding:34px 30px 22px;
+  font-family:${SANS};
+  box-shadow:0 1px 2px rgba(16,20,40,.06), 0 28px 70px -24px rgba(16,20,40,.34);
+  animation:pw-sheet-in .38s cubic-bezier(.32,.72,0,1) both;
+  outline:none;
+}
+.pw-sheet.is-closing{ animation:pw-sheet-in .18s cubic-bezier(.32,.72,0,1) reverse both; }
+@keyframes pw-sheet-in{
+  from{ opacity:0; transform:translateY(10px) scale(.965); filter:blur(6px) }
+  to  { opacity:1; transform:none;                          filter:blur(0)  }
+}
+
+.pw-x{
+  position:absolute; top:16px; right:16px;
+  width:32px; height:32px; border-radius:999px;
+  display:grid; place-items:center;
+  background:transparent; border:none; cursor:pointer; color:${T.dim};
+  transition:background .16s ease, color .16s ease, transform .1s ease-out;
+}
+.pw-x:hover{ background:${T.neutralBg}; color:${T.text} }
+.pw-x:active{ transform:scale(.92) }
+
+.pw-head{ text-align:center; max-width:520px; margin:0 auto }
+.pw-brand{
+  display:inline-flex; align-items:center; gap:7px;
+  font-size:12.5px; font-weight:650; color:${T.muted};
+  letter-spacing:.01em; margin-bottom:14px;
+}
+.pw-brand img{ border-radius:5px; display:block }
+/* Large text wants negative tracking and tight leading. */
+.pw-title{
+  font-family:${SERIF}; font-weight:600;
+  font-size:clamp(25px,3.3vw,33px); line-height:1.08; letter-spacing:-.021em;
+  margin:0 0 9px; text-wrap:balance; color:${T.text};
+}
+.pw-sub{ margin:0; font-size:14.5px; line-height:1.5; color:${T.muted} }
+
+.pw-togwrap{ display:flex; flex-direction:column; align-items:center; margin:22px 0 20px }
+.pw-save{ font-size:12px; font-weight:650; color:${T.green}; margin-bottom:7px; letter-spacing:.01em }
+.pw-tog{ display:inline-flex; gap:3px; padding:4px; border-radius:999px; background:${T.neutralBg} }
+.pw-tog button{
+  padding:8px 20px; border-radius:999px; border:none; cursor:pointer;
+  font-family:inherit; font-size:13.5px; font-weight:640; color:${T.muted};
+  background:transparent; transition:color .18s ease, transform .1s ease-out;
+}
+.pw-tog button:active{ transform:scale(.97) }
+.pw-tog button.on{ background:${T.card}; color:${T.text}; box-shadow:0 1px 3px rgba(16,20,40,.12) }
+
+.pw-err{
+  margin:0 auto 14px; max-width:520px; text-align:center;
+  font-size:13px; color:${T.red}; background:${T.redBg};
+  padding:9px 14px; border-radius:10px;
+}
+
+.pw-cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); gap:14px }
+
+.pw-card{
+  position:relative; border-radius:18px; padding:24px 22px 20px;
+  border:1px solid ${T.border}; background:${T.card};
+}
+/* The featured card is brand blue, not a generic black slab. */
+.pw-card.is-featured{
+  border-color:transparent; color:#fff;
+  background:linear-gradient(168deg, ${T.blue} 0%, ${T.blueHov} 100%);
+  box-shadow:0 12px 34px -14px rgba(52,82,217,.55);
+}
+.pw-badge{
+  position:absolute; top:-10px; left:22px;
+  background:${T.card}; color:${T.blue};
+  font-size:10.5px; font-weight:750; letter-spacing:.035em; text-transform:uppercase;
+  padding:4px 9px; border-radius:6px; box-shadow:0 2px 8px rgba(16,20,40,.16);
+}
+.pw-name{ margin:0 0 10px; font-size:15px; font-weight:700; letter-spacing:-.005em }
+.pw-price{ margin:0; display:flex; align-items:baseline; gap:5px; flex-wrap:wrap }
+.pw-amount{ font-size:38px; font-weight:700; letter-spacing:-.032em; line-height:1; font-variant-numeric:tabular-nums }
+.pw-unit{ font-size:14px; font-weight:500; opacity:.62 }
+.pw-pct{
+  margin-left:2px; font-size:11px; font-weight:700; letter-spacing:.02em;
+  padding:3px 7px; border-radius:5px; background:${T.greenBg}; color:${T.green};
+}
+.pw-card.is-featured .pw-pct{ background:rgba(255,255,255,.18); color:#fff }
+.pw-desc{ margin:9px 0 16px; font-size:13px; line-height:1.45; opacity:.72 }
+
+.pw-cta{
+  display:block; width:100%; padding:13px 16px; border-radius:11px; border:none;
+  font-family:inherit; font-size:14.5px; font-weight:680; cursor:pointer;
+  background:${T.blue}; color:#fff;
+  transition:transform .1s ease-out, filter .16s ease, opacity .16s ease;
+}
+.pw-card.is-featured .pw-cta{ background:#fff; color:${T.blue} }
+.pw-cta:hover{ filter:brightness(1.05) }
+/* Response lands on the press, not the release. */
+.pw-cta:active{ transform:scale(.978) }
+.pw-cta:disabled{ opacity:.6; cursor:default; transform:none }
+.pw-spin{
+  display:inline-block; width:15px; height:15px; border-radius:50%;
+  border:2px solid currentColor; border-top-color:transparent;
+  animation:pw-spin .7s linear infinite; vertical-align:-2px;
+}
+@keyframes pw-spin{ to{ transform:rotate(360deg) } }
+.pw-fine{ margin:9px 0 16px; text-align:center; font-size:11.5px; line-height:1.45; opacity:.62 }
+
+.pw-feath{
+  display:flex; align-items:flex-start; gap:7px;
+  margin:0 0 10px; font-size:12.5px; font-weight:650; line-height:1.4;
+}
+.pw-feath svg{ margin-top:2px; flex:none; color:${T.green} }
+.pw-card.is-featured .pw-feath svg{ color:#fff }
+.pw-list{ list-style:none; margin:0; padding:0 }
+.pw-row{
+  display:flex; align-items:center; gap:9px; width:100%;
+  padding:5px 0; background:none; border:none; cursor:pointer;
+  font-family:inherit; font-size:13px; text-align:left; color:inherit;
+}
+.pw-plus{
+  width:17px; height:17px; border-radius:999px; flex:none;
+  display:inline-grid; place-items:center;
+  border:1px solid ${T.border}; font-size:11px; line-height:1; opacity:.75;
+  transition:transform .1s ease-out;
+}
+.pw-card.is-featured .pw-plus{ border-color:rgba(255,255,255,.32) }
+.pw-row:active .pw-plus{ transform:scale(.9) }
+.pw-detail{ margin:0 0 6px 26px; font-size:12.5px; line-height:1.5; opacity:.66 }
+
+.pw-foot{ margin-top:18px; text-align:center }
+.pw-later{
+  background:none; border:none; cursor:pointer; font-family:inherit;
+  font-size:13px; font-weight:600; color:${T.dim}; padding:8px 12px; border-radius:8px;
+  transition:color .16s ease, background .16s ease;
+}
+.pw-later:hover{ color:${T.text}; background:${T.neutralBg} }
+.pw-reason label{ display:block; font-size:13px; font-weight:650; margin-bottom:9px; color:${T.text} }
+.pw-reason div{ display:flex; gap:8px; max-width:440px; margin:0 auto }
+.pw-reason input{
+  flex:1; padding:10px 13px; border-radius:10px; border:1px solid ${T.border};
+  font-family:inherit; font-size:13.5px; color:${T.text}; background:${T.bg};
+}
+.pw-reason input:focus{ outline:2px solid ${T.blueBg}; border-color:${T.blue} }
+.pw-send{
+  padding:10px 16px; border-radius:10px; border:none; cursor:pointer;
+  font-family:inherit; font-size:13.5px; font-weight:650; background:${T.blue}; color:#fff;
+  transition:transform .1s ease-out;
+}
+.pw-send:active{ transform:scale(.97) }
+.pw-skip{
+  margin-top:10px; background:none; border:none; cursor:pointer;
+  font-family:inherit; font-size:12.5px; color:${T.dim}; text-decoration:underline;
+}
+
+/* Mobile: Pro first, price and CTA above the fold, features collapsed. */
+@media (max-width:768px){
+  .pw-scrim{ padding:12px 10px; align-items:flex-start }
+  .pw-sheet{ padding:26px 18px 18px; border-radius:20px }
+  .pw-cards{ grid-template-columns:1fr }
+  .pw-list{ display:none }
+  .pw-feath{ margin-bottom:2px }
+}
+
+@media (prefers-reduced-motion:reduce){
+  .pw-scrim,.pw-sheet,.pw-scrim.is-closing,.pw-sheet.is-closing{
+    animation:pw-fade .2s ease both; filter:none; transform:none;
+  }
+  @keyframes pw-fade{ from{opacity:0} to{opacity:1} }
+  .pw-cta:active,.pw-tog button:active,.pw-x:active,.pw-send:active,.pw-row:active .pw-plus{ transform:none }
+  .pw-spin{ animation-duration:2s }
+}
+@media (prefers-reduced-transparency:reduce){
+  .pw-scrim{ background:rgba(12,14,24,.82); backdrop-filter:none; -webkit-backdrop-filter:none }
+}
+@media (prefers-contrast:more){
+  .pw-card{ border-color:rgba(0,0,0,.5) }
+  .pw-sub,.pw-desc,.pw-fine,.pw-detail{ opacity:1; color:${T.text} }
+}
+`

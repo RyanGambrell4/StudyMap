@@ -168,9 +168,9 @@ export default async function handler(req, res) {
 
     const upgradeUrl = trialUsed
       ? `https://getstudyedge.com/app?upgrade=1&utm_source=email&utm_medium=lifecycle&utm_campaign=day5_proof_winback`
-      : story.ctaHref + (story.ctaHref.includes('?') ? '&signup=1&plan=pro&billing=weekly&trial=1' : '?signup=1&plan=pro&billing=weekly&trial=1')
-    const ctaLabel    = trialUsed ? 'Upgrade to Pro · $2.99/wk' : story.ctaLabel
-    const ctaFootnote = trialUsed ? '$2.99/wk · Cancel anytime' : 'Card required · $2.99/wk after 7 days · Cancel anytime'
+      : story.ctaHref + (story.ctaHref.includes('?') ? '&signup=1&plan=pro&billing=monthly&trial=1' : '?signup=1&plan=pro&billing=monthly&trial=1')
+    const ctaLabel    = trialUsed ? 'Upgrade to Pro · $9.99/mo' : story.ctaLabel
+    const ctaFootnote = trialUsed ? '$9.99/mo · Cancel anytime' : 'Card required · $9.99/mo after 7 days · Cancel anytime'
 
     try {
       await resend.emails.send({
@@ -218,7 +218,7 @@ ${preheader(story.preheaderText)}
         </table>
 
         <p style="margin:0 0 22px;font-size:15px;color:#6B6B6B;line-height:1.7;">
-          Pro is <strong style="color:#111111;">$2.99/week</strong>, less than a coffee.
+          Pro is <strong style="color:#111111;">$9.99/month</strong>, less than a coffee.
           ${trialUsed
             ? 'You\'ve already seen what it does. Get it back.'
             : 'Try it free for 7 days. You won\'t be charged until day 8.'}

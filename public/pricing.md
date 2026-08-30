@@ -10,16 +10,14 @@ AI study planner for college students. Free to start, no credit card required.
 - Credit card: Not required
 
 ## Pro
-- Weekly price: $2.99/week
 - Monthly price: $9.99/month
 - Annual price: $69.99/year ($5.83/month equivalent)
 - Courses: 5 courses
 - AI actions: 100 AI study boosts/month
 - Included features: AI Study Coach, Session Blueprints, Focus Mode, AI Flashcard Maker, Google Calendar sync, smart scheduler, Grade Hub, Syllabus import, streak tracking
-- Trial: 7-day free trial. Credit card required; auto-renews at $2.99/week unless cancelled. Cancel anytime.
+- Trial: 7-day free trial. Credit card required; auto-renews at $9.99/month unless cancelled. Cancel anytime.
 
 ## Unlimited
-- Weekly price: $4.99/week
 - Monthly price: $14.99/month
 - Annual price: $119.99/year ($10.00/month equivalent)
 - Courses: Unlimited
@@ -35,7 +33,7 @@ AI study planner for college students. Free to start, no credit card required.
 - For support: support@getstudyedge.com
 
 ## Sign up
-https://getstudyedge.com/app?signup=1&plan=pro&billing=weekly&trial=1
+https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1
 
 ## Pricing page
 https://getstudyedge.com/pricing
