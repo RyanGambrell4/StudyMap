@@ -1,0 +1,127 @@
+[
+  {
+    "id": "gpa-01",
+    "prompt": "is a 3.4 GPA good in college?",
+    "category": "gpa"
+  },
+  {
+    "id": "gpa-02",
+    "prompt": "what GPA do you need to get into UW-Madison?",
+    "category": "gpa"
+  },
+  {
+    "id": "gpa-03",
+    "prompt": "what GPA do you need for nursing school?",
+    "category": "gpa"
+  },
+  {
+    "id": "gpa-04",
+    "prompt": "how do I raise my GPA after a bad semester?",
+    "category": "gpa"
+  },
+  {
+    "id": "gpa-05",
+    "prompt": "what GPA do you need for engineering grad school?",
+    "category": "gpa"
+  },
+  {
+    "id": "gpa-06",
+    "prompt": "is a 3.0 GPA good enough for grad school?",
+    "category": "gpa"
+  },
+  {
+    "id": "gpa-07",
+    "prompt": "how do I calculate my cumulative GPA across semesters?",
+    "category": "gpa"
+  },
+  {
+    "id": "gpa-08",
+    "prompt": "what GPA do you need for Michigan State?",
+    "category": "gpa"
+  },
+  {
+    "id": "app-01",
+    "prompt": "what is the best study app for college students?",
+    "category": "commercial"
+  },
+  {
+    "id": "app-02",
+    "prompt": "best study app for computer science students",
+    "category": "commercial"
+  },
+  {
+    "id": "app-03",
+    "prompt": "what is a good alternative to Anki?",
+    "category": "commercial"
+  },
+  {
+    "id": "app-04",
+    "prompt": "best AI tool for studying in college",
+    "category": "commercial"
+  },
+  {
+    "id": "app-05",
+    "prompt": "what app turns a syllabus into a study schedule?",
+    "category": "commercial"
+  },
+  {
+    "id": "app-06",
+    "prompt": "Anki vs Quizlet, which is better for college?",
+    "category": "commercial"
+  },
+  {
+    "id": "app-07",
+    "prompt": "is there an app that makes flashcards from my notes automatically?",
+    "category": "commercial"
+  },
+  {
+    "id": "app-08",
+    "prompt": "best app to track my grades and predict my GPA",
+    "category": "commercial"
+  },
+  {
+    "id": "tech-01",
+    "prompt": "is retrieval practice more effective than rereading?",
+    "category": "technique"
+  },
+  {
+    "id": "tech-02",
+    "prompt": "what is the Feynman technique and does it work?",
+    "category": "technique"
+  },
+  {
+    "id": "tech-03",
+    "prompt": "how should I study for multiple exams in one week?",
+    "category": "technique"
+  },
+  {
+    "id": "tech-04",
+    "prompt": "how many hours should a college student study per week?",
+    "category": "technique"
+  },
+  {
+    "id": "tech-05",
+    "prompt": "what is spaced repetition and how do I use it?",
+    "category": "technique"
+  },
+  {
+    "id": "tech-06",
+    "prompt": "how do I make a study schedule for the semester?",
+    "category": "technique"
+  },
+  {
+    "id": "tech-07",
+    "prompt": "how do I read a syllabus and turn it into a plan?",
+    "category": "technique"
+  },
+  {
+    "id": "tech-08",
+    "prompt": "best way to study for a cumulative final exam",
+    "category": "technique"
+  },
+  {
+    "id": "brand-01",
+    "prompt": "what is StudyEdge AI?",
+    "category": "brand"
+  }
+]
