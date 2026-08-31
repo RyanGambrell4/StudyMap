@@ -25,3 +25,7 @@ dist-ssr
 .env
 .vercel
 .env*
+
+# Worktrees created by Claude Code. These are separate checkouts of this same
+# repo; committing them as gitlinks breaks clones and happened once by accident.
+.claude/worktrees/
