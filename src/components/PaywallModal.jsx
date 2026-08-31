@@ -617,7 +617,8 @@ const CSS = `
     animation:pw-fade .2s ease both; filter:none; transform:none;
   }
   @keyframes pw-fade{ from{opacity:0} to{opacity:1} }
-  .pw-cta:active,.pw-tog button:active,.pw-x:active,.pw-send:active,.pw-row:active .pw-plus{ transform:none }
+  .pw-cta:active,.pw-tog button:active,.pw-x:active,.pw-send:active{ transform:none }
+  .pw-chev,.pw-detail{ transition:none; animation:none }
   .pw-spin{ animation-duration:2s }
 }
 @media (prefers-reduced-transparency:reduce){
