@@ -7,6 +7,13 @@
     "That happened three times (llms.txt pricing URL, an admit-rate placeholder, and the trial",
     "length, which was wrong on every single static page while the app itself was correct).",
     "",
+    "It then happened a fourth time, which is why `retiredPrices` and the jsonld-offer-price",
+    "rule now exist. Weekly billing was retired in the app and in Stripe on 2026-08-30, but",
+    "120 static pages kept a JSON-LD offer of \"price\": \"2.99\" and the landing page still",
+    "opened on a Weekly tab. Visible copy had been swept; structured data had not, because",
+    "JSON-LD carries the amount and the interval in separate fields and the original",
+    "price-interval-pairing rule only ever looked at prose like \"$2.99/month\".",
+    "",
     "The values here are NOT the runtime source of truth for billing. lib/server/trialPlan.js",
     "is, and it stays that way because it is revenue-critical and independently tested.",
     "scripts/check-facts.mjs asserts this file agrees with it, so marketing copy cannot drift",
@@ -19,30 +26,43 @@
   "trial": {
     "days": 7,
     "plan": "pro",
-    "billingPeriod": "weekly",
+    "billingPeriod": "monthly",
     "cardRequired": true
   },
 
   "plans": {
     "free": {
       "name": "Free",
-      "week": null,
       "month": 0,
       "year": null
     },
     "pro": {
       "name": "Pro",
-      "week": 2.99,
       "month": 9.99,
       "year": 69.99
     },
     "unlimited": {
       "name": "Unlimited",
-      "week": 4.99,
       "month": 14.99,
       "year": 119.99
     }
   },
+
+  "$retiredComment": [
+    "Amounts we used to charge and no longer sell. Any appearance of one of these in a",
+    "customer-facing file is a bug: it advertises a price Stripe will not honour.",
+    "",
+    "Dropping `week` from plans above is necessary but not sufficient. allowedPriceIntervals()",
+    "only inspects amounts it recognises as ours, so once 2.99 stopped being one of our",
+    "prices the checker would have silently reclassified \"$2.99/wk\" as a competitor quote",
+    "and skipped it. Listing retired amounts explicitly closes that hole.",
+    "",
+    "Verified 2026-08-31 that none of these collide with a competitor price quoted on any",
+    "comparison page: Chegg $15.95/mo, Course Hero $39.95/mo and Wolfram Alpha $7.99/mo are",
+    "the quoted competitors and none of them match."
+  ],
+  "retiredPrices": [2.99, 4.99],
+  "retiredPeriods": ["week", "weekly", "semester"],
 
   "support": {
     "email": "support@getstudyedge.com"

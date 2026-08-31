@@ -17,7 +17,14 @@ import { globSync, readFileSync, writeFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
 import { dirname, join } from 'node:path'
 
-import { facts, TARGET_GLOBS } from './facts.mjs'
+import {
+  facts,
+  TARGET_GLOBS,
+  JSONLD_OFFER_RE,
+  expectedOfferPrice,
+  extractPriceTable,
+  renderPriceTable,
+} from './facts.mjs'
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 const DRY = process.argv.includes('--dry')
@@ -27,6 +34,30 @@ const SUBS = [
   { re: /(\d+)-day trial/gi, to: () => `${facts.trial.days}-day trial` },
   { re: /free for (\d+) days/gi, to: () => `free for ${facts.trial.days} days` },
 ]
+
+/** Regenerate the landing page PRICE_TABLE literal from content/facts.json. */
+function regenPriceTable(text, onEdit) {
+  const found = extractPriceTable(text)
+  if (found === null) return text
+  const want = renderPriceTable()
+  if (found.body === want) return text
+  onEdit()
+  return text.slice(0, found.start) + '\n' + want + '\n      ' + text.slice(found.end)
+}
+
+/**
+ * JSON-LD offer prices ARE unambiguous, unlike prose, so unlike "$2.99/month"
+ * they get repaired automatically. The `"name"` field states which plan the
+ * offer is for, so there is exactly one correct amount and no interval to guess.
+ */
+function fixJsonLdOffers(text, onEdit) {
+  return text.replace(JSONLD_OFFER_RE, (match, head, planName, amount, tail) => {
+    const want = expectedOfferPrice(planName)
+    if (want === null || amount === want) return match
+    onEdit()
+    return `${head}${want}${tail}`
+  })
+}
 
 const files = [...new Set(TARGET_GLOBS.flatMap((p) => globSync(p, { cwd: ROOT })))].sort()
 
@@ -38,6 +69,9 @@ for (const file of files) {
   const before = readFileSync(path, 'utf8')
   let after = before
   let edits = 0
+
+  after = fixJsonLdOffers(after, () => { edits++ })
+  after = regenPriceTable(after, () => { edits++ })
 
   for (const { re, to } of SUBS) {
     after = after.replace(re, (match) => {

@@ -79,4 +79,8 @@ if (violations) {
   process.exit(1)
 }
 
-console.log(`facts: ${files.length} files clean (trial ${facts.trial.days}d, Pro $${facts.plans.pro.week}/wk)`)
+console.log(
+  `facts: ${files.length} files clean ` +
+    `(trial ${facts.trial.days}d on ${facts.trial.plan}/${facts.trial.billingPeriod}, ` +
+    `Pro $${facts.plans.pro.month}/mo, Unlimited $${facts.plans.unlimited.month}/mo)`,
+)
