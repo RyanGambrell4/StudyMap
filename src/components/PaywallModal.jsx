@@ -44,9 +44,24 @@ const PLANS = {
     // exactly the student who was going to buy.
     pro:       { price: '$69.99',  unit: '/yr', note: 'Billed once a year', save: 'Save 42%' },
     unlimited: { price: '$119.99', unit: '/yr', note: 'Billed once a year', save: 'Save 33%' },
-    savings:   'Save up to 42%',
   },
 }
+
+/**
+ * The annual discount, advertised while the student is still on Monthly.
+ *
+ * This used to hang off PLANS.yearly, which meant the saving only appeared
+ * once they had already switched to Annual: the one moment they no longer
+ * needed persuading. Nobody on Monthly ever saw a reason to look.
+ *
+ * It now appears in two places, and the duplication is deliberate. The pill on
+ * the Annual tab is the strong version, because a control should carry the
+ * information about itself rather than rely on a caption elsewhere. The line
+ * above the toggle is the one that gets read, because it sits on the path the
+ * eye already travels from the headline down to the price.
+ */
+const ANNUAL_SAVE_TAB = 'Save 42%'
+const ANNUAL_SAVE_LINE = 'Save up to 42% with annual billing'
 
 const PRO_FEATURES = [
   ['Your full semester plan', 'Every week through finals, not just this one.'],
@@ -223,7 +238,11 @@ export default function PaywallModal({
           </header>
 
           <div className="pw-togwrap">
-            {p.savings && <span className="pw-save">{p.savings}</span>}
+            {/* The slot keeps its height on both tabs, so switching billing
+                does not shunt the cards up and down under the pointer. */}
+            <p className="pw-save" aria-hidden={billingPeriod !== 'monthly'}>
+              {billingPeriod === 'monthly' ? ANNUAL_SAVE_LINE : '\u00A0'}
+            </p>
             <div className="pw-tog" role="tablist" aria-label="Billing period">
               {['monthly', 'yearly'].map((period) => (
                 <button
@@ -234,6 +253,7 @@ export default function PaywallModal({
                   onClick={() => { setBillingPeriod(period); track('pricing_billing_toggle', { billing_period: period, trigger }) }}
                 >
                   {period === 'monthly' ? 'Monthly' : 'Annual'}
+                  {period === 'yearly' && <span className="pw-togpct">{ANNUAL_SAVE_TAB}</span>}
                 </button>
               ))}
             </div>
@@ -250,12 +270,12 @@ export default function PaywallModal({
               price={p.pro.price}
               unit={p.pro.unit}
               save={p.pro.save}
-              desc="Everything StudyEdge builds, across 5 courses"
+              desc="The whole system, across 5 courses"
               cta={proOffersTrial ? 'Start 7-day free trial' : 'Get Pro'}
               fine={proOffersTrial
                 ? `Free for 7 days, then ${p.pro.price}${p.pro.unit} · Cancel anytime`
                 : `${p.pro.note} · Cancel anytime`}
-              featuresLabel="Everything in Free, plus the whole system:"
+              featuresLabel="Everything in Free, plus"
               features={PRO_FEATURES}
               loading={loading === 'pro'}
               disabled={!!loading}
@@ -272,7 +292,7 @@ export default function PaywallModal({
               desc="No caps on anything"
               cta="Get Unlimited"
               fine={`${p.unlimited.note} · Cancel anytime`}
-              featuresLabel="Everything in Pro, plus:"
+              featuresLabel="Everything in Pro, plus"
               features={UNLIMITED_FEATURES}
               loading={loading === 'unlimited'}
               disabled={!!loading}
@@ -322,8 +342,10 @@ function Card({
 }) {
   return (
     <section className={`pw-card${featured ? ' is-featured' : ''}`}>
-      {badge && <span className="pw-badge">{badge}</span>}
-      <p className="pw-name">{name}</p>
+      <div className="pw-namerow">
+        <p className="pw-name">{name}</p>
+        {badge && <span className="pw-badge">{badge}</span>}
+      </div>
       <p className="pw-price">
         <span className="pw-amount">{price}</span>
         <span className="pw-unit">{unit}</span>
@@ -336,25 +358,31 @@ function Card({
       </button>
       <p className="pw-fine">{fine}</p>
 
-      <p className="pw-feath">
-        <svg width="13" height="13" viewBox="0 0 13 13" aria-hidden="true">
-          <path d="M1 6.8l3.4 3.4L12 2.6" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        {featuresLabel}
-      </p>
+      <p className="pw-feath">{featuresLabel}</p>
       <ul className="pw-list">
         {features.map(([label, detail], i) => {
           const key = `${id}:${i}`
           const open = expanded === key
           return (
-            <li key={label}>
+            <li key={label} className={open ? 'is-open' : ''}>
               <button
                 className="pw-row"
                 aria-expanded={open}
                 onClick={() => setExpanded(open ? null : key)}
               >
-                <span className="pw-plus" aria-hidden="true">{open ? '–' : '+'}</span>
-                <span>{label}</span>
+                <span className="pw-tick" aria-hidden="true">
+                  <svg width="11" height="11" viewBox="0 0 13 13">
+                    <path d="M1 6.8l3.4 3.4L12 2.6" stroke="currentColor" strokeWidth="2.2"
+                          fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
+                <span className="pw-rowlabel">{label}</span>
+                <span className="pw-chev" aria-hidden="true">
+                  <svg width="9" height="9" viewBox="0 0 10 10">
+                    <path d="M1.5 3.5L5 7l3.5-3.5" stroke="currentColor" strokeWidth="1.7"
+                          fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                  </svg>
+                </span>
               </button>
               {open && <p className="pw-detail">{detail}</p>}
             </li>
@@ -420,16 +448,29 @@ const CSS = `
 }
 .pw-sub{ margin:0; font-size:14.5px; line-height:1.5; color:${T.muted} }
 
-.pw-togwrap{ display:flex; flex-direction:column; align-items:center; margin:22px 0 20px }
-.pw-save{ font-size:12px; font-weight:650; color:${T.green}; margin-bottom:7px; letter-spacing:.01em }
+.pw-togwrap{ display:flex; flex-direction:column; align-items:center; margin:20px 0 18px }
+/* Fixed height on both tabs: switching billing must not shunt the cards
+   vertically under a pointer that is on its way to one of them. */
+.pw-save{
+  margin:0 0 8px; min-height:16px;
+  font-size:12.5px; font-weight:650; color:${T.green}; letter-spacing:.005em;
+}
 .pw-tog{ display:inline-flex; gap:3px; padding:4px; border-radius:999px; background:${T.neutralBg} }
 .pw-tog button{
-  padding:8px 20px; border-radius:999px; border:none; cursor:pointer;
+  display:inline-flex; align-items:center; gap:7px;
+  padding:8px 18px; border-radius:999px; border:none; cursor:pointer;
   font-family:inherit; font-size:13.5px; font-weight:640; color:${T.muted};
   background:transparent; transition:color .18s ease, transform .1s ease-out;
 }
 .pw-tog button:active{ transform:scale(.97) }
 .pw-tog button.on{ background:${T.card}; color:${T.text}; box-shadow:0 1px 3px rgba(16,20,40,.12) }
+/* The discount rides on the control it describes, so it is legible from the
+   Monthly tab without needing the caption above to be read first. */
+.pw-togpct{
+  font-size:10.5px; font-weight:750; letter-spacing:.015em;
+  padding:2.5px 6px; border-radius:999px;
+  background:${T.greenBg}; color:${T.green};
+}
 
 .pw-err{
   margin:0 auto 14px; max-width:520px; text-align:center;
@@ -437,10 +478,15 @@ const CSS = `
   padding:9px 14px; border-radius:10px;
 }
 
-.pw-cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); gap:14px }
+/* align-items:start, so each card is only as tall as it needs to be.
+   Unlimited carries half the rows Pro does; stretching it to match left a
+   block of dead white inside a bordered box, which reads as a mistake. A
+   shorter box just reads as less content. */
+.pw-cards{ display:grid; grid-template-columns:repeat(auto-fit,minmax(268px,1fr)); gap:14px; align-items:start }
 
 .pw-card{
-  position:relative; border-radius:18px; padding:24px 22px 20px;
+  position:relative; display:flex; flex-direction:column;
+  border-radius:18px; padding:22px 22px 20px;
   border:1px solid ${T.border}; background:${T.card};
 }
 /* The featured card is brand blue, not a generic black slab. */
@@ -449,13 +495,18 @@ const CSS = `
   background:linear-gradient(168deg, ${T.blue} 0%, ${T.blueHov} 100%);
   box-shadow:0 12px 34px -14px rgba(52,82,217,.55);
 }
+/* Sits inside the card rather than straddling its edge. Half-outside badges
+   read as a sticker applied to the design instead of part of it, and they
+   collide with the card above on a narrow screen. */
+.pw-namerow{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:10px }
 .pw-badge{
-  position:absolute; top:-10px; left:22px;
-  background:${T.card}; color:${T.blue};
-  font-size:10.5px; font-weight:750; letter-spacing:.035em; text-transform:uppercase;
-  padding:4px 9px; border-radius:6px; box-shadow:0 2px 8px rgba(16,20,40,.16);
+  flex:none;
+  background:${T.blueBg}; color:${T.blue};
+  font-size:10px; font-weight:750; letter-spacing:.045em; text-transform:uppercase;
+  padding:3.5px 8px; border-radius:999px;
 }
-.pw-name{ margin:0 0 10px; font-size:15px; font-weight:700; letter-spacing:-.005em }
+.pw-card.is-featured .pw-badge{ background:rgba(255,255,255,.20); color:#fff }
+.pw-name{ margin:0; font-size:15px; font-weight:700; letter-spacing:-.005em }
 .pw-price{ margin:0; display:flex; align-items:baseline; gap:5px; flex-wrap:wrap }
 .pw-amount{ font-size:38px; font-weight:700; letter-spacing:-.032em; line-height:1; font-variant-numeric:tabular-nums }
 .pw-unit{ font-size:14px; font-weight:500; opacity:.62 }
@@ -483,29 +534,42 @@ const CSS = `
   animation:pw-spin .7s linear infinite; vertical-align:-2px;
 }
 @keyframes pw-spin{ to{ transform:rotate(360deg) } }
-.pw-fine{ margin:9px 0 16px; text-align:center; font-size:11.5px; line-height:1.45; opacity:.62 }
+/* Vibrancy: over a saturated blue, thin grey-by-opacity text falls apart.
+   The featured card gets its own higher-contrast value rather than inheriting
+   the neutral card's opacity. */
+.pw-fine{ margin:9px 0 15px; text-align:center; font-size:11.5px; line-height:1.45; opacity:.62 }
+.pw-card.is-featured .pw-fine{ opacity:.86 }
 
+/* Small text takes slightly positive tracking; the uppercase-ish eyebrow role
+   this plays wants a touch more. */
 .pw-feath{
-  display:flex; align-items:flex-start; gap:7px;
-  margin:0 0 10px; font-size:12.5px; font-weight:650; line-height:1.4;
+  margin:0 0 8px; font-size:11.5px; font-weight:700; line-height:1.4;
+  letter-spacing:.02em; text-transform:uppercase; opacity:.55;
 }
-.pw-feath svg{ margin-top:2px; flex:none; color:${T.green} }
-.pw-card.is-featured .pw-feath svg{ color:#fff }
 .pw-list{ list-style:none; margin:0; padding:0 }
 .pw-row{
   display:flex; align-items:center; gap:9px; width:100%;
-  padding:5px 0; background:none; border:none; cursor:pointer;
-  font-family:inherit; font-size:13px; text-align:left; color:inherit;
+  padding:6px 0; background:none; border:none; cursor:pointer;
+  font-family:inherit; font-size:13px; line-height:1.35; text-align:left; color:inherit;
+  border-radius:7px; transition:background .16s ease;
 }
-.pw-plus{
-  width:17px; height:17px; border-radius:999px; flex:none;
-  display:inline-grid; place-items:center;
-  border:1px solid ${T.border}; font-size:11px; line-height:1; opacity:.75;
-  transition:transform .1s ease-out;
+/* Twelve circled plus signs were the single busiest thing on this screen. A
+   tick states what the row IS; the chevron, which only surfaces on hover or
+   focus, states what it DOES. The quiet state is the one people look at. */
+.pw-tick{ flex:none; display:inline-grid; place-items:center; width:13px; color:${T.green}; opacity:.9 }
+.pw-card.is-featured .pw-tick{ color:#fff; opacity:.75 }
+.pw-rowlabel{ flex:1; min-width:0 }
+.pw-chev{
+  flex:none; display:inline-grid; place-items:center;
+  opacity:0; transition:opacity .16s ease, transform .18s cubic-bezier(.32,.72,0,1);
 }
-.pw-card.is-featured .pw-plus{ border-color:rgba(255,255,255,.32) }
-.pw-row:active .pw-plus{ transform:scale(.9) }
-.pw-detail{ margin:0 0 6px 26px; font-size:12.5px; line-height:1.5; opacity:.66 }
+.pw-row:hover .pw-chev,.pw-row:focus-visible .pw-chev{ opacity:.5 }
+.pw-list li.is-open .pw-chev{ opacity:.6; transform:rotate(180deg) }
+.pw-detail{
+  margin:0 0 7px 22px; font-size:12.5px; line-height:1.5; opacity:.66;
+  animation:pw-detail-in .22s cubic-bezier(.32,.72,0,1) both;
+}
+@keyframes pw-detail-in{ from{ opacity:0; transform:translateY(-3px) } to{ opacity:.66; transform:none } }
 
 .pw-foot{ margin-top:18px; text-align:center }
 .pw-later{
@@ -532,13 +596,20 @@ const CSS = `
   font-family:inherit; font-size:12.5px; color:${T.dim}; text-decoration:underline;
 }
 
-/* Mobile: Pro first, price and CTA above the fold, features collapsed. */
+/* Mobile: Pro first, with its price, its CTA and three features above the
+   fold. The list used to be hidden outright, which left the "Everything in
+   Free, plus" label introducing nothing at all. Three rows is the spec, and a
+   label needs something to label. */
 @media (max-width:768px){
   .pw-scrim{ padding:12px 10px; align-items:flex-start }
   .pw-sheet{ padding:26px 18px 18px; border-radius:20px }
   .pw-cards{ grid-template-columns:1fr }
-  .pw-list{ display:none }
-  .pw-feath{ margin-bottom:2px }
+  .pw-list li:nth-child(n+4){ display:none }
+  .pw-row{ padding:5px 0 }
+  .pw-title{ font-size:23px }
+  .pw-amount{ font-size:34px }
+  /* The chevron has no hover on touch, so show the affordance outright. */
+  .pw-chev{ opacity:.4 }
 }
 
 @media (prefers-reduced-motion:reduce){
