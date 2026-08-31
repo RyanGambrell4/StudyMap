@@ -5,19 +5,82 @@ import { getCachedStudyTools } from '../lib/db'
 import { getDueCards } from '../lib/sm2'
 import { getReviewStats } from '../lib/masteryStore'
 import OnboardingTour from './OnboardingTour'
+import { T } from '../theme/tokens'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
-const NAV_BG  = '#FFFFFF'
-const PAGE_BG = '#F7F8FA'
-const ACCENT  = '#3B61C4'
-const TEXT    = '#111111'
-const MUTED   = '#6B6B6B'
-const BORDER  = '#E5E5E5'
+// These were the deprecated V1 palette (accent #3B61C4, text #111, muted
+// #6B6B6B) sitting on a V2 page, which is why the nav read slightly off-brand
+// against everything else. Aliased to src/theme/tokens.js rather than deleted,
+// because they are referenced throughout this file and one indirection is a
+// smaller change than a hundred call sites.
+const NAV_BG  = T.card
+const PAGE_BG = T.bg
+const ACCENT  = T.blue
+const TEXT    = T.text
+const MUTED   = T.muted
+const BORDER  = T.border
 
 const STRATEGY_SECTIONS = ['coach', 'grades', 'practice', 'tutor']
 const BRAIN_SECTIONS    = ['tools', 'diagrams', 'problem-solver', 'essay-architect']
 
 const EXAM_PATTERN = /C\/P|CARS|B\/B|P\/S|Logical Reasoning|Analytical Reasoning|FAR|AUD|REG|MBE|MEE|Verbal Reasoning|Quantitative Reasoning|MCAT|LSAT|CPA|GMAT/i
+
+/**
+ * The account cluster in the top-right.
+ *
+ * It had grown three different pill treatments sitting side by side: a grey
+ * chip for AI actions, a green-bordered chip for trial status, and a solid
+ * blue button, each with its own radius, padding and font weight. Things that
+ * look different should behave differently, and these do not, so they now
+ * share one chip: same radius, same height, same type. Only colour varies, and
+ * only to carry state (neutral, warning, good).
+ *
+ * The solid blue button stays visually distinct on purpose: it is the one
+ * control here that starts a paid flow, and it should not be mistaken for a
+ * status readout.
+ */
+const NAV_CSS = `
+.nav-chip{
+  display:inline-flex; align-items:center; gap:5px;
+  height:26px; padding:0 9px; border-radius:8px;
+  font-size:11.5px; font-weight:650; letter-spacing:-.002em; white-space:nowrap;
+  color:${T.muted}; background:${T.neutralBg}; border:1px solid transparent;
+}
+.nav-chip.is-warn{ color:${T.amber}; background:${T.amberBg}; border-color:rgba(232,177,74,.42) }
+.nav-chip.is-ok  { color:${T.green}; background:${T.greenBg}; border-color:rgba(16,165,110,.30) }
+.nav-chip.is-plan{ color:${T.blue};  background:${T.blueBg};  border-color:rgba(52,82,217,.22) }
+.nav-chip.is-btn{ cursor:pointer; font-family:inherit; transition:filter .16s ease, transform .1s ease-out }
+.nav-chip.is-btn:hover{ filter:brightness(.97) }
+.nav-chip.is-btn:active{ transform:scale(.96) }
+
+.nav-avatar{
+  width:30px; height:30px; flex:none; border-radius:50%; border:none; cursor:pointer;
+  display:grid; place-items:center;
+  background:${T.blue}; color:#fff;
+  font-family:inherit; font-size:11px; font-weight:700; letter-spacing:.01em;
+  transition:transform .1s ease-out, box-shadow .16s ease;
+}
+.nav-avatar:hover{ box-shadow:0 0 0 3px ${T.blueBg} }
+.nav-avatar:active{ transform:scale(.94) }
+
+.nav-primary{
+  height:26px; padding:0 11px; border:none; border-radius:8px; cursor:pointer;
+  background:${T.blue}; color:#fff;
+  font-family:inherit; font-size:11.5px; font-weight:700; white-space:nowrap;
+  letter-spacing:-.002em;
+  transition:filter .16s ease, transform .1s ease-out;
+}
+.nav-primary:hover{ filter:brightness(1.06) }
+/* Feedback on the press, not on the release. */
+.nav-primary:active{ transform:scale(.96) }
+
+@media (prefers-reduced-motion:reduce){
+  .nav-chip.is-btn:active,.nav-avatar:active,.nav-primary:active{ transform:none }
+}
+@media (prefers-contrast:more){
+  .nav-chip{ border-color:rgba(0,0,0,.45); color:${T.text} }
+}
+`
 
 export default function AppShell({
   activeSection,
@@ -120,6 +183,8 @@ export default function AppShell({
 
   return (
     <div style={{ minHeight: '100vh', background: PAGE_BG }}>
+      <style>{NAV_CSS}</style>
+
 
       {/* ── Desktop top nav ── */}
       <header
@@ -469,14 +534,13 @@ export default function AppShell({
             )}
           </div>
 
-          {/* Avatar / Account */}
-          <button
-            onClick={onNavigateToAccount}
-            title={displayName}
-            style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '4px', borderRadius: 8, background: 'transparent', border: 'none', cursor: 'pointer' }}
-            onMouseEnter={e => e.currentTarget.style.background = '#F0EFEC'}
-            onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
-          >
+          {/* Account cluster.
+              These used to be nested inside one big <button onClick=account>:
+              a trial button inside the avatar button. Nested buttons are
+              invalid HTML, the inner click needed stopPropagation to not also
+              navigate, and hovering the trial pill lit up the whole cluster.
+              They are siblings now, and only the avatar navigates. */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             {/* Remaining free AI actions. Free users only, and only once the
                 number means something: before the first generation there is
                 nothing to count down and the gate is what matters. Reads the
@@ -489,50 +553,43 @@ export default function AppShell({
               const low = left <= 1
               return (
                 <span
+                  className={`nav-chip${low ? ' is-warn' : ''}`}
                   title={`${left} of ${limit} free AI actions left this month`}
-                  style={{
-                    fontSize: 11, fontWeight: 700, whiteSpace: 'nowrap',
-                    padding: '3px 8px', borderRadius: 6, marginRight: 2,
-                    color: low ? '#D97706' : '#5C5952',
-                    background: low ? '#FFF7ED' : '#EFF1F4',
-                    border: `1px solid ${low ? '#FED7AA' : 'transparent'}`,
-                  }}
                 >
-                  {left === 0 ? 'No AI actions left' : `${left} AI left`}
+                  {left === 0 ? 'No AI left' : `${left} AI left`}
                 </span>
               )
             })()}
-            <div style={{ width: 32, height: 32, borderRadius: '50%', background: ACCENT, display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff', fontSize: 11, fontWeight: 700, flexShrink: 0 }}>{initials}</div>
+            <button
+              onClick={onNavigateToAccount}
+              title={displayName}
+              aria-label={`Account: ${displayName}`}
+              className="nav-avatar"
+            >
+              {initials}
+            </button>
             {isTrialing ? (
               <button
-                onClick={(e) => { e.stopPropagation(); onOpenPaywall?.('trial') }}
-                style={{ display: 'flex', alignItems: 'center', gap: 4, padding: '3px 8px', borderRadius: 6, background: daysLeft <= 1 ? '#FFF7ED' : '#F0FDF4', border: `1px solid ${daysLeft <= 1 ? '#FED7AA' : '#BBF7D0'}`, cursor: 'pointer' }}
+                onClick={() => onOpenPaywall?.('trial')}
+                className={`nav-chip is-btn${daysLeft <= 1 ? ' is-warn' : ' is-ok'}`}
               >
-                <svg style={{ width: 10, height: 10, color: daysLeft <= 1 ? '#D97706' : '#16A34A', flexShrink: 0 }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg width="10" height="10" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                 </svg>
-                <span style={{ fontSize: 11, fontWeight: 700, color: daysLeft <= 1 ? '#D97706' : '#16A34A', whiteSpace: 'nowrap' }}>
-                  Trial · {daysLeft}d left
-                </span>
+                Trial · {daysLeft}d left
               </button>
             ) : plan === 'free' && !hasUsedTrial() ? (
-              <button
-                onClick={(e) => { e.stopPropagation(); onOpenPaywall?.('nav-trial') }}
-                style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ACCENT, border: 'none', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
-              >
-                Start 7-Day Trial
+              <button onClick={() => onOpenPaywall?.('nav-trial')} className="nav-primary">
+                Start free trial
               </button>
             ) : plan !== 'free' ? (
-              <span style={{ fontSize: 11, fontWeight: 700, color: plan === 'unlimited' ? '#16A34A' : ACCENT }}>{planLabel}</span>
+              <span className={`nav-chip${plan === 'unlimited' ? ' is-ok' : ' is-plan'}`}>{planLabel}</span>
             ) : plan === 'free' ? (
-              <button
-                onClick={(e) => { e.stopPropagation(); onOpenPaywall?.('nav-upgrade') }}
-                style={{ fontSize: 11, fontWeight: 700, color: '#fff', background: ACCENT, border: 'none', borderRadius: 6, padding: '3px 8px', cursor: 'pointer', whiteSpace: 'nowrap' }}
-              >
+              <button onClick={() => onOpenPaywall?.('nav-upgrade')} className="nav-primary">
                 Upgrade
               </button>
             ) : null}
-          </button>
+          </div>
         </div>
       </header>
 

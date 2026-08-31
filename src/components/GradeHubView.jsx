@@ -180,73 +180,156 @@ function IcoPlus()     { return <svg width="13" height="13" viewBox="0 0 24 24" 
 function IcoX()        { return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 6l12 12M6 18L18 6"/></svg> }
 function IcoLock()     { return <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg> }
 function IcoShield()   { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"/></svg> }
+function IcoTrend()    { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17l5.5-5.5 3.5 3.5L21 6"/><path d="M15 6h6v6"/></svg> }
 function IcoCheck()    { return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg> }
 
 // ── Locked state ──────────────────────────────────────────────────────────────
+/**
+ * Locked Grade Hub.
+ *
+ * The old version hardcoded the deprecated V1 blue (#3B61C4) and V1 greys
+ * against a V2 page, which is most of why it read as off-brand.
+ *
+ * Three craft fixes beyond the palette:
+ *  - The scrim is a real material. It was blur(1px) over content already
+ *    blurred 4px, which just muddied it. Now the scrim carries the blur and
+ *    the depth, so the data behind reads as *behind* rather than smeared.
+ *  - "7-day free trial. Cancel anytime." was blue and bold directly above the
+ *    button, so it looked like a link and was not one. The terms belong under
+ *    the button as quiet fine print, which is also where the eye expects them.
+ *  - The button gets feedback on press rather than only on release.
+ */
+const GH_LOCK_CSS = `
+.ghlock-scrim{
+  position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+  padding:24px;
+  /* Light enough that the locked data still reads as data. A heavier scrim
+     hid it completely, and a lock over nothing visible sells nothing: the
+     thing that persuades is seeing your own trajectory sitting there. */
+  background:linear-gradient(180deg, rgba(245,246,248,.42) 0%, rgba(245,246,248,.66) 100%);
+  -webkit-backdrop-filter:blur(3px) saturate(112%);
+  backdrop-filter:blur(3px) saturate(112%);
+}
+/* Materialize: blur and scale together, so it arrives as a surface. */
+.ghlock-card{
+  max-width:392px; width:100%; text-align:center;
+  background:${G.card}; border:1px solid ${G.cardBorder}; border-radius:20px;
+  padding:32px 30px 24px;
+  box-shadow:0 1px 2px rgba(16,20,40,.05), 0 20px 52px -18px rgba(16,20,40,.26);
+  animation:ghlock-in .42s cubic-bezier(.32,.72,0,1) both;
+}
+@keyframes ghlock-in{
+  from{ opacity:0; transform:translateY(8px) scale(.97); filter:blur(4px) }
+  to  { opacity:1; transform:none;                        filter:blur(0)  }
+}
+.ghlock-ico{
+  width:44px; height:44px; border-radius:13px; margin:0 auto 15px;
+  display:grid; place-items:center; color:${G.blue};
+  background:rgba(52,82,217,.09);
+}
+/* Large text: tighter leading and negative tracking. */
+.ghlock-title{
+  margin:0 0 9px; font-size:19px; font-weight:700; line-height:1.22;
+  letter-spacing:-.018em; color:${G.ink}; text-wrap:balance;
+}
+.ghlock-body{
+  margin:0 0 20px; font-size:13.5px; line-height:1.55; color:${G.secondary};
+  text-wrap:pretty;
+}
+.ghlock-cta{
+  width:100%; padding:12px 24px; border:none; border-radius:11px; cursor:pointer;
+  background:${G.blue}; color:#fff;
+  font-family:inherit; font-size:14px; font-weight:680; letter-spacing:-.003em;
+  box-shadow:0 1px 2px rgba(16,20,40,.10), 0 8px 20px -10px rgba(52,82,217,.55);
+  transition:transform .1s ease-out, filter .16s ease;
+}
+.ghlock-cta:hover{ filter:brightness(1.05) }
+/* Feedback on the press, not the release. */
+.ghlock-cta:active{ transform:scale(.978) }
+.ghlock-fine{
+  margin:10px 0 0; font-size:11.5px; line-height:1.45; color:${G.label};
+}
+
+@media (max-width:520px){
+  .ghlock-card{ padding:26px 20px 20px; border-radius:18px }
+  .ghlock-title{ font-size:17.5px }
+}
+@media (prefers-reduced-motion:reduce){
+  .ghlock-card{ animation:ghlock-fade .2s ease both; filter:none; transform:none }
+  @keyframes ghlock-fade{ from{opacity:0} to{opacity:1} }
+  .ghlock-cta:active{ transform:none }
+}
+@media (prefers-reduced-transparency:reduce){
+  .ghlock-scrim{ background:${G.pageBg}; -webkit-backdrop-filter:none; backdrop-filter:none }
+}
+@media (prefers-contrast:more){
+  .ghlock-card{ border-color:rgba(0,0,0,.5) }
+  .ghlock-body,.ghlock-fine{ color:${G.ink} }
+}
+`
+
 function LockedState({ onShowPaywall }) {
   const trialUsed = hasUsedTrial()
   const fakeRows = [
-    { label: 'Midterm Exam',    weight: '25%', score: '82 / 100', grade: 'B',  color: '#3B61C4' },
-    { label: 'Lab Report 3',    weight: '10%', score: '91 / 100', grade: 'A-', color: '#16A34A' },
-    { label: 'Problem Set 4',   weight: '8%',  score: '–',        grade: '–',  color: '#D97706' },
-    { label: 'Final Exam',      weight: '35%', score: '–',        grade: '–',  color: '#D97706' },
+    { label: 'Midterm Exam',    weight: '25%', score: '82 / 100', grade: 'B',  color: G.blue },
+    { label: 'Lab Report 3',    weight: '10%', score: '91 / 100', grade: 'A-', color: G.green },
+    { label: 'Problem Set 4',   weight: '8%',  score: '–',        grade: '–',  color: G.amber },
+    { label: 'Final Exam',      weight: '35%', score: '–',        grade: '–',  color: G.amber },
   ]
   return (
     <div style={{ position: 'relative', minHeight: 480, background: D.bg, overflow: 'hidden' }}>
       {/* Ghost preview */}
-      <div style={{ filter: 'blur(4px)', opacity: 0.4, pointerEvents: 'none', userSelect: 'none', padding: '28px 32px' }}>
+      <div style={{ filter: 'blur(2.5px)', opacity: 0.55, pointerEvents: 'none', userSelect: 'none', padding: '28px 32px' }}>
         <div style={{ display: 'flex', gap: 16, marginBottom: 20 }}>
-          <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: '16px 20px', flex: 1 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Current Grade</div>
-            <div style={{ fontSize: 36, fontWeight: 800, color: '#3B61C4', letterSpacing: -1 }}>83.4%</div>
-            <div style={{ fontSize: 13, color: '#6B6B6B', marginTop: 4 }}>B+ · On track for A-</div>
+          <div style={{ background: G.card, border: `1px solid ${G.cardBorder}`, borderRadius: 12, padding: '16px 20px', flex: 1 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: G.label, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Current Grade</div>
+            <div style={{ fontSize: 36, fontWeight: 800, color: G.blue, letterSpacing: -1 }}>83.4%</div>
+            <div style={{ fontSize: 13, color: G.secondary, marginTop: 4 }}>B+ · On track for A-</div>
           </div>
-          <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, padding: '16px 20px', flex: 1 }}>
-            <div style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Need on Final</div>
-            <div style={{ fontSize: 36, fontWeight: 800, color: '#16A34A', letterSpacing: -1 }}>78%</div>
-            <div style={{ fontSize: 13, color: '#6B6B6B', marginTop: 4 }}>to hit your A- target</div>
+          <div style={{ background: G.card, border: `1px solid ${G.cardBorder}`, borderRadius: 12, padding: '16px 20px', flex: 1 }}>
+            <div style={{ fontSize: 11, fontWeight: 700, color: G.label, textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 6 }}>Need on Final</div>
+            <div style={{ fontSize: 36, fontWeight: 800, color: G.green, letterSpacing: -1 }}>78%</div>
+            <div style={{ fontSize: 13, color: G.secondary, marginTop: 4 }}>to hit your A- target</div>
           </div>
         </div>
-        <div style={{ background: '#fff', border: '1px solid rgba(0,0,0,0.07)', borderRadius: 12, overflow: 'hidden' }}>
-          <div style={{ padding: '12px 20px', borderBottom: '1px solid rgba(0,0,0,0.07)', display: 'grid', gridTemplateColumns: '1fr 80px 100px 60px', gap: 12 }}>
+        <div style={{ background: G.card, border: `1px solid ${G.cardBorder}`, borderRadius: 12, overflow: 'hidden' }}>
+          <div style={{ padding: '12px 20px', borderBottom: `1px solid ${G.cardBorder}`, display: 'grid', gridTemplateColumns: '1fr 80px 100px 60px', gap: 12 }}>
             {['Assignment', 'Weight', 'Score', 'Grade'].map(h => (
-              <div key={h} style={{ fontSize: 11, fontWeight: 700, color: '#9B9B9B', textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</div>
+              <div key={h} style={{ fontSize: 11, fontWeight: 700, color: G.label, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{h}</div>
             ))}
           </div>
           {fakeRows.map((r, i) => (
-            <div key={i} style={{ padding: '12px 20px', borderBottom: i < fakeRows.length - 1 ? '1px solid rgba(0,0,0,0.05)' : 'none', display: 'grid', gridTemplateColumns: '1fr 80px 100px 60px', gap: 12, alignItems: 'center' }}>
+            <div key={i} style={{ padding: '12px 20px', borderBottom: i < fakeRows.length - 1 ? `1px solid ${G.rowRule}` : 'none', display: 'grid', gridTemplateColumns: '1fr 80px 100px 60px', gap: 12, alignItems: 'center' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                 <div style={{ width: 4, height: 16, borderRadius: 2, background: r.color }} />
-                <span style={{ fontSize: 13, fontWeight: 500, color: '#111' }}>{r.label}</span>
+                <span style={{ fontSize: 13, fontWeight: 500, color: G.ink }}>{r.label}</span>
               </div>
-              <span style={{ fontSize: 12, color: '#6B6B6B' }}>{r.weight}</span>
-              <span style={{ fontSize: 12, color: '#6B6B6B' }}>{r.score}</span>
-              <span style={{ fontSize: 12, fontWeight: 700, color: r.grade === '–' ? '#9B9B9B' : r.color }}>{r.grade}</span>
+              <span style={{ fontSize: 12, color: G.secondary }}>{r.weight}</span>
+              <span style={{ fontSize: 12, color: G.secondary }}>{r.score}</span>
+              <span style={{ fontSize: 12, fontWeight: 700, color: r.grade === '–' ? G.label : r.color }}>{r.grade}</span>
             </div>
           ))}
         </div>
       </div>
 
       {/* CTA overlay */}
-      <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(247,246,243,0.65)', backdropFilter: 'blur(1px)', padding: 24 }}>
-        <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 20, padding: '36px 32px', maxWidth: 380, width: '100%', textAlign: 'center', boxShadow: '0 16px 48px rgba(0,0,0,0.12)' }}>
-          <div style={{ width: 48, height: 48, borderRadius: 12, margin: '0 auto 16px', background: 'rgba(59,97,196,0.08)', border: '1px solid rgba(59,97,196,0.2)', display: 'grid', placeItems: 'center', color: D.indigo }}>
-            <IcoShield />
-          </div>
-          <div style={{ fontSize: 18, fontWeight: 700, color: D.text, marginBottom: 8 }}>Know your grade before it's too late.</div>
-          <p style={{ fontSize: 13.5, color: D.muted, margin: '0 auto 6px', lineHeight: 1.55 }}>
-            Track every assignment, run what-if scenarios, and see exactly what you need on your final to hit your target.
+      <style>{GH_LOCK_CSS}</style>
+      <div className="ghlock-scrim">
+        <div className="ghlock-card">
+          <span className="ghlock-ico" aria-hidden="true">
+            <IcoTrend />
+          </span>
+          <h3 className="ghlock-title">Know your grade before it&rsquo;s too late</h3>
+          <p className="ghlock-body">
+            Track every assignment, run what-if scenarios, and see exactly what you
+            need on the final to hit your target.
           </p>
-          {!trialUsed && (
-            <p style={{ fontSize: 12, color: D.indigo, fontWeight: 600, margin: '8px auto 20px' }}>7-day free trial. Cancel anytime.</p>
-          )}
-          {trialUsed && <div style={{ marginBottom: 20 }} />}
-          <button
-            onClick={() => onShowPaywall?.('grades')}
-            style={{ width: '100%', padding: '12px 24px', background: '#3B61C4', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(59,97,196,0.35)' }}
-          >
-            {trialUsed ? 'Upgrade to Pro' : 'Start 7-day free trial →'}
+          <button className="ghlock-cta" onClick={() => onShowPaywall?.('grades')}>
+            {trialUsed ? 'Upgrade to Pro' : 'Start 7-day free trial'}
           </button>
+          <p className="ghlock-fine">
+            {trialUsed ? 'Cancel anytime' : 'Free for 7 days, then $9.99/mo \u00B7 Cancel anytime'}
+          </p>
         </div>
       </div>
     </div>
