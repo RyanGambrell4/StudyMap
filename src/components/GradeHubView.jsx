@@ -180,12 +180,21 @@ function IcoPlus()     { return <svg width="13" height="13" viewBox="0 0 24 24" 
 function IcoX()        { return <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M6 6l12 12M6 18L18 6"/></svg> }
 function IcoLock()     { return <svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 018 0v4"/></svg> }
 function IcoShield()   { return <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M12 2l8 4v6c0 5-3.5 9-8 10-4.5-1-8-5-8-10V6z"/></svg> }
-function IcoTrend()    { return <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.9" strokeLinecap="round" strokeLinejoin="round"><path d="M3 17l5.5-5.5 3.5 3.5L21 6"/><path d="M15 6h6v6"/></svg> }
 function IcoCheck()    { return <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5"/></svg> }
 
 // ── Locked state ──────────────────────────────────────────────────────────────
 /**
  * Locked Grade Hub.
+ *
+ * Formatted to match the paywall screen, because they are two steps of one
+ * flow and were speaking in two different visual languages: this card had a
+ * sans headline and an icon badge, the paywall a serif headline and no badge.
+ * Same serif, same tracking, same button, same fine print.
+ *
+ * NO ICON. Not this one, not a replacement. The badge-in-a-rounded-square is
+ * retired product-wide: a decorative glyph above a headline adds a beat before
+ * the sentence that does the actual work, and it never carried meaning here.
+ * The headline leads.
  *
  * The old version hardcoded the deprecated V1 blue (#3B61C4) and V1 greys
  * against a V2 page, which is most of why it read as off-brand.
@@ -222,37 +231,37 @@ const GH_LOCK_CSS = `
   from{ opacity:0; transform:translateY(8px) scale(.97); filter:blur(4px) }
   to  { opacity:1; transform:none;                        filter:blur(0)  }
 }
-.ghlock-ico{
-  width:44px; height:44px; border-radius:13px; margin:0 auto 15px;
-  display:grid; place-items:center; color:${G.blue};
-  background:rgba(52,82,217,.09);
-}
-/* Large text: tighter leading and negative tracking. */
+/* Matches .pw-title on the paywall: same serif, same negative tracking, same
+   tight leading. Scaled down because this card is roughly half the width. */
 .ghlock-title{
-  margin:0 0 9px; font-size:19px; font-weight:700; line-height:1.22;
-  letter-spacing:-.018em; color:${G.ink}; text-wrap:balance;
+  margin:0 0 10px;
+  font-family:${GH_SERIF}; font-weight:600;
+  font-size:clamp(21px,2.4vw,25px); line-height:1.1; letter-spacing:-.021em;
+  color:${G.ink}; text-wrap:balance;
 }
+/* Matches .pw-sub. */
 .ghlock-body{
-  margin:0 0 20px; font-size:13.5px; line-height:1.55; color:${G.secondary};
+  margin:0 0 20px; font-size:14.5px; line-height:1.5; color:${G.secondary};
   text-wrap:pretty;
 }
+/* Matches .pw-cta. */
 .ghlock-cta{
-  width:100%; padding:12px 24px; border:none; border-radius:11px; cursor:pointer;
-  background:${G.blue}; color:#fff;
-  font-family:inherit; font-size:14px; font-weight:680; letter-spacing:-.003em;
-  box-shadow:0 1px 2px rgba(16,20,40,.10), 0 8px 20px -10px rgba(52,82,217,.55);
+  display:block; width:100%; padding:13px 16px; border:none; border-radius:11px;
+  cursor:pointer; background:${G.blue}; color:#fff;
+  font-family:inherit; font-size:14.5px; font-weight:680;
   transition:transform .1s ease-out, filter .16s ease;
 }
 .ghlock-cta:hover{ filter:brightness(1.05) }
 /* Feedback on the press, not the release. */
 .ghlock-cta:active{ transform:scale(.978) }
+/* Matches .pw-fine. */
 .ghlock-fine{
-  margin:10px 0 0; font-size:11.5px; line-height:1.45; color:${G.label};
+  margin:9px 0 0; font-size:11.5px; line-height:1.45; color:${G.label};
 }
 
 @media (max-width:520px){
   .ghlock-card{ padding:26px 20px 20px; border-radius:18px }
-  .ghlock-title{ font-size:17.5px }
+  .ghlock-title{ font-size:20px }
 }
 @media (prefers-reduced-motion:reduce){
   .ghlock-card{ animation:ghlock-fade .2s ease both; filter:none; transform:none }
@@ -316,9 +325,6 @@ function LockedState({ onShowPaywall }) {
       <style>{GH_LOCK_CSS}</style>
       <div className="ghlock-scrim">
         <div className="ghlock-card">
-          <span className="ghlock-ico" aria-hidden="true">
-            <IcoTrend />
-          </span>
           <h3 className="ghlock-title">Know your grade before it&rsquo;s too late</h3>
           <p className="ghlock-body">
             Track every assignment, run what-if scenarios, and see exactly what you
