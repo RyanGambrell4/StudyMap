@@ -36,8 +36,8 @@ Read via the Stripe MCP against `acct_1TME18KCY4pCgrHv`, livemode.
 
 | Price ID | Amount | Interval | State when read |
 |---|---|---|---|
-| `price_1TbnTNKCY4pCgrHvQP07wLN8` | $2.99 | week | **ACTIVE** (needs archiving) |
-| `price_1TbnXfKCY4pCgrHvIU2Wv6LY` | $4.99 | week | **ACTIVE** (needs archiving) |
+| `price_1TbnTNKCY4pCgrHvQP07wLN8` | $2.99 | week | was ACTIVE, now **archived** |
+| `price_1TbnXfKCY4pCgrHvIU2Wv6LY` | $4.99 | week | was ACTIVE, now **archived** |
 | `price_1TbnTjKCY4pCgrHvqTZgXPAA` | $9.99 | month | active, correct |
 | `price_1TbnU2KCY4pCgrHvPQWa7sTU` | $69.99 | year | active, correct |
 | `price_1TbnYSKCY4pCgrHv3oZPSDpu` | $14.99 | month | active, correct |
@@ -47,8 +47,11 @@ Read via the Stripe MCP against `acct_1TME18KCY4pCgrHv`, livemode.
 key is read-only for price writes and returns "Your API key does not have the required
 permissions for 'PostPricesPrice'". No Stripe CLI installed, no local `.env`.
 
-Ryan said on 2026-08-31 he is archiving both weekly prices in the dashboard himself.
-**TODO: re-read the two weekly prices and confirm `active: false`.**
+**RESOLVED 2026-08-31.** Ryan archived both weekly prices in the dashboard.
+Re-read individually and confirmed `active: false` on both, and both objects
+still exist rather than being deleted, so any subscription still sitting on them
+is undisturbed. The live price list is now exactly four: Pro $9.99/mo and
+$69.99/yr, Unlimited $14.99/mo and $119.99/yr.
 
 Subscriber exposure, checked before recommending the archive: 25 subscriptions total,
 24 canceled or past_due, exactly **1 active** — and it is on Unlimited $14.99/month, not
@@ -180,9 +183,6 @@ inherits the bug it exists to catch).
 
 ## TODO
 
-- **Re-verify the two weekly Stripe prices are archived.** Ryan was doing this by
-  hand on 2026-08-31. Read `price_1TbnTNKCY4pCgrHvQP07wLN8` and
-  `price_1TbnXfKCY4pCgrHvIU2Wv6LY` and confirm `active: false`.
 - Reconcile the 1 active Unlimited monthly subscription against the "zero active
   subs ever" note in assistant memory.
 - `index.html` headline still reads "Less than a coffee, free to start." That was
