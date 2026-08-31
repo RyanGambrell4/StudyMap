@@ -141,14 +141,14 @@
       {
         "@type": "Offer",
         "name": "Pro",
-        "price": "2.99",
+        "price": "9.99",
         "priceCurrency": "USD",
         "description": "Pro plan, $9.99/month (also $9.99/month or $69.99/year). 5 courses, 100 AI study boosts/month, AI Study Coach, Session Blueprints, smart calendar. 7-day free trial, cancel anytime."
       },
       {
         "@type": "Offer",
         "name": "Unlimited",
-        "price": "4.99",
+        "price": "14.99",
         "priceCurrency": "USD",
         "description": "Unlimited plan, $14.99/month (also $14.99/month or $119.99/year). Unlimited courses and AI actions, AI Tutor with session memory, advanced practice exam analytics, predicted exam score."
       }
@@ -2159,26 +2159,27 @@
     }
 
     function Pricing() {
-      const [bill, setBill] = useState('weekly');
+      // Monthly is the default and the only starting period we sell. Weekly was
+      // retired on 2026-08-30; this tab used to default to it, so the homepage
+      // advertised the retired weekly price while Stripe billed monthly.
+      const [bill, setBill] = useState('monthly');
 
+      /* facts:price-table - generated from content/facts.json by `npm run facts:sync`.
+         Do not hand-edit: scripts/check-facts.mjs fails the build on drift. */
       const PRICE_TABLE = {
-        pro:       { weekly: 2.99, monthly: 9.99,  yearly: 69.99  },
-        unlimited: { weekly: 4.99, monthly: 14.99, yearly: 119.99 },
+        pro:       { monthly: 9.99, yearly: 69.99 },
+        unlimited: { monthly: 14.99, yearly: 119.99 },
       };
+      /* /facts:price-table */
 
       const billedSub = (planKey) => {
-        if (planKey === 'pro') {
-          if (bill === 'weekly')  return 'Billed weekly · 7-day free trial, cancel anytime';
-          if (bill === 'monthly') return 'Billed $' + PRICE_TABLE[planKey].monthly.toFixed(2) + '/month · 7-day free trial';
-          return 'Billed $' + PRICE_TABLE[planKey].yearly.toFixed(2) + '/year · 7-day free trial';
-        }
-        if (bill === 'weekly')  return 'Billed weekly · cancel anytime';
-        if (bill === 'monthly') return 'Billed $' + PRICE_TABLE[planKey].monthly.toFixed(2) + '/month · cancel anytime';
-        return 'Billed $' + PRICE_TABLE[planKey].yearly.toFixed(2) + '/year · cancel anytime';
+        const trial = planKey === 'pro' ? ' · 7-day free trial' : ' · cancel anytime';
+        if (bill === 'monthly') return 'Billed $' + PRICE_TABLE[planKey].monthly.toFixed(2) + '/month' + trial;
+        return 'Billed $' + PRICE_TABLE[planKey].yearly.toFixed(2) + '/year' + trial;
       };
 
       const displayPrice = (planKey) => PRICE_TABLE[planKey][bill];
-      const unitLabel = bill === 'weekly' ? '/wk' : bill === 'monthly' ? '/mo' : '/yr';
+      const unitLabel = bill === 'monthly' ? '/mo' : '/yr';
 
       const goSignup = (plan, eventName) => {
         const qs = new URLSearchParams({ signup: '1' });
@@ -2209,9 +2210,8 @@
             </h2>
             <div className="billing-toggle">
               {[
-                {k: 'weekly',  l: 'Weekly',  save: null},
-                {k: 'monthly', l: 'Monthly', save: 'Save 17%'},
-                {k: 'yearly',  l: 'Annual',  save: 'Save 55%'},
+                {k: 'monthly', l: 'Monthly', save: null},
+                {k: 'yearly',  l: 'Annual',  save: 'Save up to 42%'},
               ].map(b => (
                 <button
                   key={b.k}

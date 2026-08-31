@@ -17,7 +17,12 @@ export default defineConfig([
     ],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        // Compiled in by the build-id plugin in vite.config.js. Real at build
+        // time, absent in dev, which src/lib/appVersion.js handles explicitly.
+        __BUILD_ID__: 'readonly',
+      },
       parserOptions: {
         ecmaVersion: 'latest',
         ecmaFeatures: { jsx: true },

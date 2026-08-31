@@ -4,6 +4,7 @@ import './index.css'
 import App from './App.jsx'
 import { initSentry } from './lib/sentry'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
+import UpdateBanner from './components/UpdateBanner.jsx'
 import { Analytics } from '@vercel/analytics/react'
 
 // Guard against DOM mutations from Google Translate, in-app browsers, and
@@ -37,5 +38,8 @@ createRoot(document.getElementById('root')).render(
       <App />
       <Analytics />
     </ErrorBoundary>
+    {/* Outside the boundary on purpose: if stale code is what crashed the app,
+        Refresh is the fix and has to stay reachable through the crash screen. */}
+    <UpdateBanner />
   </StrictMode>,
 )

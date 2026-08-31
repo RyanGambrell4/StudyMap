@@ -385,10 +385,46 @@ Return ONLY the JSON array with no other text. Example:
   }
 }
 
+/**
+ * One build id, written to two places that must agree:
+ *   - `__BUILD_ID__`, compiled into the app bundle (what is RUNNING)
+ *   - `/version.json`, emitted as a static asset (what is DEPLOYED)
+ *
+ * src/lib/appVersion.js compares them to decide whether to offer a refresh.
+ *
+ * Prefer the Vercel commit SHA so every instance of a given deploy agrees; a
+ * timestamp would differ per build and make identical deploys look like updates.
+ */
+const BUILD_ID =
+  process.env.VERCEL_GIT_COMMIT_SHA?.slice(0, 12) ||
+  process.env.GITHUB_SHA?.slice(0, 12) ||
+  `local-${Date.now().toString(36)}`
+
+function buildIdPlugin() {
+  return {
+    name: 'studyedge-build-id',
+    apply: 'build',
+    generateBundle() {
+      this.emitFile({
+        type: 'asset',
+        fileName: 'version.json',
+        // Not precached by workbox: injectManifest globs only assets/**/*.{js,css}
+        // and app.html, so this stays a live network read. It must, or it would
+        // report the build it shipped with rather than the one on the server.
+        source: JSON.stringify({ buildId: BUILD_ID }) + '\n',
+      })
+    },
+  }
+}
+
 export default defineConfig({
+  define: {
+    __BUILD_ID__: JSON.stringify(BUILD_ID),
+  },
   plugins: [
     react(),
     apiDevPlugin(),
+    buildIdPlugin(),
     VitePWA({
       strategies: 'injectManifest',
       srcDir: 'src',

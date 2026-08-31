@@ -1,0 +1,195 @@
+# Pricing source of truth + stale client — session state
+
+Branch: `pricing-source-of-truth` (worktree `.claude/worktrees/pricing-sot`)
+Started: 2026-08-31, from `main` at `cfba4f5`.
+
+This file exists because the previous session ended mid-Stripe-write with no record of
+what had completed. Anything below marked DONE is committed on this branch. Anything
+marked TODO is not.
+
+---
+
+## What was already true when this session started (verified, not assumed)
+
+Local `main` was 4 commits behind `origin/main`. Branch 3 (`6966a5c`, "retire weekly
+billing, and one paywall screen") merged on 2026-08-30 13:46 and is deployed.
+
+- `PrePaywall.jsx` and `PaywallExitGift.jsx` are deleted from the repo.
+- The live production bundle (`assets/app-Cd4JyRxd.js`) contains **zero** occurrences of
+  `skip the gift` / `Here are 5 free AI actions`, and **does** contain `What stopped you?`.
+- The exit-gift modal reported as live was a **stale cached client**, not production.
+- The only `2.99` in that bundle is a path coordinate inside the inlined Google logo SVG.
+
+So HARD_PAYWALL_SPEC.md section 3 (the one paywall screen) was already built and shipped.
+The real live defect was on the marketing site, which branch 3 did not touch.
+
+## Stripe — state as of 2026-08-31 08:1x ET
+
+Read via the Stripe MCP against `acct_1TME18KCY4pCgrHv`, livemode.
+
+| Price ID | Amount | Interval | State when read |
+|---|---|---|---|
+| `price_1TbnTNKCY4pCgrHvQP07wLN8` | $2.99 | week | **ACTIVE** (needs archiving) |
+| `price_1TbnXfKCY4pCgrHvIU2Wv6LY` | $4.99 | week | **ACTIVE** (needs archiving) |
+| `price_1TbnTjKCY4pCgrHvqTZgXPAA` | $9.99 | month | active, correct |
+| `price_1TbnU2KCY4pCgrHvPQWa7sTU` | $69.99 | year | active, correct |
+| `price_1TbnYSKCY4pCgrHv3oZPSDpu` | $14.99 | month | active, correct |
+| `price_1TbnZ0KCY4pCgrHvmcPQiD4U` | $119.99 | year | active, correct |
+
+**The archive did not happen last session.** It was not a context problem: the Stripe MCP
+key is read-only for price writes and returns "Your API key does not have the required
+permissions for 'PostPricesPrice'". No Stripe CLI installed, no local `.env`.
+
+Ryan said on 2026-08-31 he is archiving both weekly prices in the dashboard himself.
+**TODO: re-read the two weekly prices and confirm `active: false`.**
+
+Subscriber exposure, checked before recommending the archive: 25 subscriptions total,
+24 canceled or past_due, exactly **1 active** — and it is on Unlimited $14.99/month, not
+weekly. Archiving the weekly prices affects nobody.
+
+Note: that active Unlimited monthly subscription contradicts the "zero active subs ever"
+note in the assistant's memory. Worth reconciling separately.
+
+No checkout could reach a weekly price regardless: `PRICE_IDS` in `api/stripe.js` omits
+them and `resolveCheckoutPlan()` (`lib/server/trialPlan.js:47`) coerces any weekly request
+to monthly and flags it `coerced`.
+
+---
+
+## DONE on this branch
+
+### 1. Adopted the existing facts guard rather than building a second one
+`8bb5e61` from the unmerged `worktree-facts-source-guard` branch (2026-08-16) already had
+the right architecture: `content/facts.json` as source, `scripts/check-facts.mjs` failing
+the build on drift, `scripts/sync-facts.mjs` repairing what is unambiguous. It was 38
+commits stale and its data still described weekly billing. Cherry-picked as `b509e45`
+(one `package.json` conflict, resolved as a union of both script lists).
+
+### 2. Updated `content/facts.json` to the current product
+- `trial.billingPeriod`: `weekly` -> `monthly`
+- dropped `week` from every plan
+- added `retiredPrices: [2.99, 4.99]` and `retiredPeriods: ["week","weekly","semester"]`
+
+### 3. Three new rules in `scripts/facts.mjs`
+- **`jsonld-offer-price`** — an Offer named after a plan must carry that plan's monthly
+  price. This is the rule that would have caught the whole bug: JSON-LD keeps the amount
+  and the interval in separate fields, so the pre-existing prose rule
+  (`price-interval-pairing`, which looks for `"$2.99/month"`) could never see it.
+  Auto-repaired by sync, because the `"name"` field makes the correct value unambiguous.
+- **`retired-price`** — any `$2.99` / `$4.99` anywhere customer-facing. Necessary because
+  dropping `week` from the plans would otherwise make the checker *blind*:
+  `allowedPriceIntervals()` only inspects amounts it recognises as ours, so a retired 2.99
+  would have been silently reclassified as a competitor quote and skipped.
+- **`landing-price-table`** — `index.html` PRICE_TABLE must equal the literal generated
+  from facts.json, between `/* facts:price-table */` markers.
+- **`retired-period-offer`** — a whole Offer named `"<Plan> <RetiredPeriod>"`, e.g.
+  "Pro Weekly". Reported, not auto-fixed: the offer has to be deleted, not repriced.
+
+Two false-positive classes were found and fixed during development:
+- a bare search for `weekly|semester` in JSON-LD `"name"` matched **97** study-schedule
+  steps ("Week 8: Sharpen and rest") and FAQ entries ("What is semester GPA?"). The rule
+  is now anchored to one of our plan names.
+- a bare `2.99` matched **SVG path coordinates** in the inlined Google logo
+  (`...-.76-2.99-.76-4.59...`). `retired-price` now requires a literal `$`.
+
+### 4. Fixed every live pricing surface
+- **120 JSON-LD offer prices** across 119 files: `2.99 -> 9.99`, `4.99 -> 14.99`,
+  via `npm run facts:sync`.
+- **`public/pricing.html`** — deleted the `Pro Weekly` and `Unlimited Weekly` Offer blocks
+  outright. Both were self-contradictory: name "Pro Weekly", price "2.99", description
+  "$9.99 per month". `Pro Monthly` / `Unlimited Monthly` already existed, so nothing lost.
+  Verified both remaining JSON-LD blocks still `JSON.parse` cleanly.
+- **`public/llms.txt`** — dropped the `$2.99/week or` and `$4.99/week or` options.
+- **`index.html`** (the actual landing page, the worst offender):
+  - default billing tab `weekly` -> `monthly`
+  - weekly removed from PRICE_TABLE entirely, so it cannot be selected
+  - the Weekly toggle button is gone
+  - `billedSub()` weekly branches removed, `unitLabel` no longer yields `/wk`
+  - annual badge `Save 55%` -> `Save up to 42%`, and the monthly `Save 17%` badge removed.
+    Both old numbers were computed against the retired weekly price. Real savings are
+    Pro 41.6% (119.88 -> 69.99) and Unlimited 33.3% (179.88 -> 119.99), so a single
+    toggle badge has to say "up to".
+
+`npm run facts:check`: **247 files clean.**
+
+Guard proven by reintroducing all three regressions at once (landing table, a JSON-LD
+offer price, and a weekly line in llms.txt). The checker reported all three with
+file:line and exited 1. Restored, clean again.
+
+### Deliberately left alone (Ryan confirmed)
+- `src/components/LandingPage.jsx` — dead code, never imported.
+- `api/stripe.js:64`, `lib/server/trialPlan.js:8,13` — deliberate incident comments.
+- `src/lib/trialPlan.test.js`, `lib/server/trialPlan.test.js` — tests asserting weekly is
+  retired. These *should* still say 2.99.
+
+None of these are in `TARGET_GLOBS`, so the guard does not touch them.
+
+---
+
+### 5. Stale-client version check  (commit `7bbe76e`)
+
+Root cause was `src/sw.js` calling `skipWaiting()` on install, commented "take
+over immediately on update so users don't see stale UI". It does the opposite.
+The new worker activates at once, but the open page keeps running the JavaScript
+already in memory and nothing reloads it; the navigation route serves app.html
+from the precache, so moving around the SPA fetches nothing new either. The
+waiting state that would normally be the signal never exists to be noticed.
+
+It was also a correctness hazard: the new worker served the NEW precache to a
+page running OLD code, so a lazily imported chunk requested by its old hashed
+filename 404'd.
+
+Two mechanisms, because neither is sufficient alone:
+- **version.json is the detector.** One build id, written into the bundle as
+  `__BUILD_ID__` and emitted as a static asset. Compared on a 15 minute timer,
+  on tab focus, and on regaining network. The SW's own update check is not
+  enough: the browser only looks on a navigation or roughly every 24 hours.
+- **The waiting worker is the applier.** A plain reload is served the OLD
+  precache by the still-active worker, so without this the button looks broken.
+
+Deliberately not a silent auto-update: reloading underneath someone destroys a
+focus session or a half-written brain dump.
+
+**A real bug was found by testing this in a browser rather than trusting the
+unit tests.** `applyUpdate()` only handed over when `registration.waiting`
+already existed, and it usually does not, because version.json learns about the
+deploy before the browser has fetched the new worker. Refresh fell through to a
+plain reload and came back on the same build. Now it calls `update()` and waits
+up to 8s for a worker to reach `waiting`, then hands over, and reloads
+regardless. Regression covered by tests.
+
+Verified end to end on localhost against a real service worker: clean baseline
+on `app-DrtP6cvB.js` with no banner, rebuilt underneath the open tab, banner
+appeared on focus, Refresh landed on `app-DcoIzEcG.js` with the banner gone.
+
+Files: `src/lib/appVersion.js`, `src/components/UpdateBanner.jsx` (mounted
+outside the ErrorBoundary in `main.jsx` on purpose), `src/sw.js`,
+`vite.config.js`, `vercel.json` (`version.json` set `no-store`, or the detector
+inherits the bug it exists to catch).
+
+737 tests passing, build clean, 247 files fact-clean.
+
+---
+
+## TODO
+
+- **Re-verify the two weekly Stripe prices are archived.** Ryan was doing this by
+  hand on 2026-08-31. Read `price_1TbnTNKCY4pCgrHvQP07wLN8` and
+  `price_1TbnXfKCY4pCgrHvIU2Wv6LY` and confirm `active: false`.
+- Reconcile the 1 active Unlimited monthly subscription against the "zero active
+  subs ever" note in assistant memory.
+- `index.html` headline still reads "Less than a coffee, free to start." That was
+  written for $2.99/wk. At $9.99/mo it is a stretch, though roughly $2.30/week.
+  Left alone deliberately: it is positioning copy, not a price claim, and
+  changing it was outside what was asked.
+
+## Notes for the next session
+
+- `jsdom` IS installed and works (13 jsdom tests added here). An older assistant
+  memory claiming it was uninstalled and that component tests silently skip is
+  **wrong** and should be corrected.
+- The app cannot boot from `vite preview` without env: run
+  `node scripts/use-env.mjs staging`, which writes a gitignored `.env.local`.
+  Also note preview has no `/app` rewrite, so use `/app.html` directly, and
+  `/app.html?signup=1` to stay on the auth screen instead of being redirected
+  to the landing page.
