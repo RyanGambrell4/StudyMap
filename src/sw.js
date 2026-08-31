@@ -3,8 +3,28 @@ import { NavigationRoute, registerRoute } from 'workbox-routing'
 import { CacheFirst, NetworkFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 
-// Take over immediately on update so users don't see stale UI
-self.addEventListener('install', () => self.skipWaiting())
+// A new worker WAITS. It does not skipWaiting().
+//
+// This used to call skipWaiting() with the comment "take over immediately on
+// update so users don't see stale UI", which is the opposite of what it did.
+// The new worker activated at once, but the open page kept running the
+// JavaScript already in memory and nothing ever reloaded it, so the tab served
+// week-old code indefinitely. That is how three already-fixed bugs came to be
+// reported in a single week.
+//
+// It was also a correctness hazard: the new worker began serving the NEW
+// precache to a page still running OLD code, so any lazily imported chunk the
+// old code requested by its old hashed filename 404'd.
+//
+// Waiting instead makes staleness observable. src/lib/appVersion.js notices the
+// waiting worker (and independently polls version.json), the user is shown a
+// banner, and only when they press Refresh do we get the message below.
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') self.skipWaiting()
+})
+
+// clients.claim() still matters for the FIRST install, so a page loaded before
+// any worker existed comes under control without needing a reload.
 self.addEventListener('activate', (e) => e.waitUntil(clients.claim()))
 
 // Precache all Vite-built assets
