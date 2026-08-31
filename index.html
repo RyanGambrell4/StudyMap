@@ -911,11 +911,21 @@
       pointer-events: none;
     }
 
-    /* SEO prerender */
+    /* Pre-hydration content.
+     *
+     * This block used to be clipped to a 1x1 box (clip: rect(0,0,0,0)), which
+     * made it crawler-only: React destroys it on mount, so no human ever saw
+     * it, and it carried a different H1 and different copy than the rendered
+     * page. Hidden text plus different content for crawlers than for users is
+     * cloaking, and the homepage was suppressed on our own brand query while a
+     * third-party directory page describing us ranked in its place.
+     *
+     * It is now genuinely visible: whatever a crawler reads here is what a
+     * human sees before hydration. Keep it that way. If the copy below ever
+     * diverges from the React hero again, that is the bug, not the styling. */
     .seo-prerender {
-      position: absolute; width: 1px; height: 1px;
-      padding: 0; margin: -1px; overflow: hidden;
-      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+      max-width: 720px; margin: 0 auto; padding: 48px 20px;
+      font-family: var(--sans, system-ui, sans-serif);
     }
 
     /* Mobile */
@@ -940,12 +950,6 @@
       .hero-stat:last-child { border-bottom: none; }
       .finalcta { padding: 90px 24px; }
       .testi-header { margin-bottom: 40px; }
-    }
-
-    .sr-only {
-      position: absolute; width: 1px; height: 1px;
-      padding: 0; margin: -1px; overflow: hidden;
-      clip: rect(0,0,0,0); white-space: nowrap; border: 0;
     }
 
     /* --- Blinking adapted dot --- */
@@ -1033,8 +1037,8 @@
       </header>
       <main>
         <section>
-          <h1>StudyEdge AI: AI Study Planner for Students | getstudyedge.com</h1>
-          <p>StudyEdge AI at getstudyedge.com is the AI-powered study planner built for high school and college students. Search for "StudyEdge AI" or visit getstudyedge.com to access your account. StudyEdge AI (getstudyedge.com) is not affiliated with studyedge.com, we are a separate AI study app for students.</p>
+          <h1>Your grades aren't the problem. Your system is.</h1>
+          <p>StudyEdge AI is the AI-powered study planner built for high school and college students. It is a separate company from Study Edge, the human tutoring service at studyedge.com.</p>
           <p>StudyEdge AI builds your personalized study schedule, plans every session minute-by-minute with a Session Blueprint, and runs your sessions with flashcards, quizzes, active recall, and an AI tutor all built in. One app, all semester. Free to start at getstudyedge.com, no credit card required.</p>
           <a href="/app?signup=1" onclick="posthog && posthog.capture('landing_cta_clicked', {page:'homepage', cta_text:'Get Started Free on StudyEdge AI', destination:'/app?signup=1'})">Get Started Free on StudyEdge AI</a>
           <a href="/login">Log In to StudyEdge AI</a>
