@@ -15,7 +15,9 @@
     "sitemap:lastmod": "node scripts/updateSitemapLastmod.mjs",
     "sitemap:check": "node scripts/updateSitemapLastmod.mjs --check",
     "indexnow": "node scripts/indexnow.mjs",
-    "indexnow:submit": "node scripts/indexnow.mjs --submit"
+    "indexnow:submit": "node scripts/indexnow.mjs --submit",
+    "build:android": "VITE_ANDROID_BUILD=1 vite build",
+    "android:sync": "VITE_ANDROID_BUILD=1 vite build && npx cap sync android"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",

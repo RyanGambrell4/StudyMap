@@ -29,3 +29,14 @@ dist-ssr
 # Worktrees created by Claude Code. These are separate checkouts of this same
 # repo; committing them as gitlinks breaks clones and happened once by accident.
 .claude/worktrees/
+
+# Android signing material. The upload keystore is unrecoverable: lose it and
+# the Play listing can never be updated again under this package name. It lives
+# outside the repo (~/.studyedge/keys/) with the passwords in a password
+# manager; these patterns exist so a stray copy can never be committed.
+*.jks
+*.keystore
+android/keystore.properties
+android/key.properties
+android/app/*.jks
+android/app/*.keystore

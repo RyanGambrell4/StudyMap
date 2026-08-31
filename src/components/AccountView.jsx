@@ -3,6 +3,7 @@ import { getActivePlan, getCachedSubscription, initSubscription, isTrialActive, 
 import { supabase } from '../lib/supabase'
 import { track } from '../lib/analytics'
 import ReferralCard from './ReferralCard'
+import { CAN_PURCHASE_IN_APP } from '../lib/platform'
 
 const PLAN_INFO = {
   free: {
@@ -443,7 +444,7 @@ export default function AccountView({
         </ul>
 
         {/* Free trial CTA - only when plan is free and trial never used */}
-        {plan === 'free' && !trialUsed && !trialActive && (
+        {CAN_PURCHASE_IN_APP && plan === 'free' && !trialUsed && !trialActive && (
           <div style={{
             background: '#F0EFEC',
             border: '1px solid rgba(0,0,0,0.07)',

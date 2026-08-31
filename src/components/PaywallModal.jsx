@@ -29,6 +29,7 @@ import {
 } from '../lib/subscription'
 import { track } from '../lib/analytics'
 import { T, SERIF, SANS } from '../theme/tokens'
+import { CAN_PURCHASE_IN_APP } from '../lib/platform'
 
 // ── Pricing. Mirrors PRICE_IDS in api/stripe.js; the server is authoritative. ──
 const PLANS = {
@@ -162,6 +163,34 @@ export default function PaywallModal({
   const sub = primaryCourseName
     ? `Your full plan for ${primaryCourseName} through finals${coursesCount > 1 ? `, and ${coursesCount - 1} more ${coursesCount - 1 === 1 ? 'class' : 'classes'}` : ''}.`
     : 'Your full plan through finals.'
+
+  // Google Play ships free tier only. Its Payments policy bans both processing a
+  // digital subscription outside Play Billing and linking users out to buy, so
+  // this build shows what the limit is and stops. No prices, no CTA, and
+  // deliberately no "upgrade on our website" line, which would be the steering
+  // the policy actually prohibits.
+  if (!CAN_PURCHASE_IN_APP) {
+    return createPortal(
+      <>
+        <style>{CSS}</style>
+        <div
+          className={`pw-scrim${closing ? ' is-closing' : ''}`}
+          onClick={() => dismiss('scrim')}
+          role="presentation"
+        />
+        <div className="pw-sheet" ref={sheetRef} role="dialog" aria-modal="true" aria-label="Plan limit reached">
+          <button className="pw-x" onClick={() => dismiss('x')} aria-label="Close">&times;</button>
+          <h2 className="pw-headline">{headline}</h2>
+          <p className="pw-sub">
+            You have used everything the free plan includes here. Your work is saved,
+            and the rest of the app keeps working.
+          </p>
+          <button className="pw-cta" onClick={() => dismiss('ok')}>Got it</button>
+        </div>
+      </>,
+      document.body
+    )
+  }
 
   return createPortal(
     <>

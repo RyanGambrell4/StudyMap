@@ -14,6 +14,7 @@ export const TRIAL_DURATION_DAYS = 7
 
 import { supabase } from './supabase'
 import { track } from './analytics'
+import { CAN_PURCHASE_IN_APP } from './platform'
 
 // ── Plan limits ───────────────────────────────────────────────────────────────
 
@@ -503,6 +504,23 @@ export function incrementAIQuery(source) {
 // Pass opts.trial: true to create a 7-day Stripe trial (card collected upfront).
 
 export async function createCheckoutSession(plan, billingPeriod, userEmail, userId, opts = {}) {
+  // Hard stop on the Android build. The UI already hides every purchase entry
+  // point, so reaching here means a branch was missed; failing loudly in dev is
+  // how that gets found before it reaches Play review. Google Play's Payments
+  // policy prohibits both processing a digital subscription outside Play Billing
+  // AND linking users to an external purchase flow, so this must never run.
+  if (!CAN_PURCHASE_IN_APP) {
+    // Always null, never throw. Every caller guards with `if (!url) return`
+    // before assigning window.location.href, and App.jsx calls this with a bare
+    // .then() and no .catch() — so throwing here would turn a blocked purchase
+    // into an unhandled rejection. Loud in dev, quiet and safe in production.
+    console[import.meta.env?.DEV ? 'error' : 'warn'](
+      '[subscription] purchase blocked on this build target. ' +
+      'Gate the calling UI with CAN_PURCHASE_IN_APP so this is never reached.'
+    )
+    return null
+  }
+
   // checkout_button_clicked = honest name for what happened (CTA was clicked, API call is starting).
   // checkout_started fires server-side from api/stripe.js only when the Stripe session is created.
   track('checkout_button_clicked', { plan, billingPeriod, trial: !!opts.trial, has_promo: !!opts.promo })

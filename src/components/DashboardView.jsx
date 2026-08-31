@@ -23,6 +23,7 @@ import WeeklyGoalCard from './WeeklyGoalCard'
 import { buildQuickSession, QUICK_PRESETS } from '../lib/quickStart'
 import { getDueForReview, getReviewStats } from '../lib/masteryStore'
 import { detectComeback } from '../lib/momentum'
+import { CAN_PURCHASE_IN_APP } from '../lib/platform'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
@@ -260,14 +261,16 @@ export default function DashboardView({
   // per-surface conditions below — free plan, AI usage, session count,
   // account age — are the real triggers and are enough on their own.
   const showAiChip = plan === 'free' && aiUsed >= 3 && !aiChipDismissed
-  const aiChipTrialEligible = showAiChip && !hasUsedTrial()
+  // CAN_PURCHASE_IN_APP is false on the Play build, which ships free tier only:
+  // no purchase surface and no route to one.
+  const aiChipTrialEligible = CAN_PURCHASE_IN_APP && showAiChip && !hasUsedTrial()
   const [trialCardDismissed, setTrialCardDismissed] = useState(() => {
     const ts = localStorage.getItem('studyedge_trial_card_dismissed_at')
     if (!ts) return false
     const hoursSince = (Date.now() - parseInt(ts, 10)) / 3_600_000
     return hoursSince < 24
   })
-  const showTrialCard = plan === 'free' && !hasUsedTrial() && !trialCardDismissed && !showAiChip && !(completedSessions?.length >= 1)
+  const showTrialCard = CAN_PURCHASE_IN_APP && plan === 'free' && !hasUsedTrial() && !trialCardDismissed && !showAiChip && !(completedSessions?.length >= 1)
 
   // ── Session-based nudge: shown when user completes 3+ focus sessions ──────
   const sessionsCount = completedSessions?.length ?? 0
@@ -290,6 +293,7 @@ export default function DashboardView({
     return ts === new Date().toISOString().slice(0, 10)
   })
   const showSevenDayBanner =
+    CAN_PURCHASE_IN_APP &&
     plan === 'free' &&
     !hasUsedTrial() &&
     accountAgeDays !== null &&
@@ -1113,7 +1117,7 @@ export default function DashboardView({
             )
           })()}
         </div>
-      ) : (hasCompletedFirstSession && plan === 'free' && !hasUsedTrial() && !firstBlueprintCtaDismissed) ? (
+      ) : (CAN_PURCHASE_IN_APP && hasCompletedFirstSession && plan === 'free' && !hasUsedTrial() && !firstBlueprintCtaDismissed) ? (
         <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
           <div className="dash-banner-inner" style={{
             background: 'linear-gradient(135deg, #f8f9ff, #eef1ff)',
