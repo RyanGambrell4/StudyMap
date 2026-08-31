@@ -1,5 +1,12 @@
 # Pricing source of truth + stale client — session state
 
+> **SHIPPED.** Merged to `main` as `c9b7c09` and deployed 2026-08-31.
+> Production `buildId` is `c9b7c09afbae`. Verified live: homepage defaults to
+> Monthly with no weekly tab, zero `"price": "2.99"` in JSON-LD across the site,
+> `/pricing` carries no weekly offer, `llms.txt` lists monthly and annual only,
+> `version.json` returns `no-store`, and the live `sw.js` has no install-time
+> `skipWaiting()`.
+
 Branch: `pricing-source-of-truth` (worktree `.claude/worktrees/pricing-sot`)
 Started: 2026-08-31, from `main` at `cfba4f5`.
 
