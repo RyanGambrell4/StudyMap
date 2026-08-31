@@ -32,10 +32,16 @@ export function initAnalytics() {
     capture_pageview: true,
     capture_pageleave: true,
     autocapture: false, // manual events only - keep it clean
-    session_recording: {
-      maskAllInputs: true,   // never record passwords / typed text
-      maskTextSelector: '[data-private]', // opt-in masking for extra-sensitive elements
-    },
+    // Session replay is OFF. It was active on this surface (the marketing site
+    // has always disabled it) and recorded 620 sessions in four weeks, 158 of
+    // them belonging to users who identified as high school students. maskAllInputs
+    // covered typed text but not rendered content, so recordings contained grades,
+    // course names, syllabus text and tutor conversations on screen.
+    //
+    // Off rather than masked: the privacy policy does not disclose replay and the
+    // retention period is not established, so off is the only defensible state
+    // until both are. Revisit with maskAllText once those are settled.
+    disable_session_recording: true,
     loaded: () => { if (import.meta.env.DEV) console.info('[analytics] posthog ready') },
   })
   _ready = true
