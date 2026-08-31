@@ -230,7 +230,13 @@ export default function PaywallModal({
 
           <header className="pw-head">
             <div className="pw-brand">
-              <img src="/favicon.png" alt="" width="22" height="22" />
+              {/* If the logo fails to load, drop it rather than leaving a
+                  broken-image glyph sitting next to the wordmark. Seen once in
+                  the wild; the file itself serves 200. */}
+              <img
+                src="/favicon.png" alt="" width="22" height="22"
+                onError={(e) => { e.currentTarget.style.display = 'none' }}
+              />
               <span>StudyEdge AI</span>
             </div>
             <h2 className="pw-title">{headline}</h2>
