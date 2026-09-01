@@ -103,17 +103,11 @@
     <p class="footer-note">Don't have an account? <a href="/app?signup=1">Sign up free</a>, no credit card required.</p>
   </div>
 
-  <!-- SEO content for Google -->
-  <div style="display:none;">
-    <h2>StudyEdge AI Login, getstudyedge.com</h2>
-    <p>StudyEdge AI is the AI-powered study planner for college and university students, available at getstudyedge.com. Log in to access your personalized study schedule, AI session blueprints, built-in flashcards and quizzes, AI Study Coach, and Grade Hub.</p>
-    <p>Looking for StudyEdge AI? You are at the right place, getstudyedge.com is the StudyEdge AI app for students. Not the Florida tutoring company studyedge.com.</p>
-    <ul>
-      <li><a href="/">StudyEdge AI Home, getstudyedge.com</a></li>
-      <li><a href="/app?signup=1">Create a free StudyEdge AI account</a></li>
-      <li><a href="/ai-study-coach">AI Study Coach</a></li>
-      <li><a href="/study-schedule-generator">AI Study Schedule Generator</a></li>
-    </ul>
-  </div>
+  <!-- No hidden "SEO content" block here. There was one, a display:none div
+       holding a heading, three paragraphs and a link list, commented "SEO
+       content for Google". It was the same pattern that cost the homepage its
+       ranking on 2026-08-29, and on this page it could not even have helped:
+       login.html is noindex, so nothing in it was ever going to rank. Pure
+       downside. scripts/assertNoHiddenContent.mjs now fails the build on it. -->
 </body>
 </html>

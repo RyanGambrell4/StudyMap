@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build",
+    "build": "npm run seo:hidden && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run && node scripts/check-facts.mjs",
@@ -17,7 +17,8 @@
     "indexnow": "node scripts/indexnow.mjs",
     "indexnow:submit": "node scripts/indexnow.mjs --submit",
     "build:android": "VITE_ANDROID_BUILD=1 vite build",
-    "android:sync": "VITE_ANDROID_BUILD=1 vite build && npx cap sync android"
+    "android:sync": "VITE_ANDROID_BUILD=1 vite build && npx cap sync android",
+    "seo:hidden": "node scripts/assertNoHiddenContent.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
