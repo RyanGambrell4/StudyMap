@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
 import { verifyAuth } from '../lib/server/usage.js'
+import { reportQueryError } from '../lib/server/supabaseErrors.js'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
@@ -13,11 +14,29 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
   if (!process.env.RESEND_API_KEY) return res.status(200).json({ ok: true, skipped: true })
 
-  const userId = await verifyAuth(req)
-  if (!userId) return res.status(401).json({ error: 'Unauthorized' })
+  // verifyAuth returns an object, and its failure value is truthy, so the
+  // previous `const userId = await verifyAuth(req); if (!userId)` never
+  // rejected anything: this handler ran unauthenticated, with an object
+  // standing in for the user id.
+  const auth = await verifyAuth(req)
+  if (!auth.ok) return res.status(auth.status ?? 401).json({ error: auth.error ?? 'Unauthorized' })
+  const userId = auth.userId
 
-  const { streak, email } = req.body ?? {}
-  if (!email || !streak) return res.status(400).json({ error: 'Missing streak or email' })
+  const { streak } = req.body ?? {}
+  if (!streak) return res.status(400).json({ error: 'Missing streak' })
+
+  // The recipient is resolved from the authenticated user, never taken from
+  // the request. It used to be read straight out of req.body and passed to
+  // `to:`, which together with the auth bypass above made this endpoint an
+  // open relay: any caller could send mail from noreply@getstudyedge.com to
+  // any address they chose.
+  const { data: authUser, error: authUserErr } = await supabaseAdmin.auth.admin.getUserById(userId)
+  if (authUserErr) {
+    reportQueryError(authUserErr, { table: 'auth.users', context: 'streak-broken-trigger recipient lookup' })
+    return res.status(200).json({ ok: true, skipped: 'lookup_failed' })
+  }
+  const email = authUser?.user?.email
+  if (!email) return res.status(200).json({ ok: true, skipped: 'no_email' })
 
   const ok = await canSendUserEmail(userId, 'streak-broken-trigger', 20 * 60) // 20h cooldown
   if (!ok) return res.status(200).json({ ok: true, skipped: true, reason: 'recently_sent' })

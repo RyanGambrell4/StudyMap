@@ -11,8 +11,13 @@ export const config = { maxDuration: 15 }
 
 export default async function handler(req, res) {
   if (req.method === 'GET') {
-    const userId = await verifyAuth(req)
-    if (!userId) return res.status(401).json({ error: 'Unauthorized' })
+    // verifyAuth returns an object, and its failure value is truthy, so the
+    // previous `const userId = await verifyAuth(req); if (!userId)` never
+    // rejected anything: this handler ran unauthenticated, with an object
+    // standing in for the user id.
+    const auth = await verifyAuth(req)
+    if (!auth.ok) return res.status(auth.status ?? 401).json({ error: auth.error ?? 'Unauthorized' })
+    const userId = auth.userId
 
     // Count users who signed up via this user's referral link
     const { data: signups, error: signupErr } = await supabaseAdmin
