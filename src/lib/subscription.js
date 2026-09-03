@@ -593,6 +593,18 @@ export async function createCheckoutSession(plan, billingPeriod, userEmail, user
       return { alreadySubscribed: true }
     }
 
+    // Confirmation now gates checkout instead of entry, so this is the one
+    // place a user can be stopped by it. Returning null keeps the existing
+    // `if (!url) return` contract at every call site; the event re-opens the
+    // email banner App.jsx already renders rather than adding a new surface.
+    if (res.status === 403 && data.code === 'email_unconfirmed') {
+      track('checkout_blocked_email_unconfirmed', { plan, billingPeriod, trial: !!opts.trial })
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('studyedge:email-unconfirmed'))
+      }
+      return null
+    }
+
     if (!res.ok || !data.url) {
       console.error('[subscription] Checkout session error:', data.error)
       track('checkout_error', {

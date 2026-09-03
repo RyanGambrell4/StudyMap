@@ -77,6 +77,18 @@ export default function App() {
     () => sessionStorage.getItem('studyedge_email_banner_dismissed') === '1'
   )
 
+  // Checkout is the only thing email confirmation still gates. When it blocks a
+  // purchase, un-dismiss the banner so the user is looking at the reason and
+  // the resend button, instead of a CTA that did nothing.
+  useEffect(() => {
+    const handler = () => {
+      sessionStorage.removeItem('studyedge_email_banner_dismissed')
+      setEmailBannerDismissed(false)
+    }
+    window.addEventListener('studyedge:email-unconfirmed', handler)
+    return () => window.removeEventListener('studyedge:email-unconfirmed', handler)
+  }, [])
+
   // ── Floating trial nudge (appears 2 min after entering app) ───────────────
   const [trialNudgeDismissed, setTrialNudgeDismissed] = useState(
     () => sessionStorage.getItem('studyedge_trial_nudge_dismissed') === '1'

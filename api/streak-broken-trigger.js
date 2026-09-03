@@ -10,6 +10,15 @@ const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABAS
 
 export const config = { maxDuration: 15 }
 
+// requireEmailConfirmed is asserted here but is NOT what protects this endpoint:
+// with Supabase auto-confirm on, every account satisfies it. It is kept because
+// it starts working the day we have real verification.
+//
+// What actually stops abuse today: the recipient is resolved from the
+// authenticated user rather than the request body, so this can only mail the
+// account's own address, and canSendUserEmail enforces a 20 hour cooldown per
+// user. A throwaway signup can therefore mail itself once a day, which is noise
+// rather than a relay.
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
   if (!process.env.RESEND_API_KEY) return res.status(200).json({ ok: true, skipped: true })
@@ -18,7 +27,7 @@ export default async function handler(req, res) {
   // previous `const userId = await verifyAuth(req); if (!userId)` never
   // rejected anything: this handler ran unauthenticated, with an object
   // standing in for the user id.
-  const auth = await verifyAuth(req)
+  const auth = await verifyAuth(req, { requireEmailConfirmed: true })
   if (!auth.ok) return res.status(auth.status ?? 401).json({ error: auth.error ?? 'Unauthorized' })
   const userId = auth.userId
 

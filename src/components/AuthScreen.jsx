@@ -130,6 +130,20 @@ export default function AuthScreen({ initialMode, onBack }) {
           return
         }
         track('signup_email_sent', { method: 'email' })
+        // The confirmation wall is gone. When Supabase is configured to not
+        // require confirmation up front it returns a live session here, and the
+        // user goes straight into onboarding; App.jsx shows the unconfirmed
+        // email banner and confirmation continues in the background.
+        //
+        // 90 people reached ConfirmationPending in 90 days and 3 confirmed. It
+        // is kept only as the fallback for the case where no session comes back
+        // (confirmation still required at the project level), so this screen
+        // degrades to the old behaviour instead of stranding the user.
+        if (data?.session) {
+          track('signup_entered_without_confirmation', { method: 'email' })
+          setPassword('')
+          return
+        }
         setSignupPendingEmail(email)
         setPassword('')
       } else if (mode === 'login') {
