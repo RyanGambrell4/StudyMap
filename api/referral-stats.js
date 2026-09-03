@@ -9,6 +9,16 @@ const resend = new Resend(process.env.RESEND_API_KEY)
 
 export const config = { maxDuration: 15 }
 
+// No email-confirmation gate here, deliberately. An earlier pass in this branch
+// added one on the assumption that this endpoint mails a third party. It does,
+// but not on this path: the send lives in the POST branch, which is a
+// server-to-server call authenticated by a shared secret derived from
+// SUPABASE_SERVICE_KEY and rate limited to one message per referrer per hour. A
+// normal session token cannot reach it.
+//
+// The GET branch below, which is what verifyAuth guards, only reads the caller's
+// own referral counts. Gating that on confirmation would have been a gate that
+// reads like protection while protecting nothing.
 export default async function handler(req, res) {
   if (req.method === 'GET') {
     // verifyAuth returns an object, and its failure value is truthy, so the

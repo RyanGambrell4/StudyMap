@@ -68,11 +68,18 @@ const DEFAULT_COPY = {
   unlock: 'Pro gives you 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions. Everything you need to actually stay on top of your coursework.',
 }
 
+// requireEmailConfirmed is asserted here but is NOT what protects this endpoint:
+// with Supabase auto-confirm on, every account satisfies it.
+//
+// What actually stops abuse today: the recipient is looked up from the
+// authenticated user id, so it can only mail the account's own address, and the
+// handler returns early for anyone not on free-and-never-trialed. The blast
+// radius is one message to an address the signup already claimed.
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
   if (!process.env.RESEND_API_KEY) return res.status(200).json({ ok: true, skipped: 'no_resend' })
 
-  const auth = await verifyAuth(req)
+  const auth = await verifyAuth(req, { requireEmailConfirmed: true })
   if (!auth.ok) return res.status(401).json({ error: 'Unauthorized' })
   const userId = auth.userId
 

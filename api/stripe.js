@@ -1145,6 +1145,22 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
     if (checkoutAuthErr || !checkoutUser || checkoutUser.id !== body.userId) {
       return res.status(403).json({ error: 'Forbidden' })
     }
+
+    // Email confirmation gates money, not use.
+    //
+    // It used to gate the whole product: verifyAuth() and reserveAiUsage() both
+    // rejected an unconfirmed account, so a new signup was parked on a
+    // confirmation screen before it had seen anything. 90 people reached that
+    // screen in 90 days and 3 confirmed. Those checks are gone; this is the one
+    // that stays, because a subscription needs a reachable address for receipts,
+    // dunning and cancellation mail, and because it keeps a throwaway address
+    // from opening a card-required trial.
+    if (!checkoutUser.email_confirmed_at) {
+      return res.status(403).json({
+        error: 'Confirm your email before subscribing. Check your inbox for the confirmation link.',
+        code: 'email_unconfirmed',
+      })
+    }
   }
 
   const { plan: rawPlan, billingPeriod: rawBillingPeriod, userEmail, userId, trial, promo } = body
