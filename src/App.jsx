@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import { supabase } from './lib/supabase'
+import { supabase, getAccessToken } from './lib/supabase'
 import { initUserData, clearUserData, savePlan, refreshSubscription, saveEmailDigest } from './lib/db'
 import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getCachedSubscription, TRIAL_DURATION_DAYS, TRIAL_PLAN, TRIAL_BILLING_PERIOD } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
@@ -509,6 +509,48 @@ export default function App() {
     window.location.href = '/'
   }
 
+  /**
+   * Lifecycle email endpoints, called from the client.
+   *
+   * Both of these verify a bearer token server-side and both were being called
+   * without one, so every call has returned 401 since the endpoints were
+   * written, and `.catch(() => {})` swallowed it. Neither email has ever been
+   * sent from these paths. Sending the token is half the fix; the other half is
+   * that a non-2xx now reports itself instead of disappearing.
+   *
+   * These still will not deliver mail until the email_suppression migration is
+   * applied - canSendUserEmail fails closed while the table is missing. That is
+   * a separate, deliberate state. What matters here is that the request is
+   * correct and its outcome is visible.
+   */
+  const postLifecycleEmail = async (path, body, onceKey) => {
+    try {
+      const token = await getAccessToken()
+      if (!token) { track('lifecycle_email_failed', { path, reason: 'no_session_token' }); return }
+      const res = await fetch(path, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+        body: JSON.stringify(body),
+      })
+      if (!res.ok) {
+        const detail = await res.text().catch(() => '')
+        console.error(`[lifecycle-email] ${path} failed: ${res.status} ${detail.slice(0, 200)}`)
+        track('lifecycle_email_failed', { path, reason: 'http_error', status: res.status })
+        return
+      }
+      const data = await res.json().catch(() => ({}))
+      // A 200 with skipped:true is the suppression guard doing its job, not a
+      // success. Recording it separately keeps "the path works" and "the mail
+      // went out" from being the same number.
+      track(data?.skipped ? 'lifecycle_email_skipped' : 'lifecycle_email_sent',
+            { path, reason: data?.reason ?? null })
+      if (onceKey) localStorage.setItem(onceKey, '1')
+    } catch (err) {
+      console.error(`[lifecycle-email] ${path} threw:`, err)
+      track('lifecycle_email_failed', { path, reason: err?.message ?? 'network_error' })
+    }
+  }
+
   const handleOnboardingComplete = ({ yearLevel: yl, learningStyle: ls, preferredTime, schoolType: st, emailDigest, durationMs, trialTaken }) => {
     setYearLevel(yl)
     setLearningStyle(ls)
@@ -544,18 +586,14 @@ export default function App() {
     if (session?.user?.email) {
       const key = `studyedge_onboarding_email_${session.user.id}`
       if (!localStorage.getItem(key)) {
-        fetch('/api/onboarding-complete', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: session.user.email,
-            userId: session.user.id,
-            firstName: session.user.user_metadata?.name,
-            yearLevel: yl,
-            learningStyle: ls,
-            preferredTime,
-          }),
-        }).then(() => localStorage.setItem(key, '1')).catch(() => {})
+        // email and userId are no longer sent: the endpoint resolves the
+        // recipient from the session, which is what closed the relay class.
+        postLifecycleEmail('/api/onboarding-complete', {
+          firstName: session.user.user_metadata?.name,
+          yearLevel: yl,
+          learningStyle: ls,
+          preferredTime,
+        }, key)
       }
     }
   }
@@ -605,16 +643,12 @@ export default function App() {
     if (isFirstCourse && session?.user?.email) {
       const key = `studyedge_first_plan_email_${session.user.id}`
       if (!localStorage.getItem(key)) {
-        fetch('/api/first-plan', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: session.user.email,
-            firstName: session.user.user_metadata?.name,
-            courses: newCourses.map(c => c.name).filter(Boolean),
-            userId: session.user.id,
-          }),
-        }).then(() => localStorage.setItem(key, '1')).catch(() => {})
+        // email and userId are no longer sent: the endpoint resolves the
+        // recipient from the session, which is what closed the relay class.
+        postLifecycleEmail('/api/first-plan', {
+          firstName: session.user.user_metadata?.name,
+          courses: newCourses.map(c => c.name).filter(Boolean),
+        }, key)
       }
     }
   }
