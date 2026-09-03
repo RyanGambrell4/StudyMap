@@ -49,6 +49,75 @@ still outstanding.
 - reverting to `.catch(() => {})`. The whole reason this survived three
   discoveries is that it failed silently.
 
+## Activation baseline — frozen 2026-09-02, before the A/B deploy
+
+This is the pre-deployment snapshot for the email-wall removal (Task A) and the
+first-plan generation (Task B). It is deliberately a like-for-like window:
+**2026-08-16 to 2026-09-02**, which is the only period where both
+`CourseRequiredGate` and `first_generation_succeeded` existed. Comparing
+anything wider blends two different products.
+
+Do not re-cut this baseline after deploying. Compare against these numbers.
+
+### Funnel, unique people, 2026-08-16 to 2026-09-02
+
+| Event | Events | People |
+| --- | --- | --- |
+| `oauth_clicked` | 278 | 193 |
+| `signup_completed` | 604 | 171 |
+| `onboarding_completed` | 111 | 109 |
+| `course_gate_shown` | 137 | 77 |
+| `course_added` | 102 | 63 |
+| `first_generation_succeeded` | 21 | 21 |
+| `paywall_shown` | 85 | 39 |
+| `checkout_started` | 64 | 32 |
+| `signup_started` | 14 | 14 |
+| `email_confirmation_screen_shown` | 12 | 12 |
+| `email_confirmed` | 1 | 1 |
+| `checkout_error` | 0 | 0 |
+| `dashboard_empty_state_shown` | 0 | 0 |
+
+### The two numbers that matter
+
+**Activation (Task B):** `course_gate_shown` 77 → `course_added` 63 (82%) →
+`first_generation_succeeded` 21 (**33% of course-adders, 27% of gate-viewers**).
+The gate converts well. What follows it does not. 42 people got a course and
+never generated anything.
+
+**Email wall (Task A):** `email_confirmation_screen_shown` 12 → `email_confirmed`
+1 (**8%**). Over the full 90 days the same ratio is 90 → 3.
+
+### Split by auth provider
+
+| Provider | onboarding_completed | gate_shown | course_added | generated |
+| --- | --- | --- | --- | --- |
+| google | 103 | 70 | 58 | 19 |
+| email | 6 | 7 | 5 | 2 |
+
+Google is ~95% of the funnel (838 of 983 accounts lifetime). Task A only moves
+the email path, which is small. Task B moves both. Size expectations accordingly:
+**Task A is a small absolute win; Task B is the one that should move the 33%.**
+
+### Caveats on these numbers, read before comparing
+
+- `signup_completed` reads 604 events for 171 people (3.5x per person) because
+  `SIGNED_IN` fires repeatedly inside the 30s freshness window. This is fixed in
+  the deploy being measured, so **post-deploy event counts will drop sharply and
+  that is the fix, not a regression.** Compare people, not events, across the
+  boundary.
+- `signup_started` (14) instruments the email path only in this window. It now
+  fires on the Google path too, so it will jump for the same reason.
+- `first_generation_succeeded` did not exist before 2026-08-23. Any window
+  starting earlier undercounts it to zero.
+- `checkout_error` is 0 here. The 29 occurrences investigated on 2026-09-01 were
+  a two-day outage on 2026-07-30/31, last seen 2026-08-11. Not a live bug.
+
+### Database state at snapshot
+
+983 accounts: 838 google, 142 email, 3 apple. 37 email accounts are stranded
+unconfirmed and have never been able to use the product; Task A is what releases
+them. 105 of 142 email accounts confirmed.
+
 ## Verification Agent -- 2026-08-24 (P0 audit, shipped with the funnel branch)
 
 Shipped as 4 commits on top of the 12 unmerged `worktree-fix-funnel-course-gate`
