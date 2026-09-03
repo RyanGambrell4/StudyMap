@@ -1,8 +1,9 @@
-import { verifyAuth } from '../lib/server/usage.js'
+import { verifyAuth, reserveAiUsage } from '../lib/server/usage.js'
 import { createClient } from '@supabase/supabase-js'
 import { getCourseContext, formatCourseContextForPrompt } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
+import { reportQueryError } from '../lib/server/supabaseErrors.js'
 
 let _client = null
 function getAdminClient() {
@@ -15,12 +16,63 @@ function weekExpired(resetAt) {
   return Date.now() >= new Date(resetAt).getTime()
 }
 
+/**
+ * What one podcast costs against the plan's monthly AI actions.
+ *
+ * This endpoint is the most expensive thing we run, and until now it was the
+ * only one spending money without going through reserveAiUsage(). The two
+ * gates it did have are not a quota: the plan check and the 1-per-week counter
+ * both read `user_data.subscription`, and RLS lets a signed-in user write their
+ * own row, so both are self-serve. The email-confirmation gate stops being a
+ * gate at all the moment Supabase auto-confirm is switched on.
+ *
+ * The number, measured rather than guessed (Haiku 4.5 at $1/$5 per MTok,
+ * OpenAI tts-1 at $15 per 1M characters):
+ *
+ *   script     ~2.5k in + ~1.8k out on Haiku 4.5      ~$0.012
+ *   audio      ~4-8k characters of TTS                ~$0.06-0.12
+ *   total                                             ~$0.10
+ *
+ * A median metered endpoint here is one Haiku call at roughly $0.006, so a
+ * podcast is around 15-20x a normal action.
+ *
+ * Pricing it at that ratio is not the answer — 5 free actions a month means
+ * anything above 5 is indistinguishable from "off", and it would misprice this
+ * against generate-study-coach-plan, which runs Sonnet 4.6 at 16k max_tokens
+ * for roughly $0.19 and costs 1. Marginal API cost is not what the free tier
+ * meters; it meters how much of a month's sampling one action should consume.
+ *
+ * 3 is the number that survives both directions:
+ *
+ *   free (5/mo)   one podcast a month, with 2 actions left to try anything
+ *                 else. At 5 a single call zeroes a new account's whole
+ *                 allowance before they have seen the product, which is the
+ *                 exact failure the reserve/commit split was written to stop.
+ *                 At 1 or 2 the free tier funds two or five podcasts a month.
+ *
+ *   pro (100/mo)  caps a determined subscriber at 33 podcasts, about $3.30 of
+ *                 API spend against $9.99 of revenue. This is the argument
+ *                 that actually decides it: at cost 1, those same 100 actions
+ *                 buy 100 podcasts, about $10 — a Pro subscriber could spend
+ *                 more on podcasts alone than their subscription is worth,
+ *                 before touching any other feature.
+ *
+ * Unlimited is Infinity, so the quota never binds there and the 1-per-week
+ * counter below stays the real limit for that plan.
+ */
+const PODCAST_AI_COST = 3
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
   const auth = await verifyAuth(req)
   if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
   const { userId } = auth
+
+  // Body validation runs before the reservation, so a request that is going to
+  // be rejected with a 400 never costs anyone an action.
+  const { courseId, courseName } = req.body ?? {}
+  if (!courseId) return res.status(400).json({ error: 'courseId is required' })
 
   const supabase = getAdminClient()
 
@@ -55,9 +107,6 @@ export default async function handler(req, res) {
     })
   }
 
-  const { courseId, courseName } = req.body
-  if (!courseId) return res.status(400).json({ error: 'courseId is required' })
-
   // Build content from session notes for this course
   const allNotes = row?.session_notes ?? {}
   const noteEntries = Object.entries(allNotes)
@@ -82,6 +131,17 @@ export default async function handler(req, res) {
       error: 'No study notes found for this course. Add some session notes first, then generate a podcast.',
     })
   }
+
+  // Everything that can 400 has now run. Reserve the quota before spending a
+  // cent: this is the first gate on this endpoint that a user cannot grant
+  // themselves by editing their own subscription row, and it is the only one
+  // that survives Supabase auto-confirm. `verified` is passed so this does not
+  // re-verify the bearer token that verifyAuth already checked.
+  //
+  // Nothing is written until gate.commit() below, so an Anthropic or TTS
+  // failure costs the user nothing.
+  const gate = await reserveAiUsage(req, { verified: auth, cost: PODCAST_AI_COST })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error })
 
   // Layer the server-assembled course context on top of the session-notes
   // content. Podcast content stays notes-driven; context adds tone/framing
@@ -216,21 +276,54 @@ Output only the lines. No stage directions, no headers, no extra text. No em das
     createdAt: new Date().toISOString(),
   }
 
-  const updatedSub = {
-    ...sub,
-    feature_usage: {
-      ...(sub.feature_usage ?? {}),
-      podcast: { count: 1, resetAt: weekFromNow },
-    },
-    podcasts: [podcastEntry, ...(sub.podcasts ?? [])].slice(0, 5),
+  // The audio exists, so the work succeeded: charge for it.
+  //
+  // Order matters here, and getting it wrong silently refunds the podcast.
+  // commit() writes the whole `subscription` object built from the copy it
+  // read at reservation time, and the write below does the same from `sub`,
+  // which was read before that. Whichever runs second wins outright. So commit
+  // first, then re-read, then merge the podcast fields onto what commit left
+  // behind — otherwise this update would overwrite aiQueriesUsed and the
+  // action would cost nothing.
+  await gate.commit()
+
+  // Read the error, don't just the data. If this read fails and we silently
+  // fall back to the stale `sub`, the update below writes back the pre-commit
+  // aiQueriesUsed and the podcast becomes free — the failure would look like
+  // a working endpoint.
+  const { data: freshRow, error: freshErr } = await supabase
+    .from('user_data')
+    .select('subscription')
+    .eq('user_id', userId)
+    .maybeSingle()
+
+  if (freshErr) {
+    reportQueryError(freshErr, { table: 'user_data', context: 'generate-podcast post-commit re-read' })
   }
 
-  const { error: writeErr } = await supabase
-    .from('user_data')
-    .update({ subscription: updatedSub, updated_at: new Date().toISOString() })
-    .eq('user_id', userId)
+  // Prefer what commit() just wrote. On a failed read, skip the podcast
+  // bookkeeping entirely rather than overwriting the charge with stale data:
+  // the user has their audio and has paid for it, and the weekly counter
+  // resetting is a far smaller problem than a silent refund.
+  const baseSub = freshErr ? null : (freshRow?.subscription ?? sub)
 
-  if (writeErr) console.error('[podcast] Subscription update failed', writeErr)
+  if (baseSub) {
+    const updatedSub = {
+      ...baseSub,
+      feature_usage: {
+        ...(baseSub.feature_usage ?? {}),
+        podcast: { count: 1, resetAt: weekFromNow },
+      },
+      podcasts: [podcastEntry, ...(baseSub.podcasts ?? [])].slice(0, 5),
+    }
+
+    const { error: writeErr } = await supabase
+      .from('user_data')
+      .update({ subscription: updatedSub, updated_at: new Date().toISOString() })
+      .eq('user_id', userId)
+
+    if (writeErr) console.error('[podcast] Subscription update failed', writeErr)
+  }
 
   saveArtifact({
     userId,
@@ -246,5 +339,6 @@ Output only the lines. No stage directions, no headers, no extra text. No em das
   return res.status(200).json({
     podcast: podcastEntry,
     usage: { count: 1, limit: 1, resetAt: weekFromNow },
+    aiUsage: gate.usage,
   })
 }
