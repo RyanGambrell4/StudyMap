@@ -38,8 +38,14 @@ export default async function handler(req, res) {
   const email = authUser?.user?.email
   if (!email) return res.status(200).json({ ok: true, skipped: 'no_email' })
 
-  const ok = await canSendUserEmail(userId, 'streak-broken-trigger', 20 * 60) // 20h cooldown
-  if (!ok) return res.status(200).json({ ok: true, skipped: true, reason: 'recently_sent' })
+  // Same bug class as the verifyAuth one above, in the same file, and it
+  // survived that fix. canSendUserEmail returns { ok, reason }; the failure
+  // value is an object, so `!ok` was never true and the suppression list and
+  // the frequency throttle were both bypassed on every send. The old
+  // positional arguments were ignored too - the signature has taken an options
+  // object since the suppression work, so the 20h cooldown was never 20h.
+  const gate = await canSendUserEmail(userId, { priority: 'low', email })
+  if (!gate.ok) return res.status(200).json({ ok: true, skipped: true, reason: gate.reason })
 
   const streakNum = parseInt(streak, 10) || 1
   const subject = streakNum >= 7

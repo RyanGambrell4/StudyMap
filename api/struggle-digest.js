@@ -62,8 +62,12 @@ export default async function handler(req, res) {
 
     const plan = userData?.subscription?.plan ?? 'free'
 
-    const ok = await canSendUserEmail(userId, 'struggle-digest', 6 * 24 * 60) // 6-day cooldown
-    if (!ok) { skipped++; continue }
+    // canSendUserEmail returns { ok, reason }. The failure value is an object,
+    // so `!ok` was never true and every suppressed or throttled address was
+    // mailed anyway. The positional cooldown was ignored too - the signature
+    // takes an options object.
+    const gate = await canSendUserEmail(userId, { priority: 'normal', email })
+    if (!gate.ok) { skipped++; continue }
 
     const topicList = top.map(s => `<strong>${s.topic}</strong> (${s.course_name})`).join(', ')
     const topicBullets = top.map(s => `

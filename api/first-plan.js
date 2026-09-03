@@ -2,6 +2,7 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 import { verifyAuth } from '../lib/server/usage.js'
+import { reportQueryError } from '../lib/server/supabaseErrors.js'
 import { isEnabled } from '../lib/server/featureFlags.js'
 import { enqueueEmail } from '../lib/server/emailQueue.js'
 
@@ -21,9 +22,21 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid JSON' })
   }
 
-  const { email, firstName, courses, userId } = body
-  if (!email) return res.status(400).json({ error: 'Missing email' })
-  if (userId && userId !== auth.userId) return res.status(403).json({ error: 'Forbidden' })
+  const { firstName, courses } = body
+
+  // The recipient comes from the session, never from the request. The old
+  // `if (userId && userId !== auth.userId)` guard was skippable by omitting
+  // userId, which left `email` unvalidated on its way to `to:` - with
+  // `firstName` and the course names interpolated into the body. See
+  // api/welcome-email.js for the full note.
+  const userId = auth.userId
+  const { data: authUser, error: authUserErr } = await supabaseAdmin.auth.admin.getUserById(userId)
+  if (authUserErr) {
+    reportQueryError(authUserErr, { table: 'auth.users', context: 'first-plan recipient lookup' })
+    return res.status(200).json({ ok: true, skipped: true, reason: 'lookup_failed' })
+  }
+  const email = authUser?.user?.email
+  if (!email) return res.status(200).json({ ok: true, skipped: true, reason: 'no_email' })
 
   if (!process.env.RESEND_API_KEY) {
     console.warn('[first-plan] RESEND_API_KEY not set - skipping')

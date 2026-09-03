@@ -69,8 +69,12 @@ export default async function handler(req, res) {
     const referrerEmail = referrerAuth?.user?.email
     if (!referrerEmail) return res.status(200).json({ ok: true, skipped: 'no_email' })
 
-    const ok = await canSendUserEmail(referrerId, 'referral-join', 60) // max 1/hour
-    if (!ok) return res.status(200).json({ ok: true, skipped: 'cooldown' })
+    // canSendUserEmail returns { ok, reason }. The failure value is an object,
+    // so `!ok` was never true: suppression and throttling were both bypassed.
+    // The positional cooldown was ignored as well - the signature takes an
+    // options object.
+    const gate = await canSendUserEmail(referrerId, { priority: 'normal', email: referrerEmail })
+    if (!gate.ok) return res.status(200).json({ ok: true, skipped: gate.reason })
 
     const firstName = referrerEmail.split('@')[0].split('.')?.[0]
 

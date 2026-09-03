@@ -4,6 +4,7 @@ import { upsertContact, triggerEvent } from '../lib/server/loops.js'
 import { logUserEvent } from '../lib/server/axiom.js'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 import { verifyAuth } from '../lib/server/usage.js'
+import { reportQueryError } from '../lib/server/supabaseErrors.js'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
@@ -21,9 +22,24 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid JSON' })
   }
 
-  const { email, userId, firstName, createdAt } = body
-  if (!email) return res.status(400).json({ error: 'Missing email' })
-  if (userId && userId !== auth.userId) return res.status(403).json({ error: 'Forbidden' })
+  const { firstName, createdAt } = body
+
+  // The recipient comes from the session, never from the request.
+  //
+  // This used to read `email` straight out of the body and pass it to `to:`.
+  // The guard beside it, `if (userId && userId !== auth.userId)`, only fired
+  // when the caller supplied a userId - omit that one field and any signed-in
+  // account could send StudyEdge-branded mail from our sending domain to any
+  // address it liked, with `firstName` interpolated into the body. Same open
+  // relay as api/streak-broken-trigger.js, one authentication step further in.
+  const userId = auth.userId
+  const { data: authUser, error: authUserErr } = await supabaseAdmin.auth.admin.getUserById(userId)
+  if (authUserErr) {
+    reportQueryError(authUserErr, { table: 'auth.users', context: 'welcome-email recipient lookup' })
+    return res.status(200).json({ ok: true, skipped: true, reason: 'lookup_failed' })
+  }
+  const email = authUser?.user?.email
+  if (!email) return res.status(200).json({ ok: true, skipped: true, reason: 'no_email' })
 
   // Server-side guard: only send if the account is truly new (< 30 min old).
   // Prevents re-sends from new devices/browsers where localStorage is empty.
