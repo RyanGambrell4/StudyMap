@@ -2,12 +2,22 @@
 // Env var: WOLFRAM_APP_ID
 
 import { verifyAuth } from '../lib/server/usage.js'
+import { rateLimit } from '../lib/server/rateLimit.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 
   const auth = await verifyAuth(req, { requireEmailConfirmed: false })
   if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
+
+  // Paid third-party API with no quota and, as of this commit, no caller in the
+  // app at all - the only reference to Wolfram in src/ is marketing copy on the
+  // landing page. An endpoint nothing uses should still not be a free meter for
+  // anyone holding a valid token.
+  const rl = await rateLimit(`wolfram:${auth.userId}`, 30, 3600)
+  if (!rl.allowed) {
+    return res.status(429).json({ error: 'Too many requests. Try again shortly.', answer: null, available: false })
+  }
 
   const appId = process.env.WOLFRAM_APP_ID
   if (!appId) return res.status(503).json({ error: 'Wolfram not configured' })

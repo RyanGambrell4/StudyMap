@@ -2,12 +2,23 @@
 // Env var: OPENAI_API_KEY
 
 import { verifyAuth } from '../lib/server/usage.js'
+import { rateLimit } from '../lib/server/rateLimit.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
 
   const auth = await verifyAuth(req, { requireEmailConfirmed: false })
   if (!auth.ok) return res.status(auth.status).json({ error: auth.error })
+
+  // Spends money on OpenAI and had no limit of any kind. Deliberately NOT billed
+  // against the monthly AI allowance: this backs flashcard dedup and runs several
+  // times per generation, so charging a study boost per call would exhaust a free
+  // account in one sitting. It needs a ceiling, not a price. Its own Redis key, so
+  // it does not eat the user's AI request budget.
+  const rl = await rateLimit(`embed:${auth.userId}`, 60, 3600)
+  if (!rl.allowed) {
+    return res.status(429).json({ error: 'Too many requests. Try again shortly.', embeddings: [] })
+  }
 
   const apiKey = process.env.OPENAI_API_KEY
   if (!apiKey) return res.status(503).json({ error: 'Embeddings not configured', embeddings: [] })

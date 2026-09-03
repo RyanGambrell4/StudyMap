@@ -1,4 +1,4 @@
-import { verifyAuth } from '../lib/server/usage.js'
+import { verifyAuth, reserveAiUsage } from '../lib/server/usage.js'
 import { createClient } from '@supabase/supabase-js'
 import { getCourseContext, formatCourseContextForPrompt } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
@@ -15,6 +15,11 @@ function weekExpired(resetAt) {
   return Date.now() >= new Date(resetAt).getTime()
 }
 
+// Two paid APIs run past this point: Anthropic for the script, OpenAI TTS for
+// the audio. Until this commit nothing metered them. The Unlimited-plan check
+// and the one-per-week cap below are the primary controls; the shared AI
+// reservation adds the Redis sliding-window rate limit those two do not give
+// us, and puts this endpoint's spend in the same ledger as every other.
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
 
@@ -57,6 +62,13 @@ export default async function handler(req, res) {
 
   const { courseId, courseName } = req.body
   if (!courseId) return res.status(400).json({ error: 'courseId is required' })
+
+  // Reserved only now, once the request is known to be well formed and the plan
+  // and weekly cap have both passed - the same ordering the other AI endpoints
+  // use, so a request that is about to 400 does not cost anything. For Unlimited
+  // the quota limit is Infinity, so this never rejects a paying user on count.
+  const gate = await reserveAiUsage(req, { verified: auth })
+  if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
   // Build content from session notes for this course
   const allNotes = row?.session_notes ?? {}
@@ -242,6 +254,10 @@ Output only the lines. No stage directions, no headers, no extra text. No em das
     payload: { script, audioUrl: publicUrl, segments },
   }).then(w => { if (!w.ok) console.warn('[podcast] saveArtifact failed', w.error) })
     .catch(err => console.warn('[podcast] saveArtifact threw', err?.message))
+
+  // Committed only on the success path, so a run that failed part way through
+  // does not bill the user for audio they never received.
+  await gate.commit()
 
   return res.status(200).json({
     podcast: podcastEntry,
