@@ -1,4 +1,5 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
+import { checkFeatureRateLimit } from '../lib/server/rateLimit.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
@@ -48,8 +49,27 @@ export default async function handler(req, res) {
   }
 
   // The course has resolved and the request is well formed, so this is the
-  // first point at which it is honest to charge for it. predict-grade does no
-  // AI work and never reserves.
+  // first point at which it is honest to charge for it.
+  //
+  // predict-grade stays free, deliberately. It is one Haiku call with
+  // max_tokens 1000, about a tenth of a cent, and it is the moment a student
+  // sees what the product is for — spending one of a free account's five
+  // actions on it would cost more in conversion than it saves.
+  //
+  // But the comment that used to sit here said predict-grade "does no AI work",
+  // and that was simply false: it calls Anthropic like every other mode. Since
+  // skipping reserveAiUsage also skips checkAiRateLimit, this was the only AI
+  // call in the product with no ceiling of any kind. Free is a pricing choice;
+  // unlimited was an accident. It gets its own ceiling instead of the monthly
+  // allowance.
+  if (isPredict) {
+    const limit = await checkFeatureRateLimit(auth.userId, 'predict-grade', { perMinute: 6, perDay: 60 })
+    if (!limit.allowed) {
+      if (limit.retryAfter) res.setHeader('Retry-After', String(limit.retryAfter))
+      return res.status(429).json({ error: limit.error })
+    }
+  }
+
   const gate = isPredict ? auth : await reserveAiUsage(req, { verified: auth })
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
