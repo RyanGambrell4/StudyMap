@@ -62,6 +62,12 @@ export default function AuthScreen({ initialMode, onBack }) {
     if (trial === '1') preserve.set('trial', '1')
     const qs = preserve.toString()
     const redirectTo = `${window.location.origin}/app${qs ? '?' + qs : ''}`
+    // signup_started previously fired only in the email branch of handleSubmit,
+    // so it instrumented a minority path and read as top-of-funnel. Fire it on
+    // the Google path too, with method, so the two are comparable.
+    if (mode === 'signup') {
+      track('signup_started', { method: 'google', plan_context: planContext?.plan ?? null })
+    }
     track('oauth_clicked', { provider: 'google', mode, plan_context: planContext?.plan ?? null })
     const { error } = await supabase.auth.signInWithOAuth({
       provider: 'google',

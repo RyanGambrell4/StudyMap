@@ -268,7 +268,15 @@ export default function App() {
         })
         register({ auth_provider: session.user.app_metadata?.provider ?? 'email' })
         track('user_signed_in', { fresh_signup: !!isFreshSignup, auth_provider: session.user.app_metadata?.provider ?? 'email' })
-        if (isFreshSignup) {
+        // isFreshSignup is a 30s window, and SIGNED_IN fires more than once
+        // inside it: on initial load, on tab focus, and on token refresh. That
+        // produced 1808 signup_completed events for 568 people, so the event
+        // could not be used to count signups. The guard is the same one this
+        // file already uses for the one-shot lifecycle emails below.
+        const signupCountedKey = `studyedge_signup_counted_${session.user.id}`
+        const alreadyCounted = localStorage.getItem(signupCountedKey) === '1'
+        if (isFreshSignup && !alreadyCounted) {
+          localStorage.setItem(signupCountedKey, '1')
           track('signup_completed', {
             auth_provider: session.user.app_metadata?.provider ?? 'email',
             ...(firstTouch && {
