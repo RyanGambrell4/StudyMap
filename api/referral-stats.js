@@ -69,8 +69,11 @@ export default async function handler(req, res) {
     const referrerEmail = referrerAuth?.user?.email
     if (!referrerEmail) return res.status(200).json({ ok: true, skipped: 'no_email' })
 
-    const ok = await canSendUserEmail(referrerId, 'referral-join', 60) // max 1/hour
-    if (!ok) return res.status(200).json({ ok: true, skipped: 'cooldown' })
+    // Same defect as the two above. This one mails the referrer, so ignoring the
+    // suppression list meant a bounced or complained referrer kept receiving mail
+    // every time someone used their link.
+    const gate = await canSendUserEmail(referrerId, { priority: 'normal', email: referrerEmail })
+    if (!gate.ok) return res.status(200).json({ ok: true, skipped: gate.reason ?? 'throttled' })
 
     const firstName = referrerEmail.split('@')[0].split('.')?.[0]
 

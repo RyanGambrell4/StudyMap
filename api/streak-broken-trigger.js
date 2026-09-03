@@ -38,8 +38,16 @@ export default async function handler(req, res) {
   const email = authUser?.user?.email
   if (!email) return res.status(200).json({ ok: true, skipped: 'no_email' })
 
-  const ok = await canSendUserEmail(userId, 'streak-broken-trigger', 20 * 60) // 20h cooldown
-  if (!ok) return res.status(200).json({ ok: true, skipped: true, reason: 'recently_sent' })
+  // Was `canSendUserEmail(userId, 'streak-broken-trigger', 20 * 60)` assigned to
+  // `ok` and tested with `if (!ok)`. Two faults in one line: the second argument
+  // is an options object, not a name, so the intended cooldown was never applied
+  // and priority silently defaulted; and the return value is an object, so
+  // `if (!ok)` was never true and the result was discarded. That meant this
+  // endpoint ignored the suppression list, which is the thing standing between
+  // us and sending to addresses that have already hard-bounced or complained.
+  // 'low' matches api/streak-broken.js, the cron that sends the same message.
+  const gate = await canSendUserEmail(userId, { priority: 'low', email })
+  if (!gate.ok) return res.status(200).json({ ok: true, skipped: true, reason: gate.reason ?? 'throttled' })
 
   const streakNum = parseInt(streak, 10) || 1
   const subject = streakNum >= 7

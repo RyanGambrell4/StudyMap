@@ -62,8 +62,11 @@ export default async function handler(req, res) {
 
     const plan = userData?.subscription?.plan ?? 'free'
 
-    const ok = await canSendUserEmail(userId, 'struggle-digest', 6 * 24 * 60) // 6-day cooldown
-    if (!ok) { skipped++; continue }
+    // Same defect as streak-broken-trigger: positional args against an options
+    // signature, and an object tested for truthiness. The 6 day intent maps to
+    // 'low' (>= 5 days), and the suppression check now actually applies.
+    const gate = await canSendUserEmail(userId, { priority: 'low' })
+    if (!gate.ok) { skipped++; continue }
 
     const topicList = top.map(s => `<strong>${s.topic}</strong> (${s.course_name})`).join(', ')
     const topicBullets = top.map(s => `
