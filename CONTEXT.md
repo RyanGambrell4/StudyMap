@@ -1,5 +1,54 @@
 # StudyEdge AI — Living Context
 
+## Known dead since forever: client-called lifecycle email (found 3rd time, 2026-09-03)
+
+Writing this down because it has now been rediscovered three separate times and
+each time it looked like a new bug.
+
+`/api/onboarding-complete` and `/api/first-plan` are called from `src/App.jsx`
+after onboarding and after the first course. Both endpoints call `verifyAuth`,
+which requires a bearer token. Both were being called with
+`headers: { 'Content-Type': 'application/json' }` and nothing else.
+
+**Every call has returned 401 since the endpoints were written.** Neither email
+has ever been sent from these paths, for any user, ever. The failure was
+invisible because both call sites ended in `.catch(() => {})` and the endpoints
+return 200 for most non-delivery cases anyway, so nothing logged, nothing
+alerted, and no metric moved.
+
+Fixed on the activation branch: both now send `Authorization: Bearer <token>`
+via a shared `postLifecycleEmail()` helper, and a non-2xx is logged and tracked
+as `lifecycle_email_failed` rather than swallowed. `email` and `userId` are no
+longer sent in the body at all — the endpoints resolve the recipient from the
+session, which is what closed the relay class in `a134876`.
+
+### They still will not deliver mail, and that is expected
+
+`canSendUserEmail` fails closed while `email_suppression` is missing, and that
+table does not exist in production — confirmed against `information_schema` on
+2026-09-02, which is the same state the `emailGuard.js` comment described in
+July. So these will report `lifecycle_email_skipped` with a suppression reason
+until `migrations/20260821_email_suppression_and_queue_v2.sql` is applied.
+
+That is two distinct problems that look identical from the outside, which is
+why this keeps getting rediscovered:
+
+1. **the request was malformed** (401, no token) — fixed
+2. **the send is deliberately blocked** (suppression list unreadable) — open,
+   needs the migration
+
+`lifecycle_email_sent` vs `lifecycle_email_skipped` now tells them apart. If you
+see neither, the path is broken again. If you see `skipped`, the migration is
+still outstanding.
+
+### Do not "fix" this by
+
+- adding `EMAIL_SUPPRESSION_FAIL_OPEN=1`. That restores sending to addresses
+  that have already hard-bounced or complained, which is the opposite of what is
+  wanted heading into a period of unverified signups.
+- reverting to `.catch(() => {})`. The whole reason this survived three
+  discoveries is that it failed silently.
+
 ## Verification Agent -- 2026-08-24 (P0 audit, shipped with the funnel branch)
 
 Shipped as 4 commits on top of the 12 unmerged `worktree-fix-funnel-course-gate`
