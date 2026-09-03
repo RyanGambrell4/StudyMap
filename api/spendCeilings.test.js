@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { readFileSync } from 'fs'
+import { readFileSync, readdirSync } from 'fs'
 import { join } from 'path'
 
 /**
@@ -123,6 +123,22 @@ describe('predict-grade', () => {
   it('no longer claims it does no AI work, because it does', () => {
     const src = read('generate-study-tools.js')
     expect(src).not.toMatch(/predict-grade does no AI work/)
+  })
+})
+
+describe('wolfram', () => {
+  it('is gone, and nothing fetches it', () => {
+    const files = readdirSync(API_DIR)
+    expect(files).not.toContain('wolfram.js')
+
+    // The endpoint was removed because it had never once run: chat-tutor called
+    // it over HTTP with no Authorization header and got 401 back every time.
+    // A future caller reintroducing that fetch would be reviving dead code
+    // against a route that no longer exists.
+    const callers = files
+      .filter(f => f.endsWith('.js') && !f.endsWith('.test.js'))
+      .filter(f => /fetch\([^)]*\/api\/wolfram/.test(read(f)))
+    expect(callers, `still fetching /api/wolfram: ${callers.join(', ')}`).toEqual([])
   })
 })
 

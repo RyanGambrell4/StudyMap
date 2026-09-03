@@ -146,26 +146,20 @@ Only include this line when the student is clearly struggling. Otherwise omit it
   // blow the context window.
   const recentMessages = tutorMemory === true ? messages.slice(-60) : messages.slice(-10)
 
-  // Try Wolfram Alpha for math/science/calculation queries
-  let wolframContext = ''
-  const mathPattern = /\b(solve|calculate|compute|integral|derivative|equation|factor|simplify|convert|what is \d|how many|square root|log|sin|cos|tan|percent|probability)\b/i
-  if (mathPattern.test(latestUserMessage)) {
-    try {
-      const wolfRes = await fetch(`${process.env.NEXT_PUBLIC_APP_URL || 'https://getstudyedge.com'}/api/wolfram`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query: latestUserMessage }),
-      })
-      const wolfData = await wolfRes.json()
-      if (wolfData.available && wolfData.answer) {
-        wolframContext = `\n\n[Wolfram Alpha computed result for this query: "${wolfData.answer}". Use this as ground truth for the calculation.]\n`
-      }
-    } catch {
-      // Wolfram unavailable - proceed without it
-    }
-  }
-
-  const effectiveSystemPrompt = systemPrompt + wolframContext
+  // The Wolfram Alpha lookup that used to sit here is gone, along with
+  // api/wolfram.js.
+  //
+  // It never once ran. This handler called our own /api/wolfram over HTTP with
+  // no Authorization header, and that endpoint starts with verifyAuth, so the
+  // fetch got back {"error":"Unauthorized"} every time. `wolfData.available`
+  // was undefined, the branch never fired, and nothing was ever added to the
+  // prompt. Confirmed against production before removing it: an unauthenticated
+  // POST to /api/wolfram returns 401, which is exactly the request this made.
+  //
+  // So this cost nothing and delivered nothing, while adding a full extra HTTP
+  // round trip to every tutor message that mentioned a number, inside the
+  // latency budget of a streaming response.
+  const effectiveSystemPrompt = systemPrompt
 
   // Set SSE headers
   res.setHeader('Content-Type', 'text/event-stream')
