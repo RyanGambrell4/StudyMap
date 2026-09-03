@@ -18,6 +18,7 @@ import { Resend } from 'resend'
 import { onTrialEndingSoon, onUpgraded, onChurned } from '../lib/server/loops.js'
 import { preheader, listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
 import { sendFounderCancellationEmail } from '../lib/server/founderOutreach.js'
+import { commitStripeBilling } from '../lib/server/billing.js'
 import { createTrialCancelOffer, userHasExistingOffer } from '../lib/server/oneTimeOffer.js'
 import { sendProWelcomeEmail } from '../lib/server/proWelcomeEmail.js'
 import { resolveCheckoutPlan, TRIAL_PLAN, TRIAL_BILLING_PERIOD, TRIAL_PERIOD_DAYS } from '../lib/server/trialPlan.js'
@@ -731,6 +732,23 @@ ${preheader('You started signing up for Pro but didn\'t finish. Your spot is sti
                 ? new Date().toISOString()
                 : null),
         }
+
+        // public.user_billing is authoritative for plan and status, and this
+        // webhook is the only thing permitted to write them. It goes first: if
+        // the mirror below fails, the user is entitled to exactly what they
+        // paid for and the client is briefly stale, which is the right way
+        // round. Doing it the other way would mean a failed write could leave
+        // someone paying for a plan the server refuses to honour.
+        const billingWrite = await commitStripeBilling(supabaseAdmin, userId, {
+          plan:             mergedSub.plan,
+          status:           mergedSub.status,
+          stripeCustomerId: mergedSub.stripeCustomerId,
+          stripeSubId:      mergedSub.stripeSubId,
+          billingPeriod:    mergedSub.billingPeriod,
+          currentPeriodEnd: mergedSub.currentPeriodEnd,
+          trialUsedAt:      mergedSub.trialUsedAt,
+        })
+        if (!billingWrite.ok) throw new Error(`user_billing write failed: ${billingWrite.error}`)
 
         const { error } = await supabaseAdmin
           .from('user_data')

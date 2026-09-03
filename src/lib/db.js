@@ -8,20 +8,44 @@
 
 import { supabase } from './supabase'
 import { initSubscription, clearSubscription } from './subscription'
+import { identifyUser } from './analytics'
 
 let _cache = null   // all user data
 let _userId = null  // current user's id
+let _billing = null // public.user_billing row: readable here, writable only by the server
+
+/**
+ * Fetch the server-owned billing row.
+ *
+ * Its RLS grants SELECT on your own row and nothing else, so this read is
+ * expected to succeed and any write from here is expected to fail. Returns null
+ * rather than throwing when the table is absent, so the app still loads on a
+ * deploy that lands before the migration.
+ */
+async function fetchBilling(uid) {
+  const { data, error } = await supabase
+    .from('user_billing')
+    .select('plan, status, granted_by, ai_queries_used, ai_queries_reset_at, current_period_end, billing_period')
+    .eq('user_id', uid)
+    .maybeSingle()
+
+  if (error) {
+    console.warn('[db] user_billing unavailable, falling back to the legacy blob:', error.message)
+    return null
+  }
+  return data ?? null
+}
 
 // ── Init ──────────────────────────────────────────────────────────────────────
 
 /** Called once after login. Fetches all data and fills the cache. */
 export async function initUserData(uid) {
   _userId = uid
-  const { data, error } = await supabase
-    .from('user_data')
-    .select('*')
-    .eq('user_id', uid)
-    .maybeSingle()
+  const [{ data, error }, billing] = await Promise.all([
+    supabase.from('user_data').select('*').eq('user_id', uid).maybeSingle(),
+    fetchBilling(uid),
+  ])
+  _billing = billing
 
   if (error) console.error('[db] initUserData error', error)
 
@@ -42,7 +66,25 @@ export async function initUserData(uid) {
   if (_cache && !_cache.completed_sessions) _cache.completed_sessions = []
 
   // Initialise subscription cache from DB data
-  initSubscription(uid, _cache.subscription ?? null)
+  initSubscription(uid, _cache.subscription ?? null, _billing)
+
+  // Stamp the comp marker onto the PostHog person so every funnel, conversion
+  // and retention number in the project can exclude these accounts.
+  //
+  // Thirteen accounts hold a free Unlimited plan, three of them ours. Left
+  // unmarked they sit in the numerator of activation, the denominator of
+  // conversion and the top of retention forever, and in six months nobody
+  // remembers why the cohort looks strange. Set from user_billing rather than
+  // the legacy blob so it cannot be flipped from the browser.
+  //
+  // Filter in PostHog with:  person.properties.comped is not set  (or != true)
+  if (_billing) {
+    identifyUser(uid, {
+      comped:       !!_billing.granted_by,
+      granted_by:   _billing.granted_by ?? null,
+      billing_plan: _billing.plan ?? 'free',
+    })
+  }
 
   return _cache
 }
@@ -57,13 +99,15 @@ export async function refreshSubscription(uid) {
   if (error) { console.error('[db] refreshSubscription error', error); return }
   const sub = data?.subscription ?? null
   if (_cache) _cache.subscription = sub
-  initSubscription(uid, sub)
+  _billing = await fetchBilling(uid)
+  initSubscription(uid, sub, _billing)
 }
 
 /** Clear cache on sign-out */
 export function clearUserData() {
   _cache = null
   _userId = null
+  _billing = null
   clearSubscription()
 }
 

@@ -58,7 +58,11 @@ describe('the free AI allowance has exactly one definition', () => {
     // reserveAiUsage resets the counter on a month boundary via isNewMonth.
     // If the model ever moves off monthly, that helper has to move with it.
     const server = readFileSync(new URL('../../lib/server/usage.js', import.meta.url), 'utf8')
-    expect(server).toContain('isNewMonth(sub.aiQueriesResetAt)')
+    // The reset field moved from the user-writable user_data.subscription blob
+    // to the server-owned user_billing row, so this reads `billing` rather than
+    // `sub`. The assertion is unchanged in intent: the server, not the client,
+    // decides when the month rolls over.
+    expect(server).toContain('isNewMonth(billing.aiQueriesResetAt)')
     expect(AI_ACTION_PERIOD).toBe('month')
   })
 

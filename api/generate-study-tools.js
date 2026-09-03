@@ -63,6 +63,17 @@ export default async function handler(req, res) {
   // unlimited was an accident. It gets its own ceiling instead of the monthly
   // allowance.
   if (isPredict) {
+    // NOTE, and re-read this before moving anything expensive onto this path:
+    // checkFeatureRateLimit is the ONLY ceiling on this call. There is no
+    // reservation behind it. And rateLimit() FAILS OPEN when Redis is
+    // unreachable or unconfigured, so a Redis outage removes the limit
+    // entirely rather than degrading it.
+    //
+    // That is an acceptable trade for one Haiku call at max_tokens 1000,
+    // roughly a tenth of a cent. It stops being acceptable the moment this
+    // branch grows a bigger model, a longer output, or a second provider call.
+    // If you are here to make predict-grade do more work, give it a
+    // reservation first.
     const limit = await checkFeatureRateLimit(auth.userId, 'predict-grade', { perMinute: 6, perDay: 60 })
     if (!limit.allowed) {
       if (limit.retryAfter) res.setHeader('Retry-After', String(limit.retryAfter))

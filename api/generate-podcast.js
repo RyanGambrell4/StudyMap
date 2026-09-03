@@ -4,6 +4,7 @@ import { getCourseContext, formatCourseContextForPrompt } from '../lib/server/co
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
 import { reportQueryError } from '../lib/server/supabaseErrors.js'
+import { readBilling, commitFeatureUsage } from '../lib/server/billing.js'
 
 let _client = null
 function getAdminClient() {
@@ -87,16 +88,25 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: 'Failed to load user data.' })
   }
 
+  // Plan and the weekly counter both come from user_billing now. Both used to
+  // be read from user_data.subscription, which the user can write — so the
+  // "Unlimited only" gate and the one-a-week gate were each self-serve. Those
+  // were the two gates left standing after the email-confirmation one went
+  // away, and neither was real.
+  const billingRead = await readBilling(supabase, userId)
+  if (!billingRead.ok) return res.status(500).json({ error: 'Failed to load user data.' })
+  const billing = billingRead.billing
+
   const sub = row?.subscription ?? {}
   const activeStatuses = ['active', 'trialing', 'past_due']
-  const plan = activeStatuses.includes(sub.status) ? (sub.plan ?? 'free') : 'free'
+  const plan = activeStatuses.includes(billing.status) ? (billing.plan ?? 'free') : 'free'
 
   if (plan !== 'unlimited') {
     return res.status(403).json({ error: 'Study podcasts are available on the Unlimited plan only.', upgrade: true })
   }
 
   // Weekly limit: 1 podcast per 7 days
-  const podcastUsage = sub.feature_usage?.podcast ?? { count: 0, resetAt: null }
+  const podcastUsage = billing.featureUsage?.podcast ?? { count: 0, resetAt: null }
   const expired = weekExpired(podcastUsage.resetAt)
   const currentCount = expired ? 0 : (podcastUsage.count ?? 0)
 
@@ -277,20 +287,21 @@ Output only the lines. No stage directions, no headers, no extra text. No em das
   }
 
   // The audio exists, so the work succeeded: charge for it.
-  //
-  // Order matters here, and getting it wrong silently refunds the podcast.
-  // commit() writes the whole `subscription` object built from the copy it
-  // read at reservation time, and the write below does the same from `sub`,
-  // which was read before that. Whichever runs second wins outright. So commit
-  // first, then re-read, then merge the podcast fields onto what commit left
-  // behind — otherwise this update would overwrite aiQueriesUsed and the
-  // action would cost nothing.
   await gate.commit()
 
-  // Read the error, don't just the data. If this read fails and we silently
-  // fall back to the stale `sub`, the update below writes back the pre-commit
-  // aiQueriesUsed and the podcast becomes free — the failure would look like
-  // a working endpoint.
+  // The weekly counter now lives in user_billing, on its own column, so it no
+  // longer races the usage commit. The whole-object-overwrite hazard that used
+  // to be here — two writers each replacing the entire subscription blob from
+  // a copy read at a different moment, last write winning and silently
+  // refunding the podcast — cannot happen between two targeted column updates.
+  const featureWrite = await commitFeatureUsage(supabase, userId, {
+    ...(billing.featureUsage ?? {}),
+    podcast: { count: 1, resetAt: weekFromNow },
+  })
+  if (!featureWrite.ok) console.error('[podcast] feature usage write failed', featureWrite.error)
+
+  // The list of generated podcasts is display data the user is welcome to
+  // have, so it stays in user_data. It gates nothing.
   const { data: freshRow, error: freshErr } = await supabase
     .from('user_data')
     .select('subscription')
@@ -298,31 +309,21 @@ Output only the lines. No stage directions, no headers, no extra text. No em das
     .maybeSingle()
 
   if (freshErr) {
-    reportQueryError(freshErr, { table: 'user_data', context: 'generate-podcast post-commit re-read' })
-  }
-
-  // Prefer what commit() just wrote. On a failed read, skip the podcast
-  // bookkeeping entirely rather than overwriting the charge with stale data:
-  // the user has their audio and has paid for it, and the weekly counter
-  // resetting is a far smaller problem than a silent refund.
-  const baseSub = freshErr ? null : (freshRow?.subscription ?? sub)
-
-  if (baseSub) {
-    const updatedSub = {
-      ...baseSub,
-      feature_usage: {
-        ...(baseSub.feature_usage ?? {}),
-        podcast: { count: 1, resetAt: weekFromNow },
-      },
-      podcasts: [podcastEntry, ...(baseSub.podcasts ?? [])].slice(0, 5),
-    }
-
+    reportQueryError(freshErr, { table: 'user_data', context: 'generate-podcast podcast list re-read' })
+  } else {
+    const baseSub = freshRow?.subscription ?? sub
     const { error: writeErr } = await supabase
       .from('user_data')
-      .update({ subscription: updatedSub, updated_at: new Date().toISOString() })
+      .update({
+        subscription: {
+          ...baseSub,
+          podcasts: [podcastEntry, ...(baseSub.podcasts ?? [])].slice(0, 5),
+        },
+        updated_at: new Date().toISOString(),
+      })
       .eq('user_id', userId)
 
-    if (writeErr) console.error('[podcast] Subscription update failed', writeErr)
+    if (writeErr) console.error('[podcast] podcast list update failed', writeErr)
   }
 
   saveArtifact({

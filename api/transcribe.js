@@ -36,6 +36,13 @@ export default async function handler(req, res) {
   // Free, but not unlimited. Twelve clips a minute is faster than anyone can
   // actually speak a question, and 200 a day is well past a heavy study session
   // while still making a script pointless.
+  //
+  // NOTE, and re-read this before raising MAX_CLIP_BYTES: this rate limit and
+  // the size cap are the ONLY ceilings here — there is no reservation. And
+  // rateLimit() FAILS OPEN when Redis is unreachable, so an outage leaves the
+  // size cap alone against a paid API. Fine at 2 MB of Deepgram, a couple of
+  // cents a call. Not fine if this ever accepts a lecture-sized upload; that
+  // is what transcribe-file is for, and it reserves.
   const limit = await checkFeatureRateLimit(auth.userId, 'voice', { perMinute: 12, perDay: 200 })
   if (!limit.allowed) {
     if (limit.retryAfter) res.setHeader('Retry-After', String(limit.retryAfter))

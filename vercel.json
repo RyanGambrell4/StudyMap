@@ -68,6 +68,10 @@
   ],
   "crons": [
     {
+      "path": "/api/reconcile-billing",
+      "schedule": "0 7 * * *"
+    },
+    {
       "path": "/api/re-engage",
       "schedule": "0 10 * * *"
     },

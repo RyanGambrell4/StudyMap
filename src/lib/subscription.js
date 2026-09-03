@@ -88,6 +88,11 @@ export function canUseUnlimitedFeature(featureName) {
 let _sub = null
 let _uid = null
 
+// The row from public.user_billing, which the user can read and cannot write.
+// Null when it has not loaded (or the table is not there yet), which is why
+// every read below has to tolerate its absence rather than assume free.
+let _billing = null
+
 const DEFAULT_SUB = {
   plan: 'free',
   status: 'active',
@@ -104,20 +109,39 @@ const DEFAULT_SUB = {
 
 // ── Init / clear ──────────────────────────────────────────────────────────────
 
-export function initSubscription(uid, subFromDb) {
+export function initSubscription(uid, subFromDb, billingFromDb = null) {
   _uid = uid
   _sub = subFromDb ?? { ...DEFAULT_SUB }
+  _billing = billingFromDb ?? null
 }
 
 export function clearSubscription() {
   _sub = null
   _uid = null
+  _billing = null
 }
 
 // ── Reads ─────────────────────────────────────────────────────────────────────
 
 export function getCachedSubscription() {
   return _sub ?? { ...DEFAULT_SUB }
+}
+
+/** The server-owned billing row, or null if it has not loaded. */
+export function getCachedBilling() {
+  return _billing
+}
+
+/**
+ * A comped account: an entitlement granted by hand rather than bought.
+ *
+ * Thirteen accounts are on Unlimited for free, three of them ours. They have to
+ * be excludable from every funnel and conversion number or they quietly inflate
+ * activation, retention and ARPU forever, and nobody remembers why. This is set
+ * as a PostHog person property at identify so any insight can filter on it.
+ */
+export function isComped() {
+  return !!_billing?.granted_by
 }
 
 // ── Trial helpers ─────────────────────────────────────────────────────────────
@@ -180,21 +204,44 @@ export async function activateTrial(userId, userEmail) {
 
 // ── Plan resolution ───────────────────────────────────────────────────────────
 
-export function getActivePlan() {
-  const sub = getCachedSubscription()
+const PLAN_RANK = { free: 0, pro: 1, unlimited: 2 }
 
-  // Stripe paid subscription
+/** Resolve a plan from a { plan, status } pair, whichever table it came from. */
+function planFrom(sub) {
   const paidStatuses = ['active', 'past_due']
   if (paidStatuses.includes(sub?.status) && sub?.plan === 'unlimited') return 'unlimited'
   if (paidStatuses.includes(sub?.status) && sub?.plan === 'pro') return 'pro'
-
-  // Active trial (Stripe trialing or legacy DB-only)
-  if (isTrialActive()) return 'pro'
-
-  // Stripe trialing belt-and-suspenders
   if (sub?.status === 'trialing' && sub?.plan) return sub.plan
-
   return 'free'
+}
+
+/**
+ * The plan the UI should render.
+ *
+ * Two sources exist during Phase 1: the legacy user_data.subscription blob,
+ * which the user can write, and the user_billing row, which they cannot. The
+ * server enforces on user_billing.
+ *
+ * When they disagree, take the MORE RESTRICTIVE answer. A UI that says
+ * "Unlimited" while every action comes back 402 is worse than one that says
+ * "Free" — the first looks like the product is broken, the second looks like
+ * the paywall, and only one of those is true. This also means a user who edits
+ * their own blob gains nothing visible, which removes the reason to try.
+ *
+ * If the billing row has not loaded, fall back to the blob rather than locking
+ * a paying customer out over a failed fetch.
+ */
+export function getActivePlan() {
+  const sub = getCachedSubscription()
+
+  // The legacy answer, including the trial, which lives only in the blob.
+  let fromBlob = planFrom(sub)
+  if (fromBlob === 'free' && isTrialActive()) fromBlob = 'pro'
+
+  if (!_billing) return fromBlob
+
+  const fromBilling = planFrom({ plan: _billing.plan, status: _billing.status })
+  return PLAN_RANK[fromBilling] < PLAN_RANK[fromBlob] ? fromBilling : fromBlob
 }
 
 export function getPlanLimits() {
