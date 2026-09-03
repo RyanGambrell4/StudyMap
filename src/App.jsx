@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
 import { supabase, getAccessToken } from './lib/supabase'
 import { initUserData, clearUserData, savePlan, refreshSubscription, saveEmailDigest } from './lib/db'
-import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getCachedSubscription, TRIAL_DURATION_DAYS, TRIAL_PLAN, TRIAL_BILLING_PERIOD } from './lib/subscription'
+import { getActivePlan, canAddCourse, createCheckoutSession, activateTrial, hasUsedTrial, isTrialActive, getCachedSubscription, isSeededGenerationSource, TRIAL_DURATION_DAYS, TRIAL_PLAN, TRIAL_BILLING_PERIOD } from './lib/subscription'
 import { useTheme } from './utils/useTheme'
 import { initAnalytics, identifyUser, resetUser, track, register, registerOnce } from './lib/analytics'
 import { captureReferralParam, getStoredReferrer, clearStoredReferrer } from './lib/referral'
 import { captureFirstTouch, getFirstTouch, firstTouchPostHogProps } from './lib/firstTouch'
 import { captureUtmForOnboarding } from './lib/utmPersonalize'
+import { COURSE_COLORS } from './theme/tokens'
+import { armFirstPlan } from './lib/firstCoursePlan'
 import SharedPlanView from './components/SharedPlanView'
 import AuthScreen from './components/AuthScreen'
 import Spinner from './components/ui/spinner'
@@ -73,6 +75,12 @@ export default function App() {
 
   // ── Email verification resend state ────────────────────────────────────────
   const [resendState, setResendState] = useState('') // '' | 'sending' | 'sent' | 'error'
+  // Set to a course id when a course has just become the account's first one,
+  // from onboarding or from the course gate. OutputView watches it and
+  // generates that course's study plan straight away, so the student's first
+  // screen after setup is real output instead of a dashboard with nothing in it.
+  const [autoPlanCourseId, setAutoPlanCourseId] = useState(null)
+
   const [emailBannerDismissed, setEmailBannerDismissed] = useState(
     () => sessionStorage.getItem('studyedge_email_banner_dismissed') === '1'
   )
@@ -165,7 +173,11 @@ export default function App() {
   // state — a different screen, or a control that explains itself — never a
   // silent no-op. A refusal nobody can see is indistinguishable from a bug, and
   // this one hid for as long as it existed.
-  const openPaywall = useCallback((trigger = 'courses') => {
+  // `source` distinguishes an impression that arrived because the student did
+  // something from one that arrived because the funnel changed shape underneath
+  // them. Task B seeds a generation for every new account, so without this the
+  // paywall_shown baseline stops being comparable the day it ships.
+  const openPaywall = useCallback((trigger = 'courses', { source = 'organic' } = {}) => {
     const plan = getActivePlan()
 
     // The only sanctioned way to not open. Any future condition that wants to
@@ -188,6 +200,7 @@ export default function App() {
     const unlimitedTriggers = new Set(['tutorMemory', 'practiceExamAnalytics', 'unlimited'])
     track('paywall_shown', {
       trigger,
+      source,
       plan_required: unlimitedTriggers.has(trigger) ? 'unlimited' : 'pro',
       current_plan: plan,
     })
@@ -207,9 +220,17 @@ export default function App() {
   useEffect(() => {
     const handler = (e) => {
       if (getActivePlan() !== 'free') return
+      const genSource = e.detail?.source ?? null
+      // Defence in depth. subscription.js already refuses to dispatch this for a
+      // seeded generation; if that ever regresses, the ask still does not land
+      // on a plan the student did not ask for.
+      if (isSeededGenerationSource(genSource)) {
+        track('first_win_paywall_suppressed', { reason: 'seeded_generation', source: genSource })
+        return
+      }
       // Let the result render and be seen before the ask lands on top of it.
-      setTimeout(() => openPaywall('first-win'), 2500)
-      track('first_win_paywall_scheduled', { source: e.detail?.source ?? null })
+      setTimeout(() => openPaywall('first-win', { source: 'organic_generation' }), 2500)
+      track('first_win_paywall_scheduled', { source: genSource })
     }
     window.addEventListener('studyedge:first-win', handler)
     return () => window.removeEventListener('studyedge:first-win', handler)
@@ -551,14 +572,64 @@ export default function App() {
     }
   }
 
-  const handleOnboardingComplete = ({ yearLevel: yl, learningStyle: ls, preferredTime, schoolType: st, emailDigest, durationMs, trialTaken }) => {
+  const handleOnboardingComplete = ({ yearLevel: yl, learningStyle: ls, preferredTime, schoolType: st, emailDigest, durationMs, trialTaken, courseName, examDate }) => {
     setYearLevel(yl)
     setLearningStyle(ls)
     setSchoolType(st ?? null)
-    setSchedule({ hoursPerWeek: 15, preferredTime })
-    setCourses([])
+    const nextSchedule = { hoursPerWeek: 15, preferredTime }
+    setSchedule(nextSchedule)
+
+    // Onboarding asks for a course and an exam date and then used to throw both
+    // away: this handler called setCourses([]) and its own comment recorded the
+    // consequence as "n_courses is 0 here by definition (user lands in dashboard
+    // empty-state)". When onboarding collected them, seed the course here so the
+    // student never sees the course gate for a question they already answered.
+    // The date is only carried through when it is in the future; a stale value
+    // restored from se_ob_progress would otherwise schedule a plan into the past.
+    const seedName = typeof courseName === 'string' ? courseName.trim() : ''
+    const todayStr = new Date().toISOString().split('T')[0]
+    const seedDate = examDate && examDate > todayStr ? examDate : ''
+    const seededCourse = seedName && seedDate
+      ? {
+          id: Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+          name: seedName,
+          code: '',
+          examDate: seedDate,
+          difficulty: 'Medium',
+          targetGrade: 'A',
+          color: { name: 'custom', dot: COURSE_COLORS[0].dot },
+        }
+      : null
+
+    const seededCourses = seededCourse ? [seededCourse] : []
+    setCourses(seededCourses)
     setInitialCompletedIds(new Set())
     setShowOutput(true)
+
+    if (seededCourse) {
+      // Persisted with the values set in this call rather than the ones in
+      // scope, which are a render behind the setState calls above.
+      const seedSaved = savePlan({
+        courses: seededCourses,
+        schedule: nextSchedule,
+        learningStyle: ls,
+        yearLevel: yl,
+        schoolType: st ?? null,
+        completedIds: [],
+        assignments: [],
+        savedAt: Date.now(),
+      })
+      track('course_added', {
+        first_course: true,
+        total_courses: 1,
+        has_exam_date: true,
+        has_target_grade: true,
+        source: 'onboarding',
+      })
+      // Armed only once the write has landed. See lib/firstCoursePlan.js.
+      armFirstPlan({ persisted: seedSaved, courseId: seededCourse.id, arm: setAutoPlanCourseId })
+        .catch(() => {})
+    }
     // Persist email digest preference so the weekly cron can read it
     if (emailDigest) {
       localStorage.setItem('studyedge_email_digest', '1')
@@ -567,17 +638,18 @@ export default function App() {
     }
     saveEmailDigest(!!emailDigest)
     // duration_ms captures total time from splash to onboarding finish.
-    // n_courses is 0 here by definition (user lands in dashboard empty-state)
-    // but kept for spec compliance and future flows that may pre-seed
-    // courses. trial_taken differentiates trial-start vs. skip since both
-    // call handleOnboardingComplete.
+    // n_courses used to be 0 by definition, with a comment saying so and
+    // recording the consequence: the student landed on an empty dashboard.
+    // Onboarding now seeds the course it just asked about, so it reports what
+    // actually happened. trial_taken differentiates trial-start vs. skip since
+    // both call handleOnboardingComplete.
     track('onboarding_completed', {
       yearLevel: yl,
       learningStyle: ls,
       preferredTime,
       emailDigest: !!emailDigest,
       duration_ms: typeof durationMs === 'number' ? durationMs : null,
-      n_courses: 0,
+      n_courses: seededCourses.length,
       n_assignments: 0,
       trial_taken: !!trialTaken,
       school_type: st ?? null,
@@ -629,7 +701,12 @@ export default function App() {
       has_target_grade: !!course.targetGrade,
     })
     setCourses(newCourses)
-    savePlan({
+    // Returned so the caller can await persistence. The first-course plan
+    // generation in OutputView needs the course to exist in user_data.plan
+    // server-side before it calls the endpoint: getCourseContext() reads the
+    // course back by id, so generating before this resolves fails with
+    // course_context_failed.
+    const saved = savePlan({
       courses: newCourses,
       schedule,
       learningStyle,
@@ -651,6 +728,16 @@ export default function App() {
         }, key)
       }
     }
+
+    // Armed only once the write has landed, never alongside it. The server
+    // reads this course back by id, so arming first is a race that fails as
+    // course_context_failed and drops the student on the empty dashboard.
+    if (isFirstCourse) {
+      armFirstPlan({ persisted: saved, courseId: course.id, arm: setAutoPlanCourseId })
+        .catch(() => {})
+    }
+
+    return saved
   }
 
   const handleEditCourse = (idx, updatedCourse) => {
@@ -895,6 +982,8 @@ export default function App() {
           onEditPlan={handleEditPlan}
           onSignOut={handleSignOut}
           onAddCourse={handleAddCourse}
+          autoPlanCourseId={autoPlanCourseId}
+          onAutoPlanSettled={() => setAutoPlanCourseId(null)}
           onEditCourse={handleEditCourse}
           onDeleteCourse={handleDeleteCourse}
           userEmail={session.user.email}

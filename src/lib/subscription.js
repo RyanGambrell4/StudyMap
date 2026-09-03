@@ -486,9 +486,50 @@ export function markSuccessfulGeneration(source) {
   }
 
   track('first_generation_succeeded', { source: source ?? null, plan: getActivePlan() })
-  if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent('studyedge:first-win', { detail: { source: source ?? null } }))
+  // The first-win event is NOT dispatched here any more. This function fires on
+  // the first successful generation of any kind, including the one onboarding
+  // seeds on the student's behalf, and that one must not trigger a card ask.
+  // See maybeFireFirstWin below.
+  return true
+}
+
+// ── First-win paywall ────────────────────────────────────────────────────────
+//
+// A generation the product ran FOR the student is not a win they earned, and
+// 2.5 seconds after their first screen is the worst moment in the funnel to ask
+// for money. The ask belongs on the first generation they chose to run.
+//
+// Kept separate from markSuccessfulGeneration on purpose: firstGenerationAt
+// still gets stamped by the seeded run, because it is what unlocks the rest of
+// the entitlement logic and it is the honest answer to "has this account ever
+// produced anything". Only the ASK is deferred.
+
+export const SEEDED_GENERATION_SOURCES = new Set(['first_course_plan'])
+
+export function isSeededGenerationSource(source) {
+  return SEEDED_GENERATION_SOURCES.has(source)
+}
+
+const firstWinKey = (uid) => `studyedge_first_win_shown_${uid}`
+
+/**
+ * Dispatch the first-win event for the first generation the student ran
+ * themselves. Idempotent per user, and a no-op for seeded sources.
+ */
+export function maybeFireFirstWin(source) {
+  if (typeof window === 'undefined') return false
+  if (isSeededGenerationSource(source)) return false
+  if (!_uid) return false
+
+  const key = firstWinKey(_uid)
+  try {
+    if (localStorage.getItem(key) === '1') return false
+    localStorage.setItem(key, '1')
+  } catch {
+    // Private mode. Firing once per session beats never firing.
   }
+
+  window.dispatchEvent(new CustomEvent('studyedge:first-win', { detail: { source: source ?? null } }))
   return true
 }
 
@@ -521,6 +562,10 @@ export function incrementAIQuery(source) {
   // is the app's de facto "a generation just worked" signal. Stamping the first
   // win here is what unlocks the card ask; see hasSuccessfulGeneration.
   markSuccessfulGeneration(source ?? 'ai_action')
+
+  // Separate from the stamp above: the ask only follows a generation the
+  // student chose to run.
+  maybeFireFirstWin(source ?? 'ai_action')
 
   if (!_sub) return
   const now = new Date().toISOString()
@@ -575,7 +620,8 @@ export async function createCheckoutSession(plan, billingPeriod, userEmail, user
     // The bearer token is what activates the ownership check in api/stripe.js.
     // That check is written as `if (checkoutToken && body.userId)` and no caller
     // was sending the header, so it has never run: anyone who knew a userId
-    // could open a checkout against it.
+    // could open a checkout against it, and the email-confirmation gate added
+    // alongside it would have been dead code too.
     const accessToken = await getAccessToken()
     const res = await fetch('/api/stripe', {
       method: 'POST',

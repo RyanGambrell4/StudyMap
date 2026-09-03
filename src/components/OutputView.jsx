@@ -27,6 +27,7 @@ import BlueprintScreen from './BlueprintScreen'
 import SyllabusUploadModal from './SyllabusUploadModal'
 import SyllabusOnboardingModal from './SyllabusOnboardingModal'
 import CourseRequiredGate from './CourseRequiredGate'
+import FirstPlanGenerating from './FirstPlanGenerating'
 import { T, RADIUS } from '../theme/tokens'
 import { addUpload } from '../lib/uploadRegistry'
 import { courseIdentityPatch } from '../lib/courseIdentity'
@@ -417,6 +418,7 @@ export default function OutputView({
   courses, schedule, learningStyle, yearLevel, schoolType,
   initialCompletedIds, initialAssignments, onSavePlan, onEditPlan, onSignOut, onAddCourse, onEditCourse, onDeleteCourse,
   userEmail, userId, onShowPaywall, openSyllabusOnMount,
+  autoPlanCourseId, onAutoPlanSettled,
 }) {
   const result = useMemo(
     () => generateSchedule(courses, schedule, learningStyle, yearLevel),
@@ -544,6 +546,109 @@ export default function OutputView({
   const [gradesCourseIdx, setGradesCourseIdx] = useState(0)
   const [coachCourseIdx, setCoachCourseIdx] = useState(0)
   const [coachPlans, setCoachPlans] = useState({})
+
+  // ── First course, first plan ──────────────────────────────────────────────
+  // Onboarding and the course gate both end with a course and nothing in it.
+  // In the three weeks after the gate shipped, 63 people added a course and 21
+  // generated anything; the rest were handed a dashboard and left. The syllabus
+  // upload path already generated a plan on completion (see
+  // handleStartSyllabusOnboarding below) and the typed-course-name path did
+  // not, which is the gap this closes. Same endpoint, same contract.
+  const [firstPlan, setFirstPlan] = useState(null) // { courseName, examDate, done }
+  const autoPlanRunFor = useRef(null)
+
+  useEffect(() => {
+    if (!autoPlanCourseId) return
+    // StrictMode double-invokes effects and this one spends an AI action.
+    if (autoPlanRunFor.current === autoPlanCourseId) return
+    autoPlanRunFor.current = autoPlanCourseId
+
+    const course = courses.find(c => c.id === autoPlanCourseId)
+    if (!course) { onAutoPlanSettled?.(); return }
+
+    // A user who cannot spend an action here must not be shown a screen that
+    // promises output. They fall through to the dashboard, as before.
+    if (!canUseAI()) {
+      track('first_plan_skipped', { reason: 'no_ai_quota' })
+      onAutoPlanSettled?.()
+      return
+    }
+
+    let cancelled = false
+    setFirstPlan({ courseName: course.name, examDate: course.examDate ?? null, done: false })
+    const startedAt = Date.now()
+    track('first_plan_started', { has_exam_date: !!course.examDate })
+
+    ;(async () => {
+      try {
+        const importantDates = course.examDate
+          ? [{ label: `${course.name} exam`, date: course.examDate }]
+          : []
+        const token = await getAccessToken()
+        const res = await fetch('/api/generate-study-coach-plan', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+          body: JSON.stringify({
+            courseName: course.name,
+            courseId: course.id,
+            goal: 'Do well in this course',
+            importantDates,
+            daysPerWeek: schedule?.daysPerWeek ?? 3,
+            sessionMinutes: 60,
+            timePreference: schedule?.preferredTime ?? undefined,
+            learningStyle,
+          }),
+        })
+        const plan = await res.json()
+        if (cancelled) return
+
+        if (res.ok && plan.weeklyFocus) {
+          // Counted only once the response is known good, matching the syllabus
+          // path. incrementAIQuery is also what stamps the first successful
+          // generation and fires first_generation_succeeded.
+          // Spends one of the five free monthly AI actions, which is the real
+          // cost of a real generation. It deliberately does NOT consume the
+          // free `coachPlan` allowance (1 total): the student did not ask for
+          // this one, so charging their single manual build for it would make
+          // their first deliberate attempt hit a paywall.
+          incrementAIQuery('first_course_plan')
+          const formData = {
+            courseName: course.name,
+            goal: 'Do well in this course',
+            emphasisTopics: '',
+            importantDates,
+            sessionMinutes: 60,
+          }
+          dbSaveCoachPlan(course.id, plan, formData)
+          setCoachPlans(prev => ({ ...prev, [course.id]: { ...plan, formData } }))
+          track('first_plan_succeeded', { ms: Date.now() - startedAt })
+          // Land on the plan itself. Showing it is the entire point; returning
+          // to the dashboard would reproduce the problem this fixes.
+          setCoachCourseIdx(Math.max(0, courses.findIndex(c => c.id === course.id)))
+          setActiveSection('coach')
+          // Let the bar reach the end and rest there before the screen changes.
+          // Clearing on the same frame the response lands cuts the progress off
+          // mid-travel, which reads as a glitch rather than as work completing.
+          setFirstPlan(f => (f ? { ...f, done: true } : f))
+          await new Promise(r => setTimeout(r, 480))
+        } else {
+          track('first_plan_failed', { status: res.status, reason: plan?.error ?? 'no_plan' })
+        }
+      } catch (err) {
+        if (!cancelled) track('first_plan_failed', { status: null, reason: err?.message ?? 'network_error' })
+      } finally {
+        if (!cancelled) {
+          // Always clears. A failure drops the student on the dashboard, which
+          // is where they were before this existed, never on a stuck screen.
+          setFirstPlan(null)
+          onAutoPlanSettled?.()
+        }
+      }
+    })()
+
+    return () => { cancelled = true }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autoPlanCourseId])
   const [tutorPrefill, setTutorPrefill] = useState(null)
 
   useEffect(() => {
@@ -1621,6 +1726,19 @@ export default function OutputView({
   // The condition is the course list itself, not a "new user" flag, so a
   // returning account that has no courses lands here too rather than on a
   // dashboard that cannot work.
+  // Rendered ahead of everything else: the student has a course by now, so the
+  // gate below is already satisfied, and the dashboard underneath is the screen
+  // this exists to keep them from landing on.
+  if (firstPlan) {
+    return (
+      <FirstPlanGenerating
+        courseName={firstPlan.courseName}
+        examDate={firstPlan.examDate}
+        done={firstPlan.done}
+      />
+    )
+  }
+
   if (courses.length === 0) {
     return (
       <>

@@ -81,8 +81,12 @@ describe('the first successful generation', () => {
     // See docs/subscription-column-writes.md.
     expect(upserts).toHaveLength(1)
     expect(upserts[0].subscription.firstGenerationAt).toBeTruthy()
-    // Announced, so the card ask can fire off the win.
-    expect(dispatched.map(e => e.type)).toContain('studyedge:first-win')
+    // NOT announced from here any more. markSuccessfulGeneration fires on the
+    // first generation of any kind, including the one onboarding now seeds on
+    // the student's behalf, and a gift must not trigger a card ask. The
+    // announcement moved to maybeFireFirstWin(), which excludes seeded sources.
+    // See src/lib/firstWinSeeded.test.js.
+    expect(dispatched.map(e => e.type)).not.toContain('studyedge:first-win')
     expect(tracked.map(t => t.event)).toContain('first_generation_succeeded')
   })
 
@@ -147,7 +151,9 @@ describe('openPaywall opens, unconditionally', () => {
 
   it('the win still schedules an ask — that part was never the problem', () => {
     expect(app).toContain("window.addEventListener('studyedge:first-win', handler)")
-    expect(app).toContain("openPaywall('first-win')")
+    // Now carries a source, so a paywall impression caused by the funnel
+    // changing shape stays distinguishable from one the student caused.
+    expect(app).toContain("openPaywall('first-win', { source: 'organic_generation' })")
   })
 
   it('onboarding still contains no trial step', () => {
