@@ -1,31 +1,63 @@
 name: Revenue smoke
 
-# Runs the trial -> Stripe Checkout smoke test against production on every push
-# to main. Also runs every 6 hours so a broken deploy doesn't sit silent if no
-# new commits land for a few days.
+# ─────────────────────────────────────────────────────────────────────────────
+# DISABLED 2026-09-05. Do not re-enable without reading this.
 #
-# Background: on 2026-05-25 a one-line commit silently disabled the trial flow.
-# Zero new customers for 9 days. This workflow exists so that fails the build.
+# This workflow created REAL Stripe Checkout Sessions in LIVE MODE, four to six
+# times a day, for three months.
+#
+#   first run   2026-06-09
+#   last run    2026-09-06
+#   464 runs    348 scheduled, 105 on push, 11 on pull_request
+#   ~906 live-mode Checkout Sessions, two per run
+#
+# scripts/verify-trial-flow.mjs POSTs to https://getstudyedge.com/api/stripe,
+# which holds sk_live_. There was never a test-mode path: the script has no
+# flag for one and the production endpoint has no way to use a test key. So the
+# answer to "did it ever run against test mode" is no, it could not have.
+#
+# Every session used an email of the form trial-verify+<epoch_ms>@getstudyedge.com,
+# so they are exactly identifiable and can be excluded from analysis. They were
+# never completed, so no card was charged and no revenue is affected. What IS
+# affected is every conversion rate anyone has computed from Stripe: the
+# denominator was mostly robot.
+#
+# It also kept requesting billingPeriod: 'weekly' after weekly was retired on
+# 2026-08-30. ae7c02c updated this script's comments and its printed
+# instructions to say monthly and left the two actual postCheckout() calls on
+# weekly, which is why sessions kept appearing against a dead price ID.
+#
+# ── the workflow was not wrong to exist ──────────────────────────────────────
+# On 2026-05-25 a one-line commit silently disabled the trial flow and nobody
+# noticed for nine days. That is a real failure mode and it deserves a guard.
+# The guard just has to not transact.
+#
+# ── what a safe version needs ────────────────────────────────────────────────
+# Any of these, in rough order of effort:
+#
+#   1. A test-mode path end to end. /api/stripe would need to accept a
+#      caller-supplied mode, or a sibling endpoint gated on a shared secret
+#      would need to use STRIPE_SECRET_KEY_TEST. Then the smoke test proves the
+#      same thing against sk_test_ and creates nothing billable.
+#   2. Assert without transacting. Most of the 2026-05-25 failure is visible
+#      without creating a session at all: that /api/stripe returns 200 and a
+#      checkout.stripe.com URL for a dry-run request the endpoint declines to
+#      persist.
+#   3. If neither, run it manually before a release, not on a timer.
+#
+# Until one of those exists this file stays disabled. `on: workflow_dispatch`
+# is deliberately the ONLY trigger, and the script itself now refuses live mode
+# unless explicitly forced, so dispatching it by accident still creates nothing.
+# ─────────────────────────────────────────────────────────────────────────────
 
 on:
-  push:
-    branches: [main]
-    paths:
-      - 'src/App.jsx'
-      - 'src/lib/subscription.js'
-      - 'src/components/AuthScreen.jsx'
-      - 'src/components/PaywallModal.jsx'
-      - 'src/components/LandingPage.jsx'
-      - 'src/components/Onboarding.jsx'
-      - 'api/stripe.js'
-      - 'scripts/verify-trial-flow.mjs'
-      - '.github/workflows/revenue-smoke.yml'
-  pull_request:
-    branches: [main]
-  schedule:
-    # Every 6 hours
-    - cron: '0 */6 * * *'
+  # No schedule. No push. No pull_request. See the note above.
   workflow_dispatch:
+    inputs:
+      i_understand_this_creates_live_stripe_sessions:
+        description: 'Type CREATE-LIVE-SESSIONS to confirm. Anything else and the script refuses.'
+        required: true
+        default: 'no'
 
 jobs:
   trial-flow:
@@ -33,11 +65,9 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Wait for Vercel deploy to settle (push only)
-        if: github.event_name == 'push'
-        run: sleep 60
-
       - name: Verify trial -> Stripe Checkout
+        env:
+          ALLOW_LIVE_CHECKOUT: ${{ inputs.i_understand_this_creates_live_stripe_sessions }}
         run: node scripts/verify-trial-flow.mjs --base=https://getstudyedge.com
 
       - name: Notify failure

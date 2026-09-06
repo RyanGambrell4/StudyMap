@@ -25,6 +25,46 @@ const BASE = args.base || 'https://getstudyedge.com'
 const TEST_EMAIL = args.email || `trial-verify+${Date.now()}@getstudyedge.com`
 const TEST_USER_ID = args.userId || crypto.randomUUID()
 
+// ── This script transacts. Treat it accordingly. ────────────────────────────
+//
+// Every run POSTs twice to /api/stripe, and that endpoint holds sk_live_. So
+// every run creates two REAL Stripe Checkout Sessions in LIVE MODE. There is
+// no test-mode path here and there never was: production has one Stripe key.
+//
+// Between 2026-06-09 and 2026-09-06 a GitHub Actions schedule ran this four to
+// six times a day, 464 times, creating roughly 906 live sessions. Nothing was
+// charged, because nobody completes them, but they became 85% of recent
+// checkout volume and silently poisoned every conversion rate computed from
+// Stripe.
+//
+// The guard below is the thing that was missing. A script that spends money,
+// or that manufactures records indistinguishable from customer behaviour, has
+// to be hard to run by accident. Pointing it at localhost is free; pointing it
+// at production now requires saying so out loud.
+const IS_LIVE = /getstudyedge\.com/.test(BASE)
+const FORCED = process.env.ALLOW_LIVE_CHECKOUT === 'CREATE-LIVE-SESSIONS' || args.allowLive === true
+
+if (IS_LIVE && !FORCED) {
+  console.error(`
+Refusing to run against ${BASE}.
+
+This creates two REAL Stripe Checkout Sessions in LIVE MODE, one per POST, using
+the email ${TEST_EMAIL}. It ran on a 6-hourly schedule from
+2026-06-09 to 2026-09-06 and produced ~906 of them, which is most of the
+checkout volume in that period and the reason every funnel number from Stripe
+was wrong.
+
+If you genuinely need this against production:
+  ALLOW_LIVE_CHECKOUT=CREATE-LIVE-SESSIONS node scripts/verify-trial-flow.mjs
+
+and afterwards exclude trial-verify+*@getstudyedge.com from any analysis.
+
+Against a local server, no confirmation needed:
+  node scripts/verify-trial-flow.mjs --base=http://localhost:3000
+`)
+  process.exit(2)
+}
+
 const c = { red: '\x1b[31m', green: '\x1b[32m', dim: '\x1b[2m', reset: '\x1b[0m' }
 const pass = (msg) => console.log(`${c.green}✓${c.reset} ${msg}`)
 const fail = (msg) => console.log(`${c.red}✗${c.reset} ${msg}`)
@@ -47,7 +87,7 @@ async function main() {
 
   // 1) Trial checkout should return a Stripe URL
   console.log('1) POST /api/stripe with trial=true')
-  const t = await postCheckout({ plan: 'pro', billingPeriod: 'weekly', trial: true })
+  const t = await postCheckout({ plan: 'pro', billingPeriod: 'monthly', trial: true })
   if (t.status !== 200 || !t.data.url) {
     fail(`Expected 200 + checkout URL, got ${t.status} ${JSON.stringify(t.data)}`)
     fail('Trial checkout endpoint is broken. This is the #1 thing to fix.')
@@ -73,7 +113,7 @@ async function main() {
 
   // 3) Paid (non-trial) checkout baseline
   console.log('\n3) POST /api/stripe with trial=false (baseline)')
-  const p = await postCheckout({ plan: 'pro', billingPeriod: 'weekly', trial: false })
+  const p = await postCheckout({ plan: 'pro', billingPeriod: 'monthly', trial: false })
   if (p.status !== 200 || !p.data.url) {
     fail(`Paid checkout broken: ${p.status} ${JSON.stringify(p.data)}`)
     process.exit(1)
