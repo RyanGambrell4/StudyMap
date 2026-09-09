@@ -17,6 +17,7 @@ import {
 // redeclaration that Node rejects outright.
 import { assignScheduledDates } from '../lib/shared/coachPlan.js'
 import { logAiCall } from '../lib/server/aiCost.js'
+import { rateLimit } from '../lib/server/rateLimit.js'
 
 /**
  * What one coach plan costs against the monthly AI allowance.
@@ -38,6 +39,16 @@ import { logAiCall } from '../lib/server/aiCost.js'
  * number. Revisit once there is a week of real cost-per-endpoint data.
  */
 const COACH_PLAN_AI_COST = 5
+
+/**
+ * Hourly ceiling on coach plan ATTEMPTS per user, successful or not.
+ *
+ * Deliberately generous against real use — nobody legitimately builds five
+ * study plans in an hour, let alone twenty — and small enough that grinding
+ * failed Sonnet generations stops being free.
+ */
+const COACH_ATTEMPTS_PER_HOUR_FREE = 5
+const COACH_ATTEMPTS_PER_HOUR_PAID = 20
 
 // ─── Calendar helpers ────────────────────────────────────────────────────────
 // LLMs are unreliable at calendar math (Monday of week N, weeks-until-exam,
@@ -327,6 +338,33 @@ export default async function handler(req, res) {
   const gate = await reserveAiUsage(req, { verified: auth, cost: COACH_PLAN_AI_COST })
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
+  // A ceiling on ATTEMPTS, not on successes.
+  //
+  // reserve/commit means a generation that fails costs the user nothing, which
+  // is right and humane everywhere else in the product. Here it is also an
+  // unmetered budget: this is the one Sonnet endpoint, a failed attempt still
+  // bills us in full, and quota can never catch it because a reservation that
+  // is not committed is never written. Anyone willing to make requests that
+  // fail could previously do so as often as the generic AI limiter allowed.
+  //
+  // This does not change reserve/commit. A user who fails still pays no quota,
+  // they just cannot fail indefinitely. A free user cannot reach this line
+  // during a Redis outage anyway: checkAiRateLimit inside reserveAiUsage
+  // already refused them, so allowing on `degraded` here adds no exposure.
+  const attempts = await rateLimit(
+    `coach:attempts:${gate.userId}`,
+    gate.plan === 'free' ? COACH_ATTEMPTS_PER_HOUR_FREE : COACH_ATTEMPTS_PER_HOUR_PAID,
+    3600,
+  )
+  if (!attempts.allowed) {
+    const minutes = Math.max(1, Math.ceil(attempts.resetIn / 60))
+    return res.status(429).json({
+      error: `You've hit the hourly limit for building study plans. Try again in ${minutes} minutes.`,
+      code: 'COACH_ATTEMPT_LIMIT',
+      retryAfter: attempts.resetIn,
+    })
+  }
+
 
   let brain
   try {
@@ -500,7 +538,12 @@ Output the JSON now.`
   })()
   const expectedSessionCount = scaffold.totalWeeks * sessionsPerWeek
 
-  const callModel = async (messages) => {
+  // `phase` distinguishes the first pass from the single repair pass in the
+  // telemetry. The repair re-sends the whole first response as input and
+  // generates up to 16k again, so it is the most expensive thing this endpoint
+  // can do and it needs its own line in the cost data rather than being summed
+  // into the initial attempt.
+  const callModel = async (messages, phase = 'initial') => {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
@@ -531,7 +574,7 @@ Output the JSON now.`
 
     const data = await response.json()
     await logAiCall({
-      endpoint: 'generate-study-coach-plan',
+      endpoint: phase === 'repair' ? 'generate-study-coach-plan:repair' : 'generate-study-coach-plan',
       model: 'claude-sonnet-4-6',
       userId: gate.userId,
       plan: gate.plan,
@@ -607,7 +650,7 @@ Output the JSON now.`
         ...messages,
         { role: 'assistant', content: firstPass.text },
         { role: 'user', content: buildRepairPrompt(result.violations) },
-      ])
+      ], 'repair')
       plan = shape(repaired.raw)
       result = check(plan)
     }
