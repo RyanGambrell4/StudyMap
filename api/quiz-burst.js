@@ -4,6 +4,7 @@ import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from 
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 // pickFocus reads server-derivable signals from the CourseContext object,
 // and client-derived quiz-miss / mastery signals from the optional legacy
@@ -132,6 +133,15 @@ Rules:
       }),
     })
     const data = await response.json()
+    await logAiCall({
+      endpoint: 'quiz-burst',
+      model: 'claude-haiku-4-5-20251001',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: data?.usage,
+      ok: response.ok,
+      reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+    })
     const content = data.content?.[0]?.text
     if (!content) throw new Error('Empty AI response')
     const first = content.indexOf('[')

@@ -2,6 +2,7 @@ import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
 import { resolveCourseId } from '../lib/server/courseContext.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -54,6 +55,15 @@ Rules:
       }),
     })
     const data = await response.json()
+    await logAiCall({
+      endpoint: 'generate-mnemonic',
+      model: 'claude-haiku-4-5-20251001',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: data?.usage,
+      ok: response.ok,
+      reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+    })
     const content = data.content?.[0]?.text
     if (!content) throw new Error('Empty AI response')
     const first = content.indexOf('{')

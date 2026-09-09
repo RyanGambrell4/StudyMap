@@ -3,6 +3,7 @@
 
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
@@ -112,6 +113,15 @@ Example: [{"name":"Midterm Exam","date":"${currentYear}-03-12","type":"Midterm",
     })
 
     const anthropicData = await anthropicRes.json()
+    await logAiCall({
+      endpoint: 'scrape-syllabus',
+      model: 'claude-haiku-4-5-20251001',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: anthropicData?.usage,
+      ok: anthropicRes.ok,
+      reason: anthropicRes.ok ? null : (anthropicData?.error?.type ?? `http_${anthropicRes.status}`),
+    })
     const text = anthropicData.content?.[0]?.text
     if (!text) throw new Error(anthropicData.error?.message ?? 'Empty AI response')
 

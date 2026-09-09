@@ -3,6 +3,7 @@ import { sendUserError } from '../lib/server/userErrors.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 // Server-side variant of hasRichContext: enough grounding to write a real
 // outline, not a generic one. Deliberately conservative — if the student
@@ -131,6 +132,15 @@ Rules:
   }
 
   const data = await response.json()
+  await logAiCall({
+    endpoint: 'essay-outline',
+    model: 'claude-sonnet-4-6',
+    userId: gate.userId,
+    plan: gate.plan,
+    usage: data?.usage,
+    ok: response.ok,
+    reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+  })
   const raw = data.content?.[0]?.text || ''
   const jsonMatch = raw.match(/\{[\s\S]*\}/)
   if (!jsonMatch) return res.status(500).json({ error: 'Failed to parse AI response' })

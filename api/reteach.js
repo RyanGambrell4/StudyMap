@@ -3,6 +3,7 @@ import { sendUserError } from '../lib/server/userErrors.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildContextBlock } from '../lib/server/courseContextPrompt.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 // Re-explain a concept in a different mode. Called by the ExplainAs component
 // whenever the student taps "30-sec" / "Visual" / "Worked example" or the
@@ -89,6 +90,15 @@ No em dashes anywhere.`
       }),
     })
     const data = await response.json()
+    await logAiCall({
+      endpoint: 'reteach',
+      model: 'claude-haiku-4-5-20251001',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: data?.usage,
+      ok: response.ok,
+      reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+    })
     const content = data.content?.[0]?.text
     if (!content) throw new Error('Empty AI response')
     const first = content.indexOf('{')

@@ -1,6 +1,9 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { USER_ERRORS, sendUserError } from '../lib/server/userErrors.js'
 import { logAiCall } from '../lib/server/axiom.js'
+// Aliased: axiom.js exports its own logAiCall (the `ai.request` latency event).
+// This one is the costed `ai.call` event; both are kept.
+import { logAiCall as logAiCost } from '../lib/server/aiCost.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 
@@ -188,6 +191,15 @@ Only include this line when the student is clearly struggling. Otherwise omit it
     })
 
     if (!anthropicRes.ok) {
+      await logAiCost({
+        endpoint: 'chat-tutor',
+        model: 'claude-haiku-4-5-20251001',
+        userId: gate.userId,
+        plan: gate.plan,
+        usage: null,
+        ok: false,
+        reason: `http_${anthropicRes.status}`,
+      })
       res.write(`data: ${JSON.stringify({ error: 'AI unavailable' })}\n\n`)
       res.end()
       return
@@ -196,6 +208,11 @@ Only include this line when the student is clearly struggling. Otherwise omit it
     const reader = anthropicRes.body.getReader()
     const decoder = new TextDecoder()
     let fullText = ''
+    // A streamed response carries no usage on the body, so it has to be
+    // assembled from the stream itself: message_start has the input and cache
+    // counts, message_delta carries the running output count. Without this,
+    // chat-tutor is the one endpoint whose spend stays invisible.
+    const streamUsage = {}
 
     while (true) {
       const { done, value } = await reader.read()
@@ -210,6 +227,11 @@ Only include this line when the student is clearly struggling. Otherwise omit it
           if (data === '[DONE]') continue
           try {
             const parsed = JSON.parse(data)
+            if (parsed.type === 'message_start' && parsed.message?.usage) {
+              Object.assign(streamUsage, parsed.message.usage)
+            } else if (parsed.type === 'message_delta' && parsed.usage) {
+              Object.assign(streamUsage, parsed.usage)
+            }
             if (parsed.type === 'content_block_delta' && parsed.delta?.type === 'text_delta') {
               fullText += parsed.delta.text
               res.write(`data: ${JSON.stringify({ text: parsed.delta.text })}\n\n`)
@@ -234,6 +256,16 @@ Only include this line when the student is clearly struggling. Otherwise omit it
       userId: gate.userId,
       plan: gate.plan,
       latencyMs: Date.now() - t0,
+    })
+
+    await logAiCost({
+      endpoint: 'chat-tutor',
+      model: 'claude-haiku-4-5-20251001',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: streamUsage,
+      ok: true,
+      reason: null,
     })
 
     // The stream completed, so charge for it. This is awaited before res.end()

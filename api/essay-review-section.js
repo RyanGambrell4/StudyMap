@@ -2,6 +2,7 @@ import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 // Section-by-section drafting partner. Takes the student's draft of one
 // outline section and returns targeted feedback + concrete edits + evidence
@@ -118,6 +119,15 @@ Rules:
       }),
     })
     const data = await response.json()
+    await logAiCall({
+      endpoint: 'essay-review-section',
+      model: 'claude-sonnet-4-6',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: data?.usage,
+      ok: response.ok,
+      reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+    })
     const content = data.content?.[0]?.text
     if (!content) throw new Error('Empty AI response')
     const first = content.indexOf('{')

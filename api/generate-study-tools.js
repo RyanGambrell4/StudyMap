@@ -5,6 +5,7 @@ import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
 import { USER_ERRORS, sendUserError } from '../lib/server/userErrors.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 export default async function handler(req, res) {
   try {
@@ -158,6 +159,15 @@ Rules:
         }),
       })
       const data = await response.json()
+      await logAiCall({
+        endpoint: 'generate-study-tools',
+        model: 'claude-haiku-4-5-20251001',
+        userId: gate.userId,
+        plan: gate.plan,
+        usage: data?.usage,
+        ok: response.ok,
+        reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+      })
       const content = data.content?.[0]?.text
       if (!content) throw new Error(data.error?.message ?? 'Empty AI response')
       const strippedQ = content.replace(/```(?:json)?\s*/gi, '').replace(/```\s*/g, '')
@@ -257,6 +267,15 @@ Rules:
       }),
     })
       const data = await response.json()
+      await logAiCall({
+        endpoint: 'generate-study-tools',
+        model: 'claude-haiku-4-5-20251001',
+        userId: gate.userId,
+        plan: gate.plan,
+        usage: data?.usage,
+        ok: response.ok,
+        reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+      })
       const content = data.content?.[0]?.text
       if (!content) throw new Error(data.error?.message ?? 'Empty AI response')
       const first = content.indexOf('{')
@@ -368,8 +387,26 @@ Hard rules:
       data = JSON.parse(rawText)
     } catch (e) {
       console.error('[generate-study-tools] Anthropic returned non-JSON:', rawText.slice(0, 500))
+      await logAiCall({
+        endpoint: 'generate-study-tools',
+        model: 'claude-haiku-4-5-20251001',
+        userId: gate.userId,
+        plan: gate.plan,
+        usage: null,
+        ok: false,
+        reason: 'non_json_response',
+      })
       throw new Error('AI service returned an unexpected response. Please try again.')
     }
+    await logAiCall({
+      endpoint: 'generate-study-tools',
+      model: 'claude-haiku-4-5-20251001',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: data?.usage,
+      ok: response.ok,
+      reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+    })
     const content = data.content?.[0]?.text
     if (!content) {
       console.error('[generate-study-tools] No content. Full Anthropic response:', JSON.stringify(data).slice(0, 500))

@@ -1,5 +1,6 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -58,6 +59,15 @@ export default async function handler(req, res) {
     })
 
     const data = await response.json()
+    await logAiCall({
+      endpoint: 'scan-notes',
+      model: 'claude-haiku-4-5-20251001',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: data?.usage,
+      ok: response.ok,
+      reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+    })
     if (!response.ok) {
       throw new Error(data.error?.message ?? 'Anthropic API error')
     }

@@ -1,5 +1,6 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -71,6 +72,15 @@ export default async function handler(req, res) {
   }
 
   const data = await response.json()
+  await logAiCall({
+    endpoint: 'solve-problem',
+    model: 'claude-sonnet-4-6',
+    userId: gate.userId,
+    plan: gate.plan,
+    usage: data?.usage,
+    ok: response.ok,
+    reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+  })
   const raw = data.content?.[0]?.text || ''
   const jsonMatch = raw.match(/\{[\s\S]*\}/)
   if (!jsonMatch) return res.status(500).json({ error: 'Failed to parse AI response' })

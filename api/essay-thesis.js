@@ -2,6 +2,7 @@ import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { sendUserError } from '../lib/server/userErrors.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -72,6 +73,15 @@ Return ONLY a JSON array of 3 strings: ["thesis 1", "thesis 2", "thesis 3"]`
   }
 
   const data = await response.json()
+  await logAiCall({
+    endpoint: 'essay-thesis',
+    model: 'claude-haiku-4-5-20251001',
+    userId: gate.userId,
+    plan: gate.plan,
+    usage: data?.usage,
+    ok: response.ok,
+    reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+  })
   const raw = data.content?.[0]?.text || ''
   const arrMatch = raw.match(/\[[\s\S]*\]/)
   if (!arrMatch) return res.status(500).json({ error: 'Failed to parse response' })

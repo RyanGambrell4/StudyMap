@@ -3,6 +3,7 @@ import { sendUserError } from '../lib/server/userErrors.js'
 import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from '../lib/server/courseContext.js'
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 // Pull concept candidates out of a CourseContext + optional legacy ctx.
 function conceptsFrom(brain, legacyCtx) {
@@ -197,6 +198,15 @@ Be fair but exacting — a vague answer scores below 60. No em dashes anywhere.`
       }),
     })
     const data = await response.json()
+    await logAiCall({
+      endpoint: 'connections-mode',
+      model: 'claude-haiku-4-5-20251001',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: data?.usage,
+      ok: response.ok,
+      reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+    })
     const content = data.content?.[0]?.text
     if (!content) throw new Error('Empty AI response')
     const first = content.indexOf('{')

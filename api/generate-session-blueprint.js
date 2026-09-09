@@ -2,6 +2,7 @@ import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { USER_ERRORS, sendUserError } from '../lib/server/userErrors.js'
 import { tracedCall } from '../lib/server/langfuse.js'
 import { logAiCall } from '../lib/server/axiom.js'
+import { logAiCall as logAiCost } from '../lib/server/aiCost.js'
 import {
   ANTI_GUESSING_RULES,
   NO_STUDENT_CONTENT_DIRECTIVE,
@@ -267,6 +268,19 @@ Rules:
         output: data.usage?.output_tokens,
         total: (data.usage?.input_tokens ?? 0) + (data.usage?.output_tokens ?? 0),
       },
+    })
+
+    // Imported under an alias because lib/server/axiom.js exports its own
+    // logAiCall (the `ai.request` latency event above). This one is the costed
+    // `ai.call` event; both are kept so the latency series is not lost.
+    await logAiCost({
+      endpoint: 'generate-session-blueprint',
+      model: 'claude-haiku-4-5-20251001',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: data?.usage,
+      ok: !data?.error,
+      reason: data?.error?.type ?? null,
     })
 
     const content = data.content?.[0]?.text

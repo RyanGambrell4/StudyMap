@@ -1,5 +1,6 @@
 import { reserveAiUsage, verifyAuth } from '../lib/server/usage.js'
 import { USER_ERRORS, sendUserError } from '../lib/server/userErrors.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -136,6 +137,15 @@ ${text.slice(0, 30000)}`,
     })
 
     const data = await response.json()
+    await logAiCall({
+      endpoint: 'parse-syllabus',
+      model: 'claude-haiku-4-5-20251001',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: data?.usage,
+      ok: response.ok,
+      reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+    })
     if (!response.ok) throw new Error(data.error?.message ?? `Anthropic API error ${response.status}`)
 
     const raw = data.content?.[0]?.text

@@ -16,6 +16,7 @@ import {
 // and parseISO for the week scaffold; importing the shared ones as well is a
 // redeclaration that Node rejects outright.
 import { assignScheduledDates } from '../lib/shared/coachPlan.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 // ─── Calendar helpers ────────────────────────────────────────────────────────
 // LLMs are unreliable at calendar math (Monday of week N, weeks-until-exam,
@@ -508,6 +509,15 @@ Output the JSON now.`
     })
 
     const data = await response.json()
+    await logAiCall({
+      endpoint: 'generate-study-coach-plan',
+      model: 'claude-sonnet-4-6',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: data?.usage,
+      ok: response.ok,
+      reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+    })
     if (!response.ok) {
       throw new Error(data.error?.message ?? `Anthropic API error ${response.status}`)
     }

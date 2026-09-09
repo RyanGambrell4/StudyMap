@@ -4,6 +4,7 @@ import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from 
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 const COLORS = ['#3B61C4', '#16A34A', '#D97706', '#DC2626', '#6366F1', '#0891B2', '#DB2777', '#EA580C']
 
@@ -143,6 +144,15 @@ Grounding requirements:
     })
 
     const data = await response.json()
+    await logAiCall({
+      endpoint: 'generate-diagram',
+      model: 'claude-haiku-4-5-20251001',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: data?.usage,
+      ok: response.ok,
+      reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+    })
     const content = data.content?.[0]?.text
     if (!content) throw new Error('Empty AI response')
 

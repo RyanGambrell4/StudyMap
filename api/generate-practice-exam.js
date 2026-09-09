@@ -3,6 +3,7 @@ import { getCourseContext, formatCourseContextForPrompt, resolveCourseId } from 
 import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
 import { sendUserError } from '../lib/server/userErrors.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 const MIN_LEN = 10
 const MAX_LEN = 30
@@ -159,8 +160,26 @@ Hard rules:
     try { data = JSON.parse(raw) }
     catch {
       console.error('[generate-practice-exam] Anthropic returned non-JSON:', raw.slice(0, 400))
+      await logAiCall({
+        endpoint: 'generate-practice-exam',
+        model: 'claude-haiku-4-5-20251001',
+        userId: gate.userId,
+        plan: gate.plan,
+        usage: null,
+        ok: false,
+        reason: 'non_json_response',
+      })
       return res.status(502).json({ error: 'AI service returned an unexpected response. Please try again.' })
     }
+    await logAiCall({
+      endpoint: 'generate-practice-exam',
+      model: 'claude-haiku-4-5-20251001',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: data?.usage,
+      ok: response.ok,
+      reason: response.ok ? null : (data?.error?.type ?? `http_${response.status}`),
+    })
 
     const content = data.content?.[0]?.text
     if (!content) {

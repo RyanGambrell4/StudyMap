@@ -7,6 +7,7 @@ import { buildClientSupplementBlock } from '../lib/server/courseContextPrompt.js
 import { recordTopicSignal } from '../lib/server/topicSignals.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
 import { shapeBrainDumpResult, isRetryableWriteFailure } from '../lib/shared/brainDumpResult.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' })
@@ -150,6 +151,18 @@ ${missedRules}
           messages: [{ role: 'user', content: [{ type: 'text', text: prompt, cache_control: { type: 'ephemeral' } }] }],
         }),
       }).then(r => r.json()),
+    })
+    // tracedCall resolves the parsed body, so there is no Response to read a
+    // status off. An Anthropic error body carries `error`, so its absence is
+    // the success signal here.
+    await logAiCall({
+      endpoint: 'brain-dump-score',
+      model: 'claude-haiku-4-5-20251001',
+      userId: gate.userId,
+      plan: gate.plan,
+      usage: data?.usage,
+      ok: !data?.error,
+      reason: data?.error?.type ?? null,
     })
     const content = data.content?.[0]?.text
     if (!content) throw new Error('Empty AI response')

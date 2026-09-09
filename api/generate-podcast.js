@@ -5,6 +5,7 @@ import { ANTI_GUESSING_RULES } from '../lib/server/coachAntiGuessing.js'
 import { saveArtifact } from '../lib/server/artifactWriter.js'
 import { reportQueryError } from '../lib/server/supabaseErrors.js'
 import { readBilling, commitFeatureUsage } from '../lib/server/billing.js'
+import { logAiCall } from '../lib/server/aiCost.js'
 
 let _client = null
 function getAdminClient() {
@@ -210,6 +211,15 @@ Output only the lines. No stage directions, no headers, no extra text. No em das
   }
 
   const scriptData = await anthropicRes.json()
+  await logAiCall({
+    endpoint: 'generate-podcast',
+    model: 'claude-haiku-4-5-20251001',
+    userId: gate.userId,
+    plan: gate.plan,
+    usage: scriptData?.usage,
+    ok: anthropicRes.ok,
+    reason: anthropicRes.ok ? null : (scriptData?.error?.type ?? `http_${anthropicRes.status}`),
+  })
   const script = scriptData.content?.[0]?.text ?? ''
 
   const segments = script
