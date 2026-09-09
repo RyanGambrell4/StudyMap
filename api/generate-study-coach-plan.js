@@ -18,6 +18,27 @@ import {
 import { assignScheduledDates } from '../lib/shared/coachPlan.js'
 import { logAiCall } from '../lib/server/aiCost.js'
 
+/**
+ * What one coach plan costs against the monthly AI allowance.
+ *
+ * This is the only Sonnet 4.6 call in the product and it runs at 16k
+ * max_tokens, so a single generation is roughly 100x a Haiku call and can
+ * double again when the repair pass fires. At cost 1 it was the widest gap in
+ * the product between what a user spends and what they cost.
+ *
+ * 5 is a deliberate starting number, not a researched one, and it is worth
+ * knowing that it is contested: the rationale on PODCAST_AI_COST in
+ * api/generate-podcast.js argues against 5 for precisely this endpoint, because
+ * the free tier is 5 actions a month and a cost of 5 means one coach plan
+ * consumes a new account's entire allowance before they have seen anything
+ * else. That is the failure mode the reserve/commit split was written to avoid.
+ * Pro (100/mo) is unaffected either way, and Unlimited never binds.
+ *
+ * The `ai.call` telemetry added alongside this is what should settle the
+ * number. Revisit once there is a week of real cost-per-endpoint data.
+ */
+const COACH_PLAN_AI_COST = 5
+
 // ─── Calendar helpers ────────────────────────────────────────────────────────
 // LLMs are unreliable at calendar math (Monday of week N, weeks-until-exam,
 // phase boundaries). We compute the week scaffold deterministically here and
@@ -303,7 +324,7 @@ export default async function handler(req, res) {
   // Quota is reserved only now, once the request is known to be well formed.
   // It used to be taken at the top of the handler, so a request that was about
   // to be rejected for a missing course still cost the user an AI action.
-  const gate = await reserveAiUsage(req, { verified: auth })
+  const gate = await reserveAiUsage(req, { verified: auth, cost: COACH_PLAN_AI_COST })
   if (!gate.ok) return res.status(gate.status).json({ error: gate.error, usage: gate.usage })
 
 
