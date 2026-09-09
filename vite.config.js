@@ -21,7 +21,23 @@ if (fs.existsSync(envPath)) {
   })
 }
 
-async function anthropicPost(body) {
+// Every AI route below is opt-in. These handlers do no auth, no rate limiting
+// and no usage gating, and they spend the real ANTHROPIC_API_KEY out of .env.
+// On localhost that is only a billing leak; behind `vite --host`, an ngrok
+// tunnel for phone testing, or a shared network it is an open relay on the key
+// with no ceiling of any kind. Default off, and never default it on.
+const DEV_AI_ENABLED = process.env.ALLOW_DEV_AI === '1'
+
+const DEV_AI_ROUTES = [
+  '/api/generate-session-blueprint',
+  '/api/generate-study-coach-plan',
+  '/api/generate-study-tools',
+  '/api/generate-quick-quiz',
+  '/api/scan-notes',
+  '/api/extract-syllabus-events',
+]
+
+async function anthropicPost(body, endpointName = 'unknown') {
   const res = await fetch('https://api.anthropic.com/v1/messages', {
     method: 'POST',
     headers: {
@@ -31,7 +47,27 @@ async function anthropicPost(body) {
     },
     body: JSON.stringify(body),
   })
-  return res.json()
+  const data = await res.json()
+
+  // Local testing shows up in the same telemetry as production rather than
+  // being invisible. Imported lazily so a missing lib/ or a logging fault can
+  // never stop the dev server from booting.
+  try {
+    const { logAiCall } = await import('./lib/server/aiCost.js')
+    await logAiCall({
+      endpoint: `dev:${endpointName}`,
+      model: body?.model ?? null,
+      userId: null,
+      plan: 'dev',
+      usage: data?.usage,
+      ok: res.ok,
+      reason: res.ok ? null : (data?.error?.type ?? `http_${res.status}`),
+    })
+  } catch (err) {
+    console.error('[api] dev telemetry failed:', err?.message ?? err)
+  }
+
+  return data
 }
 
 function makeHandler(fn) {
@@ -73,6 +109,27 @@ function apiDevPlugin() {
         }
         next()
       })
+
+      // ── AI routes are opt-in ─────────────────────────────────────────────
+      // Registering a 503 for each route rather than leaving them unbound, so
+      // the failure says why instead of surfacing as a confusing 404 against
+      // the SPA fallback.
+      if (!DEV_AI_ENABLED) {
+        for (const route of DEV_AI_ROUTES) {
+          server.middlewares.use(route, (req, res) => {
+            res.statusCode = 503
+            res.setHeader('Content-Type', 'application/json')
+            res.end(JSON.stringify({
+              error: 'Dev AI routes are disabled. Set ALLOW_DEV_AI=1 in .env to enable them, and use a separate low-limit Anthropic key, never the production one.',
+              code: 'DEV_AI_DISABLED',
+            }))
+          })
+        }
+        console.log('[api] dev AI routes disabled (set ALLOW_DEV_AI=1 to enable)')
+        return
+      }
+
+      console.warn('[api] dev AI routes ENABLED — these are unauthenticated and spend the real ANTHROPIC_API_KEY')
 
       // ── /api/generate-session-blueprint ──────────────────────────────────
       server.middlewares.use('/api/generate-session-blueprint', makeHandler(async ({ courseName, sessionType, durationMinutes, examDate, targetGrade, uploadedTopics, studentFocus }) => {
@@ -124,7 +181,7 @@ Rules:
 - If exam is less than 7 days away, weight heavily toward practice and recall
 - Include a 5-min break block if session is over 50 minutes, after the halfway point`,
           }],
-        })
+        }, 'generate-session-blueprint')
         const content = data.content[0].text
         const first = content.indexOf('{')
         const last = content.lastIndexOf('}')
@@ -211,7 +268,7 @@ Rules:
 - If there are important dates, weight the weeks before them appropriately (ramp up intensity)
 - Generate enough weeks to cover all listed dates plus 1-2 weeks before the last one`,
           }],
-        })
+        }, 'generate-study-coach-plan')
         const content = data.content[0].text
         const first = content.indexOf('{')
         const last = content.lastIndexOf('}')
@@ -254,7 +311,7 @@ Rules:
 - Never use single words like "Investors" or "What" as a flashcard front
 - Focus on concepts students will actually be tested on`,
           }],
-        })
+        }, 'generate-study-tools')
         const content = data.content[0].text
         const firstBrace = content.indexOf('{')
         const lastBrace = content.lastIndexOf('}')
@@ -304,7 +361,7 @@ Rules:
 - Answer must exactly match one of the options strings
 - Explanations must be 1-2 sentences maximum`,
           }],
-        })
+        }, 'generate-quick-quiz')
         const content = data.content[0].text
         const first = content.indexOf('[')
         const last = content.lastIndexOf(']')
@@ -340,7 +397,7 @@ Rules:
               { type: 'text', text: 'Extract and clean up all the text from these handwritten notes. Format it as clear, readable study notes with headers and bullet points. Preserve all the information but make it well-organized and easy to read.' },
             ],
           }],
-        })
+        }, 'scan-notes')
         return { text: data.content?.[0]?.text ?? '' }
       }))
 
@@ -373,7 +430,7 @@ For each item return:
 Return ONLY the JSON array with no other text. Example:
 [{"name": "Midterm Exam", "date": "2026-02-12", "type": "Midterm", "weight": 20, "notes": "In Class"}]`,
           }],
-        })
+        }, 'extract-syllabus-events')
         const content = data.content[0].text
         const firstBracket = content.indexOf('[')
         const lastBracket = content.lastIndexOf(']')
@@ -450,6 +507,10 @@ export default defineConfig({
     }),
   ],
   server: {
+    // Explicit loopback bind. The dev API routes above hold the real Anthropic
+    // key, so `--host` must not be able to put them on the local network by
+    // accident. Overriding this is a deliberate act, not a flag away.
+    host: '127.0.0.1',
     proxy: {
       '/ph': {
         target: 'https://us.i.posthog.com',
