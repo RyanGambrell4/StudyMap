@@ -1,8 +1,24 @@
 # Migration runbook: `email_suppression` + `user_billing`
 
-One sitting, two migrations, in this order. Everything here was checked against
-production on 2026-09-10. Neither migration is an emergency; read the "what this
-is not" note under each before you decide the order matters.
+**STOP. These are no longer a single sitting, and the order below is now load
+bearing. Read this box before you run anything.**
+
+| | what | when |
+| --- | --- | --- |
+| **1** | `user_billing` | **Now.** It blocks Task B. |
+| **2** | `email_suppression` | **Not yet.** Four gated steps first, below. |
+
+`user_billing` moved from nice-to-have to blocking: the seeded-plan grant that
+keeps Task B from spending a student's whole month writes `bonus_ai_actions`,
+and that column only exists in this migration. Until it is applied the grant
+refuses, the seeded generation is skipped, and Task B does nothing for anyone.
+
+`email_suppression` must NOT be run until the four steps in its section are
+done, in order. Landing it early resumes lifecycle mail to every address that
+has bounced since 27 July, with no bounce telemetry to see it happening.
+
+Everything here was checked against production on 2026-09-11. `user_billing` is
+not an emergency in the security sense; read its "what this is not" note.
 
 Run both in the **Supabase SQL editor** against project `vpmgamaspefwqywttdtj`.
 Both files are idempotent (`IF NOT EXISTS` / `ON CONFLICT DO NOTHING`), so a
@@ -29,98 +45,7 @@ does a full-table backfill and a snapshot makes the rollback a non-event.
 
 ---
 
-## Migration 1 — `email_suppression` (+ `email_queue`, `app_config`)
-
-**File:** `migrations/20260821_email_suppression_and_queue_v2.sql` (148 lines)
-
-**What it does:** creates three locked tables and adds `user_data.feature_flags`.
-RLS on, **zero policies**, `REVOKE ALL` from `anon` and `authenticated` — service
-role only.
-
-**What it unblocks:** `canSendUserEmail()` fails closed while the table is
-missing, so **every** lifecycle email is currently refused. This is why nothing
-has sent. It also unblocks the `lifecycle` commit on the activation branch.
-
-**What this is not:** it does not suppress anybody. It creates an *empty* table.
-Every address that hard-bounced or complained since 27 July is still absent from
-it, so the moment it exists, lifecycle mail resumes to all of them.
-
-### Steps
-
-1. Paste the whole file into the SQL editor and run it. It is wrapped in
-   `BEGIN; … COMMIT;` so it lands atomically.
-
-2. **Verify — locked correctly.** Expect three rows, `relrowsecurity = true`,
-   `policies = 0` for all three:
-
-```sql
-select c.relname, c.relrowsecurity,
-       (select count(*) from pg_policies p
-         where p.schemaname='public' and p.tablename=c.relname) as policies
-  from pg_class c join pg_namespace n on n.oid=c.relnamespace
- where n.nspname='public'
-   and c.relname in ('email_suppression','email_queue','app_config');
-```
-
-3. **Verify — not reachable with the anon key.** Expect
-   `No path reachable with the anon key.` and exit code 0:
-
-```bash
-node scripts/probeSuppressionTableExposure.mjs
-```
-
-4. **Verify — schema is complete.** `scripts/checkSchema.mjs` does not exist;
-   use this instead. Expect all four rows present:
-
-```sql
-select table_name from information_schema.tables
- where table_schema='public'
-   and table_name in ('email_suppression','email_queue','app_config')
-union all
-select 'user_data.feature_flags' from information_schema.columns
- where table_schema='public' and table_name='user_data'
-   and column_name='feature_flags';
-```
-
-### Immediately after: decide about the backfill
-
-The migration says to run `scripts/backfillEmailSuppression.mjs`. **It does not
-exist.** Until something populates the list, the table is empty and lifecycle
-mail will go to addresses that have already bounced or complained.
-
-You have two safe options, and I would take the first:
-
-- **Leave lifecycle email off until the list is populated.** Nothing has sent
-  since July, so there is no regression in waiting. Populate from Resend's
-  Suppressions / Bounces export, then turn the taps on.
-- **Accept it and watch the bounce rate.** Only reasonable once
-  `email.bounced` and `email.complained` are subscribed in the Resend webhook —
-  they are still not firing, so there is currently nothing to watch.
-
-To insert from a Resend CSV export once you have one:
-
-```sql
--- one row per suppressed address; reason is free text ('bounce' | 'complaint')
-insert into email_suppression (email, reason, created_at)
-values ('someone@example.com', 'bounce', now())
-on conflict do nothing;
-```
-
-### Rollback (migration 1)
-
-```sql
-DROP TABLE IF EXISTS email_queue;
-DROP TABLE IF EXISTS email_suppression;
-DROP TABLE IF EXISTS app_config;
-ALTER TABLE user_data DROP COLUMN IF EXISTS feature_flags;
-```
-
-Safe: nothing reads these today except the guard, which returns to failing
-closed. No application data is lost.
-
----
-
-## Migration 2 — `user_billing`
+## Migration 1 — `user_billing`
 
 **File:** `migrations/20260903_user_billing.sql` (188 lines)
 
@@ -192,7 +117,7 @@ select granted_by, count(*) from public.user_billing
 node scripts/probeUserBillingExposure.mjs
 ```
 
-### Rollback (migration 2)
+### Rollback (user_billing)
 
 Phase 1 dual-writes `user_data.subscription`, so the legacy column stays current
 while this table exists. Rollback is: revert the code, and optionally
@@ -207,15 +132,134 @@ you read this, do not drop the table, restore the snapshot instead.
 
 ---
 
-## After both
+## Migration 2 — `email_suppression` (+ `email_queue`, `app_config`)
 
-Nothing on the activation branch requires either migration to merge. Specifically:
+**File:** `migrations/20260821_email_suppression_and_queue_v2.sql` (148 lines)
 
-- **Task A + the Confirm-email toggle** needs neither. It is independent.
-- The **lifecycle** commit needs migration 1 before its two emails will actually
-  send; without it they will correctly report `lifecycle_email_skipped`.
-- **Task B** needs neither, and is blocked on a separate question
-  (`COACH_PLAN_AI_COST`), not on schema.
+**What it does:** creates three locked tables and adds `user_data.feature_flags`.
+RLS on, **zero policies**, `REVOKE ALL` from `anon` and `authenticated` — service
+role only.
+
+**What it unblocks:** `canSendUserEmail()` fails closed while the table is
+missing, so **every** lifecycle email is currently refused. This is why nothing
+has sent. It also unblocks the `lifecycle` commit on the activation branch.
+
+**What this is not:** it does not suppress anybody. It creates an *empty* table.
+Every address that hard-bounced or complained since 27 July is still absent from
+it, so the moment it exists, lifecycle mail resumes to all of them.
+
+**DO NOT RUN THIS YET.** Four gates, in order. The migration is step 4.
+
+The reason is in the note above: this creates an **empty** suppression list.
+`canSendUserEmail` currently fails closed, so nothing is sending at all. The
+moment the table exists the guard starts passing, and lifecycle mail resumes to
+every address that has hard-bounced or complained since 27 July — while
+`email.bounced` and `email.complained` still are not firing in the Resend
+webhook, so there would be nothing watching it happen. Empty list plus no
+telemetry is strictly worse than the current silence.
+
+| # | Gate | Owner | Done when |
+| --- | --- | --- | --- |
+| 1 | Subscribe `email.bounced` and `email.complained` in the Resend webhook | Ryan | Both appear in PostHog as `email_bounced` / `email_complained` |
+| 2 | Export the bounce + complaint list from Resend | Ryan | CSV in hand |
+| 3 | Turn that CSV into the populate step | Claude | SQL written against the real columns |
+| 4 | Run the migration, then immediately the populate step | Ryan | Verifications below pass and the list is non-empty |
+
+**Gate 1 check** — run this before going further. It must return two rows; if it
+returns nothing, the webhook subscription has not taken and gates 2 to 4 are
+premature:
+
+```sql
+-- PostHog, not Postgres. Confirms bounce telemetry is actually arriving.
+--   select event, count() from events
+--    where event in ('email_bounced','email_complained')
+--      and timestamp > now() - interval 7 day
+--    group by event
+```
+
+**Gate 3 note.** The populate step is deliberately not pre-written here. The
+column shape is known (`email`, `reason`, `user_id`, `created_at`) but the CSV's
+is not, and a guessed `COPY` against a real export is how you end up suppressing
+the wrong addresses or none of them. Send the CSV header and a sample row and it
+takes a minute to write properly.
+
+Only once gates 1 to 3 are done:
+
+### Steps
+
+1. Paste the whole file into the SQL editor and run it. It is wrapped in
+   `BEGIN; … COMMIT;` so it lands atomically.
+
+2. **Verify — locked correctly.** Expect three rows, `relrowsecurity = true`,
+   `policies = 0` for all three:
+
+```sql
+select c.relname, c.relrowsecurity,
+       (select count(*) from pg_policies p
+         where p.schemaname='public' and p.tablename=c.relname) as policies
+  from pg_class c join pg_namespace n on n.oid=c.relnamespace
+ where n.nspname='public'
+   and c.relname in ('email_suppression','email_queue','app_config');
+```
+
+3. **Verify — not reachable with the anon key.** Expect
+   `No path reachable with the anon key.` and exit code 0:
+
+```bash
+node scripts/probeSuppressionTableExposure.mjs
+```
+
+4. **Verify — schema is complete.** `scripts/checkSchema.mjs` does not exist;
+   use this instead. Expect all four rows present:
+
+```sql
+select table_name from information_schema.tables
+ where table_schema='public'
+   and table_name in ('email_suppression','email_queue','app_config')
+union all
+select 'user_data.feature_flags' from information_schema.columns
+ where table_schema='public' and table_name='user_data'
+   and column_name='feature_flags';
+```
+
+### Immediately after the migration: populate the list
+
+Run the populate step from gate 3 in the same sitting, before anything has a
+chance to send. Then confirm it is not empty:
+
+```sql
+select count(*) as suppressed, count(*) filter (where reason ilike '%complain%') as complaints
+  from email_suppression;
+```
+
+A count of 0 here means the guard is now passing for addresses that should be
+blocked. If that happens and you cannot populate immediately, the safe move is
+the rollback below, which returns the guard to failing closed.
+
+### Rollback (email_suppression)
+
+```sql
+DROP TABLE IF EXISTS email_queue;
+DROP TABLE IF EXISTS email_suppression;
+DROP TABLE IF EXISTS app_config;
+ALTER TABLE user_data DROP COLUMN IF EXISTS feature_flags;
+```
+
+Safe: nothing reads these today except the guard, which returns to failing
+closed. No application data is lost.
+
+---
+
+## What each one unblocks
+
+- **Task B** needs `user_billing`, and nothing else. The seeded-plan grant writes
+  `bonus_ai_actions`; until the column exists the grant refuses, the seed is
+  skipped, and Task B is a no-op. This is the dependency that was missed when
+  the bonus-grant approach was chosen.
+- **Task A + the Confirm-email toggle** needs neither migration. Independent.
+- The **lifecycle** commit needs `email_suppression` before its two emails send.
+  Until then they correctly report `lifecycle_email_skipped`, which is the
+  intended state, not a fault.
 
 Post-migration sanity, run once:
 
