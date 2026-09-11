@@ -19,6 +19,7 @@ import {
   getCachedAllNotes,
   saveCoachPlanHardNote,
   getCachedStudyTools,
+  refreshSubscription,
 } from '../lib/db'
 import { runAdaptation } from '../utils/adaptationEngine'
 import AdaptModal from './AdaptModal'
@@ -43,7 +44,7 @@ import { QUICK_PRESETS, buildQuickSession } from '../lib/quickStart'
 import { useSessionReminders } from '../utils/useSessionReminders'
 import { useStreak } from '../utils/useStreak'
 import { getAccessToken } from '../lib/supabase'
-import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, hasUsedTrial, canUseFeature } from '../lib/subscription'
+import { canUseAI, incrementAIQuery, getActivePlan, canUseFocusMinutes, hasUsedTrial, canUseFeature, getAiActionsRemaining } from '../lib/subscription'
 const CoursesView    = lazy(() => import('./CoursesView'))
 const ProgressView   = lazy(() => import('./ProgressView'))
 const StudyToolsView = lazy(() => import('./StudyToolsView'))
@@ -581,6 +582,30 @@ export default function OutputView({
 
     ;(async () => {
       try {
+        // The seeded plan is paid for by a grant, not by the student.
+        // COACH_PLAN_AI_COST is 5 and the free tier is 5 a month, so without
+        // this the gift would consume their entire allowance before they had
+        // chosen to do anything, and the next thing they touched would be a
+        // paywall. grantFirstPlanBonus raises the ceiling by exactly one plan.
+        //
+        // If the grant does not land we do NOT generate. Charging the student's
+        // own five for a plan they did not ask for is the precise outcome this
+        // exists to prevent, so the safe failure is to skip the seed and land on
+        // the dashboard, which is where they landed before any of this existed.
+        const grantToken = await getAccessToken()
+        const grantRes = await fetch('/api/grant-first-plan-bonus', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${grantToken}` },
+        })
+        const grant = await grantRes.json().catch(() => ({}))
+        if (cancelled) return
+        if (!grantRes.ok || !grant?.ok) {
+          track('first_plan_skipped', {
+            reason: 'bonus_grant_failed',
+            grant_reason: grant?.reason ?? `http_${grantRes.status}`,
+          })
+          return
+        }
         const importantDates = course.examDate
           ? [{ label: `${course.name} exam`, date: course.examDate }]
           : []
@@ -621,7 +646,17 @@ export default function OutputView({
           }
           dbSaveCoachPlan(course.id, plan, formData)
           setCoachPlans(prev => ({ ...prev, [course.id]: { ...plan, formData } }))
-          track('first_plan_succeeded', { ms: Date.now() - startedAt })
+          // Pull the authoritative counters back before the student sees the
+          // quota chip. incrementAIQuery above bumps the cached count by one,
+          // but the server charged COACH_PLAN_AI_COST against a ceiling raised
+          // by the grant, so the cached numbers are wrong in both directions
+          // until this lands. Without it the chip briefly claims an allowance
+          // the student does not have.
+          await refreshSubscription(userId).catch(() => {})
+          track('first_plan_succeeded', {
+            ms: Date.now() - startedAt,
+            ai_actions_remaining: getAiActionsRemaining(),
+          })
           // Land on the plan itself. Showing it is the entire point; returning
           // to the dashboard would reproduce the problem this fixes.
           setCoachCourseIdx(Math.max(0, courses.findIndex(c => c.id === course.id)))
