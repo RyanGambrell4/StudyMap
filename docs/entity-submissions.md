@@ -127,20 +127,48 @@ Both are free to list. Category: Study Tools / Education Software.
 - https://www.g2.com/products/new
 - https://www.capterra.com/vendors
 
-### 5. Wikidata — do last
+### 5. Wikidata — now unblocked
 
-Needs 2+ independent references, which items 1 and 2 provide. The payload:
+Crunchbase is live and citable: https://www.crunchbase.com/organization/studyedge-ai
+It ranks on page one of "studyedge ai" as of 2026-09-14, which is the proof
+Google reads it. That plus the live product site is enough to support an item.
 
-- Label: `StudyEdge AI`
-- Description: `AI study planner application for students`
-- `instance of` → mobile app / web application
-- `official website` → https://getstudyedge.com
-- `inception` → 2025
-- **`different from (P1889)` → the Study Edge item**
+Create at https://www.wikidata.org/wiki/Special:NewItem (free account, no wait).
 
-That P1889 statement is the strongest disambiguation signal available anywhere,
-and it is the specific thing that tells Google's entity system these are two
-companies rather than one.
+| Field | Value |
+|---|---|
+| Label (English) | `StudyEdge AI` |
+| Description | `AI study planner application for students` |
+| Also known as | `StudyEdgeAI`, `getstudyedge` |
+
+Statements, in this order:
+
+- `instance of` (P31) -> **web application**, and add a second P31 -> **mobile app**
+- `official website` (P856) -> `https://getstudyedge.com`
+- `inception` (P571) -> `2025`
+- `Crunchbase organization ID` (P2088) -> `studyedge-ai`
+- `industry` (P452) -> **educational technology**
+- **`different from` (P1889) -> the Study Edge item**
+
+That last statement is the entire point of the exercise. Search Wikidata for
+"Study Edge" and select the Florida tutoring company. If no item exists for
+them, create a minimal one first (label `Study Edge`, description
+`American tutoring company`, official website `https://www.studyedge.com`),
+then point P1889 at it. P1889 is reciprocal in practice: add it on their item
+pointing back at ours too.
+
+**Reference every statement.** Wikidata rejects unsourced claims and an
+unsourced item can be deleted. For each statement use "add reference" ->
+`reference URL` (P854) -> the Crunchbase URL above, or `https://getstudyedge.com`
+for the website and inception claims.
+
+**Why this matters more than the other listings.** The measured failure on
+"studyedge ai" is not a ranking problem, it is an inclusion problem: in the US
+the homepage is either position 1.00 or absent from the result set entirely,
+never in between. Google is resolving the query to one entity or the other and
+getting it wrong more often than not. P1889 is the only machine-readable
+statement anywhere that says these are two distinct entities, which is exactly
+the decision Google is getting wrong.
 
 ---
 
