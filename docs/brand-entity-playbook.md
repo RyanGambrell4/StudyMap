@@ -60,7 +60,7 @@ time destroys the thing we are trying to build.
 **Disambiguation line — include wherever a listing allows free text:**
 > Not affiliated with Study Edge (studyedge.com) or studyedge.eu.
 
-**Category:** Education / Productivity · **Founded:** 2025 · **Site:** https://getstudyedge.com
+**Category:** Education / Productivity · **Founded:** 2026 · **Site:** https://getstudyedge.com
 
 ---
 
@@ -168,7 +168,7 @@ Statements
   instance of (P31)          mobile app (Q620615)
   instance of (P31)          web application (Q193424)
   official website (P856)    https://getstudyedge.com
-  inception (P571)           2025
+  inception (P571)           2026
   different from (P1889)     <Study Edge, studyedge.com - Florida tutoring company>
   different from (P1889)     <Study Edge Intelligence, studyedge.eu - Netherlands>
   operating system (P306)    Android, iOS, web

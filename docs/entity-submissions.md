@@ -23,7 +23,7 @@ is worse than no entry.
 |---|---|
 | Legal/product name | StudyEdge AI |
 | Website | https://getstudyedge.com |
-| Founded | 2025 |
+| Founded | 2026 |
 | Category | Education technology, study tools, AI software |
 | Audience | High school and college students |
 | Business model | Freemium subscription |
@@ -78,7 +78,7 @@ that is a different claim.
 > StudyEdge AI is a software product. It does not provide human tutors,
 > in-person classes, or live exam-review sessions.
 >
-> StudyEdge AI was founded in 2025 and is not affiliated with Study Edge
+> StudyEdge AI was founded in 2026 and is not affiliated with Study Edge
 > (studyedge.com), a separate human tutoring company founded in Florida around
 > 2014. The two companies have different founders, different products, and no
 > business relationship.
@@ -101,7 +101,7 @@ listing.
 
 - https://tracxn.com — "Add your company" / claim profile
 - Use the medium description plus the disambiguation line
-- Founded 2025, category Education Technology
+- Founded 2026, category Education Technology
 
 ### 2. Crunchbase
 
@@ -145,7 +145,7 @@ Statements, in this order:
 
 - `instance of` (P31) -> **web application**, and add a second P31 -> **mobile app**
 - `official website` (P856) -> `https://getstudyedge.com`
-- `inception` (P571) -> `2025`
+- `inception` (P571) -> `2026`
 - `Crunchbase organization ID` (P2088) -> `studyedge-ai`
 - `industry` (P452) -> **educational technology**
 - **`different from` (P1889) -> the Study Edge item**
