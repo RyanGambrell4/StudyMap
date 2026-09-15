@@ -1,8 +1,30 @@
 # Runbook: restore email suppression
 
-**Status as of 2026-08-21: broken in production. Lifecycle mail is going out with no suppression list.**
+**Status as of 2026-09-15: steps 2 and 6 are DONE. Steps 0, 3, 4 (the bounce backfill) are still outstanding.**
 
-Nothing here has been applied. Every command is yours to run.
+History: on 2026-08-21 this was "broken, lifecycle mail going out with no suppression list."
+The fail-closed guard then shipped, which silently changed the failure mode: from
+2026-08-25 to 2026-09-15 the missing table blocked **all** lifecycle mail —
+281 refusals across 61 users.
+
+What has since been applied to production (`vpmgamaspefwqywttdtj`):
+
+- **Step 2 — DONE 2026-09-15.** `20260821_email_suppression_and_queue_v2.sql` applied.
+  `email_suppression`, `email_queue`, `app_config` exist with RLS on and zero
+  anon/authenticated policies. Lifecycle sending self-healed on the next cron tick.
+- **Step 6 — DONE 2026-09-15.** `api/resend-webhook.js` now writes the suppression
+  list: `suppressAddress()` records complaints always, and bounces only when
+  Resend reports `bounce.type === 'Permanent'`. The table populates itself from
+  here on, so fault 2 below is fixed permanently.
+- Also applied: `20260903_user_billing.sql` (unblocks `api/reconcile-billing.js`)
+  and `20260915_user_data_email_digest.sql`.
+
+**Still outstanding — steps 0, 3 and 4.** The table starts EMPTY, so addresses that
+hard-bounced between 2026-07-27 and 2026-09-15 are not suppressed yet and will be
+mailed once more until they bounce again (at which point step 6 now catches them
+permanently). To close that window, export bounced/complained from the Resend
+dashboard and run the backfill below. Note: a Resend **Domains** export is not the
+right file — you need the bounced/complained list.
 
 ---
 
