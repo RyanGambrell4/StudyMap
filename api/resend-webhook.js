@@ -120,6 +120,49 @@ async function updateEngagement(userId, type, campaign, extra = {}) {
   }
 }
 
+// ─── Suppression list writer ─────────────────────────────────────────────────
+// This is the piece that was missing. `email_suppression` had no writer at all:
+// bounces and complaints fired a PostHog event and a console.warn and nothing
+// else, so the table stayed empty even once it existed, and emailGuard could
+// only ever fail open or fail closed — never actually suppress anybody.
+//
+// Only PERMANENT bounces suppress. Resend reports `bounce.type` as
+// 'Permanent' | 'Transient' | 'Undetermined'. A transient bounce is a full
+// mailbox or a greylist, and permanently suppressing on one of those silently
+// loses a real, reachable user forever. Complaints always suppress: someone
+// pressing "spam" is the most expensive signal there is for sender reputation,
+// and it does not get less true later.
+async function suppressAddress(email, reason, { userId = null, detail = '' } = {}) {
+  if (!email) return
+
+  const row = { email: email.toLowerCase().trim(), reason }
+
+  // user_id is a FK to auth.users. A stale tag from a deleted account would
+  // make the whole insert fail on 23503 and leave the address un-suppressed,
+  // so the address is the part we insist on and the attribution is optional.
+  const attempt = (withUser) => supabaseAdmin
+    .from('email_suppression')
+    .upsert(withUser ? { ...row, user_id: userId } : row,
+            { onConflict: 'email', ignoreDuplicates: true })
+
+  let { error } = await attempt(!!userId)
+  if (error?.code === '23503' && userId) {
+    console.warn(`[resend-webhook] suppress ${email}: user_id ${userId} not in auth.users, retrying unattributed`)
+    ;({ error } = await attempt(false))
+  }
+
+  if (error) {
+    // Loud. A failure here means this address keeps receiving lifecycle mail.
+    console.error(
+      `[resend-webhook] FAILED to suppress ${email} (${reason}): ` +
+      `${error.message} ${error.code ?? ''}`
+    )
+    return
+  }
+
+  console.warn(`[resend-webhook] SUPPRESSED ${email} reason=${reason} ${detail}`.trim())
+}
+
 // ─── Handler ─────────────────────────────────────────────────────────────────
 export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).end()
@@ -185,14 +228,26 @@ export default async function handler(req, res) {
     }
 
     case 'email.bounced': {
-      await posthogCapture('email_bounced', distinctId, baseProps)
-      console.warn(`[resend-webhook] bounced  email=${email}`)
+      const bounceType = data.bounce?.type ?? 'Undetermined'
+      const bounceSub  = data.bounce?.subType ?? ''
+      await posthogCapture('email_bounced', distinctId, {
+        ...baseProps, bounce_type: bounceType, bounce_subtype: bounceSub,
+      })
+      if (bounceType === 'Permanent') {
+        await suppressAddress(email, 'bounced', {
+          userId, detail: `type=${bounceType} sub=${bounceSub}`,
+        })
+      } else {
+        // Soft bounce: log it, keep mailing. Suppressing here would be a
+        // permanent decision made on temporary evidence.
+        console.warn(`[resend-webhook] bounced (soft, not suppressing) email=${email} type=${bounceType} sub=${bounceSub}`)
+      }
       break
     }
 
     case 'email.complained': {
       await posthogCapture('email_complained', distinctId, baseProps)
-      console.warn(`[resend-webhook] complained email=${email}`)
+      await suppressAddress(email, 'complained', { userId })
       break
     }
 
