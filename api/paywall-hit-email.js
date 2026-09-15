@@ -2,70 +2,100 @@ import { createClient } from '@supabase/supabase-js'
 import { Resend } from 'resend'
 import { verifyAuth } from '../lib/server/usage.js'
 import { canSendUserEmail, recordUserEmail } from '../lib/server/emailGuard.js'
-import { listUnsubscribeHeaders, preheader } from '../lib/server/emailHelpers.js'
+import { listUnsubscribeHeaders } from '../lib/server/emailHelpers.js'
+import { renderEmail, TRIAL_TERMS } from '../lib/server/emailTemplate.js'
 
 const supabaseAdmin = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY)
 const resend = new Resend(process.env.RESEND_API_KEY)
 
 export const config = { maxDuration: 15 }
 
-// Personalized messaging per paywall trigger
+// Personalized messaging per paywall trigger.
+//
+// Subject lines lead with what the student GETS BACK, not with what they just
+// ran out of. Every previous subject here opened by restating the user's
+// failure ("You hit the AI limit", "You tried to add more courses"), which
+// gives someone staring at a blocked action no reason to open. These name the
+// unblock and the fact that it costs nothing for 7 days, which is the part
+// that actually reduces friction.
+//
+// `resume` is the one-line bridge back to the exact thing they were doing.
+// This email only ever fires at the moment of peak intent -- 25 of 777 users
+// have ever hit a limit at all -- so relevance matters more here than reach.
 const TRIGGER_COPY = {
   ai: {
-    subject: 'You hit the AI limit on StudyEdge',
+    subject: '100 AI questions a month, free for 7 days',
     headline: 'You ran out of free AI questions.',
-    what_happened: 'You hit the limit on free AI coaching sessions.',
+    what_happened: 'you hit the limit on free AI coaching sessions.',
     unlock: 'Pro gives you 100 AI actions per month. Ask anything about any of your courses, any time.',
+    resume: 'Start the trial and your next question goes through straight away.',
+    cta: 'Unlock 100 AI questions',
   },
   'ai-exhausted': {
-    subject: 'You hit the AI limit on StudyEdge',
-    headline: 'You ran out of free AI questions.',
-    what_happened: 'You used up your 5 free AI coaching sessions.',
+    subject: '100 AI questions a month, free for 7 days',
+    headline: 'You used all 5 free AI questions.',
+    what_happened: 'you used up your 5 free AI coaching sessions.',
     unlock: 'Pro gives you 100 AI actions per month. Ask anything about any of your courses, any time.',
+    resume: 'Start the trial and your next question goes through straight away.',
+    cta: 'Unlock 100 AI questions',
   },
   'ai-struggle': {
-    subject: 'You were trying to work through a tough topic',
+    subject: 'You ran out mid-way through a weak spot',
     headline: 'You hit the AI limit while drilling a weak spot.',
-    what_happened: 'You were working through a topic you flagged as a struggle and hit the free AI limit.',
-    unlock: 'Pro gives you 100 AI coaching sessions per month so you can drill weak spots until they stick, not just until you run out.',
+    what_happened: 'you were working through a topic you had flagged as a struggle, and hit the free AI limit.',
+    unlock: 'Pro gives you 100 AI coaching sessions a month, so you can drill a weak spot until it sticks rather than until you run out.',
+    resume: 'Pick that topic back up where you left it.',
+    cta: 'Finish that topic',
   },
   courses: {
-    subject: 'You tried to add more courses on StudyEdge',
+    subject: 'Room for 5 courses, free for 7 days',
     headline: 'You tried to add another course.',
-    what_happened: 'The free plan covers 1 course. You tried to add more.',
-    unlock: 'Pro gives you up to 5 courses: full study plans, grade tracking, and AI coaching for each one.',
+    what_happened: 'the free plan covers 1 course, and you went to add another.',
+    unlock: 'Pro covers up to 5 courses, each with its own study plan, grade tracking and AI coaching.',
+    resume: 'Add the rest of your semester in one sitting.',
+    cta: 'Add my other courses',
   },
   focusMode: {
-    subject: 'You hit your free focus session limit',
+    subject: 'Unlimited focus sessions, free for 7 days',
     headline: 'You hit your free Focus Mode limit.',
-    what_happened: 'You ran out of free Focus Mode time for today.',
-    unlock: 'Pro gives you unlimited Focus Mode sessions. Build the daily habit without hitting a cap.',
+    what_happened: 'you ran out of free Focus Mode time for today.',
+    unlock: 'Pro gives you unlimited Focus Mode sessions, so the daily habit never stops at a cap.',
+    resume: 'Get back into a session tonight.',
+    cta: 'Unlock unlimited sessions',
   },
   blueprints: {
-    subject: 'You tried to generate another blueprint on StudyEdge',
+    subject: 'Unlimited session blueprints, free for 7 days',
     headline: 'You hit the free blueprint limit.',
-    what_happened: 'You tried to generate another study session blueprint and hit the free limit.',
-    unlock: 'Pro gives you unlimited session blueprints so you always have a plan for what to study next.',
+    what_happened: 'you went to generate another study session blueprint and hit the free limit.',
+    unlock: 'Pro gives you unlimited session blueprints, so you always know what to study next.',
+    resume: 'Generate the plan you were after.',
+    cta: 'Unlock unlimited blueprints',
   },
   examRescue: {
-    subject: 'You tried to use Exam Rescue on StudyEdge',
+    subject: 'Exam Rescue, free for 7 days',
     headline: 'Exam Rescue is a Pro feature.',
-    what_happened: 'You tried to use Exam Rescue, the last-minute exam prep tool.',
-    unlock: 'Pro unlocks Exam Rescue so you can generate a focused last-48-hour cram plan for any course.',
+    what_happened: 'you went to use Exam Rescue, the last-minute exam prep tool.',
+    unlock: 'Pro unlocks Exam Rescue, which builds a focused last-48-hours cram plan for any course.',
+    resume: 'If that exam is close, this is the one to start now.',
+    cta: 'Unlock Exam Rescue',
   },
   cheatSheet: {
-    subject: 'You tried to generate a cheat sheet on StudyEdge',
+    subject: 'Unlimited AI cheat sheets, free for 7 days',
     headline: 'AI Cheat Sheets are a Pro feature.',
-    what_happened: 'You tried to generate an AI-written cheat sheet and hit the free limit.',
-    unlock: 'Pro unlocks unlimited AI cheat sheets. Pull the key concepts from any topic in seconds.',
+    what_happened: 'you went to generate an AI-written cheat sheet and hit the free limit.',
+    unlock: 'Pro unlocks unlimited AI cheat sheets, pulling the key concepts out of any topic in seconds.',
+    resume: 'Generate the sheet you were after.',
+    cta: 'Unlock cheat sheets',
   },
 }
 
 const DEFAULT_COPY = {
-  subject: 'You hit the free limit on StudyEdge',
+  subject: 'Everything in Pro, free for 7 days',
   headline: 'You hit the free limit.',
-  what_happened: 'You tried to use a Pro feature and hit the free plan limit.',
-  unlock: 'Pro gives you 5 courses, 100 AI actions/month, unlimited blueprints and focus sessions. Everything you need to actually stay on top of your coursework.',
+  what_happened: 'you went to use a Pro feature and hit the free plan limit.',
+  unlock: 'Pro gives you 5 courses, 100 AI actions a month, and unlimited blueprints and focus sessions.',
+  resume: 'Pick up exactly where you stopped.',
+  cta: 'Start my free trial',
 }
 
 export default async function handler(req, res) {
@@ -108,51 +138,25 @@ export default async function handler(req, res) {
       to: email,
       subject: copy.subject,
       headers: listUnsubscribeHeaders(userId),
-      html: `
-<!DOCTYPE html>
-<html>
-<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
-<body style="margin:0;padding:0;background:#f5f5f5;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;">
-${preheader(copy.unlock)}
-  <div style="max-width:560px;margin:0 auto;padding:32px 16px;">
-    <div style="background:#fff;border-radius:16px;padding:36px 32px;border:1px solid #e5e7eb;">
-      <img src="https://getstudyedge.com/favicon.png" alt="StudyEdge AI" style="width:36px;height:36px;border-radius:9px;margin-bottom:20px;">
-
-      <h1 style="margin:0 0 12px;font-size:20px;font-weight:800;color:#111;letter-spacing:-0.03em;">
-        ${copy.headline}
-      </h1>
-      <p style="margin:0 0 20px;font-size:15px;color:#4b5563;line-height:1.6;">
-        Hey ${firstName}, ${copy.what_happened}
-      </p>
-
-      <div style="background:#f8f9ff;border:1px solid rgba(59,97,196,0.15);border-left:4px solid #3B61C4;border-radius:12px;padding:16px 18px;margin-bottom:24px;">
-        <p style="margin:0 0 4px;font-size:13px;font-weight:700;color:#3B61C4;">What Pro unlocks</p>
-        <p style="margin:0;font-size:14px;color:#4b5563;line-height:1.6;">${copy.unlock}</p>
-      </div>
-
-      <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px 18px;margin-bottom:24px;">
-        <p style="margin:0;font-size:13.5px;color:#166534;line-height:1.6;">
-          <strong>Try Pro free for 7 days.</strong> No charge during the trial. $9.99/month or $9.99/month after. Cancel anytime.
-        </p>
-      </div>
-
-      <a href="https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=paywall_hit" style="display:block;text-align:center;background:#E8531A;color:#fff;font-weight:800;font-size:15px;padding:14px 24px;border-radius:12px;text-decoration:none;letter-spacing:-0.01em;">
-        Start Free 7-Day Trial →
-      </a>
-      <p style="margin:12px 0 0;font-size:12px;color:#9ca3af;text-align:center;">Card required · Cancel before day 8 and pay nothing</p>
-
-      <p style="margin:24px 0 0;font-size:13px;color:#6b7280;line-height:1.6;">
-        If you have any questions about whether Pro is right for you, just reply to this email. I read every reply.
-      </p>
-      <p style="margin:8px 0 0;font-size:13px;color:#6b7280;">The StudyEdge AI Team</p>
-
-      <p style="margin:20px 0 0;font-size:12px;color:#9ca3af;text-align:center;">
-        StudyEdge AI · <a href="https://getstudyedge.com/unsubscribe?uid=${userId}" style="color:#9ca3af;">Unsubscribe</a>
-      </p>
-    </div>
-  </div>
-</body>
-</html>`,
+      html: renderEmail({
+        // The preview line carries the offer, because that is the part that
+        // decides whether a blocked user opens this at all.
+        preheaderText: `${copy.unlock} ${TRIAL_TERMS}`,
+        headline: copy.headline,
+        paragraphs: [
+          `Hey ${firstName}, ${copy.what_happened}`,
+          copy.resume,
+        ],
+        callout: { title: 'What Pro unlocks', body: copy.unlock },
+        cta: {
+          label: copy.cta,
+          url: 'https://getstudyedge.com/app?signup=1&plan=pro&billing=monthly&trial=1&utm_source=email&utm_medium=lifecycle&utm_campaign=paywall_hit',
+        },
+        // Card-required is stated on the button, not buried. Hiding it wins a
+        // click and loses the charge to a dispute on day 8.
+        ctaSubtext: `${TRIAL_TERMS} Card required to start.`,
+        unsubscribeUrl: `https://getstudyedge.com/unsubscribe?uid=${userId}`,
+      }),
     })
     await recordUserEmail(userId, 'paywall-hit')
     console.log(`[paywall-hit-email] sent to ${userId} trigger=${trigger}`)
