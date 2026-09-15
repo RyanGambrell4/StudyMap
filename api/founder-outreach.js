@@ -106,7 +106,7 @@ ${preheader('Quick question from the StudyEdge AI team. Takes 30 seconds.')}
         <a href="https://getstudyedge.com/app?plan=pro&billing=monthly&trial=1" style="display:inline-block;background:#3B61C4;color:#fff;font-weight:700;font-size:14px;padding:12px 22px;border-radius:10px;text-decoration:none;">
           Try Pro free for 7 days →
         </a>
-        <p style="margin:10px 0 0;font-size:12px;color:#9ca3af;">No charge during the trial. $9.99/mo or $9.99/month after.</p>
+        <p style="margin:10px 0 0;font-size:12px;color:#9ca3af;">No charge during the trial. $9.99/month or $69.99/year after.</p>
       </div>
 
       <p style="margin:0;font-size:15px;color:#374151;line-height:1.7;">
