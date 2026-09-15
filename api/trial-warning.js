@@ -41,8 +41,22 @@ export default async function handler(req, res) {
   for (const row of rows ?? []) {
     try {
       const sub = row.subscription ?? {}
-      const plan = sub.plan ?? 'free'
-      if (plan !== 'free') { skipped++; continue }
+
+      // Target people whose trial is STILL RUNNING -- they are the only ones
+      // who can act on "you get charged tomorrow".
+      //
+      // This used to read `if (sub.plan !== 'free') continue`, which could
+      // never match its own audience. The Stripe webhook writes
+      // `plan: isActive ? planInfo.plan : 'free'` with
+      // isActive = ['active','trialing'].includes(status), so a live trial is
+      // stored as plan 'pro' / status 'trialing'. Requiring plan 'free' inside
+      // a window that only contains live trials (144-168h after trialUsedAt,
+      // i.e. before the 168h trial end) meant the two conditions were mutually
+      // exclusive: this email has never sent to anybody, ever.
+      //
+      // Matches the check already used by day1-trial-tips, day2-trial-progress
+      // and day3-trial-tips, which is the one that was right.
+      if (sub.status !== 'trialing') { skipped++; continue }
 
       const trialUsedAt = sub.trialUsedAt
       if (!trialUsedAt) { skipped++; continue }
@@ -50,10 +64,18 @@ export default async function handler(req, res) {
       const trialUsedDate = new Date(trialUsedAt)
       if (isNaN(trialUsedDate.getTime())) { skipped++; continue }
 
-      // Only send when trialUsedAt falls in the 48-72h ago window (trial ends in ~24h).
+      // Send only while trialUsedAt sits 144-168h back, i.e. the last 24h of a
+      // 7-day trial. (The old comment here said 48-72h and described neither
+      // the window above nor a 7-day trial.)
       if (trialUsedDate < windowStart || trialUsedDate > windowEnd) { skipped++; continue }
 
-      const gate = await canSendUserEmail(row.user_id, { priority: 'high' })
+      // 'critical', not 'high'. This is the notice that a card is about to be
+      // charged, so it must never lose a coin-flip against the 24h frequency
+      // gap -- day5-social-proof fires ~24h earlier off the signup date and
+      // would otherwise suppress it. Charging a student's debit card with no
+      // warning because a marketing email went out first is not a tradeoff
+      // worth having.
+      const gate = await canSendUserEmail(row.user_id, { priority: 'critical' })
       if (!gate.ok) { skipped++; continue }
 
       let email
