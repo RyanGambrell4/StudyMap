@@ -130,10 +130,18 @@ ${preheader("That is the hardest part. Every session from here gets easier to st
     })
 
     const merged = { ...(row?.subscription ?? {}), first_session_email_sent: true }
-    await supabaseAdmin.from('user_data').upsert(
+    // Same fix as api/onboarding-complete.js: supabase-js query builders are
+    // thenable but not Promises, so .catch is undefined and calling it threw a
+    // TypeError after the email had already been sent — surfacing a delivered
+    // email as a 500 and leaving first_session_email_sent unrecorded, so the
+    // send could repeat. Bind `error` instead.
+    const { error: flagErr } = await supabaseAdmin.from('user_data').upsert(
       { user_id: userId, subscription: merged, updated_at: new Date().toISOString() },
       { onConflict: 'user_id' }
-    ).catch(e => console.error('[first-session] Failed to record flag:', e))
+    )
+    if (flagErr) {
+      console.error('[first-session] Failed to record flag:', flagErr.message, flagErr.code ?? '')
+    }
 
     return res.status(200).json({ ok: true })
   } catch (err) {

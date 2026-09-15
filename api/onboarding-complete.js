@@ -142,10 +142,19 @@ ${preheader("Your profile is set. One step left before your study plan can work.
     if (userId) {
       const { data: r } = await supabaseAdmin.from('user_data').select('subscription').eq('user_id', userId).maybeSingle()
       const merged = { ...(r?.subscription ?? {}), onboarding_email_sent: true }
-      await supabaseAdmin.from('user_data').upsert(
+      // No .catch() here: supabase-js query builders are thenable but are not
+      // Promises, so .catch is undefined on them. Calling it threw a TypeError
+      // AFTER the email had already gone out, which the outer catch then
+      // reported as "Failed to send" and returned a 500 for — so the caller
+      // saw a failure for a delivered email, and onboarding_email_sent was
+      // never recorded, leaving the send repeatable. Bind `error` instead.
+      const { error: flagErr } = await supabaseAdmin.from('user_data').upsert(
         { user_id: userId, subscription: merged, updated_at: new Date().toISOString() },
         { onConflict: 'user_id' }
-      ).catch(e => console.error('[onboarding-complete] Failed to record flag:', e))
+      )
+      if (flagErr) {
+        console.error('[onboarding-complete] Failed to record flag:', flagErr.message, flagErr.code ?? '')
+      }
     }
     return res.status(200).json({ ok: true })
   } catch (err) {
