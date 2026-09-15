@@ -1,6 +1,6 @@
 # Runbook: restore email suppression
 
-**Status as of 2026-09-15: steps 2 and 6 are DONE. Steps 0, 3, 4 (the bounce backfill) are still outstanding.**
+**Status as of 2026-09-15: COMPLETE. All steps done and verified. Nothing here is outstanding.**
 
 History: on 2026-08-21 this was "broken, lifecycle mail going out with no suppression list."
 The fail-closed guard then shipped, which silently changed the failure mode: from
@@ -19,12 +19,22 @@ What has since been applied to production (`vpmgamaspefwqywttdtj`):
 - Also applied: `20260903_user_billing.sql` (unblocks `api/reconcile-billing.js`)
   and `20260915_user_data_email_digest.sql`.
 
-**Still outstanding — steps 0, 3 and 4.** The table starts EMPTY, so addresses that
-hard-bounced between 2026-07-27 and 2026-09-15 are not suppressed yet and will be
-mailed once more until they bounce again (at which point step 6 now catches them
-permanently). To close that window, export bounced/complained from the Resend
-dashboard and run the backfill below. Note: a Resend **Domains** export is not the
-right file — you need the bounced/complained list.
+- **Steps 0, 3, 4 — DONE 2026-09-15.** The historical backfill is applied:
+  **8 addresses, all `bounced`, 0 complaints**, every one matching a real account so
+  both lookups in `canSendUserEmail()` block them. Source was the Resend
+  **Suppressions** export (`id,email_address,reason,reason_detail,created_at`).
+  Verified read-only, per the warning in step 5 — a live send was never attempted
+  against production.
+
+  Two notes for next time. A Resend **Domains** export is the wrong file; you want
+  **Suppressions**. And the export CSV is deliberately NOT committed to this repo:
+  it is a list of real subscriber email addresses.
+
+  `scripts/backfill-email-suppression.mjs` was not used — it needs the production
+  service key, and its `auth.admin.listUsers()` account-mapping step would hit the
+  GoTrue NULL-confirmation_token bug anyway. The insert was done directly against
+  the database with the same semantics the script documents (lowercase the address,
+  normalise the reason, dedupe by email, complaint outranks bounce).
 
 ---
 

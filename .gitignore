@@ -40,3 +40,10 @@ android/keystore.properties
 android/key.properties
 android/app/*.jks
 android/app/*.keystore
+
+# Resend exports are lists of real subscriber email addresses. The suppression
+# backfill (docs/RUNBOOK-email-suppression.md) has you download one of these;
+# it must never end up in the repo.
+bounces.csv
+suppressions-*.csv
+domains-*.csv
