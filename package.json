@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "npm run seo:hidden && vite build",
+    "build": "npm run seo:hidden && vite build && npm run landing:precompile",
     "lint": "eslint .",
     "preview": "vite preview",
     "test": "vitest run && node scripts/check-facts.mjs",
@@ -18,7 +18,8 @@
     "indexnow:submit": "node scripts/indexnow.mjs --submit",
     "build:android": "VITE_ANDROID_BUILD=1 vite build",
     "android:sync": "VITE_ANDROID_BUILD=1 vite build && npx cap sync android",
-    "seo:hidden": "node scripts/assertNoHiddenContent.mjs"
+    "seo:hidden": "node scripts/assertNoHiddenContent.mjs",
+    "landing:precompile": "node scripts/precompileLanding.mjs"
   },
   "dependencies": {
     "@capacitor/android": "^8.3.1",
@@ -50,6 +51,7 @@
     "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@babel/standalone": "^7.29.0",
     "@eslint/js": "^9.39.4",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
