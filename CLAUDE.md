@@ -123,8 +123,19 @@ Run the StudyEdge Email agent. Read EMAIL_AGENT_SPEC.md and AGENTS_SPEC.md first
 **What it does:** Continuously improves getstudyedge.com's landing page for conversion and visual quality. Audits the biggest weakness each run and implements it.
 **Key context:**
 - Landing page lives in the root `index.html` (embedded React via Babel, ~2500 lines). `src/components/LandingPage.jsx` is legacy dead code — do NOT edit it and do NOT import it back into `App.jsx`.
-- Landing page is INTENTIONALLY DARK (`#060614` bg) — do NOT convert to light theme
-- This is the exception to the light-only rule — landing page dark theme is by design
+- **The landing page is LIGHT** (`--bg: #F7F6F3`), and has been for a while. This
+  file and `LANDING_AGENT_SPEC.md` both claimed it was "INTENTIONALLY DARK
+  (`#060614`)" long after that stopped being true; `#060614` appears nowhere in
+  `index.html`. Corrected 2026-09-19. Do not "restore" a dark theme on the
+  strength of a stale note — read the CSS.
+- The JSX is compiled at build time by `scripts/precompileLanding.mjs`, which
+  rewrites `dist/index.html` only. The source file stays openable in a browser,
+  so local dev still uses Babel-in-browser and needs no build step. Do not add
+  `@babel/standalone` back to the page: it cost 654 KB gzipped on the critical
+  path of every visit and caused a visible flash of the `.seo-prerender` block.
+- Do NOT preload `og-hero-v1.png`. It is 392 KB and is never drawn on the page;
+  it exists only for `og:image`/`twitter:image`, which crawlers read from the
+  meta tags.
 - CTA `goTrial()` must always point to `/app?signup=1&plan=pro&billing=monthly&trial=1`
 - Trial CTAs must NOT say "no credit card required" — the trial goes through Stripe Checkout and collects a card. Use "7-day free trial · Cancel anytime" instead.
 **Invocation:**

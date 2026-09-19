@@ -9,7 +9,7 @@ _Built from deep interview — May 2026_
 **Stack:** React + Vite SPA. Landing page lives entirely in `src/components/LandingPage.jsx` (837 lines). Deployed via Vercel. Push to `main` = auto-deploy.
 **Repo:** `/Users/ryangambrell/Desktop/StudyMap`
 **Design system (app):** Light — bg `#F7F6F3`, card `#FFFFFF`, border `rgba(0,0,0,0.07)`, accent `#3B61C4`, text `#111111`
-**Landing page:** Intentionally dark-themed marketing page (dark ≠ bug here). Current bg `#060614`. This is correct — do NOT convert to light theme. The landing page is a separate visual experience from the in-app UI.
+**Landing page:** Light-themed marketing page, `--bg: #F7F6F3`. This file used to say it was intentionally dark at `#060614`; that has not been true for some time and `#060614` appears nowhere in `index.html`. Corrected 2026-09-19. Read the CSS before acting on any colour claim in this document.
 
 ---
 
@@ -110,7 +110,7 @@ Footer                 — Links, legal
 **Reference level:** Notion.so + Apple.com energy. Clean, editorial, high-trust. Cinematic where motion adds value, restrained where it doesn't.
 
 **Color palette to work within:**
-- Page bg: `#060614` (deep navy/black)
+- Page bg: `#F7F6F3` (light cream) — see the note above; the old `#060614` value is stale
 - Cards: `rgba(255,255,255,0.03)` to `rgba(255,255,255,0.06)` with subtle borders
 - Accent: `#3B61C4` (brand blue — use for CTAs, highlights, and key interactive elements)
 - Indigo/purple `#6366f1` is acceptable as a secondary accent for visual interest
