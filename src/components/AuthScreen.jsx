@@ -487,7 +487,7 @@ function LeftPanel() {
       style={{
         width: '45%',
         minWidth: 380,
-        background: 'linear-gradient(145deg, #3B61C4 0%, #2D4FA8 45%, #1e3a7a 100%)',
+        background: '#3452D9',  // brand blue, flat: gradients are banned and #3B61C4 is deprecated
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
@@ -537,22 +537,9 @@ function LeftPanel() {
         </p>
       </div>
 
-      {/* Social proof */}
+      {/* Social proof removed: quotes could not be verified as real,
+          permissioned reviews. */}
       <div style={{ position: 'relative' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-          {[
-            { quote: '"finally consistent with my studying for the first time ever"', name: 'Andy G.' },
-            { quote: '"finished top of my cohort last semester"', name: 'Danny K.' },
-          ].map(t => (
-            <div key={t.name} style={{
-              backgroundColor: 'rgba(255,255,255,0.08)', borderRadius: 12,
-              padding: '12px 16px', border: '1px solid rgba(255,255,255,0.12)',
-            }}>
-              <p style={{ margin: '0 0 6px', fontSize: 13, color: 'rgba(255,255,255,0.85)', lineHeight: 1.5 }}>{t.quote}</p>
-              <p style={{ margin: 0, fontSize: 11, color: 'rgba(255,255,255,0.45)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>{t.name}</p>
-            </div>
-          ))}
-        </div>
       </div>
     </div>
   )

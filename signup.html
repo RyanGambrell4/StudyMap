@@ -4,9 +4,10 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Sign Up — StudyEdge AI</title>
+  <meta name="robots" content="noindex" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Source+Serif+4:wght@600;700&display=swap" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
     const { createClient } = window.supabase;
@@ -16,24 +17,23 @@
     );
   </script>
   <style>
+    /* V2 brand tokens (src/theme/tokens.js). Light theme only. */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --bg: #080D1A;
-      --surface: #0D1425;
-      --surface2: #111C30;
-      --border: rgba(255,255,255,0.07);
-      --border2: rgba(255,255,255,0.13);
-      --accent: #4F7EF7;
-      --accent2: #7C5CFA;
-      --text: #F1F5F9;
-      --text2: #94A3B8;
-      --text3: #475569;
-      --green: #34D399;
-      --red: #F87171;
+      --bg: #F7F8FA;
+      --card: #FFFFFF;
+      --border: rgba(0,0,0,0.07);
+      --text: #1C1B18;
+      --muted: #5C5952;
+      --dim: #6E6B64;
+      --blue: #3452D9;
+      --blue-hov: #2A43B8;
+      --blue-bg: rgba(52,82,217,0.08);
+      --red: #D64545;
+      --red-bg: rgba(214,69,69,0.08);
+      --green: #10A56E;
     }
-
-    html { scroll-behavior: smooth; }
 
     body {
       background: var(--bg);
@@ -49,291 +49,225 @@
 
     a { color: inherit; text-decoration: none; }
 
-    /* ── Nav ── */
     nav {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 20px 40px;
+      padding: 18px 32px;
       border-bottom: 1px solid var(--border);
+      background: var(--card);
     }
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 700;
-      font-size: 1.05rem;
-      letter-spacing: -0.3px;
-      cursor: pointer;
-    }
-    .logo-icon {
-      width: 28px; height: 28px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border-radius: 7px;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .nav-link {
-      color: var(--text2);
-      font-size: 0.9rem;
-      transition: color 0.2s;
-    }
+    .logo { font-weight: 800; font-size: 17px; letter-spacing: -0.02em; cursor: pointer; }
+    .logo span { color: var(--blue); }
+    .nav-link { font-size: 14px; color: var(--muted); font-weight: 500; }
     .nav-link:hover { color: var(--text); }
 
-    /* ── Main layout ── */
     main {
       flex: 1;
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
-      padding: 48px 24px;
+      padding: 48px 20px 64px;
     }
 
-    .signup-card {
+    .card {
       width: 100%;
-      max-width: 440px;
+      max-width: 420px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 36px 32px;
+      box-shadow: 0 8px 30px rgba(28,27,24,0.06);
     }
 
-    .plan-chip {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: rgba(79,126,247,0.12);
-      border: 1px solid rgba(79,126,247,0.25);
-      border-radius: 999px;
-      padding: 5px 14px;
-      font-size: 0.8rem;
+    .referral-note {
+      display: none;
+      font-size: 13px;
       font-weight: 600;
-      color: var(--accent);
-      margin-bottom: 20px;
-      text-transform: capitalize;
+      color: var(--blue);
+      background: var(--blue-bg);
+      border-radius: 999px;
+      padding: 6px 14px;
+      margin-bottom: 16px;
+      width: fit-content;
     }
-    .plan-chip .plan-dot {
-      width: 6px; height: 6px;
-      background: var(--accent);
-      border-radius: 50%;
-    }
-    .plan-chip.pro {
-      background: rgba(124,92,250,0.12);
-      border-color: rgba(124,92,250,0.25);
-      color: #a78bfa;
-    }
-    .plan-chip.pro .plan-dot { background: #a78bfa; }
-    .plan-chip.unlimited {
-      background: rgba(52,211,153,0.1);
-      border-color: rgba(52,211,153,0.2);
-      color: var(--green);
-    }
-    .plan-chip.unlimited .plan-dot { background: var(--green); }
+    .referral-note.visible { display: block; }
 
     h1 {
-      font-size: 1.9rem;
-      font-weight: 800;
-      letter-spacing: -1.2px;
-      line-height: 1.15;
+      font-family: 'Source Serif 4', Georgia, serif;
+      font-size: 28px;
+      font-weight: 700;
+      letter-spacing: -0.01em;
+      line-height: 1.25;
       margin-bottom: 8px;
     }
-    .sub {
-      color: var(--text2);
-      font-size: 0.95rem;
-      margin-bottom: 32px;
-    }
+    .sub { font-size: 14.5px; color: var(--muted); margin-bottom: 24px; }
 
-    .form-group {
-      margin-bottom: 16px;
+    .plan-chip {
+      display: inline-block;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      background: var(--bg);
+      border-radius: 999px;
+      padding: 4px 12px;
+      margin-bottom: 20px;
     }
+    .plan-chip.pro, .plan-chip.unlimited { color: var(--blue); background: var(--blue-bg); border-color: transparent; }
+
     label {
       display: block;
-      font-size: 0.82rem;
-      font-weight: 600;
-      color: var(--text2);
-      margin-bottom: 6px;
-      letter-spacing: 0.2px;
-    }
-    input[type="email"],
-    input[type="password"] {
-      width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--border2);
-      border-radius: 10px;
-      padding: 12px 16px;
-      color: var(--text);
-      font-family: inherit;
-      font-size: 0.95rem;
-      outline: none;
-      transition: border-color 0.2s, box-shadow 0.2s;
-    }
-    input[type="email"]:focus,
-    input[type="password"]:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(79,126,247,0.15);
-    }
-    input.error {
-      border-color: var(--red);
-      box-shadow: 0 0 0 3px rgba(248,113,113,0.15);
-    }
-
-    .error-msg {
-      display: none;
-      color: var(--red);
-      font-size: 0.82rem;
-      margin-top: 6px;
-    }
-    .error-msg.visible { display: block; }
-
-    .submit-btn {
-      width: 100%;
-      padding: 13px;
-      background: linear-gradient(135deg, var(--accent), var(--accent2));
-      border: none;
-      border-radius: 10px;
-      color: white;
-      font-family: inherit;
-      font-size: 0.95rem;
+      font-size: 12px;
       font-weight: 700;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: opacity 0.2s, transform 0.1s;
-      letter-spacing: -0.2px;
+      color: var(--dim);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      margin: 0 0 6px;
     }
-    .submit-btn:hover { opacity: 0.92; }
-    .submit-btn:active { transform: scale(0.99); }
-    .submit-btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .field { margin-bottom: 16px; }
+    input {
+      width: 100%;
+      background: #fff;
+      border: 1px solid rgba(0,0,0,0.12);
+      border-radius: 10px;
+      padding: 12px 14px;
+      font-size: 15px;
+      font-family: inherit;
+      color: var(--text);
+      outline: none;
+      transition: border-color .12s;
+    }
+    input:focus { border-color: var(--blue); }
+    input.error { border-color: var(--red); }
 
-    .divider {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin: 20px 0;
-      color: var(--text3);
-      font-size: 0.82rem;
+    .field-error {
+      display: none;
+      font-size: 12.5px;
+      color: var(--red);
+      margin-top: 5px;
     }
-    .divider::before, .divider::after {
-      content: '';
-      flex: 1;
-      height: 1px;
-      background: var(--border);
-    }
-
-    .signin-link {
-      text-align: center;
-      font-size: 0.88rem;
-      color: var(--text2);
-    }
-    .signin-link a {
-      color: var(--accent);
-      font-weight: 600;
-    }
-    .signin-link a:hover { text-decoration: underline; }
+    .field-error.visible { display: block; }
 
     .global-error {
       display: none;
-      background: rgba(248,113,113,0.1);
-      border: 1px solid rgba(248,113,113,0.25);
-      border-radius: 8px;
-      padding: 11px 14px;
+      font-size: 13.5px;
       color: var(--red);
-      font-size: 0.88rem;
-      margin-bottom: 16px;
+      background: var(--red-bg);
+      border-radius: 10px;
+      padding: 10px 14px;
+      margin-bottom: 14px;
     }
     .global-error.visible { display: block; }
 
-    .success-state {
+    button {
+      width: 100%;
+      background: var(--blue);
+      color: #fff;
+      font-family: inherit;
+      font-size: 15.5px;
+      font-weight: 700;
+      border: none;
+      border-radius: 12px;
+      padding: 14px;
+      cursor: pointer;
+      transition: background .12s;
+    }
+    button:hover { background: var(--blue-hov); }
+    button:disabled { opacity: .6; cursor: default; }
+
+    .fine {
+      font-size: 12.5px;
+      color: var(--dim);
+      margin-top: 14px;
+      text-align: center;
+    }
+    .fine a { color: var(--blue); font-weight: 600; }
+
+    .signin {
+      font-size: 14px;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 22px;
+      padding-top: 20px;
+      border-top: 1px solid var(--border);
+    }
+    .signin a { color: var(--blue); font-weight: 600; }
+
+    #success-state {
       display: none;
       text-align: center;
-      padding: 32px 0;
+      padding: 16px 0 8px;
     }
-    .success-state.visible { display: block; }
-    .success-icon {
-      width: 56px; height: 56px;
-      background: rgba(52,211,153,0.12);
-      border: 1px solid rgba(52,211,153,0.3);
+    #success-state.visible { display: block; }
+    .success-mark {
+      width: 48px; height: 48px;
       border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      margin: 0 auto 16px;
+      background: rgba(16,165,110,0.12);
+      color: var(--green);
+      font-size: 24px;
+      line-height: 48px;
+      margin: 0 auto 14px;
     }
-    .success-state h2 {
-      font-size: 1.4rem;
-      font-weight: 800;
-      letter-spacing: -0.8px;
-      margin-bottom: 8px;
-    }
-    .success-state p {
-      color: var(--text2);
-      font-size: 0.9rem;
-    }
-
-    @media (max-width: 480px) {
-      nav { padding: 16px 20px; }
-      h1 { font-size: 1.6rem; }
-    }
+    #success-state h2 { font-size: 20px; font-weight: 700; margin-bottom: 6px; }
+    #success-state p { font-size: 14px; color: var(--muted); }
   </style>
 </head>
 <body>
 
 <nav>
-  <div class="logo" onclick="location.href='/'">
-    <div class="logo-icon">
-      <svg width="14" height="14" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
-      </svg>
-    </div>
-    StudyEdge AI
-  </div>
+  <div class="logo" onclick="location.href='/'">Study<span>Edge</span> AI</div>
   <a href="/" class="nav-link">Back to home</a>
 </nav>
 
 <main>
-  <div class="signup-card">
-
+  <div class="card">
     <div id="form-state">
-      <div class="plan-chip" id="plan-chip">
-        <span class="plan-dot"></span>
-        <span id="plan-label">Free plan</span>
-      </div>
-
-      <h1>Create your account</h1>
-      <p class="sub">Start studying smarter today.</p>
+      <div class="referral-note" id="referral-note">A friend invited you to StudyEdge</div>
+      <div class="plan-chip" id="plan-chip"><span id="plan-label">Free plan</span></div>
+      <h1>Create your account.</h1>
+      <p class="sub">Your courses, exams, and study plan in one place.</p>
 
       <div class="global-error" id="global-error"></div>
 
-      <form id="signup-form">
-        <div class="form-group">
+      <form id="signup-form" novalidate>
+        <div class="field">
           <label for="email">Email</label>
-          <input type="email" id="email" placeholder="you@university.edu" autocomplete="email" required />
-          <div class="error-msg" id="email-error">Please enter a valid email address.</div>
+          <input type="email" id="email" autocomplete="email" placeholder="you@school.edu" />
+          <div class="field-error" id="email-error">Enter a valid email address.</div>
         </div>
-        <div class="form-group">
+        <div class="field">
           <label for="password">Password</label>
-          <input type="password" id="password" placeholder="At least 8 characters" autocomplete="new-password" required />
-          <div class="error-msg" id="password-error">Password must be at least 8 characters.</div>
+          <input type="password" id="password" autocomplete="new-password" placeholder="At least 8 characters" />
+          <div class="field-error" id="password-error">Password must be at least 8 characters.</div>
         </div>
-        <button type="submit" class="submit-btn" id="submit-btn">Create account</button>
+        <button type="submit" id="submit-btn">Create account</button>
       </form>
 
-      <div class="divider">or</div>
-
-      <div class="signin-link">
-        Already have an account? <a href="/app">Sign in</a>
-      </div>
+      <p class="fine">By continuing you agree to the <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.</p>
+      <p class="signin">Already have an account? <a href="/app">Sign in</a></p>
     </div>
 
-    <div class="success-state" id="success-state">
-      <div class="success-icon">
-        <svg width="24" height="24" fill="none" stroke="#34D399" stroke-width="2.5" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-        </svg>
-      </div>
-      <h2>Account created!</h2>
-      <p>Redirecting you to the app…</p>
+    <div id="success-state">
+      <div class="success-mark">✓</div>
+      <h2>Account created</h2>
+      <p>Taking you to the app…</p>
     </div>
-
   </div>
 </main>
 
 <script>
-  // Read plan from query param
   const params = new URLSearchParams(location.search);
   const plan = (params.get('plan') || 'free').toLowerCase();
+  const ref = params.get('ref');
+
+  // Referral attribution. The app reads localStorage 'studyedge_referrer'
+  // (src/lib/referral.js) on mount; store it here AND forward the params on
+  // the redirect so attribution survives either way.
+  if (ref && ref.length > 10) {
+    try { localStorage.setItem('studyedge_referrer', ref); } catch {}
+    document.getElementById('referral-note').classList.add('visible');
+  }
 
   const chip = document.getElementById('plan-chip');
   const label = document.getElementById('plan-label');
@@ -342,7 +276,17 @@
   if (plan === 'pro') chip.classList.add('pro');
   if (plan === 'unlimited') chip.classList.add('unlimited');
 
-  // Form submission
+  /** Preserve ref + utm_* (+ plan) onto the app URL so in-app attribution
+      and analytics see the same campaign the visitor arrived with. */
+  function appUrl() {
+    const out = new URLSearchParams();
+    for (const [k, v] of params) {
+      if (k === 'ref' || k === 'plan' || k.startsWith('utm_')) out.set(k, v);
+    }
+    const qs = out.toString();
+    return 'https://getstudyedge.com/app' + (qs ? `?${qs}` : '');
+  }
+
   document.getElementById('signup-form').addEventListener('submit', async e => {
     e.preventDefault();
 
@@ -353,7 +297,6 @@
     const globalError = document.getElementById('global-error');
     const btn = document.getElementById('submit-btn');
 
-    // Reset errors
     emailInput.classList.remove('error');
     passwordInput.classList.remove('error');
     emailError.classList.remove('visible');
@@ -379,11 +322,11 @@
     btn.disabled = true;
     btn.textContent = 'Creating account…';
 
-    const { data, error } = await sb.auth.signUp({
+    const { error } = await sb.auth.signUp({
       email,
       password,
       options: {
-        data: { plan },
+        data: { plan, referred_by: ref || null },
       },
     });
 
@@ -395,10 +338,9 @@
       return;
     }
 
-    // Show success then redirect
     document.getElementById('form-state').style.display = 'none';
     document.getElementById('success-state').classList.add('visible');
-    setTimeout(() => { location.href = 'https://getstudyedge.com/app'; }, 1800);
+    setTimeout(() => { location.href = appUrl(); }, 1800);
   });
 </script>
 </body>

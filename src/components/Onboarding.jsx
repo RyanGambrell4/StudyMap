@@ -574,9 +574,7 @@ export default function Onboarding({ onComplete, userEmail, userId }) {
                 </div>
               ))}
             </div>
-            <p style={{ color: 'rgba(255,255,255,.3)', fontSize: '0.74rem' }}>
-              Joined by <span style={{ color: 'rgba(255,255,255,.6)', fontWeight: 700 }}>400+</span> students
-            </p>
+
           </div>
         </div>
       </div>
