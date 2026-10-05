@@ -128,7 +128,11 @@ Rules:
       },
       body: JSON.stringify({
         model: 'claude-haiku-4-5-20251001',
-        max_tokens: 2000,
+        // Five questions, each with four options, an explanation, a
+        // rootCauseType and five distractorTags, does not fit in 2000
+        // tokens. The reply was being truncated mid-object, so JSON.parse
+        // threw and every single request 500'd.
+        max_tokens: 4000,
         messages: [{ role: 'user', content: [{ type: 'text', text: prompt, cache_control: { type: 'ephemeral' } }] }],
       }),
     })
@@ -144,6 +148,12 @@ Rules:
     })
     const content = data.content?.[0]?.text
     if (!content) throw new Error('Empty AI response')
+    // Name a truncated reply for what it is. Without this the only clue was
+    // a JSON syntax error at a byte offset, which reads like a model quirk
+    // rather than a ceiling we set.
+    if (data?.stop_reason === 'max_tokens') {
+      throw new Error(`Truncated AI response: hit max_tokens (${content.length} chars)`)
+    }
     const first = content.indexOf('[')
     const last = content.lastIndexOf(']')
     if (first === -1 || last === -1) throw new Error('Malformed AI response')
