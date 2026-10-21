@@ -110,7 +110,9 @@ export default function LandingPage({ onGetStarted }) {
 
   const goTrial = () => window.location.href = '/app?signup=1&plan=pro&billing=monthly&trial=1'
 
-  const [pricingPeriod, setPricingPeriod] = useState('weekly')
+  // Monthly, not weekly: weekly billing is retired, and the pricing object
+  // below no longer carries a weekly tier to read from.
+  const [pricingPeriod, setPricingPeriod] = useState('monthly')
   const goCheckout = (plan, period) => {
     const trialParam = plan === 'pro' ? '&trial=1' : ''
     window.location.href = `/app?signup=1&plan=${plan}&billing=${period}${trialParam}`
@@ -2087,7 +2089,6 @@ export default function LandingPage({ onGetStarted }) {
             borderRadius: 999, padding: 4,
           }}>
             {[
-              { id: 'weekly',  label: 'Weekly',  save: null,           best: false },
               { id: 'monthly', label: 'Monthly', save: 'Save 17%',     best: false },
               { id: 'yearly',  label: 'Annual',  save: 'Best Value ✦', best: true  },
             ].map(p => {
@@ -2136,13 +2137,15 @@ export default function LandingPage({ onGetStarted }) {
         {(() => {
           const pricing = {
             free: { weekly: '$0', monthly: '$0', yearly: '$0', sub: 'Forever free' },
+            // No weekly tier: weekly billing was retired on 2026-08-30. The old
+            // weekly amounts are listed in facts.json retiredPrices, and Stripe
+            // will not honour them. Do not quote them here either -- the
+            // retired-price rule reads comments too, which is the point.
             pro: {
-              weekly:  { price: '$2.99', unit: '/week',  sub: 'Billed weekly · less than a coffee' },
               monthly: { price: '$9.99', unit: '/month', sub: 'Billed monthly' },
               yearly:  { price: '$69.99', unit: '/year',  sub: 'Billed annually · ~$1.35/wk' },
             },
             unlimited: {
-              weekly:  { price: '$4.99',  unit: '/week',  sub: 'Billed weekly' },
               monthly: { price: '$14.99', unit: '/month', sub: 'Billed monthly' },
               yearly:  { price: '$119.99', unit: '/year', sub: 'Billed annually · ~$2.31/wk' },
             },

@@ -184,7 +184,7 @@ export default function SharedPlanView() {
             Get started free
           </a>
           <div style={{ fontSize: 12, color: '#94A3B8', marginTop: 10 }}>
-            Joined by 2,000+ students this semester
+            Joined by thousands of students this semester
           </div>
         </div>
       </div>

@@ -238,7 +238,7 @@ function Hero(){
                 <div key={i} className="av" style={{background:`linear-gradient(135deg,${c},${c}aa)`,zIndex:4-i}}/>
               ))}
             </div>
-            <div className="hero-trust-text">Join <strong>30,000+ students</strong> already building their edge this semester</div>
+            <div className="hero-trust-text">Join the <strong>30,000+ students</strong> who follow StudyEdge AI</div>
           </div>
         </div>
         <div className="hero-right" style={{'--tx':`${tilt.x*6}deg`,'--ty':`${-tilt.y*4}deg`}}>
