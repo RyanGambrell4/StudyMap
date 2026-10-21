@@ -2239,7 +2239,10 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
         )}
 
         {/* ── Timer + controls (hero section) ── */}
-        <div className="flex-1 flex flex-col items-center justify-center px-6 min-h-0" style={{ minHeight: 160, overflow: 'hidden', background: `radial-gradient(ellipse at 50% 40%, ${dot}0e 0%, transparent 68%)` }}>
+        {/* `safe center` keeps the content centred when it fits but falls back to
+            top-aligned once the recall drawer squeezes this region, so the timer
+            is never clipped out of reach at the top. */}
+        <div className="flex-1 flex flex-col items-center px-6 min-h-0" style={{ minHeight: 160, overflowY: 'auto', overflowX: 'hidden', justifyContent: 'safe center', paddingTop: 14, paddingBottom: 14, background: `radial-gradient(ellipse at 50% 40%, ${dot}0e 0%, transparent 68%)` }}>
           {finished ? (
             <div className="flex flex-col items-center gap-3">
               <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke={dot} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -2257,10 +2260,13 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                 const blockProgress = blocks && currentBlock ? Math.min(1, 1 - blockRemaining / (currentBlock.duration * 60)) : 0
                 const ringProgress = blocks ? blockProgress : sessionProgress
                 const dash = C * ringProgress
+                // `flex: 0 1 300px` + a square aspect ratio lets the ring shrink
+                // instead of overflowing when the region is short; `containerType`
+                // gives the digits below a box to size themselves against.
                 return (
-                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', width: 300, height: 300 }}>
+                  <div style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', flex: '0 1 300px', width: 'auto', aspectRatio: '1 / 1', minHeight: 132, maxHeight: 300, containerType: 'size' }}>
                     <svg
-                      width="300" height="300"
+                      viewBox="0 0 300 300" width="100%" height="100%"
                       style={{ position: 'absolute', top: 0, left: 0, transform: 'rotate(-90deg)' }}
                       aria-hidden="true"
                     >
@@ -2278,7 +2284,7 @@ export default function FocusMode({ session, blueprint, onComplete, onExit, next
                     </svg>
                     <div
                       style={{
-                        fontSize: 'clamp(3.2rem, 11vw, 6rem)',
+                        fontSize: 'clamp(2.1rem, 32cqh, 6rem)',
                         fontWeight: 800,
                         fontFamily: '"SF Mono", "Fira Code", ui-monospace, monospace',
                         letterSpacing: '-0.03em',
