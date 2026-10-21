@@ -64,6 +64,65 @@
   "retiredPrices": [2.99, 4.99],
   "retiredPeriods": ["week", "weekly", "semester"],
 
+  "$audienceComment": [
+    "Real audience numbers. These exist because the static pages carried a fabricated",
+    "\"500,000+ students\" stat on 12 pages, a \"50K+\" stat on 2 more, and a",
+    "\"4.8/5 from 2,000+ reviews\" proof item on 5. None of those numbers were ever real.",
+    "",
+    "`users` is the actual registered-user count. The sanctioned way to express it in",
+    "marketing copy is `usersPhrase` / `usersStat` -- \"thousands\", not a precise figure",
+    "that rots every week.",
+    "",
+    "`followers` is the social following (TikTok), which is where the 30,000+ community",
+    "number comes from. It is NOT a user count. Never attach it to a label like",
+    "\"students using StudyEdge AI\" -- that converts a true number into a false one.",
+    "",
+    "retiredAudienceClaims lists the exact fabricated strings. scripts/facts.mjs fails the",
+    "build if any of them reappears in a customer-facing file. Entries must be unambiguous",
+    "self-claims: \"400,000+\" is deliberately absent because UNISA genuinely enrolls that",
+    "many and best-study-app-for-unisa-students.html quotes it as a fact about the school."
+  ],
+
+  "audience": {
+    "users": 1200,
+    "usersPhrase": "thousands of students",
+    "usersStat": "Thousands",
+    "followers": 30000,
+    "followersStat": "30,000+",
+    "followersLabel": "Students follow StudyEdge AI"
+  },
+
+  "retiredAudienceClaims": [
+    "500,000+",
+    "500,000",
+    "50K+",
+    "50k+",
+    "2,000+ reviews",
+    "2,000+ students",
+    "2,000+ college students",
+    "300+ colleges",
+    "400+ colleges"
+  ],
+
+  "$competitorPricesComment": [
+    "Competitor prices that collide with one of our amounts at a different interval.",
+    "",
+    "price-interval-pairing assumed any amount it did not recognise as ours belonged to a",
+    "competitor and could be skipped. The inverse case was never handled: a competitor",
+    "charging OUR amount at an interval we do not sell it at. That stayed invisible while",
+    "the checker ignored public/blog/, and surfaced the moment blog posts came into scope --",
+    "GoodNotes 6 really is $9.99/year and Notability really is $14.99/year, which collide",
+    "with Pro monthly ($9.99) and Unlimited monthly ($14.99).",
+    "",
+    "Only add an entry after confirming the competitor genuinely charges that amount at",
+    "that interval. Each entry is a hole in the price checker, so keep the list short."
+  ],
+
+  "competitorPrices": [
+    { "name": "GoodNotes 6", "amount": "9.99", "interval": "year" },
+    { "name": "Notability", "amount": "14.99", "interval": "year" }
+  ],
+
   "support": {
     "email": "support@getstudyedge.com"
   },

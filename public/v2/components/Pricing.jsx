@@ -102,7 +102,7 @@ function Pricing(){
                   color:'#34d399', background:'rgba(52,211,153,0.1)', border:'1px solid rgba(52,211,153,0.3)',
                   borderRadius:6, padding:'3px 8px', marginBottom:8,
                 }}>
-                  3-DAY FREE TRIAL · NO CARD
+                  7-DAY FREE TRIAL
                 </div>
               )}
               <div className="tier-name">{t.name}</div>

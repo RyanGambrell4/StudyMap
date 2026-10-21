@@ -15,10 +15,20 @@ const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
 export const facts = JSON.parse(readFileSync(join(ROOT, 'content/facts.json'), 'utf8'))
 
 /** Files that carry marketing facts and therefore have to stay in sync. */
+/*
+ * Every file a customer can read. `public/blog/*.html` was missing until
+ * 2026-10-20, which is why 67 blog posts advertised a "3-day free trial" for
+ * months after the trial became 7 days while `facts:check` reported "clean".
+ * The checker is only as good as this list: if you add a customer-facing
+ * directory, add it here in the same commit.
+ */
 export const TARGET_GLOBS = [
   'public/*.html',
   'public/*.md',
   'public/llms.txt',
+  'public/blog/*.html',
+  'public/v2/**/*.jsx',
+  'src/components/*.jsx',
   'index.html',
   'signup.html',
   'app.html',
@@ -58,6 +68,11 @@ export function allowedPriceIntervals() {
 }
 
 const INTERVAL = { wk: 'week', week: 'week', weekly: 'week', mo: 'month', month: 'month', monthly: 'month', yr: 'year', year: 'year', annually: 'year' }
+
+/** "9.99@year" for every competitor price that collides with one of ours. */
+const COMPETITOR_PRICE_PAIRS = new Set(
+  (facts.competitorPrices ?? []).map((c) => `${c.amount}@${c.interval}`),
+)
 
 /** Plan names exactly as they appear in JSON-LD `"name"` fields, longest first. */
 const PLAN_NAMES = Object.values(facts.plans).map((p) => p.name)
@@ -136,13 +151,21 @@ export const RULES = [
   {
     name: 'trial-length',
     // "7-day free trial", "7-day trial", "free for 7 days"
+    //
+    // GAP is what sits between the number and the words "free trial" in real
+    // markup. The original rule required a single literal space, so the proof
+    // strip these pages actually ship --
+    //   <span class="proof-num">3-day</span>&nbsp;free trial
+    // -- never matched: a closing tag and a U+00A0 are both in the way. That
+    // is how 67 blog posts kept a retired trial length through a passing check.
     run(text) {
       const problems = []
       const want = facts.trial.days
+      const GAP = '(?:\\s|&nbsp;|\\u00a0|<\\/?[a-z][^>]*>)*'
       const patterns = [
-        /(\d+)-day free trial/gi,
-        /(\d+)-day trial/gi,
-        /free for (\d+) days/gi,
+        new RegExp(`(\\d+)-day${GAP}free${GAP}trial`, 'gi'),
+        new RegExp(`(\\d+)-day${GAP}trial`, 'gi'),
+        new RegExp(`free${GAP}for${GAP}(\\d+)${GAP}days`, 'gi'),
       ]
       for (const re of patterns) {
         for (const m of text.matchAll(re)) {
@@ -173,6 +196,9 @@ export const RULES = [
         const valid = ok.get(amount)
         // Not one of our amounts -> a competitor price on a comparison page. Skip.
         if (!valid) continue
+        // One of our amounts, but a competitor genuinely charges it at this
+        // interval (see facts.json $competitorPricesComment). Skip.
+        if (COMPETITOR_PRICE_PAIRS.has(`${amount}@${interval}`)) continue
         if (!valid.has(interval)) {
           problems.push({
             index: m.index,
@@ -310,6 +336,50 @@ export const RULES = [
             found: m[0],
             expected: want,
             message: `support address is ${want} (content/facts.json)`,
+          })
+        }
+      }
+      return problems
+    },
+  },
+  {
+    name: 'retired-audience-claim',
+    /*
+     * Audience size is the one marketing fact with no runtime source to drift
+     * against -- nothing in the app contradicts "500,000+ students", so it sat
+     * on 12 pages unchallenged alongside a "50K+" stat and a "4.8/5 from
+     * 2,000+ reviews" proof item. Real figures live in facts.audience.
+     *
+     * This is a blocklist of exact strings rather than a numeric ceiling
+     * because legitimate large counts exist: UNISA really does enroll more
+     * than 400,000 students and ASU really does enroll over 75,000, and those
+     * are quoted as facts about the schools on their own pages. A ceiling rule
+     * would flag them. See facts.json $audienceComment.
+     */
+    run(text) {
+      const problems = []
+      // Longest first, and claim each span, so "500,000+" reports once instead
+      // of twice via the "500,000" entry nested inside it.
+      const claimed = []
+      const overlaps = (a, b) => claimed.some(([x, y]) => a < y && x < b)
+      const ordered = [...facts.retiredAudienceClaims].sort((a, b) => b.length - a.length)
+      for (const claim of ordered) {
+        let from = 0
+        for (;;) {
+          const i = text.indexOf(claim, from)
+          if (i === -1) break
+          from = i + claim.length
+          if (overlaps(i, i + claim.length)) continue
+          claimed.push([i, i + claim.length])
+          problems.push({
+            index: i,
+            found: claim,
+            expected: facts.audience.usersStat,
+            message:
+              `"${claim}" is a retired audience claim. Real numbers: ` +
+              `${facts.audience.users}+ users ("${facts.audience.usersPhrase}") and ` +
+              `${facts.audience.followersStat} followers. Never label the follower ` +
+              `count as users.`,
           })
         }
       }
