@@ -337,7 +337,13 @@ export default function App() {
       }
       setSession(session)
       if (!session) {
-        resetUser()
+        // Reset analytics identity only on a real sign-out. Supabase also fires
+        // INITIAL_SESSION with a null session for every logged-out visitor on
+        // page load, and resetting there gave each one a fresh anonymous id the
+        // moment they arrived at /app from the homepage or an SEO page. Their
+        // signup then attached to that new id, so 361 of 369 signups in the 60
+        // days to 2026-10-23 had no link to the page that actually sent them.
+        if (_event === 'SIGNED_OUT') resetUser()
         clearUserData()
         setDbReady(false)
         setShowOutput(false)
