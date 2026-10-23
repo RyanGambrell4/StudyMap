@@ -187,7 +187,7 @@ function AddonToggle({ active, onToggle, icon, color, title, subtitle, badge, ch
   return (
     <div style={{
       borderRadius: 11,
-      background: active ? `linear-gradient(155deg, ${color}18, transparent 60%)` : 'rgba(255,255,255,0.015)',
+      background: active ? `linear-gradient(155deg, ${color}18, transparent 60%)` : 'transparent',
       border: `1px solid ${active ? color + '40' : D.border}`,
       overflow: 'hidden', transition: 'all 0.2s',
     }}>
@@ -204,7 +204,7 @@ function AddonToggle({ active, onToggle, icon, color, title, subtitle, badge, ch
           </div>
           <div style={{ fontSize: 11.5, color: D.muted, marginTop: 2 }}>{subtitle}</div>
         </div>
-        <div style={{ width: 34, height: 20, borderRadius: 10, flexShrink: 0, background: active ? color : 'rgba(255,255,255,0.08)', position: 'relative', transition: 'all 0.15s', boxShadow: active ? `0 0 10px ${color}80` : 'none' }}>
+        <div style={{ width: 34, height: 20, borderRadius: 10, flexShrink: 0, background: active ? color : 'rgba(0,0,0,0.14)', position: 'relative', transition: 'all 0.15s', boxShadow: active ? `0 0 10px ${color}80` : 'none' }}>
           <div style={{ position: 'absolute', top: 2, left: active ? 16 : 2, width: 16, height: 16, borderRadius: '50%', background: '#fff', transition: 'all 0.15s' }} />
         </div>
       </button>
@@ -464,7 +464,7 @@ function AddCoursePanel({ courseCount, onClose, onAdd, onStartSyllabusOnboarding
               <AddonToggle
                 active={syllabusOpen}
                 onToggle={() => { setSyllabusOpen(x => !x); if (syllabusFile && syllabusOpen) setSyllabusFile(null) }}
-                icon="file" color="#6366f1"
+                icon="file" color={T.blue}
                 title="Import syllabus"
                 subtitle="Upload a PDF and I'll extract dates, topics, and weights"
               >
@@ -488,7 +488,7 @@ function AddCoursePanel({ courseCount, onClose, onAdd, onStartSyllabusOnboarding
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '16px 24px', borderTop: `1px solid ${D.border}`, display: 'flex', gap: 10, background: 'rgba(255,255,255,0.015)' }}>
+        <div style={{ padding: '16px 24px', borderTop: `1px solid ${D.border}`, display: 'flex', gap: 10, background: T.bg }}>
           <button onClick={onClose} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
           <button onClick={handleAdd} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: name.trim() ? T.blue : 'rgba(0,0,0,0.04)', color: name.trim() ? '#fff' : D.dim, fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, boxShadow: name.trim() ? '0 4px 12px rgba(52,82,217,0.25)' : 'none', cursor: name.trim() ? 'pointer' : 'not-allowed', border: 'none' }}>
             <Icon name="plus" size={13} /> Add course
@@ -565,7 +565,7 @@ function EditCoursePanel({ course, onClose, onSave }) {
           <AddonToggle
             active={syllabusOpen}
             onToggle={() => { setSyllabusOpen(x => !x); if (syllabusFile && syllabusOpen) setSyllabusFile(null) }}
-            icon="file" color="#6366f1"
+            icon="file" color={T.blue}
             title="Import syllabus"
             subtitle="Drop a PDF or paste a link: we'll extract dates, weights, and topics"
           >
@@ -583,7 +583,7 @@ function EditCoursePanel({ course, onClose, onSave }) {
           {error && <div style={{ fontSize: 12, color: '#f87171', padding: '8px 12px', background: 'rgba(239,68,68,0.08)', borderRadius: 8, border: '1px solid rgba(239,68,68,0.2)' }}>{error}</div>}
         </div>
 
-        <div style={{ padding: '16px 24px', borderTop: `1px solid ${D.border}`, display: 'flex', gap: 10, background: 'rgba(255,255,255,0.015)' }}>
+        <div style={{ padding: '16px 24px', borderTop: `1px solid ${D.border}`, display: 'flex', gap: 10, background: T.bg }}>
           <button onClick={onClose} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
           <button onClick={handleSave} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: T.blue, color: '#fff', fontSize: 13, fontWeight: 600, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, boxShadow: '0 4px 12px rgba(52,82,217,0.25)', cursor: 'pointer', border: 'none' }}>
             Save changes
@@ -751,7 +751,7 @@ function CourseRow({ course, idx, expanded, onToggle, sessions, completedIds, sy
                   ? (
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 6 }}>
                       <span style={{ fontFamily: 'ui-monospace, monospace', fontWeight: 600, color: D.text }}>{latestScore.score}</span>
-                      <span style={{ display: 'inline-block', width: 48, height: 4, borderRadius: 2, background: 'rgba(255,255,255,0.07)', overflow: 'hidden', verticalAlign: 'middle' }}>
+                      <span style={{ display: 'inline-block', width: 48, height: 4, borderRadius: 2, background: 'rgba(0,0,0,0.08)', overflow: 'hidden', verticalAlign: 'middle' }}>
                         <span style={{
                           display: 'block', height: '100%', borderRadius: 2,
                           width: `${Math.min(100, Math.max(0, ((latestScore.score - (parseFloat(course.targetScore) * 0.8)) / (parseFloat(course.targetScore) * 0.2)) * 100))}%`,
@@ -866,7 +866,7 @@ function ExamSetupModal({ courseCount, onClose, onAdd, onOpenStudyCoach }) {
             <div style={{ fontSize: 12, color: D.muted, marginTop: 2 }}>Step {step} of 4</div>
           </div>
           <div style={{ display: 'flex', gap: 5, marginRight: 16 }}>
-            {[1,2,3,4].map(s => <div key={s} style={{ width: s <= step ? 22 : 7, height: 7, borderRadius: 4, background: s <= step ? D.accent : 'rgba(255,255,255,0.1)', transition: 'all 0.2s' }} />)}
+            {[1,2,3,4].map(s => <div key={s} style={{ width: s <= step ? 22 : 7, height: 7, borderRadius: 4, background: s <= step ? D.accent : 'rgba(0,0,0,0.12)', transition: 'all 0.2s' }} />)}
           </div>
           <button onClick={onClose} className="cv-icon-btn"><Icon name="x" size={13} /></button>
         </div>
@@ -930,7 +930,7 @@ function ExamSetupModal({ courseCount, onClose, onAdd, onOpenStudyCoach }) {
           )}
         </div>
 
-        <div style={{ padding: '16px 24px', borderTop: `1px solid ${D.border}`, display: 'flex', gap: 10, background: 'rgba(255,255,255,0.015)' }}>
+        <div style={{ padding: '16px 24px', borderTop: `1px solid ${D.border}`, display: 'flex', gap: 10, background: T.bg }}>
           {step > 1 && <button onClick={() => setStep(s => s - 1)} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Back</button>}
           {step < 4 ? (
             <button onClick={() => { if (!canNext) return; setStep(s => s + 1) }} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: canNext ? T.blue : 'rgba(0,0,0,0.04)', color: canNext ? '#fff' : D.dim, fontSize: 13, fontWeight: 600, border: 'none', cursor: canNext ? 'pointer' : 'not-allowed', boxShadow: canNext ? '0 4px 12px rgba(52,82,217,0.25)' : 'none' }}>
@@ -1001,7 +1001,7 @@ function ExamAddSectionModal({ courseCount, onClose, onAdd }) {
           {error && <div style={{ fontSize: 12, color: '#f87171', padding: '8px 12px', background: 'rgba(239,68,68,0.08)', borderRadius: 8, border: '1px solid rgba(239,68,68,0.2)' }}>{error}</div>}
         </div>
 
-        <div style={{ padding: '16px 24px', borderTop: `1px solid ${D.border}`, display: 'flex', gap: 10, background: 'rgba(255,255,255,0.015)' }}>
+        <div style={{ padding: '16px 24px', borderTop: `1px solid ${D.border}`, display: 'flex', gap: 10, background: T.bg }}>
           <button onClick={onClose} style={{ padding: '12px 22px', borderRadius: 10, background: 'rgba(0,0,0,0.04)', border: `1px solid ${D.border}`, color: D.text, fontSize: 13, fontWeight: 500, cursor: 'pointer' }}>Cancel</button>
           <button onClick={handleAdd} style={{ flex: 1, padding: '12px 22px', borderRadius: 10, background: name.trim() ? T.blue : 'rgba(0,0,0,0.04)', color: name.trim() ? '#fff' : D.dim, fontSize: 13, fontWeight: 600, border: 'none', cursor: name.trim() ? 'pointer' : 'not-allowed', boxShadow: name.trim() ? '0 4px 12px rgba(52,82,217,0.25)' : 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7 }}>
             <Icon name="plus" size={13} /> Add section

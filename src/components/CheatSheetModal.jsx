@@ -8,12 +8,13 @@ import { getLastSessionBridge } from '../lib/lastSessionBridge'
 import { pickSmartCourse } from '../lib/smartDefault'
 import { updateMastery } from '../lib/masteryStore'
 import { track } from '../lib/analytics'
+import { T } from '../theme/tokens'
 
 const D = {
   bg: '#F7F8FA', bgCard: '#FFFFFF',
   border: 'rgba(0,0,0,0.07)', borderStrong: 'rgba(0,0,0,0.12)',
   text: '#111111', textMuted: '#6B6B6B', textDim: '#9B9B9B',
-  accent: '#E8531A', green: '#16A34A', amber: '#D97706', red: '#DC2626', blue: '#3B61C4',
+  accent: T.blue, green: '#16A34A', amber: '#D97706', red: '#DC2626', blue: '#3B61C4',
 }
 
 const LIKELIHOOD_STYLE = {
@@ -439,8 +440,8 @@ export default function CheatSheetModal({ courses, onClose, onShowPaywall, onOpe
                           onClick={() => onOpenQuizBurst({ courseIdx, topic: topic.name })}
                           style={{
                             fontSize: 11.5, fontWeight: 700, padding: '3px 9px', borderRadius: 6,
-                            background: 'rgba(232,83,26,0.08)', border: '1px solid rgba(232,83,26,0.22)',
-                            color: '#E8531A', cursor: 'pointer', fontFamily: 'inherit',
+                            background: 'rgba(52,82,217,0.08)', border: '1px solid rgba(52,82,217,0.22)',
+                            color: T.blue, cursor: 'pointer', fontFamily: 'inherit',
                           }}
                         >
                           Start {Math.max(2, Math.min(topic.estimatedMinutes || 5, 15))}-min sprint →

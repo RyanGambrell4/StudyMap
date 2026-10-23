@@ -15,6 +15,7 @@ import OutputView from './components/OutputView'
 import PaywallModal from './components/PaywallModal'
 import FeedbackModal from './components/FeedbackModal'
 import './index.css'
+import { T } from './theme/tokens'
 
 export default function App() {
   useTheme()
@@ -661,9 +662,9 @@ export default function App() {
           @keyframes se-pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.4;transform:scale(0.85)} }
           @keyframes se-bar { 0%{transform:translateX(-100%)} 100%{transform:translateX(400%)} }
           @keyframes se-fadein { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
-          .se-dot { width:8px;height:8px;border-radius:50%;background:#3B61C4;animation:se-pulse 1.2s ease-in-out infinite; }
-          .se-dot:nth-child(2){animation-delay:0.2s;background:#5577d4;}
-          .se-dot:nth-child(3){animation-delay:0.4s;background:#E8531A;}
+          .se-dot { width:8px;height:8px;border-radius:50%;background:${T.blue};animation:se-pulse 1.2s ease-in-out infinite; }
+          .se-dot:nth-child(2){animation-delay:0.2s;background:rgba(52,82,217,0.7);}
+          .se-dot:nth-child(3){animation-delay:0.4s;background:rgba(52,82,217,0.45);}
         `}</style>
         <div style={{ animation: 'se-fadein 0.5s ease forwards', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 20 }}>
           <div style={{ position: 'relative' }}>
@@ -691,7 +692,7 @@ export default function App() {
           }}>
             <div style={{
               width: '40%', height: '100%', borderRadius: 99,
-              background: 'linear-gradient(90deg, #3B61C4, #E8531A)',
+              background: `linear-gradient(90deg, ${T.blue}, rgba(52,82,217,0.45))`,
               animation: 'se-bar 1.6s ease-in-out infinite',
             }} />
           </div>

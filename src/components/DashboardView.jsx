@@ -24,6 +24,7 @@ import { buildQuickSession, QUICK_PRESETS } from '../lib/quickStart'
 import { getDueForReview, getReviewStats } from '../lib/masteryStore'
 import { detectComeback } from '../lib/momentum'
 import { CAN_PURCHASE_IN_APP } from '../lib/platform'
+import { T } from '../theme/tokens'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
@@ -34,7 +35,7 @@ const D = {
   text:         '#111111',
   textMuted:    '#6B6B6B',
   textDim:      '#9B9B9B',
-  accent:       '#E8531A',
+  accent:       T.blue,
   green:        '#16A34A',
   amber:        '#D97706',
   red:          '#DC2626',
@@ -1272,10 +1273,10 @@ export default function DashboardView({
         <div className="dash-banner-wrap" style={{ padding: '12px 32px 4px' }}>
           <div className="dash-banner-inner" style={{
             background: '#FFFFFF',
-            border: '1px solid rgba(232,83,26,0.2)',
-            borderLeft: '4px solid #E8531A',
+            border: '1px solid rgba(52,82,217,0.2)',
+            borderLeft: `4px solid ${T.blue}`,
             borderRadius: 10,
-            boxShadow: '0 2px 12px rgba(232,83,26,0.07)',
+            boxShadow: '0 2px 12px rgba(52,82,217,0.07)',
             padding: '14px 18px',
             display: 'flex', alignItems: 'center', gap: 16, flexWrap: 'wrap',
           }}>
@@ -2019,7 +2020,7 @@ export default function DashboardView({
               gridColumn: 'span 12',
               padding: '18px 22px',
               borderLeft: `4px solid ${D.accent}`,
-              background: `linear-gradient(135deg, rgba(232,83,26,0.03) 0%, #ffffff 50%)`,
+              background: `linear-gradient(135deg, rgba(52,82,217,0.03) 0%, #ffffff 50%)`,
             }}
           >
             <div className="dash-brief-row" style={{ display: 'flex', alignItems: 'flex-start', gap: 16 }}>

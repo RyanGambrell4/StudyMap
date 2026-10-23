@@ -7,6 +7,7 @@ import { addStudySession } from '../lib/studyHistory'
 import { addCardsToDeck, cardFromQuizMiss } from '../lib/deckAdditions'
 import { hydrateCourseContext } from '../lib/courseContext'
 import { track } from '../lib/analytics'
+import { T } from '../theme/tokens'
 
 // CourseDiagnostic — a 5-Q seed quiz that fires the first time a course has
 // zero mastery data. Every answer writes to masteryStore so the rest of the
@@ -22,7 +23,7 @@ const D = {
   bg: '#F7F8FA', bgCard: '#FFFFFF',
   border: 'rgba(0,0,0,0.07)',
   text: '#111111', textMuted: '#6B6B6B', textDim: '#9B9B9B',
-  accent: '#E8531A', green: '#16A34A', amber: '#D97706', red: '#DC2626', blue: '#3B61C4',
+  accent: T.blue, green: '#16A34A', amber: '#D97706', red: '#DC2626', blue: '#3B61C4',
 }
 
 export default function CourseDiagnostic({
@@ -156,7 +157,7 @@ export default function CourseDiagnostic({
 
             {error && <div style={{ fontSize: 13, color: D.red, marginBottom: 12, padding: '10px 14px', background: 'rgba(220,38,38,0.06)', borderRadius: 8 }}>{error}</div>}
 
-            <button onClick={startDiagnostic} style={{ width: '100%', padding: '13px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 3px 12px rgba(232,83,26,0.35)` }}>
+            <button onClick={startDiagnostic} style={{ width: '100%', padding: '13px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 3px 12px rgba(52,82,217,0.35)` }}>
               Start diagnostic →
             </button>
             <button onClick={onClose} style={{ marginTop: 8, width: '100%', padding: '8px', fontSize: 12.5, color: D.textDim, background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', fontWeight: 600 }}>
@@ -221,7 +222,7 @@ export default function CourseDiagnostic({
             </div>
             <button
               onClick={() => { onComplete?.({ score: Math.round((correctCount / questions.length) * 100) }); onClose?.() }}
-              style={{ width: '100%', padding: '13px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 3px 12px rgba(232,83,26,0.35)` }}
+              style={{ width: '100%', padding: '13px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 3px 12px rgba(52,82,217,0.35)` }}
             >
               See your personalized dashboard →
             </button>

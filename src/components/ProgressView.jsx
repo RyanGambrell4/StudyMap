@@ -8,6 +8,7 @@ import { getActivePlan, hasUsedTrial } from '../lib/subscription'
 import { getAllMastery, getMasteryLevel, getMasteryColor, getReviewStats } from '../lib/masteryStore'
 import { computeConfidenceGap } from '../lib/confidenceStore'
 import { computeMomentumHistory, momentumColor } from '../lib/momentum'
+import { T } from '../theme/tokens'
 
 // ── Design tokens ─────────────────────────────────────────────────────────────
 const D = {
@@ -17,12 +18,12 @@ const D = {
   text:         '#111111',
   textMuted:    '#6B6B6B',
   textDim:      '#9B9B9B',
-  accent:       '#E8531A',
+  accent:       T.blue,
   green:        '#16A34A',
   amber:        '#D97706',
   pink:         '#DC2626',
   cyan:         '#0891B2',
-  orange:       '#E8531A',
+  orange:       T.amber,
   blue:         '#2563EB',
   purple:       '#3B61C4',
 }
@@ -686,7 +687,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
           </div>
 
           {showScoreForm && (
-            <div style={{ background: 'rgba(232,83,26,0.04)', border: '1px solid rgba(232,83,26,0.15)', borderRadius: 12, padding: '16px 20px', marginBottom: 18 }}>
+            <div style={{ background: 'rgba(52,82,217,0.04)', border: '1px solid rgba(52,82,217,0.15)', borderRadius: 12, padding: '16px 20px', marginBottom: 18 }}>
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 12 }}>
                 <div>
                   <label style={{ fontSize: 11, fontWeight: 600, color: D.textMuted, display: 'block', marginBottom: 5 }}>Section</label>
@@ -835,7 +836,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                 if (latestPerSection.every(v => v !== null)) {
                   const total = latestPerSection.reduce((a, b) => a + b, 0)
                   return (
-                    <div style={{ marginTop: 8, padding: '12px 16px', borderRadius: 10, background: 'rgba(232,83,26,0.06)', border: '1px solid rgba(232,83,26,0.18)', display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{ marginTop: 8, padding: '12px 16px', borderRadius: 10, background: 'rgba(52,82,217,0.06)', border: '1px solid rgba(52,82,217,0.18)', display: 'flex', alignItems: 'center', gap: 14 }}>
                       <div>
                         <div style={{ fontSize: 10, fontWeight: 700, letterSpacing: '0.07em', color: D.textMuted, textTransform: 'uppercase', marginBottom: 2 }}>Projected MCAT Composite</div>
                         <div style={{ display: 'flex', alignItems: 'baseline', gap: 6 }}>
@@ -1093,7 +1094,7 @@ export default function ProgressView({ courses, allSessions, completedIds, compl
                     <div key={s} style={{
                       height: 22, borderRadius: 4,
                       background: intensity > 0
-                        ? `rgba(232,83,26,${0.1 + intensity * 0.75})`
+                        ? `rgba(52,82,217,${0.1 + intensity * 0.75})`
                         : 'rgba(0,0,0,0.04)',
                       border: '1px solid rgba(0,0,0,0.04)',
                     }} />

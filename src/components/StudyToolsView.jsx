@@ -12,6 +12,7 @@ import { getDeckHealth, labelForSource } from '../lib/deckHealth'
 import { useCelebration } from '../utils/useCelebration'
 import { hydrateCourseContext } from '../lib/courseContext'
 import { track } from '../lib/analytics'
+import { T } from '../theme/tokens'
 
 function loadSaved() {
   return getCachedStudyTools()
@@ -856,7 +857,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
 
             {onOpenSessionBundle && courses.length > 0 && (
               <div style={{ marginBottom: 22, padding: '18px 20px', borderRadius: 14, background: 'linear-gradient(135deg, #111111 0%, #1F1F1F 100%)', color: '#fff', boxShadow: '0 8px 24px rgba(0,0,0,0.18)', position: 'relative', overflow: 'hidden' }}>
-                <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(232,83,26,0.20)', filter: 'blur(40px)' }} />
+                <div style={{ position: 'absolute', top: -30, right: -30, width: 120, height: 120, borderRadius: '50%', background: 'rgba(52,82,217,0.20)', filter: 'blur(40px)' }} />
                 <div style={{ position: 'relative' }}>
                   <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: '#F97316', marginBottom: 8 }}>Session Bundle</div>
                   <div style={{ fontSize: 20, fontWeight: 800, letterSpacing: -0.3, marginBottom: 4 }}>Start a 15-min session</div>
@@ -865,7 +866,7 @@ export default function StudyToolsView({ courses, userId, onShowPaywall, onNavig
                   </div>
                   <button
                     onClick={onOpenSessionBundle}
-                    style={{ padding: '11px 20px', background: '#E8531A', color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(232,83,26,0.45)' }}
+                    style={{ padding: '11px 20px', background: T.blue, color: '#fff', border: 'none', borderRadius: 10, fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: '0 3px 12px rgba(52,82,217,0.45)' }}
                   >
                     Start now →
                   </button>

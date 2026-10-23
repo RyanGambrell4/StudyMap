@@ -5,12 +5,13 @@ import { canUseAI, incrementAIQuery, getActivePlan, canUseFeature, incrementFeat
 import { addStudySession } from '../lib/studyHistory'
 import { daysBetween } from '../utils/dateUtils'
 import { track } from '../lib/analytics'
+import { T } from '../theme/tokens'
 
 const D = {
   bg: '#F7F8FA', bgCard: '#FFFFFF',
   border: 'rgba(0,0,0,0.07)', borderStrong: 'rgba(0,0,0,0.12)',
   text: '#111111', textMuted: '#6B6B6B', textDim: '#9B9B9B',
-  accent: '#E8531A', green: '#16A34A', amber: '#D97706', red: '#DC2626', blue: '#3B61C4',
+  accent: T.blue, green: '#16A34A', amber: '#D97706', red: '#DC2626', blue: '#3B61C4',
 }
 
 const GRADE_STEPS = ['F','D-','D','D+','C-','C','C+','B-','B','B+','A-','A','A+']

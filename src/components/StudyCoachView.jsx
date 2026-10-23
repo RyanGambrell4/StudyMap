@@ -13,6 +13,7 @@ import { getAccessToken } from '../lib/supabase'
 import { canUseAI, incrementAIQuery, canUseFeature, incrementFeatureUsage, getActivePlan } from '../lib/subscription'
 import { getCurrentGrade, letterGrade, TARGET_OPTIONS } from '../utils/gradeCalc'
 import { track } from '../lib/analytics'
+import { T } from '../theme/tokens'
 
 // ── DB helpers ────────────────────────────────────────────────────────────────
 function loadCoachPlan(courseId) { return getCachedCoachPlan(courseId) }
@@ -43,7 +44,7 @@ const D = {
   text: '#111111', muted: '#6B6B6B', dim: '#9B9B9B',
   accent: '#3B61C4', glow: 'rgba(59,97,196,0.2)',
   indigo: '#3B61C4', violet: '#111111',
-  mint: '#16A34A', orange: '#E8531A', sky: '#2563EB',
+  mint: '#16A34A', orange: T.amber, sky: '#2563EB',
   pink: '#DC2626', amber: '#D97706', cyan: '#0891B2',
 }
 
@@ -214,7 +215,7 @@ function CoachQuestion({ n, question, form, setForm, field }) {
   return (
     <div style={{ padding: 14, borderRadius: 10, background: answered ? 'rgba(52,211,153,0.06)' : 'rgba(0,0,0,0.03)', border: `1px solid ${answered ? 'rgba(52,211,153,0.25)' : D.border}` }}>
       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: answered ? 0 : 10 }}>
-        <div style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, background: answered ? D.mint : 'rgba(232,83,26,0.12)', color: answered ? '#fff' : D.indigo, display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 700 }}>
+        <div style={{ width: 22, height: 22, borderRadius: '50%', flexShrink: 0, background: answered ? D.mint : 'rgba(52,82,217,0.12)', color: answered ? '#fff' : D.indigo, display: 'grid', placeItems: 'center', fontSize: 10, fontWeight: 700 }}>
           {answered ? <Icon name="check" size={11} stroke={3} /> : n}
         </div>
         <div style={{ fontSize: 13, color: D.text, lineHeight: 1.5 }}>{question}</div>
@@ -853,7 +854,7 @@ export default function StudyCoachView({ courses, userId, onShowPaywall, googleE
         {/* CTA overlay */}
         <div style={{ position: 'absolute', inset: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(6,6,20,0.6)', backdropFilter: 'blur(1px)', padding: 24 }}>
           <div style={{ background: '#FFFFFF', border: '1px solid rgba(0,0,0,0.10)', borderRadius: 20, padding: '40px 36px', maxWidth: 400, width: '100%', textAlign: 'center', boxShadow: '0 24px 64px rgba(0,0,0,0.6)' }}>
-            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(232,83,26,0.1)', border: '1px solid rgba(232,83,26,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+            <div style={{ width: 52, height: 52, borderRadius: 14, background: 'rgba(52,82,217,0.1)', border: '1px solid rgba(52,82,217,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
               <Icon name="sparkles" size={24} color="#3B61C4" />
             </div>
             <h2 style={{ color: '#111111', fontSize: 20, fontWeight: 700, letterSpacing: -0.4, margin: '0 0 10px' }}>Your study plan is one step away.</h2>
@@ -1059,7 +1060,7 @@ function StruggleTracker({ struggles, courseId, courseName, dot, onSave, courseI
         </svg>
         <span style={{ flex: 1, fontSize: 13.5, fontWeight: 700, color: D.text }}>Struggle Tracker</span>
         {active.length > 0 && (
-          <span style={{ fontSize: 11, fontWeight: 700, color: D.orange, background: 'rgba(232,83,26,0.1)', border: '1px solid rgba(232,83,26,0.2)', padding: '2px 8px', borderRadius: 999 }}>
+          <span style={{ fontSize: 11, fontWeight: 700, color: D.orange, background: T.amberBg, border: '1px solid rgba(138,106,46,0.25)', padding: '2px 8px', borderRadius: 999 }}>
             {active.length} active
           </span>
         )}
@@ -1093,7 +1094,7 @@ function StruggleTracker({ struggles, courseId, courseName, dot, onSave, courseI
           {active.length > 0 && (
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
               {active.map(s => (
-                <div key={s.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', background: 'rgba(232,83,26,0.04)', border: '1px solid rgba(232,83,26,0.12)', borderRadius: 10 }}>
+                <div key={s.id} style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '10px 12px', background: 'rgba(232,177,74,0.08)', border: '1px solid rgba(138,106,46,0.18)', borderRadius: 10 }}>
                   <div style={{ flex: 1, minWidth: 0 }}>
                     <div style={{ fontSize: 13.5, color: D.text, lineHeight: 1.4 }}>{s.text}</div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 5 }}>

@@ -12,12 +12,13 @@ import { addCardsToDeck, cardFromQuizMiss } from '../lib/deckAdditions'
 import { recordConfidence } from '../lib/confidenceStore'
 import { track } from '../lib/analytics'
 import Spinner from './ui/spinner'
+import { T } from '../theme/tokens'
 
 const D = {
   bg: '#F7F8FA', bgCard: '#FFFFFF',
   border: 'rgba(0,0,0,0.07)', borderStrong: 'rgba(0,0,0,0.12)',
   text: '#111111', textMuted: '#6B6B6B', textDim: '#9B9B9B',
-  accent: '#E8531A', green: '#16A34A', amber: '#D97706', red: '#DC2626', blue: '#3B61C4',
+  accent: T.blue, green: '#16A34A', amber: '#D97706', red: '#DC2626', blue: '#3B61C4',
 }
 
 const DIFFICULTY_COLOR = { easy: '#16A34A', medium: '#D97706', hard: '#DC2626' }
@@ -442,7 +443,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
 
         {/* Header */}
         <div style={{ padding: '16px 20px', borderBottom: `1px solid ${D.border}`, display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
-          <div style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(232,83,26,0.10)', border: '1px solid rgba(232,83,26,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+          <div style={{ width: 34, height: 34, borderRadius: 9, background: 'rgba(52,82,217,0.10)', border: '1px solid rgba(52,82,217,0.20)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
             <svg width="16" height="16" fill="none" stroke={D.accent} strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" viewBox="0 0 24 24">
               <path d="M13 2L4 14h7l-1 8 9-12h-7l1-8z"/>
             </svg>
@@ -494,7 +495,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                     return (
                       <button
                         onClick={!canQuiz ? () => onShowPaywall?.('quizBurst') : () => startQuiz(smart.topic)}
-                        style={{ width: '100%', padding: '13px', background: !canQuiz ? D.blue : D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: !canQuiz ? `0 3px 12px rgba(59,97,196,0.30)` : `0 3px 12px rgba(232,83,26,0.35)` }}
+                        style={{ width: '100%', padding: '13px', background: !canQuiz ? D.blue : D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: !canQuiz ? `0 3px 12px rgba(59,97,196,0.30)` : `0 3px 12px rgba(52,82,217,0.35)` }}
                       >
                         {!canQuiz ? (hasUsedTrial() ? 'Upgrade to Pro →' : 'Start 7-day free trial →') : 'Start 5-question quiz'}
                       </button>
@@ -572,8 +573,8 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
                       onClick={() => setTopic(t)}
                       style={{
                         padding: '4px 10px', borderRadius: 6, fontSize: 12, fontWeight: 600,
-                        color: D.accent, background: 'rgba(232,83,26,0.08)',
-                        border: '1px solid rgba(232,83,26,0.18)',
+                        color: D.accent, background: 'rgba(52,82,217,0.08)',
+                        border: '1px solid rgba(52,82,217,0.18)',
                         cursor: 'pointer', textTransform: 'capitalize',
                         whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: 160,
                       }}
@@ -601,7 +602,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
               return (
                 <button
                   onClick={!canQuiz ? () => onShowPaywall?.('quizBurst') : () => startQuiz()}
-                  style={{ width: '100%', padding: '13px', background: !canQuiz ? D.blue : D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: !canQuiz ? `0 3px 12px rgba(59,97,196,0.30)` : `0 3px 12px rgba(232,83,26,0.35)` }}
+                  style={{ width: '100%', padding: '13px', background: !canQuiz ? D.blue : D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: !canQuiz ? `0 3px 12px rgba(59,97,196,0.30)` : `0 3px 12px rgba(52,82,217,0.35)` }}
                 >
                   {!canQuiz ? (hasUsedTrial() ? 'Upgrade to Pro →' : 'Start 7-day free trial →') : 'Start quiz'}
                 </button>
@@ -611,7 +612,7 @@ export default function QuickQuizBurst({ courses, onClose, onShowPaywall, onOpen
             {(showManual || !smart?.topic) && isPro && (
               <button
                 onClick={() => startQuiz()}
-                style={{ width: '100%', padding: '13px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 3px 12px rgba(232,83,26,0.35)` }}
+                style={{ width: '100%', padding: '13px', background: D.accent, border: 'none', borderRadius: 10, color: '#fff', fontSize: 14, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit', boxShadow: `0 3px 12px rgba(52,82,217,0.35)` }}
               >
                 Start quiz
               </button>
