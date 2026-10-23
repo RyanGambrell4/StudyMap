@@ -22,13 +22,30 @@ export default async function handler(req, res) {
     return res.status(400).json({ error: 'Invalid JSON' })
   }
 
-  const { firstName, yearLevel, learningStyle, preferredTime } = body
+  const { firstName, yearLevel, learningStyle, preferredTime, onboardingAnswers } = body
 
   // The recipient comes from the session, never from the request. The old
   // `if (userId && userId !== auth.userId)` guard was skippable by omitting
   // userId, which left `email` unvalidated on its way to `to:`. See
   // api/welcome-email.js for the full note.
   const userId = auth.userId
+
+  // The iOS onboarding v2 answers (role, struggle, hours, exam date,
+  // reminders choice) land on the profile row before any email decision, so
+  // a skipped or duplicate email never loses them. Shape is whitelisted in
+  // sanitizeOnboardingAnswers; see migrations/20261021_user_data_onboarding_answers.sql.
+  const answers = sanitizeOnboardingAnswers(onboardingAnswers)
+  if (answers) {
+    const { error: answersErr } = await supabaseAdmin
+      .from('user_data')
+      .upsert(
+        { user_id: userId, onboarding_answers: answers, updated_at: new Date().toISOString() },
+        { onConflict: 'user_id' }
+      )
+    if (answersErr) {
+      reportQueryError(answersErr, { table: 'user_data', context: 'onboarding-complete answers' })
+    }
+  }
   const { data: authUser, error: authUserErr } = await supabaseAdmin.auth.admin.getUserById(userId)
   if (authUserErr) {
     reportQueryError(authUserErr, { table: 'auth.users', context: 'onboarding-complete recipient lookup' })
@@ -161,4 +178,31 @@ ${preheader("Your profile is set. One step left before your study plan can work.
     console.error('[onboarding-complete] Failed to send:', err)
     return res.status(500).json({ error: 'Failed to send email' })
   }
+}
+
+const ANSWER_ENUMS = {
+  role:             ['highSchool', 'university', 'gradSchool', 'other'],
+  struggle:         ['fallingBehind', 'tooMuchToReview', 'cramming', 'cantFocus', 'dontKnow'],
+  hours_per_week:   ['underFive', 'fiveToTen', 'tenToTwenty', 'twentyPlus'],
+  reminders_choice: ['granted', 'denied', 'notNow'],
+}
+
+/**
+ * Keep only the keys OnboardingAnswers.swift sends, with their values checked.
+ * Returns null when nothing usable was sent, so the column is left alone.
+ */
+export function sanitizeOnboardingAnswers(raw) {
+  if (!raw || typeof raw !== 'object' || Array.isArray(raw)) return null
+  const out = {}
+  for (const [key, allowed] of Object.entries(ANSWER_ENUMS)) {
+    if (typeof raw[key] === 'string' && allowed.includes(raw[key])) out[key] = raw[key]
+  }
+  for (const key of ['hours_midpoint', 'days_until_exam']) {
+    const n = Number(raw[key])
+    if (Number.isInteger(n) && n >= 0 && n <= 100000) out[key] = n
+  }
+  if (typeof raw.has_exam_date === 'boolean') out.has_exam_date = raw.has_exam_date
+  if (Object.keys(out).length === 0) return null
+  out.received_at = new Date().toISOString()
+  return out
 }
