@@ -14,6 +14,7 @@ export default async function handler(req, res) {
     hoursAvailable,
     step,
     topics,
+    topic,
     syllabusText,
     recallHistory,
     coachPlan,
@@ -63,6 +64,11 @@ export default async function handler(req, res) {
   if (learningStyle) personalLines.push(`Learning style: ${learningStyle}. Tailor topic framing to match.`)
   if (Array.isArray(struggles) && struggles.length) personalLines.push(`Active struggle areas (prioritize): ${struggles.join(', ')}.`)
   const personalBlock = personalLines.length ? `\n${personalLines.join('\n')}\n` : ''
+  // iOS sends what the student typed as the exam's scope. It used to be
+  // dropped, so the ranked topics ignored it and came back generic.
+  const scopeLine = typeof topic === 'string' && topic.trim()
+    ? `\nThe student says this exam covers: ${topic.trim().slice(0, 300)}. Every ranked topic must fall inside that scope.\n`
+    : ''
 
   if (step === 'topics' || !step) {
     const prompt = `You are an expert academic coach helping a student prepare for an urgent exam.
@@ -73,7 +79,7 @@ ${courseContextBlock}
 
 Course: ${resolvedName}
 Current grade: ${currentGrade || 'unknown'}
-Hours available: ${safeHours}${personalBlock}
+Hours available: ${safeHours}${personalBlock}${scopeLine}
 ${context}
 
 Generate 5 ranked topics ordered by (exam likelihood multiplied by current weakness). Prioritize what will move the grade most.
