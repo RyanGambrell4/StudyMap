@@ -101,7 +101,7 @@
 <div class="container">
 
   <h1>Privacy Policy</h1>
-  <p class="meta">Last updated: September 22, 2026 &nbsp;&middot;&nbsp; Effective: September 22, 2026</p>
+  <p class="meta">Last updated: October 24, 2026 &nbsp;&middot;&nbsp; Effective: October 24, 2026</p>
 
   <p>StudyEdge AI ("we", "us", or "our") is committed to protecting your personal information. This Privacy Policy explains what we collect, how we use it, who we share it with, and your rights as a user. We comply with Canada's Personal Information Protection and Electronic Documents Act (PIPEDA), Canada's Anti-Spam Legislation (CASL), the European Union General Data Protection Regulation (GDPR) where applicable, and the California Consumer Privacy Act (CCPA) where applicable.</p>
 
@@ -112,7 +112,9 @@
   <h2>1. What We Collect</h2>
   <p>We collect the following categories of information when you use StudyEdge AI:</p>
   <ul>
-    <li><strong>Account information:</strong> your email address and password (stored securely via Supabase authentication). If you sign in with Google, we receive your name and email from Google.</li>
+    <li><strong>Account information:</strong> your email address and password (stored securely via Supabase authentication). If you sign in with Apple or Google, we receive your name (if you choose to share it) and your email address, which may be an Apple private relay address.</li>
+    <li><strong>Onboarding answers:</strong> in the iOS app, your role (for example high school or university), the study problem you pick as your biggest, roughly how many hours a week you study, your next exam or deadline date, and whether and when you want study reminders. We store these with your account to personalize your plan, and record them in PostHog to understand how onboarding performs.</li>
+    <li><strong>Reminders:</strong> the iOS app schedules study, session and trial reminders on your device at the times you choose. The reminder time and the notifications are stored and created on your device.</li>
     <li><strong>Study data:</strong> courses, schedules, assignments, exam dates, session notes, and study plans you create inside the app.</li>
     <li><strong>AI interaction data:</strong> the content of prompts you send to StudyEdge AI's AI features (flashcards, session blueprints, study coach, quizzes, AI tutor). This content is processed by Anthropic's API and is not used to train Anthropic's models under the current API terms.</li>
     <li><strong>Usage and analytics data:</strong> how you interact with the app, session frequency, features used, page visits, click events, and general performance metrics. This data is collected via PostHog and Vercel Analytics. Your email address and name are associated with your PostHog analytics profile.</li>
@@ -131,7 +133,7 @@
     <li>To send transactional emails (account verification, password reset, subscription receipts) via Resend.</li>
     <li>To send product updates and announcements via Loops.so, where you have given consent under CASL. You can opt out at any time using the unsubscribe link in any marketing email or at <a href="/unsubscribe">getstudyedge.com/unsubscribe</a>.</li>
     <li>To send SMS study reminders, if you have opted in. You can opt out at any time by replying STOP to any message or from your account settings.</li>
-    <li>To improve the product through aggregate and anonymized usage analysis via PostHog.</li>
+    <li>To improve the product by analyzing how accounts use features, via PostHog.</li>
     <li>To process your subscription and manage billing events via Stripe.</li>
     <li>To comply with legal obligations and enforce these policies.</li>
   </ul>
@@ -151,7 +153,7 @@
     <li><strong>Axiom:</strong> structured server-side logging. Axiom receives server log events associated with your user ID (not your email) to support debugging and operational monitoring. Log data is retained according to Axiom's retention policy.</li>
     <li><strong>Langfuse:</strong> AI observability and tracing. When you use AI features, the full input and output of those AI calls, including your prompts and StudyEdge AI's responses, are logged to Langfuse for quality monitoring and debugging. This includes the text of your study notes, course details, and AI tutor conversations submitted during those interactions. See <a href="https://langfuse.com/privacy" target="_blank" rel="noopener">Langfuse's Privacy Policy</a>.</li>
     <li><strong>Deepgram:</strong> audio transcription. If you use voice-to-text features, your audio is sent to Deepgram for transcription. The audio is not retained by us after transcription. See <a href="https://deepgram.com/privacy" target="_blank" rel="noopener">Deepgram's Privacy Policy</a>.</li>
-    <li><strong>OpenAI:</strong> semantic embeddings used for study content matching and recall scoring within the app. Text you provide (such as course topics and study notes) may be sent to OpenAI's embeddings API. See <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">OpenAI's Privacy Policy</a>.</li>
+    <li><strong>OpenAI:</strong> semantic embeddings used for study content matching and recall scoring within the app. This covers the text of generated flashcards (to detect and remove duplicates) and, on the web app, study text you choose to turn into an audio summary (to generate speech). See <a href="https://openai.com/policies/privacy-policy" target="_blank" rel="noopener">OpenAI's Privacy Policy</a>.</li>
     <li><strong>Wolfram Alpha:</strong> mathematical computation. Study-related queries you submit to the AI tutor's math feature may be forwarded to the Wolfram Alpha API to compute answers. See <a href="https://www.wolfram.com/legal/privacy/wolfram/" target="_blank" rel="noopener">Wolfram Alpha's Privacy Policy</a>.</li>
     <li><strong>YouTube (Google):</strong> contextual video suggestions. During study sessions, your study topic and course name may be sent to the YouTube Data API to surface relevant educational videos. See <a href="https://policies.google.com/privacy" target="_blank" rel="noopener">Google's Privacy Policy</a>.</li>
     <li><strong>Firecrawl:</strong> web page content extraction. If you use the syllabus URL import feature, the URL you provide is sent to Firecrawl, which fetches and extracts the page content. Only the URL itself and the resulting page text are involved. No personal information beyond your user session is shared with Firecrawl. See <a href="https://www.firecrawl.dev/privacy" target="_blank" rel="noopener">Firecrawl's Privacy Policy</a>.</li>
@@ -165,7 +167,7 @@
   <p>Some StudyEdge AI features send content you provide to independent third-party artificial intelligence services. These are separate companies, not StudyEdge AI. The services, and the data each one receives, are:</p>
   <ul>
     <li><strong>Anthropic (Claude):</strong> receives the content behind nearly every AI feature: your questions to the AI tutor, course names, study notes, uploaded syllabi and photographs of handwritten notes, and the text used to generate flashcards, quizzes, practice exams, session blueprints, and cheat sheets.</li>
-    <li><strong>OpenAI:</strong> receives the text of generated flashcards, solely to detect and remove duplicates.</li>
+    <li><strong>OpenAI:</strong> receives the text of generated flashcards, to detect and remove duplicates, and on the web app, study text you choose to turn into an audio summary, to generate speech.</li>
     <li><strong>Wolfram Alpha:</strong> receives your question when you ask the AI tutor something mathematical.</li>
     <li><strong>Deepgram:</strong> receives audio you record when you use a voice feature on the web app, solely to transcribe it into text. Voice dictation in the StudyEdge AI iOS app is transcribed entirely on your device and that audio is not sent to Deepgram or any other third party.</li>
   </ul>
