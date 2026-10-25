@@ -56,6 +56,22 @@
       }
     });
 
+    // SEO page CTAs that carry data-seo-cta (cta_location) and optionally
+    // data-gpa. Sent by beacon because the click navigates straight to /app,
+    // which would otherwise cancel a normal request before it leaves.
+    // Capture only: it never calls identify or reset, so it cannot affect the
+    // anonymous id that carries this visit into signup.
+    document.querySelectorAll('a[data-seo-cta]').forEach(function (a) {
+      a.addEventListener('click', function () {
+        var gpa = parseFloat(a.getAttribute('data-gpa'));
+        posthog && posthog.capture('seo_cta_click', {
+          page_path: window.location.pathname,
+          cta_location: a.getAttribute('data-seo-cta'),
+          gpa_value: isNaN(gpa) ? null : gpa,
+        }, { transport: 'sendBeacon' });
+      });
+    });
+
     // Scroll depth tracking: fires at 25/50/75/100%
     var depths = [25, 50, 75, 100], fired = {};
     function onScroll() {
