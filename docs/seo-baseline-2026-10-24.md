@@ -10,9 +10,13 @@ this Mac at `~/Projects/studyedge-gsc/token.json`. These are manual.
   Search Console for 2026-10-24 to 2026-11-06, US only, and compare it to the
   "Before" row in the 3.7 section below (9,542 US impressions, 3 clicks,
   position 8.6 over 60 days). Compare CTR, not raw clicks, since the windows
-  differ in length. Quickest route:
-  `python3 ~/Projects/studyedge-gsc/gsc.py page-queries --page /is-a-3-7-gpa-good --days 14`
-  (use the Python that has `requests`, currently `/opt/anaconda3/bin/python3`).
+  differ in length. Quickest route, verified 2026-10-24:
+  `GSC_SITE=sc-domain:getstudyedge.com /opt/anaconda3/bin/python3 ~/Projects/studyedge-gsc/gsc.py page-queries --page https://getstudyedge.com/is-a-3-7-gpa-good --days 14`
+  Both details matter: without `GSC_SITE` the script defaults to a property
+  this account cannot read (403), and a bare path like `/is-a-3-7-gpa-good`
+  gets the property name prefixed to it and silently returns no rows. Pass
+  the full URL. That command does not filter to the US; for the US-only
+  figure, filter by country as the audit scripts did.
   Also check the 3.4, 3.5, 3.6 and 3.8 pages, retitled 2026-10-24 in `08d59fd`.
 - [ ] **2026-11-14: landing page to signup.** Open the saved PostHog funnel
   [SEO landing page to signup (post identity fix)](https://us.posthog.com/project/412740/insights/sAKt88RY)
